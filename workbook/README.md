@@ -44,7 +44,18 @@ mtsw strip example.mtsw -w
 
 # Run and persist outputs back into the file (opt-in; never writes without --write).
 mtsw run example.mtsw --write
+
+# Edit cells (atomic, in-place; --json returns the updated doc, --dry-run previews).
+mtsw cell add example.mtsw --type code --id gauss --content "n*(n+1)/2" --depends-on n
+mtsw cell add example.mtsw --type code --id big --content-file body.txt   # or - for stdin
+mtsw cell edit example.mtsw gauss --content "n*(n-1)/2"
+mtsw cell move example.mtsw gauss --before n          # --before/--after <id> | --at <index>
+mtsw cell rename example.mtsw n count                 # rewrites dependents' depends_on
+mtsw cell rm example.mtsw n                           # refuses if cells depend on it
+mtsw cell rm example.mtsw n --force                   # removes + detaches dependents
 ```
+
+**Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell *content*, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins (an optimistic-lock guard arrives with the `serve` session).
 
 Diagnostics and errors are written to stderr; results (including `--json`) go to stdout, so the exit code can be used in scripts independently of the output.
 

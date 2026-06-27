@@ -10,13 +10,15 @@
 
 import { readFileSync, writeFileSync, renameSync, lstatSync, realpathSync, unlinkSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { parseWorkbook, serializeWorkbook, stripOutputs } from './parser';
+import { parseWorkbook, serializeWorkbook, stripOutputs, SUPPORTED_CELL_TYPES } from './parser';
 import { createExecutor } from './executor';
 import { buildDependencyGraph, detectCycles, toMermaid } from './graph';
 import { formatResult } from './formatter';
 import { VERSION } from './index';
 import { SCHEMA_VERSION } from './contract';
-import type { CellResult, Workbook, ParseResult } from './types';
+import { addCell, editCell, removeCell, moveCell, renameCell } from './edit';
+import type { CellPosition } from './edit';
+import type { CellResult, Workbook, ParseResult, CellType } from './types';
 
 export interface CommandResult {
   stdout: string;
@@ -40,6 +42,14 @@ Usage:
   mtsw new <name> [-t basic] [--force]      Scaffold a new <name>.mtsw
   mtsw capabilities [--json]                Engine version + feature flags
   mtsw templates [--json]                   List scaffold templates
+  mtsw cell <verb> <file> ...               Edit cells (atomic, in-place):
+      cell add <file> --type <t> --id <id> [--content <s> | --content-file <p|->]
+                                  [--depends-on a,b] [--before|--after <id> | --at <n>]
+      cell edit <file> <id> [--content <s> | --content-file <p|->] [--type <t>] [--depends-on a,b]
+      cell rm <file> <id> [--force]         (--force detaches dependents)
+      cell move <file> <id> (--before|--after <id> | --at <n>)
+      cell rename <file> <oldId> <newId>
+      (any cell verb accepts --json and --dry-run)
 
 Options:
   -h, --help     Show this help
@@ -79,11 +89,14 @@ function jsonEnvelope(command: string, ok: boolean, data: unknown, problems: str
 
 /** The dispatchable commands (advertised by `capabilities`; a test guards drift). */
 const COMMAND_NAMES = [
-  'run', 'describe', 'validate', 'graph', 'strip', 'new', 'capabilities', 'templates',
+  'run', 'describe', 'validate', 'graph', 'strip', 'new', 'capabilities', 'templates', 'cell',
 ] as const;
 
 /** Flags that consume the following argument as their value. */
-const VALUE_FLAGS = new Set(['-f', '--format', '-t', '--template', '-c', '--cell']);
+const VALUE_FLAGS = new Set([
+  '-f', '--format', '-t', '--template', '-c', '--cell',
+  '--id', '--content', '--content-file', '--depends-on', '--before', '--after', '--at',
+]);
 
 /**
  * First argument that is neither a flag nor the value of a value-flag, so the
@@ -335,6 +348,45 @@ export function validateCommand(args: string[]): CommandResult {
   return { stdout: '', stderr: `Invalid workbook:\n${bullets(problems)}`, exitCode: 1 };
 }
 
+/** The structured `describe` payload for a (possibly missing) workbook. */
+function describeData(wb: Workbook | undefined): {
+  version: string;
+  metadata: Workbook['metadata'];
+  runtime: Workbook['runtime'];
+  cells: Array<{
+    id: string;
+    type: string;
+    content: string;
+    dependsOn: string[];
+    metadata: Record<string, unknown>;
+    output: unknown;
+    error: unknown;
+  }>;
+  graph: { edges: Array<{ from: string; to: string }>; cycles: string[][] };
+} {
+  const cells = (wb?.cells ?? []).map((c) => ({
+    id: c.id,
+    type: c.type,
+    content: c.content,
+    dependsOn: c.dependsOn ?? [],
+    metadata: c.metadata ?? {},
+    output: c.output ?? null,
+    error: c.error ?? null,
+  }));
+  const graph = wb ? buildDependencyGraph(wb.cells) : undefined;
+  const edges = graph
+    ? [...graph.nodes].flatMap(([id, node]) => node.dependencies.map((dep) => ({ from: dep, to: id })))
+    : [];
+  const cycles = graph ? detectCycles(graph) : [];
+  return {
+    version: wb?.version ?? '1.0',
+    metadata: wb?.metadata ?? {},
+    runtime: wb?.runtime ?? { engine: 'mathts', execution: 'reactive' },
+    cells,
+    graph: { edges, cycles },
+  };
+}
+
 export function describeCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const file = firstPositional(args);
@@ -354,31 +406,8 @@ export function describeCommand(args: string[]): CommandResult {
   const parsed = parseWorkbook(read.content!);
   const problems = computeProblems(parsed);
   const ok = parsed.success && problems.length === 0;
-  const wb = parsed.workbook;
-
-  const cells = (wb?.cells ?? []).map((c) => ({
-    id: c.id,
-    type: c.type,
-    content: c.content,
-    dependsOn: c.dependsOn ?? [],
-    metadata: c.metadata ?? {},
-    output: c.output ?? null,
-    error: c.error ?? null,
-  }));
-
-  const graph = wb ? buildDependencyGraph(wb.cells) : undefined;
-  const edges = graph
-    ? [...graph.nodes].flatMap(([id, node]) => node.dependencies.map((dep) => ({ from: dep, to: id })))
-    : [];
-  const cycles = graph ? detectCycles(graph) : [];
-
-  const data = {
-    version: wb?.version ?? '1.0',
-    metadata: wb?.metadata ?? {},
-    runtime: wb?.runtime ?? { engine: 'mathts', execution: 'reactive' },
-    cells,
-    graph: { edges, cycles },
-  };
+  const data = describeData(parsed.workbook);
+  const cells = data.cells;
 
   if (json) {
     return { stdout: jsonEnvelope('describe', ok, data, problems), stderr: '', exitCode: ok ? 0 : 1 };
@@ -404,11 +433,11 @@ export function capabilitiesCommand(args: string[]): CommandResult {
     name: 'mtsw',
     version: VERSION,
     cellTypes: {
-      supported: ['code', 'markdown', 'data', 'test'],
+      supported: [...SUPPORTED_CELL_TYPES],
       deferred: ['tensor', 'equation', 'visualization', 'export'],
     },
     commands: [...COMMAND_NAMES],
-    features: { json: true, write: true, runCell: true, incremental: false, serve: false },
+    features: { json: true, write: true, runCell: true, editCell: true, incremental: false, serve: false },
   };
   if (args.includes('--json')) {
     return { stdout: jsonEnvelope('capabilities', true, data, []), stderr: '', exitCode: 0 };
@@ -564,6 +593,180 @@ export function newCommand(args: string[]): CommandResult {
   return { stdout: `Created ${target}`, stderr: '', exitCode: 0 };
 }
 
+/** All non-flag positional args, skipping value-flag values. */
+function positionals(args: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (VALUE_FLAGS.has(a)) {
+      i++;
+      continue;
+    }
+    if (!a.startsWith('-')) out.push(a);
+  }
+  return out;
+}
+
+/** Parse `--depends-on a,b` into a trimmed, de-duplicated, non-empty list. */
+function parseDependsOn(args: string[]): string[] | undefined {
+  const value = flagValue(args, '--depends-on');
+  if (value === undefined) return undefined;
+  return [...new Set(value.split(',').map((s) => s.trim()).filter(Boolean))];
+}
+
+function parsePosition(args: string[]): CellPosition | undefined {
+  const before = flagValue(args, '--before');
+  if (before !== undefined) return { before };
+  const after = flagValue(args, '--after');
+  if (after !== undefined) return { after };
+  const at = flagValue(args, '--at');
+  if (at !== undefined) {
+    const n = Number(at);
+    if (!Number.isInteger(n)) throw new Error(`--at must be an integer (got '${at}')`);
+    return { at: n };
+  }
+  return undefined;
+}
+
+/** Resolve cell content from --content (inline) or --content-file (path | - for stdin). */
+function resolveContent(args: string[]): { content?: string; error?: string } {
+  const inline = flagValue(args, '--content');
+  const fromFile = flagValue(args, '--content-file');
+  if (inline !== undefined && fromFile !== undefined) {
+    return { error: 'Use only one of --content / --content-file' };
+  }
+  if (inline !== undefined) return { content: inline };
+  if (fromFile !== undefined) {
+    if (fromFile === '-') {
+      if (process.stdin.isTTY) {
+        return { error: 'No piped input for --content-file - (pipe content via stdin, or use --content)' };
+      }
+      try {
+        return { content: readFileSync(0, 'utf-8') };
+      } catch (error) {
+        return { error: `Cannot read stdin: ${errMessage(error)}` };
+      }
+    }
+    const r = readFile(fromFile);
+    return r.error ? { error: r.error } : { content: r.content };
+  }
+  return {};
+}
+
+const CELL_VERBS = ['add', 'edit', 'rm', 'move', 'rename'];
+
+export function cellCommand(args: string[]): CommandResult {
+  const json = args.includes('--json');
+  const fail = (problems: string[]): CommandResult =>
+    json
+      ? { stdout: jsonEnvelope('cell', false, null, problems), stderr: '', exitCode: 1 }
+      : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
+
+  const verb = args[0];
+  if (!verb || !CELL_VERBS.includes(verb)) {
+    return fail([`Usage: mtsw cell <${CELL_VERBS.join('|')}> <file> ...`]);
+  }
+  const vargs = args.slice(1);
+  const pos = positionals(vargs);
+  const file = pos[0];
+  if (!file) return fail([`Usage: mtsw cell ${verb} <file> ...`]);
+
+  const read = readFile(file);
+  if (read.error) return fail([read.error]);
+  const parsed = parseWorkbook(read.content!);
+  if (!parsed.success) return fail(parsed.errors ?? ['Parse error']);
+  const wb = parsed.workbook!;
+
+  let result: Workbook;
+  let changedCells: string[] = [];
+  try {
+    switch (verb) {
+      case 'add': {
+        const id = flagValue(vargs, '--id');
+        const type = flagValue(vargs, '--type') ?? flagValue(vargs, '-t');
+        if (!id) return fail(['cell add requires --id']);
+        if (!type) return fail(['cell add requires --type']);
+        const content = resolveContent(vargs);
+        if (content.error) return fail([content.error]);
+        result = addCell(
+          wb,
+          { id, type: type as CellType, content: content.content, dependsOn: parseDependsOn(vargs) },
+          parsePosition(vargs)
+        );
+        break;
+      }
+      case 'edit': {
+        const id = pos[1];
+        if (!id) return fail(['cell edit requires <id>']);
+        const content = resolveContent(vargs);
+        if (content.error) return fail([content.error]);
+        const type = flagValue(vargs, '--type') ?? flagValue(vargs, '-t');
+        const deps = parseDependsOn(vargs);
+        const changes: { content?: string; type?: CellType; dependsOn?: string[] } = {};
+        if (content.content !== undefined) changes.content = content.content;
+        if (type !== undefined) changes.type = type as CellType;
+        if (deps !== undefined) changes.dependsOn = deps;
+        result = editCell(wb, id, changes);
+        break;
+      }
+      case 'rm': {
+        const id = pos[1];
+        if (!id) return fail(['cell rm requires <id>']);
+        const removed = removeCell(wb, id, { force: vargs.includes('--force') });
+        result = removed.workbook;
+        changedCells = removed.changedCells;
+        break;
+      }
+      case 'move': {
+        const id = pos[1];
+        if (!id) return fail(['cell move requires <id>']);
+        const position = parsePosition(vargs);
+        if (!position) return fail(['cell move requires --before/--after/--at']);
+        result = moveCell(wb, id, position);
+        break;
+      }
+      case 'rename': {
+        const oldId = pos[1];
+        const newId = pos[2];
+        if (!oldId || !newId) return fail(['cell rename requires <oldId> <newId>']);
+        result = renameCell(wb, oldId, newId);
+        break;
+      }
+      default:
+        return fail([`Unknown cell verb: ${verb}`]);
+    }
+  } catch (error) {
+    return fail([errMessage(error)]);
+  }
+
+  const after = serializeWorkbook(result);
+  const changed = after !== serializeWorkbook(wb);
+
+  if (vargs.includes('--dry-run')) {
+    if (json) {
+      const data = { dryRun: true, changed, content: after, ...(changedCells.length ? { changedCells } : {}) };
+      return { stdout: jsonEnvelope('cell', true, data, []), stderr: '', exitCode: 0 };
+    }
+    return { stdout: after, stderr: '', exitCode: 0 };
+  }
+
+  if (changed) {
+    try {
+      writeFileAtomic(file, after);
+    } catch (error) {
+      return fail([`Failed to write '${file}': ${errMessage(error)}`]);
+    }
+  }
+
+  if (json) {
+    const data = { changed, ...(changedCells.length ? { changedCells } : {}), ...describeData(result) };
+    return { stdout: jsonEnvelope('cell', true, data, []), stderr: '', exitCode: 0 };
+  }
+  const note = changed ? `Updated ${file}` : `No change (${file})`;
+  const detached = changedCells.length ? `\nDetached from: ${changedCells.join(', ')}` : '';
+  return { stdout: '', stderr: note + detached, exitCode: 0 };
+}
+
 /**
  * Route argv to a command handler. Pure — returns a CommandResult.
  */
@@ -594,6 +797,8 @@ export async function dispatch(argv: string[]): Promise<CommandResult> {
         return capabilitiesCommand(rest);
       case 'templates':
         return templatesCommand(rest);
+      case 'cell':
+        return cellCommand(rest);
       default:
         return { stdout: '', stderr: `Unknown command: ${command}\n${HELP}`, exitCode: 1 };
     }

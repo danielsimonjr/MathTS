@@ -36,6 +36,10 @@ export { WorkbookExecutor, createExecutor } from './executor';
 // Result formatting
 export { formatResult } from './formatter';
 
+// Cell mutation (pure, immutable)
+export { addCell, editCell, removeCell, moveCell, renameCell } from './edit';
+export type { CellPosition, RemoveResult } from './edit';
+
 // Machine contract
 export { SCHEMA_VERSION } from './contract';
 

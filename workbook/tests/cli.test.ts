@@ -209,6 +209,124 @@ describe('cli envelope robustness', () => {
   });
 });
 
+describe('cli cell (mutation)', () => {
+  const BASE = 'cells:\n  - code: "1"\n    id: a';
+  const A_B = 'cells:\n  - code: "1"\n    id: a\n  - code: "a + 1"\n    id: b\n    depends_on: [a]';
+
+  it('add appends a cell and writes the file', async () => {
+    const p = fixture(BASE);
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', 'a + 1', '--depends-on', 'a', '--json']);
+    expect(r.exitCode).toBe(0);
+    const env = JSON.parse(r.stdout);
+    expect(env.command).toBe('cell');
+    expect(env.data.cells.map((c: { id: string }) => c.id)).toEqual(['a', 'b']);
+    expect(readFileSync(p, 'utf-8')).toContain('id: b');
+  });
+
+  it('add reads content from --content-file', async () => {
+    const p = fixture(BASE);
+    const cf = join(dir, `content-${counter++}.txt`);
+    writeFileSync(cf, 'a * 3', 'utf-8');
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content-file', cf, '--depends-on', 'a']);
+    expect(r.exitCode).toBe(0);
+    expect(readFileSync(p, 'utf-8')).toContain('a * 3');
+  });
+
+  it('edit changes content', async () => {
+    const p = fixture(BASE);
+    const r = await dispatch(['cell', 'edit', p, 'a', '--content', '42']);
+    expect(r.exitCode).toBe(0);
+    expect(readFileSync(p, 'utf-8')).toContain('42');
+  });
+
+  it('rm refuses with dependents, --force detaches and reports changedCells', async () => {
+    const p = fixture(A_B);
+    const refused = await dispatch(['cell', 'rm', p, 'a', '--json']);
+    expect(refused.exitCode).toBe(1);
+    expect(JSON.parse(refused.stdout).problems.join(' ')).toMatch(/dependent/i);
+
+    const forced = await dispatch(['cell', 'rm', p, 'a', '--force', '--json']);
+    expect(forced.exitCode).toBe(0);
+    expect(JSON.parse(forced.stdout).data.changedCells).toContain('b');
+    expect(readFileSync(p, 'utf-8')).not.toContain('id: a');
+  });
+
+  it('rename updates dependents (edge + content) so the workbook still runs', async () => {
+    const p = fixture(A_B); // b: content "a + 1", depends_on [a]
+    const r = await dispatch(['cell', 'rename', p, 'a', 'alpha']);
+    expect(r.exitCode).toBe(0);
+    const after = readFileSync(p, 'utf-8');
+    expect(after).toContain('id: alpha');
+    expect(after).toContain('alpha + 1'); // by-id content reference rewritten
+    expect(after).not.toMatch(/\ba \+ 1\b/);
+    // and it still runs clean end-to-end
+    const run = await dispatch(['run', p, '--json']);
+    expect(JSON.parse(run.stdout).ok).toBe(true);
+  });
+
+  it('move reorders', async () => {
+    const p = fixture('cells:\n  - code: "1"\n    id: a\n  - markdown: "x"\n    id: b');
+    const r = await dispatch(['cell', 'move', p, 'b', '--at', '0', '--json']);
+    expect(JSON.parse(r.stdout).data.cells.map((c: { id: string }) => c.id)).toEqual(['b', 'a']);
+  });
+
+  it('leaves the file byte-for-byte unchanged on an invalid op', async () => {
+    const p = fixture(BASE);
+    const before = readFileSync(p, 'utf-8');
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'a']); // duplicate id
+    expect(r.exitCode).toBe(1);
+    expect(readFileSync(p, 'utf-8')).toBe(before);
+  });
+
+  it('rejects a cycle-forming edit (file unchanged)', async () => {
+    const p = fixture('cells:\n  - code: "b"\n    id: a\n    depends_on: [b]\n  - code: "1"\n    id: b');
+    const before = readFileSync(p, 'utf-8');
+    const r = await dispatch(['cell', 'edit', p, 'b', '--depends-on', 'a', '--json']);
+    expect(r.exitCode).toBe(1);
+    expect(JSON.parse(r.stdout).problems.join(' ')).toMatch(/cycle/i);
+    expect(readFileSync(p, 'utf-8')).toBe(before);
+  });
+
+  it('--dry-run previews without writing', async () => {
+    const p = fixture(BASE);
+    const before = readFileSync(p, 'utf-8');
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', '2', '--dry-run']);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('id: b');
+    expect(readFileSync(p, 'utf-8')).toBe(before);
+  });
+
+  it('rejects a non-integer --at', async () => {
+    const p = fixture(BASE);
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--at', 'x', '--json']);
+    expect(r.exitCode).toBe(1);
+    expect(JSON.parse(r.stdout).problems.join(' ')).toMatch(/--at/);
+  });
+
+  it('normalizes --depends-on (trims, drops empties, de-dups)', async () => {
+    const p = fixture(BASE);
+    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', 'a', '--depends-on', 'a, ,a', '--json']);
+    expect(r.exitCode).toBe(0);
+    const b = JSON.parse(r.stdout).data.cells.find((c: { id: string }) => c.id === 'b');
+    expect(b.dependsOn).toEqual(['a']);
+  });
+
+  it('errors when both --content and --content-file are given', async () => {
+    const p = fixture(BASE);
+    const r = await dispatch(['cell', 'edit', p, 'a', '--content', '1', '--content-file', 'x.txt', '--json']);
+    expect(r.exitCode).toBe(1);
+    expect(JSON.parse(r.stdout).problems.join(' ').toLowerCase()).toContain('only one');
+  });
+
+  it('clears stale persisted output when a cell is edited', async () => {
+    const p = fixture('cells:\n  - code: "1"\n    id: a\n    output: 1');
+    await dispatch(['cell', 'edit', p, 'a', '--content', '999']);
+    const after = readFileSync(p, 'utf-8');
+    expect(after).toContain('999');
+    expect(after).not.toContain('output');
+  });
+});
+
 describe('cli validate', () => {
   it('should report OK for a valid workbook', async () => {
     const r = await dispatch(['validate', fixture(PASSING)]);

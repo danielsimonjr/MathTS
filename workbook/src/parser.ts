@@ -27,6 +27,14 @@ const RESERVED_CELL_KEYS = ['id', 'depends_on', 'language', 'format', 'output', 
 /** Valid MathTS identifier — required for cell ids so by-id dependency refs work. */
 const IDENTIFIER_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+/** Whether a string is a valid cell id (a MathTS identifier). */
+export function isValidIdentifier(id: string): boolean {
+  return typeof id === 'string' && IDENTIFIER_RE.test(id);
+}
+
+/** Cell types the runtime can execute today (the rest are reserved/deferred). */
+export const SUPPORTED_CELL_TYPES: CellType[] = ['code', 'markdown', 'data', 'test'];
+
 const EXECUTION_MODES = ['reactive', 'sequential', 'manual'];
 
 /**
