@@ -27,6 +27,11 @@ export default tseslint.config(
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      // typescript-eslint recommends disabling core `no-undef` for TS: the
+      // TypeScript compiler already reports undefined references (and our
+      // typecheck is 0 errors), so `no-undef` only produces false positives
+      // on ambient globals / type-only names.
+      'no-undef': 'off',
     },
   },
   // ---------------------------------------------------------------------------
@@ -137,7 +142,6 @@ export default tseslint.config(
       'prefer-rest-params': 'warn',
       'no-useless-escape': 'warn',
       'no-self-assign': 'warn',
-      'no-undef': 'warn',
       'no-empty': 'warn',
       'no-prototype-builtins': 'warn',
       'no-control-regex': 'warn',

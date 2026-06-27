@@ -53,9 +53,10 @@ What remains in `functions/src/` is **all reachable from
   `parse`, backed by the `expression` package)
 
 A few legacy synced files were intentionally KEPT because direct tests exercise
-them: `functions/src/signal/{fft,conv}.ts`, `functions/src/type/local/Decimal.ts`,
-and the `functions/src/wasm/**` bindings reached via `wasm/index.ts` ←
-`tests/wasm/typescript-integration.test.ts`.
+them: `functions/src/signal/{fft,conv}.ts` and `functions/src/type/local/Decimal.ts`.
+(The vestigial pre-migration AssemblyScript-source-as-`.ts` under `functions/src/wasm/`
+was deleted 2026-06-27 — the real WASM backend is `assembly/src/`; only the active
+JS dispatch bridges + loader remain in `functions/src/wasm/`.)
 
 `functions/tsconfig.json` now uses `strict:true` (flipped 2026-06-27). The
 former ~430 strict violations across the active graph (activated factories +
