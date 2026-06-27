@@ -8,14 +8,19 @@
  * WASM acceleration path:
  *   - Symmetric matrices: Jacobi eigenvalue algorithm (AssemblyScript
  *     `matrix_eig_symmetric`, `assembly/src/ops/eig.ts`)
- *   - Non-symmetric matrices: falls back to JS QR algorithm
+ *   - Non-symmetric matrices: Hessenberg reduction + Francis double-shift
+ *     implicit QR to the real Schur form, with eigenvector back-substitution
+ *     (AssemblyScript `matrix_eig_general`, `assembly/src/ops/eig.ts`)
  *
- * JS fallback path:
+ * JS fallback path (wasm unavailable, n < threshold, or missing export):
  *   - Full QR algorithm with implicit shifts (eig.ts)
  *
- * Phase 7b: repointed off the retired Rust crate. The AS kernel packs its
- * result as `[ eigenvalues(n) | eigenvectors(n*n) ]` with eigenvectors as
- * COLUMNS (`V[i*n+j]` = component `i` of eigenvector `j`).
+ * Packing of the AS return values (both decoded via `readReturnedFloat64Array`):
+ *   - matrix_eig_symmetric: `[ eigenvalues(n) | eigenvectors(n*n) ]`
+ *   - matrix_eig_general:   `[ re(n) | im(n) | eigenvectors(n*n) ]`
+ * Eigenvectors are stored as COLUMNS (`V[i*n+j]` = component `i` of
+ * eigenvector `j`). Complex-eigenvalue columns are zero (the real `number[][]`
+ * vector contract cannot represent complex eigenvectors).
  *
  * @packageDocumentation
  */
@@ -81,63 +86,104 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
   }
   const symmetric = isSymmetric(matrix);
 
-  if (
-    !module ||
-    n < WASM_EIG_THRESHOLD ||
-    !symmetric ||
-    typeof module.matrix_eig_symmetric !== 'function'
-  ) {
-    // JS fallback: use the existing QR-based implementation
+  // Decide whether a WASM kernel is available for this matrix:
+  //   symmetric     -> matrix_eig_symmetric (Jacobi)
+  //   non-symmetric -> matrix_eig_general   (Hessenberg + Francis double-shift QR)
+  const useSymWasm =
+    !!module && n >= WASM_EIG_THRESHOLD && symmetric && typeof module.matrix_eig_symmetric === 'function';
+  const useGenWasm =
+    !!module &&
+    n >= WASM_EIG_THRESHOLD &&
+    !symmetric &&
+    typeof module.matrix_eig_general === 'function';
+
+  if (!useSymWasm && !useGenWasm) {
+    // JS fallback: use the existing QR-based implementation. Covers
+    // wasm-unavailable, small matrices, and the missing-export case.
     return eig(matrix, options);
   }
 
   const computeVectors = options?.computeVectors ?? true;
+  const identityVectors = (): number[][] =>
+    Array.from({ length: n }, (_, i) => {
+      const row = new Array(n).fill(0);
+      row[i] = 1;
+      return row;
+    });
 
   // Flatten matrix to row-major order
   const flatMatrix = flattenMatrix(matrix);
   const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
 
   try {
-    // matrix_eig_symmetric returns a managed Float64Array header packing
-    // [ eigenvalues(n) | eigenvectors(n*n) ], eigenvectors as columns.
-    const packedPtr = module.matrix_eig_symmetric(matrixAlloc.ptr, n);
+    if (useSymWasm) {
+      // matrix_eig_symmetric returns a managed Float64Array header packing
+      // [ eigenvalues(n) | eigenvectors(n*n) ], eigenvectors as columns.
+      const packedPtr = module!.matrix_eig_symmetric!(matrixAlloc.ptr, n);
+      const packed = wasmLoader.readReturnedFloat64Array(packedPtr);
+      if (packed.length < n + n * n) {
+        // Unexpected shape — fall back to JS.
+        return eig(matrix, options);
+      }
+
+      const values: Array<{ re: number; im: number }> = [];
+      for (let j = 0; j < n; j++) {
+        values.push({ re: packed[j], im: 0 });
+      }
+
+      let vectors: number[][];
+      if (computeVectors) {
+        // Eigenvector j is column j: component i is packed[n + i*n + j].
+        // Emit vectors[j] = the j-th eigenvector (row of components), matching
+        // the JS `eig` contract where vectors[k] is the k-th eigenvector.
+        vectors = [];
+        for (let j = 0; j < n; j++) {
+          const vec: number[] = [];
+          for (let i = 0; i < n; i++) {
+            vec.push(packed[n + i * n + j]);
+          }
+          vectors.push(vec);
+        }
+      } else {
+        vectors = identityVectors();
+      }
+
+      return { values, vectors, isSymmetric: true };
+    }
+
+    // Non-symmetric WASM path: matrix_eig_general returns a managed
+    // Float64Array header packing [ re(n) | im(n) | eigenvectors(n*n) ],
+    // eigenvectors as columns (real eigenvectors unit-normalised; complex
+    // eigenvalue columns zero-filled — matching the real-valued `number[][]`
+    // contract the JS reference uses, where complex eigenvectors are zero).
+    const packedPtr = module!.matrix_eig_general!(matrixAlloc.ptr, n);
     const packed = wasmLoader.readReturnedFloat64Array(packedPtr);
-    if (packed.length < n + n * n) {
+    if (packed.length < 2 * n + n * n) {
       // Unexpected shape — fall back to JS.
       return eig(matrix, options);
     }
 
     const values: Array<{ re: number; im: number }> = [];
     for (let j = 0; j < n; j++) {
-      values.push({ re: packed[j], im: 0 });
+      values.push({ re: packed[j], im: packed[n + j] });
     }
 
     let vectors: number[][];
     if (computeVectors) {
-      // Eigenvector j is column j: component i is packed[n + i*n + j].
-      // Emit vectors[j] = the j-th eigenvector (row of components), matching
-      // the JS `eig` contract where vectors[k] is the k-th eigenvector.
+      // Eigenvector j is column j: component i is packed[2n + i*n + j].
       vectors = [];
       for (let j = 0; j < n; j++) {
         const vec: number[] = [];
         for (let i = 0; i < n; i++) {
-          vec.push(packed[n + i * n + j]);
+          vec.push(packed[2 * n + i * n + j]);
         }
         vectors.push(vec);
       }
     } else {
-      vectors = Array.from({ length: n }, (_, i) => {
-        const row = new Array(n).fill(0);
-        row[i] = 1;
-        return row;
-      });
+      vectors = identityVectors();
     }
 
-    return {
-      values,
-      vectors,
-      isSymmetric: true,
-    };
+    return { values, vectors, isSymmetric: false };
   } catch {
     // If WASM call fails for any reason, fall back to JS
     return eig(matrix, options);

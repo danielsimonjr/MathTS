@@ -218,7 +218,7 @@ export { matrix_svd, matrix_singular_values } from './ops/svd';
 // Symmetric Eigendecomposition (Jacobi) + spectral radius
 // =============================================================================
 
-export { matrix_eig_symmetric, matrix_spectral_radius } from './ops/eig';
+export { matrix_eig_symmetric, matrix_spectral_radius, matrix_eig_general } from './ops/eig';
 
 // =============================================================================
 // FFT (radix-2 Cooley-Tukey): fft/ifft, rfft, powerSpectrum (interleaved)

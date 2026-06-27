@@ -505,10 +505,15 @@ export interface WasmModule {
   //  - matrix_singular_values(a, m, n)    -> S (k), descending
   //  - matrix_eig_symmetric(a, n)         -> packed [ eigenvalues(n) | eigenvectors(n*n) ]
   //                                          (eigenvectors as columns: V[i*n+j])
+  //  - matrix_eig_general(a, n)           -> packed [ re(n) | im(n) | eigenvectors(n*n) ]
+  //                                          (non-symmetric; eigenvectors as columns,
+  //                                          real eigenvectors unit-normalised,
+  //                                          complex-eigenvalue columns zero-filled)
   //  - matrix_spectral_radius(a, n)       -> f64 (max |eigenvalue|)
   matrix_svd?: (aHdr: number, m: number, n: number) => number;
   matrix_singular_values?: (aHdr: number, m: number, n: number) => number;
   matrix_eig_symmetric?: (aHdr: number, n: number) => number;
+  matrix_eig_general?: (aHdr: number, n: number) => number;
   matrix_spectral_radius?: (aHdr: number, n: number) => number;
 
   // Memory management — AssemblyScript managed runtime.

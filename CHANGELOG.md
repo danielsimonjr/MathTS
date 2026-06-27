@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-26) — AssemblyScript general (non-symmetric) real eigensolver + wired into matrix
+
+- **New AS kernel `matrix_eig_general(a, n)`** (`assembly/src/ops/eig.ts`, exported
+  from `assembly/src/index.ts`): a general real non-symmetric eigendecomposition —
+  Householder reduction to upper Hessenberg form, Francis double-shift implicit QR
+  to the real Schur form (real eigenvalues + complex-conjugate pairs from 2×2
+  blocks), then eigenvector back-substitution and back-transform. Ported from the
+  public-domain JAMA `EigenvalueDecomposition` (`orthes` + `hqr2`, the canonical
+  EISPACK algorithm). Returns a packed `Float64Array` `[ re(n) | im(n) |
+  eigenvectors(n*n) ]` — eigenvectors stored as COLUMNS, real eigenvectors
+  unit-normalised, complex-eigenvalue columns zero-filled (the real `number[][]`
+  vector contract cannot represent complex eigenvectors, matching the JS reference
+  which returns the zero vector for complex eigenvalues).
+- **`matrix/src/operations/eig-wasm.ts` non-symmetric path now routes to AS.**
+  Previously every non-symmetric matrix fell back to the JS QR algorithm; now
+  non-symmetric matrices with `n >= 8` use `matrix_eig_general` when the AS binary
+  is loaded, keeping the JS fallback for wasm-unavailable, small matrices, and the
+  missing-export case. `matrix_eig_general?` added to the `WasmModule` interface.
+- **Verified correctness (parity oracle = JS eig + invariants + known matrices).**
+  Against trace invariant, true roots, and real-eigenvector residuals across a
+  companion matrix, `[[0,-1],[1,0]]→±i`, rotation/Jordan blocks, and random
+  non-symmetric `n = 4/8/16`: worst eigenvalue set diff vs JS `3.3e-13`, worst
+  true-root set diff `3.9e-14`, worst real-eigenvector residual `2.9e-14`
+  (tolerances `1e-8` / `1e-7`). The AS kernel is in fact **more accurate than the
+  JS reference**, which returns all-zero eigenvalues for higher-degree companion
+  matrices (e.g. the 5th/8th roots of unity) where the AS kernel is exact. New
+  live-AS test `matrix/tests/decomposition/eig-general-wasm.test.ts` proves
+  execution on the AS kernel via the degree-8 companion (8th roots of unity)
+  discriminator — a green there is impossible on the broken JS fallback path.
+
 ### Changed (2026-06-26) — dedup special-function scalars + parallel helpers in `functions` (Duplication Audit Clusters A & E)
 
 - **New canonical scalar module `functions/src/wasm/special/scalars.ts`** — the
