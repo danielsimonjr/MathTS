@@ -88,6 +88,29 @@ export function getDependents(graph: DependencyGraph, cellId: string): string[] 
 }
 
 /**
+ * Render the dependency graph as a Mermaid `graph TD` diagram.
+ *
+ * Cell ids are validated identifiers (`[A-Za-z_][A-Za-z0-9_]*`), so they are
+ * safe to use verbatim as both the node id and its quoted label — Mermaid
+ * syntax injection is impossible and no cell content appears in the output.
+ */
+export function toMermaid(graph: DependencyGraph): string {
+  const lines: string[] = ['graph TD'];
+
+  for (const id of graph.nodes.keys()) {
+    lines.push(`  ${id}["${id}"]`);
+  }
+
+  for (const [id, node] of graph.nodes) {
+    for (const dep of node.dependencies) {
+      lines.push(`  ${dep} --> ${id}`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+/**
  * Detect circular dependencies
  */
 export function detectCycles(graph: DependencyGraph): string[][] {

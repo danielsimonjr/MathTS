@@ -1,11 +1,10 @@
 version: "1.0"
 
 metadata:
-  title: "Basic MathTS Workbook Example"
-  author: "MathTS Team"
-  description: "A simple example demonstrating the .mtsw workbook format"
+  title: "Basic MathTS Workbook"
+  author: "MathTS"
+  description: "Expression-style .mtsw demonstrating code, dependencies, data, and self-verifying test cells."
   tags: [example, tutorial, basics]
-  created: 2025-12-10T00:00:00Z
 
 runtime:
   engine: mathts
@@ -15,84 +14,67 @@ cells:
   - markdown: |
       # Basic MathTS Workbook
 
-      This workbook demonstrates the fundamental features of MathTS scientific workbooks.
+      This workbook demonstrates the headless `.mtsw` runtime:
 
-      ## What is a Workbook?
+      - **code** cells evaluate MathTS expressions
+      - cells reference each other by id via **depends_on**
+      - **data** cells hold structured YAML
+      - **test** cells assert results (they make the workbook self-verifying)
 
-      A workbook (`.mtsw` file) is a YAML-based document that combines:
-      - **Markdown** for documentation
-      - **Code** for computation
-      - **Equations** for mathematical notation
-      - **Visualizations** for data display
+      Run it with: `mtsw run examples/basic-workbook.mtsw`
     id: intro
 
   - markdown: |
-      ## Simple Calculation
+      ## Gauss sum
 
-      Let's start with a basic calculation. The cell below computes
-      the sum of the first 10 natural numbers using the formula:
+      The sum of the first `n` natural numbers is `n(n+1)/2`.
+    id: gaussIntro
 
-      $$S_n = \frac{n(n+1)}{2}$$
-    id: sum-intro
+  - code: "10"
+    id: n
 
-  - code: |
-      // Calculate the sum of first n natural numbers
-      const n = 10;
-      const sum = (n * (n + 1)) / 2;
+  - code: "n * (n + 1) / 2"
+    id: gaussSum
+    depends_on: [n]
 
-      console.log(`Sum of first ${n} natural numbers:`, sum);
-      export { n, sum };
-    id: sum-calc
-    language: typescript
+  - test: "gaussSum == 55"
+    id: checkGauss
+    depends_on: [gaussSum]
 
   - markdown: |
-      ## Dependency Example
+      ## Object results & property access
 
-      Cells can depend on other cells. The next cell uses the result
-      from the calculation above.
-    id: dep-intro
+      A code cell can return multiple named values as an object; downstream
+      cells read them with sandboxed property access.
+    id: objectIntro
 
-  - code: |
-      import { n, sum } from '#sum-calc';
+  - code: "{ pi: 3.14159265359, e: 2.71828182846 }"
+    id: constants
 
-      // Verify our calculation
-      let manualSum = 0;
-      for (let i = 1; i <= n; i++) {
-        manualSum += i;
-      }
-
-      const verified = manualSum === sum;
-      console.log('Verified:', verified);
-      console.log('Manual sum:', manualSum);
-
-      export { verified };
-    id: verify
-    depends_on: [sum-calc]
+  - test: "constants.pi > 3.14"
+    id: checkPi
+    depends_on: [constants]
 
   - markdown: |
-      ## Data Cells
+      ## Numeric check
 
-      Data cells allow you to define structured data in YAML format.
-    id: data-intro
+      `sqrt(2)` squared returns to 2 within floating-point tolerance.
+    id: rootIntro
+
+  - code: "sqrt(2)"
+    id: root2
+
+  - test: "abs(root2 * root2 - 2) < 1e-9"
+    id: checkRoot2
+    depends_on: [root2]
+
+  - markdown: |
+      ## Data cells
+
+      Data cells hold structured YAML, parsed into a value at run time.
+    id: dataIntro
 
   - data: |
-      constants:
-        pi: 3.14159265359
-        e: 2.71828182846
-        phi: 1.61803398875
-      description: "Mathematical constants"
-    id: math-constants
-    format: yaml
-
-  - markdown: |
-      ## Next Steps
-
-      Explore more advanced features:
-      - **Tensor cells** for Einstein notation
-      - **Visualization cells** for 3D graphics
-      - **Test cells** for assertions
-      - **Export cells** for publication output
-
-      See the [Workbook Specification](../docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md)
-      for complete documentation.
-    id: conclusion
+      label: "demo dataset"
+      values: [1, 2, 3, 4]
+    id: dataset

@@ -13,16 +13,21 @@ export type {
   RuntimeConfig,
   ParseResult,
   WorkbookEvent,
+  CellResult,
+  RunResult,
 } from './types';
 
 // Parser
-export { parseWorkbook, serializeWorkbook, stripOutputs } from './parser';
+export { parseWorkbook, serializeWorkbook, stripOutputs, detectCellType } from './parser';
 
 // Dependency graph
-export { buildDependencyGraph, topologicalSort, getDependents } from './graph';
+export { buildDependencyGraph, topologicalSort, getDependents, detectCycles, toMermaid } from './graph';
 
 // Executor
 export { WorkbookExecutor, createExecutor } from './executor';
+
+// Result formatting
+export { formatResult } from './formatter';
 
 // Version
 export const VERSION = '0.1.0';

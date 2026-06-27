@@ -2,10 +2,10 @@
  * Workbook executor
  */
 
-import type { Workbook, Cell, WorkbookEvent, DependencyGraph } from './types';
-import { buildDependencyGraph, getDependents } from './graph';
+import type { Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult } from './types';
+import { buildDependencyGraph, getDependents, detectCycles } from './graph';
 import { evaluate } from '@danielsimonjr/mathts-functions';
-import { parse as parseYaml } from 'yaml';
+import { parseYamlHardened, assertNoPollution } from './yaml-safe';
 
 /**
  * Event handler type
@@ -122,6 +122,8 @@ export class WorkbookExecutor {
     switch (cell.type) {
       case 'code':
         return this.executeCode(cell);
+      case 'test':
+        return this.executeTest(cell);
       case 'markdown':
         return cell.content; // Markdown is pass-through
       case 'data':
@@ -132,34 +134,119 @@ export class WorkbookExecutor {
   }
 
   /**
+   * Build the evaluation scope from a cell's DIRECT dependency outputs.
+   *
+   * Dependency outputs are injected as named variables keyed by the
+   * dependency's cell id, so a cell can reference an earlier cell's result by
+   * that id. Injection is non-transitive: only ids in `cell.dependsOn` are
+   * injected (a dependency's own dependencies are not). An output of
+   * `undefined` (cell never ran) is skipped, so the reference fails loudly.
+   */
+  private buildScope(cell: Cell): Record<string, unknown> {
+    const scope: Record<string, unknown> = {};
+    if (cell.dependsOn) {
+      for (const depId of cell.dependsOn) {
+        // Use `has` (not `!== undefined`) so a dependency whose result is
+        // legitimately `undefined` is still injected rather than silently
+        // dropped. A dependency that never ran has no entry and is skipped.
+        if (this.outputs.has(depId)) {
+          scope[depId] = this.outputs.get(depId);
+        }
+      }
+    }
+    return scope;
+  }
+
+  /**
    * Execute a code cell by evaluating its content as a MathTS expression.
    *
-   * Dependency outputs are injected as named variables in the evaluation
-   * scope, so a cell can reference the result of an earlier cell by its id.
    * Evaluation goes through the MathTS expression engine — property and
    * method access route through the expression sandbox, so this does not
    * have the arbitrary-code-execution exposure of the `Function` constructor.
    */
   private async executeCode(cell: Cell): Promise<unknown> {
-    // Build the evaluation scope from dependency outputs.
-    const scope: Record<string, unknown> = {};
-    if (cell.dependsOn) {
-      for (const depId of cell.dependsOn) {
-        const output = this.outputs.get(depId);
-        if (output !== undefined) {
-          scope[depId] = output;
-        }
-      }
-    }
-
-    return evaluate(cell.content, scope);
+    return evaluate(cell.content, this.buildScope(cell));
   }
 
   /**
-   * Execute a data cell — parse its content as YAML (a superset of JSON).
+   * Execute a test cell: evaluate its assertion expression in the dependency
+   * scope. The result must be a boolean — `runReport` classifies `true` as a
+   * pass and `false` as a fail. A non-boolean result is a usage error (a test
+   * that doesn't assert), surfaced via throw like any other evaluation error.
+   */
+  private async executeTest(cell: Cell): Promise<boolean> {
+    const result = evaluate(cell.content, this.buildScope(cell));
+    if (typeof result !== 'boolean') {
+      throw new Error(`test cell must evaluate to a boolean, got ${typeof result}`);
+    }
+    return result;
+  }
+
+  /**
+   * Execute a data cell — parse its content as YAML (a superset of JSON) using
+   * the same hardened options + prototype-pollution guard as the document
+   * parser, so both YAML entry points are consistent.
    */
   private async executeData(cell: Cell): Promise<unknown> {
-    return parseYaml(cell.content);
+    const value = parseYamlHardened(cell.content);
+    assertNoPollution(value);
+    return value;
+  }
+
+  /**
+   * Run every cell in dependency order and return a structured report.
+   *
+   * Unlike {@link runAll} (the event-stream API, which throws on the first cell
+   * error), `runReport` is the headless/report API: it is **continue-on-error**
+   * (one failing cell does not abort the rest) and never throws on a cell
+   * failure. A dependency cycle is refused up front. Test cells are classified
+   * as `pass`/`fail`/`error`; all other cells as `success`/`error`.
+   */
+  async runReport(): Promise<RunResult> {
+    const cells: CellResult[] = [];
+
+    const cycles = detectCycles(this.graph);
+    if (cycles.length > 0) {
+      const description = cycles.map((cycle) => cycle.join(' -> ')).join('; ');
+      cells.push({
+        id: '(workbook)',
+        type: 'code',
+        status: 'error',
+        error: `Dependency cycle detected: ${description}`,
+      });
+      return { cells, ok: false };
+    }
+
+    for (const cellId of this.graph.executionOrder) {
+      const cell = this.workbook.cells.find((c) => c.id === cellId);
+      if (!cell) continue;
+
+      try {
+        const output = await this.runCell(cellId);
+        if (cell.type === 'test') {
+          const passed = output === true;
+          cells.push({
+            id: cell.id,
+            type: cell.type,
+            status: passed ? 'pass' : 'fail',
+            output,
+            error: passed ? undefined : `Assertion failed in cell '${cell.id}'`,
+          });
+        } else {
+          cells.push({ id: cell.id, type: cell.type, status: 'success', output });
+        }
+      } catch (error) {
+        cells.push({
+          id: cell.id,
+          type: cell.type,
+          status: 'error',
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const ok = cells.every((c) => c.status === 'success' || c.status === 'pass');
+    return { cells, ok };
   }
 
   /**

@@ -1,130 +1,243 @@
 #!/usr/bin/env node
 /**
  * MathTS Workbook CLI
+ *
+ * Command handlers are pure functions returning `{ stdout, stderr, exitCode }`
+ * (no direct console / process.exit) so they can be unit-tested. The thin
+ * `main()` at the bottom wires them to the real streams, and only runs when
+ * this file is the process entry point.
  */
 
-import { parseWorkbook, createExecutor } from './index';
+import { readFileSync, realpathSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import { parseWorkbook } from './parser';
+import { createExecutor } from './executor';
+import { buildDependencyGraph, detectCycles, toMermaid } from './graph';
+import { formatResult } from './formatter';
+import { VERSION } from './index';
+import type { CellResult } from './types';
+
+export interface CommandResult {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+}
 
 const HELP = `
 mtsw - MathTS Workbook CLI
 
 Usage:
-  mtsw run <file>              Execute a workbook
-  mtsw run <file> -c <cell>    Run specific cell
-  mtsw run <file> -v           Verbose output
-  mtsw watch <file>            Watch and re-run on changes
-  mtsw validate <file>         Validate workbook structure
-  mtsw graph <file>            Show dependency graph
-  mtsw graph <file> -f mermaid Export as Mermaid diagram
-  mtsw strip <file>            Strip outputs (for git)
-  mtsw new <name>              Create new workbook
-  mtsw new <name> -t <template> Use template (basic|tensor-physics|data-science)
-  mtsw export <file> -f <fmt>  Export to format (html|pdf|ipynb|latex)
+  mtsw run <file> [-v] [--json]   Execute a workbook (-v: events, --json: machine output)
+  mtsw validate <file>            Validate workbook structure (ids, deps, cycles)
+  mtsw graph <file> [-f mermaid]  Print the dependency graph
 
 Options:
   -h, --help     Show this help
-  -v, --verbose  Verbose output
   -V, --version  Show version
-`;
 
-async function main() {
-  const args = process.argv.slice(2);
+Notes:
+  Dependency scope is direct-only (non-transitive): a cell sees only the cells
+  listed in its own depends_on, not their dependencies. Cell ids must be valid
+  identifiers ([A-Za-z_][A-Za-z0-9_]*).
+`.trimStart();
 
-  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
-    console.log(HELP);
-    process.exit(0);
+/** Flags that consume the following argument as their value. */
+const VALUE_FLAGS = new Set(['-f', '--format']);
+
+/**
+ * First argument that is neither a flag nor the value of a value-flag, so the
+ * filename is found regardless of where flags appear (`graph -f mermaid file`
+ * and `graph file -f mermaid` both work).
+ */
+function firstPositional(args: string[]): string | undefined {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (VALUE_FLAGS.has(arg)) {
+      i++; // skip this flag's value
+      continue;
+    }
+    if (!arg.startsWith('-')) return arg;
+  }
+  return undefined;
+}
+
+function flagValue(args: string[], flag: string): string | undefined {
+  const i = args.indexOf(flag);
+  return i >= 0 ? args[i + 1] : undefined;
+}
+
+function readFile(file: string): { content?: string; error?: string } {
+  try {
+    return { content: readFileSync(file, 'utf-8') };
+  } catch (error) {
+    return { error: `Cannot read file '${file}': ${error instanceof Error ? error.message : String(error)}` };
+  }
+}
+
+function bullets(items: string[]): string {
+  return items.map((item) => `  - ${item}`).join('\n');
+}
+
+function statusMark(status: CellResult['status']): string {
+  return status === 'success' || status === 'pass' ? '✓' : '✗';
+}
+
+function humanCellLine(cell: CellResult): string {
+  const mark = statusMark(cell.status);
+  const body =
+    cell.status === 'error' || cell.status === 'fail'
+      ? (cell.error ?? '(failed)')
+      : formatResult(cell.output);
+  return `${mark} ${cell.id} (${cell.type}): ${body}`;
+}
+
+function failureSummary(cells: CellResult[]): string {
+  const failures = cells.filter((c) => c.status === 'error' || c.status === 'fail');
+  if (failures.length === 0) return '';
+  return `${failures.length} cell(s) failed:\n${bullets(failures.map((c) => `${c.id}: ${c.error ?? '(failed)'}`))}`;
+}
+
+export async function runCommand(args: string[]): Promise<CommandResult> {
+  const file = firstPositional(args);
+  if (!file) {
+    return { stdout: '', stderr: 'Usage: mtsw run <file> [-v] [--json]', exitCode: 1 };
   }
 
-  if (args.includes('-V') || args.includes('--version')) {
-    console.log('mtsw version 0.1.0');
-    process.exit(0);
+  const read = readFile(file);
+  if (read.error) return { stdout: '', stderr: read.error, exitCode: 1 };
+
+  const parsed = parseWorkbook(read.content!);
+  if (!parsed.success) {
+    return { stdout: '', stderr: `Parse errors:\n${bullets(parsed.errors ?? [])}`, exitCode: 1 };
   }
 
-  const command = args[0];
+  const verbose = args.includes('-v') || args.includes('--verbose');
+  const json = args.includes('--json');
 
+  const executor = createExecutor(parsed.workbook!);
+  const events: string[] = [];
+  if (verbose) {
+    executor.on((event) => events.push(`[${event.type}] ${event.cellId ?? ''}`.trimEnd()));
+  }
+
+  const report = await executor.runReport();
+  const stderr = report.ok ? '' : failureSummary(report.cells);
+
+  if (json) {
+    const cells = report.cells.map((c) => ({
+      id: c.id,
+      type: c.type,
+      status: c.status,
+      ...(c.output !== undefined ? { output: formatResult(c.output) } : {}),
+      ...(c.error ? { error: c.error } : {}),
+    }));
+    const stdout = JSON.stringify({ ok: report.ok, cells }, null, 2);
+    return { stdout, stderr, exitCode: report.ok ? 0 : 1 };
+  }
+
+  const body = report.cells.map(humanCellLine).join('\n');
+  const stdout = verbose && events.length > 0 ? `${events.join('\n')}\n\n${body}` : body;
+  return { stdout, stderr, exitCode: report.ok ? 0 : 1 };
+}
+
+export function validateCommand(args: string[]): CommandResult {
+  const file = firstPositional(args);
+  if (!file) {
+    return { stdout: '', stderr: 'Usage: mtsw validate <file>', exitCode: 1 };
+  }
+
+  const read = readFile(file);
+  if (read.error) return { stdout: '', stderr: read.error, exitCode: 1 };
+
+  const parsed = parseWorkbook(read.content!);
+  const problems: string[] = [...(parsed.errors ?? [])];
+
+  if (parsed.success) {
+    const graph = buildDependencyGraph(parsed.workbook!.cells);
+    for (const cycle of detectCycles(graph)) {
+      problems.push(`Dependency cycle: ${cycle.join(' -> ')}`);
+    }
+  }
+
+  if (problems.length === 0) {
+    const count = parsed.workbook!.cells.length;
+    return { stdout: `OK: '${file}' is valid (${count} cell(s))`, stderr: '', exitCode: 0 };
+  }
+
+  return { stdout: '', stderr: `Invalid workbook:\n${bullets(problems)}`, exitCode: 1 };
+}
+
+export function graphCommand(args: string[]): CommandResult {
+  const file = firstPositional(args);
+  if (!file) {
+    return { stdout: '', stderr: 'Usage: mtsw graph <file> [-f mermaid]', exitCode: 1 };
+  }
+
+  const read = readFile(file);
+  if (read.error) return { stdout: '', stderr: read.error, exitCode: 1 };
+
+  const parsed = parseWorkbook(read.content!);
+  if (!parsed.success) {
+    return { stdout: '', stderr: `Parse errors:\n${bullets(parsed.errors ?? [])}`, exitCode: 1 };
+  }
+
+  const graph = buildDependencyGraph(parsed.workbook!.cells);
+
+  if (flagValue(args, '-f') === 'mermaid' || flagValue(args, '--format') === 'mermaid') {
+    return { stdout: toMermaid(graph), stderr: '', exitCode: 0 };
+  }
+
+  const lines = [...graph.nodes].map(([id, node]) => `${id}: [${node.dependencies.join(', ')}]`);
+  return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+}
+
+/**
+ * Route argv to a command handler. Pure — returns a CommandResult.
+ */
+export async function dispatch(argv: string[]): Promise<CommandResult> {
+  if (argv.length === 0 || argv.includes('-h') || argv.includes('--help')) {
+    return { stdout: HELP, stderr: '', exitCode: 0 };
+  }
+  if (argv.includes('-V') || argv.includes('--version')) {
+    return { stdout: `mtsw version ${VERSION}`, stderr: '', exitCode: 0 };
+  }
+
+  const [command, ...rest] = argv;
   switch (command) {
     case 'run':
-      await runCommand(args.slice(1));
-      break;
+      return runCommand(rest);
     case 'validate':
-      await validateCommand(args.slice(1));
-      break;
+      return validateCommand(rest);
     case 'graph':
-      await graphCommand(args.slice(1));
-      break;
-    case 'new':
-      await newCommand(args.slice(1));
-      break;
+      return graphCommand(rest);
     default:
-      console.error(`Unknown command: ${command}`);
-      console.log(HELP);
-      process.exit(1);
+      return { stdout: '', stderr: `Unknown command: ${command}\n${HELP}`, exitCode: 1 };
   }
 }
 
-async function runCommand(args: string[]) {
-  const file = args[0];
-  if (!file) {
-    console.error('Usage: mtsw run <file>');
-    process.exit(1);
-  }
+async function main(): Promise<void> {
+  const result = await dispatch(process.argv.slice(2));
+  if (result.stdout) process.stdout.write(`${result.stdout}\n`);
+  if (result.stderr) process.stderr.write(`${result.stderr}\n`);
+  process.exit(result.exitCode);
+}
 
-  console.log(`Running workbook: ${file}`);
-
-  // TODO: Read file and execute
-  const content = ''; // fs.readFileSync(file, 'utf-8')
-  const result = parseWorkbook(content);
-
-  if (!result.success) {
-    console.error('Parse errors:', result.errors);
-    process.exit(1);
-  }
-
-  if (result.workbook) {
-    const executor = createExecutor(result.workbook);
-
-    executor.on((event) => {
-      console.log(`[${event.type}] ${event.cellId ?? ''}`);
-    });
-
-    await executor.runAll();
+/**
+ * True when this module is the process entry point. Resolves argv[1] through
+ * `realpathSync` first, so a symlinked bin (npm's POSIX `.bin/mtsw` shim) still
+ * matches `import.meta.url` (which is always the real path).
+ */
+function isEntryPoint(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(entry)).href;
+  } catch {
+    return import.meta.url === pathToFileURL(entry).href;
   }
 }
 
-async function validateCommand(args: string[]) {
-  const file = args[0];
-  if (!file) {
-    console.error('Usage: mtsw validate <file>');
-    process.exit(1);
-  }
-
-  console.log(`Validating: ${file}`);
-  // TODO: Implement validation
+// Only run when invoked as the entry point (not when imported by tests).
+if (isEntryPoint()) {
+  void main();
 }
-
-async function graphCommand(args: string[]) {
-  const file = args[0];
-  if (!file) {
-    console.error('Usage: mtsw graph <file>');
-    process.exit(1);
-  }
-
-  console.log(`Dependency graph for: ${file}`);
-  // TODO: Implement graph visualization
-}
-
-async function newCommand(args: string[]) {
-  const name = args[0];
-  if (!name) {
-    console.error('Usage: mtsw new <name>');
-    process.exit(1);
-  }
-
-  console.log(`Creating new workbook: ${name}.mtsw`);
-  // TODO: Implement template creation
-}
-
-main().catch((error) => {
-  console.error('Error:', error);
-  process.exit(1);
-});

@@ -40,6 +40,13 @@ describe('workbook/src/index.ts – package entry smoke test', () => {
     expect(typeof wb.createExecutor).toBe('function');
   });
 
+  it('exports the new v1 helpers (formatResult, toMermaid, detectCycles, detectCellType)', () => {
+    expect(typeof wb.formatResult).toBe('function');
+    expect(typeof wb.toMermaid).toBe('function');
+    expect(typeof wb.detectCycles).toBe('function');
+    expect(typeof wb.detectCellType).toBe('function');
+  });
+
   it('type-only exports are importable (compile-time check)', () => {
     type _CheckWorkbook = Workbook;
     type _CheckCell = Cell;

@@ -86,6 +86,25 @@ export interface WorkbookEvent {
 }
 
 /**
+ * Result of executing a single cell in a run report.
+ */
+export interface CellResult {
+  id: string;
+  type: CellType;
+  status: 'success' | 'error' | 'pass' | 'fail';
+  output?: unknown;
+  error?: string;
+}
+
+/**
+ * Aggregated result of running an entire workbook (continue-on-error).
+ */
+export interface RunResult {
+  cells: CellResult[];
+  ok: boolean;
+}
+
+/**
  * Dependency graph node
  */
 export interface DependencyNode {
