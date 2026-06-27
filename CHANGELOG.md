@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-06-26) — JS non-symmetric eigensolver returned all-zero eigenvalues
+
+- **`matrix/src/operations/eig.ts` non-symmetric path rewritten** (root-cause fix).
+  The old path used an ad-hoc Francis `doubleShiftQR` bulge-chase plus
+  inverse-iteration that failed to converge on companion-style matrices — `eig`
+  returned `λ = 0` for *every* eigenvalue (reproduced on the companion matrices of
+  `x^3 − 1` and `x^5 − 1`, whose true eigenvalues are the cube/fifth roots of unity
+  with `|λ| = 1`). This was live: `eig`, `eigvals`, and their in-package consumers
+  (`matrixSqrtm`, `matrixLogm`) plus the `eig-wasm` JS fallback (non-symmetric
+  `n < 8`, or any `n` when the AS binary is unavailable) all hit it.
+- **Fix:** non-symmetric matrices (`n >= 2`) now run a direct JS port of the same
+  public-domain JAMA `orthes` + `hqr2` algorithm used by the AS
+  `matrix_eig_general` kernel (Householder Hessenberg reduction + Francis
+  double-shift implicit QR to real Schur form + eigenvector back-substitution and
+  back-transform). The JS fallback and the WASM kernel are now numerically
+  identical. The **symmetric path is unchanged** (cyclic-Jacobi-equivalent Givens
+  QR). The dead `doubleShiftQR` helper was removed.
+- **Measured (companion of `x^n − 1`):** max eigenvalue diff vs the true `n`th
+  roots of unity — `n=3` `4.4e-16`, `n=4` `9.3e-16`, `n=5` `7.2e-16`, `n=8`
+  `1.1e-15`; max real-eigenvector residual `‖A·v − λ·v‖` `≤ 1.3e-15`. Plus
+  trace `Σλ` and determinant `Πλ` invariants, `[[0,-1],[1,0]] → ±i`, rotation and
+  Jordan blocks, and random non-symmetric `n = 4/8/16`. New regression suite:
+  `matrix/tests/decomposition/eig-nonsymmetric.test.ts`.
+- **Corrected a test that encoded the bug.** The degree-8 discriminator in
+  `matrix/tests/decomposition/eig-general-wasm.test.ts` asserted the JS path
+  returned all-zero eigenvalues (`jsMaxAbs < 1e-6`) as "proof" only the AS kernel
+  could solve it. With the JS path fixed that assertion was a bug-encoding; it is
+  now an AS↔JS parity check confirming both return the 8th roots of unity.
+
 ### Added (2026-06-26) — AssemblyScript general (non-symmetric) real eigensolver + wired into matrix
 
 - **New AS kernel `matrix_eig_general(a, n)`** (`assembly/src/ops/eig.ts`, exported

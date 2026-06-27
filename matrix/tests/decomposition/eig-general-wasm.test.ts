@@ -4,14 +4,15 @@
  * `eigWasm` routes non-symmetric matrices (n >= 8) to the AssemblyScript
  * `matrix_eig_general` kernel (Hessenberg + Francis double-shift QR + eigenvector
  * back-substitution, `assembly/src/ops/eig.ts`). This suite LOADS the real AS
- * binary and proves the kernel actually executes — it does NOT false-green via
- * the JS fallback.
+ * binary and proves the kernel actually executes (the `onAS` gate loads the real
+ * `matrix_eig_general` export before any `it.runIf` runs).
  *
- * Proof of AS execution: the degree-8 companion matrix of x^8 - 1 (the 8th roots
- * of unity) is a case where the JS reference QR *fails* and returns all-zero
- * eigenvalues, whereas the AS kernel returns the correct roots. A green on that
- * assertion is therefore only possible on the AS path. (See the `discriminator`
- * test, which also asserts the JS path is in fact broken on the same input.)
+ * Historical note: the degree-8 companion of x^8 - 1 (the 8th roots of unity)
+ * used to be a JS/AS *discriminator* because the old JS reference QR returned
+ * all-zero eigenvalues on it. That JS bug is now fixed — the JS `eig`
+ * non-symmetric path is a direct port of the same JAMA orthes/hqr2 algorithm —
+ * so JS and AS now agree on this input. The corresponding test was updated to an
+ * AS↔JS parity check rather than asserting the (former) JS breakage.
  *
  * The cross-checks against the JS `eig` use random non-symmetric matrices, where
  * the JS reference is reliable.
@@ -174,7 +175,7 @@ describe('eigWasm — proves execution on the AssemblyScript kernel', () => {
   });
 
   it.runIf(onAS)(
-    'discriminator: solves the degree-8 companion (8th roots of unity) that the JS path cannot',
+    'degree-8 companion (8th roots of unity): AS and JS both solve it and agree',
     async () => {
       const A = companion([-1, 0, 0, 0, 0, 0, 0, 0]); // x^8 - 1 = 0, n = 8 (>= threshold)
       const trueRoots = Array.from({ length: 8 }, (_, k) => {
@@ -189,13 +190,13 @@ describe('eigWasm — proves execution on the AssemblyScript kernel', () => {
       const diffTrue = eigSetMaxDiff(wasmRes.values, trueRoots);
       expect(diffTrue).toBeLessThan(1e-8);
 
-      // The JS reference is broken on this case (returns all-zero eigenvalues),
-      // so a green above could ONLY have come from the AS kernel.
+      // The JS reference is now a port of the same JAMA orthes/hqr2 algorithm,
+      // so it ALSO returns the 8th roots of unity (previously it returned
+      // all-zero eigenvalues — that bug is fixed). Confirm JS correctness and
+      // AS↔JS parity on this discriminator input.
       const jsRes = eig(A);
-      const jsMaxAbs = Math.max(
-        ...jsRes.values.map((v) => Math.hypot(v.re, v.im))
-      );
-      expect(jsMaxAbs).toBeLessThan(1e-6); // JS gave (≈0, ≈0) for every root
+      expect(eigSetMaxDiff(jsRes.values, trueRoots)).toBeLessThan(1e-8);
+      expect(eigSetMaxDiff(jsRes.values, wasmRes.values)).toBeLessThan(1e-8);
     }
   );
 
