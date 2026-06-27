@@ -88,14 +88,25 @@ signal/                    # @danielsimonjr/mathts-signal - signal-processing do
 ### Dependency Graph
 
 ```
-typed-function ← core ← matrix ← functions
-                   ↑        ↑         ↑
-workerpool ← parallel ─────┘         │
-                   ↑                  │
-                   └──────────────────┘
-matrix ← tensor ← autograd
-functions ← workbook
-core, matrix, functions, parallel ← compat
+# Per-package dependencies (verified from each package.json — source of truth):
+core        → typed-function
+parallel    → workerpool                          # low-level; NOT core/matrix
+expression  → core
+matrix      → core, parallel
+tensor      → core, matrix
+autograd    → core, tensor
+functions   → core, matrix, parallel, expression
+workbook    → core, functions
+compat      → core, matrix, parallel, functions
+
+# Same edges read as "← is depended on by":
+typed-function ← core
+workerpool     ← parallel
+core           ← expression, matrix, tensor, autograd, functions, workbook, compat
+parallel       ← matrix, functions, compat
+expression     ← functions
+matrix         ← tensor, functions, compat
+tensor         ← autograd
 
 # Focused re-export packages (leaf; depend only on the package they re-export):
 core       ← numbers, units
@@ -103,6 +114,8 @@ expression ← parser, ast, evaluator
 matrix     ← linalg
 functions  ← arithmetic, trigonometry, statistics, signal
 ```
+
+> Generated, always-current form: `docs/Architecture/DEPENDENCY_GRAPH.md` (`npm run docs:deps`).
 
 ### Package Build Details
 
