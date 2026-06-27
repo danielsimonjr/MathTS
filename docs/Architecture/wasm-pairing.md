@@ -1,6 +1,6 @@
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-06-26 (by tools/create-dependency-graph)
+**Generated**: 2026-06-27 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS (the legacy Rust path was removed from the functions bridges in the Phase 5 cutover).
 
@@ -137,4 +137,4 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | trigonometry | 8 | 4 | 7 |
 | unit | 0 | 0 | 2 |
 
-> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which still uses the Rust binary for fft/eig/svd/decomposition — its Rust→AS migration is a separate, pending slice. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — the four Rust→AS migration Phase 6 follow-ups. See docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md and the `bench:elementwise`/`bench:special-array` benches.
+> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which runs the AssemblyScript binary for fft/eig/svd/decomposition (Rust→AS migration complete 2026-06-26). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups. See docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md and the `bench:elementwise`/`bench:special-array` benches.

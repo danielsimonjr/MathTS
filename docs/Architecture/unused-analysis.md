@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-06-26
+**Generated**: 2026-06-27
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 474
+- **Potentially unused exports**: 473
 
 ## Potentially Unused Files
 
@@ -87,7 +87,6 @@ These exports are not imported by any other file in the codebase:
 - `WasmLoader` (class)
 - `Allocation` (interface)
 - `LoadingMetrics` (interface)
-- `AllocatorKind` (type)
 
 ### `matrix/src/config.ts`
 

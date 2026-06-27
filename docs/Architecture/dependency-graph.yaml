@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: "2026-06-26"
-  totalFiles: 559
+  lastUpdated: "2026-06-27"
+  totalFiles: 560
   totalModules: 69
-  totalExports: 3522
+  totalExports: 3530
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1377,21 +1377,6 @@ modules:
             - GPUBackendOptions
             - GPUBackendStatus
           reExport: true
-        - file: ./RustWASMBackend.js
-          imports:
-            - RustWASMBackend
-            - rustWasmBackend
-            - createRustWASMBackend
-            - RustWASMBackendConfig
-          reExport: true
-        - file: ./RustWasmLoader.js
-          imports:
-            - RustWasmLoader
-            - rustWasmLoader
-            - initRustWasm
-            - RustWasmExports
-            - RustLoadingMetrics
-          reExport: true
         - file: ./BackendManager.js
           imports:
             - BackendManager
@@ -1449,15 +1434,6 @@ modules:
         - destroyGlobalGPUBackend
         - GPUBackendOptions
         - GPUBackendStatus
-        - RustWASMBackend
-        - rustWasmBackend
-        - createRustWASMBackend
-        - RustWASMBackendConfig
-        - RustWasmLoader
-        - rustWasmLoader
-        - initRustWasm
-        - RustWasmExports
-        - RustLoadingMetrics
         - BackendManager
         - backendManager
         - createBackendManager
@@ -1506,15 +1482,6 @@ modules:
         - destroyGlobalGPUBackend
         - GPUBackendOptions
         - GPUBackendStatus
-        - RustWASMBackend
-        - rustWasmBackend
-        - createRustWASMBackend
-        - RustWASMBackendConfig
-        - RustWasmLoader
-        - rustWasmLoader
-        - initRustWasm
-        - RustWasmExports
-        - RustLoadingMetrics
         - BackendManager
         - backendManager
         - createBackendManager
@@ -1583,56 +1550,6 @@ modules:
         - createParallelBackend
       constants:
         - parallelBackend
-    matrix/src/backends/RustWASMBackend.ts:
-      description: Rust WASM Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./RustWasmLoader.js
-          imports:
-            - rustWasmLoader
-            - RustWasmExports
-      exports:
-        - rustWasmBackend
-        - createRustWASMBackend
-        - RustWASMBackend
-      classes:
-        - RustWASMBackend
-      interfaces:
-        - RustWASMBackendConfig
-      functions:
-        - createRustWASMBackend
-      constants:
-        - rustWasmBackend
-    matrix/src/backends/RustWasmLoader.ts:
-      description: Rust WASM Loader
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - rustWasmLoader
-        - initRustWasm
-        - RustWasmLoader
-      classes:
-        - RustWasmLoader
-      interfaces:
-        - RustWasmExports
-        - RustLoadingMetrics
-      functions:
-        - initRustWasm
-      constants:
-        - rustWasmLoader
     matrix/src/backends/wasm/detect.ts:
       description: WASM Feature Detection
       externalDependencies: []
@@ -2067,6 +1984,39 @@ modules:
         - CholeskyResult
       functions:
         - cholesky
+    matrix/src/operations/common.ts:
+      description: Shared decomposition helpers (number[][] dense algebra)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - eye
+        - cloneMatrix
+        - transpose
+        - isSymmetric
+        - matMul
+        - matAdd
+        - matSub
+        - matScale
+        - normInf
+        - norm1
+        - householder
+        - applyHouseholderLeft
+        - applyHouseholderRight
+      functions:
+        - eye
+        - cloneMatrix
+        - transpose
+        - isSymmetric
+        - matMul
+        - matAdd
+        - matSub
+        - matScale
+        - normInf
+        - norm1
+        - householder
+        - applyHouseholderLeft
+        - applyHouseholderRight
     matrix/src/operations/eig-wasm.ts:
       description: WASM-accelerated Eigendecomposition
       externalDependencies: []
@@ -2077,6 +2027,9 @@ modules:
             - eig
             - EigResult
             - EigOptions
+        - file: ./common.js
+          imports:
+            - isSymmetric
         - file: ../backends/WasmLoader.js
           imports:
             - wasmLoader
@@ -2092,7 +2045,15 @@ modules:
       description: Eigenvalue and Eigenvector Decomposition
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./common.js
+          imports:
+            - isSymmetric
+            - eye
+            - cloneMatrix
+            - householder
+            - applyHouseholderLeft
+            - applyHouseholderRight
       exports:
         - eig
         - eigvals
@@ -2112,6 +2073,14 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./common.js
+          imports:
+            - eye
+            - matMul
+            - matAdd
+            - matSub
+            - matScale
+            - norm1
       exports:
         - matrixExpm
       interfaces:
@@ -2281,6 +2250,14 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+        - file: ./common.js
+          imports:
+            - eye
+            - matMul
+            - transpose
+            - matScale
+            - normInf
+            - norm1
       exports:
         - matrixLogm
       interfaces:
@@ -2341,6 +2318,13 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./common.js
+          imports:
+            - eye
+            - cloneMatrix
+            - householder
+            - applyHouseholderLeft
+            - applyHouseholderRight
       exports:
         - matrixSchur
         - schurInternal
@@ -2364,6 +2348,11 @@ modules:
         - file: ./schur.js
           imports:
             - schurInternal
+        - file: ./common.js
+          imports:
+            - eye
+            - matMul
+            - transpose
       exports:
         - matrixSqrtm
         - matrixSqrtNewtonInternal
@@ -2382,9 +2371,9 @@ modules:
             - svd
             - SVDResult
             - SVDOptions
-        - file: ../backends/RustWasmLoader.js
+        - file: ../backends/WasmLoader.js
           imports:
-            - RustWasmLoader
+            - wasmLoader
       exports:
         - svdWasm
       functions:
@@ -2393,7 +2382,14 @@ modules:
       description: Singular Value Decomposition (SVD)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./common.js
+          imports:
+            - eye
+            - cloneMatrix
+            - householder
+            - applyHouseholderLeft
+            - applyHouseholderRight
       exports:
         - svd
         - singularValues
@@ -17661,6 +17657,17 @@ modules:
             - matrix_svd
             - matrix_singular_values
           reExport: true
+        - file: ./ops/eig
+          imports:
+            - matrix_eig_symmetric
+            - matrix_spectral_radius
+          reExport: true
+        - file: ./ops/fft
+          imports:
+            - fft
+            - rfft
+            - powerSpectrum
+          reExport: true
         - file: ./algebra/decomposition
           imports:
             - matrix_lu_decompose
@@ -18038,6 +18045,11 @@ modules:
         - matrix_gemv
         - matrix_svd
         - matrix_singular_values
+        - matrix_eig_symmetric
+        - matrix_spectral_radius
+        - fft
+        - rfft
+        - powerSpectrum
         - matrix_lu_decompose
         - matrix_qr_decompose
         - matrix_cholesky
@@ -18358,6 +18370,11 @@ modules:
         - matrix_gemv
         - matrix_svd
         - matrix_singular_values
+        - matrix_eig_symmetric
+        - matrix_spectral_radius
+        - fft
+        - rfft
+        - powerSpectrum
         - matrix_lu_decompose
         - matrix_qr_decompose
         - matrix_cholesky
@@ -18952,6 +18969,30 @@ modules:
         - expfit
         - logfit
         - powerfit
+    assembly/src/ops/eig.ts:
+      description: Eigenvalue decomposition for real **symmetric** matrices via the classic
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - matrix_eig_symmetric
+        - matrix_spectral_radius
+      functions:
+        - matrix_eig_symmetric
+        - matrix_spectral_radius
+    assembly/src/ops/fft.ts:
+      description: Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - fft
+        - rfft
+        - powerSpectrum
+      functions:
+        - fft
+        - rfft
+        - powerSpectrum
     assembly/src/ops/linalg.ts:
       description: Extra linear-algebra kernels — AssemblyScript fallback mirroring
       externalDependencies: []
@@ -19556,8 +19597,6 @@ dependencyGraph:
         - matrix/src/backends/index.ts
         - matrix/src/backends/JSBackend.ts
         - matrix/src/backends/ParallelBackend.ts
-        - matrix/src/backends/RustWASMBackend.ts
-        - matrix/src/backends/RustWasmLoader.ts
         - matrix/src/backends/wasm/detect.ts
         - matrix/src/backends/wasm/fft-wasm.ts
         - matrix/src/backends/wasm/index.ts
@@ -19572,6 +19611,7 @@ dependencyGraph:
     - name: Matrix/operations
       files:
         - matrix/src/operations/cholesky.ts
+        - matrix/src/operations/common.ts
         - matrix/src/operations/eig-wasm.ts
         - matrix/src/operations/eig.ts
         - matrix/src/operations/expm.ts
@@ -20192,6 +20232,8 @@ dependencyGraph:
         - assembly/src/ops/complex-array.ts
         - assembly/src/ops/complex-ops.ts
         - assembly/src/ops/curvefit.ts
+        - assembly/src/ops/eig.ts
+        - assembly/src/ops/fft.ts
         - assembly/src/ops/linalg.ts
         - assembly/src/ops/matrix.ts
         - assembly/src/ops/number-theory.ts
@@ -20210,19 +20252,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 559
+  totalTypeScriptFiles: 560
   totalModules: 69
-  totalLinesOfCode: 148610
-  totalExports: 3522
-  totalClasses: 51
-  totalInterfaces: 316
-  totalFunctions: 1307
-  totalTypeGuards: 130
+  totalLinesOfCode: 147386
+  totalExports: 3530
+  totalClasses: 49
+  totalInterfaces: 313
+  totalFunctions: 1323
+  totalTypeGuards: 131
   totalEnums: 0
-  totalConstants: 1126
-  totalReExports: 1080
-  totalTypeOnlyImports: 357
+  totalConstants: 1124
+  totalReExports: 1076
+  totalTypeOnlyImports: 356
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 474
+  unusedExportsCount: 473

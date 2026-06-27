@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-06-26
+**Version**: 0.1.0 | **Last Updated**: 2026-06-27
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -97,9 +97,9 @@ The codebase is organized into the following modules:
 - **core**: 1 file
 - **core/typed**: 3 files
 - **core/types**: 7 files
-- **matrix/backends**: 21 files
+- **matrix/backends**: 19 files
 - **matrix**: 4 files
-- **matrix/operations**: 13 files
+- **matrix/operations**: 14 files
 - **matrix/types**: 6 files
 - **tensor**: 4 files
 - **tensor/operations**: 17 files
@@ -157,7 +157,7 @@ The codebase is organized into the following modules:
 - **workbook**: 5 files
 - **assembly/algebra**: 1 file
 - **assembly**: 7 files
-- **assembly/ops**: 16 files
+- **assembly/ops**: 18 files
 - **assembly/types**: 1 file
 - **compat**: 2 files
 
@@ -171,7 +171,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 2 | 3 |
 | `@danielsimonjr/mathts-core` (`core/`) | (none) | 13 | 86 |
-| `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 44 | 6 |
+| `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 43 | 5 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
 | `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 373 | 417 |
@@ -188,7 +188,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-signal` (`signal/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
 | `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 11 | 4 |
 | `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 5 | 2 |
-| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 25 | 3 |
+| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 27 | 3 |
 | `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 2 | 1 |
 
 ### Package Dependency Diagram
@@ -677,14 +677,12 @@ graph LR
 | `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
 | `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
 | `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
-| `./RustWASMBackend.js` | `RustWASMBackend, rustWasmBackend, createRustWASMBackend, RustWASMBackendConfig` | Re-export |
-| `./RustWasmLoader.js` | `RustWasmLoader, rustWasmLoader, initRustWasm, RustWasmExports, RustLoadingMetrics` | Re-export |
 | `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
 | `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
 | `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
 
 **Exports:**
-- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `RustWASMBackend`, `rustWasmBackend`, `createRustWASMBackend`, `RustWASMBackendConfig`, `RustWasmLoader`, `rustWasmLoader`, `initRustWasm`, `RustWasmExports`, `RustLoadingMetrics`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
+- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
 
 ---
 
@@ -715,34 +713,6 @@ graph LR
 - Interfaces: `ParallelBackendConfig`
 - Functions: `createParallelBackend`
 - Constants: `parallelBackend`
-
----
-
-### `matrix/src/backends/RustWASMBackend.ts` - Rust WASM Matrix Backend
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./RustWasmLoader.js` | `rustWasmLoader, RustWasmExports` | Import |
-
-**Exports:**
-- Classes: `RustWASMBackend`
-- Interfaces: `RustWASMBackendConfig`
-- Functions: `createRustWASMBackend`
-- Constants: `rustWasmBackend`
-
----
-
-### `matrix/src/backends/RustWasmLoader.ts` - Rust WASM Loader
-
-**Exports:**
-- Classes: `RustWasmLoader`
-- Interfaces: `RustWasmExports`, `RustLoadingMetrics`
-- Functions: `initRustWasm`
-- Constants: `rustWasmLoader`
 
 ---
 
@@ -804,7 +774,6 @@ graph LR
 **Exports:**
 - Classes: `WasmLoader`
 - Interfaces: `WasmModule`, `Allocation`, `LoadingMetrics`
-- Types: `AllocatorKind`
 - Functions: `initWasm`
 - Constants: `wasmLoader`
 
@@ -887,12 +856,20 @@ graph LR
 
 ---
 
+### `matrix/src/operations/common.ts` - Shared decomposition helpers (number[][] dense algebra)
+
+**Exports:**
+- Functions: `eye`, `cloneMatrix`, `transpose`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+
+---
+
 ### `matrix/src/operations/eig-wasm.ts` - WASM-accelerated Eigendecomposition
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `./eig.js` | `eig, EigResult, EigOptions` | Import |
+| `./common.js` | `isSymmetric` | Import |
 | `../backends/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
@@ -901,6 +878,11 @@ graph LR
 ---
 
 ### `matrix/src/operations/eig.ts` - Eigenvalue and Eigenvector Decomposition
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./common.js` | `isSymmetric, eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 
 **Exports:**
 - Interfaces: `EigResult`, `EigOptions`
@@ -914,6 +896,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./common.js` | `eye, matMul, matAdd, matSub, matScale, norm1` | Import |
 
 **Exports:**
 - Interfaces: `ExpmOptions`
@@ -952,6 +935,7 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 | `./eig.js` | `eig` | Import |
 | `./schur.js` | `schurInternal` | Import |
+| `./common.js` | `eye, matMul, transpose, matScale, normInf, norm1` | Import |
 
 **Exports:**
 - Interfaces: `LogmOptions`
@@ -1005,6 +989,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 
 **Exports:**
 - Interfaces: `SchurResult`, `SchurOptions`
@@ -1020,6 +1005,7 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 | `./eig.js` | `eig` | Import |
 | `./schur.js` | `schurInternal` | Import |
+| `./common.js` | `eye, matMul, transpose` | Import |
 
 **Exports:**
 - Interfaces: `SqrtmOptions`
@@ -1033,7 +1019,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./svd.js` | `svd, SVDResult, SVDOptions` | Import |
-| `../backends/RustWasmLoader.js` | `RustWasmLoader` | Import |
+| `../backends/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Functions: `svdWasm`
@@ -1041,6 +1027,11 @@ graph LR
 ---
 
 ### `matrix/src/operations/svd.ts` - Singular Value Decomposition (SVD)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
 
 **Exports:**
 - Interfaces: `SVDResult`, `SVDOptions`
@@ -8343,6 +8334,8 @@ graph LR
 | `./ops/array` | `array_sum, array_product, array_mean, array_variance, array_stddev, array_min, array_max, array_argmin, array_argmax, array_norm, array_norm_l1, array_norm_linf, array_dot, array_add, array_sub, array_mul, array_div, array_scale, array_add_scalar, array_neg, array_abs, array_sqrt, array_square, array_exp, array_log, array_sin, array_cos, array_axpby, array_distance, array_cosine_similarity, array_scale_inplace, array_add_scalar_inplace, array_add_inplace, array_clamp_inplace, array_fill, array_copy` | Re-export |
 | `./ops/matrix` | `matrix_zeros, matrix_ones, matrix_fill, matrix_identity, matrix_diag, matrix_get, matrix_set, matrix_get_row, matrix_get_col, matrix_get_diag, matrix_add, matrix_sub, matrix_mul_elementwise, matrix_div_elementwise, matrix_scale, matrix_add_scalar, matrix_neg, matrix_multiply, matrix_vector_multiply, vector_matrix_multiply, matrix_outer, matrix_transpose, matrix_sum, matrix_mean, matrix_min, matrix_max, matrix_norm_frobenius, matrix_trace, matrix_sum_rows, matrix_sum_cols, matrix_is_square, matrix_is_symmetric, matrix_is_diagonal, matrix_is_identity, matrix_scale_inplace, matrix_add_scalar_inplace, matrix_add_inplace, matrix_copy, matrix_axpy, matrix_gemm, matrix_gemv` | Re-export |
 | `./ops/svd` | `matrix_svd, matrix_singular_values` | Re-export |
+| `./ops/eig` | `matrix_eig_symmetric, matrix_spectral_radius` | Re-export |
+| `./ops/fft` | `fft, rfft, powerSpectrum` | Re-export |
 | `./algebra/decomposition` | `matrix_lu_decompose, matrix_qr_decompose, matrix_cholesky, matrix_inverse, matrix_determinant` | Re-export |
 | `./ops/special` | `chebyshevT, hermiteH, laguerreL, legendreP, erfi, expIntegralEi, sinIntegral, cosIntegral, logIntegral` | Re-export |
 | `./ops/number-theory` | `eulerPhi, divisorSigma, moebiusMu, carmichaelLambda, jacobiSymbol, harmonicNumber, partitions, primeFactors, divisors, integerDigits, chineseRemainder` | Re-export |
@@ -8364,7 +8357,7 @@ graph LR
 | `./ops/complex-array` | `complex_array_zeros, complex_array_ones, complex_array_fill, complex_array_get, complex_array_set, complex_array_set_parts, complex_array_get_re, complex_array_get_im, complex_array_length, complex_array_add, complex_array_sub, complex_array_mul, complex_array_div, complex_array_scale_real, complex_array_scale_complex, complex_array_neg, complex_array_conj, complex_array_abs, complex_array_arg, complex_array_abs_squared, complex_array_real, complex_array_imag, complex_array_exp, complex_array_log, complex_array_sqrt, complex_array_sum, complex_array_mean, complex_array_dot, complex_array_norm, complex_array_scale_inplace, complex_array_conj_inplace, complex_array_add_inplace, complex_array_copy` | Re-export |
 
 **Exports:**
-- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `poly_resultant_f64`, `poly_discriminant_f64`, `array_abs_ptr`, `array_sin_ptr`, `array_cos_ptr`, `array_tan_ptr`, `array_exp_ptr`, `array_log_ptr`, `array_atan_ptr`, `array_sinh_ptr`, `array_tanh_ptr`, `array_atanh_ptr`, `array_expm1_ptr`, `array_log1p_ptr`, `array_log2_ptr`, `array_log10_ptr`, `array_sec_ptr`, `array_csc_ptr`, `array_cot_ptr`, `array_erfc_ptr`, `tridiag_solve_f64`, `divided_difference_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_j_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `bessel_y_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `lgamma_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`, `sort_f64`, `argsort_f64`, `rank_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
+- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_eig_symmetric`, `matrix_spectral_radius`, `fft`, `rfft`, `powerSpectrum`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `poly_resultant_f64`, `poly_discriminant_f64`, `array_abs_ptr`, `array_sin_ptr`, `array_cos_ptr`, `array_tan_ptr`, `array_exp_ptr`, `array_log_ptr`, `array_atan_ptr`, `array_sinh_ptr`, `array_tanh_ptr`, `array_atanh_ptr`, `array_expm1_ptr`, `array_log1p_ptr`, `array_log2_ptr`, `array_log10_ptr`, `array_sec_ptr`, `array_csc_ptr`, `array_cot_ptr`, `array_erfc_ptr`, `tridiag_solve_f64`, `divided_difference_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_j_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `bessel_y_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `lgamma_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`, `sort_f64`, `argsort_f64`, `rank_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
 
 ---
 
@@ -8456,6 +8449,20 @@ graph LR
 
 **Exports:**
 - Functions: `expfit`, `logfit`, `powerfit`
+
+---
+
+### `assembly/src/ops/eig.ts` - Eigenvalue decomposition for real **symmetric** matrices via the classic
+
+**Exports:**
+- Functions: `matrix_eig_symmetric`, `matrix_spectral_radius`
+
+---
+
+### `assembly/src/ops/fft.ts` - Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
+
+**Exports:**
+- Functions: `fft`, `rfft`, `powerSpectrum`
 
 ---
 
@@ -8592,10 +8599,10 @@ graph LR
 | `functions/src/utils/object` | 1 file | 28 files |
 | `functions/src/typed/index` | 26 files | 2 files |
 | `functions/src/type/matrix/types` | 0 files | 27 files |
+| `assembly/src/index` | 26 files | 0 files |
 | `expression/src/index` | 25 files | 0 files |
 | `expression/src/utils/is` | 0 files | 25 files |
-| `matrix/src/types/DenseMatrix` | 3 files | 21 files |
-| `assembly/src/index` | 24 files | 0 files |
+| `matrix/src/types/DenseMatrix` | 3 files | 20 files |
 | `expression/src/utils/factory` | 2 files | 20 files |
 | `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
 | `tensor/src/index` | 20 files | 0 files |
@@ -8688,7 +8695,7 @@ graph TD
         N23[ShaderManager]
         N24[Sync]
         N25[GPUBackend]
-        N26[...11 more]
+        N26[...9 more]
     end
 
     subgraph Matrix
@@ -8700,16 +8707,16 @@ graph TD
 
     subgraph Matrix/operations
         N31[cholesky]
-        N32[eig-wasm]
-        N33[eig]
-        N34[expm]
-        N35[index]
-        N36[logm]
-        N37[lu]
-        N38[pinv]
-        N39[qr]
-        N40[schur]
-        N41[...3 more]
+        N32[common]
+        N33[eig-wasm]
+        N34[eig]
+        N35[expm]
+        N36[index]
+        N37[logm]
+        N38[lu]
+        N39[pinv]
+        N40[qr]
+        N41[...4 more]
     end
 
     subgraph Matrix/types
@@ -9177,11 +9184,11 @@ graph TD
         N332[complex-array]
         N333[complex-ops]
         N334[curvefit]
-        N335[linalg]
-        N336[matrix]
-        N337[number-theory]
-        N338[optimization]
-        N339[...6 more]
+        N335[eig]
+        N336[fft]
+        N337[linalg]
+        N338[matrix]
+        N339[...8 more]
     end
 
     subgraph Assembly/types
@@ -9238,25 +9245,26 @@ graph TD
     N25 --> N22
     N27 --> N16
     N28 --> N45
-    N28 --> N35
+    N28 --> N36
     N28 --> N30
     N28 --> N29
     N31 --> N44
-    N32 --> N33
-    N34 --> N44
-    N35 --> N33
+    N33 --> N34
+    N33 --> N32
+    N34 --> N32
+    N35 --> N44
     N35 --> N32
-    N35 --> N38
-    N35 --> N39
-    N35 --> N37
-    N35 --> N31
-    N35 --> N34
-    N35 --> N36
-    N35 --> N40
-    N36 --> N44
+    N36 --> N34
     N36 --> N33
+    N36 --> N39
     N36 --> N40
+    N36 --> N38
+    N36 --> N31
+    N36 --> N35
+    N36 --> N37
     N37 --> N44
+    N37 --> N34
+    N37 --> N32
     N38 --> N44
     N39 --> N44
     N40 --> N44
@@ -9267,7 +9275,6 @@ graph TD
     N43 --> N44
     N44 --> N46
     N44 --> N42
-    N44 --> N43
 ```
 
 ---
@@ -9277,21 +9284,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 559 |
+| Total TypeScript Files | 560 |
 | Total Modules | 69 |
-| Total Lines of Code | 148610 |
-| Total Exports | 3522 |
-| Total Re-exports | 1080 |
-| Total Classes | 51 |
-| Total Interfaces | 316 |
-| Total Functions | 1307 |
-| Total Type Guards | 130 |
+| Total Lines of Code | 147386 |
+| Total Exports | 3530 |
+| Total Re-exports | 1076 |
+| Total Classes | 49 |
+| Total Interfaces | 313 |
+| Total Functions | 1323 |
+| Total Type Guards | 131 |
 | Total Enums | 0 |
-| Type-only Imports | 357 |
+| Type-only Imports | 356 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 2 |
 
 ---
 
-*Last Updated*: 2026-06-26
+*Last Updated*: 2026-06-27
 *Version*: 0.1.0
