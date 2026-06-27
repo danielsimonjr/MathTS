@@ -2,15 +2,13 @@
  * Eigenvalue decomposition for real **symmetric** matrices via the classic
  * cyclic Jacobi algorithm.
  *
- * AssemblyScript counterpart to the Rust `eigsSymmetric` /` spectralRadius`
- * kernels (original Rust `matrix/eigs.rs`) and the JS
- * fallback in `matrix/src/operations/eig.ts`. Jacobi is compact,
+ * AssemblyScript `eigsSymmetric` / `spectralRadius` kernels, parity with the
+ * JS fallback in `matrix/src/operations/eig.ts`. Jacobi is compact,
  * allocation-light, and converges to (near) machine precision for symmetric
  * input — eigenvalues land on the diagonal, eigenvectors accumulate in `V`.
  *
- * Sign/order convention (kept identical to the original Rust binary so the
- * Phase 7b binding could swap artifacts transparently during the migration;
- * retained now for JS-fallback parity): eigenvalues are sorted **ascending by
+ * Sign/order convention (kept for JS-fallback parity): eigenvalues are
+ * sorted **ascending by
  * absolute value**; eigenvectors are stored **as columns** of a row-major
  * `n x n` block, i.e. component `i` of eigenvalue `j`'s eigenvector is at
  * `V[i * n + j]`. Eigenvectors match the reference only up to sign/order, so
@@ -115,7 +113,7 @@ export function matrix_eig_symmetric(a: Float64Array, n: i32): Float64Array {
   const ev = new Float64Array(n);
   for (let i = 0; i < n; i++) ev[i] = A[i * n + i];
 
-  // Selection-sort an index permutation ascending by |eigenvalue| (Rust order).
+  // Selection-sort an index permutation ascending by |eigenvalue|.
   const order = new Int32Array(n);
   for (let i = 0; i < n; i++) order[i] = i;
   for (let i = 0; i < n - 1; i++) {
@@ -149,8 +147,8 @@ export function matrix_eig_symmetric(a: Float64Array, n: i32): Float64Array {
 /**
  * Spectral radius of a real symmetric `n x n` matrix = max |eigenvalue|.
  *
- * Exact for symmetric input (unlike the Rust power-iteration variant, this
- * reuses the full Jacobi solve), which is what `spectralRadius` documents.
+ * Exact for symmetric input (reuses the full Jacobi solve rather than a
+ * power-iteration approximation), which is what `spectralRadius` documents.
  */
 export function matrix_spectral_radius(a: Float64Array, n: i32): f64 {
   if (n <= 0) return 0.0;

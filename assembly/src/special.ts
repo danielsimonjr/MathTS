@@ -1,11 +1,10 @@
 /**
  * Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.
  *
- * Mirrors the algorithms in the original Rust implementation
- * (removed in the Rust→AS migration):
- *   special/functions.rs  (Bessel/lgamma scalars)
- *   bessel.rs             (array kernels)
- *   special/functions.rs  (Airy scalars)
+ * AssemblyScript implementations of:
+ *   Bessel/lgamma scalars
+ *   Bessel array kernels
+ *   Airy scalars
  *
  * All exported functions accept / return Float64Array and use the same
  * typed-array calling convention as the other AS kernels (tridiag.ts, poly.ts).
@@ -27,8 +26,7 @@
 // Handles x ≤ 0 (non-positive integers) → +∞.
 // Negative non-integer x: reflection formula  lgamma(x) = ln(π/|sin(πx)|) − lgamma(1−x).
 //
-// Reference: Numerical Recipes §6.1; matches the original Rust
-//   implementation in `special/functions.rs :: lgamma`.
+// Reference: Numerical Recipes §6.1.
 // ===========================================================================
 
 const _LGAMMA_G: f64 = 7.0;
@@ -304,7 +302,6 @@ function _besselYn(n: i32, x: f64): f64 {
 // ---------------------------------------------------------------------------
 // Airy scalars — power series + asymptotic expansion
 //
-// Algorithm follows the original Rust `special/functions.rs` implementation.
 // c_k coefficients: c_k = Γ(3k+1/2) / (54^k · k! · Γ(k+1/2))  (DLMF §9.7.1)
 //
 // Ai(0) = c1 ≈ 0.35502805388781724
@@ -509,11 +506,10 @@ export function bessel_yn_f64(n: i32, xs: Float64Array): Float64Array {
 }
 
 // ---------------------------------------------------------------------------
-// General-order array exports matching the consumed Rust export names
-// `bessel_j_f64` / `bessel_y_f64`. The Rust kernels take a fixed integer
-// `order` (original Rust `bessel.rs`: `order: i32`), so these reuse the existing
-// integer-order recurrence/Hankel logic (`_besselJn` / `_besselYn`), mirroring
-// the JS general-order reference in functions/src/wasm/special/wasm-bridge.ts.
+// General-order array exports `bessel_j_f64` / `bessel_y_f64`. These take a
+// fixed integer `order`, so they reuse the existing integer-order
+// recurrence/Hankel logic (`_besselJn` / `_besselYn`), mirroring the JS
+// general-order reference in functions/src/wasm/special/wasm-bridge.ts.
 // ---------------------------------------------------------------------------
 
 /** Apply J_order(x) element-wise (fixed integer order). */
@@ -630,7 +626,6 @@ export function elliptic_e_f64(ms: Float64Array): Float64Array {
 // ===========================================================================
 // Carlson Symmetric Forms — Slice 6.4
 //
-// Mirrors the original Rust `special/functions.rs :: carlson_*`.
 // Duplication-theorem iterative algorithm (Numerical Recipes §6.11).
 // Tolerance 0.0015 per NR; ≤ 30 iterations for f64 precision.
 // ===========================================================================

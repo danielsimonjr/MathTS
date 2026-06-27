@@ -2,8 +2,7 @@
  * Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
  * complex data `[re0, im0, re1, im1, ...]`.
  *
- * AssemblyScript counterpart to the Rust `fft` / `rfft` / `powerSpectrum`
- * kernels (original Rust `signal/fft.rs`) and a line-for-
+ * AssemblyScript `fft` / `rfft` / `powerSpectrum` kernels — a line-for-
  * line match of the JS fallback `fftJS` in
  * `matrix/src/backends/wasm/fft-wasm.ts` (same bit-reversal, twiddle
  * recurrence, direction sign, and 1/n inverse scaling — so AS↔JS agreement is

@@ -1,8 +1,7 @@
 /**
  * Spectral-windowing WASM kernels — AssemblyScript parity port (Slice 5.6).
  *
- * Mirrors the algorithms in the original Rust `signal/spectral.rs`
- * implementation (removed in the Rust→AS migration).
+ * AssemblyScript implementations of the spectral-windowing algorithms.
  *
  * All exported functions use the typed-array calling convention.
  * Window-type encoding: 0=Hann, 1=Hamming, 2=Blackman, 3=Rectangular.

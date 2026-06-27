@@ -1,8 +1,7 @@
 /**
  * Singular Value Decomposition via the one-sided Jacobi algorithm.
  *
- * AssemblyScript fallback mirroring the original Rust implementation in
- * `matrix/svd.rs` (removed in the Rust→AS migration). One-sided Jacobi is
+ * AssemblyScript fallback implementation. One-sided Jacobi is
  * compact, allocation-light, numerically robust, and needs no
  * bidiagonalization — it works for any real m x n matrix.
  */

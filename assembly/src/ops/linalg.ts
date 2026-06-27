@@ -1,7 +1,6 @@
 /**
- * Extra linear-algebra kernels — AssemblyScript fallback mirroring the
- * original Rust `matrix/linalg_ext.rs` implementation: reduced row echelon
- * form and the characteristic polynomial (Faddeev-LeVerrier).
+ * Extra linear-algebra kernels — AssemblyScript fallback: reduced row
+ * echelon form and the characteristic polynomial (Faddeev-LeVerrier).
  */
 
 /** Reduced row echelon form of an m x n row-major matrix. */

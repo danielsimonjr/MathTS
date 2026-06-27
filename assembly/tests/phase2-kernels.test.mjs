@@ -1,8 +1,8 @@
 /**
- * Phase-2 kernel validation (Rust→AS migration).
+ * Phase-2 kernel validation.
  *
  * Validates the AS kernels authored in Phase 2 against their JS scalar
- * references, with NO Rust involvement:
+ * references:
  *
  *   1. Elementwise pointer-ABI kernels `array_<op>_ptr(inPtr,outPtr,n)` for all
  *      18 WASM_ELEMENTWISE_OPS — vs the JS scalar reference (same math),

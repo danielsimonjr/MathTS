@@ -12,9 +12,7 @@
  * (a, result); the shift kernels also take per-element shift counts
  * stored in a parallel `Int32Array`.
  *
- * The legacy scalar bitwise primitives lived in the original Rust
- * `bitwise/operations.rs` (removed in the Rust→AS migration); these
- * elementwise variants are what `functions/src/typed/bitwise.ts`
+ * These elementwise variants are what `functions/src/typed/bitwise.ts`
  * dispatches to for large `Int32Array` inputs when the AS backend is
  * selected via `MATHJS_WASM_BACKEND=assemblyscript`.
  */

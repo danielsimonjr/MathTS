@@ -1,14 +1,11 @@
 /**
  * Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.
  *
- * AssemblyScript port of the original Rust `algebra/decomposition.rs`
- * implementation (which Rust used directly). The Rust crate operated
- * on flat-memory pointers + lengths; AS-managed Float64Array / Int32Array
- * arguments carry their own length via the AS runtime header, so the
- * signatures here drop the per-buffer length params and keep `n`/`m` as
- * shape metadata. Apart from that, the algorithms are line-for-line
- * equivalent — Doolittle LU with partial pivoting, Householder QR, and
- * a right-looking Cholesky.
+ * AssemblyScript dense-decomposition kernels. AS-managed Float64Array /
+ * Int32Array arguments carry their own length via the AS runtime header,
+ * so the signatures here drop the per-buffer length params and keep
+ * `n`/`m` as shape metadata. The algorithms are Doolittle LU with partial
+ * pivoting, Householder QR, and a right-looking Cholesky.
  *
  * Indexing convention: row-major. `a[i * n + j]` denotes row `i`, col `j`.
  *
@@ -121,12 +118,11 @@ export function matrix_lu_decompose(
  *
  * Returns 0 on success.
  *
- * Algorithm mirrors the original Rust `decomposition.rs::qrDecomposition`:
- * apply Householder reflectors to a working copy of A (becomes R) and
- * accumulate them into Q starting from the identity. Householder vector
- * `v` is normalized such that `v[0] = 1`; the trailing entries live
+ * Algorithm: apply Householder reflectors to a working copy of A (becomes
+ * R) and accumulate them into Q starting from the identity. Householder
+ * vector `v` is normalized such that `v[0] = 1`; the trailing entries live
  * in `r_below_diag / u1` and we recompute them on the fly per column
- * (matches the Rust implementation exactly — no intermediate `v` array).
+ * (no intermediate `v` array).
  */
 export function matrix_qr_decompose(
   a: Float64Array,
@@ -145,8 +141,8 @@ export function matrix_qr_decompose(
   const minDim: i32 = m < n ? m : n;
 
   // Precompute the Householder vector once per column. We can't re-derive
-  // `v[i] = r[i,k] / u1` inside the R-update loop the way the Rust ref
-  // does, because the first column-update iteration mutates r[i,k] in
+  // `v[i] = r[i,k] / u1` on the fly inside the R-update loop, because the
+  // first column-update iteration mutates r[i,k] in
   // place — after that, the on-the-fly `vi` reads would see garbage and
   // the algorithm degenerates (all subsequent updates skip). Storing the
   // reflector in a fresh buffer matches the JS reference in
@@ -230,7 +226,7 @@ export function matrix_qr_decompose(
  * Returns 0 on success, -1 if A is not positive-definite (detected as
  * a non-positive diagonal element during the factorization).
  *
- * Uses the right-looking variant that mirrors the Rust reference: for
+ * Uses the right-looking variant: for
  * each column j we compute `L[j,j] = sqrt(A[j,j] - sum_k L[j,k]^2)` and
  * `L[i,j] = (A[i,j] - sum_k L[i,k] * L[j,k]) / L[j,j]` for i > j.
  */

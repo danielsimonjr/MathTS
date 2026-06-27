@@ -1,6 +1,5 @@
 /**
- * Rank-N tensor operations — AssemblyScript fallback mirroring the original
- * Rust `matrix/tensor_ops.rs` implementation.
+ * Rank-N tensor operations — AssemblyScript fallback.
  */
 
 /**

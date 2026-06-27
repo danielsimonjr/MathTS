@@ -1,7 +1,6 @@
 /**
- * Rational approximation — AssemblyScript fallback mirroring the original
- * Rust `numeric/approx_ext.rs` implementation: partial-fraction residues and
- * Padé approximants.
+ * Rational approximation — AssemblyScript fallback: partial-fraction
+ * residues and Padé approximants.
  */
 
 function evalPoly(c: Float64Array, x: f64): f64 {

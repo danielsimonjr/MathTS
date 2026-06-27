@@ -1,15 +1,14 @@
 /**
  * Sort hot-loop kernels — AssemblyScript parity port (Slice 5.7a).
  *
- * Mirrors the algorithms in the original Rust `sort.rs` implementation
- * (removed in the Rust→AS migration).
+ * AssemblyScript implementations of the sort algorithms.
  *
  * Three exported functions:
  *   - `sort_f64`    — in-place ascending sort (NaN-last, typed-array ABI).
  *   - `argsort_f64` — return Int32Array of permutation indices (NaN-last, STABLE).
  *   - `rank_f64`    — return Int32Array of ranks (0-indexed, NaN-last, STABLE).
  *
- * Algorithm (Rust→AS migration Phase 6):
+ * Algorithm:
  *   - `sort_f64` uses INTROSORT — a 3-way (Dutch-national-flag) quicksort with
  *     a median-of-three pivot, an insertion-sort cutoff for small ranges, and a
  *     heapsort fallback once the recursion depth exceeds 2·⌊log2 n⌋. The 3-way
@@ -25,8 +24,8 @@
  *     construction. The all-duplicates case maps to a strictly index-ordered
  *     (already-sorted) key sequence, which median-of-three handles in O(n log n).
  *
- * NaN ordering: NaN sorts after all finite values (NaN-last), matching the
- * Rust kernel and JS `Array.prototype.sort`.
+ * NaN ordering: NaN sorts after all finite values (NaN-last), matching
+ * JS `Array.prototype.sort`.
  */
 
 // ---------------------------------------------------------------------------

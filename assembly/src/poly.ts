@@ -1,11 +1,8 @@
 /**
  * Polynomial hot-loop kernels — AssemblyScript parity port.
  *
- * These two exports mirror the original Rust kernels in `poly.rs`
- * (removed in the Rust→AS migration).
- *
- * Naming uses snake_case to match the Rust export surface so the
- * bridge can probe for either backend with the same name lookup.
+ * Naming uses snake_case for the export surface so the bridge can probe
+ * for the backend with a consistent name lookup.
  *
  * Polynomials are coefficient arrays, constant term first (index = power):
  *   p(x) = a[0] + a[1]*x + a[2]*x^2 + …

@@ -116,11 +116,10 @@ export interface MathTSWasmExports {
   matrix_trace(dataPtr: number, rows: number, cols: number): number;
   matrix_norm_frobenius(dataPtr: number): number;
 
-  // Dense matrix decompositions — AS exports added in tandem with the
-  // Rust crate's `decomposition.rs` so the AS backend can stop falling
-  // back to JS for these ops. AS calling convention: pass typed-array
-  // *header* references (the AS runtime carries length, no ptr+len args).
-  // See `assembly/src/algebra/decomposition.ts` for the kernels.
+  // Dense matrix decompositions — AS exports so the AS backend can stop
+  // falling back to JS for these ops. AS calling convention: pass
+  // typed-array *header* references (the AS runtime carries length, no
+  // ptr+len args). See `assembly/src/algebra/decomposition.ts` for the kernels.
   matrix_lu_decompose?(
     a: Float64Array,
     n: number,
@@ -140,11 +139,10 @@ export interface MathTSWasmExports {
   matrix_determinant?(a: Float64Array, n: number, work: Float64Array): number;
 
   // Bitwise operations (Int32Array, elementwise) — AS-backend kernels.
-  // The legacy Rust backend shipped an equivalent set under the `*Array` /
+  // A legacy backend shipped an equivalent set under the `*Array` /
   // `*ArrayPerElement` naming (still declared, now vestigial, in
-  // functions/src/wasm/WasmLoader.ts's interface; removed in the Rust→AS
-  // migration); the AS kernels keep the `_i32_array` suffix to match AS
-  // export-name discoverability.
+  // functions/src/wasm/WasmLoader.ts's interface); the AS kernels keep the
+  // `_i32_array` suffix to match AS export-name discoverability.
   bitAnd_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
   bitOr_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
   bitXor_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;

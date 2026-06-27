@@ -1,6 +1,5 @@
 /**
- * Log-linearized curve fitting — AssemblyScript fallback mirroring the
- * original Rust `numeric/curvefit.rs` implementation. Each fit returns `[a, b]`.
+ * Log-linearized curve fitting — AssemblyScript fallback. Each fit returns `[a, b]`.
  */
 
 /** Exponential fit `y = a * exp(b * x)`. Returns [a, b]. */
