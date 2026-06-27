@@ -10,13 +10,13 @@
 
 The codebase has 57 files with compute-heavy patterns (nested loops, iterative algorithms, convergence loops). Of these, **19 high-value function files** and **7 type implementation files** lack WASM acceleration.
 
-The Rust migration should include these as NEW WASM opportunities — not just porting existing AS modules, but expanding coverage.
+WASM coverage should expand to include these as NEW opportunities — not just the existing AS modules, but broader coverage.
 
 ---
 
 ## Tier 1: High-Value New WASM Opportunities
 
-These files have significant compute-heavy code with no WASM path today. Adding Rust WASM here would produce measurable speedups.
+These files have significant compute-heavy code with no WASM path today. Adding WASM kernels here would produce measurable speedups.
 
 ### Matrix Operations (not yet bridged to WASM)
 
@@ -46,7 +46,7 @@ These files have significant compute-heavy code with no WASM path today. Adding 
 
 | File                                        | Lines       | For-loops | Opportunity                                                                                                                           |
 | ------------------------------------------- | ----------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/type/matrix/SparseMatrix.ts`           | 1846        | 40        | **CSC sparse matrix core** — get/set, forEach, map, multiply all have nested loops over column pointers. The #1 target for Rust WASM. |
+| `src/type/matrix/SparseMatrix.ts`           | 1846        | 40        | **CSC sparse matrix core** — get/set, forEach, map, multiply all have nested loops over column pointers. The #1 target for WASM. |
 | `src/type/matrix/DenseMatrix.ts`            | 1307        | 20        | **Dense matrix core** — resize, map, forEach, clone all iterate over all elements.                                                    |
 | `src/type/unit/Unit.ts`                     | 3753        | 42        | **Unit system** — parsing, conversion, simplification have many loops. The unit conversion table lookup is hot for large datasets.    |
 | `src/type/matrix/utils/matAlgo*` (15 files) | ~2700 total | ~40       | **Matrix algorithm suite** — sparse/dense combination algorithms used by every binary operator. Each runs O(nnz) or O(n^2) loops.     |
@@ -55,7 +55,7 @@ These files have significant compute-heavy code with no WASM path today. Adding 
 
 ## Tier 2: Bridge Wiring Opportunities
 
-These files have WASM modules already compiled but the **JS function doesn't call the WASM path**. Zero new Rust code needed — just wire up `wasmLoader` calls in the TypeScript:
+These files have WASM modules already compiled but the **JS function doesn't call the WASM path**. Zero new WASM code needed — just wire up `wasmLoader` calls in the TypeScript:
 
 | JS Function                   | Existing WASM Module                                   | Estimated Effort              |
 | ----------------------------- | ------------------------------------------------------ | ----------------------------- |
@@ -69,7 +69,7 @@ These files have WASM modules already compiled but the **JS function doesn't cal
 | `combinatorics/stirlingS2.ts` | `wasm/combinatorics/basic.ts` (stirlingS2)             | Wire bridge                   |
 | `probability/permutations.ts` | `wasm/combinatorics/basic.ts` (permutations)           | Wire bridge                   |
 
-**Quick win:** These 9 bridge-wiring tasks don't need the Rust migration at all. They can be done immediately for instant speedups.
+**Quick win:** These 9 bridge-wiring tasks don't need any new WASM authoring at all. They can be done immediately for instant speedups.
 
 ---
 
@@ -97,21 +97,21 @@ These scored high in the scan due to recursive patterns, but are **tree-walking 
 
 ---
 
-## Recommendations for Rust Migration
+## Recommendations for WASM Coverage
 
-### Expand scope: Add these to the Rust WASM migration plan
+### Expand scope: Add these to the WASM acceleration plan
 
-1. **SparseMatrix core operations** (Tier 1) — Port the inner loops of `SparseMatrix.ts` (get, set, forEach, multiply) to Rust. This is 1846 lines of loop-heavy code that every sparse operation touches. Use `sprs` crate.
+1. **SparseMatrix core operations** (Tier 1) — Port the inner loops of `SparseMatrix.ts` (get, set, forEach, multiply) to AssemblyScript WASM. This is 1846 lines of loop-heavy code that every sparse operation touches.
 
-2. **DenseMatrix core operations** (Tier 1) — Port element-wise operations (map, forEach, resize, clone) to Rust. These are the hot inner loops for all dense matrix math.
+2. **DenseMatrix core operations** (Tier 1) — Port element-wise operations (map, forEach, resize, clone) to AssemblyScript WASM. These are the hot inner loops for all dense matrix math.
 
-3. **Matrix algorithm suite** (`matAlgo01` through `matAlgo14`) — 15 files, ~2700 lines total. These run for every binary operator on matrices. Porting to Rust with SIMD would accelerate `add(A, B)`, `multiply(A, B)`, etc. for all matrix types.
+3. **Matrix algorithm suite** (`matAlgo01` through `matAlgo14`) — 15 files, ~2700 lines total. These run for every binary operator on matrices. Porting to WASM with SIMD would accelerate `add(A, B)`, `multiply(A, B)`, etc. for all matrix types.
 
-4. **Unit conversion hot path** — The `convert()` and `toSI()`/`fromSI()` functions in `Unit.ts` are called repeatedly for unit-aware computations. Port the conversion lookup table and multiplication chain to Rust.
+4. **Unit conversion hot path** — The `convert()` and `toSI()`/`fromSI()` functions in `Unit.ts` are called repeatedly for unit-aware computations. Port the conversion lookup table and multiplication chain to WASM.
 
-### Wire existing WASM bridges NOW (pre-Rust)
+### Wire existing WASM bridges NOW
 
-The 9 bridge-wiring tasks in Tier 2 are immediate wins. They should be done before or in parallel with the Rust migration — they'll produce measurable speedups with minimal effort, and the Rust versions will inherit the same bridge connections.
+The 9 bridge-wiring tasks in Tier 2 are immediate wins. They should be done before or in parallel with the new WASM kernels — they'll produce measurable speedups with minimal effort, and the new kernels will inherit the same bridge connections.
 
 ### Don't WASM-ify (Tier 3)
 
@@ -119,11 +119,11 @@ Symbolic/AST operations (simplify, derivative, rationalize) operate on tree stru
 
 ---
 
-## Updated Line Counts for Rust Migration
+## Updated Line Counts for WASM Coverage
 
-Adding Tier 1 opportunities to the existing AS port:
+Adding Tier 1 opportunities to the existing AS modules:
 
-| Component                 | Existing AS (port) | New Rust WASM                                  | Total       |
+| Component                 | Existing AS        | New WASM                                       | Total       |
 | ------------------------- | ------------------ | ---------------------------------------------- | ----------- |
 | Matrix modules            | ~5,500             | +3,000 (SparseMatrix, DenseMatrix inner loops) | ~8,500      |
 | Algebra modules           | ~4,200             | +1,000 (lsolveAll, usolveAll, bridge wiring)   | ~5,200      |
@@ -134,4 +134,4 @@ Adding Tier 1 opportunities to the existing AS port:
 | Unit conversion           | 801 (existing)     | +500 (Unit.ts hot paths)                       | ~1,300      |
 | **Total**                 | **~21,600**        | **+7,200**                                     | **~28,800** |
 
-The Rust migration scope grows from ~33,600 lines (AS port only) to ~40,800 lines (AS port + new opportunities).
+The WASM scope grows from ~33,600 lines (existing AS only) to ~40,800 lines (existing AS + new opportunities).

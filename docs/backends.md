@@ -2,15 +2,12 @@
 
 MathTS provides a three-tier backend system for matrix operations that automatically selects the optimal implementation based on matrix size and operation type.
 
-> **WASM backend (migration COMPLETE 2026-06-26).** The acceleration path is
+> **WASM backend.** The acceleration path is
 > **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the **sole
 > WASM backend** for the whole repo — both `functions` and `matrix` load
-> `mathts-as.wasm` (source `assembly/src/`) and dispatch is AS→JS. The
-> Rust→AssemblyScript migration is finished and the Rust toolchain (the
-> `wasm-rust/` Cargo workspace, `build:wasm:rust`/`build:wasm:all`/`bench:wasm`
-> scripts, the dead `MatrixWasmBridge`, and the `MATHTS_WASM_BACKEND=rust` loader
-> opt-in) has been removed. SHA-384 integrity verification of the AS binary is
-> retained. See `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md`.
+> `mathts-as.wasm` (source `assembly/src/`) and dispatch is AS→JS. The legacy
+> native-WASM path has since been removed. SHA-384 integrity verification of the
+> AS binary is retained.
 
 ## Backend Types
 

@@ -32,8 +32,7 @@ here first.
 Reading order before any UPT PR lands: confirm each consumed export
 still exists in `<package>/src/index.ts` of the relevant package, since
 the typed-layer expansion has reshaped some surfaces (e.g. `WASMBackend`
-is now AS-only after the Rust/AS split — Rust callers use the separate
-`RustWASMBackend`).
+is the AssemblyScript-backed WASM backend).
 
 ## Open questions from UPT v0.70 §10.2
 
@@ -106,7 +105,7 @@ The forward op can execute through any of:
 
 - In-process JS (`parallel/src/ops/<op>.ts`)
 - ComputePool worker pool (above `thresholdByOp[<op>]`)
-- WASM kernel (Rust or AS) when the dispatched op has a WASM
+- WASM kernel (AssemblyScript) when the dispatched op has a WASM
   implementation and the input is large enough to amortise the
   marshal cost (see `functions/src/wasm/bitwise/wasm-bridge.ts` for
   the bitwise example; `WASM_BITWISE_THRESHOLD = 64 × 1024`).
@@ -164,7 +163,6 @@ working contract.
   parallel overloads, and the WebGPU opt-in.
 - [Architecture overview](../Architecture/OVERVIEW.md) and
   [ARCHITECTURE.md](../Architecture/ARCHITECTURE.md) — package layout,
-  dispatch tiers, and the AllocatorKind / WASMBackend / RustWASMBackend
-  split.
+  dispatch tiers, and the AllocatorKind / WASMBackend layout.
 - [TODO.md](../../TODO.md) — current open actions and documented non-
   decisions.

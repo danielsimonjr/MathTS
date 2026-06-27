@@ -52,7 +52,7 @@ This package is under active development. Currently implemented:
 - [x] Dense matrix structure
 - [x] Sparse matrix (CSR) structure
 - [x] Matrix operations (add, multiply, transpose, etc.)
-- [x] WASM backend (Rust primary, AssemblyScript legacy)
+- [x] WASM backend (AssemblyScript)
 - [x] GPU backend (WebGPU)
 - [x] SVD decomposition
 - [x] Eigenvalue solvers

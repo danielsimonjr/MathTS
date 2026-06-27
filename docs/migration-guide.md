@@ -155,7 +155,7 @@ const r = await bitAnd(a, b); // Int32Array([0b1000, 0b0010])
 
 Dispatch order for `Int32Array` inputs:
 
-1. WASM (Rust or AS) when `length > 65_536`
+1. WASM (AssemblyScript) when `length > 65_536`
 2. Worker pool (`ComputePool`) above the standard elementwise threshold
 3. In-process
 

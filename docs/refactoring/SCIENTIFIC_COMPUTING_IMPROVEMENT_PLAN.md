@@ -9,7 +9,7 @@ This document outlines a comprehensive plan to transform mathjs into a full-feat
 - **Total Functions Implemented**: 444+ functions across 21 categories (as of v15.6.0)
 - **Tests**: 9,263 passing, 0 failing
 - **TypeScript Conversion**: Complete (100%, 1,331 TS files, 0 errors)
-- **WASM Integration**: Complete (Rust primary backend, 826 exports; AS legacy for benchmarking)
+- **WASM Integration**: Complete (AssemblyScript backend)
 - **Overall Scientific Computing Completeness**: ~60% (toward SciPy parity goal)
 
 ### Target State

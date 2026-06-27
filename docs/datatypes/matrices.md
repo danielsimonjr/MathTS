@@ -124,7 +124,7 @@ MathTS dispatches matrix operations to one of three backends based on matrix siz
 | Backend         | Threshold (elements)       | Technology                                                   |
 | --------------- | -------------------------- | ------------------------------------------------------------ |
 | **JSBackend**   | Always available (default) | Pure TypeScript / `Float64Array`                             |
-| **WASMBackend** | > 1,000 elements           | Rust WASM (primary) / AssemblyScript WASM (legacy) with SIMD |
+| **WASMBackend** | > 1,000 elements           | AssemblyScript WASM with SIMD                                |
 | **GPUBackend**  | > 100,000 elements         | WebGPU compute shaders                                       |
 
 Operation-specific thresholds override the general rule:
@@ -169,7 +169,7 @@ If a higher-tier backend is unavailable or fails to initialize, MathTS falls bac
 
 ## Matrix Bridge (SparseMatrix CSC)
 
-The `MatrixWasmBridge` provides interoperability between the TypeScript matrix layer and native WASM/Rust kernels, including CSC (Compressed Sparse Column) format conversion for sparse operations.
+The matrix WASM bridge provides interoperability between the TypeScript matrix layer and the AssemblyScript WASM kernels, including CSC (Compressed Sparse Column) format conversion for sparse operations.
 
 ## Decompositions
 

@@ -343,29 +343,19 @@ export const createBesselJ = factory('besselJ', ['typed'], ({ typed }) => {
 
 ### WASM Acceleration
 
-For compute-intensive functions (Bessel, hypergeometric, optimization), implement in Rust WASM first, then wire the JS bridge:
+For compute-intensive functions (Bessel, hypergeometric, optimization), implement the AssemblyScript WASM kernel first, then wire the JS bridge:
 
-1. Add to `src/wasm-rust/crates/mathjs-wasm/src/special/` (or new category)
+1. Add to `assembly/src/special.ts` (or new category module)
 2. Add export to `WasmModule` interface
 3. Add threshold-based WASM bridge in the JS factory function
 4. JS fallback for small inputs / non-number types
-
-### Rust Crate Leverage
-
-| Domain            | Rust Crate | Already in wasm-rust? |
-| ----------------- | ---------- | --------------------- |
-| Special functions | `statrs`   | Yes                   |
-| Linear algebra    | `faer`     | Yes                   |
-| FFT/signal        | `rustfft`  | Yes                   |
-| Optimization      | `argmin`   | No — add              |
-| Graph theory      | `petgraph` | No — add              |
 
 ### Estimated Effort
 
 | Phase                | Functions | Est. Weeks      | WASM Benefit                      |
 | -------------------- | --------- | --------------- | --------------------------------- |
 | Phase 1 (Foundation) | ~80       | 6-8             | HIGH (expose existing WASM)       |
-| Phase 2 (Expansion)  | ~80       | 8-12            | MEDIUM (new Rust implementations) |
+| Phase 2 (Expansion)  | ~80       | 8-12            | MEDIUM (new WASM implementations)  |
 | Phase 3 (Advanced)   | ~40       | 6-8             | LOW (exotic, niche use cases)     |
 | **Total**            | **~200**  | **20-28 weeks** |                                   |
 

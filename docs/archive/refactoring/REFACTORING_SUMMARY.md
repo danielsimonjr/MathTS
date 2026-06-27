@@ -262,7 +262,7 @@ npm run build:clean      # Remove build artifacts
 - ✅ Examples created
 - ✅ Unit tests complete (9,263 passing, 0 failing)
 - ✅ Integration tests complete
-- ✅ Performance benchmarks complete (Rust WASM: 2-55x faster than JS)
+- ✅ Performance benchmarks complete (WASM: 2-55x faster than JS)
 
 ### Recommended Testing Approach
 

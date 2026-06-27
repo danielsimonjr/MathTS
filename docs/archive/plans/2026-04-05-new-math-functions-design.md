@@ -71,9 +71,9 @@ MathTS has **100% coverage** of all mathjs factory functions (242/273 activated,
 
 ### Option A: WASM-First (Recommended)
 
-Wire the existing Rust WASM implementations through `RustWasmLoader` with JS fallback.
+Wire the existing AssemblyScript WASM implementations through the WASM loader with JS fallback.
 
-- Pros: Already implemented, tested in Rust, WASM-accelerated
+- Pros: Already implemented, tested, WASM-accelerated
 - Cons: Needs JS fallback for each function
 
 ### Option B: TypeScript-First
@@ -81,7 +81,7 @@ Wire the existing Rust WASM implementations through `RustWasmLoader` with JS fal
 Implement in pure TypeScript, add WASM acceleration later.
 
 - Pros: No WASM dependency, works everywhere
-- Cons: Slower, duplicates existing Rust code
+- Cons: Slower, duplicates existing WASM code
 
 ### Option C: Hybrid
 
@@ -90,7 +90,7 @@ TypeScript implementations that optionally delegate to WASM when loaded.
 - Pros: Best of both worlds
 - Cons: Most code to write
 
-**Recommendation: Option C** — TypeScript implementations with `RustWasmLoader` acceleration when available. This matches the existing pattern used by `fft-wasm.ts` and `eig-wasm.ts`.
+**Recommendation: Option C** — TypeScript implementations with WASM acceleration when available. This matches the existing pattern used by `fft-wasm.ts` and `eig-wasm.ts`.
 
 ## Priority Order
 

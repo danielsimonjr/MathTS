@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-> **Current State (v15.6.0, 2026-04-10):** TypeScript conversion is 100% complete (1,331 TS source files). WASM integration is complete with 57 AssemblyScript modules and a Rust WASM backend (63 files, 826 exports). 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing.
+> **Current State (v15.6.0, 2026-04-10):** TypeScript conversion is 100% complete (1,331 TS source files). WASM integration is complete with 57 AssemblyScript modules. 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing.
 
 This document records the comprehensive plan that was executed to convert JavaScript files to TypeScript with WASM compilation support.
 
@@ -10,7 +10,7 @@ This document records the comprehensive plan that was executed to convert JavaSc
 
 - ✅ **Infrastructure**: Complete (WASM pipeline, parallel computing, build system)
 - ✅ **TypeScript Conversion**: 100% complete (1,331 files, 0 errors)
-- ✅ **WASM Integration**: Complete (Rust primary + AS legacy)
+- ✅ **WASM Integration**: Complete (AssemblyScript)
 - ✅ **All Phases**: Complete
 
 ### Goals

@@ -8,7 +8,7 @@ CURRENT STATE (v15.6.0, 2026-04-10):
 - 444+ functions, 545 factory functions, 21 categories
 - 9,263 tests passing, 0 failing
 - 100% TypeScript (all test files also converted)
-- WASM: Rust primary backend complete (826 exports, 669KB)
+- WASM: AssemblyScript backend complete
 - # Full function reference: https://danielsimonjr.github.io/mathjs/
 
 ================================================================================

@@ -11,9 +11,9 @@
 > - **The expression evaluator is WIRED**, not "empty stubs" —
 >   `functions/src/factories/evaluate.ts` exports `evaluate`/`compileExpr`/`parse`.
 > - **Versions vary per package** (0.1.3–0.2.0), not "all v0.1.2".
-> - WASM export counts: Rust **1122** / AS **302** (this doc's figures drifted).
-> - A **Rust→AS migration is planned** (delete Rust, single AS backend) —
->   `docs/roadmap/RUST_TO_AS_MIGRATION_{EVAL,PLAN}.md`. Not yet executed.
+> - WASM export counts in this doc's figures have drifted from the current
+>   AssemblyScript backend.
+> - AssemblyScript is the sole WASM backend.
 > The structural maps below (packages, kernels, categories) remain broadly accurate.
 
 ---
@@ -87,13 +87,7 @@
 
 ### WASM
 
-**Rust WASM (primary) — 1,017 exports**:
-
-- 826 core Rust exports (arithmetic, linear algebra, FFT, statistics, special functions)
-- 192 AssemblyScript compat wrappers (`wasm-rust/crates/mathts-wasm/src/compat/`) — full AS parity achieved
-- Dual-backend migration is complete; Rust backend supersedes AssemblyScript for all operations
-
-**AssemblyScript WASM (legacy, benchmarking) — 432 exports**:
+**AssemblyScript WASM (sole backend) — 432 exports**:
 
 - Scalar: 52 ops (arithmetic, trig, transcendental)
 - Array: 36 ops (element-wise, norms, dot products)
@@ -127,7 +121,6 @@
 | workbook           | 6            | 690     | 3          | 29      |
 | compat             | 3            | 883     | 2          | 132     |
 | assembly (WASM-AS) | 10           | 3,324   | 0          | 432     |
-| wasm-rust          | 63           | ~18,500 | —          | 1,017   |
 | typed-function     | 2            | 692     | 2          | 62      |
 | workerpool         | 3            | 2,637   | 1          | 37      |
 

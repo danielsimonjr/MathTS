@@ -2794,7 +2794,7 @@ Convert document cells to Jupyter notebook format with Deno kernel metadata:
 > **Goal:** Extend the symbolic engine with integration, limits, series expansion, step-by-step display, and an assumption system.
 
 **Prerequisites:** Iteration 3 complete
-**Note:** Some features depend on math.js core additions (symbolic integration, limits). Where math.js lacks a feature, the plan calls for a WASM CAS module stub or delegates to the Rust migration.
+**Note:** Some features depend on math.js core additions (symbolic integration, limits). Where math.js lacks a feature, the plan calls for a WASM CAS module stub or delegates to WASM acceleration.
 
 ---
 
@@ -2914,7 +2914,7 @@ Allow users to declare variable assumptions:
 
 > **Goal:** Add animated plots with parameter sliders, large-scale matrix operations with progress indicators, parallel computation visualization, and WebGPU exploration.
 
-**Prerequisites:** Iteration 4 complete, Rust WASM migration Phase 1+ (for maximum performance benefit)
+**Prerequisites:** Iteration 4 complete, WASM acceleration in place (for maximum performance benefit)
 
 ---
 
