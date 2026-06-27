@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed (2026-06-27) — vestigial pre-migration AssemblyScript-source from `functions/src/wasm/`
+
+- Deleted **26 files / ~14k LOC** of dead AssemblyScript source written as `.ts`
+  (using AS intrinsics `usize`/`i32`/`f64`/`load`/`store`/`v128`) under
+  `functions/src/wasm/`: the `matrix/`, `algebra/`, `complex/`, `geometry/`,
+  `logical/`, `numeric/`, `plain/`, `relational/`, `set/`, `simd/`,
+  `statistics/`, `string/`, `utils/` directories, `signal/{fft,processing}.ts`,
+  `special/functions.ts`, and the `wasm/index.ts` aggregator that re-exported
+  them. These were unreachable from `functions/src/index.ts` and only
+  soft-imported by the `tests/wasm/typescript-integration.test.ts`
+  skip-on-fail smoke test. The real (sole) WASM backend is `assembly/src/`
+  (built by `npm run build:wasm`); these `.ts` copies were pre-migration
+  leftovers that generated **~9,000 false `no-undef` lint warnings** on the AS
+  intrinsics (functions package: 9027 → 0 `no-undef`).
+- **Kept** the active JS-side WASM dispatch/loader surface: `WasmLoader.ts`,
+  `integrity.ts`, `resolve.ts`, `bridges/common.ts`, `special/scalars.ts`, and
+  the `*/wasm-bridge.ts` bridges (`elementwise`, `special`, `sort`, `signal`,
+  `poly`, `interpolation`, `bitwise`) — all reachable from `functions/src/index.ts`
+  via `typed/`.
+- Trimmed `tests/wasm/typescript-integration.test.ts`: removed the now-dead
+  cases that imported the deleted `functions/src/wasm/index.js`,
+  `wasm/arithmetic/index.js`, and `wasm/complex/index.js` modules; kept the
+  `assembly/build/mathts.js` import test and the `WasmLoader.load()` block.
+
 ### Changed (2026-06-27) — `functions` + `expression` now match base on all four lint-grade compiler flags
 
 - Removed the last relaxed overrides from `functions/tsconfig.json`
