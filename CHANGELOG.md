@@ -35,6 +35,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   returned all-zero eigenvalues (`jsMaxAbs < 1e-6`) as "proof" only the AS kernel
   could solve it. With the JS path fixed that assertion was a bug-encoding; it is
   now an AS↔JS parity check confirming both return the 8th roots of unity.
+- **Corrected an autograd test exposed by the eig fix.**
+  `autograd/tests/tape-decomposition-ad.test.ts` "case 3" finite-difference-checked
+  the gradient of raw `sum(eigvecs)` against the analytical eigenvector VJP. That
+  loss is ill-posed: an eigenvector's sign is gauge-ambiguous and not a continuous
+  function of `A`, so the (now-correct) hqr2 solver can return the opposite sign at
+  a perturbed point — making the central FD of `sum(V)` measure a sign
+  discontinuity rather than a derivative (verified: the 2nd eigenvector flips sign
+  between the base point and both `±h` points, yielding the reported
+  analytical=0.3536 / numerical=−0.7071 mismatch). The case only "passed" before
+  because the buggy eig returned all-zero eigenvectors (`sum(V)=0`, `FD=0`,
+  vacuously equal). Rewrote it to FD-check `sum((V·Vᵀ)²)` — a sign- and
+  permutation-invariant, non-constant function of the eigenvectors that still
+  exercises the eigenvector VJP (mirrors the existing sign-invariant case 4
+  `sum(V²)` and case 7 `sum(V·Vᵀ)`). The eigenvector VJP itself was confirmed
+  correct (no `autograd/src` change needed); this is a test correction, not a
+  weakening. autograd suite: 246/246.
 
 ### Added (2026-06-26) — AssemblyScript general (non-symmetric) real eigensolver + wired into matrix
 

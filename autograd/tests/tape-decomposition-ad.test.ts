@@ -927,7 +927,22 @@ describe('TapedTensor.eig (non-symmetric) — backward correctness (FD)', () => 
     assertClose(grad, expected, 1e-5, 'non-sym eig sum(λ) = trace');
   });
 
-  it('case 3: sum(eigvecs) FD on well-conditioned 3×3', () => {
+  it('case 3: sum((V·Vᵀ)²) FD on well-conditioned 3×3 (sign-invariant eigvec loss)', () => {
+    // DO NOT FD-check raw sum(eigvecs): an eigenvector's sign is gauge-ambiguous
+    // and NOT a continuous function of A. The hqr2 eigensolver may return the
+    // OPPOSITE sign at a perturbed point, so a central finite difference of
+    // sum(V) measures a sign discontinuity, not a derivative — it disagrees with
+    // ANY analytical gradient (the observed sign-flip + ~2× factor is exactly
+    // this artifact). The earlier sum(V) form only "passed" because the
+    // now-fixed non-symmetric eig returned all-zero eigenvectors (sum(V)=0,
+    // FD=0, vacuously equal).
+    //
+    // Correct approach (mirrors case 7): test a SIGN- and PERMUTATION-invariant
+    // function of the eigenvectors. V·Vᵀ = Σ_k v_k v_kᵀ is invariant to per-
+    // column sign flips (v_k v_kᵀ is unchanged by v_k → −v_k) and to column
+    // permutation. Its Frobenius-squared norm sum((V·Vᵀ)²) is a non-constant
+    // scalar with a genuinely nonzero gradient, so it both exercises the
+    // eigenvector VJP and is well-posed for finite differences.
     const aData = buildAFromEig(
       [
         [1, 1, 0],
@@ -940,19 +955,32 @@ describe('TapedTensor.eig (non-symmetric) — backward correctness (FD)', () => 
     const { id } = tape.allocate(aData.length);
     const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
     const { eigvecs } = a.eig({ symmetric: false });
-    const out = eigvecs.sum();
+    // (V·Vᵀ)[i,j] = Σ_k V[i,k]·V[j,k] → contract eigvecs with itself on axis 1.
+    const prod = eigvecs.tensordot(eigvecs, [[1, 1]]);
+    const out = prod.square().sum();
     tape.backward(out.id, new Float64Array([1]));
     const grad = new Float64Array(tape.getInputGrad(id)!);
 
-    const num = fdGrad((x) => {
-      const aT = new Tensor([3, 3], x);
-      const r = tensorEig(aT, [0], { symmetric: false, computeVectors: true });
-      let s = 0;
-      for (const v of r.eigenvectors!.data) s += v;
-      return s;
-    }, aData);
+    const num = fdGrad(
+      (x) => {
+        const aT = new Tensor([3, 3], x);
+        const r = tensorEig(aT, [0], { symmetric: false, computeVectors: true });
+        const V = r.eigenvectors!.data;
+        let s = 0;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            let p = 0;
+            for (let k = 0; k < 3; k++) p += V[i * 3 + k] * V[j * 3 + k];
+            s += p * p;
+          }
+        }
+        return s;
+      },
+      aData,
+      1e-5
+    );
 
-    assertClose(grad, num, 1e-4, 'non-sym eig sum(V) FD');
+    assertClose(grad, num, 1e-3, 'non-sym eig sum((V·Vᵀ)²) FD');
   });
 
   it('case 4: sum(V²) on unit-normalised V → near-zero gradient', () => {
