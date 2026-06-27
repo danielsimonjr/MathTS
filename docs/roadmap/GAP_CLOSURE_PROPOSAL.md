@@ -155,8 +155,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Files:**
 
-- `wasm-rust/crates/<crate>/src/poly.rs` — NEW. `#[wasm_bindgen]` exports.
-- `assembly/src/poly.ts` — AS parity port.
+- `assembly/src/poly.ts` — NEW AssemblyScript WASM kernel.
 - `wasm-manifest.json` — regenerate.
 - `functions/src/wasm/poly/wasm-bridge.ts` — NEW. Threshold gate.
 - `functions/src/typed/algebra.ts` — wire the bridge into `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`. (Discriminant and resultant come in a follow-up after the Sylvester-fill helper lands.)
@@ -200,8 +199,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Files:**
 
-- `wasm-rust/crates/<crate>/src/tridiag.rs` — NEW.
-- `assembly/src/tridiag.ts` — AS port.
+- `assembly/src/tridiag.ts` — NEW AssemblyScript WASM kernel.
 - `functions/src/wasm/interpolation/wasm-bridge.ts` — NEW.
 - `functions/src/typed/interpolation.ts` — wire the bridge.
 - `tools/benchmark/wasm/tridiag.bench.ts` — NEW.
@@ -218,21 +216,19 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Files:**
 
-- `wasm-rust/crates/<crate>/src/special.rs` — NEW (lift from Cephes or use the existing `statrs` crate where coverage exists).
-- `assembly/src/special.ts` — AS port (more involved; consider deferring AS parity if scope balloons).
+- `assembly/src/special.ts` — NEW AssemblyScript WASM kernel (lift from Cephes; more involved, consider deferring if scope balloons).
 - `functions/src/wasm/special/wasm-bridge.ts` — NEW.
 - `functions/src/typed/special.ts` — wire the bridge for array inputs (≥ threshold).
 - `tools/benchmark/wasm/special.bench.ts` — NEW.
 
 **Threshold starting point:** `minElements = 1024`.
 
-**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). Landed as two sub-slices per plan: 3.10c-1 (Bessel J/Y, Rust only) is done; 3.10c-2 is deferred.
+**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). Landed as two sub-slices per plan: 3.10c-1 (Bessel J/Y) is done; 3.10c-2 is deferred.
 
-**Slice 3.10c-2 — TODO (deferred):** Airy Ai/Bi WASM kernels + AssemblyScript parity port for Bessel.
+**Slice 3.10c-2 — TODO (deferred):** Airy Ai/Bi WASM kernels for the AssemblyScript backend.
 
-- Add `airyAi(x)` / `airyBi(x)` scalar functions and array kernels in `wasm-rust/crates/mathts-wasm/src/bessel.rs` (or a new `airy.rs`).
-- Add AS parity in `assembly/src/special.ts`; register `bessel_j0_f64_as` etc. in `WasmLoader.ts`.
-- The bridge in `functions/src/wasm/special/wasm-bridge.ts` is already wired for `_as`-suffix probing — only the AS implementation is missing.
+- Add `airyAi(x)` / `airyBi(x)` scalar functions and array kernels in `assembly/src/special.ts` (or a new `assembly/src/airy.ts`); register `bessel_j0_f64` etc. in `WasmLoader.ts`.
+- The bridge in `functions/src/wasm/special/wasm-bridge.ts` is already wired for kernel probing — only the AssemblyScript implementation is missing.
 - Blocked on: no immediate consumer demand; Airy series convergence at large |x| requires asymptotic expansion (different from Bessel).
 
 ## Tier 4 — Deferred

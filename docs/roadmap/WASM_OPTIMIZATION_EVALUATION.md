@@ -12,7 +12,7 @@
 | 32 high-value functions   | DONE   |
 | 40 medium-value functions | DONE   |
 | 8 review bugs fixed       | DONE   |
-| Total Rust WASM exports   | ~1,100 |
+| Total WASM exports        | ~1,100 |
 
 ## Summary
 
@@ -24,10 +24,10 @@
 | **Not suitable**      | 71      | String/expression manipulation, can't WASM       |
 | **Total**             | **349** |                                                  |
 
-## Already in Rust WASM (partial coverage)
+## Already in WASM (partial coverage)
 
-5 high-value functions already have Rust equivalents:
-| TS Function | Rust Equivalent | Category |
+5 high-value functions already have WASM equivalents:
+| TS Function | WASM Equivalent | Category |
 |-------------|----------------|----------|
 | `findRoot` | `bisectionStep`, `newtonStep`, `brentStep` | numeric |
 | `linsolve` | `luSolve`, `sparseLuSolve` | algebra |
@@ -35,7 +35,7 @@
 | `solveODESystem` | `rk45Step`, `rk23Step` | numeric |
 | `fft2d` | `fft2d` | signal |
 
-## Priority 1: High-Value WASM Candidates (32 functions — need Rust)
+## Priority 1: High-Value WASM Candidates (32 functions — need WASM kernels)
 
 ### Numerical Methods (12)
 
@@ -114,7 +114,7 @@ These must remain in TypeScript.
 | **2** | Signal processing (9)           | 3-5 days  | 3-10x   | High — FFT-related hot paths             |
 | **3** | Numerical methods (12)          | 1-2 weeks | 5-10x   | High — optimization/fitting              |
 | **4** | Geometry algorithms (3)         | 2-3 days  | 5-10x   | Medium — Delaunay is complex             |
-| **5** | Array arithmetic (15)           | 2-3 days  | 2-3x    | Medium — already partially in Rust       |
+| **5** | Array arithmetic (15)           | 2-3 days  | 2-3x    | Medium — already partially in WASM       |
 | **6** | Statistics + distributions (12) | 3-5 days  | 2-3x    | Medium                                   |
 | **7** | Graph algorithms (5)            | 2-3 days  | 2-3x    | Low — not compute-bound for small graphs |
 | **8** | Interpolation (6)               | 2-3 days  | 2-3x    | Low — already fast in JS                 |
@@ -125,10 +125,10 @@ Each WASM-accelerated function should follow the existing pattern:
 
 ```typescript
 export function myFunction(args) {
-  // Try Rust WASM first
-  if (rustWasmLoader.isLoaded) {
+  // Try WASM first
+  if (wasmLoader.isLoaded) {
     try {
-      return rustWasmAccelerated(args);
+      return wasmAccelerated(args);
     } catch {
       /* fall through */
     }
@@ -138,5 +138,5 @@ export function myFunction(args) {
 }
 ```
 
-The Rust implementations go in `wasm-rust/crates/mathts-wasm/src/` alongside existing modules.
+The WASM implementations go in `assembly/src/` alongside existing modules.
 The TS wrappers go in the existing typed function files with conditional WASM dispatch.

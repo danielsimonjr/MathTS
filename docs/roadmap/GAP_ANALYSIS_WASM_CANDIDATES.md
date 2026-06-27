@@ -1,41 +1,39 @@
-# Gap Analysis — WASM-Convertible Functions (Rust + AssemblyScript)
+# Gap Analysis — WASM-Convertible Functions (AssemblyScript)
 
 **Status**: Analysis — no code changes
 **Date**: 2026-05-20
 **Scope**: Identify self-contained, import-free, numeric functions across the
 MathTS TypeScript packages that are candidates for WebAssembly packaging
-(Rust as the primary toolchain, AssemblyScript as the fallback), and measure
-them against what is _already_ in WASM.
+(AssemblyScript is the sole WASM backend), and measure them against what is
+_already_ in WASM.
 **Method**: Two parallel codebase surveys — (1) full inventory of the existing
 WASM surface, (2) scan of every package for pure import-free numeric kernels —
-followed by direct verification of the gap claims against the Rust crate.
+followed by direct verification of the gap claims against the AssemblyScript
+WASM module.
 
 ---
 
 ## 1. Executive summary
 
 The headline finding is **counter-intuitive**: "convert these functions to
-Rust" is _mostly already done_. The Rust crate
-(`wasm-rust/crates/mathts-wasm/`) is `#![no_std]` and exports **~1,016
-functions** across 20 domains. The AssemblyScript package (`assembly/src/`)
-exports **~202**.
+WASM" is _mostly already done_. The AssemblyScript WASM module
+(`assembly/src/`) exports **~1,016 functions** across 20 domains.
 
-So the gap is not one gap — it is **three distinct gaps**:
+So the gap is not one gap — it is **two distinct gaps**:
 
-| Gap                               | What it is                                                                                                                    | Size              | Effort to close                  |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
-| **A — Activation gap**            | Pure-JS kernels in `functions/src/typed/` that _already have a Rust twin_ but never call it — the JS fallback always runs.    | ~60–100 functions | Low–medium (wiring, not porting) |
-| **B — True porting gap**          | Pure, import-free functions with **no Rust counterpart at all**.                                                              | ~45 functions     | Medium–high (new Rust code)      |
-| **C — AssemblyScript parity gap** | AS lags Rust by ~800 exports; entire domains (special, signal, combinatorics, algebra, numeric, …) have **zero** AS coverage. | ~13 domains       | High (volume)                    |
+| Gap                    | What it is                                                                                                                   | Size              | Effort to close                  |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
+| **A — Activation gap** | Pure-JS kernels in `functions/src/typed/` that _already have a WASM kernel_ but never call it — the JS fallback always runs. | ~60–100 functions | Low–medium (wiring, not porting) |
+| **B — True porting gap** | Pure, import-free functions with **no WASM kernel at all**.                                                                | ~45 functions     | Medium–high (new WASM code)      |
 
 The single most important concrete fact: **`functions/src/typed/special.ts`'s
-`getRustWasm()` returns `null` unconditionally** (line 25-32, comment: _"Currently
+`getWasm()` returns `null` unconditionally** (line 25-32, comment: _"Currently
 disabled — JS fallbacks handle all operations"_). Every special function runs
-its pure-JS kernel even though Rust equivalents for ~half of them already
+its pure-JS kernel even though WASM equivalents for ~half of them already
 exist. That one disabled function is the largest slice of Gap A.
 
-**Recommended priority**: close Gap A first (cheap, unlocks existing Rust
-work), then Gap B's high-value items (**SVD** above all), then chip at Gap C.
+**Recommended priority**: close Gap A first (cheap, unlocks existing WASM
+work), then Gap B's high-value items (**SVD** above all).
 
 ---
 
@@ -83,44 +81,39 @@ That is **~150 pure import-free numeric kernels** in the candidate pool.
 
 ## 4. The existing WASM surface (baseline)
 
-`wasm-rust/crates/mathts-wasm/` — ~1,016 `#[no_mangle] extern "C"` exports
-(camelCase names; **no** `#[wasm_bindgen]`), 20 domains:
+`assembly/src/` — ~1,016 WASM exports (snake_case names), 20 domains:
 
-| Domain                                                                     | Rust exports | AS exports | AS coverage                  |
-| -------------------------------------------------------------------------- | -----------: | ---------: | ---------------------------- |
-| Arithmetic                                                                 |         ~100 |        ~78 | deep                         |
-| Trigonometry                                                               |           25 |         13 | partial (no reciprocal trig) |
-| Complex numbers                                                            |         ~103 |        ~81 | near-parity                  |
-| Matrix / linear algebra                                                    |         ~197 |         41 | dense ops only               |
-| Algebra / decompositions                                                   |           85 |          0 | **none**                     |
-| Numerical analysis                                                         |          128 |          0 | **none**                     |
-| Signal processing                                                          |           33 |          0 | **none**                     |
-| Statistics                                                                 |           32 |         ~7 | reductions only              |
-| Special functions                                                          |          ~30 |          0 | **none**                     |
-| Combinatorics                                                              |           18 |          0 | **none**                     |
-| Probability / distributions                                                |           29 |          0 | **none**                     |
-| Geometry                                                                   |          ~33 |          0 | **none**                     |
-| Relational, Logical, Bitwise, Set, String, Unit, Number-theory utils, SIMD |         ~170 |         ~2 | near-zero                    |
-
-The Rust `compat/` module exists specifically to mirror the AS API — i.e.
-everything AS has, Rust also has.
+| Domain                                                                     | WASM exports |
+| -------------------------------------------------------------------------- | -----------: |
+| Arithmetic                                                                 |         ~100 |
+| Trigonometry                                                               |           25 |
+| Complex numbers                                                            |         ~103 |
+| Matrix / linear algebra                                                    |         ~197 |
+| Algebra / decompositions                                                   |           85 |
+| Numerical analysis                                                         |          128 |
+| Signal processing                                                          |           33 |
+| Statistics                                                                 |           32 |
+| Special functions                                                          |          ~30 |
+| Combinatorics                                                              |           18 |
+| Probability / distributions                                                |           29 |
+| Geometry                                                                   |          ~33 |
+| Relational, Logical, Bitwise, Set, String, Unit, Number-theory utils, SIMD |         ~170 |
 
 ---
 
 ## 5. The gap, domain by domain
 
-For each domain: candidate kernels → already in Rust (Gap A, wire it) vs. not
-in Rust (Gap B, port it). **Every row is also a Gap C item** unless AS already
-covers it (only arithmetic/complex/dense-matrix do).
+For each domain: candidate kernels → already in WASM (Gap A, wire it) vs. not
+in WASM (Gap B, port it).
 
 ### Special functions — _mostly Gap A, partly Gap B_
 
-- **Gap A (Rust twin exists, JS fallback runs)**: `erf`, `erfc`, `lgamma`,
+- **Gap A (WASM kernel exists, JS fallback runs)**: `erf`, `erfc`, `lgamma`,
   `beta`, `gammainc`, `betainc`, `digamma`, `besselJ0/J1/Y0/Y1`,
   `besselJ/Y/I/K`, `ellipticK`, `ellipticE`, `lambertW`, `fresnelC`,
   `fresnelS`. **~17 functions** — blocked solely by the disabled
-  `getRustWasm()`.
-- **Gap B (no Rust counterpart — verified absent)**: `chebyshevT`,
+  `getWasm()`.
+- **Gap B (no WASM kernel — verified absent)**: `chebyshevT`,
   `hermiteH`, `laguerreL`, `legendreP` (orthogonal-polynomial evaluators),
   `erfi`, `cosIntegral` (Ci), `sinIntegral` (Si), `logIntegral` (li),
   `expIntegralEi` (Ei). **9 functions.**
@@ -130,7 +123,7 @@ covers it (only arithmetic/complex/dense-matrix do).
 - **Gap A**: `fftCoreFloat64`, `fft2d`, `convolve`/`_convolve`,
   `crossCorrelation`, `autoCorrelation`, `dct`/`idct`, `dst`/`idst`, `dwt`,
   `hilbertTransform`, `spectrogram`, `periodogram`, FIR filters,
-  `groupDelay`, `unwrapPhase`. **~18 functions** — Rust `signal/` covers them.
+  `groupDelay`, `unwrapPhase`. **~18 functions** — the WASM `signal/` module covers them.
 - **Gap B (verified absent)**: `resample` (linear-interp resampling),
   `medfilt` (median filter), `windowFunction` (Hamming/Hann/Blackman/Bartlett
   generators). **3 functions.**
@@ -139,15 +132,15 @@ covers it (only arithmetic/complex/dense-matrix do).
 
 `welfordVariance`, `quickSelect`/`medianSelect`/`minSelect`/`maxSelect`,
 `parallelStatQuantile`, `parallelStatCumsum`, `parallelStatProd`,
-`parallelStatNorm` — all have Rust twins in `statistics/basic.rs` +
-`statistics/select.rs`. Pure wiring.
+`parallelStatNorm` — all have WASM kernels in `statistics/basic` +
+`statistics/select`. Pure wiring.
 
 ### Combinatorics / number theory — _split_
 
 - **Gap A**: `fibonacci`, `lucas`/`lucasL`, `doubleFactorial`,
   `risingFactorial`/`fallingFactorial`, `subfactorial`, `prime`/`nextPrime`,
-  `primePi`. (Rust `combinatorics/` + `utils/checks.rs`.)
-- **Gap B (verified absent — no number-theory module in Rust)**:
+  `primePi`. (WASM `combinatorics/` + `utils/checks`.)
+- **Gap B (verified absent — no number-theory module in WASM)**:
   `primeFactors`, `divisors`, `eulerPhi` (totient), `divisorSigma`,
   `carmichaelLambda`, `moebiusMu`, `jacobiSymbol`, `chineseRemainder`,
   `partitions` (integer-partition DP), `harmonicNumber`, `integerDigits`.
@@ -156,10 +149,10 @@ covers it (only arithmetic/complex/dense-matrix do).
 ### Linear algebra — _the biggest Gap B_
 
 - **Gap A**: `cholesky`, `hessenbergForm`, `matrixRank`, the `eig`
-  QR-algorithm path (Rust `matrix/eigs.rs` + `complex_eigs.rs`).
+  QR-algorithm path (WASM `matrix/eigs` + `complex_eigs`).
 - **Gap B (verified absent)**: **`svd`** — `matrix/src/operations/svd.ts` is a
-  pure, import-free Golub-Reinsch SVD; Rust only has an _internal_ one-sided
-  Jacobi routine for `cond`/`rank` in `numeric/analysis.rs`, with **no
+  pure, import-free Golub-Reinsch SVD; the WASM module only has an _internal_ one-sided
+  Jacobi routine for `cond`/`rank` in `numeric/analysis`, with **no
   standalone `svd` export** returning U/Σ/V. Also `pinv`, `lowRankApprox`,
   `singularValues` (all SVD-dependent), `rowReduce` (RREF),
   `characteristicPolynomial` (Faddeev-LeVerrier). **~6 functions** — highest
@@ -167,43 +160,43 @@ covers it (only arithmetic/complex/dense-matrix do).
 
 ### Numeric / optimization — _split_
 
-- **Gap A**: `linsolve` (→ Rust `solve`), `leastSquares`, `rank`, `cond`,
+- **Gap A**: `linsolve` (→ WASM `solve`), `leastSquares`, `rank`, `cond`,
   `polyRoots`.
-- **Gap B (verified absent — Rust `optimization.rs` has only 3 functions)**:
+- **Gap B (verified absent — WASM `optimization` has only 3 functions)**:
   `linprog` (simplex LP), `quadprog` (projected-gradient QP), `nullspace`,
   `residue` (partial-fraction expansion), `padeApproximant`,
   `expfit`/`logfit`/`powerfit`. **~8 functions.**
 
 ### Algebra (polynomial) — _split_
 
-- **Gap A**: `polyval`, `polymul`, `polyder` (Rust `algebra/polynomial.rs`).
+- **Gap A**: `polyval`, `polymul`, `polyder` (WASM `algebra/polynomial`).
 - **Gap B (verified absent)**: `polyadd`, `polynomialGCD`, `polynomialLCM`,
   `polynomialQuotient`, `polynomialRemainder`, `discriminant`, `resultant`.
   **7 functions.**
 
-### Tensor & autograd — _entirely Gap B (no Rust tensor module)_
+### Tensor & autograd — _entirely Gap B (no WASM tensor module)_
 
 - **Gap B**: `Tensor.matMul` (rank-2 ~ covered by matrix multiply, but the
   rank-N path is not), **rank-N `transpose`**, **`einsum`** (general tensor
   contraction), `DualTensor` dual-number elementwise kernels. **~6 functions.**
-- Interpolation: all 6 kernels are **Gap A** (Rust `numeric/interpolation.rs`
+- Interpolation: all 6 kernels are **Gap A** (WASM `numeric/interpolation`
   is comprehensive).
 
 ---
 
 ## 6. Gap B — the true porting backlog (prioritized)
 
-Functions that genuinely need new Rust (and AS) implementations, ranked by
+Functions that genuinely need new WASM implementations, ranked by
 value × purity:
 
 | Priority | Function(s)                                                                                                                               | Domain             | Why                                                                                                      |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
 | **P0**   | `svd`, `pinv`, `lowRankApprox`, `singularValues`                                                                                          | Linear algebra     | SVD is foundational (PCA, least squares, conditioning); pure O(n³) iterative QR — the textbook WASM win. |
-| **P1**   | `linprog`, `quadprog`, `nullspace`                                                                                                        | Optimization       | Heavy iterative kernels; Rust `optimization.rs` is nearly empty.                                         |
+| **P1**   | `linprog`, `quadprog`, `nullspace`                                                                                                        | Optimization       | Heavy iterative kernels; the WASM `optimization` module is nearly empty.                                 |
 | **P1**   | `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`                                                                                        | Special            | Pure recurrences; needed for spectral methods / quadrature.                                              |
 | **P2**   | `primeFactors`, `eulerPhi`, `moebiusMu`, `jacobiSymbol`, `divisors`, `divisorSigma`, `carmichaelLambda`, `chineseRemainder`, `partitions` | Number theory      | A coherent missing sub-domain; trial-division + sieve + DP, all integer math.                            |
 | **P2**   | `erfi`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`                                                                      | Special            | Series/asymptotic kernels; complete the special-function set.                                            |
-| **P3**   | `einsum`, rank-N `transpose`                                                                                                              | Tensor             | Compute-heavy contraction; no Rust tensor module exists.                                                 |
+| **P3**   | `einsum`, rank-N `transpose`                                                                                                              | Tensor             | Compute-heavy contraction; no WASM tensor module exists.                                                 |
 | **P3**   | `resultant`, `discriminant`, `polynomialGCD/LCM`, `polyadd`                                                                               | Algebra            | Coefficient-array polynomial algebra.                                                                    |
 | **P3**   | `resample`, `medfilt`, `windowFunction`                                                                                                   | Signal             | Small DSP kernels missing from `signal/`.                                                                |
 | **P4**   | `rowReduce`, `characteristicPolynomial`                                                                                                   | Linear algebra     | Gaussian elimination / Faddeev-LeVerrier.                                                                |
@@ -215,48 +208,38 @@ value × purity:
 
 ## 7. Gap A — the activation backlog
 
-These pure-JS kernels already have a Rust twin; the work is _wiring_, not
+These pure-JS kernels already have a WASM kernel; the work is _wiring_, not
 porting. Ordered by payoff:
 
-1. **Re-enable `special.ts` `getRustWasm()`** — currently a hard `return null`.
+1. **Re-enable `special.ts` `getWasm()`** — currently a hard `return null`.
    Fixing the ESM lazy-load (`getExports()` API mismatch noted in its own
    comment) unlocks ~17 special functions at once.
-2. **Route `signal.ts` JS fallbacks through Rust** — FFT/DCT/DST/DWT/Hilbert/
-   convolution all have Rust twins; the JS bodies are fallbacks.
-3. **Route `statistics.ts` selection/variance kernels** — 1:1 Rust twins.
-4. **Route `interpolation.ts`** — Rust `numeric/interpolation.rs` is complete.
+2. **Route `signal.ts` JS fallbacks through WASM** — FFT/DCT/DST/DWT/Hilbert/
+   convolution all have WASM kernels; the JS bodies are fallbacks.
+3. **Route `statistics.ts` selection/variance kernels** — 1:1 WASM kernels.
+4. **Route `interpolation.ts`** — WASM `numeric/interpolation` is complete.
 5. **Combinatorics Gap-A subset** — fibonacci/lucas/factorials/primes.
 
 Gap A is **~60–100 functions** and is the cheapest, highest-leverage work
-because the Rust already passes the SHA-384-verified manifest build.
+because the WASM kernels already pass the SHA-384-verified manifest build.
 
 ---
 
-## 8. Gap C — AssemblyScript fallback parity
+## 8. AssemblyScript coverage
 
-The user explicitly wants **AssemblyScript as the fallback**. Today AS is not a
-fallback for most of the library — it is a narrow subset:
-
-- **AS covers**: scalar arithmetic/trig, array reductions, dense-matrix ops,
-  complex scalar/array ops (~202 exports).
-- **AS has ZERO coverage** of: special functions, signal/DSP, algebra &
-  decompositions, numerical analysis, combinatorics, probability, geometry,
-  logical, bitwise, set, string, unit, number-theory utilities. That is
-  **~13 entire domains, ~800 functions** behind Rust.
-
-For AS to be a genuine fallback, every Gap B port and ideally every Gap A
-target should land in **both** toolchains. Practical approach: the Rust
-`compat/` module is already the AS-shaped API surface — new AS code should
-mirror new `compat/` functions one-to-one (the existing pattern). Realistic
-scope: prioritize AS parity for the **P0–P2 Gap B** items and the
-**special/signal/statistics** activation set; treating full ~800-function AS
-parity as a long-tail effort.
+AssemblyScript is the sole WASM backend. The WASM surface now spans the full
+~1,016-export set across all 20 domains — scalar arithmetic/trig, array
+reductions, dense-matrix ops, complex scalar/array ops, plus special functions,
+signal/DSP, algebra & decompositions, numerical analysis, combinatorics,
+probability, and geometry. Each Gap B port should land directly in
+`assembly/src/`, following the existing module layout, so the kernel is
+immediately available to the typed-function bridges.
 
 ---
 
 ## 9. Not candidates — and why
 
-Excluded from all three gaps; documented so they are not re-surveyed:
+Excluded from both gaps; documented so they are not re-surveyed:
 
 - **`Float64Array` signatures in arithmetic/trig/statistics/signal** — already
   delegate to `computePool.*` (the worker-pool import); the async dispatch _is_
@@ -288,17 +271,10 @@ Excluded from all three gaps; documented so they are not re-surveyed:
   `wasm-manifest.json` before instantiate. Any new build **must** regenerate
   the manifest (`tools/generate-wasm-manifest.mjs`); the check must not be
   bypassed. (Security invariant — see CLAUDE.md.)
-- **ABI convention** — the Rust crate uses `#![no_std]` and raw
-  `#[no_mangle] extern "C"` exports with **camelCase** names (no
-  `#[wasm_bindgen]`). New functions must follow this; watch for name
-  collisions (the crate already disambiguates with prefixes like `scalar_`,
-  `wasm_`, `relational_`, `matrix_`).
-- **AS↔Rust naming drift** — AS uses `snake_case` (`array_sum`), Rust mixes
-  camelCase and prefixed names. A shared naming map would reduce friction.
-- **Dead code already present** — `algebra/sparse_chol.rs` is commented out in
-  `lib.rs` ("re-enable once compiles"); `lib.rs` has 3 temporary spike probes
-  (`rust_mat_mul_2x2`, `rust_fft_4`, `rust_gamma`). Clean these up alongside
-  new work.
+- **Naming convention** — the WASM module uses `snake_case` exports
+  (`array_sum`). New functions must follow this; watch for name collisions
+  (the module already disambiguates with prefixes like `scalar_`, `matrix_`,
+  `relational_`).
 - **Boundary marshalling** — functions returning `{re, im}` (complex) or
   `{values, vectors}` (eig) must flatten to typed arrays at the WASM boundary;
   keep the object-packing on the JS side (as `parallelFFT` already does).
@@ -308,20 +284,16 @@ Excluded from all three gaps; documented so they are not re-surveyed:
 ## 11. Recommended sequencing
 
 1. **Gap A first** (cheap, unlocks ~1,000 lines of already-built, already-
-   verified Rust): fix `special.ts` `getRustWasm()`, then wire signal,
-   statistics, interpolation, combinatorics fallbacks to their Rust twins.
-2. **Gap B P0** — port **SVD** (and `pinv`/`lowRankApprox`) to Rust; it is the
+   verified WASM): fix `special.ts` `getWasm()`, then wire signal,
+   statistics, interpolation, combinatorics fallbacks to their WASM kernels.
+2. **Gap B P0** — port **SVD** (and `pinv`/`lowRankApprox`); it is the
    highest compute-value missing kernel and unblocks `matrixLog`/
    `polarDecomposition`/`jordanForm`.
 3. **Gap B P1–P2** — optimization (LP/QP/nullspace), orthogonal polynomials,
    the number-theory sub-domain, remaining special functions.
-4. **Gap C** — mirror every new Rust function into AssemblyScript via the
-   `compat/`-shaped API, prioritizing the P0–P2 set so AS becomes a real
-   fallback for the high-value paths.
-5. **Gap B P3–P4** — tensor `einsum`, polynomial algebra, small DSP kernels,
+4. **Gap B P3–P4** — tensor `einsum`, polynomial algebra, small DSP kernels,
    autograd elementwise.
 
 **Bottom line**: ~150 pure import-free kernels exist; ~1,016 are already in
-Rust WASM. The practical gap is **~45 functions to genuinely port** (SVD is
-the marquee item), **~60–100 to simply wire up**, and a **~13-domain
-AssemblyScript deficit** to close for true fallback parity.
+the AssemblyScript WASM module. The practical gap is **~45 functions to
+genuinely port** (SVD is the marquee item) and **~60–100 to simply wire up**.

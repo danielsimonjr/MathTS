@@ -11,7 +11,7 @@ The mathjs fork added 216 new mathematical functions across versions 15.4.0–15
 | ----------------------- | --------- | ------------------------------------- | ---------------------------------------------------------------------- |
 | **Sync from mathjs JS** | 54        | Low (copy + factory activate)         | 1 — quickest wins                                                      |
 | **New TypeScript**      | 74        | Medium (implement from spec)          | 2 — CAS, graph theory, distributions                                   |
-| **Rust WASM**           | 79        | High (implement in Rust + TS wrapper) | 3 — numerical methods, signal processing (**infrastructure complete**) |
+| **WASM (AssemblyScript)** | 79      | High (implement in AssemblyScript + TS wrapper) | 3 — numerical methods, signal processing (**infrastructure complete**) |
 | **Total**               | **207**   |                                       |                                                                        |
 
 ---
@@ -202,13 +202,13 @@ These need native TypeScript implementations. They're symbolic/CAS functions, gr
 
 ---
 
-## Phase 3: Rust WASM Implementations (79 functions)
+## Phase 3: WASM Implementations (79 functions)
 
-> **Infrastructure complete as of 2026-04-10.** The Rust WASM crate now has 1,017 exports with full AssemblyScript parity (192 compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). New Phase 3 functions can be added directly to the existing Rust crate — no setup needed.
+> **Infrastructure complete as of 2026-04-10.** The AssemblyScript WASM module now has 1,017 exports (192 compat wrappers in `assembly/src/compat/`). New Phase 3 functions can be added directly to the existing AssemblyScript module — no setup needed.
 
-These are computation-heavy functions that benefit from WASM acceleration. Implement in Rust with TypeScript wrappers and JS fallbacks.
+These are computation-heavy functions that benefit from WASM acceleration. Implement in AssemblyScript with TypeScript wrappers and JS fallbacks.
 
-### Numerical Methods — Rust (36 functions)
+### Numerical Methods — AssemblyScript (36 functions)
 
 | Function                                                | Description                      | Complexity |
 | ------------------------------------------------------- | -------------------------------- | ---------- |
@@ -227,7 +227,7 @@ These are computation-heavy functions that benefit from WASM acceleration. Imple
 | `stiffODESolver` / `odeAdaptiveStep` / `eventDetection` | Advanced ODE features            | High       |
 | `cond` / `rank` / `nullspace` / `residue`               | Matrix analysis                  | Medium     |
 
-### Signal Processing — Rust (14 functions)
+### Signal Processing — AssemblyScript (14 functions)
 
 | Function                                              | Description                     | Complexity |
 | ----------------------------------------------------- | ------------------------------- | ---------- |
@@ -240,7 +240,7 @@ These are computation-heavy functions that benefit from WASM acceleration. Imple
 | `lowpassFilter` / `highpassFilter` / `bandpassFilter` | Digital filters                 | Medium     |
 | `resample`                                            | Signal resampling               | Medium     |
 
-### Special Functions — Rust (20 functions)
+### Special Functions — AssemblyScript (20 functions)
 
 | Function                                                        | Description                  | Complexity |
 | --------------------------------------------------------------- | ---------------------------- | ---------- |
@@ -253,7 +253,7 @@ These are computation-heavy functions that benefit from WASM acceleration. Imple
 | `cosIntegral` / `sinIntegral` / `logIntegral` / `expIntegralEi` | Integral functions           | Medium     |
 | `fresnelC` / `fresnelS`                                         | Fresnel integrals            | Medium     |
 
-### Geometry — Rust (6 functions)
+### Geometry — AssemblyScript (6 functions)
 
 | Function                                                        | Description            | Complexity |
 | --------------------------------------------------------------- | ---------------------- | ---------- |
@@ -262,7 +262,7 @@ These are computation-heavy functions that benefit from WASM acceleration. Imple
 | `kdTree`                                                        | k-d tree spatial index | High       |
 | `chebyshevDistance` / `manhattanDistance` / `minkowskiDistance` | Distance metrics       | Low        |
 
-### Matrix — Rust (3 functions)
+### Matrix — AssemblyScript (3 functions)
 
 | Function         | Description                  | Complexity |
 | ---------------- | ---------------------------- | ---------- |
@@ -280,13 +280,13 @@ These are computation-heavy functions that benefit from WASM acceleration. Imple
 | **2**    | Distribution objects (TS) | 12        | 2-3 days  | High — widely used          |
 | **3**    | Graph theory (TS)         | 8         | 3-5 days  | High — new capability       |
 | **4**    | Number theory (TS)        | 7+8       | 3-5 days  | Medium                      |
-| **5**    | Special functions (Rust)  | 20        | 1-2 weeks | High — scientific computing |
+| **5**    | Special functions (WASM)  | 20        | 1-2 weeks | High — scientific computing |
 | **6**    | Statistical tests (TS)    | 7         | 1 week    | Medium                      |
-| **7**    | Signal processing (Rust)  | 14        | 1-2 weeks | Medium                      |
-| **8**    | Numerical methods (Rust)  | 36        | 2-4 weeks | High — core capability      |
+| **7**    | Signal processing (WASM)  | 14        | 1-2 weeks | Medium                      |
+| **8**    | Numerical methods (WASM)  | 36        | 2-4 weeks | High — core capability      |
 | **9**    | Symbolic CAS (TS)         | 28        | 3-6 weeks | High — differentiator       |
-| **10**   | Matrix advanced (TS+Rust) | 11        | 1-2 weeks | Medium                      |
-| **11**   | Geometry advanced (Rust)  | 10        | 1 week    | Low                         |
+| **10**   | Matrix advanced (TS+WASM) | 11        | 1-2 weeks | Medium                      |
+| **11**   | Geometry advanced (WASM)  | 10        | 1 week    | Low                         |
 
 ## Dependency Chain
 
@@ -297,7 +297,7 @@ Phase 2 (distributions 12) → needs Phase 1 for statistical distribution base
 Phase 3 (graph theory 8) → independent, new package possible
 Phase 4 (number theory 15) → independent
     ↓
-Phase 5-7 (Rust WASM 34+14+20) → can start immediately, independent of Phases 2-4
+Phase 5-7 (WASM 34+14+20) → can start immediately, independent of Phases 2-4
     ↓
 Phase 8 (numerical methods 36) → some depend on Phase 5 special functions
 Phase 9 (symbolic CAS 28) → depends on expression parser infrastructure

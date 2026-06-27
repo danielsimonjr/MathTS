@@ -88,9 +88,9 @@ functions do exist in source (`assembly/src/ops/number-theory.ts`,
 
 - No `.wasm` artifact is built in this environment (`npm run build:wasm` has not
   been run; `lib/wasm/*.wasm` is absent).
-- The Rust WASM path (`getRustWasm` in the old `special.ts`) was **deliberately
-  disabled** — ESM cannot `require()` it and its loader API did not match
-  (`wasm.exports.x` vs `getExports()?.x`). It was removed as dead code.
+- A legacy native-WASM path (`getNativeWasm` in the old `special.ts`) was
+  **deliberately disabled** — ESM cannot `require()` it and its loader API did
+  not match (`wasm.exports.x` vs `getExports()?.x`). It was removed as dead code.
 - Wiring therefore cannot be written _and verified_ without first producing a
   working WASM build and re-validating the `WasmLoader` integration (including
   the SHA-384 manifest integrity check, a security invariant).

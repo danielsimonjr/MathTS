@@ -4,7 +4,7 @@
 
 This document presents the performance comparison between JavaScript, WebAssembly (WASM), and WASM+SIMD implementations of various mathematical operations in MathTS.
 
-> **Note**: These results predate the Rust WASM backend and cover only the AssemblyScript WASM toolchain. For the current Rust-vs-AssemblyScript-vs-JS comparison, see [performance.md](./performance.md#rust-wasm-benchmark-results).
+> **Note**: These results cover the AssemblyScript WASM toolchain (the sole WASM backend). For the latest JS-vs-WASM comparison, see [performance.md](./performance.md).
 
 **Test Environment:**
 
@@ -150,7 +150,7 @@ The implementation includes WebWorker support for parallel execution:
 ## Running Benchmarks
 
 ```bash
-# Run the Rust-vs-AssemblyScript WASM benchmark
+# Run the AssemblyScript WASM benchmark
 npm run bench:wasm
 
 # Run AssemblyScript WASM tests

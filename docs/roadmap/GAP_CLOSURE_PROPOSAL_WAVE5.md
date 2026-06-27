@@ -77,7 +77,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Goal:** Mirror the Airy pattern from Slice 4.9. AGM (arithmetic-geometric-mean) algorithm — well-conditioned at all `m ∈ [0, 1)`.
 
-**Files:** `wasm-rust/crates/mathts-wasm/src/special/functions.rs` + `bessel.rs` (or new `elliptic.rs`), `assembly/src/special.ts` (extend), `functions/src/wasm/special/wasm-bridge.ts` (extend), `functions/src/wasm/WasmLoader.ts` (extend), `functions/src/typed/special.ts` (extend), `wasm-manifest.json` (regen), new tests in `typed-special-wasm.test.ts`.
+**Files:** `assembly/src/special.ts` (extend, or new `assembly/src/elliptic.ts`), `functions/src/wasm/special/wasm-bridge.ts` (extend), `functions/src/wasm/WasmLoader.ts` (extend), `functions/src/typed/special.ts` (extend), `wasm-manifest.json` (regen), new tests in `typed-special-wasm.test.ts`.
 
 **Reference:** Slice 4.9 (`276a75b`). AGM convergence reference: DLMF §19.8.
 
@@ -85,7 +85,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Goal:** Build a Vandermonde matrix and call into the existing `wasm.qrF64` kernel.
 
-**Files:** `wasm-rust/crates/mathts-wasm/src/poly.rs` (extend with `vandermonde_f64`), `assembly/src/poly.ts` (extend), `functions/src/wasm/poly/wasm-bridge.ts` (extend), `functions/src/typed/cas.ts` (wire), tests, manifest.
+**Files:** `assembly/src/poly.ts` (extend with `vandermonde_f64`), `functions/src/wasm/poly/wasm-bridge.ts` (extend), `functions/src/typed/cas.ts` (wire), tests, manifest.
 
 **Threshold:** `≥ 1024 samples`.
 
@@ -93,7 +93,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Goal:** O(n²) divided-difference table → WASM kernel. Reuses the existing interpolation bridge from Slice 3.10b.
 
-**Files:** `wasm-rust/crates/mathts-wasm/src/tridiag.rs` (extend or new `interpolation.rs`), `assembly/src/tridiag.ts` (extend), `functions/src/wasm/interpolation/wasm-bridge.ts` (extend), tests, manifest.
+**Files:** `assembly/src/tridiag.ts` (extend, or new `assembly/src/interpolation.ts`), `functions/src/wasm/interpolation/wasm-bridge.ts` (extend), tests, manifest.
 
 **Threshold:** `≥ 256 nodes`.
 
@@ -101,7 +101,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Goal:** Window-application + frame-averaging hot loops. FFT path already WASM (Slice 1 of Wave 1 / earlier). This slice adds `applyWindowF64` and `averagePSDF64` kernels.
 
-**Files:** New `wasm-rust/crates/mathts-wasm/src/signal.rs`, AS port, bridge, typed wiring, tests, manifest.
+**Files:** New `assembly/src/signal.ts` WASM kernel, bridge, typed wiring, tests, manifest.
 
 **Threshold:** `≥ 4096 samples`.
 
@@ -111,13 +111,13 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Goal:** Unblocks several B.1 candidates that all depend on a fast sort. Add the kernel, then wire `typed/statistics.ts` `histogram`/`quantile`/`percentile`, `typed/hypothesis.ts` `KS/MW/SW` (which currently keep sort on main thread per Slice 3.10), and `typed/geometry.ts` `convexHull2D`/`convexHull3D`/`delaunay2D`.
 
-**Files:** New Rust + AS sort kernel (probably a SIMD-friendly radix-sort or fall-back to introsort), bridge, then 3 typed-layer rewires. Larger slice; may split into 5.7a (kernel) + 5.7b (statistics wire) + 5.7c (hypothesis re-wire) + 5.7d (geometry wire) if scope balloons.
+**Files:** New AssemblyScript sort kernel (probably a SIMD-friendly radix-sort or fall-back to introsort), bridge, then 3 typed-layer rewires. Larger slice; may split into 5.7a (kernel) + 5.7b (statistics wire) + 5.7c (hypothesis re-wire) + 5.7d (geometry wire) if scope balloons.
 
 ### Slice 5.8 — ✅ LANDED in `8872e4b` — `wasm.lgammaF64` + distributions pdf WASM (`betaPdf`, `gammaPdf`, `studentTPdf`, `noncentralChi2Pdf`)
 
-**Goal:** New `lgamma_f64` array kernel (most are reachable via `statrs::function::gamma::ln_gamma` already in the Rust crate; check first). Then wire the four pdf functions to use it.
+**Goal:** New `lgamma_f64` array kernel (check the existing `assembly/src/special.ts` gamma helpers first — `ln_gamma` may already be available). Then wire the four pdf functions to use it.
 
-**Files:** Rust kernel addition, AS parity, bridge, typed wiring, tests, manifest.
+**Files:** AssemblyScript kernel addition, bridge, typed wiring, tests, manifest.
 
 ### Slice 5.9 — ✅ LANDED as 5.9a in `ca08c12` — `matrixExpm` / `matrixLogm` / `matrixSqrtm` primitives + typed wiring
 

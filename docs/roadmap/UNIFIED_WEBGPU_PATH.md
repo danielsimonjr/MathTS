@@ -235,7 +235,7 @@ Phases 1–2 are the minimum that delivers value (coverage + residency). Phase 3
 ## 11. Risks & open questions
 
 - **Maintenance cost.** WGSL is a second shading language to maintain alongside
-  the Rust/AssemblyScript WASM kernels. Each numerical kernel now has up to four
+  the AssemblyScript WASM kernels. Each numerical kernel now has up to four
   implementations (JS, WASM, worker, WGSL).
 - **Is f32 acceptable?** If most MathTS users need f64, the GPU path stays a
   niche opt-in and the ROI is low.

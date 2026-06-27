@@ -14,11 +14,11 @@ Executed under dev-workflow + honest-claude. Outcome:
   functions were always accelerated via the worker pool, just not via a
   `*Dispatch`.
 - **T1 (statistics reductions) — NOT WIRED (would regress).** The reduction
-  WASM bridge already exists (`functions/src/wasm/statistics/basic.ts` + Rust
+  WASM bridge already exists (`functions/src/wasm/statistics/basic.ts` + WASM
   kernels) but is dormant; stats route to `computePool` (threshold `'never'`, so
   effectively synchronous JS). Decision-gate benchmark
   (`tools/benchmark/wasm/reduction.bench.mjs`): **with the realistic JS→wasm
-  copy-in, the Rust reduction kernels are 0.4–0.7× the speed of plain JS**
+  copy-in, the WASM reduction kernels are 0.4–0.7× the speed of plain JS**
   (correctness exact). Copy is O(n), reduction is O(n), so transfer dominates and
   V8's JIT'd `+=` loop wins. Not wired, per "don't wire a path that loses".
 - **T3 (trig/arithmetic elementwise transcendentals) — WIRED (✓ 0.2.13).**
@@ -28,22 +28,21 @@ Executed under dev-workflow + honest-claude. Outcome:
   `abs/sin/cos/tan/exp/log` over `Float64Array` ≥ 1024 are **1.35–5.1× faster**
   than JS *including* copy-in **and** copy-out, because `Math.sin` etc. are
   expensive enough that libm-in-wasm + 2 copies still wins. Wired via
-  `functions/src/wasm/elementwise/wasm-bridge.ts` (Rust `simd_*_array`,
-  self-managed scratch since the Rust module exports only `memory`).
+  `functions/src/wasm/elementwise/wasm-bridge.ts` (WASM `simd_*_array`,
+  self-managed scratch since the WASM module exports only `memory`).
   `sqrt` excluded (hardware `Math.sqrt` wins, 0.5–0.66×). Verified <1e-12 vs JS.
-- **T2 (binary arithmetic add/sub/mul/div) — NOT WIRED (no kernel).** The Rust
-  wasm has no binary elementwise array kernel (only unary `simd_*_array`);
+- **T2 (binary arithmetic add/sub/mul/div) — NOT WIRED (no kernel).** The WASM
+  module has no binary elementwise array kernel (only unary `simd_*_array`);
   wiring would require new kernels. Deferred to a kernel-authoring task; low
   priority (binary ops are cheap — like reductions, copy would likely dominate).
 - **Special functions (bessel/airy/elliptic/…) — NOT WIRED (measured).** They
-  currently fall back to JS for the Rust backend (the loader's allocator is
-  AS-only — correct, not a crash; the special dispatch's allocate is inside its
-  try/catch). Hypothesis: wire them via the elementwise self-scratch pattern for
+  currently fall back to JS (correct, not a crash; the special dispatch's
+  allocate is inside its try/catch). Hypothesis: wire them via the elementwise self-scratch pattern for
   a ~2× win. Decision-gate benchmark
   (`tools/benchmark/wasm/special-array.bench.mts`, `npm run bench:special-array`)
   **refuted it**: bessel 0.9–1.2× (break-even), **airy 0.4–0.65× (regresses)**.
   Unlike `Math.sin`, the JS scalar bessel/airy (series+Hankel/asymptotic) are
-  already efficient and JIT'd and do the same flops as the Rust kernels, so the
+  already efficient and JIT'd and do the same flops as the WASM kernels, so the
   JS↔wasm copy is pure overhead. Not wired.
 > Lesson (rules-for-life #4): never conclude a perf decision by inference —
 > measure each case. The reduction result did NOT generalize to elementwise
@@ -56,15 +55,15 @@ Executed under dev-workflow + honest-claude. Outcome:
 Effective-wasm coverage **6 → 18** of 218 typed functions (39 routed). Each tier
 benchmark-gated; only measured winners wired.
 
-- **Tier 1 — extend the elementwise win (DONE).** Authored 17 new Rust
-  `simd_*_array` kernels; benchmarked (`npm run bench:transcendental`). Wired the
+- **Tier 1 — extend the elementwise win (DONE).** Authored 17 new
+  `simd_*_array` WASM kernels; benchmarked (`npm run bench:transcendental`). Wired the
   11 that win at every size: `atan, sinh, tanh, atanh, expm1, log1p, log2,
   log10, sec, csc, cot` (1.4–5× over JS incl. copy). Measured losers left on JS:
   `sqrt, cbrt, asin, acos, cosh, asinh, acosh` (hardware-fast or fast JS).
 - **Tier 2 — expensive js-only specials (DONE for the kernel-backed one).**
   `erfc` wired — **5–7×** (its JS is a continued-fraction scalar, far costlier
   than `Math.*`). `digamma/expIntegralEi/sin·cosIntegral` are likely wins too but
-  need *authored + mpmath-validated* Rust scalar kernels (no libm equivalent) —
+  need *authored + mpmath-validated* WASM scalar kernels (no libm equivalent) —
   a separate numerical task, not a libm wrapper. `erf` has no public consumer.
 - **Tier 3 — op-fusion (DONE, primitive + public API).** `fuseUnaryChain(ops,
   xs)` (`functions/src/typed/fused.ts`) keeps the array resident in wasm across a
@@ -153,7 +152,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 
 ### T0 — Design the special-bridge pattern for elementwise/reduction (architect)
 - **Why:** the special-function bridge (`functions/src/wasm/special/wasm-bridge.ts`)
-  is the proven template (Rust→AS→JS dispatch, threshold, integrity-checked
+  is the proven template (WASM→JS dispatch, threshold, integrity-checked
   loader, allocate/free). T1–T3 should reuse it, not reinvent.
 - **Deliverable:** a short design note + a `functions/src/wasm/elementwise/`
   and `functions/src/wasm/reduction/` bridge skeleton mirroring `special/`.
@@ -163,8 +162,8 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 - **Scope:** `sum`, `mean`, `variance`, `std`, `min`, `max`, plus `dot`/`norm`
   where applicable, in `functions/src/typed/statistics.ts`, `Float64Array`
   overloads ≥ threshold.
-- **Kernels:** `array_sum/mean/variance/stddev/min/max/dot/norm` (assembly) +
-  Rust equivalents; verify each exists and is correct first.
+- **Kernels:** `array_sum/mean/variance/stddev/min/max/dot/norm` (assembly);
+  verify each exists and is correct first.
 - **TDD:** failing differential test (wasm vs JS reduction, seeded sweep,
   <1e-12) → implement `reductionDispatch` + wire overloads → green.
 - **Benchmark:** `tools/benchmark/wasm/reduction.bench.ts`; set threshold to the
@@ -186,7 +185,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 ### T3 — Trigonometry elementwise → WASM (partial; benchmark-gated)
 - **Scope:** `sin`, `cos` (only these have `array_sin/array_cos` kernels).
 - **Sub-gap:** other trig (`tan`, `asin`, `atan`, hyperbolics, …) have **no**
-  array kernel. Either (a) add AS/Rust `array_tan` etc. kernels (new-kernel
+  array kernel. Either (a) add AssemblyScript `array_tan` etc. kernels (new-kernel
   task, larger) or (b) leave as parallel/JS and document. Default: (b); list
   the missing kernels as a follow-up backlog item.
 - Same TDD + benchmark gates as T2.
@@ -229,7 +228,7 @@ only when a task changes a published package's runtime behavior (T1–T3 change
   reductions yes; elementwise only if T2's benchmark shows a win; fusion is the
   real lever but a larger design.)
 - **Add missing array kernels** (`array_tan`, full trig/hyperbolic, etc.) to
-  AS/Rust, or accept parallel/JS for those? (Recommend: defer until a consumer
+  AssemblyScript, or accept parallel/JS for those? (Recommend: defer until a consumer
   needs them.)
 - **Threshold policy:** reuse `WASM_SPECIAL_THRESHOLD` (1024) or measure
   per-op? (Recommend: per-op from the benchmark; elementwise break-even differs

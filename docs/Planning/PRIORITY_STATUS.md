@@ -40,8 +40,8 @@ All integration tasks complete:
 | Plan                                         | Status                                                                                                                    | Depends On                  |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
 | Workbook ↔ expression integration            | Deferred                                                                                                                  | Independent                 |
-| Rust WASM migration                          | **COMPLETE** — 1,017 exports, full AS parity via 192 compat wrappers                                                      | Independent                 |
-| WASM optimization (75 high+medium functions) | **COMPLETE** — 32 high-value + 40 medium-value functions implemented, 8 review bugs fixed, ~1,100 total Rust WASM exports | Independent                 |
+| AssemblyScript WASM backend                  | **COMPLETE** — sole WASM backend, 1,000+ exports                                                                         | Independent                 |
+| WASM optimization (75 high+medium functions) | **COMPLETE** — 32 high-value + 40 medium-value functions implemented, 8 review bugs fixed, ~1,100 total WASM exports     | Independent                 |
 | Scientific calculator (Electron)             | Not started                                                                                                               | Factory activation (done)   |
 | ISE Workbench (3-zone layout)                | Not started (0/16)                                                                                                        | Expression evaluator (done) |
 | Deno notebook                                | Not started                                                                                                               | Workbook + Expression       |

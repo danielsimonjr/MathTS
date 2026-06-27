@@ -36,13 +36,13 @@ are healthy; five carry material gaps, three of them severe.
 | B1  | typed-function type registration            | Healthy        | 100%         |
 | B2  | Matrix factory bridge (`MathJSDenseMatrix`) | **Weak**       | ~65%         |
 | B3  | Matrix backend selection (`BackendManager`) | Healthy        | ~95%         |
-| B4  | WASM loaders (Rust + AssemblyScript)        | Healthy        | ~95%         |
+| B4  | WASM loaders (AssemblyScript)               | Healthy        | ~95%         |
 | B5  | `compat` package (mathjs API shim)          | **Severe gap** | ~25%         |
 | B6  | expression ↔ functions scope                | Healthy        | 100%         |
 | B7  | workbook ↔ expression/functions             | **Severe gap** | ~10%         |
 | B8  | tensor ↔ autograd ↔ matrix/functions        | **Severe gap** | ~0%          |
 | B9  | parallel ↔ typed functions                  | **Weak**       | ~40%         |
-| B10 | AssemblyScript ↔ Rust WASM toolchains       | Healthy        | ~95%         |
+| B10 | AssemblyScript WASM toolchain               | Healthy        | ~95%         |
 
 ### Function surface
 
@@ -169,16 +169,16 @@ is genuine and well-built.
 ### B3 — Matrix backend selection · Healthy (~95%)
 
 `matrix/src/backends/BackendManager.ts` cleanly routes by element count and
-operation across `JSBackend`, `WASMBackend` (AssemblyScript), `RustWASMBackend`,
-and `GPUBackend`, with per-operation thresholds, adaptive threshold tuning, and
-fallback-on-error. Minor gap: `MatrixWasmBridge.ts:350` throws _"JavaScript FFT
-fallback not implemented in bridge"_ — one un-covered fallback path.
+operation across `JSBackend`, `WASMBackend` (AssemblyScript), and `GPUBackend`,
+with per-operation thresholds, adaptive threshold tuning, and fallback-on-error.
+Minor gap: the matrix WASM bridge throws _"JavaScript FFT fallback not
+implemented in bridge"_ — one un-covered fallback path.
 
 ### B4 — WASM loaders · Healthy (~95%)
 
-Two-tier loader (`RustWasmLoader.ts` primary, `WasmLoader.ts` AssemblyScript
-legacy). SHA-384 manifest verification is enforced on both paths per the
-security invariants. Healthy.
+Single loader (`WasmLoader.ts`) for the AssemblyScript WASM binary. SHA-384
+manifest verification is enforced on the load path per the security invariants.
+Healthy.
 
 ### B5 — `compat` package · Severe gap (~25%)
 
@@ -264,10 +264,10 @@ parallel path is **opt-in by a separate name**, not transparent:
 - There is no `ThresholdDispatcher` integration inside the default typed
   functions, so callers must know to pick the parallel variant themselves.
 
-### B10 — AssemblyScript ↔ Rust WASM · Healthy
+### B10 — AssemblyScript WASM · Healthy
 
-Two independent toolchains, independently built and independently selectable by
-`BackendManager`. Rust is primary; AssemblyScript is legacy fallback. Healthy.
+AssemblyScript is the sole WASM backend, built independently and selected by
+`BackendManager` with JS fallback-on-error. Healthy.
 
 ---
 
@@ -362,7 +362,7 @@ not the source tree, as the API contract — and keep it in sync (roadmap item 1
 | 7   | Transparent size-based parallel dispatch inside default typed functions (retire the `parallel*`-named duplicates)                              | B9            | M      | **P2**             |
 | 8   | Implement `executeData()` YAML/JSON parsing in the workbook                                                                                    | B7            | S      | **P2**             |
 | 9   | Stateful `Parser` object + JSON `reviver`/`replacer`; export type-conversion fns (`complex`, `matrix`, …)                                      | 3.3           | M      | **P3**             |
-| 10  | JS FFT fallback in `MatrixWasmBridge`                                                                                                          | B3            | S      | **P3**             |
+| 10  | JS FFT fallback in the matrix WASM bridge                                                                                                      | B3            | S      | **P3**             |
 | 11  | Generate/CI-check `docs/reference/functions.md` from the export surface so it cannot drift again                                               | 3.5           | S      | **P3**             |
 
 **Effort key**: S ≤ 1 day · M ≈ 2–5 days · L ≈ 1–2 weeks.
@@ -385,14 +385,14 @@ not the source tree, as the API contract — and keep it in sync (roadmap item 1
 | ------ | ---------------------------------------------------------------------------------------- |
 | B1     | `core/src/typed/type-bridge.ts`, `functions/src/typed/typed-bridge.ts`                   |
 | B2     | `functions/src/factories/matrix-bridge.ts`, `functions/src/factories/scope.ts`           |
-| B3     | `matrix/src/backends/BackendManager.ts`, `MatrixWasmBridge.ts`                           |
-| B4     | `matrix/src/backends/{RustWasmLoader,WasmLoader}.ts`, `functions/src/wasm/WasmLoader.ts` |
+| B3     | `matrix/src/backends/BackendManager.ts`, matrix WASM bridge                              |
+| B4     | `matrix/src/backends/WasmLoader.ts`, `functions/src/wasm/WasmLoader.ts`                  |
 | B5     | `compat/src/index.ts`, `compat/src/shims.ts`                                             |
 | B6     | `functions/src/factories/evaluate.ts`                                                    |
 | B7     | `workbook/src/executor.ts`                                                               |
 | B8     | `tensor/src/`, `autograd/src/`                                                           |
 | B9     | `parallel/src/`, `functions/src/typed/{statistics,signal,arithmetic}.ts`                 |
-| B10    | `assembly/`, `wasm-rust/`                                                                |
+| B10    | `assembly/`                                                                              |
 
 ## Appendix B — The 52 dormant physical constants
 

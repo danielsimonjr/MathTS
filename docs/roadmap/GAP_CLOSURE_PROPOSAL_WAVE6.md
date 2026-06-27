@@ -9,7 +9,7 @@
 ## Pre-flight findings (audited the codebase before designing)
 
 - **Schur form already exists internally** in `matrix/src/operations/eig.ts` (line 372: "Extract eigenvalues from quasi-upper-triangular Schur form") but isn't exposed as a public matrix-package primitive. Slice 6.1 either exposes the internal Schur or implements `matrixSchur` standalone.
-- **`delaunayTriangulation` (2-D) + `voronoi` + k-d tree already have WASM kernels** in `wasm-rust/crates/mathts-wasm/src/geometry/advanced.rs`. The remaining geometry gap is **`convexHull3D`** only (and a few peripheral 2-D/3-D predicates like `orient3D`/`inSphere` that no consumer in the monorepo currently calls).
+- **`delaunayTriangulation` (2-D) + `voronoi` + k-d tree already have WASM kernels** in `assembly/src/geometry/advanced.ts`. The remaining geometry gap is **`convexHull3D`** only (and a few peripheral 2-D/3-D predicates like `orient3D`/`inSphere` that no consumer in the monorepo currently calls).
 - **Complete elliptic** integrals `K(m)` / `E(m)` landed Slice 5.3 with `wasm.elliptic_k_f64` / `wasm.elliptic_e_f64`. The audit's "incomplete + Carlson" sibling is genuinely missing — no Carlson R-form WASM exists.
 - **WebGPU paths** (`functions/src/typed/gpu.ts`, `matrix/src/backends/gpu/*`) have no headless-runnable smoke test today — a long-standing infra gap.
 
@@ -99,8 +99,7 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 
 **Files:**
 
-- `wasm-rust/crates/mathts-wasm/src/geometry/advanced.rs` — extend with `convex_hull_3d_wasm(pts_ptr, n, faces_ptr) -> i32` (incremental QuickHull-3D).
-- `assembly/src/geometry/advanced.ts` (if it exists; check) — AS parity.
+- `assembly/src/geometry/advanced.ts` — extend with `convex_hull_3d_wasm(pts_ptr, n, faces_ptr) -> i32` (incremental QuickHull-3D).
 - `functions/src/wasm/WasmLoader.ts` — register the new export.
 - `functions/src/typed/geometry.ts` — add `convexHull3D` exported.
 - `functions/tests/typed-geometry.test.ts` — extend with ≥ 6 hull-3D tests.
@@ -115,9 +114,7 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 
 **Files:**
 
-- `wasm-rust/crates/mathts-wasm/src/special/functions.rs` — add scalar `carlson_rc(x, y)`, `carlson_rd(x, y, z)`, `carlson_rf(x, y, z)`, `carlson_rj(x, y, z, p)` per Numerical Recipes §6.11.
-- `wasm-rust/crates/mathts-wasm/src/bessel.rs` — add array kernels.
-- `assembly/src/special.ts` — AS parity.
+- `assembly/src/special.ts` — add scalar `carlson_rc(x, y)`, `carlson_rd(x, y, z)`, `carlson_rf(x, y, z)`, `carlson_rj(x, y, z, p)` per Numerical Recipes §6.11, plus the array kernels.
 - `functions/src/wasm/special/wasm-bridge.ts` — add Carlson + incomplete-elliptic dispatchers.
 - `functions/src/wasm/WasmLoader.ts` — register.
 - `functions/src/typed/special.ts` — add `ellipticF`, `ellipticPi`, `carlsonRC`/`RD`/`RF`/`RJ` exports.
@@ -153,10 +150,10 @@ After Wave 6 lands, the entire MathTS gap-closure roadmap from `FUNCTION_GAPS_AU
 | `d0466b3` | 6.1   | +19   | Matrix Schur primitive + Higham-2008 general-case logm/sqrtm (Björck-Hammarling) |
 | `048e9e1` | 6.2   | +13   | `TapedTensor.eig` non-symmetric reverse-mode AD (Townsend/Magnus-Neudecker)  |
 | `3aac312` | 6.5   | infra | `@vitest/browser` + Playwright WebGPU smoke harness + CI job                 |
-| `bba468b` | 6.3   | +18   | Rust `convex_hull_3d_wasm` QuickHull-3D kernel + `convexHull3D` dispatch     |
-| `2be52f9` | 6.4   | +41   | Carlson `RC/RD/RF/RJ` + incomplete elliptic `F/E/Π` WASM (Rust + AS parity)  |
+| `bba468b` | 6.3   | +18   | `convex_hull_3d_wasm` QuickHull-3D kernel + `convexHull3D` dispatch          |
+| `2be52f9` | 6.4   | +41   | Carlson `RC/RD/RF/RJ` + incomplete elliptic `F/E/Π` WASM (AssemblyScript)    |
 | `dc5c050` | fix   | —     | Manifest SHA-384 regeneration after combined 6.3+6.4 rebuild + AS wiring     |
 
 **Suite delta:** 6249 → 6308 tests (+59), 236 → 238 files (+2). 172 WASM integration tests pass. Zero regressions.
 
-**Security invariants intact:** WASM SHA-384 manifest verification re-validated for both `mathts.wasm` (Rust, 754 KB, primary) and `mathts-as.wasm` (AS, 62 KB, legacy with full Carlson parity).
+**Security invariants intact:** WASM SHA-384 manifest verification re-validated for `mathts-as.wasm` (the AssemblyScript WASM binary, with full Carlson parity).

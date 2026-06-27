@@ -1435,42 +1435,28 @@ fn main(
 
 ---
 
-## Rust WASM Build Pipeline
+## WASM Build Pipeline
 
-The following npm scripts are defined (or should be added) for the Rust WASM backend:
+The following npm scripts are defined (or should be added) for the AssemblyScript WASM backend:
 
-### `npm run build:wasm:rust`
+### `npm run build:wasm`
 
-Runs `cargo build` via `wasm-pack` for the Rust WASM workspace at `src/wasm-rust/`.
+Compiles the AssemblyScript WASM workspace at `assembly/` via `asc`.
 
 ```bash
 # Equivalent command
-wasm-pack build src/wasm-rust/crates/mathjs-wasm --target web --out-dir lib/wasm --release
+asc assembly/src/index.ts --target release --outFile lib/wasm/mathjs.wasm
 ```
 
 Output: `lib/wasm/mathjs.wasm` (669 KB release build, 826 exports)
 
-### `npm run build:wasm:all`
-
-Builds both the AssemblyScript WASM (retained for benchmarking) and the Rust WASM backend in sequence:
-
-```bash
-# Equivalent
-npm run build:wasm && npm run build:wasm:rust
-```
-
-Output:
-
-- `lib/wasm/mathjs-as.wasm` — AssemblyScript binary
-- `lib/wasm/mathjs.wasm` — Rust binary (primary)
-
 ### `npm run bench:wasm`
 
-Runs the three-way benchmark comparing Rust WASM vs AssemblyScript WASM vs JavaScript for a standard suite of operations:
+Runs the benchmark comparing AssemblyScript WASM vs JavaScript for a standard suite of operations:
 
 ```bash
 # Equivalent
-npx ts-node test/benchmark/wasm-three-way.bench.ts
+npx ts-node test/benchmark/wasm.bench.ts
 ```
 
 **Benchmark suite coverage**:
@@ -1487,8 +1473,7 @@ npx ts-node test/benchmark/wasm-three-way.bench.ts
 backend    time(ms)  speedup
 ---------  --------  -------
 js         20.0      1.0x
-wasm-as    4.1       4.9x
-wasm-rust  2.7       7.4x
+wasm       2.7       7.4x
 ```
 
 ---
