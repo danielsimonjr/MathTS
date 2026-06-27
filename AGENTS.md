@@ -22,7 +22,7 @@ human-facing overview.
 | Typecheck all | `npm run typecheck` | turbo; **green baseline = 28/28, 0 errors** |
 | Test all | `npm run test` | vitest via turbo |
 | Lint / format | `npm run lint` · `npm run format` | eslint + prettier |
-| Coverage | `npm run test:coverage` | whitelist excludes dormant code |
+| Coverage | `npm run test:coverage` | measurement scoped to an include-list in vitest.config.ts |
 | One package | `npx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` | |
 | One test file | `npx vitest run <path>` | e.g. `core/tests/utils.test.ts` |
 | WASM (AS) | `npm run build:wasm` | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |

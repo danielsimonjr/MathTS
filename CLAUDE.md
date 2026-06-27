@@ -19,7 +19,7 @@ It also includes a Scientific Workbook system (`.mtsw` files) for reactive YAML-
 npm run build               # turbo run build (all packages)
 npm run dev                 # turbo run dev (watch mode, all packages)
 npm run test                # turbo run test (all packages)
-npm run test:coverage       # turbo run test:coverage (with whitelist for dormant code)
+npm run test:coverage       # turbo run test:coverage (coverage scoped to an include-list in vitest.config.ts)
 npm run typecheck           # turbo run typecheck (all packages)
 npm run lint                # turbo run lint (all packages)
 npm run format              # prettier --write all files
@@ -46,7 +46,7 @@ cd matrix && npx vitest run
 # Typecheck a single package:
 cd functions && npx tsc --noEmit
 
-# Coverage (uses whitelist in root vitest.config.ts to exclude dormant code).
+# Coverage measurement is scoped to an explicit include-list in root vitest.config.ts.
 # Prefer the npm script — it goes through Turbo for caching:
 npm run test:coverage
 ```
@@ -234,7 +234,7 @@ What this means for the codebase today:
 - The **dead** synced remnant (unexported AND unreachable AND untested) was **deleted on 2026-06-27**: 455 files / ~58.6k LOC across `functions/` + `core/` (the bulk being the dead `functions/src/expression/` mirror). See "Code in `functions/`" above.
 - Future upstream additions require manual JS→TS porting, not syncing — the porting workspace lives in `tools/mathjs-port/` (one-off scaffolding/drafts; not a workspace member, not part of the build).
 
-The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `npm run typecheck` reports 0 errors (28/28 tasks), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. `functions/tsconfig.json` now has `strict: true` (all packages' tsconfigs that extend `tsconfig.base.json` inherit strict; `functions` no longer opts out). The former ~430 strict violations were fixed honestly in the 2026-06-27 strict-flip (see the functions-layer note above for the root cause).
+The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `npm run typecheck` reports 0 errors (28/28 tasks), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. All packages compile under `strict: true` (see the functions-layer note above for the 2026-06-27 strict-flip root cause).
 
 ## Known Issues
 
