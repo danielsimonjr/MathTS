@@ -106,6 +106,13 @@ export interface MathTSTyped extends Omit<TypedInstance, never> {
   (
     ...args: Array<string | SignatureRecord | TypedFunction | (SignatureImpl & { signature: string })>
   ): TypedFunction;
+
+  // `referTo`/`referToSelf` callbacks *return* the implementation typed-function
+  // stores for a signature. Like the call signatures above, that returned impl
+  // is an input position, so it accepts concrete-typed implementations via
+  // `SignatureImpl` rather than the published `SignatureFunction`.
+  referToSelf: (callback: (self: TypedFunction) => SignatureImpl) => ReferToSelf;
+  referTo: (...args: [...string[], (...fns: SignatureFunction[]) => SignatureImpl]) => ReferTo;
 }
 
 /**

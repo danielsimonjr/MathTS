@@ -97,13 +97,19 @@ export interface TypedFunction extends Function {
   signatures?: TypedSignatures;
   /** Check if a value is a typed function */
   isTypedFunction: (value: unknown) => value is TypedFunction;
+  // The callback's *returned* implementation is stored by typed-function and
+  // later called with validated args. Typed as `(...args: never[]) => unknown`
+  // (the correct top-type for "any function" in an input position) so that
+  // implementations declared with concrete parameter types are accepted under
+  // `strictFunctionTypes` (where function params are contravariant — an
+  // `unknown[]` param list would reject every concrete-typed impl).
   referToSelf: (
-    callback: (self: TypedFunction) => (...args: unknown[]) => unknown
+    callback: (self: TypedFunction) => (...args: never[]) => unknown
   ) => (...args: unknown[]) => unknown;
   referTo: (
     ...signatureNames: string[]
   ) => (
-    callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: unknown[]) => unknown
+    callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
   ) => (...args: unknown[]) => unknown;
   create: () => TypedFunction;
   addTypes: (types: TypeDefinition[]) => void;
