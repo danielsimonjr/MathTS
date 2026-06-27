@@ -111,3 +111,28 @@ describe('WorkbookExecutor - runReport', () => {
     expect(report.ok).toBe(true);
   });
 });
+
+describe('WorkbookExecutor - runReport({ only })', () => {
+  it('runs only the target cell and its transitive dependencies', async () => {
+    const wb = makeWorkbook([
+      { id: 'a', type: 'code', content: '10' },
+      { id: 'b', type: 'code', content: 'a * 2', dependsOn: ['a'] },
+      { id: 'unrelated', type: 'code', content: '999' },
+    ]);
+    const report = await new WorkbookExecutor(wb).runReport({ only: 'b' });
+    const ids = report.cells.map((c) => c.id).sort();
+    expect(ids).toEqual(['a', 'b']);
+    expect(report.cells.find((c) => c.id === 'unrelated')).toBeUndefined();
+    expect(report.cells.find((c) => c.id === 'b')!.output).toBe(20);
+    expect(report.ok).toBe(true);
+  });
+
+  it('runs everything when no target is given (back-compat)', async () => {
+    const wb = makeWorkbook([
+      { id: 'a', type: 'code', content: '1' },
+      { id: 'b', type: 'code', content: '2' },
+    ]);
+    const report = await new WorkbookExecutor(wb).runReport();
+    expect(report.cells.map((c) => c.id).sort()).toEqual(['a', 'b']);
+  });
+});

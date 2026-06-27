@@ -3,7 +3,7 @@
  */
 
 import type { Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult } from './types';
-import { buildDependencyGraph, getDependents, detectCycles } from './graph';
+import { buildDependencyGraph, getDependents, detectCycles, getAncestors } from './graph';
 import { evaluate } from '@danielsimonjr/mathts-functions';
 import { parseYamlHardened, assertNoPollution } from './yaml-safe';
 
@@ -202,7 +202,7 @@ export class WorkbookExecutor {
    * failure. A dependency cycle is refused up front. Test cells are classified
    * as `pass`/`fail`/`error`; all other cells as `success`/`error`.
    */
-  async runReport(): Promise<RunResult> {
+  async runReport(options: { only?: string } = {}): Promise<RunResult> {
     const cells: CellResult[] = [];
 
     const cycles = detectCycles(this.graph);
@@ -217,7 +217,15 @@ export class WorkbookExecutor {
       return { cells, ok: false };
     }
 
-    for (const cellId of this.graph.executionOrder) {
+    // When `only` is set, restrict execution to that cell's ancestor closure
+    // (the cell plus everything it transitively depends on), in topo order.
+    let order = this.graph.executionOrder;
+    if (options.only !== undefined) {
+      const allowed = new Set(getAncestors(this.graph, options.only));
+      order = order.filter((id) => allowed.has(id));
+    }
+
+    for (const cellId of order) {
       const cell = this.workbook.cells.find((c) => c.id === cellId);
       if (!cell) continue;
 

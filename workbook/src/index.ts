@@ -21,13 +21,23 @@ export type {
 export { parseWorkbook, serializeWorkbook, stripOutputs, detectCellType } from './parser';
 
 // Dependency graph
-export { buildDependencyGraph, topologicalSort, getDependents, detectCycles, toMermaid } from './graph';
+export {
+  buildDependencyGraph,
+  topologicalSort,
+  getDependents,
+  detectCycles,
+  getAncestors,
+  toMermaid,
+} from './graph';
 
 // Executor
 export { WorkbookExecutor, createExecutor } from './executor';
 
 // Result formatting
 export { formatResult } from './formatter';
+
+// Machine contract
+export { SCHEMA_VERSION } from './contract';
 
 // Version
 export const VERSION = '0.1.0';

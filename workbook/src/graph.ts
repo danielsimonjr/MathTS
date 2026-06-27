@@ -88,6 +88,28 @@ export function getDependents(graph: DependencyGraph, cellId: string): string[] 
 }
 
 /**
+ * All transitive dependencies of `id` plus `id` itself (its ancestor closure).
+ * Used to run a single cell together with everything it needs. Cycle-safe via
+ * a visited set; returns `[]` if `id` is not in the graph.
+ */
+export function getAncestors(graph: DependencyGraph, id: string): string[] {
+  const result = new Set<string>();
+
+  function visit(nodeId: string): void {
+    if (result.has(nodeId)) return;
+    const node = graph.nodes.get(nodeId);
+    if (!node) return;
+    result.add(nodeId);
+    for (const dep of node.dependencies) visit(dep);
+  }
+
+  visit(id);
+  // Return in topological (dependency-first) order so external callers get a
+  // runnable sequence; `executionOrder` is the canonical topo order.
+  return graph.executionOrder.filter((nodeId) => result.has(nodeId));
+}
+
+/**
  * Render the dependency graph as a Mermaid `graph TD` diagram.
  *
  * Cell ids are validated identifiers (`[A-Za-z_][A-Za-z0-9_]*`), so they are

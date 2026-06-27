@@ -47,6 +47,11 @@ describe('workbook/src/index.ts – package entry smoke test', () => {
     expect(typeof wb.detectCellType).toBe('function');
   });
 
+  it('exports getAncestors and the SCHEMA_VERSION contract constant', () => {
+    expect(typeof wb.getAncestors).toBe('function');
+    expect(wb.SCHEMA_VERSION).toEqual({ major: 1, minor: 0 });
+  });
+
   it('type-only exports are importable (compile-time check)', () => {
     type _CheckWorkbook = Workbook;
     type _CheckCell = Cell;

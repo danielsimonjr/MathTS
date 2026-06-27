@@ -75,13 +75,137 @@ describe('cli run', () => {
     expect(r.stdout).toContain('a (code): 5');
   });
 
-  it('should emit valid JSON and still exit non-zero with --json on failure', async () => {
+  it('should emit the envelope and still exit non-zero with --json on failure', async () => {
     const wb = 'cells:\n  - code: "5"\n    id: a\n  - test: "a == 9"\n    id: checkA\n    depends_on: [a]';
     const r = await dispatch(['run', fixture(wb), '--json']);
     expect(r.exitCode).toBe(1);
-    const parsed = JSON.parse(r.stdout);
-    expect(parsed.ok).toBe(false);
-    expect(parsed.cells.find((c: { id: string }) => c.id === 'checkA').status).toBe('fail');
+    const env = JSON.parse(r.stdout);
+    expect(env.schemaVersion).toEqual({ major: 1, minor: 0 });
+    expect(env.command).toBe('run');
+    expect(env.ok).toBe(false);
+    expect(env.problems.length).toBeGreaterThan(0);
+    expect(env.data.cells.find((c: { id: string }) => c.id === 'checkA').status).toBe('fail');
+  });
+});
+
+describe('cli run --cell', () => {
+  const WB = [
+    'cells:',
+    '  - code: "10"',
+    '    id: a',
+    '  - code: "a * 2"',
+    '    id: b',
+    '    depends_on: [a]',
+    '  - code: "999"',
+    '    id: unrelated',
+  ].join('\n');
+
+  it('runs only the target cell and its transitive deps', async () => {
+    const r = await dispatch(['run', fixture(WB), '--cell', 'b', '--json']);
+    expect(r.exitCode).toBe(0);
+    const env = JSON.parse(r.stdout);
+    const ids = env.data.cells.map((c: { id: string }) => c.id).sort();
+    expect(ids).toEqual(['a', 'b']);
+  });
+
+  it('errors on an unknown cell id', async () => {
+    const r = await dispatch(['run', fixture(WB), '--cell', 'ghost', '--json']);
+    expect(r.exitCode).toBe(1);
+    const env = JSON.parse(r.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.problems.join(' ')).toContain('ghost');
+  });
+});
+
+describe('cli describe', () => {
+  const WB = 'cells:\n  - code: "1"\n    id: a\n    output: 1\n  - code: "a+1"\n    id: b\n    depends_on: [a]';
+
+  it('emits the structured document envelope with cells, outputs, and graph edges', async () => {
+    const r = await dispatch(['describe', fixture(WB), '--json']);
+    expect(r.exitCode).toBe(0);
+    const env = JSON.parse(r.stdout);
+    expect(env.command).toBe('describe');
+    expect(env.ok).toBe(true);
+    const a = env.data.cells.find((c: { id: string }) => c.id === 'a');
+    expect(a).toMatchObject({ type: 'code', content: '1', output: 1 });
+    expect(env.data.graph.edges).toContainEqual({ from: 'a', to: 'b' });
+  });
+
+  it('returns ok:false with problems on an invalid workbook (still an envelope)', async () => {
+    const r = await dispatch(['describe', fixture('cells:\n  - code: "1"\n    id: bad-id'), '--json']);
+    expect(r.exitCode).toBe(1);
+    const env = JSON.parse(r.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.problems.length).toBeGreaterThan(0);
+  });
+});
+
+describe('cli validate --json', () => {
+  it('carries the verdict in ok/problems', async () => {
+    const okEnv = JSON.parse((await dispatch(['validate', fixture(PASSING), '--json'])).stdout);
+    expect(okEnv.ok).toBe(true);
+    expect(okEnv.data.cellCount).toBeGreaterThan(0);
+
+    const badEnv = JSON.parse(
+      (await dispatch(['validate', fixture('cells:\n  - code: "1"'), '--json'])).stdout
+    );
+    expect(badEnv.ok).toBe(false);
+    expect(badEnv.problems.length).toBeGreaterThan(0);
+  });
+});
+
+describe('cli capabilities / templates', () => {
+  it('capabilities --json reports features and cell types', async () => {
+    const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
+    expect(env.command).toBe('capabilities');
+    expect(env.data.features.json).toBe(true);
+    expect(env.data.cellTypes.supported).toContain('code');
+  });
+
+  it('templates --json lists a template that `new` accepts', async () => {
+    const env = JSON.parse((await dispatch(['templates', '--json'])).stdout);
+    const names = env.data.templates.map((t: { name: string }) => t.name);
+    expect(names).toContain('basic');
+  });
+});
+
+describe('cli graph has no --json', () => {
+  it('returns a parseable envelope error (directing to describe) when --json is passed', async () => {
+    const r = await dispatch(['graph', fixture(PASSING), '--json']);
+    expect(r.exitCode).toBe(1);
+    const env = JSON.parse(r.stdout);
+    expect(env.command).toBe('graph');
+    expect(env.ok).toBe(false);
+    expect(env.problems.join(' ')).toContain('describe');
+  });
+
+  it('still emits human text without --json', async () => {
+    const r = await dispatch(['graph', fixture(PASSING)]);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('checkA: [a]');
+  });
+});
+
+describe('cli envelope robustness', () => {
+  it('describe does not crash on a circular output (YAML anchor) — still emits an envelope', async () => {
+    const wb = 'cells:\n  - code: "1"\n    id: a\n    output: &o\n      r: *o';
+    const r = await dispatch(['describe', fixture(wb), '--json']);
+    let env: unknown;
+    expect(() => {
+      env = JSON.parse(r.stdout);
+    }).not.toThrow();
+    expect((env as { command: string }).command).toBe('describe');
+    expect(JSON.stringify(env)).toContain('[Circular]');
+  });
+
+  it('every command advertised by capabilities is routable (no drift)', async () => {
+    const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
+    for (const name of env.data.commands as string[]) {
+      // No extra arg → each command hits its own usage/output path, never the
+      // "Unknown command" branch, and (importantly) `new` creates no file.
+      const r = await dispatch([name]);
+      expect(r.stderr).not.toContain('Unknown command');
+    }
   });
 });
 

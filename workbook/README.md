@@ -17,14 +17,22 @@ npm install @danielsimonjr/mathts-workbook
 # Exits non-zero if any cell errors or any test assertion fails.
 mtsw run example.mtsw
 mtsw run example.mtsw -v        # also print the execution event stream
-mtsw run example.mtsw --json    # machine-readable output on stdout
+mtsw run example.mtsw --json    # machine-readable envelope on stdout
+mtsw run example.mtsw -c gauss  # run one cell + its transitive deps (stateless)
+
+# Describe the structured document model (cells, outputs, dependency graph).
+mtsw describe example.mtsw --json
 
 # Validate structure: ids, dependency references, and cycles.
-mtsw validate example.mtsw
+mtsw validate example.mtsw [--json]
 
-# Print the dependency graph.
+# Print the dependency graph (human only; use `describe --json` for structured data).
 mtsw graph example.mtsw                 # text adjacency
 mtsw graph example.mtsw -f mermaid      # Mermaid `graph TD`
+
+# Engine introspection (for tooling / GUIs).
+mtsw capabilities --json                # version, supported cell types, feature flags
+mtsw templates --json                   # available `new` templates
 
 # Scaffold a new workbook (<name>.mtsw) from a template.
 mtsw new my-notebook                    # basic template; refuses to overwrite
@@ -39,6 +47,17 @@ mtsw run example.mtsw --write
 ```
 
 Diagnostics and errors are written to stderr; results (including `--json`) go to stdout, so the exit code can be used in scripts independently of the output.
+
+**Machine contract (`--json`).** Every `--json` command emits one envelope on stdout:
+`{ schemaVersion: {major,minor}, command, ok, data, problems }`. The envelope is
+emitted even on failure (and is cycle/BigInt-safe, so it never crashes on
+pathological data); the exit code mirrors `ok` for shells, but tooling/GUIs
+should read `ok` and treat a missing/unparseable envelope as the only transport
+error. Compatibility rule: ignore unknown fields when `major` matches; refuse on
+a `major` mismatch. `run --cell <id>` is stateless (it recomputes the target's
+transitive deps each call; `run --cell --write` persists only the executed
+cells). This is the contract a GUI binds to; a persistent `serve` mode (streaming
+events, incremental re-execution) is planned.
 
 **Saving / round-trip.** `serializeWorkbook` (and the write commands above) round-trips a workbook through the parser: structure is preserved exactly, and persisted `output` values round-trip best-effort (plain numbers/strings/arrays/objects exactly; exotic types to their plain shape). All writes are **atomic** (temp file + rename). Note that any write path is parse→serialize and therefore **drops YAML comments and re-orders keys** — a CST-preserving in-place rewrite is a future enhancement.
 
