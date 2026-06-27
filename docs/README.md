@@ -168,17 +168,6 @@ items they still track.
 | [roadmap/WASM_OPTIMIZATION_EVALUATION.md](roadmap/WASM_OPTIMIZATION_EVALUATION.md) | Implementation complete (2026-04-10). |
 | [roadmap/WASM_PAIRING_GAP_PLAN.md](roadmap/WASM_PAIRING_GAP_PLAN.md) | Executed 2026-06-25. |
 
-### Migration: Rust → AssemblyScript — COMPLETE (2026-06-26) 🗄️
-| Doc | Status |
-| --- | --- |
-| [roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md](roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md) | Completion record. |
-| [roadmap/RUST_TO_AS_MIGRATION_PLAN.md](roadmap/RUST_TO_AS_MIGRATION_PLAN.md) | Migration plan (complete). |
-| [roadmap/RUST_TO_AS_MIGRATION_EVAL.md](roadmap/RUST_TO_AS_MIGRATION_EVAL.md) | Parity evaluation (complete). |
-| [roadmap/RUST_TO_AS_MIGRATION_PHASE1.md](roadmap/RUST_TO_AS_MIGRATION_PHASE1.md) | Phase 1 (complete). |
-| [roadmap/RUST_TO_AS_MIGRATION_PHASE5.md](roadmap/RUST_TO_AS_MIGRATION_PHASE5.md) | Phase 5 (complete). |
-
-> Data file: `roadmap/RUST_WASM_PARITY.json`.
-
 ## 12. Planning ✅/🗄️
 
 | Doc | Status |

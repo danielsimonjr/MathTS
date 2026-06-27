@@ -76,16 +76,13 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo
 Structure**. Don't duplicate it here — reference it.
 
-> **✅ WASM backend (migration COMPLETE 2026-06-26).** AssemblyScript is the
+> **✅ WASM backend.** AssemblyScript is the
 > **sole WASM backend** for the whole repo. Both `functions` and `matrix` load
 > the AssemblyScript binary `mathts-as.wasm` (source `assembly/src/`); dispatch is
-> **AS→JS**. The Rust→AssemblyScript migration is finished — the Rust toolchain
-> (the `wasm-rust/` Cargo workspace, `build:wasm:rust`/`build:wasm:all`/`bench:wasm`
-> scripts, the dead `MatrixWasmBridge`, and the `MATHTS_WASM_BACKEND=rust` loader
-> opt-in) has been removed. SHA-384 integrity verification of the AS binary is
+> **AS→JS**. The legacy native-WASM path and its toolchain have been removed.
+> SHA-384 integrity verification of the AS binary is
 > retained. A few kernels (poly fits, Airy Ai/Bi, argsort/rank) deliberately stay
-> on JS where their AS kernels are still being stabilized. See
-> `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md`.
+> on JS where their AS kernels are still being stabilized.
 
 ---
 

@@ -217,9 +217,8 @@ resolves per-op thresholds via `thresholdByOp`.
 ### WASM backend
 
 The stack is **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the
-**sole WASM backend** for the whole repo as of the completed Rust→AS migration
-(2026-06-26). Both `functions` and `matrix` load `mathts-as.wasm` and dispatch is
-**AS→JS**.
+**sole WASM backend** for the whole repo. Both `functions` and `matrix` load
+`mathts-as.wasm` and dispatch is **AS→JS**.
 
 | Backend       | Class | Source          | Binary           | Use                                                                              |
 | ------------- | ----- | --------------- | ---------------- | -------------------------------------------------------------------------------- |

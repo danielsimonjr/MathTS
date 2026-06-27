@@ -26,8 +26,7 @@ npm run format              # prettier --write all files
 npm run format:check        # prettier --check (CI)
 
 # WASM builds. AssemblyScript is the SOLE WASM backend for the whole repo
-# (functions + matrix). The Rust→AS migration is COMPLETE (2026-06-26) and the
-# Rust toolchain (`wasm-rust/`) has been removed.
+# (functions + matrix).
 npm run build:wasm          # AssemblyScript build (assembly/ package) — the only WASM build
 npm run test:wasm           # AssemblyScript WASM tests
 npm run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)

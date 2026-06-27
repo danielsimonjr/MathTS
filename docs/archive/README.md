@@ -21,19 +21,17 @@ closed sprint cycles).
 - [2026-03-05-ise-guided-discovery-design.md](plans/2026-03-05-ise-guided-discovery-design.md)
 - [2026-03-05-ise-workbench-design.md](plans/2026-03-05-ise-workbench-design.md)
 - [2026-03-05-ise-workbench-plan.md](plans/2026-03-05-ise-workbench-plan.md)
-- [2026-03-11-assemblyscript-to-rust-wasm-design.md](plans/2026-03-11-assemblyscript-to-rust-wasm-design.md)
 - [2026-03-11-wasm-opportunity-audit.md](plans/2026-03-11-wasm-opportunity-audit.md)
 - [2026-04-03-mathematical-function-expansion-roadmap.md](plans/2026-04-03-mathematical-function-expansion-roadmap.md)
 - [2026-04-05-new-math-functions-design.md](plans/2026-04-05-new-math-functions-design.md)
 
 ## superpowers-plans/ — agent execution notes
 
-One-off execution runs that have shipped (integration, Rust-WASM migration, WASM optimization).
+One-off execution runs that have shipped (integration, WASM optimization).
 
 - [2026-04-03-fix-all-preexisting-issues.md](superpowers-plans/2026-04-03-fix-all-preexisting-issues.md)
 - [2026-04-03-integration-plan.md](superpowers-plans/2026-04-03-integration-plan.md)
 - [2026-04-03-remaining-integration.md](superpowers-plans/2026-04-03-remaining-integration.md)
-- [2026-04-10-rust-wasm-migration.md](superpowers-plans/2026-04-10-rust-wasm-migration.md)
 - [2026-04-10-wasm-optimization.md](superpowers-plans/2026-04-10-wasm-optimization.md)
 
 ## refactoring/ — completed refactoring reports

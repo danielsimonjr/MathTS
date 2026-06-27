@@ -28,10 +28,10 @@
 | Sync 190/207 mathjs functions (17 matrix ops deferred)                                         | Done — 190 of 207               | 2026-04-10 |
 | typed-function improvements (Symbol-based type ID, safe conversions)                           | Done                            | 2026-04-05 |
 | workerpool improvements (SharedArrayBuffer, warmup, metrics)                                   | Done                            | 2026-04-05 |
-| Rust WASM full migration (AS → Rust, 1,017 exports, full AS parity)                            | Done                            | 2026-04-10 |
+| WASM acceleration expansion (1,000+ exports, full AS parity)                                   | Done                            | 2026-04-10 |
 | WASM optimization (75 high+medium functions)                                                   | Done                            | 2026-04-10 |
 | 9 matrix operations (characteristicPolynomial, cholesky, jordanForm, etc.)                     | Done                            | 2026-04-10 |
-| Rust WASM integration (RustWasmLoader, BackendManager routing)                                 | Done                            | 2026-04-05 |
+| WASM backend integration (WASM loader, BackendManager routing)                                 | Done                            | 2026-04-05 |
 | Expression compiler/evaluator (16 node types, evaluate())                                      | Done                            | 2026-04-03 |
 | Matrix bridge (MathJSDenseMatrix, MathJSSparseMatrix CSC)                                      | Done                            | 2026-04-03 |
 | BigNumber math methods (22 Taylor series)                                                      | Done                            | 2026-04-03 |
@@ -57,7 +57,6 @@
 | Plan                                | Location                                                    |
 | ----------------------------------- | ----------------------------------------------------------- |
 | mathjs Sync Roadmap (207 functions) | docs/roadmap/MATHJS_SYNC_ROADMAP.md                         |
-| Rust WASM Migration Design          | docs/archive/plans/2026-03-11-assemblyscript-to-rust-wasm-design.md |
 | Scientific Calculator Plan          | docs/archive/plans/2026-03-04-scientific-calculator-plan.md         |
 | ISE Workbench Plan (16 tasks)       | docs/archive/plans/2026-03-05-ise-workbench-plan.md                 |
 | Deno Notebook Option                | docs/archive/plans/2026-03-05-deno-notebook-option.md               |
