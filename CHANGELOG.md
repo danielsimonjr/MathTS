@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pre-existing strict-mode errors honestly (no `any`/`@ts-ignore`/
   `@ts-expect-error`; only narrow, commented assertions where provably safe).
   Behavior-preserving — full `functions` suite unchanged (2902 pass / 41 skip).
+- Flipped `expression/tsconfig.json` to `strict: true` (0 errors — its strict
+  violations were already resolved at root while fixing the `functions`
+  path-mapped sources). **All packages now compile under `strict: true`**
+  (monorepo-wide); no package overrides `strict` to `false` anymore.
 - **Root cause (≈300 of the errors):** typed-function dispatch. The published
   `SignatureFunction` (`(...args: unknown[]) => unknown`) is correct for
   output/internal positions but wrong as an *input* type when declaring

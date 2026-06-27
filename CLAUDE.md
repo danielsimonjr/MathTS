@@ -214,6 +214,7 @@ Three hard rules from the 2026-05-01 security release. Future edits must preserv
 
 - `tsconfig.base.json`: strict mode, ES2022 target, ESNext modules, bundler resolution
 - Each package extends the base config
+- **All packages compile under `strict: true`** (as of 2026-06-27 — `functions` and `expression` were the last holdouts; no package overrides `strict` to `false`).
 - Import extensions must be `.js` (ESM resolution) — **exception**: `tensor/src/` uses bare relative imports (`from './Tensor'`); tsup bundles it before runtime so the rule isn't enforced there. Match existing style per package.
 
 ## Code Style
