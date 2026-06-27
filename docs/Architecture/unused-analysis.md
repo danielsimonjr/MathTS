@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 473
+- **Potentially unused exports**: 471
 
 ## Potentially Unused Files
 
@@ -800,14 +800,9 @@ These exports are not imported by any other file in the codebase:
 
 - `memorySizeBytes` (function)
 
-### `workbook/src/graph.ts`
-
-- `detectCycles` (function)
-
 ### `workbook/src/types.ts`
 
 - `WorkbookMetadata` (interface)
-- `RuntimeConfig` (interface)
 - `ExecutionMode` (type)
 
 ### `assembly/src/types/complex.ts`

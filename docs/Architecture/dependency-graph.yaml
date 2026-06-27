@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: "2026-06-27"
-  totalFiles: 562
+  totalFiles: 564
   totalModules: 69
-  totalExports: 3558
+  totalExports: 3568
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -17431,10 +17431,7 @@ modules:
   workbook:
     workbook/src/executor.ts:
       description: Workbook executor
-      externalDependencies:
-        - package: yaml
-          imports:
-            - parse
+      externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./types
@@ -17443,11 +17440,18 @@ modules:
             - Cell
             - WorkbookEvent
             - DependencyGraph
+            - CellResult
+            - RunResult
           typeOnly: true
         - file: ./graph
           imports:
             - buildDependencyGraph
             - getDependents
+            - detectCycles
+        - file: ./yaml-safe
+          imports:
+            - parseYamlHardened
+            - assertNoPollution
       exports:
         - createExecutor
         - WorkbookExecutor
@@ -17455,6 +17459,15 @@ modules:
         - WorkbookExecutor
       functions:
         - createExecutor
+    workbook/src/formatter.ts:
+      description: Human-readable rendering of cell results for terminal output.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - formatResult
+      functions:
+        - formatResult
     workbook/src/graph.ts:
       description: Dependency graph management
       externalDependencies: []
@@ -17470,11 +17483,13 @@ modules:
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - toMermaid
         - detectCycles
       functions:
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - toMermaid
         - detectCycles
     workbook/src/index.ts:
       description: Scientific workbook runtime
@@ -17486,52 +17501,77 @@ modules:
             - parseWorkbook
             - serializeWorkbook
             - stripOutputs
+            - detectCellType
           reExport: true
         - file: ./graph
           imports:
             - buildDependencyGraph
             - topologicalSort
             - getDependents
+            - detectCycles
+            - toMermaid
           reExport: true
         - file: ./executor
           imports:
             - WorkbookExecutor
             - createExecutor
           reExport: true
+        - file: ./formatter
+          imports:
+            - formatResult
+          reExport: true
       exports:
         - parseWorkbook
         - serializeWorkbook
         - stripOutputs
+        - detectCellType
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - detectCycles
+        - toMermaid
         - WorkbookExecutor
         - createExecutor
+        - formatResult
         - VERSION
       reExported:
         - parseWorkbook
         - serializeWorkbook
         - stripOutputs
+        - detectCellType
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - detectCycles
+        - toMermaid
         - WorkbookExecutor
         - createExecutor
+        - formatResult
       constants:
         - VERSION
     workbook/src/parser.ts:
       description: Workbook YAML parser
-      externalDependencies: []
+      externalDependencies:
+        - package: yaml
+          imports:
+            - stringify
       nodeDependencies: []
       internalDependencies:
+        - file: ./yaml-safe
+          imports:
+            - parseYamlHardened
+            - findPollutionKeys
         - file: ./types
           imports:
             - Workbook
             - ParseResult
             - CellType
+            - Cell
+            - RuntimeConfig
           typeOnly: true
       exports:
         - detectCellType
+        - CELL_TYPE_KEYS
         - parseWorkbook
         - serializeWorkbook
         - stripOutputs
@@ -17552,8 +17592,26 @@ modules:
         - Workbook
         - ParseResult
         - WorkbookEvent
+        - CellResult
+        - RunResult
         - DependencyNode
         - DependencyGraph
+    workbook/src/yaml-safe.ts:
+      description: Hardened YAML parsing shared by the workbook parser (document load) and the
+      externalDependencies:
+        - package: yaml
+          imports:
+            - parse
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - parseYamlHardened
+        - findPollutionKeys
+        - assertNoPollution
+      functions:
+        - parseYamlHardened
+        - findPollutionKeys
+        - assertNoPollution
   assembly/algebra:
     assembly/src/algebra/decomposition.ts:
       description: "Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant."
@@ -20328,10 +20386,12 @@ dependencyGraph:
     - name: Workbook
       files:
         - workbook/src/executor.ts
+        - workbook/src/formatter.ts
         - workbook/src/graph.ts
         - workbook/src/index.ts
         - workbook/src/parser.ts
         - workbook/src/types.ts
+        - workbook/src/yaml-safe.ts
     - name: Assembly/algebra
       files:
         - assembly/src/algebra/decomposition.ts
@@ -20372,19 +20432,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 562
+  totalTypeScriptFiles: 564
   totalModules: 69
-  totalLinesOfCode: 148061
-  totalExports: 3558
+  totalLinesOfCode: 148455
+  totalExports: 3568
   totalClasses: 49
-  totalInterfaces: 313
-  totalFunctions: 1350
+  totalInterfaces: 315
+  totalFunctions: 1355
   totalTypeGuards: 131
   totalEnums: 0
   totalConstants: 1124
-  totalReExports: 1077
+  totalReExports: 1081
   totalTypeOnlyImports: 356
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 473
+  unusedExportsCount: 471

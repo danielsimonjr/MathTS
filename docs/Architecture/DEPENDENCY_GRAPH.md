@@ -154,7 +154,7 @@ The codebase is organized into the following modules:
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
-- **workbook**: 5 files
+- **workbook**: 7 files
 - **assembly/algebra**: 1 file
 - **assembly**: 7 files
 - **assembly/ops**: 18 files
@@ -170,11 +170,11 @@ The codebase is organized into the following modules:
 |---------|------------|----------------|-----------------|
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 2 | 3 |
-| `@danielsimonjr/mathts-core` (`core/`) | (none) | 13 | 86 |
+| `@danielsimonjr/mathts-core` (`core/`) | (none) | 13 | 12 |
 | `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 43 | 5 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
-| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 375 | 416 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 375 | 35 |
 | `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 47 | 381 |
 | `@danielsimonjr/mathts-parser` (`parser/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
 | `@danielsimonjr/mathts-units` (`units/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
@@ -187,7 +187,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
 | `@danielsimonjr/mathts-signal` (`signal/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
 | `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 11 | 4 |
-| `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 5 | 2 |
+| `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 7 | 2 |
 | `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 27 | 3 |
 | `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 2 | 1 |
 
@@ -8256,20 +8256,23 @@ graph LR
 
 ### `workbook/src/executor.ts` - Workbook executor
 
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `yaml` | `parse` |
-
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types` | `Workbook, Cell, WorkbookEvent, DependencyGraph` | Import (type-only) |
-| `./graph` | `buildDependencyGraph, getDependents` | Import |
+| `./types` | `Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult` | Import (type-only) |
+| `./graph` | `buildDependencyGraph, getDependents, detectCycles` | Import |
+| `./yaml-safe` | `parseYamlHardened, assertNoPollution` | Import |
 
 **Exports:**
 - Classes: `WorkbookExecutor`
 - Functions: `createExecutor`
+
+---
+
+### `workbook/src/formatter.ts` - Human-readable rendering of cell results for terminal output.
+
+**Exports:**
+- Functions: `formatResult`
 
 ---
 
@@ -8281,7 +8284,7 @@ graph LR
 | `./types` | `Cell, DependencyGraph, DependencyNode` | Import (type-only) |
 
 **Exports:**
-- Functions: `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`
+- Functions: `buildDependencyGraph`, `topologicalSort`, `getDependents`, `toMermaid`, `detectCycles`
 
 ---
 
@@ -8290,22 +8293,29 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./parser` | `parseWorkbook, serializeWorkbook, stripOutputs` | Re-export |
-| `./graph` | `buildDependencyGraph, topologicalSort, getDependents` | Re-export |
+| `./parser` | `parseWorkbook, serializeWorkbook, stripOutputs, detectCellType` | Re-export |
+| `./graph` | `buildDependencyGraph, topologicalSort, getDependents, detectCycles, toMermaid` | Re-export |
 | `./executor` | `WorkbookExecutor, createExecutor` | Re-export |
+| `./formatter` | `formatResult` | Re-export |
 
 **Exports:**
 - Constants: `VERSION`
-- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `WorkbookExecutor`, `createExecutor`
+- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `detectCellType`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`, `toMermaid`, `WorkbookExecutor`, `createExecutor`, `formatResult`
 
 ---
 
 ### `workbook/src/parser.ts` - Workbook YAML parser
 
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `yaml` | `stringify` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types` | `Workbook, ParseResult, CellType` | Import (type-only) |
+| `./yaml-safe` | `parseYamlHardened, findPollutionKeys` | Import |
+| `./types` | `Workbook, ParseResult, CellType, Cell, RuntimeConfig` | Import (type-only) |
 
 **Exports:**
 - Functions: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`
@@ -8315,8 +8325,20 @@ graph LR
 ### `workbook/src/types.ts` - Workbook type definitions
 
 **Exports:**
-- Interfaces: `WorkbookMetadata`, `RuntimeConfig`, `Cell`, `Workbook`, `ParseResult`, `WorkbookEvent`, `DependencyNode`, `DependencyGraph`
+- Interfaces: `WorkbookMetadata`, `RuntimeConfig`, `Cell`, `Workbook`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `DependencyNode`, `DependencyGraph`
 - Types: `CellType`, `ExecutionMode`
+
+---
+
+### `workbook/src/yaml-safe.ts` - Hardened YAML parsing shared by the workbook parser (document load) and the
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `yaml` | `parse` |
+
+**Exports:**
+- Functions: `parseYamlHardened`, `findPollutionKeys`, `assertNoPollution`
 
 ---
 
@@ -9175,47 +9197,49 @@ graph TD
 
     subgraph Workbook
         N316[executor]
-        N317[graph]
-        N318[index]
-        N319[parser]
-        N320[types]
+        N317[formatter]
+        N318[graph]
+        N319[index]
+        N320[parser]
+        N321[types]
+        N322[yaml-safe]
     end
 
     subgraph Assembly/algebra
-        N321[decomposition]
+        N323[decomposition]
     end
 
     subgraph Assembly
-        N322[elementwise]
-        N323[index]
-        N324[poly]
-        N325[signal]
-        N326[sort]
-        N327[special]
-        N328[tridiag]
+        N324[elementwise]
+        N325[index]
+        N326[poly]
+        N327[signal]
+        N328[sort]
+        N329[special]
+        N330[tridiag]
     end
 
     subgraph Assembly/ops
-        N329[approx]
-        N330[array]
-        N331[bitwise]
-        N332[complex-array]
-        N333[complex-ops]
-        N334[curvefit]
-        N335[eig]
-        N336[fft]
-        N337[linalg]
-        N338[matrix]
-        N339[...8 more]
+        N331[approx]
+        N332[array]
+        N333[bitwise]
+        N334[complex-array]
+        N335[complex-ops]
+        N336[curvefit]
+        N337[eig]
+        N338[fft]
+        N339[linalg]
+        N340[matrix]
+        N341[...8 more]
     end
 
     subgraph Assembly/types
-        N340[complex]
+        N342[complex]
     end
 
     subgraph Compat
-        N341[index]
-        N342[shims]
+        N343[index]
+        N344[shims]
     end
 
     N2 --> N1
@@ -9302,14 +9326,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 562 |
+| Total TypeScript Files | 564 |
 | Total Modules | 69 |
-| Total Lines of Code | 148061 |
-| Total Exports | 3558 |
-| Total Re-exports | 1077 |
+| Total Lines of Code | 148455 |
+| Total Exports | 3568 |
+| Total Re-exports | 1081 |
 | Total Classes | 49 |
-| Total Interfaces | 313 |
-| Total Functions | 1350 |
+| Total Interfaces | 315 |
+| Total Functions | 1355 |
 | Total Type Guards | 131 |
 | Total Enums | 0 |
 | Type-only Imports | 356 |
