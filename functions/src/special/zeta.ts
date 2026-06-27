@@ -24,21 +24,24 @@ interface BigNumberConstructor {
 
 type NumericValue = number | BigNumberType | ComplexType;
 
+/** A scalar arithmetic op used here within the NumericValue domain. */
+type NumericFn = (...args: NumericValue[]) => NumericValue;
+
 interface ZetaDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
-  multiply: TypedFunction;
-  pow: TypedFunction;
-  divide: TypedFunction;
-  factorial: TypedFunction;
+  multiply: NumericFn;
+  pow: NumericFn;
+  divide: NumericFn;
+  factorial: NumericFn;
   equal: TypedFunction;
   smallerEq: TypedFunction;
   isBounded: TypedFunction;
   isNegative: TypedFunction;
-  gamma: TypedFunction;
-  sin: TypedFunction;
-  subtract: TypedFunction;
-  add: TypedFunction;
+  gamma: NumericFn;
+  sin: NumericFn;
+  subtract: NumericFn;
+  add: NumericFn;
   Complex?: ComplexConstructor;
   BigNumber?: BigNumberConstructor;
   pi: number | BigNumberType;

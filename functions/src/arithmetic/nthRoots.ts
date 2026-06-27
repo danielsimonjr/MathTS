@@ -66,7 +66,10 @@ export const createNthRoots = /* #__PURE__ */ factory(
       if (root % 1 !== 0) throw new Error('Root must be an integer');
       if (a === 0 || a.abs() === 0) return [new Complex(0, 0)];
       const aIsNumeric = typeof a === 'number';
-      let offset;
+      // NaN sentinel for off-axis complex values (no exact half-pi offset);
+      // (NaN + 4k)/root is NaN, so the exact-result branch below is skipped —
+      // matching the prior behaviour when `offset` was left undefined.
+      let offset = NaN;
       // determine the offset (argument of a)/(pi/2)
       if (aIsNumeric || a.re === 0 || a.im === 0) {
         if (aIsNumeric) {

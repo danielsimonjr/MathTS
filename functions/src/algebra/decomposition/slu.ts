@@ -113,7 +113,11 @@ export const createSlu = /* #__PURE__ */ factory(
       larger,
       largerEq,
       SparseMatrix,
-    }) as CsLuFunction;
+      // The CSparse port returns LuResult (L/U as internal SparseMatrixData),
+      // which is the same runtime data the SparseMatrix-typed CsLuFunction
+      // expects; the two declared shapes don't structurally overlap, so cast
+      // through unknown.
+    }) as unknown as CsLuFunction;
 
     /**
      * Calculate the Sparse Matrix LU decomposition with full pivoting. Sparse Matrix `A` is decomposed in two matrices (`L`, `U`) and two permutation vectors (`pinv`, `q`) where

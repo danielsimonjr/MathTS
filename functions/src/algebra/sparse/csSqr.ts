@@ -117,8 +117,9 @@ export const createCsSqr = /* #__PURE__ */ factory(
       // initialize s arrays
       s.pinv = []; // (m + n)
       s.leftmost = []; // (m)
-      // vars
-      const parent = s.parent;
+      // vars. _vcount is only invoked once s.parent has been computed
+      // (see the `c && s.parent && s.cp && _vcount(...)` guard in the caller).
+      const parent = s.parent!;
       const pinv = s.pinv;
       const leftmost = s.leftmost;
       // workspace, next: first m entries, head: next n entries, tail: next n entries, nque: next n entries
@@ -180,7 +181,7 @@ export const createCsSqr = /* #__PURE__ */ factory(
         // associate row i with V(:,k)
         pinv[i] = k;
         // skip if V(k+1:m,k) is empty
-        if (--nque[k] <= 0) {
+        if (--w[nque + k] <= 0) {
           continue;
         }
         // nque[k] is nnz (V(k+1:m,k))

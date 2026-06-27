@@ -61,8 +61,9 @@ export function csPermute(
       const r = pinv ? pinv[aindex[t]] : aindex[t];
       // index
       cindex[nz] = r;
-      // check we need to populate values
-      if (cvalues) {
+      // check we need to populate values. `cvalues` is only created when
+      // `a._values` exists, so `avalues` is defined whenever `cvalues` is.
+      if (cvalues && avalues) {
         cvalues[nz] = avalues[t];
       }
       // increment number of nonzero elements

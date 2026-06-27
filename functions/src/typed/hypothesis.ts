@@ -533,6 +533,9 @@ export async function chiSquareTest(
 
   const df = obs1d.length - 1;
   const n = obs1d.length;
+  // `expected` is narrowed to f64[] by the guard above; capture it in a const so
+  // the narrowing is visible inside the nested bootstrap closure below.
+  const expectedSafe = expected;
 
   // --- Worker-dispatch path: element-wise (o-e)²/e reduction via pool --------
   let baseStatistic: f64;
@@ -600,7 +603,7 @@ export async function chiSquareTest(
     }
     let stat = 0;
     for (let i = 0; i < n; i++) {
-      stat += (resampled[i] - expected[i]) ** 2 / expected[i];
+      stat += (resampled[i] - expectedSafe[i]) ** 2 / expectedSafe[i];
     }
     return stat;
   }

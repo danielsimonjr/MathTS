@@ -134,8 +134,10 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
           // remove x from child list
           x!.left!.right = x!.right;
           x!.right!.left = x!.left;
-          // add x to root list of heap
-          x!.left = minimum;
+          // add x to root list of heap. `minimum` is the initial non-null
+          // minimum here (not reassigned until after this loop), as the adjacent
+          // `minimum!` uses already assume.
+          x!.left = minimum!;
           x!.right = minimum!.right;
           minimum!.right = x;
           x!.right!.left = x;

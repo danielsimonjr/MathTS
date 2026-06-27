@@ -5,7 +5,10 @@ import { createSolveValidation } from './utils/solveValidation.js';
 type ScalarValue = number | bigint | { re: number; im: number } | unknown;
 
 interface TypedFunction {
-  <T>(name: string, signatures: Record<string, (...args: unknown[]) => T>): T;
+  // `never[]` is the correct top-type for "any function" in an input position:
+  // every concrete-typed implementation is assignable to it (function params
+  // are contravariant under strictFunctionTypes).
+  <T>(name: string, signatures: Record<string, (...args: never[]) => T>): T;
 }
 
 interface MatrixConstructor {

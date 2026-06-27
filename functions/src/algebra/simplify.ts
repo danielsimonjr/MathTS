@@ -304,7 +304,13 @@ export const createSimplify = /* #__PURE__ */ factory(
     // Wrap in try-catch to handle case when both JS and TS versions are loaded
     // in the same process (they share the same typed-function singleton)
     try {
-      typed.addConversion({ from: 'Object', to: 'Map', convert: createMap });
+      // createMap accepts the Object/Map values typed-function passes at runtime
+      // and returns a Map; expose it under the generic conversion signature.
+      typed.addConversion({
+        from: 'Object',
+        to: 'Map',
+        convert: createMap as (value: unknown) => unknown,
+      });
     } catch (e: any) {
       // Ignore "already exists" error when conversion was registered by another instance
       if (!e.message?.includes('already a conversion')) {
@@ -745,6 +751,8 @@ export const createSimplify = /* #__PURE__ */ factory(
     ): MathNode[] | undefined {
       let resNodes = nodes;
       if (nodes) {
+        // Reassign from the narrowed `nodes` so `resNodes` is known non-undefined.
+        resNodes = nodes;
         for (let i = 0; i < nodes.length; ++i) {
           const newNode = applyRule(nodes[i], rule, context);
           if (newNode !== nodes[i]) {
@@ -857,9 +865,10 @@ export const createSimplify = /* #__PURE__ */ factory(
         repl = rule.expandedNC1.r;
         matches = _ruleMatch(rule.expandedNC1.l, res, mergedContext)[0];
         if (!matches) {
-          // Existence of NC1 implies NC2
-          repl = rule.expandedNC2.r;
-          matches = _ruleMatch(rule.expandedNC2.l, res, mergedContext)[0];
+          // Existence of NC1 implies NC2 (both are assigned together in the
+          // non-commutative branch of _canonicalizeRule), so NC2 is defined here.
+          repl = rule.expandedNC2!.r;
+          matches = _ruleMatch(rule.expandedNC2!.l, res, mergedContext)[0];
         }
       }
 

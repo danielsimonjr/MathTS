@@ -49,7 +49,8 @@ export const createGetMatrixDataType = /* #__PURE__ */ factory(
      * @return {string} A string representation of the matrix type
      */
     return typed(name, {
-      Array: function (x: any[]): string {
+      Array: function (x: any[]): string | undefined {
+        // getArrayDataType returns undefined for heterogeneous arrays.
         return getArrayDataType(x, typeOf);
       },
       Matrix: function (x: any): string {

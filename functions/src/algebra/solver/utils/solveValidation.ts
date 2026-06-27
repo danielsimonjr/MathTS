@@ -170,5 +170,8 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
         'Dimension mismatch. The right side has to be either 1- or 2-dimensional vector.'
       );
     }
+
+    // Unreachable: `b` is always a Matrix or Array per the parameter type.
+    throw new TypeError('Unexpected type of right-hand side; expected Matrix or Array.');
   };
 }

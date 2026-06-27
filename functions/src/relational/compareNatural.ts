@@ -115,7 +115,7 @@ export const createCompareNatural = /* #__PURE__ */ factory(
         (typeY === 'number' || typeY === 'BigNumber' || typeY === 'Fraction')
       ) {
         c = compare(x, y);
-        if (c.toString() !== '0') {
+        if (String(c) !== '0') {
           // c can be number, BigNumber, or Fraction
           return (c as number) > 0 ? 1 : -1; // return a number
         } else {

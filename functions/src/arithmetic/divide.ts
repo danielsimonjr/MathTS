@@ -6,7 +6,8 @@ import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
 // Type definitions
 interface TypedFunction<T = any> {
   (...args: any[]): T;
-  signatures?: Record<string, Function>;
+  // A typed function always exposes its signature map.
+  signatures: Record<string, Function>;
 }
 
 interface DenseMatrix {

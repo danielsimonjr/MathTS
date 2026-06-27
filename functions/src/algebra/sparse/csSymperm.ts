@@ -104,8 +104,9 @@ export const createCsSymperm = /* #__PURE__ */ factory(
           const q = w[Math.max(i2, j2)]++;
           // update C index for entry q
           cindex[q] = Math.min(i2, j2);
-          // check we need to process values
-          if (cvalues) {
+          // check we need to process values. `cvalues` is only created when
+          // `avalues` exists, so `avalues` is defined whenever `cvalues` is.
+          if (cvalues && avalues) {
             cvalues[q] = i2 <= j2 ? avalues[p] : conj(avalues[p]);
           }
         }

@@ -324,8 +324,10 @@ export function createComplexEigs({
       }
     }
 
-    // return the diagonal row transformation matrix
-    return findVectors ? diag(Rdiag) : null;
+    // return the diagonal row transformation matrix.
+    // Rdiag is initialised whenever findVectors is true (same invariant the
+    // Rdiag![i] writes above rely on).
+    return findVectors ? diag(Rdiag!) : null;
   }
 
   /**
@@ -842,7 +844,9 @@ export function createComplexEigs({
   ): Scalar[] | null {
     const largeNum: Scalar = type === 'BigNumber' ? bignumber(1000) : 1000;
 
-    let b: Scalar[]; // the vector
+    // Definitely assigned before use: the loop below runs at least once
+    // (assigning b) and the `if (i >= 5) return` guard rules out the no-run case.
+    let b!: Scalar[]; // the vector
 
     // you better choose a random vector before I count to five
     let i = 0;

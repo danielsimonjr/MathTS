@@ -1771,7 +1771,9 @@ function solveQuarticRadicals(
   if (inner < -1e-10) {
     // No real factorisation found from this m; fall back to numerical
     const numRoots = solve(`${A}*x^4 + ${B}*x^3 + ${C}*x^2 + ${D}*x + ${E}`, 'x');
-    return numRoots.map(formatCoeff);
+    // Numerical fallback yields real roots here; format each as a real coeff
+    // (preserves the prior untyped `map(formatCoeff)` behaviour).
+    return numRoots.map((c) => formatCoeff(c as number));
   }
 
   const sqrtInner = Math.sqrt(Math.max(0, inner));
@@ -1932,9 +1934,10 @@ export function toRadicals(expr: string): string[] {
     return solveQuarticRadicals(qrt_A, qrt_B, qrt_C, qrt_D, qrt_E, fm2, fm1, f0, f1, f2);
   }
 
-  // Higher degree: fall back to numerical roots
+  // Higher degree: fall back to numerical roots.
+  // Format each as a real coeff (preserves the prior untyped `map(formatCoeff)`).
   const numRoots = solve(expr, 'x');
-  return numRoots.map(formatCoeff);
+  return numRoots.map((c) => formatCoeff(c as number));
 }
 
 /**

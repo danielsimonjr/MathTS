@@ -18,13 +18,16 @@ interface BigNumberType {
 
 type NumericValue = number | BigNumberType;
 
+/** A scalar arithmetic op used here within the NumericValue domain. */
+type NumericFn = (...args: NumericValue[]) => NumericValue;
+
 interface HypotDependencies {
   typed: TypedFunction;
-  abs: TypedFunction;
-  addScalar: TypedFunction;
-  divideScalar: TypedFunction;
-  multiplyScalar: TypedFunction;
-  sqrt: TypedFunction;
+  abs: NumericFn;
+  addScalar: NumericFn;
+  divideScalar: NumericFn;
+  multiplyScalar: NumericFn;
+  sqrt: NumericFn;
   smaller: TypedFunction;
   isPositive: TypedFunction;
 }

@@ -128,7 +128,10 @@ export const createUtil = /* #__PURE__ */ factory(
      * Flatten all associative operators in an expression tree.
      * Assumes parentheses have already been removed.
      */
-    function flatten(node: MathNode & { args?: MathNode[] }, context: OperatorContext): void {
+    function flatten(
+      node: MathNode & { args?: MathNode[] },
+      context: OperatorContext = defaultContext
+    ): void {
       if (!node.args || node.args.length === 0) {
         return;
       }
@@ -171,7 +174,10 @@ export const createUtil = /* #__PURE__ */ factory(
     /**
      *  Unflatten all flattened operators to a right-heavy binary tree.
      */
-    function unflattenr(node: MathNode & { args?: MathNode[] }, context: OperatorContext): void {
+    function unflattenr(
+      node: MathNode & { args?: MathNode[] },
+      context: OperatorContext = defaultContext
+    ): void {
       if (!node.args || node.args.length === 0) {
         return;
       }
@@ -192,7 +198,10 @@ export const createUtil = /* #__PURE__ */ factory(
     /**
      *  Unflatten all flattened operators to a left-heavy binary tree.
      */
-    function unflattenl(node: MathNode & { args?: MathNode[] }, context: OperatorContext): void {
+    function unflattenl(
+      node: MathNode & { args?: MathNode[] },
+      context: OperatorContext = defaultContext
+    ): void {
       if (!node.args || node.args.length === 0) {
         return;
       }

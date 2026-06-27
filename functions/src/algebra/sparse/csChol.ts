@@ -132,7 +132,9 @@ export const createCsChol = /* #__PURE__ */ factory(
         // x = full(triu(C(:,k)))
         for (p = cptr[k]; p < cptr[k + 1]; p++) {
           if (cindex[p] <= k) {
-            x[cindex[p]] = cvalues[p];
+            // cm is a value matrix (input m, or csSymperm(..., true)), so its
+            // values array is present.
+            x[cindex[p]] = cvalues![p];
           }
         }
         // d = C(k,k)
@@ -141,8 +143,9 @@ export const createCsChol = /* #__PURE__ */ factory(
         x[k] = 0;
         // solve L(0:k-1,0:k-1) * x = C(:,k)
         for (; top < n; top++) {
-          // s[top..n-1] is pattern of L(k,:)
-          const i = s[top];
+          // pattern of L(k,:) lives in the upper n entries of the workspace `c`,
+          // where csEreach wrote it (c[n + top .. n + n-1]).
+          const i = c[n + top];
           // L(k,i) = x (i) / L(i,i)
           const lki = divideScalar(x[i], lvalues[lptr[i]]);
           // clear x for k+1st iteration

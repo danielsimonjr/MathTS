@@ -109,7 +109,9 @@ export const createMatAlgo06xS0S0 = /* #__PURE__ */ factory(
       const cptr: number[] = [];
 
       // workspaces
-      const x: MatrixValue[] | undefined = cvalues ? [] : undefined;
+      // Use `null` (not undefined) for the empty workspace so it matches
+      // scatter()'s `T[] | null` parameter; both are falsy in the `if (x)` guard.
+      const x: MatrixValue[] | null = cvalues ? [] : null;
       // marks indicating we have a value in x for a given column
       const w: number[] = [];
       // marks indicating value in a given row has been updated

@@ -364,8 +364,10 @@ export function create(
   });
 
   // the create function exposed on the mathjs instance is bound to
-  // the factory functions passed before
-  math.create = create.bind(null, factories);
+  // the factory functions passed before. Binding fixes `factories`, so the
+  // bound function's runtime signature is `(config?) => MathJsInstance`; the
+  // public `create` field keeps the general signature, hence the cast.
+  math.create = create.bind(null, factories) as unknown as MathJsInstance['create'];
 
   // export factory function
   math.factory = factory;
