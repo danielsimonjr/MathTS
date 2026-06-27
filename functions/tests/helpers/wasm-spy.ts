@@ -1,5 +1,5 @@
 /**
- * Shared helpers for the Rust→AS migration Phase 3b AS-execution tests.
+ * Shared helpers for the migration Phase 3b AS-execution tests.
  *
  * The bridge tests must prove a dispatch (a) actually executes on the AS wasm
  * binary — NOT the JS fallback — and (b) matches the JS reference. Because the

@@ -551,8 +551,8 @@ export interface WasmModule {
     maxFaces: number
   ) => number;
 
-  // Bitwise operations (Int32, elementwise). Legacy Rust pointer-ABI fields
-  // (removed in the Rust→AS migration; declarations retained below for
+  // Bitwise operations (Int32, elementwise). Legacy native-pointer ABI fields
+  // (removed; declarations retained below for
   // reference): binary kernels accepted two Int32 pointers + output + length,
   // the per-element shift kernels took (a_ptr, b_ptr, result_ptr, length),
   // named *_Array / *_ArrayPerElement. The live AS backend uses *_i32_array
@@ -592,7 +592,7 @@ export interface WasmModule {
   rightLogShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
 
   // Polynomial hot-loop kernels (Slice 3.7).
-  // Legacy Rust ABI (removed): pointer-style (a_ptr, a_len, b_ptr, b_len, out_ptr) → out_len.
+  // Legacy native-pointer ABI (removed): pointer-style (a_ptr, a_len, b_ptr, b_len, out_ptr) → out_len.
   // AS backend (live): typed-array-style (a: Float64Array, b: Float64Array) → Float64Array.
   poly_mul_f64?: (aPtr: number, aLen: number, bPtr: number, bLen: number, outPtr: number) => number;
   poly_div_mod_f64?: (
@@ -604,13 +604,13 @@ export interface WasmModule {
   ) => number;
 
   // Polynomial scalar kernels (Slice 4.5).
-  // Legacy Rust ABI (removed): pointer-style, returns a scalar f64.
+  // Legacy native-pointer ABI (removed): pointer-style, returns a scalar f64.
   // AS backend (live): typed-array calling convention, returns f64.
   poly_resultant_f64?: (pPtr: number, pLen: number, qPtr: number, qLen: number) => number;
   poly_discriminant_f64?: (pPtr: number, pLen: number) => number;
 
   // Polynomial-fit kernels (Slice 5.4).
-  // Legacy Rust ABI (removed): pointer-style.
+  // Legacy native-pointer ABI (removed): pointer-style.
   //   poly_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
   //   cheb_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
   //   legendre_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
@@ -641,7 +641,7 @@ export interface WasmModule {
   ) => number;
 
   // Tridiagonal-solve kernel (Slice 3.10b).
-  // Legacy Rust ABI (removed): pointer-style
+  // Legacy native-pointer ABI (removed): pointer-style
   //   (diag_ptr, lower_ptr, upper_ptr, rhs_ptr, n, out_ptr) → n (or -1 on singular).
   // AS backend (live): typed-array-style (diag, lower, upper, rhs) → Float64Array.
   tridiag_solve_f64?: (
@@ -654,14 +654,14 @@ export interface WasmModule {
   ) => number;
 
   // Divided-difference kernel (Slice 5.5).
-  // Legacy Rust ABI (removed): pointer-style
+  // Legacy native-pointer ABI (removed): pointer-style
   //   divided_difference_f64(xs_ptr, ys_ptr, n, out_ptr) → n (or -1 on duplicate xs).
   // AS backend (live): typed-array calling convention.
   //   divided_difference_f64_as(xs, ys) → Float64Array (length 0 on duplicate xs).
   divided_difference_f64?: (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
 
   // Bessel J/Y array kernels (Slice 3.10c-1) + Airy Ai/Bi (Slice 4.9).
-  // Legacy Rust ABI (removed): pointer-style.
+  // Legacy native-pointer ABI (removed): pointer-style.
   //   bessel_j0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
   //   bessel_j1_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
   //   bessel_j_f64(order, xs_ptr, n_elems, out_ptr) → n_elems (or -1)
@@ -688,7 +688,7 @@ export interface WasmModule {
   airy_ai_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   airy_bi_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   // Elliptic K/E array kernels (Slice 5.3).
-  // Legacy Rust ABI (removed): pointer-style.
+  // Legacy native-pointer ABI (removed): pointer-style.
   //   elliptic_k_f64(ms_ptr, n, out_ptr) → n (or -1 on error)
   //   elliptic_e_f64(ms_ptr, n, out_ptr) → n (or -1 on error)
   // AS backend: typed-array calling convention.
@@ -697,7 +697,7 @@ export interface WasmModule {
   elliptic_k_f64?: (msPtr: number, n: number, outPtr: number) => number;
   elliptic_e_f64?: (msPtr: number, n: number, outPtr: number) => number;
   // Carlson symmetric forms + incomplete elliptic integrals (Slice 6.4).
-  // Legacy Rust ABI (removed): pointer-style (all input arrays + count + output pointer).
+  // Legacy native-pointer ABI (removed): pointer-style (all input arrays + count + output pointer).
   //   carlson_rc_f64(xs_ptr, ys_ptr, n, out_ptr)                     → n | -1
   //   carlson_rf_f64(xs_ptr, ys_ptr, zs_ptr, n, out_ptr)             → n | -1
   //   carlson_rd_f64(xs_ptr, ys_ptr, zs_ptr, n, out_ptr)             → n | -1
@@ -715,7 +715,7 @@ export interface WasmModule {
   elliptic_pi_incomplete_f64?: (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
 
   // Spectral signal kernels (Slice 5.6).
-  // Legacy Rust ABI (removed): pointer-style.
+  // Legacy native-pointer ABI (removed): pointer-style.
   //   apply_window_f64(samples_ptr, n, window_type) → 0 on success, -1 on error
   //   welch_psd_f64(samples_ptr, n, frame_length, overlap, window_type, out_ptr) → 0/-1
   //   bartlett_psd_f64(samples_ptr, n, frame_length, out_ptr) → 0/-1
@@ -751,7 +751,7 @@ export interface WasmModule {
   ) => number;
 
   // Sort kernels (Slice 5.7a).
-  // Legacy Rust ABI (removed): pointer-style.
+  // Legacy native-pointer ABI (removed): pointer-style.
   //   sort_f64(ptr, n)              → n (in-place, NaN-last)
   //   argsort_f64(data_ptr, n, out_ptr) → n
   //   rank_f64(data_ptr, n, out_ptr)    → n
@@ -764,10 +764,9 @@ export interface WasmModule {
   rank_f64?: (dataPtr: number, n: number, outPtr: number) => number;
 
   // Dense matrix decompositions exported by the AssemblyScript binary.
-  // The legacy Rust binary exposed the same algorithms under `luDecomposition` /
+  // The legacy native binary exposed the same algorithms under `luDecomposition` /
   // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see
-  // entries above) with raw flat-memory pointer arguments (removed in the
-  // Rust→AS migration). The live AS exports use AS-runtime header references
+  // entries above) with raw flat-memory pointer arguments (removed). The live AS exports use AS-runtime header references
   // that carry their own length, so the signatures here take `number` headers
   // because calling these through `instance.exports` passes the header pointer,
   // not a JS typed array. The matrix backend (matrix/src/backends/WASMBackend.ts)
@@ -927,8 +926,8 @@ export class WasmLoader {
   /**
    * Get the WASM binary path.
    *
-   * AssemblyScript is the sole WASM backend (`mathts-as.wasm`); the Rust
-   * toolchain was removed in the Rust→AS migration (complete 2026-06-26).
+   * AssemblyScript is the sole WASM backend (`mathts-as.wasm`); the legacy
+   * native WASM toolchain was removed (migration complete 2026-06-26).
    *
    * Returns an async result because the Node branch dynamically imports
    * `node:url` (fileURLToPath) so the path is resolved relative to this

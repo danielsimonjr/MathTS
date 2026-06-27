@@ -10,7 +10,7 @@
  *   - `sort_f64` uses the AS managed kernel — now an INTROSORT (3-way quicksort +
  *     median-of-3 + heapsort fallback), so duplicate-heavy input is O(n log n)
  *     (the old Lomuto quicksort degraded to O(n²)); value-sort stays bit-identical.
- *   - `argsort_f64` / `rank_f64` are repointed to AS (Rust→AS Phase 6): the AS
+ *   - `argsort_f64` / `rank_f64` are repointed to AS (Phase 6): the AS
  *     index sort now uses a STABLE total-order comparator (value, then original
  *     index), so for tied values it returns the same permutation as the JS stable
  *     reference (verified Phase 6 — exact match on tie-heavy + NaN input).
@@ -39,7 +39,7 @@ export const WASM_SORT_THRESHOLD = 16384;
 // Pure-JS fallback implementations
 // ---------------------------------------------------------------------------
 
-/** NaN-last comparator matching the original Rust `cmp_f64_nan_last`. */
+/** NaN-last comparator matching the original `cmp_f64_nan_last`. */
 function cmpNanLast(a: number, b: number): number {
   if (a < b) return -1;
   if (a > b) return 1;

@@ -106,8 +106,8 @@ function evalNewton(xs: Float64Array, coeffs: Float64Array, x: number): number {
  * evaluated at x.
  *
  * When `xs.length >= WASM_INTERP_THRESHOLD` (256), the O(n²)
- * divided-difference table is computed via the WASM kernel (Rust primary,
- * AssemblyScript fallback) and the result is evaluated in Newton form.
+ * divided-difference table is computed via the AssemblyScript WASM kernel
+ * and the result is evaluated in Newton form.
  * Below the threshold the classical direct Lagrange formula is used.
  *
  * @param xs - Distinct x-coordinates
@@ -489,7 +489,7 @@ function pchipEndSlope(
  * Returns coefficients [a0, a1, ..., a_degree] where p(x) = a0 + a1*x + ... + a_d*x^d.
  *
  * When xs.length >= WASM_POLY_FIT_THRESHOLD (1024), the hot-loop is dispatched
- * to the WASM Rust backend (or AS fallback). Below the threshold, a normal-
+ * to the AssemblyScript WASM backend. Below the threshold, a normal-
  * equation / Gaussian-elimination path runs in pure JS.
  *
  * @param xs - x-coordinates

@@ -5,8 +5,8 @@
  * JS because the wasm was never bundled.
  *
  * AssemblyScript is the sole WASM backend. The functions loader loads the
- * AssemblyScript binary (`mathts-as.wasm`); the Rust toolchain was removed in
- * the Rust→AS migration (complete 2026-06-26).
+ * AssemblyScript binary (`mathts-as.wasm`); the legacy native WASM toolchain
+ * was removed (migration complete 2026-06-26).
  *
  * Sources:
  *   AS  : <repo>/matrix/dist/wasm/mathts-as.wasm  (built by `npm run build:wasm`,

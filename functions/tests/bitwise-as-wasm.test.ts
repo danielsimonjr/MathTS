@@ -1,5 +1,5 @@
 /**
- * Rust→AS migration Phase 3b — bitwise bridge on the AS binary.
+ * Migration Phase 3b — bitwise bridge on the AS binary.
  *
  * Proves the Int32 bitwise kernels execute on the AS managed `*_i32_array`
  * kernels (call-counter > 0) and bit-match the JS reference op. Before the fix

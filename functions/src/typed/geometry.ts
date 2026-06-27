@@ -1013,7 +1013,7 @@ export type HullFace3D = [i32, i32, i32];
  * Compute the 3-D convex hull of a set of points using QuickHull (incremental
  * variant — Barber, Dobkin, Huhdanpaa 1996).
  *
- * Point sets with ≥ 1024 points are dispatched to the Rust WASM kernel;
+ * Point sets with ≥ 1024 points are dispatched to the WASM kernel;
  * smaller sets use a pure-TypeScript fallback with the same algorithm.
  *
  * @param points - Array of 3-D points, each `[x, y, z]`.
@@ -1077,7 +1077,7 @@ export function convexHull3D(points: number[][]): HullFace3D[] {
 
 /**
  * Pure-TypeScript QuickHull-3D fallback (same incremental algorithm as the
- * Rust kernel).  Used for n < HULL3D_WASM_THRESHOLD and as a safety net when
+ * WASM kernel).  Used for n < HULL3D_WASM_THRESHOLD and as a safety net when
  * the WASM module is unavailable.
  */
 function convexHull3DJS(points: number[][]): HullFace3D[] {

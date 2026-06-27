@@ -3,9 +3,9 @@
  *
  * Strategy:
  *   1. Force the WASM module to load via `wasmLoader.load(<path>)`
- *      pointing at the built Rust artifact. Skip the whole suite when
+ *      pointing at the built WASM artifact. Skip the whole suite when
  *      that artifact isn't present (so the suite is no-op on dev
- *      machines without `cargo`/`wasm-pack`).
+ *      machines without the WASM build toolchain).
  *   2. Construct an Int32Array operand pair of length 64K (the
  *      `WASM_BITWISE_THRESHOLD`) plus 1, so the dispatch tier definitely
  *      hits the WASM path.
@@ -15,9 +15,9 @@
  *   4. Negative test: after `wasmLoader.reset()` (no module loaded),
  *      the same call must succeed by falling through to ComputePool.
  *
- * NOTE: The Rust WASM artifact lives outside the repo
+ * NOTE: The WASM artifact lives outside the repo
  * (`/home/user/lib/wasm/mathts.wasm`) because the build script writes
- * to a path two levels above `wasm-rust/scripts/`. We walk the same
+ * to a path two levels above the build-scripts directory. We walk the same
  * path from this test file so it's robust to wherever vitest sets cwd.
  */
 
@@ -47,7 +47,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const WASM_PATH = (() => {
   // functions/tests/.. -> functions/.. -> repo root /home/user/MathTS
   // The build script writes to ../../lib/wasm/mathts.wasm relative to
-  // wasm-rust/scripts/ → /home/user/lib/wasm/mathts.wasm.
+  // the build-scripts directory → /home/user/lib/wasm/mathts.wasm.
   const candidate = resolve(here, '../../../lib/wasm/mathts.wasm');
   return existsSync(candidate) ? candidate : null;
 })();
@@ -114,7 +114,7 @@ const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
 
 describeIfWasm('typed bitwise — WASM dispatch tier (Int32Array, n >= threshold)', () => {
   beforeAll(async () => {
-    // Drop any earlier-loaded module, then load the Rust WASM artifact.
+    // Drop any earlier-loaded module, then load the WASM artifact.
     wasmLoader.reset();
     await wasmLoader.load(WASM_PATH!);
   }, 30000);
@@ -191,7 +191,7 @@ describeIfWasm('typed bitwise — WASM dispatch tier (Int32Array, n >= threshold
 // -----------------------------------------------------------------------------
 // Negative test — the WASM tier MUST be safely optional. With no module
 // loaded, the dispatch must fall through to ComputePool and produce the
-// same answer. We run this unconditionally (no Rust artifact needed).
+// same answer. We run this unconditionally (no WASM artifact needed).
 // -----------------------------------------------------------------------------
 
 describe('typed bitwise — WASM fallback when module not loaded', () => {

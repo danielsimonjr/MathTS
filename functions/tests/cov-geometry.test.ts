@@ -9,14 +9,14 @@
  *   - coordinateTransform: the unknown-source / unknown-target throws
  *   - convexHull3D (JS fallback): the all-same-x and all-collinear degenerate throws
  *
- * NOTE ON THE WASM CEILING: a large block of geometry.ts (the Rust-WASM
+ * NOTE ON THE WASM CEILING: a large block of geometry.ts (the WASM
  * dispatch paths inside delaunayTriangulation, voronoiDiagram, nearestNeighbor
  * and convexHull3D) is unreachable in this environment. Those branches only run
- * when `wasmLoader.getModule()` returns a compiled Rust kernel exporting
+ * when `wasmLoader.getModule()` returns a compiled WASM kernel exporting
  * `delaunay_wasm` / `voronoi_wasm` / `kdtree_*_wasm` / `convex_hull_3d_wasm`.
- * No `lib/wasm/mathts.wasm` is built here (no Rust WASM artifact present), so
+ * No `lib/wasm/mathts.wasm` is built here (no WASM artifact present), so
  * every call falls through to the JS path. Those ~86 lines therefore cannot be
- * covered without first running `npm run build:wasm:rust`. The tests below cover
+ * covered without first building that WASM artifact. The tests below cover
  * the remaining JS-reachable branches.
  */
 
@@ -34,7 +34,7 @@ import {
 describe('convexHull — large input uses the argsort dispatch (>= WASM_SORT_THRESHOLD)', () => {
   it('hull of a dense disc with >= 16384 points is the bounding square corners', () => {
     // WASM_SORT_THRESHOLD is 16384; argsortF64Dispatch falls back to pure-JS
-    // argsort here (no Rust WASM), exercising the large-n sort branch and the
+    // argsort here (no WASM), exercising the large-n sort branch and the
     // stable secondary-key tie-break loop in convexHull.
     const N = 16400;
     const pts: number[][] = [];

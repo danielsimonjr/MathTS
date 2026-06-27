@@ -1,11 +1,11 @@
 /**
- * Rust→AS migration Phase 3a — elementwise bridge repointed to the
+ * Migration Phase 3a — elementwise bridge repointed to the
  * AssemblyScript pointer-ABI kernels (`array_<op>_ptr`).
  *
  * Proves the AS-load path end-to-end for the elementwise bridge:
  *   1. The functions loader can load the AS binary and the loaded module
  *      exports `array_sin_ptr` + the AS managed runtime (`__new`) and does NOT
- *      export the legacy Rust `simd_sin_array`.
+ *      export the legacy `simd_sin_array`.
  *   2. `elementwiseUnaryDispatch` actually executes the AS `array_<op>_ptr`
  *      kernel (returns a non-null result — JS fallback returns null) and the
  *      result is bit-close to JS `Math.*` for every accelerated op.
@@ -89,7 +89,7 @@ describeIfAS('elementwise AS pointer-kernel dispatch (Phase 3a)', () => {
     const mod = wasmLoader.getModule() as unknown as Record<string, unknown>;
     expect(mod).not.toBeNull();
     expect(typeof mod.array_sin_ptr).toBe('function');
-    expect(typeof mod.simd_sin_array).not.toBe('function'); // legacy Rust name — gone
+    expect(typeof mod.simd_sin_array).not.toBe('function'); // legacy name — gone
     expect('__new' in mod).toBe(true); // AS managed runtime
   });
 
@@ -179,6 +179,6 @@ describeIfDist('functions WASM loader default backend (Phase 3a cutover)', () =>
     resetScratch();
     const mod = (await wasmLoader.load()) as unknown as Record<string, unknown>;
     expect(typeof mod.array_sin_ptr).toBe('function'); // AS sentinel
-    expect(typeof mod.simd_sin_array).not.toBe('function'); // not the Rust binary
+    expect(typeof mod.simd_sin_array).not.toBe('function'); // not the legacy pointer binary
   });
 });

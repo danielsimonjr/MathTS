@@ -434,7 +434,7 @@ function legendreFitJSFallback(xs: Float64Array, ys: Float64Array, degree: numbe
 }
 
 /**
- * Generic dispatch helper for fit kernels — AS managed → JS (Rust→AS Phase 6).
+ * Generic dispatch helper for fit kernels — AS managed → JS (Phase 6).
  *
  * The AS managed fit kernels (poly_fit_f64 / cheb_fit_f64 / legendre_fit_f64)
  * are now CORRECT: the Householder-QR least-squares solver in assembly/src/poly.ts

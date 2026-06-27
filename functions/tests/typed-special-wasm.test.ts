@@ -279,7 +279,7 @@ describe('Bessel edge cases', () => {
     // J20(10) is small but nonzero — test recurrence stability
     const xs = new Float64Array([10]);
     const r = besselJDispatch(20, xs)[0];
-    // The exact value is approximately 1.238e-10; JS and Rust give the same
+    // The exact value is approximately 1.238e-10; JS and WASM give the same
     // because both use Miller's backward recurrence.
     const jsR = besselJnJS(20, xs)[0];
     expect(Math.abs(r - jsR)).toBeLessThan(TOL_AGREE);

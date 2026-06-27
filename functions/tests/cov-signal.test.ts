@@ -16,9 +16,9 @@
  *
  * WASM-only branches (the `if (wasm) { ... wasm.<kernel>_wasm(...) ... }` blocks
  * in dct/idct/dst/idst/dwt/hilbertTransform/spectrogram/periodogram/_convolve)
- * are NOT reachable in this Node environment: they require the prebuilt Rust
- * artifact at lib/wasm/mathts.wasm, which exports the *_wasm kernels and is only
- * produced by a Rust/wasm-pack toolchain. The AssemblyScript module does not
+ * are NOT reachable in this Node environment: they require a prebuilt WASM
+ * artifact at lib/wasm/mathts.wasm, which exports the *_wasm kernels. The
+ * current AssemblyScript module does not
  * export those signal kernels. This mirrors the repo's own typed-*-wasm.test.ts
  * suites, which describe.skip when the artifact is absent. We attempt the load
  * below and skip the WASM-path assertions when it is missing.
@@ -216,9 +216,9 @@ describe('signal — JS reference correctness (non-WASM small inputs)', () => {
   });
 });
 
-// WASM dispatch tier: only runs when the prebuilt Rust artifact is present at
-// lib/wasm/mathts.wasm (produced by `npm run build:wasm:rust`). When the Rust
-// toolchain is available this exercises the `wasm.*_wasm(...)` success paths in
+// WASM dispatch tier: only runs when a prebuilt WASM artifact is present at
+// lib/wasm/mathts.wasm exporting the *_wasm kernels. When that artifact
+// is available this exercises the `wasm.*_wasm(...)` success paths in
 // dct/idct/dst/idst/dwt/hilbert/spectrogram/periodogram/_convolve. Each kernel
 // is driven with a length >= WASM_THRESHOLD (64) and validated against the same
 // function's pure-JS output (computed by resetting the loader first), so we

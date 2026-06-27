@@ -1565,7 +1565,7 @@ export function correlate(a: number[], b: number[]): number[] {
  * Welch's overlapped-segment-averaging Power Spectral Density.
  *
  * For arrays >= WASM_SIGNAL_THRESHOLD samples (4096) dispatches to the
- * WASM kernel (Rust → AS → JS fallback).
+ * WASM kernel (AS → JS fallback).
  *
  * @param signal - Input signal samples
  * @param opts - { frameLength, overlap, window }

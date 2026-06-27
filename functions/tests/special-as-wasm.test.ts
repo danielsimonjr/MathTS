@@ -1,5 +1,5 @@
 /**
- * Rust→AS migration Phase 3b — special-function bridge on the AS binary.
+ * Migration Phase 3b — special-function bridge on the AS binary.
  *
  * Proves each repointed special dispatch (a) executes on the AS managed kernel
  * (call-counter > 0, via the writable module clone) and (b) matches the JS

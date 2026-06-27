@@ -18,11 +18,11 @@
  *    `ComputePool` fallback still runs — the WASM tier is purely an
  *    optimization, not a correctness requirement.
  *
- * Backend (AssemblyScript only, as of the Rust→AS migration Phase 5 functions
+ * Backend (AssemblyScript only, as of the Phase 5 functions
  * cutover):
  *   - AS exports use `*_i32_array` and pass high-level `Int32Array` references
  *     that the AS loader rebinds against module memory.
- *   - The legacy Rust `*Array` / `*ArrayPerElement` pointer-ABI path was removed
+ *   - The legacy native `*Array` / `*ArrayPerElement` pointer-ABI path was removed
  *     from this bridge; under any non-AS binary the helpers return `null` and the
  *     caller falls back to `ComputePool`.
  */

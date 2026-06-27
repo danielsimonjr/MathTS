@@ -42,7 +42,7 @@ export interface RawWasm {
  * This gate lets a bridge confirm the loaded module is the AS binary before
  * issuing a managed-ABI call. If the binary can't be loaded or lacks the AS
  * exports, the gate is false and the bridge falls back to JS. AssemblyScript is
- * the sole WASM backend (the Rust→AS migration is complete); dispatch is AS→JS.
+ * the sole WASM backend; dispatch is AS→JS.
  */
 export function isAsWasm(wasm: Record<string, unknown> | null | undefined): boolean {
   return !!wasm && typeof wasm['array_sin_ptr'] === 'function';
@@ -151,7 +151,7 @@ export function runChainPtr(
 // length) silently mis-reads the header and produces garbage (the Phase-3a
 // corruption: poly returned all-zeros for n≥256). These helpers build a real
 // AS array (pinned buffer + header) the way `matrix/src/backends/WASMBackend.ts`
-// (`AsAllocCache`) and `tools/benchmark/wasm/rust-vs-as-abi.spike.mts` do, so a
+// (`AsAllocCache`) and the wasm ABI benchmark spike do, so a
 // managed kernel can be called correctly from the functions bridges.
 // ---------------------------------------------------------------------------
 

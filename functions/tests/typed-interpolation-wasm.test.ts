@@ -5,7 +5,7 @@
  * Strategy:
  *   1. Below-threshold — pure-JS fallback must be numerically correct for
  *      small inputs (no WASM artifact needed).
- *   2. Above-threshold WASM dispatch — when the Rust artifact is present,
+ *   2. Above-threshold WASM dispatch — when the WASM artifact is present,
  *      verify the WASM path produces the same result as the JS path within
  *      1e-12.  The suite is skipped when the artifact is absent.
  *   3. Mathematical correctness — solve a small tridiag system by hand and
@@ -237,7 +237,7 @@ describe('cubicSpline — JS-path correctness', () => {
 });
 
 // ===========================================================================
-// Suite 3: WASM dispatch — above threshold (requires Rust artifact)
+// Suite 3: WASM dispatch — above threshold (requires WASM artifact)
 // ===========================================================================
 
 const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
@@ -484,7 +484,7 @@ describe('lagrangeInterp + newtonInterp — divided-difference dispatch (Slice 5
 });
 
 // ===========================================================================
-// Suite 7: Divided-difference WASM dispatch (requires Rust artifact)
+// Suite 7: Divided-difference WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
 describeIfWasm('dividedDifference — above-threshold WASM dispatch', () => {

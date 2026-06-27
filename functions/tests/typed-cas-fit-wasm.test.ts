@@ -3,7 +3,7 @@
  *
  * Strategy:
  *   1. Below-threshold correctness — pure-JS normal-equation path (no WASM needed).
- *   2. Above-threshold WASM dispatch — when Rust artifact is present, verify the
+ *   2. Above-threshold WASM dispatch — when the WASM artifact is present, verify the
  *      WASM path matches the JS path within tight tolerances.
  *   3. Edge cases — rank-deficient inputs (all xs equal) must throw or return NaN.
  *   4. Basis recovery — each basis recovers the coefficients of its own basis
@@ -273,7 +273,7 @@ describe('polyFit/chebyshevFit/legendreFit — JS fallback (no WASM loaded)', ()
 });
 
 // ===========================================================================
-// Suite 5: WASM dispatch (requires Rust artifact)
+// Suite 5: WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
 const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;

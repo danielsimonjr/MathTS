@@ -1,8 +1,8 @@
 /**
- * Rust→AS migration Phase 3b — poly bridge on the AssemblyScript binary.
+ * Migration Phase 3b — poly bridge on the AssemblyScript binary.
  *
  * This is the regression guard for the Phase-3a corruption: with the loader
- * defaulting to the AS binary, the poly bridge probed the *Rust pointer* export
+ * defaulting to the AS binary, the poly bridge probed the *legacy pointer* export
  * name (`poly_mul_f64`, …) and called the AS *managed* kernel with pointer args,
  * silently producing all-zeros (mul / divmod / fit) or NaN/garbage (resultant /
  * discriminant) for n ≥ 256 — with NO output guard.
@@ -10,7 +10,7 @@
  * RED before the fix:
  *   - polyMulDispatch returned all-zeros (≠ the convolution) for n ≥ 256.
  *   - resultantDispatch / discriminantDispatch returned NaN.
- * GREEN after gating the Rust probe behind isRustWasm and adding the AS managed
+ * GREEN after gating the legacy pointer probe behind the AS sentinel and adding the AS managed
  * call: each dispatch invokes the AS kernel (proven by the call counter) and
  * matches the reference.
  *
@@ -123,11 +123,11 @@ describeIfAS('poly bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     wasmLoader.reset();
   });
 
-  it('loaded the AS binary (managed runtime present, Rust pointer kernel absent)', () => {
+  it('loaded the AS binary (managed runtime present, legacy pointer kernel absent)', () => {
     const mod = wasmLoader.getModule() as unknown as Record<string, unknown>;
     expect(typeof mod.__new).toBe('function'); // AS managed runtime
     expect(typeof mod.array_sin_ptr).toBe('function'); // AS sentinel
-    expect(typeof mod.simd_sin_array).not.toBe('function'); // not the Rust binary
+    expect(typeof mod.simd_sin_array).not.toBe('function'); // not the legacy pointer binary
   });
 
   it('polyMulDispatch executes the AS kernel and matches the convolution (n ≥ 256)', () => {
@@ -204,7 +204,7 @@ describeIfAS('poly bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
   });
 
   it('polyFit/chebFit/legendreFit execute the AS QR solver and recover the fit (n ≥ 1024)', () => {
-    // Rust→AS Phase 6: the AS Householder-QR least-squares solver in
+    // Phase 6: the AS Householder-QR least-squares solver in
     // assembly/src/poly.ts was fixed (the reflection was corrupting its own
     // pivot column). The bridge now routes fit to the AS kernel above threshold;
     // it must be invoked (counter > 0) AND recover the least-squares solution.

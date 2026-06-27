@@ -18,8 +18,8 @@
  * AS parity (Slice 4.9): `assembly/src/special.ts` implements the Bessel/Y and
  *   lgamma/elliptic kernels with the same algorithms, validated ≤1e-12 vs the JS
  *   reference. (Airy is the exception — see `airyAiDispatch`/`airyBiDispatch`,
- *   which stay on JS pending a Phase 6 AS asymptotic fix.) The legacy Rust
- *   pointer-ABI path was removed from this bridge in the Phase 5 AS cutover.
+ *   which stay on JS pending a Phase 6 AS asymptotic fix.) The legacy
+ *   native-pointer path was removed from this bridge in the Phase 5 AS cutover.
  *
  * Any thrown error is swallowed and the JS fallback runs — the WASM tier
  * is an optimisation, not a correctness requirement.
@@ -215,7 +215,7 @@ export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
 }
 
 /**
- * Dispatch Ai(x) / Bi(x) over an array — AS managed → JS (Rust→AS Phase 6).
+ * Dispatch Ai(x) / Bi(x) over an array — AS managed → JS (Phase 6).
  *
  * The AS Airy asymptotic kernel now mirrors the JS reference exactly: its
  * asymptotic sum is capped at the same 13-term (u_0..u_12) truncation as the
@@ -269,8 +269,8 @@ export const lgammaDispatch = makeUnaryArrayDispatch({
 // ===========================================================================
 // Carlson Symmetric Forms — Slice 6.4
 //
-// JS fallbacks mirror the duplication-theorem algorithm from the original Rust
-// `special/functions.rs :: carlson_*` (removed in the Rust→AS migration).
+// JS fallbacks mirror the duplication-theorem algorithm from the original native
+// `special/functions :: carlson_*` (removed in the migration).
 // Numerical Recipes §6.11; tolerance 0.0015; ≤ 30 iterations.
 // ===========================================================================
 

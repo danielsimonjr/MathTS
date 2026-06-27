@@ -1,10 +1,10 @@
 /**
- * Rust→AS migration Phase 3b — spectral signal bridge on the AS binary.
+ * Migration Phase 3b — spectral signal bridge on the AS binary.
  *
  * Proves apply_window / welch / bartlett / goertzel / chirp-Z execute on the AS
  * managed kernels (call-counter > 0) and match the JS reference.
  *
- * RED before the fix (AS default): the bridge probed the Rust pointer name and
+ * RED before the fix (AS default): the bridge probed the legacy pointer name and
  * called the AS managed kernel with pointer args — apply_window was a silent
  * no-op and goertzel returned garbage.
  *

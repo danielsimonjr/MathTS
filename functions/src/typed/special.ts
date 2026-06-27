@@ -579,7 +579,7 @@ export const erfi = mathTyped('erfi', {
  * Negative non-integer inputs use the reflection formula.
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via lgamma_f64, Slice 5.8; or AS via lgamma_f64_as).
+ * WASM kernel (AS via lgamma_f64_as, Slice 5.8).
  *
  * Reference values:
  *   lgamma(1)   = 0
@@ -700,7 +700,7 @@ export const digamma = mathTyped('digamma', {
  * Bessel function of the first kind, order 0: J0(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_j0_f64, Slice 3.10c-1); smaller inputs and
+ * WASM kernel (AS, Slice 3.10c-1); smaller inputs and
  * scalars use the inline JS approximation.
  *
  * @param x - Input value, or Float64Array of values
@@ -722,7 +722,7 @@ export const besselJ0 = mathTyped('besselJ0', {
  * Bessel function of the first kind, order 1: J1(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_j1_f64, Slice 3.10c-1).
+ * WASM kernel (AS, Slice 3.10c-1).
  *
  * @param x - Input value, or Float64Array of values
  * @returns J1(x)
@@ -743,7 +743,7 @@ export const besselJ1 = mathTyped('besselJ1', {
  * Bessel function of the second kind, order 0: Y0(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_y0_f64, Slice 3.10c-1).
+ * WASM kernel (AS, Slice 3.10c-1, Y0).
  *
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y0(x)
@@ -764,7 +764,7 @@ export const besselY0 = mathTyped('besselY0', {
  * Bessel function of the second kind, order 1: Y1(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_y1_f64, Slice 3.10c-1).
+ * WASM kernel (AS, Slice 3.10c-1, Y1).
  *
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y1(x)
@@ -785,7 +785,7 @@ export const besselY1 = mathTyped('besselY1', {
  * Bessel function of the first kind, general integer order n: J_n(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_j_f64, Slice 3.10c-1).
+ * WASM kernel (AS, Slice 3.10c-1, Jn).
  *
  * @param n - Order (integer)
  * @param x - Input value, or Float64Array of values
@@ -813,7 +813,7 @@ export const besselJ = mathTyped('besselJ', {
  * Bessel function of the second kind, general integer order n: Y_n(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via bessel_y_f64, Slice 3.10c-1).
+ * WASM kernel (AS, Slice 3.10c-1, Yn).
  *
  * @param n - Order (integer)
  * @param x - Input value (must be positive), or Float64Array of values
@@ -883,7 +883,7 @@ export const besselK = mathTyped('besselK', {
  * Complete elliptic integral of the first kind K(m).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via elliptic_k_f64, Slice 5.3; or AS via elliptic_k_f64_as).
+ * WASM kernel (AS via elliptic_k_f64_as, Slice 5.3).
  *
  * Algorithm: AGM (arithmetic-geometric mean) — K = π / (2·agm(1, √(1−m))).
  * Converges quadratically; ~10 iterations for full f64 precision.
@@ -916,7 +916,7 @@ export const ellipticK = mathTyped('ellipticK', {
  * With one number argument, returns the complete integral E(m).
  * With a Float64Array, dispatches the complete integral E(m) across the array.
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) use the WASM kernel
- * (Rust via elliptic_e_f64, Slice 5.3; or AS via elliptic_e_f64_as).
+ * (AS via elliptic_e_f64_as, Slice 5.3).
  *
  * Algorithm: Carlson-Bulirsch AGM variant (complete form).
  * Domain: m ∈ [0, 1].  E(0) = π/2, E(1) = 1.  m < 0 or m > 1 → NaN.
@@ -1130,7 +1130,7 @@ export const fresnelS = mathTyped('fresnelS', {
  * Airy function of the first kind Ai(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via airy_ai_f64, Slice 4.9; or AS via airy_ai_f64_as).
+ * WASM kernel (AS via airy_ai_f64_as, Slice 4.9).
  *
  * Algorithm:
  *   - |x| ≤ 4.5: power series (DLMF §9.2.2) — ~1e-10 relative error
@@ -1159,7 +1159,7 @@ export const airyAi = mathTyped('airyAi', {
  * Airy function of the second kind Bi(x).
  *
  * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
- * WASM kernel (Rust via airy_bi_f64, Slice 4.9; or AS via airy_bi_f64_as).
+ * WASM kernel (AS via airy_bi_f64_as, Slice 4.9).
  *
  * Reference values (DLMF §9.2):
  *   Bi(0) ≈ 0.614926627446001

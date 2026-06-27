@@ -1,5 +1,5 @@
 /**
- * Rust→AS migration Phase 3b — interpolation bridge on the AS binary.
+ * Migration Phase 3b — interpolation bridge on the AS binary.
  *
  * Proves tridiag-solve and divided-difference execute on the AS managed kernels
  * (call-counter > 0) and bit-match the JS reference, with singular / duplicate-x

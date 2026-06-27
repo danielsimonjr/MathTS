@@ -4,7 +4,7 @@
  * Strategy:
  *   1. Below-threshold paths — pure-JS fallback must be numerically
  *      correct for small inputs (no WASM module needed).
- *   2. Above-threshold paths — when the Rust WASM artifact is present,
+ *   2. Above-threshold paths — when the WASM artifact is present,
  *      verify the WASM path produces the same result as the JS path.
  *      The suite is skipped (describe.skip) for the WASM-dependent
  *      group when the artifact is absent.
@@ -206,7 +206,7 @@ describe('polynomial algebra — below-threshold correctness (pure JS)', () => {
 });
 
 // ===========================================================================
-// Suite 2: Above-threshold WASM dispatch (requires Rust artifact)
+// Suite 2: Above-threshold WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
 const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
@@ -446,7 +446,7 @@ describe('resultant — below-threshold correctness (pure JS)', () => {
 });
 
 // ===========================================================================
-// Suite 6: discriminant + resultant — WASM dispatch (requires Rust artifact)
+// Suite 6: discriminant + resultant — WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
 describeIfWasm('discriminant + resultant — above-threshold WASM dispatch', () => {

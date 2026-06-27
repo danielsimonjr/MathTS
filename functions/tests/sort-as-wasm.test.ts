@@ -1,7 +1,7 @@
 /**
- * Rust→AS migration Phase 3b — sort bridge on the AS binary.
+ * Migration Phase 3b — sort bridge on the AS binary.
  *
- * All three kernels are on the AS managed binary. Rust→AS Phase 6:
+ * All three kernels are on the AS managed binary. Phase 6:
  *   - sort_f64 is now an INTROSORT (3-way quicksort + median-of-3 + heapsort
  *     fallback): duplicate-heavy input is O(n log n) (was O(n²)); value-sort
  *     stays bit-identical to JS.

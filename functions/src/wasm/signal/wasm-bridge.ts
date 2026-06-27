@@ -12,7 +12,7 @@
  *   1. AS managed kernel (the binary the functions package bundles).
  *   2. Fall back to pure-JS implementation.
  *
- * The legacy Rust pointer-ABI path was removed from this bridge in the Rust→AS
+ * The legacy native-pointer path was removed from this bridge in the
  * migration Phase 5 functions cutover.
  *
  * Window-type encoding:

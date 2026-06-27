@@ -11,9 +11,9 @@
  *
  * NOTE on coverage ceiling: the WASM-accelerated `if (wasm) { ... }` blocks in
  * leastSquares/bezierCurve/loess/griddata/rbfInterpolate/solveODESystem/cond/
- * rank are dead in this environment because no Rust WASM module is loaded
- * (`wasmLoader.getModule()` returns undefined on Node without the wasm-rust
- * toolchain — see CLAUDE.md "WASM JS-fallback on Node"). Those branches are
+ * rank are dead in this environment because no WASM module is loaded
+ * (`wasmLoader.getModule()` returns undefined on Node without the WASM
+ * artifact — see CLAUDE.md "WASM JS-fallback on Node"). Those branches are
  * intentionally uncoverable here; all such inputs therefore take the JS path,
  * which we assert below.
  */

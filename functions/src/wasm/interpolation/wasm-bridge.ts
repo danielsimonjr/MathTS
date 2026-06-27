@@ -15,8 +15,8 @@
  *     the result.
  *   - Any thrown error is swallowed and the JS fallback runs — the
  *     WASM tier is an optimisation, not a correctness requirement.
- *   - The legacy Rust pointer-ABI path was removed from this bridge in the
- *     Rust→AS migration Phase 5 functions cutover.
+ *   - The legacy native-pointer path was removed from this bridge in the
+ *     migration Phase 5 functions cutover.
  *
  * Threshold:
  *   The marshal cost (four memcpys in + one out) pays off when the O(n)
