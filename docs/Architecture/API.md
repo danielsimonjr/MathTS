@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
+**Generated**: 2026-06-26
 
 ---
 
@@ -384,10 +384,9 @@ Forked worker pool management. Used internally by `@danielsimonjr/mathts-paralle
 The built `mathts-as.wasm` binary exports **318 functions** (330 total exports,
 including 11 numeric globals such as `PI`/`E` plus the linear memory), compiled
 from 30 AssemblyScript source files under `assembly/src/`. The same binary is
-bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. (The Rust
-backend was removed in the Rust→AS migration; AssemblyScript is now the only
-WASM toolchain.) Counts verified via `WebAssembly.Module.exports()` on the
-built `.wasm`.
+bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. AssemblyScript
+is the only WASM toolchain. Counts verified via `WebAssembly.Module.exports()` on
+the built `.wasm`.
 
 | Category                       | Function exports | Examples                                                           |
 | ------------------------------ | ---------------- | ------------------------------------------------------------------ |
@@ -416,15 +415,13 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 | `bench:special-array`   | `npx tsx tools/benchmark/wasm/special-array.bench.mts` | Special-function array benchmark      |
 | `bench:fusion`          | `node tools/benchmark/wasm/fusion.bench.mjs`       | Op-fusion (resident-buffer) benchmark    |
 
-(The former `build:wasm:rust`, `build:wasm:all`, and `bench:wasm` scripts were
-removed with the Rust backend.)
+(The former native-WASM build and benchmark scripts were removed when
+AssemblyScript became the sole WASM toolchain.)
 
 ---
 
 ## Environment Variables
 
 There is no WASM backend-selection environment variable. AssemblyScript is the
-sole WASM backend, so the former `MATHTS_WASM_BACKEND` variable (which chose
-between `rust`/`assemblyscript`/`auto`/`none`) was removed in the Rust→AS
-migration. WASM is loaded automatically when the binary is present and the
+sole WASM backend. WASM is loaded automatically when the binary is present and the
 operation is above the size threshold, with transparent fallback to JS.

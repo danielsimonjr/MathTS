@@ -1,6 +1,6 @@
 # MathTS Project Overview
 
-**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
+**Generated**: 2026-06-26
 
 ## What is MathTS?
 
@@ -38,9 +38,9 @@ files excluded), per the 2026-06-25 dependency-graph report. Regenerate with
 The monorepo has **22 npm packages**. The 12 primary packages are listed below;
 the other 10 are thin re-export leaf packages (`parser`, `ast`, `evaluator`,
 `units`, `numbers`, `linalg`, `arithmetic`, `trigonometry`, `statistics`,
-`signal`) — see `ARCHITECTURE.md`. There is no longer a Rust Cargo crate: the
-`wasm-rust/` workspace was removed in the Rust→AS migration. File counts are
-reachable (active) files from the dependency-graph report.
+`signal`) — see `ARCHITECTURE.md`. AssemblyScript (`assembly/`) is the sole WASM
+toolchain. File counts are reachable (active) files from the dependency-graph
+report.
 
 | Package                                   | Description                                                  | Active Files | Version |
 | ----------------------------------------- | ------------------------------------------------------------ | ------------ | ------- |
@@ -68,7 +68,7 @@ These are exported, tested, and built. Includes:
 - **374+ typed function exports** across 20 modules: arithmetic (54), trigonometry (20), statistics (25), signal (33), special (29), distributions (11), integration (4), interpolation (6), combinatorics (21), geometry (31), algebra (37), cas (30), graph (8), dist-objects (13), hypothesis (14), numeric (37), bridge (1), gpu (4), matrix-ops, and typed-bridge
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: **318 AssemblyScript function exports** (330 total) — the sole WASM backend (Rust removed in the Rust→AS migration)
+- **WASM**: **318 AssemblyScript function exports** (330 total) — the sole WASM backend
 
 ### Beyond mathjs — ~250 New Functions
 
@@ -107,8 +107,8 @@ MathTS has three computation backends selected automatically based on operation 
 
 The AssemblyScript backend compiles `assembly/src/` (30 source files) to a
 single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and
-`functions/dist/wasm/`. The former Rust backend (`wasm-rust/`) was removed in
-the Rust→AS migration; there is no longer a backend-selection step.
+`functions/dist/wasm/`. There is no backend-selection step — AssemblyScript is
+the sole WASM toolchain.
 
 `matrix/src/backends/WASMBackend.ts` is the sole WASM matrix backend and handles
 automatic JS-vs-WASM selection based on per-operation size thresholds.

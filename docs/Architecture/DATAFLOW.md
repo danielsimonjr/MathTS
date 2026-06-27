@@ -1,6 +1,6 @@
 # MathTS Data Flow
 
-**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
+**Generated**: 2026-06-26
 
 ## Overview
 
@@ -116,9 +116,8 @@ typed-function dispatch -> WASMBackend (matrix/src/backends/WASMBackend.ts)
   7. Returns result as DenseMatrix to caller
 ```
 
-AssemblyScript is the sole WASM backend (the Rust backend and the
-`MATHTS_WASM_BACKEND` selection env var were removed in the Rust→AS migration),
-so dispatch is simply **AS → JS fallback** with no backend choice.
+AssemblyScript is the sole WASM backend, so dispatch is simply **AS → JS
+fallback** with no backend choice.
 
 ---
 

@@ -11,14 +11,13 @@ Last updated: 2026-06-26.
 
 WASM acceleration is **selective and threshold-gated**, not universal:
 
-- **AssemblyScript is the sole WASM backend** for the whole repo (Rust→AS
-  migration COMPLETE 2026-06-26). The `functions` package bundles
-  `dist/wasm/mathts-as.wasm` (~292 `f64` kernels), resolves it package-relative,
-  and its dispatch is **AS → JS**. The `matrix` package loads the same
-  AssemblyScript binary for its heavy ops (fft/eig/svd/decomposition). The Rust
-  toolchain (`wasm-rust/`) has been removed. The AS binary is numerically
-  verified to <1e-9 against mpmath for the special functions, and SHA-384
-  integrity-verified before instantiation.
+- **AssemblyScript is the sole WASM backend** for the whole repo. The
+  `functions` package bundles `dist/wasm/mathts-as.wasm` (~292 `f64` kernels),
+  resolves it package-relative, and its dispatch is **AS → JS**. The `matrix`
+  package loads the same AssemblyScript binary for its heavy ops
+  (fft/eig/svd/decomposition). The AS binary is numerically verified to <1e-9
+  against mpmath for the special functions, and SHA-384 integrity-verified before
+  instantiation.
 - **Threshold:** the `functions` special bridges engage WASM only for arrays of
   `length >= WASM_SPECIAL_THRESHOLD` (= **1024**). Scalars and small arrays run
   JS.
@@ -51,9 +50,8 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 > reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
 > than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
 > in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
-> chain. The remaining "parallel" routing is intentional. See
-> `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md` and the `bench:elementwise` /
-> `bench:reduction` benchmarks.
+> chain. The remaining "parallel" routing is intentional. See the
+> `bench:elementwise` / `bench:reduction` benchmarks.
 
 ### The WASM-accelerated typed functions
 

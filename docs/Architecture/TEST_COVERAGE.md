@@ -505,14 +505,12 @@ The following 355 source files are not directly imported by any test file:
 | `sort/wasm-bridge.ts` | `typed-geometry-hull-wasm.test.ts`, `typed-sort-wasm.test.ts`, `typed-statistics-wasm.test.ts` |
 | `special/wasm-bridge.ts` | `typed-distributions-wasm.test.ts`, `typed-special-carlson.test.ts`, `typed-special-wasm.test.ts` |
 | `src/index.ts` | `linalg.test.ts` |
-| `backends/Backend.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/BackendManager.ts` | `BackendManager.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
+| `backends/Backend.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
+| `backends/BackendManager.ts` | `BackendManager.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/GPUBackend.ts` | `initialization.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/GPUMatrixBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/JSBackend.ts` | `WASMBackend-as.test.ts`, `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `operations.test.ts` |
 | `backends/ParallelBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/RustWASMBackend.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/RustWasmLoader.ts` | `svd-wasm-mock.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
 | `backends/WASMBackend.ts` | `WASMBackend-as.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `loading.test.ts`, `operations.test.ts` |
 | `backends/WasmLoader.ts` | `WasmLoader-as.test.ts`, `WasmLoader-browser.test.ts`, `MatrixWasmBridge.test.ts`, `eig-wasm-mock.test.ts`, `fft-wasm-mock.test.ts`, `fft-wasm.test.ts`, `WasmLoader.test.ts` |
 | `gpu/BatchExecutor.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
@@ -543,7 +541,7 @@ The following 355 source files are not directly imported by any test file:
 | `operations/svd.ts` | `svd.test.ts`, `svd-wasm-mock.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts` |
 | `src/parallel-matrix.ts` | `typed-operations.test.ts` |
 | `src/typed-operations.ts` | `typed-operations.test.ts` |
-| `types/DenseMatrix.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `WASMBackend-as.test.ts`, `DenseMatrix.test.ts`, `JSBackend.test.ts`, `cholesky.test.ts`, `expm.test.ts`, `logm.test.ts`, `lu.test.ts`, `pinv.test.ts`, `qr.test.ts`, `schur.test.ts`, `sqrtm.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `operations.test.ts`, `rust-wasm.test.ts` |
+| `types/DenseMatrix.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `WASMBackend-as.test.ts`, `DenseMatrix.test.ts`, `JSBackend.test.ts`, `cholesky.test.ts`, `expm.test.ts`, `logm.test.ts`, `lu.test.ts`, `pinv.test.ts`, `qr.test.ts`, `schur.test.ts`, `sqrtm.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `operations.test.ts` |
 | `types/Matrix.ts` | `typed-operations.test.ts` |
 | `types/SparseMatrix.ts` | `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts` |
 | `types/index.ts` | `typed-operations.test.ts` |
@@ -664,7 +662,6 @@ The following 355 source files are not directly imported by any test file:
 | `wasm/fft-wasm.test.ts` | 2 files |
 | `wasm/loading.test.ts` | 20 files |
 | `wasm/operations.test.ts` | 3 files |
-| `wasm/rust-wasm.test.ts` | 5 files |
 | `tests/wasm-fft-fallback.test.ts` | 0 files |
 | `tests/WasmLoader.test.ts` | 1 files |
 | `tests/broadcasting.test.ts` | 1 files |

@@ -32,8 +32,8 @@ necessarily under-reports for any code that is:
 1. **Mechanically synced from upstream** and exercised through a thin
    active wrapper layer (the upstream tests have already validated the
    inner code; the wrapper layer carries the project's own tests).
-2. **Written in a language Vitest cannot import** (AssemblyScript,
-   Rust — the `*.ts` extension is misleading for AssemblyScript).
+2. **Written in a language Vitest cannot import** (AssemblyScript —
+   the `*.ts` extension is misleading for AssemblyScript).
 3. **Type-only** (`interface` / `type` / `.d.ts`) — no runtime to
    exercise.
 

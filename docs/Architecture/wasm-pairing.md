@@ -2,7 +2,7 @@
 
 **Generated**: 2026-06-27 (by tools/create-dependency-graph)
 
-Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS (the legacy Rust path was removed from the functions bridges in the Phase 5 cutover).
+Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 
 > Detection is per-`mathTyped`-block direct references; routing reached only via helper functions outside the block is not traced, so this can under-report.
 
@@ -13,7 +13,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | JS-only | 127 |
 | **Total** | **218** |
 
-**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 39 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending the Rust→AS migration Phase 6 fixes).
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 39 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
 
 ## WASM-accelerated functions
 
@@ -137,4 +137,4 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | trigonometry | 8 | 4 | 7 |
 | unit | 0 | 0 | 2 |
 
-> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which runs the AssemblyScript binary for fft/eig/svd/decomposition (Rust→AS migration complete 2026-06-26). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups. See docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md and the `bench:elementwise`/`bench:special-array` benches.
+> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which runs the AssemblyScript binary for fft/eig/svd/decomposition. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups. See the `bench:elementwise`/`bench:special-array` benches.

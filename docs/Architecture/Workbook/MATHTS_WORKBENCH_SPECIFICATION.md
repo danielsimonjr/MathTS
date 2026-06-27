@@ -6891,19 +6891,19 @@ The MTSW ISE exposes a per-session WASM engine toggle that controls which backen
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  WASM Engine  ┌──────┐  ┌──────────┐  ┌──────────────┐  │
-│               │  JS  │  │ WASM-AS  │  │  WASM-Rust   │  │
+│               │  JS  │  │   WASM   │  │   WebGPU     │  │
 │               └──────┘  └──────────┘  └──────────────┘  │
-│               (fallback) (benchmark)  (primary ✅)        │
+│               (fallback) (default ✅) (experimental)     │
 └──────────────────────────────────────────────────────────┘
 ```
 
 **Behavior**:
 
 - `JS` — forces pure TypeScript execution (no WASM); useful for debugging type dispatch
-- `WASM-AS` — forces the AssemblyScript backend (`lib/wasm/mathjs-as.wasm`); retained for benchmarking
-- `WASM-Rust` — (default) uses the Rust backend (`lib/wasm/mathjs.wasm`); 2–55x faster than JS
+- `WASM` — (default) uses the AssemblyScript backend (`lib/wasm/mathjs.wasm`); 2–55x faster than JS
+- `WebGPU` — experimental compute-shader backend for very large workloads
 
-The toggle maps to the `MATHTS_WASM_BACKEND` environment variable (see below).
+The toggle maps to the `MATHTS_BACKEND` environment variable (see below).
 
 ### Benchmark Overlay
 
@@ -6912,8 +6912,7 @@ When the benchmark overlay is enabled in the ISE toolbar, each output cell annot
 | Annotation     | Meaning                           |
 | -------------- | --------------------------------- |
 | `[JS 12.3ms]`  | Executed on JavaScript fallback   |
-| `[AS 1.8ms]`   | Executed on AssemblyScript WASM   |
-| `[Rust 1.2ms]` | Executed on Rust WASM (primary)   |
+| `[WASM 1.2ms]` | Executed on AssemblyScript WASM   |
 | `[GPU 0.4ms]`  | Executed on WebGPU compute shader |
 
 The overlay timer captures wall-clock time from cell dispatch to result receipt (excludes render time). For WASM operations this includes the JS↔WASM bridge overhead.
@@ -6929,27 +6928,24 @@ workbench:
     timingHistory: 10 # Keep last N timings per cell
 ```
 
-### `MATHTS_WASM_BACKEND` Environment Variable
+### `MATHTS_BACKEND` Environment Variable
 
 Set this variable to control backend selection at startup:
 
 ```bash
-# Use Rust WASM (default — primary backend)
-MATHTS_WASM_BACKEND=rust npx mathts serve
-
-# Use AssemblyScript WASM (benchmark/comparison)
-MATHTS_WASM_BACKEND=as npx mathts serve
+# Use AssemblyScript WASM (default)
+MATHTS_BACKEND=wasm npx mathts serve
 
 # Force JavaScript fallback (debugging)
-MATHTS_WASM_BACKEND=js npx mathts serve
+MATHTS_BACKEND=js npx mathts serve
 
 # Enable WebGPU (experimental, requires Chrome 113+)
-MATHTS_WASM_BACKEND=webgpu npx mathts serve
+MATHTS_BACKEND=webgpu npx mathts serve
 ```
 
-Valid values: `rust` (default), `as`, `js`, `webgpu`
+Valid values: `wasm` (default), `js`, `webgpu`
 
-The runtime reads this variable during `backendManager.initialize()` and sets the preferred backend before any computation cells execute. Auto-fallback remains active: if Rust WASM fails to load, the system falls back to `as`, then to `js`.
+The runtime reads this variable during `backendManager.initialize()` and sets the preferred backend before any computation cells execute. Auto-fallback remains active: if WASM fails to load, the system falls back to `js`.
 
 **Accessing the current backend from a cell**:
 
@@ -6958,7 +6954,7 @@ import { backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Check what's active
 const active = backendManager.getActiveBackendName();
-// → 'wasm-rust' | 'wasm-as' | 'js' | 'webgpu'
+// → 'wasm' | 'js' | 'webgpu'
 ```
 
 ---

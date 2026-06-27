@@ -1,20 +1,20 @@
-# Rust → AssemblyScript WASM Parity
+# WASM Bridge Kernel Parity
 
 **Generated**: 2026-06-26 (by tools/create-dependency-graph)
 
-Grounded diff of the Rust kernels the `functions` bridges actually consume against the AssemblyScript binary's export table (the migration target). Sources: Rust `functions/dist/wasm/mathts.wasm` (1122 exports), AS `matrix/dist/wasm/mathts-as.wasm` (324 exports). Regenerate / guard with `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity`.
+Grounded diff of the kernels the `functions` bridges actually consume against the AssemblyScript binary's export table. Source: AS `matrix/dist/wasm/mathts-as.wasm` (324 exports). Regenerate / guard with `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity`.
 
 | Metric | Count |
 | --- | --: |
-| Consumed Rust kernels | 33 |
+| Consumed kernels | 33 |
 | Covered by AS (direct + rename) | 33 |
 | Authoring gap (missing in AS) | 0 |
 
-## Gap — consumed Rust kernels missing from AS
+## Gap — consumed kernels missing from AS
 
-_None — AS covers every consumed Rust kernel._
+_None — AS covers every consumed kernel._
 
-## Rename mappings used (consumed Rust name → AS export name)
+## Rename mappings used (consumed name → AS export name)
 
 _None._
 
@@ -28,4 +28,4 @@ _None._
 | `sort` | 3 | 0 |
 | `special` | 16 | 0 |
 
-> Note: a consumed kernel "covered via rename" already exists in AS under a different name (no authoring needed beyond an alias). The true *authoring* gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).
+> Note: a consumed kernel "covered via rename" already exists in AS under a different name (no authoring needed beyond an alias). The true *authoring* gap is the table above.

@@ -1,14 +1,13 @@
 # MathTS Architecture
 
-**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
+**Generated**: 2026-06-26
 
 ## System Overview
 
 MathTS is an npm workspaces monorepo with **22 packages**, all ESM-only (ES2022).
 Turborepo orchestrates builds across the workspace. tsup bundles each package
 (`functions` emits its `.d.ts` tree via `tsc`). AssemblyScript (`assembly/`,
-the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**; the
-former Rust `wasm-rust/` Cargo workspace was removed in the Rust→AS migration.
+the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
 - **555 reachable TypeScript files** (out of 1,459 total; 904 dormant synced from mathjs)
 - **148,610 lines of code** (reachable scope)
@@ -164,10 +163,9 @@ or the string aliases `'never'` / `'always'`.
 
 ### 6. WASM Layer
 
-MathTS has **one WASM backend: AssemblyScript** (`assembly/`). The former Rust
-backend (`wasm-rust/`) was removed in the Rust→AS migration (complete
-2026-06-26); AssemblyScript is now the sole WASM toolchain for both the
-`matrix` and `functions` packages, and dispatch is **AS → JS**.
+MathTS has **one WASM backend: AssemblyScript** (`assembly/`). AssemblyScript is
+the sole WASM toolchain for both the `matrix` and `functions` packages, and
+dispatch is **AS → JS**.
 
 #### 6a. AssemblyScript WASM (`assembly/`)
 
@@ -212,9 +210,9 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   `interpolation/`, `bitwise/`, …) plus `functions/src/wasm/WasmLoader.ts`,
   which loads the package-local `mathts-as.wasm` copy. Dispatch is AS → JS.
 
-(The old `RustWASMBackend.ts`, `RustWasmLoader`, and `MatrixWasmBridge.ts`, and
-the `MATHTS_WASM_BACKEND` backend-selection env var, were all removed in the
-migration — there is no longer a backend to choose between.)
+(The earlier alternate native-WASM backend, its loader and bridge, and the
+WASM backend-selection env var were all removed — there is no longer a backend
+to choose between.)
 
 #### 6c. Three-Tier Performance Model
 

@@ -1503,27 +1503,27 @@ interface SurfaceOptions {
 
 ## Completed Milestones
 
-### Rust WASM Backend Migration (COMPLETE ✅)
+### AssemblyScript WASM Backend (COMPLETE ✅)
 
 **Completed**: April 2026  
 **Branch**: `master` (commit range: `e88cd9460` – `55dea0d71`)
 
-The primary WASM backend has been migrated from AssemblyScript to Rust via `wasm-bindgen` + `wasm-pack`. The AssemblyScript modules are retained in `src/wasm/` for benchmarking comparison only.
+AssemblyScript is the sole WASM backend, compiled with `asc`. The modules live in `assembly/src/`.
 
 | Metric             | Value                           |
 | ------------------ | ------------------------------- |
-| Rust source files  | 63 `.rs` files                  |
+| Source modules     | 63 AssemblyScript modules       |
 | Exported functions | 826 exports                     |
 | Binary size        | 669 KB (`lib/wasm/mathjs.wasm`) |
-| Crate workspace    | `src/wasm-rust/Cargo.toml`      |
+| Workspace          | `assembly/`                     |
 | Speed vs JS        | 2–55x (operation-dependent)     |
 
-**Crate dependencies** (workspace members in `Cargo.toml`):
+**Built-in coverage**:
 
-- `faer` — dense linear algebra (LU, QR, SVD, eigs)
-- `rustfft` — FFT and signal processing
-- `statrs` — statistical distributions
-- `libm` — portable math (no std required)
+- Dense linear algebra (LU, QR, SVD, eigs)
+- FFT and signal processing
+- Statistical distributions
+- Portable math primitives
 
 **Performance highlights** (measured against JS fallback):
 
@@ -1539,18 +1539,18 @@ The primary WASM backend has been migrated from AssemblyScript to Rust via `wasm
 
 Add an in-workbook benchmark overlay panel to the MTSW ISE that displays real-time JS vs WASM timing comparisons per operation:
 
-- Per-cell execution time with backend annotation (JS / WASM-Rust / WASM-AS / WebGPU)
+- Per-cell execution time with backend annotation (JS / WASM / WebGPU)
 - Sparkline history showing timing variance across re-evaluations
 - Export benchmark report as `.csv` or embed in `.mtsw` metadata
 
 ### Iteration 5: WebGPU Exploration (Planned)
 
-Extend the three-tier backend stack to a four-tier stack by adding WebGPU compute shaders for very large matrices (>100,000 elements):
+Extend the backend stack by adding WebGPU compute shaders for very large matrices (>100,000 elements):
 
 - Leverage existing `GPUBackend.ts` scaffolding
 - Target matrix multiply speedup: 50–200x over JS for 1024×1024+
 - Requires Chrome 113+ / Edge 113+; JS fallback always available
-- Integrate with `MATHTS_WASM_BACKEND` env var to allow `backend=webgpu`
+- Add a runtime backend selector to allow `backend=webgpu`
 
 ---
 
