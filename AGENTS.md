@@ -32,24 +32,40 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 
 ---
 
-## The one rule that saves the most time: active vs. dormant code
+## functions/ is now a single active graph (the dormant layer was deleted)
 
-`functions/` has **two layers**. Editing the wrong one wastes effort.
+There used to be a "two-layer" rule here (active vs. dormant). **It no longer
+applies.** On 2026-06-27 the dormant layer — unexported, unreachable, untested
+synced-mathjs code — was deleted (**455 files / ~58.6k LOC** across `functions/`
++ `core/`, the bulk being the dead `functions/src/expression/` mirror). The
+`.ts→.ts` mathjs sync model that produced it is dead (upstream TS-split,
+2026-04-10).
 
-- ✅ **ACTIVE (built + shipped):** everything reachable from
-  `functions/src/index.ts` → `typed/` (typed-dispatch impls), `typed/cas.ts`,
-  **`factories/` (activated mathjs leaf factories)**, and the **wired expression
-  evaluator** `factories/evaluate.ts` (`evaluate` / `compileExpr` / `parse`).
-- 💤 **DORMANT (NOT exported, NOT built):** the ~20 category dirs
-  `functions/src/{arithmetic,algebra,bitwise,matrix,...}/` synced from the
-  mathjs fork, plus support dirs `functions/src/{utils,core,plain,type,...}/`.
-  These carry upstream type errors on purpose (`functions/tsconfig.json` uses
-  `strict:false`). **Do not "fix" them or assume they run.**
+What remains in `functions/src/` is **all reachable from
+`functions/src/index.ts`** — one active graph:
 
-> ⚠️ The `docs/inventory/` reports (dated 2026-04-10) predate factory
-> activation and the evaluator wiring — they still call factories "dormant" and
-> the evaluator "stubbed." Trust the **export surface in `functions/src/index.ts`
-> + a green typecheck**, not those numbers, until the inventory is refreshed.
+- ✅ `typed/` (typed-dispatch impls) + `typed/cas.ts`
+- ✅ `factories/` — **activated** mathjs leaf factories, re-exported from
+  `index.ts` (these import the surviving category dirs `arithmetic/`, `algebra/`,
+  `type/`, `utils/`, `plain/`, … — those are now ACTIVE, edit them normally)
+- ✅ `wasm/` bridges (`*Dispatch`, `WasmLoader`, `integrity`) + the wired
+  expression evaluator `factories/evaluate.ts` (`evaluate` / `compileExpr` /
+  `parse`, backed by the `expression` package)
+
+A few legacy synced files were intentionally KEPT because direct tests exercise
+them: `functions/src/signal/{fft,conv}.ts`, `functions/src/type/local/Decimal.ts`,
+and the `functions/src/wasm/**` bindings reached via `wasm/index.ts` ←
+`tests/wasm/typescript-integration.test.ts`.
+
+`functions/tsconfig.json` still uses `strict:false`, but **not** because of
+dormant code anymore — the active graph (activated factories + path-mapped
+`expression`/`core`) has ~430 pre-existing strict violations (a separate
+cleanup). Trust the **export surface in `functions/src/index.ts` + a green
+`npm run typecheck`** as the source of truth.
+
+> ⚠️ The `docs/inventory/` reports (dated 2026-04-10) are stale: they predate
+> factory activation, evaluator wiring, AND this dormant purge. Do not trust
+> their file counts or the active/dormant framing in `02-synced-factories.md`.
 
 ---
 

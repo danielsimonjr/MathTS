@@ -1,5 +1,17 @@
 # Synced mathjs Factory Functions Inventory
 
+> ⚠️ **STALE (2026-04-10 snapshot — superseded 2026-06-27).** This inventory
+> describes the old two-layer model where synced mathjs code sat dormant in
+> `functions/src/`. That model is gone: the valuable synced code has been
+> **activated** via `functions/src/factories/index.ts`, and the dormant
+> remnant — unexported, unreachable, untested — was **deleted** (455 files /
+> ~58.6k LOC across `functions/` + `core/`, including the entire
+> `functions/src/expression/` mirror and the support/standalone files counted
+> in the note below). The `.ts→.ts` sync model is dead (upstream mathjs
+> TS-split). The counts and file lists below no longer reflect the tree —
+> regenerate from `tools/create-dependency-graph` (`npm run docs:deps`) and see
+> CLAUDE.md → "Code in `functions/`" for the current picture.
+
 ## Summary
 
 - Total categories: 19

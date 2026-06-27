@@ -126,13 +126,17 @@ All packages use `tsup src/index.ts --format esm --dts --clean` except:
 
 ## Architecture
 
-### Two-Layer Code in `functions/`
+### Code in `functions/` (single active graph)
 
-The functions package has two distinct code layers:
+Everything remaining in `functions/src/` is reachable from `functions/src/index.ts` — there is **one** active code graph, not the old active/dormant split:
 
-1. **Active typed functions** (`functions/src/typed/`): New parallel-first implementations using `@danielsimonjr/mathts-core` typed dispatch. These are the only files exported from `functions/src/index.ts`. Includes: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`.
+- **Typed functions** (`functions/src/typed/`): parallel-first implementations using `@danielsimonjr/mathts-core` typed dispatch (e.g. `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`, `cas.ts`). Exported directly from `index.ts`.
+- **Activated mathjs factories** (`functions/src/factories/index.ts` + the category dirs it imports — `arithmetic/`, `algebra/`, `type/`, `utils/`, `plain/`, etc.): factory-pattern functions that originated from the mathjs fork and have since been **wired into the live graph** via `factories/index.ts` (re-exported from `index.ts`). These ARE built and shipped.
+- **WASM bridges** (`functions/src/wasm/`): the `*Dispatch` bridges imported by `typed/`, plus `WasmLoader.ts` / `integrity.ts` and the integration-tested binding subset under `wasm/index.ts`.
 
-2. **Synced mathjs factories** (`functions/src/{arithmetic,algebra,bitwise,...}/`): ~20 category directories containing factory-pattern functions synced from the mathjs fork (`~/Dropbox/Github/mathjs`). These are **not exported** and not in the build entry point. Support files in `functions/src/{utils,core,plain,type,expression,error,wasm}/`.
+> **History (2026-06-27 dormant purge):** functions/ previously carried a large *second* layer — unexported, unreachable synced-mathjs code that the (now-dead) `.ts→.ts` sync model dumped in. After the mathjs TS-split broke syncing, that dormant remnant was deleted: **455 files / ~58.6k LOC** across `functions/` + `core/`, the largest single chunk being the entire dead `functions/src/expression/` mirror (313 files — the real expression evaluator lives in the `expression` package, wired via `factories/evaluate.ts`). A handful of legacy synced files were KEPT because they are exercised by their own direct tests (`functions/src/signal/{fft,conv}.ts`, `functions/src/type/local/Decimal.ts`, the `functions/src/wasm/**` bindings reached via `wasm/index.ts` ← `tests/wasm/typescript-integration.test.ts`).
+
+`functions/tsconfig.json` still uses `strict: false`, but **not** because of dormant code anymore — the active graph (activated factories like `arithmetic/floor.ts`, `algebra/simplify.ts`, plus the path-mapped `expression`/`core` sources) carries ~430 pre-existing strict-mode violations. Enabling `strict: true` is a separate, larger cleanup, unrelated to the dormant purge.
 
 Import path difference from mathjs: mathjs uses `../../utils/` (extra `function/` directory level), mathts uses `../utils/`. Import extensions are `.js` in mathts.
 
@@ -164,12 +168,17 @@ math.add(1, 2); // delegates to @danielsimonjr/mathts-core types + operations
 
 ### Workbook Runtime
 
-YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/`:
+Headless runtime for YAML notebooks (`.mtsw` files). Code/test cells evaluate
+**MathTS expressions** via the sandboxed engine (not TypeScript); a GUI is a
+separate future project. Key source files in `workbook/src/`:
 
-- `types.ts` - `Workbook`, `Cell`, `DependencyGraph`, `ExecutionContext`
-- `parser.ts` / `index.ts` - YAML parsing/serialization
-- `graph.ts` - dependency resolution with topological sort
-- `executor.ts` - `WorkbookExecutor` with reactive/sequential/manual execution modes
+- `types.ts` - `Workbook`, `Cell`, `DependencyGraph`, `CellResult`, `RunResult`
+- `parser.ts` - `.mtsw` → `Workbook` (validates ids/types/deps); `serializeWorkbook` still deferred
+- `yaml-safe.ts` - shared hardened YAML parse (core schema, merges off) + prototype-pollution guard, used by parser and data cells
+- `graph.ts` - dependency resolution, topological sort, cycle detection, `toMermaid`
+- `executor.ts` - `WorkbookExecutor`: `runCell`/`runAll` (event stream, throws on error) and `runReport` (continue-on-error, structured report); `test` cells are boolean assertions
+- `formatter.ts` - `formatResult` (crash-proof rendering of cell results)
+- `cli.ts` - `mtsw` CLI (`run`/`validate`/`graph`); handlers return `{stdout,stderr,exitCode}`
 
 ## Testing
 
@@ -215,30 +224,15 @@ Three hard rules from the 2026-05-01 security release. Future edits must preserv
 
 ## Syncing from mathjs
 
-The `functions/` package contains synced factory-pattern functions from the mathjs fork.
+**The `.ts→.ts` sync model is dead — do not try to re-sync.** Historically the `functions/` package was bulk-copied from the mathjs fork by `~/.claude/scripts/sync_mathjs_to_mathts.py` (copy `.ts` category/support dirs + standalone files, rewrite import depth/extensions). That script is now **moot**: upstream mathjs performed a TS-split at commit `e62bcd749` (2026-04-10) removing all `.ts` files, so the last real sync was `55dea0d71` (2026-04-02) and nothing further can be pulled as TypeScript. The script file still exists on the maintainer's machine but **should not be run** — running it would do nothing useful and could resurrect deleted dead code.
 
-**Sync script**: `~/.claude/scripts/sync_mathjs_to_mathts.py`
-**Run with**: `python -X utf8 ~/.claude/scripts/sync_mathjs_to_mathts.py`
+What this means for the codebase today:
 
-The script:
+- The **valuable** synced code has been **activated** — wired into the live graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`). That is now first-class active code; edit it like any other source.
+- The **dead** synced remnant (unexported AND unreachable AND untested) was **deleted on 2026-06-27**: 455 files / ~58.6k LOC across `functions/` + `core/` (the bulk being the dead `functions/src/expression/` mirror). See "Code in `functions/`" above.
+- Future upstream additions require manual JS→TS porting, not syncing — the porting workspace lives in `tools/mathjs-port/` (one-off scaffolding/drafts; not a workspace member, not part of the build).
 
-1. Copies `.ts` files from `~/Dropbox/Github/Mathjs/src/function/<category>/` → `functions/src/<category>/`
-2. Copies function subdirs: `src/function/shared/` → `functions/src/shared/`
-3. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
-4. Copies standalone files: `types.ts`, `constants.ts`, `factoriesAny.ts`, `factoriesNumber.ts`, `defaultInstance.ts`
-5. Copies `types/` definition directory
-6. Transforms imports:
-   - Relative depth reduction: `../../utils/` → `../utils/` (removes one `../` for any depth)
-   - Standalone file: `../../types.js` → `../types.js`
-   - Function segment strip: `../../function/<category>/` → `../../<category>/` (for support dir cross-refs)
-   - Scoped packages: `@danielsimonjr/typed-function` → `typed-function`, `@danielsimonjr/workerpool` → `workerpool`
-   - Extensions: `.ts` → `.js`, adds `.js` to bare relative imports
-7. Skips Dropbox conflict files
-8. Only writes files that actually changed
-
-**Last sync**: mathjs commit `55dea0d71` (2026-04-02; commit message marks `[15.3.4]` but the tag was never pushed — `package.json` version was `15.2.0`). Upstream then performed a TS-split at `e62bcd749` (2026-04-10) removing all `.ts` files from mathjs. Post-split, the sync script's `.ts → .ts` model cannot pull mathjs's new work; further upstream additions require JS→TS porting (see `tools/mathjs-port/`).
-
-**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` (plus the activated `factories/`) is in the build graph. The dormant synced code carries upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself, so `functions/tsconfig.json` uses `strict: false`. The **active graph** (everything reachable from `src/index.ts`), however, is type-clean: `tsc --noEmit` reports 0 errors, and `tsc -p tsconfig.dts.json` emits the published `.d.ts` tree. (The old "no types, ~700 errors blocks --dts" note was stale — the real blocker was one TS4023 on `evaluate`, fixed via `ReturnType<typeof createEvaluate>`.)
+The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `npm run typecheck` reports 0 errors (28/28 tasks), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. `functions/tsconfig.json` keeps `strict: false` because the activated factory layer + path-mapped `expression`/`core` sources carry ~430 pre-existing strict violations (a separate cleanup), NOT because of dormant code.
 
 ## Known Issues
 
@@ -250,9 +244,10 @@ The script:
 
 `tools/` contains standalone utility packages (not workspace members):
 
-- `create-dependency-graph/` - generates package dependency graphs
+- `create-dependency-graph/` - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`)
 - `compress-for-context/` - compresses code for LLM context windows
 - `chunking-for-files/` - splits large files into chunks
+- `mathjs-port/` - one-off JS→TS porting scaffolding/drafts for pulling new upstream mathjs work now that the `.ts→.ts` sync model is dead (see "Syncing from mathjs"). Not a workspace member; not built.
 
 ## Versioning
 
