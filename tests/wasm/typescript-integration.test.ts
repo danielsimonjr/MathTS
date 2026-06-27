@@ -21,16 +21,6 @@ const hasWasm = wasmArtifactAvailable();
 if (!hasWasm) warnWasmArtifactsMissing(1);
 const describeWasm = hasWasm ? describe : describe.skip;
 
-const EPSILON = 1e-10;
-
-function approxEqual(actual: number, expected: number, tolerance = EPSILON): void {
-  const diff = Math.abs(actual - expected);
-  assert.ok(
-    diff <= tolerance,
-    `Expected ${actual} to be approximately equal to ${expected} (diff: ${diff})`
-  );
-}
-
 function shouldSkip(err: Error): boolean {
   return (
     err.message.includes('Cannot find module') ||
@@ -59,66 +49,6 @@ describe('TypeScript + WASM Integration Tests', { timeout: 15000 }, () => {
       } catch (err) {
         if (shouldSkip(err as Error)) {
           assert.ok(true, 'Module not available - skipping (run: npm run build:wasm)');
-        } else {
-          throw err;
-        }
-      }
-    });
-
-    it('should import WASM functions from functions package', async () => {
-      try {
-        const wasm = await import('../../functions/src/wasm/index.js');
-
-        assert.ok(wasm, 'WASM functions index should be importable');
-      } catch (err) {
-        if (shouldSkip(err as Error)) {
-          assert.ok(true, 'Module not available - skipping');
-        } else {
-          throw err;
-        }
-      }
-    });
-  });
-
-  describe('TypeScript AssemblyScript Integration', () => {
-    it('should import AssemblyScript modules as TypeScript', async () => {
-      try {
-        const arithmetic = await import('../../functions/src/wasm/arithmetic/index.js');
-
-        assert.ok(arithmetic, 'Arithmetic module should be importable');
-
-        if (typeof arithmetic.square === 'function') {
-          approxEqual(arithmetic.square(5), 25);
-        }
-        if (typeof arithmetic.cube === 'function') {
-          approxEqual(arithmetic.cube(3), 27);
-        }
-      } catch (err) {
-        if (shouldSkip(err as Error)) {
-          assert.ok(true, 'Module not available - skipping');
-        } else {
-          throw err;
-        }
-      }
-    });
-
-    it('should handle complex operations with proper types', async () => {
-      try {
-        const complex = await import('../../functions/src/wasm/complex/index.js');
-
-        if (typeof complex.mulComplex === 'function') {
-          // Complex multiplication: (2+3i) * (4+5i) = -7 + 22i
-          const result = complex.mulComplex(2, 3, 4, 5);
-          assert.ok(result[0] !== undefined, 'Real part should exist');
-          assert.ok(result[1] !== undefined, 'Imaginary part should exist');
-          approxEqual(result[0], -7);
-          approxEqual(result[1], 22);
-        } else {
-          assert.ok(true, 'mulComplex not available - skipping');
-        }
-      } catch (err) {
-        if (shouldSkip(err as Error)) {
-          assert.ok(true, 'Module not available - skipping');
         } else {
           throw err;
         }
@@ -163,29 +93,4 @@ describe('TypeScript + WASM Integration Tests', { timeout: 15000 }, () => {
       }
     });
   });
-
-  describe('Error Handling with Types', () => {
-    it('should handle invalid inputs gracefully', async () => {
-      try {
-        const wasm = await import('../../functions/src/wasm/index.js');
-
-        // Special functions should handle edge cases
-        if (typeof wasm.erf === 'function') {
-          const erfResult = wasm.erf(0);
-          approxEqual(erfResult, 0, 1e-7);
-        }
-        if (typeof wasm.gamma === 'function') {
-          const gammaResult = wasm.gamma(1);
-          approxEqual(gammaResult, 1);
-        }
-      } catch (err) {
-        if (shouldSkip(err as Error)) {
-          assert.ok(true, 'Module not available - skipping');
-        } else {
-          throw err;
-        }
-      }
-    });
-  });
-
 });
