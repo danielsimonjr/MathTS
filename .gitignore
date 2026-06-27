@@ -8,6 +8,10 @@ build/
 out/
 *.tsbuildinfo
 
+# Python bytecode (inventory/scan tooling under tools/)
+__pycache__/
+*.pyc
+
 # WASM build artifacts
 assembly/build/
 *.wasm
