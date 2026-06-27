@@ -267,11 +267,19 @@ for (const [op, data] of stats.operationStats) {
 
 ### Benchmarking
 
-Run the built-in benchmarks:
+Run the AssemblyScript-vs-JS WASM benchmark suite (full round-trip, median of
+several reps, with a correctness `maxdiff` column):
 
 ```bash
-npx ts-node tools/benchmark/e2e/backend-comparison.bench.ts
+npm run bench:wasm            # full suite
+npm run bench:elementwise     # array_<op>_ptr kernels vs Math.*
+npm run bench:special         # bessel / lgamma / elliptic kernels
+npm run bench:sort            # sort_f64 introsort vs JS comparator sort
+npm run bench:matrix          # multiply / svd / eig / Welch-PSD (FFT) vs JS
 ```
+
+The numbers are AS-vs-JS only and hardware-specific; re-run on your target
+hardware. A dated snapshot lives in `docs/BENCHMARK_RESULTS.md`.
 
 ## Hardware Considerations
 
@@ -348,7 +356,7 @@ setBackendThreshold('wasm', actualCrossover);
 
 ## WASM Benchmark Results
 
-The following measurements were recorded with the AssemblyScript WASM backend compared against the JavaScript fallback. All timings are median over 50 runs, Node.js 22 on AMD Ryzen 9 5900X. (These are kept as a historical record — the standalone WASM benchmark suite they were produced with was removed in the Rust scrub and can no longer be re-run.)
+The following measurements were recorded with the AssemblyScript WASM backend compared against the JavaScript fallback. All timings are median over 50 runs, Node.js 22 on AMD Ryzen 9 5900X. (These are kept as a historical record. The standalone WASM benchmark suite has since been recreated as an AssemblyScript-vs-JS suite under `tools/benchmark/wasm/` — run `npm run bench:wasm` to reproduce on your hardware; current measured numbers are in `docs/BENCHMARK_RESULTS.md`.)
 
 ### Matrix Multiplication
 

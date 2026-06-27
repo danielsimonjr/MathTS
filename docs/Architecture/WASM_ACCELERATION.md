@@ -50,9 +50,12 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 > reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
 > than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
 > in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
-> chain. The remaining "parallel" routing is intentional. (These figures were
-> measured with the former `tools/benchmark/wasm/` micro-benchmark suite, since
-> removed in the Rust scrub.)
+> chain. The remaining "parallel" routing is intentional. (These figures can be
+> re-measured with the `tools/benchmark/wasm/` AssemblyScript-vs-JS suite — `npm
+> run bench:wasm`, or the per-area `bench:elementwise` / `bench:special` /
+> `bench:sort` / `bench:matrix`. The suite times each accelerated path against
+> its JS fallback over a full JS↔wasm round-trip and prints a correctness
+> `maxdiff` column. A dated snapshot lives in `docs/BENCHMARK_RESULTS.md`.)
 
 ### The WASM-accelerated typed functions
 

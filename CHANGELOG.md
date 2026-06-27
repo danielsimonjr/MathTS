@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tooling (2026-06-27) — Recreated the AS-vs-JS WASM benchmark suite
+
+- Rebuilt `tools/benchmark/wasm/` from scratch as an **AssemblyScript-vs-JS**
+  suite (the old suite was deleted in the Rust scrub because it loaded the
+  removed native binary). The new suite measures each accelerated path against
+  its JS fallback over a realistic full JS↔wasm round-trip, median of several
+  reps, with a correctness `maxdiff` column. No source logic changed.
+  - `harness.ts` — reusable timing/maxdiff/table primitives, tsx-runnable.
+  - `elementwise.bench.ts` — `array_<op>_ptr` kernels + op-fusion chain vs `Math.*`.
+  - `special.bench.ts` — bessel_j0/j1, lgamma, elliptic_k AS kernels vs JS scalars.
+  - `sort.bench.ts` — `sort_f64` introsort vs JS NaN-last comparator sort.
+  - `matrix.bench.ts` — multiply / svd / eig (symmetric) / Welch-PSD (FFT) vs JS.
+  - `run.ts` — full-suite orchestrator.
+- npm scripts: `bench:wasm` (full) + `bench:elementwise` / `bench:special` /
+  `bench:sort` / `bench:matrix` (per-area), matching the existing
+  `bench:parallel` / `bench:tensor` style.
+- Docs refreshed to point at the recreated suite and a dated, measured snapshot:
+  `docs/Architecture/API.md`, `docs/Architecture/WASM_ACCELERATION.md`,
+  `docs/performance.md`, `docs/BENCHMARK_RESULTS.md`. AS-vs-JS only — no Rust.
+
 ### Docs (2026-06-26) — Corrected stale Rust-dispatch comments in active WASM bridges
 
 - Swept every `Rust` mention in the active WASM code (`functions/src/wasm/**`,

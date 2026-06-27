@@ -404,17 +404,23 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 
 ## npm Scripts (WASM-related)
 
-| Script                  | Command                                            | Description                              |
-| ----------------------- | -------------------------------------------------- | ---------------------------------------- |
-| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`    | Build the AssemblyScript WASM backend    |
-| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`       | AssemblyScript WASM tests                |
-| `test:wasm:integration` | `vitest run tests/wasm/`                           | Cross-package WASM integration tests     |
+| Script                  | Command                                            | Description                                          |
+| ----------------------- | -------------------------------------------------- | ---------------------------------------------------- |
+| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`    | Build the AssemblyScript WASM backend                |
+| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`       | AssemblyScript WASM tests                            |
+| `test:wasm:integration` | `vitest run tests/wasm/`                           | Cross-package WASM integration tests                |
+| `bench:wasm`            | `npx tsx tools/benchmark/wasm/run.ts`              | Full AssemblyScript-vs-JS benchmark suite            |
+| `bench:elementwise`     | `npx tsx tools/benchmark/wasm/elementwise.bench.ts`| Elementwise `array_<op>_ptr` kernels vs `Math.*`     |
+| `bench:special`         | `npx tsx tools/benchmark/wasm/special.bench.ts`    | Special-function kernels (bessel/lgamma/elliptic)    |
+| `bench:sort`            | `npx tsx tools/benchmark/wasm/sort.bench.ts`       | `sort_f64` introsort vs JS comparator sort           |
+| `bench:matrix`          | `npx tsx tools/benchmark/wasm/matrix.bench.ts`     | multiply / svd / eig / Welch-PSD (FFT) vs JS         |
 
-(The former native-WASM build was removed when AssemblyScript became the sole
-WASM toolchain. The standalone `tools/benchmark/wasm/` micro-benchmark suite —
-`bench:wasm`, `bench:elementwise`, `bench:reduction`, `bench:transcendental`,
-`bench:special-array`, `bench:fusion` — was removed in the Rust scrub; those
-scripts and files no longer exist.)
+The `tools/benchmark/wasm/` suite measures each AssemblyScript-accelerated path
+against its pure-JS fallback over a realistic full JS↔wasm round-trip (median of
+several reps, plus a correctness `maxdiff` column). It is AS-vs-JS only — the
+former native-WASM build was removed when AssemblyScript became the sole WASM
+toolchain. See `docs/BENCHMARK_RESULTS.md` for a dated snapshot of measured
+numbers.
 
 ---
 
