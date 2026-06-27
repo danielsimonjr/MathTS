@@ -117,6 +117,7 @@ reference). Looking for something? Skim the group headers, then the table.
 | [Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md](Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md) | Workbook (.mtsw) runtime spec. |
 | [Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md](Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md) | Workbench (ISE) spec. |
 | [Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md](Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md) | Workbook enhancement roadmap (forward-looking). |
+| [superpowers/specs/2026-06-27-workbook-headless-v1-design.md](superpowers/specs/2026-06-27-workbook-headless-v1-design.md) | Workbook **headless v1** runtime design spec (CLI/terminal `.mtsw`; Draft). |
 
 > The `Architecture/Workbook/` folder also holds reference source/example files
 > (`*.ts`, `*.mtsw`, `mathts-architecture.mermaid`).
