@@ -141,7 +141,12 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 ## Tier 3 — WASM-route slices (sequenced, one at a time)
 
-These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice ends with a `bench:wasm` pass that sets the per-op `minElements` threshold.
+> **Historical note:** The `bench:wasm` script and the `tools/benchmark/wasm/`
+> suite referenced throughout this tier (including the per-slice `*.bench.ts`
+> "NEW" file entries below) were removed in the Rust scrub and no longer exist.
+> The threshold-tuning step would need a replacement harness.
+
+These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice ends with a benchmark pass that sets the per-op `minElements` threshold.
 
 ### Slice 3.7 — ✅ LANDED in `6520a76` — typed/algebra.ts polynomial WASM ports (rank 7)
 

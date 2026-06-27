@@ -87,7 +87,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 - `functions/src/wasm/poly/wasm-bridge.ts` — add `discriminantDispatch` / `resultantDispatch` + JS fallbacks at the existing `WASM_POLY_THRESHOLD = 256` threshold.
 - `functions/src/typed/algebra.ts` — wire the dispatch into the existing `discriminant` and `resultant` typed functions.
 - `functions/tests/typed-algebra-wasm.test.ts` — extend with 6+ tests (correctness above/below threshold, known reference values e.g. `discriminant([1,-3,2]) = 1`).
-- `tools/benchmark/wasm/poly.bench.ts` — extend with discriminant/resultant timing.
+- `tools/benchmark/wasm/poly.bench.ts` — extend with discriminant/resultant timing. _(Historical: this benchmark file and the `tools/benchmark/wasm/` suite were since removed in the Rust scrub.)_
 - `lib/wasm/wasm-manifest.json` — regenerated via `node tools/generate-wasm-manifest.mjs`.
 
 **Reference:** Slice 3.7 (`6520a76`) — your template for the end-to-end AS+bridge+typed-wiring chain. The `det` primitive already exists in `assembly/src/`.

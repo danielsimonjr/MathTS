@@ -409,14 +409,12 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 | `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`    | Build the AssemblyScript WASM backend    |
 | `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`       | AssemblyScript WASM tests                |
 | `test:wasm:integration` | `vitest run tests/wasm/`                           | Cross-package WASM integration tests     |
-| `bench:elementwise`     | `node tools/benchmark/wasm/elementwise.bench.mjs`  | Elementwise WASM-vs-JS benchmark         |
-| `bench:reduction`       | `node tools/benchmark/wasm/reduction.bench.mjs`    | Reduction WASM-vs-JS benchmark           |
-| `bench:transcendental`  | `node tools/benchmark/wasm/transcendental.bench.mjs` | Transcendental WASM-vs-JS benchmark    |
-| `bench:special-array`   | `npx tsx tools/benchmark/wasm/special-array.bench.mts` | Special-function array benchmark      |
-| `bench:fusion`          | `node tools/benchmark/wasm/fusion.bench.mjs`       | Op-fusion (resident-buffer) benchmark    |
 
-(The former native-WASM build and benchmark scripts were removed when
-AssemblyScript became the sole WASM toolchain.)
+(The former native-WASM build was removed when AssemblyScript became the sole
+WASM toolchain. The standalone `tools/benchmark/wasm/` micro-benchmark suite —
+`bench:wasm`, `bench:elementwise`, `bench:reduction`, `bench:transcendental`,
+`bench:special-array`, `bench:fusion` — was removed in the Rust scrub; those
+scripts and files no longer exist.)
 
 ---
 

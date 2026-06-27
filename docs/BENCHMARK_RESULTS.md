@@ -149,10 +149,12 @@ The implementation includes WebWorker support for parallel execution:
 
 ## Running Benchmarks
 
-```bash
-# Run the AssemblyScript WASM benchmark
-npm run bench:wasm
+> **Historical note:** The standalone WASM micro-benchmark suite (`npm run
+> bench:wasm` and the `tools/benchmark/wasm/` files) was removed in the Rust
+> scrub. The figures above are kept as a historical record and can no longer be
+> regenerated with that script. The WASM tests below still run.
 
+```bash
 # Run AssemblyScript WASM tests
 npm run test:wasm
 

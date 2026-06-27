@@ -1450,9 +1450,12 @@ asc assembly/src/index.ts --target release --outFile lib/wasm/mathjs.wasm
 
 Output: `lib/wasm/mathjs.wasm` (669 KB release build, 826 exports)
 
-### `npm run bench:wasm`
+### `npm run bench:wasm` _(historical — since removed)_
 
-Runs the benchmark comparing AssemblyScript WASM vs JavaScript for a standard suite of operations:
+> This script and the `tools/benchmark/wasm/` suite were removed in the Rust
+> scrub and no longer exist. Retained here as a record of the original plan.
+
+Ran the benchmark comparing AssemblyScript WASM vs JavaScript for a standard suite of operations:
 
 ```bash
 # Equivalent

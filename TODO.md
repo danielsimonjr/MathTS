@@ -1116,9 +1116,10 @@ number,matrix/,unit/}`). Active typed-function code stays strict.
       referenced the un-prefixed `math` identifier. Surfaced once
       `--dts` typecheck ran cleanly. Renamed back to `math` in the
       signature; bodies are correct as written.
-- [x] **`npm run bench:wasm`** now runs end-to-end. WASM column
+- [x] **`npm run bench:wasm`** ran end-to-end. WASM column
       populated: **1.3×–26.6× faster than JS** across matmul / dot /
-      vecadd / det.
+      vecadd / det. _(The `bench:wasm` script and `tools/benchmark/wasm/`
+      suite were since removed in the Rust scrub.)_
 - [x] **`npm run bench:parallel`** produces full per-op break-even
       data. Only `matmul` (≥64-element matrices) and `spectrogram`
       (≥65,536 samples) beat sequential in this container.

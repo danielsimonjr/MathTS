@@ -79,7 +79,7 @@ The dep-graph snapshot of per-typed-file dispatch routing (`wasmLoader.*` and `c
 
 The table below picks out the **specific functions** inside each `typed/` file (or each synced category that has been promoted) whose hot loops would benefit from a WASM kernel. Selection criterion: the function spends ≥ 80% of its wall time in a regular numeric loop ≥ O(n) with n ≥ a few hundred elements, and the loop is _not_ already routed through `ComputePool` (which would already amortise its cost across workers).
 
-Threshold guidance: each candidate has a recommended `minElements` (the size below which the WASM marshal cost dominates and the JS path should win). Treat these as starting points for a `bench:wasm` pass — the real thresholds get measured the same way `WASM_BITWISE_THRESHOLD = 65_536` was set.
+Threshold guidance: each candidate has a recommended `minElements` (the size below which the WASM marshal cost dominates and the JS path should win). Treat these as starting points for a benchmark pass — the real thresholds get measured the same way `WASM_BITWISE_THRESHOLD = 65_536` was set. _(The standalone `bench:wasm` / `tools/benchmark/wasm/` suite this playbook originally relied on was removed in the Rust scrub; a future pass would need a replacement harness.)_
 
 | Candidate (file → exports)                                                                                                                                       | Loop kind                                                 | Where the time goes                                            | Suggested WASM kernel                                                                                                                                                       | Suggested `minElements` | Effort                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -135,7 +135,7 @@ The pattern (lifted from the bitwise port that's already shipped):
 3. Regenerate the manifest with `node tools/generate-wasm-manifest.mjs`.
 4. Add a bridge in `functions/src/wasm/<area>/wasm-bridge.ts` that gates on `minElements`.
 5. Wire `typed/<file>.ts` to call the bridge for the relevant types; keep the pure-JS implementation for small inputs and the fallback.
-6. Add a `tools/benchmark/wasm/<op>.bench.ts` to measure and re-tune the threshold.
+6. Measure and re-tune the threshold with a benchmark. _(The original `tools/benchmark/wasm/` micro-benchmark suite was removed in the Rust scrub; this step needs a replacement harness.)_
 7. Update `docs/Architecture/dependency-summary.compact.json` via `npm run cdg` so this audit's class B table reflects the new acceleration coverage.
 
 For a B.2 (worker-only) entry, steps 1–4 are skipped — only the `typed/<file>.ts` and the `tools/benchmark/parallel/<op>.bench.ts` change.
@@ -185,7 +185,7 @@ For a B.2 (worker-only) entry, steps 1–4 are skipped — only the `typed/<file
 
 | Item                                                                  | Status                                                                                                                                                                                                      |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bench:wasm` (AS vs JS)                                               | ✅ exists                                                                                                                                                                                                   |
+| `bench:wasm` (AS vs JS)                                               | ⛔ removed in the Rust scrub (script + `tools/benchmark/wasm/` suite no longer exist)                                                                                                                       |
 | `bench:parallel` (worker vs sequential break-even)                    | ✅ exists                                                                                                                                                                                                   |
 | `bench:tensor` (contract, contractNetwork, tensordot, decompositions) | ✅ landed in commit `08ce15f` (GAP_CLOSURE Slice 1.6) — four bench files + `npm run bench:tensor` script; baseline numbers (2026-05-24) captured in `ACCELERATION_BENCHMARKS.md`. Full suite wall-time 25s. |
 
@@ -268,7 +268,7 @@ Two genuinely-unconsumed test-escape-hatch exports were also flagged and resolve
 Inspection of the post-fix `unused-analysis.md` confirms the remainder breaks down as:
 
 - **201 interface / type declarations (65%)** — public-API type exports consumed by downstream packages (UPT, external apps) and consumer code outside the monorepo. CDG can't see those consumers, so the flag is unavoidable without a deeper public-API manifest.
-- **64 functions (21%)** — public-API helpers + benchmark-only entry points (`tools/benchmark/wasm/*.bench.ts` consumes `tridiagSolveJS`, `besselJ0JS`, etc.; CDG's reachability scope doesn't include `tools/`).
+- **64 functions (21%)** — public-API helpers + benchmark-only entry points (at the time of this audit, `tools/benchmark/wasm/*.bench.ts` consumed `tridiagSolveJS`, `besselJ0JS`, etc.; CDG's reachability scope doesn't include `tools/`). _Note: that WASM benchmark suite was since removed in the Rust scrub._
 - **42 constants (14%)** — config defaults, threshold constants exported for consumer tuning.
 - **3 classes (1%)** — public-API class exports.
 

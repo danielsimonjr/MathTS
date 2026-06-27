@@ -3,6 +3,13 @@
 **Status:** executed 2026-06-25 · **Drafted:** 2026-06-25 · **Source of truth for
 the pairing:** `docs/Architecture/wasm-pairing.md` (regenerate: `npm run docs:deps`)
 
+> **Historical note (post Rust scrub):** the decision-gate benchmarks cited
+> throughout this document — `bench:wasm`, `bench:reduction`, `bench:elementwise`,
+> `bench:special-array`, `bench:transcendental`, `bench:fusion`, and the
+> `tools/benchmark/wasm/` files — were removed in the Rust scrub and no longer
+> exist. The measurements below are retained as the historical record that drove
+> the wiring decisions; they can no longer be regenerated with those scripts.
+
 ## Resolution (2026-06-25)
 
 Executed under dev-workflow + honest-claude. Outcome:
