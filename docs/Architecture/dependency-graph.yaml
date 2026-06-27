@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: "2026-06-27"
-  totalFiles: 560
+  totalFiles: 562
   totalModules: 69
-  totalExports: 3530
+  totalExports: 3558
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12076,6 +12076,10 @@ modules:
             - WASM_SPECIAL_THRESHOLD
             - lgammaDispatch
             - lgammaJS
+        - file: ./parallel-map.js
+          imports:
+            - mapArray
+            - kernelSource
       exports:
         - normalPDF
         - normalCDF
@@ -12802,6 +12806,17 @@ modules:
         - quadprog
         - linprog
         - solvePDE
+    functions/src/typed/parallel-map.ts:
+      description: Shared parallel array-evaluation helpers for the typed math surfaces.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - kernelSource
+        - mapArray
+      functions:
+        - kernelSource
+        - mapArray
     functions/src/typed/probability.ts:
       description: Typed Probability & Combinatorics Functions
       externalDependencies:
@@ -12995,6 +13010,36 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+        - file: ./parallel-map.js
+          imports:
+            - mapArray
+            - kernelSource
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+            - factorial
+            - betaScalar
+            - gammaincScalar
+            - gammaincpScalar
+            - betaincScalar
+            - besselIScalar
+            - besselHankel
+            - besselJ0Series
+            - besselJ1Series
+            - besselY0Series
+            - besselY1Series
+            - besselJ0Scalar
+            - besselJ1Scalar
+            - besselY0Scalar
+            - besselY1Scalar
+            - besselJScalar
+            - besselYScalar
+            - airyUCoeffs
+            - airyAsymPQ
+            - airyAiScalar
+            - airyBiScalar
+            - ellipticKScalar
+            - ellipticECompleteScalar
         - file: ../wasm/special/wasm-bridge.js
           imports:
             - WASM_SPECIAL_THRESHOLD
@@ -14516,6 +14561,61 @@ modules:
         - rankF64Dispatch
       constants:
         - WASM_SORT_THRESHOLD
+    functions/src/wasm/special/scalars.ts:
+      description: Canonical special-function scalar implementations.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - _lgamma
+        - besselHankel
+        - besselJ0Series
+        - besselJ1Series
+        - besselY0Series
+        - besselY1Series
+        - besselJ0Scalar
+        - besselJ1Scalar
+        - besselY0Scalar
+        - besselY1Scalar
+        - besselJScalar
+        - besselYScalar
+        - ellipticKScalar
+        - ellipticECompleteScalar
+        - airyUCoeffs
+        - airyAsymPQ
+        - airyAiScalar
+        - airyBiScalar
+        - factorial
+        - betaScalar
+        - gammaincScalar
+        - gammaincpScalar
+        - betaincScalar
+        - besselIScalar
+      functions:
+        - _lgamma
+        - besselHankel
+        - besselJ0Series
+        - besselJ1Series
+        - besselY0Series
+        - besselY1Series
+        - besselJ0Scalar
+        - besselJ1Scalar
+        - besselY0Scalar
+        - besselY1Scalar
+        - besselJScalar
+        - besselYScalar
+        - ellipticKScalar
+        - ellipticECompleteScalar
+        - airyUCoeffs
+        - airyAsymPQ
+        - airyAiScalar
+        - airyBiScalar
+        - factorial
+        - betaScalar
+        - gammaincScalar
+        - gammaincpScalar
+        - betaincScalar
+        - besselIScalar
     functions/src/wasm/special/wasm-bridge.ts:
       description: WASM dispatch bridge for Bessel J/Y and Airy Ai/Bi array kernels.
       externalDependencies: []
@@ -14532,6 +14632,19 @@ modules:
             - asReadReturnedF64
             - makeUnaryArrayDispatch
             - RawWasm
+        - file: ./scalars.js
+          imports:
+            - _lgamma
+            - besselJ0Scalar
+            - besselJ1Scalar
+            - besselJScalar
+            - besselY0Scalar
+            - besselY1Scalar
+            - besselYScalar
+            - airyAiScalar
+            - airyBiScalar
+            - ellipticKScalar
+            - ellipticECompleteScalar
       exports:
         - WASM_SPECIAL_THRESHOLD
         - besselJ0Dispatch
@@ -17661,6 +17774,7 @@ modules:
           imports:
             - matrix_eig_symmetric
             - matrix_spectral_radius
+            - matrix_eig_general
           reExport: true
         - file: ./ops/fft
           imports:
@@ -18047,6 +18161,7 @@ modules:
         - matrix_singular_values
         - matrix_eig_symmetric
         - matrix_spectral_radius
+        - matrix_eig_general
         - fft
         - rfft
         - powerSpectrum
@@ -18372,6 +18487,7 @@ modules:
         - matrix_singular_values
         - matrix_eig_symmetric
         - matrix_spectral_radius
+        - matrix_eig_general
         - fft
         - rfft
         - powerSpectrum
@@ -18671,7 +18787,7 @@ modules:
         - divided_difference_f64
   assembly/ops:
     assembly/src/ops/approx.ts:
-      description: Rational approximation — AssemblyScript fallback mirroring
+      description: "Rational approximation — AssemblyScript fallback: partial-fraction"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -18957,7 +19073,7 @@ modules:
         - complex_axpby
         - complex_distance
     assembly/src/ops/curvefit.ts:
-      description: Log-linearized curve fitting — AssemblyScript fallback mirroring
+      description: Log-linearized curve fitting — AssemblyScript fallback. Each fit returns `[a, b]`.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -18977,9 +19093,11 @@ modules:
       exports:
         - matrix_eig_symmetric
         - matrix_spectral_radius
+        - matrix_eig_general
       functions:
         - matrix_eig_symmetric
         - matrix_spectral_radius
+        - matrix_eig_general
     assembly/src/ops/fft.ts:
       description: Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
       externalDependencies: []
@@ -18994,7 +19112,7 @@ modules:
         - rfft
         - powerSpectrum
     assembly/src/ops/linalg.ts:
-      description: Extra linear-algebra kernels — AssemblyScript fallback mirroring
+      description: "Extra linear-algebra kernels — AssemblyScript fallback: reduced row"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19094,7 +19212,7 @@ modules:
         - matrix_gemm
         - matrix_gemv
     assembly/src/ops/number-theory.ts:
-      description: Number-theory functions — AssemblyScript fallback mirroring
+      description: Number-theory functions — AssemblyScript fallback.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19123,7 +19241,7 @@ modules:
         - integerDigits
         - chineseRemainder
     assembly/src/ops/optimization.ts:
-      description: Optimization kernels — AssemblyScript fallback mirroring
+      description: "Optimization kernels — AssemblyScript fallback: linear programming"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19136,7 +19254,7 @@ modules:
         - linprog
         - nullspace
     assembly/src/ops/polynomial.ts:
-      description: Polynomial algebra — AssemblyScript fallback mirroring
+      description: Polynomial algebra — AssemblyScript fallback.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19269,7 +19387,7 @@ modules:
         - LOG10E
         - EPSILON
     assembly/src/ops/signal.ts:
-      description: Signal windowing / resampling kernels — AssemblyScript fallback mirroring
+      description: Signal windowing / resampling kernels — AssemblyScript fallback.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19318,7 +19436,7 @@ modules:
         - matrix_svd
         - matrix_singular_values
     assembly/src/ops/tensor.ts:
-      description: Rank-N tensor operations — AssemblyScript fallback mirroring
+      description: Rank-N tensor operations — AssemblyScript fallback.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -20026,6 +20144,7 @@ dependencyGraph:
         - functions/src/typed/logical.ts
         - functions/src/typed/matrix-ops.ts
         - functions/src/typed/numeric.ts
+        - functions/src/typed/parallel-map.ts
         - functions/src/typed/probability.ts
         - functions/src/typed/relational.ts
         - functions/src/typed/set.ts
@@ -20091,6 +20210,7 @@ dependencyGraph:
         - functions/src/wasm/resolve.ts
         - functions/src/wasm/signal/wasm-bridge.ts
         - functions/src/wasm/sort/wasm-bridge.ts
+        - functions/src/wasm/special/scalars.ts
         - functions/src/wasm/special/wasm-bridge.ts
         - functions/src/wasm/WasmLoader.ts
     - name: Expression/compiler
@@ -20252,17 +20372,17 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 560
+  totalTypeScriptFiles: 562
   totalModules: 69
-  totalLinesOfCode: 147386
-  totalExports: 3530
+  totalLinesOfCode: 148061
+  totalExports: 3558
   totalClasses: 49
   totalInterfaces: 313
-  totalFunctions: 1323
+  totalFunctions: 1350
   totalTypeGuards: 131
   totalEnums: 0
   totalConstants: 1124
-  totalReExports: 1076
+  totalReExports: 1077
   totalTypeOnlyImports: 356
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2

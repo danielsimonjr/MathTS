@@ -892,7 +892,7 @@
       - `lambertW` solves `w·e^w = x`; pass `branch = 0` for the principal branch
         (default) or `branch = -1` for the lower real branch on `[-1/e, 0)`.
       - **WASM acceleration:** `besselJ0` / `besselJ1` / `besselJ(n, x)` and
-        `besselY0` / `besselY1` / `besselY(n, x)` route to Rust+AssemblyScript
+        `besselY0` / `besselY1` / `besselY(n, x)` route to AssemblyScript
         WASM kernels for `Float64Array` inputs of length ≥ 1024
         (`WASM_SPECIAL_THRESHOLD`). Both paths share the Numerical Recipes
         §6.5 polynomial-and-recurrence algorithm, so WASM↔JS agreement is
@@ -1394,7 +1394,7 @@
       - `apart` / `together` are inverses: partial-fraction decomposition versus
         recombination into a single rational expression.
       - **WASM acceleration:** `polymul`, `polynomialGCD`, `polynomialLCM`,
-        `polynomialQuotient`, and `polynomialRemainder` route to a Rust/AS
+        `polynomialQuotient`, and `polynomialRemainder` route to an AssemblyScript
         WASM kernel for coefficient arrays of length ≥ 256
         (`WASM_POLY_THRESHOLD`). Smaller inputs stay on the JS path where
         marshal overhead would dominate. `discriminant` and `resultant` are
@@ -1581,7 +1581,7 @@
       - `griddata` and `rbfInterpolate` handle scattered (non-gridded) data;
         `chebyshevApprox` and `padeApproximant` approximate a known function.
       - **WASM acceleration:** `cubicSpline` routes its tridiagonal-solve
-        hot loop to a Rust/AS WASM kernel (Thomas algorithm) when the
+        hot loop to an AssemblyScript WASM kernel (Thomas algorithm) when the
         system has ≥ 1024 unknowns (`WASM_TRIDIAG_THRESHOLD`). `pchip` and
         `akima` use analytic monotone-cubic slope formulas
         (Fritsch-Carlson / Akima) with no tridiagonal system, so they

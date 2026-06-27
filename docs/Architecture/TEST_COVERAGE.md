@@ -1,17 +1,17 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-06-15
+**Generated**: 2026-06-27
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 554 |
-| Total Test Files | 304 |
-| Source Files with Tests | 199 |
-| Source Files without Tests | 355 |
-| Coverage (raw, direct-import) | **35.9%** |
-| Coverage (effective, active code only) | **98.5%** (194 / 197) |
+| Total Source Files | 562 |
+| Total Test Files | 320 |
+| Source Files with Tests | 201 |
+| Source Files without Tests | 361 |
+| Coverage (raw, direct-import) | **35.8%** |
+| Coverage (effective, active code only) | **97.5%** (196 / 201) |
 
 > The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
 
@@ -20,19 +20,21 @@
 | Category | Count | Why it is intentionally untested |
 |---|---:|---|
 | **Synced mathjs categories in functions/** | 326 | Mechanically synced from upstream mathjs by ~/. |
-| **AssemblyScript sources under assembly/src/** | 24 | AssemblyScript is not a vitest target. |
+| **Synced WASM binding helpers under functions/src/wasm/** | 1 | Same sync source as the mathjs categories. |
+| **AssemblyScript sources under assembly/src/** | 27 | AssemblyScript is not a vitest target. |
 | **Type-only files** | 2 | Pure interface / type declarations with no runtime to exercise. |
-| **Active (real gap — needs a test)** | 3 | These are the files that should grow a direct-import test. |
+| **Active (real gap — needs a test)** | 5 | These are the files that should grow a direct-import test. |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 355 source files are not directly imported by any test file:
+The following 361 source files are not directly imported by any test file:
 
 ### src/
 
 - `assembly/src/algebra/decomposition.ts` → Expected test: `tests/unit/src/decomposition.test.ts`
+- `assembly/src/elementwise.ts` → Expected test: `tests/unit/src/elementwise.test.ts`
 - `assembly/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `assembly/src/ops/approx.ts` → Expected test: `tests/unit/src/approx.test.ts`
 - `assembly/src/ops/array.ts` → Expected test: `tests/unit/src/array.test.ts`
@@ -40,6 +42,8 @@ The following 355 source files are not directly imported by any test file:
 - `assembly/src/ops/complex-array.ts` → Expected test: `tests/unit/src/complex-array.test.ts`
 - `assembly/src/ops/complex-ops.ts` → Expected test: `tests/unit/src/complex-ops.test.ts`
 - `assembly/src/ops/curvefit.ts` → Expected test: `tests/unit/src/curvefit.test.ts`
+- `assembly/src/ops/eig.ts` → Expected test: `tests/unit/src/eig.test.ts`
+- `assembly/src/ops/fft.ts` → Expected test: `tests/unit/src/fft.test.ts`
 - `assembly/src/ops/linalg.ts` → Expected test: `tests/unit/src/linalg.test.ts`
 - `assembly/src/ops/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
 - `assembly/src/ops/number-theory.ts` → Expected test: `tests/unit/src/number-theory.test.ts`
@@ -344,6 +348,7 @@ The following 355 source files are not directly imported by any test file:
 - `functions/src/type/unit/function/splitUnit.ts` → Expected test: `tests/unit/src/splitUnit.test.ts`
 - `functions/src/type/unit/function/unit.ts` → Expected test: `tests/unit/src/unit.test.ts`
 - `functions/src/type/unit/physicalConstants.ts` → Expected test: `tests/unit/src/physicalConstants.test.ts`
+- `functions/src/typed/parallel-map.ts` → Expected test: `tests/unit/src/parallel-map.test.ts`
 - `functions/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
 - `functions/src/unit/to.ts` → Expected test: `tests/unit/src/to.test.ts`
 - `functions/src/unit/toBest.ts` → Expected test: `tests/unit/src/toBest.test.ts`
@@ -385,6 +390,8 @@ The following 355 source files are not directly imported by any test file:
 - `functions/src/utils/string.ts` → Expected test: `tests/unit/src/string.test.ts`
 - `functions/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
 - `functions/src/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
+- `functions/src/wasm/resolve.ts` → Expected test: `tests/unit/src/resolve.test.ts`
+- `functions/src/wasm/special/scalars.ts` → Expected test: `tests/unit/src/scalars.test.ts`
 - `matrix/src/types/dense/arithmetic.ts` → Expected test: `tests/unit/src/arithmetic.test.ts`
 - `matrix/src/types/dense/reduction.ts` → Expected test: `tests/unit/src/reduction.test.ts`
 
@@ -396,26 +403,26 @@ The following 355 source files are not directly imported by any test file:
 |-------------|------------|
 | `src/index.ts` | `arithmetic.test.ts` |
 | `src/index.ts` | `ast.test.ts` |
-| `src/dual-tensor.ts` | `scaffold.test.ts` |
+| `src/dual-tensor.ts` | `dual-elementwise-ad.test.ts`, `scaffold.test.ts` |
 | `src/forward-grad.ts` | `forward-grad.test.ts`, `scaffold.test.ts` |
 | `src/index.ts` | `scaffold.test.ts` |
 | `src/reverse-grad.ts` | `reverse-grad.test.ts`, `scaffold.test.ts` |
-| `src/tape.ts` | `ad-wasm-interop.test.ts`, `scaffold.test.ts`, `tape-decomposition-ad.test.ts`, `tape-elementwise-ad.test.ts`, `tape-reductions-ad.test.ts`, `tensor-contract-ad.test.ts` |
-| `src/index.ts` | `compat.test.ts`, `coverage-gaps.test.ts`, `create.test.ts`, `delegation.test.ts` |
-| `src/shims.ts` | `compat.test.ts`, `coverage-gaps.test.ts`, `create.test.ts`, `delegation.test.ts`, `shims.test.ts` |
-| `factory/factory.ts` | `factory.test.ts`, `version.test.ts` |
-| `factory/index.ts` | `factory.test.ts`, `version.test.ts` |
-| `src/index.ts` | `version.test.ts` |
-| `typed/index.ts` | `version.test.ts` |
-| `typed/mathts-typed.ts` | `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts` |
-| `typed/type-bridge.ts` | `type-bridge.test.ts`, `version.test.ts` |
-| `types/bignumber.ts` | `BigNumber-formatter-api.test.ts`, `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-coverage.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
-| `types/complex.ts` | `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex-coverage.test.ts`, `complex.test.ts`, `version.test.ts` |
-| `types/fraction.ts` | `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction-coverage.test.ts`, `fraction.test.ts`, `version.test.ts` |
+| `src/tape.ts` | `ad-wasm-interop.test.ts`, `scaffold.test.ts`, `tape-decomposition-ad.test.ts`, `tape-elementwise-ad.test.ts`, `tape-elementwise-extended-ad.test.ts`, `tape-reductions-ad.test.ts`, `tensor-contract-ad.test.ts` |
+| `src/index.ts` | `compat.test.ts`, `coverage-gaps.test.ts`, `create.test.ts`, `delegation.test.ts`, `matrix-array-ops.test.ts`, `std-variance.test.ts` |
+| `src/shims.ts` | `compat.test.ts`, `coverage-gaps.test.ts`, `create.test.ts`, `delegation.test.ts`, `matrix-array-ops.test.ts`, `shims.test.ts`, `std-variance.test.ts` |
+| `factory/factory.ts` | `factory.test.ts`, `type-guards.test.ts`, `version.test.ts` |
+| `factory/index.ts` | `factory.test.ts`, `type-guards.test.ts`, `version.test.ts` |
+| `src/index.ts` | `type-guards.test.ts`, `version.test.ts` |
+| `typed/index.ts` | `type-guards.test.ts`, `version.test.ts` |
+| `typed/mathts-typed.ts` | `type-guards.test.ts`, `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts` |
+| `typed/type-bridge.ts` | `type-guards.test.ts`, `type-bridge.test.ts`, `version.test.ts` |
+| `types/bignumber.ts` | `BigNumber-formatter-api.test.ts`, `type-guards.test.ts`, `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-coverage.test.ts`, `bignumber-math.test.ts`, `bignumber-radix.test.ts`, `bignumber.test.ts`, `version.test.ts` |
+| `types/complex.ts` | `type-guards.test.ts`, `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex-coverage.test.ts`, `complex.test.ts`, `version.test.ts` |
+| `types/fraction.ts` | `type-guards.test.ts`, `mathts-typed-coverage.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction-coverage.test.ts`, `fraction.test.ts`, `version.test.ts` |
 | `types/interfaces.ts` | `types-interfaces.test.ts` |
-| `types/unit-definitions.ts` | `version.test.ts` |
-| `types/unit-prefixes.ts` | `version.test.ts` |
-| `types/unit.ts` | `unit.test.ts`, `version.test.ts` |
+| `types/unit-definitions.ts` | `type-guards.test.ts`, `version.test.ts` |
+| `types/unit-prefixes.ts` | `type-guards.test.ts`, `version.test.ts` |
+| `types/unit.ts` | `type-guards.test.ts`, `unit.test.ts`, `version.test.ts` |
 | `src/index.ts` | `evaluator.test.ts` |
 | `src/Help.ts` | `Help-config.test.ts`, `Help.test.ts`, `package-index.test.ts` |
 | `src/Parser.ts` | `package-index.test.ts`, `Parser-extra.test.ts`, `Parser.test.ts` |
@@ -464,7 +471,7 @@ The following 355 source files are not directly imported by any test file:
 | `utils/string.ts` | `utils-string-object-factory-extra.test.ts`, `utils-string.test.ts` |
 | `utils/switch.ts` | `utils-switch.test.ts` |
 | `factories/evaluate.ts` | `conversions-parser.test.ts`, `cov-cas.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-cas-batch-workers.test.ts`, `Parser-extra.test.ts`, `Parser.test.ts` |
-| `factories/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts` |
+| `factories/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts` |
 | `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts` |
 | `factories/scope.ts` | `factory-scope.test.ts` |
 | `src/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
@@ -476,6 +483,7 @@ The following 355 source files are not directly imported by any test file:
 | `typed/complex.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-complex.test.ts` |
 | `typed/dist-objects.ts` | `conversions-parser.test.ts`, `cov-dist-objects.test.ts`, `dist-objects.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-dist-objects-workers.test.ts` |
 | `typed/distributions.ts` | `conversions-parser.test.ts`, `distributions.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/fused.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/geometry.ts` | `conversions-parser.test.ts`, `cov-geometry.test.ts`, `docs-sync.test.ts`, `geometry-extended.test.ts`, `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-geometry-hull-wasm.test.ts`, `typed-geometry.test.ts` |
 | `typed/gpu.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `gpu-smoke.browser.test.ts`, `gpu.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/graph.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `graph.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-graph-workers.test.ts` |
@@ -496,14 +504,16 @@ The following 355 source files are not directly imported by any test file:
 | `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `cov-trigonometry.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-trig-unary.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts` |
 | `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
 | `typed/unit.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-unit.test.ts` |
-| `wasm/WasmLoader.ts` | `cov-signal.test.ts`, `typed-algebra-wasm.test.ts`, `typed-bitwise-wasm.test.ts`, `typed-cas-fit-wasm.test.ts`, `typed-interpolation-wasm.test.ts` |
-| `bitwise/wasm-bridge.ts` | `typed-bitwise-wasm.test.ts` |
+| `wasm/WasmLoader.ts` | `bitwise-as-wasm.test.ts`, `cov-signal.test.ts`, `interpolation-as-wasm.test.ts`, `poly-as-wasm.test.ts`, `signal-as-wasm.test.ts`, `sort-as-wasm.test.ts`, `special-as-wasm.test.ts`, `typed-algebra-wasm.test.ts`, `typed-bitwise-wasm.test.ts`, `typed-cas-fit-wasm.test.ts`, `typed-elementwise-as-wasm.test.ts`, `typed-interpolation-wasm.test.ts` |
+| `bitwise/wasm-bridge.ts` | `bitwise-as-wasm.test.ts`, `typed-bitwise-wasm.test.ts` |
+| `bridges/common.ts` | `typed-elementwise-as-wasm.test.ts` |
+| `elementwise/wasm-bridge.ts` | `typed-elementwise-as-wasm.test.ts` |
 | `wasm/integrity.ts` | `wasm-integrity.test.ts` |
-| `interpolation/wasm-bridge.ts` | `typed-interpolation-wasm.test.ts` |
-| `poly/wasm-bridge.ts` | `typed-algebra-wasm.test.ts`, `typed-cas-fit-wasm.test.ts` |
-| `signal/wasm-bridge.ts` | `typed-signal-wasm.test.ts` |
-| `sort/wasm-bridge.ts` | `typed-geometry-hull-wasm.test.ts`, `typed-sort-wasm.test.ts`, `typed-statistics-wasm.test.ts` |
-| `special/wasm-bridge.ts` | `typed-distributions-wasm.test.ts`, `typed-special-carlson.test.ts`, `typed-special-wasm.test.ts` |
+| `interpolation/wasm-bridge.ts` | `interpolation-as-wasm.test.ts`, `typed-interpolation-wasm.test.ts` |
+| `poly/wasm-bridge.ts` | `poly-as-wasm.test.ts`, `typed-algebra-wasm.test.ts`, `typed-cas-fit-wasm.test.ts` |
+| `signal/wasm-bridge.ts` | `signal-as-wasm.test.ts`, `typed-signal-wasm.test.ts` |
+| `sort/wasm-bridge.ts` | `sort-as-wasm.test.ts`, `typed-geometry-hull-wasm.test.ts`, `typed-sort-wasm.test.ts`, `typed-statistics-wasm.test.ts` |
+| `special/wasm-bridge.ts` | `special-as-wasm.test.ts`, `typed-distributions-wasm.test.ts`, `typed-special-carlson.test.ts`, `typed-special-wasm.test.ts` |
 | `src/index.ts` | `linalg.test.ts` |
 | `backends/Backend.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/BackendManager.ts` | `BackendManager.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
@@ -512,7 +522,7 @@ The following 355 source files are not directly imported by any test file:
 | `backends/JSBackend.ts` | `WASMBackend-as.test.ts`, `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `operations.test.ts` |
 | `backends/ParallelBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/WASMBackend.ts` | `WASMBackend-as.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `loading.test.ts`, `operations.test.ts` |
-| `backends/WasmLoader.ts` | `WasmLoader-as.test.ts`, `WasmLoader-browser.test.ts`, `MatrixWasmBridge.test.ts`, `eig-wasm-mock.test.ts`, `fft-wasm-mock.test.ts`, `fft-wasm.test.ts`, `WasmLoader.test.ts` |
+| `backends/WasmLoader.ts` | `WasmLoader-as.test.ts`, `WasmLoader-browser.test.ts`, `eig-general-wasm.test.ts`, `eig-wasm-mock.test.ts`, `svd-wasm-mock.test.ts`, `svd-wasm.test.ts`, `fft-wasm-mock.test.ts`, `fft-wasm.test.ts`, `heavy-ops-as.test.ts`, `WasmLoader.test.ts` |
 | `gpu/BatchExecutor.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `gpu/BufferPool.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `gpu/GPUContext.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
@@ -527,8 +537,9 @@ The following 355 source files are not directly imported by any test file:
 | `src/config.ts` | `BackendManager.test.ts`, `config.test.ts` |
 | `src/index.ts` | `typed-operations.test.ts` |
 | `operations/cholesky.ts` | `cholesky.test.ts`, `typed-operations.test.ts` |
-| `operations/eig-wasm.ts` | `eig-wasm.test.ts`, `eig-wasm-mock.test.ts`, `typed-operations.test.ts` |
-| `operations/eig.ts` | `eig.test.ts`, `eig-wasm-mock.test.ts`, `typed-operations.test.ts` |
+| `operations/common.ts` | `common.test.ts` |
+| `operations/eig-wasm.ts` | `eig-general-wasm.test.ts`, `eig-wasm.test.ts`, `eig-wasm-mock.test.ts`, `typed-operations.test.ts`, `heavy-ops-as.test.ts` |
+| `operations/eig.ts` | `eig-general-wasm.test.ts`, `eig-nonsymmetric.test.ts`, `eig.test.ts`, `eig-wasm-mock.test.ts`, `typed-operations.test.ts`, `heavy-ops-as.test.ts` |
 | `operations/expm.ts` | `expm.test.ts`, `logm.test.ts`, `typed-operations.test.ts` |
 | `operations/index.ts` | `typed-operations.test.ts` |
 | `operations/logm.ts` | `logm.test.ts`, `typed-operations.test.ts` |
@@ -537,8 +548,8 @@ The following 355 source files are not directly imported by any test file:
 | `operations/qr.ts` | `qr.test.ts`, `typed-operations.test.ts` |
 | `operations/schur.ts` | `schur.test.ts`, `typed-operations.test.ts` |
 | `operations/sqrtm.ts` | `sqrtm.test.ts`, `typed-operations.test.ts` |
-| `operations/svd-wasm.ts` | `svd-wasm.test.ts`, `typed-operations.test.ts` |
-| `operations/svd.ts` | `svd.test.ts`, `svd-wasm-mock.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts` |
+| `operations/svd-wasm.ts` | `svd-wasm.test.ts`, `typed-operations.test.ts`, `heavy-ops-as.test.ts` |
+| `operations/svd.ts` | `svd.test.ts`, `svd-wasm-mock.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts`, `heavy-ops-as.test.ts` |
 | `src/parallel-matrix.ts` | `typed-operations.test.ts` |
 | `src/typed-operations.ts` | `typed-operations.test.ts` |
 | `types/DenseMatrix.ts` | `Backend.test.ts`, `BackendManager.test.ts`, `WASMBackend-as.test.ts`, `DenseMatrix.test.ts`, `JSBackend.test.ts`, `cholesky.test.ts`, `expm.test.ts`, `logm.test.ts`, `lu.test.ts`, `pinv.test.ts`, `qr.test.ts`, `schur.test.ts`, `sqrtm.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `operations.test.ts` |
@@ -563,7 +574,7 @@ The following 355 source files are not directly imported by any test file:
 | `src/index.ts` | `parser.test.ts` |
 | `src/index.ts` | `signal.test.ts` |
 | `src/index.ts` | `statistics.test.ts` |
-| `src/Tensor.ts` | `broadcasting.test.ts`, `contraction-sequence.test.ts`, `cholesky.test.ts`, `concatenate.test.ts`, `eig.test.ts`, `flip.test.ts`, `gather.test.ts`, `kron.test.ts`, `lu.test.ts`, `pad.test.ts`, `pinv.test.ts`, `qr.test.ts`, `random.test.ts`, `roll.test.ts`, `scatter.test.ts`, `slice.test.ts`, `solve.test.ts`, `stack.test.ts`, `svd.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `Tensor-contract.test.ts`, `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `tensordot.test.ts` |
+| `src/Tensor.ts` | `broadcasting.test.ts`, `contraction-sequence.test.ts`, `cholesky.test.ts`, `concatenate.test.ts`, `eig.test.ts`, `flip.test.ts`, `gather.test.ts`, `kron.test.ts`, `lu.test.ts`, `pad.test.ts`, `pinv.test.ts`, `qr.test.ts`, `random.test.ts`, `roll.test.ts`, `scatter.test.ts`, `slice.test.ts`, `solve.test.ts`, `stack.test.ts`, `svd.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `rowMajorStrides.test.ts`, `Tensor-contract.test.ts`, `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `tensordot.test.ts` |
 | `src/contraction-sequence.ts` | `contraction-sequence.test.ts`, `package-index.test.ts` |
 | `src/index.ts` | `package-index.test.ts` |
 | `src/named-index.ts` | `contraction-sequence.test.ts`, `Index.test.ts`, `cholesky.test.ts`, `concatenate.test.ts`, `eig.test.ts`, `flip.test.ts`, `gather.test.ts`, `kron.test.ts`, `lu.test.ts`, `pad.test.ts`, `pinv.test.ts`, `qr.test.ts`, `random.test.ts`, `roll.test.ts`, `scatter.test.ts`, `slice.test.ts`, `solve.test.ts`, `stack.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `Tensor-contract.test.ts`, `tensordot.test.ts` |
@@ -610,12 +621,14 @@ The following 355 source files are not directly imported by any test file:
 | `factory/factory.test.ts` | 2 files |
 | `tests/factory-sort.test.ts` | 0 files |
 | `tests/shared.test.ts` | 0 files |
+| `tests/type-guards.test.ts` | 12 files |
 | `typed/mathts-typed-coverage.test.ts` | 4 files |
 | `typed/mathts-typed-extended.test.ts` | 4 files |
 | `typed/mathts-typed.test.ts` | 4 files |
 | `typed/type-bridge.test.ts` | 4 files |
 | `types/bignumber-coverage.test.ts` | 1 files |
 | `types/bignumber-math.test.ts` | 1 files |
+| `types/bignumber-radix.test.ts` | 1 files |
 | `types/bignumber.test.ts` | 1 files |
 | `types/complex-coverage.test.ts` | 1 files |
 | `types/complex.test.ts` | 1 files |
@@ -632,6 +645,8 @@ The following 355 source files are not directly imported by any test file:
 | `backends/WasmLoader-as.test.ts` | 1 files |
 | `backends/WasmLoader-browser.test.ts` | 1 files |
 | `tests/config.test.ts` | 1 files |
+| `decomposition/eig-general-wasm.test.ts` | 3 files |
+| `decomposition/eig-nonsymmetric.test.ts` | 1 files |
 | `decomposition/eig-wasm.test.ts` | 1 files |
 | `decomposition/eig.test.ts` | 1 files |
 | `decomposition/svd.test.ts` | 1 files |
@@ -640,8 +655,8 @@ The following 355 source files are not directly imported by any test file:
 | `gpu/integration.test.ts` | 5 files |
 | `gpu/operations.test.ts` | 1 files |
 | `tests/JSBackend.test.ts` | 3 files |
-| `tests/MatrixWasmBridge.test.ts` | 1 files |
 | `operations/cholesky.test.ts` | 2 files |
+| `operations/common.test.ts` | 1 files |
 | `operations/eig-wasm-mock.test.ts` | 3 files |
 | `operations/expm.test.ts` | 2 files |
 | `operations/logm.test.ts` | 3 files |
@@ -655,14 +670,15 @@ The following 355 source files are not directly imported by any test file:
 | `sparse/operations.test.ts` | 2 files |
 | `sparse/SparseMatrix.test.ts` | 2 files |
 | `tests/svd-wasm.test.ts` | 3 files |
-| `tests/typed-operations.test.ts` | 40 files |
+| `tests/typed-operations.test.ts` | 38 files |
 | `wasm/accuracy.test.ts` | 2 files |
 | `wasm/decompositions-as.test.ts` | 2 files |
 | `wasm/fft-wasm-mock.test.ts` | 2 files |
 | `wasm/fft-wasm.test.ts` | 2 files |
-| `wasm/loading.test.ts` | 20 files |
+| `wasm/heavy-ops-as.test.ts` | 5 files |
+| `wasm/loading.test.ts` | 18 files |
 | `wasm/operations.test.ts` | 3 files |
-| `tests/wasm-fft-fallback.test.ts` | 0 files |
+| `tests/wasm-resolve.test.ts` | 0 files |
 | `tests/WasmLoader.test.ts` | 1 files |
 | `tests/broadcasting.test.ts` | 1 files |
 | `tests/contraction-sequence.test.ts` | 3 files |
@@ -686,25 +702,29 @@ The following 355 source files are not directly imported by any test file:
 | `operations/svd.test.ts` | 2 files |
 | `tests/package-index.test.ts` | 21 files |
 | `tests/reductions.test.ts` | 2 files |
+| `tests/rowMajorStrides.test.ts` | 1 files |
 | `tests/Tensor-contract.test.ts` | 2 files |
 | `tests/Tensor.matrix-bridge.test.ts` | 1 files |
 | `tests/Tensor.ops.test.ts` | 1 files |
 | `tests/Tensor.test.ts` | 1 files |
 | `tests/tensordot.test.ts` | 2 files |
 | `tests/ad-wasm-interop.test.ts` | 1 files |
+| `tests/dual-elementwise-ad.test.ts` | 1 files |
 | `tests/forward-grad.test.ts` | 1 files |
 | `tests/reverse-grad.test.ts` | 1 files |
 | `tests/scaffold.test.ts` | 5 files |
 | `tests/tape-decomposition-ad.test.ts` | 1 files |
 | `tests/tape-elementwise-ad.test.ts` | 1 files |
+| `tests/tape-elementwise-extended-ad.test.ts` | 1 files |
 | `tests/tape-reductions-ad.test.ts` | 1 files |
 | `tests/tensor-contract-ad.test.ts` | 1 files |
 | `tests/algebra.test.ts` | 1 files |
 | `tests/arithmetic-extended.test.ts` | 2 files |
+| `tests/bitwise-as-wasm.test.ts` | 2 files |
 | `tests/cas.test.ts` | 1 files |
 | `tests/combinatorics-extended.test.ts` | 1 files |
 | `tests/combinatorics.test.ts` | 1 files |
-| `tests/conversions-parser.test.ts` | 30 files |
+| `tests/conversions-parser.test.ts` | 31 files |
 | `tests/cov-arithmetic.test.ts` | 1 files |
 | `tests/cov-bitwise.test.ts` | 1 files |
 | `tests/cov-cas.test.ts` | 2 files |
@@ -720,7 +740,7 @@ The following 355 source files are not directly imported by any test file:
 | `tests/cov-trigonometry.test.ts` | 1 files |
 | `tests/dist-objects.test.ts` | 1 files |
 | `tests/distributions.test.ts` | 1 files |
-| `tests/docs-sync.test.ts` | 30 files |
+| `tests/docs-sync.test.ts` | 31 files |
 | `tests/evaluate.test.ts` | 1 files |
 | `tests/factories-final.test.ts` | 3 files |
 | `tests/factories-leaf.test.ts` | 7 files |
@@ -735,30 +755,35 @@ The following 355 source files are not directly imported by any test file:
 | `tests/graph.test.ts` | 1 files |
 | `tests/hypothesis.test.ts` | 1 files |
 | `tests/integration.test.ts` | 1 files |
+| `tests/interpolation-as-wasm.test.ts` | 2 files |
 | `tests/interpolation.test.ts` | 1 files |
 | `tests/matrix-bridge-accel.test.ts` | 1 files |
 | `tests/matrix-ops.test.ts` | 1 files |
 | `tests/numeric.test.ts` | 1 files |
 | `tests/parallel-arithmetic-unary.test.ts` | 1 files |
-| `tests/parallel-arithmetic.test.ts` | 30 files |
-| `tests/parallel-dispatch.test.ts` | 30 files |
-| `tests/parallel-signal.test.ts` | 30 files |
+| `tests/parallel-arithmetic.test.ts` | 31 files |
+| `tests/parallel-dispatch.test.ts` | 31 files |
+| `tests/parallel-signal.test.ts` | 31 files |
 | `tests/parallel-stat-prod.test.ts` | 1 files |
 | `tests/parallel-trig-unary.test.ts` | 1 files |
 | `tests/physical-constants.test.ts` | 1 files |
+| `tests/poly-as-wasm.test.ts` | 2 files |
 | `security/wasm-integrity.test.ts` | 1 files |
 | `signal/conv.test.ts` | 0 files |
 | `signal/fft.test.ts` | 0 files |
+| `tests/signal-as-wasm.test.ts` | 2 files |
 | `tests/signal-extended.test.ts` | 1 files |
 | `tests/signal-extended2.test.ts` | 1 files |
+| `tests/sort-as-wasm.test.ts` | 2 files |
 | `tests/sparse-bridge.test.ts` | 1 files |
+| `tests/special-as-wasm.test.ts` | 2 files |
 | `tests/special-extended.test.ts` | 1 files |
 | `tests/special.test.ts` | 1 files |
 | `tests/statistics-extended.test.ts` | 1 files |
 | `tests/statistics-extended2.test.ts` | 1 files |
 | `tests/statistics-selection.test.ts` | 1 files |
 | `tests/typed-algebra-wasm.test.ts` | 3 files |
-| `tests/typed-arithmetic.test.ts` | 30 files |
+| `tests/typed-arithmetic.test.ts` | 31 files |
 | `tests/typed-bitwise-wasm.test.ts` | 3 files |
 | `tests/typed-bitwise.test.ts` | 1 files |
 | `tests/typed-bridge.test.ts` | 1 files |
@@ -767,6 +792,7 @@ The following 355 source files are not directly imported by any test file:
 | `tests/typed-complex.test.ts` | 1 files |
 | `tests/typed-dist-objects-workers.test.ts` | 1 files |
 | `tests/typed-distributions-wasm.test.ts` | 1 files |
+| `tests/typed-elementwise-as-wasm.test.ts` | 3 files |
 | `tests/typed-geometry-hull-wasm.test.ts` | 2 files |
 | `tests/typed-geometry.test.ts` | 1 files |
 | `tests/typed-graph-workers.test.ts` | 1 files |
@@ -788,7 +814,7 @@ The following 355 source files are not directly imported by any test file:
 | `tests/typed-statistics-wasm.test.ts` | 2 files |
 | `tests/typed-string.test.ts` | 1 files |
 | `tests/typed-unit.test.ts` | 1 files |
-| `tests/typed-variadic.test.ts` | 2 files |
+| `tests/typed-variadic.test.ts` | 3 files |
 | `tests/access.test.ts` | 1 files |
 | `tests/AccessorNode.test.ts` | 5 files |
 | `tests/ArrayNode.test.ts` | 3 files |
@@ -893,7 +919,9 @@ The following 355 source files are not directly imported by any test file:
 | `tests/coverage-gaps.test.ts` | 2 files |
 | `tests/create.test.ts` | 2 files |
 | `tests/delegation.test.ts` | 2 files |
+| `tests/matrix-array-ops.test.ts` | 2 files |
 | `tests/shims.test.ts` | 1 files |
+| `tests/std-variance.test.ts` | 2 files |
 | `benchmark/performance.test.ts` | 0 files |
 | `benchmark/wasm-comparison.test.ts` | 0 files |
 | `integration/functions.test.ts` | 0 files |

@@ -1,56 +1,49 @@
 {
   "metadata": {
-    "generated": "2026-04-10T11:13:29.317730",
+    "generated": "2026-06-27T08:28:57.595083",
     "project": "mathts",
     "version": "0.1.0",
     "description": "A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration",
     "generator": "tools/build-mathts-inventory.py"
   },
   "summary": {
-    "total_files": 2316,
-    "source": 1353,
-    "source_ts": 1353,
+    "total_files": 2310,
+    "source": 1515,
+    "source_ts": 1515,
     "wasm_as": 16,
-    "tests": 84,
-    "docs": 153,
+    "tests": 346,
+    "docs": 181,
     "declarations": 14,
-    "config": 221,
-    "other": 475,
-    "total_lines": 249214,
+    "config": 133,
+    "other": 105,
+    "total_lines": 343826,
     "extensions": {
-      ".ts": 1466,
-      ".json": 221,
-      ".md": 153,
-      "": 144,
-      ".rs": 71,
-      ".timestamp": 60,
-      ".d": 51,
-      ".rlib": 44,
-      ".rmeta": 44,
-      ".yaml": 13,
-      ".py": 6,
-      ".dll": 5,
-      ".exp": 5,
-      ".lib": 5,
-      ".pdb": 5,
+      ".ts": 1868,
+      ".md": 181,
+      ".json": 136,
+      ".log": 54,
+      ".mjs": 20,
+      ".py": 14,
+      "": 12,
+      ".draft": 8,
       ".wgsl": 5,
-      ".js": 3,
+      ".txt": 3,
       ".mtsw": 3,
-      ".toml": 3,
-      ".txt": 2,
-      ".TAG": 2,
-      ".wasm": 2,
-      ".lock": 1,
-      ".sh": 1,
-      ".mermaid": 1
+      ".js": 2,
+      ".yaml": 1,
+      ".html": 1,
+      ".mermaid": 1,
+      ".pid": 1
     }
   },
   "packages": {
     "core": {
       "package": {
         "name": "@danielsimonjr/mathts-core",
-        "version": "0.1.2",
-        "dependencies": ["typed-function"],
+        "version": "0.1.5",
+        "dependencies": [
+          "typed-function"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -64,19 +57,23 @@
           "build:prod"
         ]
       },
-      "source_files": 95,
-      "source_lines": 23780,
-      "test_files": 12,
-      "test_lines": 2470,
-      "total_exports": 625
+      "source_files": 99,
+      "source_lines": 26006,
+      "test_files": 24,
+      "test_lines": 4597,
+      "total_exports": 659
     },
     "matrix": {
       "package": {
         "name": "@danielsimonjr/mathts-matrix",
-        "version": "0.1.2",
-        "dependencies": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-parallel"],
+        "version": "0.1.9",
+        "dependencies": [
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-parallel"
+        ],
         "scripts": [
           "build",
+          "copy:wasm",
           "dev",
           "test",
           "test:watch",
@@ -88,16 +85,16 @@
           "build:prod"
         ]
       },
-      "source_files": 38,
-      "source_lines": 15250,
-      "test_files": 17,
-      "test_lines": 6292,
-      "total_exports": 351
+      "source_files": 48,
+      "source_lines": 16295,
+      "test_files": 41,
+      "test_lines": 11739,
+      "total_exports": 391
     },
     "functions": {
       "package": {
         "name": "@danielsimonjr/mathts-functions",
-        "version": "0.1.2",
+        "version": "0.2.14",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "@danielsimonjr/mathts-expression",
@@ -117,6 +114,8 @@
           "build",
           "dev",
           "test",
+          "test:diff",
+          "golden:gen",
           "test:watch",
           "test:coverage",
           "typecheck",
@@ -126,17 +125,19 @@
           "build:prod"
         ]
       },
-      "source_files": 760,
-      "source_lines": 130146,
-      "test_files": 24,
-      "test_lines": 5983,
-      "total_exports": 3871
+      "source_files": 791,
+      "source_lines": 146348,
+      "test_files": 97,
+      "test_lines": 27450,
+      "total_exports": 4406
     },
     "parallel": {
       "package": {
         "name": "@danielsimonjr/mathts-parallel",
-        "version": "0.1.2",
-        "dependencies": ["@danielsimonjr/mathts-workerpool"],
+        "version": "0.2.2",
+        "dependencies": [
+          "@danielsimonjr/mathts-workerpool"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -150,17 +151,20 @@
           "build:prod"
         ]
       },
-      "source_files": 16,
-      "source_lines": 4156,
-      "test_files": 13,
-      "test_lines": 2839,
-      "total_exports": 176
+      "source_files": 15,
+      "source_lines": 4680,
+      "test_files": 19,
+      "test_lines": 4608,
+      "total_exports": 182
     },
     "expression": {
       "package": {
         "name": "@danielsimonjr/mathts-expression",
-        "version": "0.1.2",
-        "dependencies": ["@danielsimonjr/mathts-core", "typed-function"],
+        "version": "0.2.4",
+        "dependencies": [
+          "@danielsimonjr/mathts-core",
+          "typed-function"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -174,17 +178,21 @@
           "build:prod"
         ]
       },
-      "source_files": 391,
-      "source_lines": 20993,
-      "test_files": 2,
-      "test_lines": 677,
-      "total_exports": 608
+      "source_files": 428,
+      "source_lines": 20763,
+      "test_files": 64,
+      "test_lines": 15988,
+      "total_exports": 647
     },
     "workbook": {
       "package": {
         "name": "@danielsimonjr/mathts-workbook",
-        "version": "0.1.2",
-        "dependencies": ["@danielsimonjr/mathts-core", "yaml"],
+        "version": "0.1.8",
+        "dependencies": [
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-functions",
+          "yaml"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -198,57 +206,70 @@
           "build:prod"
         ]
       },
-      "source_files": 6,
-      "source_lines": 690,
-      "test_files": 3,
-      "test_lines": 459,
-      "total_exports": 29
+      "source_files": 7,
+      "source_lines": 695,
+      "test_files": 7,
+      "test_lines": 843,
+      "total_exports": 30
     },
     "compat": {
       "package": {
         "name": "@danielsimonjr/mathts-compat",
-        "version": "0.1.2",
+        "version": "0.1.9",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "@danielsimonjr/mathts-functions",
           "@danielsimonjr/mathts-matrix",
           "@danielsimonjr/mathts-parallel"
         ],
-        "scripts": ["build", "dev", "typecheck", "test", "build:prod"]
+        "scripts": [
+          "build",
+          "dev",
+          "typecheck",
+          "test",
+          "test:coverage",
+          "build:prod"
+        ]
       },
       "source_files": 3,
-      "source_lines": 883,
-      "test_files": 2,
-      "test_lines": 540,
-      "total_exports": 132
+      "source_lines": 1008,
+      "test_files": 7,
+      "test_lines": 1062,
+      "total_exports": 134
     },
     "assembly": {
       "package": {
         "name": "@danielsimonjr/mathts-wasm",
-        "version": "0.1.2",
+        "version": "0.1.5",
         "dependencies": [],
         "scripts": [
           "asbuild:debug",
           "asbuild:release",
           "asbuild",
+          "gen:manifest",
           "build:bindings",
           "build",
           "clean",
           "test",
+          "test:diff",
+          "coverage:matrix",
+          "golden:gen",
           "benchmark"
         ]
       },
-      "source_files": 10,
-      "source_lines": 3324,
+      "source_files": 30,
+      "source_lines": 8826,
       "test_files": 0,
       "test_lines": 0,
-      "total_exports": 432
+      "total_exports": 664
     },
     "packages/typed-function": {
       "package": {
         "name": "@danielsimonjr/mathts-typed-function",
         "version": "0.1.2",
-        "dependencies": ["typed-function"],
+        "dependencies": [
+          "typed-function"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -263,16 +284,18 @@
         ]
       },
       "source_files": 2,
-      "source_lines": 692,
+      "source_lines": 703,
       "test_files": 2,
-      "test_lines": 622,
+      "test_lines": 617,
       "total_exports": 62
     },
     "packages/workerpool": {
       "package": {
         "name": "@danielsimonjr/mathts-workerpool",
-        "version": "0.1.2",
-        "dependencies": ["workerpool"],
+        "version": "0.2.0",
+        "dependencies": [
+          "workerpool"
+        ],
         "scripts": [
           "build",
           "dev",
@@ -286,17 +309,17 @@
           "build:prod"
         ]
       },
-      "source_files": 3,
-      "source_lines": 2637,
-      "test_files": 1,
-      "test_lines": 612,
-      "total_exports": 37
+      "source_files": 5,
+      "source_lines": 4014,
+      "test_files": 4,
+      "test_lines": 1162,
+      "total_exports": 48
     }
   },
   "core_types": {
     "Complex": {
       "file": "core/src/types/complex.ts",
-      "lines": 641,
+      "lines": 663,
       "instance_methods": [
         "Complex",
         "Magnitude",
@@ -308,8 +331,10 @@
         "acos",
         "acosh",
         "add",
+        "aliases",
         "angle",
         "arg",
+        "arithmetic",
         "asin",
         "asinh",
         "atan",
@@ -325,6 +350,7 @@
         "coth",
         "csc",
         "csch",
+        "div",
         "divide",
         "equals",
         "exp",
@@ -351,7 +377,9 @@
         "log2",
         "magnitude",
         "match",
+        "mul",
         "multiply",
+        "neg",
         "negate",
         "nthRoot",
         "nthRoots",
@@ -372,6 +400,7 @@
         "sinh",
         "slice",
         "sqrt",
+        "sub",
         "subtract",
         "tan",
         "tanh",
@@ -382,12 +411,18 @@
         "toString",
         "valueOf"
       ],
-      "static_methods": ["compare", "fromJSON", "fromNumber", "fromPolar", "parse"],
-      "method_count": 83
+      "static_methods": [
+        "compare",
+        "fromJSON",
+        "fromNumber",
+        "fromPolar",
+        "parse"
+      ],
+      "method_count": 89
     },
     "Fraction": {
       "file": "core/src/types/fraction.ts",
-      "lines": 613,
+      "lines": 621,
       "instance_methods": [
         "BigInt",
         "Error",
@@ -398,11 +433,14 @@
         "Truncate",
         "abs",
         "add",
+        "aliases",
         "ceil",
         "clone",
         "compare",
         "compareTo",
         "denominator",
+        "dispatch",
+        "div",
         "divide",
         "equals",
         "floor",
@@ -426,6 +464,7 @@
         "match",
         "mediant",
         "mod",
+        "mul",
         "multiply",
         "negate",
         "number",
@@ -438,6 +477,7 @@
         "simplify",
         "split",
         "startsWith",
+        "sub",
         "subtract",
         "terms",
         "toContinuedFraction",
@@ -459,13 +499,14 @@
         "fromNumber",
         "parse"
       ],
-      "method_count": 61
+      "method_count": 66
     },
     "BigNumber": {
       "file": "core/src/types/bignumber.ts",
-      "lines": 1377,
+      "lines": 1557,
       "instance_methods": [
         "1",
+        "12345",
         "AGM",
         "BigInt",
         "BigNumber",
@@ -482,6 +523,7 @@
         "acosh",
         "add",
         "alignExponents",
+        "argument",
         "asin",
         "asinh",
         "atan",
@@ -498,8 +540,10 @@
         "cos",
         "cosh",
         "decimal",
+        "digits",
         "divide",
         "dividend",
+        "e",
         "ensureBigNumber",
         "equals",
         "exp",
@@ -510,6 +554,7 @@
         "fromNumber",
         "greaterThan",
         "greaterThanOrEqual",
+        "gt",
         "hypot",
         "in",
         "indexOf",
@@ -528,6 +573,7 @@
         "log2",
         "min",
         "mod",
+        "mul",
         "multiply",
         "negate",
         "normalize",
@@ -547,20 +593,30 @@
         "sinh",
         "slice",
         "sqrt",
+        "string",
+        "sub",
         "subtract",
         "tan",
         "tanh",
         "toBigInt",
+        "toBinary",
         "toExponential",
         "toFixed",
         "toFixedInternal",
+        "toHexadecimal",
         "toJSON",
         "toLowerCase",
+        "toNumber",
+        "toOctal",
         "toPrecision",
+        "toRadixString",
+        "toSignificantDigits",
         "toString",
         "trim",
         "trunc",
-        "valueOf"
+        "unchanged",
+        "valueOf",
+        "values"
       ],
       "static_methods": [
         "compare",
@@ -572,13 +628,57 @@
         "parse",
         "resetConfig"
       ],
-      "method_count": 96
+      "method_count": 112
     }
   },
   "typed_functions": {
+    "algebra": {
+      "file": "functions/src/typed/algebra.ts",
+      "lines": 1182,
+      "exports": [
+        "polyval",
+        "polyadd",
+        "polymul",
+        "polyder",
+        "polynomialGCD",
+        "polynomialLCM",
+        "polynomialQuotient",
+        "polynomialRemainder",
+        "degree",
+        "coefficientList",
+        "discriminant",
+        "differences",
+        "variables",
+        "substitute",
+        "expand",
+        "factor",
+        "collect",
+        "cancel",
+        "together",
+        "apart",
+        "trigExpand",
+        "trigReduce",
+        "trigToExp",
+        "expToTrig",
+        "tangentLine",
+        "reduce",
+        "combine",
+        "complexExpand",
+        "normalForm",
+        "powerExpand",
+        "fullSimplify",
+        "element",
+        "eliminate",
+        "symbolicPartialDerivative",
+        "functionExpand",
+        "resultant",
+        "typedAlgebra"
+      ],
+      "export_count": 37
+    },
     "arithmetic": {
       "file": "functions/src/typed/arithmetic.ts",
-      "lines": 994,
+      "lines": 1179,
       "exports": [
         "add",
         "subtract",
@@ -631,22 +731,137 @@
       ],
       "export_count": 48
     },
+    "bitwise": {
+      "file": "functions/src/typed/bitwise.ts",
+      "lines": 415,
+      "exports": [
+        "bitAnd",
+        "bitOr",
+        "bitXor",
+        "bitNot",
+        "leftShift",
+        "rightArithShift",
+        "rightLogShift",
+        "typedBitwise"
+      ],
+      "export_count": 8
+    },
+    "cas": {
+      "file": "functions/src/typed/cas.ts",
+      "lines": 3164,
+      "exports": [
+        "integrate",
+        "limit",
+        "partialDerivative",
+        "directionalDerivative",
+        "gradientSymbolic",
+        "jacobian",
+        "laplacian",
+        "divergence",
+        "laplace",
+        "inverseLaplace",
+        "fourierSeries",
+        "zTransform",
+        "taylor",
+        "multivariateTaylor",
+        "series",
+        "seriesCoefficient",
+        "solve",
+        "implicitDiff",
+        "summation",
+        "symbolicProduct",
+        "assume",
+        "getAssumptions",
+        "clearAssumptions",
+        "asymptotic",
+        "groebnerBasis",
+        "minimalPolynomial",
+        "toRadicals",
+        "piecewise",
+        "odeGeneral",
+        "curl",
+        "inverseLaplaceTransform",
+        "CAS_BATCH_THRESHOLD",
+        "casSimplify",
+        "casSimplify",
+        "casSimplify",
+        "casDerivative",
+        "casDerivative",
+        "casDerivative",
+        "casExpand",
+        "casExpand",
+        "casExpand",
+        "casFactor",
+        "casFactor",
+        "casFactor"
+      ],
+      "export_count": 44
+    },
     "combinatorics": {
       "file": "functions/src/typed/combinatorics.ts",
-      "lines": 291,
+      "lines": 924,
       "exports": [
         "fibonacci",
         "lucas",
         "doubleFactorial",
         "risingFactorial",
         "fallingFactorial",
-        "subfactorial"
+        "subfactorial",
+        "prime",
+        "nextPrime",
+        "primePi",
+        "primeFactors",
+        "divisors",
+        "eulerPhi",
+        "divisorSigma",
+        "carmichaelLambda",
+        "moebiusMu",
+        "jacobiSymbol",
+        "chineseRemainder",
+        "lucasL",
+        "partitions",
+        "harmonicNumber",
+        "integerDigits"
       ],
-      "export_count": 6
+      "export_count": 21
+    },
+    "complex": {
+      "file": "functions/src/typed/complex.ts",
+      "lines": 182,
+      "exports": [
+        "arg",
+        "conj",
+        "im",
+        "re",
+        "typedComplex"
+      ],
+      "export_count": 5
+    },
+    "dist-objects": {
+      "file": "functions/src/typed/dist-objects.ts",
+      "lines": 1079,
+      "exports": [
+        "DIST_WORKER_THRESHOLD",
+        "SampleNOptions",
+        "Distribution",
+        "normalDist",
+        "betaDist",
+        "binomialDist",
+        "chiSquaredDist",
+        "exponentialDist",
+        "fDist",
+        "gammaDist",
+        "logNormalDist",
+        "poissonDist",
+        "tDist",
+        "uniformDist",
+        "weibullDist"
+      ],
+      "export_count": 15
     },
     "distributions": {
       "file": "functions/src/typed/distributions.ts",
-      "lines": 370,
+      "lines": 763,
       "exports": [
         "normalPDF",
         "normalCDF",
@@ -658,13 +873,25 @@
         "bernoulliPMF",
         "entropy",
         "jsDivergence",
+        "betaPDF",
+        "gammaPDF",
+        "studentTPDF",
+        "noncentralChi2PDF",
         "typedDistributions"
       ],
-      "export_count": 11
+      "export_count": 15
+    },
+    "fused": {
+      "file": "functions/src/typed/fused.ts",
+      "lines": 57,
+      "exports": [
+        "fuseUnaryChain"
+      ],
+      "export_count": 1
     },
     "geometry": {
       "file": "functions/src/typed/geometry.ts",
-      "lines": 406,
+      "lines": 1255,
       "exports": [
         "angle2D",
         "angle3D",
@@ -683,32 +910,254 @@
         "distanceND",
         "distancePointToLine2D",
         "intersectLines2D",
-        "intersectSegments2D"
+        "intersectSegments2D",
+        "Shape",
+        "area",
+        "centroid",
+        "coordinateTransform",
+        "polygonPerimeter",
+        "manhattanDistance",
+        "chebyshevDistance",
+        "minkowskiDistance",
+        "delaunayTriangulation",
+        "voronoiDiagram",
+        "KDTreeNode",
+        "kdTree",
+        "kdTreeNearest",
+        "nearestNeighbor",
+        "HullFace3D",
+        "convexHull3D"
       ],
-      "export_count": 18
+      "export_count": 34
+    },
+    "gpu": {
+      "file": "functions/src/typed/gpu.ts",
+      "lines": 87,
+      "exports": [],
+      "export_count": 0
+    },
+    "graph": {
+      "file": "functions/src/typed/graph.ts",
+      "lines": 1114,
+      "exports": [
+        "adjacencyMatrix",
+        "shortestPath",
+        "minimumSpanningTree",
+        "connectedComponents",
+        "stronglyConnectedComponents",
+        "topologicalSort",
+        "isConnected",
+        "graphDistance",
+        "CENTRALITY_WORKER_THRESHOLD",
+        "CentralityRestartOptions",
+        "PageRankOptions",
+        "PageRankResult",
+        "PageRankRestartResult",
+        "BetweennessOptions",
+        "BetweennessResult",
+        "BetweennessRestartResult",
+        "EigenvectorOptions",
+        "EigenvectorResult",
+        "EigenvectorRestartResult"
+      ],
+      "export_count": 19
+    },
+    "hypothesis": {
+      "file": "functions/src/typed/hypothesis.ts",
+      "lines": 1326,
+      "exports": [
+        "TTestResult",
+        "ChiSquareResult",
+        "AnovaResult",
+        "KSTestResult",
+        "MannWhitneyResult",
+        "ShapiroWilkResult",
+        "PCAResult",
+        "BootstrapOptions",
+        "KSBootstrapResult",
+        "MWBootstrapResult",
+        "SWBootstrapResult",
+        "ChiSquareBootstrapResult",
+        "studentTTest",
+        "anova",
+        "principalComponentAnalysis"
+      ],
+      "export_count": 15
     },
     "integration": {
       "file": "functions/src/typed/integration.ts",
-      "lines": 206,
-      "exports": ["trapz", "simpson", "gaussQuad", "romberg"],
-      "export_count": 4
+      "lines": 667,
+      "exports": [
+        "GAUSS_WORKER_THRESHOLD",
+        "ARRAY_WORKER_THRESHOLD",
+        "validateClosureSource",
+        "trapz",
+        "simpson",
+        "GaussQuadOptions",
+        "gaussQuad",
+        "RombergOptions"
+      ],
+      "export_count": 8
     },
     "interpolation": {
       "file": "functions/src/typed/interpolation.ts",
-      "lines": 433,
+      "lines": 761,
       "exports": [
         "linearInterp",
         "lagrangeInterp",
+        "newtonInterp",
         "cubicSpline",
         "hermiteInterp",
         "pchipInterp",
-        "polyFit"
+        "polyFit",
+        "chebyshevFit",
+        "legendreFit",
+        "WASM_INTERP_THRESHOLD"
+      ],
+      "export_count": 10
+    },
+    "logical": {
+      "file": "functions/src/typed/logical.ts",
+      "lines": 234,
+      "exports": [
+        "not",
+        "and",
+        "or",
+        "xor",
+        "nullish",
+        "typedLogical"
       ],
       "export_count": 6
     },
+    "matrix-ops": {
+      "file": "functions/src/typed/matrix-ops.ts",
+      "lines": 1279,
+      "exports": [
+        "rowReduce",
+        "matrixRank",
+        "CholeskyResult",
+        "cholesky",
+        "HessenbergResult",
+        "hessenbergForm",
+        "PolarResult",
+        "JordanResult",
+        "pinv",
+        "cond",
+        "norm2",
+        "normFro",
+        "lowRankApprox",
+        "singularValues",
+        "matrixExpm",
+        "matrixLogm",
+        "matrixSqrtm"
+      ],
+      "export_count": 17
+    },
+    "numeric": {
+      "file": "functions/src/typed/numeric.ts",
+      "lines": 2158,
+      "exports": [
+        "FindRootOptions",
+        "findRoot",
+        "linsolve",
+        "MinimizeOptions",
+        "minimize",
+        "maximize",
+        "globalMinimize",
+        "leastSquares",
+        "nintegrate",
+        "simpsons",
+        "interpolate",
+        "cspline",
+        "pchip",
+        "bezierCurve",
+        "bspline",
+        "loess",
+        "griddata",
+        "rbfInterpolate",
+        "curvefit",
+        "expfit",
+        "logfit",
+        "powerfit",
+        "ODESolution",
+        "solveODESystem",
+        "stiffODESolver",
+        "solveBVP",
+        "odeAdaptiveStep",
+        "eventDetection",
+        "cond",
+        "rank",
+        "nullspace",
+        "residue",
+        "chebyshevApprox",
+        "padeApproximant",
+        "quadprog",
+        "linprog",
+        "solvePDE"
+      ],
+      "export_count": 37
+    },
+    "parallel-map": {
+      "file": "functions/src/typed/parallel-map.ts",
+      "lines": 46,
+      "exports": [
+        "kernelSource"
+      ],
+      "export_count": 1
+    },
+    "probability": {
+      "file": "functions/src/typed/probability.ts",
+      "lines": 450,
+      "exports": [
+        "bernoulli",
+        "combinations",
+        "combinationsWithRep",
+        "multinomial",
+        "permutations",
+        "seedProbabilityRng",
+        "random",
+        "randomInt",
+        "pickRandom",
+        "typedProbability"
+      ],
+      "export_count": 10
+    },
+    "relational": {
+      "file": "functions/src/typed/relational.ts",
+      "lines": 470,
+      "exports": [
+        "equalScalar",
+        "unequal",
+        "deepEqual",
+        "compareText",
+        "equalText",
+        "compareNatural",
+        "compareUnits",
+        "typedRelational"
+      ],
+      "export_count": 8
+    },
+    "set": {
+      "file": "functions/src/typed/set.ts",
+      "lines": 451,
+      "exports": [
+        "setUnion",
+        "setIntersect",
+        "setDifference",
+        "setSymDifference",
+        "setIsSubset",
+        "setMultiplicity",
+        "setPowerset",
+        "setDistinct",
+        "setSize",
+        "setCartesian",
+        "typedSet"
+      ],
+      "export_count": 11
+    },
     "signal": {
       "file": "functions/src/typed/signal.ts",
-      "lines": 561,
+      "lines": 1776,
       "exports": [
         "parallelFFT",
         "parallelIFFT",
@@ -721,29 +1170,82 @@
         "autoCorrelation",
         "groupDelay",
         "unwrapPhase",
+        "dct",
+        "idct",
+        "dst",
+        "idst",
+        "dwt",
+        "fourier",
+        "invFourier",
+        "hilbertTransform",
+        "periodogram",
+        "lowpassFilter",
+        "highpassFilter",
+        "bandpassFilter",
+        "resample",
+        "medfilt",
+        "windowFunction",
+        "convolve",
+        "correlate",
+        "welchPSD",
+        "bartlettPSD",
+        "multiTaperPSD",
+        "goertzel",
+        "chirpZTransform",
         "typedSignal"
       ],
-      "export_count": 12
+      "export_count": 34
     },
     "special": {
       "file": "functions/src/typed/special.ts",
-      "lines": 462,
+      "lines": 1381,
       "exports": [
+        "erfcScalar",
         "erfc",
+        "erfi",
+        "lgamma",
         "beta",
         "gammainc",
+        "gammaincp",
+        "betainc",
         "digamma",
         "besselJ0",
         "besselJ1",
         "besselY0",
         "besselY1",
+        "besselJ",
+        "besselY",
+        "besselI",
+        "besselK",
+        "ellipticK",
+        "ellipticE",
+        "chebyshevT",
+        "hermiteH",
+        "laguerreL",
+        "legendreP",
+        "lambertW",
+        "cosIntegral",
+        "sinIntegral",
+        "logIntegral",
+        "expIntegralEi",
+        "fresnelC",
+        "fresnelS",
+        "airyAi",
+        "airyBi",
+        "carlsonRC",
+        "carlsonRF",
+        "carlsonRD",
+        "carlsonRJ",
+        "ellipticF",
+        "ellipticEIncomplete",
+        "ellipticPi",
         "typedSpecial"
       ],
-      "export_count": 9
+      "export_count": 40
     },
     "statistics": {
       "file": "functions/src/typed/statistics.ts",
-      "lines": 854,
+      "lines": 903,
       "exports": [
         "NormalizationType",
         "parallelStatSum",
@@ -762,6 +1264,7 @@
         "parallelStatMAD",
         "parallelStatCumsum",
         "parallelStatQuantile",
+        "parallelStatPercentile",
         "parallelStatHistogram",
         "quickSelect",
         "medianSelect",
@@ -769,11 +1272,24 @@
         "maxSelect",
         "typedStatistics"
       ],
-      "export_count": 23
+      "export_count": 24
+    },
+    "string": {
+      "file": "functions/src/typed/string.ts",
+      "lines": 310,
+      "exports": [
+        "bin",
+        "hex",
+        "oct",
+        "format",
+        "print",
+        "typedString"
+      ],
+      "export_count": 6
     },
     "trigonometry": {
       "file": "functions/src/typed/trigonometry.ts",
-      "lines": 270,
+      "lines": 382,
       "exports": [
         "sin",
         "cos",
@@ -801,14 +1317,26 @@
     "typed-bridge": {
       "file": "functions/src/typed/typed-bridge.ts",
       "lines": 14,
-      "exports": ["initTypeBridge"],
+      "exports": [
+        "initTypeBridge"
+      ],
       "export_count": 1
+    },
+    "unit": {
+      "file": "functions/src/typed/unit.ts",
+      "lines": 82,
+      "exports": [
+        "to",
+        "toBest",
+        "typedUnit"
+      ],
+      "export_count": 3
     }
   },
   "synced_factories": {
     "algebra": {
       "file_count": 45,
-      "total_lines": 11441,
+      "total_lines": 10822,
       "factory_count": 28,
       "factories": [
         {
@@ -832,12 +1360,21 @@
         {
           "name": "leafCount",
           "creator": "createLeafCount",
-          "deps": ["parse", "typed"]
+          "deps": [
+            "parse",
+            "typed"
+          ]
         },
         {
           "name": "lyap",
           "creator": "createLyap",
-          "deps": ["typed", "matrix", "sylvester", "multiply", "transpose"]
+          "deps": [
+            "typed",
+            "matrix",
+            "sylvester",
+            "multiply",
+            "transpose"
+          ]
         },
         {
           "name": "polynomialRoot",
@@ -994,7 +1531,12 @@
         {
           "name": "symbolicEqual",
           "creator": "createSymbolicEqual",
-          "deps": ["parse", "simplify", "typed", "OperatorNode"]
+          "deps": [
+            "parse",
+            "simplify",
+            "typed",
+            "OperatorNode"
+          ]
         },
         {
           "name": "lup",
@@ -1039,7 +1581,15 @@
         {
           "name": "schur",
           "creator": "createSchur",
-          "deps": ["typed", "matrix", "identity", "multiply", "qr", "norm", "subtract"]
+          "deps": [
+            "typed",
+            "matrix",
+            "identity",
+            "multiply",
+            "qr",
+            "norm",
+            "subtract"
+          ]
         },
         {
           "name": "slu",
@@ -1060,7 +1610,11 @@
         {
           "name": "simplifyUtil",
           "creator": "createUtil",
-          "deps": ["FunctionNode", "OperatorNode", "SymbolNode"]
+          "deps": [
+            "FunctionNode",
+            "OperatorNode",
+            "SymbolNode"
+          ]
         },
         {
           "name": "lsolve",
@@ -1091,7 +1645,15 @@
         {
           "name": "lusolve",
           "creator": "createLusolve",
-          "deps": ["typed", "matrix", "lup", "slu", "usolve", "lsolve", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "matrix",
+            "lup",
+            "slu",
+            "usolve",
+            "lsolve",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "usolve",
@@ -1122,7 +1684,11 @@
         {
           "name": "csAmd",
           "creator": "createCsAmd",
-          "deps": ["add", "multiply", "transpose"]
+          "deps": [
+            "add",
+            "multiply",
+            "transpose"
+          ]
         },
         {
           "name": "csChol",
@@ -1143,7 +1709,9 @@
         {
           "name": "csCounts",
           "creator": "createCsCounts",
-          "deps": ["transpose"]
+          "deps": [
+            "transpose"
+          ]
         },
         {
           "name": "csLu",
@@ -1161,29 +1729,42 @@
         {
           "name": "csSpsolve",
           "creator": "createCsSpsolve",
-          "deps": ["divideScalar", "multiply", "subtract"]
+          "deps": [
+            "divideScalar",
+            "multiply",
+            "subtract"
+          ]
         },
         {
           "name": "csSqr",
           "creator": "createCsSqr",
-          "deps": ["add", "multiply", "transpose"]
+          "deps": [
+            "add",
+            "multiply",
+            "transpose"
+          ]
         },
         {
           "name": "csSymperm",
           "creator": "createCsSymperm",
-          "deps": ["conj", "SparseMatrix"]
+          "deps": [
+            "conj",
+            "SparseMatrix"
+          ]
         }
       ]
     },
     "arithmetic": {
       "file_count": 40,
-      "total_lines": 7416,
+      "total_lines": 6934,
       "factory_count": 40,
       "factories": [
         {
           "name": "abs",
           "creator": "createAbs",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "add",
@@ -1202,7 +1783,9 @@
         {
           "name": "addScalar",
           "creator": "createAddScalar",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "cbrt",
@@ -1221,12 +1804,22 @@
         {
           "name": "ceil",
           "creator": "createCeilNumber",
-          "deps": ["typed", "config", "round", "matrix", "equalScalar", "zeros", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "cube",
           "creator": "createCube",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "divide",
@@ -1244,7 +1837,10 @@
         {
           "name": "divideScalar",
           "creator": "createDivideScalar",
-          "deps": ["typed", "numeric"]
+          "deps": [
+            "typed",
+            "numeric"
+          ]
         },
         {
           "name": "dotDivide",
@@ -1262,22 +1858,41 @@
         {
           "name": "dotMultiply",
           "creator": "createDotMultiply",
-          "deps": ["typed", "matrix", "equalScalar", "multiplyScalar", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "multiplyScalar",
+            "concat"
+          ]
         },
         {
           "name": "dotPow",
           "creator": "createDotPow",
-          "deps": ["typed", "equalScalar", "matrix", "pow", "DenseMatrix", "concat", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "equalScalar",
+            "matrix",
+            "pow",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "exp",
           "creator": "createExp",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "expm1",
           "creator": "createExpm1",
-          "deps": ["typed", "Complex"]
+          "deps": [
+            "typed",
+            "Complex"
+          ]
         },
         {
           "name": "fix",
@@ -1296,7 +1911,15 @@
         {
           "name": "floor",
           "creator": "createFloorNumber",
-          "deps": ["typed", "config", "round", "matrix", "equalScalar", "zeros", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "gcd",
@@ -1345,27 +1968,52 @@
         {
           "name": "lcm",
           "creator": "createLcm",
-          "deps": ["typed", "matrix", "equalScalar", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "concat"
+          ]
         },
         {
           "name": "log",
           "creator": "createLog",
-          "deps": ["config", "typed", "typeOf", "divideScalar", "Complex"]
+          "deps": [
+            "config",
+            "typed",
+            "typeOf",
+            "divideScalar",
+            "Complex"
+          ]
         },
         {
           "name": "log10",
           "creator": "createLog10",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "log1p",
           "creator": "createLog1p",
-          "deps": ["typed", "config", "divideScalar", "log", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "divideScalar",
+            "log",
+            "Complex"
+          ]
         },
         {
           "name": "log2",
           "creator": "createLog2",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "mod",
@@ -1397,7 +2045,9 @@
         {
           "name": "multiplyScalar",
           "creator": "createMultiplyScalar",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "norm",
@@ -1421,12 +2071,23 @@
         {
           "name": "nthRoot",
           "creator": "createNthRoot",
-          "deps": ["typed", "matrix", "equalScalar", "BigNumber", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "BigNumber",
+            "concat"
+          ]
         },
         {
           "name": "nthRoots",
           "creator": "createNthRoots",
-          "deps": ["config", "typed", "divideScalar", "Complex"]
+          "deps": [
+            "config",
+            "typed",
+            "divideScalar",
+            "Complex"
+          ]
         },
         {
           "name": "pow",
@@ -1446,22 +2107,41 @@
         {
           "name": "round",
           "creator": "createRound",
-          "deps": ["typed", "config", "matrix", "equalScalar", "zeros", "BigNumber", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "BigNumber",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "sign",
           "creator": "createSign",
-          "deps": ["typed", "BigNumber", "complex", "Fraction"]
+          "deps": [
+            "typed",
+            "BigNumber",
+            "complex",
+            "Fraction"
+          ]
         },
         {
           "name": "sqrt",
           "creator": "createSqrt",
-          "deps": ["config", "typed", "Complex"]
+          "deps": [
+            "config",
+            "typed",
+            "Complex"
+          ]
         },
         {
           "name": "square",
           "creator": "createSquare",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "subtract",
@@ -1480,81 +2160,145 @@
         {
           "name": "subtractScalar",
           "creator": "createSubtractScalar",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "unaryMinus",
           "creator": "createUnaryMinus",
-          "deps": ["typed", "config", "?bignumber"]
+          "deps": [
+            "typed",
+            "config",
+            "?bignumber"
+          ]
         },
         {
           "name": "unaryPlus",
           "creator": "createUnaryPlus",
-          "deps": ["typed", "config", "numeric"]
+          "deps": [
+            "typed",
+            "config",
+            "numeric"
+          ]
         },
         {
           "name": "xgcd",
           "creator": "createXgcd",
-          "deps": ["typed", "config", "matrix", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
         },
         {
           "name": "nodeOperations",
           "creator": "createNodeOperations",
-          "deps": ["ConstantNode", "OperatorNode"]
+          "deps": [
+            "ConstantNode",
+            "OperatorNode"
+          ]
         }
       ]
     },
     "bitwise": {
       "file_count": 8,
-      "total_lines": 797,
+      "total_lines": 743,
       "factory_count": 7,
       "factories": [
         {
           "name": "bitAnd",
           "creator": "createBitAnd",
-          "deps": ["typed", "matrix", "equalScalar", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "concat"
+          ]
         },
         {
           "name": "bitNot",
           "creator": "createBitNot",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "bitOr",
           "creator": "createBitOr",
-          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "concat"
+          ]
         },
         {
           "name": "bitXor",
           "creator": "createBitXor",
-          "deps": ["typed", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "leftShift",
           "creator": "createLeftShift",
-          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
         },
         {
           "name": "rightArithShift",
           "creator": "createRightArithShift",
-          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
         },
         {
           "name": "rightLogShift",
           "creator": "createRightLogShift",
-          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
         }
       ]
     },
     "combinatorics": {
       "file_count": 4,
-      "total_lines": 388,
+      "total_lines": 356,
       "factory_count": 4,
       "factories": [
         {
           "name": "bellNumbers",
           "creator": "createBellNumbers",
-          "deps": ["typed", "addScalar", "isNegative", "isInteger", "stirlingS2"]
+          "deps": [
+            "typed",
+            "addScalar",
+            "isNegative",
+            "isInteger",
+            "stirlingS2"
+          ]
         },
         {
           "name": "catalan",
@@ -1605,34 +2349,42 @@
     },
     "complex": {
       "file_count": 4,
-      "total_lines": 280,
+      "total_lines": 271,
       "factory_count": 4,
       "factories": [
         {
           "name": "arg",
           "creator": "createArg",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "conj",
           "creator": "createConj",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "im",
           "creator": "createIm",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "re",
           "creator": "createRe",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         }
       ]
     },
     "geometry": {
       "file_count": 2,
-      "total_lines": 1251,
+      "total_lines": 1017,
       "factory_count": 2,
       "factories": [
         {
@@ -1674,65 +2426,114 @@
     },
     "logical": {
       "file_count": 5,
-      "total_lines": 665,
+      "total_lines": 648,
       "factory_count": 5,
       "factories": [
         {
           "name": "and",
           "creator": "createAnd",
-          "deps": ["typed", "matrix", "equalScalar", "zeros", "not", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "not",
+            "concat"
+          ]
         },
         {
           "name": "not",
           "creator": "createNot",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "nullish",
           "creator": "createNullish",
-          "deps": ["typed", "matrix", "size", "flatten", "deepEqual"]
+          "deps": [
+            "typed",
+            "matrix",
+            "size",
+            "flatten",
+            "deepEqual"
+          ]
         },
         {
           "name": "or",
           "creator": "createOr",
-          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "concat"
+          ]
         },
         {
           "name": "xor",
           "creator": "createXor",
-          "deps": ["typed", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
         }
       ]
     },
     "matrix": {
-      "file_count": 44,
-      "total_lines": 9604,
+      "file_count": 45,
+      "total_lines": 8930,
       "factory_count": 42,
       "factories": [
         {
           "name": "column",
           "creator": "createColumn",
-          "deps": ["typed", "Index", "matrix", "range"]
+          "deps": [
+            "typed",
+            "Index",
+            "matrix",
+            "range"
+          ]
         },
         {
           "name": "concat",
           "creator": "createConcat",
-          "deps": ["typed", "matrix", "isInteger"]
+          "deps": [
+            "typed",
+            "matrix",
+            "isInteger"
+          ]
         },
         {
           "name": "count",
           "creator": "createCount",
-          "deps": ["typed", "size", "prod"]
+          "deps": [
+            "typed",
+            "size",
+            "prod"
+          ]
         },
         {
           "name": "cross",
           "creator": "createCross",
-          "deps": ["typed", "matrix", "subtract", "multiply"]
+          "deps": [
+            "typed",
+            "matrix",
+            "subtract",
+            "multiply"
+          ]
         },
         {
           "name": "ctranspose",
           "creator": "createCtranspose",
-          "deps": ["typed", "transpose", "conj"]
+          "deps": [
+            "typed",
+            "transpose",
+            "conj"
+          ]
         },
         {
           "name": "det",
@@ -1750,17 +2551,33 @@
         {
           "name": "diag",
           "creator": "createDiag",
-          "deps": ["typed", "matrix", "DenseMatrix", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "diff",
           "creator": "createDiff",
-          "deps": ["typed", "matrix", "subtract", "number"]
+          "deps": [
+            "typed",
+            "matrix",
+            "subtract",
+            "number"
+          ]
         },
         {
           "name": "dot",
           "creator": "createDot",
-          "deps": ["typed", "addScalar", "multiplyScalar", "conj", "size"]
+          "deps": [
+            "typed",
+            "addScalar",
+            "multiplyScalar",
+            "conj",
+            "size"
+          ]
         },
         {
           "name": "eigs",
@@ -1804,7 +2621,14 @@
         {
           "name": "expm",
           "creator": "createExpm",
-          "deps": ["typed", "abs", "add", "identity", "inv", "multiply"]
+          "deps": [
+            "typed",
+            "abs",
+            "add",
+            "identity",
+            "inv",
+            "multiply"
+          ]
         },
         {
           "name": "fft",
@@ -1829,32 +2653,53 @@
         {
           "name": "filter",
           "creator": "createFilter",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "flatten",
           "creator": "createFlatten",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "forEach",
           "creator": "createForEach",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "getMatrixDataType",
           "creator": "createGetMatrixDataType",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "identity",
           "creator": "createIdentity",
-          "deps": ["typed", "config", "matrix", "BigNumber", "DenseMatrix", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "ifft",
           "creator": "createIfft",
-          "deps": ["typed", "fft", "dotDivide", "conj", "complex"]
+          "deps": [
+            "typed",
+            "fft",
+            "dotDivide",
+            "conj",
+            "complex"
+          ]
         },
         {
           "name": "inv",
@@ -1874,42 +2719,75 @@
         {
           "name": "kron",
           "creator": "createKron",
-          "deps": ["typed", "matrix", "multiplyScalar"]
+          "deps": [
+            "typed",
+            "matrix",
+            "multiplyScalar"
+          ]
         },
         {
           "name": "map",
           "creator": "createMap",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "mapSlices",
           "creator": "createMapSlices",
-          "deps": ["typed", "isInteger"]
+          "deps": [
+            "typed",
+            "isInteger"
+          ]
         },
         {
           "name": "matrixFromColumns",
           "creator": "createMatrixFromColumns",
-          "deps": ["typed", "matrix", "flatten", "size"]
+          "deps": [
+            "typed",
+            "matrix",
+            "flatten",
+            "size"
+          ]
         },
         {
           "name": "matrixFromFunction",
           "creator": "createMatrixFromFunction",
-          "deps": ["typed", "matrix", "isZero"]
+          "deps": [
+            "typed",
+            "matrix",
+            "isZero"
+          ]
         },
         {
           "name": "matrixFromRows",
           "creator": "createMatrixFromRows",
-          "deps": ["typed", "matrix", "flatten", "size"]
+          "deps": [
+            "typed",
+            "matrix",
+            "flatten",
+            "size"
+          ]
         },
         {
           "name": "ones",
           "creator": "createOnes",
-          "deps": ["typed", "config", "matrix", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
         },
         {
           "name": "partitionSelect",
           "creator": "createPartitionSelect",
-          "deps": ["typed", "isNumeric", "isNaN", "compare"]
+          "deps": [
+            "typed",
+            "isNumeric",
+            "isNaN",
+            "compare"
+          ]
         },
         {
           "name": "pinv",
@@ -1950,17 +2828,29 @@
         {
           "name": "reshape",
           "creator": "createReshape",
-          "deps": ["typed", "isInteger", "matrix"]
+          "deps": [
+            "typed",
+            "isInteger",
+            "matrix"
+          ]
         },
         {
           "name": "resize",
           "creator": "createResize",
-          "deps": ["config", "matrix"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix"
+          ]
         },
         {
           "name": "rotate",
           "creator": "createRotate",
-          "deps": ["typed", "multiply", "rotationMatrix"]
+          "deps": [
+            "typed",
+            "multiply",
+            "rotationMatrix"
+          ]
         },
         {
           "name": "rotationMatrix",
@@ -1983,17 +2873,29 @@
         {
           "name": "row",
           "creator": "createRow",
-          "deps": ["typed", "Index", "matrix", "range"]
+          "deps": [
+            "typed",
+            "Index",
+            "matrix",
+            "range"
+          ]
         },
         {
           "name": "size",
           "creator": "createSize",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "sort",
           "creator": "createSort",
-          "deps": ["typed", "matrix", "compare", "compareNatural"]
+          "deps": [
+            "typed",
+            "matrix",
+            "compare",
+            "compareNatural"
+          ]
         },
         {
           "name": "sqrtm",
@@ -2015,33 +2917,52 @@
         {
           "name": "squeeze",
           "creator": "createSqueeze",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "subset",
           "creator": "createSubset",
-          "deps": ["typed", "matrix", "zeros", "add"]
+          "deps": [
+            "typed",
+            "matrix",
+            "zeros",
+            "add"
+          ]
         },
         {
           "name": "trace",
           "creator": "createTrace",
-          "deps": ["typed", "matrix", "add"]
+          "deps": [
+            "typed",
+            "matrix",
+            "add"
+          ]
         },
         {
           "name": "transpose",
           "creator": "createTranspose",
-          "deps": ["typed", "matrix"]
+          "deps": [
+            "typed",
+            "matrix"
+          ]
         },
         {
           "name": "zeros",
           "creator": "createZeros",
-          "deps": ["typed", "config", "matrix", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
         }
       ]
     },
     "numeric": {
       "file_count": 1,
-      "total_lines": 712,
+      "total_lines": 655,
       "factory_count": 1,
       "factories": [
         {
@@ -2069,33 +2990,54 @@
     },
     "probability": {
       "file_count": 14,
-      "total_lines": 1740,
+      "total_lines": 1637,
       "factory_count": 12,
       "factories": [
         {
           "name": "bernoulli",
           "creator": "createBernoulli",
-          "deps": ["typed", "config", "isInteger", "number", "?BigNumber", "?Fraction"]
+          "deps": [
+            "typed",
+            "config",
+            "isInteger",
+            "number",
+            "?BigNumber",
+            "?Fraction"
+          ]
         },
         {
           "name": "combinations",
           "creator": "createCombinations",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "combinationsWithRep",
           "creator": "createCombinationsWithRep",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "factorial",
           "creator": "createFactorial",
-          "deps": ["typed", "gamma"]
+          "deps": [
+            "typed",
+            "gamma"
+          ]
         },
         {
           "name": "gamma",
           "creator": "createGamma",
-          "deps": ["typed", "config", "multiplyScalar", "pow", "BigNumber", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "multiplyScalar",
+            "pow",
+            "BigNumber",
+            "Complex"
+          ]
         },
         {
           "name": "kldivergence",
@@ -2115,38 +3057,65 @@
         {
           "name": "lgamma",
           "creator": "createLgamma",
-          "deps": ["Complex", "typed"]
+          "deps": [
+            "Complex",
+            "typed"
+          ]
         },
         {
           "name": "multinomial",
           "creator": "createMultinomial",
-          "deps": ["typed", "add", "divide", "multiply", "factorial", "isInteger", "isPositive"]
+          "deps": [
+            "typed",
+            "add",
+            "divide",
+            "multiply",
+            "factorial",
+            "isInteger",
+            "isPositive"
+          ]
         },
         {
           "name": "permutations",
           "creator": "createPermutations",
-          "deps": ["typed", "factorial"]
+          "deps": [
+            "typed",
+            "factorial"
+          ]
         },
         {
           "name": "pickRandom",
           "creator": "createPickRandom",
-          "deps": ["typed", "config", "?on"]
+          "deps": [
+            "typed",
+            "config",
+            "?on"
+          ]
         },
         {
           "name": "random",
           "creator": "createRandom",
-          "deps": ["typed", "config", "?on"]
+          "deps": [
+            "typed",
+            "config",
+            "?on"
+          ]
         },
         {
           "name": "randomInt",
           "creator": "createRandomInt",
-          "deps": ["typed", "config", "log2", "?on"]
+          "deps": [
+            "typed",
+            "config",
+            "log2",
+            "?on"
+          ]
         }
       ]
     },
     "relational": {
       "file_count": 13,
-      "total_lines": 1807,
+      "total_lines": 1716,
       "factory_count": 12,
       "factories": [
         {
@@ -2166,32 +3135,55 @@
         {
           "name": "compareNatural",
           "creator": "createCompareNatural",
-          "deps": ["typed", "compare"]
+          "deps": [
+            "typed",
+            "compare"
+          ]
         },
         {
           "name": "compareText",
           "creator": "createCompareText",
-          "deps": ["typed", "matrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "concat"
+          ]
         },
         {
           "name": "deepEqual",
           "creator": "createDeepEqual",
-          "deps": ["typed", "equal"]
+          "deps": [
+            "typed",
+            "equal"
+          ]
         },
         {
           "name": "equal",
           "creator": "createEqual",
-          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "equalScalar",
           "creator": "createEqualScalar",
-          "deps": ["typed", "config"]
+          "deps": [
+            "typed",
+            "config"
+          ]
         },
         {
           "name": "equalText",
           "creator": "createEqualText",
-          "deps": ["typed", "compareText", "isZero"]
+          "deps": [
+            "typed",
+            "compareText",
+            "isZero"
+          ]
         },
         {
           "name": "larger",
@@ -2209,7 +3201,14 @@
         {
           "name": "largerEq",
           "creator": "createLargerEq",
-          "deps": ["typed", "config", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "smaller",
@@ -2227,7 +3226,14 @@
         {
           "name": "smallerEq",
           "creator": "createSmallerEq",
-          "deps": ["typed", "config", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
         },
         {
           "name": "unequal",
@@ -2246,87 +3252,166 @@
     },
     "set": {
       "file_count": 10,
-      "total_lines": 847,
+      "total_lines": 713,
       "factory_count": 10,
       "factories": [
         {
           "name": "setCartesian",
           "creator": "createSetCartesian",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "setDifference",
           "creator": "createSetDifference",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "setDistinct",
           "creator": "createSetDistinct",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "setIntersect",
           "creator": "createSetIntersect",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
         },
         {
           "name": "setIsSubset",
           "creator": "createSetIsSubset",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
         },
         {
           "name": "setMultiplicity",
           "creator": "createSetMultiplicity",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
         },
         {
           "name": "setPowerset",
           "creator": "createSetPowerset",
-          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
         },
         {
           "name": "setSize",
           "creator": "createSetSize",
-          "deps": ["typed", "compareNatural"]
+          "deps": [
+            "typed",
+            "compareNatural"
+          ]
         },
         {
           "name": "setSymDifference",
           "creator": "createSetSymDifference",
-          "deps": ["typed", "size", "concat", "subset", "setDifference", "Index"]
+          "deps": [
+            "typed",
+            "size",
+            "concat",
+            "subset",
+            "setDifference",
+            "Index"
+          ]
         },
         {
           "name": "setUnion",
           "creator": "createSetUnion",
-          "deps": ["typed", "size", "concat", "subset", "setIntersect", "setSymDifference", "Index"]
+          "deps": [
+            "typed",
+            "size",
+            "concat",
+            "subset",
+            "setIntersect",
+            "setSymDifference",
+            "Index"
+          ]
         }
       ]
     },
     "signal": {
       "file_count": 5,
-      "total_lines": 1349,
+      "total_lines": 1281,
       "factory_count": 2,
       "factories": [
         {
           "name": "freqz",
           "creator": "createFreqz",
-          "deps": ["typed", "add", "multiply", "Complex", "divide", "matrix"]
+          "deps": [
+            "typed",
+            "add",
+            "multiply",
+            "Complex",
+            "divide",
+            "matrix"
+          ]
         },
         {
           "name": "zpk2tf",
           "creator": "createZpk2tf",
-          "deps": ["typed", "add", "multiply", "Complex", "number"]
+          "deps": [
+            "typed",
+            "add",
+            "multiply",
+            "Complex",
+            "number"
+          ]
         }
       ]
     },
     "special": {
       "file_count": 2,
-      "total_lines": 502,
+      "total_lines": 480,
       "factory_count": 2,
       "factories": [
         {
           "name": "erf",
           "creator": "createErf",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "zeta",
@@ -2355,7 +3440,7 @@
     },
     "statistics": {
       "file_count": 14,
-      "total_lines": 2461,
+      "total_lines": 2300,
       "factory_count": 13,
       "factories": [
         {
@@ -2377,42 +3462,84 @@
         {
           "name": "cumsum",
           "creator": "createCumSum",
-          "deps": ["typed", "add", "unaryPlus"]
+          "deps": [
+            "typed",
+            "add",
+            "unaryPlus"
+          ]
         },
         {
           "name": "mad",
           "creator": "createMad",
-          "deps": ["typed", "abs", "map", "median", "subtract"]
+          "deps": [
+            "typed",
+            "abs",
+            "map",
+            "median",
+            "subtract"
+          ]
         },
         {
           "name": "max",
           "creator": "createMax",
-          "deps": ["typed", "config", "numeric", "larger", "isNaN"]
+          "deps": [
+            "typed",
+            "config",
+            "numeric",
+            "larger",
+            "isNaN"
+          ]
         },
         {
           "name": "mean",
           "creator": "createMean",
-          "deps": ["typed", "add", "divide"]
+          "deps": [
+            "typed",
+            "add",
+            "divide"
+          ]
         },
         {
           "name": "median",
           "creator": "createMedian",
-          "deps": ["typed", "add", "divide", "compare", "partitionSelect"]
+          "deps": [
+            "typed",
+            "add",
+            "divide",
+            "compare",
+            "partitionSelect"
+          ]
         },
         {
           "name": "min",
           "creator": "createMin",
-          "deps": ["typed", "config", "numeric", "smaller", "isNaN"]
+          "deps": [
+            "typed",
+            "config",
+            "numeric",
+            "smaller",
+            "isNaN"
+          ]
         },
         {
           "name": "mode",
           "creator": "createMode",
-          "deps": ["typed", "isNaN", "isNumeric"]
+          "deps": [
+            "typed",
+            "isNaN",
+            "isNumeric"
+          ]
         },
         {
           "name": "prod",
           "creator": "createProd",
-          "deps": ["typed", "config", "multiplyScalar", "numeric", "parseNumberWithConfig"]
+          "deps": [
+            "typed",
+            "config",
+            "multiplyScalar",
+            "numeric",
+            "parseNumberWithConfig"
+          ]
         },
         {
           "name": "quantileSeq",
@@ -2436,280 +3563,444 @@
         {
           "name": "std",
           "creator": "createStd",
-          "deps": ["typed", "map", "sqrt", "variance"]
+          "deps": [
+            "typed",
+            "map",
+            "sqrt",
+            "variance"
+          ]
         },
         {
           "name": "sum",
           "creator": "createSum",
-          "deps": ["typed", "config", "add", "numeric", "parseNumberWithConfig"]
+          "deps": [
+            "typed",
+            "config",
+            "add",
+            "numeric",
+            "parseNumberWithConfig"
+          ]
         },
         {
           "name": "variance",
           "creator": "createVariance",
-          "deps": ["typed", "add", "subtract", "multiply", "divide", "mapSlices", "isNaN"]
+          "deps": [
+            "typed",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "mapSlices",
+            "isNaN"
+          ]
         }
       ]
     },
     "string": {
       "file_count": 5,
-      "total_lines": 441,
+      "total_lines": 436,
       "factory_count": 5,
       "factories": [
         {
           "name": "bin",
           "creator": "createBin",
-          "deps": ["typed", "format"]
+          "deps": [
+            "typed",
+            "format"
+          ]
         },
         {
           "name": "format",
           "creator": "createFormat",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "hex",
           "creator": "createHex",
-          "deps": ["typed", "format"]
+          "deps": [
+            "typed",
+            "format"
+          ]
         },
         {
           "name": "oct",
           "creator": "createOct",
-          "deps": ["typed", "format"]
+          "deps": [
+            "typed",
+            "format"
+          ]
         },
         {
           "name": "print",
           "creator": "createPrint",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         }
       ]
     },
     "trigonometry": {
       "file_count": 26,
-      "total_lines": 1658,
+      "total_lines": 1649,
       "factory_count": 25,
       "factories": [
         {
           "name": "acos",
           "creator": "createAcos",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "acosh",
           "creator": "createAcosh",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "acot",
           "creator": "createAcot",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "acoth",
           "creator": "createAcoth",
-          "deps": ["typed", "config", "Complex", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
         },
         {
           "name": "acsc",
           "creator": "createAcsc",
-          "deps": ["typed", "config", "Complex", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
         },
         {
           "name": "acsch",
           "creator": "createAcsch",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "asec",
           "creator": "createAsec",
-          "deps": ["typed", "config", "Complex", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
         },
         {
           "name": "asech",
           "creator": "createAsech",
-          "deps": ["typed", "config", "Complex", "BigNumber"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
         },
         {
           "name": "asin",
           "creator": "createAsin",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "asinh",
           "creator": "createAsinh",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "atan",
           "creator": "createAtan",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "atan2",
           "creator": "createAtan2",
-          "deps": ["typed", "matrix", "equalScalar", "BigNumber", "DenseMatrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "BigNumber",
+            "DenseMatrix",
+            "concat"
+          ]
         },
         {
           "name": "atanh",
           "creator": "createAtanh",
-          "deps": ["typed", "config", "Complex"]
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
         },
         {
           "name": "cos",
           "creator": "createCos",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "cosh",
           "creator": "createCosh",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "cot",
           "creator": "createCot",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "coth",
           "creator": "createCoth",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "csc",
           "creator": "createCsc",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "csch",
           "creator": "createCsch",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "sec",
           "creator": "createSec",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "sech",
           "creator": "createSech",
-          "deps": ["typed", "BigNumber"]
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
         },
         {
           "name": "sin",
           "creator": "createSin",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "sinh",
           "creator": "createSinh",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "tan",
           "creator": "createTan",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "tanh",
           "creator": "createTanh",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         }
       ]
     },
     "unit": {
       "file_count": 2,
-      "total_lines": 137,
+      "total_lines": 126,
       "factory_count": 2,
       "factories": [
         {
           "name": "to",
           "creator": "createTo",
-          "deps": ["typed", "matrix", "concat"]
+          "deps": [
+            "typed",
+            "matrix",
+            "concat"
+          ]
         },
         {
           "name": "toBest",
           "creator": "createToBest",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         }
       ]
     },
     "utils": {
       "file_count": 46,
-      "total_lines": 7649,
+      "total_lines": 7375,
       "factory_count": 15,
       "factories": [
         {
           "name": "clone",
           "creator": "createClone",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "log",
           "creator": "createLog",
-          "deps": ["config", "typed", "divideScalar", "Complex"]
+          "deps": [
+            "config",
+            "typed",
+            "divideScalar",
+            "Complex"
+          ]
         },
         {
           "name": "hasNumericValue",
           "creator": "createHasNumericValue",
-          "deps": ["typed", "isNumeric"]
+          "deps": [
+            "typed",
+            "isNumeric"
+          ]
         },
         {
           "name": "isBounded",
           "creator": "createIsBounded",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "isFinite",
           "creator": "createIsFinite",
-          "deps": ["typed", "isBounded", "map"]
+          "deps": [
+            "typed",
+            "isBounded",
+            "map"
+          ]
         },
         {
           "name": "isInteger",
           "creator": "createIsInteger",
-          "deps": ["typed", "equal"]
+          "deps": [
+            "typed",
+            "equal"
+          ]
         },
         {
           "name": "isNaN",
           "creator": "createIsNaN",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "isNegative",
           "creator": "createIsNegative",
-          "deps": ["typed", "config"]
+          "deps": [
+            "typed",
+            "config"
+          ]
         },
         {
           "name": "isNumeric",
           "creator": "createIsNumeric",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "isPositive",
           "creator": "createIsPositive",
-          "deps": ["typed", "config"]
+          "deps": [
+            "typed",
+            "config"
+          ]
         },
         {
           "name": "isPrime",
           "creator": "createIsPrime",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         },
         {
           "name": "isZero",
           "creator": "createIsZero",
-          "deps": ["typed", "equalScalar"]
+          "deps": [
+            "typed",
+            "equalScalar"
+          ]
         },
         {
           "name": "numeric",
           "creator": "createNumeric",
-          "deps": ["number", "?bignumber", "?fraction"]
+          "deps": [
+            "number",
+            "?bignumber",
+            "?fraction"
+          ]
         },
         {
           "name": "parseNumberWithConfig",
           "creator": "createParseNumberWithConfig",
-          "deps": ["config", "?bignumber"]
+          "deps": [
+            "config",
+            "?bignumber"
+          ]
         },
         {
           "name": "typeOf",
           "creator": "createTypeOf",
-          "deps": ["typed"]
+          "deps": [
+            "typed"
+          ]
         }
       ]
     }
@@ -2739,7 +4030,7 @@
       "method_count": 17
     },
     "BackendManager": {
-      "lines": 680,
+      "lines": 641,
       "methods": [
         "GPU",
         "Map",
@@ -2778,7 +4069,6 @@
         "now",
         "onConfigChange",
         "operation",
-        "operations",
         "push",
         "recordSample",
         "reduce",
@@ -2797,10 +4087,10 @@
         "transpose",
         "warn"
       ],
-      "method_count": 55
+      "method_count": 54
     },
     "GPUBackend": {
-      "lines": 511,
+      "lines": 464,
       "methods": [
         "BufferPool",
         "Error",
@@ -2842,7 +4132,7 @@
       "method_count": 36
     },
     "GPUMatrixBackend": {
-      "lines": 402,
+      "lines": 395,
       "methods": [
         "Error",
         "Float32Array",
@@ -2888,12 +4178,12 @@
       "method_count": 40
     },
     "index": {
-      "lines": 114,
+      "lines": 85,
       "methods": [],
       "method_count": 0
     },
     "JSBackend": {
-      "lines": 306,
+      "lines": 302,
       "methods": [
         "DenseMatrix",
         "Error",
@@ -2926,76 +4216,8 @@
       ],
       "method_count": 28
     },
-    "MatrixWasmBridge": {
-      "lines": 851,
-      "methods": [
-        "A",
-        "Error",
-        "Float64Array",
-        "Int32Array",
-        "JS",
-        "O",
-        "Parallel",
-        "abs",
-        "allocateFloat64Array",
-        "allocateInt32Array",
-        "catch",
-        "cleanup",
-        "collect",
-        "cond1",
-        "cond1JS",
-        "cond1Wasm",
-        "condInf",
-        "condInfJS",
-        "condInfWasm",
-        "configure",
-        "data",
-        "eigenvalue",
-        "eigsSymmetric",
-        "eigsSymmetricJS",
-        "eigsSymmetricWasm",
-        "exp",
-        "expm",
-        "expmJS",
-        "expmWasm",
-        "fft",
-        "fftWasm",
-        "free",
-        "getCapabilities",
-        "init",
-        "intensive",
-        "inv2x2",
-        "inv2x2JS",
-        "inv3x3",
-        "inv3x3JS",
-        "laCond1",
-        "laCondInf",
-        "laInv2x2",
-        "laInv3x3",
-        "load",
-        "luDecomposition",
-        "luDecompositionJS",
-        "luDecompositionWasm",
-        "matrices",
-        "matrix",
-        "multiply",
-        "multiplyDense",
-        "multiplyDenseSIMD",
-        "multiplyJS",
-        "multiplyWasm",
-        "sizes",
-        "sqrt",
-        "sqrtm",
-        "sqrtmJS",
-        "sqrtmWasm",
-        "terminate",
-        "threshold",
-        "warn"
-      ],
-      "method_count": 62
-    },
     "ParallelBackend": {
-      "lines": 381,
+      "lines": 371,
       "methods": [
         "ComputePool",
         "DenseMatrix",
@@ -3035,259 +4257,248 @@
       ],
       "method_count": 35
     },
-    "RustWASMBackend": {
-      "lines": 475,
-      "methods": [
-        "Error",
-        "Operations",
-        "WASM",
-        "abs",
-        "add",
-        "allocF64",
-        "allocI32",
-        "divideElementwise",
-        "doInitialize",
-        "dot",
-        "eigsSymmetric",
-        "fft",
-        "fromFlat",
-        "getConfig",
-        "getExports",
-        "initialize",
-        "inverse",
-        "isAvailable",
-        "isRustLoaded",
-        "laInv",
-        "load",
-        "luDecomposition",
-        "multiply",
-        "multiplyDenseSIMD",
-        "multiplyElementwise",
-        "negate",
-        "norm",
-        "readF64",
-        "readI32",
-        "resetAllocator",
-        "scale",
-        "shouldUseRustWasm",
-        "simdAbsF64",
-        "simdAddF64",
-        "simdDotF64",
-        "simdMulF64",
-        "simdNormF64",
-        "simdScaleF64",
-        "simdSubF64",
-        "simdSumF64",
-        "subtract",
-        "sum",
-        "sumAxis",
-        "transpose",
-        "updateConfig",
-        "warn",
-        "writeF64"
-      ],
-      "method_count": 47
-    },
-    "RustWasmLoader": {
-      "lines": 475,
-      "methods": [
-        "BumpAllocator",
-        "Error",
-        "Float64Array",
-        "Int32Array",
-        "Management",
-        "RustWasmLoader",
-        "alloc",
-        "allocF64",
-        "allocI32",
-        "arrayBuffer",
-        "catch",
-        "compile",
-        "default",
-        "doLoad",
-        "fetch",
-        "findWasmPath",
-        "getExports",
-        "getImports",
-        "getInstance",
-        "getLoadingMetrics",
-        "getMemory",
-        "import",
-        "instantiate",
-        "instantiateStreaming",
-        "isArray",
-        "isLoaded",
-        "load",
-        "loader",
-        "location",
-        "memory",
-        "now",
-        "readF64",
-        "readFileSync",
-        "readI32",
-        "require",
-        "reset",
-        "resetAllocator",
-        "resetInstance",
-        "resolve",
-        "set",
-        "singleton",
-        "statics",
-        "times",
-        "warn",
-        "writeF64",
-        "writeI32"
-      ],
-      "method_count": 46
+    "register-backends": {
+      "lines": 27,
+      "methods": [],
+      "method_count": 0
     },
     "WASMBackend": {
-      "lines": 862,
+      "lines": 1085,
       "methods": [
-        "Decomposition",
-        "Determinant",
+        "AsAllocCache",
         "Error",
         "Float64Array",
         "Int32Array",
-        "Inversion",
+        "URL",
+        "Uint8Array",
         "abs",
         "add",
-        "allocateFloat64Array",
-        "allocateInt32Array",
+        "allocAsFloat64Array",
+        "allocAsInt32Array",
+        "arrayBuffer",
+        "array_abs",
+        "array_dot",
+        "artifact",
+        "call",
         "catch",
         "choleskyDecomposition",
         "choleskyDecompositionJS",
+        "compile",
         "detectWasmFeatures",
         "determinantJS",
         "determinantWasm",
         "divideElementwise",
         "doInitialize",
         "dot",
-        "dotProduct",
-        "free",
-        "from",
+        "error",
+        "fallback",
+        "fetch",
+        "fileURLToPath",
         "fromFlat",
         "getConfig",
         "getFeatures",
+        "import",
         "initialize",
+        "instantiate",
+        "instantiateStreaming",
         "inverse",
         "inverseJS",
         "isAvailable",
-        "laInv",
-        "load",
+        "loadAsModule",
+        "loadWasmManifest",
         "luDecomposition",
         "luDecompositionJS",
-        "luDeterminant",
+        "matrix_add",
+        "matrix_div_elementwise",
+        "matrix_mul_elementwise",
+        "matrix_multiply",
+        "matrix_neg",
+        "matrix_norm_frobenius",
+        "matrix_scale",
+        "matrix_sub",
+        "matrix_sum",
+        "matrix_transpose",
         "min",
         "multiply",
-        "multiplyDense",
-        "multiplyDenseSIMD",
         "multiplyElementwise",
         "negate",
         "norm",
+        "now",
+        "points",
+        "promisify",
         "qrDecomposition",
         "qrDecompositionJS",
-        "scalarMultiply",
+        "readAsFloat64Array",
+        "readAsInt32Array",
+        "readFile",
+        "relative",
+        "release",
+        "releaseAsInt32Array",
+        "resolveAsWasmPath",
+        "resolvePackagedWasm",
         "scale",
         "shouldUseWasm",
-        "simdAbsF64",
-        "simdAddF64",
-        "simdDotF64",
-        "simdMulF64",
-        "simdNormF64",
-        "simdScaleF64",
-        "simdSubF64",
-        "simdSumF64",
+        "sign",
         "sqrt",
         "subtract",
         "sum",
         "sumAxis",
+        "these",
         "toFloat64Array",
         "transpose",
         "updateConfig",
+        "verifyWasmIntegrity",
         "warn",
+        "writeAsFloat64Array",
         "zeros"
       ],
-      "method_count": 63
+      "method_count": 86
     },
     "WasmLoader": {
-      "lines": 1069,
+      "lines": 1130,
       "methods": [
+        "DataView",
         "Error",
         "Float64Array",
         "Int32Array",
-        "Rust",
         "URL",
         "WasmLoader",
         "__collect",
         "__new",
+        "__pin",
         "__unpin",
+        "acquireFromAsPool",
+        "allocateAsFloat64",
+        "allocateAsInt32",
         "allocateFloat64Array",
         "allocateFloat64ArrayEmpty",
         "allocateInt32Array",
         "allocateInt32ArrayEmpty",
         "arrayBuffer",
+        "artifact",
         "clearPool",
         "collect",
         "compile",
         "compileStreaming",
+        "conversion",
         "data",
         "error",
         "fetch",
+        "fileURLToPath",
         "filter",
         "find",
+        "floor",
         "free",
+        "functions",
         "getCompiledModule",
         "getDefaultWasmPath",
-        "getFromPool",
         "getImports",
         "getInstance",
         "getLoadingMetrics",
         "getModule",
         "getPoolStats",
+        "getUint32",
         "import",
         "instantiate",
         "instantiateStreaming",
         "isLoaded",
         "isPrecompiled",
-        "it",
+        "layouts",
         "load",
         "loadBrowserWasm",
         "loadModule",
         "loadNodeWasm",
+        "loadWasmManifest",
         "loader",
+        "makeAsFloat64",
+        "makeAsInt32",
         "memory",
+        "migration",
         "module",
         "now",
+        "path",
         "precompile",
+        "present",
         "promisify",
         "readFile",
+        "readReturnedFloat64Array",
         "reduce",
+        "relative",
         "release",
         "reset",
+        "resolvePackagedWasm",
+        "runtime",
         "set",
-        "size"
+        "setUint32",
+        "verifyWasmIntegrity"
       ],
-      "method_count": 54
+      "method_count": 74
     }
   },
   "wasm_operations": {
+    "algebra/decomposition.ts": {
+      "lines": 402,
+      "exports": [
+        "matrix_lu_decompose",
+        "matrix_qr_decompose",
+        "matrix_cholesky",
+        "matrix_inverse",
+        "matrix_determinant"
+      ],
+      "export_count": 5
+    },
     "bindings/index.ts": {
       "lines": 10,
-      "exports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
+      "exports": [
+        "MathTSWasm",
+        "loadWasm",
+        "loadWasmSync"
+      ],
       "export_count": 3
     },
     "bindings/wasm-loader.ts": {
-      "lines": 262,
-      "exports": ["MathTSWasmExports", "MathTSWasmInstance", "loadWasmSync", "MathTSWasm"],
+      "lines": 382,
+      "exports": [
+        "MathTSWasmExports",
+        "MathTSWasmInstance",
+        "loadWasmSync",
+        "MathTSWasm"
+      ],
       "export_count": 4
+    },
+    "elementwise.ts": {
+      "lines": 201,
+      "exports": [
+        "array_abs_ptr",
+        "array_sin_ptr",
+        "array_cos_ptr",
+        "array_tan_ptr",
+        "array_exp_ptr",
+        "array_log_ptr",
+        "array_atan_ptr",
+        "array_sinh_ptr",
+        "array_tanh_ptr",
+        "array_atanh_ptr",
+        "array_expm1_ptr",
+        "array_log1p_ptr",
+        "array_log2_ptr",
+        "array_log10_ptr",
+        "array_sec_ptr",
+        "array_csc_ptr",
+        "array_cot_ptr",
+        "array_erfc_ptr"
+      ],
+      "export_count": 18
     },
     "env/abort.ts": {
       "lines": 21,
-      "exports": ["abort"],
+      "exports": [
+        "abort"
+      ],
       "export_count": 1
     },
     "index.ts": {
-      "lines": 329,
+      "lines": 549,
       "exports": [
         "Complex",
         "complex",
@@ -3421,6 +4632,65 @@
         "// BLAS-like operations\n  matrix_axpy",
         "matrix_gemm",
         "matrix_gemv",
+        "matrix_svd",
+        "matrix_singular_values",
+        "matrix_eig_symmetric",
+        "matrix_spectral_radius",
+        "matrix_eig_general",
+        "fft",
+        "rfft",
+        "powerSpectrum",
+        "matrix_lu_decompose",
+        "matrix_qr_decompose",
+        "matrix_cholesky",
+        "matrix_inverse",
+        "matrix_determinant",
+        "chebyshevT",
+        "hermiteH",
+        "laguerreL",
+        "legendreP",
+        "erfi",
+        "expIntegralEi",
+        "sinIntegral",
+        "cosIntegral",
+        "logIntegral",
+        "eulerPhi",
+        "divisorSigma",
+        "moebiusMu",
+        "carmichaelLambda",
+        "jacobiSymbol",
+        "harmonicNumber",
+        "partitions",
+        "primeFactors",
+        "divisors",
+        "integerDigits",
+        "chineseRemainder",
+        "polyadd",
+        "polynomialQuotient",
+        "polynomialRemainder",
+        "polynomialGCD",
+        "polynomialLCM",
+        "discriminant",
+        "resultant",
+        "resample",
+        "medfilt",
+        "windowFunction",
+        "apply_window_f64",
+        "welch_psd_f64",
+        "bartlett_psd_f64",
+        "goertzel_f64",
+        "chirp_z_transform_f64",
+        "rowReduce",
+        "characteristicPolynomial",
+        "expfit",
+        "logfit",
+        "powerfit",
+        "quadprog",
+        "linprog",
+        "nullspace",
+        "residue",
+        "padeApproximant",
+        "tensorTranspose",
         "// Basic arithmetic\n  complex_add",
         "complex_sub",
         "complex_mul",
@@ -3465,6 +4735,63 @@
         "complex_to_polar",
         "// Linear algebra\n  complex_axpby",
         "complex_distance",
+        "bitAnd_i32_array",
+        "bitOr_i32_array",
+        "bitXor_i32_array",
+        "bitNot_i32_array",
+        "leftShift_i32_array",
+        "rightArithShift_i32_array",
+        "rightLogShift_i32_array",
+        "poly_mul_f64",
+        "poly_div_mod_f64",
+        "poly_fit_f64",
+        "cheb_fit_f64",
+        "legendre_fit_f64",
+        "poly_resultant_f64",
+        "poly_discriminant_f64",
+        "array_abs_ptr",
+        "array_sin_ptr",
+        "array_cos_ptr",
+        "array_tan_ptr",
+        "array_exp_ptr",
+        "array_log_ptr",
+        "array_atan_ptr",
+        "array_sinh_ptr",
+        "array_tanh_ptr",
+        "array_atanh_ptr",
+        "array_expm1_ptr",
+        "array_log1p_ptr",
+        "array_log2_ptr",
+        "array_log10_ptr",
+        "array_sec_ptr",
+        "array_csc_ptr",
+        "array_cot_ptr",
+        "array_erfc_ptr",
+        "tridiag_solve_f64",
+        "divided_difference_f64",
+        "bessel_j0_f64",
+        "bessel_j1_f64",
+        "bessel_jn_f64",
+        "bessel_j_f64",
+        "bessel_y0_f64",
+        "bessel_y1_f64",
+        "bessel_yn_f64",
+        "bessel_y_f64",
+        "airy_ai_f64",
+        "airy_bi_f64",
+        "elliptic_k_f64",
+        "elliptic_e_f64",
+        "lgamma_f64",
+        "carlson_rc_f64",
+        "carlson_rf_f64",
+        "carlson_rd_f64",
+        "carlson_rj_f64",
+        "elliptic_f_incomplete_f64",
+        "elliptic_e_incomplete_f64",
+        "elliptic_pi_incomplete_f64",
+        "sort_f64",
+        "argsort_f64",
+        "rank_f64",
         "// Creation\n  complex_array_zeros",
         "complex_array_ones",
         "complex_array_fill",
@@ -3499,10 +4826,18 @@
         "complex_array_add_inplace",
         "complex_array_copy"
       ],
-      "export_count": 209
+      "export_count": 325
+    },
+    "ops/approx.ts": {
+      "lines": 176,
+      "exports": [
+        "residue",
+        "padeApproximant"
+      ],
+      "export_count": 2
     },
     "ops/array.ts": {
-      "lines": 441,
+      "lines": 443,
       "exports": [
         "array_sum",
         "array_product",
@@ -3543,8 +4878,21 @@
       ],
       "export_count": 36
     },
+    "ops/bitwise.ts": {
+      "lines": 100,
+      "exports": [
+        "bitAnd_i32_array",
+        "bitOr_i32_array",
+        "bitXor_i32_array",
+        "bitNot_i32_array",
+        "leftShift_i32_array",
+        "rightArithShift_i32_array",
+        "rightLogShift_i32_array"
+      ],
+      "export_count": 7
+    },
     "ops/complex-array.ts": {
-      "lines": 438,
+      "lines": 431,
       "exports": [
         "complex_array_zeros",
         "complex_array_ones",
@@ -3583,7 +4931,7 @@
       "export_count": 33
     },
     "ops/complex-ops.ts": {
-      "lines": 379,
+      "lines": 367,
       "exports": [
         "complex_add",
         "complex_sub",
@@ -3632,8 +4980,43 @@
       ],
       "export_count": 44
     },
+    "ops/curvefit.ts": {
+      "lines": 78,
+      "exports": [
+        "expfit",
+        "logfit",
+        "powerfit"
+      ],
+      "export_count": 3
+    },
+    "ops/eig.ts": {
+      "lines": 689,
+      "exports": [
+        "matrix_eig_symmetric",
+        "matrix_spectral_radius",
+        "matrix_eig_general"
+      ],
+      "export_count": 3
+    },
+    "ops/fft.ts": {
+      "lines": 130,
+      "exports": [
+        "fft",
+        "rfft",
+        "powerSpectrum"
+      ],
+      "export_count": 3
+    },
+    "ops/linalg.ts": {
+      "lines": 85,
+      "exports": [
+        "rowReduce",
+        "characteristicPolynomial"
+      ],
+      "export_count": 2
+    },
     "ops/matrix.ts": {
-      "lines": 599,
+      "lines": 615,
       "exports": [
         "matrix_zeros",
         "matrix_ones",
@@ -3678,6 +5061,45 @@
         "matrix_gemv"
       ],
       "export_count": 41
+    },
+    "ops/number-theory.ts": {
+      "lines": 263,
+      "exports": [
+        "eulerPhi",
+        "divisorSigma",
+        "moebiusMu",
+        "carmichaelLambda",
+        "jacobiSymbol",
+        "harmonicNumber",
+        "partitions",
+        "primeFactors",
+        "divisors",
+        "integerDigits",
+        "chineseRemainder"
+      ],
+      "export_count": 11
+    },
+    "ops/optimization.ts": {
+      "lines": 198,
+      "exports": [
+        "quadprog",
+        "linprog",
+        "nullspace"
+      ],
+      "export_count": 3
+    },
+    "ops/polynomial.ts": {
+      "lines": 234,
+      "exports": [
+        "polyadd",
+        "polynomialQuotient",
+        "polynomialRemainder",
+        "polynomialGCD",
+        "polynomialLCM",
+        "discriminant",
+        "resultant"
+      ],
+      "export_count": 7
     },
     "ops/scalar.ts": {
       "lines": 381,
@@ -3737,8 +5159,114 @@
       ],
       "export_count": 52
     },
+    "ops/signal.ts": {
+      "lines": 86,
+      "exports": [
+        "resample",
+        "medfilt",
+        "windowFunction"
+      ],
+      "export_count": 3
+    },
+    "ops/special.ts": {
+      "lines": 167,
+      "exports": [
+        "chebyshevT",
+        "hermiteH",
+        "laguerreL",
+        "legendreP",
+        "erfi",
+        "expIntegralEi",
+        "sinIntegral",
+        "cosIntegral",
+        "logIntegral"
+      ],
+      "export_count": 9
+    },
+    "ops/svd.ts": {
+      "lines": 169,
+      "exports": [
+        "matrix_svd",
+        "matrix_singular_values"
+      ],
+      "export_count": 2
+    },
+    "ops/tensor.ts": {
+      "lines": 71,
+      "exports": [
+        "tensorTranspose"
+      ],
+      "export_count": 1
+    },
+    "poly.ts": {
+      "lines": 452,
+      "exports": [
+        "poly_mul_f64",
+        "poly_div_mod_f64",
+        "poly_resultant_f64",
+        "poly_fit_f64",
+        "cheb_fit_f64",
+        "legendre_fit_f64",
+        "poly_discriminant_f64"
+      ],
+      "export_count": 7
+    },
+    "signal.ts": {
+      "lines": 363,
+      "exports": [
+        "apply_window_f64",
+        "welch_psd_f64",
+        "bartlett_psd_f64",
+        "goertzel_f64",
+        "chirp_z_transform_f64"
+      ],
+      "export_count": 5
+    },
+    "sort.ts": {
+      "lines": 319,
+      "exports": [
+        "sort_f64",
+        "argsort_f64",
+        "rank_f64"
+      ],
+      "export_count": 3
+    },
+    "special.ts": {
+      "lines": 871,
+      "exports": [
+        "lgamma_f64",
+        "bessel_j0_f64",
+        "bessel_j1_f64",
+        "bessel_jn_f64",
+        "bessel_y0_f64",
+        "bessel_y1_f64",
+        "bessel_yn_f64",
+        "bessel_j_f64",
+        "bessel_y_f64",
+        "airy_ai_f64",
+        "airy_bi_f64",
+        "elliptic_k_f64",
+        "elliptic_e_f64",
+        "carlson_rc_f64",
+        "carlson_rf_f64",
+        "carlson_rd_f64",
+        "carlson_rj_f64",
+        "elliptic_f_incomplete_f64",
+        "elliptic_e_incomplete_f64",
+        "elliptic_pi_incomplete_f64"
+      ],
+      "export_count": 20
+    },
+    "tridiag.ts": {
+      "lines": 121,
+      "exports": [
+        "tridiag_solve_f64",
+        "divided_difference_f64"
+      ],
+      "export_count": 2
+    },
     "types/complex.ts": {
-      "lines": 464,
+      "lines": 452,
       "exports": [
         "Complex",
         "complex",

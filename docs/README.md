@@ -33,7 +33,6 @@ reference). Looking for something? Skim the group headers, then the table.
 | [Architecture/DEPENDENCY_GRAPH.md](Architecture/DEPENDENCY_GRAPH.md) | Package dependency graph (see also the generated `dependency-graph.json/.yaml`). |
 | [Architecture/WASM_ACCELERATION.md](Architecture/WASM_ACCELERATION.md) | WASM acceleration design (AssemblyScript backend). |
 | [Architecture/wasm-pairing.md](Architecture/wasm-pairing.md) | WASM-effective function pairing (data: `wasm-pairing.json`). |
-| [Architecture/wasm-parity.md](Architecture/wasm-parity.md) | AS↔consumer kernel parity (data: `wasm-parity.json`). |
 | [Architecture/COVERAGE_POLICY.md](Architecture/COVERAGE_POLICY.md) | Test-coverage policy (data: `coverage-policy.json`). |
 | [Architecture/TEST_COVERAGE.md](Architecture/TEST_COVERAGE.md) | Coverage report (data: `test-coverage.json`). |
 | [Architecture/unused-analysis.md](Architecture/unused-analysis.md) | Unused-export analysis. |

@@ -3,9 +3,9 @@
  *
  * Several suites under `tests/wasm/` exercise `WasmLoader`, which reads a
  * compiled `.wasm` binary from `lib/wasm/`. That binary is produced by
- * `npm run build:wasm` (AssemblyScript) or `npm run build:wasm:rust` and is
- * NOT committed to the repo. On a fresh checkout the binary is absent, so
- * those suites would fail with an opaque `ENOENT ... mathts.wasm`.
+ * `npm run build:wasm` (AssemblyScript) and is NOT committed to the repo.
+ * On a fresh checkout the binary is absent, so those suites would fail with
+ * an opaque `ENOENT ... mathts-as.wasm`.
  *
  * To keep a fresh checkout's test run honest, suites that genuinely require
  * the artifact use {@link wasmArtifactAvailable} to switch to `describe.skip`
@@ -22,8 +22,7 @@ import { fileURLToPath } from 'node:url';
  * check is independent of the test runner's current working directory.
  */
 const WASM_BINARY_PATHS = [
-  // Default (Rust-after-cutover) and AssemblyScript binary names.
-  '../../lib/wasm/mathts.wasm',
+  // AssemblyScript binary (the sole WASM backend).
   '../../lib/wasm/mathts-as.wasm',
 ].map((rel) => fileURLToPath(new URL(rel, import.meta.url)));
 
@@ -47,9 +46,8 @@ export function warnWasmArtifactsMissing(skippedSuiteCount: number): void {
   if (warned) return;
   warned = true;
   console.warn(
-    `\n[WASM] WASM artifacts not built — run \`npm run build:wasm\` ` +
-      `(or \`npm run build:wasm:rust\`). ` +
+    `\n[WASM] WASM artifacts not built — run \`npm run build:wasm\`. ` +
       `Skipping ${skippedSuiteCount} WASM-dependent test suite(s) ` +
-      `(lib/wasm/mathts.wasm is absent).\n`
+      `(lib/wasm/mathts-as.wasm is absent).\n`
   );
 }

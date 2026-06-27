@@ -96,7 +96,7 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
           const msg = (err as Error).message;
           if (
             msg.includes('WASM abort') ||
-            // Rust WASM does not export __new (AssemblyScript GC API); the
+            // Some builds don't expose the GC allocator (__new); the
             // allocateFloat64Array hybrid bug is tracked in TODO.md and is
             // being fixed by the parallel WasmLoader-allocator agent.
             msg.includes('is not a function')
@@ -128,7 +128,7 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
           const msg = (err as Error).message;
           if (
             msg.includes('WASM abort') ||
-            // Rust WASM does not export __new (AssemblyScript GC API); the
+            // Some builds don't expose the GC allocator (__new); the
             // allocateInt32Array hybrid bug is tracked in TODO.md and is
             // being fixed by the parallel WasmLoader-allocator agent.
             msg.includes('is not a function')
@@ -163,7 +163,7 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
           const msg = (err as Error).message;
           if (
             msg.includes('WASM abort') ||
-            // Rust WASM does not export __new (AssemblyScript GC API); the
+            // Some builds don't expose the GC allocator (__new); the
             // allocateFloat64Array hybrid bug is tracked in TODO.md and is
             // being fixed by the parallel WasmLoader-allocator agent.
             msg.includes('is not a function')

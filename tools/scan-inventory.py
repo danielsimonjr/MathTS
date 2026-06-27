@@ -15,7 +15,7 @@ inventory = {
     "metadata": {"generated": "2026-04-03", "root": str(ROOT.resolve())},
     "summary": {},
     "files": [],
-    "duplicates": {"js_ts_pairs": [], "as_rust_pairs": [], "conflicted_copies": []},
+    "duplicates": {"js_ts_pairs": [], "conflicted_copies": []},
     "categories": {},
 }
 
@@ -50,7 +50,6 @@ by_dir = defaultdict(int)
 conflicted = []
 source_files = []
 wasm_as_files = []
-wasm_rust_files = []
 test_files = []
 doc_files = []
 demo_files = []
@@ -96,10 +95,7 @@ for rel, p in all_files:
         conflicted.append(entry)
         continue
 
-    if rel.startswith("src/wasm-rust/"):
-        entry["category"] = "wasm-rust"
-        wasm_rust_files.append(entry)
-    elif rel.startswith("src/wasm/"):
+    if rel.startswith("src/wasm/"):
         entry["category"] = "wasm-as"
         wasm_as_files.append(entry)
     elif rel.startswith("src/"):
@@ -129,34 +125,7 @@ for js in sorted(js_set):
     if ts in ts_set:
         js_ts_pairs.append({"js": js, "ts": ts})
 
-# Detect AS/Rust pairs
-as_mods = set()
-for e in wasm_as_files:
-    if e["ext"] == ".ts":
-        mod = e["path"].replace("src/wasm/", "").replace(".ts", "")
-        as_mods.add(mod)
-
-rust_mods = set()
-for e in wasm_rust_files:
-    if e["ext"] == ".rs":
-        mod = (
-            e["path"]
-            .replace("src/wasm-rust/crates/mathjs-wasm/src/", "")
-            .replace(".rs", "")
-        )
-        rust_mods.add(mod)
-
-as_rust_pairs = []
-for am in sorted(as_mods):
-    for rm in rust_mods:
-        if rm == am or rm.replace("_", "/") == am or am.replace("/", "_") == rm:
-            as_rust_pairs.append(
-                {"as": "src/wasm/" + am + ".ts", "rust": "wasm-rust/" + rm + ".rs"}
-            )
-            break
-
 inventory["duplicates"]["js_ts_pairs"] = js_ts_pairs
-inventory["duplicates"]["as_rust_pairs"] = as_rust_pairs
 inventory["duplicates"]["conflicted_copies"] = [c["path"] for c in conflicted]
 
 # Source categories
@@ -179,13 +148,11 @@ s = {
     "source_js": sum(1 for e in source_files if e["ext"] == ".js"),
     "source_ts": sum(1 for e in source_files if e["ext"] == ".ts"),
     "wasm_as": len(wasm_as_files),
-    "wasm_rust": len(wasm_rust_files),
     "tests": len(test_files),
     "docs": len(doc_files),
     "demo": len(demo_files),
     "other": len(other_files),
     "js_ts_pairs": len(js_ts_pairs),
-    "as_rust_pairs": len(as_rust_pairs),
     "extensions": dict(sorted(by_ext.items(), key=lambda x: -x[1])[:20]),
     "top_dirs": dict(sorted(by_dir.items(), key=lambda x: -x[1])[:15]),
 }
@@ -204,14 +171,12 @@ print(
     f"   Source (src/):        {s['source']}  ({s['source_js']} JS, {s['source_ts']} TS)"
 )
 print(f"   WASM AS (src/wasm/):  {s['wasm_as']}")
-print(f"   WASM Rust:            {s['wasm_rust']}")
 print(f"   Tests (test/):        {s['tests']}")
 print(f"   Docs:                 {s['docs']}")
 print(f"   Demo (ISE):           {s['demo']}")
 print(f"   Other:                {s['other']}")
 print(f"\n DUPLICATES")
 print(f"   JS/TS pairs:          {s['js_ts_pairs']}")
-print(f"   AS/Rust pairs:        {s['as_rust_pairs']}")
 print(f"   Dropbox conflicts:    {s['conflicted_copies']}")
 print(f"\n TOP EXTENSIONS")
 for ext, count in list(s["extensions"].items())[:10]:
