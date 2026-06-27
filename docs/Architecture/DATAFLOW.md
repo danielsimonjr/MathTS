@@ -1,6 +1,6 @@
 # MathTS Data Flow
 
-**Generated**: 2026-05-22
+**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
 
 ## Overview
 
@@ -92,38 +92,33 @@ Variadic overloads (2–4 scalars) are synchronous.
 
 ## 3b. WASM Bridge Interception Flow
 
-When `MatrixWasmBridge` is active (WASM backend loaded, operation size above threshold), the
-matrix backend flow is extended:
+When the WASM backend is active (`mathts-as.wasm` loaded, operation size above
+threshold), the matrix backend flow is extended:
 
 ```text
-typed-function dispatch -> MatrixWasmBridge.execute(op, args)
+typed-function dispatch -> WASMBackend (matrix/src/backends/WASMBackend.ts)
   1. Threshold check:
        element_count < threshold  -> skip to JSBackend immediately
        element_count >= threshold -> proceed to WASM path
-  2. Memory allocation (WasmLoader):
-       allocate(byteLength) reserves space in the WASM linear memory pool
+  2. Memory allocation (WasmLoader, AssemblyScript managed allocator):
+       __new(byteLength) reserves space in the WASM linear memory pool
        Input Float64Arrays written to WASM memory via copyToWasm()
   3. WASM function call:
-       Calls exported Rust/AS function with pointer + length args
-       WASM executes natively (faer, rustfft, statrs, libm as needed)
+       Calls the exported AssemblyScript function with header pointer + length args
+       WASM executes natively (AssemblyScript-compiled kernels, SIMD where available)
   4. Result read-back:
        copyFromWasm(ptr, length) reads result Float64Array from WASM memory
   5. Memory free:
-       free(ptr) returns memory to the pool
+       the pinned allocation is released back to the pool
   6. On any failure (WASM unavailable, OOM, runtime trap):
        Falls back to JSBackend transparently
        Error is logged but not re-thrown
   7. Returns result as DenseMatrix to caller
 ```
 
-Backend selected by `MATHTS_WASM_BACKEND` environment variable:
-
-| Value            | Behavior                                    |
-| ---------------- | ------------------------------------------- |
-| `rust`           | Force Rust WASM backend                     |
-| `assemblyscript` | Force AssemblyScript WASM backend           |
-| `auto` (default) | Prefer Rust; fall back to AS if unavailable |
-| `none`           | Disable WASM, use JS only                   |
+AssemblyScript is the sole WASM backend (the Rust backend and the
+`MATHTS_WASM_BACKEND` selection env var were removed in the Rust→AS migration),
+so dispatch is simply **AS → JS fallback** with no backend choice.
 
 ---
 
@@ -205,8 +200,8 @@ besselJ0(x: number)                     // scalar — synchronous, number -> num
 besselJ0(xs: Float64Array)               // array overload
   1. xs.length < 1024 (WASM_SPECIAL_THRESHOLD): map the scalar over the array (JS)
   2. xs.length >= 1024: dispatch to the WASM kernel
-       Rust (bessel_j0_f64) -> AssemblyScript (bessel_j0_f64_as) -> JS fallback
-     The `functions` package bundles the Rust wasm (dist/wasm/mathts.wasm) and
+       AssemblyScript (bessel_j0_f64) -> JS fallback
+     The `functions` package bundles the AS wasm (dist/wasm/mathts-as.wasm) and
      resolves it package-relative, so this path is live (not a JS fallback).
 ```
 
@@ -320,10 +315,9 @@ typed-function (@danielsimonjr/mathts-core)
     |
     +---> Matrix (@danielsimonjr/mathts-matrix)
     |         |
-    |         +---> MatrixWasmBridge (threshold check)
+    |         +---> WASMBackend (threshold check)
     |         |         |
-    |         |         +---> [>1K elements] WasmLoader --> wasm-rust (Rust/faer/rustfft)
-    |         |         |                              or --> assembly (AS, legacy)
+    |         |         +---> [>1K elements] WasmLoader --> assembly (AS, mathts-as.wasm)
     |         |         +---> [<1K or fallback] JSBackend
     |         |
     |         +---> [>100K elements] ComputePool (@danielsimonjr/mathts-parallel)

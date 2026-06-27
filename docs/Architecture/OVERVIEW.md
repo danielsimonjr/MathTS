@@ -1,6 +1,6 @@
 # MathTS Project Overview
 
-**Generated**: 2026-05-23
+**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
 
 ## What is MathTS?
 
@@ -35,8 +35,12 @@ files excluded), per the 2026-06-25 dependency-graph report. Regenerate with
 
 ## Packages
 
-The monorepo has **12 npm packages** plus the `wasm-rust` Cargo crate (not an
-npm package). File counts are reachable (active) files from the 2026-05-23 report.
+The monorepo has **22 npm packages**. The 12 primary packages are listed below;
+the other 10 are thin re-export leaf packages (`parser`, `ast`, `evaluator`,
+`units`, `numbers`, `linalg`, `arithmetic`, `trigonometry`, `statistics`,
+`signal`) — see `ARCHITECTURE.md`. There is no longer a Rust Cargo crate: the
+`wasm-rust/` workspace was removed in the Rust→AS migration. File counts are
+reachable (active) files from the dependency-graph report.
 
 | Package                                   | Description                                                  | Active Files | Version |
 | ----------------------------------------- | ------------------------------------------------------------ | ------------ | ------- |
@@ -51,8 +55,7 @@ npm package). File counts are reachable (active) files from the 2026-05-23 repor
 | `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 45           | 0.2.0   |
 | `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 5            | 0.1.2   |
 | `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 2            | 0.1.2   |
-| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM source (AssemblyScript)                                 | 19           | 0.1.3   |
-| `wasm-rust`                               | Rust WASM (primary backend; Cargo crate)                     | 63           | —       |
+| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 19           | 0.1.3   |
 
 ## Two-Layer Code Architecture
 
@@ -65,7 +68,7 @@ These are exported, tested, and built. Includes:
 - **374+ typed function exports** across 20 modules: arithmetic (54), trigonometry (20), statistics (25), signal (33), special (29), distributions (11), integration (4), interpolation (6), combinatorics (21), geometry (31), algebra (37), cas (30), graph (8), dist-objects (13), hypothesis (14), numeric (37), bridge (1), gpu (4), matrix-ops, and typed-bridge
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: 432 AssemblyScript exports (legacy) + **1,017 Rust WASM exports** (primary, full AS parity via compat module)
+- **WASM**: **318 AssemblyScript function exports** (330 total) — the sole WASM backend (Rust removed in the Rust→AS migration)
 
 ### Beyond mathjs — ~250 New Functions
 
@@ -96,20 +99,21 @@ Not exported from package entry points. Support files in `functions/src/{utils,c
 
 MathTS has three computation backends selected automatically based on operation size and availability:
 
-| Backend             | Source                             | Status                | Description                                                   |
-| ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------------------- |
-| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                                      |
-| AssemblyScript WASM | `assembly/`                        | Legacy (benchmarking) | 432 exports, SIMD-optimized                                   |
-| Rust WASM           | `wasm-rust/`                       | **Primary**           | 63 source files, **1,017 exports** (826 core + 192 AS compat) |
+| Backend             | Source                             | Status                | Description                                          |
+| ------------------- | ---------------------------------- | --------------------- | --------------------------------------------------- |
+| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                            |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 318 function exports (330 total), SIMD-optimized    |
+| WebGPU              | `matrix/src/backends/gpu/`         | >100K elements        | WebGPU compute shaders                              |
 
-The Rust WASM backend is a Cargo workspace rooted at `wasm-rust/` with the `mathts-wasm` crate. It uses:
+The AssemblyScript backend compiles `assembly/src/` (30 source files) to a
+single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and
+`functions/dist/wasm/`. The former Rust backend (`wasm-rust/`) was removed in
+the Rust→AS migration; there is no longer a backend-selection step.
 
-- **faer** — high-performance linear algebra (LU, QR, SVD, eigendecomposition)
-- **rustfft** — FFT and inverse FFT
-- **statrs** — statistical distributions and special functions
-- **libm** — portable math (sin, cos, exp, log, etc.) for `no_std` WASM targets
-
-`matrix/src/backends/MatrixWasmBridge.ts` handles automatic JS-vs-WASM selection based on per-operation size thresholds. `matrix/src/backends/WasmLoader.ts` loads the WASM binary (Rust output under `wasm-rust/target/wasm32-unknown-unknown/release/`), manages a memory pool, and selects the active backend via the `MATHTS_WASM_BACKEND` environment variable.
+`matrix/src/backends/WASMBackend.ts` is the sole WASM matrix backend and handles
+automatic JS-vs-WASM selection based on per-operation size thresholds.
+`matrix/src/backends/WasmLoader.ts` loads the AssemblyScript binary
+(`mathts-as.wasm`) and manages a memory pool using the AS managed allocator.
 
 ## Technology Stack
 
@@ -119,8 +123,7 @@ The Rust WASM backend is a Cargo workspace rooted at `wasm-rust/` with the `math
 | Modules        | ESM-only                           |
 | Build          | tsup + Turborepo                   |
 | Test           | Vitest                             |
-| WASM (primary) | Rust + wasm-bindgen (`wasm-rust/`) |
-| WASM (legacy)  | AssemblyScript (`assembly/`)       |
+| WASM           | AssemblyScript (`assembly/`)       |
 | GPU            | WebGPU compute shaders             |
 | Parallelism    | Web Workers (worker_threads)       |
 | Notebooks      | YAML-based .mtsw format            |
@@ -152,8 +155,7 @@ math.add(1, 2);
 | Workbook   | Active       | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                                               |
 | Expression | Active       | Parser (16 node types), compiler, and evaluator fully functional; sandbox-hardened (2026-05-01 security release)                                                                                                                                                                  |
 | Compat     | Active       | 54 shims wired to real implementations, 87 test cases                                                                                                                                                                                                                             |
-| Assembly   | Legacy       | 432 WASM exports, kept for benchmarking against Rust backend                                                                                                                                                                                                                      |
-| Rust WASM  | **Complete** | **1,017 exports** (826 core + 192 AS compat), primary WASM backend with full AS parity                                                                                                                                                                                            |
+| Assembly   | **Primary**  | Sole WASM backend — 318 function exports (330 total) in `mathts-as.wasm`; powers both `matrix` heavy ops and `functions` kernels (AS → JS dispatch)                                                                                                                                                                                                                      |
 
 ## Integration Progress
 

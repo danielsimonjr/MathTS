@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-05-22
+**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
 
 ---
 
@@ -379,40 +379,52 @@ Forked worker pool management. Used internally by `@danielsimonjr/mathts-paralle
 
 ## WASM Modules
 
-### AssemblyScript WASM (`assembly/`) — Legacy
+### AssemblyScript WASM (`assembly/`) — Sole WASM backend
 
-209 exported operations from AssemblyScript source. Kept for benchmarking against the Rust backend.
+The built `mathts-as.wasm` binary exports **318 functions** (330 total exports,
+including 11 numeric globals such as `PI`/`E` plus the linear memory), compiled
+from 30 AssemblyScript source files under `assembly/src/`. The same binary is
+bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. (The Rust
+backend was removed in the Rust→AS migration; AssemblyScript is now the only
+WASM toolchain.) Counts verified via `WebAssembly.Module.exports()` on the
+built `.wasm`.
 
-| Category       | Count | Examples                                                           |
-| -------------- | ----- | ------------------------------------------------------------------ |
-| Scalar f64     | 52    | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`, `PI`, `E`              |
-| Array ops      | 36    | `array_add`, `array_dot`, `array_norm`, `array_sum`, `array_mean`  |
-| Matrix ops     | 41    | `matrix_multiply`, `matrix_transpose`, `matrix_gemm`, `matrix_lu*` |
-| Complex scalar | 44    | `complex_add`, `complex_sin`, `complex_exp`, `complex_sqrt`        |
-| Complex array  | 33    | `complex_array_add`, `complex_array_dot`, `complex_array_norm`     |
+| Category                       | Function exports | Examples                                                           |
+| ------------------------------ | ---------------- | ------------------------------------------------------------------ |
+| Scalar f64                     | 79               | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`                          |
+| Array ops                      | 54               | `array_add`, `array_dot`, `array_norm`, `array_sum`, `array_mean`  |
+| Matrix ops                     | 50               | `matrix_multiply`, `matrix_transpose`, `matrix_gemm`, `matrix_lu*` |
+| Complex scalar                 | 46               | `complex_add`, `complex_sin`, `complex_exp`, `complex_sqrt`        |
+| Complex array                  | 33               | `complex_array_add`, `complex_array_dot`, `complex_array_norm`     |
+| FFT                            | 2                | `fft`, `ifft`                                                       |
+| Special/poly/sort/signal/other | 54               | bessel/elliptic/carlson, `poly_mul`, `sort_f64`, window functions  |
 
 WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
-
-### Rust WASM (`wasm-rust/`) — Primary
-
-**1,017 exported functions** — 826 core compiled from 63 Rust source files (~18,500 lines) + 192 AssemblyScript compat wrappers (`src/compat/`) providing full AS parity. The `mathts-wasm` crate's build output lives under `wasm-rust/target/wasm32-unknown-unknown/release/`. Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
-
-WASM bindings (same interface as AssemblyScript): `loadWasm()`, `loadWasmSync()`, `MathTSWasm`
 
 ---
 
 ## npm Scripts (WASM-related)
 
-| Script            | Command                                      | Description                          |
-| ----------------- | -------------------------------------------- | ------------------------------------ |
-| `build:wasm:rust` | `cargo build --release` in `wasm-rust/`      | Build Rust WASM backend              |
-| `build:wasm:all`  | Builds both Rust and AssemblyScript backends | Full WASM build                      |
-| `bench:wasm`      | Runs three-way benchmark                     | Rust vs AssemblyScript vs JavaScript |
+| Script                  | Command                                            | Description                              |
+| ----------------------- | -------------------------------------------------- | ---------------------------------------- |
+| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`    | Build the AssemblyScript WASM backend    |
+| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`       | AssemblyScript WASM tests                |
+| `test:wasm:integration` | `vitest run tests/wasm/`                           | Cross-package WASM integration tests     |
+| `bench:elementwise`     | `node tools/benchmark/wasm/elementwise.bench.mjs`  | Elementwise WASM-vs-JS benchmark         |
+| `bench:reduction`       | `node tools/benchmark/wasm/reduction.bench.mjs`    | Reduction WASM-vs-JS benchmark           |
+| `bench:transcendental`  | `node tools/benchmark/wasm/transcendental.bench.mjs` | Transcendental WASM-vs-JS benchmark    |
+| `bench:special-array`   | `npx tsx tools/benchmark/wasm/special-array.bench.mts` | Special-function array benchmark      |
+| `bench:fusion`          | `node tools/benchmark/wasm/fusion.bench.mjs`       | Op-fusion (resident-buffer) benchmark    |
+
+(The former `build:wasm:rust`, `build:wasm:all`, and `bench:wasm` scripts were
+removed with the Rust backend.)
 
 ---
 
 ## Environment Variables
 
-| Variable              | Values                                   | Default | Description                                                                                 |
-| --------------------- | ---------------------------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| `MATHTS_WASM_BACKEND` | `rust`, `assemblyscript`, `auto`, `none` | `auto`  | Selects WASM backend. `auto` prefers Rust, falls back to AS. `none` disables WASM entirely. |
+There is no WASM backend-selection environment variable. AssemblyScript is the
+sole WASM backend, so the former `MATHTS_WASM_BACKEND` variable (which chose
+between `rust`/`assemblyscript`/`auto`/`none`) was removed in the Rust→AS
+migration. WASM is loaded automatically when the binary is present and the
+operation is above the size threshold, with transparent fallback to JS.

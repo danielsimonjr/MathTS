@@ -1,13 +1,14 @@
 # MathTS Architecture
 
-**Generated**: 2026-06-25
+**Generated**: 2026-06-26 (refreshed: Rust→AS migration complete)
 
 ## System Overview
 
 MathTS is an npm workspaces monorepo with **22 packages**, all ESM-only (ES2022).
 Turborepo orchestrates builds across the workspace. tsup bundles each package
-(`functions` emits its `.d.ts` tree via `tsc`). A Cargo crate (`wasm-rust`)
-provides the primary WASM backend but is not an npm package.
+(`functions` emits its `.d.ts` tree via `tsc`). AssemblyScript (`assembly/`,
+the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**; the
+former Rust `wasm-rust/` Cargo workspace was removed in the Rust→AS migration.
 
 - **555 reachable TypeScript files** (out of 1,459 total; 904 dormant synced from mathjs)
 - **148,610 lines of code** (reachable scope)
@@ -163,45 +164,59 @@ or the string aliases `'never'` / `'always'`.
 
 ### 6. WASM Layer
 
-MathTS has two WASM backends. The Rust backend is primary; AssemblyScript is kept for benchmarking.
+MathTS has **one WASM backend: AssemblyScript** (`assembly/`). The former Rust
+backend (`wasm-rust/`) was removed in the Rust→AS migration (complete
+2026-06-26); AssemblyScript is now the sole WASM toolchain for both the
+`matrix` and `functions` packages, and dispatch is **AS → JS**.
 
-#### 6a. AssemblyScript WASM (Legacy — `assembly/`)
+#### 6a. AssemblyScript WASM (`assembly/`)
 
-AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
+AssemblyScript compiles to a single WebAssembly binary (`mathts-as.wasm`,
+bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`). The built
+module exports **318 functions** (330 total exports, including 11 numeric
+globals such as `PI`/`E` plus the linear memory), compiled from **30
+AssemblyScript source files** under `assembly/src/`. (Verify with
+`WebAssembly.Module.exports()` on the built `.wasm`; rebuild via
+`npm run build:wasm`.)
 
-| Category       | Operations                                        |
-| -------------- | ------------------------------------------------- |
-| Scalar         | 52 ops (arithmetic, trig, transcendental)         |
-| Array          | 36 ops (element-wise, norms, dot products)        |
-| Matrix         | 41 ops (multiply, transpose, LU, QR, determinant) |
-| Complex scalar | 44 ops                                            |
-| Complex array  | 33 ops                                            |
+| Category             | Function exports |
+| -------------------- | ---------------- |
+| Scalar `f64`         | 79               |
+| Array                | 54               |
+| Matrix               | 50               |
+| Complex scalar       | 46               |
+| Complex array        | 33               |
+| FFT                  | 2                |
+| Special/poly/sort/signal/other | 54     |
 
-#### 6b. Rust WASM (Primary — `wasm-rust/`)
+The binary is SHA-384 integrity-verified before instantiation and numerically
+verified to <1e-9 vs mpmath for the special-function kernels (see
+`docs/Architecture/WASM_ACCELERATION.md`).
 
-A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, **1,017 wasm-bindgen exports** (826 core + 192 AssemblyScript compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). Compiled output lives under `wasm-rust/target/wasm32-unknown-unknown/release/`.
+#### 6b. WASM Bridge Layer
 
-The `compat/` module provides full AssemblyScript API parity — every function previously exported by the AssemblyScript backend is now available through the Rust backend, making the dual-backend strategy complete.
+- **`matrix/src/backends/WasmLoader.ts`**: Loads and instantiates the
+  AssemblyScript WASM binary (`mathts-as.wasm`), manages a shared linear memory
+  pool, and handles allocation/deallocation. It uses the AssemblyScript managed
+  runtime: buffers are allocated via `__new(byteLength, id)` and typed-array
+  exports take a 12-byte header pointer; callers receive an opaque `Allocation`
+  handle so they need not do pointer arithmetic.
+- **`matrix/src/backends/WASMBackend.ts`**: The sole WASM matrix backend. It
+  decides JS vs. WASM per operation by element-count threshold (e.g. matrix
+  multiply switches to WASM above 1,000 elements) and falls back to `JSBackend`
+  transparently on WASM failure. It also hosts the AS kernels for the heavy
+  linear-algebra ops (multiply/gemm, transpose, inverse, determinant, LU/QR/
+  Cholesky/SVD, symmetric + non-symmetric eig, FFT/IFFT).
+- **`functions/src/wasm/`**: The `functions` package's own AS bridges
+  (`bridges/`, `elementwise/`, `special/`, `poly/`, `sort/`, `signal/`,
+  `interpolation/`, `bitwise/`, …) plus `functions/src/wasm/WasmLoader.ts`,
+  which loads the package-local `mathts-as.wasm` copy. Dispatch is AS → JS.
 
-Key crate dependencies:
+(The old `RustWASMBackend.ts`, `RustWasmLoader`, and `MatrixWasmBridge.ts`, and
+the `MATHTS_WASM_BACKEND` backend-selection env var, were all removed in the
+migration — there is no longer a backend to choose between.)
 
-| Crate   | Version | Role                                         |
-| ------- | ------- | -------------------------------------------- |
-| faer    | 0.24    | LU, QR, SVD, Cholesky, eigendecomposition    |
-| rustfft | 6.4     | FFT and IFFT                                 |
-| statrs  | 0.18    | Statistical distributions, special functions |
-| libm    | 0.2     | Portable math for `no_std` WASM targets      |
-
-#### 6c. WASM Bridge Layer (`matrix/src/backends/`)
-
-Two TypeScript files manage the bridge between JavaScript and WASM:
-
-- **`WasmLoader.ts`**: Loads and instantiates the AssemblyScript WASM binary (`mathts-as.wasm`), manages a shared linear memory pool, and handles allocation/deallocation. At load time it calls `detectAllocatorKind()` to inspect whether the module exports `__new` (AS managed runtime) or not (Rust flat memory), setting `AllocatorKind` to `'as'` or `'rust'` accordingly. The `MATHTS_WASM_BACKEND` environment variable selects `rust`, `assemblyscript`, or `auto` (default). Callers receive an opaque `Allocation` handle — the correct pointer arithmetic is handled internally so callers need not branch on `kind`.
-- **`MatrixWasmBridge.ts`**: Intercepts typed-function dispatch and decides whether to use JavaScript or WASM for each operation. Selection is based on per-operation element-count thresholds (e.g., matrix multiply switches to WASM above 1,000 elements). Falls back to `JSBackend` transparently on WASM failure.
-
-`WASMBackend` (`matrix/src/backends/WASMBackend.ts`) is AssemblyScript-only and uses the managed allocator path in `WasmLoader`. Rust callers route through `RustWASMBackend` (`matrix/src/backends/RustWASMBackend.ts`) and `RustWasmLoader`, which loads the separate Rust-compiled binary and uses a JS-side bump allocator anchored at `__heap_base`.
-
-#### 6d. Three-Tier Performance Model
+#### 6c. Three-Tier Performance Model
 
 For matrix operations via `BackendManager`:
 

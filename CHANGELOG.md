@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Docs (2026-06-26) — Architecture docs refreshed to AS-only post-migration
+
+- Refreshed `docs/Architecture/{ARCHITECTURE,OVERVIEW,DATAFLOW,API}.md` to the
+  current reality after the Rust→AS migration: **AssemblyScript (`assembly/`) is
+  the sole WASM backend**; the deleted `wasm-rust/` Cargo workspace, the
+  `RustWASMBackend`/`RustWasmLoader`/`MatrixWasmBridge` modules, and the
+  `MATHTS_WASM_BACKEND` backend-selection env var are all removed from the docs
+  (kept only as explicit historical "removed in the migration" notes).
+- Replaced stale export/file counts with figures verified against the code:
+  the built `mathts-as.wasm` exports **318 functions (330 total)** — verified via
+  `WebAssembly.Module.exports()` — compiled from **30** AssemblyScript source
+  files; **22** npm workspaces. Dropped the obsolete "1,017 Rust / 432 AS / 63
+  wasm-rust files" figures. Removed the `build:wasm:rust`/`build:wasm:all`/
+  `bench:wasm` script rows; documented the current `build:wasm` + `bench:*`
+  scripts. WASM dataflow corrected to AS → JS.
+
 ### Fixed (2026-06-26) — JS non-symmetric eigensolver returned all-zero eigenvalues
 
 - **`matrix/src/operations/eig.ts` non-symmetric path rewritten** (root-cause fix).
