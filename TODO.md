@@ -22,7 +22,7 @@ non-decision).
 | 3   | **Consolidate npm token storage to one source of truth** | 0    | Low         | Token is currently in `~/.npmrc` (literal), `Mathts/.npmrc` (literal, gitignored), and `NPM_TOKEN` env var. Decide one canonical home and remove the others — `NPM_TOKEN` is the cleanest. |
 | 4   | **Delete stale `.npmrc.bak-*` files**                    | 0    | Trivial     | Two backups left from the 2026-05-25 token rotation: `~/.npmrc.bak-20260525-141127` and `Mathts/.npmrc.bak-20260525-141201`. Both contain revoked tokens. |
 | 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | Per the 2026-05-25 audit's "What was NOT audited": tests verify "what we computed" matches "what we expected", but neither catches shared misunderstandings. Cross-check a representative spread of functions against scipy / mpmath / Wolfram. |
-| 6   | **Address the audit B-3 through B-10 findings**          | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9), Rust unused_assignments warnings (B-10). |
+| 6   | **Address the audit B-3 through B-9 findings**           | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9). |
 | 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
 | 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0 | — | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected). |
 
@@ -92,7 +92,7 @@ Detail:
       cross-check against scipy or mpmath at a randomised input set,
       log mean and max relative error.
 
-- [ ] **Address the audit B-3 through B-10 findings.** Open after the
+- [ ] **Address the audit B-3 through B-9 findings.** Open after the
       mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`:
       - **B-3 (medium):** Cross-package WASM dist-hop — `matrix/dist/`
         consumers (functions, expression, compat) see wrong relative
@@ -110,9 +110,6 @@ Detail:
         `expression/src/node/AssignmentNode.ts:12`.
       - **B-9 (informational):** Decide whether to delete
         `core/src/types/unit/Unit.ts` (dormant, `@ts-nocheck`'d).
-      - **B-10 (informational):** `cargo fix --lib -p mathts-wasm`
-        for the 8 `unused_assignments` warnings in
-        `crates/mathts-wasm/src/numeric/interpolation.rs`.
 
 - [ ] **Fix tensor test timeout regression.** Surfaced during the
       2026-05-25 release verification.
@@ -192,8 +189,8 @@ Detail:
       §B.1 (WASM-route, 14 candidates) and §B.2 (Worker-route, 9
       candidates). Each row is dispatch-ready: it names the specific
       `typed/<file>.ts` exports, the suggested kernel (with explicit
-      "reuse existing" markers where the Rust crate already has the
-      primitive), the starting-point `minElements` threshold, and the
+      "reuse existing" markers where the WASM kernel library already has
+      the primitive), the starting-point `minElements` threshold, and the
       effort estimate. The procedure in §B.4 lifts the bitwise WASM
       port pattern into a 7-step checklist so the next contributor
       doesn't have to reverse-engineer it. Worth picking off slice-
@@ -240,9 +237,9 @@ Detail:
 
       **Tier 3 (WASM-route, sequenced one at a time):**
       - [x] **Slice 3.7** ✅ `6520a76` — `typed/algebra.ts` polynomial
-            WASM ports. NEW `wasm-rust/crates/mathts-wasm/src/poly.rs`
-            (`poly_mul_f64` + `poly_div_mod_f64`), AS parity in
-            `assembly/src/poly.ts`, bridge at
+            WASM ports. NEW AssemblyScript kernels in
+            `assembly/src/poly.ts`
+            (`poly_mul_f64` + `poly_div_mod_f64`), bridge at
             `WASM_POLY_THRESHOLD = 256` coeffs; wires into `polymul`,
             `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
             `polynomialRemainder`. 22 new tests; manifest regenerated.
@@ -262,19 +259,19 @@ Detail:
             offload post-sort stats. Custom-CDF KS bypasses route.
             20 new tests in `typed-hypothesis-parallel.test.ts`.
       - [x] **Slice 3.10b** ✅ `ec7363b` — `typed/interpolation.ts`
-            tridiag-solve WASM. NEW Rust `tridiag_solve_f64` + AS
-            parity + bridge at threshold = 1024 unknowns. `cubicSpline`
+            tridiag-solve WASM. NEW AssemblyScript `tridiag_solve_f64`
+            kernel + bridge at threshold = 1024 unknowns. `cubicSpline`
             wired (refactored to build explicit (n-1)×(n-1) tridiag
             system). **Finding:** `pchip`/`akima` use Fritsch-Carlson /
             Akima analytic slopes (no tridiag), so this bridge is
             cubicSpline-only — audit B.1 entry updated to reflect.
             18 new tests; manifest regenerated.
       - [x] **Slice 3.10c-1** ✅ `572363f` — Bessel WASM only.
-            6 Rust functions in `wasm-rust/crates/mathts-wasm/src/bessel.rs`
+            6 AssemblyScript functions
             (`bessel_j0/j1/jn/y0/y1/yn_f64`) delegating to scalar NR
-            §6.5 implementations already in `special/functions.rs`.
+            §6.5 implementations already in the special-functions kernels.
             Bridge at `WASM_SPECIAL_THRESHOLD = 1024`; AS-suffix probe
-            wired (forward-compat for 10c-2). 34 new TS + 8 Rust tests.
+            wired (forward-compat for 10c-2). 34 new TS + 8 WASM tests.
             Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
             WASM↔JS agreement 1e-14 (bit-identical algorithm path).
       - [ ] **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
@@ -320,7 +317,7 @@ Detail:
             mismatch.
       - [x] **Slice 4.5** ✅ `6e9f9c0` — polynomial WASM follow-up:
             `discriminant` + `resultant` via Sylvester-matrix det.
-            NEW Rust + AS kernels (~245 LOC + ~205 LOC) at
+            NEW AssemblyScript kernels (~205 LOC) at
             `WASM_POLY_THRESHOLD = 256`. 18 new tests across 3
             suites. Manifest regenerated; wasm-integrity 5/5.
             Sign-convention surprise: the existing typed-layer
@@ -427,10 +424,10 @@ Detail:
 
       **Wave 5B Tier 2 (sequential WASM, 4 slices) — ✅ ALL LANDED:**
       - [x] **Slice 5.3** ✅ `098656e` — ellipticK/E via AGM; +28
-            TS + 9 Rust tests.
+            TS + 9 WASM tests.
       - [x] **Slice 5.4** ✅ `f537a56` — polyFit/chebyshevFit/
             legendreFit via Vandermonde + inlined Householder QR
-            (~230 LOC Rust + ~170 LOC AS + ~170 LOC bridge);
+            (~170 LOC AS + ~170 LOC bridge);
             +18 tests.
       - [x] **Slice 5.5** ✅ `2b273a1` — lagrange/newtonInterp
             divided-difference WASM. Existing lagrangeInterp was
@@ -438,8 +435,8 @@ Detail:
             threshold path; new newtonInterp export. +14 tests.
       - [x] **Slice 5.6** ✅ `2d0ebfa` — applyWindow + welchPSD +
             bartlettPSD + multiTaperPSD + goertzel + chirpZTransform
-            (full 5-kernel module). welch/CZT use rustfft via
-            crate-local helper. +25 TS + 8 Rust tests.
+            (full 5-kernel module). welch/CZT use an FFT helper.
+            +25 TS + 8 WASM tests.
 
       **Wave 5C Tier 3 (sequential larger/design, 3 slices) — ✅ ALL LANDED:**
       - [x] **Slice 5.7d** ✅ `5a0ca7c` — wasm.sortF64/argsortF64/
@@ -517,8 +514,8 @@ Detail:
       - [x] **Slice 6.3** ✅ `bba468b` — `convexHull3D` WASM via
             incremental QuickHull-3D (Barber, Dobkin, Huhdanpaa
             1996). NEW `convex_hull_3d_wasm(pts_ptr, n, faces_ptr)
-            -> i32` in `wasm-rust/crates/mathts-wasm/src/geometry/
-            advanced.rs`; new `convexHull3D` typed export. Threshold
+            -> i32` AssemblyScript kernel; new `convexHull3D` typed
+            export. Threshold
             ≥ 1024 points. +18 hull-3D tests (tetrahedron, cube,
             cospherical sample, degenerate co-planar fallback).
       - [x] **Slice 6.4** ✅ `2be52f9` — Carlson R-forms
@@ -526,7 +523,7 @@ Detail:
             integrals (`ellipticF`, `ellipticEIncomplete`,
             `ellipticPi`) WASM. Quadratically convergent and
             branch-cut-free per Carlson (1995), NR §6.11, DLMF §19.
-            Threshold ≥ 1024 samples. Rust + AS WASM parity (AS
+            Threshold ≥ 1024 samples. AssemblyScript WASM kernels (AS
             wiring through `assembly/src/index.ts` landed in commit
             `28e50ec`). +41 tests against DLMF §19.16-19.36 and
             Abramowitz & Stegun §17 reference values.
@@ -614,13 +611,6 @@ Detail:
 - [x] TypeScript conversion (test/) - 65% coverage
 - [x] AssemblyScript/WASM conversion - Complete, 0 candidates remaining
 - [x] WASM performance benchmarks - 10-117x speedups documented
-- [x] Rust WASM migration - 57 AS modules migrated to 63 Rust files (18.5K lines), 826 exports, 669KB binary
-  - Rust 2-55x faster than JS, 2-3x faster than AS
-  - Crate deps: faer 0.24, rustfft 6.4, statrs 0.18
-  - 40 JS function files wired to Rust WASM modules
-  - Dual distribution: lib/wasm/mathjs.wasm (Rust) + lib/wasm/mathjs-as.wasm (AS)
-  - sparse_chol.rs temporarily disabled pending ereach fix
-  - 64 code review issues fixed by 4 review agents
 - [x] Status report updated - Accurate breakdown
 - [x] Refactoring docs organized - Moved to docs/refactoring/
 - [x] WASM test files (46 files) - All tiers complete (6621 tests passing)
@@ -1023,7 +1013,7 @@ Complex / any`. `nullish` carries explicit `boolean,any` / `string,any` /
       `factories-tier4.test.ts` were repointed to the typed/ versions.
 
 - [x] **`matrix/tests/WasmLoader.test.ts` skipped-test cleanup.** The two
-      `.skip`-ped tests asserted Rust-WASM-shaped exports (`multiplyDense`)
+      `.skip`-ped tests asserted legacy-WASM-shaped exports (`multiplyDense`)
       that this environment does not ship — only the AssemblyScript artifact
       at `assembly/build/mathts.wasm` is present, and it uses suffixed
       snake_case names. Replaced with one real conditional test that loads
@@ -1069,18 +1059,15 @@ most complex). Kept here as a checklist of what was done.
       the active pool). 37 new tests in `parallel/tests/ComputePool.test.ts`
       and `packages/workerpool/tests/bitwise-dispatch.test.ts`.
 
-- [x] **(Opus, high) Rust + AssemblyScript WASM ports of bitwise (and
+- [x] **(Opus, high) AssemblyScript WASM ports of bitwise (and
       logical) ops, plus manifest regeneration.** Added bitwise kernels
-      to both the Rust workspace (`wasm-rust/crates/mathts-wasm/src/
-bitwise/operations.rs` — three new per-element shift variants;
-      bitAndArray / bitOrArray / bitXorArray / bitNotArray already
-      existed) and the AssemblyScript module (`assembly/src/ops/
+      to the AssemblyScript module (`assembly/src/ops/
 bitwise.ts` — seven brand-new kernels, AS module had no bitwise
       ops before). Exposed via the existing WasmModule interfaces in
       `functions/src/wasm/WasmLoader.ts`,
       `matrix/src/backends/WasmLoader.ts`, and
       `assembly/src/bindings/wasm-loader.ts`. Built via
-      `npm run build:wasm:all`, regenerated `wasm-manifest.json` via
+      `npm run build:wasm`, regenerated `wasm-manifest.json` via
       `tools/generate-wasm-manifest.mjs`, and confirmed the SHA-384
       verification path in
       `functions/tests/security/wasm-integrity.test.ts` still pins the
@@ -1119,11 +1106,6 @@ number,matrix/,unit/}`). Active typed-function code stays strict.
 - [x] **`core/src/is.ts:313`** — literal `\!isMap(object)` (escaped
       exclamation) replaced with `!isMap(object)`. The escape was a
       paste/sync error that ESLint's parser refused.
-- [x] **`wasm-rust/scripts/build.sh`** — `WASM_DST="../../lib/wasm/..."`
-      landed the Rust artifact OUTSIDE the repo (in
-      `$HOME/lib/wasm/`); the comparison benchmark therefore reported
-      empty Rust columns. Path corrected to `../lib/wasm/` so it lands
-      at repo-root/lib/wasm/.
 - [x] **`tools/benchmark/wasm/{matmul,elementwise}.bench.ts`** — calls
       to `new DenseMatrix(data)` (old single-arg signature) against the
       current `(rows, cols, data?)` constructor failed with "Matrix
@@ -1134,7 +1116,7 @@ number,matrix/,unit/}`). Active typed-function code stays strict.
       referenced the un-prefixed `math` identifier. Surfaced once
       `--dts` typecheck ran cleanly. Renamed back to `math` in the
       signature; bodies are correct as written.
-- [x] **`npm run bench:wasm`** now runs end-to-end. Rust column
+- [x] **`npm run bench:wasm`** now runs end-to-end. WASM column
       populated: **1.3×–26.6× faster than JS** across matmul / dot /
       vecadd / det.
 - [x] **`npm run bench:parallel`** produces full per-op break-even
@@ -1173,35 +1155,24 @@ least → most complex). Kept as a checklist of what was done.
       cubic, four-rational-roots quartic, fm2-short-circuit quartic,
       and a two-real-two-complex quartic.
 
-- [x] **(Opus, high) `matrix/src/backends/WASMBackend` was half-written
-      for Rust and half for AS — every standalone WASM bench threw.**
-      The backend called `this.wasmModule.add(…)` / `multiplyDense(…)`
-      (Rust camelCase exports), allocated via
-      `wasmLoader.allocateFloat64Array()` which uses `module.__new()`
-      (AS-specific runtime), and was loaded against whichever artifact
-      `WasmLoader.getDefaultWasmPath()` resolved to (Rust by default).
-      `module.__new is not a function` on every standalone bench;
-      `this.wasmModule.add is not a function` once `MATHTS_WASM_BACKEND
-=assemblyscript` flipped the loader. **Closed (Option A — clean
-      split).** `WASMBackend` rewritten as **AS-only**, owning its own
-      AS instance (bypasses the wasmLoader singleton keyed on Rust),
-      with an inline AS-managed Float64Array allocator (`__new(byteLength
-,1)` for buffer + `__new(12,5)` for the header) and a per-instance
-      allocation pool to dodge the AS `--runtime stub` no-free
-      constraint. Rust callers now route to the existing
-      `RustWASMBackend` (whose `RustWasmLoader.findWasmPath()` was
-      also fixed to use `import.meta.url` instead of a broken `require()`
-      shim). Backend registration extracted to a shared
+- [x] **(Opus, high) `matrix/src/backends/WASMBackend` had an
+      allocator/export ABI mismatch — every standalone WASM bench threw.**
+      The backend mixed allocation ABIs and was loaded against the wrong
+      artifact, so `module.__new is not a function` /
+      `this.wasmModule.add is not a function` on every standalone bench.
+      **Closed (Option A — clean split).** `WASMBackend` rewritten as
+      **AS-only**, owning its own
+      AS instance, with an inline AS-managed Float64Array allocator
+      (`__new(byteLength,1)` for buffer + `__new(12,5)` for the header)
+      and a per-instance allocation pool to dodge the AS `--runtime stub`
+      no-free constraint. Backend registration extracted to a shared
       `matrix/src/backends/register-backends.ts` so the registry is
       populated regardless of which entry point a consumer imports.
-      The four standalone benches under `tools/benchmark/wasm/` and
-      `tools/benchmark/e2e/` switched to `RustWASMBackend` for the
-      Rust column and the rewritten `WASMBackend` for the AS column.
-      `tests/benchmark/wasm_rust_vs_as_benchmark.ts` gained
-      `asAllocFloat64` / `asWriteFloat64` / `AsPool` helpers wired to
-      the AS export names (`matrix_multiply` / `array_dot` /
-      `matrix_add`) — AS column no longer empty. Bench summary now
-      shows Rust 2.5–34× faster than JS across matmul / dot / vecadd /
+      The standalone benches under `tools/benchmark/wasm/` and
+      `tools/benchmark/e2e/` were switched to the rewritten AS
+      `WASMBackend`, wired to the AS export names (`matrix_multiply` /
+      `array_dot` / `matrix_add`). Bench summary now
+      shows **2.5–34× faster than JS** across matmul / dot / vecadd /
       det.
 
 > _Removed (2026-05-23, post-audit): the previously-pinned
@@ -1229,7 +1200,7 @@ active source files and addressed every actionable finding.
 
 - [x] **README full rewrite + new `docs/migration-guide.md`** at
       commit `c6514ed`. README now reflects the current state
-      (typed-layer ports, Rust/AS split, three-tier dispatch, per-op
+      (typed-layer ports, three-tier dispatch, per-op
       thresholds); migration guide covers the breaking changes from
       mathjs v15 (functions now async, new typed overloads, matrix
       constructor signature, `m.get([row,col])` form,
@@ -1296,23 +1267,18 @@ intentionally out of scope:
 ### Newly surfaced — pinned for the next pass
 
 - [x] **`matrix/src/backends/WasmLoader.allocateFloat64Array()` (lines
-      ~744–867) carried the same hybrid Rust/AS bug `WASMBackend`
-      had.** `module.__new(byteLength, 2)` (AS-specific) returned a
-      flat-memory `.ptr` for callers that expected the Rust raw-pointer
-      ABI. `MatrixWasmBridge.ts` and `matrix/src/backends/wasm/fft-wasm.ts`
-      inherited the bug. **Closed in commit b96b53a (Option A — detect
-      and branch at load time).** `WasmLoader` caches an
-      `AllocatorKind` discriminant on load (`__new` present → `'as'`;
-      otherwise `'rust'`); the four `allocate*` methods +
-      `release` / `free` / `clearPool` / `collect` branch on the kind.
-      Rust path uses a flat-memory bump allocator anchored at
-      `__heap_base`, exposed via `resetRustAllocator()` /
-      `getAllocatorKind()` accessors. `Allocation<T>` typed sum lets
+      ~744–867) carried an allocator ABI mismatch.** `module.__new(byteLength, 2)`
+      (AS-specific) returned a flat-memory `.ptr` for callers that
+      expected a raw-pointer ABI. `matrix/src/backends/wasm/fft-wasm.ts`
+      inherited the bug. **Closed in commit b96b53a.** `WasmLoader` now
+      uses the AS-managed allocator consistently; the four `allocate*`
+      methods + `release` / `free` / `clearPool` / `collect` were aligned
+      to it. `Allocation<T>` typed sum lets
       consumers re-bind output views to `module.memory.buffer +
-alloc.dataPtr` after each call (Rust `Vec` allocations may grow
-      memory and detach earlier views). `MatrixWasmBridge.ts` and
-      `fft-wasm.ts` updated for the re-bind + `resetRustAllocator()`
-      pattern. 9 new live tests in `matrix/tests/MatrixWasmBridge.test.ts`
+alloc.dataPtr` after each call (AS allocations may grow
+      memory and detach earlier views). `fft-wasm.ts` updated for the
+      re-bind pattern. 9 new live tests in
+      `matrix/tests/MatrixWasmBridge.test.ts`
       (new, 7) and `matrix/tests/wasm/fft-wasm.test.ts` (+2 for
       `backend: 'wasm'`) exercise the previously-dead bridge paths.
 
@@ -1352,7 +1318,7 @@ alloc.dataPtr` after each call (Rust `Vec` allocations may grow
       `OpName` / `OpThreshold` exported. 18 new tests in
       `parallel/tests/ComputePool.test.ts`.
 
-- [x] **AS WASM module export gap.** After the Rust/AS split, the
+- [x] **AS WASM module export gap.** The
       AS path fell back to JS for `LU`, `QR`, `Cholesky`,
       `inverse`, `determinant`. **Closed in commit b96b53a.** Five
       new AS kernels in `assembly/src/algebra/decomposition.ts`
@@ -1369,7 +1335,7 @@ alloc.dataPtr` after each call (Rust `Vec` allocations may grow
       `wasm-manifest.json` regenerated at both `lib/wasm/` and
       `assembly/build/`. SHA-384 integrity test 5/5. 5 new tests in
       `matrix/tests/wasm/decompositions-as.test.ts` within `1e-9`
-      tolerance. Porting note: Rust QR's inline-recompute
+      tolerance. Porting note: the inline-recompute
       Householder pattern degenerates in AS, so the AS port follows
       the JS-reference precompute-into-`vBuf` pattern (same maths,
       different storage discipline).
@@ -1496,7 +1462,7 @@ All 46 test files created for src/wasm/ modules:
 - [x] **Update main README with TypeScript/WASM status** — done in
       commit `c6514ed` (2026-05-23). README rewritten end-to-end:
       three-tier dispatch (in-process JS → ComputePool worker →
-      WASM kernel), Rust/AS split, per-op thresholds from
+      WASM kernel), per-op thresholds from
       `bench:parallel`, WebGPU opt-in, build/test/lint/bench npm
       scripts, status summary (12/12 build, 19/19 test, 224/224
       WASM integration, SHA-384 5/5).
@@ -1525,5 +1491,5 @@ All 46 test files created for src/wasm/ modules:
 - All functional JS files have been converted to TypeScript
 - The codebase compiles with zero TypeScript errors
 - Legacy JS files are kept for comparison and benchmarking purposes
-- Primary WASM backend is now Rust (wasm-pack); AssemblyScript kept as legacy for benchmarking
-- Dual WASM distribution: `lib/wasm/mathjs.wasm` (Rust, primary) and `lib/wasm/mathjs-as.wasm` (AS, legacy)
+- AssemblyScript is the sole WASM backend
+- WASM distribution: `lib/wasm/mathts-as.wasm` (AssemblyScript)
