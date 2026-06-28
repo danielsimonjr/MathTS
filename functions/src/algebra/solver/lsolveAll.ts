@@ -89,8 +89,8 @@ export const createLsolveAll = /* #__PURE__ */ factory(
     DenseMatrix,
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any,
-    }) as unknown as SolveValidationFunction;
+      DenseMatrix,
+    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
 
     /**
      * Finds all solutions of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix.

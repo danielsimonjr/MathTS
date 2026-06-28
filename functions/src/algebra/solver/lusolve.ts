@@ -3,46 +3,43 @@ import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { csIpvec } from '../sparse/csIpvec.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_LUSOLVE_THRESHOLD = 16; // 4x4 matrix
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
-
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
   type: 'DenseMatrix';
   isDenseMatrix: true;
-  _data: any[][];
+  _data: unknown[][];
   _size: number[];
   _datatype?: string;
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface SparseMatrix {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
-  _data?: any;
-  valueOf(): any[][];
+  _data?: unknown;
+  valueOf(): unknown[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix;
+  new (data: { data: unknown[][]; size: number[]; datatype?: string }): DenseMatrix;
 }
 
 interface LUPDecomposition {
-  L: DenseMatrix | SparseMatrix | any[][];
-  U: DenseMatrix | SparseMatrix | any[][];
+  L: DenseMatrix | SparseMatrix | unknown[][];
+  U: DenseMatrix | SparseMatrix | unknown[][];
   p: number[] | null;
   q?: number[] | null;
 }
@@ -50,13 +47,13 @@ interface LUPDecomposition {
 interface SolveValidationFunction {
   (
     matrix: DenseMatrix | SparseMatrix,
-    b: any[][] | DenseMatrix | SparseMatrix,
+    b: unknown[][] | DenseMatrix | SparseMatrix,
     copy: boolean
   ): DenseMatrix;
 }
 
 interface LupFunction {
-  (matrix: DenseMatrix | SparseMatrix | any[][]): LUPDecomposition;
+  (matrix: DenseMatrix | SparseMatrix | unknown[][]): LUPDecomposition;
 }
 
 interface SluFunction {
@@ -84,7 +81,7 @@ interface Dependencies {
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -99,7 +96,7 @@ function isPlainNumberMatrix(matrix: any[][]): boolean {
 /**
  * Check if a column vector (2D array with 1 column) contains only plain numbers
  */
-function isPlainNumberVector(vec: any[][]): boolean {
+function isPlainNumberVector(vec: unknown[][]): boolean {
   for (let i = 0; i < vec.length; i++) {
     if (typeof vec[i][0] !== 'number') {
       return false;
@@ -140,8 +137,8 @@ export const createLusolve = /* #__PURE__ */ factory(
   dependencies,
   ({ typed, matrix, lup, slu, usolve, lsolve, DenseMatrix }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any,
-    }) as unknown as SolveValidationFunction;
+      DenseMatrix,
+    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
 
     /**
      * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
@@ -178,9 +175,9 @@ export const createLusolve = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array, Array | Matrix': function (
-        a: any[][],
-        b: any[][] | DenseMatrix | SparseMatrix
-      ): any[][] {
+        a: unknown[][],
+        b: unknown[][] | DenseMatrix | SparseMatrix
+      ): unknown[][] {
         const rows = a.length;
         const columns = a[0]?.length || 0;
 
@@ -199,7 +196,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
           if (isPlainNumberVector(bdata) && bdata.length === rows) {
             try {
-              const aFlat = flattenToFloat64(a, rows, columns);
+              const aFlat = flattenToFloat64(a as number[][], rows, columns);
               const bFlat = vectorToFloat64(bdata as number[][]);
 
               const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
@@ -249,7 +246,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
       'DenseMatrix, Array | Matrix': function (
         a: DenseMatrix,
-        b: any[][] | DenseMatrix | SparseMatrix
+        b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
         const rows = a._size[0];
         const columns = a._size[1];
@@ -268,7 +265,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
           if (isPlainNumberVector(bdata) && bdata.length === rows) {
             try {
-              const aFlat = flattenToFloat64(a._data, rows, columns);
+              const aFlat = flattenToFloat64(a._data as number[][], rows, columns);
               const bFlat = vectorToFloat64(bdata as number[][]);
 
               const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
@@ -320,7 +317,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
       'SparseMatrix, Array | Matrix': function (
         a: SparseMatrix,
-        b: any[][] | DenseMatrix | SparseMatrix
+        b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
         const d = lup(a);
         return _lusolve(d.L, d.U, d.p, null, b);
@@ -328,7 +325,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
       'SparseMatrix, Array | Matrix, number, number': function (
         a: SparseMatrix,
-        b: any[][] | DenseMatrix | SparseMatrix,
+        b: unknown[][] | DenseMatrix | SparseMatrix,
         order: number,
         threshold: number
       ): DenseMatrix {
@@ -338,13 +335,13 @@ export const createLusolve = /* #__PURE__ */ factory(
 
       'Object, Array | Matrix': function (
         d: LUPDecomposition,
-        b: any[][] | DenseMatrix | SparseMatrix
+        b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
         return _lusolve(d.L, d.U, d.p, d.q, b);
       },
     });
 
-    function _toMatrix(a: DenseMatrix | SparseMatrix | any[][]): DenseMatrix | SparseMatrix {
+    function _toMatrix(a: DenseMatrix | SparseMatrix | unknown[][]): DenseMatrix | SparseMatrix {
       if (isMatrix(a)) {
         return a as DenseMatrix | SparseMatrix;
       }
@@ -355,11 +352,11 @@ export const createLusolve = /* #__PURE__ */ factory(
     }
 
     function _lusolve(
-      l: DenseMatrix | SparseMatrix | any[][],
-      u: DenseMatrix | SparseMatrix | any[][],
+      l: DenseMatrix | SparseMatrix | unknown[][],
+      u: DenseMatrix | SparseMatrix | unknown[][],
       p: number[] | null | undefined,
       q: number[] | null | undefined,
-      b: any[][] | DenseMatrix | SparseMatrix
+      b: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // verify decomposition
       const L = _toMatrix(l);
@@ -369,7 +366,7 @@ export const createLusolve = /* #__PURE__ */ factory(
       let bMatrix: DenseMatrix;
       if (p) {
         bMatrix = solveValidation(L, b, true);
-        bMatrix._data = csIpvec(p, bMatrix._data) as any[][];
+        bMatrix._data = csIpvec(p, bMatrix._data) as unknown[][];
       } else {
         bMatrix = solveValidation(L, b, true);
       }
@@ -381,7 +378,7 @@ export const createLusolve = /* #__PURE__ */ factory(
 
       // apply column permutations if needed (x is a DenseMatrix)
       if (q) {
-        x._data = csIpvec(q, x._data) as any[][];
+        x._data = csIpvec(q, x._data) as unknown[][];
       }
 
       return x;

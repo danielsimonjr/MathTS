@@ -6,7 +6,7 @@ import { format } from '../../../utils/string.js';
 interface DenseMatrixType {
   type: 'DenseMatrix';
   isDenseMatrix: true;
-  _data: any[][];
+  _data: unknown[][];
   _size: number[];
   _datatype?: string;
   size(): number[];
@@ -15,7 +15,7 @@ interface DenseMatrixType {
 interface SparseMatrixType {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
@@ -24,11 +24,21 @@ interface SparseMatrixType {
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrixType;
+  new (data: { data: unknown[][]; size: number[]; datatype?: string }): DenseMatrixType;
 }
 
 interface SolveValidationDependencies {
   DenseMatrix: DenseMatrixConstructor;
+}
+
+/** Runtime access to a matrix's internal fields (after an isMatrix narrowing) */
+interface MatrixInternal {
+  size(): number[];
+  _data?: unknown[];
+  _datatype?: string;
+  _values?: unknown[];
+  _index?: number[];
+  _ptr?: number[];
 }
 
 export function createSolveValidation({ DenseMatrix }: SolveValidationDependencies) {
@@ -43,7 +53,7 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
    */
   return function solveValidation(
     m: DenseMatrixType | SparseMatrixType,
-    b: any[][] | DenseMatrixType | SparseMatrixType,
+    b: unknown[][] | DenseMatrixType | SparseMatrixType,
     copy?: boolean
   ): DenseMatrixType {
     const mSize = m.size();
@@ -59,11 +69,12 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
       throw new RangeError('Matrix must be square (size: ' + format(mSize, {}) + ')');
     }
 
-    let data: any[] = [];
+    let data: unknown[][] = [];
 
     if (isMatrix(b)) {
-      const bSize = (b as any).size();
-      const bdata = (b as any)._data;
+      const bm = b as unknown as MatrixInternal;
+      const bSize = bm.size();
+      const bdata = bm._data as unknown[];
 
       // 1-dim vector
       if (bSize.length === 1) {
@@ -78,7 +89,7 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
         return new DenseMatrix({
           data,
           size: [rows, 1],
-          datatype: (b as any)._datatype,
+          datatype: bm._datatype,
         });
       }
 
@@ -93,13 +104,13 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
             data = [];
 
             for (let i = 0; i < rows; i++) {
-              data[i] = [bdata[i][0]];
+              data[i] = [(bdata[i] as unknown[])[0]];
             }
 
             return new DenseMatrix({
               data,
               size: [rows, 1],
-              datatype: (b as any)._datatype,
+              datatype: bm._datatype,
             });
           }
 
@@ -111,19 +122,19 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
             data[i] = [0];
           }
 
-          const values = (b as any)._values;
-          const index = (b as any)._index;
-          const ptr = (b as any)._ptr;
+          const values = bm._values!;
+          const index = bm._index!;
+          const ptr = bm._ptr!;
 
           for (let k1 = ptr[1], k = ptr[0]; k < k1; k++) {
             const i = index[k];
-            data[i][0] = values[k];
+            (data[i] as unknown[])[0] = values[k];
           }
 
           return new DenseMatrix({
             data,
             size: [rows, 1],
-            datatype: (b as any)._datatype,
+            datatype: bm._datatype,
           });
         }
       }
@@ -157,7 +168,7 @@ export function createSolveValidation({ DenseMatrix }: SolveValidationDependenci
         }
 
         for (let i = 0; i < rows; i++) {
-          data[i] = [b[i][0]];
+          data[i] = [(b[i] as unknown[])[0]];
         }
 
         return new DenseMatrix({

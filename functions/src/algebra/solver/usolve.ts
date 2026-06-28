@@ -1,53 +1,50 @@
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_USOLVE_THRESHOLD = 16; // 4x4 matrix
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
-
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
   type: 'DenseMatrix';
   isDenseMatrix: true;
-  _data: any[][];
+  _data: unknown[][];
   _size: number[];
   _datatype?: string;
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface SparseMatrix {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
   _size: number[];
   _datatype?: string;
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix;
+  new (data: { data: unknown[][]; size: number[]; datatype?: string }): DenseMatrix;
 }
 
 interface SolveValidationFunction {
   (
     matrix: DenseMatrix | SparseMatrix,
-    b: any[][] | DenseMatrix | SparseMatrix,
+    b: unknown[][] | DenseMatrix | SparseMatrix,
     copy: boolean
   ): DenseMatrix;
 }
 
 interface ScalarFunction {
-  (a: any, b: any): any;
+  (a: unknown, b: unknown): unknown;
 }
 
 interface Dependencies {
@@ -63,7 +60,7 @@ interface Dependencies {
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -78,7 +75,7 @@ function isPlainNumberMatrix(matrix: any[][]): boolean {
 /**
  * Check if a column vector (2D array with 1 column) contains only plain numbers
  */
-function isPlainNumberVector(vec: any[][]): boolean {
+function isPlainNumberVector(vec: unknown[][]): boolean {
   for (let i = 0; i < vec.length; i++) {
     if (typeof vec[i][0] !== 'number') {
       return false;
@@ -135,8 +132,8 @@ export const createUsolve = /* #__PURE__ */ factory(
     DenseMatrix,
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any,
-    }) as unknown as SolveValidationFunction;
+      DenseMatrix,
+    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
 
     /**
      * Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Throws an error if there's no solution.
@@ -165,22 +162,22 @@ export const createUsolve = /* #__PURE__ */ factory(
     return typed(name, {
       'SparseMatrix, Array | Matrix': function (
         m: SparseMatrix,
-        b: any[][] | DenseMatrix | SparseMatrix
+        b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
         return _sparseBackwardSubstitution(m, b);
       },
 
       'DenseMatrix, Array | Matrix': function (
         m: DenseMatrix,
-        b: any[][] | DenseMatrix | SparseMatrix
+        b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
         return _denseBackwardSubstitution(m, b);
       },
 
       'Array, Array | Matrix': function (
-        a: any[][],
-        b: any[][] | DenseMatrix | SparseMatrix
-      ): any[][] {
+        a: unknown[][],
+        b: unknown[][] | DenseMatrix | SparseMatrix
+      ): unknown[][] {
         const m = matrix(a) as DenseMatrix;
         const r = _denseBackwardSubstitution(m, b);
         return r.valueOf();
@@ -189,7 +186,7 @@ export const createUsolve = /* #__PURE__ */ factory(
 
     function _denseBackwardSubstitution(
       m: DenseMatrix,
-      b: any[][] | DenseMatrix | SparseMatrix
+      b: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // make b into a column vector
       const bVector = solveValidation(m, b, true);
@@ -211,7 +208,7 @@ export const createUsolve = /* #__PURE__ */ factory(
         isPlainNumberVector(bdata)
       ) {
         try {
-          const uFlat = flattenToFloat64(mdata, rows, columns);
+          const uFlat = flattenToFloat64(mdata as number[][], rows, columns);
           const bFlat = vectorToFloat64(bdata as number[][]);
 
           const uAlloc = wasmLoader.allocateFloat64Array(uFlat);
@@ -248,14 +245,14 @@ export const createUsolve = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       // result
-      const x: any[][] = [];
+      const x: unknown[][] = [];
 
       // loop columns backwards
       for (let j = columns - 1; j >= 0; j--) {
         // b[j]
         const bj = bdata[j][0] || 0;
         // x[j]
-        let xj: any;
+        let xj: unknown;
 
         if (!equalScalar(bj, 0)) {
           // value at [j, j]
@@ -289,7 +286,7 @@ export const createUsolve = /* #__PURE__ */ factory(
 
     function _sparseBackwardSubstitution(
       m: SparseMatrix,
-      b: any[][] | DenseMatrix | SparseMatrix
+      b: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // make b into a column vector
       const bVector = solveValidation(m, b, true);
@@ -304,7 +301,7 @@ export const createUsolve = /* #__PURE__ */ factory(
       const ptr = m._ptr;
 
       // result
-      const x: any[][] = [];
+      const x: unknown[][] = [];
 
       // loop columns backwards
       for (let j = columns - 1; j >= 0; j--) {
@@ -313,10 +310,10 @@ export const createUsolve = /* #__PURE__ */ factory(
         if (!equalScalar(bj, 0)) {
           // non-degenerate row, find solution
 
-          let vjj: any = 0;
+          let vjj: unknown = 0;
 
           // upper triangular matrix values & index (column j)
-          const jValues: any[] = [];
+          const jValues: unknown[] = [];
           const jIndices: number[] = [];
 
           // first & last indeces in column
