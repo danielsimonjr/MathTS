@@ -2331,7 +2331,12 @@ function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string
     simplified = node;
   }
 
-  const nodeAny = simplified;
+  // Dynamic AST inspection: narrow by `type`/`op` then read operator args.
+  const nodeAny = simplified as unknown as {
+    type: string;
+    op?: string;
+    args: MathNode[];
+  };
 
   if (nodeAny.type === 'OperatorNode' && nodeAny.op === '+') {
     const left = _inverseLaplaceNode(nodeAny.args[0], sVar, tVar);

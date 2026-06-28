@@ -172,7 +172,7 @@ export class MathJSDenseMatrix {
   /**
    * Basic subset access (simplified for common patterns).
    */
-  subset(index: any, replacement?: any, defaultValue?: any): any {
+  subset(index: number[], replacement?: number, defaultValue?: number): number | MathJSDenseMatrix {
     if (replacement === undefined) {
       return this.get(index);
     }
@@ -378,7 +378,7 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
  * etc.) to operate directly on CSC data without conversion.
  */
 export class MathJSSparseMatrix {
-  _values: any[] | null;
+  _values: unknown[] | null;
   _index: number[];
   _ptr: number[];
   _size: number[];
@@ -386,17 +386,17 @@ export class MathJSSparseMatrix {
 
   constructor(
     data?:
-      | any[][]
+      | unknown[][]
       | {
-          values?: any[] | null;
+          values?: unknown[] | null;
           index?: number[];
           ptr?: number[];
-          _values?: any[] | null;
+          _values?: unknown[] | null;
           _index?: number[];
           _ptr?: number[];
           size?: number[];
           _size?: number[];
-          data?: any[][];
+          data?: unknown[][];
           datatype?: string;
           _datatype?: string;
         }
@@ -416,7 +416,7 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data as any[][]);
+      this._fromDenseArray(data as unknown[][]);
       return;
     }
 
@@ -448,7 +448,7 @@ export class MathJSSparseMatrix {
   /**
    * Convert a dense 2D array to CSC format.
    */
-  private _fromDenseArray(data: any[][]): void {
+  private _fromDenseArray(data: unknown[][]): void {
     const rows = data.length;
     const cols = rows > 0 && Array.isArray(data[0]) ? data[0].length : 0;
     this._values = [];
@@ -495,7 +495,7 @@ export class MathJSSparseMatrix {
   /**
    * Get element at [row, col]. Returns 0 for structural zeros.
    */
-  get(index: number[]): any {
+  get(index: number[]): unknown {
     const [i, j] = index;
     if (j < 0 || j >= this._size[1] || i < 0 || i >= this._size[0]) {
       throw new RangeError(`Index out of range (${i}, ${j}) for matrix of size [${this._size}]`);
@@ -512,7 +512,7 @@ export class MathJSSparseMatrix {
    * Set element at [row, col]. Inserts, updates, or removes entries as needed.
    * Returns this for chaining (mathjs convention).
    */
-  set(index: number[], value: any, _defaultValue?: any): MathJSSparseMatrix {
+  set(index: number[], value: unknown, _defaultValue?: unknown): MathJSSparseMatrix {
     const [i, j] = index;
 
     // Expand matrix dimensions if needed
@@ -564,9 +564,9 @@ export class MathJSSparseMatrix {
   /**
    * Convert to dense nested array.
    */
-  valueOf(): any[][] {
+  valueOf(): unknown[][] {
     const [rows, cols] = this._size;
-    const result: any[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
+    const result: unknown[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
     for (let j = 0; j < cols; j++) {
       for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
         result[this._index[k]][j] = this._values ? this._values[k] : 1;
@@ -575,7 +575,7 @@ export class MathJSSparseMatrix {
     return result;
   }
 
-  toArray(): any[][] {
+  toArray(): unknown[][] {
     return this.valueOf();
   }
 
@@ -597,7 +597,7 @@ export class MathJSSparseMatrix {
    * Create a new matrix of the same type from nested array data.
    * Used internally by mathjs factories (e.g., transpose calls x.create(...)).
    */
-  create(data: any[][], datatype?: string): MathJSSparseMatrix {
+  create(data: unknown[][], datatype?: string): MathJSSparseMatrix {
     const m = new MathJSSparseMatrix(data);
     m._datatype = datatype;
     return m;
@@ -608,7 +608,7 @@ export class MathJSSparseMatrix {
    * algebra factories that call a.createSparseMatrix({...}).
    */
   createSparseMatrix(opts: {
-    values?: any[] | null;
+    values?: unknown[] | null;
     index?: number[];
     ptr?: number[];
     size: number[];
@@ -622,10 +622,10 @@ export class MathJSSparseMatrix {
    * Callback signature: (value, index, matrix) => newValue
    */
   map(
-    callback: (value: any, index: number[], matrix: MathJSSparseMatrix) => any
+    callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => unknown
   ): MathJSSparseMatrix {
     const [rows, cols] = this._size;
-    const newValues: any[] = [];
+    const newValues: unknown[] = [];
     const newIndex: number[] = [];
     const newPtr: number[] = [0];
 
@@ -660,7 +660,7 @@ export class MathJSSparseMatrix {
    * Iterate over non-zero elements.
    * Callback signature: (value, index, matrix) => void
    */
-  forEach(callback: (value: any, index: number[], matrix: MathJSSparseMatrix) => void): void {
+  forEach(callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => void): void {
     const cols = this._size[1];
     for (let j = 0; j < cols; j++) {
       for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
@@ -695,7 +695,7 @@ export class MathJSSparseMatrix {
     // Truncate rows if shrinking
     if (newRows < this._size[0]) {
       // Remove entries with row index >= newRows
-      const vals: any[] = [];
+      const vals: unknown[] = [];
       const idx: number[] = [];
       const ptr: number[] = [0];
       const cols = Math.min(newCols, this._ptr.length - 1);
@@ -719,7 +719,7 @@ export class MathJSSparseMatrix {
 
   toJSON(): {
     mathjs: string;
-    values: any[] | null;
+    values: unknown[] | null;
     index: number[];
     ptr: number[];
     size: number[];
@@ -753,7 +753,7 @@ export class MathJSSparseMatrix {
    */
   static diagonal(
     size: number[],
-    value: any | any[],
+    value: unknown | unknown[],
     k: number = 0,
     defaultValue: number = 0,
     _datatype?: string
@@ -762,7 +762,7 @@ export class MathJSSparseMatrix {
     const kRow = k < 0 ? -k : 0;
     const kCol = k > 0 ? k : 0;
     const diagLen = Math.min(rows - kRow, cols - kCol);
-    const values: any[] = [];
+    const values: unknown[] = [];
     const index: number[] = [];
     const ptr: number[] = [0];
 
@@ -795,7 +795,7 @@ export class MathJSSparseMatrix {
     j: number,
     pi: number,
     n: number,
-    values: any[],
+    values: unknown[],
     index: number[],
     ptr: number[]
   ): void {
@@ -846,10 +846,10 @@ export class MathJSSparseMatrix {
    */
   static _forEachRow(
     j: number,
-    values: any[],
+    values: unknown[],
     index: number[],
     ptr: number[],
-    callback: (col: number, value: any) => void
+    callback: (col: number, value: unknown) => void
   ): void {
     const n = ptr.length - 1; // number of columns
     for (let c = 0; c < n; c++) {
@@ -897,7 +897,7 @@ Object.defineProperty(MathJSSparseMatrix.prototype, 'type', {
  */
 export function createMatrixBridge() {
   return function matrix(
-    data?: any[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
+    data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
   ): MathJSDenseMatrix | MathJSSparseMatrix {
     // matrix('sparse') or matrix('dense') or matrix('default')
@@ -917,7 +917,9 @@ export function createMatrixBridge() {
       }
       return data;
     }
-    return storageType === 'sparse' ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data);
+    return storageType === 'sparse'
+      ? new MathJSSparseMatrix(data)
+      : new MathJSDenseMatrix(data as number[][]);
   };
 }
 
@@ -926,10 +928,10 @@ export function createMatrixBridge() {
 // ---------------------------------------------------------------------------
 
 /** Infer size from nested array. Handles 1D and 2D. */
-function inferSize(data: any[]): number[] {
+function inferSize(data: unknown[]): number[] {
   if (data.length === 0) return [0];
   if (Array.isArray(data[0])) {
-    return [data.length, (data[0] as any[]).length];
+    return [data.length, (data[0] as unknown[]).length];
   }
   return [data.length];
 }

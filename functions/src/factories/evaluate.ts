@@ -22,15 +22,15 @@ import * as typedFns from '../typed/index.js';
 // Step 1: Build the full math scope
 // ---------------------------------------------------------------------------
 
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   // Core scope (typed, config, Complex, BigNumber, etc.)
   ...factoryScope,
 
   // Activated factory functions (abs, addScalar, equalScalar, etc.)
-  ...(activatedFactories as Record<string, any>),
+  ...(activatedFactories as Record<string, unknown>),
 
   // Typed functions (add, subtract, multiply, divide, pow, sin, cos, etc.)
-  ...(typedFns as Record<string, any>),
+  ...(typedFns as Record<string, unknown>),
 
   // Math constants
   pi: Math.PI,
@@ -54,7 +54,7 @@ const mathScope: Record<string, any> = {
  * Reuses the parse function built in index.ts to avoid duplicate
  * typed-function conversion registrations.
  */
-export const parse = (factoryScope as any).parse;
+export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
 
 // ---------------------------------------------------------------------------
 // Step 3: Create the evaluate function

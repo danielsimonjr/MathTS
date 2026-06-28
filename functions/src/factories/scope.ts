@@ -15,7 +15,7 @@ initTypeBridge();
 
 // Register extra types that mathjs factories reference in their typed() signatures
 // but aren't in the default MathTS typed-function instance.
-const typed = mathTyped as any;
+const typed = mathTyped as unknown as { addType(type: unknown, before: boolean): void };
 const extraTypes = [
   // mathjs uses lowercase 'function' in signatures; typed-function registers 'Function'
   {
@@ -26,94 +26,94 @@ const extraTypes = [
   {
     name: 'Node',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isNode === true,
   },
   {
     name: 'SymbolNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isSymbolNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isSymbolNode === true,
   },
   {
     name: 'ConstantNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isConstantNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isConstantNode === true,
   },
   {
     name: 'OperatorNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isOperatorNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isOperatorNode === true,
   },
   {
     name: 'FunctionNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isFunctionNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isFunctionNode === true,
   },
   {
     name: 'ParenthesisNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isParenthesisNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isParenthesisNode === true,
   },
   {
     name: 'AccessorNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isAccessorNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isAccessorNode === true,
   },
   {
     name: 'ArrayNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isArrayNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isArrayNode === true,
   },
   {
     name: 'AssignmentNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isAssignmentNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isAssignmentNode === true,
   },
   {
     name: 'BlockNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isBlockNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isBlockNode === true,
   },
   {
     name: 'ConditionalNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isConditionalNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isConditionalNode === true,
   },
   {
     name: 'FunctionAssignmentNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isFunctionAssignmentNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isFunctionAssignmentNode === true,
   },
   {
     name: 'IndexNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isIndexNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isIndexNode === true,
   },
   {
     name: 'ObjectNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isObjectNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isObjectNode === true,
   },
   {
     name: 'RangeNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isRangeNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isRangeNode === true,
   },
   {
     name: 'RelationalNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isRelationalNode === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isRelationalNode === true,
   },
   // Index type — stub that matches objects with isIndex flag
   {
     name: 'Index',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isIndex === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isIndex === true,
   },
   // Range type — stub that matches objects with isRange flag
   {
     name: 'Range',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as any).isRange === true,
+      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isRange === true,
   },
   // Map type — needed by resolve() and other factories that accept scope maps
   { name: 'Map', test: (x: unknown): x is Map<string, unknown> => x instanceof Map },
@@ -157,6 +157,6 @@ export const factoryScope: Record<string, unknown> = {
   number: Number,
 
   // Matrix helper factories
-  createDenseMatrix: (data: any) => new MathJSDenseMatrix(data),
-  createSparseMatrix: (data: any) => new MathJSSparseMatrix(data),
+  createDenseMatrix: (data: ConstructorParameters<typeof MathJSDenseMatrix>[0]) => new MathJSDenseMatrix(data),
+  createSparseMatrix: (data: ConstructorParameters<typeof MathJSSparseMatrix>[0]) => new MathJSSparseMatrix(data),
 };
