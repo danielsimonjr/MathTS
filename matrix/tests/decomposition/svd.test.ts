@@ -13,7 +13,6 @@ import {
   cond,
   norm2,
   normFro as normFroFn,
-  SVDResult,
 } from '../../src/operations/svd.js';
 
 /**

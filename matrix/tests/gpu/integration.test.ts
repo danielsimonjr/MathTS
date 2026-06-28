@@ -5,24 +5,18 @@
  * These tests verify the advanced GPU infrastructure components.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  GPUContext,
-  getGlobalGPUContext,
-  destroyGlobalGPU,
-} from '../../src/backends/gpu/GPUContext.js';
+import { describe, it, expect } from 'vitest';
+import { GPUContext } from '../../src/backends/gpu/GPUContext.js';
 import { BufferPool } from '../../src/backends/gpu/BufferPool.js';
 import { ShaderManager, BUILTIN_SHADERS } from '../../src/backends/gpu/ShaderManager.js';
 import {
   BatchExecutor,
   type BatchOperation,
-  type BatchResult,
 } from '../../src/backends/gpu/BatchExecutor.js';
 import {
   SyncManager,
   createSyncManager,
   type SyncStrategy,
-  type TransferResult,
 } from '../../src/backends/gpu/Sync.js';
 
 describe('BatchExecutor', () => {
@@ -317,7 +311,6 @@ describe('WGSL Shader Files', () => {
       // LU = [[4, 3], [6, 3]] ✓
 
       const a = [4, 3, 6, 3];
-      const n = 2;
 
       // Simple LU without pivoting
       const L = [1, 0, 0, 1];

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { eig, eigvals, powerIteration, EigResult } from '../../src/operations/eig.js';
+import { eig, eigvals, powerIteration } from '../../src/operations/eig.js';
 
 /**
  * Helper: matrix-vector multiply

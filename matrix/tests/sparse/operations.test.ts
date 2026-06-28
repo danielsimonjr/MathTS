@@ -399,7 +399,6 @@ describe('Sparse Matrix Operations', () => {
       expect(sparse.nnz).toBe(4);
       expect(sparse.sparsity).toBe(0);
 
-      const recovered = sparse.toDense();
       expectMatchesDense(sparse, original);
     });
 

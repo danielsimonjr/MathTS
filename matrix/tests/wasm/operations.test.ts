@@ -122,7 +122,7 @@ describe('WASM Operations', () => {
 
   describe('Element-wise Multiplication', () => {
     it('should multiply matrices element-wise correctly', () => {
-      const a = createMatrix(10, 10, (i, j) => i + 1);
+      const a = createMatrix(10, 10, (i, _j) => i + 1);
       const b = createMatrix(10, 10, (i, j) => j + 1);
 
       const jsResult = jsBackend.multiplyElementwise(a, b);

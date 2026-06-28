@@ -58,7 +58,6 @@ async function detectAS(): Promise<WasmModule | null> {
 const asModule = await detectAS();
 const onAS = !!asModule && typeof asModule.matrix_eig_general === 'function';
 // Surface which backend served the suite (informational).
-// eslint-disable-next-line no-console
 console.log(
   `eig-general-wasm backend: ${onAS ? 'AssemblyScript WASM' : 'JS fallback (AS unavailable)'}`
 );

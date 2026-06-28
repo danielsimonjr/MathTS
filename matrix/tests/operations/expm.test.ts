@@ -53,17 +53,6 @@ function frobDiff(A: DenseMatrix, B: DenseMatrix): number {
   return Math.sqrt(s);
 }
 
-/** Frobenius distance between two number[][] matrices. */
-function frobDiff2D(A: number[][], B: number[][]): number {
-  let s = 0;
-  for (let i = 0; i < A.length; i++)
-    for (let j = 0; j < A[0].length; j++) {
-      const d = A[i][j] - B[i][j];
-      s += d * d;
-    }
-  return Math.sqrt(s);
-}
-
 /** Make an n×n identity DenseMatrix. */
 function eye(n: number): DenseMatrix {
   return DenseMatrix.fromArray(

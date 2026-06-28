@@ -9,7 +9,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   GPUBackend,
-  getGlobalGPUBackend,
   destroyGlobalGPUBackend,
 } from '../../src/backends/GPUBackend.js';
 
@@ -195,9 +194,6 @@ describe('GPU Matrix Operations', () => {
     });
 
     it('should check size threshold', () => {
-      // Access private threshold for testing
-      const threshold = 100000; // Default threshold
-
       // Below threshold (assuming backend were ready)
       expect(backend.shouldUseGPU(100, 100)).toBe(false); // 10000 < 100000
 

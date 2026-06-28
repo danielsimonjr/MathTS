@@ -39,7 +39,6 @@ describe('WASM Decomposition Accuracy', () => {
     // Create A^T * A which is always positive semi-definite
     // Add nI to ensure positive definite
     const a = randomMatrix(n, n);
-    const at = DenseMatrix.fromFlat(n, n, Array.from(a.toFloat64Array()));
 
     // Manual A^T * A + nI computation
     const data = new Float64Array(n * n);

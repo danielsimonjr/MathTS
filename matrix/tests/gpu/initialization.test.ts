@@ -5,7 +5,7 @@
  * Note: Many tests are skipped in Node.js environment as WebGPU requires a browser.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   hasWebGPU,
   isBrowser,
@@ -20,8 +20,7 @@ import {
   getGlobalGPUContext,
   destroyGlobalGPU,
 } from '../../src/backends/gpu/GPUContext.js';
-import { BufferPool } from '../../src/backends/gpu/BufferPool.js';
-import { ShaderManager, BUILTIN_SHADERS } from '../../src/backends/gpu/ShaderManager.js';
+import { BUILTIN_SHADERS } from '../../src/backends/gpu/ShaderManager.js';
 import {
   GPUBackend,
   getGlobalGPUBackend,
@@ -325,7 +324,11 @@ describe('Workgroup calculations', () => {
     const backend = new GPUBackend();
 
     // Access private method through type assertion for testing
-    const calculateWorkgroups = (backend as any).calculateWorkgroups.bind(backend);
+    const calculateWorkgroups = (
+      backend as unknown as {
+        calculateWorkgroups: (m: number, n: number) => [number, number, number];
+      }
+    ).calculateWorkgroups.bind(backend);
 
     // Default workgroup size is [16, 16, 1]
     expect(calculateWorkgroups(32, 32)).toEqual([2, 2, 1]);
