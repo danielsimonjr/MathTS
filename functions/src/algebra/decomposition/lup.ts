@@ -1,6 +1,7 @@
 import { clone } from '../../utils/object.js';
 import { factory } from '../../utils/factory.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_LUP_THRESHOLD = 16; // 4x4 matrix
@@ -8,7 +9,7 @@ const WASM_LUP_THRESHOLD = 16; // 4x4 matrix
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -34,69 +35,64 @@ function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float
 }
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-}
-
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
   type: 'DenseMatrix';
   isDenseMatrix: true;
-  _data: any[][];
+  _data: unknown[][];
   _size: number[];
   _datatype?: string;
   storage(): 'dense';
   size(): number[];
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface SparseMatrix {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
-  _data?: any;
+  _data?: unknown;
   storage(): 'sparse';
   size(): number[];
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix;
-  _swapRows(i: number, j: number, data: any[][]): void;
+  new (data: { data: unknown[][]; size: number[]; datatype?: string }): DenseMatrix;
+  _swapRows(i: number, j: number, data: unknown[][]): void;
 }
 
 interface SparseMatrixConstructor {
   new (data: {
-    values?: any[];
+    values?: unknown[];
     index?: number[];
     ptr?: number[];
     size: number[];
     datatype?: string;
   }): SparseMatrix;
-  _swapRows(j: number, pi: number, n: number, values: any[], index: number[], ptr: number[]): void;
+  _swapRows(j: number, pi: number, n: number, values: unknown[], index: number[], ptr: number[]): void;
   _forEachRow(
     j: number,
-    values: any[],
+    values: unknown[],
     index: number[],
     ptr: number[],
-    callback: (i: number, value: any) => void
+    callback: (i: number, value: unknown) => void
   ): void;
 }
 
 interface Spa {
   new (): Spa;
-  set(i: number, value: any): void;
-  get(i: number): any;
-  accumulate(i: number, value: any): void;
-  forEach(start: number, end: number, callback: (i: number, value: any) => void): void;
+  set(i: number, value: unknown): void;
+  get(i: number): unknown;
+  accumulate(i: number, value: unknown): void;
+  forEach(start: number, end: number, callback: (i: number, value: unknown) => void): void;
   swap(i: number, j: number): void;
 }
 
@@ -112,8 +108,8 @@ interface LUPResult {
 }
 
 interface LUPArrayResult {
-  L: any[][];
-  U: any[][];
+  L: unknown[][];
+  U: unknown[][];
   p: number[];
 }
 
@@ -125,8 +121,8 @@ interface Dependencies {
   divideScalar: TypedFunction;
   multiplyScalar: TypedFunction;
   subtractScalar: TypedFunction;
-  larger: TypedFunction<boolean>;
-  equalScalar: TypedFunction<boolean>;
+  larger: TypedFunction;
+  equalScalar: TypedFunction;
   unaryMinus: TypedFunction;
   DenseMatrix: DenseMatrixConstructor;
   SparseMatrix: SparseMatrixConstructor;
@@ -203,15 +199,15 @@ export const createLup = /* #__PURE__ */ factory(
         return _sparseLUP(m);
       },
 
-      Array: function (a: any[][]): LUPArrayResult {
+      Array: function (a: unknown[][]): LUPArrayResult {
         // create dense matrix from array
         const m = matrix(a) as DenseMatrix;
         // lup, use matrix implementation
         const r = _denseLUP(m);
         // result
         return {
-          L: r.L.valueOf() as any[][],
-          U: r.U.valueOf() as any[][],
+          L: r.L.valueOf() as unknown[][],
+          U: r.U.valueOf() as unknown[][],
           p: r.p,
         };
       },
@@ -233,7 +229,7 @@ export const createLup = /* #__PURE__ */ factory(
         isPlainNumberMatrix(m._data)
       ) {
         try {
-          const flat = flattenToFloat64(m._data, rows, columns);
+          const flat = flattenToFloat64(m._data as number[][], rows, columns);
           const aAlloc = wasmLoader.allocateFloat64Array(flat);
           // Permutation vector needs Int32Array (4 bytes per element)
           const permAlloc = wasmLoader.allocateInt32ArrayEmpty(rows);
@@ -312,10 +308,10 @@ export const createLup = /* #__PURE__ */ factory(
       // matrix array, clone original data
       const data = clone(m._data);
       // l matrix arrays
-      const ldata: any[][] = [];
+      const ldata: unknown[][] = [];
       const lsize = [rows, n];
       // u matrix arrays
-      const udata: any[][] = [];
+      const udata: unknown[][] = [];
       const usize = [n, columns];
       // vars
       let i: number, j: number, k: number;
@@ -333,7 +329,7 @@ export const createLup = /* #__PURE__ */ factory(
             // min i,j
             const min = Math.min(i, j);
             // v[i, j]
-            let s: any = 0;
+            let s: unknown = 0;
             // loop up to min
             for (k = 0; k < min; k++) {
               // s = l[i, k] - data[k, j]
@@ -344,8 +340,8 @@ export const createLup = /* #__PURE__ */ factory(
         }
         // row with larger value in cvector, row >= j
         let pi = j;
-        let pabsv: any = 0;
-        let vjj: any = 0;
+        let pabsv: unknown = 0;
+        let vjj: unknown = 0;
         // loop rows
         for (i = j; i < rows; i++) {
           // data @ i, j
@@ -473,12 +469,12 @@ export const createLup = /* #__PURE__ */ factory(
       const index = m._index!;
       const ptr = m._ptr!;
       // l matrix arrays
-      const lvalues: any[] = [];
+      const lvalues: unknown[] = [];
       const lindex: number[] = [];
       const lptr: number[] = [];
       const lsize = [rows, n];
       // u matrix arrays
-      const uvalues: any[] = [];
+      const uvalues: unknown[] = [];
       const uindex: number[] = [];
       const uptr: number[] = [];
       const usize = [n, columns];
@@ -530,9 +526,9 @@ export const createLup = /* #__PURE__ */ factory(
         // skip first column in upper triangular matrix
         if (j > 0) {
           // loop rows in column j (above diagonal)
-          spa.forEach(0, j - 1, function (k: number, vkj: any) {
+          spa.forEach(0, j - 1, function (k: number, vkj: unknown) {
             // loop rows in column k (L)
-            SparseMatrix._forEachRow(k, lvalues, lindex, lptr, function (i: number, vik: any) {
+            SparseMatrix._forEachRow(k, lvalues, lindex, lptr, function (i: number, vik: unknown) {
               // check row is below k
               if (i > k) {
                 // update spa value
@@ -546,7 +542,7 @@ export const createLup = /* #__PURE__ */ factory(
         let vjj = spa.get(j);
         let pabsv = abs(vjj);
         // loop values in spa (order by row, below diagonal)
-        spa.forEach(j + 1, rows - 1, function (x: number, v: any) {
+        spa.forEach(j + 1, rows - 1, function (x: number, v: unknown) {
           // absolute value
           const absv = abs(v);
           // value is greater than pivote value
@@ -571,7 +567,7 @@ export const createLup = /* #__PURE__ */ factory(
           swapIndeces(j, pi);
         }
         // loop values in spa (order by row)
-        spa.forEach(0, rows - 1, function (x: number, v: any) {
+        spa.forEach(0, rows - 1, function (x: number, v: unknown) {
           // check we are above diagonal
           if (x <= j) {
             // update upper triangular matrix

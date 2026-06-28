@@ -77,6 +77,11 @@ export const createResolve = /* #__PURE__ */ factory(
     OperatorNode,
     ParenthesisNode,
   }: ResolveDependencies) => {
+    // typed-function's runtime `referTo` is single-call variadic
+    // (`referTo(...signatures, callback)`); the imported TypedFunction interface
+    // models it curried, so narrow to the real contract via `unknown`.
+    type Fn = (...args: unknown[]) => unknown;
+    const referTo = typed.referTo as unknown as (sig: string, cb: (ref: Fn) => unknown) => unknown;
     /**
      * resolve(expr, scope) replaces variable nodes with their scoped values
      *
@@ -170,14 +175,14 @@ export const createResolve = /* #__PURE__ */ factory(
         (self: TypedFunction) => (A: { map: (fn: (n: MathNode) => MathNode) => unknown }) =>
           A.map((n: MathNode) => self(n) as MathNode)
       ),
-      'Array, Object': (typed.referTo as any)(
+      'Array, Object': referTo(
         'Array,Map',
-        (selfAM: TypedFunction) => (A: unknown[], scope: Record<string, unknown>) =>
+        (selfAM: Fn) => (A: unknown[], scope: Record<string, unknown>) =>
           selfAM(A, createMap(scope))
       ),
-      'Matrix, Object': (typed.referTo as any)(
+      'Matrix, Object': referTo(
         'Matrix,Map',
-        (selfMM: TypedFunction) =>
+        (selfMM: Fn) =>
           (
             A: { map: (fn: (n: MathNode) => MathNode) => unknown },
             scope: Record<string, unknown>

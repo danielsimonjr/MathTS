@@ -1,5 +1,6 @@
 import { factory } from '../../utils/factory.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum matrix size (m*n elements) for WASM to be beneficial
 const WASM_QR_THRESHOLD = 16; // 4x4 matrix
@@ -7,7 +8,7 @@ const WASM_QR_THRESHOLD = 16; // 4x4 matrix
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -33,39 +34,34 @@ function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float
 }
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-}
-
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
   type: 'DenseMatrix';
   isDenseMatrix: true;
-  _data: any[][] | any[];
+  _data: unknown[][] | unknown[];
   _size: number[];
   _datatype?: string;
   storage(): 'dense';
   size(): number[];
-  valueOf(): any[][] | any[];
+  valueOf(): unknown[][] | unknown[];
   clone(): DenseMatrix;
 }
 
 interface SparseMatrix {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
-  _data?: any;
+  _data?: unknown;
   storage(): 'sparse';
   size(): number[];
-  valueOf(): any[][];
+  valueOf(): unknown[][];
 }
 
 interface ZerosFunction {
@@ -77,7 +73,7 @@ interface IdentityFunction {
 }
 
 interface ComplexFunction {
-  (re: number, im?: number): any;
+  (re: number, im?: number): unknown;
 }
 
 interface QRResult {
@@ -87,8 +83,8 @@ interface QRResult {
 }
 
 interface QRArrayResult {
-  Q: any[][];
-  R: any[][];
+  Q: unknown[][];
+  R: unknown[][];
 }
 
 interface Dependencies {
@@ -96,8 +92,8 @@ interface Dependencies {
   matrix: MatrixConstructor;
   zeros: ZerosFunction;
   identity: IdentityFunction;
-  isZero: TypedFunction<boolean>;
-  equal: TypedFunction<boolean>;
+  isZero: TypedFunction;
+  equal: TypedFunction;
   sign: TypedFunction;
   sqrt: TypedFunction;
   conj: TypedFunction;
@@ -200,21 +196,21 @@ export const createQr = /* #__PURE__ */ factory(
         return _sparseQR(m);
       },
 
-      Array: function (a: any[][]): QRArrayResult {
+      Array: function (a: unknown[][]): QRArrayResult {
         // create dense matrix from array
         const m = matrix(a) as DenseMatrix;
         // lup, use matrix implementation
         const r = _denseQR(m);
         // result
         return {
-          Q: r.Q.valueOf() as any[][],
-          R: r.R.valueOf() as any[][],
+          Q: r.Q.valueOf() as unknown[][],
+          R: r.R.valueOf() as unknown[][],
         };
       },
     });
 
     // Attach _denseQRimpl to the typed function
-    (qrTyped as any)._denseQRimpl = _denseQRimpl;
+    (qrTyped as unknown as { _denseQRimpl: typeof _denseQRimpl })._denseQRimpl = _denseQRimpl;
 
     return qrTyped;
 
@@ -225,7 +221,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       // WASM fast path for plain number matrices
       const wasm = wasmLoader.getModule();
-      if (wasm && rows * cols >= WASM_QR_THRESHOLD && isPlainNumberMatrix(m._data as any[][])) {
+      if (wasm && rows * cols >= WASM_QR_THRESHOLD && isPlainNumberMatrix(m._data as unknown[][])) {
         try {
           const flat = flattenToFloat64(m._data as number[][], rows, cols);
           const aAlloc = wasmLoader.allocateFloat64Array(flat);
@@ -275,15 +271,15 @@ export const createQr = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       const Q = identity([rows], 'dense');
-      const Qdata = Q._data as any[][];
+      const Qdata = Q._data as unknown[][];
 
       const R = m.clone();
-      const Rdata = R._data as any[][];
+      const Rdata = R._data as unknown[][];
 
       // vars
       let i: number, j: number, k: number;
 
-      const w = zeros([rows], '') as any;
+      const w = zeros([rows], '') as unknown as unknown[];
 
       for (k = 0; k < Math.min(cols, rows); ++k) {
         /*
@@ -314,7 +310,7 @@ export const createQr = /* #__PURE__ */ factory(
         const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
-        let alphaSquared: any = 0;
+        let alphaSquared: unknown = 0;
 
         for (i = k; i < rows; i++) {
           alphaSquared = addScalar(alphaSquared, multiplyScalar(Rdata[i][k], conj(Rdata[i][k])));
@@ -336,7 +332,7 @@ export const createQr = /* #__PURE__ */ factory(
           // tau = - conj(u1 / alpha)
           const tau = unaryMinus(conj(divideScalar(u1, alpha)));
 
-          let s: any;
+          let s: unknown;
 
           /*
            * tau and w have been choosen so that
@@ -408,9 +404,9 @@ export const createQr = /* #__PURE__ */ factory(
 
     function _denseQR(m: DenseMatrix): QRResult {
       const ret = _denseQRimpl(m);
-      const Rdata = ret.R._data as any[][];
-      if ((m._data as any[][]).length > 0) {
-        const zero = Rdata[0][0].type === 'Complex' ? complex(0) : 0;
+      const Rdata = ret.R._data as unknown[][];
+      if ((m._data as unknown[][]).length > 0) {
+        const zero = (Rdata[0][0] as { type?: string }).type === 'Complex' ? complex(0) : 0;
 
         for (let i = 0; i < Rdata.length; ++i) {
           for (let j = 0; j < i && j < (Rdata[0] || []).length; ++j) {

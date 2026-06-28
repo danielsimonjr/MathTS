@@ -2,16 +2,13 @@ import { isInteger } from '../../utils/number.js';
 import { factory } from '../../utils/factory.js';
 import { createCsSqr } from '../sparse/csSqr.js';
 import { createCsLu } from '../sparse/csLu.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
-
 interface SparseMatrix {
   type: 'SparseMatrix';
   isSparseMatrix: true;
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
   _size: number[];
@@ -21,7 +18,7 @@ interface SparseMatrix {
 
 interface SparseMatrixConstructor {
   new (data: {
-    values?: any[];
+    values?: unknown[];
     index: number[];
     ptr: number[];
     size: number[];
@@ -70,8 +67,8 @@ interface Dependencies {
   transpose: TypedFunction;
   divideScalar: TypedFunction;
   subtract: TypedFunction;
-  larger: TypedFunction<boolean>;
-  largerEq: TypedFunction<boolean>;
+  larger: TypedFunction;
+  largerEq: TypedFunction;
   SparseMatrix: SparseMatrixConstructor;
 }
 

@@ -1,5 +1,6 @@
 import { factory } from '../../utils/factory.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_SCHUR_THRESHOLD = 16; // 4x4 matrix
@@ -7,7 +8,7 @@ const WASM_SCHUR_THRESHOLD = 16; // 4x4 matrix
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -33,13 +34,8 @@ function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float
 }
 
 // Type definitions
-type NestedArray<T = any> = T | NestedArray<T>[];
-type MatrixData = NestedArray<any>;
-
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-}
+type NestedArray<T = unknown> = T | NestedArray<T>[];
+type MatrixData = NestedArray;
 
 interface Matrix {
   type: string;
@@ -55,7 +51,7 @@ interface Matrix {
 }
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface IdentityFunction {
@@ -74,8 +70,8 @@ interface SchurResult {
 }
 
 interface SchurArrayResult {
-  U: any[][];
-  T: any[][];
+  U: unknown[][];
+  T: unknown[][];
 }
 
 interface Dependencies {
@@ -83,8 +79,8 @@ interface Dependencies {
   matrix: MatrixConstructor;
   identity: IdentityFunction;
   multiply: TypedFunction;
-  qr: TypedFunction<QRResult>;
-  norm: TypedFunction<number>;
+  qr: (a: Matrix) => QRResult;
+  norm: (x: unknown) => number;
   subtract: TypedFunction;
 }
 
@@ -118,11 +114,11 @@ export const createSchur = /* #__PURE__ */ factory(
      * @return {{U: Array | Matrix, T: Array | Matrix}} Object containing both matrix U and T of the Schur Decomposition A=UTU'
      */
     return typed(name, {
-      Array: function (X: any[][]): SchurArrayResult {
+      Array: function (X: unknown[][]): SchurArrayResult {
         const r = _schur(matrix(X));
         return {
-          U: r.U.valueOf() as any[][],
-          T: r.T.valueOf() as any[][],
+          U: r.U.valueOf() as unknown[][],
+          T: r.T.valueOf() as unknown[][],
         };
       },
 
@@ -136,7 +132,7 @@ export const createSchur = /* #__PURE__ */ factory(
 
       // WASM fast path for square plain number matrices
       const wasm = wasmLoader.getModule();
-      const data = X._data as any[][];
+      const data = X._data as unknown[][];
       if (
         wasm &&
         X.storage() === 'dense' &&
@@ -145,7 +141,7 @@ export const createSchur = /* #__PURE__ */ factory(
         isPlainNumberMatrix(data)
       ) {
         try {
-          const flat = flattenToFloat64(data, n, n);
+          const flat = flattenToFloat64(data as number[][], n, n);
           const aAlloc = wasmLoader.allocateFloat64Array(flat);
           const qAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
           const tAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
