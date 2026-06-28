@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import Decimal from 'decimal.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 import type { Complex } from '../type/complex/Complex.js';
@@ -65,7 +66,7 @@ export const createAsec = /* #__PURE__ */ factory(
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return new BigNumber(1).div(x as any).acos() as unknown as BigNumber;
+        return new BigNumber(1).div(x as unknown as Decimal).acos() as unknown as BigNumber;
       },
     }) as TypedFunction;
   }

@@ -52,9 +52,7 @@ export const createCsc = /* #__PURE__ */ factory(
         number: cscNumber,
         Complex: (x: Complex) => x.csc(),
         BigNumber: (x: BigNumber): BigNumber =>
-          new BigNumber(1).div(
-            (x as unknown as { sin(): unknown }).sin() as any
-          ) as unknown as BigNumber,
+          new BigNumber(1).div(x.sin()) as unknown as BigNumber,
       },
       trigUnit
     ) as TypedFunction;

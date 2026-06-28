@@ -40,8 +40,8 @@ export const createAsinh = /* #__PURE__ */ factory(
         return x.asinh();
       },
 
-      BigNumber: function (x: BigNumber) {
-        return (x as any).asinh();
+      BigNumber: function (x: BigNumber): BigNumber {
+        return x.asinh() as unknown as BigNumber;
       },
     }) as TypedFunction;
   }

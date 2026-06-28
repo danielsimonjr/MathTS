@@ -200,7 +200,7 @@ export const createDerivative = /* #__PURE__ */ factory(
     derivative._simplify = true;
 
     derivative.toTex = function (deriv: { args: unknown[] }): string {
-      return _derivTex.apply(null, deriv.args);
+      return _derivTex(...deriv.args);
     };
 
     // FIXME: move the toTex method of derivative to latex.js. Difficulty is that it relies on parse.

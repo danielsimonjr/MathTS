@@ -7,18 +7,12 @@ import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Matrix } from '../types.js';
 
 // Type definitions for atan2
-interface BigNumberType {
-  // BigNumber instance
-}
-
 interface BigNumberConstructor {
-  atan2(y: BigNumberType, x: BigNumberType): BigNumberType;
-}
-
-interface Matrix {
-  // Matrix instance
+  atan2(y: BigNumber, x: BigNumber): BigNumber;
 }
 
 interface MatrixConstructor {
@@ -92,7 +86,7 @@ export const createAtan2 = /* #__PURE__ */ factory(
         // the atan only on base of the real part of the numbers and ignored
         // the imaginary.
 
-        'BigNumber, BigNumber': (y: BigNumberType, x: BigNumberType): BigNumberType =>
+        'BigNumber, BigNumber': (y: BigNumber, x: BigNumber): BigNumber =>
           BigNumber.atan2(y, x),
       },
       matrixAlgorithmSuite({

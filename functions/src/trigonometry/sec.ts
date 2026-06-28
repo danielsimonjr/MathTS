@@ -52,9 +52,7 @@ export const createSec = /* #__PURE__ */ factory(
         number: secNumber,
         Complex: (x: Complex) => x.sec(),
         BigNumber: (x: BigNumber): BigNumber =>
-          new BigNumber(1).div(
-            (x as unknown as { cos(): unknown }).cos() as any
-          ) as unknown as BigNumber,
+          new BigNumber(1).div(x.cos()) as unknown as BigNumber,
       },
       trigUnit
     ) as TypedFunction;
