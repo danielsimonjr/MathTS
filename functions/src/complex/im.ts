@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix } from '../types.js';
 
 // Type definitions for imaginary part operation
 interface BigNumberType {
@@ -56,7 +57,9 @@ export const createIm = /* #__PURE__ */ factory(name, dependencies, ({ typed }: 
       x.mul(0),
     Complex: (x: ComplexType): number => x.im,
     'Array | Matrix': typed.referToSelf(
-      (self: (value: any) => any) => (x: any) => deepMap(x, self)
+      (self: TypedFunction) =>
+        (x: unknown[] | Matrix): unknown[] | Matrix =>
+          deepMap(x as unknown[], self) as unknown[] | Matrix
     ),
   });
 });

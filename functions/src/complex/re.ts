@@ -1,16 +1,9 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix, BigNumber, Fraction } from '../types.js';
 
 // Type definitions for real part operation
-interface BigNumberType {
-  // BigNumber placeholder
-}
-
-interface FractionType {
-  // Fraction placeholder
-}
-
 interface ComplexType {
   re: number;
 }
@@ -51,12 +44,13 @@ export const createRe = /* #__PURE__ */ factory(name, dependencies, ({ typed }: 
    * @return {number | BigNumber | Array | Matrix} The real part of x
    */
   return typed(name, {
-    'number | BigNumber | Fraction': (
-      x: number | BigNumberType | FractionType
-    ): number | BigNumberType | FractionType => x,
+    'number | BigNumber | Fraction': (x: number | BigNumber | Fraction): number | BigNumber | Fraction =>
+      x,
     Complex: (x: ComplexType): number => x.re,
     'Array | Matrix': typed.referToSelf(
-      (self: (value: any) => any) => (x: any) => deepMap(x, self)
+      (self: TypedFunction) =>
+        (x: unknown[] | Matrix): unknown[] | Matrix =>
+          deepMap(x as unknown[], self) as unknown[] | Matrix
     ),
   });
 });

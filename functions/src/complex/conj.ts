@@ -1,15 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Type definitions for complex conjugate operation
-interface BigNumberType {
-  // BigNumber placeholder
-}
-
-interface FractionType {
-  // Fraction placeholder
-}
+import type { Matrix, BigNumber, Fraction, Unit } from '../types.js';
 
 interface ComplexType {
   conjugate(): ComplexType;
@@ -52,17 +44,21 @@ export const createConj = /* #__PURE__ */ factory(
      *            The complex conjugate of x
      */
     return typed(name, {
-      'number | BigNumber | Fraction': (
-        x: number | BigNumberType | FractionType
-      ): number | BigNumberType | FractionType => x,
+      'number | BigNumber | Fraction': (x: number | BigNumber | Fraction): number | BigNumber | Fraction =>
+        x,
       Complex: (x: ComplexType): ComplexType => x.conjugate(),
       Unit: typed.referToSelf(
-        (self: any) =>
-          (x: any): any =>
-            new x.constructor(self(x.toNumeric()), x.formatUnits())
+        (self: TypedFunction) =>
+          (x: Unit): Unit => {
+            const ctor = (x as unknown as { constructor: new (value: unknown, units: unknown) => Unit })
+              .constructor;
+            return new ctor(self(x.toNumeric()), x.formatUnits());
+          }
       ),
       'Array | Matrix': typed.referToSelf(
-        (self: (value: any) => any) => (x: any) => deepMap(x, self)
+        (self: TypedFunction) =>
+          (x: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(x as unknown[], self) as unknown[] | Matrix
       ),
     });
   }

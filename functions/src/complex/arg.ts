@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix } from '../types.js';
 
 // Type definitions for complex arg operation
 interface BigNumberType {
@@ -67,7 +68,9 @@ export const createArg = /* #__PURE__ */ factory(
       // TODO: implement BigNumber support for function arg
 
       'Array | Matrix': typed.referToSelf(
-        (self: (value: any) => any) => (x: any) => deepMap(x, self)
+        (self: TypedFunction) =>
+          (x: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(x as unknown[], self) as unknown[] | Matrix
       ),
     });
   }
