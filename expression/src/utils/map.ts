@@ -9,13 +9,13 @@ import { isMap, isObject } from './is.js';
  * will stop using this method, as all objects will be Maps, rather than
  * more security prone objects.
  */
-export class ObjectWrappingMap<K = string, V = any> implements Map<K, V> {
+export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
   wrappedObject: Record<string, V>;
   readonly [Symbol.toStringTag]: string = 'ObjectWrappingMap';
 
   constructor(object: Record<string, V>) {
     this.wrappedObject = object;
-    (this as any)[Symbol.iterator] = this.entries;
+    (this as unknown as { [Symbol.iterator]: unknown })[Symbol.iterator] = this.entries;
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
@@ -54,7 +54,7 @@ export class ObjectWrappingMap<K = string, V = any> implements Map<K, V> {
 
   forEach(callback: (value: V, key: K, map: Map<K, V>) => void): void {
     for (const key of this.keys()) {
-      callback(this.get(key)!, key, this as any);
+      callback(this.get(key)!, key, this as unknown as Map<K, V>);
     }
   }
 
@@ -91,7 +91,7 @@ export class ObjectWrappingMap<K = string, V = any> implements Map<K, V> {
  * In this case, values `x` and `y` are read/written to map `b`,
  * all other values are read/written to map `a`.
  */
-export class PartitionedMap<K = any, V = any> implements Map<K, V> {
+export class PartitionedMap<K = unknown, V = unknown> implements Map<K, V> {
   a: Map<K, V>;
   b: Map<K, V>;
   bKeys: Set<K>;
@@ -106,7 +106,7 @@ export class PartitionedMap<K = any, V = any> implements Map<K, V> {
     this.a = a;
     this.b = b;
     this.bKeys = bKeys;
-    (this as any)[Symbol.iterator] = this.entries;
+    (this as unknown as { [Symbol.iterator]: unknown })[Symbol.iterator] = this.entries;
   }
 
   get(key: K): V | undefined {
@@ -145,7 +145,7 @@ export class PartitionedMap<K = any, V = any> implements Map<K, V> {
 
   forEach(callback: (value: V, key: K, map: Map<K, V>) => void): void {
     for (const key of this.keys()) {
-      callback(this.get(key)!, key, this as any);
+      callback(this.get(key)!, key, this as unknown as Map<K, V>);
     }
   }
 
@@ -185,7 +185,7 @@ function mapIterator<T, U>(it: Iterator<T>, callback: (value: T) => U): Iterator
  *
  * @returns an empty Map or Map like object.
  */
-export function createEmptyMap<K = any, V = any>(): Map<K, V> {
+export function createEmptyMap<K = string, V = unknown>(): Map<K, V> {
   return new Map<K, V>();
 }
 
@@ -195,7 +195,7 @@ export function createEmptyMap<K = any, V = any>(): Map<K, V> {
  * @param mapOrObject - Map or object to convert
  * @returns Map instance
  */
-export function createMap<K = any, V = any>(
+export function createMap<K = string, V = unknown>(
   mapOrObject?: Map<K, V> | Record<string, V> | null
 ): Map<K, V> {
   if (!mapOrObject) {
@@ -217,14 +217,14 @@ export function createMap<K = any, V = any>(
  * @param map - Map to convert to object
  * @returns Plain object
  */
-export function toObject<V = any>(map: Map<any, V>): Record<string, V> {
+export function toObject<V = unknown>(map: Map<unknown, V>): Record<string, V> {
   if (map instanceof ObjectWrappingMap) {
     return map.wrappedObject;
   }
   const object: Record<string, V> = {};
   for (const key of map.keys()) {
     const value = map.get(key)!;
-    setSafeProperty(object, key, value);
+    setSafeProperty(object, key as string, value);
   }
   return object;
 }
@@ -236,7 +236,7 @@ export function toObject<V = any>(map: Map<any, V>): Record<string, V> {
  *
  * This is the `Map` analog to `Object.assign`.
  */
-export function assign<K = any, V = any>(
+export function assign<K = unknown, V = unknown>(
   map: Map<K, V>,
   ...objects: (Map<K, V> | Record<string, V> | null | undefined)[]
 ): Map<K, V> {

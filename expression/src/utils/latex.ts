@@ -3,6 +3,7 @@
 // @ts-expect-error - escape-latex may not have type declarations
 import escapeLatexLib from 'escape-latex';
 import { hasOwnProperty } from './object.js';
+import type { MathNode } from '../node/Node.js';
 
 export const latexSymbols = {
   // GREEK LETTERS
@@ -150,14 +151,14 @@ export const latexFunctions = {
   },
   norm: {
     1: '\\left\\|${args[0]}\\right\\|',
-    2: undefined as any, // use default template
+    2: undefined as string | undefined, // use default template
   },
   nthRoot: { 2: '\\sqrt[${args[1]}]{${args[0]}}' },
   nthRoots: { 2: '\\{y : y^${args[1]} = {${args[0]}}\\}' },
   pow: { 2: `\\left(\${args[0]}\\right)${latexOperators.pow}{\${args[1]}}` },
   round: {
     1: '\\left\\lfloor${args[0]}\\right\\rceil',
-    2: undefined as any, // use default template
+    2: undefined as string | undefined, // use default template
   },
   sign: { 1: '\\mathrm{${name}}\\left(${args[0]}\\right)' },
   sqrt: { 1: '\\sqrt{${args[0]}}' },
@@ -282,9 +283,9 @@ export const latexFunctions = {
   to: { 2: `\\left(\${args[0]}${latexOperators.to}\${args[1]}\\right)` },
 
   // utils
-  numeric: function (node: any, _options: any) {
+  numeric: function (node: MathNode, _options?: unknown) {
     // Not sure if this is strictly right but should work correctly for the vast majority of use cases.
-    return node.args[0].toTex();
+    return (node as unknown as { args: { toTex: () => string }[] }).args[0].toTex();
   },
 
   // type
@@ -331,13 +332,13 @@ const latexUnits = {
   deg: '^\\circ',
 };
 
-export function escapeLatex(string: any) {
+export function escapeLatex(string: string) {
   return escapeLatexLib(string, { preserveFormatting: true });
 }
 
 // @param {string} name
 // @param {boolean} isUnit
-export function toSymbol(name: any, isUnit: any) {
+export function toSymbol(name: string, isUnit?: unknown) {
   isUnit = typeof isUnit === 'undefined' ? false : isUnit;
   if (isUnit) {
     if (hasOwnProperty(latexUnits, name)) {

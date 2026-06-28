@@ -245,7 +245,7 @@ export function isMatrix(x: unknown): x is Matrix {
  * @param {*} x
  * @returns {boolean} isCollection
  */
-export function isCollection(x: unknown): x is any[] | Matrix {
+export function isCollection(x: unknown): x is unknown[] | Matrix {
   return Array.isArray(x) || isMatrix(x);
 }
 
@@ -427,7 +427,7 @@ export function isConstantNode(x: unknown): x is ConstantNode {
    Its name does not start with 'is' to prevent utils/snapshot.js from thinking
    it should be exported.
 */
-export function rule2Node(node: Node): boolean {
+export function rule2Node(node: unknown): boolean {
   return (
     isConstantNode(node) ||
     (isOperatorNode(node) &&

@@ -4,8 +4,8 @@ import { MathjsError } from '../error/MathjsError.js';
 /**
  * Type for a factory function that creates instances
  */
-export interface FactoryFunction<_TDeps = any, TResult = any> {
-  (scope: Record<string, any>): TResult;
+export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
+  (scope: Record<string, unknown>): TResult;
   isFactory: true;
   fn: string;
   dependencies: string[];
@@ -18,7 +18,7 @@ export interface FactoryFunction<_TDeps = any, TResult = any> {
 export interface LegacyFactory {
   type?: string;
   name: string;
-  factory: (...args: any[]) => any;
+  factory: (...args: unknown[]) => unknown;
   math?: boolean;
   dependencies?: string[];
   meta?: FactoryMeta;
@@ -39,7 +39,7 @@ export interface FactoryMeta {
   /**
    * Additional custom metadata
    */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -50,7 +50,7 @@ export type DependencyName = string;
 /**
  * Type for the create callback function
  */
-export type CreateFunction<TDeps extends Record<string, any>, TResult> = (
+export type CreateFunction<TDeps extends object, TResult> = (
   dependencies: TDeps
 ) => TResult;
 
@@ -80,13 +80,16 @@ export type CreateFunction<TDeps extends Record<string, any>, TResult> = (
  *                       docs/core/extension.md.
  * @returns The factory function
  */
-export function factory<TDeps extends Record<string, any> = any, TResult = any>(
+export function factory<
+  TDeps extends object = Record<string, (...args: unknown[]) => unknown>,
+  TResult = unknown,
+>(
   name: string,
   dependencies: DependencyName[],
   create: CreateFunction<TDeps, TResult>,
   meta?: FactoryMeta
 ): FactoryFunction<TDeps, TResult> {
-  function assertAndCreate(scope: Record<string, any>): TResult {
+  function assertAndCreate(scope: Record<string, unknown>): TResult {
     // we only pass the requested dependencies to the factory function
     // to prevent functions to rely on dependencies that are not explicitly
     // requested.
@@ -202,8 +205,8 @@ export function sortFactories(
 // TODO: comment or cleanup if unused in the end
 export function create(
   factories: Array<FactoryFunction | LegacyFactory>,
-  scope: Record<string, any> = {}
-): Record<string, any> {
+  scope: Record<string, unknown> = {}
+): Record<string, unknown> {
   sortFactories(factories).forEach((factory) => {
     if (isFactory(factory)) {
       factory(scope);
@@ -219,8 +222,12 @@ export function create(
  * @param obj Any value to test
  * @returns true if obj is a factory function
  */
-export function isFactory(obj: any): obj is FactoryFunction {
-  return typeof obj === 'function' && typeof obj.fn === 'string' && Array.isArray(obj.dependencies);
+export function isFactory(obj: unknown): obj is FactoryFunction {
+  return (
+    typeof obj === 'function' &&
+    typeof (obj as { fn?: unknown }).fn === 'string' &&
+    Array.isArray((obj as { dependencies?: unknown }).dependencies)
+  );
 }
 
 /**
@@ -236,7 +243,7 @@ export function isFactory(obj: any): obj is FactoryFunction {
 export function assertDependencies(
   name: string,
   dependencies: DependencyName[],
-  scope: Record<string, any>
+  scope: Record<string, unknown>
 ): void {
   const allDefined = dependencies
     .filter((dependency) => !isOptionalDependency(dependency)) // filter optionals

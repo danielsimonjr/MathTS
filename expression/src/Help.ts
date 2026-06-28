@@ -14,7 +14,16 @@ interface HelpDoc {
   examples?: string[];
   mayThrow?: string[];
   seealso?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+interface HelpInstance {
+  doc: HelpDoc;
+  type: string;
+  isHelp: boolean;
+  toString(): string;
+  toJSON(): Record<string, unknown>;
+  valueOf(): string;
 }
 
 export const createHelpClass = /* #__PURE__ */ factory(
@@ -53,7 +62,7 @@ export const createHelpClass = /* #__PURE__ */ factory(
      * @return {string} Returns a string
      * @private
      */
-    Help.prototype.toString = function (this: any): string {
+    Help.prototype.toString = function (this: { doc?: HelpDoc }): string {
       const doc: HelpDoc = this.doc || {};
       let desc = '\n';
 
@@ -77,8 +86,8 @@ export const createHelpClass = /* #__PURE__ */ factory(
         let configChanged = false;
         const originalConfig = evaluate('config()');
 
-        const scope: Record<string, any> = {
-          config: (newConfig: any) => {
+        const scope: Record<string, unknown> = {
+          config: (newConfig: unknown) => {
             configChanged = true;
             return evaluate('config(newConfig)', { newConfig });
           },
@@ -88,7 +97,7 @@ export const createHelpClass = /* #__PURE__ */ factory(
           const expr = doc.examples[i];
           desc += '    ' + expr + '\n';
 
-          let res: any;
+          let res: unknown;
           try {
             // note: res can be undefined when `expr` is an empty string
             res = evaluate(expr, scope);
@@ -118,7 +127,7 @@ export const createHelpClass = /* #__PURE__ */ factory(
     /**
      * Export the help object to JSON
      */
-    Help.prototype.toJSON = function (this: any): Record<string, any> {
+    Help.prototype.toJSON = function (this: { doc: HelpDoc }): Record<string, unknown> {
       const obj = clone(this.doc);
       obj.mathjs = 'Help';
       return obj;
@@ -129,7 +138,7 @@ export const createHelpClass = /* #__PURE__ */ factory(
      * @param {Object} json
      * @returns {Help} Returns a new Help object
      */
-    Help.fromJSON = function (json: Record<string, any>): any {
+    Help.fromJSON = function (json: Record<string, unknown>): HelpInstance {
       const doc: HelpDoc = {};
 
       Object.keys(json)
@@ -138,7 +147,7 @@ export const createHelpClass = /* #__PURE__ */ factory(
           doc[prop] = json[prop];
         });
 
-      return new (Help as any)(doc);
+      return new (Help as unknown as new (doc: HelpDoc) => HelpInstance)(doc);
     };
 
     /**

@@ -7,7 +7,7 @@ import { format as formatBigNumber } from './bignumber/formatter.js';
  * @param {string} text
  * @param {string} search
  */
-export function endsWith(text: any, search: any) {
+export function endsWith(text: string, search: string) {
   const start = text.length - search.length;
   const end = text.length;
   return text.substring(start, end) === search;
@@ -51,41 +51,45 @@ export function endsWith(text: any, search: any) {
  *     have been more, they are deleted and replaced by an ellipsis).
  * @return {string} str
  */
-export function format(value: any, options: any): string {
+export function format(value: unknown, options: unknown): string {
   const result: string = _format(value, options);
   if (
     options &&
     typeof options === 'object' &&
     'truncate' in options &&
-    result.length > options.truncate
+    result.length > (options as { truncate: number }).truncate
   ) {
-    return result.substring(0, options.truncate - 3) + '...';
+    return result.substring(0, (options as { truncate: number }).truncate - 3) + '...';
   }
   return result;
 }
 
-function _format(value: any, options: any): string {
+function _format(value: unknown, options: unknown): string {
   if (typeof value === 'number') {
-    return formatNumber(value, options);
+    return formatNumber(value, options as Parameters<typeof formatNumber>[1]);
   }
 
   if (isBigNumber(value)) {
-    return formatBigNumber(value, options);
+    return formatBigNumber(
+      value as unknown as Parameters<typeof formatBigNumber>[0],
+      options as Parameters<typeof formatBigNumber>[1]
+    );
   }
 
   // note: we use unsafe duck-typing here to check for Fractions, this is
   // ok here since we're only invoking toString or concatenating its values
   if (looksLikeFraction(value)) {
-    if (!options || options.fraction !== 'decimal') {
+    const v = value as { n: bigint; s: bigint; d: bigint; toString: (o?: unknown) => string };
+    const opts = options as { fraction?: string } | null | undefined;
+    if (!opts || opts.fraction !== 'decimal') {
       // output as ratio, like '1/3'
       // Convert sign to BigInt to avoid "Cannot mix BigInt and other types" error
       // when n is a BigInt (as in local Fraction implementation)
-      const signedNumerator =
-        typeof value.n === 'bigint' ? BigInt(value.s) * value.n : value.s * value.n;
-      return `${signedNumerator}/${value.d}`;
+      const signedNumerator = typeof v.n === 'bigint' ? BigInt(v.s) * v.n : v.s * v.n;
+      return `${signedNumerator}/${v.d}`;
     } else {
       // output as decimal, like '0.(3)'
-      return value.toString();
+      return v.toString();
     }
   }
 
@@ -98,18 +102,23 @@ function _format(value: any, options: any): string {
   }
 
   if (typeof value === 'function') {
-    return value.syntax ? String(value.syntax) : 'function';
+    const fn = value as { syntax?: unknown };
+    return fn.syntax ? String(fn.syntax) : 'function';
   }
 
   if (value && typeof value === 'object') {
-    if (typeof value.format === 'function') {
-      return value.format(options);
-    } else if (value && value.toString(options) !== {}.toString()) {
+    const v = value as {
+      format?: (o: unknown) => string;
+      toString: (o?: unknown) => string;
+    };
+    if (typeof v.format === 'function') {
+      return v.format(options);
+    } else if (value && v.toString(options) !== {}.toString()) {
       // this object has a non-native toString method, use that one
-      return value.toString(options);
+      return v.toString(options);
     } else {
       const entries = Object.keys(value).map((key) => {
-        return stringify(key) + ': ' + format(value[key], options);
+        return stringify(key) + ': ' + format((value as Record<string, unknown>)[key], options);
       });
 
       return '{' + entries.join(', ') + '}';
@@ -125,7 +134,7 @@ function _format(value: any, options: any): string {
  * @param {*} value
  * @return {string}
  */
-export function stringify(value: any) {
+export function stringify(value: unknown) {
   const text = String(value);
   let escaped = '';
   let i = 0;
@@ -153,7 +162,7 @@ const controlCharacters = {
  * @param {*} value
  * @return {string}
  */
-export function escape(value: any) {
+export function escape(value: unknown) {
   let text = String(value);
   text = text
     .replace(/&/g, '&amp;')
@@ -175,7 +184,7 @@ export function escape(value: any) {
  *                                                options.
  * @returns {string} str
  */
-function formatArray(array: any, options: any) {
+function formatArray(array: unknown, options: unknown): string {
   if (Array.isArray(array)) {
     let str = '[';
     const len = array.length;
@@ -197,13 +206,13 @@ function formatArray(array: any, options: any) {
  * @param {*} value
  * @return {boolean}
  */
-function looksLikeFraction(value: any) {
+function looksLikeFraction(value: unknown): boolean {
   return (
-    (value &&
+    (!!value &&
       typeof value === 'object' &&
-      typeof value.s === 'bigint' &&
-      typeof value.n === 'bigint' &&
-      typeof value.d === 'bigint') ||
+      typeof (value as { s?: unknown }).s === 'bigint' &&
+      typeof (value as { n?: unknown }).n === 'bigint' &&
+      typeof (value as { d?: unknown }).d === 'bigint') ||
     false
   );
 }
@@ -214,7 +223,7 @@ function looksLikeFraction(value: any) {
  * @param {string} y
  * @returns {number}
  */
-export function compareText(x: any, y: any) {
+export function compareText(x: unknown, y: unknown) {
   // we don't want to convert numbers to string, only accept string input
   if (!isString(x)) {
     throw new TypeError(

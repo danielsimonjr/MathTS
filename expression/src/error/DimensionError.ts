@@ -48,8 +48,11 @@ export class DimensionError extends RangeError {
     }
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if ((Error as any).captureStackTrace) {
-      (Error as any).captureStackTrace(this, DimensionError);
+    const { captureStackTrace } = Error as unknown as {
+      captureStackTrace?: (targetObject: object, constructorOpt?: object) => void;
+    };
+    if (captureStackTrace) {
+      captureStackTrace(this, DimensionError);
     }
   }
 }

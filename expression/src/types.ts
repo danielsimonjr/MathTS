@@ -2,13 +2,13 @@
 // Re-export from internal types
 
 // Typed function type - a callable with signatures metadata
-export type TypedFunction = ((...args: any[]) => any) & {
-  signatures: Record<string, (...args: any[]) => any>;
+export type TypedFunction = ((...args: unknown[]) => unknown) & {
+  signatures: Record<string, (...args: unknown[]) => unknown>;
 };
 
 // TypedFunctionConstructor can be defined inline if needed
 export type TypedFunctionConstructor = {
-  (...args: any[]): any;
+  (...args: unknown[]): unknown;
   create: () => TypedFunctionConstructor;
   isTypedFunction: (fn: unknown) => boolean;
 };

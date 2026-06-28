@@ -1,5 +1,45 @@
 import { isBigNumber, isNumber } from '../is.js';
-import { isInteger, normalizeFormatOptions } from '../number.js';
+import { isInteger, normalizeFormatOptions, type FormatOptions } from '../number.js';
+
+/**
+ * Constructor of a Decimal-like BigNumber value. Only the `new (value)` shape
+ * actually used here is modelled.
+ */
+interface DecimalConstructor {
+  new (value: number | string): DecimalLike;
+}
+
+/**
+ * Structural type describing the Decimal/BigNumber instances flowing through the
+ * formatter. Only the members actually used in this file are declared.
+ */
+interface DecimalLike {
+  /** Decimal exponent. */
+  readonly e: number;
+  readonly constructor: DecimalConstructor;
+  isFinite(): boolean;
+  isNaN(): boolean;
+  isZero(): boolean;
+  isInteger(): boolean;
+  gt(n: number | DecimalLike): boolean;
+  greaterThan(n: number | DecimalLike): boolean;
+  lessThan(n: number | DecimalLike): boolean;
+  add(n: number | DecimalLike): DecimalLike;
+  sub(n: number | DecimalLike): DecimalLike;
+  mul(n: number | DecimalLike): DecimalLike;
+  pow(n: number | DecimalLike): DecimalLike;
+  toSignificantDigits(precision?: number): DecimalLike;
+  toFixed(precision?: number): string;
+  toExponential(precision?: number): string;
+  toPrecision(precision?: number): string;
+  toBinary(): string;
+  toOctal(): string;
+  toHexadecimal(): string;
+  toNumber(): number;
+}
+
+/** A custom formatting function: `format(value, fn)`. */
+type FormatFn = (value: DecimalLike) => string;
 
 /**
  * Formats a BigNumber in a given base
@@ -8,7 +48,7 @@ import { isInteger, normalizeFormatOptions } from '../number.js';
  * @param {number} size
  * @returns {string}
  */
-function formatBigNumberToBase(n: any, base: any, size: any) {
+function formatBigNumberToBase(n: DecimalLike, base: number, size?: number) {
   const BigNumberCtor = n.constructor;
   const big2 = new BigNumberCtor(2);
   let suffix = '';
@@ -123,7 +163,10 @@ function formatBigNumberToBase(n: any, base: any, size: any) {
  * @param {Object | Function | number | BigNumber} [options]
  * @return {string} str The formatted value
  */
-export function format(value: any, options: any) {
+export function format(
+  value: DecimalLike,
+  options?: FormatOptions | number | FormatFn
+): string {
   if (typeof options === 'function') {
     // handle format(value, fn)
     return options(value);
@@ -159,8 +202,9 @@ export function format(value: any, options: any) {
     case 'auto': {
       // determine lower and upper bound for exponential notation.
       // TODO: implement support for upper and lower to be BigNumbers themselves
-      const lowerExp = _toNumberOrDefault(options?.lowerExp, -3);
-      const upperExp = _toNumberOrDefault(options?.upperExp, 5);
+      const optionsObject = typeof options === 'object' ? options : undefined;
+      const lowerExp = _toNumberOrDefault(optionsObject?.lowerExp, -3);
+      const upperExp = _toNumberOrDefault(optionsObject?.upperExp, 5);
 
       // handle special case zero
       if (value.isZero()) return '0';
@@ -200,7 +244,7 @@ export function format(value: any, options: any) {
  * @param {BigNumber} value
  * @param {number} [precision]        Optional number of significant figures to return.
  */
-export function toEngineering(value: any, precision: any) {
+export function toEngineering(value: DecimalLike, precision?: number) {
   // find nearest lower multiple of 3 for exponent
   const e = value.e;
   const newExp = e % 3 === 0 ? e : e < 0 ? e - 3 - (e % 3) : e - (e % 3);
@@ -225,7 +269,7 @@ export function toEngineering(value: any, precision: any) {
  *                              is used.
  * @returns {string} str
  */
-export function toExponential(value: any, precision: any) {
+export function toExponential(value: DecimalLike, precision?: number) {
   if (precision !== undefined) {
     return value.toExponential(precision - 1); // Note the offset of one
   } else {
@@ -239,15 +283,15 @@ export function toExponential(value: any, precision: any) {
  * @param {number} [precision=undefined] Optional number of decimals after the
  *                                       decimal point. Undefined by default.
  */
-export function toFixed(value: any, precision: any) {
+export function toFixed(value: DecimalLike, precision?: number) {
   return value.toFixed(precision);
 }
 
-function _toNumberOrDefault(value: any, defaultValue: any) {
+function _toNumberOrDefault(value: unknown, defaultValue: number): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as any).toNumber();
+    return (value as unknown as DecimalLike).toNumber();
   } else {
     return defaultValue;
   }

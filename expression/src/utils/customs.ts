@@ -8,17 +8,21 @@ import { hasOwnProperty } from './object.js';
  * @param {string} prop
  * @return {*} Returns the property value when safe
  */
-function getSafeProperty(object: any, prop: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic sandbox accessor. Out-of-scope, immutable consumers (compiler/, node/OperatorNode, node/RelationalNode) call the returned value directly as a function and read non-standard properties (e.g. `rawArgs`) without narrowing, so the honest dynamic return type is irreducibly `any` here. Internal logic and whitelist checks are unchanged.
+function getSafeProperty(object: unknown, prop: unknown): any {
   // only allow getting safe properties of a plain object
   if (isSafeProperty(object, prop)) {
-    return object[prop];
+    return (object as Record<string, unknown>)[prop as string];
   }
 
-  if (typeof object[prop] === 'function' && isSafeMethod(object, prop)) {
-    throw new Error('Cannot access method "' + prop + '" as a property');
+  if (
+    typeof (object as Record<string, unknown>)[prop as string] === 'function' &&
+    isSafeMethod(object, prop)
+  ) {
+    throw new Error('Cannot access method "' + String(prop) + '" as a property');
   }
 
-  throw new Error('No access to property "' + prop + '"');
+  throw new Error('No access to property "' + String(prop) + '"');
 }
 
 /**
@@ -31,14 +35,14 @@ function getSafeProperty(object: any, prop: any) {
  * @return {*} Returns the value
  */
 // TODO: merge this function into access.js?
-function setSafeProperty(object: any, prop: any, value: any) {
+function setSafeProperty(object: unknown, prop: unknown, value: unknown): unknown {
   // only allow setting safe properties of a plain object
   if (isSafeProperty(object, prop)) {
-    object[prop] = value;
+    (object as Record<string, unknown>)[prop as string] = value;
     return value;
   }
 
-  throw new Error('No access to property "' + prop + '"');
+  throw new Error('No access to property "' + String(prop) + '"');
 }
 
 /**
@@ -48,18 +52,18 @@ function setSafeProperty(object: any, prop: any, value: any) {
  * @param {string} prop
  * @return {boolean} Returns true when safe
  */
-function isSafeProperty(object: any, prop: any) {
+function isSafeProperty(object: unknown, prop: unknown): boolean {
   if (!isPlainObject(object) && !Array.isArray(object)) {
     return false;
   }
   // SAFE: whitelisted
   // e.g length
-  if (hasOwnProperty(safeNativeProperties, prop)) {
+  if (hasOwnProperty(safeNativeProperties, prop as string)) {
     return true;
   }
   // UNSAFE: inherited from Object prototype
   // e.g constructor
-  if (prop in Object.prototype) {
+  if ((prop as string) in Object.prototype) {
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Object.prototype is a root object
@@ -67,7 +71,7 @@ function isSafeProperty(object: any, prop: any) {
   }
   // UNSAFE: inherited from Function prototype
   // e.g call, apply
-  if (prop in Function.prototype) {
+  if ((prop as string) in Function.prototype) {
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Function.prototype is a root object
@@ -83,12 +87,13 @@ function isSafeProperty(object: any, prop: any) {
  * @param {string} method
  * @return {function} Returns the method when valid
  */
-function getSafeMethod(object: any, method: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic sandbox accessor. Out-of-scope, immutable consumers (compiler/, node/FunctionNode) invoke the returned method directly and read non-standard properties (e.g. `rawArgs`) without narrowing, so the honest dynamic return type is irreducibly `any` here. Internal logic and whitelist checks are unchanged.
+function getSafeMethod(object: unknown, method: unknown): any {
   if (!isSafeMethod(object, method)) {
-    throw new Error('No access to method "' + method + '"');
+    throw new Error('No access to method "' + String(method) + '"');
   }
 
-  return object[method];
+  return (object as Record<string, unknown>)[method as string];
 }
 
 /**
@@ -98,28 +103,32 @@ function getSafeMethod(object: any, method: any) {
  * @param {string} method
  * @return {boolean} Returns true when safe, false otherwise
  */
-function isSafeMethod(object: any, method: any) {
-  if (object === null || object === undefined || typeof object[method] !== 'function') {
+function isSafeMethod(object: unknown, method: unknown): boolean {
+  if (
+    object === null ||
+    object === undefined ||
+    typeof (object as Record<string, unknown>)[method as string] !== 'function'
+  ) {
     return false;
   }
   // UNSAFE: ghosted
   // e.g overridden toString
   // Note that IE10 doesn't support __proto__ and we can't do this check there.
   if (
-    hasOwnProperty(object, method) &&
+    hasOwnProperty(object, method as string) &&
     Object.getPrototypeOf &&
-    method in Object.getPrototypeOf(object)
+    (method as string) in Object.getPrototypeOf(object)
   ) {
     return false;
   }
   // SAFE: whitelisted
   // e.g toString
-  if (hasOwnProperty(safeNativeMethods, method)) {
+  if (hasOwnProperty(safeNativeMethods, method as string)) {
     return true;
   }
   // UNSAFE: inherited from Object prototype
   // e.g constructor
-  if (method in Object.prototype) {
+  if ((method as string) in Object.prototype) {
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Object.prototype is a root object
@@ -127,7 +136,7 @@ function isSafeMethod(object: any, method: any) {
   }
   // UNSAFE: inherited from Function prototype
   // e.g call, apply
-  if (method in Function.prototype) {
+  if ((method as string) in Function.prototype) {
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Function.prototype is a root object
@@ -136,8 +145,12 @@ function isSafeMethod(object: any, method: any) {
   return true;
 }
 
-function isPlainObject(object: any) {
-  return typeof object === 'object' && object && object.constructor === Object;
+function isPlainObject(object: unknown): boolean {
+  return (
+    typeof object === 'object' &&
+    !!object &&
+    (object as { constructor?: unknown }).constructor === Object
+  );
 }
 
 const safeNativeProperties = {

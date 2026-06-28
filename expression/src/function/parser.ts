@@ -6,7 +6,13 @@ const dependencies = ['typed', 'Parser'];
 export const createParser = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, Parser }: { typed: any; Parser: any }) => {
+  ({
+    typed,
+    Parser,
+  }: {
+    typed: (name: string, signatures: Record<string, unknown>) => (...args: unknown[]) => unknown;
+    Parser: new () => unknown;
+  }) => {
     /**
      * Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of expressions in that context.
      *
@@ -51,7 +57,7 @@ export const createParser = /* #__PURE__ */ factory(
      * @return {Parser} Parser
      */
     return typed(name, {
-      '': function (): any {
+      '': function (): unknown {
         return new Parser();
       },
     });

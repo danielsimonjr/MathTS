@@ -1,12 +1,29 @@
 import { deepMap } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
-type MathArray = any[] | number[][];
-type Matrix = any;
+import type { Matrix } from '../utils/is.js';
+
+type MathArray = unknown[] | number[][];
+
+interface CompiledNode {
+  evaluate(scope?: Map<string, unknown> | Record<string, unknown>): unknown;
+}
+
+interface ParseResult {
+  compile(): CompiledNode;
+}
+
+interface CompileDependencies {
+  typed: (name: string, signatures: Record<string, unknown>) => (...args: unknown[]) => unknown;
+  parse: (expr: string) => ParseResult;
+}
 
 const name = 'compile';
 const dependencies = ['typed', 'parse'];
 
-export const createCompile = /* #__PURE__ */ factory(name, dependencies, ({ typed, parse }) => {
+export const createCompile = /* #__PURE__ */ factory<
+  CompileDependencies,
+  (...args: unknown[]) => unknown
+>(name, dependencies, ({ typed, parse }) => {
   /**
    * Parse and compile an expression.
    * Returns a an object with a function `evaluate([scope])` to evaluate the
@@ -47,8 +64,8 @@ export const createCompile = /* #__PURE__ */ factory(name, dependencies, ({ type
     },
 
     'Array | Matrix': function (expr: MathArray | Matrix) {
-      return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile();
+      return deepMap(expr as unknown[], function (entry: unknown) {
+        return parse(entry as string).compile();
       });
     },
   });

@@ -1,13 +1,30 @@
 import { deepMap } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
 import { createEmptyMap } from '../utils/map.js';
-type MathArray = any[] | number[][];
-type Matrix = any;
+import type { Matrix } from '../utils/is.js';
+
+type MathArray = unknown[] | number[][];
+
+interface CompiledNode {
+  evaluate(scope?: Map<string, unknown> | Record<string, unknown>): unknown;
+}
+
+interface ParseResult {
+  compile(): CompiledNode;
+}
+
+interface EvaluateDependencies {
+  typed: (name: string, signatures: Record<string, unknown>) => (...args: unknown[]) => unknown;
+  parse: (expr: string) => ParseResult;
+}
 
 const name = 'evaluate';
 const dependencies = ['typed', 'parse'];
 
-export const createEvaluate = /* #__PURE__ */ factory(name, dependencies, ({ typed, parse }) => {
+export const createEvaluate = /* #__PURE__ */ factory<
+  EvaluateDependencies,
+  (...args: unknown[]) => unknown
+>(name, dependencies, ({ typed, parse }) => {
   /**
    * Evaluate an expression.
    *
@@ -51,23 +68,30 @@ export const createEvaluate = /* #__PURE__ */ factory(name, dependencies, ({ typ
       return parse(expr).compile().evaluate(scope);
     },
 
-    'string, Map | Object': function (expr: string, scope: Map<string, any> | Record<string, any>) {
+    'string, Map | Object': function (
+      expr: string,
+      scope: Map<string, unknown> | Record<string, unknown>
+    ) {
       return parse(expr).compile().evaluate(scope);
     },
 
     'Array | Matrix': function (expr: MathArray | Matrix) {
       const scope = createEmptyMap();
-      return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile().evaluate(scope);
+      return deepMap(expr as unknown[], function (entry: unknown) {
+        return parse(entry as string)
+          .compile()
+          .evaluate(scope);
       });
     },
 
     'Array | Matrix, Map | Object': function (
       expr: MathArray | Matrix,
-      scope: Map<string, any> | Record<string, any>
+      scope: Map<string, unknown> | Record<string, unknown>
     ) {
-      return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile().evaluate(scope);
+      return deepMap(expr as unknown[], function (entry: unknown) {
+        return parse(entry as string)
+          .compile()
+          .evaluate(scope);
       });
     },
   });

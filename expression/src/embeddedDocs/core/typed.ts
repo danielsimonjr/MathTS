@@ -8,5 +8,5 @@ export const typedDocs = {
     'double(2)',
     'double("hello")',
   ],
-  seealso: [] as any[],
+  seealso: [] as string[],
 };

@@ -14,9 +14,9 @@ export const createHelp = /* #__PURE__ */ factory(
     mathWithTransform,
     Help,
   }: {
-    typed: any;
-    mathWithTransform: Record<string, any>;
-    Help: any;
+    typed: (name: string, signatures: Record<string, unknown>) => (...args: unknown[]) => unknown;
+    mathWithTransform: Record<string, unknown>;
+    Help: new (doc: unknown) => unknown;
   }) => {
     /**
      * Retrieve help on a function or data type.
@@ -37,9 +37,9 @@ export const createHelp = /* #__PURE__ */ factory(
      * @return {Help} A help object
      */
     return typed(name, {
-      any: function (search: any): any {
+      any: function (search: unknown): unknown {
         let prop: string;
-        let searchName: any = search;
+        let searchName: unknown = search;
 
         if (typeof search !== 'string') {
           for (prop in mathWithTransform) {
@@ -65,9 +65,10 @@ export const createHelp = /* #__PURE__ */ factory(
          */
         }
 
-        const doc = getSafeProperty(embeddedDocs, searchName);
+        const doc = getSafeProperty(embeddedDocs, searchName as string);
         if (!doc) {
-          const searchText = typeof searchName === 'function' ? searchName.name : searchName;
+          const searchText =
+            typeof searchName === 'function' ? searchName.name : (searchName as string);
           throw new Error('No documentation found on "' + searchText + '"');
         }
         return new Help(doc);

@@ -13,7 +13,7 @@ import { ObjectWrappingMap, PartitionedMap } from './map.js';
  * @param args - Arguments to add to the new scope
  * @returns PartitionedMap with parent and args
  */
-export function createSubScope<K = any, V = any>(
+export function createSubScope<K = unknown, V = unknown>(
   parentScope: Map<K, V>,
   args: Record<string, V>
 ): PartitionedMap<K, V> {
