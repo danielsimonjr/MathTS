@@ -8,8 +8,7 @@ import { hasOwnProperty } from './object.js';
  * @param {string} prop
  * @return {*} Returns the property value when safe
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic sandbox accessor. Out-of-scope, immutable consumers (compiler/, node/OperatorNode, node/RelationalNode) call the returned value directly as a function and read non-standard properties (e.g. `rawArgs`) without narrowing, so the honest dynamic return type is irreducibly `any` here. Internal logic and whitelist checks are unchanged.
-function getSafeProperty(object: unknown, prop: unknown): any {
+function getSafeProperty(object: unknown, prop: unknown): unknown {
   // only allow getting safe properties of a plain object
   if (isSafeProperty(object, prop)) {
     return (object as Record<string, unknown>)[prop as string];
@@ -87,8 +86,7 @@ function isSafeProperty(object: unknown, prop: unknown): boolean {
  * @param {string} method
  * @return {function} Returns the method when valid
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic sandbox accessor. Out-of-scope, immutable consumers (compiler/, node/FunctionNode) invoke the returned method directly and read non-standard properties (e.g. `rawArgs`) without narrowing, so the honest dynamic return type is irreducibly `any` here. Internal logic and whitelist checks are unchanged.
-function getSafeMethod(object: unknown, method: unknown): any {
+function getSafeMethod(object: unknown, method: unknown): unknown {
   if (!isSafeMethod(object, method)) {
     throw new Error('No access to method "' + String(method) + '"');
   }

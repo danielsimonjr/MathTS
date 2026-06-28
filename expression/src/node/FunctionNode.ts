@@ -215,7 +215,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           if (!argNames[name]) {
             // we can statically determine whether the function
             // has the rawArgs property
-            const fn = name in math ? getSafeProperty(math, name) : undefined;
+            const fn = name in math ? (getSafeProperty(math, name) as MathFunction) : undefined;
             const isRaw = typeof fn === 'function' && fn.rawArgs === true;
 
             const resolveFn = (scope: Map<string, unknown>): MathFunction | undefined => {
@@ -311,7 +311,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
               args: Record<string, unknown>,
               context: unknown
             ) {
-              const fn = getSafeProperty(args, name);
+              const fn = getSafeProperty(args, name) as MathFunction | undefined;
               if (fromOptionalChaining && fn === undefined) return undefined;
               if (typeof fn !== 'function') {
                 throw new TypeError(
@@ -355,7 +355,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
               return undefined;
             }
 
-            const fn = getSafeMethod(object, prop);
+            const fn = getSafeMethod(object, prop) as MathFunction;
 
             if (fn?.rawArgs) {
               // "Raw" evaluation

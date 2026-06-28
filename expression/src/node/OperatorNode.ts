@@ -410,7 +410,9 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           }
         }
 
-        const fn = getSafeProperty(math, this.fn);
+        const fn = getSafeProperty(math, this.fn) as ((...args: unknown[]) => unknown) & {
+          rawArgs?: boolean;
+        };
         const evalArgs = map(this.args, function (arg: Node): CompileFunction {
           return arg._compile(math, argNames);
         });

@@ -115,7 +115,9 @@ export const createRelationalNode = /* #__PURE__ */ factory(
           for (let i = 0; i < conditionals.length; i++) {
             evalLhs = evalRhs;
             evalRhs = compiled[i + 1](scope, args, context);
-            const condFn = getSafeProperty(math, conditionals[i]);
+            const condFn = getSafeProperty(math, conditionals[i]) as (
+              ...args: unknown[]
+            ) => unknown;
             if (!condFn(evalLhs, evalRhs)) {
               return false;
             }

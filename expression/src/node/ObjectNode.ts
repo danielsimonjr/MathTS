@@ -90,7 +90,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
             // so you cannot create a key like {"co\\u006Estructor": null}
             const stringifiedKey = stringify(key);
             const parsedKey = JSON.parse(stringifiedKey);
-            const prop = getSafeProperty(this.properties, key);
+            const prop = getSafeProperty(this.properties, key) as Node;
 
             evalEntries[parsedKey] = prop._compile(math, argNames);
           }

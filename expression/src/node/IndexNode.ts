@@ -141,7 +141,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
           }
         );
 
-        const index = getSafeProperty(math, 'index');
+        const index = getSafeProperty(math, 'index') as (...args: unknown[]) => unknown;
 
         return function evalIndexNode(
           scope: Map<string, unknown>,
