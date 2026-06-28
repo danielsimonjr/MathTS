@@ -315,9 +315,9 @@ describe('parse — unary, postfix, percentage', () => {
 
   it('parses x + y% as x + x * y (percentage inside add)', () => {
     // 100 + 10% → add(100, multiply(100, 10/100))
-    const n = parse('100 + 10%') as any;
+    const n = parse('100 + 10%');
     expect(n.fn).toBe('add');
-    expect(n.args[1].fn).toBe('multiply');
+    expect(n.args?.[1].fn).toBe('multiply');
   });
 
   it('parses binary modulo % when a term follows', () => {
@@ -374,10 +374,10 @@ describe('parse — conditional operator', () => {
   });
 
   it('parses nested (right-associative) conditionals', () => {
-    const n = parse('a ? b : c ? d : e') as any;
+    const n = parse('a ? b : c ? d : e');
     expect(n.isConditionalNode).toBe(true);
     // false-expr is itself a conditional
-    expect(n.falseExpr.isConditionalNode).toBe(true);
+    expect(n.falseExpr?.isConditionalNode).toBe(true);
   });
 
   it('throws when the false-part is missing', () => {
@@ -635,7 +635,7 @@ describe('parse — blocks & comments', () => {
   });
 
   it('attaches a comment to a node', () => {
-    const n = parse('2 # note') as any;
+    const n = parse('2 # note');
     expect(n.comment).toContain('note');
   });
 });
@@ -647,11 +647,11 @@ describe('parse — parentheses & constants', () => {
   });
 
   it('parses boolean/null constants and numeric constants', () => {
-    expect((parse('true') as any).value).toBe(true);
-    expect((parse('false') as any).value).toBe(false);
-    expect((parse('null') as any).value).toBe(null);
-    expect(Number.isNaN((parse('NaN') as any).value)).toBe(true);
-    expect((parse('Infinity') as any).value).toBe(Infinity);
+    expect(parse('true').value).toBe(true);
+    expect(parse('false').value).toBe(false);
+    expect(parse('null').value).toBe(null);
+    expect(Number.isNaN(parse('NaN').value as number)).toBe(true);
+    expect(parse('Infinity').value).toBe(Infinity);
   });
 
   it('throws Parenthesis ) expected on an unclosed paren', () => {
@@ -674,12 +674,12 @@ describe('parse — parentheses & constants', () => {
 
 describe('parse — custom node handlers', () => {
   it('invokes a custom node constructor with parsed params', () => {
-    const seen: any[] = [];
+    const seen: unknown[][] = [];
     class CustomNode {
-      params: any[];
+      params: unknown[];
       isNode = true;
       type = 'CustomNode';
-      constructor(params: any[]) {
+      constructor(params: unknown[]) {
         this.params = params;
         seen.push(params);
       }
@@ -687,7 +687,7 @@ describe('parse — custom node handlers', () => {
         return 'CUSTOM';
       }
     }
-    const node = parse('plot(1, 2)', { nodes: { plot: CustomNode } }) as any;
+    const node = parse('plot(1, 2)', { nodes: { plot: CustomNode } });
     expect(node).toBeInstanceOf(CustomNode);
     expect(node.params).toHaveLength(2);
     expect(seen).toHaveLength(1);
@@ -695,17 +695,17 @@ describe('parse — custom node handlers', () => {
 
   it('invokes a custom node constructor with no params', () => {
     class CustomNode {
-      params: any[];
+      params: unknown[];
       isNode = true;
       type = 'CustomNode';
-      constructor(params: any[]) {
+      constructor(params: unknown[]) {
         this.params = params;
       }
       toString() {
         return 'C';
       }
     }
-    const node = parse('thing', { nodes: { thing: CustomNode } }) as any;
+    const node = parse('thing', { nodes: { thing: CustomNode } });
     expect(node).toBeInstanceOf(CustomNode);
     expect(node.params).toEqual([]);
   });
@@ -714,7 +714,7 @@ describe('parse — custom node handlers', () => {
     class CustomNode {
       isNode = true;
       type = 'CustomNode';
-      constructor(public params: any[]) {}
+      constructor(public params: unknown[]) {}
       toString() {
         return 'C';
       }
@@ -727,7 +727,7 @@ describe('parse — custom node handlers', () => {
 
 describe('parse — array & matrix input forms', () => {
   it('parses an array of expression strings into an array of nodes', () => {
-    const nodes = parse(['1 + 1', '2 + 2', 'sqrt(9)']) as any[];
+    const nodes = parse(['1 + 1', '2 + 2', 'sqrt(9)']) as unknown as ParsedNode[];
     expect(Array.isArray(nodes)).toBe(true);
     expect(nodes).toHaveLength(3);
     expect(nodes[0].toString()).toBe('1 + 1');
@@ -736,12 +736,12 @@ describe('parse — array & matrix input forms', () => {
   });
 
   it('parses an array of expressions with an options object', () => {
-    const nodes = parse(['1 + 1'], { nodes: {} }) as any[];
+    const nodes = parse(['1 + 1'], { nodes: {} }) as unknown as ParsedNode[];
     expect(nodes[0].toString()).toBe('1 + 1');
   });
 
   it('throws when an array element is not a string', () => {
-    expect(() => parse([42 as any])).toThrow(/String expected/);
+    expect(() => parse([42 as unknown as string])).toThrow(/String expected/);
   });
 
   it('accepts the string + options overload', () => {

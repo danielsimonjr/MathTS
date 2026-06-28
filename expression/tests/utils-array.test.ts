@@ -584,7 +584,7 @@ describe('get', () => {
   });
 
   it('throws when not passed an array', () => {
-    expect(() => get(42 as any, [0])).toThrow('Array expected');
+    expect(() => get(42 as unknown as number[], [0])).toThrow('Array expected');
   });
 });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { BigNumber } from '@danielsimonjr/mathts-core';
 import { format, toEngineering, toExponential, toFixed } from '../src/utils/bignumber/formatter.js';
+import type { FormatOptions } from '../src/utils/number.js';
 
 /**
  * Helper that wraps BigNumber.fromNumber / BigNumber.parse so tests read like
@@ -106,6 +107,8 @@ describe('format (BigNumber formatter)', () => {
   });
 
   it('throws for unknown notation', () => {
-    expect(() => format(bn(1), { notation: 'unknown' as any })).toThrow('Unknown notation');
+    expect(() => format(bn(1), { notation: 'unknown' as FormatOptions['notation'] })).toThrow(
+      'Unknown notation'
+    );
   });
 });

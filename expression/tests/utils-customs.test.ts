@@ -145,7 +145,7 @@ describe('utils/customs - isSafeMethod', () => {
         return 'proto';
       }
     }
-    const f = new Foo() as any;
+    const f = new Foo();
     f.bar = () => 'ghost';
     expect(isSafeMethod(f, 'bar')).toBe(false);
   });

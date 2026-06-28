@@ -11,9 +11,9 @@ describe('containsCollections', () => {
 
   it('returns true when the array contains a Matrix-like object', () => {
     // isMatrix() checks obj.constructor?.prototype?.isMatrix === true
-    function MatrixClass(this: any) {}
+    function MatrixClass(this: unknown) {}
     MatrixClass.prototype.isMatrix = true;
-    const matrix = new (MatrixClass as any)();
+    const matrix = new (MatrixClass as unknown as new () => unknown)();
     expect(containsCollections([1, matrix])).toBe(true);
   });
 

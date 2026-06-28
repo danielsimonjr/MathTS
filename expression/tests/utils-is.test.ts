@@ -53,7 +53,7 @@ import {
  */
 function makeWithProto(...flags: string[]): unknown {
   class Fake {}
-  for (const f of flags) (Fake.prototype as any)[f] = true;
+  for (const f of flags) (Fake.prototype as Record<string, unknown>)[f] = true;
   return new Fake();
 }
 
@@ -160,7 +160,10 @@ describe('isMap', () => {
 
 describe('isPartitionedMap', () => {
   it('returns true for a map with a and b sub-maps', () => {
-    const partitioned: any = new Map();
+    const partitioned: Map<unknown, unknown> & {
+      a?: Map<unknown, unknown>;
+      b?: Map<unknown, unknown>;
+    } = new Map();
     partitioned.a = new Map();
     partitioned.b = new Map();
     expect(isPartitionedMap(partitioned)).toBe(true);
