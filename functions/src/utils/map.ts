@@ -27,7 +27,7 @@ export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
   }
 
   get(key: K): V | undefined {
-    return getSafeProperty(this.wrappedObject, key as string);
+    return getSafeProperty(this.wrappedObject, key as string) as V | undefined;
   }
 
   set(key: K, value: V): this {
