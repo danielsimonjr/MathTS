@@ -91,7 +91,7 @@ export type TypedSignatures = Record<string, (...args: unknown[]) => unknown>;
 /**
  * Type definition for a typed function
  */
-export interface TypedFunction extends Function {
+export interface TypedFunction {
   (...args: unknown[]): unknown;
   /** The signatures of this typed function (always present on a typed function) */
   signatures: TypedSignatures;

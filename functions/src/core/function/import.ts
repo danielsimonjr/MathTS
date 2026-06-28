@@ -24,9 +24,10 @@ export interface ImportOptions {
 /**
  * A function with an optional typed-function signature
  */
-interface FunctionWithSignature extends Function {
+interface FunctionWithSignature {
+  (...args: unknown[]): unknown;
   signature?: string;
-  transform?: Function;
+  transform?: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -47,7 +48,14 @@ interface MathNamespace {
 /**
  * A value that can be imported into the math namespace
  */
-type ImportableValue = Function | number | string | boolean | null | object | unknown[];
+type ImportableValue =
+  | ((...args: unknown[]) => unknown)
+  | number
+  | string
+  | boolean
+  | null
+  | object
+  | unknown[];
 
 export function importFactory(
   typed: TypedFunction,
@@ -190,7 +198,7 @@ export function importFactory(
     let importValue: unknown = value;
     if (options.wrap && typeof importValue === 'function') {
       // create a wrapper around the function
-      importValue = _wrap(importValue);
+      importValue = _wrap(importValue as FunctionWithSignature);
     }
 
     // turn a plain function with a typed-function signature into a typed-function
@@ -238,7 +246,7 @@ export function importFactory(
   }
 
   function _importTransform(name: string, value: unknown): void {
-    const valueWithTransform = value as { transform?: Function };
+    const valueWithTransform = value as { transform?: (...args: unknown[]) => unknown };
     if (valueWithTransform && typeof valueWithTransform.transform === 'function') {
       math.expression.transform[name] = valueWithTransform.transform;
       if (allowedInExpressions(name)) {
@@ -337,7 +345,7 @@ export function importFactory(
 
       const instance = /* #__PURE__ */ factory(dependencies);
 
-      const instanceWithTransform = instance as { transform?: Function };
+      const instanceWithTransform = instance as { transform?: (...args: unknown[]) => unknown };
       if (instanceWithTransform && typeof instanceWithTransform.transform === 'function') {
         throw new Error(
           'Transforms cannot be attached to factory functions. ' +

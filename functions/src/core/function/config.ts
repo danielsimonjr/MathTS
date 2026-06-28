@@ -132,8 +132,12 @@ export function configFactory(config: MathJsConfig, emit: EmitFunction): ConfigF
   }
 
   // attach the valid options to the function so they can be extended
-  (_config as any).MATRIX_OPTIONS = MATRIX_OPTIONS;
-  (_config as any).NUMBER_OPTIONS = NUMBER_OPTIONS;
+  const _configWithOptions = _config as typeof _config & {
+    MATRIX_OPTIONS: readonly string[];
+    NUMBER_OPTIONS: readonly string[];
+  };
+  _configWithOptions.MATRIX_OPTIONS = MATRIX_OPTIONS;
+  _configWithOptions.NUMBER_OPTIONS = NUMBER_OPTIONS;
 
   // attach the config properties as readonly properties to the config function
   Object.keys(DEFAULT_CONFIG).forEach((key) => {

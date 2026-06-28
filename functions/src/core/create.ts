@@ -58,6 +58,7 @@ import type { ConfigOptions, MathJsConfig } from './config.js';
 export type { MathJsConfig };
 import { configFactory } from './function/config.js';
 import { importFactory } from './function/import.js';
+import type { TypedFunction } from './function/typed.js';
 
 /**
  * Type for the mathjs instance
@@ -110,10 +111,10 @@ export interface MathJsInstance {
 
   // Core functions
   config: (config?: Partial<ConfigOptions>) => ConfigOptions;
-  import: (factories: any, options?: ImportOptions) => void;
+  import: (factories: FactoriesInput, options?: ImportOptions) => void;
   create: (factories?: FactoriesInput, config?: Partial<ConfigOptions>) => MathJsInstance;
   factory: typeof factory;
-  typed: typeof typedFunction & { isTypedFunction?: (value: any) => boolean };
+  typed: typeof typedFunction & { isTypedFunction?: (value: unknown) => boolean };
 
   // Error types
   ArgumentsError: typeof ArgumentsError;
@@ -122,24 +123,24 @@ export interface MathJsInstance {
 
   // Expression namespace
   expression: {
-    transform: Record<string, any>;
+    transform: Record<string, unknown>;
     mathWithTransform: {
       config: (config?: Partial<ConfigOptions>) => ConfigOptions;
-      [key: string]: any;
+      [key: string]: unknown;
     };
   };
 
   // Type namespace
-  type?: Record<string, any>;
+  type?: Record<string, unknown>;
 
   // Event emitter methods
-  on: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
-  off: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
-  once: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
-  emit: (event: string, ...args: any[]) => MathJsInstance;
+  on: (event: string, callback: (...args: unknown[]) => void) => MathJsInstance;
+  off: (event: string, callback: (...args: unknown[]) => void) => MathJsInstance;
+  once: (event: string, callback: (...args: unknown[]) => void) => MathJsInstance;
+  emit: (event: string, ...args: unknown[]) => MathJsInstance;
 
   // Additional dynamically added functions
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -164,8 +165,8 @@ export interface ImportOptions {
  * Type for lazy typed function
  */
 interface LazyTyped {
-  (...args: any[]): any;
-  isTypedFunction?: (value: any) => boolean;
+  (...args: unknown[]): unknown;
+  isTypedFunction?: (value: unknown) => boolean;
 }
 
 /**
@@ -286,7 +287,7 @@ export function create(
 
   // cached factories and instances used by function load
   const legacyFactories: LegacyFactory[] = [];
-  const legacyInstances: any[] = [];
+  const legacyInstances: unknown[] = [];
 
   /**
    * Load a function or data type from a factory.
@@ -295,12 +296,15 @@ export function create(
    * @param factory The factory function or object
    * @returns The created instance
    */
-  function load(factory: FactoryFunction | LegacyFactory | any): any {
+  function load(
+    factory: FactoryFunction | LegacyFactory | Record<string, unknown>
+  ): unknown {
     if (isFactory(factory)) {
       return factory(math);
     }
 
-    const firstProperty = factory[Object.keys(factory)[0]];
+    const factoryObj = factory as Record<string, unknown>;
+    const firstProperty = factoryObj[Object.keys(factoryObj)[0]];
     if (isFactory(firstProperty)) {
       return firstProperty(math);
     }
@@ -313,19 +317,20 @@ export function create(
       throw new Error('Factory object with properties `type`, `name`, and `factory` expected');
     }
 
-    const index = legacyFactories.indexOf(factory);
-    let instance: any;
+    const legacyFactory = factory as LegacyFactory;
+    const index = legacyFactories.indexOf(legacyFactory);
+    let instance: unknown;
     if (index === -1) {
       // doesn't yet exist
-      if (factory.math === true) {
+      if (legacyFactory.math === true) {
         // pass with math namespace
-        instance = factory.factory(math.type, configInternal, load, math.typed, math);
+        instance = legacyFactory.factory(math.type, configInternal, load, math.typed, math);
       } else {
-        instance = factory.factory(math.type, configInternal, load, math.typed);
+        instance = legacyFactory.factory(math.type, configInternal, load, math.typed);
       }
 
       // append to the cache
-      legacyFactories.push(factory);
+      legacyFactories.push(legacyFactory);
       legacyInstances.push(instance);
     } else {
       // already existing function, return the cached instance
@@ -338,13 +343,15 @@ export function create(
   const importedFactories: Record<string, FactoryFunction | LegacyFactory> = {};
 
   // load the import function
-  function lazyTyped(...args: any[]): any {
-    return math.typed.apply(math.typed, args);
+  function lazyTyped(...args: unknown[]): unknown {
+    return (math.typed as (...args: unknown[]) => unknown).apply(math.typed, args);
   }
-  (lazyTyped as LazyTyped).isTypedFunction = (typedFunction as any).isTypedFunction;
+  (lazyTyped as LazyTyped).isTypedFunction = (
+    typedFunction as { isTypedFunction?: (value: unknown) => boolean }
+  ).isTypedFunction;
 
   const internalImport = importFactory(
-    lazyTyped as any,
+    lazyTyped as unknown as TypedFunction,
     load,
     math,
     importedFactories as Record<string, FactoryFunction>
@@ -375,7 +382,9 @@ export function create(
   // import the factory functions like createAdd as an array instead of object,
   // else they will get a different naming (`createAdd` instead of `add`).
   if (factories) {
-    math.import(Object.values(deepFlatten(factories as Record<string, unknown>)));
+    math.import(
+      Object.values(deepFlatten(factories as Record<string, unknown>)) as FactoriesInput
+    );
   }
 
   math.ArgumentsError = ArgumentsError;
