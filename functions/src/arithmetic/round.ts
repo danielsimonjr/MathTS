@@ -258,14 +258,14 @@ export const createRound = /* #__PURE__ */ factory(
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x as any, n, self, false) as any as Matrix;
+            return matAlgo11xS0s(x as unknown as Parameters<typeof matAlgo11xS0s>[0], n, self, false) as unknown as Matrix;
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x as any, n, self, false) as any as Matrix;
+            return matAlgo14xDs(x as unknown as Parameters<typeof matAlgo14xDs>[0], n, self, false) as unknown as Matrix;
           }
       ),
 
@@ -273,7 +273,7 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(x) as any, n, self, false) as any).valueOf() as unknown[];
+            return (matAlgo14xDs(matrix(x) as unknown as Parameters<typeof matAlgo14xDs>[0], n, self, false)).valueOf() as unknown[];
           }
       ),
 
@@ -285,7 +285,7 @@ export const createRound = /* #__PURE__ */ factory(
               // do not execute algorithm, result will be a zero matrix
               return zeros(n.size(), n.storage());
             }
-            return matAlgo12xSfs(n as any, x, self, true) as any as Matrix;
+            return matAlgo12xSfs(n as unknown as Parameters<typeof matAlgo12xSfs>[0], x, self, true) as unknown as Matrix;
           }
       ),
 
@@ -297,7 +297,7 @@ export const createRound = /* #__PURE__ */ factory(
               // do not execute algorithm, result will be a zero matrix
               return zeros(n.size(), n.storage());
             }
-            return matAlgo14xDs(n as any, x, self, true) as any as Matrix;
+            return matAlgo14xDs(n as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true) as unknown as Matrix;
           }
       ),
 
@@ -305,7 +305,7 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: number | ComplexType | BigNumberType | FractionType, n: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(n) as any, x, self, true) as any).valueOf() as unknown[];
+            return (matAlgo14xDs(matrix(n) as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true)).valueOf() as unknown[];
           }
       ),
     });

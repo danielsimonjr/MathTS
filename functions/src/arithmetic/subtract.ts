@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
@@ -136,11 +137,11 @@ export const createSubtract = /* #__PURE__ */ factory(
       },
       matrixAlgorithmSuite({
         elop: subtractScalar,
-        SS: matAlgo05xSfSf as any,
-        DS: matAlgo01xDSid as any,
-        SD: matAlgo03xDSf as any,
-        Ss: matAlgo12xSfs as any,
-        sS: matAlgo10xSids as any,
+        SS: matAlgo05xSfSf as unknown as AlgorithmFunction,
+        DS: matAlgo01xDSid as unknown as AlgorithmFunction,
+        SD: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
+        sS: matAlgo10xSids as unknown as AlgorithmFunction,
       })
     );
   }

@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../types.js';
 import { flatten } from '../utils/array.js';
 import { isComplex } from '../utils/is.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
@@ -12,11 +13,7 @@ interface Matrix {
   toArray(): unknown[];
 }
 
-interface BigNumberType {
-  // BigNumber operations for hypot calculation
-}
-
-type NumericValue = number | BigNumberType;
+type NumericValue = number | BigNumber;
 
 /** A scalar arithmetic op used here within the NumericValue domain. */
 type NumericFn = (...args: NumericValue[]) => NumericValue;

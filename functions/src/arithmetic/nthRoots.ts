@@ -40,16 +40,16 @@ export const createNthRoots = /* #__PURE__ */ factory(
      */
     // This is used to fix float artifacts for zero-valued components.
     const _calculateExactResult = [
-      function realPos(val: any): any {
+      function realPos(val: number): ComplexType {
         return new Complex(val, 0);
       },
-      function imagPos(val: any): any {
+      function imagPos(val: number): ComplexType {
         return new Complex(0, val);
       },
-      function realNeg(val: any): any {
+      function realNeg(val: number): ComplexType {
         return new Complex(-val, 0);
       },
-      function imagNeg(val: any): any {
+      function imagNeg(val: number): ComplexType {
         return new Complex(0, -val);
       },
     ];
@@ -60,29 +60,29 @@ export const createNthRoots = /* #__PURE__ */ factory(
      * @param  {number} root
      * @return {Array} array of n Complex Roots
      */
-    function _nthComplexRoots(a: any, root: any): any {
+    function _nthComplexRoots(a: number | ComplexType, root: number): ComplexType[] {
       if (root < 0) throw new Error('Root must be greater than zero');
       if (root === 0) throw new Error('Root must be non-zero');
       if (root % 1 !== 0) throw new Error('Root must be an integer');
-      if (a === 0 || a.abs() === 0) return [new Complex(0, 0)];
+      if (a === 0 || (a as ComplexType).abs() === 0) return [new Complex(0, 0)];
       const aIsNumeric = typeof a === 'number';
       // NaN sentinel for off-axis complex values (no exact half-pi offset);
       // (NaN + 4k)/root is NaN, so the exact-result branch below is skipped —
       // matching the prior behaviour when `offset` was left undefined.
       let offset = NaN;
       // determine the offset (argument of a)/(pi/2)
-      if (aIsNumeric || a.re === 0 || a.im === 0) {
+      if (aIsNumeric || (a as ComplexType).re === 0 || (a as ComplexType).im === 0) {
         if (aIsNumeric) {
-          offset = 2 * +(a < 0); // numeric value on the real axis
-        } else if (a.im === 0) {
-          offset = 2 * +(a.re < 0); // complex value on the real axis
+          offset = 2 * +((a as number) < 0); // numeric value on the real axis
+        } else if ((a as ComplexType).im === 0) {
+          offset = 2 * +((a as ComplexType).re < 0); // complex value on the real axis
         } else {
-          offset = 2 * +(a.im < 0) + 1; // complex value on the imaginary axis
+          offset = 2 * +((a as ComplexType).im < 0) + 1; // complex value on the imaginary axis
         }
       }
-      const arg = a.arg();
-      const abs = a.abs();
-      const roots = [];
+      const arg = (a as ComplexType).arg();
+      const abs = (a as ComplexType).abs();
+      const roots: ComplexType[] = [];
       const r = Math.pow(abs, 1 / root);
       for (let k = 0; k < root; k++) {
         const halfPiFactor = (offset + 4 * k) / root;
@@ -137,7 +137,7 @@ export const createNthRoots = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Fraction | Complex} Returns the nth roots
      */
     return typed(name, {
-      Complex: function (x: any): any {
+      Complex: function (x: ComplexType): ComplexType[] {
         return _nthComplexRoots(x, 2);
       },
       'Complex, number': _nthComplexRoots,
