@@ -1,7 +1,7 @@
 import { errorTransform } from '../../transform/utils/errorTransform.js';
 import { setSafeProperty } from '../../utils/customs.js';
 
-export function assignFactory({ subset }: { subset: any }) {
+export function assignFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
   /**
    * Replace part of an object:
    *
@@ -16,20 +16,24 @@ export function assignFactory({ subset }: { subset: any }) {
    *                                            except in case of a string
    */
   // TODO: change assign to return the value instead of the object
-  return function assign(object: any, index: any, value: any) {
+  return function assign(
+    object: unknown,
+    index: { isObjectProperty: () => boolean; getObjectProperty: () => string },
+    value: unknown
+  ) {
     try {
       if (Array.isArray(object)) {
-        const result = subset(object, index, value);
+        const result = subset(object, index, value) as unknown[];
 
         // shallow copy all (updated) items into the original array
-        result.forEach((item: any, i: any) => {
+        result.forEach((item: unknown, i: number) => {
           object[i] = item;
         });
 
         return object;
-      } else if (object && typeof object.subset === 'function') {
+      } else if (object && typeof (object as { subset?: unknown }).subset === 'function') {
         // Matrix
-        return object.subset(index, value);
+        return (object as { subset: (...a: unknown[]) => unknown }).subset(index, value);
       } else if (typeof object === 'string') {
         // TODO: move setStringSubset into a separate util file, use that
         return subset(object, index, value);

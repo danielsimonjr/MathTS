@@ -4,8 +4,8 @@ import { getPrecedence } from '../operators.js';
 
 // Type definitions
 interface Node {
-  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: any) => Node;
+  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: unknown) => Node;
   filter: (callback: (node: Node) => boolean) => Node[];
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
@@ -14,12 +14,16 @@ interface Node {
   name?: string;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
   parenthesis?: 'keep' | 'auto' | 'all';
   implicit?: 'hide' | 'show';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Parens {
@@ -29,7 +33,7 @@ interface Parens {
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node;
+  Node: new (...args: unknown[]) => Node;
 }
 
 const name = 'RangeNode';
@@ -54,20 +58,20 @@ export const createRangeNode = /* #__PURE__ */ factory(
     ): Parens {
       // `node` is the RangeNode being rendered (a registered operator), so its
       // precedence is never null; only start/step/end may lack a precedence.
-      const precedence = getPrecedence(node as any, parenthesis, implicit, undefined) as number;
+      const precedence = getPrecedence(node, parenthesis, implicit, undefined) as number;
       const parens: Parens = { start: false, end: false };
 
-      const startPrecedence = getPrecedence(node.start as any, parenthesis, implicit, undefined);
+      const startPrecedence = getPrecedence(node.start, parenthesis, implicit, undefined);
       parens.start =
         (startPrecedence !== null && startPrecedence <= precedence) || parenthesis === 'all';
 
       if (node.step) {
-        const stepPrecedence = getPrecedence(node.step as any, parenthesis, implicit, undefined);
+        const stepPrecedence = getPrecedence(node.step, parenthesis, implicit, undefined);
         parens.step =
           (stepPrecedence !== null && stepPrecedence <= precedence) || parenthesis === 'all';
       }
 
-      const endPrecedence = getPrecedence(node.end as any, parenthesis, implicit, undefined);
+      const endPrecedence = getPrecedence(node.end, parenthesis, implicit, undefined);
       parens.end = (endPrecedence !== null && endPrecedence <= precedence) || parenthesis === 'all';
 
       return parens;
@@ -134,15 +138,19 @@ export const createRangeNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
-        const range = math.range;
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
+        const range = math.range as (...args: unknown[]) => unknown;
         const evalStart = this.start._compile(math, argNames);
         const evalEnd = this.end._compile(math, argNames);
 
         if (this.step) {
           const evalStep = this.step._compile(math, argNames);
 
-          return function evalRangeNode(scope: any, args: Record<string, any>, context: any): any {
+          return function evalRangeNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ): unknown {
             return range(
               evalStart(scope, args, context),
               evalEnd(scope, args, context),
@@ -150,7 +158,11 @@ export const createRangeNode = /* #__PURE__ */ factory(
             );
           };
         } else {
-          return function evalRangeNode(scope: any, args: Record<string, any>, context: any): any {
+          return function evalRangeNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ): unknown {
             return range(evalStart(scope, args, context), evalEnd(scope, args, context));
           };
         }
@@ -233,7 +245,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return {
           mathjs: name,
           start: this.start,

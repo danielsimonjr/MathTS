@@ -11,7 +11,7 @@ import { getSafeProperty, getSafeMethod } from '../utils/customs.js';
 import { createSubScope } from '../utils/scope.js';
 import { factory } from '../utils/factory.js';
 import { defaultTemplate, latexFunctions } from '../utils/latex.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'FunctionNode';
 const dependencies = ['math', 'Node', 'SymbolNode'];
@@ -24,12 +24,39 @@ export const createFunctionNode = /* #__PURE__ */ factory(
     Node,
     SymbolNode,
   }: {
-    math: any;
-    Node: new (...args: any[]) => MathNode;
-    SymbolNode: any;
+    math: Record<string, unknown>;
+    Node: new (...args: unknown[]) => MathNode;
+    SymbolNode: new (name: string) => MathNode;
   }) => {
+    type CompileFunction = (
+      scope: Map<string, unknown>,
+      args: Record<string, unknown>,
+      context: unknown
+    ) => unknown;
+
+    // A resolved callable from the math namespace or scope; may carry a `rawArgs` flag.
+    type MathFunction = ((...fnArgs: unknown[]) => unknown) & { rawArgs?: boolean };
+
+    // Structural view of an AccessorNode (avoids a hard dependency on its class type).
+    interface AccessorNodeLike {
+      object: {
+        _compile: (
+          math: Record<string, unknown>,
+          argNames: Record<string, boolean>
+        ) => CompileFunction;
+      };
+      index: { isObjectProperty: () => boolean; getObjectProperty: () => string };
+      optionalChaining?: boolean;
+    }
+
+    // A LaTeX converter as found in latexFunctions / on a math function's `.toTex`.
+    type LatexConverter =
+      | ((node: MathNode, options?: StringOptions) => string)
+      | string
+      | Record<number, ((node: MathNode, options?: StringOptions) => string) | string>;
+
     /* format to fixed length */
-    const strin = (entity: any): string => format(entity, { truncate: 78 });
+    const strin = (entity: unknown): string => format(entity, { truncate: 78 });
 
     /*
      * Expand a LaTeX template
@@ -39,7 +66,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
      * @param {Object} options
      * @private
      **/
-    function expandTemplate(template: string, node: any, options: any): string {
+    function expandTemplate(template: string, node: MathNode, options?: StringOptions): string {
       let latex = '';
 
       // Match everything of the form ${identifier} or ${identifier[2]} or $$
@@ -64,7 +91,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
         } else {
           // template parameter
           inputPos += match[0].length;
-          const property = node[match[1]];
+          const property = (node as unknown as Record<string, unknown>)[match[1]];
           if (!property) {
             throw new ReferenceError('Template: Property ' + match[1] + ' does not exist.');
           }
@@ -76,13 +103,13 @@ export const createFunctionNode = /* #__PURE__ */ factory(
                 break;
               case 'object':
                 if (isNode(property)) {
-                  latex += (property as any).toTex(options);
+                  latex += (property as MathNode).toTex(options);
                 } else if (Array.isArray(property)) {
                   // make array of Nodes into comma separated list
                   latex += property
                     .map(function (arg, index) {
                       if (isNode(arg)) {
-                        return (arg as any).toTex(options);
+                        return (arg as MathNode).toTex(options);
                       }
                       throw new TypeError(
                         'Template: ' + match[1] + '[' + index + '] is not a Node.'
@@ -102,8 +129,9 @@ export const createFunctionNode = /* #__PURE__ */ factory(
             }
           } else {
             // with square brackets
-            if (isNode(property[match[2]] && property[match[2]])) {
-              latex += property[match[2]].toTex(options);
+            const indexed = (property as Record<string, unknown>)[match[2]];
+            if (isNode(indexed && indexed)) {
+              latex += (indexed as MathNode).toTex(options);
             } else {
               throw new TypeError('Template: ' + match[1] + '[' + match[2] + '] is not a Node.');
             }
@@ -152,7 +180,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       // readonly property name
       get name(): string {
-        return (this.fn as any).name || '';
+        return (this.fn as { name?: string }).name || '';
       }
       static name = name;
       get type(): string {
@@ -175,25 +203,23 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @return {function} Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      _compile(
-        math: any,
-        argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         // compile arguments
         const evalArgs = this.args.map((arg) => arg._compile(math, argNames));
         const fromOptionalChaining =
-          this.optional || (isAccessorNode(this.fn) && (this.fn as any).optionalChaining);
+          this.optional ||
+          (isAccessorNode(this.fn) && (this.fn as unknown as AccessorNodeLike).optionalChaining);
 
         if (isSymbolNode(this.fn)) {
-          const name = (this.fn as any).name;
+          const name = (this.fn as unknown as { name: string }).name;
           if (!argNames[name]) {
             // we can statically determine whether the function
             // has the rawArgs property
             const fn = name in math ? getSafeProperty(math, name) : undefined;
             const isRaw = typeof fn === 'function' && fn.rawArgs === true;
 
-            const resolveFn = (scope: any): any => {
-              let value;
+            const resolveFn = (scope: Map<string, unknown>): MathFunction | undefined => {
+              let value: unknown;
               if (scope.has(name)) {
                 value = scope.get(name);
               } else if (name in math) {
@@ -202,7 +228,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
               else return FunctionNode.onUndefinedFunction(name);
 
               if (typeof value === 'function' || (fromOptionalChaining && value === undefined)) {
-                return value;
+                return value as MathFunction | undefined;
               }
 
               throw new TypeError(`'${name}' is not a function; its value is:\n  ${strin(value)}`);
@@ -212,55 +238,79 @@ export const createFunctionNode = /* #__PURE__ */ factory(
               // pass unevaluated parameters (nodes) to the function
               // "raw" evaluation
               const rawArgs = this.args;
-              return function evalFunctionNode(scope: any, args: any, context: any) {
+              return function evalFunctionNode(
+                scope: Map<string, unknown>,
+                args: Record<string, unknown>,
+                context: unknown
+              ) {
                 const fn = resolveFn(scope);
 
                 // the original function can be overwritten in the scope with a non-rawArgs function
-                if (fn.rawArgs === true) {
-                  return fn(rawArgs, math, createSubScope(scope, args));
+                if (fn!.rawArgs === true) {
+                  return fn!(rawArgs, math, createSubScope(scope, args));
                 } else {
                   // "regular" evaluation
                   const values = evalArgs.map((evalArg) => evalArg(scope, args, context));
-                  return fn(...values);
+                  return fn!(...values);
                 }
               };
             } else {
               // "regular" evaluation
               switch (evalArgs.length) {
                 case 0:
-                  return function evalFunctionNode(scope: any, _args: any, _context: any) {
+                  return function evalFunctionNode(
+                    scope: Map<string, unknown>,
+                    _args: Record<string, unknown>,
+                    _context: unknown
+                  ) {
                     const fn = resolveFn(scope);
                     if (fromOptionalChaining && fn === undefined) return undefined;
-                    return fn();
+                    return fn!();
                   };
                 case 1:
-                  return function evalFunctionNode(scope: any, args: any, context: any) {
+                  return function evalFunctionNode(
+                    scope: Map<string, unknown>,
+                    args: Record<string, unknown>,
+                    context: unknown
+                  ) {
                     const fn = resolveFn(scope);
                     if (fromOptionalChaining && fn === undefined) return undefined;
                     const evalArg0 = evalArgs[0];
-                    return fn(evalArg0(scope, args, context));
+                    return fn!(evalArg0(scope, args, context));
                   };
                 case 2:
-                  return function evalFunctionNode(scope: any, args: any, context: any) {
+                  return function evalFunctionNode(
+                    scope: Map<string, unknown>,
+                    args: Record<string, unknown>,
+                    context: unknown
+                  ) {
                     const fn = resolveFn(scope);
                     if (fromOptionalChaining && fn === undefined) return undefined;
                     const evalArg0 = evalArgs[0];
                     const evalArg1 = evalArgs[1];
-                    return fn(evalArg0(scope, args, context), evalArg1(scope, args, context));
+                    return fn!(evalArg0(scope, args, context), evalArg1(scope, args, context));
                   };
                 default:
-                  return function evalFunctionNode(scope: any, args: any, context: any) {
+                  return function evalFunctionNode(
+                    scope: Map<string, unknown>,
+                    args: Record<string, unknown>,
+                    context: unknown
+                  ) {
                     const fn = resolveFn(scope);
                     if (fromOptionalChaining && fn === undefined) return undefined;
                     const values = evalArgs.map((evalArg) => evalArg(scope, args, context));
-                    return fn(...values);
+                    return fn!(...values);
                   };
               }
             }
           } else {
             // the function symbol is an argName
             const rawArgs = this.args;
-            return function evalFunctionNode(scope: any, args: any, context: any) {
+            return function evalFunctionNode(
+              scope: Map<string, unknown>,
+              args: Record<string, unknown>,
+              context: unknown
+            ) {
               const fn = getSafeProperty(args, name);
               if (fromOptionalChaining && fn === undefined) return undefined;
               if (typeof fn !== 'function') {
@@ -279,21 +329,29 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           }
         } else if (
           isAccessorNode(this.fn) &&
-          isIndexNode((this.fn as any).index) &&
-          (this.fn as any).index.isObjectProperty()
+          isIndexNode((this.fn as unknown as AccessorNodeLike).index) &&
+          (this.fn as unknown as AccessorNodeLike).index.isObjectProperty()
         ) {
           // execute the function with the right context:
           // the object of the AccessorNode
 
-          const evalObject = (this.fn as any).object._compile(math, argNames);
-          const prop = (this.fn as any).index.getObjectProperty();
+          const accessor = this.fn as unknown as AccessorNodeLike;
+          const evalObject = accessor.object._compile(math, argNames);
+          const prop = accessor.index.getObjectProperty();
           const rawArgs = this.args;
 
-          return function evalFunctionNode(scope: any, args: any, context: any) {
+          return function evalFunctionNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ) {
             const object = evalObject(scope, args, context);
 
             // Optional chaining: if the base object is nullish, short-circuit to undefined
-            if (fromOptionalChaining && (object == null || object[prop] === undefined)) {
+            if (
+              fromOptionalChaining &&
+              (object == null || (object as Record<string, unknown>)[prop] === undefined)
+            ) {
               return undefined;
             }
 
@@ -316,7 +374,11 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           const evalFn = this.fn._compile(math, argNames);
           const rawArgs = this.args;
 
-          return function evalFunctionNode(scope: any, args: any, context: any) {
+          return function evalFunctionNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ) {
             const fn = evalFn(scope, args, context);
             if (fromOptionalChaining && fn === undefined) return undefined;
             if (typeof fn !== 'function') {
@@ -325,7 +387,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
                   `\n  ${strin(fn)}`
               );
             }
-            if (fn.rawArgs) {
+            if ((fn as MathFunction).rawArgs) {
               // "Raw" evaluation
               return fn(rawArgs, math, createSubScope(scope, args));
             } else {
@@ -342,10 +404,10 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
-        callback(this.fn, 'fn', this as any);
+        callback(this.fn, 'fn', this);
 
         for (let i = 0; i < this.args.length; i++) {
-          callback(this.args[i], 'args[' + i + ']', this as any);
+          callback(this.args[i], 'args[' + i + ']', this);
         }
       }
 
@@ -356,10 +418,10 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @returns {FunctionNode} Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): FunctionNode {
-        const fn = this._ifNode(callback(this.fn, 'fn', this as any));
+        const fn = this._ifNode(callback(this.fn, 'fn', this));
         const args: MathNode[] = [];
         for (let i = 0; i < this.args.length; i++) {
-          args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this as any));
+          args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
         }
         return new FunctionNode(fn, args);
       }
@@ -392,7 +454,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
-      toString(options?: any): string {
+      toString(options?: StringOptions): string {
         let customString;
         const name = this.fn.toString(options);
         if (
@@ -417,7 +479,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
           return arg.toString(options);
         });
@@ -458,7 +520,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
           return arg.toHTML(options);
         });
@@ -484,7 +546,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string}
        */
-      toTex(options?: any): string {
+      toTex(options?: StringOptions): string {
         let customTex;
         if (
           options &&
@@ -508,30 +570,31 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
           // get LaTeX of the arguments
           return arg.toTex(options);
         });
 
-        let latexConverter: any;
+        let latexConverter: LatexConverter | undefined;
 
-        if ((latexFunctions as any)[this.name]) {
-          latexConverter = (latexFunctions as any)[this.name];
+        if ((latexFunctions as Record<string, LatexConverter>)[this.name]) {
+          latexConverter = (latexFunctions as Record<string, LatexConverter>)[this.name];
         }
 
         // toTex property on the function itself
+        const mathEntry = math[this.name] as { toTex?: LatexConverter } | undefined;
         if (
-          math[this.name] &&
-          (typeof math[this.name].toTex === 'function' ||
-            typeof math[this.name].toTex === 'object' ||
-            typeof math[this.name].toTex === 'string')
+          mathEntry &&
+          (typeof mathEntry.toTex === 'function' ||
+            typeof mathEntry.toTex === 'object' ||
+            typeof mathEntry.toTex === 'string')
         ) {
           // .toTex is a callback function
-          latexConverter = math[this.name].toTex;
+          latexConverter = mathEntry.toTex;
         }
 
-        let customToTex;
+        let customToTex: string | undefined;
         switch (typeof latexConverter) {
           case 'function': // a callback function
             customToTex = latexConverter(this, options);
@@ -539,17 +602,20 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           case 'string': // a template string
             customToTex = expandTemplate(latexConverter, this, options);
             break;
-          case 'object':
+          case 'object': {
             // an object with different "converters" for different
             // numbers of arguments
-            switch (typeof latexConverter[args.length]) {
+            const conv = latexConverter[args.length];
+            switch (typeof conv) {
               case 'function':
-                customToTex = latexConverter[args.length](this, options);
+                customToTex = conv(this, options);
                 break;
               case 'string':
-                customToTex = expandTemplate(latexConverter[args.length], this, options);
+                customToTex = expandTemplate(conv, this, options);
                 break;
             }
+            break;
+          }
         }
 
         if (typeof customToTex !== 'undefined') {

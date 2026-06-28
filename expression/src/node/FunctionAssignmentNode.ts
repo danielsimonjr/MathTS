@@ -6,7 +6,7 @@ import { forEach, join } from '../utils/array.js';
 import { toSymbol } from '../utils/latex.js';
 import { getPrecedence } from '../operators.js';
 import { factory } from '../utils/factory.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'FunctionAssignmentNode';
 const dependencies = ['typed', 'Node'];
@@ -19,7 +19,13 @@ interface ParamWithType {
 export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, Node }: { typed: any; Node: new (...args: any[]) => MathNode }) => {
+  ({
+    typed,
+    Node,
+  }: {
+    typed: (...args: unknown[]) => unknown;
+    Node: new (...args: unknown[]) => MathNode;
+  }) => {
     /**
      * Is parenthesis needed?
      * @param {Node} node
@@ -117,9 +123,9 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
-        math: any,
+        math: Record<string, unknown>,
         argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown {
         const childArgNames = Object.create(argNames);
         forEach(this.params, function (param) {
           childArgNames[param] = true;
@@ -133,9 +139,13 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
         const signature = join(this.types, ',');
         const syntax = name + '(' + join(this.params, ', ') + ')';
 
-        return function evalFunctionAssignmentNode(scope: any, args: any, context: any) {
-          const signatures: Record<string, (...fnArgs: any[]) => any> = {};
-          signatures[signature] = function (...fnArgs: any[]) {
+        return function evalFunctionAssignmentNode(
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
+        ) {
+          const signatures: Record<string, (...fnArgs: unknown[]) => unknown> = {};
+          signatures[signature] = function (...fnArgs: unknown[]) {
             const childArgs = Object.create(args);
 
             for (let i = 0; i < params.length; i++) {
@@ -144,7 +154,10 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
             return evalExpr(scope, childArgs, context);
           };
-          const fn: any = typed(name, signatures);
+          const fn = typed(name, signatures) as ((...a: unknown[]) => unknown) & {
+            syntax?: string;
+            expr?: string;
+          };
           fn.syntax = syntax;
           fn.expr = expr.toString();
 
@@ -159,7 +172,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
-        callback(this.expr, 'expr', this as any);
+        callback(this.expr, 'expr', this);
       }
 
       /**
@@ -172,7 +185,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
       map(
         callback: (child: MathNode, path: string, parent: MathNode) => MathNode
       ): FunctionAssignmentNode {
-        const expr = this._ifNode(callback(this.expr, 'expr', this as any));
+        const expr = this._ifNode(callback(this.expr, 'expr', this));
 
         return new FunctionAssignmentNode(this.name, this.params.slice(0), expr);
       }
@@ -190,7 +203,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         let expr = this.expr.toString(options);
         if (needParenthesis(this, parenthesis, options && options.implicit)) {
@@ -243,7 +256,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const params: string[] = [];
         for (let i = 0; i < this.params.length; i++) {
@@ -276,7 +289,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         let expr = this.expr.toTex(options);
         if (needParenthesis(this, parenthesis, options && options.implicit)) {

@@ -8,20 +8,25 @@ interface Node {
   clone: () => Node;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface UnitConstructor {
+  new (value: unknown, name: string): unknown;
   isValuelessUnit: (name: string) => boolean;
 }
 
 interface Dependencies {
-  math: Record<string, any>;
+  math: Record<string, unknown>;
   Unit?: UnitConstructor;
-  Node: new (...args: any[]) => Node;
+  Node: new (...args: unknown[]) => Node;
 }
 
 const name = 'SymbolNode';
@@ -80,28 +85,40 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @return {function} Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         const name = this.name;
 
         if (argNames[name] === true) {
           // this is a FunctionAssignment argument
           // (like an x when inside the expression of a function
           // assignment `f(x) = ...`)
-          return function (_scope: any, args: Record<string, any>, _context: any): any {
+          return function (
+            _scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            _context: unknown
+          ): unknown {
             return getSafeProperty(args, name);
           };
         } else if (name in math) {
-          return function (scope: any, _args: Record<string, any>, _context: any): any {
+          return function (
+            scope: Map<string, unknown>,
+            _args: Record<string, unknown>,
+            _context: unknown
+          ): unknown {
             return scope.has(name) ? scope.get(name) : getSafeProperty(math, name);
           };
         } else {
           const isUnit = isValuelessUnit(name);
 
-          return function (scope: any, _args: Record<string, any>, _context: any): any {
+          return function (
+            scope: Map<string, unknown>,
+            _args: Record<string, unknown>,
+            _context: unknown
+          ): unknown {
             return scope.has(name)
               ? scope.get(name)
               : isUnit
-                ? new (Unit as any)(null, name)
+                ? new Unit!(null, name)
                 : SymbolNode.onUndefinedSymbol(name);
           };
         }
@@ -182,7 +199,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return {
           mathjs: 'SymbolNode',
           name: this.name,

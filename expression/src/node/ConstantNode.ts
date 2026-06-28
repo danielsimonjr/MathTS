@@ -2,7 +2,7 @@ import { format } from '../utils/string.js';
 import { typeOf } from '../utils/is.js';
 import { escapeLatex } from '../utils/latex.js';
 import { factory } from '../utils/factory.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'ConstantNode';
 const dependencies = ['Node', 'isBounded'];
@@ -14,11 +14,11 @@ export const createConstantNode = /* #__PURE__ */ factory(
     Node,
     isBounded,
   }: {
-    Node: new (...args: any[]) => MathNode;
-    isBounded: (value: any) => boolean;
+    Node: new (...args: unknown[]) => MathNode;
+    isBounded: (value: unknown) => boolean;
   }) => {
     class ConstantNode extends Node {
-      value: any;
+      value: unknown;
 
       /**
        * A ConstantNode holds a constant value like a number or string.
@@ -32,7 +32,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @constructor ConstantNode
        * @extends {Node}
        */
-      constructor(value: any) {
+      constructor(value: unknown) {
         super();
         this.value = value;
       }
@@ -58,9 +58,9 @@ export const createConstantNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
-        _math: any,
+        _math: Record<string, unknown>,
         _argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown {
         const value = this.value;
 
         return function evalConstantNode() {
@@ -99,7 +99,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         return format(this.value, options);
       }
 
@@ -108,7 +108,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         const value = this._toString(options);
 
         switch (typeOf(this.value)) {
@@ -135,7 +135,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): { mathjs: string; value: any } {
+      toJSON(): { mathjs: string; value: unknown } {
         return { mathjs: name, value: this.value };
       }
 
@@ -146,7 +146,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        *                       where mathjs is optional
        * @returns {ConstantNode}
        */
-      static fromJSON(json: { value: any }): ConstantNode {
+      static fromJSON(json: { value: unknown }): ConstantNode {
         return new ConstantNode(json.value);
       }
 
@@ -155,7 +155,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         const value = this._toString(options);
         const type = typeOf(this.value);
 
@@ -166,7 +166,9 @@ export const createConstantNode = /* #__PURE__ */ factory(
           case 'number':
           case 'BigNumber': {
             if (!isBounded(this.value)) {
-              return this.value.valueOf() < 0 ? '-\\infty' : '\\infty';
+              return (this.value as { valueOf: () => number }).valueOf() < 0
+                ? '-\\infty'
+                : '\\infty';
             }
 
             const index = value.toLowerCase().indexOf('e');
@@ -182,7 +184,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
           }
 
           case 'Fraction':
-            return this.value.toLatex();
+            return (this.value as { toLatex: () => string }).toLatex();
 
           default:
             return value;

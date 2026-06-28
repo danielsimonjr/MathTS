@@ -1,7 +1,7 @@
 import { isBigNumber, isComplex, isNode, isUnit, typeOf } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { getPrecedence } from '../operators.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'ConditionalNode';
 const dependencies = ['Node'];
@@ -9,13 +9,13 @@ const dependencies = ['Node'];
 export const createConditionalNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ Node }: { Node: new (...args: any[]) => MathNode }) => {
+  ({ Node }: { Node: new (...args: unknown[]) => MathNode }) => {
     /**
      * Test whether a condition is met
      * @param {*} condition
      * @returns {boolean} true if condition is true or non-zero, else false
      */
-    function testCondition(condition: any): boolean {
+    function testCondition(condition: unknown): boolean {
       if (
         typeof condition === 'number' ||
         typeof condition === 'boolean' ||
@@ -26,7 +26,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       if (condition) {
         if (isBigNumber(condition)) {
-          return !(condition as any).isZero();
+          return !(condition as unknown as { isZero(): boolean }).isZero();
         }
 
         if (isComplex(condition)) {
@@ -34,7 +34,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
         }
 
         if (isUnit(condition)) {
-          return !!(condition as any).value;
+          return !!(condition as { value: unknown }).value;
         }
       }
 
@@ -98,14 +98,18 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
-        math: any,
+        math: Record<string, unknown>,
         argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown {
         const evalCondition = this.condition._compile(math, argNames);
         const evalTrueExpr = this.trueExpr._compile(math, argNames);
         const evalFalseExpr = this.falseExpr._compile(math, argNames);
 
-        return function evalConditionalNode(scope: any, args: any, context: any) {
+        return function evalConditionalNode(
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
+        ) {
           return testCondition(evalCondition(scope, args, context))
             ? evalTrueExpr(scope, args, context)
             : evalFalseExpr(scope, args, context);
@@ -117,9 +121,9 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
-        callback(this.condition, 'condition', this as any);
-        callback(this.trueExpr, 'trueExpr', this as any);
-        callback(this.falseExpr, 'falseExpr', this as any);
+        callback(this.condition, 'condition', this);
+        callback(this.trueExpr, 'trueExpr', this);
+        callback(this.falseExpr, 'falseExpr', this);
       }
 
       /**
@@ -132,9 +136,9 @@ export const createConditionalNode = /* #__PURE__ */ factory(
         callback: (child: MathNode, path: string, parent: MathNode) => MathNode
       ): ConditionalNode {
         return new ConditionalNode(
-          this._ifNode(callback(this.condition, 'condition', this as any)),
-          this._ifNode(callback(this.trueExpr, 'trueExpr', this as any)),
-          this._ifNode(callback(this.falseExpr, 'falseExpr', this as any))
+          this._ifNode(callback(this.condition, 'condition', this)),
+          this._ifNode(callback(this.trueExpr, 'trueExpr', this)),
+          this._ifNode(callback(this.falseExpr, 'falseExpr', this))
         );
       }
 
@@ -151,7 +155,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         // `this` is the ConditionalNode being rendered (a registered operator),
         // so its precedence is never null; only the branches may lack one.
@@ -252,7 +256,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         // `this` is the ConditionalNode being rendered (a registered operator),
         // so its precedence is never null; only the branches may lack one.
@@ -334,7 +338,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         return (
           '\\begin{cases} {' +
           this.trueExpr.toTex(options) +

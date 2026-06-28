@@ -1,7 +1,7 @@
 import { isArrayNode, isNode } from '../utils/is.js';
 import { map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'ArrayNode';
 const dependencies = ['Node'];
@@ -9,7 +9,7 @@ const dependencies = ['Node'];
 export const createArrayNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ Node }: { Node: new (...args: any[]) => MathNode }) => {
+  ({ Node }: { Node: new (...args: unknown[]) => MathNode }) => {
     class ArrayNode extends Node {
       items: MathNode[];
 
@@ -50,17 +50,21 @@ export const createArrayNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
-        math: any,
+        math: Record<string, unknown>,
         argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown {
         const evalItems = map(this.items, function (item) {
           return item._compile(math, argNames);
         });
 
-        const asMatrix = math.config.matrix !== 'Array';
+        const asMatrix = (math.config as Record<string, unknown>).matrix !== 'Array';
         if (asMatrix) {
-          const matrix = math.matrix;
-          return function evalArrayNode(scope: any, args: any, context: any) {
+          const matrix = math.matrix as (value: unknown[]) => unknown;
+          return function evalArrayNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ) {
             return matrix(
               map(evalItems, function (evalItem) {
                 return evalItem(scope, args, context);
@@ -68,7 +72,11 @@ export const createArrayNode = /* #__PURE__ */ factory(
             );
           };
         } else {
-          return function evalArrayNode(scope: any, args: any, context: any) {
+          return function evalArrayNode(
+            scope: Map<string, unknown>,
+            args: Record<string, unknown>,
+            context: unknown
+          ) {
             return map(evalItems, function (evalItem) {
               return evalItem(scope, args, context);
             });
@@ -83,7 +91,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.items.length; i++) {
           const node = this.items[i];
-          callback(node, 'items[' + i + ']', this as any);
+          callback(node, 'items[' + i + ']', this);
         }
       }
 
@@ -96,7 +104,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ArrayNode {
         const items: MathNode[] = [];
         for (let i = 0; i < this.items.length; i++) {
-          items[i] = this._ifNode(callback(this.items[i], 'items[' + i + ']', this as any));
+          items[i] = this._ifNode(callback(this.items[i], 'items[' + i + ']', this));
         }
         return new ArrayNode(items);
       }
@@ -115,7 +123,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         const items = this.items.map(function (node) {
           return node.toString(options);
         });
@@ -150,7 +158,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         const items = this.items.map(function (node) {
           return node.toHTML(options);
         });
@@ -166,15 +174,16 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         function itemsToTex(items: MathNode[], nested: boolean): string {
           const mixedItems = items.some(isArrayNode) && !items.every(isArrayNode);
           const itemsFormRow = nested || mixedItems;
           const itemSep = itemsFormRow ? '&' : '\\\\';
           const itemsTex = items
-            .map(function (node: any) {
-              if (node.items) {
-                return itemsToTex(node.items, !nested);
+            .map(function (node: MathNode) {
+              const arrayItems = (node as { items?: MathNode[] }).items;
+              if (arrayItems) {
+                return itemsToTex(arrayItems, !nested);
               } else {
                 return node.toTex(options);
               }

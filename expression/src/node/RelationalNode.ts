@@ -6,23 +6,27 @@ import { factory } from '../utils/factory.js';
 
 // Type definitions
 interface Node {
-  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: any) => Node;
+  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: unknown) => Node;
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
   parenthesis?: 'keep' | 'auto' | 'all';
   implicit?: 'hide' | 'show';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node;
+  Node: new (...args: unknown[]) => Node;
 }
 
 const name = 'RelationalNode';
@@ -96,16 +100,16 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         const conditionals = this.conditionals;
         const compiled = this.params.map((p: Node): CompileFunction => p._compile(math, argNames));
 
         return function evalRelationalNode(
-          scope: any,
-          args: Record<string, any>,
-          context: any
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
         ): boolean {
-          let evalLhs: any;
+          let evalLhs: unknown;
           let evalRhs = compiled[0](scope, args, context);
 
           for (let i = 0; i < conditionals.length; i++) {
@@ -162,7 +166,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
         // `this` is the RelationalNode being rendered (a registered operator),
         // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
-          this as any,
+          this,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
@@ -170,7 +174,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
-            p as any,
+            p,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined
@@ -194,7 +198,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return {
           mathjs: name,
           conditionals: this.conditionals,
@@ -224,7 +228,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
         // `this` is the RelationalNode being rendered (a registered operator),
         // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
-          this as any,
+          this,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
@@ -232,7 +236,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
-            p as any,
+            p,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined
@@ -268,7 +272,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
         // `this` is the RelationalNode being rendered (a registered operator),
         // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
-          this as any,
+          this,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
@@ -276,7 +280,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
-            p as any,
+            p,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined

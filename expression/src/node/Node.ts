@@ -6,25 +6,25 @@ import { factory } from '../utils/factory.js';
 import { createMap } from '../utils/map.js';
 
 // Type definitions
-type Scope = Map<string, any>;
+type Scope = Map<string, unknown>;
 
 export interface CompiledExpression {
-  evaluate: (scope?: Record<string, any>) => any;
+  evaluate: (scope?: Record<string, unknown>) => unknown;
 }
 
-type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any;
+type CompileFunction = (scope: Scope, args: Record<string, unknown>, context: unknown) => unknown;
 
 export interface StringOptions {
   handler?:
-    | ((node: Node, options?: StringOptions) => string)
-    | Record<string, (node: Node, options?: StringOptions) => string>;
+    | ((node: MathNode, options?: StringOptions) => string)
+    | Record<string, (node: MathNode, options?: StringOptions) => string>;
   parenthesis?: 'keep' | 'auto' | 'all';
   implicit?: 'hide' | 'show';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Dependencies {
-  mathWithTransform: Record<string, any>;
+  mathWithTransform: Record<string, unknown>;
 }
 
 const name = 'Node';
@@ -62,7 +62,7 @@ export const createNode = /* #__PURE__ */ factory(
        * @param {Object} [scope]  Scope to read/write variables
        * @return {*}              Returns the result
        */
-      evaluate(scope?: Record<string, any>): any {
+      evaluate(scope?: Record<string, unknown>): unknown {
         return this.compile().evaluate(scope);
       }
 
@@ -76,10 +76,10 @@ export const createNode = /* #__PURE__ */ factory(
        */
       compile(): CompiledExpression {
         const expr = this._compile(mathWithTransform, {});
-        const args: Record<string, any> = {};
-        const context: any = null;
+        const args: Record<string, unknown> = {};
+        const context: unknown = null;
 
-        function evaluate(scope?: Record<string, any>): any {
+        function evaluate(scope?: Record<string, unknown>): unknown {
           const s = createMap(scope);
           _validateScope(s);
           return expr(s, args, context);
@@ -103,7 +103,10 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {function} Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      _compile(_math: Record<string, any>, _argNames: Record<string, boolean>): CompileFunction {
+      _compile(
+        _math: Record<string, unknown>,
+        _argNames: Record<string, boolean>
+      ): CompileFunction {
         throw new Error('Method _compile must be implemented by type ' + this.type);
       }
 
@@ -133,7 +136,7 @@ export const createNode = /* #__PURE__ */ factory(
        * @returns {Node} Returns the input if it's a node, else throws an Error
        * @protected
        */
-      _ifNode(node: any): Node {
+      _ifNode(node: unknown): Node {
         if (!isNode(node)) {
           throw new TypeError('Callback function must return a Node');
         }
@@ -299,7 +302,7 @@ export const createNode = /* #__PURE__ */ factory(
        * implementations of Node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         throw new Error('Cannot serialize object: toJSON not implemented by ' + this.type);
       }
 
@@ -386,7 +389,7 @@ export const createNode = /* #__PURE__ */ factory(
             case 'undefined':
               return;
             case 'function':
-              return options.handler(this as any, options);
+              return options.handler(this, options);
             default:
               throw new TypeError('Object or function expected as callback');
           }

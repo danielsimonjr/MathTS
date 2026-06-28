@@ -1,7 +1,7 @@
 import { isNode } from '../utils/is.js';
 import { forEach, map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
-import type { MathNode } from './Node.js';
+import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'BlockNode';
 const dependencies = ['ResultSet', 'Node'];
@@ -14,7 +14,13 @@ interface BlockItem {
 export const createBlockNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ ResultSet, Node }: { ResultSet: any; Node: new (...args: any[]) => MathNode }) => {
+  ({
+    ResultSet,
+    Node,
+  }: {
+    ResultSet: new (entries: unknown[]) => unknown;
+    Node: new (...args: unknown[]) => MathNode;
+  }) => {
     class BlockNode extends Node {
       blocks: BlockItem[];
 
@@ -66,9 +72,9 @@ export const createBlockNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
-        math: any,
+        math: Record<string, unknown>,
         argNames: Record<string, boolean>
-      ): (scope: any, args: any, context: any) => any {
+      ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown {
         const evalBlocks = map(this.blocks, function (block) {
           return {
             evaluate: block.node._compile(math, argNames),
@@ -76,10 +82,14 @@ export const createBlockNode = /* #__PURE__ */ factory(
           };
         });
 
-        return function evalBlockNodes(scope: any, args: any, context: any) {
-          const results: any[] = [];
+        return function evalBlockNodes(
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
+        ) {
+          const results: unknown[] = [];
 
-          forEach(evalBlocks, function evalBlockNode(block: any) {
+          forEach(evalBlocks, function evalBlockNode(block) {
             const result = block.evaluate(scope, args, context);
             if (block.visible) {
               results.push(result);
@@ -96,7 +106,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.blocks.length; i++) {
-          callback(this.blocks[i].node, 'blocks[' + i + '].node', this as any);
+          callback(this.blocks[i].node, 'blocks[' + i + '].node', this);
         }
       }
 
@@ -110,7 +120,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
         const blocks: BlockItem[] = [];
         for (let i = 0; i < this.blocks.length; i++) {
           const block = this.blocks[i];
-          const node = this._ifNode(callback(block.node, 'blocks[' + i + '].node', this as any));
+          const node = this._ifNode(callback(block.node, 'blocks[' + i + '].node', this));
           blocks[i] = {
             node,
             visible: block.visible,
@@ -140,7 +150,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
-      _toString(options?: any): string {
+      _toString(options?: StringOptions): string {
         return this.blocks
           .map(function (param) {
             return param.node.toString(options) + (param.visible ? '' : ';');
@@ -177,7 +187,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
-      _toHTML(options?: any): string {
+      _toHTML(options?: StringOptions): string {
         return this.blocks
           .map(function (param) {
             return (
@@ -193,7 +203,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
-      _toTex(options?: any): string {
+      _toTex(options?: StringOptions): string {
         return this.blocks
           .map(function (param) {
             return param.node.toTex(options) + (param.visible ? '' : ';');

@@ -6,21 +6,25 @@ import { escape, stringify } from '../utils/string.js';
 
 // Type definitions
 interface Node {
-  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: any) => Node;
+  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: unknown) => Node;
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node;
+  Node: new (...args: unknown[]) => Node;
 }
 
 const name = 'ObjectNode';
@@ -77,7 +81,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         const evalEntries: Record<string, CompileFunction> = {};
 
         for (const key in this.properties) {
@@ -93,11 +97,11 @@ export const createObjectNode = /* #__PURE__ */ factory(
         }
 
         return function evalObjectNode(
-          scope: any,
-          args: Record<string, any>,
-          context: any
-        ): Record<string, any> {
-          const obj: Record<string, any> = {};
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
+        ): Record<string, unknown> {
+          const obj: Record<string, unknown> = {};
 
           for (const key in evalEntries) {
             if (hasOwnProperty(evalEntries, key)) {
@@ -173,7 +177,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return {
           mathjs: name,
           properties: this.properties,

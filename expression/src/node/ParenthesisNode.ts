@@ -3,22 +3,26 @@ import { factory } from '../utils/factory.js';
 
 // Type definitions
 interface Node {
-  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
   getContent: () => Node;
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
   parenthesis?: 'keep' | 'auto' | 'all';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node;
+  Node: new (...args: unknown[]) => Node;
 }
 
 const name = 'ParenthesisNode';
@@ -69,7 +73,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         return this.content._compile(math, argNames);
       }
 
@@ -131,7 +135,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return { mathjs: name, content: this.content };
       }
 

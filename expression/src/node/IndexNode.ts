@@ -6,26 +6,30 @@ import { escape } from '../utils/string.js';
 
 // Type definitions
 interface Node {
-  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: any) => Node;
+  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: unknown) => Node;
   filter: (callback: (node: Node) => boolean) => Node[];
   isSymbolNode?: boolean;
   name?: string;
-  value?: any;
+  value?: unknown;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
   toString: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
+type CompileFunction = (
+  scope: Map<string, unknown>,
+  args: Record<string, unknown>,
+  context: unknown
+) => unknown;
 
 interface StringOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node;
-  size: (value: any) => number[];
+  Node: new (...args: unknown[]) => Node;
+  size: (value: unknown) => number[];
 }
 
 const name = 'IndexNode';
@@ -88,7 +92,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
-      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+      _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         // TODO: implement support for bignumber (currently bignumbers are silently
         //       reduced to numbers when changing the value to zero-based)
 
@@ -100,9 +104,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
           this.dimensions,
           function (dimension: Node, i: number): CompileFunction {
             const needsEnd =
-              dimension.filter(
-                (node: Node) => !!(node.isSymbolNode && node.name === 'end')
-              ).length > 0;
+              dimension.filter((node: Node) => !!(node.isSymbolNode && node.name === 'end'))
+                .length > 0;
 
             if (needsEnd) {
               // SymbolNode 'end' is used inside the index,
@@ -113,10 +116,10 @@ export const createIndexNode = /* #__PURE__ */ factory(
               const _evalDimension = dimension._compile(math, childArgNames);
 
               return function evalDimension(
-                scope: any,
-                args: Record<string, any>,
-                context: any
-              ): any {
+                scope: Map<string, unknown>,
+                args: Record<string, unknown>,
+                context: unknown
+              ): unknown {
                 if (!isMatrix(context) && !isArray(context) && !isString(context)) {
                   throw new TypeError(
                     'Cannot resolve "end": ' +
@@ -140,10 +143,17 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
         const index = getSafeProperty(math, 'index');
 
-        return function evalIndexNode(scope: any, args: Record<string, any>, context: any): any {
-          const dimensions = map(evalDimensions, function (evalDimension: CompileFunction): any {
-            return evalDimension(scope, args, context);
-          });
+        return function evalIndexNode(
+          scope: Map<string, unknown>,
+          args: Record<string, unknown>,
+          context: unknown
+        ): unknown {
+          const dimensions = map(
+            evalDimensions,
+            function (evalDimension: CompileFunction): unknown {
+              return evalDimension(scope, args, context);
+            }
+          );
 
           return index(...dimensions);
         };
@@ -200,7 +210,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * @return {string | null}
        */
       getObjectProperty(): string | null {
-        return this.isObjectProperty() ? this.dimensions[0].value : null;
+        // isObjectProperty() guarantees dimensions[0].value is a string
+        return this.isObjectProperty() ? (this.dimensions[0].value as string) : null;
       }
 
       /**
@@ -219,7 +230,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * @returns {Object}
        */
-      toJSON(): Record<string, any> {
+      toJSON(): Record<string, unknown> {
         return {
           mathjs: name,
           dimensions: this.dimensions,
