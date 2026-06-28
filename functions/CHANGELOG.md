@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-functions
 
+## Unreleased
+
+### Changed — eslint `no-explicit-any`/`no-unsafe-function-type` cleanup (subset-2)
+
+- Drove the `functions/src` dirs `utils`, `type`, `core`, `arithmetic`, and
+  `complex` toward zero eslint warnings, replacing `any`/`Function` with real
+  project types (`MathCollection`, `Matrix`, `Complex`, `BigNumber`, `Fraction`,
+  `Unit`, `AlgorithmFunction`, `MatrixCallback`, `TypedFunction`, structural
+  `unknown`+documented-narrow casts). Behavior-preserving (no logic changes);
+  the functions suite stays green (2902 pass / 41 skip) and `tsc --noEmit` is 0.
+- `utils`, `core`, `arithmetic`, `complex`: 0 warnings. `type/`: 0 except the
+  single legacy `type/unit/Unit.ts` (still `@ts-nocheck`), which needs a
+  dedicated comprehensive typing pass (see code TODO).
+- Two documented `eslint-disable` lines remain in `utils/factory.ts` for the
+  irreducible generic-dependency `any` default that every untyped factory across
+  the repo relies on (tightening it would require annotating every factory's
+  deps object).
+
 ## 0.2.14
 
 ### Added — WASM acceleration tripled (3-tier gap-fill, effective-wasm 6 → 18)
