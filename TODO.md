@@ -615,8 +615,7 @@ Detail:
 - [x] **Monorepo-wide `strict: true`** — `functions` (430 errors fixed honestly, incl. **2 real CSparse port bugs**) + `expression` flipped; all relaxed compiler flags (`noUnusedLocals`/`noUnusedParameters`/`noImplicitReturns`/`noFallthroughCasesInSwitch`) tightened in `functions`+`expression`.
 - [x] **Lint → 0 warnings (honest typing, no `eslint-disable`)**: `core`, `parallel`, `workerpool`. Also disabled core `no-undef` for TS (typescript-eslint best practice) — eliminated ~9k false positives.
 - [x] Bugs fixed along the way: JS-eig-returns-zeros, 2 CSparse typos, poly corruption, 2 numeric, turbo build-ordering footgun, js-yaml CVE, an exit-0-masked test failure.
-- [ ] **`expression` lint → 0** — IN PROGRESS (honest `no-explicit-any` typing; ~1,168 remaining as of 2026-06-27).
-- [ ] **`functions` lint → 0** — PENDING (largest: ~2,336 warnings, mostly `no-explicit-any` in activated factory code). Goal: zero lint warnings repo-wide **except `workbook/`** (user's active headless+GUI track, left untouched).
+- [x] **Repo-wide eslint → 0 (2026-06-28)** — EVERY package's implementation (`src` + `tests`) at zero eslint problems, honestly typed: ~3,500 `no-explicit-any` replaced with real types (unions/generics/`unknown`+narrow), `Unit.ts` `@ts-nocheck` removed + fully typed, no blanket suppressions. Also fixed ~105 pre-existing lint **errors** (matrix/tensor/autograd/compat/assembly) that turbo's lint cache had masked, and deleted more dead code (orphaned `matrix/assembly/` 16 files). Two documented eslint exclusions (not impl): AssemblyScript source (`asc`-checked) + `**/*.d.ts` (ambient declarations). Gate: eslint 0 · typecheck 28/28 · build 22/22 · test 44/44 · audit 0.
 
 > Repo health at session checkpoint: typecheck 28/28, build 22/22, test 44/44, `npm audit` 0 vulns, zero Rust. Details in `CHANGELOG.md` `[Unreleased]`.
 
