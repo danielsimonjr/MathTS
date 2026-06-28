@@ -4,6 +4,37 @@ import { isEmptyIndex, validateIndex, validateIndexSourceSize } from '../utils/a
 import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { Index } from '../utils/is.js';
+
+/** A Range-like dimension within an Index */
+interface DimensionRange {
+  forEach(callback: (value: number, index: number[]) => void): void;
+  size(): number[];
+}
+
+/** The runtime Index surface used by subset (extends the structural is-guard type) */
+interface IndexLike extends Index {
+  isIndex?: boolean;
+  isScalar(): boolean;
+  size(): number[];
+  min(): number[];
+  max(): number[];
+  dimension(dim: number): number | string | DimensionRange;
+}
+
+/** Minimal Matrix surface used by subset */
+interface MatrixLike {
+  subset(index: IndexLike, replacement?: unknown, defaultValue?: unknown): MatrixLike;
+  clone(): MatrixLike;
+  valueOf(): unknown;
+  isMatrix?: boolean;
+}
+
+/** Callable matrix factory dependency */
+type MatrixFn = (value?: unknown) => MatrixLike;
+/** A scalar/elementwise implementation resolved from a typed-function */
+type Fn = (...args: unknown[]) => unknown;
 
 const name = 'subset';
 const dependencies = ['typed', 'matrix', 'zeros', 'add'];
@@ -11,7 +42,21 @@ const dependencies = ['typed', 'matrix', 'zeros', 'add'];
 export const createSubset = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, zeros, add }: { typed: any; matrix: any; zeros: any; add: any }) => {
+  ({
+    typed,
+    matrix,
+    zeros,
+    add,
+  }: {
+    typed: TypedFunction;
+    matrix: MatrixFn;
+    zeros: Fn;
+    add: Fn;
+  }) => {
+    // typed-function's runtime `referTo` is single-call variadic
+    // (`referTo(...signatures, callback)`); the imported TypedFunction interface
+    // models it curried, so narrow to the real contract via `unknown`.
+    const referTo = typed.referTo as unknown as (sig: string, cb: (ref: Fn) => Fn) => unknown;
     /**
      * Get or set a subset of a matrix or string.
      *
@@ -61,7 +106,7 @@ export const createSubset = /* #__PURE__ */ factory(
 
     return typed(name, {
       // get subset
-      'Matrix, Index': function (value: any, index: any): any {
+      'Matrix, Index': function (value: MatrixLike, index: IndexLike): unknown {
         if (isEmptyIndex(index)) {
           return matrix();
         }
@@ -69,10 +114,11 @@ export const createSubset = /* #__PURE__ */ factory(
         return value.subset(index);
       },
 
-      'Array, Index': typed.referTo('Matrix, Index', function (subsetRef: any) {
-        return function (value: any[], index: any): any {
-          const subsetResult = subsetRef(matrix(value), index);
-          return index.isScalar() ? subsetResult : subsetResult.valueOf();
+      'Array, Index': referTo('Matrix, Index', function (subsetRef: Fn) {
+        return function (value: unknown, index: unknown): unknown {
+          const idx = index as IndexLike;
+          const subsetResult = subsetRef(matrix(value), idx);
+          return idx.isScalar() ? subsetResult : (subsetResult as MatrixLike).valueOf();
         };
       }),
 
@@ -82,11 +128,11 @@ export const createSubset = /* #__PURE__ */ factory(
 
       // set subset
       'Matrix, Index, any, any': function (
-        value: any,
-        index: any,
-        replacement: any,
-        defaultValue: any
-      ): any {
+        value: MatrixLike,
+        index: IndexLike,
+        replacement: unknown,
+        defaultValue: unknown
+      ): unknown {
         if (isEmptyIndex(index)) {
           return value;
         }
@@ -94,21 +140,26 @@ export const createSubset = /* #__PURE__ */ factory(
         return value.clone().subset(index, _broadcastReplacement(replacement, index), defaultValue);
       },
 
-      'Array, Index, any, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
-        return function (value: any[], index: any, replacement: any, defaultValue: any): any {
-          const subsetResult = subsetRef(matrix(value), index, replacement, defaultValue);
+      'Array, Index, any, any': referTo('Matrix, Index, any, any', function (subsetRef: Fn) {
+        return function (
+          value: unknown,
+          index: unknown,
+          replacement: unknown,
+          defaultValue: unknown
+        ): unknown {
+          const subsetResult = subsetRef(matrix(value), index, replacement, defaultValue) as MatrixLike;
           return subsetResult.isMatrix ? subsetResult.valueOf() : subsetResult;
         };
       }),
 
-      'Array, Index, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
-        return function (value: any[], index: any, replacement: any): any {
-          return subsetRef(matrix(value), index, replacement, undefined).valueOf();
+      'Array, Index, any': referTo('Matrix, Index, any, any', function (subsetRef: Fn) {
+        return function (value: unknown, index: unknown, replacement: unknown): unknown {
+          return (subsetRef(matrix(value), index, replacement, undefined) as MatrixLike).valueOf();
         };
       }),
 
-      'Matrix, Index, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
-        return function (value: any, index: any, replacement: any): any {
+      'Matrix, Index, any': referTo('Matrix, Index, any, any', function (subsetRef: Fn) {
+        return function (value: unknown, index: unknown, replacement: unknown): unknown {
           return subsetRef(value, index, replacement, undefined);
         };
       }),
@@ -125,7 +176,7 @@ export const createSubset = /* #__PURE__ */ factory(
      * @returns broadcasted replacement that matches the size of index
      */
 
-    function _broadcastReplacement(replacement: any, index: any): any {
+    function _broadcastReplacement(replacement: unknown, index: IndexLike): unknown {
       if (typeof replacement === 'string') {
         throw new Error("can't boradcast a string");
       }
@@ -154,7 +205,7 @@ export const createSubset = /* #__PURE__ */ factory(
  * @returns {string} substring
  * @private
  */
-function _getSubstring(str: string, index: any): string {
+function _getSubstring(str: string, index: IndexLike): string {
   if (!isIndex(index)) {
     // TODO: better error message
     throw new TypeError('Index expected');
@@ -165,25 +216,25 @@ function _getSubstring(str: string, index: any): string {
   }
   validateIndexSourceSize(Array.from(str), index);
 
-  if ((index as any).size().length !== 1) {
-    throw new DimensionError((index as any).size().length, 1);
+  if (index.size().length !== 1) {
+    throw new DimensionError(index.size().length, 1);
   }
 
   // validate whether the range is out of range
   const strLen = str.length;
-  validateIndex((index as any).min()[0], strLen);
-  validateIndex((index as any).max()[0], strLen);
+  validateIndex(index.min()[0], strLen);
+  validateIndex(index.max()[0], strLen);
 
-  const range = (index as any).dimension(0);
+  const range = index.dimension(0);
 
   let substr = '';
   function callback(v: number): void {
     substr += str.charAt(v);
   }
   if (Number.isInteger(range)) {
-    callback(range);
+    callback(range as number);
   } else {
-    range.forEach(callback);
+    (range as DimensionRange).forEach(callback);
   }
 
   return substr;
@@ -201,7 +252,7 @@ function _getSubstring(str: string, index: any): string {
  */
 function _setSubstring(
   str: string,
-  index: any,
+  index: IndexLike,
   replacement: string,
   defaultValue?: string
 ): string {
@@ -225,10 +276,10 @@ function _setSubstring(
   }
 
   const range = index.dimension(0);
-  const len = Number.isInteger(range) ? 1 : range.size()[0];
+  const len = Number.isInteger(range) ? 1 : (range as DimensionRange).size()[0];
 
   if (len !== replacement.length) {
-    throw new DimensionError(range.size()[0], replacement.length);
+    throw new DimensionError((range as DimensionRange).size()[0], replacement.length);
   }
 
   // validate whether the range is out of range
@@ -247,9 +298,9 @@ function _setSubstring(
   }
 
   if (Number.isInteger(range)) {
-    callback(range, [0]);
+    callback(range as number, [0]);
   } else {
-    range.forEach(callback);
+    (range as DimensionRange).forEach(callback);
   }
 
   // initialize undefined characters with a space
@@ -271,7 +322,7 @@ function _setSubstring(
  * @return {*} Returns the value of the property
  * @private
  */
-function _getObjectProperty(object: any, index: any): any {
+function _getObjectProperty(object: Record<string, unknown>, index: IndexLike): unknown {
   if (isEmptyIndex(index)) {
     return undefined;
   }
@@ -296,7 +347,11 @@ function _getObjectProperty(object: any, index: any): any {
  * @return {*} Returns the updated object
  * @private
  */
-function _setObjectProperty(object: any, index: any, replacement: any): any {
+function _setObjectProperty(
+  object: Record<string, unknown>,
+  index: IndexLike,
+  replacement: unknown
+): unknown {
   if (isEmptyIndex(index)) {
     return object;
   }
