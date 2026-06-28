@@ -34,10 +34,8 @@ import {
   carlsonRCDispatch,
   carlsonRFDispatch,
   carlsonRDDispatch,
-  carlsonRJDispatch,
   ellipticFIncompleteDispatch,
   ellipticEIncompleteDispatch,
-  ellipticPiIncompleteDispatch,
   ellipticKJS,
   ellipticEJS,
   WASM_SPECIAL_THRESHOLD,
@@ -46,16 +44,6 @@ import {
 const TOL = 1e-9;
 const TOL_AGREE = 1e-12;
 const PI = Math.PI;
-
-function scalar<T extends (...args: number[]) => number>(
-  fn: (xs: Float64Array, ...rest: Float64Array[]) => Float64Array,
-  ...args: number[]
-): number {
-  // Helper for single-element array calls
-  const arrays = args.map((v) => new Float64Array([v]));
-  // @ts-expect-error – variadic splat
-  return fn(...arrays)[0];
-}
 
 // ---------------------------------------------------------------------------
 // Suite 1 — RC known values

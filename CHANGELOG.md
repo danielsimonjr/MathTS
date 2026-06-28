@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-28) — `functions/tests/**` driven to ZERO eslint problems (honest typing)
+
+- Replaced all 38 `@typescript-eslint/no-explicit-any` findings in
+  `functions/tests/**` with real types: duck-type marker access via a shared
+  `MatrixMarkers` shape (`factories-matrix`, `sparse-bridge`), intentional
+  wrong-argument throw tests cast to `(...args: unknown[]) => unknown`
+  (`typed-matrix-ops`), AST/Unit/internal-property access cast to concrete
+  shapes (`evaluate`, `physical-constants`, `factory-scope`, `typed-bridge`),
+  and `forEach` tuple accumulators typed as `[number, number(, number)][]`.
+- Cleared the remaining 26 pre-existing eslint errors + 1 unused-disable
+  warning in the same tree: removed unused imports/helpers/locals
+  (`numeric`, `cov-statistics`, `factories-final`, `statistics-extended2`,
+  `typed-signal-wasm`, `signal-extended`, `typed-algebra-wasm`,
+  `typed-cas-fit-wasm`, `typed-integration-fanout`, `typed-special-carlson`)
+  and rewrote the 9 `no-loss-of-precision` numeric-literal reference values
+  (`cov-special`, `typed-special-wasm`) to their shortest round-tripping form
+  (identical double bits, behavior-preserving). No `eslint-disable`/`@ts-ignore`
+  used. `functions/tests` now lints clean; tsc clean; 2902 pass / 41 skip.
+
 ### Changed (2026-06-27) — `expression` eslint cleanup (honest typing, in progress)
 
 - Fixed all non-`any` eslint findings in `expression` at root (62 problems incl.

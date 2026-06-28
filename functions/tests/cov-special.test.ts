@@ -104,8 +104,8 @@ describe('special — scalar branches the base suites miss', () => {
     expect(Math.abs(j25)).toBeLessThan(1e-10);
     // J_n at x ~ 0 -> 0 for n >= 2
     expect(besselJ(3, 0) as number).toBe(0);
-    // Y2(5) = 0.36766288260552836
-    expect(besselY(2, 5) as number).toBeCloseTo(0.36766288260552836, 5);
+    // Y2(5) = 0.3676628826055284
+    expect(besselY(2, 5) as number).toBeCloseTo(0.3676628826055284, 5);
     expect(besselY(0, 5) as number).toBeCloseTo(besselY0(5) as number, 10);
     expect(besselY(1, 5) as number).toBeCloseTo(besselY1(5) as number, 10);
     // domain guard
@@ -147,8 +147,8 @@ describe('special — scalar branches the base suites miss', () => {
     expect((expIntegralEi(45) as number) > 0).toBe(true);
     // Ei(0) = -Infinity
     expect(expIntegralEi(0) as number).toBe(-Infinity);
-    // li(x) = Ei(ln x); li(2) ~ 1.0451637801174926
-    expect(logIntegral(2) as number).toBeCloseTo(1.0451637801174926, 5);
+    // li(x) = Ei(ln x); li(2) ~ 1.0451637801174927
+    expect(logIntegral(2) as number).toBeCloseTo(1.0451637801174927, 5);
     expect(Number.isNaN(logIntegral(1) as number)).toBe(true);
     expect(Number.isNaN(cosIntegral(-1) as number)).toBe(true);
   });
@@ -157,8 +157,8 @@ describe('special — scalar branches the base suites miss', () => {
     // Positive (exponential) branch.
     // Ai(5) = 1.0834442813607e-4
     expect(airyAi(5) as number).toBeCloseTo(1.0834442813607e-4, 8);
-    // Bi(5) = 657.7920441711156 (growing asymptotic)
-    expect(airyBi(5) as number).toBeCloseTo(657.7920441711156, 0);
+    // Bi(5) = 657.7920441711155 (growing asymptotic)
+    expect(airyBi(5) as number).toBeCloseTo(657.7920441711155, 0);
     // Negative (oscillatory) branch — these exercise the DLMF §9.7.9/§9.7.10
     // u_k asymptotic that was fixed (the old code returned ~0.138 for Ai(-5)).
     // Ai(-5) = 0.3507610090241531 (verified against the Airy power series).

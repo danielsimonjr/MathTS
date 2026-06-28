@@ -45,7 +45,6 @@ import {
   row,
   cross,
   diff,
-  sqrtm,
   lup,
   slu,
   intersect,

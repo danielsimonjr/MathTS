@@ -75,13 +75,6 @@ function legendreEval(coeffs: number[], x: number): number {
   return sum;
 }
 
-/** Max absolute difference between two arrays of the same length. */
-function maxDiff(a: number[], b: number[]): number {
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d = Math.max(d, Math.abs(a[i] - b[i]));
-  return d;
-}
-
 /** Generate n equispaced points in [lo, hi]. */
 function linspace(lo: number, hi: number, n: number): number[] {
   const xs: number[] = [];

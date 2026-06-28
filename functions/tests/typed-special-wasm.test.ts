@@ -395,13 +395,13 @@ const TOL_AIRY_AGREE = 1e-14; // JS vs WASM (same algorithm, bit-identical)
 describe('Airy Ai/Bi scalar reference values (DLMF §9.2)', () => {
   it('Ai(0) ≈ 0.355028053887817', () => {
     const r = airyAiJS(new Float64Array([0]))[0];
-    const ref = 0.35502805388781723926;
+    const ref = 0.3550280538878172;
     expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
   });
 
   it('Bi(0) ≈ 0.614926627446001', () => {
     const r = airyBiJS(new Float64Array([0]))[0];
-    const ref = 0.61492662744600073;
+    const ref = 0.6149266274460007;
     expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
   });
 
@@ -419,7 +419,7 @@ describe('Airy Ai/Bi scalar reference values (DLMF §9.2)', () => {
 
   it('Ai(-1) ≈ 0.535560883292352', () => {
     const r = airyAiJS(new Float64Array([-1]))[0];
-    const ref = 0.53556088329235129;
+    const ref = 0.5355608832923513;
     expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
   });
 
@@ -507,13 +507,13 @@ describe('Airy dispatch threshold behaviour', () => {
   it('airyAi typed scalar overload returns correct value', async () => {
     const { airyAi } = await import('../src/typed/special.js');
     const r = airyAi(0.0) as number;
-    expect(Math.abs(r - 0.35502805388781723926)).toBeLessThan(TOL_AIRY);
+    expect(Math.abs(r - 0.3550280538878172)).toBeLessThan(TOL_AIRY);
   });
 
   it('airyBi typed scalar overload returns correct value', async () => {
     const { airyBi } = await import('../src/typed/special.js');
     const r = airyBi(0.0) as number;
-    expect(Math.abs(r - 0.61492662744600073)).toBeLessThan(TOL_AIRY);
+    expect(Math.abs(r - 0.6149266274460007)).toBeLessThan(TOL_AIRY);
   });
 
   it('airyAi typed array overload (≥ threshold) resolves correctly', async () => {
@@ -800,9 +800,9 @@ describe('lgamma scalar reference values (Slice 5.8)', () => {
   });
 
   // Test 5: large x — lgamma(100)
-  it('lgamma(100) ≈ 359.13420536957544', () => {
+  it('lgamma(100) ≈ 359.13420536957545', () => {
     const r = lgammaJS(new Float64Array([100]))[0];
-    expect(Math.abs(r - 359.13420536957544)).toBeLessThan(1e-8);
+    expect(Math.abs(r - 359.13420536957545)).toBeLessThan(1e-8);
   });
 
   // Test 6: pole at 0 → +Infinity

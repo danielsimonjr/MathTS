@@ -26,14 +26,6 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Total quadrature points for composite gaussQuad with n sub-intervals and
- * order 5 GL nodes.
- */
-function totalPoints(n: number): number {
-  return n * 5;
-}
-
 // ---------------------------------------------------------------------------
 // Test suite
 // ---------------------------------------------------------------------------
@@ -115,7 +107,6 @@ describe('Slice 5.10 — sub-interval fan-out (gaussQuad / romberg)', () => {
 
   // 10. gaussQuad fan-out: arrow function without parens (x => ...) stringifies
   it('gaussQuad: workerCount=2 works with terse arrow x => x**2', async () => {
-    // eslint-disable-next-line arrow-parens
     const f = (x: number) => x ** 2;
     const n = GAUSS_WORKER_THRESHOLD;
     const result = await Promise.resolve(gaussQuad(f, 0, 1, n, 5, { workerCount: 2 }));

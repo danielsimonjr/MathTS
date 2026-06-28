@@ -33,12 +33,6 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function linspace(lo: number, hi: number, n: number): Float64Array {
-  const out = new Float64Array(n);
-  for (let i = 0; i < n; i++) out[i] = lo + ((hi - lo) * i) / (n - 1);
-  return out;
-}
-
 function sinusoid(freq: number, sampleRate: number, n: number, amp = 1): Float64Array {
   const out = new Float64Array(n);
   for (let i = 0; i < n; i++) {

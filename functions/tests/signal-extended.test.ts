@@ -59,7 +59,6 @@ describe('autoCorrelation', () => {
   it('should be symmetric', () => {
     const a = [1, 2, 3, 4];
     const result = autoCorrelation(a);
-    const n = result.length; // 2*4-1 = 7
     // Auto-correlation is symmetric around center (index n-1 = 3)
     const center = a.length - 1;
     for (let i = 0; i < center; i++) {

@@ -99,7 +99,6 @@ function verifyRoundTrip(num: number[], den: number[], tol: number = 1e-9): void
 
   // deg(rem) < deg(den)
   const effDenDeg = den.length - 1;
-  const effRemDeg = rem.filter((_, i) => i === rem.length - 1 && rem[i] !== 0).length;
   const remDeg = (() => {
     let d = rem.length - 1;
     while (d > 0 && rem[d] === 0) d--;
@@ -417,15 +416,13 @@ describe('resultant — below-threshold correctness (pure JS)', () => {
     const dp = [p[1], 2 * p[2]]; // derivative: -3 + 4x
     // disc = (-1)^(2*(2-1)/2) / a_2 * Res(p, dp) = (-1)^1 / 2 * Res(p,dp)
     const res = resultant(p, dp);
-    const disc_ref = ((-1 * res) / p[p.length - 1]) * -1; // sign = (-1)^1 = -1
-    // Actually: sign = ((deg*(deg-1))/2)%2===0 ? 1 : -1; deg=2: (2*1/2)%2=1 => sign=-1
+    // sign = ((deg*(deg-1))/2)%2===0 ? 1 : -1; deg=2: (2*1/2)%2=1 => sign=-1
     const disc_computed = (-1 * res) / p[p.length - 1];
     expect(Math.abs(disc_computed - 1)).toBeLessThan(1e-10);
   });
 
   it('discriminant via dispatch fallback matches JS reference within 1e-8', () => {
     // Above-threshold input — JS fallback since no WASM loaded in this suite
-    const N = WASM_POLY_THRESHOLD + 5;
     // Build a polynomial with known discriminant by making all roots equal (disc=0)
     // (x-1)^N — the discriminant should be 0 since all roots coincide
     // We use a small degree for simplicity:
