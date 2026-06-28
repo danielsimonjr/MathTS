@@ -221,3 +221,16 @@ export function renameCell(wb: Workbook, oldId: string, newId: string): Workbook
   // each cell's computed value is unchanged, so cached outputs stay valid.
   return next;
 }
+
+/** Update workbook-level metadata fields (only the provided ones). */
+export function setMetadata(
+  wb: Workbook,
+  changes: { title?: string; author?: string; description?: string; tags?: string[] }
+): Workbook {
+  const next = cloneWorkbook(wb);
+  if (changes.title !== undefined) next.metadata.title = changes.title;
+  if (changes.author !== undefined) next.metadata.author = changes.author;
+  if (changes.description !== undefined) next.metadata.description = changes.description;
+  if (changes.tags !== undefined) next.metadata.tags = changes.tags;
+  return next;
+}

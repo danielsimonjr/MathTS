@@ -202,7 +202,16 @@ export class WorkbookExecutor {
    * failure. A dependency cycle is refused up front. Test cells are classified
    * as `pass`/`fail`/`error`; all other cells as `success`/`error`.
    */
-  async runReport(options: { only?: string } = {}): Promise<RunResult> {
+  /**
+   * Seed the output cache (for incremental session runs): non-stale cells'
+   * outputs are provided so downstream cells can read them as scope without
+   * re-execution. Replaces any existing cached outputs.
+   */
+  seedOutputs(entries: Map<string, unknown>): void {
+    this.outputs = new Map(entries);
+  }
+
+  async runReport(options: { only?: string; runIds?: Set<string> } = {}): Promise<RunResult> {
     const cells: CellResult[] = [];
 
     const cycles = detectCycles(this.graph);
@@ -226,6 +235,9 @@ export class WorkbookExecutor {
     }
 
     for (const cellId of order) {
+      // Incremental: when `runIds` is given, execute only those cells; the
+      // others keep their seeded cached output (used as scope) and are skipped.
+      if (options.runIds && !options.runIds.has(cellId)) continue;
       const cell = this.workbook.cells.find((c) => c.id === cellId);
       if (!cell) continue;
 

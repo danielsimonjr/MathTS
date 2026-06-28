@@ -135,4 +135,16 @@ describe('WorkbookExecutor - runReport({ only })', () => {
     const report = await new WorkbookExecutor(wb).runReport();
     expect(report.cells.map((c) => c.id).sort()).toEqual(['a', 'b']);
   });
+
+  it('seedOutputs + runReport({runIds}) executes only the named cells, reusing seeds as scope', async () => {
+    const wb = makeWorkbook([
+      { id: 'a', type: 'code', content: '10' },
+      { id: 'b', type: 'code', content: 'a * 2', dependsOn: ['a'] },
+    ]);
+    const exec = new WorkbookExecutor(wb);
+    exec.seedOutputs(new Map([['a', 10]])); // pretend a is cached
+    const report = await exec.runReport({ runIds: new Set(['b']) });
+    expect(report.cells.map((c) => c.id)).toEqual(['b']); // a was NOT re-run
+    expect(report.cells[0].output).toBe(20); // used the seeded a = 10
+  });
 });

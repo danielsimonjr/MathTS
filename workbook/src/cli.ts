@@ -8,15 +8,20 @@
  * this file is the process entry point.
  */
 
-import { readFileSync, writeFileSync, renameSync, lstatSync, realpathSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, lstatSync, realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { parseWorkbook, serializeWorkbook, stripOutputs, SUPPORTED_CELL_TYPES } from './parser';
+import { createInterface } from 'node:readline';
+import { writeFileAtomic } from './fs-atomic';
+import { Session } from './session';
+import { handleRequest, type JsonRpcRequest } from './rpc';
+import { parseWorkbook, serializeWorkbook, stripOutputs } from './parser';
 import { createExecutor } from './executor';
 import { buildDependencyGraph, detectCycles, toMermaid } from './graph';
 import { formatResult } from './formatter';
-import { VERSION } from './index';
-import { SCHEMA_VERSION } from './contract';
-import { addCell, editCell, removeCell, moveCell, renameCell } from './edit';
+import { SCHEMA_VERSION, VERSION } from './contract';
+import { describeData } from './doc';
+import { capabilitiesInfo, listFunctions } from './introspect';
+import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit';
 import type { CellPosition } from './edit';
 import type { CellResult, Workbook, ParseResult, CellType } from './types';
 
@@ -50,6 +55,11 @@ Usage:
       cell move <file> <id> (--before|--after <id> | --at <n>)
       cell rename <file> <oldId> <newId>
       (any cell verb accepts --json and --dry-run)
+  mtsw functions [--json]                    List functions/constants cells can call
+  mtsw meta get <file> [--json]             Show workbook metadata
+  mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
+  mtsw serve [<file>]                        JSON-RPC over stdio (persistent session
+                                            w/ streaming events + incremental run)
 
 Options:
   -h, --help     Show this help
@@ -87,15 +97,11 @@ function jsonEnvelope(command: string, ok: boolean, data: unknown, problems: str
   );
 }
 
-/** The dispatchable commands (advertised by `capabilities`; a test guards drift). */
-const COMMAND_NAMES = [
-  'run', 'describe', 'validate', 'graph', 'strip', 'new', 'capabilities', 'templates', 'cell',
-] as const;
-
 /** Flags that consume the following argument as their value. */
 const VALUE_FLAGS = new Set([
   '-f', '--format', '-t', '--template', '-c', '--cell',
   '--id', '--content', '--content-file', '--depends-on', '--before', '--after', '--at',
+  '--title', '--author', '--description', '--tags',
 ]);
 
 /**
@@ -128,29 +134,6 @@ function readFile(file: string): { content?: string; error?: string } {
   }
 }
 
-let atomicWriteCounter = 0;
-
-/**
- * Write `content` to `file` atomically: write a uniquely-named sibling temp
- * file (exclusive create, so a pre-planted symlink can't be hijacked), then
- * rename over the target (atomic on the same filesystem; replaces a symlink
- * rather than writing through it). On any failure the temp file is removed, so
- * a crashed write can never leave a truncated notebook or a temp corpse.
- */
-function writeFileAtomic(file: string, content: string): void {
-  const tmp = `${file}.${process.pid}.${atomicWriteCounter++}.tmp`;
-  writeFileSync(tmp, content, { encoding: 'utf-8', flag: 'wx' });
-  try {
-    renameSync(tmp, file);
-  } catch (error) {
-    try {
-      unlinkSync(tmp);
-    } catch {
-      // best-effort cleanup
-    }
-    throw error;
-  }
-}
 
 /** Scaffold template for `mtsw new`. `<NAME>` is replaced with the bare name. */
 const BASIC_TEMPLATE = `version: "1.0"
@@ -348,45 +331,6 @@ export function validateCommand(args: string[]): CommandResult {
   return { stdout: '', stderr: `Invalid workbook:\n${bullets(problems)}`, exitCode: 1 };
 }
 
-/** The structured `describe` payload for a (possibly missing) workbook. */
-function describeData(wb: Workbook | undefined): {
-  version: string;
-  metadata: Workbook['metadata'];
-  runtime: Workbook['runtime'];
-  cells: Array<{
-    id: string;
-    type: string;
-    content: string;
-    dependsOn: string[];
-    metadata: Record<string, unknown>;
-    output: unknown;
-    error: unknown;
-  }>;
-  graph: { edges: Array<{ from: string; to: string }>; cycles: string[][] };
-} {
-  const cells = (wb?.cells ?? []).map((c) => ({
-    id: c.id,
-    type: c.type,
-    content: c.content,
-    dependsOn: c.dependsOn ?? [],
-    metadata: c.metadata ?? {},
-    output: c.output ?? null,
-    error: c.error ?? null,
-  }));
-  const graph = wb ? buildDependencyGraph(wb.cells) : undefined;
-  const edges = graph
-    ? [...graph.nodes].flatMap(([id, node]) => node.dependencies.map((dep) => ({ from: dep, to: id })))
-    : [];
-  const cycles = graph ? detectCycles(graph) : [];
-  return {
-    version: wb?.version ?? '1.0',
-    metadata: wb?.metadata ?? {},
-    runtime: wb?.runtime ?? { engine: 'mathts', execution: 'reactive' },
-    cells,
-    graph: { edges, cycles },
-  };
-}
-
 export function describeCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const file = firstPositional(args);
@@ -429,16 +373,7 @@ export function describeCommand(args: string[]): CommandResult {
 }
 
 export function capabilitiesCommand(args: string[]): CommandResult {
-  const data = {
-    name: 'mtsw',
-    version: VERSION,
-    cellTypes: {
-      supported: [...SUPPORTED_CELL_TYPES],
-      deferred: ['tensor', 'equation', 'visualization', 'export'],
-    },
-    commands: [...COMMAND_NAMES],
-    features: { json: true, write: true, runCell: true, editCell: true, incremental: false, serve: false },
-  };
+  const data = capabilitiesInfo();
   if (args.includes('--json')) {
     return { stdout: jsonEnvelope('capabilities', true, data, []), stderr: '', exitCode: 0 };
   }
@@ -457,6 +392,152 @@ export function templatesCommand(args: string[]): CommandResult {
     return { stdout: jsonEnvelope('templates', true, { templates }, []), stderr: '', exitCode: 0 };
   }
   return { stdout: templates.map((t) => `${t.name} - ${t.description}`).join('\n'), stderr: '', exitCode: 0 };
+}
+
+export function functionsCommand(args: string[]): CommandResult {
+  const data = listFunctions();
+  if (args.includes('--json')) {
+    return { stdout: jsonEnvelope('functions', true, data, []), stderr: '', exitCode: 0 };
+  }
+  const lines = [
+    `functions (${data.functions.length}): ${data.functions.join(', ')}`,
+    `constants (${data.constants.length}): ${data.constants.join(', ')}`,
+  ];
+  return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+}
+
+export function metaCommand(args: string[]): CommandResult {
+  const json = args.includes('--json');
+  const fail = (problems: string[]): CommandResult =>
+    json
+      ? { stdout: jsonEnvelope('meta', false, null, problems), stderr: '', exitCode: 1 }
+      : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
+
+  const verb = args[0];
+  if (verb !== 'get' && verb !== 'set') return fail(['Usage: mtsw meta <get|set> <file> ...']);
+  const vargs = args.slice(1);
+  const file = positionals(vargs)[0];
+  if (!file) return fail([`Usage: mtsw meta ${verb} <file> ...`]);
+
+  const read = readFile(file);
+  if (read.error) return fail([read.error]);
+  const parsed = parseWorkbook(read.content!);
+  if (!parsed.success) return fail(parsed.errors ?? ['Parse error']);
+  const wb = parsed.workbook!;
+
+  if (verb === 'get') {
+    if (json) return { stdout: jsonEnvelope('meta', true, wb.metadata, []), stderr: '', exitCode: 0 };
+    const lines = Object.entries(wb.metadata).map(
+      ([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`
+    );
+    return { stdout: lines.join('\n') || '(no metadata)', stderr: '', exitCode: 0 };
+  }
+
+  const changes: { title?: string; author?: string; description?: string; tags?: string[] } = {};
+  const title = flagValue(vargs, '--title');
+  if (title !== undefined) changes.title = title;
+  const author = flagValue(vargs, '--author');
+  if (author !== undefined) changes.author = author;
+  const description = flagValue(vargs, '--description');
+  if (description !== undefined) changes.description = description;
+  const tags = flagValue(vargs, '--tags');
+  if (tags !== undefined) changes.tags = tags.split(',').map((s) => s.trim()).filter(Boolean);
+  if (Object.keys(changes).length === 0) {
+    return fail(['meta set requires at least one of --title/--author/--description/--tags']);
+  }
+
+  let next: Workbook;
+  try {
+    next = setMetadata(wb, changes);
+  } catch (error) {
+    return fail([errMessage(error)]);
+  }
+  try {
+    writeFileAtomic(file, serializeWorkbook(next));
+  } catch (error) {
+    return fail([`Failed to write '${file}': ${errMessage(error)}`]);
+  }
+  if (json) return { stdout: jsonEnvelope('meta', true, next.metadata, []), stderr: '', exitCode: 0 };
+  return { stdout: '', stderr: `Updated metadata in ${file}`, exitCode: 0 };
+}
+
+/**
+ * Run the JSON-RPC-over-stdio server loop until `shutdown`, stdin EOF, or a
+ * termination signal. NDJSON via readline (chunked-input / CRLF safe). Events
+ * for a run are flushed before that run's response (not mid-run in v1).
+ */
+export function runServer(
+  input: NodeJS.ReadableStream = process.stdin,
+  output: NodeJS.WritableStream = process.stdout
+): Promise<void> {
+  const session = new Session();
+  const rl = createInterface({ input, crlfDelay: Infinity });
+  const write = (obj: unknown): void => {
+    output.write(`${JSON.stringify(obj)}\n`);
+  };
+
+  return new Promise<void>((resolve) => {
+    let done = false;
+    const finish = (): void => {
+      if (done) return;
+      done = true;
+      process.removeListener('SIGINT', finish);
+      process.removeListener('SIGTERM', finish);
+      rl.close();
+      resolve();
+    };
+
+    const processLine = async (line: string): Promise<void> => {
+      if (done) return;
+      const text = line.trim();
+      if (!text) return;
+      let request: unknown;
+      try {
+        request = JSON.parse(text);
+      } catch {
+        write({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
+        return;
+      }
+      if (Array.isArray(request)) {
+        write({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Batch requests are not supported' } });
+        return;
+      }
+      try {
+        const { response, events, shutdown } = await handleRequest(session, request as JsonRpcRequest);
+        for (const event of events) write(event);
+        write(response);
+        if (shutdown) finish();
+      } catch (error) {
+        // Defense-in-depth: a handler should never throw, but never crash the loop.
+        write({
+          jsonrpc: '2.0',
+          id: null,
+          error: { code: -32603, message: error instanceof Error ? error.message : String(error) },
+        });
+      }
+    };
+
+    // Serialize: requests are processed strictly in arrival order (readline can
+    // emit lines faster than an async handler completes, so a chain prevents
+    // a later request from racing ahead of an earlier one).
+    let queue: Promise<void> = Promise.resolve();
+    rl.on('line', (line) => {
+      queue = queue.then(() => processLine(line));
+    });
+
+    // On stdin EOF, wait for queued requests to finish processing (and writing)
+    // before resolving — otherwise the last responses are lost.
+    rl.on('close', () => {
+      void queue.then(finish);
+    });
+    process.once('SIGINT', finish);
+    process.once('SIGTERM', finish);
+  });
+}
+
+export async function serveCommand(): Promise<CommandResult> {
+  await runServer();
+  return { stdout: '', stderr: '', exitCode: 0 };
 }
 
 export function graphCommand(args: string[]): CommandResult {
@@ -799,6 +880,12 @@ export async function dispatch(argv: string[]): Promise<CommandResult> {
         return templatesCommand(rest);
       case 'cell':
         return cellCommand(rest);
+      case 'functions':
+        return functionsCommand(rest);
+      case 'meta':
+        return metaCommand(rest);
+      case 'serve':
+        return serveCommand();
       default:
         return { stdout: '', stderr: `Unknown command: ${command}\n${HELP}`, exitCode: 1 };
     }

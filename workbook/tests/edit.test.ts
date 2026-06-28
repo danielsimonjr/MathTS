@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addCell, editCell, removeCell, moveCell, renameCell } from '../src/edit.js';
+import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from '../src/edit.js';
 import type { Workbook, Cell } from '../src/types.js';
 
 const cell = (id: string, dependsOn?: string[], content = '0'): Cell => ({
@@ -158,5 +158,16 @@ describe('edit ops — review hardening', () => {
   it('rename preserves cached outputs (pure relabel)', () => {
     const wb = makeWb([{ ...cell('a'), output: 42 }]);
     expect(renameCell(wb, 'a', 'alpha').cells[0].output).toBe(42);
+  });
+});
+
+describe('setMetadata', () => {
+  it('updates only the provided metadata fields, immutably', () => {
+    const wb = makeWb([cell('a')]);
+    const out = setMetadata(wb, { author: 'Ada', tags: ['x', 'y'] });
+    expect(out.metadata.title).toBe('Edit'); // unchanged
+    expect(out.metadata.author).toBe('Ada');
+    expect(out.metadata.tags).toEqual(['x', 'y']);
+    expect(wb.metadata.author).toBeUndefined(); // input not mutated
   });
 });

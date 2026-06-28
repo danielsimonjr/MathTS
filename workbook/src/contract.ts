@@ -7,3 +7,12 @@
  * `major`.
  */
 export const SCHEMA_VERSION = { major: 1, minor: 0 } as const;
+
+/** Package/engine version reported by `--version`, `capabilities`, and serve. */
+export const VERSION = '0.1.0';
+
+/** Canonical dispatchable command list (advertised by `capabilities`; a test guards drift). */
+export const COMMAND_NAMES = [
+  'run', 'describe', 'validate', 'graph', 'strip', 'new',
+  'capabilities', 'templates', 'cell', 'serve', 'functions', 'meta',
+] as const;

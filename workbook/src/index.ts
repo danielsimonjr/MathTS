@@ -37,11 +37,12 @@ export { WorkbookExecutor, createExecutor } from './executor';
 export { formatResult } from './formatter';
 
 // Cell mutation (pure, immutable)
-export { addCell, editCell, removeCell, moveCell, renameCell } from './edit';
+export { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit';
 export type { CellPosition, RemoveResult } from './edit';
 
 // Machine contract
-export { SCHEMA_VERSION } from './contract';
+export { SCHEMA_VERSION, VERSION } from './contract';
 
-// Version
-export const VERSION = '0.1.0';
+// Serve session + JSON-RPC router
+export { Session } from './session';
+export { handleRequest } from './rpc';

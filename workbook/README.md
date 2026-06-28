@@ -53,7 +53,21 @@ mtsw cell move example.mtsw gauss --before n          # --before/--after <id> | 
 mtsw cell rename example.mtsw n count                 # rewrites dependents' depends_on
 mtsw cell rm example.mtsw n                           # refuses if cells depend on it
 mtsw cell rm example.mtsw n --force                   # removes + detaches dependents
+
+# Introspection + metadata.
+mtsw functions --json                  # functions/constants cells can call (autocomplete)
+mtsw meta get example.mtsw             # show workbook metadata
+mtsw meta set example.mtsw --title "My Notebook" --author Ada --tags physics,demo
+
+# Persistent session for a GUI/tooling: JSON-RPC 2.0 over stdio (NDJSON).
+mtsw serve
+#   -> {"jsonrpc":"2.0","id":1,"method":"open","params":{"path":"example.mtsw"}}
+#   <- {"jsonrpc":"2.0","id":1,"result":{...describe doc...}}
+#   -> {"jsonrpc":"2.0","id":2,"method":"run"}              # streams cell/event notifications
+#   methods: open/describe/validate/graph/run/cell.*/meta.*/save/capabilities/functions/shutdown
 ```
+
+**`serve` (persistent session).** One long-lived process holds the workbook in memory with a per-cell result cache and a **stale set**: a `cell.*` edit marks that cell and its transitive dependents stale, and a `run` re-executes **only** the stale cells (reusing cached outputs for the rest) — the incremental latency win a GUI needs. Requests are processed strictly in order; `run` streams `cell/event` notifications (flushed before that run's response in v1, not mid-run). Edits stay in memory until `save`. Single-document per process; concurrent writers are last-write-wins.
 
 **Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell *content*, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins (an optimistic-lock guard arrives with the `serve` session).
 

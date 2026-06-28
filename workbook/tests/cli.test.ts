@@ -201,6 +201,7 @@ describe('cli envelope robustness', () => {
   it('every command advertised by capabilities is routable (no drift)', async () => {
     const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
     for (const name of env.data.commands as string[]) {
+      if (name === 'serve') continue; // long-running stdio loop; covered by the serve smoke
       // No extra arg → each command hits its own usage/output path, never the
       // "Unknown command" branch, and (importantly) `new` creates no file.
       const r = await dispatch([name]);
@@ -324,6 +325,40 @@ describe('cli cell (mutation)', () => {
     const after = readFileSync(p, 'utf-8');
     expect(after).toContain('999');
     expect(after).not.toContain('output');
+  });
+});
+
+describe('cli functions / meta', () => {
+  it('functions --json lists callable names + constants', async () => {
+    const env = JSON.parse((await dispatch(['functions', '--json'])).stdout);
+    expect(env.command).toBe('functions');
+    expect(Array.isArray(env.data.functions)).toBe(true);
+    expect(env.data.functions.length).toBeGreaterThan(0);
+    expect(Array.isArray(env.data.constants)).toBe(true);
+  });
+
+  it('meta get returns workbook metadata', async () => {
+    const p = fixture('metadata:\n  title: Hello\n  author: Ada\ncells:\n  - code: "1"\n    id: a');
+    const env = JSON.parse((await dispatch(['meta', 'get', p, '--json'])).stdout);
+    expect(env.data.title).toBe('Hello');
+    expect(env.data.author).toBe('Ada');
+  });
+
+  it('meta set updates fields and writes the file', async () => {
+    const p = fixture('cells:\n  - code: "1"\n    id: a');
+    const r = await dispatch(['meta', 'set', p, '--title', 'New Title', '--tags', 'x, y', '--json']);
+    expect(r.exitCode).toBe(0);
+    const after = readFileSync(p, 'utf-8');
+    expect(after).toContain('New Title');
+    const env = JSON.parse(r.stdout);
+    expect(env.data.title).toBe('New Title');
+    expect(env.data.tags).toEqual(['x', 'y']);
+  });
+
+  it('meta set with no fields errors', async () => {
+    const p = fixture('cells:\n  - code: "1"\n    id: a');
+    const r = await dispatch(['meta', 'set', p, '--json']);
+    expect(r.exitCode).toBe(1);
   });
 });
 
