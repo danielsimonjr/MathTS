@@ -86,7 +86,7 @@ describe('ObjectWrappingMap', () => {
 
   it('delete returns false for an unsafe key', () => {
     const m = new ObjectWrappingMap({});
-    expect(m.delete('__proto__' as any)).toBe(false);
+    expect(m.delete('__proto__')).toBe(false);
   });
 
   it('clear removes all entries', () => {
@@ -235,7 +235,9 @@ describe('createMap', () => {
   });
 
   it('throws for unsupported inputs', () => {
-    expect(() => createMap(42 as any)).toThrow('createMap can create maps from objects or Maps');
+    expect(() => createMap(42 as unknown as Record<string, unknown>)).toThrow(
+      'createMap can create maps from objects or Maps'
+    );
   });
 });
 
@@ -276,7 +278,7 @@ describe('assign', () => {
 
   it('copies entries from a plain object', () => {
     const target = new Map<string, number>();
-    assign(target, { x: 5, y: 6 } as any);
+    assign(target, { x: 5, y: 6 });
     expect(target.get('x')).toBe(5);
     expect(target.get('y')).toBe(6);
   });
@@ -289,7 +291,7 @@ describe('assign', () => {
 
   it('merges multiple sources', () => {
     const target = new Map<string, number>();
-    assign(target, { a: 1 } as any, new Map([['b', 2]]));
+    assign(target, { a: 1 }, new Map([['b', 2]]));
     expect(target.get('a')).toBe(1);
     expect(target.get('b')).toBe(2);
   });

@@ -96,13 +96,13 @@ describe('object utils - extra branches', () => {
   });
 
   it('deepExtend into an array target', () => {
-    const a: any = [{ x: 1 }];
+    const a: Record<string, unknown>[] = [{ x: 1 }];
     deepExtend(a, [{ y: 2 }]);
     expect(a[0]).toEqual({ x: 1, y: 2 });
   });
 
   it('deepExtend throws when extending an object with an array', () => {
-    expect(() => deepExtend({} as any, [1, 2])).toThrow('Cannot extend an object with an array');
+    expect(() => deepExtend({}, [1, 2])).toThrow('Cannot extend an object with an array');
   });
 
   it('deepStrictEqual compares functions by reference', () => {
@@ -112,8 +112,8 @@ describe('object utils - extra branches', () => {
   });
 
   it('deepStrictEqual returns false for object vs non-object', () => {
-    expect(deepStrictEqual({ a: 1 }, 5 as any)).toBe(false);
-    expect(deepStrictEqual({ a: 1 }, [1] as any)).toBe(false);
+    expect(deepStrictEqual({ a: 1 }, 5)).toBe(false);
+    expect(deepStrictEqual({ a: 1 }, [1])).toBe(false);
   });
 
   it('deepStrictEqual returns false when b has an extra key', () => {
@@ -129,10 +129,13 @@ describe('object utils - extra branches', () => {
   });
 
   it('traverse creates missing namespaces', () => {
-    const obj: any = {};
+    const obj: Record<string, unknown> = {};
     const leaf = traverse(obj, 'a.b.c');
     leaf.value = 42;
-    expect(obj.a.b.c.value).toBe(42);
+    expect(
+      (obj as unknown as Record<string, Record<string, Record<string, Record<string, unknown>>>>).a
+        .b.c.value
+    ).toBe(42);
   });
 });
 
@@ -165,9 +168,9 @@ describe('factory - sortFactories', () => {
 
   it('places legacy factories after regular factories', () => {
     const a = factory('a', [], () => 'a');
-    const legacy: any = { name: 'legacy', factory: () => 'legacy' };
+    const legacy: LegacyFactory = { name: 'legacy', factory: () => 'legacy' };
     const sorted = sortFactories([legacy, a]);
-    const names = sorted.map((f) => (isFactory(f) ? f.fn : (f as any).name));
+    const names = sorted.map((f) => (isFactory(f) ? f.fn : f.name));
     expect(names.indexOf('a')).toBeLessThan(names.indexOf('legacy'));
   });
 });

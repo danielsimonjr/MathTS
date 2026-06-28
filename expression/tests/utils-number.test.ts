@@ -26,6 +26,7 @@ import {
   tanh,
   copysign,
 } from '../src/utils/number.js';
+import type { FormatOptions } from '../src/utils/number.js';
 
 // ---------------------------------------------------------------------------
 // isInteger
@@ -313,7 +314,9 @@ describe('format (number)', () => {
   });
 
   it('throws for unknown notation', () => {
-    expect(() => format(1, { notation: 'unknown' as any })).toThrow('Unknown notation');
+    expect(() => format(1, { notation: 'unknown' as FormatOptions['notation'] })).toThrow(
+      'Unknown notation'
+    );
   });
 });
 
@@ -340,7 +343,9 @@ describe('normalizeFormatOptions', () => {
   });
 
   it('throws for an unsupported type', () => {
-    expect(() => normalizeFormatOptions('bad' as any)).toThrow('Unsupported type');
+    expect(() => normalizeFormatOptions('bad' as unknown as FormatOptions)).toThrow(
+      'Unsupported type'
+    );
   });
 });
 

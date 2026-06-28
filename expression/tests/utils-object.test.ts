@@ -251,13 +251,15 @@ describe('traverse', () => {
   it('traverses a dot-separated path, creating missing namespaces', () => {
     const obj: Record<string, unknown> = {};
     const leaf = traverse(obj, 'a.b.c');
-    expect(leaf).toBe((obj as any).a.b.c);
+    expect(leaf).toBe(
+      (obj as unknown as Record<string, Record<string, Record<string, unknown>>>).a.b.c
+    );
   });
 
   it('accepts an array path', () => {
     const obj: Record<string, unknown> = {};
     traverse(obj, ['x', 'y']);
-    expect((obj as any).x.y).toBeDefined();
+    expect((obj as unknown as Record<string, Record<string, unknown>>).x.y).toBeDefined();
   });
 
   it('returns the root when path is empty string', () => {
