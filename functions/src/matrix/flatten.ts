@@ -35,17 +35,21 @@ export const createFlatten = /* #__PURE__ */ factory(
      * @return {DenseMatrix | Array} Returns the flattened matrix
      */
     return typed(name, {
-      Array: function (x: any[]): any[] {
+      Array: function (x: unknown[]): unknown[] {
         return flattenArray(x);
       },
 
-      DenseMatrix: function (x: any): any {
+      DenseMatrix: function (x: {
+        create(data: unknown, datatype?: string): unknown;
+        valueOf(): unknown[];
+        datatype(): string;
+      }): unknown {
         // Return the same matrix type as x (Dense or Sparse Matrix)
         // Return the same data type as x
         return x.create(flattenArray(x.valueOf(), true), x.datatype());
       },
 
-      SparseMatrix: function (_x: any): never {
+      SparseMatrix: function (_x: unknown): never {
         throw new TypeError(
           'SparseMatrix is not supported by function flatten ' +
             'because it does not support 1D vectors. ' +

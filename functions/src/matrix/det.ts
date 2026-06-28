@@ -60,7 +60,7 @@ const WASM_DET_THRESHOLD = 25; // 5x5 matrix
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {

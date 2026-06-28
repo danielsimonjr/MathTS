@@ -44,17 +44,21 @@ export const createSqueeze = /* #__PURE__ */ factory(
      * @return {Matrix | Array} Squeezed matrix
      */
     return typed(name, {
-      Array: function (x: any[]): any {
+      Array: function (x: unknown[]): unknown {
         return arraySqueeze(clone(x));
       },
 
-      Matrix: function (x: any): any {
+      Matrix: function (x: {
+        toArray(): unknown[];
+        create(data: unknown, datatype?: string): unknown;
+        datatype(): string;
+      }): unknown {
         const res = arraySqueeze(x.toArray());
         // FIXME: return the same type of matrix as the input
         return Array.isArray(res) ? x.create(res, x.datatype()) : res;
       },
 
-      any: function (x: any): any {
+      any: function (x: unknown): unknown {
         // scalar
         return clone(x);
       },

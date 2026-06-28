@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix } from '../types.js';
 
 interface CountDependencies {
   typed: TypedFunction;
@@ -40,7 +41,7 @@ export const createCount = /* #__PURE__ */ factory(
         return x.length;
       },
 
-      'Matrix | Array': function (x: any): number {
+      'Matrix | Array': function (x: unknown[] | Matrix): number {
         return prod(size(x)) as number;
       },
     });

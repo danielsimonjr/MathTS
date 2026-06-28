@@ -55,17 +55,20 @@ export const createReshape = /* #__PURE__ */ factory(
      *                                not equal that of the old ones
      */
     return typed(name, {
-      'Matrix, Array': function (x: any, sizes: number[]): any {
+      'Matrix, Array': function (
+        x: { reshape(sizes: number[], copy?: boolean): unknown },
+        sizes: number[]
+      ): unknown {
         return x.reshape(sizes, true);
       },
 
-      'Array, Array': function (x: any[], sizes: number[]): any[] {
+      'Array, Array': function (x: unknown[], sizes: number[]): unknown[] {
         sizes.forEach(function (size) {
           if (!isInteger(size)) {
             throw new TypeError('Invalid size for dimension: ' + size);
           }
         });
-        return arrayReshape(x, sizes);
+        return arrayReshape(x, sizes) as unknown[];
       },
     });
   }

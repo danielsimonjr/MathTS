@@ -37,7 +37,7 @@ export const createCtranspose = /* #__PURE__ */ factory(
      * @return {Array | Matrix}   The ctransposed matrix
      */
     return typed(name, {
-      any: function (x: any): any {
+      any: function (x: unknown): unknown {
         return conj(transpose(x));
       },
     });

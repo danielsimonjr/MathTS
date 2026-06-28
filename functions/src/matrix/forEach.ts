@@ -7,6 +7,9 @@ interface ForEachDependencies {
   typed: TypedFunction;
 }
 
+/** Callback invoked per element: (value, index, matrix) => void */
+type ForEachCallback = (...args: unknown[]) => unknown;
+
 const name = 'forEach';
 const dependencies = ['typed'];
 
@@ -47,7 +50,10 @@ export const createForEach = /* #__PURE__ */ factory(
     return typed(name, {
       'Array, function': _forEach,
 
-      'Matrix, function': function (x: any, callback: Function): void {
+      'Matrix, function': function (
+        x: { forEach(callback: ForEachCallback): void },
+        callback: ForEachCallback
+      ): void {
         x.forEach(callback);
       },
     });
@@ -60,7 +66,7 @@ export const createForEach = /* #__PURE__ */ factory(
  * @param {Function} callback
  * @private
  */
-function _forEach(array: any[], callback: Function): void {
+function _forEach(array: unknown[], callback: ForEachCallback): void {
   const fastCallback = optimizeCallback(callback, array, name);
   deepForEach(array, fastCallback.fn, fastCallback.isUnary);
 }

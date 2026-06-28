@@ -4,6 +4,14 @@ import { arraySize, concat as _concat } from '../utils/array.js';
 import { IndexError } from '../error/IndexError.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix } from '../types.js';
+
+interface ConcatDependencies {
+  typed: TypedFunction;
+  matrix: (data: unknown) => Matrix;
+  isInteger: (x: unknown) => boolean;
+}
 
 const name = 'concat';
 const dependencies = ['typed', 'matrix', 'isInteger'];
@@ -11,7 +19,7 @@ const dependencies = ['typed', 'matrix', 'isInteger'];
 export const createConcat = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, isInteger }: { typed: any; matrix: any; isInteger: any }) => {
+  ({ typed, matrix, isInteger }: ConcatDependencies) => {
     /**
      * Concatenate two or more matrices.
      *
@@ -43,13 +51,13 @@ export const createConcat = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // TODO: change signature to '...Array | Matrix, dim?' when supported
-      '...Array | Matrix | number | BigNumber': function (args: any[]): any {
+      '...Array | Matrix | number | BigNumber': function (args: unknown[]): unknown {
         let i: number;
         const len = args.length;
         let dim = -1; // zero-based dimension
         let prevDim: number;
         let asMatrix = false;
-        const matrices: any[] = []; // contains multi dimensional arrays
+        const matrices: unknown[] = []; // contains multi dimensional arrays
 
         for (i = 0; i < len; i++) {
           const arg = args[i];
@@ -74,11 +82,11 @@ export const createConcat = /* #__PURE__ */ factory(
 
             if (dim < 0 || (i > 0 && dim > prevDim)) {
               // TODO: would be more clear when throwing a DimensionError here
-              throw new IndexError(dim, prevDim + 1) as any;
+              throw new IndexError(dim, prevDim + 1);
             }
           } else {
             // this is a matrix or array
-            const m = clone(arg).valueOf();
+            const m = (clone(arg) as { valueOf(): unknown }).valueOf() as unknown[];
             const size = arraySize(m);
             matrices[i] = m;
             prevDim = dim;

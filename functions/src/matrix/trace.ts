@@ -65,7 +65,7 @@ export const createTrace = /* #__PURE__ */ factory(
      * @return {number} The trace of `x`
      */
     return typed('trace', {
-      Array: function _arrayTrace(x: any[]): any {
+      Array: function _arrayTrace(x: unknown[]): unknown {
         // use dense matrix implementation
         return _denseTrace(matrix(x) as DenseMatrix);
       },
@@ -77,7 +77,7 @@ export const createTrace = /* #__PURE__ */ factory(
       any: clone,
     });
 
-    function _denseTrace(m: DenseMatrix): any {
+    function _denseTrace(m: DenseMatrix): unknown {
       // matrix size & data
       const size = m._size;
       const data = m._data;
@@ -88,7 +88,7 @@ export const createTrace = /* #__PURE__ */ factory(
           // vector
           if (size[0] === 1) {
             // return data[0]
-            return clone((data as any[])[0]);
+            return clone((data as unknown[])[0]);
           }
           throw new RangeError('Matrix must be square (size: ' + format(size, {}) + ')');
         case 2: {
@@ -97,10 +97,10 @@ export const createTrace = /* #__PURE__ */ factory(
           const cols = size[1];
           if (rows === cols) {
             // calculate sum
-            let sum: any = 0;
+            let sum: unknown = 0;
             // loop diagonal
             for (let i = 0; i < rows; i++) {
-              sum = add(sum, (data as any[][])[i][i]);
+              sum = add(sum, (data as unknown[][])[i][i]);
             }
             // return trace
             return sum;
@@ -114,7 +114,7 @@ export const createTrace = /* #__PURE__ */ factory(
       }
     }
 
-    function _sparseTrace(m: SparseMatrix): any {
+    function _sparseTrace(m: SparseMatrix): unknown {
       // matrix arrays
       const values = m._values;
       const index = m._index;
@@ -126,7 +126,7 @@ export const createTrace = /* #__PURE__ */ factory(
       // matrix must be square
       if (rows === columns) {
         // calculate sum
-        let sum: any = 0;
+        let sum: unknown = 0;
         // check we have data (avoid looping columns)
         if (values && values.length > 0 && index && ptr) {
           // loop columns
