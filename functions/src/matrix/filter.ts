@@ -7,6 +7,16 @@ interface FilterDependencies {
   typed: TypedFunction;
 }
 
+/** Callback invoked per element: (value, index, array) => boolean */
+type FilterCallback = (...args: unknown[]) => unknown;
+
+/** Minimal Matrix surface used by filter */
+interface FilterMatrix {
+  create(data: unknown[], datatype?: string): unknown;
+  valueOf(): unknown[];
+  datatype(): string;
+}
+
 const name = 'filter';
 const dependencies = ['typed'];
 
@@ -53,14 +63,14 @@ export const createFilter = /* #__PURE__ */ factory(
     return typed('filter', {
       'Array, function': _filterCallback,
 
-      'Matrix, function': function (x: any, test: Function): any {
+      'Matrix, function': function (x: FilterMatrix, test: FilterCallback): unknown {
         return x.create(_filterCallback(x.valueOf(), test), x.datatype());
       },
 
       'Array, RegExp': filterRegExp,
 
-      'Matrix, RegExp': function (x: any, test: RegExp): any {
-        return x.create(filterRegExp(x.valueOf(), test), x.datatype());
+      'Matrix, RegExp': function (x: FilterMatrix, test: RegExp): unknown {
+        return x.create(filterRegExp(x.valueOf() as string[], test), x.datatype());
       },
     });
   }
@@ -73,12 +83,15 @@ export const createFilter = /* #__PURE__ */ factory(
  * @return {Array} Returns the filtered array
  * @private
  */
-function _filterCallback(x: any[], callback: Function): any[] {
+function _filterCallback(x: unknown[], callback: FilterCallback): unknown[] {
   const fastCallback = optimizeCallback(callback, x, 'filter');
   if (fastCallback.isUnary) {
-    return filter(x, fastCallback.fn as (value: any, index: number, array: any[]) => boolean);
+    return filter(
+      x,
+      fastCallback.fn as (value: unknown, index: number, array: unknown[]) => boolean
+    );
   }
-  return filter(x, function (value: any, index: number, array: any[]): boolean {
+  return filter(x, function (value: unknown, index: number, array: unknown[]): boolean {
     // invoke the callback function with the right number of arguments
     return fastCallback.fn(value, [index], array) as boolean;
   });

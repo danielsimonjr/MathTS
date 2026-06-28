@@ -4,15 +4,15 @@ import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
 interface Matrix {
-  toArray(): any[];
+  toArray(): unknown[];
 }
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface MatrixConstructor {
-  (data: any[]): Matrix;
+  (data: unknown[]): Matrix;
 }
 
 interface Dependencies {
@@ -27,7 +27,7 @@ const WASM_KRON_THRESHOLD = 64;
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumber2D(arr: any[][]): boolean {
+function isPlainNumber2D(arr: unknown[][]): boolean {
   for (let i = 0; i < arr.length; i++) {
     const row = arr[i];
     for (let j = 0; j < row.length; j++) {
@@ -106,11 +106,11 @@ export const createKron = /* #__PURE__ */ factory(
         return matrix(_kron(x.toArray(), y.toArray()));
       },
 
-      'Matrix, Array': function (x: Matrix, y: any[]): Matrix {
+      'Matrix, Array': function (x: Matrix, y: unknown[]): Matrix {
         return matrix(_kron(x.toArray(), y));
       },
 
-      'Array, Matrix': function (x: any[], y: Matrix): Matrix {
+      'Array, Matrix': function (x: unknown[], y: Matrix): Matrix {
         return matrix(_kron(x, y.toArray()));
       },
 
@@ -125,7 +125,7 @@ export const createKron = /* #__PURE__ */ factory(
      * @returns {Array}  the 1-dimensional Kronecker product of a and b
      * @private
      */
-    function _kron1d(a: any[], b: any[]): any[] {
+    function _kron1d(a: unknown[], b: unknown[]): unknown[] {
       // TODO in core overhaul: would be faster to see if we can choose a
       // particular implementation of multiplyScalar at the beginning,
       // rather than re-dispatch for _every_ ordered pair of entries.
@@ -140,7 +140,7 @@ export const createKron = /* #__PURE__ */ factory(
      * @returns {Array} Returns the Kronecker product of x and y
      * @private
      */
-    function _kron(a: any[], b: any[], d: number = -1): any[] {
+    function _kron(a: unknown[], b: unknown[], d: number = -1): unknown[] {
       if (d < 0) {
         let adim = size(a).length;
         let bdim = size(b).length;
@@ -194,7 +194,9 @@ export const createKron = /* #__PURE__ */ factory(
         }
       }
 
-      return a.flatMap((aSlice) => b.map((bSlice) => _kron(aSlice, bSlice, d - 1)));
+      return a.flatMap((aSlice) =>
+        b.map((bSlice) => _kron(aSlice as unknown[], bSlice as unknown[], d - 1))
+      );
     }
   }
 );

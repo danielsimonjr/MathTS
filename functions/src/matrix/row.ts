@@ -6,24 +6,23 @@ import { validateIndex } from '../utils/array.js';
 // Type definitions
 interface Matrix {
   size(): number[];
-  subset(index: any): any;
+  subset(index: unknown): unknown;
+  valueOf(): unknown[];
 }
 
-interface Index {
-  new (...ranges: any[]): Index;
-}
+type IndexConstructor = new (...ranges: unknown[]) => object;
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface MatrixConstructor {
-  (data: any[]): Matrix;
+  (data: unknown[]): Matrix;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  Index: Index;
+  Index: IndexConstructor;
   matrix: MatrixConstructor;
   range: TypedFunction;
 }
@@ -59,8 +58,8 @@ export const createRow = /* #__PURE__ */ factory(
     return typed(name, {
       'Matrix, number': _row,
 
-      'Array, number': function (value: any[], row: number): any[] {
-        return _row(matrix(clone(value)), row).valueOf() as any[];
+      'Array, number': function (value: unknown[], row: number): unknown[] {
+        return _row(matrix(clone(value)), row).valueOf() as unknown[];
       },
     });
 
@@ -72,15 +71,15 @@ export const createRow = /* #__PURE__ */ factory(
      */
     function _row(value: Matrix, row: number): Matrix {
       // check dimensions
-      if ((value as any).size().length !== 2) {
+      if (value.size().length !== 2) {
         throw new Error('Only two dimensional matrix is supported');
       }
 
-      validateIndex(row, (value as any).size()[0]);
+      validateIndex(row, value.size()[0]);
 
-      const columnRange = range(0, (value as any).size()[1]);
+      const columnRange = range(0, value.size()[1]);
       const index = new Index([row], columnRange);
-      const result = (value as any).subset(index);
+      const result = value.subset(index);
       // once config.legacySubset just return result
       return isMatrix(result) ? (result as Matrix) : matrix([[result]]);
     }

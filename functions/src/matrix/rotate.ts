@@ -15,8 +15,8 @@ export const createRotate = /* #__PURE__ */ factory(
     rotationMatrix,
   }: {
     typed: TypedFunction;
-    multiply: any;
-    rotationMatrix: any;
+    multiply: TypedFunction;
+    rotationMatrix: TypedFunction;
   }): TypedFunction => {
     /**
      * Rotate a vector of size 1x2 counter-clockwise by a given angle
@@ -48,11 +48,11 @@ export const createRotate = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array , number | BigNumber | Complex | Unit': function (
-        w: any[],
+        w: unknown[],
         theta: number | BigNumber | Complex | Unit
-      ): any[] {
+      ): unknown[] {
         _validateSize(w, 2);
-        const matrixRes = multiply(rotationMatrix(theta), w);
+        const matrixRes = multiply(rotationMatrix(theta), w) as Matrix;
         return matrixRes.toArray();
       },
 
@@ -61,14 +61,14 @@ export const createRotate = /* #__PURE__ */ factory(
         theta: number | BigNumber | Complex | Unit
       ): Matrix {
         _validateSize(w, 2);
-        return multiply(rotationMatrix(theta), w);
+        return multiply(rotationMatrix(theta), w) as Matrix;
       },
 
       'Array, number | BigNumber | Complex | Unit, Array | Matrix': function (
-        w: any[],
+        w: unknown[],
         theta: number | BigNumber | Complex | Unit,
-        v: any[] | Matrix
-      ): any[] {
+        v: unknown[] | Matrix
+      ): unknown {
         _validateSize(w, 3);
         const matrixRes = multiply(rotationMatrix(theta, v), w);
         return matrixRes;
@@ -77,14 +77,14 @@ export const createRotate = /* #__PURE__ */ factory(
       'Matrix, number | BigNumber | Complex | Unit, Array | Matrix': function (
         w: Matrix,
         theta: number | BigNumber | Complex | Unit,
-        v: any[] | Matrix
+        v: unknown[] | Matrix
       ): Matrix {
         _validateSize(w, 3);
-        return multiply(rotationMatrix(theta, v), w);
+        return multiply(rotationMatrix(theta, v), w) as Matrix;
       },
     }) as unknown as TypedFunction;
 
-    function _validateSize(v: any, expectedSize: any) {
+    function _validateSize(v: unknown[] | Matrix, expectedSize: number) {
       const actualSize = Array.isArray(v) ? arraySize(v) : v.size();
       if (actualSize.length > 2) {
         throw new RangeError(`Vector must be of dimensions 1x${expectedSize}`);
