@@ -52,7 +52,7 @@ interface ODEOptions {
 /**
  * Solution result from ODE solver
  */
-interface ODESolution<T = any> {
+interface ODESolution<T = unknown> {
   t: T[];
   y: T[];
 }
@@ -141,7 +141,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     /**
      * Check if y0 is a plain number array suitable for WASM acceleration
      */
-    function _isPlainNumberArray(y0: any[]): boolean {
+    function _isPlainNumberArray(y0: unknown[]): boolean {
       if (!Array.isArray(y0) || y0.length < WASM_ODE_THRESHOLD) return false;
       for (let i = 0; i < y0.length; i++) {
         if (typeof y0[i] !== 'number') return false;
@@ -160,7 +160,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
      */
     function _rkWasmLoop(
       f: ForcingFunction,
-      tspan: any[],
+      tspan: unknown[],
       y0: number[],
       options: ODEOptions,
       butcherTableau: ButcherTableau
@@ -372,8 +372,8 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
       return function (
         f: ForcingFunction,
-        tspan: any[],
-        y0: any[],
+        tspan: unknown[],
+        y0: unknown[],
         options: ODEOptions
       ): ODESolution {
         // adaptive runge kutta methods
@@ -437,8 +437,8 @@ export const createSolveODE = /* #__PURE__ */ factory(
             ? firstStep
             : unaryMinus(firstStep)
           : divide(subtract(tf, t0), steps); // define the first step size
-        const t: any[] = [t0]; // start the time array
-        const y: any[] = [y0]; // start the solution array
+        const t: unknown[] = [t0]; // start the time array
+        const y: unknown[] = [y0]; // start the solution array
 
         const deltaB = subtract(b, bp); // b - bp
 
@@ -448,22 +448,22 @@ export const createSolveODE = /* #__PURE__ */ factory(
         const trimStep = _createTrimStep(isForwards);
         // iterate unitil it reaches either the final time or maximum iterations
         while (ongoing(t[n], tf)) {
-          const k: any[] = [];
+          const k: unknown[] = [];
 
           // trim the time step so that it doesn't overshoot
           h = trimStep(t[n], tf, h);
 
           // calculate the first value of k
-          k.push(f(t[n], y[n]));
+          k.push(f(t[n] as MathNumericType, y[n] as MathNumericType | MathArray));
 
           // calculate the rest of the values of k
-          for (let i = 1; i < (c as any[]).length; ++i) {
+          for (let i = 1; i < (c as unknown[]).length; ++i) {
             k.push(f(add(t[n], multiply(c[i], h)), add(y[n], multiply(h, a[i], k))));
           }
 
           // estimate the error by comparing solutions of different orders
           const TE = max(
-            abs(map(multiply(deltaB, k), (X: any) => (isUnit(X) ? (X as any).value : X)))
+            abs(map(multiply(deltaB, k), (X: unknown) => (isUnit(X) ? (X as Unit).value : X)))
           );
 
           if (TE < tol && tol / TE > 1 / 4) {
@@ -499,7 +499,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
       };
     }
 
-    function _rk23(f: ForcingFunction, tspan: any[], y0: any[], options: ODEOptions): ODESolution {
+    function _rk23(
+      f: ForcingFunction,
+      tspan: unknown[],
+      y0: unknown[],
+      options: ODEOptions
+    ): ODESolution {
       // Bogacki–Shampine method
 
       // Define the butcher table
@@ -515,7 +520,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return _rk(butcherTableau)(f, tspan, y0, options);
     }
 
-    function _rk45(f: ForcingFunction, tspan: any[], y0: any[], options: ODEOptions): ODESolution {
+    function _rk45(
+      f: ForcingFunction,
+      tspan: unknown[],
+      y0: unknown[],
+      options: ODEOptions
+    ): ODESolution {
       // Dormand Prince method
 
       // Define the butcher tableau
@@ -547,7 +557,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return _rk(butcherTableau)(f, tspan, y0, options);
     }
 
-    function _solveODE(f: ForcingFunction, tspan: any[], y0: any[], opt: ODEOptions): ODESolution {
+    function _solveODE(
+      f: ForcingFunction,
+      tspan: unknown[],
+      y0: unknown[],
+      opt: ODEOptions
+    ): ODESolution {
       const method = opt.method ? opt.method : 'RK45';
       const methods: Record<string, typeof _rk23 | typeof _rk45> = {
         RK23: _rk23,
@@ -568,20 +583,20 @@ export const createSolveODE = /* #__PURE__ */ factory(
       }
     }
 
-    function _createOngoing(isForwards: any): typeof smaller | typeof larger {
+    function _createOngoing(isForwards: unknown): typeof smaller | typeof larger {
       // returns the correct function to test if it's still iterating
       return isForwards ? smaller : larger;
     }
 
-    function _createTrimStep(isForwards: any) {
+    function _createTrimStep(isForwards: unknown) {
       const outOfBounds = isForwards ? larger : smaller;
-      return function (t: any, tf: any, h: any): any {
+      return function (t: unknown, tf: unknown, h: unknown): unknown {
         const next = add(t, h);
         return outOfBounds(next, tf) ? subtract(tf, t) : h;
       };
     }
 
-    function isNumOrBig(x: any): boolean {
+    function isNumOrBig(x: unknown): boolean {
       // checks if it's a number or bignumber
       return isBigNumber(x) || isNumber(x);
     }
@@ -600,17 +615,17 @@ export const createSolveODE = /* #__PURE__ */ factory(
     return typed('solveODE', {
       'function, Array, Array, Object': _solveODE,
       'function, Matrix, Matrix, Object': _matrixSolveODE,
-      'function, Array, Array': (f: ForcingFunction, T: any[], y0: any[]) =>
+      'function, Array, Array': (f: ForcingFunction, T: unknown[], y0: unknown[]) =>
         _solveODE(f, T, y0, {}),
       'function, Matrix, Matrix': (f: ForcingFunction, T: Matrix, y0: Matrix) =>
         _matrixSolveODE(f, T, y0, {}),
       'function, Array, number | BigNumber | Unit': (
         f: ForcingFunction,
-        T: any[],
+        T: unknown[],
         y0: number | BigNumber | Unit
       ) => {
         const sol = _solveODE(f, T, [y0], {});
-        return { t: sol.t, y: sol.y.map((Y: any) => Y[0]) };
+        return { t: sol.t, y: sol.y.map((Y: unknown) => (Y as unknown[])[0]) };
       },
       'function, Matrix, number | BigNumber | Unit': (
         f: ForcingFunction,
@@ -618,16 +633,16 @@ export const createSolveODE = /* #__PURE__ */ factory(
         y0: number | BigNumber | Unit
       ) => {
         const sol = _solveODE(f, T.toArray(), [y0], {});
-        return { t: matrix(sol.t), y: matrix(sol.y.map((Y: any) => Y[0])) };
+        return { t: matrix(sol.t), y: matrix(sol.y.map((Y: unknown) => (Y as unknown[])[0])) };
       },
       'function, Array, number | BigNumber | Unit, Object': (
         f: ForcingFunction,
-        T: any[],
+        T: unknown[],
         y0: number | BigNumber | Unit,
         options: ODEOptions
       ) => {
         const sol = _solveODE(f, T, [y0], options);
-        return { t: sol.t, y: sol.y.map((Y: any) => Y[0]) };
+        return { t: sol.t, y: sol.y.map((Y: unknown) => (Y as unknown[])[0]) };
       },
       'function, Matrix, number | BigNumber | Unit, Object': (
         f: ForcingFunction,
@@ -636,7 +651,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         options: ODEOptions
       ) => {
         const sol = _solveODE(f, T.toArray(), [y0], options);
-        return { t: matrix(sol.t), y: matrix(sol.y.map((Y: any) => Y[0])) };
+        return { t: matrix(sol.t), y: matrix(sol.y.map((Y: unknown) => (Y as unknown[])[0])) };
       },
     });
   }

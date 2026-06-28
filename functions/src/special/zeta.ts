@@ -1,12 +1,9 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
+import type { BigNumber as BigNumberType } from '../types.js';
 
 // Type definitions for zeta function
-interface BigNumberType {
-  // BigNumber placeholder
-}
-
 interface ComplexType {
   re: number;
   im: number;
