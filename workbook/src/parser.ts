@@ -33,7 +33,7 @@ export function isValidIdentifier(id: string): boolean {
 }
 
 /** Cell types the runtime can execute today (the rest are reserved/deferred). */
-export const SUPPORTED_CELL_TYPES: CellType[] = ['code', 'markdown', 'data', 'test'];
+export const SUPPORTED_CELL_TYPES: CellType[] = ['code', 'markdown', 'data', 'test', 'equation'];
 
 const EXECUTION_MODES = ['reactive', 'sequential', 'manual'];
 

@@ -29,3 +29,7 @@ export { to, toBest } from './typed/unit.js';
 
 // Expression evaluator (wired to full math scope)
 export { evaluate, compileExpr, parse, parser, reviver, replacer } from './factories/evaluate.js';
+// Note: the rendering generators (toMathML/toHTML/…) live in and are imported
+// directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
+// cross-package type resolution (the package-name re-export poisoned this
+// module's export list for consumers).

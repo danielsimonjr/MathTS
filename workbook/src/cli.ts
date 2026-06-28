@@ -24,6 +24,18 @@ import { capabilitiesInfo, listFunctions } from './introspect';
 import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit';
 import type { CellPosition } from './edit';
 import type { CellResult, Workbook, ParseResult, CellType } from './types';
+import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { toHTML } from '@danielsimonjr/mathts-expression';
+import type { RenderDoc, RenderCell } from '@danielsimonjr/mathts-expression';
+
+/**
+ * The wired expression parser. `parse` is a real runtime export of the
+ * functions package, but its declared type (`Parameters<typeof createEvaluate>[0]`)
+ * references an expression type that doesn't resolve cleanly across the package
+ * boundary, so TS omits the named export. The runtime value is present (verified
+ * by the export E2E), so we assert the call signature here.
+ */
+const parse = (mathFunctions as unknown as { parse: (expr: string) => unknown }).parse;
 
 export interface CommandResult {
   stdout: string;
@@ -58,6 +70,9 @@ Usage:
   mtsw functions [--json]                    List functions/constants cells can call
   mtsw meta get <file> [--json]             Show workbook metadata
   mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
+  mtsw export <file> [--format html] [-o out.html] [--no-run]
+                                            Render to a self-contained HTML document
+                                            (MathML equations + charts, no external deps)
   mtsw serve [<file>]                        JSON-RPC over stdio (persistent session
                                             w/ streaming events + incremental run)
 
@@ -101,7 +116,7 @@ function jsonEnvelope(command: string, ok: boolean, data: unknown, problems: str
 const VALUE_FLAGS = new Set([
   '-f', '--format', '-t', '--template', '-c', '--cell',
   '--id', '--content', '--content-file', '--depends-on', '--before', '--after', '--at',
-  '--title', '--author', '--description', '--tags',
+  '--title', '--author', '--description', '--tags', '-o', '--output',
 ]);
 
 /**
@@ -459,6 +474,88 @@ export function metaCommand(args: string[]): CommandResult {
   }
   if (json) return { stdout: jsonEnvelope('meta', true, next.metadata, []), stderr: '', exitCode: 0 };
   return { stdout: '', stderr: `Updated metadata in ${file}`, exitCode: 0 };
+}
+
+/** Map a workbook (+ optional run results) to the generic render document. */
+function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null): RenderDoc {
+  const cells = workbook.cells.map((c): RenderCell => {
+    const rc: RenderCell = { type: c.type, content: c.content, id: c.id };
+    if (c.type === 'markdown' || c.type === 'equation') return rc;
+
+    const r = byId?.get(c.id);
+    const status = r?.status;
+    const output = r ? r.output : c.output;
+    const error = r ? r.error : c.error;
+
+    if (c.type === 'test') {
+      if (status === 'error') rc.error = error ?? 'error';
+      else if (status !== undefined) rc.passed = status === 'pass';
+      else if (typeof output === 'boolean') rc.passed = output;
+      // else: never run and no cached result → leave `passed` undefined (neutral badge)
+      return rc;
+    }
+    if (status === 'error' || status === 'fail' || (status === undefined && error !== undefined)) {
+      rc.error = error ?? 'error';
+    } else if (output !== undefined) {
+      rc.output = formatResult(output);
+    }
+    return rc;
+  });
+
+  return {
+    title: workbook.metadata.title,
+    author: workbook.metadata.author,
+    description: workbook.metadata.description,
+    tags: workbook.metadata.tags,
+    cells,
+  };
+}
+
+export async function exportCommand(args: string[]): Promise<CommandResult> {
+  const json = args.includes('--json');
+  const fail = (problems: string[]): CommandResult =>
+    json
+      ? { stdout: jsonEnvelope('export', false, null, problems), stderr: '', exitCode: 1 }
+      : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
+
+  const format = flagValue(args, '--format') ?? 'html';
+  if (format !== 'html') return fail([`Unknown format '${format}' (supported: html)`]);
+
+  const file = firstPositional(args);
+  if (!file) return fail(['Usage: mtsw export <file> [--format html] [-o out.html] [--no-run]']);
+
+  const read = readFile(file);
+  if (read.error) return fail([read.error]);
+  const parsed = parseWorkbook(read.content!);
+  if (!parsed.success) return fail(parsed.errors ?? ['Parse error']);
+  const workbook = parsed.workbook!;
+
+  let byId: Map<string, CellResult> | null = null;
+  if (!args.includes('--no-run')) {
+    const report = await createExecutor(workbook).runReport();
+    // A whole-run failure (e.g. a dependency cycle) surfaces as a synthetic
+    // '(workbook)' result that maps to no real cell — fail loudly rather than
+    // emit a misleading "nothing ran" document with exit 0.
+    const fatal = report.cells.find((r) => r.id === '(workbook)');
+    if (fatal) return fail([fatal.error ?? 'workbook run failed']);
+    byId = new Map(report.cells.map((r) => [r.id, r]));
+  }
+
+  const html = toHTML(buildRenderDoc(workbook, byId), { parse });
+  const bytes = Buffer.byteLength(html, 'utf-8');
+  const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
+
+  if (outPath) {
+    try {
+      writeFileAtomic(outPath, html);
+    } catch (error) {
+      return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
+    }
+    if (json) return { stdout: jsonEnvelope('export', true, { path: outPath, bytes }, []), stderr: '', exitCode: 0 };
+    return { stdout: '', stderr: `Exported ${file} -> ${outPath} (${bytes} bytes)`, exitCode: 0 };
+  }
+  if (json) return { stdout: jsonEnvelope('export', true, { bytes }, []), stderr: '', exitCode: 0 };
+  return { stdout: html, stderr: '', exitCode: 0 };
 }
 
 /**
@@ -884,6 +981,8 @@ export async function dispatch(argv: string[]): Promise<CommandResult> {
         return functionsCommand(rest);
       case 'meta':
         return metaCommand(rest);
+      case 'export':
+        return exportCommand(rest);
       case 'serve':
         return serveCommand();
       default:

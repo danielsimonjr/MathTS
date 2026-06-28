@@ -16,6 +16,13 @@ export * from './Help.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';
 
+// Rendering generators (alongside node .toTex()/.toHTML()): MathML, Markdown,
+// SVG charts, and self-contained HTML document assembly. Zero external deps.
+export { toMathML, mathMLError } from './toMathML.js';
+export { markdownToHtml } from './markdown.js';
+export { toHTML, toCSS } from './html.js';
+export type { RenderDoc, RenderCell, ToHtmlOptions } from './html.js';
+
 // Node constructors (for bootstrapping parse outside the expression package)
 export { createNode } from './node/Node.js';
 export { createAccessorNode } from './node/AccessorNode.js';

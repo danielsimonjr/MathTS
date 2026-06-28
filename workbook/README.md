@@ -59,6 +59,11 @@ mtsw functions --json                  # functions/constants cells can call (aut
 mtsw meta get example.mtsw             # show workbook metadata
 mtsw meta set example.mtsw --title "My Notebook" --author Ada --tags physics,demo
 
+# Render to a self-contained HTML document (runs first, then renders).
+mtsw export example.mtsw -o example.html     # one offline file; stdout if no -o
+mtsw export example.mtsw --no-run            # render cached outputs without executing
+mtsw export example.mtsw --json              # envelope: { data: { path, bytes } }
+
 # Persistent session for a GUI/tooling: JSON-RPC 2.0 over stdio (NDJSON).
 mtsw serve
 #   -> {"jsonrpc":"2.0","id":1,"method":"open","params":{"path":"example.mtsw"}}
@@ -66,6 +71,19 @@ mtsw serve
 #   -> {"jsonrpc":"2.0","id":2,"method":"run"}              # streams cell/event notifications
 #   methods: open/describe/validate/graph/run/cell.*/meta.*/save/capabilities/functions/shutdown
 ```
+
+**`export` (self-contained HTML).** `mtsw export <file> --format html` renders a
+notebook to a single offline `.html` with **no external requests**: markdown prose,
+**equations typeset as MathML** (rendered natively by modern browsers — Chromium ≥109,
+Firefox, Safari), code cells with their embedded outputs, ✓/✗ test badges, and (as of
+the chart slice) inline SVG plots. All rendering is MathTS-native — the generators
+(`toMathML`/`toHTML`/`toCSS`, plus `markdownToHtml`) live in the `expression` package
+alongside the node `.toTex()`/`.toHTML()` serializers, with **zero external
+dependencies**. Equation cells contain MathTS expression syntax (e.g.
+`c = 1 / sqrt(eps0 * mu0)`), not raw LaTeX; they are display-only and rendered via
+`toMathML`. By default `export` runs the workbook first (use `--no-run` for cached
+outputs); a whole-run failure such as a dependency cycle fails loudly rather than
+emitting a misleading document.
 
 **`serve` (persistent session).** One long-lived process holds the workbook in memory with a per-cell result cache and a **stale set**: a `cell.*` edit marks that cell and its transitive dependents stale, and a `run` re-executes **only** the stale cells (reusing cached outputs for the rest) — the incremental latency win a GUI needs. Requests are processed strictly in order; `run` streams `cell/event` notifications (flushed before that run's response in v1, not mid-run). Edits stay in memory until `save`. Single-document per process; concurrent writers are last-write-wins.
 

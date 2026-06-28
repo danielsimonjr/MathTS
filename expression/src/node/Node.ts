@@ -1,4 +1,5 @@
 import { isNode } from '../utils/is.js';
+import { toMathML as renderMathML } from '../toMathML.js';
 
 import { keywords } from '../keywords.js';
 import { deepStrictEqual } from '../utils/object.js';
@@ -365,6 +366,15 @@ export const createNode = /* #__PURE__ */ factory(
         }
 
         return this._toTex(options);
+      }
+
+      /**
+       * Render this node to a self-contained MathML `<math>` element. Sits
+       * alongside `toTex`/`toHTML`; browsers typeset MathML natively.
+       * @return {string}
+       */
+      toMathML(): string {
+        return renderMathML(this);
       }
 
       /**

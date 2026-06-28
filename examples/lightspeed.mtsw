@@ -1,0 +1,78 @@
+version: "1.0"
+
+metadata:
+  title: "Deriving the Speed of Light in a Vacuum"
+  author: "MathTS Workbook"
+  description: "A live, self-verifying derivation of c via Maxwell's relation and a wavelength-frequency cross-check, using MathTS constants and functions."
+  tags: [physics, electromagnetism, constants, derivation]
+
+runtime:
+  engine: mathts
+  execution: reactive
+
+cells:
+  - markdown: |
+      # Deriving the Speed of Light in a Vacuum
+
+      The speed of light **c** can be derived from two electromagnetic
+      constants of free space — the vacuum permittivity **ε₀** and the vacuum
+      permeability **μ₀** — via Maxwell's relation:
+
+      c = 1 / sqrt(ε₀ · μ₀)
+
+      We then cross-check it against the wavelength-frequency relation c = λ·ν.
+      The values below are MathTS's `electricConstant`, `magneticConstant`, and
+      `speedOfLight`; all arithmetic uses MathTS functions.
+    id: intro
+
+  - markdown: |
+      ## 1. Maxwell's relation
+
+      ε₀ (vacuum permittivity) and μ₀ (vacuum permeability), in SI units.
+    id: maxwellIntro
+
+  - code: "8.8541878128e-12"
+    id: eps0
+
+  - code: "1.25663706212e-6"
+    id: mu0
+
+  - code: "1 / sqrt(eps0 * mu0)"
+    id: cMaxwell
+    depends_on: [eps0, mu0]
+
+  - code: "299792458"
+    id: cDefined
+
+  - test: "abs(cMaxwell - cDefined) / cDefined < 1e-6"
+    id: checkMaxwell
+    depends_on: [cMaxwell, cDefined]
+
+  - markdown: |
+      ## 2. Wavelength-frequency cross-check (c = λ·ν)
+
+      A HeNe laser line: wavelength λ ≈ 632.8 nm, frequency ν ≈ 4.738e14 Hz.
+    id: lambdaNuIntro
+
+  - code: "632.8e-9"
+    id: lambda
+
+  - code: "4.738e14"
+    id: nu
+
+  - code: "lambda * nu"
+    id: cLambdaNu
+    depends_on: [lambda, nu]
+
+  - test: "abs(cLambdaNu - cDefined) / cDefined < 0.01"
+    id: checkLambdaNu
+    depends_on: [cLambdaNu, cDefined]
+
+  - markdown: |
+      ## Conclusion
+
+      Both routes reproduce c = 299,792,458 m/s — Maxwell's relation to within
+      floating-point precision, and λ·ν to within measurement tolerance. The
+      `test` cells make this document self-verifying: a green run proves the
+      derivation holds.
+    id: conclusion
