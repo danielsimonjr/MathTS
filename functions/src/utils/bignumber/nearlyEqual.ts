@@ -14,6 +14,11 @@
  * nearlyEqual(1.0, 1.009, undefined, 0.02);       // true
  * nearlyEqual(0.000000001, 0.0, undefined, 1e-8); // true
  */
+/**
+ * Internal structural contract for the BigNumber values compared here. Inputs
+ * are accepted as `unknown` (callers pass a variety of duck-typed BigNumber
+ * shapes) and narrowed to this contract for the actual comparison.
+ */
 interface BigNumberLike {
   isNaN(): boolean;
   isFinite(): boolean;
@@ -27,12 +32,7 @@ interface BigNumberLike {
   };
 }
 
-export function nearlyEqual(
-  a: BigNumberLike,
-  b: BigNumberLike,
-  relTol = 1e-9,
-  absTol = 0
-): boolean {
+export function nearlyEqual(a: unknown, b: unknown, relTol = 1e-9, absTol = 0): boolean {
   if (relTol <= 0) {
     throw new Error('Relative tolerance must be greater than 0');
   }
@@ -40,21 +40,25 @@ export function nearlyEqual(
   if (absTol < 0) {
     throw new Error('Absolute tolerance must be at least 0');
   }
+
+  const x = a as BigNumberLike;
+  const y = b as BigNumberLike;
+
   // NaN
-  if (a.isNaN() || b.isNaN()) {
+  if (x.isNaN() || y.isNaN()) {
     return false;
   }
 
-  if (!a.isFinite() || !b.isFinite()) {
-    return a.eq(b);
+  if (!x.isFinite() || !y.isFinite()) {
+    return x.eq(y);
   }
   // use "==" operator, handles infinities
-  if (a.eq(b)) {
+  if (x.eq(y)) {
     return true;
   }
   // abs(a-b) <= max(relTol * max(abs(a), abs(b)), absTol)
-  return a
-    .minus(b)
+  return x
+    .minus(y)
     .abs()
-    .lte(a.constructor.max(a.constructor.max(a.abs(), b.abs()).mul(relTol), absTol));
+    .lte(x.constructor.max(x.constructor.max(x.abs(), y.abs()).mul(relTol), absTol));
 }
