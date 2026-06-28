@@ -1,6 +1,7 @@
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array size for WASM to be beneficial
 const WASM_FFT_THRESHOLD = 64; // At least 64 elements
@@ -16,8 +17,8 @@ function isPowerOf2(n: number): boolean {
  * Convert complex array to interleaved Float64Array [re0, im0, re1, im1, ...]
  */
 function complexToInterleaved(
-  arr: any[],
-  _complex: (re: number, im?: number) => any
+  arr: unknown[],
+  _complex: (re: number, im?: number) => unknown
 ): Float64Array | null {
   const n = arr.length;
   const result = new Float64Array(n * 2);
@@ -26,9 +27,13 @@ function complexToInterleaved(
     if (typeof val === 'number') {
       result[i * 2] = val;
       result[i * 2 + 1] = 0;
-    } else if (val && typeof val.re === 'number' && typeof val.im === 'number') {
-      result[i * 2] = val.re;
-      result[i * 2 + 1] = val.im;
+    } else if (
+      val &&
+      typeof (val as { re?: unknown }).re === 'number' &&
+      typeof (val as { im?: unknown }).im === 'number'
+    ) {
+      result[i * 2] = (val as { re: number }).re;
+      result[i * 2 + 1] = (val as { im: number }).im;
     } else {
       // Unsupported type, fall back to JS
       return null;
@@ -43,9 +48,9 @@ function complexToInterleaved(
 function interleavedToComplex(
   data: Float64Array,
   n: number,
-  complex: (re: number, im?: number) => any
-): any[] {
-  const result: any[] = [];
+  complex: (re: number, im?: number) => unknown
+): unknown[] {
+  const result: unknown[] = [];
   for (let i = 0; i < n; i++) {
     result.push(complex(data[i * 2], data[i * 2 + 1]));
   }
@@ -57,18 +62,15 @@ function interleavedToComplex(
 
 // Type definitions for FFT operations
 type ComplexNumber = { re: number; im: number } | number;
-type ComplexArray = ComplexNumber[];
-type ComplexArrayND = ComplexNumber[] | any[];
-
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-  convert(value: any, type: string): any;
-}
+/** Complex/number values flow through dynamically-dispatched scalar ops */
+type ComplexArray = unknown[];
+type ComplexArrayND = unknown;
+/** A scalar operation resolved from a typed-function */
+type ScalarFn = (...args: unknown[]) => unknown;
 
 interface Matrix {
-  _data?: any[] | any[][];
-  _values?: any[];
+  _data?: unknown[] | unknown[][];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
@@ -76,25 +78,25 @@ interface Matrix {
   storage(): 'dense' | 'sparse';
   size(): number[];
   getDataType(): string;
-  create(data: any[], datatype?: string): Matrix;
-  valueOf(): any[] | any[][];
+  create(data: unknown[], datatype?: string): Matrix;
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (data: any[], storage?: 'dense' | 'sparse') => Matrix;
-  addScalar: TypedFunction;
-  multiplyScalar: TypedFunction;
-  divideScalar: TypedFunction;
-  exp: TypedFunction;
+  matrix: (data: unknown[], storage?: 'dense' | 'sparse') => Matrix;
+  addScalar: ScalarFn;
+  multiplyScalar: ScalarFn;
+  divideScalar: ScalarFn;
+  exp: ScalarFn;
   tau: number;
   i: ComplexNumber;
-  dotDivide: TypedFunction;
-  conj: TypedFunction;
-  pow: TypedFunction;
-  ceil: TypedFunction;
-  log2: TypedFunction;
-  complex: (re: number, im?: number) => any;
+  dotDivide: ScalarFn;
+  conj: ScalarFn;
+  pow: ScalarFn;
+  ceil: ScalarFn;
+  log2: ScalarFn;
+  complex: (re: number, im?: number) => unknown;
 }
 
 // FFT WASM integration note:
@@ -164,7 +166,7 @@ export const createFft = /* #__PURE__ */ factory(
     return typed(name, {
       Array: _ndFft,
       Matrix: function (matrix: Matrix): Matrix {
-        return matrix.create(_ndFft(matrix.valueOf()), matrix._datatype);
+        return matrix.create(_ndFft(matrix.valueOf()) as unknown[], matrix._datatype);
       },
     });
 
@@ -174,12 +176,12 @@ export const createFft = /* #__PURE__ */ factory(
      * @param {Array} arr      The array
      * @return {Array}         resulting array
      */
-    function _ndFft(arr: ComplexArrayND): any {
+    function _ndFft(arr: ComplexArrayND): unknown {
       const size = arraySize(arr);
       if (size.length === 1) return _fft(arr as ComplexArray, size[0]);
       // ndFft along dimension 1,...,N-1 then 1dFft along dimension 0
       return _1dFft(
-        (arr as any[]).map((slice) => _ndFft(slice)),
+        (arr as unknown[]).map((slice) => _ndFft(slice)),
         0
       );
     }
@@ -191,32 +193,32 @@ export const createFft = /* #__PURE__ */ factory(
      * @param {number} dim     dimension of the array to perform on
      * @return {Array}         resulting array
      */
-    function _1dFft(arr: ComplexArrayND, dim: number): any {
+    function _1dFft(arr: ComplexArrayND, dim: number): unknown {
       const size = arraySize(arr);
       if (dim !== 0) {
-        const result: any[] = [];
+        const result: unknown[] = [];
         for (let i = 0; i < size[0]; i++) {
-          result.push(_1dFft((arr as any[])[i], dim - 1));
+          result.push(_1dFft((arr as unknown[])[i], dim - 1));
         }
         return result;
       }
       if (size.length === 1) return _fft(arr as ComplexArray);
 
-      function _transpose(arr: any[]): any[] {
+      function _transpose(arr: unknown[]): unknown[] {
         // Swap first 2 dimensions
         const size = arraySize(arr);
-        const result: any[] = [];
+        const result: unknown[] = [];
         for (let j = 0; j < size[1]; j++) {
-          const row: any[] = [];
+          const row: unknown[] = [];
           for (let i = 0; i < size[0]; i++) {
-            row.push(arr[i][j]);
+            row.push((arr[i] as unknown[])[j]);
           }
           result.push(row);
         }
         return result;
       }
 
-      return _transpose(_1dFft(_transpose(arr as any[]), 1) as any[]);
+      return _transpose(_1dFft(_transpose(arr as unknown[]), 1) as unknown[]);
     }
 
     /**
@@ -228,19 +230,19 @@ export const createFft = /* #__PURE__ */ factory(
     function _czt(arr: ComplexArray): ComplexArray {
       const n = arr.length;
       const w = exp(divideScalar(multiplyScalar(-1, multiplyScalar(I, tau)), n));
-      const chirp: ComplexNumber[] = [];
+      const chirp: unknown[] = [];
       for (let i = 1 - n; i < n; i++) {
         chirp.push(pow(w, divideScalar(pow(i, 2), 2)));
       }
-      const N2 = pow(2, ceil(log2(n + n - 1)));
-      const xp: ComplexNumber[] = [];
+      const N2 = pow(2, ceil(log2(n + n - 1))) as number;
+      const xp: unknown[] = [];
       for (let i = 0; i < n; i++) {
         xp.push(multiplyScalar(arr[i], chirp[n - 1 + i]));
       }
       for (let i = 0; i < N2 - n; i++) {
         xp.push(0);
       }
-      const ichirp: ComplexNumber[] = [];
+      const ichirp: unknown[] = [];
       for (let i = 0; i < n + n - 1; i++) {
         ichirp.push(divideScalar(1, chirp[i]));
       }
@@ -249,12 +251,12 @@ export const createFft = /* #__PURE__ */ factory(
       }
       const fftXp = _fft(xp);
       const fftIchirp = _fft(ichirp);
-      const fftProduct: ComplexNumber[] = [];
+      const fftProduct: unknown[] = [];
       for (let i = 0; i < N2; i++) {
         fftProduct.push(multiplyScalar(fftXp[i], fftIchirp[i]));
       }
-      const ifftProduct = dotDivide(conj(_ndFft(conj(fftProduct))), N2);
-      const ret: ComplexNumber[] = [];
+      const ifftProduct = dotDivide(conj(_ndFft(conj(fftProduct))), N2) as unknown[];
+      const ret: unknown[] = [];
       for (let i = n - 1; i < n + n - 1; i++) {
         ret.push(multiplyScalar(ifftProduct[i], chirp[i]));
       }
@@ -298,7 +300,7 @@ export const createFft = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       if (length % 2 === 0) {
-        const ret: ComplexNumber[] = [
+        const ret: unknown[] = [
           ..._fft(
             arr.filter((_, i) => i % 2 === 0),
             length / 2
