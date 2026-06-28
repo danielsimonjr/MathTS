@@ -8,7 +8,7 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values: any[];
+  _values: unknown[];
   _index: number[];
   _ptr: number[];
 }
@@ -48,7 +48,7 @@ export const createCsSpsolve = /* #__PURE__ */ factory(
       b: SparseMatrixData,
       k: number,
       xi: number[],
-      x: any[],
+      x: unknown[],
       pinv: number[] | null,
       lo: boolean
     ): number {

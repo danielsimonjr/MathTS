@@ -12,7 +12,7 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }
@@ -26,8 +26,8 @@ interface CsSqrDependencies {
 // Symbolic analysis result
 export interface SymbolicAnalysis {
   q: number[] | null;
-  parent?: number[];
-  cp?: number[];
+  parent?: number[] | null;
+  cp?: number[] | null;
   pinv?: number[];
   leftmost?: number[];
   lnz?: number;
@@ -68,7 +68,7 @@ export const createCsSqr = /* #__PURE__ */ factory(
       // vars
       let k: number;
       // symbolic analysis result
-      const s: any = {};
+      const s = {} as SymbolicAnalysis;
       // fill-reducing ordering
       s.q = csAmd(order, a);
       // validate results
@@ -79,7 +79,12 @@ export const createCsSqr = /* #__PURE__ */ factory(
       if (qr) {
         // apply permutations if needed
         const c = order
-          ? (csPermute(a as any, null, s.q, false) as unknown as SparseMatrixData)
+          ? (csPermute(
+              a as unknown as Parameters<typeof csPermute>[0],
+              null,
+              s.q,
+              false
+            ) as unknown as SparseMatrixData)
           : a;
         // etree of C'*C, where C=A(:,q)
         s.parent = csEtree(c, true);

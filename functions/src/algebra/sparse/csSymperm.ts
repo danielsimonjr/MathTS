@@ -8,14 +8,14 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }
 
 interface SparseMatrixConstructor {
   new (data: {
-    values: any[] | null;
+    values: unknown[] | null;
     index: number[];
     ptr: number[];
     size: number[];
@@ -59,7 +59,7 @@ export const createCsSymperm = /* #__PURE__ */ factory(
       // columns
       const n = asize[1];
       // C matrix arrays
-      const cvalues: any[] | null = values && avalues ? [] : null;
+      const cvalues: unknown[] | null = values && avalues ? [] : null;
       const cindex: number[] = []; // (nz)
       const cptr: number[] = []; // (n + 1)
       // variables

@@ -9,13 +9,13 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values: any[];
+  _values: unknown[];
   _index: number[];
   _ptr: number[];
 }
 
 interface SparseMatrixConstructor {
-  new (data: { values: any[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
+  new (data: { values: unknown[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
 }
 
 interface CsCholDependencies {
@@ -98,7 +98,7 @@ export const createCsChol = /* #__PURE__ */ factory(
       const cp = s.cp;
       const pinv = s.pinv;
       // L arrays
-      const lvalues: any[] = [];
+      const lvalues: unknown[] = [];
       const lindex: number[] = [];
       const lptr: number[] = [];
       // L
@@ -110,7 +110,7 @@ export const createCsChol = /* #__PURE__ */ factory(
       });
       // vars
       const c: number[] = []; // (2 * n)
-      const x: any[] = []; // (n)
+      const x: unknown[] = []; // (n)
       // compute C = P * A * P'
       const cm = pinv ? csSymperm(m, pinv, true) : m;
       // C matrix arrays

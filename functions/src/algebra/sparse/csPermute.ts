@@ -5,12 +5,12 @@
 // Sparse matrix internal structure
 interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
   _datatype?: string;
   createSparseMatrix(data: {
-    values: any[] | null;
+    values: unknown[] | null;
     index: number[];
     ptr: number[];
     size: number[];
@@ -44,7 +44,7 @@ export function csPermute(
   const m = asize[0];
   const n = asize[1];
   // c arrays
-  const cvalues: any[] | null = values && a._values ? [] : null;
+  const cvalues: unknown[] | null = values && a._values ? [] : null;
   const cindex: number[] = []; // (aptr[n])
   const cptr: number[] = []; // (n + 1)
   // initialize vars

@@ -14,7 +14,7 @@ const WASM_AMD_THRESHOLD = 100;
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }

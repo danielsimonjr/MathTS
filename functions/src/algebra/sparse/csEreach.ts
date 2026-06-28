@@ -7,7 +7,7 @@ import { csMarked } from './csMarked.js';
 // Sparse matrix internal structure
 interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }

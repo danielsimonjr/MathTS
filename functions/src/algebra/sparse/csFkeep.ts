@@ -5,7 +5,7 @@
 // Sparse matrix internal structure
 interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }
@@ -45,7 +45,7 @@ export function csFkeep<T, S = unknown>(
     aptr[j] = nz;
     for (; p < aptr[j + 1]; p++) {
       // check we need to keep this item
-      if (callback(aindex[p], j, avalues ? avalues[p] : 1, other)) {
+      if (callback(aindex[p], j, (avalues ? avalues[p] : 1) as T, other)) {
         // keep A(i,j)
         aindex[nz] = aindex[p];
         // check we need to process values (pattern only)

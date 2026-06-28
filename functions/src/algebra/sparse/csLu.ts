@@ -9,13 +9,13 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values: any[];
+  _values: unknown[];
   _index: number[];
   _ptr: number[];
 }
 
 interface SparseMatrixConstructor {
-  new (data: { values: any[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
+  new (data: { values: unknown[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
 }
 
 interface CsLuDependencies {
@@ -96,7 +96,7 @@ export const createCsLu = /* #__PURE__ */ factory(
         unz = s.unz || unz;
       }
       // L arrays
-      const lvalues: any[] = []; // (lnz)
+      const lvalues: unknown[] = []; // (lnz)
       const lindex: number[] = []; // (lnz)
       const lptr: number[] = []; // (n + 1)
       // L
@@ -107,7 +107,7 @@ export const createCsLu = /* #__PURE__ */ factory(
         size: [n, n],
       });
       // U arrays
-      const uvalues: any[] = []; // (unz)
+      const uvalues: unknown[] = []; // (unz)
       const uindex: number[] = []; // (unz)
       const uptr: number[] = []; // (n + 1)
       // U
@@ -122,7 +122,7 @@ export const createCsLu = /* #__PURE__ */ factory(
       // vars
       let i: number, p: number;
       // allocate arrays
-      const x: any[] = []; // (n)
+      const x: unknown[] = []; // (n)
       const xi: number[] = []; // (2 * n)
       // initialize variables
       for (i = 0; i < n; i++) {

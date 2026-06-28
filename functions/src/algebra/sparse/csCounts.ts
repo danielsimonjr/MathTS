@@ -12,7 +12,7 @@ const WASM_COUNTS_THRESHOLD = 50;
 // Sparse matrix internal structure
 export interface SparseMatrixData {
   _size: number[];
-  _values?: any[];
+  _values?: unknown[];
   _index: number[];
   _ptr: number[];
 }
