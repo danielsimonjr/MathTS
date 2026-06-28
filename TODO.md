@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-05-25
+Updated: 2026-06-27
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
@@ -606,6 +606,19 @@ Detail:
       compile-time shape inference in the TS type system.
 
 ## ✅ Completed
+
+### 2026-06-27 session — Rust removal · dormant purge · strict mode · lint cleanup
+
+- [x] **Rust → AssemblyScript migration complete**, then **all Rust scrubbed** from docs *and* code — zero `Rust` outside the 3 CHANGELOGs. AssemblyScript is the sole WASM backend.
+- [x] **Dormant code purged**: 455 synced-mathjs files (~58.6k LOC) from `functions/`+`core/`, plus 26 vestigial AS-source-as-`.ts` (~14k LOC) from `functions/src/wasm/`.
+- [x] **AS-vs-JS WASM benchmark suite** recreated (the old Rust-dependent suite was deleted with the migration).
+- [x] **Monorepo-wide `strict: true`** — `functions` (430 errors fixed honestly, incl. **2 real CSparse port bugs**) + `expression` flipped; all relaxed compiler flags (`noUnusedLocals`/`noUnusedParameters`/`noImplicitReturns`/`noFallthroughCasesInSwitch`) tightened in `functions`+`expression`.
+- [x] **Lint → 0 warnings (honest typing, no `eslint-disable`)**: `core`, `parallel`, `workerpool`. Also disabled core `no-undef` for TS (typescript-eslint best practice) — eliminated ~9k false positives.
+- [x] Bugs fixed along the way: JS-eig-returns-zeros, 2 CSparse typos, poly corruption, 2 numeric, turbo build-ordering footgun, js-yaml CVE, an exit-0-masked test failure.
+- [ ] **`expression` lint → 0** — IN PROGRESS (honest `no-explicit-any` typing; ~1,168 remaining as of 2026-06-27).
+- [ ] **`functions` lint → 0** — PENDING (largest: ~2,336 warnings, mostly `no-explicit-any` in activated factory code). Goal: zero lint warnings repo-wide **except `workbook/`** (user's active headless+GUI track, left untouched).
+
+> Repo health at session checkpoint: typecheck 28/28, build 22/22, test 44/44, `npm audit` 0 vulns, zero Rust. Details in `CHANGELOG.md` `[Unreleased]`.
 
 - [x] TypeScript conversion (src/) - 66% coverage, 0 errors
 - [x] TypeScript conversion (test/) - 65% coverage
