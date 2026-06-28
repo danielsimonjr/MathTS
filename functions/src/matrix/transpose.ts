@@ -8,8 +8,8 @@ import type { TypedFunction } from '../core/function/typed.js';
 const WASM_TRANSPOSE_THRESHOLD = 100;
 
 interface MatrixData {
-  data?: any[] | any[][];
-  values?: any[];
+  data?: unknown[] | unknown[][];
+  values?: unknown[];
   index?: number[];
   ptr?: number[];
   size: number[];
@@ -17,36 +17,36 @@ interface MatrixData {
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][];
+  _data: unknown[] | unknown[][];
   _size: number[];
   _datatype?: string;
   storage(): 'dense';
   size(): number[];
   getDataType(): string;
   createDenseMatrix(data: MatrixData): DenseMatrix;
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
   clone(): DenseMatrix;
 }
 
 interface SparseMatrix {
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
-  _data?: any;
+  _data?: unknown;
   storage(): 'sparse';
   size(): number[];
   getDataType(): string;
   createSparseMatrix(data: MatrixData): SparseMatrix;
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
   clone(): SparseMatrix;
 }
 
 type Matrix = DenseMatrix | SparseMatrix;
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface TransposeDependencies {
@@ -57,7 +57,7 @@ interface TransposeDependencies {
 /**
  * Check if a 2D array contains only plain numbers
  */
-function isPlainNumberMatrix(matrix: any[][]): boolean {
+function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
     const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
@@ -112,7 +112,7 @@ export const createTranspose = /* #__PURE__ */ factory(
      * @return {Array | Matrix}   The transposed matrix
      */
     return typed(name, {
-      Array: (x: any[]): any[] => transposeMatrix(matrix(x)).valueOf() as any[],
+      Array: (x: unknown[]): unknown[] => transposeMatrix(matrix(x)).valueOf() as unknown[],
       Matrix: transposeMatrix,
       any: clone, // scalars
     });
@@ -180,13 +180,13 @@ export const createTranspose = /* #__PURE__ */ factory(
      */
     function _denseTranspose(m: DenseMatrix, rows: number, columns: number): DenseMatrix {
       // matrix array
-      const data = m._data as any[][];
+      const data = m._data as unknown[][];
 
       // Try WASM for large matrices with plain numbers
       const wasm = wasmLoader.getModule();
       if (wasm && rows * columns >= WASM_TRANSPOSE_THRESHOLD && isPlainNumberMatrix(data)) {
         try {
-          const flat = flattenToFloat64(data, rows, columns);
+          const flat = flattenToFloat64(data as number[][], rows, columns);
           const input = wasmLoader.allocateFloat64Array(flat);
           const output = wasmLoader.allocateFloat64ArrayEmpty(rows * columns);
           try {
@@ -215,8 +215,8 @@ export const createTranspose = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback
-      const transposed: any[][] = [];
-      let transposedRow: any[];
+      const transposed: unknown[][] = [];
+      let transposedRow: unknown[];
       // loop columns
       for (let j = 0; j < columns; j++) {
         // initialize row
@@ -248,7 +248,7 @@ export const createTranspose = /* #__PURE__ */ factory(
       const index = m._index!;
       const ptr = m._ptr!;
       // result matrices
-      const cvalues: any[] | undefined = values ? [] : undefined;
+      const cvalues: unknown[] | undefined = values ? [] : undefined;
       const cindex: number[] = [];
       const cptr: number[] = [];
       // row counts
