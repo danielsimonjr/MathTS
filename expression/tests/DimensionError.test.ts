@@ -131,9 +131,10 @@ describe('DimensionError - usage in throw/catch', () => {
   it('message is preserved when caught', () => {
     try {
       throw new DimensionError(5, 6, '!=');
-    } catch (e: any) {
-      expect(e.message).toBe('Dimension mismatch (5 != 6)');
-      expect(e.isDimensionError).toBe(true);
+    } catch (e) {
+      const err = e as DimensionError;
+      expect(err.message).toBe('Dimension mismatch (5 != 6)');
+      expect(err.isDimensionError).toBe(true);
     }
   });
 

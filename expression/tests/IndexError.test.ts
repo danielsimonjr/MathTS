@@ -126,9 +126,10 @@ describe('IndexError - throw and catch', () => {
   it('message is preserved in catch', () => {
     try {
       throw new IndexError(5, 0, 3);
-    } catch (e: any) {
-      expect(e.message).toBe('Index out of range (5 > 2)');
-      expect(e.isIndexError).toBe(true);
+    } catch (e) {
+      const err = e as IndexError;
+      expect(err.message).toBe('Index out of range (5 > 2)');
+      expect(err.isIndexError).toBe(true);
     }
   });
 

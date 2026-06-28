@@ -8,11 +8,11 @@ import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js'
  *  - security rejections surfacing through forEach
  */
 
-function constantNode(value: any) {
+function constantNode(value: unknown) {
   return { type: 'ConstantNode', isConstantNode: true, value };
 }
 
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
 };
 
@@ -26,7 +26,7 @@ describe('evaluator validateAst - forEach traversal path', () => {
         isOperatorNode: true,
         fn: 'add',
         args: [child, constantNode(0)],
-        forEach(cb: (c: any) => void) {
+        forEach(cb: (c: unknown) => void) {
           cb(child);
           cb(constantNode(0));
         },
@@ -42,7 +42,7 @@ describe('evaluator validateAst - forEach traversal path', () => {
         isOperatorNode: true,
         fn: 'add',
         args: [],
-        forEach(cb: (c: any) => void) {
+        forEach(cb: (c: unknown) => void) {
           // a child that is a forbidden assignment node
           cb({ isAssignmentNode: true });
         },

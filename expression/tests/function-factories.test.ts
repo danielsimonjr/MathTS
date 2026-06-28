@@ -154,7 +154,7 @@ describe('function/help factory', () => {
     });
     const result = help('sin');
     expect(result).toBeInstanceOf(FakeHelp);
-    expect((result as any).doc).toBeTruthy();
+    expect((result as FakeHelp).doc).toBeTruthy();
   });
 
   it('resolves a function reference back to its name', () => {

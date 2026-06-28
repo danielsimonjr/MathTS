@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parse, math, OperatorNode, ConstantNode, SymbolNode } from './helpers/bootstrap.js';
 
-const c = (v: any) => new ConstantNode(v);
+const c = (v: unknown) => new ConstantNode(v);
 const s = (n: string) => new SymbolNode(n);
 
 describe('OperatorNode._compile - arity dispatch', () => {

@@ -19,13 +19,14 @@ function makeNumericIndex(_i: number) {
 
 // ── Minimal subset implementation (for arrays and strings) ────────────────
 
-function subsetGet(obj: any, index: any): any {
+function subsetGet(obj: unknown, index: unknown): unknown {
+  const i = (index as { _i: number })._i;
   if (Array.isArray(obj)) {
     // Very simple 1D subset extraction for tests
-    return obj[index._i];
+    return obj[i];
   }
   if (typeof obj === 'string') {
-    return obj[index._i];
+    return obj[i];
   }
   throw new Error('Not supported by mock subset');
 }
@@ -103,7 +104,7 @@ describe('access - string access via subset', () => {
 describe('access - Matrix-like object (has .subset method)', () => {
   it('calls the .subset method on Matrix-like objects', () => {
     const matrix = {
-      subset: (index: any) => `matrix[${JSON.stringify(index)}]`,
+      subset: (index: unknown) => `matrix[${JSON.stringify(index)}]`,
     };
     const index = makeSimpleNumericIndex(2);
     const result = access(matrix, index);

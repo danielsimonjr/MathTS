@@ -8,7 +8,7 @@ import { parse, OperatorNode, ConstantNode, SymbolNode } from './helpers/bootstr
  * `parenthesis` and `implicit` option matrix.
  */
 
-const c = (v: any) => new ConstantNode(v);
+const c = (v: unknown) => new ConstantNode(v);
 const s = (n: string) => new SymbolNode(n);
 
 describe('OperatorNode - parenthesis modes (toString/toTex/toHTML)', () => {

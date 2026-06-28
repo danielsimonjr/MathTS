@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   guard (`no-unsafe-function-type`); and silenced genuinely-unused test
   scaffolding via `_`-prefix / removal. No runtime behavior changed; expression
   suite stays green (1966 tests, incl. the sandbox security regression test).
+- Drove `expression/tests/**` to ZERO eslint warnings: replaced the remaining
+  58 `no-explicit-any` findings (and one unused-var error) with real types —
+  `catch (e: any)` narrowed via `as DimensionError`/`as IndexError`; mock
+  factory/node helpers typed with `unknown` + structural casts; internal-access
+  casts use the concrete class (`as FakeHelp`, `as ConstantNode`) rather than
+  `any`. No `eslint-disable`/`@ts-ignore`/`any`-alias used. Behavior preserved
+  (1966 tests pass).
 
 ### Changed (2026-06-27) — `core`, `parallel`, `workerpool` driven to ZERO eslint warnings (honest typing)
 
