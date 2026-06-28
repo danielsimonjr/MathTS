@@ -1,12 +1,12 @@
 import { factory } from '../utils/factory.js';
 
 // Type definitions
-type NestedArray<T = any> = T | NestedArray<T>[];
-type MatrixData = NestedArray<any>;
+type NestedArray<T = unknown> = T | NestedArray<T>[];
+type MatrixData = NestedArray<unknown>;
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
+  find(func: unknown, signature: string[]): TypedFunction<T>;
 }
 
 interface Matrix {
@@ -23,15 +23,15 @@ interface Matrix {
 }
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface FlattenFunction {
-  (arr: any): any[];
+  (arr: unknown): unknown[];
 }
 
 interface SizeFunction {
-  (arr: any): number[];
+  (arr: unknown): number[];
 }
 
 interface Dependencies {
@@ -72,19 +72,23 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
      */
     return typed(name, {
       // Single variadic handler for arrays, matrices, and mixed types
-      '...': function (arr: (any[] | Matrix)[]): any[][] | Matrix {
+      '...': function (arr: (unknown[] | Matrix)[]): unknown[][] | Matrix {
         if (arr.length === 0) {
           throw new TypeError('At least one row is needed to construct a matrix.');
         }
 
         // Check if all arguments are Matrix (none are plain arrays)
-        const allMatrix = arr.every((item) => typeof (item as any).toArray === 'function');
+        const allMatrix = arr.every(
+          (item) => typeof (item as { toArray?: unknown }).toArray === 'function'
+        );
         // Check if any argument is a plain array
         const hasArray = arr.some((item) => Array.isArray(item));
 
         // Convert all to arrays for processing
         const arrays = arr.map((item) =>
-          typeof (item as any).toArray === 'function' ? (item as Matrix).toArray() : item
+          typeof (item as { toArray?: unknown }).toArray === 'function'
+            ? (item as Matrix).toArray()
+            : item
         );
 
         const result = _createArray(arrays);
@@ -99,12 +103,12 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
       // TODO implement this properly for SparseMatrix
     });
 
-    function _createArray(arr: any[]): any[][] {
+    function _createArray(arr: unknown[]): unknown[][] {
       if (arr.length === 0)
         throw new TypeError('At least one row is needed to construct a matrix.');
       const N = checkVectorTypeAndReturnLength(arr[0]);
 
-      const result: any[][] = [];
+      const result: unknown[][] = [];
       for (const row of arr) {
         const rowLength = checkVectorTypeAndReturnLength(row);
 
@@ -120,7 +124,7 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
       return result;
     }
 
-    function checkVectorTypeAndReturnLength(vec: any): number {
+    function checkVectorTypeAndReturnLength(vec: unknown): number {
       const s = size(vec);
 
       if (s.length === 1) {

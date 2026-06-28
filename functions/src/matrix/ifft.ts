@@ -17,8 +17,8 @@ function isPowerOf2(n: number): boolean {
  * Convert complex array to interleaved Float64Array [re0, im0, re1, im1, ...]
  */
 function complexToInterleaved(
-  arr: any[],
-  _complex: (re: number, im?: number) => any
+  arr: unknown[],
+  _complex: (re: number, im?: number) => unknown
 ): Float64Array | null {
   const n = arr.length;
   const result = new Float64Array(n * 2);
@@ -27,9 +27,14 @@ function complexToInterleaved(
     if (typeof val === 'number') {
       result[i * 2] = val;
       result[i * 2 + 1] = 0;
-    } else if (val && typeof val.re === 'number' && typeof val.im === 'number') {
-      result[i * 2] = val.re;
-      result[i * 2 + 1] = val.im;
+    } else if (
+      val &&
+      typeof (val as { re?: unknown }).re === 'number' &&
+      typeof (val as { im?: unknown }).im === 'number'
+    ) {
+      const cval = val as { re: number; im: number };
+      result[i * 2] = cval.re;
+      result[i * 2 + 1] = cval.im;
     } else {
       // Unsupported type, fall back to JS
       return null;
@@ -44,9 +49,9 @@ function complexToInterleaved(
 function interleavedToComplex(
   data: Float64Array,
   n: number,
-  complex: (re: number, im?: number) => any
-): any[] {
-  const result: any[] = [];
+  complex: (re: number, im?: number) => unknown
+): unknown[] {
+  const result: unknown[] = [];
   for (let i = 0; i < n; i++) {
     result.push(complex(data[i * 2], data[i * 2 + 1]));
   }
@@ -57,15 +62,15 @@ function interleavedToComplex(
 type ComplexNumber = { re: number; im: number } | number;
 type ComplexArrayND = ComplexNumber[] | ComplexArrayND[];
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-  convert(value: any, type: string): any;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
+  find(func: unknown, signature: string[]): TypedFunction<T>;
+  convert(value: unknown, type: string): unknown;
 }
 
 interface Matrix {
-  _data?: any[] | any[][];
-  _values?: any[];
+  _data?: unknown[] | unknown[][];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
@@ -73,8 +78,8 @@ interface Matrix {
   storage(): 'dense' | 'sparse';
   size(): number[];
   getDataType(): string;
-  create(data: any[], datatype?: string): Matrix;
-  valueOf(): any[] | any[][];
+  create(data: unknown[], datatype?: string): Matrix;
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface Dependencies {
@@ -82,7 +87,7 @@ interface Dependencies {
   fft: TypedFunction<ComplexArrayND | Matrix>;
   dotDivide: TypedFunction;
   conj: TypedFunction;
-  complex: (re: number, im?: number) => any;
+  complex: (re: number, im?: number) => unknown;
 }
 
 const name = 'ifft';
@@ -121,7 +126,7 @@ export const createIfft = /* #__PURE__ */ factory(
           const wasm = wasmLoader.getModule();
           if (wasm && length >= WASM_IFFT_THRESHOLD && isPowerOf2(length)) {
             const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
-            const interleaved = complexToInterleaved(arrData as any[], complex);
+            const interleaved = complexToInterleaved(arrData as unknown[], complex);
             if (interleaved) {
               try {
                 const dataAlloc = wasmLoader.allocateFloat64Array(interleaved);
@@ -132,7 +137,7 @@ export const createIfft = /* #__PURE__ */ factory(
                   if (isMatrix(arr)) {
                     return (arr as Matrix).create(result);
                   }
-                  return result;
+                  return result as ComplexArrayND;
                 } finally {
                   wasmLoader.free(dataAlloc.ptr);
                 }
@@ -144,7 +149,7 @@ export const createIfft = /* #__PURE__ */ factory(
         }
 
         // JavaScript fallback
-        return dotDivide(conj(fft(conj(arr))), totalSize);
+        return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
       },
     });
   }

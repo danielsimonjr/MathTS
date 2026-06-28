@@ -3,6 +3,9 @@ import { factory } from '../utils/factory.js';
 
 import { TypedFunction, Matrix } from '../types.js';
 
+/** Comparator: returns >0, 0, or <0 for (a, b). */
+type CompareFn = (a: unknown, b: unknown) => number;
+
 const name = 'sort';
 const dependencies = ['typed', 'matrix', 'compare', 'compareNatural'];
 
@@ -16,12 +19,12 @@ export const createSort = /* #__PURE__ */ factory(
     compareNatural,
   }: {
     typed: TypedFunction;
-    matrix: any;
-    compare: any;
-    compareNatural: (a: any, b: any) => number;
+    matrix: (data: unknown, storage?: string) => Matrix;
+    compare: CompareFn;
+    compareNatural: CompareFn;
   }): TypedFunction => {
     const compareAsc = compare;
-    const compareDesc = (a: any, b: any) => -compare(a, b);
+    const compareDesc = (a: unknown, b: unknown): number => -compare(a, b);
 
     /**
      * Sort the items in a matrix.
@@ -55,7 +58,7 @@ export const createSort = /* #__PURE__ */ factory(
      * @return {Matrix | Array} Returns the sorted matrix.
      */
     return typed(name, {
-      Array: function (x: any[]) {
+      Array: function (x: unknown[]) {
         _arrayIsVector(x);
         return x.sort(compareAsc);
       },
@@ -65,17 +68,17 @@ export const createSort = /* #__PURE__ */ factory(
         return matrix(x.toArray().sort(compareAsc), x.storage());
       },
 
-      'Array, function': function (x: any[], _comparator: Function): any[] {
+      'Array, function': function (x: unknown[], _comparator: CompareFn): unknown[] {
         _arrayIsVector(x);
-        return x.sort(_comparator as any);
+        return x.sort(_comparator);
       },
 
-      'Matrix, function': function (x: Matrix, _comparator: Function): Matrix {
+      'Matrix, function': function (x: Matrix, _comparator: CompareFn): Matrix {
         _matrixIsVector(x);
-        return matrix(x.toArray().sort(_comparator as any), x.storage());
+        return matrix(x.toArray().sort(_comparator), x.storage());
       },
 
-      'Array, string': function (x: any[], order: string): any[] {
+      'Array, string': function (x: unknown[], order: string): unknown[] {
         _arrayIsVector(x);
         return x.sort(_comparator(order));
       },
@@ -91,7 +94,7 @@ export const createSort = /* #__PURE__ */ factory(
      * @param {'asc' | 'desc' | 'natural'} order
      * @return {Function} Returns a _comparator function
      */
-    function _comparator(order: any) {
+    function _comparator(order: string): CompareFn {
       if (order === 'asc') {
         return compareAsc;
       } else if (order === 'desc') {
@@ -109,7 +112,7 @@ export const createSort = /* #__PURE__ */ factory(
      * @param {Array} array
      * @private
      */
-    function _arrayIsVector(array: any) {
+    function _arrayIsVector(array: unknown[]) {
       if (size(array).length !== 1) {
         throw new Error('One dimensional array expected');
       }
@@ -121,7 +124,7 @@ export const createSort = /* #__PURE__ */ factory(
      * @param {Matrix} matrix
      * @private
      */
-    function _matrixIsVector(matrix: any) {
+    function _matrixIsVector(matrix: Matrix) {
       if (matrix.size().length !== 1) {
         throw new Error('One dimensional matrix expected');
       }
