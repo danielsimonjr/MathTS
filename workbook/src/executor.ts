@@ -126,7 +126,8 @@ export class WorkbookExecutor {
         return this.executeTest(cell);
       case 'markdown':
       case 'equation':
-        return cell.content; // Markdown/equation are display-only pass-through
+      case 'visualization':
+        return cell.content; // Display-only cells: pass content through, no eval
       case 'data':
         return this.executeData(cell);
       default:

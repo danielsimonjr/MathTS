@@ -89,5 +89,29 @@ describe('mtsw export', () => {
     const r = await dispatch(['export', p, '--no-run']);
     expect(r.stdout).toContain('cell-test nrun');
   });
+
+  it('renders a visualization cell as an inline SVG chart from dependency data', async () => {
+    const p = fixture(
+      [
+        'cells:',
+        '  - data: "[1, 2, 3]"',
+        '    id: xs',
+        '  - data: "[10, 20, 30]"',
+        '    id: ys',
+        '  - visualization: |',
+        '      type: line',
+        '      title: Demo Chart',
+        '      x: { label: X, data: xs }',
+        '      y: { label: Y, data: ys }',
+        '    id: chart',
+        '    depends_on: [xs, ys]',
+      ].join('\n')
+    );
+    const r = await dispatch(['export', p]);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('<svg');
+    expect(r.stdout).toContain('<polyline');
+    expect(r.stdout).toContain('Demo Chart');
+  });
 });
 

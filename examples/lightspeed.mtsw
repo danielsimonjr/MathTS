@@ -3,7 +3,7 @@ version: "1.0"
 metadata:
   title: "Deriving the Speed of Light in a Vacuum"
   author: "MathTS Workbook"
-  description: "A live, self-verifying derivation of c via Maxwell's relation and a wavelength-frequency cross-check, using MathTS constants and functions."
+  description: "A live, self-verifying derivation of c via Maxwell's relation and a wavelength-frequency cross-check, with rendered equations and a chart — all MathTS-native."
   tags: [physics, electromagnetism, constants, derivation]
 
 runtime:
@@ -14,21 +14,18 @@ cells:
   - markdown: |
       # Deriving the Speed of Light in a Vacuum
 
-      The speed of light **c** can be derived from two electromagnetic
-      constants of free space — the vacuum permittivity **ε₀** and the vacuum
-      permeability **μ₀** — via Maxwell's relation:
-
-      c = 1 / sqrt(ε₀ · μ₀)
-
-      We then cross-check it against the wavelength-frequency relation c = λ·ν.
-      The values below are MathTS's `electricConstant`, `magneticConstant`, and
-      `speedOfLight`; all arithmetic uses MathTS functions.
+      The speed of light **c** follows from two electromagnetic constants of
+      free space — the vacuum permittivity **ε₀** and the vacuum permeability
+      **μ₀** — via Maxwell's relation:
     id: intro
+
+  - equation: "c = 1 / sqrt(epsilon_0 * mu_0)"
+    id: maxwellEq
 
   - markdown: |
       ## 1. Maxwell's relation
 
-      ε₀ (vacuum permittivity) and μ₀ (vacuum permeability), in SI units.
+      ε₀ and μ₀ in SI units (MathTS's `electricConstant` and `magneticConstant`):
     id: maxwellIntro
 
   - code: "8.8541878128e-12"
@@ -49,10 +46,17 @@ cells:
     depends_on: [cMaxwell, cDefined]
 
   - markdown: |
-      ## 2. Wavelength-frequency cross-check (c = λ·ν)
+      ## 2. Wavelength–frequency cross-check
 
-      A HeNe laser line: wavelength λ ≈ 632.8 nm, frequency ν ≈ 4.738e14 Hz.
+      In vacuum, every wave satisfies c = λ·ν:
     id: lambdaNuIntro
+
+  - equation: "c = lambda * nu"
+    id: lambdaNuEq
+
+  - markdown: |
+      A HeNe laser line: λ ≈ 632.8 nm, ν ≈ 4.738×10¹⁴ Hz.
+    id: heneNote
 
   - code: "632.8e-9"
     id: lambda
@@ -69,10 +73,31 @@ cells:
     depends_on: [cLambdaNu, cDefined]
 
   - markdown: |
+      ## 3. Dispersion-free vacuum
+
+      Across the visible spectrum, frequency is exactly inverse to wavelength
+      (ν = c/λ), since c is constant:
+    id: chartIntro
+
+  - data: "[4.0e-7, 5.0e-7, 6.0e-7, 7.0e-7]"
+    id: lambdas
+
+  - code: "cDefined ./ lambdas"
+    id: nus
+    depends_on: [cDefined, lambdas]
+
+  - visualization: |
+      type: line
+      title: "Vacuum: frequency vs wavelength (ν = c/λ)"
+      x: { label: "wavelength λ (m)", data: lambdas }
+      y: { label: "frequency ν (Hz)", data: nus }
+    id: dispersionChart
+    depends_on: [lambdas, nus]
+
+  - markdown: |
       ## Conclusion
 
-      Both routes reproduce c = 299,792,458 m/s — Maxwell's relation to within
-      floating-point precision, and λ·ν to within measurement tolerance. The
-      `test` cells make this document self-verifying: a green run proves the
-      derivation holds.
+      Both routes reproduce **c = 299,792,458 m/s** — Maxwell's relation to
+      floating-point precision and λ·ν to measurement tolerance — and the green
+      `test` cells make the document self-verifying.
     id: conclusion

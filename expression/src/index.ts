@@ -20,6 +20,8 @@ export * from './evaluator/index.js';
 // SVG charts, and self-contained HTML document assembly. Zero external deps.
 export { toMathML, mathMLError } from './toMathML.js';
 export { markdownToHtml } from './markdown.js';
+export { renderChart } from './svg.js';
+export type { ChartSpec } from './svg.js';
 export { toHTML, toCSS } from './html.js';
 export type { RenderDoc, RenderCell, ToHtmlOptions } from './html.js';
 

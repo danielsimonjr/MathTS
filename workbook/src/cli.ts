@@ -25,8 +25,9 @@ import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from
 import type { CellPosition } from './edit';
 import type { CellResult, Workbook, ParseResult, CellType } from './types';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
-import { toHTML } from '@danielsimonjr/mathts-expression';
+import { toHTML, renderChart } from '@danielsimonjr/mathts-expression';
 import type { RenderDoc, RenderCell } from '@danielsimonjr/mathts-expression';
+import { parseYamlHardened } from './yaml-safe';
 
 /**
  * The wired expression parser. `parse` is a real runtime export of the
@@ -478,9 +479,34 @@ export function metaCommand(args: string[]): CommandResult {
 
 /** Map a workbook (+ optional run results) to the generic render document. */
 function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null): RenderDoc {
+  // Resolve a chart data reference: a cell id -> that cell's output, or an inline array.
+  const lookup = (ref: unknown): unknown => {
+    if (typeof ref !== 'string') return ref;
+    return byId?.get(ref)?.output ?? workbook.cells.find((c) => c.id === ref)?.output;
+  };
+
   const cells = workbook.cells.map((c): RenderCell => {
     const rc: RenderCell = { type: c.type, content: c.content, id: c.id };
     if (c.type === 'markdown' || c.type === 'equation') return rc;
+    if (c.type === 'visualization') {
+      rc.type = 'chart';
+      try {
+        const spec = parseYamlHardened(c.content) as {
+          type?: 'line' | 'scatter' | 'bar';
+          title?: string;
+          x?: { label?: string; data?: unknown };
+          y?: { label?: string; data?: unknown };
+        };
+        rc.chartSvg = renderChart(
+          { type: spec?.type, title: spec?.title, xLabel: spec?.x?.label, yLabel: spec?.y?.label },
+          lookup(spec?.x?.data),
+          lookup(spec?.y?.data)
+        );
+      } catch {
+        rc.chartSvg = renderChart({}, [], []); // "no data" placeholder
+      }
+      return rc;
+    }
 
     const r = byId?.get(c.id);
     const status = r?.status;

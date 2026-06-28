@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deriving the Speed of Light in a Vacuum</title>
+<style>:root{--fg:#1a1a2e;--muted:#5a5a72;--bg:#fff;--code-bg:#f4f4f8;--border:#e0e0ea;--accent:#2a4d8f;--pass:#1a7f37;--fail:#cf222e;}*{box-sizing:border-box}body{margin:0;color:var(--fg);background:var(--bg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:48rem;margin:0 auto;padding:2rem 1.25rem}header{border-bottom:2px solid var(--border);margin-bottom:1.5rem;padding-bottom:1rem}.doc-title{margin:0 0 .25rem;font-size:1.9rem}.doc-meta,.doc-desc{color:var(--muted);margin:.15rem 0}.tag{display:inline-block;background:var(--code-bg);border:1px solid var(--border);border-radius:1rem;padding:.05rem .55rem;font-size:.8rem;margin-right:.3rem}.cell{margin:1.1rem 0}h1,h2,h3,h4{line-height:1.25}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;overflow:auto}.cell-code{border-left:3px solid var(--accent);padding-left:.9rem}.cell-code figcaption{color:var(--muted);font-size:.8rem;font-family:ui-monospace,monospace;margin-bottom:.2rem}.cell-output{background:#fafaff;border:1px solid var(--border);border-radius:6px;padding:.5rem .9rem;margin-top:.4rem;white-space:pre-wrap}.cell-error{background:#fff0f0;border:1px solid #f3c0c0;color:var(--fail);border-radius:6px;padding:.5rem .9rem;margin-top:.4rem}.cell-eq{text-align:center;margin:1.3rem 0}math{font-size:1.15rem}.cell-test{display:flex;align-items:center;gap:.5rem;font-size:.95rem}.cell-test .badge{font-weight:700;width:1.4rem;height:1.4rem;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#fff}.cell-test.pass .badge{background:var(--pass)}.cell-test.fail .badge{background:var(--fail)}.cell-test.err .badge{background:#9a6700}.cell-test.nrun .badge{background:#8a8a9a}.cell-test .note{color:var(--fail);font-size:.85rem}.cell-chart{text-align:center}.note{color:var(--muted)}</style>
+</head>
+<body>
+<main>
+<header><h1 class="doc-title">Deriving the Speed of Light in a Vacuum</h1><p class="doc-meta">by MathTS Workbook</p><p class="doc-desc">A live, self-verifying derivation of c via Maxwell's relation and a wavelength-frequency cross-check, with rendered equations and a chart — all MathTS-native.</p><p class="doc-tags"><span class="tag">physics</span><span class="tag">electromagnetism</span><span class="tag">constants</span><span class="tag">derivation</span></p></header>
+<section class="cell cell-md"><h1>Deriving the Speed of Light in a Vacuum</h1>
+<p>The speed of light <strong>c</strong> follows from two electromagnetic constants of free space — the vacuum permittivity <strong>ε₀</strong> and the vacuum permeability <strong>μ₀</strong> — via Maxwell's relation:</p></section>
+<figure class="cell cell-eq"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>c</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mrow><msub><mi>ε</mi><mn>0</mn></msub><mo>&#x22C5;</mo><msub><mi>μ</mi><mn>0</mn></msub></mrow></msqrt></mrow></mfrac></mrow></math></figure>
+<section class="cell cell-md"><h2>1. Maxwell's relation</h2>
+<p>ε₀ and μ₀ in SI units (MathTS's <code>electricConstant</code> and <code>magneticConstant</code>):</p></section>
+<figure class="cell cell-code"><figcaption>eps0</figcaption><pre class="src"><code>8.8541878128e-12</code></pre><div class="cell-output">8.8541878128e-12</div></figure>
+<figure class="cell cell-code"><figcaption>mu0</figcaption><pre class="src"><code>1.25663706212e-6</code></pre><div class="cell-output">0.00000125663706212</div></figure>
+<figure class="cell cell-code"><figcaption>cMaxwell</figcaption><pre class="src"><code>1 / sqrt(eps0 * mu0)</code></pre><div class="cell-output">299792458.0000065</div></figure>
+<figure class="cell cell-code"><figcaption>cDefined</figcaption><pre class="src"><code>299792458</code></pre><div class="cell-output">299792458</div></figure>
+<figure class="cell cell-test pass"><span class="badge">✓</span> <code>abs(cMaxwell - cDefined) / cDefined &lt; 1e-6</code></figure>
+<section class="cell cell-md"><h2>2. Wavelength–frequency cross-check</h2>
+<p>In vacuum, every wave satisfies c = λ·ν:</p></section>
+<figure class="cell cell-eq"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>c</mi><mo>=</mo><mrow><mi>λ</mi><mo>&#x22C5;</mo><mi>ν</mi></mrow></mrow></math></figure>
+<section class="cell cell-md"><p>A HeNe laser line: λ ≈ 632.8 nm, ν ≈ 4.738×10¹⁴ Hz.</p></section>
+<figure class="cell cell-code"><figcaption>lambda</figcaption><pre class="src"><code>632.8e-9</code></pre><div class="cell-output">6.328e-7</div></figure>
+<figure class="cell cell-code"><figcaption>nu</figcaption><pre class="src"><code>4.738e14</code></pre><div class="cell-output">473800000000000</div></figure>
+<figure class="cell cell-code"><figcaption>cLambdaNu</figcaption><pre class="src"><code>lambda * nu</code></pre><div class="cell-output">299820640</div></figure>
+<figure class="cell cell-test pass"><span class="badge">✓</span> <code>abs(cLambdaNu - cDefined) / cDefined &lt; 0.01</code></figure>
+<section class="cell cell-md"><h2>3. Dispersion-free vacuum</h2>
+<p>Across the visible spectrum, frequency is exactly inverse to wavelength (ν = c/λ), since c is constant:</p></section>
+<figure class="cell cell-data"><figcaption>lambdas</figcaption><pre><code>[4e-7,5e-7,6e-7,7e-7]</code></pre></figure>
+<figure class="cell cell-code"><figcaption>nus</figcaption><pre class="src"><code>cDefined ./ lambdas</code></pre><div class="cell-output">[749481145000000,599584916000000,499654096666666.7,428274940000000]</div></figure>
+<figure class="cell cell-chart"><figcaption>dispersionChart</figcaption><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 320" width="100%" role="img"><style>.t-axis{stroke:#5a5a72;stroke-width:1}.t-line{fill:none;stroke:#2a4d8f;stroke-width:2}.t-pt{fill:#2a4d8f}.t-bar{fill:#2a4d8f}.t-title{font:600 14px system-ui,sans-serif;fill:#1a1a2e}.t-tick{font:11px system-ui,sans-serif;fill:#5a5a72}.t-lab{font:12px system-ui,sans-serif;fill:#1a1a2e}.t-note{font:13px system-ui,sans-serif;fill:#8a8a9a}</style><text x="260" y="18" text-anchor="middle" class="t-title">Vacuum: frequency vs wavelength (ν = c/λ)</text><line x1="64" y1="275" x2="500" y2="275" class="t-axis"/><line x1="64" y1="30" x2="64" y2="275" class="t-axis"/><text x="64" y="291" text-anchor="middle" class="t-tick">4.00e-7</text><text x="282.0000000000001" y="291" text-anchor="middle" class="t-tick">5.50e-7</text><text x="500" y="291" text-anchor="middle" class="t-tick">7.00e-7</text><text x="56" y="279" text-anchor="end" class="t-tick">4.28e+14</text><text x="56" y="156.5" text-anchor="end" class="t-tick">5.89e+14</text><text x="56" y="34" text-anchor="end" class="t-tick">7.49e+14</text><text x="282" y="314" text-anchor="middle" class="t-lab">wavelength λ (m)</text><text transform="translate(16,152.5) rotate(-90)" text-anchor="middle" class="t-lab">frequency ν (Hz)</text><polyline points="64,30 209.33333333333331,144.33333333333334 354.66666666666663,220.55555555555554 500,275" class="t-line"/><circle cx="64" cy="30" r="2.5" class="t-pt"/><circle cx="209.33333333333331" cy="144.33333333333334" r="2.5" class="t-pt"/><circle cx="354.66666666666663" cy="220.55555555555554" r="2.5" class="t-pt"/><circle cx="500" cy="275" r="2.5" class="t-pt"/></svg></figure>
+<section class="cell cell-md"><h2>Conclusion</h2>
+<p>Both routes reproduce <strong>c = 299,792,458 m/s</strong> — Maxwell's relation to floating-point precision and λ·ν to measurement tolerance — and the green <code>test</code> cells make the document self-verifying.</p></section>
+</main>
+</body>
+</html>
