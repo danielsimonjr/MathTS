@@ -128,7 +128,19 @@ export function createRealSymmetric({
         const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(N * N);
 
         try {
-          const iterations = (wasm as any).eigsSymmetric(
+          const iterations = (
+            wasm as {
+              eigsSymmetric(
+                matrixPtr: number,
+                n: number,
+                valuesPtr: number,
+                vectorsPtr: number,
+                workPtr: number,
+                maxIterations: number,
+                precision: number
+              ): number;
+            }
+          ).eigsSymmetric(
             matrixAlloc.ptr,
             N,
             eigenvaluesAlloc.ptr,
@@ -266,7 +278,7 @@ export function createRealSymmetric({
   function getThetaBig(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber;
     if (bigLte(abs(denom), bignumber(config.relTol as number))) {
-      return (bignumber(-1) as any).acos().div(4) as unknown as BigNumber;
+      return (bignumber(-1) as BigNumber & { acos(): BigNumber }).acos().div(4) as unknown as BigNumber;
     } else {
       return multiplyScalar(
         bignumber(0.5),

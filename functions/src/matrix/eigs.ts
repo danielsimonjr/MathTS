@@ -198,7 +198,7 @@ export const createEigs = /* #__PURE__ */ factory(
       complex,
       multiply,
       add,
-    } as any);
+    } as unknown as Parameters<typeof createRealSymmetric>[0]);
     const doComplexEigs = createComplexEigs({
       addScalar,
       subtract,
@@ -222,7 +222,7 @@ export const createEigs = /* #__PURE__ */ factory(
       smaller,
       matrixFromColumns,
       dot,
-    } as any);
+    } as unknown as Parameters<typeof createComplexEigs>[0]);
 
     /**
      * Compute eigenvalues and optionally eigenvectors of a square matrix.
@@ -358,7 +358,13 @@ export const createEigs = /* #__PURE__ */ factory(
 
         if (isSymmetric(arr, N, prec)) {
           const type = coerceTypes(mat, arr, N); // modifies arr by side effect
-          return doRealSymmetric(arr as any, N, prec, type as any, computeVectors);
+          return doRealSymmetric(
+            arr as unknown as (number | BigNumber)[][],
+            N,
+            prec,
+            type as 'number' | 'BigNumber',
+            computeVectors
+          );
         }
       }
 

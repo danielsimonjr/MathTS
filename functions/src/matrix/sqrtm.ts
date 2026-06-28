@@ -75,7 +75,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
       if (!wasm || n * n < WASM_SQRTM_THRESHOLD) return null;
 
       // Extract data
-      const data = isMatrix(A) ? (A as any)._data : A;
+      const data = isMatrix(A) ? (A as Matrix)._data : A;
       if (!data || !Array.isArray(data)) return null;
 
       try {
@@ -84,8 +84,9 @@ export const createSqrtm = /* #__PURE__ */ factory(
           const row = data[i];
           if (!Array.isArray(row)) return null;
           for (let j = 0; j < n; j++) {
-            if (typeof row[j] !== 'number') return null;
-            flat[i * n + j] = row[j];
+            const val = row[j];
+            if (typeof val !== 'number') return null;
+            flat[i * n + j] = val;
           }
         }
 
@@ -116,10 +117,18 @@ export const createSqrtm = /* #__PURE__ */ factory(
             }
 
             if (isMatrix(A)) {
-              return (A as any).createDenseMatrix({
+              const matA = A as Matrix & {
+                createDenseMatrix(opts: {
+                  data: MatrixData;
+                  size: number[];
+                  datatype?: string;
+                }): Scalar[][] | Matrix;
+                _datatype?: string;
+              };
+              return matA.createDenseMatrix({
                 data: result,
                 size: [n, n],
-                datatype: (A as any)._datatype,
+                datatype: matA._datatype,
               });
             }
             return result;

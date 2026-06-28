@@ -153,7 +153,7 @@ export const createExpm = /* #__PURE__ */ factory(
       if (!wasm || n * n < WASM_EXPM_THRESHOLD) return null;
 
       // Extract data and check it's plain numbers
-      const data = (A as any)._data;
+      const data = (A as Matrix & { _data?: unknown })._data;
       if (!data || !Array.isArray(data)) return null;
 
       try {
@@ -187,13 +187,22 @@ export const createExpm = /* #__PURE__ */ factory(
             }
 
             // Return same Matrix type as input
+            const matA = A as Matrix & {
+              createSparseMatrix(opts: { data: number[][]; size: number[] }): Matrix;
+              createDenseMatrix(opts: {
+                data: number[][];
+                size: number[];
+                datatype?: string;
+              }): Matrix;
+              _datatype?: string;
+            };
             if (isSparseMatrix(A)) {
-              return (A as any).createSparseMatrix({ data: result, size: [n, n] });
+              return matA.createSparseMatrix({ data: result, size: [n, n] });
             }
-            return (A as any).createDenseMatrix({
+            return matA.createDenseMatrix({
               data: result,
               size: [n, n],
-              datatype: (A as any)._datatype,
+              datatype: matA._datatype,
             });
           }
         } finally {
