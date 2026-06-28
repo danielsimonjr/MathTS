@@ -1,11 +1,8 @@
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
-
 interface Matrix {
   size(): number[];
 }
@@ -52,6 +49,6 @@ export const createSize = /* #__PURE__ */ factory(name, dependencies, ({ typed }
     string: (x: string): number[] => [x.length],
 
     // scalar
-    'number | Complex | BigNumber | Unit | boolean | null': (_x: any): number[] => [],
+    'number | Complex | BigNumber | Unit | boolean | null': (_x: unknown): number[] => [],
   });
 });

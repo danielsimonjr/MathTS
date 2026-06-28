@@ -1,11 +1,10 @@
 import { isBigNumber } from '../../utils/is.js';
 import { isInteger } from '../../utils/number.js';
 import { resize } from '../../utils/array.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
-export interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
+export type { TypedFunction };
 
 export interface BigNumberConstructor {
   new (value: number | string): BigNumber;
@@ -18,15 +17,14 @@ export interface BigNumber {
 }
 
 export interface MatrixConstructor {
-  (data?: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
-  (storage?: 'dense' | 'sparse'): Matrix;
+  (data?: unknown, storage?: string): Matrix;
 }
 
 export interface Matrix {
   _size: number[];
   storage(): 'dense' | 'sparse';
-  valueOf(): any[] | any[][];
-  resize(size: number[], defaultValue: any): Matrix;
+  valueOf(): unknown[] | unknown[][];
+  resize(size: number[], defaultValue: unknown): Matrix;
 }
 
 export interface Config {
@@ -46,7 +44,7 @@ export function createZerosAndOnes(
   { typed, config, matrix, BigNumber }: Dependencies
 ) {
   return typed(name, {
-    '': function (): any[] | Matrix {
+    '': function (): unknown[] | Matrix {
       return config.matrix === 'Array' ? _zerosAndOnes([]) : _zerosAndOnes([], 'default');
     },
 
@@ -54,7 +52,7 @@ export function createZerosAndOnes(
     // TODO: more accurate signature '...number | BigNumber, string' as soon as typed-function supports this
     '...number | BigNumber | string': function (
       size: (number | BigNumber | string)[]
-    ): any[] | Matrix {
+    ): unknown[] | Matrix {
       const last = size[size.length - 1];
       if (typeof last === 'string') {
         const format = size.pop() as string;
@@ -73,7 +71,7 @@ export function createZerosAndOnes(
       return _zerosAndOnes(size.valueOf() as number[], format) as Matrix;
     },
 
-    'Array | Matrix, string': function (size: any[] | Matrix, format: string): Matrix {
+    'Array | Matrix, string': function (size: unknown[] | Matrix, format: string): Matrix {
       const sizeArray = Array.isArray(size) ? size : (size as Matrix).valueOf();
       return _zerosAndOnes(sizeArray as number[], format) as Matrix;
     },
@@ -86,23 +84,23 @@ export function createZerosAndOnes(
    * @return {Array | Matrix}
    * @private
    */
-  function _zerosAndOnes(size: any[] | (number | BigNumber)[], format?: string): any[] | Matrix {
+  function _zerosAndOnes(size: unknown[] | (number | BigNumber)[], format?: string): unknown[] | Matrix {
     const hasBigNumbers = _normalize(size as number[]);
     const dflt = hasBigNumbers ? new BigNumber(defaultValue) : defaultValue;
     _validate(size as number[]);
 
     if (format) {
       // return a matrix
-      const m = (matrix as any)(format);
+      const m = matrix(format);
       if ((size as number[]).length > 0) {
         return m.resize(size as number[], dflt);
       }
       return m;
     } else {
       // return an Array
-      const arr: any[] = [];
+      const arr: unknown[] = [];
       if ((size as number[]).length > 0) {
-        return resize(arr, size as number[], dflt);
+        return resize(arr, size as number[], dflt) as unknown[];
       }
       return arr;
     }
@@ -111,10 +109,10 @@ export function createZerosAndOnes(
   // replace BigNumbers with numbers, returns true if size contained BigNumbers
   function _normalize(size: number[]): boolean {
     let hasBigNumbers = false;
-    size.forEach(function (value: any, index: number, arr: any[]) {
+    size.forEach(function (value: unknown, index: number, arr: unknown[]) {
       if (isBigNumber(value)) {
         hasBigNumbers = true;
-        arr[index] = (value as any).toNumber();
+        arr[index] = (value as BigNumber).toNumber();
       }
     });
     return hasBigNumbers;
@@ -122,7 +120,7 @@ export function createZerosAndOnes(
 
   // validate arguments
   function _validate(size: number[]): void {
-    size.forEach(function (value: any) {
+    size.forEach(function (value: unknown) {
       if (typeof value !== 'number' || !isInteger(value) || value < 0) {
         throw new Error(`Parameters in function ${name} must be positive integers`);
       }

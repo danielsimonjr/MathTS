@@ -1,8 +1,19 @@
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 
-import { TypedFunction, Matrix, MatrixConstructor, BigNumber, Complex, Unit } from '../types.js';
+import type { TypedFunction, Matrix, BigNumber, Complex, Unit } from '../types.js';
 import type { ConfigOptions } from '../core/config.js';
+
+/** Rotation angle scalar */
+type Scalar = number | BigNumber | Complex | Unit;
+/** A scalar operation resolved from a typed-function */
+type ScalarFn = (...args: unknown[]) => unknown;
+/** Callable matrix factory dependency */
+type MatrixFn = (data?: unknown, format?: string) => Matrix;
+/** Constructor for a BigNumber-like value */
+type BigNumberCtor = new (value: number | string) => BigNumber;
+/** Constructor for a matrix storage class */
+type MatrixCtor = new (data: unknown) => Matrix;
 
 const name = 'rotationMatrix';
 const dependencies = [
@@ -39,16 +50,16 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
   }: {
     typed: TypedFunction;
     config: ConfigOptions;
-    multiplyScalar: (a: number, b: number) => number;
-    addScalar: (a: number, b: number) => number;
-    unaryMinus: (a: number) => number;
-    norm: any;
-    BigNumber: any;
-    matrix: MatrixConstructor;
-    DenseMatrix: any;
-    SparseMatrix: any;
-    cos: any;
-    sin: any;
+    multiplyScalar: ScalarFn;
+    addScalar: ScalarFn;
+    unaryMinus: ScalarFn;
+    norm: (v: unknown) => number;
+    BigNumber: BigNumberCtor;
+    matrix: MatrixFn;
+    DenseMatrix: MatrixCtor;
+    SparseMatrix: MatrixCtor;
+    cos: ScalarFn;
+    sin: ScalarFn;
   }): TypedFunction => {
     /**
      * Create a 2-dimensional counter-clockwise rotation matrix (2x2) for a given angle (expressed in radians).
@@ -85,11 +96,11 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
 
     return typed(name, {
       '': function () {
-        return config.matrix === 'Matrix' ? (matrix as any)([]) : [];
+        return config.matrix === 'Matrix' ? matrix([]) : [];
       },
 
       string: function (format: string) {
-        return (matrix as any)(format);
+        return matrix(format);
       },
 
       'number | BigNumber | Complex | Unit': function (theta: number | BigNumber | Complex | Unit) {
@@ -105,11 +116,11 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
 
       'number | BigNumber | Complex | Unit, Array': function (
         theta: number | BigNumber | Complex | Unit,
-        v: any[]
-      ): any[] {
-        const matrixV = (matrix as any)(v);
+        v: unknown[]
+      ): unknown[] {
+        const matrixV = matrix(v);
         _validateVector(matrixV);
-        return _rotationMatrix3x3(theta, matrixV, undefined);
+        return _rotationMatrix3x3(theta, matrixV, undefined) as unknown[];
       },
 
       'number | BigNumber | Complex | Unit, Matrix': function (
@@ -118,17 +129,17 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
       ): Matrix {
         _validateVector(v);
         const storageType = v.storage() || (config.matrix === 'Matrix' ? 'dense' : undefined);
-        return _rotationMatrix3x3(theta, v, storageType);
+        return _rotationMatrix3x3(theta, v, storageType) as Matrix;
       },
 
       'number | BigNumber | Complex | Unit, Array, string': function (
         theta: number | BigNumber | Complex | Unit,
-        v: any[],
+        v: unknown[],
         format: string
-      ): any[] {
-        const matrixV = (matrix as any)(v);
+      ): unknown[] {
+        const matrixV = matrix(v);
         _validateVector(matrixV);
-        return _rotationMatrix3x3(theta, matrixV, format);
+        return _rotationMatrix3x3(theta, matrixV, format) as unknown[];
       },
 
       'number | BigNumber | Complex | Unit, Matrix, string': function (
@@ -137,7 +148,7 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
         format: string
       ): Matrix {
         _validateVector(v);
-        return _rotationMatrix3x3(theta, v, format);
+        return _rotationMatrix3x3(theta, v, format) as Matrix;
       },
     }) as unknown as TypedFunction;
 
@@ -149,7 +160,7 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
      * @returns {Matrix}
      * @private
      */
-    function _rotationMatrix2x2(theta: any, format: any) {
+    function _rotationMatrix2x2(theta: Scalar, format?: string): unknown {
       const Big = isBigNumber(theta);
 
       const minusOne = Big ? new BigNumber(-1) : -1;
@@ -163,18 +174,18 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
       return _convertToFormat(data, format);
     }
 
-    function _validateVector(v: any) {
+    function _validateVector(v: Matrix): void {
       const size = v.size();
       if (size.length < 1 || size[0] !== 3) {
         throw new RangeError('Vector must be of dimensions 1x3');
       }
     }
 
-    function _mul(array: any) {
-      return array.reduce((p: any, curr: any) => multiplyScalar(p, curr));
+    function _mul(array: unknown[]): unknown {
+      return array.reduce((p: unknown, curr: unknown) => multiplyScalar(p, curr));
     }
 
-    function _convertToFormat(data: any, format: any) {
+    function _convertToFormat(data: unknown, format?: string): unknown {
       if (format) {
         if (format === 'sparse') {
           return new SparseMatrix(data);
@@ -196,7 +207,7 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
      * @returns {Matrix}
      * @private
      */
-    function _rotationMatrix3x3(theta: any, v: any, format: any) {
+    function _rotationMatrix3x3(theta: Scalar, v: Matrix, format?: string): unknown {
       const normV = norm(v);
       if (normV === 0) {
         throw new RangeError('Rotation around zero vector');

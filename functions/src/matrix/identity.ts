@@ -2,12 +2,9 @@ import { isBigNumber } from '../utils/is.js';
 import { resize } from '../utils/array.js';
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-}
-
 interface BigNumberConstructor {
   new (value: number | string): BigNumber;
   (value: number | string): BigNumber;
@@ -20,22 +17,21 @@ interface BigNumber {
 }
 
 interface MatrixConstructor {
-  (data?: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
-  (storage?: 'dense' | 'sparse'): Matrix;
+  (data?: unknown, storage?: string): Matrix;
 }
 
 interface Matrix {
   _size: number[];
   storage(): 'dense' | 'sparse';
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface DenseMatrixConstructor {
-  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix;
+  diagonal(size: number[], value: unknown, k: number, defaultValue: unknown): Matrix;
 }
 
 interface SparseMatrixConstructor {
-  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix;
+  diagonal(size: number[], value: unknown, k: number, defaultValue: unknown): Matrix;
 }
 
 interface Config {
@@ -89,15 +85,15 @@ export const createIdentity = /* #__PURE__ */ factory(
      * @return {Matrix | Array | number} A matrix with ones on the diagonal.
      */
     return typed(name, {
-      '': function (): any[] | Matrix {
+      '': function (): unknown[] | Matrix {
         return config.matrix === 'Matrix' ? matrix([]) : [];
       },
 
       string: function (format: string): Matrix {
-        return (matrix as any)(format);
+        return matrix(format);
       },
 
-      'number | BigNumber': function (rows: number | BigNumber): any[][] | Matrix {
+      'number | BigNumber': function (rows: number | BigNumber): unknown[][] | Matrix {
         return _identity(rows, rows, config.matrix === 'Matrix' ? 'dense' : undefined);
       },
 
@@ -108,7 +104,7 @@ export const createIdentity = /* #__PURE__ */ factory(
       'number | BigNumber, number | BigNumber': function (
         rows: number | BigNumber,
         cols: number | BigNumber
-      ): any[][] | Matrix {
+      ): unknown[][] | Matrix {
         return _identity(rows, cols, config.matrix === 'Matrix' ? 'dense' : undefined);
       },
 
@@ -120,7 +116,7 @@ export const createIdentity = /* #__PURE__ */ factory(
         return _identity(rows, cols, format) as Matrix;
       },
 
-      Array: function (size: number[]): any[] | any[][] | Matrix {
+      Array: function (size: number[]): unknown[] | unknown[][] | Matrix {
         return _identityVector(size);
       },
 
@@ -137,10 +133,10 @@ export const createIdentity = /* #__PURE__ */ factory(
       },
     });
 
-    function _identityVector(size: number[], format?: string): any[] | any[][] | Matrix {
+    function _identityVector(size: number[], format?: string): unknown[] | unknown[][] | Matrix {
       switch (size.length) {
         case 0:
-          return format ? (matrix as any)(format) : [];
+          return format ? matrix(format) : [];
         case 1:
           return _identity(size[0], size[0], format);
         case 2:
@@ -162,12 +158,12 @@ export const createIdentity = /* #__PURE__ */ factory(
       rows: number | BigNumber,
       cols: number | BigNumber,
       format?: string
-    ): any[][] | Matrix {
+    ): unknown[][] | Matrix {
       // BigNumber constructor with the right precision
       const Big = isBigNumber(rows) || isBigNumber(cols) ? BigNumber : null;
 
-      if (isBigNumber(rows)) rows = (rows as any).toNumber();
-      if (isBigNumber(cols)) cols = (cols as any).toNumber();
+      if (isBigNumber(rows)) rows = (rows as BigNumber).toNumber();
+      if (isBigNumber(cols)) cols = (cols as BigNumber).toNumber();
 
       if (!isInteger(rows as number) || (rows as number) < 1) {
         throw new Error('Parameters in function identity must be positive integers');
@@ -198,9 +194,9 @@ export const createIdentity = /* #__PURE__ */ factory(
       const minimum = (rows as number) < (cols as number) ? (rows as number) : (cols as number);
       // fill diagonal
       for (let d = 0; d < minimum; d++) {
-        (res as any[][])[d][d] = one;
+        (res as unknown[][])[d][d] = one;
       }
-      return res as any[][];
+      return res as unknown[][];
     }
   }
 );
