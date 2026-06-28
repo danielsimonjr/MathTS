@@ -7,6 +7,7 @@ import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for mod
@@ -133,11 +134,11 @@ export const createMod = /* #__PURE__ */ factory(
         },
       },
       matrixAlgorithmSuite({
-        SS: matAlgo05xSfSf as any,
-        DS: matAlgo03xDSf as any,
-        SD: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any,
+        SS: matAlgo05xSfSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        sS: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     );
 

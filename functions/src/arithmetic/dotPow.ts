@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction, ElementwiseOperation } from '../type/matrix/types.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
@@ -90,11 +91,11 @@ export const createDotPow = /* #__PURE__ */ factory(
     return typed(
       name,
       matrixAlgorithmSuite({
-        elop: powScalar as any,
-        SS: matAlgo07xSSf as any,
-        DS: matAlgo03xDSf as any,
-        Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any,
+        elop: powScalar as unknown as ElementwiseOperation,
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        sS: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     ) as TypedFunction;
   }

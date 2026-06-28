@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
@@ -82,11 +83,11 @@ export const createDotDivide = /* #__PURE__ */ factory(
       name,
       matrixAlgorithmSuite({
         elop: divideScalar,
-        SS: matAlgo07xSSf as any,
-        DS: matAlgo03xDSf as any,
-        SD: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any,
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        sS: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     ) as TypedFunction;
   }

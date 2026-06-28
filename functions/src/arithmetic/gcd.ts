@@ -1,6 +1,7 @@
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import type { ConfigOptions } from '../core/config.js';
 import { createMod } from './mod.js';
 import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
@@ -130,9 +131,9 @@ export const createGcd = /* #__PURE__ */ factory(
         'Fraction, Fraction': (x: FractionType, y: FractionType): FractionType => x.gcd(y),
       },
       matrixAlgorithmSuite({
-        SS: matAlgo04xSidSid as any,
-        DS: matAlgo01xDSid as any,
-        Ss: matAlgo10xSids as any,
+        SS: matAlgo04xSidSid as unknown as AlgorithmFunction,
+        DS: matAlgo01xDSid as unknown as AlgorithmFunction,
+        Ss: matAlgo10xSids as unknown as AlgorithmFunction,
       }),
       {
         [gcdManyTypesSignature]: typed.referToSelf(

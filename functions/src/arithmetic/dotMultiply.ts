@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo09xS0Sf } from '../type/matrix/utils/matAlgo09xS0Sf.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
@@ -66,9 +67,9 @@ export const createDotMultiply = /* #__PURE__ */ factory(
       name,
       matrixAlgorithmSuite({
         elop: multiplyScalar,
-        SS: matAlgo09xS0Sf as any,
-        DS: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
+        SS: matAlgo09xS0Sf as unknown as AlgorithmFunction,
+        DS: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
       })
     ) as TypedFunction;
   }

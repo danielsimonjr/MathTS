@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
@@ -92,9 +93,9 @@ export const createLcm = /* #__PURE__ */ factory(
         'Fraction, Fraction': (x: FractionType, y: FractionType): FractionType => x.lcm(y),
       },
       matrixAlgorithmSuite({
-        SS: matAlgo06xS0S0 as any,
-        DS: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
+        SS: matAlgo06xS0S0 as unknown as AlgorithmFunction,
+        DS: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
       }),
       lcmManySignature
     ) as TypedFunction;
