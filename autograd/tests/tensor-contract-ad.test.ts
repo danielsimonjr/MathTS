@@ -20,19 +20,6 @@ import { Tape, TapedTensor } from '../src/tape.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Sum all elements of a TapedTensor (returns a single-element TapedTensor of shape []). */
-function tapedSum(t: TapedTensor): TapedTensor {
-  // Fold all elements by repeatedly adding 1-element slices.
-  // Simplest: scale by 1 for each element and chain adds —
-  // but we don't have a reduce primitive. Instead, implement sum via
-  // the known-working mul+scale: use scale(1) and accumulate.
-  //
-  // Actually the cleanest approach is: return t.scale(1) and seed the
-  // backward with an all-ones gradient to simulate "sum".
-  // For testing we'll just return the flat tensor and seed backward(id, ones).
-  return t.scale(1.0);
-}
-
 /**
  * Run reverse-mode AD on a computation that takes two TapedTensor leaves (A, B)
  * and returns a scalar (summed) output. Returns [gradA, gradB].

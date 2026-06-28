@@ -26,27 +26,6 @@ import { Tape, TapedTensor } from '../src/tape.js';
 // ---------------------------------------------------------------------------
 
 /**
- * Run single-leaf reverse-mode AD: seed output gradient with all-ones
- * (= gradient of sum-of-outputs). Returns the accumulated input gradient.
- */
-function reverseGradOne(
-  fn: (t: TapedTensor) => TapedTensor,
-  xData: Float64Array,
-  xShape: ReadonlyArray<number>
-): Float64Array {
-  const tape = new Tape();
-  const xT = new TapedTensor(xShape, new Float64Array(xData), tape, tape.allocate(xData.length).id);
-  // Re-allocate properly
-  const tape2 = new Tape();
-  const { id } = tape2.allocate(xData.length);
-  const leaf = new TapedTensor(xShape, new Float64Array(xData), tape2, id);
-  const out = fn(leaf);
-  const onesGrad = new Float64Array(out.primal.length).fill(1.0);
-  tape2.backward(out.id, onesGrad);
-  return new Float64Array(tape2.getInputGrad(id)!);
-}
-
-/**
  * Numerical gradient (central finite differences) of sum(f(x)) w.r.t. x.
  * ε = 1e-6.
  */

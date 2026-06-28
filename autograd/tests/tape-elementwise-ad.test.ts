@@ -49,27 +49,6 @@ function reverseGradOne(
 }
 
 /**
- * Allocate a leaf TapedTensor and run reverse-mode AD on fn(leaf).
- * Seeds the backward pass with the provided output gradient.
- */
-function reverseGradOneSeeded(
-  fn: (t: TapedTensor) => TapedTensor,
-  xData: Float64Array,
-  xShape: ReadonlyArray<number>,
-  outGrad: Float64Array
-): { grad: Float64Array; value: Float64Array } {
-  const tape = new Tape();
-  const { id } = tape.allocate(xData.length);
-  const leaf = new TapedTensor(xShape, new Float64Array(xData), tape, id);
-  const out = fn(leaf);
-  tape.backward(out.id, outGrad);
-  return {
-    grad: new Float64Array(tape.getInputGrad(id)!),
-    value: new Float64Array(out.primal),
-  };
-}
-
-/**
  * Numerical gradient (central finite differences) of sum(f(x)) w.r.t. x.
  * ε = 1e-6.
  */
