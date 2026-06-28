@@ -34,6 +34,28 @@ interface SymbolNodeConstructor {
   new (name: string): SymbolNode;
 }
 
+// Minimal runtime node shapes (the published generic node types do not expose
+// some runtime-only fields such as OperatorNode.fn or FunctionNode.name)
+interface ConstNodeLike extends MathNode {
+  value: unknown;
+}
+interface ParenNodeLike extends MathNode {
+  content: MathNode;
+}
+interface SymNodeLike extends MathNode {
+  isSymbolNode?: boolean;
+  name: string;
+}
+interface FuncNodeLike extends MathNode {
+  name: string;
+  args: MathNode[];
+}
+interface OpNodeLike extends MathNode {
+  op: string;
+  fn: string;
+  args: MathNode[];
+}
+
 interface DerivativeDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
@@ -143,7 +165,7 @@ export const createDerivative = /* #__PURE__ */ factory(
 
     function parseIdentifier(string: string): SymbolNode {
       const symbol = parse(string);
-      if (!(symbol as any).isSymbolNode) {
+      if (!(symbol as unknown as SymNodeLike).isSymbolNode) {
         throw new TypeError(
           'Invalid variable. ' +
             `Cannot parse ${JSON.stringify(string)} into a variable in function derivative`
@@ -152,7 +174,7 @@ export const createDerivative = /* #__PURE__ */ factory(
       return symbol as SymbolNode;
     }
 
-    const derivative: any = typed(name, {
+    const derivative = typed(name, {
       'Node, SymbolNode': plainDerivative,
       'Node, SymbolNode, Object': plainDerivative,
       'Node, string': (node: MathNode, symbol: string) =>
@@ -170,27 +192,30 @@ export const createDerivative = /* #__PURE__ */ factory(
       return res
     }
     */
-    });
+    }) as unknown as TypedFunction & {
+      _simplify?: boolean;
+      toTex?: (deriv: { args: unknown[] }) => string;
+    };
 
     derivative._simplify = true;
 
-    derivative.toTex = function (deriv: any): string {
+    derivative.toTex = function (deriv: { args: unknown[] }): string {
       return _derivTex.apply(null, deriv.args);
     };
 
     // FIXME: move the toTex method of derivative to latex.js. Difficulty is that it relies on parse.
     // NOTE: the optional "order" parameter here is currently unused
-    const _derivTex: any = typed('_derivTex', {
+    const _derivTex = typed('_derivTex', {
       'Node, SymbolNode': function (expr: MathNode, x: SymbolNode): string {
-        if (isConstantNode(expr) && typeOf((expr as any).value) === 'string') {
-          return _derivTex(parse((expr as any).value).toString(), x.toString(), 1);
+        if (isConstantNode(expr) && typeOf((expr as unknown as ConstNodeLike).value) === 'string') {
+          return _derivTex(parse((expr as unknown as ConstNodeLike).value as string).toString(), x.toString(), 1);
         } else {
           return _derivTex(expr.toTex(), x.toString(), 1);
         }
       },
       'Node, ConstantNode': function (expr: MathNode, x: ConstantNode): string {
-        if (typeOf((x as any).value) === 'string') {
-          return _derivTex(expr, parse((x as any).value));
+        if (typeOf((x as unknown as ConstNodeLike).value) === 'string') {
+          return _derivTex(expr, parse((x as unknown as ConstNodeLike).value as string));
         } else {
           throw new Error("The second parameter to 'derivative' is a non-string constant");
         }
@@ -211,7 +236,7 @@ export const createDerivative = /* #__PURE__ */ factory(
         }
         return d + `\\left[${expr}\\right]`;
       },
-    });
+    }) as unknown as (...args: unknown[]) => string;
 
     /**
      * Checks if a node is constants (e.g. 2 + 2).
@@ -227,7 +252,7 @@ export const createDerivative = /* #__PURE__ */ factory(
      * @param  {string} varName     Variable that we are differentiating
      * @return {boolean}  if node is constant
      */
-    const _isConst: any = typed('_isConst', {
+    const _isConst = typed('_isConst', {
       'function, ConstantNode, string': function (): boolean {
         return true;
       },
@@ -247,7 +272,7 @@ export const createDerivative = /* #__PURE__ */ factory(
         node: ParenthesisNode,
         varName: string
       ): boolean {
-        return isConst((node as any).content, varName);
+        return isConst((node as unknown as ParenNodeLike).content, varName);
       },
 
       'function, FunctionAssignmentNode, string': function (
@@ -268,7 +293,7 @@ export const createDerivative = /* #__PURE__ */ factory(
       ): boolean {
         return node.args.every((arg: MathNode) => isConst(arg, varName));
       },
-    });
+    }) as unknown as (...args: unknown[]) => boolean;
 
     /**
      * Applies differentiation rules.
@@ -277,7 +302,7 @@ export const createDerivative = /* #__PURE__ */ factory(
      * @param  {function} isConst  Function that tells if a node is constant
      * @return {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode}    The derivative of `expr`
      */
-    const _derivative: any = typed('_derivative', {
+    const _derivative = typed('_derivative', {
       'ConstantNode, function': function (): ConstantNode {
         return createConstantNode(0);
       },
@@ -296,7 +321,7 @@ export const createDerivative = /* #__PURE__ */ factory(
         node: ParenthesisNode,
         isConst: (node: MathNode) => boolean
       ): ParenthesisNode {
-        return new ParenthesisNode(_derivative((node as any).content, isConst));
+        return new ParenthesisNode(_derivative((node as unknown as ParenNodeLike).content, isConst));
       },
 
       'FunctionAssignmentNode, function': function (
@@ -324,7 +349,7 @@ export const createDerivative = /* #__PURE__ */ factory(
         let negative = false; // is output negative?
 
         let funcDerivative: MathNode | undefined;
-        switch ((node as any).name) {
+        switch ((node as unknown as FuncNodeLike).name) {
           case 'cbrt':
             // d/dx(cbrt(x)) = 1 / (3x^(2/3))
             div = true;
@@ -354,7 +379,7 @@ export const createDerivative = /* #__PURE__ */ factory(
             break;
           case 'log10':
           case 'log':
-            if ((node as any).name === 'log10') {
+            if ((node as unknown as FuncNodeLike).name === 'log10') {
               arg1 = createConstantNode(10);
             }
             if (!arg1 && node.args.length === 1) {
@@ -612,7 +637,7 @@ export const createDerivative = /* #__PURE__ */ factory(
           default:
             throw new Error(
               'Cannot process function "' +
-                (node as any).name +
+                (node as unknown as FuncNodeLike).name +
                 '" in derivative: ' +
                 'the function is not supported, undefined, or the number of arguments passed to it are not supported'
             );
@@ -650,7 +675,7 @@ export const createDerivative = /* #__PURE__ */ factory(
           // d/dx(sum(f(x)) = sum(f'(x))
           return new OperatorNode(
             node.op,
-            (node as any).fn,
+            (node as unknown as OpNodeLike).fn,
             node.args.map(function (arg: MathNode) {
               return _derivative(arg, isConst);
             })
@@ -660,14 +685,14 @@ export const createDerivative = /* #__PURE__ */ factory(
         if (node.op === '-') {
           // d/dx(+/-f(x)) = +/-f'(x)
           if (node.isUnary()) {
-            return new OperatorNode(node.op, (node as any).fn, [
+            return new OperatorNode(node.op, (node as unknown as OpNodeLike).fn, [
               _derivative(node.args[0], isConst),
             ]);
           }
 
           // Linearity of differentiation, d/dx(f(x) +/- g(x)) = f'(x) +/- g'(x)
           if (node.isBinary()) {
-            return new OperatorNode(node.op, (node as any).fn, [
+            return new OperatorNode(node.op, (node as unknown as OpNodeLike).fn, [
               _derivative(node.args[0], isConst),
               _derivative(node.args[1], isConst),
             ]);
@@ -749,7 +774,7 @@ export const createDerivative = /* #__PURE__ */ factory(
             // If is secretly constant; 0^f(x) = 1 (in JS), 1^f(x) = 1
             if (
               isConstantNode(arg0) &&
-              (isZero((arg0 as any).value) || equal((arg0 as any).value, 1))
+              (isZero((arg0 as unknown as ConstNodeLike).value) || equal((arg0 as unknown as ConstNodeLike).value, 1))
             ) {
               return createConstantNode(0);
             }
@@ -767,11 +792,11 @@ export const createDerivative = /* #__PURE__ */ factory(
           if (isConst(arg1)) {
             if (isConstantNode(arg1)) {
               // If is secretly constant; f(x)^0 = 1 -> d/dx(1) = 0
-              if (isZero((arg1 as any).value)) {
+              if (isZero((arg1 as unknown as ConstNodeLike).value)) {
                 return createConstantNode(0);
               }
               // Ignore exponent; f(x)^1 = f(x)
-              if (equal((arg1 as any).value, 1)) {
+              if (equal((arg1 as unknown as ConstNodeLike).value, 1)) {
                 return _derivative(arg0, isConst);
               }
             }
@@ -811,7 +836,7 @@ export const createDerivative = /* #__PURE__ */ factory(
             'the operator is not supported, undefined, or the number of arguments passed to it are not supported'
         );
       },
-    });
+    }) as unknown as (...args: unknown[]) => MathNode;
 
     /**
      * Helper function to create a constant node with a specific type
