@@ -68,7 +68,7 @@ export type MathNumericValue = number | BigNumberLike | ComplexLike | FractionLi
  * runtime type dispatch. The actual type is determined by matrix._datatype
  * at runtime, not at compile time.
  */
-export type MatrixValue = any;
+export type MatrixValue = unknown;
 
 /**
  * Data type string for matrix elements (e.g., 'number', 'BigNumber', 'Complex')
@@ -105,14 +105,14 @@ export type MatrixArray<T = MatrixValue> = T[][];
  * based on runtime types. The actual signature like (number, number) => number
  * is resolved at runtime via typed.find().
  */
-export type MatrixCallback = (a: any, b: any) => any;
+export type MatrixCallback = (a: unknown, b: unknown) => unknown;
 
 /**
  * Scalar equality comparison function.
  *
  * INTENTIONAL ANY: Used with typed-function for type-specific comparisons.
  */
-export type EqualScalarFunction = (a: any, b: any) => boolean;
+export type EqualScalarFunction = (a: unknown, b: unknown) => boolean;
 
 /**
  * Map callback for matrix.map() operations
@@ -147,14 +147,17 @@ export interface TypedFunction {
    * Find a specific signature of a typed function.
    * Returns the function matching the given type signature.
    */
-  find(fn: Function, signature: string[]): Function | null;
+  find(
+    fn: (...args: unknown[]) => unknown,
+    signature: string[]
+  ): ((...args: unknown[]) => unknown) | null;
 
   /**
    * Convert a value to a specific datatype.
    * @param value - Value to convert (any type)
    * @param datatype - Target datatype string (e.g., 'number', 'BigNumber')
    */
-  convert(value: any, datatype: string): any;
+  convert(value: unknown, datatype: string): unknown;
 
   /**
    * Create a self-referential typed function.
@@ -163,12 +166,12 @@ export interface TypedFunction {
    * INTENTIONAL ANY: The self parameter represents the typed function itself
    * which has dynamic signatures.
    */
-  referToSelf<T>(fn: (self: T) => any): any;
+  referToSelf<T>(fn: (self: T) => (...args: never[]) => unknown): (...args: unknown[]) => unknown;
 
   /**
    * Signatures of the typed function (optional)
    */
-  signatures?: Record<string, Function>;
+  signatures?: Record<string, (...args: unknown[]) => unknown>;
 }
 
 // =============================================================================
@@ -198,22 +201,22 @@ export interface IndexInterface {
    * INTENTIONAL ANY return: A dimension can be a number, Range, or ImmutableDenseMatrix.
    * The actual type depends on how the index was constructed.
    */
-  dimension(dim: number): any;
+  dimension(dim: number): unknown;
 
   /** Check if the index represents a scalar value */
   isScalar(): boolean;
 
   /** Iterate over dimensions */
-  forEach(callback: (dimension: any, index: number, indexObject: IndexInterface) => void): void;
+  forEach(callback: (dimension: unknown, index: number, indexObject: IndexInterface) => void): void;
 
   /** Clone the index */
   clone(): IndexInterface;
 
   /** Convert to array representation */
-  toArray(): any[];
+  toArray(): unknown[];
 
   /** Get primitive value */
-  valueOf(): any[];
+  valueOf(): unknown[];
 
   /** Check if this is an object property index */
   isObjectProperty?(): boolean;
@@ -311,7 +314,7 @@ export interface SparseMatrixInterface<T = MatrixValue> extends MatrixInterface<
   _size: [number, number];
   _datatype?: DataType;
 
-  createSparseMatrix(data?: any, datatype?: string): SparseMatrixInterface<T>;
+  createSparseMatrix(data?: unknown, datatype?: string): SparseMatrixInterface<T>;
   getDataType(): string;
   density(): number;
   diagonal?(k?: number | BigNumberLike): SparseMatrixInterface<T>;
@@ -395,7 +398,7 @@ export interface RangeJSON {
  */
 export interface IndexJSON {
   mathjs: 'Index';
-  dimensions: any[];
+  dimensions: unknown[];
 }
 
 // =============================================================================
@@ -452,14 +455,14 @@ export interface ImmutableDenseMatrixConstructorData<T = MatrixValue> {
 /**
  * Elementwise operation function type
  */
-export type ElementwiseOperation = ((a: any, b: any) => any) & {
-  signatures?: Record<string, Function>;
+export type ElementwiseOperation = ((a: unknown, b: unknown) => unknown) & {
+  signatures?: Record<string, (...args: unknown[]) => unknown>;
 };
 
 /**
  * Algorithm function type (for sparse/dense matrix algorithms)
  */
-export type AlgorithmFunction = (...args: any[]) => MatrixInterface;
+export type AlgorithmFunction = (...args: unknown[]) => MatrixInterface;
 
 /**
  * Options for matrixAlgorithmSuite
@@ -493,7 +496,7 @@ export interface MatrixAlgorithmSuiteOptions {
 /**
  * Matrix signatures map for typed-function
  */
-export type MatrixSignatures = Record<string, Function>;
+export type MatrixSignatures = Record<string, (...args: never[]) => unknown>;
 
 // =============================================================================
 // FibonacciHeap Types
@@ -536,7 +539,7 @@ export interface FibonacciHeapInterface<T = MatrixValue> {
  * passes 'this' which is the class instance. Using RangeInterface here would
  * create a circular reference since Range implements RangeInterface.
  */
-export type RangeForEachCallback = (value: number, index: [number], range: any) => void;
+export type RangeForEachCallback = (value: number, index: [number], range: unknown) => void;
 
 /**
  * Callback for Range map operations.
@@ -545,7 +548,7 @@ export type RangeForEachCallback = (value: number, index: [number], range: any) 
  * passes 'this' which is the class instance. Using RangeInterface here would
  * create a circular reference since Range implements RangeInterface.
  */
-export type RangeMapCallback<T> = (value: number, index: [number], range: any) => T;
+export type RangeMapCallback<T> = (value: number, index: [number], range: unknown) => T;
 
 /**
  * Format options for Range display
