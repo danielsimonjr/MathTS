@@ -8,7 +8,13 @@ const dependencies = ['typed', 'Chain'];
 export const createChain = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, Chain }: { typed: TypedFunction; Chain: any }): TypedFunction => {
+  ({
+    typed,
+    Chain,
+  }: {
+    typed: TypedFunction;
+    Chain: new (value?: unknown) => unknown;
+  }): TypedFunction => {
     /**
      * Wrap any value in a chain, allowing to perform chained operations on
      * the value.
@@ -49,7 +55,7 @@ export const createChain = /* #__PURE__ */ factory(
         return new Chain();
       },
 
-      any: function (value: any) {
+      any: function (value: unknown) {
         return new Chain(value);
       },
     }) as unknown as TypedFunction;

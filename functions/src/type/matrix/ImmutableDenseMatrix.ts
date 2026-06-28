@@ -179,14 +179,17 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         switch (arguments.length) {
           case 1: {
             // use base implementation
-            const m = (DenseMatrix.prototype as any).subset.call(this, index);
+            const m = (
+              DenseMatrix.prototype as { subset: (...args: unknown[]) => unknown }
+            ).subset.call(this, index);
             // check result is a matrix
             if (isMatrix(m)) {
               // return immutable matrix
+              const mm = m as { _data: DenseMatrixData; _size: number[]; _datatype?: string };
               return new ImmutableDenseMatrix({
-                data: (m as any)._data,
-                size: (m as any)._size,
-                datatype: (m as any)._datatype,
+                data: mm._data,
+                size: mm._size,
+                datatype: mm._datatype,
               });
             }
             return m;
@@ -342,11 +345,16 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
 
     // Set up prototype chain to inherit from DenseMatrix
     Object.setPrototypeOf(ImmutableDenseMatrix.prototype, DenseMatrix.prototype);
-    (ImmutableDenseMatrix.prototype as any).constructor = ImmutableDenseMatrix;
+    const proto = ImmutableDenseMatrix.prototype as {
+      constructor: unknown;
+      type: string;
+      isImmutableDenseMatrix: boolean;
+    };
+    proto.constructor = ImmutableDenseMatrix;
 
     // Override type information
-    (ImmutableDenseMatrix.prototype as any).type = 'ImmutableDenseMatrix';
-    (ImmutableDenseMatrix.prototype as any).isImmutableDenseMatrix = true;
+    proto.type = 'ImmutableDenseMatrix';
+    proto.isImmutableDenseMatrix = true;
 
     return ImmutableDenseMatrix;
   },

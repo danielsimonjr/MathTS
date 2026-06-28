@@ -95,7 +95,7 @@ export const createComplexClass = /* #__PURE__ */ factory(
      * Attach type information
      */
     Object.defineProperty(Complex, 'name', { value: 'Complex' });
-    Complex.prototype.constructor = Complex as any;
+    Complex.prototype.constructor = Complex as unknown as typeof Complex.prototype.constructor;
     Complex.prototype.type = 'Complex';
     Complex.prototype.isComplex = true;
 
@@ -201,10 +201,10 @@ export const createComplexClass = /* #__PURE__ */ factory(
      * @param {*} args...
      * @return {Complex}
      */
-    Complex.fromPolar = function (_args: PolarInput | number): Complex {
-      switch (arguments.length) {
+    Complex.fromPolar = function (...args: unknown[]): Complex {
+      switch (args.length) {
         case 1: {
-          const arg = arguments[0] as PolarInput | number;
+          const arg = args[0] as PolarInput | number;
           if (typeof arg === 'object') {
             return Complex(arg);
           } else {
@@ -212,8 +212,8 @@ export const createComplexClass = /* #__PURE__ */ factory(
           }
         }
         case 2: {
-          const r = arguments[0] as number;
-          let phi = arguments[1] as
+          const r = args[0] as number;
+          let phi = args[1] as
             | number
             | {
                 hasBase: (base: string) => boolean;
@@ -239,7 +239,7 @@ export const createComplexClass = /* #__PURE__ */ factory(
           throw new SyntaxError('Wrong number of arguments in function fromPolar');
       }
     };
-    (Complex.prototype as any).valueOf = Complex.prototype.toString;
+    (Complex.prototype as { valueOf: unknown }).valueOf = Complex.prototype.toString;
 
     /**
      * Create a Complex number from a JSON object

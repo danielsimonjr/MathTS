@@ -28,7 +28,6 @@ export type IndexDimension =
     };
 
 // Forward declaration for Index class (used in callback type)
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IndexClass {
   _dimensions: IndexDimension[];
   _sourceSize: (number | null)[];
@@ -130,7 +129,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        */
       _isScalar: boolean;
 
-      constructor(...ranges: any[]) {
+      constructor(...ranges: unknown[]) {
         if (!(this instanceof Index)) {
           throw new SyntaxError('Constructor must be called with the new operator');
         }
@@ -156,12 +155,14 @@ export const createIndexClass = /* #__PURE__ */ factory(
 
             if (getMatrixDataType(arg) === 'boolean') {
               if (argIsArray)
-                m = _createImmutableMatrix(_booleansArrayToNumbersForIndex(arg as any));
+                m = _createImmutableMatrix(_booleansArrayToNumbersForIndex(arg as boolean[]));
               if (argIsMatrix)
-                m = _createImmutableMatrix(_booleansArrayToNumbersForIndex((arg as any)._data));
-              sourceSize = (arg.valueOf() as any).length;
+                m = _createImmutableMatrix(
+                  _booleansArrayToNumbersForIndex((arg as { _data: boolean[] })._data)
+                );
+              sourceSize = (arg as { valueOf(): unknown[] }).valueOf().length;
             } else {
-              m = _createImmutableMatrix(arg.valueOf() as any);
+              m = _createImmutableMatrix((arg as { valueOf(): number[] }).valueOf());
             }
 
             this._dimensions.push(m!);
@@ -202,7 +203,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @return {Index} index
        * @private
        */
-      static create(ranges: any[]): Index {
+      static create(ranges: unknown[]): Index {
         return new Index(...ranges);
       }
 
@@ -323,8 +324,8 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @memberof Index
        * @returns {Array} array
        */
-      toArray(): any[] {
-        const array: any[] = [];
+      toArray(): unknown[] {
+        const array: unknown[] = [];
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
           const dimension = this._dimensions[i];
           array.push(
@@ -342,7 +343,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @memberof Index
        * @returns {Array} array
        */
-      valueOf(): any[] {
+      valueOf(): unknown[] {
         return this.toArray();
       }
 
@@ -359,7 +360,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
           if (isString(dimension)) {
             strings.push(JSON.stringify(dimension));
           } else {
-            strings.push((dimension as any).toString());
+            strings.push((dimension as { toString(): string }).toString());
           }
         }
 
@@ -393,8 +394,9 @@ export const createIndexClass = /* #__PURE__ */ factory(
 
     // Set prototype properties for type checking (duck typing)
     // These are needed because is.ts checks constructor.prototype.isIndex
-    (Index.prototype as any).type = 'Index';
-    (Index.prototype as any).isIndex = true;
+    const indexProto = Index.prototype as { type: string; isIndex: boolean };
+    indexProto.type = 'Index';
+    indexProto.isIndex = true;
 
     return Index;
   },

@@ -3,7 +3,7 @@ import { factory } from '../../../utils/factory.js';
 import type { TypedFunction } from '../../../core/function/typed.js';
 
 interface IndexConstructor {
-  new (...ranges: any[]): any;
+  new (...ranges: unknown[]): unknown;
 }
 
 interface IndexDependencies {
@@ -54,14 +54,18 @@ export const createIndex = /* #__PURE__ */ factory(
      * @return {Index}        Returns the created index
      */
     return typed(name, {
-      '...number | string | BigNumber | Range | Array | Matrix': function (args: any[]): any {
-        const ranges = args.map(function (arg: any) {
+      '...number | string | BigNumber | Range | Array | Matrix': function (
+        args: unknown[]
+      ): unknown {
+        const ranges = args.map(function (arg: unknown) {
           if (isBigNumber(arg)) {
-            return (arg as any).toNumber(); // convert BigNumber to Number
+            return (arg as unknown as { toNumber(): number }).toNumber(); // convert BigNumber to Number
           } else if (isArray(arg) || isMatrix(arg)) {
-            return (arg as any).map(function (elem: any) {
+            return (arg as { map(cb: (elem: unknown) => unknown): unknown }).map(function (
+              elem: unknown
+            ) {
               // convert BigNumber to Number
-              return isBigNumber(elem) ? (elem as any).toNumber() : elem;
+              return isBigNumber(elem) ? (elem as unknown as { toNumber(): number }).toNumber() : elem;
             });
           } else {
             return arg;

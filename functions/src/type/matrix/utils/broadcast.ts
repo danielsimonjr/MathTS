@@ -4,8 +4,8 @@ import { deepStrictEqual } from '../../../utils/object.js';
 // Type definitions for Matrix interface
 interface Matrix {
   size(): number[];
-  create(data: any, datatype?: string): Matrix;
-  valueOf(): any;
+  create(data: unknown, datatype?: string): Matrix;
+  valueOf(): unknown;
   datatype(): string | undefined;
 }
 
