@@ -1,36 +1,31 @@
 import { factory } from '../utils/factory.js';
 import { isMatrix } from '../utils/is.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
-// Type definitions for better WASM integration and type safety
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
-  convert(value: any, type: string): any;
-  referTo<U>(signature: string, fn: (ref: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
-  referToSelf<U>(fn: (self: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
-}
+/** A scalar implementation resolved from a typed-function (e.g. via typed.find) */
+type ScalarFn = (...args: unknown[]) => unknown;
 
 interface DenseMatrix {
-  _data: any[] | any[][];
+  _data: unknown[] | unknown[][];
   _size: number[];
   _datatype?: string;
   storage(): 'dense';
   size(): number[];
   getDataType(): string;
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface SparseMatrix {
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
-  _data?: any;
+  _data?: unknown;
   storage(): 'sparse';
   size(): number[];
   getDataType(): string;
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
 }
 
 type Matrix = DenseMatrix | SparseMatrix;
@@ -84,7 +79,7 @@ export const createDot = /* #__PURE__ */ factory(
      * @param y - Second vector
      * @returns Length of vectors
      */
-    function _validateDim(x: any[] | Matrix, y: any[] | Matrix): number {
+    function _validateDim(x: unknown[] | Matrix, y: unknown[] | Matrix): number {
       const xSize = _size(x);
       const ySize = _size(y);
       let xLen: number, yLen: number;
@@ -122,7 +117,7 @@ export const createDot = /* #__PURE__ */ factory(
      * @param b - Second dense matrix or array
      * @returns Dot product result
      */
-    function _denseDot(a: any[] | DenseMatrix, b: any[] | DenseMatrix): any {
+    function _denseDot(a: unknown[] | DenseMatrix, b: unknown[] | DenseMatrix): unknown {
       const N = _validateDim(a, b);
 
       const adata = isMatrix(a) ? (a as DenseMatrix)._data : a;
@@ -139,8 +134,8 @@ export const createDot = /* #__PURE__ */ factory(
       const aIsColumn = _size(a).length === 2;
       const bIsColumn = _size(b).length === 2;
 
-      let add: TypedFunction = addScalar;
-      let mul: TypedFunction = multiplyScalar;
+      let add: ScalarFn = addScalar;
+      let mul: ScalarFn = multiplyScalar;
 
       // process data types
       if (adt && bdt && adt === bdt && typeof adt === 'string' && adt !== 'mixed') {
@@ -152,36 +147,36 @@ export const createDot = /* #__PURE__ */ factory(
 
       // both vectors 1-dimensional
       if (!aIsColumn && !bIsColumn) {
-        let c = mul(conj((adata as any[])[0]), (bdata as any[])[0]);
+        let c = mul(conj((adata as unknown[])[0]), (bdata as unknown[])[0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[])[i]));
+          c = add(c, mul(conj((adata as unknown[])[i]), (bdata as unknown[])[i]));
         }
         return c;
       }
 
       // a is 1-dim, b is column
       if (!aIsColumn && bIsColumn) {
-        let c = mul(conj((adata as any[])[0]), (bdata as any[][])[0][0]);
+        let c = mul(conj((adata as unknown[])[0]), (bdata as unknown[][])[0][0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[][])[i][0]));
+          c = add(c, mul(conj((adata as unknown[])[i]), (bdata as unknown[][])[i][0]));
         }
         return c;
       }
 
       // a is column, b is 1-dim
       if (aIsColumn && !bIsColumn) {
-        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[])[0]);
+        let c = mul(conj((adata as unknown[][])[0][0]), (bdata as unknown[])[0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[][])[i][0]), (bdata as any[])[i]));
+          c = add(c, mul(conj((adata as unknown[][])[i][0]), (bdata as unknown[])[i]));
         }
         return c;
       }
 
       // both vectors are column
-      if (aIsColumn && bIsColumn) {
-        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[][])[0][0]);
+      {
+        let c = mul(conj((adata as unknown[][])[0][0]), (bdata as unknown[][])[0][0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[][])[i][0]), (bdata as any[][])[i][0]));
+          c = add(c, mul(conj((adata as unknown[][])[i][0]), (bdata as unknown[][])[i][0]));
         }
         return c;
       }
@@ -193,7 +188,7 @@ export const createDot = /* #__PURE__ */ factory(
      * @param y - Second sparse matrix
      * @returns Dot product result
      */
-    function _sparseDot(x: SparseMatrix, y: SparseMatrix): any {
+    function _sparseDot(x: SparseMatrix, y: SparseMatrix): unknown {
       _validateDim(x, y);
 
       const xindex = x._index!;
@@ -203,9 +198,9 @@ export const createDot = /* #__PURE__ */ factory(
       const yvalues = y._values!;
 
       // TODO optimize add & mul using datatype
-      let c: any = 0;
-      const add: TypedFunction = addScalar;
-      const mul: TypedFunction = multiplyScalar;
+      let c: unknown = 0;
+      const add: ScalarFn = addScalar;
+      const mul: ScalarFn = multiplyScalar;
 
       let i = 0;
       let j = 0;
@@ -237,8 +232,8 @@ export const createDot = /* #__PURE__ */ factory(
      * @param x - Matrix or array
      * @returns Size array
      */
-    function _size(x: any[] | Matrix): number[] {
-      return isMatrix(x) ? (x as Matrix).size() : size(x);
+    function _size(x: unknown[] | Matrix): number[] {
+      return isMatrix(x) ? (x as Matrix).size() : (size(x) as number[]);
     }
   }
 );

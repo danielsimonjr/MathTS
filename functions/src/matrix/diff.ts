@@ -2,7 +2,12 @@ import { factory } from '../utils/factory.js';
 import { isInteger } from '../utils/number.js';
 import { isMatrix } from '../utils/is.js';
 
-import { TypedFunction, Matrix, MatrixConstructor } from '../types.js';
+import type { TypedFunction, Matrix } from '../types.js';
+
+/** Callable matrix factory dependency (mathjs `matrix(data, format?)`) */
+type MatrixFn = (data: unknown, format?: string) => Matrix;
+/** A scalar/elementwise implementation resolved from a typed-function */
+type ScalarFn = (...args: unknown[]) => unknown;
 
 const name = 'diff';
 const dependencies = ['typed', 'matrix', 'subtract', 'number'];
@@ -17,9 +22,9 @@ export const createDiff = /* #__PURE__ */ factory(
     number,
   }: {
     typed: TypedFunction;
-    matrix: MatrixConstructor;
-    subtract: any;
-    number: any;
+    matrix: MatrixFn;
+    subtract: ScalarFn;
+    number: ScalarFn;
   }): TypedFunction => {
     /**
      * Create a new matrix or array of the difference between elements of the given array
@@ -68,30 +73,31 @@ export const createDiff = /* #__PURE__ */ factory(
      * @return {Array | Matrix}         Difference between array elements in given dimension
      */
     return typed(name, {
-      'Array | Matrix': function (arr: any[] | Matrix) {
+      'Array | Matrix': function (arr: unknown[] | Matrix) {
         // No dimension specified => assume dimension 0
         if (isMatrix(arr)) {
-          return (matrix as any)(_diff((arr as any).toArray()));
+          return matrix(_diff((arr as Matrix).toArray()));
         } else {
           return _diff(arr);
         }
       },
-      'Array | Matrix, number': function (arr: any[] | Matrix, dim: number): any {
+      'Array | Matrix, number': function (arr: unknown[] | Matrix, dim: number): unknown {
         if (!isInteger(dim)) throw new RangeError('Dimension must be a whole number');
         if (isMatrix(arr)) {
-          return (matrix as any)(_recursive((arr as any).toArray(), dim));
+          return matrix(_recursive((arr as Matrix).toArray(), dim));
         } else {
           return _recursive(arr, dim);
         }
       },
-      'Array, BigNumber': (typed as any).referTo(
-        'Array,number',
-        (selfAn: any) => (arr: any, dim: any) => selfAn(arr, number(dim))
-      ),
-      'Matrix, BigNumber': (typed as any).referTo(
-        'Matrix,number',
-        (selfMn: any) => (arr: any, dim: any) => selfMn(arr, number(dim))
-      ),
+      // typed-function's runtime `referTo` is single-call variadic
+      // (`referTo(...signatures, callback)`); the imported TypedFunction interface
+      // models it curried, so narrow to the real contract via `unknown`.
+      'Array, BigNumber': (
+        typed.referTo as unknown as (sig: string, cb: (self: ScalarFn) => ScalarFn) => unknown
+      )('Array,number', (selfAn) => (arr: unknown, dim: unknown) => selfAn(arr, number(dim))),
+      'Matrix, BigNumber': (
+        typed.referTo as unknown as (sig: string, cb: (self: ScalarFn) => ScalarFn) => unknown
+      )('Matrix,number', (selfMn) => (arr: unknown, dim: unknown) => selfMn(arr, number(dim))),
     }) as unknown as TypedFunction;
 
     /**
@@ -102,15 +108,15 @@ export const createDiff = /* #__PURE__ */ factory(
      * @param {number} dim     Dimension
      * @return {Array}         resulting array
      */
-    function _recursive(arr: any, dim: any): any[] {
+    function _recursive(arr: unknown, dim: number): unknown[] {
       if (isMatrix(arr)) {
-        arr = (arr as any).toArray(); // Makes sure arrays like [ matrix([0, 1]), matrix([1, 0]) ] are processed properly
+        arr = (arr as Matrix).toArray(); // Makes sure arrays like [ matrix([0, 1]), matrix([1, 0]) ] are processed properly
       }
       if (!Array.isArray(arr)) {
         throw RangeError('Array/Matrix does not have that many dimensions');
       }
       if (dim > 0) {
-        const result: any[] = [];
+        const result: unknown[] = [];
         arr.forEach((element) => {
           result.push(_recursive(element, dim - 1));
         });
@@ -128,8 +134,8 @@ export const createDiff = /* #__PURE__ */ factory(
      * @param {Array} arr      An array
      * @return {Array}         resulting array
      */
-    function _diff(arr: any) {
-      const result = [];
+    function _diff(arr: unknown[]): unknown[] {
+      const result: unknown[] = [];
       const size = arr.length;
       for (let i = 1; i < size; i++) {
         result.push(_ElementDiff(arr[i - 1], arr[i]));
@@ -144,15 +150,15 @@ export const createDiff = /* #__PURE__ */ factory(
      * @param {Object} obj2    Second object
      * @return {Array}         resulting array
      */
-    function _ElementDiff(obj1: any, obj2: any): any {
+    function _ElementDiff(obj1: unknown, obj2: unknown): unknown {
       // Convert matrices to arrays
-      if (isMatrix(obj1)) obj1 = (obj1 as any).toArray();
-      if (isMatrix(obj2)) obj2 = (obj2 as any).toArray();
+      if (isMatrix(obj1)) obj1 = (obj1 as Matrix).toArray();
+      if (isMatrix(obj2)) obj2 = (obj2 as Matrix).toArray();
 
       const obj1IsArray = Array.isArray(obj1);
       const obj2IsArray = Array.isArray(obj2);
       if (obj1IsArray && obj2IsArray) {
-        return _ArrayDiff(obj1, obj2);
+        return _ArrayDiff(obj1 as unknown[], obj2 as unknown[]);
       }
       if (!obj1IsArray && !obj2IsArray) {
         return subtract(obj2, obj1); // Difference is (second - first) NOT (first - second)
@@ -167,11 +173,11 @@ export const createDiff = /* #__PURE__ */ factory(
      * @param {Array} arr2     Array 2
      * @return {Array}         resulting array
      */
-    function _ArrayDiff(arr1: any, arr2: any): any[] {
+    function _ArrayDiff(arr1: unknown[], arr2: unknown[]): unknown[] {
       if (arr1.length !== arr2.length) {
         throw RangeError('Not all sub-arrays have the same length');
       }
-      const result = [];
+      const result: unknown[] = [];
       const size = arr1.length;
       for (let i = 0; i < size; i++) {
         result.push(_ElementDiff(arr1[i], arr2[i]));
