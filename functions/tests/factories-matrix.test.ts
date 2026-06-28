@@ -28,6 +28,14 @@ import {
   reshape,
 } from '../src/factories/index.js';
 
+/** Duck-type markers attached to bridge matrix instances. */
+type MatrixMarkers = {
+  isMatrix?: boolean;
+  isDenseMatrix?: boolean;
+  isSparseMatrix?: boolean;
+  type?: string;
+};
+
 // ---------------------------------------------------------------------------
 // MathJSDenseMatrix adapter
 // ---------------------------------------------------------------------------
@@ -94,9 +102,9 @@ describe('MathJSDenseMatrix', () => {
 
   it('has isDenseMatrix and isMatrix duck-type markers', () => {
     const m = new MathJSDenseMatrix([[1]]);
-    expect((m as any).isDenseMatrix).toBe(true);
-    expect((m as any).isMatrix).toBe(true);
-    expect((m as any).type).toBe('DenseMatrix');
+    expect((m as MatrixMarkers).isDenseMatrix).toBe(true);
+    expect((m as MatrixMarkers).isMatrix).toBe(true);
+    expect((m as MatrixMarkers).type).toBe('DenseMatrix');
   });
 
   it('get() retrieves element by [row, col]', () => {
@@ -232,9 +240,9 @@ describe('MathJSSparseMatrix', () => {
 
   it('has isSparseMatrix marker', () => {
     const m = new MathJSSparseMatrix([[1]]);
-    expect((m as any).isSparseMatrix).toBe(true);
-    expect((m as any).isMatrix).toBe(true);
-    expect((m as any).isDenseMatrix).toBe(false);
+    expect((m as MatrixMarkers).isSparseMatrix).toBe(true);
+    expect((m as MatrixMarkers).isMatrix).toBe(true);
+    expect((m as MatrixMarkers).isDenseMatrix).toBe(false);
   });
 });
 
@@ -259,7 +267,7 @@ describe('createMatrixBridge', () => {
       [1, 2],
       [3, 4],
     ]);
-    expect((m as any).isDenseMatrix).toBe(true);
+    expect((m as MatrixMarkers).isDenseMatrix).toBe(true);
   });
 
   it('creates sparse matrix when storageType is "sparse"', () => {
@@ -271,7 +279,7 @@ describe('createMatrixBridge', () => {
       'sparse'
     );
     expect(m.storage()).toBe('sparse');
-    expect((m as any).isSparseMatrix).toBe(true);
+    expect((m as MatrixMarkers).isSparseMatrix).toBe(true);
   });
 });
 
@@ -298,7 +306,7 @@ describe('transpose factory', () => {
       [3, 4],
     ]);
     const result = factory_transpose(m);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 3],
       [2, 4],
@@ -327,7 +335,7 @@ describe('identity factory', () => {
   it('creates 3x3 identity (default config returns Matrix)', () => {
     // Default config: matrix='Matrix', so identity(n) returns a Matrix
     const result = identity(3);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 0, 0],
       [0, 1, 0],
@@ -346,7 +354,7 @@ describe('identity factory', () => {
 
   it('creates identity matrix with explicit dense format', () => {
     const result = identity([2, 2], 'dense');
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 0],
       [0, 1],
@@ -357,7 +365,7 @@ describe('identity factory', () => {
 describe('zeros factory', () => {
   it('creates zero matrix (default config returns Matrix)', () => {
     const result = zeros(2, 3);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [0, 0, 0],
       [0, 0, 0],
@@ -366,7 +374,7 @@ describe('zeros factory', () => {
 
   it('creates zero vector (default config returns Matrix)', () => {
     const result = zeros(3);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     // 1D matrix stores flat values
     expect(result.size()).toEqual([3]);
   });
@@ -375,7 +383,7 @@ describe('zeros factory', () => {
 describe('ones factory', () => {
   it('creates ones matrix (default config returns Matrix)', () => {
     const result = ones(2, 2);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 1],
       [1, 1],
@@ -401,7 +409,7 @@ describe('diag factory', () => {
       [7, 8, 9],
     ]);
     const result = diag(m);
-    expect((result as any).isMatrix).toBe(true);
+    expect((result as MatrixMarkers).isMatrix).toBe(true);
     const vals = result.valueOf();
     expect(vals).toEqual([1, 5, 9]);
   });

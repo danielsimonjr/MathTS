@@ -218,7 +218,7 @@ describe('factoryScope.createDenseMatrix helper', () => {
     const m = create([
       [1, 2],
       [3, 4],
-    ]) as any;
+    ]) as { _data?: unknown };
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });
@@ -227,7 +227,7 @@ describe('factoryScope.createDenseMatrix helper', () => {
     const m = create([
       [1, 2],
       [3, 4],
-    ]) as any;
+    ]) as { _data?: unknown };
     expect(Array.isArray(m._data)).toBe(true);
   });
 });
@@ -239,7 +239,7 @@ describe('factoryScope.createSparseMatrix helper', () => {
     const m = create([
       [1, 0],
       [0, 2],
-    ]) as any;
+    ]) as { _data?: unknown };
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });
@@ -260,7 +260,7 @@ describe('factoryScope.matrix factory', () => {
     const m = matrixFn([
       [1, 2],
       [3, 4],
-    ]) as any;
+    ]) as { _data?: unknown };
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });

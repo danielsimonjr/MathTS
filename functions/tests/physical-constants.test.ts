@@ -19,11 +19,11 @@ import {
 describe('physical constants', () => {
   it('exposes unit-valued constants as Unit instances', () => {
     expect(speedOfLight).toBeDefined();
-    expect((speedOfLight as any).toNumeric()).toBe(299792458);
+    expect((speedOfLight as { toNumeric(): number }).toNumeric()).toBe(299792458);
   });
 
   it('matches known SI values for unit constants', () => {
-    const c = (u: unknown) => (u as any).toNumeric();
+    const c = (u: unknown) => (u as { toNumeric(): number }).toNumeric();
     expect(c(planckConstant)).toBeCloseTo(6.62607015e-34, 44);
     expect(c(electronMass)).toBeCloseTo(9.1093837015e-31, 41);
     expect(c(boltzmann)).toBeCloseTo(1.380649e-23, 29);

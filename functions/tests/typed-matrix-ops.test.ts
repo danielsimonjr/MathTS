@@ -106,7 +106,7 @@ describe('pinv (typed/)', () => {
 
   it('throws TypeError for non-DenseMatrix input', () => {
     expect(() =>
-      (pinv as any)([
+      (pinv as (...args: unknown[]) => unknown)([
         [1, 2],
         [3, 4],
       ])
@@ -151,7 +151,7 @@ describe('cond (typed/)', () => {
   });
 
   it('throws TypeError for non-array input', () => {
-    expect(() => (cond as any)(42)).toThrow(TypeError);
+    expect(() => (cond as (...args: unknown[]) => unknown)(42)).toThrow(TypeError);
   });
 });
 
@@ -187,7 +187,7 @@ describe('norm2 (typed/)', () => {
   });
 
   it('throws TypeError for non-array input', () => {
-    expect(() => (norm2 as any)('hello')).toThrow(TypeError);
+    expect(() => (norm2 as (...args: unknown[]) => unknown)('hello')).toThrow(TypeError);
   });
 });
 
@@ -220,7 +220,7 @@ describe('normFro (typed/)', () => {
   });
 
   it('throws TypeError for non-array input', () => {
-    expect(() => (normFro as any)(99)).toThrow(TypeError);
+    expect(() => (normFro as (...args: unknown[]) => unknown)(99)).toThrow(TypeError);
   });
 });
 
@@ -257,7 +257,7 @@ describe('lowRankApprox (typed/)', () => {
   });
 
   it('throws TypeError for non-array first argument', () => {
-    expect(() => (lowRankApprox as any)('matrix', 1)).toThrow(TypeError);
+    expect(() => (lowRankApprox as (...args: unknown[]) => unknown)('matrix', 1)).toThrow(TypeError);
   });
 });
 
@@ -302,7 +302,7 @@ describe('singularValues (typed/)', () => {
   });
 
   it('throws TypeError for non-array input', () => {
-    expect(() => (singularValues as any)(null)).toThrow(TypeError);
+    expect(() => (singularValues as (...args: unknown[]) => unknown)(null)).toThrow(TypeError);
   });
 });
 
@@ -375,7 +375,7 @@ describe('matrixExpm (typed/)', () => {
   });
 
   it('5. TypeError for non-matrix input', () => {
-    expect(() => (matrixExpm as any)(null)).toThrow(TypeError);
+    expect(() => (matrixExpm as (...args: unknown[]) => unknown)(null)).toThrow(TypeError);
   });
 });
 

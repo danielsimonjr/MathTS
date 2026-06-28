@@ -133,7 +133,7 @@ describe('parse()', () => {
   });
 
   it('parsed node has correct structure', () => {
-    const node = parse('sin(pi)') as any;
+    const node = parse('sin(pi)') as { type: string; fn: { name: string } };
     expect(node.type).toBe('FunctionNode');
     expect(node.fn.name).toBe('sin');
   });

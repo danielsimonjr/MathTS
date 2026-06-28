@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { MathJSSparseMatrix, createMatrixBridge } from '../src/factories/matrix-bridge.js';
 
+/** Duck-type markers attached to bridge matrix instances. */
+type MatrixMarkers = {
+  isMatrix?: boolean;
+  isDenseMatrix?: boolean;
+  isSparseMatrix?: boolean;
+  type?: string;
+};
+
 describe('MathJSSparseMatrix', () => {
   // ---- Construction ----
 
@@ -84,10 +92,10 @@ describe('MathJSSparseMatrix', () => {
   describe('duck-typing', () => {
     it('has correct type markers', () => {
       const s = new MathJSSparseMatrix();
-      expect((s as any).isSparseMatrix).toBe(true);
-      expect((s as any).isMatrix).toBe(true);
-      expect((s as any).isDenseMatrix).toBe(false);
-      expect((s as any).type).toBe('SparseMatrix');
+      expect((s as MatrixMarkers).isSparseMatrix).toBe(true);
+      expect((s as MatrixMarkers).isMatrix).toBe(true);
+      expect((s as MatrixMarkers).isDenseMatrix).toBe(false);
+      expect((s as MatrixMarkers).type).toBe('SparseMatrix');
     });
 
     it('has rows and cols getters', () => {
@@ -278,7 +286,7 @@ describe('MathJSSparseMatrix', () => {
         [1, 0, 3],
         [0, 2, 0],
       ]);
-      const entries: [number, number, any][] = [];
+      const entries: [number, number, number][] = [];
       s.forEach((v, idx) => {
         entries.push([idx[0], idx[1], v]);
       });
@@ -362,7 +370,7 @@ describe('MathJSSparseMatrix', () => {
       const values = [1, 4, 2, 5, 3, 6];
       const index = [0, 1, 0, 1, 0, 1];
       const ptr = [0, 2, 4, 6];
-      const row0: [number, any][] = [];
+      const row0: [number, number][] = [];
       MathJSSparseMatrix._forEachRow(0, values, index, ptr, (col, val) => {
         row0.push([col, val]);
       });
