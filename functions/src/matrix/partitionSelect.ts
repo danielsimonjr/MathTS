@@ -9,14 +9,14 @@ const WASM_PARTITION_SELECT_THRESHOLD = 100;
 // Type definitions
 interface Matrix {
   size(): number[];
-  valueOf(): any[];
+  valueOf(): unknown[];
 }
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
-type CompareFunction = (a: any, b: any) => number;
+type CompareFunction = (a: unknown, b: unknown) => number;
 
 interface Dependencies {
   typed: TypedFunction;
@@ -28,7 +28,7 @@ interface Dependencies {
 /**
  * Check if an array is a flat array of plain numbers
  */
-function isFlatNumberArray(arr: any[]): arr is number[] {
+function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
       return false;
@@ -45,7 +45,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
   dependencies,
   ({ typed, isNumeric, isNaN: mathIsNaN, compare }: Dependencies) => {
     const asc = compare;
-    const desc = (a: any, b: any): number => -compare(a, b);
+    const desc = (a: unknown, b: unknown): number => -compare(a, b);
 
     /**
      * Partition-based selection of an array or 1D matrix.
@@ -85,15 +85,15 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
      * @return {*} Returns the kth lowest value.
      */
     return typed(name, {
-      'Array | Matrix, number': function (x: any[] | Matrix, k: number): any {
+      'Array | Matrix, number': function (x: unknown[] | Matrix, k: number): unknown {
         return _partitionSelect(x, k, asc);
       },
 
       'Array | Matrix, number, string': function (
-        x: any[] | Matrix,
+        x: unknown[] | Matrix,
         k: number,
         compare: string
-      ): any {
+      ): unknown {
         if (compare === 'asc') {
           return _partitionSelect(x, k, asc);
         } else if (compare === 'desc') {
@@ -106,7 +106,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
       'Array | Matrix, number, function': _partitionSelect,
     });
 
-    function _partitionSelect(x: any[] | Matrix, k: number, compare: CompareFunction): any {
+    function _partitionSelect(x: unknown[] | Matrix, k: number, compare: CompareFunction): unknown {
       if (!isInteger(k) || k < 0) {
         throw new Error('k must be a non-negative integer');
       }
@@ -119,9 +119,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
         return quickSelect((x as Matrix).valueOf(), k, compare);
       }
 
-      if (Array.isArray(x)) {
-        return quickSelect(x, k, compare);
-      }
+      return quickSelect(x as unknown[], k, compare);
     }
 
     /**
@@ -134,7 +132,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
      * @param {Function} compare
      * @private
      */
-    function quickSelect(arr: any[], k: number, compare: CompareFunction): any {
+    function quickSelect(arr: unknown[], k: number, compare: CompareFunction): unknown {
       if (k >= arr.length) {
         throw new Error('k out of bounds');
       }

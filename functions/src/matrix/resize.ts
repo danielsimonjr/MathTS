@@ -9,12 +9,12 @@ import type { MathJsConfig } from '../core/config.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 interface MatrixType {
-  valueOf(): any[];
-  resize(size: number[], defaultValue?: any, copy?: boolean): MatrixType;
+  valueOf(): unknown[];
+  resize(size: number[], defaultValue?: unknown, copy?: boolean): MatrixType;
 }
 
 interface MatrixConstructor {
-  (data: any[]): MatrixType;
+  (data: unknown[]): MatrixType;
 }
 
 interface ResizeDependencies {
@@ -57,60 +57,60 @@ export const createResize = /* #__PURE__ */ factory(
      * @return {* | Array | Matrix} A resized clone of matrix `x`
      */
     return typed(name, {
-      'any, Array | Matrix': function (x: any, size: any): any {
+      'any, Array | Matrix': function (x: unknown, size: unknown): unknown {
         return _resize(x, size);
       },
 
-      'any, Array | Matrix, any': function (x: any, size: any, defaultValue: any): any {
+      'any, Array | Matrix, any': function (x: unknown, size: unknown, defaultValue: unknown): unknown {
         return _resize(x, size, defaultValue);
       }
     });
 
-    function _resize(x: any, size: any, defaultValue?: any): any {
+    function _resize(x: unknown, size: unknown, defaultValue?: unknown): unknown {
+      let sz: unknown[] = isMatrix(size) ? (size.valueOf() as unknown[]) : (size as unknown[]);
 
-      if (isMatrix(size)) {
-        size = size.valueOf(); // get Array
-      }
-
-      if (isBigNumber(size[0])) {
+      if (isBigNumber(sz[0])) {
         // convert bignumbers to numbers
-        size = size.map(function (value: any) {
-          return !isBigNumber(value) ? value : (value as any).toNumber();
+        sz = sz.map(function (value: unknown) {
+          return !isBigNumber(value)
+            ? value
+            : (value as unknown as { toNumber(): number }).toNumber();
         });
       }
 
       // check x is a Matrix
       if (isMatrix(x)) {
         // use optimized matrix implementation, return copy
-        return (x as any).resize(size, defaultValue, true);
+        return (
+          x as unknown as { resize(size: unknown[], defaultValue: unknown, copy: boolean): unknown }
+        ).resize(sz, defaultValue, true);
       }
 
       if (typeof x === 'string') {
         // resize string
-        return _resizeString(x, size, defaultValue);
+        return _resizeString(x, sz as number[], defaultValue as string | undefined);
       }
 
       // check result should be a matrix
       const asMatrix = Array.isArray(x) ? false : config.matrix !== 'Array';
 
-      if (size.length === 0) {
+      if (sz.length === 0) {
         // output a scalar
-        while (Array.isArray(x)) {
-          x = x[0];
+        let scalar = x;
+        while (Array.isArray(scalar)) {
+          scalar = scalar[0];
         }
 
-        return clone(x);
+        return clone(scalar);
       } else {
         // output an array/matrix
-        if (!Array.isArray(x)) {
-          x = [x];
-        }
-        x = clone(x);
+        let arr: unknown[] = !Array.isArray(x) ? [x] : x;
+        arr = clone(arr);
 
-        const res = arrayResize(x, size, defaultValue);
-        return asMatrix ? matrix(res) : res;
+        const res = arrayResize(arr, sz as number[], defaultValue);
+        return asMatrix ? matrix(res as unknown[]) : res;
       }
-    };
+    }
 
     /**
      * Resize a string

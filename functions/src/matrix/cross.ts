@@ -1,5 +1,7 @@
 import { arraySize, squeeze } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { Matrix } from '../types.js';
 
 const name = 'cross';
 const dependencies = ['typed', 'matrix', 'subtract', 'multiply'];
@@ -13,10 +15,10 @@ export const createCross = /* #__PURE__ */ factory(
     subtract,
     multiply,
   }: {
-    typed: any;
-    matrix: any;
-    subtract: any;
-    multiply: any;
+    typed: TypedFunction;
+    matrix: (data: unknown) => Matrix;
+    subtract: TypedFunction;
+    multiply: TypedFunction;
   }) => {
     /**
      * Calculate the cross product for two vectors in three dimensional space.
@@ -52,15 +54,15 @@ export const createCross = /* #__PURE__ */ factory(
      * @return {Array | Matrix}     Returns the cross product of `x` and `y`
      */
     return typed(name, {
-      'Matrix, Matrix': function (x: any, y: any): any {
+      'Matrix, Matrix': function (x: Matrix, y: Matrix): Matrix {
         return matrix(_cross(x.toArray(), y.toArray()));
       },
 
-      'Matrix, Array': function (x: any, y: any[]): any {
+      'Matrix, Array': function (x: Matrix, y: unknown[]): Matrix {
         return matrix(_cross(x.toArray(), y));
       },
 
-      'Array, Matrix': function (x: any[], y: any): any {
+      'Array, Matrix': function (x: unknown[], y: Matrix): Matrix {
         return matrix(_cross(x, y.toArray()));
       },
 
@@ -74,11 +76,11 @@ export const createCross = /* #__PURE__ */ factory(
      * @returns {Array} Returns the cross product of x and y
      * @private
      */
-    function _cross(x: any[], y: any[]): any[] {
+    function _cross(x: unknown[], y: unknown[]): unknown[] {
       const highestDimension = Math.max(arraySize(x).length, arraySize(y).length);
 
-      x = squeeze(x);
-      y = squeeze(y);
+      x = squeeze(x) as unknown[];
+      y = squeeze(y) as unknown[];
 
       const xSize = arraySize(x);
       const ySize = arraySize(y);

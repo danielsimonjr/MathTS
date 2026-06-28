@@ -5,6 +5,9 @@ import { IndexError } from '../error/IndexError.js';
 
 import { TypedFunction, Matrix, BigNumber } from '../types.js';
 
+/** Callback applied to each slice (an array), returning a scalar. */
+type SliceCallback = (...args: unknown[]) => unknown;
+
 const name = 'mapSlices';
 const dependencies = ['typed', 'isInteger'];
 
@@ -16,7 +19,7 @@ export const createMapSlices = /* #__PURE__ */ factory(
     isInteger,
   }: {
     typed: TypedFunction;
-    isInteger: (value: any) => boolean;
+    isInteger: (value: unknown) => boolean;
   }): TypedFunction => {
     /**
      * Apply a function that maps an array to a scalar
@@ -57,25 +60,25 @@ export const createMapSlices = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix, number | BigNumber, function': function (
-        mat: any[] | Matrix,
+        mat: unknown[] | Matrix,
         dim: number | BigNumber,
-        callback: Function
+        callback: SliceCallback
       ) {
         if (!isInteger(dim)) {
           throw new TypeError('Integer number expected for dimension');
         }
 
-        const dimNum = typeof dim === 'number' ? dim : (dim as any).toNumber();
-        const size = Array.isArray(mat) ? arraySize(mat) : (mat as any).size();
+        const dimNum = typeof dim === 'number' ? dim : dim.toNumber();
+        const size = Array.isArray(mat) ? arraySize(mat) : mat.size();
         if (dimNum < 0 || dimNum >= size.length) {
-          throw new IndexError(dimNum, 0, size.length) as any;
+          throw new IndexError(dimNum, 0, size.length);
         }
 
         if (isMatrix(mat)) {
-          return (mat as any).create(
-            _mapSlices((mat as any).valueOf(), dimNum, callback),
-            (mat as any).datatype()
-          );
+          const m = mat as Matrix & {
+            create(data: unknown, datatype?: string): unknown;
+          };
+          return m.create(_mapSlices(m.valueOf(), dimNum, callback), m.datatype());
         } else {
           return _mapSlices(mat, dimNum, callback);
         }
@@ -93,8 +96,10 @@ export const createMapSlices = /* #__PURE__ */ factory(
  * @returns {Array} ret
  * @private
  */
-function _mapSlices(mat: any, dim: any, callback: any): any {
-  let i, ret, tran;
+function _mapSlices(mat: unknown[], dim: number, callback: SliceCallback): unknown {
+  let i: number;
+  let ret: unknown[];
+  let tran: unknown[][];
 
   if (dim <= 0) {
     if (!Array.isArray(mat[0])) {
@@ -110,7 +115,7 @@ function _mapSlices(mat: any, dim: any, callback: any): any {
   } else {
     ret = [];
     for (i = 0; i < mat.length; i++) {
-      ret[i] = _mapSlices(mat[i], dim - 1, callback);
+      ret[i] = _mapSlices(mat[i] as unknown[], dim - 1, callback);
     }
     return ret;
   }
@@ -122,15 +127,15 @@ function _mapSlices(mat: any, dim: any, callback: any): any {
  * @returns {Array} ret
  * @private
  */
-function _switch(mat: any) {
+function _switch(mat: unknown[]): unknown[][] {
   const I = mat.length;
-  const J = mat[0].length;
-  let i, j;
-  const ret = [];
+  const J = (mat[0] as unknown[]).length;
+  let i: number, j: number;
+  const ret: unknown[][] = [];
   for (j = 0; j < J; j++) {
-    const tmp = [];
+    const tmp: unknown[] = [];
     for (i = 0; i < I; i++) {
-      tmp.push(mat[i][j]);
+      tmp.push((mat[i] as unknown[])[j]);
     }
     ret.push(tmp);
   }
