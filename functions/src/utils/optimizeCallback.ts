@@ -2,6 +2,9 @@ import typed from 'typed-function';
 import { get, arraySize } from './array.js';
 import { typeOf as _typeOf } from './is.js';
 
+/** A generic callable; callbacks/signatures handled here are dynamically typed. */
+type AnyFunction = (...args: unknown[]) => unknown;
+
 // Type definitions
 interface Matrix<T = unknown> {
   isMatrix: boolean;
@@ -12,7 +15,7 @@ interface Matrix<T = unknown> {
 
 interface TypedFunction<T = unknown, R = unknown> {
   (...args: T[]): R;
-  signatures: Record<string, Function>;
+  signatures: Record<string, AnyFunction>;
   name: string;
 }
 
@@ -31,14 +34,14 @@ interface OptimizedCallback<T = unknown, R = unknown> {
  * @returns Returns a simplified version of the callback function.
  */
 export function optimizeCallback<T, R>(
-  callback: Function,
+  callback: AnyFunction,
   array: T[] | Matrix<T>,
   name: string,
   isUnary?: boolean
 ): OptimizedCallback<unknown, R> {
   const typedAny = typed as unknown as {
-    isTypedFunction: (fn: Function) => boolean;
-    resolve: (fn: Function, args: unknown[]) => Function | null;
+    isTypedFunction: (fn: AnyFunction) => boolean;
+    resolve: (fn: AnyFunction, args: unknown[]) => AnyFunction | null;
   };
   if (typedAny.isTypedFunction(callback)) {
     let numberOfArguments: number | undefined;
@@ -69,7 +72,7 @@ export function optimizeCallback<T, R>(
         typedAny
       );
     }
-    let fastCallback: Function;
+    let fastCallback: AnyFunction;
     if (
       (array as Matrix<T>).isMatrix &&
       (array as Matrix<T>).dataType !== 'mixed' &&
@@ -114,8 +117,8 @@ export function optimizeCallback<T, R>(
 function _findSingleSignatureWithArity(
   callback: TypedFunction,
   arity: number
-): Function | undefined {
-  const matchingFunctions: Function[] = [];
+): AnyFunction | undefined {
+  const matchingFunctions: AnyFunction[] = [];
   Object.entries(callback.signatures).forEach(([signature, func]) => {
     if (signature.split(',').length === arity) {
       matchingFunctions.push(func);
@@ -139,7 +142,7 @@ function _findSingleSignatureWithArity(
  * @param callback - The callback function to be checked.
  * @returns Returns `true` if the callback is unary, otherwise `false`.
  */
-function _findIfCallbackIsUnary(callback: Function): boolean {
+function _findIfCallbackIsUnary(callback: AnyFunction): boolean {
   if (callback.length !== 1) return false;
 
   const callbackStr = callback.toString();
@@ -158,7 +161,7 @@ function _findNumberOfArgumentsTyped<T>(
   value: T,
   index: number[],
   array: T[] | Matrix<T>,
-  typedAny: { resolve: (fn: Function, args: unknown[]) => Function | null }
+  typedAny: { resolve: (fn: AnyFunction, args: unknown[]) => AnyFunction | null }
 ): number | undefined {
   const testArgs: unknown[] = [value, index, array];
   for (let i = 3; i > 0; i--) {
@@ -179,13 +182,13 @@ function _findNumberOfArgumentsTyped<T>(
  * @throws Throws an error when no matching signature was found
  */
 function _tryFunctionWithArgs<R>(
-  func: Function,
+  func: AnyFunction,
   args: unknown[],
   mappingFnName: string,
   callbackName: string
 ): R {
   try {
-    return func(...args);
+    return func(...args) as R;
   } catch (err) {
     _createCallbackError(err as Error, args, mappingFnName, callbackName);
   }
@@ -219,12 +222,12 @@ function _createCallbackError(
     }
 
     throw new TypeError(
-      `Function ${mappingFnName} cannot apply callback arguments ` +
+      `AnyFunction ${mappingFnName} cannot apply callback arguments ` +
         `${callbackName}(${argsDesc.join(', ')}) at index ${JSON.stringify(args[1])}`
     );
   } else {
     throw new TypeError(
-      `Function ${mappingFnName} cannot apply callback arguments ` +
+      `AnyFunction ${mappingFnName} cannot apply callback arguments ` +
         `to function ${callbackName}: ${err.message}`
     );
   }
