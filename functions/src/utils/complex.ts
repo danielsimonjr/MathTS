@@ -1,4 +1,5 @@
 import { nearlyEqual } from './number.js';
+import type { Complex } from '../types.js';
 
 /**
  * Test whether two complex values are equal provided a given relTol and absTol.
@@ -9,6 +10,6 @@ import { nearlyEqual } from './number.js';
  * @param {number} absTol - The absolute tolerance for comparison.
  * @returns {boolean} - Returns true if the two complex numbers are equal within the given tolerances, otherwise returns false.
  */
-export function complexEquals(x: any, y: any, relTol: any, absTol: any) {
+export function complexEquals(x: Complex, y: Complex, relTol: number, absTol: number): boolean {
   return nearlyEqual(x.re, y.re, relTol, absTol) && nearlyEqual(x.im, y.im, relTol, absTol);
 }

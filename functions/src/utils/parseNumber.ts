@@ -1,4 +1,5 @@
 import { factory } from './factory.js';
+import type { BigNumber } from '../types.js';
 
 const name = 'parseNumberWithConfig';
 const dependencies = ['config', '?bignumber'];
@@ -28,7 +29,7 @@ export const createParseNumberWithConfig = /* #__PURE__ */ factory(
      * parseNumberWithConfig('5')    // Returns: 5n
      * parseNumberWithConfig('3.14') // Returns: 3.14 (number fallback)
      */
-    function parseNumberWithConfig(str: string): number | any {
+    function parseNumberWithConfig(str: string): number | bigint | BigNumber {
       if (typeof str !== 'string') {
         throw new TypeError(`parseNumberWithConfig expects string, got ${typeof str}`);
       }

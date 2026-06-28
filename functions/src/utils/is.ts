@@ -245,7 +245,7 @@ export function isMatrix(x: unknown): x is Matrix {
  * @param {*} x
  * @returns {boolean} isCollection
  */
-export function isCollection(x: unknown): x is any[] | Matrix {
+export function isCollection(x: unknown): x is unknown[] | Matrix {
   return Array.isArray(x) || isMatrix(x);
 }
 
@@ -295,7 +295,7 @@ export function isHelp(x: unknown): x is Help {
   return obj.constructor?.prototype?.isHelp === true;
 }
 
-export function isFunction(x: unknown): x is Function {
+export function isFunction(x: unknown): x is (...args: unknown[]) => unknown {
   return typeof x === 'function';
 }
 

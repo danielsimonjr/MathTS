@@ -18,34 +18,33 @@ import { lruQueue } from './lruQueue.js';
  * @return {function}                       Returns the memoized function
  */
 export interface MemoizeCache {
-  values: Map<string, any>;
+  values: Map<string, unknown>;
   lru: ReturnType<typeof lruQueue>;
 }
 
 export interface MemoizedFunction {
-  (...args: any[]): any;
+  (...args: unknown[]): unknown;
   cache?: MemoizeCache;
 }
 
 export function memoize(
-  fn: any,
-  { hasher, limit }: { hasher?: any; limit?: any } = {}
+  fn: (...args: unknown[]) => unknown,
+  {
+    hasher,
+    limit,
+  }: { hasher?: (args: unknown[]) => string; limit?: number } = {}
 ): MemoizedFunction {
-  limit = limit == null ? Number.POSITIVE_INFINITY : limit;
-  hasher = hasher == null ? JSON.stringify : hasher;
+  const effectiveLimit = limit == null ? Number.POSITIVE_INFINITY : limit;
+  const effectiveHasher = hasher == null ? (args: unknown[]): string => JSON.stringify(args) : hasher;
 
-  const memoized: MemoizedFunction = function () {
+  const memoized: MemoizedFunction = function (...args: unknown[]): unknown {
     if (typeof memoized.cache !== 'object') {
       memoized.cache = {
-        values: new Map(),
-        lru: lruQueue(limit || Number.POSITIVE_INFINITY),
+        values: new Map<string, unknown>(),
+        lru: lruQueue(effectiveLimit || Number.POSITIVE_INFINITY),
       };
     }
-    const args = [];
-    for (let i = 0; i < arguments.length; i++) {
-      args[i] = arguments[i];
-    }
-    const hash = hasher(args);
+    const hash = effectiveHasher(args);
 
     if (memoized.cache.values.has(hash)) {
       memoized.cache.lru.hit(hash);
@@ -54,7 +53,10 @@ export function memoize(
 
     const newVal = fn.apply(fn, args);
     memoized.cache.values.set(hash, newVal);
-    memoized.cache.values.delete(memoized.cache.lru.hit(hash));
+    const evicted = memoized.cache.lru.hit(hash);
+    if (evicted !== undefined) {
+      memoized.cache.values.delete(evicted);
+    }
 
     return newVal;
   };
@@ -76,15 +78,23 @@ export function memoize(
  * @param {function(a: *, b: *) : boolean} isEqual
  * @returns {function}
  */
-export function memoizeCompare(fn: any, isEqual: any): any {
-  const memoize: any = function memoize(): any {
-    const args: any[] = [];
-    for (let i = 0; i < arguments.length; i++) {
-      args[i] = arguments[i];
-    }
+interface CompareCacheEntry {
+  args: unknown[];
+  res: unknown;
+}
 
+interface MemoizeCompareFunction {
+  (...args: unknown[]): unknown;
+  cache: CompareCacheEntry[];
+}
+
+export function memoizeCompare(
+  fn: (...args: unknown[]) => unknown,
+  isEqual: (a: unknown[], b: unknown[]) => boolean
+): MemoizeCompareFunction {
+  const memoize = function (...args: unknown[]): unknown {
     for (let c = 0; c < memoize.cache.length; c++) {
-      const cached: any = memoize.cache[c];
+      const cached = memoize.cache[c];
 
       if (isEqual(args, cached.args)) {
         memoize.cache.splice(c, 1);
@@ -97,9 +107,9 @@ export function memoizeCompare(fn: any, isEqual: any): any {
     memoize.cache.unshift({ args, res });
 
     return res;
-  };
+  } as MemoizeCompareFunction;
 
-  memoize.cache = [] as any[];
+  memoize.cache = [];
 
   return memoize;
 }

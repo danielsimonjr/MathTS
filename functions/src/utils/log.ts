@@ -4,7 +4,7 @@
 export const warnOnce = (() => {
   const messages: Record<string, boolean> = {};
 
-  return function warnOnce(...args: any[]): void {
+  return function warnOnce(...args: unknown[]): void {
     const message = args.join(', ');
 
     if (!messages[message]) {

@@ -133,7 +133,7 @@ function _reduce<T, U>(mat: T[], dim: number, callback: (acc: U | T, val: T) => 
       }
       return val as U;
     } else {
-      tran = _switch(mat as unknown as T[][]);
+      tran = _switch(mat as unknown as T[][]) as T[][];
       ret = [];
       for (i = 0; i < tran.length; i++) {
         ret[i] = _reduce(tran[i], dim - 1, callback) as U;

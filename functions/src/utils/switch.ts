@@ -4,15 +4,16 @@
  * @returns {Array} ret
  * @private
  */
-export function _switch(mat: any) {
-  const I = mat.length;
-  const J = mat[0].length;
+export function _switch(mat: unknown[]): unknown[] {
+  const rows = mat as unknown[][];
+  const I = rows.length;
+  const J = rows[0].length;
   let i, j;
-  const ret = [];
+  const ret: unknown[][] = [];
   for (j = 0; j < J; j++) {
-    const tmp = [];
+    const tmp: unknown[] = [];
     for (i = 0; i < I; i++) {
-      tmp.push(mat[i][j]);
+      tmp.push(rows[i][j]);
     }
     ret.push(tmp);
   }
