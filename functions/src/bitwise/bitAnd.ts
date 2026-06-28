@@ -6,6 +6,7 @@ import { factory } from '../utils/factory.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { bitAndNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for bitAnd
 interface BitAndDependencies {
@@ -61,9 +62,9 @@ export const createBitAnd = /* #__PURE__ */ factory(
         'bigint, bigint': (x: bigint, y: bigint): bigint => x & y,
       },
       matrixAlgorithmSuite({
-        SS: matAlgo06xS0S0 as any,
-        DS: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
+        SS: matAlgo06xS0S0 as unknown as AlgorithmFunction,
+        DS: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
       })
     );
   }

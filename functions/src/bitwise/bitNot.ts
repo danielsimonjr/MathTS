@@ -49,7 +49,7 @@ export const createBitNot = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>
-            deepMap(x as any, self) as unknown[] | Matrix
+            deepMap(x as unknown as Parameters<typeof deepMap>[0], self) as unknown[] | Matrix
       ),
     });
   }

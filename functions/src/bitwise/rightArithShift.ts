@@ -11,6 +11,7 @@ import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js';
 import { rightArithShiftNumber } from '../plain/number/index.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for rightArithShift
 interface Matrix {
@@ -90,7 +91,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone();
               }
-              return matAlgo11xS0s(x as any, y, self, false) as unknown as Matrix;
+              return matAlgo11xS0s(x as unknown as Parameters<typeof matAlgo11xS0s>[0], y, self, false) as unknown as Matrix;
             }
         ),
 
@@ -101,7 +102,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone();
               }
-              return matAlgo14xDs(x as any, y, self, false) as unknown as Matrix;
+              return matAlgo14xDs(x as unknown as Parameters<typeof matAlgo14xDs>[0], y, self, false) as unknown as Matrix;
             }
         ),
 
@@ -112,7 +113,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
               }
-              return matAlgo10xSids(y as any, x, self, true) as unknown as Matrix;
+              return matAlgo10xSids(y as unknown as Parameters<typeof matAlgo10xSids>[0], x, self, true) as unknown as Matrix;
             }
         ),
 
@@ -123,15 +124,15 @@ export const createRightArithShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
               }
-              return matAlgo14xDs(y as any, x, self, true) as unknown as Matrix;
+              return matAlgo14xDs(y as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true) as unknown as Matrix;
             }
         ),
       },
       useMatrixForArrayScalar,
       matrixAlgorithmSuite({
-        SS: matAlgo08xS0Sid as any,
-        DS: matAlgo01xDSid as any,
-        SD: matAlgo02xDS0 as any,
+        SS: matAlgo08xS0Sid as unknown as AlgorithmFunction,
+        DS: matAlgo01xDSid as unknown as AlgorithmFunction,
+        SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
       })
     );
   }

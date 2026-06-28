@@ -6,6 +6,7 @@ import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { bitOrNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for bitOr
 interface BitOrDependencies {
@@ -63,9 +64,9 @@ export const createBitOr = /* #__PURE__ */ factory(
         'bigint, bigint': (x: bigint, y: bigint): bigint => x | y,
       },
       matrixAlgorithmSuite({
-        SS: matAlgo04xSidSid as any,
-        DS: matAlgo01xDSid as any,
-        Ss: matAlgo10xSids as any,
+        SS: matAlgo04xSidSid as unknown as AlgorithmFunction,
+        DS: matAlgo01xDSid as unknown as AlgorithmFunction,
+        Ss: matAlgo10xSids as unknown as AlgorithmFunction,
       })
     );
   }

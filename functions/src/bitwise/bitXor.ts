@@ -6,6 +6,7 @@ import { factory } from '../utils/factory.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { bitXorNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for bitXor
 interface BitXorDependencies {
@@ -62,9 +63,9 @@ export const createBitXor = /* #__PURE__ */ factory(
         'bigint, bigint': (x: bigint, y: bigint): bigint => x ^ y,
       },
       matrixAlgorithmSuite({
-        SS: matAlgo07xSSf as any,
-        DS: matAlgo03xDSf as any,
-        Ss: matAlgo12xSfs as any,
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     );
   }
