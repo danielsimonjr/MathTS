@@ -87,7 +87,7 @@ export const createMatAlgo06xS0S0 = /* #__PURE__ */ factory(
       // equal signature to use
       let eq: EqualScalarFunction = equalScalar;
       // zero value
-      let zero: any = 0;
+      let zero: MatrixValue = 0;
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -100,7 +100,7 @@ export const createMatAlgo06xS0S0 = /* #__PURE__ */ factory(
         // convert 0 to the same datatype
         zero = typed.convert(0, dt);
         // callback
-        cf = typed.find(callback, [dt, dt]) as any as any;
+        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
       }
 
       // result arrays
@@ -124,9 +124,9 @@ export const createMatAlgo06xS0S0 = /* #__PURE__ */ factory(
         // columns mark
         const mark: number = j + 1;
         // scatter the values of A(:,j) into workspace
-        scatter(a as any, j, w, x, u, mark, cindex, cf);
+        scatter(a as unknown as Parameters<typeof scatter>[0], j, w, x, u, mark, cindex, cf);
         // scatter the values of B(:,j) into workspace
-        scatter(b as any, j, w, x, u, mark, cindex, cf);
+        scatter(b as unknown as Parameters<typeof scatter>[0], j, w, x, u, mark, cindex, cf);
         // check we need to process values (non pattern matrix)
         if (x) {
           // initialize first index in j

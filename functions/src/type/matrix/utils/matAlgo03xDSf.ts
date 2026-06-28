@@ -107,7 +107,7 @@ export const createMatAlgo03xDSf = /* #__PURE__ */ factory(
       // datatype
       let dt: DataType;
       // zero value
-      let zero: any = 0;
+      let zero: MatrixValue = 0;
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -118,7 +118,7 @@ export const createMatAlgo03xDSf = /* #__PURE__ */ factory(
         // convert 0 to the same datatype
         zero = typed.convert(0, dt);
         // callback
-        cf = typed.find(callback, [dt, dt]) as any as any as any;
+        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
       }
 
       // result (DenseMatrix)

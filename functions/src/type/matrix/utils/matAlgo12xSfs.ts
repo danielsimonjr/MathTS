@@ -65,7 +65,7 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
      */
     return function matAlgo12xSfs(
       s: SparseMatrix,
-      b: any,
+      b: MatrixValue,
       callback: MatrixCallback,
       inverse: boolean
     ): DenseMatrix {
@@ -97,7 +97,7 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
         // convert b to the same datatype
         b = typed.convert(b, dt);
         // callback
-        cf = typed.find(callback, [dt, dt]) as any as any as MatrixCallback;
+        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
       }
 
       // result arrays
