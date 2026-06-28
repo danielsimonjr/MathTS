@@ -52,6 +52,32 @@ interface RationalizeDependencies {
   ParenthesisNode: unknown;
 }
 
+/** Result of the polynomial() helper */
+interface PolynomialResult {
+  expression: MathNode;
+  variables: string[];
+}
+
+/** Detailed result returned by rationalize when `detailed` is true */
+interface RationalizeDetailed {
+  expression?: MathNode;
+  numerator?: MathNode;
+  denominator?: MathNode | null;
+  variables?: string[];
+  coefficients?: number[];
+}
+
+/** Named sets of rewrite rules (each a list of typed functions and rule objects) */
+type RuleSet = Record<string, unknown[]>;
+
+/** Internal accumulator used by polyToCanonical/recurPol */
+interface PolyState {
+  cte: number;
+  oper: string;
+  fire: string;
+  noFil?: number;
+}
+
 const name = 'rationalize';
 const dependencies = [
   'config',
@@ -166,7 +192,11 @@ export const createRationalize = /* #__PURE__ */ factory(
      *           {Expression Node}  node simplified expression
      *
      */
-    function _rationalize(expr: MathNode, scope: any = {}, detailed: boolean = false): any {
+    function _rationalize(
+      expr: MathNode,
+      scope: Record<string, unknown> = {},
+      detailed: boolean = false
+    ): MathNode | RationalizeDetailed {
       const setRules = rulesRationalize(); // Rules for change polynomial in near canonical form
       const polyRet = polynomial(expr, scope, true, setRules.firstRules); // Check if expression is a rationalizable polynomial
       const nVars = polyRet.variables.length;
@@ -178,7 +208,7 @@ export const createRationalize = /* #__PURE__ */ factory(
         // If expression in not a constant
         expr = expandPower(expr); // First expand power of polynomials (cannot be made from rules!)
         let sBefore: string; // Previous expression
-        let rules: any[];
+        let rules: unknown[];
         let eDistrDiv = true;
         let redoInic = false;
         // Apply the initial rules, including succ div rules:
@@ -209,7 +239,7 @@ export const createRationalize = /* #__PURE__ */ factory(
       } // NVars >= 1
 
       const coefficients: number[] = [];
-      const retRationalize: any = {};
+      const retRationalize: RationalizeDetailed = {};
 
       if (
         expr.type === 'OperatorNode' &&
@@ -275,17 +305,17 @@ export const createRationalize = /* #__PURE__ */ factory(
      */
     function polynomial(
       expr: MathNode | string,
-      scope: any,
+      scope: Record<string, unknown>,
       extended?: boolean,
-      rules?: any[]
-    ): any {
+      rules?: unknown[]
+    ): PolynomialResult {
       const variables: string[] = [];
       const node = simplify(expr, rules, scope, { exactFractions: false }) as MathNode; // Resolves any variables and functions with all defined parameters
       extended = !!extended;
 
       const oper = '+-*' + (extended ? '/' : '');
       recPoly(node);
-      const retFunc: any = {};
+      const retFunc = {} as PolynomialResult;
       retFunc.expression = node;
       retFunc.variables = variables;
       return retFunc;
@@ -358,7 +388,7 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      * @return {array}        rule set to rationalize an polynomial expression
      */
-    function rulesRationalize(): any {
+    function rulesRationalize(): RuleSet {
       const oldRules = [
         simplifyCore, // sCore
         { l: 'n+n', r: '2*n' },
@@ -408,7 +438,7 @@ export const createRationalize = /* #__PURE__ */ factory(
         { l: '(n1/n2/n3)', r: '(n1/(n2*n3))' },
       ];
 
-      const setRules: any = {}; // rules set in 4 steps.
+      const setRules = {} as RuleSet; // rules set in 4 steps.
 
       // All rules => infinite loop
       // setRules.allRules =oldRules.concat(rulesFirst,rulesDistrDiv,rulesSucDiv)
@@ -464,7 +494,11 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      * @return {node}        node expression with all powers expanded.
      */
-    function expandPower(node: MathNode, parent?: any, indParent?: number | string): MathNode {
+    function expandPower(
+      node: MathNode,
+      parent?: MathNode & { content?: MathNode; args?: MathNode[] },
+      indParent?: number | string
+    ): MathNode {
       const tp = node.type;
       const internal = arguments.length > 1; // TRUE in internal calls
 
@@ -522,9 +556,9 @@ export const createRationalize = /* #__PURE__ */ factory(
           if (internal) {
             // Change parent references in internal recursive calls
             if (indParent === 'content') {
-              parent.content = node;
+              parent!.content = node;
             } else {
-              parent.args[indParent!] = node;
+              parent!.args![indParent as number] = node;
             }
           }
         } // does
@@ -534,8 +568,8 @@ export const createRationalize = /* #__PURE__ */ factory(
         // Recursion
         expandPower((node as ParenthesisNode).content, node, 'content');
       } else if (tp !== 'ConstantNode' && tp !== 'SymbolNode') {
-        for (let i = 0; i < (node as any).args.length; i++) {
-          expandPower((node as any).args[i], node, i);
+        for (let i = 0; i < (node as MathNode & { args: MathNode[] }).args.length; i++) {
+          expandPower((node as MathNode & { args: MathNode[] }).args[i], node, i);
         }
       }
 
@@ -575,13 +609,10 @@ export const createRationalize = /* #__PURE__ */ factory(
       } // coefficients.
 
       coefficients[0] = 0; // index is the exponent
-      const o: any = {};
-      o.cte = 1;
-      o.oper = '+';
+      const o: PolyState = { cte: 1, oper: '+', fire: '' };
 
       // fire: mark with * or ^ when finds * or ^ down tree, reset to "" with + and -.
       //       It is used to deduce the exponent: 1 for *, 0 for "".
-      o.fire = '';
 
       let maxExpo = 0; // maximum exponent
       let varname = ''; // variable name
@@ -643,7 +674,7 @@ export const createRationalize = /* #__PURE__ */ factory(
        *
        * @return {}                    No return. If error, throws an exception
        */
-      function recurPol(node: MathNode, noPai: MathNode | null, o: any): void {
+      function recurPol(node: MathNode, noPai: MathNode | null, o: PolyState): void {
         const tp = node.type;
         if (tp === 'FunctionNode') {
           // ***** FunctionName *****
