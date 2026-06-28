@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
+
+- Removed `@ts-nocheck` from the mathjs-derived Unit factory and resolved every
+  resulting strict-mode type error plus all 67 `@typescript-eslint/no-explicit-any`
+  findings — the last file blocking a zero-eslint `functions/src` tree.
+- Extracted a sibling `functions/src/type/unit/unit-types.ts` with real
+  interfaces for the function-as-class pattern: `UnitInstance`, `UnitConstructor`
+  (typed prototype + statics + construct signature), `UnitDef`, `UnitComponent`,
+  `PrefixDef`/`PrefixTable`, `BaseUnitDef`, `UnitSystem`/`UnitSystemEntry`,
+  `UnitJSON`, `TypeConverters`/`ConverterFn`, `UnitDependencies` (typed factory
+  deps, incl. an overloaded `subtractScalar` for the Unit−Unit case in
+  `splitUnit`), and a `Numeric` value union (`number | bigint | boolean |
+  BigNumber | Fraction | Complex`).
+- `UnitInstance.constructor` is typed as `UnitConstructor` so instances are
+  assignable to the `is.ts` `Unit` guard — this makes `isUnit(x)` narrow to the
+  rich `UnitInstance` (resolving the prior `is.ts`-narrowing union conflicts)
+  without any local guard wrapper.
+- Behavior-preserving: only types changed. The function-declaration `Unit` became
+  `const Unit = function (...) { ... } as unknown as UnitConstructor` (same object,
+  same `.name`); the dynamic own-property copy loops (`clone`, alias creation) and
+  the `for…in`-over-array sites keep their exact runtime via type-only casts;
+  angle-unit `value: null as any` placeholders became honest `value: null`
+  (`UnitDef.value: Numeric | null`). No `@ts-nocheck` / `@ts-ignore` /
+  `eslint-disable` / `type X = any`; zero documented `no-explicit-any` disables.
+- Gates: `eslint Unit.ts` 0, `tsc --noEmit` 0 (functions), `npm run typecheck`
+  28/28, functions suite 2902 pass / 41 skip (unchanged).
+
 ### Changed (2026-06-28) — `functions/tests/**` driven to ZERO eslint problems (honest typing)
 
 - Replaced all 38 `@typescript-eslint/no-explicit-any` findings in
