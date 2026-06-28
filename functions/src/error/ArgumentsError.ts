@@ -36,8 +36,11 @@ export class ArgumentsError extends Error {
     this.name = 'ArgumentsError';
 
     // Maintains proper stack trace for where error was thrown (V8)
-    if ((Error as any).captureStackTrace) {
-      (Error as any).captureStackTrace(this, ArgumentsError);
+    const ErrorWithCapture = Error as unknown as {
+      captureStackTrace?(targetObject: object, constructorOpt?: unknown): void;
+    };
+    if (ErrorWithCapture.captureStackTrace) {
+      ErrorWithCapture.captureStackTrace(this, ArgumentsError);
     }
   }
 }

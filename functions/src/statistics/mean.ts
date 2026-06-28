@@ -101,7 +101,7 @@ export const createMean = /* #__PURE__ */ factory(
     ): unknown {
       try {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        const sum = reduce(array as any, dimValue, add);
+        const sum = reduce(array as Parameters<typeof reduce>[0], dimValue, add);
         const s = Array.isArray(array) ? arraySize(array) : (array as MatrixType).size();
         return divide(sum, s[dimValue]);
       } catch (err) {
@@ -139,7 +139,7 @@ export const createMean = /* #__PURE__ */ factory(
       let sum: unknown;
       let num = 0;
 
-      deepForEach(array as any, function (value: unknown) {
+      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
         try {
           sum = sum === undefined ? value : add(sum, value);
           num++;

@@ -130,7 +130,7 @@ export const createProd = /* #__PURE__ */ factory(
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let prod: unknown;
 
-      deepForEach(array as any, function (value: unknown) {
+      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE multiplication
           const converted = typeof value === 'string' ? parseNumberWithConfig(value) : value;

@@ -120,7 +120,7 @@ export const createSum = /* #__PURE__ */ factory(
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let sum: unknown;
 
-      deepForEach(array as any, function (value: unknown) {
+      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE addition
           const converted = typeof value === 'string' ? parseNumberWithConfig(value) : value;
@@ -149,7 +149,7 @@ export const createSum = /* #__PURE__ */ factory(
     function _nsumDim(array: unknown[] | MatrixType, dim: number | { valueOf(): number }): unknown {
       try {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        const sum = reduce(array as any, dimValue, add);
+        const sum = reduce(array as Parameters<typeof reduce>[0], dimValue, add);
         return sum;
       } catch (err) {
         throw improveErrorMessage(err, 'sum', undefined);

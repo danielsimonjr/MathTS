@@ -486,8 +486,8 @@ export interface MatrixAlgorithmSuiteOptions {
   /** Algorithm for scalar + SparseMatrix (false means not implemented) */
   sS?: AlgorithmFunction | false;
 
-  /** Algorithm for DenseMatrix + scalar */
-  Ds?: AlgorithmFunction;
+  /** Algorithm for DenseMatrix + scalar (true enables the default dense path) */
+  Ds?: AlgorithmFunction | boolean;
 
   /** typed-function scalar type (defaults to 'any') */
   scalar?: string;

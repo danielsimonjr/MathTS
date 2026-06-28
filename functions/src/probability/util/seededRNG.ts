@@ -1,4 +1,3 @@
-// @ts-ignore - seedrandom may not have type declarations
 import seedrandom from 'seedrandom';
 
 // Type for seedrandom function

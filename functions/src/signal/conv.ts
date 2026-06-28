@@ -62,12 +62,13 @@ export function convDirect(
     case 'full':
       return result;
 
-    case 'same':
+    case 'same': {
       // Output same size as first input
       const startSame = Math.floor((m - 1) / 2);
       return result.slice(startSame, startSame + n);
+    }
 
-    case 'valid':
+    case 'valid': {
       // Only where inputs completely overlap
       if (m > n) {
         return [];
@@ -75,6 +76,7 @@ export function convDirect(
       const startValid = m - 1;
       const validLength = Math.max(0, n - m + 1);
       return result.slice(startValid, startValid + validLength);
+    }
 
     default:
       return result;
@@ -132,17 +134,19 @@ export function convFFT(
     case 'full':
       return realResult;
 
-    case 'same':
+    case 'same': {
       const startSame = Math.floor((m - 1) / 2);
       return realResult.slice(startSame, startSame + n);
+    }
 
-    case 'valid':
+    case 'valid': {
       if (m > n) {
         return [];
       }
       const startValid = m - 1;
       const validLength = Math.max(0, n - m + 1);
       return realResult.slice(startValid, startValid + validLength);
+    }
 
     default:
       return realResult;

@@ -50,8 +50,11 @@ export class IndexError extends RangeError {
     this.name = 'IndexError';
 
     // Maintains proper stack trace for where error was thrown (V8)
-    if ((Error as any).captureStackTrace) {
-      (Error as any).captureStackTrace(this, IndexError);
+    const ErrorWithCapture = Error as unknown as {
+      captureStackTrace?(targetObject: object, constructorOpt?: unknown): void;
+    };
+    if (ErrorWithCapture.captureStackTrace) {
+      ErrorWithCapture.captureStackTrace(this, IndexError);
     }
   }
 }

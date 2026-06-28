@@ -2,11 +2,10 @@ import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { IndexInterface } from '../type/matrix/types.js';
 
 // Type definitions for setUnion
-interface Index {
-  // Index placeholder
-}
+type Index = IndexInterface;
 
 interface SetUnionDependencies {
   typed: TypedFunction;

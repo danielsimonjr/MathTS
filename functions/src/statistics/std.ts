@@ -110,10 +110,13 @@ export const createStd = /* #__PURE__ */ factory(
       },
     });
 
-    function _std(
-      array: unknown[] | MatrixType,
-      normalizationOrDim?: NormalizationType | number | { valueOf(): number }
-    ): unknown {
+    function _std(...args: unknown[]): unknown {
+      const array = args[0] as unknown[] | MatrixType;
+      const normalizationOrDim = args[1] as
+        | NormalizationType
+        | number
+        | { valueOf(): number }
+        | undefined;
       if ((array as unknown[]).length === 0) {
         throw new SyntaxError('Function std requires one or more parameters (0 provided)');
       }
@@ -152,7 +155,7 @@ export const createStd = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       try {
-        const v = variance.apply(null, arguments as unknown as unknown[]);
+        const v = (variance as (...a: unknown[]) => unknown)(...args);
         if (isCollection(v)) {
           return map(v, sqrt);
         } else {

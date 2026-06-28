@@ -1,10 +1,9 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
 
 // Type definitions for combinatorics
-interface BigNumberType {
-  // BigNumber placeholder for type compatibility
-}
+type BigNumberType = BigNumber;
 
 type NumericValue = number | BigNumberType;
 

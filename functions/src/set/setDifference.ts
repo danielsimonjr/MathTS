@@ -2,6 +2,7 @@ import { flatten, generalize, identify } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { MathArray, Matrix } from '../../types/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { IndexInterface } from '../type/matrix/types.js';
 
 // Type definitions for setDifference
 interface SetDifferenceDependencies {
@@ -13,9 +14,7 @@ interface SetDifferenceDependencies {
   DenseMatrix: new (data: unknown[]) => Matrix;
 }
 
-interface Index {
-  // Index placeholder
-}
+type Index = IndexInterface;
 
 const name = 'setDifference';
 const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index', 'DenseMatrix'];
