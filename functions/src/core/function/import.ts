@@ -371,7 +371,7 @@ export function importFactory(
     };
 
     const meta = factory.meta as FactoryMeta | undefined;
-    const former = meta?.formerly ?? '';
+    const former = (meta?.formerly as string | undefined) ?? '';
     const needsTransform =
       isTransformFunctionFactory(factory) || factoryAllowedInExpressions(factory);
     const withTransform = math.expression.mathWithTransform;
