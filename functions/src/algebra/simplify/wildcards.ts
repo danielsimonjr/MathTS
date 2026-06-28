@@ -5,12 +5,19 @@ import {
   isParenthesisNode,
 } from '../../utils/is.js';
 export { isConstantNode, isSymbolNode as isVariableNode } from '../../utils/is.js';
-import type { MathNode } from '../../utils/node.js';
+import type {
+  MathNode,
+  OperatorNode,
+  FunctionNode,
+  ParenthesisNode,
+} from '../../utils/node.js';
 
 export function isNumericNode(x: MathNode): boolean {
   return (
     isConstantNode(x) ||
-    (isOperatorNode(x) && (x as any).isUnary() && isConstantNode((x as any).args[0]))
+    (isOperatorNode(x) &&
+      (x as OperatorNode).isUnary() &&
+      isConstantNode((x as OperatorNode).args[0]))
   );
 }
 
@@ -19,11 +26,14 @@ export function isConstantExpression(x: MathNode): boolean {
     // Basic Constant types
     return true;
   }
-  if ((isFunctionNode(x) || isOperatorNode(x)) && (x as any).args.every(isConstantExpression)) {
+  if (
+    (isFunctionNode(x) || isOperatorNode(x)) &&
+    (x as OperatorNode | FunctionNode).args.every(isConstantExpression)
+  ) {
     // Can be constant depending on arguments
     return true;
   }
-  if (isParenthesisNode(x) && isConstantExpression((x as any).content)) {
+  if (isParenthesisNode(x) && isConstantExpression((x as ParenthesisNode).content)) {
     // Parenthesis are transparent
     return true;
   }

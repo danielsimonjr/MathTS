@@ -1,12 +1,36 @@
 import { isFunctionNode, isOperatorNode, isParenthesisNode } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
 import { hasOwnProperty } from '../../utils/object.js';
-import type { MathNode, FunctionNode, OperatorNode } from '../../utils/node.js';
+import type { MathNode } from '../../utils/node.js';
 
 const name = 'simplifyUtil';
 const dependencies = ['FunctionNode', 'OperatorNode', 'SymbolNode'] as const;
 
 type OperatorContext = Record<string, Record<string, boolean>>;
+
+/** Minimal runtime shape of an OperatorNode used here */
+export interface OpNodeLike extends MathNode {
+  op: string;
+  fn: string;
+  args: MathNode[];
+  implicit?: boolean;
+}
+/** Minimal runtime shape of a FunctionNode used here */
+export interface FuncNodeLike extends MathNode {
+  name: string;
+  args: MathNode[];
+}
+
+type OperatorNodeCtor = new (
+  op: string,
+  fn: string,
+  args: MathNode[],
+  implicit?: boolean
+) => MathNode;
+type FunctionNodeCtor = new (fn: MathNode, args: MathNode[]) => MathNode;
+type SymbolNodeCtor = new (name: string) => MathNode;
+/** Node accepted by createMakeNodeFunction (operator or function node) */
+type MakeNodeArg = OpNodeLike | FuncNodeLike;
 
 export const createUtil = /* #__PURE__ */ factory(
   name,
@@ -16,9 +40,9 @@ export const createUtil = /* #__PURE__ */ factory(
     OperatorNode,
     SymbolNode,
   }: {
-    FunctionNode: any;
-    OperatorNode: any;
-    SymbolNode: any;
+    FunctionNode: FunctionNodeCtor;
+    OperatorNode: OperatorNodeCtor;
+    SymbolNode: SymbolNodeCtor;
   }) => {
     // TODO commutative/associative properties rely on the arguments
     // e.g. multiply is not commutative for matrices
@@ -58,9 +82,9 @@ export const createUtil = /* #__PURE__ */ factory(
       if (typeof nodeOrName === 'string') {
         name = nodeOrName;
       } else if (isOperatorNode(nodeOrName)) {
-        name = (nodeOrName as any).fn.toString();
+        name = (nodeOrName as unknown as OpNodeLike).fn.toString();
       } else if (isFunctionNode(nodeOrName)) {
-        name = (nodeOrName as any).name;
+        name = (nodeOrName as unknown as FuncNodeLike).name;
       } else if (isParenthesisNode(nodeOrName)) {
         name = 'paren';
       }
@@ -137,7 +161,7 @@ export const createUtil = /* #__PURE__ */ factory(
       }
       node.args = allChildren(node, context);
       for (let i = 0; i < node.args.length; i++) {
-        flatten(node.args[i] as any, context);
+        flatten(node.args[i] as MathNode & { args?: MathNode[] }, context);
       }
     }
 
@@ -155,7 +179,7 @@ export const createUtil = /* #__PURE__ */ factory(
         for (let i = 0; i < (node.args?.length ?? 0); i++) {
           const child = node.args![i] as MathNode & { op?: string };
           if (isOperatorNode(child) && op === child.op) {
-            findChildren(child as any);
+            findChildren(child as unknown as MathNode & { args?: MathNode[]; op?: string });
           } else {
             children.push(child);
           }
@@ -181,17 +205,17 @@ export const createUtil = /* #__PURE__ */ factory(
       if (!node.args || node.args.length === 0) {
         return;
       }
-      const makeNode = createMakeNodeFunction(node as any);
+      const makeNode = createMakeNodeFunction(node as unknown as MakeNodeArg);
       const l = node.args.length;
       for (let i = 0; i < l; i++) {
-        unflattenr(node.args[i] as any, context);
+        unflattenr(node.args[i] as MathNode & { args?: MathNode[] }, context);
       }
       if (l > 2 && isAssociative(node, context)) {
         let curnode = node.args.pop()!;
         while (node.args.length > 0) {
           curnode = makeNode([node.args.pop()!, curnode]);
         }
-        node.args = (curnode as any).args;
+        node.args = (curnode as OpNodeLike).args;
       }
     }
 
@@ -205,35 +229,35 @@ export const createUtil = /* #__PURE__ */ factory(
       if (!node.args || node.args.length === 0) {
         return;
       }
-      const makeNode = createMakeNodeFunction(node as any);
+      const makeNode = createMakeNodeFunction(node as unknown as MakeNodeArg);
       const l = node.args.length;
       for (let i = 0; i < l; i++) {
-        unflattenl(node.args[i] as any, context);
+        unflattenl(node.args[i] as MathNode & { args?: MathNode[] }, context);
       }
       if (l > 2 && isAssociative(node, context)) {
         let curnode = node.args.shift()!;
         while (node.args.length > 0) {
           curnode = makeNode([curnode, node.args.shift()!]);
         }
-        node.args = (curnode as any).args;
+        node.args = (curnode as OpNodeLike).args;
       }
     }
 
     function createMakeNodeFunction(
-      node: (OperatorNode & { implicit?: boolean }) | (FunctionNode & { name: string })
+      node: OpNodeLike | FuncNodeLike
     ): (args: MathNode[]) => MathNode {
       if (isOperatorNode(node)) {
         return function (args: MathNode[]): MathNode {
           try {
-            return new OperatorNode(node.op, (node as any).fn, args, (node as any).implicit);
+            return new OperatorNode((node as OpNodeLike).op, (node as OpNodeLike).fn, args, (node as OpNodeLike).implicit);
           } catch (err) {
             console.error(err);
-            return [] as any;
+            return [] as unknown as MathNode;
           }
         };
       } else {
         return function (args: MathNode[]): MathNode {
-          return new FunctionNode(new SymbolNode((node as any).name), args);
+          return new FunctionNode(new SymbolNode((node as FuncNodeLike).name), args);
         };
       }
     }
