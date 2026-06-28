@@ -1,4 +1,38 @@
 /**
+ * Structural contract for the BigNumber values manipulated here. Captures the
+ * exact instance members and constructor statics used; the configured BigNumber
+ * implementation (decimal.js / local Decimal) provides them.
+ */
+interface BigNumberValue {
+  s: number;
+  d: number[] | null;
+  e: number;
+  constructor: BigNumberCtor;
+  isFinite(): boolean;
+  isInteger(): boolean;
+  isNaN(): boolean;
+  isZero(): boolean;
+  isNegative(): boolean;
+  eq(other: BigNumberValue | number): boolean;
+  lt(other: number): boolean;
+  plus(other: BigNumberValue): BigNumberValue;
+  times(other: BigNumberValue | string): BigNumberValue;
+  div(other: BigNumberValue | string): BigNumberValue;
+  pow(other: BigNumberValue): BigNumberValue;
+  floor(): BigNumberValue;
+  toNumber(): number;
+}
+
+interface BigNumberCtor {
+  new (value: number | string): BigNumberValue;
+  precision: number;
+  config(options: { precision: number }): void;
+}
+
+/** Bitwise operator applied to the individual bits (0/1) of two operands. */
+type BitFunc = (a: number, b: number) => number;
+
+/**
  * Bitwise and for Bignumbers
  *
  * Special Cases:
@@ -19,7 +53,7 @@
  * @return {BigNumber} Result of `x` & `y`, is fully precise
  * @private
  */
-export function bitAndBigNumber(x: any, y: any) {
+export function bitAndBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
   if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
     throw new Error('Integers expected in function bitAnd');
   }
@@ -62,7 +96,7 @@ export function bitAndBigNumber(x: any, y: any) {
       return x;
     }
   }
-  return bitwise(x, y, function (a: any, b: any) {
+  return bitwise(x, y, function (a: number, b: number): number {
     return a & b;
   });
 }
@@ -73,7 +107,7 @@ export function bitAndBigNumber(x: any, y: any) {
  * @return {BigNumber} Result of ~`x`, fully precise
  *
  */
-export function bitNotBigNumber(x: any) {
+export function bitNotBigNumber(x: BigNumberValue): BigNumberValue {
   if (x.isFinite() && !x.isInteger()) {
     throw new Error('Integer expected in function bitNot');
   }
@@ -83,7 +117,7 @@ export function bitNotBigNumber(x: any) {
   BigNumber.config({ precision: 1e9 });
 
   const result = x.plus(new BigNumber(1));
-  result.s = -result.s || null;
+  result.s = (-result.s || null) as unknown as number;
 
   BigNumber.config({ precision: prevPrec });
   return result;
@@ -109,7 +143,7 @@ export function bitNotBigNumber(x: any) {
  * @param {BigNumber} y
  * @return {BigNumber} Result of `x` | `y`, fully precise
  */
-export function bitOrBigNumber(x: any, y: any) {
+export function bitOrBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
   if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
     throw new Error('Integers expected in function bitOr');
   }
@@ -140,7 +174,7 @@ export function bitOrBigNumber(x: any, y: any) {
     return x.isFinite() ? y : x;
   }
 
-  return bitwise(x, y, function (a: any, b: any) {
+  return bitwise(x, y, function (a: number, b: number): number {
     return a | b;
   });
 }
@@ -152,7 +186,7 @@ export function bitOrBigNumber(x: any, y: any) {
  * @param {function (a, b)} func
  * @return {BigNumber}
  */
-export function bitwise(x: any, y: any, func: any) {
+export function bitwise(x: BigNumberValue, y: BigNumberValue, func: BitFunc): BigNumberValue {
   const BigNumber = x.constructor;
 
   let xBits, yBits;
@@ -218,9 +252,9 @@ export function bitwise(x: any, y: any, func: any) {
 }
 
 /* Extracted from decimal.js, and edited to specialize. */
-function decCoefficientToBinaryString(x: any) {
+function decCoefficientToBinaryString(x: BigNumberValue): number[] {
   // Convert to string
-  const a = x.d; // array with digits
+  const a = x.d as number[]; // array with digits
   let r = a[0] + '';
 
   for (let i = 1; i < a.length; ++i) {
@@ -295,7 +329,7 @@ function decCoefficientToBinaryString(x: any) {
  * @return {BigNumber} Result of `x` ^ `y`, fully precise
  *
  */
-export function bitXor(x: any, y: any) {
+export function bitXor(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
   if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
     throw new Error('Integers expected in function bitXor');
   }
@@ -329,7 +363,7 @@ export function bitXor(x: any, y: any) {
     }
     return new BigNumber(x.isNegative() === y.isNegative() ? Infinity : -Infinity);
   }
-  return bitwise(x, y, function (a: any, b: any) {
+  return bitwise(x, y, function (a: number, b: number): number {
     return a ^ b;
   });
 }
@@ -352,7 +386,7 @@ export function bitXor(x: any, y: any) {
  * @return {BigNumber} Result of `x` << `y`
  *
  */
-export function leftShiftBigNumber(x: any, y: any) {
+export function leftShiftBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
   if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
     throw new Error('Integers expected in function leftShift');
   }
@@ -370,7 +404,7 @@ export function leftShiftBigNumber(x: any, y: any) {
 
   // Math.pow(2, y) is fully precise for y < 55, and fast
   if (y.lt(55)) {
-    return x.times(Math.pow(2, (y as any).toNumber()) + '');
+    return x.times(Math.pow(2, y.toNumber()) + '');
   }
   return x.times(new BigNumber(2).pow(y));
 }
@@ -394,7 +428,7 @@ export function leftShiftBigNumber(x: any, y: any) {
  * @return {BigNumber} Result of `x` >> `y`
  *
  */
-export function rightArithShiftBigNumber(x: any, y: any) {
+export function rightArithShiftBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
   if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
     throw new Error('Integers expected in function rightArithShift');
   }
@@ -418,7 +452,7 @@ export function rightArithShiftBigNumber(x: any, y: any) {
 
   // Math.pow(2, y) is fully precise for y < 55, and fast
   if (y.lt(55)) {
-    return x.div(Math.pow(2, (y as any).toNumber()) + '').floor();
+    return x.div(Math.pow(2, y.toNumber()) + '').floor();
   }
   return x.div(new BigNumber(2).pow(y)).floor();
 }

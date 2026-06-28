@@ -349,9 +349,7 @@ export function format(
       // remove trailing zeros after the decimal point
       return toPrecision(value, precision, options as FormatOptions).replace(
         /((\.\d*?)(0+))($|e)/,
-        function () {
-          const digits = arguments[2];
-          const e = arguments[4];
+        function (_match: string, _g1: string, digits: string, _g3: string, e: string): string {
           return digits !== '.' ? digits + e : e;
         }
       );
@@ -386,7 +384,7 @@ export function normalizeFormatOptions(options?: FormatOptions | number): Normal
     if (isNumber(options)) {
       precision = options;
     } else if (isBigNumber(options)) {
-      precision = (options as any).toNumber();
+      precision = (options as unknown as { toNumber(): number }).toNumber();
     } else if (isObject(options)) {
       if (options.precision !== undefined) {
         precision = _toNumberOrThrow(options.precision, () => {
@@ -535,7 +533,7 @@ export function toFixed(value: number | string, precision?: number): string {
 
   // prepend zeros if needed
   if (p < 0) {
-    c = zeros(-p + 1).concat(c as any);
+    c = (zeros(-p + 1) as Array<number | string>).concat(c);
     p = 1;
   }
 
@@ -617,7 +615,7 @@ export function toPrecision(
     );
 
     // prepend zeros
-    c = zeros(-e).concat(c as any);
+    c = (zeros(-e) as Array<number | string>).concat(c);
 
     const dot = e > 0 ? e : 0;
     if (dot < c.length - 1) {
@@ -838,11 +836,11 @@ export function copysign(x: number, y: number): number {
  * @param onError Callback to execute on error
  * @returns The numeric value
  */
-function _toNumberOrThrow(value: any, onError: () => void): number {
+function _toNumberOrThrow(value: unknown, onError: () => void): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as any).toNumber();
+    return (value as unknown as { toNumber(): number }).toNumber();
   } else {
     onError();
     return 0; // unreachable but TypeScript needs a return
@@ -855,11 +853,11 @@ function _toNumberOrThrow(value: any, onError: () => void): number {
  * @param defaultValue The default value to return if conversion fails
  * @returns The numeric value or default
  */
-function _toNumberOrDefault(value: any, defaultValue: number): number {
+function _toNumberOrDefault(value: unknown, defaultValue: number): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as any).toNumber();
+    return (value as unknown as { toNumber(): number }).toNumber();
   } else {
     return defaultValue;
   }
