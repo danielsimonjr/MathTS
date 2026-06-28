@@ -10,12 +10,13 @@ import {
   broadcastArrays,
   getArrayDataType,
 } from '../src/utils/array.js';
+import type { Index } from '../src/utils/is.js';
 
-const typeOf = (v: any): string => (Array.isArray(v) ? 'Array' : typeof v);
+const typeOf = (v: unknown): string => (Array.isArray(v) ? 'Array' : typeof v);
 
 describe('arraySize - irregular / scalar edges', () => {
   it('returns [] for a scalar', () => {
-    expect(arraySize(5 as any)).toEqual([]);
+    expect(arraySize(5)).toEqual([]);
   });
 
   it('measures a nested rectangular array', () => {
@@ -31,53 +32,53 @@ describe('arraySize - irregular / scalar edges', () => {
 describe('validateIndexSourceSize', () => {
   it('passes when source size matches', () => {
     const value = [1, 2, 3];
-    const index = { _sourceSize: [3] } as any;
+    const index = { _sourceSize: [3] } as unknown as Index;
     expect(() => validateIndexSourceSize(value, index)).not.toThrow();
   });
 
   it('ignores null source dimensions', () => {
     const value = [1, 2, 3];
-    const index = { _sourceSize: [null] } as any;
+    const index = { _sourceSize: [null] } as unknown as Index;
     expect(() => validateIndexSourceSize(value, index)).not.toThrow();
   });
 
   it('throws when source size does not match the value', () => {
     const value = [1, 2, 3];
-    const index = { _sourceSize: [5] } as any;
+    const index = { _sourceSize: [5] } as unknown as Index;
     expect(() => validateIndexSourceSize(value, index)).toThrow();
   });
 });
 
 describe('isEmptyIndex', () => {
   it('true for an empty string dimension', () => {
-    const index = { _dimensions: [''] } as any;
+    const index = { _dimensions: [''] } as unknown as Index;
     expect(isEmptyIndex(index)).toBe(true);
   });
 
   it('false for a non-empty string dimension', () => {
-    const index = { _dimensions: ['abc'] } as any;
+    const index = { _dimensions: ['abc'] } as unknown as Index;
     expect(isEmptyIndex(index)).toBe(false);
   });
 
   it('true for an empty array dimension', () => {
-    const index = { _dimensions: [{ _data: [], _size: [0] }] } as any;
+    const index = { _dimensions: [{ _data: [], _size: [0] }] } as unknown as Index;
     expect(isEmptyIndex(index)).toBe(true);
   });
 
   it('true for an empty range dimension (start === end)', () => {
-    const index = { _dimensions: [{ isRange: true, start: 2, end: 2 }] } as any;
+    const index = { _dimensions: [{ isRange: true, start: 2, end: 2 }] } as unknown as Index;
     expect(isEmptyIndex(index)).toBe(true);
   });
 
   it('false for a non-empty range dimension', () => {
-    const index = { _dimensions: [{ isRange: true, start: 0, end: 3 }] } as any;
+    const index = { _dimensions: [{ isRange: true, start: 0, end: 3 }] } as unknown as Index;
     expect(isEmptyIndex(index)).toBe(false);
   });
 });
 
 describe('resize - scalar input and shrink/grow', () => {
   it('wraps a scalar into an array', () => {
-    expect(resize(5 as any, [3], 0)).toEqual([5, 0, 0]);
+    expect(resize(5, [3], 0)).toEqual([5, 0, 0]);
   });
 
   it('grows and fills with the default value (2-D)', () => {
@@ -127,7 +128,7 @@ describe('concat / broadcastArrays - single-argument paths', () => {
   });
 
   it('broadcastArrays returns the single array when given one', () => {
-    expect(broadcastArrays([1, 2, 3] as any)).toEqual([1, 2, 3]);
+    expect(broadcastArrays([1, 2, 3])).toEqual([1, 2, 3]);
   });
 });
 

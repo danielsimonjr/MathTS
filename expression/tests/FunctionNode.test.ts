@@ -3,9 +3,10 @@ import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createFunctionNode } from '../src/node/FunctionNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   sqrt: Math.sqrt,
   abs: Math.abs,
@@ -14,13 +15,13 @@ const mathScope: Record<string, any> = {
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const FunctionNode = createFunctionNode({ math: mathScope, Node, SymbolNode });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -67,21 +68,23 @@ describe('FunctionNode - construction & identity', () => {
   });
 
   it('static name is FunctionNode', () => {
-    expect((FunctionNode as any).name).toBe('FunctionNode');
+    expect((FunctionNode as unknown as { name: string }).name).toBe('FunctionNode');
   });
 
   it('throws when fn is not a Node', () => {
-    expect(() => new FunctionNode(42 as any, [])).toThrow('Node expected as parameter "fn"');
+    expect(() => new FunctionNode(42 as unknown as MathNode, [])).toThrow(
+      'Node expected as parameter "fn"'
+    );
   });
 
   it('throws when args contains non-Nodes', () => {
-    expect(() => new FunctionNode(makeSym('f'), [42 as any])).toThrow(
+    expect(() => new FunctionNode(makeSym('f'), [42 as unknown as MathNode])).toThrow(
       'Array containing Nodes expected for parameter "args"'
     );
   });
 
   it('throws when optional is not boolean or undefined', () => {
-    expect(() => new FunctionNode(makeSym('f'), [], 'yes' as any)).toThrow(
+    expect(() => new FunctionNode(makeSym('f'), [], 'yes' as unknown as boolean)).toThrow(
       'optional flag, if specified, must be boolean'
     );
   });
@@ -148,7 +151,7 @@ describe('FunctionNode - forEach', () => {
     const arg1 = makeConst(1);
     const arg2 = makeConst(2);
     const node = new FunctionNode(fnSym, [arg1, arg2]);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(3);
     expect(visited[0].child).toBe(fnSym);
@@ -162,7 +165,7 @@ describe('FunctionNode - forEach', () => {
   it('visits only fn when args is empty', () => {
     const fnSym = makeSym('f');
     const node = new FunctionNode(fnSym, []);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.forEach((child) => visited.push(child));
     expect(visited).toHaveLength(1);
     expect(visited[0]).toBe(fnSym);
@@ -184,7 +187,7 @@ describe('FunctionNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new FunctionNode(makeSym('f'), [makeConst(1)]);
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -300,7 +303,7 @@ describe('FunctionNode - traverse', () => {
     const arg1 = makeConst(1);
     const arg2 = makeConst(2);
     const node = new FunctionNode(fnSym, [arg1, arg2]);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(4); // node + fnSym + arg1 + arg2
     expect(visited[0]).toBe(node);

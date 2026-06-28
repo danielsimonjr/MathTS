@@ -6,7 +6,7 @@ import { createOperatorNode } from '../src/node/OperatorNode.js';
 import { createParenthesisNode } from '../src/node/ParenthesisNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   subtract: (a: number, b: number) => a - b,
   multiply: (a: number, b: number) => a * b,
@@ -17,17 +17,17 @@ const mathScope: Record<string, any> = {
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const _SymbolNode = createSymbolNode({ math: mathScope, Node });
 const OperatorNode = createOperatorNode({ Node });
 const _ParenthesisNode = createParenthesisNode({ Node });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
-function makeOp(op: string, fn: string, args: any[]) {
+function makeOp(op: string, fn: string, args: ConstructorParameters<typeof OperatorNode>[2]) {
   return new OperatorNode(op, fn, args);
 }
 
@@ -52,7 +52,9 @@ describe('OperatorNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((makeOp('+', 'add', [makeConst(1), makeConst(2)]) as any).isNode).toBe(true);
+    expect(
+      (makeOp('+', 'add', [makeConst(1), makeConst(2)]) as unknown as { isNode: boolean }).isNode
+    ).toBe(true);
   });
 
   it('implicit defaults to false', () => {
@@ -69,19 +71,21 @@ describe('OperatorNode - construction & identity', () => {
   });
 
   it('throws when op is not a string', () => {
-    expect(() => new (OperatorNode as any)(42, 'add', [makeConst(1)])).toThrow(
+    expect(
+      () => new (OperatorNode as unknown as new (...args: unknown[]) => unknown)(42, 'add', [makeConst(1)])
+    ).toThrow(
       'string expected for parameter "op"'
     );
   });
 
   it('throws when fn is not a string', () => {
-    expect(() => new OperatorNode('+', 42 as any, [makeConst(1)])).toThrow(
+    expect(() => new OperatorNode('+', 42 as unknown as string, [makeConst(1)])).toThrow(
       'string expected for parameter "fn"'
     );
   });
 
   it('throws when args is not an array of Nodes', () => {
-    expect(() => new OperatorNode('+', 'add', [42 as any])).toThrow(
+    expect(() => new OperatorNode('+', 'add', [42 as unknown as ReturnType<typeof makeConst>])).toThrow(
       'Array containing Nodes expected'
     );
   });
@@ -161,7 +165,7 @@ describe('OperatorNode - forEach', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = makeOp('+', 'add', [a, b]);
-    const visited: Array<{ child: any; path: string }> = [];
+    const visited: Array<{ child: unknown; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].path).toBe('args[0]');
@@ -177,7 +181,7 @@ describe('OperatorNode - map', () => {
     const b = makeConst(2);
     const node = makeOp('+', 'add', [a, b]);
     const newConst = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => newConst);
+    const mapped = node.map((_child, _path, _parent) => newConst);
     expect(mapped).not.toBe(node);
     expect(mapped.args[0]).toBe(newConst);
     expect(mapped.args[1]).toBe(newConst);
@@ -187,7 +191,9 @@ describe('OperatorNode - map', () => {
 
   it('throws when callback returns non-node', () => {
     const node = makeOp('+', 'add', [makeConst(1), makeConst(2)]);
-    expect(() => node.map((_child) => ({ notANode: true }) as any)).toThrow(
+    expect(() =>
+      node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -198,7 +204,7 @@ describe('OperatorNode - clone', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = makeOp('+', 'add', [a, b]);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.op).toBe('+');
     expect(cloned.fn).toBe('add');
@@ -334,6 +340,6 @@ describe('OperatorNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(makeOp('+', 'add', [makeConst(1), makeConst(2)]).equals(null as any)).toBe(false);
+    expect(makeOp('+', 'add', [makeConst(1), makeConst(2)]).equals(null)).toBe(false);
   });
 });

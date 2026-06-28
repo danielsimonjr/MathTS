@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createRelationalNode } from '../src/node/RelationalNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   smaller: (a: number, b: number) => a < b,
   larger: (a: number, b: number) => a > b,
   smallerEq: (a: number, b: number) => a <= b,
@@ -14,11 +15,11 @@ const mathScope: Record<string, any> = {
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const RelationalNode = createRelationalNode({ Node });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -44,19 +45,21 @@ describe('RelationalNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]) as any).isNode).toBe(
-      true
-    );
+    expect(
+      (new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]) as unknown as {
+        isNode: boolean;
+      }).isNode
+    ).toBe(true);
   });
 
   it('throws when conditionals is not an array', () => {
-    expect(() => new RelationalNode('smaller' as any, [makeConst(1), makeConst(2)])).toThrow(
+    expect(() => new RelationalNode('smaller' as unknown as string[], [makeConst(1), makeConst(2)])).toThrow(
       'Parameter conditionals must be an array'
     );
   });
 
   it('throws when params is not an array', () => {
-    expect(() => new RelationalNode(['smaller'], makeConst(1) as any)).toThrow(
+    expect(() => new RelationalNode(['smaller'], makeConst(1) as unknown as MathNode[])).toThrow(
       'Parameter params must be an array'
     );
   });
@@ -139,7 +142,7 @@ describe('RelationalNode - forEach', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = new RelationalNode(['smaller'], [a, b]);
-    const visited: Array<{ child: any; path: string }> = [];
+    const visited: Array<{ child: MathNode; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].path).toBe('params[0]');
@@ -155,7 +158,7 @@ describe('RelationalNode - map', () => {
     const b = makeConst(2);
     const node = new RelationalNode(['smaller'], [a, b]);
     const replacement = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => replacement);
+    const mapped = node.map((_child, _path, _parent) => replacement);
     expect(mapped).not.toBe(node);
     expect(mapped.params[0]).toBe(replacement);
     expect(mapped.params[1]).toBe(replacement);
@@ -164,7 +167,7 @@ describe('RelationalNode - map', () => {
 
   it('throws when callback returns non-node', () => {
     const node = new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]);
-    expect(() => node.map((_child) => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map((_child) => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -175,7 +178,7 @@ describe('RelationalNode - clone', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = new RelationalNode(['smaller'], [a, b]);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.conditionals).toEqual(['smaller']);
     expect(cloned.params[0]).toBe(a);
@@ -286,9 +289,7 @@ describe('RelationalNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]).equals(null as any)).toBe(
-      false
-    );
+    expect(new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]).equals(null)).toBe(false);
   });
 });
 
@@ -297,7 +298,7 @@ describe('RelationalNode - traverse', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = new RelationalNode(['smaller'], [a, b]);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(3); // root + 2 params
     expect(visited[0]).toBe(node);

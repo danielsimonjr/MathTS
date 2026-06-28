@@ -42,7 +42,7 @@ describe('ObjectWrappingMap', () => {
 
   it('has returns false for unsafe keys like __proto__', () => {
     const m = new ObjectWrappingMap({});
-    expect(m.has('__proto__' as any)).toBe(false);
+    expect(m.has('__proto__')).toBe(false);
   });
 
   it('keys returns an iterator over own safe keys', () => {

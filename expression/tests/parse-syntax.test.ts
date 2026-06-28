@@ -37,11 +37,18 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 
 // Register the Node type with typed-function so parse.ts's addConversion works.
 try {
-  (mathTyped as any).addType(
+  (
+    mathTyped as unknown as {
+      addType: (
+        type: { name: string; test: (x: unknown) => boolean },
+        beforePrevious: boolean
+      ) => void;
+    }
+  ).addType(
     {
       name: 'Node',
       test: (x: unknown): boolean =>
-        typeof x === 'object' && x !== null && (x as any).isNode === true,
+        typeof x === 'object' && x !== null && (x as { isNode?: unknown }).isNode === true,
     },
     false
   );
@@ -67,7 +74,36 @@ class ResultSet {
   }
 }
 
-const mathScope: Record<string, any> = {};
+const mathScope: Record<string, unknown> = {};
+
+/** Options accepted by the parse function under test. */
+interface ParseOptions {
+  nodes?: Record<string, unknown>;
+}
+
+/**
+ * Structural view of a parsed node. The parser returns concrete node subtypes;
+ * these are the type-guard flags, subtype fields, and methods read off results
+ * in this file (all optional, since which are present depends on the node kind).
+ */
+interface ParsedNode {
+  isConstantNode?: boolean;
+  isOperatorNode?: boolean;
+  isRelationalNode?: boolean;
+  isConditionalNode?: boolean;
+  isFunctionNode?: boolean;
+  isFunctionAssignmentNode?: boolean;
+  isAssignmentNode?: boolean;
+  isBlockNode?: boolean;
+  isPercentage?: boolean;
+  value?: unknown;
+  fn?: string;
+  args?: ParsedNode[];
+  falseExpr?: ParsedNode;
+  comment?: string;
+  params?: unknown[];
+  toString(): string;
+}
 
 const _Node = createNode({ mathWithTransform: mathScope });
 const _ArrayNode = createArrayNode({ Node: _Node });
@@ -140,7 +176,7 @@ const parse = createParse({
   RangeNode: _RangeNode,
   RelationalNode: _RelationalNode,
   SymbolNode: _SymbolNode,
-}) as (expr: any, options?: any) => any;
+}) as unknown as (expr: string | string[], options?: ParseOptions) => ParsedNode;
 
 const str = (s: string) => parse(s).toString();
 
@@ -156,27 +192,27 @@ describe('parse — numbers', () => {
   });
 
   it('parses scientific notation', () => {
-    expect((parse('2e3') as any).value).toBe(2000);
-    expect((parse('1.5e-2') as any).value).toBeCloseTo(0.015);
-    expect((parse('2E2') as any).value).toBe(200);
-    expect((parse('3e+2') as any).value).toBe(300);
+    expect(parse('2e3').value).toBe(2000);
+    expect(parse('1.5e-2').value).toBeCloseTo(0.015);
+    expect(parse('2E2').value).toBe(200);
+    expect(parse('3e+2').value).toBe(300);
   });
 
   it('parses hex, binary, and octal literals as number tokens', () => {
     // numeric() here uses Number(), which understands 0x/0b/0o prefixes.
-    expect((parse('0x1A') as any).value).toBe(26);
-    expect((parse('0b101') as any).value).toBe(5);
-    expect((parse('0o17') as any).value).toBe(15);
+    expect(parse('0x1A').value).toBe(26);
+    expect(parse('0b101').value).toBe(5);
+    expect(parse('0o17').value).toBe(15);
   });
 
   it('parses a radix literal with a word-size suffix without throwing', () => {
-    const n = parse('0xFFi16') as any;
+    const n = parse('0xFFi16');
     expect(n.isConstantNode).toBe(true);
   });
 
   it('parses a radix literal with a radix point without throwing', () => {
     // exercises the "radix has a '.' point" branch of the tokenizer
-    const n = parse('0b1.1') as any;
+    const n = parse('0b1.1');
     expect(n.isConstantNode).toBe(true);
   });
 
@@ -204,16 +240,16 @@ describe('parse — strings', () => {
   });
 
   it('parses escape sequences', () => {
-    expect((parse('"a\\nb"') as any).value).toBe('a\nb');
-    expect((parse('"tab\\tend"') as any).value).toBe('tab\tend');
-    expect((parse('"q\\"x"') as any).value).toBe('q"x');
-    expect((parse('"back\\\\slash"') as any).value).toBe('back\\slash');
-    expect((parse('"r\\rf\\fb\\b"') as any).value).toBe('r\rf\fb\b');
-    expect((parse('"slash\\/end"') as any).value).toBe('slash/end');
+    expect(parse('"a\\nb"').value).toBe('a\nb');
+    expect(parse('"tab\\tend"').value).toBe('tab\tend');
+    expect(parse('"q\\"x"').value).toBe('q"x');
+    expect(parse('"back\\\\slash"').value).toBe('back\\slash');
+    expect(parse('"r\\rf\\fb\\b"').value).toBe('r\rf\fb\b');
+    expect(parse('"slash\\/end"').value).toBe('slash/end');
   });
 
   it('parses a unicode escape', () => {
-    expect((parse('"\\u0041"') as any).value).toBe('A');
+    expect(parse('"\\u0041"').value).toBe('A');
   });
 
   it('throws on an unterminated string', () => {
@@ -235,10 +271,10 @@ describe('parse — arithmetic & precedence', () => {
   });
 
   it('treats power as right-associative', () => {
-    const n = parse('2^3^2') as any;
+    const n = parse('2^3^2');
     expect(n.fn).toBe('pow');
     // right child is itself a pow
-    expect(n.args[1].fn).toBe('pow');
+    expect(n.args![1].fn).toBe('pow');
   });
 
   it('parses dotPow, dotMultiply and dotDivide', () => {
@@ -249,7 +285,7 @@ describe('parse — arithmetic & precedence', () => {
 
   it('parses modulus via % and mod', () => {
     expect(str('a%b')).toBe('a % b');
-    expect((parse('7 mod 3') as any).fn).toBe('mod');
+    expect(parse('7 mod 3').fn).toBe('mod');
   });
 });
 
@@ -273,7 +309,7 @@ describe('parse — unary, postfix, percentage', () => {
 
   it('parses unary percentage as value / 100', () => {
     expect(str('10%')).toBe('10 / 100');
-    const n = parse('10%') as any;
+    const n = parse('10%');
     expect(n.isPercentage).toBe(true);
   });
 

@@ -3,19 +3,20 @@ import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createObjectNode } from '../src/node/ObjectNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   x: 10,
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const _SymbolNode = createSymbolNode({ math: mathScope, Node });
 const ObjectNode = createObjectNode({ Node });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -42,11 +43,13 @@ describe('ObjectNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((new ObjectNode({}) as any).isNode).toBe(true);
+    expect((new ObjectNode({}) as unknown as { isNode: boolean }).isNode).toBe(true);
   });
 
   it('throws when properties values are not nodes', () => {
-    expect(() => new (ObjectNode as any)({ a: 42 })).toThrow('Object containing Nodes expected');
+    expect(() => new ObjectNode({ a: 42 } as unknown as Record<string, MathNode>)).toThrow(
+      'Object containing Nodes expected'
+    );
   });
 });
 
@@ -73,7 +76,7 @@ describe('ObjectNode - forEach', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = new ObjectNode({ a, b });
-    const visited: Array<{ child: any; path: string }> = [];
+    const visited: Array<{ child: MathNode; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     const paths = visited.map((v) => v.path);
@@ -86,7 +89,7 @@ describe('ObjectNode - forEach', () => {
 
   it('calls callback for 0 props on empty ObjectNode', () => {
     const node = new ObjectNode({});
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.forEach((child) => visited.push(child));
     expect(visited).toHaveLength(0);
   });
@@ -97,14 +100,14 @@ describe('ObjectNode - map', () => {
     const a = makeConst(10);
     const node = new ObjectNode({ a });
     const newConst = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => newConst);
+    const mapped = node.map((_child, _path, _parent) => newConst);
     expect(mapped).not.toBe(node);
     expect(mapped.properties.a).toBe(newConst);
   });
 
   it('throws when callback returns non-node', () => {
     const node = new ObjectNode({ a: makeConst(1) });
-    expect(() => node.map((_child) => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map((_child) => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -114,7 +117,7 @@ describe('ObjectNode - clone', () => {
   it('creates shallow copy', () => {
     const a = makeConst(5);
     const node = new ObjectNode({ a });
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.properties.a).toBe(a);
     expect(cloned.type).toBe('ObjectNode');
@@ -199,7 +202,7 @@ describe('ObjectNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(new ObjectNode({}).equals(null as any)).toBe(false);
+    expect(new ObjectNode({}).equals(null)).toBe(false);
   });
 });
 
@@ -208,7 +211,7 @@ describe('ObjectNode - traverse', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const node = new ObjectNode({ a, b });
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(3); // root + 2 children
     expect(visited[0]).toBe(node);

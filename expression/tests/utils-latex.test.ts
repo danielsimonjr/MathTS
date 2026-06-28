@@ -75,19 +75,19 @@ describe('latexOperators', () => {
 // ---------------------------------------------------------------------------
 describe('latexFunctions', () => {
   it('has a template for abs with one argument', () => {
-    expect((latexFunctions.abs as any)[1]).toBe('\\left|${args[0]}\\right|');
+    expect(latexFunctions.abs[1]).toBe('\\left|${args[0]}\\right|');
   });
 
   it('has a template for sqrt', () => {
-    expect((latexFunctions.sqrt as any)[1]).toBe('\\sqrt{${args[0]}}');
+    expect(latexFunctions.sqrt[1]).toBe('\\sqrt{${args[0]}}');
   });
 
   it('has a template for divide (fraction form)', () => {
-    expect((latexFunctions.divide as any)[2]).toBe('\\frac{${args[0]}}{${args[1]}}');
+    expect(latexFunctions.divide[2]).toBe('\\frac{${args[0]}}{${args[1]}}');
   });
 
   it('has a template for sin', () => {
-    expect((latexFunctions.sin as any)[1]).toBe('\\sin\\left(${args[0]}\\right)');
+    expect(latexFunctions.sin[1]).toBe('\\sin\\left(${args[0]}\\right)');
   });
 
   it('has string templates (not objects) for variadic functions like max/min', () => {
@@ -158,6 +158,6 @@ describe('toSymbol', () => {
 
   it('defaults isUnit to false when not provided', () => {
     // Should return the symbol, not treat it as a unit
-    expect(toSymbol('alpha', undefined as any)).toBe('\\alpha');
+    expect(toSymbol('alpha', undefined)).toBe('\\alpha');
   });
 });

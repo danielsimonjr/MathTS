@@ -2,17 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createBlockNode } from '../src/node/BlockNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathWithTransform: Record<string, any> = {};
+const mathWithTransform: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 
 // Simple ResultSet implementation for tests
 class ResultSet {
-  entries: any[];
-  constructor(entries: any[]) {
+  entries: unknown[];
+  constructor(entries: unknown[]) {
     this.entries = entries;
   }
   get isResultSet() {
@@ -23,11 +24,11 @@ class ResultSet {
 const BlockNode = createBlockNode({ ResultSet, Node });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
-function makeBlock(blocks: Array<{ node: any; visible?: boolean }>) {
+function makeBlock(blocks: Array<{ node: MathNode; visible?: boolean }>) {
   return new BlockNode(blocks);
 }
 
@@ -59,21 +60,23 @@ describe('BlockNode - construction & identity', () => {
   });
 
   it('static name is BlockNode', () => {
-    expect((BlockNode as any).name).toBe('BlockNode');
+    expect((BlockNode as unknown as { name: string }).name).toBe('BlockNode');
   });
 
   it('throws when argument is not an array', () => {
-    expect(() => new BlockNode({} as any)).toThrow('Array expected');
+    expect(
+      () => new BlockNode({} as unknown as Array<{ node: MathNode; visible?: boolean }>)
+    ).toThrow('Array expected');
   });
 
   it('throws when a block has non-Node node property', () => {
-    expect(() => new BlockNode([{ node: 42 as any, visible: true }])).toThrow(
+    expect(() => new BlockNode([{ node: 42 as unknown as MathNode, visible: true }])).toThrow(
       'Property "node" must be a Node'
     );
   });
 
   it('throws when visible is not boolean', () => {
-    expect(() => new BlockNode([{ node: makeConst(1), visible: 'yes' as any }])).toThrow(
+    expect(() => new BlockNode([{ node: makeConst(1), visible: 'yes' as unknown as boolean }])).toThrow(
       'Property "visible" must be a boolean'
     );
   });
@@ -126,7 +129,7 @@ describe('BlockNode - forEach', () => {
     const c1 = makeConst(1);
     const c2 = makeConst(2);
     const node = makeBlock([{ node: c1 }, { node: c2 }]);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].child).toBe(c1);
@@ -150,7 +153,7 @@ describe('BlockNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = makeBlock([{ node: makeConst(1) }]);
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });

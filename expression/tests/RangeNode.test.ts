@@ -5,18 +5,18 @@ import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createRangeNode } from '../src/node/RangeNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   // Minimal range function: returns {start, end, step}
   range: (start: number, end: number, step?: number) => ({ start, end, step }),
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const RangeNode = createRangeNode({ Node });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -49,24 +49,37 @@ describe('RangeNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((new RangeNode(makeConst(1), makeConst(5)) as any).isNode).toBe(true);
+    expect((new RangeNode(makeConst(1), makeConst(5)) as unknown as { isNode: boolean }).isNode).toBe(
+      true
+    );
   });
 
   it('throws when start is not a node', () => {
-    expect(() => new RangeNode(42 as any, makeConst(5))).toThrow('Node expected');
+    expect(() => new RangeNode(42 as unknown as ReturnType<typeof makeConst>, makeConst(5))).toThrow(
+      'Node expected'
+    );
   });
 
   it('throws when end is not a node', () => {
-    expect(() => new RangeNode(makeConst(1), 42 as any)).toThrow('Node expected');
+    expect(() => new RangeNode(makeConst(1), 42 as unknown as ReturnType<typeof makeConst>)).toThrow(
+      'Node expected'
+    );
   });
 
   it('throws when step is provided but not a node', () => {
-    expect(() => new RangeNode(makeConst(1), makeConst(5), 'bad' as any)).toThrow('Node expected');
+    expect(() =>
+      new RangeNode(makeConst(1), makeConst(5), 'bad' as unknown as ReturnType<typeof makeConst>)
+    ).toThrow('Node expected');
   });
 
   it('throws with too many arguments', () => {
     expect(() =>
-      (RangeNode as any)(makeConst(1), makeConst(5), makeConst(2), makeConst(0))
+      (RangeNode as unknown as (...args: unknown[]) => unknown)(
+        makeConst(1),
+        makeConst(5),
+        makeConst(2),
+        makeConst(0)
+      )
     ).toThrow();
   });
 });
@@ -113,7 +126,7 @@ describe('RangeNode - forEach', () => {
     const end = makeConst(5);
     const node = new RangeNode(start, end);
     const paths: string[] = [];
-    const children: any[] = [];
+    const children: unknown[] = [];
     node.forEach((child, path) => {
       children.push(child);
       paths.push(path);
@@ -144,7 +157,7 @@ describe('RangeNode - map', () => {
     const end = makeConst(5);
     const node = new RangeNode(start, end);
     const replacement = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => replacement);
+    const mapped = node.map((_child, _path, _parent) => replacement);
     expect(mapped).not.toBe(node);
     expect(mapped.start).toBe(replacement);
     expect(mapped.end).toBe(replacement);
@@ -158,13 +171,15 @@ describe('RangeNode - map', () => {
     const step = makeConst(2);
     const node = new RangeNode(start, end, step);
     const replacement = makeConst(1);
-    const mapped: any = node.map((_child, _path, _parent) => replacement);
+    const mapped = node.map((_child, _path, _parent) => replacement);
     expect(mapped.step).toBe(replacement);
   });
 
   it('throws when callback returns non-node', () => {
     const node = new RangeNode(makeConst(1), makeConst(5));
-    expect(() => node.map((_child) => ({ notANode: true }) as any)).toThrow(
+    expect(() =>
+      node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -175,7 +190,7 @@ describe('RangeNode - clone', () => {
     const start = makeConst(1);
     const end = makeConst(5);
     const node = new RangeNode(start, end);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.start).toBe(start);
     expect(cloned.end).toBe(end);
@@ -187,7 +202,7 @@ describe('RangeNode - clone', () => {
     const end = makeConst(10);
     const step = makeConst(2);
     const node = new RangeNode(start, end, step);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned.step).toBe(step);
   });
 });
@@ -269,7 +284,7 @@ describe('RangeNode - toJSON / fromJSON', () => {
     const end = makeConst(10);
     const step = makeConst(2);
     const node = RangeNode.fromJSON({ start, end, step });
-    expect(node.step as any).toBe(step);
+    expect(node.step).toBe(step);
   });
 });
 
@@ -287,7 +302,7 @@ describe('RangeNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(new RangeNode(makeConst(1), makeConst(5)).equals(null as any)).toBe(false);
+    expect(new RangeNode(makeConst(1), makeConst(5)).equals(null)).toBe(false);
   });
 });
 
@@ -296,7 +311,7 @@ describe('RangeNode - traverse', () => {
     const start = makeConst(1);
     const end = makeConst(5);
     const node = new RangeNode(start, end);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(3);
     expect(visited[0]).toBe(node);
@@ -309,7 +324,7 @@ describe('RangeNode - traverse', () => {
     const end = makeConst(10);
     const step = makeConst(2);
     const node = new RangeNode(start, end, step);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(4);
     expect(visited.some((n) => n === step)).toBe(true);

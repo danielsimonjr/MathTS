@@ -15,16 +15,23 @@ import { compile } from '../src/compiler/compile.js';
  */
 
 // ── Mock node helpers ────────────────────────────────────────────────────────
-function constantNode(value: any) {
+/**
+ * Structural stand-in for the parsed AST nodes the compiler walks. Each mock
+ * carries an `is<Type>Node` discriminator plus the fields the compiler reads;
+ * dynamic field values are `unknown`.
+ */
+type MockNode = Record<string, unknown>;
+
+function constantNode(value: unknown) {
   return { type: 'ConstantNode', isConstantNode: true, value };
 }
 function symbolNode(name: string) {
   return { type: 'SymbolNode', isSymbolNode: true, name };
 }
-function operatorNode(op: string, fn: string, args: any[]) {
+function operatorNode(op: string, fn: string, args: MockNode[]) {
   return { type: 'OperatorNode', isOperatorNode: true, op, fn, args };
 }
-function functionNode(fnName: string, args: any[]) {
+function functionNode(fnName: string, args: MockNode[]) {
   return {
     type: 'FunctionNode',
     isFunctionNode: true,
@@ -35,10 +42,10 @@ function functionNode(fnName: string, args: any[]) {
     },
   };
 }
-function parenthesisNode(content: any) {
+function parenthesisNode(content: MockNode) {
   return { type: 'ParenthesisNode', isParenthesisNode: true, content };
 }
-function arrayNode(items: any[]) {
+function arrayNode(items: MockNode[]) {
   return { type: 'ArrayNode', isArrayNode: true, items };
 }
 function objectPropertyIndex(prop: string) {
@@ -50,7 +57,7 @@ function objectPropertyIndex(prop: string) {
     dimensions: [constantNode(prop)],
   };
 }
-function arrayIndexNode(dimensions: any[]) {
+function arrayIndexNode(dimensions: MockNode[]) {
   return {
     type: 'IndexNode',
     isIndexNode: true,
@@ -58,7 +65,7 @@ function arrayIndexNode(dimensions: any[]) {
     dimensions,
   };
 }
-function accessorNode(object: any, index: any, optionalChaining = false) {
+function accessorNode(object: MockNode, index: MockNode, optionalChaining = false) {
   return {
     type: 'AccessorNode',
     isAccessorNode: true,
@@ -67,22 +74,22 @@ function accessorNode(object: any, index: any, optionalChaining = false) {
     optionalChaining,
   };
 }
-function rangeNode(start: any, end: any, step?: any) {
+function rangeNode(start: MockNode, end: MockNode, step?: MockNode) {
   return { type: 'RangeNode', isRangeNode: true, start, end, step };
 }
-function blockNode(blocks: Array<{ node: any; visible: boolean }>) {
+function blockNode(blocks: Array<{ node: MockNode; visible: boolean }>) {
   return { type: 'BlockNode', isBlockNode: true, blocks };
 }
-function conditionalNode(condition: any, trueExpr: any, falseExpr: any) {
+function conditionalNode(condition: MockNode, trueExpr: MockNode, falseExpr: MockNode) {
   return { type: 'ConditionalNode', isConditionalNode: true, condition, trueExpr, falseExpr };
 }
-function objectNode(properties: Record<string, any>) {
+function objectNode(properties: Record<string, MockNode>) {
   return { type: 'ObjectNode', isObjectNode: true, properties };
 }
-function relationalNode(conditionals: string[], params: any[]) {
+function relationalNode(conditionals: string[], params: MockNode[]) {
   return { type: 'RelationalNode', isRelationalNode: true, conditionals, params };
 }
-function functionAssignmentNode(name: string, params: string[], expr: any) {
+function functionAssignmentNode(name: string, params: string[], expr: MockNode) {
   return {
     type: 'FunctionAssignmentNode',
     isFunctionAssignmentNode: true,
@@ -92,7 +99,7 @@ function functionAssignmentNode(name: string, params: string[], expr: any) {
   };
 }
 
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   multiply: (a: number, b: number) => a * b,
   smaller: (a: number, b: number) => a < b,
@@ -123,7 +130,7 @@ describe('compile - AssignmentNode (symbol target)', () => {
       object: symbolNode('x'),
       value: constantNode(5),
     };
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     expect(compile(node, mathScope).evaluate(scope)).toBe(5);
     expect(scope.x).toBe(5);
   });
@@ -137,7 +144,7 @@ describe('compile - AssignmentNode (symbol target)', () => {
       name: 'y',
       value: constantNode(11),
     };
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     expect(compile(node, mathScope).evaluate(scope)).toBe(11);
     expect(scope.y).toBe(11);
   });
@@ -299,7 +306,7 @@ describe('compile - ObjectNode (sandbox keys)', () => {
   it('rejects "__proto__" object keys (sandbox)', () => {
     // A literal `{__proto__: ...}` sets the prototype rather than an own key,
     // so define it as a real own enumerable property to exercise the sandbox.
-    const properties: Record<string, any> = {};
+    const properties: Record<string, MockNode> = {};
     Object.defineProperty(properties, '__proto__', {
       value: constantNode({ polluted: 1 }),
       enumerable: true,
@@ -366,7 +373,7 @@ describe('compile - FunctionAssignmentNode', () => {
       ['a', 'b'],
       operatorNode('+', 'add', [symbolNode('a'), symbolNode('b')])
     );
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     const fn = compile(node, mathScope).evaluate(scope);
     expect(typeof fn).toBe('function');
     expect(fn(2, 3)).toBe(5);
@@ -400,7 +407,7 @@ describe('compile - AccessorNode (array / matrix index)', () => {
   it('uses math.subset when available', () => {
     const subsetScope = {
       ...mathScope,
-      subset: (obj: any, index: any) => `subset:${JSON.stringify(obj)}:${index}`,
+      subset: (obj: unknown, index: number) => `subset:${JSON.stringify(obj)}:${index}`,
     };
     const node = accessorNode(symbolNode('arr'), arrayIndexNode([constantNode(0)]));
     const result = compile(node, subsetScope).evaluate({ arr: [10, 20] });
@@ -432,7 +439,7 @@ describe('compile - IndexNode', () => {
   it('uses math.index when available', () => {
     const indexScope = {
       ...mathScope,
-      index: (...dims: any[]) => ({ dims }),
+      index: (...dims: unknown[]) => ({ dims }),
     };
     const node = arrayIndexNode([constantNode(0), constantNode(1)]);
     expect(compile(node, indexScope).evaluate()).toEqual({ dims: [0, 1] });
@@ -467,8 +474,8 @@ describe('compile - evaluate() scope inputs', () => {
   });
 
   it('uses a Map-like scope directly (has/get/set)', () => {
-    const mapScope = new Map<string, any>([['x', 41]]);
-    expect(compile(node, mathScope).evaluate(mapScope as any)).toBe(42);
+    const mapScope = new Map<string, unknown>([['x', 41]]);
+    expect(compile(node, mathScope).evaluate(mapScope)).toBe(42);
   });
 
   it('wraps a plain object scope', () => {
@@ -547,7 +554,7 @@ describe('compile - FunctionNode resolution', () => {
 
 // ── compileFunctionNode: AccessorNode-as-fn (obj.method()) ───────────────────
 describe('compile - FunctionNode with accessor fn (method call)', () => {
-  function methodCallNode(objSymbol: string, method: string, args: any[]) {
+  function methodCallNode(objSymbol: string, method: string, args: MockNode[]) {
     return {
       type: 'FunctionNode',
       isFunctionNode: true,
@@ -575,7 +582,7 @@ describe('compile - FunctionNode with accessor fn (method call)', () => {
 
 // ── compileFunctionNode: general computed-fn fallback ────────────────────────
 describe('compile - FunctionNode with computed fn fallback', () => {
-  function computedFnCall(objSymbol: string, indexExpr: any, args: any[]) {
+  function computedFnCall(objSymbol: string, indexExpr: MockNode, args: MockNode[]) {
     // fn is an accessor with a NON-object-property index -> general fallback path.
     return {
       type: 'FunctionNode',

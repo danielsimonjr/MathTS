@@ -4,31 +4,33 @@ import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createIndexNode } from '../src/node/IndexNode.js';
 import { createAccessorNode } from '../src/node/AccessorNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {};
+const mathScope: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const IndexNode = createIndexNode({
   Node,
-  size: (v: any) => (Array.isArray(v) ? [v.length] : [0]),
+  size: (v: unknown) => (Array.isArray(v) ? [v.length] : [0]),
 });
 
 /**
  * Minimal subset stub for property access tests.
  * For matrix indexing: subset(matrix, index) → matrix[index]
  */
-const subset = (obj: any, idx: any) => {
-  if (typeof idx === 'string') return obj[idx];
-  return obj[idx];
+const subset = (obj: unknown, idx: unknown): unknown => {
+  const target = obj as Record<PropertyKey, unknown>;
+  if (typeof idx === 'string') return target[idx];
+  return target[idx as PropertyKey];
 };
 
 const AccessorNode = createAccessorNode({ subset, Node });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -81,16 +83,18 @@ describe('AccessorNode - construction & identity', () => {
   });
 
   it('static name is AccessorNode', () => {
-    expect((AccessorNode as any).name).toBe('AccessorNode');
+    expect((AccessorNode as unknown as { name: string }).name).toBe('AccessorNode');
   });
 
   it('throws when object is not a Node', () => {
     const idx = makePropertyIndex('foo');
-    expect(() => new AccessorNode(42 as any, idx)).toThrow('Node expected for parameter "object"');
+    expect(() => new AccessorNode(42 as unknown as MathNode, idx)).toThrow(
+      'Node expected for parameter "object"'
+    );
   });
 
   it('throws when index is not an IndexNode', () => {
-    expect(() => new AccessorNode(makeSym('obj'), makeConst('foo') as any)).toThrow(
+    expect(() => new AccessorNode(makeSym('obj'), makeConst('foo'))).toThrow(
       'IndexNode expected for parameter "index"'
     );
   });
@@ -168,7 +172,7 @@ describe('AccessorNode - forEach', () => {
     const sym = makeSym('obj');
     const idx = makePropertyIndex('foo');
     const node = new AccessorNode(sym, idx);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].child).toBe(sym);
@@ -201,7 +205,7 @@ describe('AccessorNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new AccessorNode(makeSym('x'), makePropertyIndex('a'));
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -302,7 +306,7 @@ describe('AccessorNode - traverse', () => {
     const sym = makeSym('obj');
     const idx = makePropertyIndex('foo');
     const node = new AccessorNode(sym, idx);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     // node itself + sym + idx + idx's dimension (makeConst('foo'))
     expect(visited.length).toBeGreaterThanOrEqual(3);

@@ -4,14 +4,14 @@ import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createArrayNode } from '../src/node/ArrayNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathWithTransform: Record<string, any> = {};
+const mathWithTransform: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ArrayNode = createArrayNode({ Node });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -42,15 +42,17 @@ describe('ArrayNode - construction & identity', () => {
   });
 
   it('static name is ArrayNode', () => {
-    expect((ArrayNode as any).name).toBe('ArrayNode');
+    expect((ArrayNode as unknown as { name: string }).name).toBe('ArrayNode');
   });
 
   it('throws when items is not an array of Nodes', () => {
-    expect(() => new ArrayNode([42 as any])).toThrow('Array containing Nodes expected');
+    expect(() => new ArrayNode([42 as unknown as ReturnType<typeof makeConst>])).toThrow(
+      'Array containing Nodes expected'
+    );
   });
 
   it('throws when a non-Node is included in items', () => {
-    expect(() => new ArrayNode(['string' as any])).toThrow();
+    expect(() => new ArrayNode(['string' as unknown as ReturnType<typeof makeConst>])).toThrow();
   });
 });
 
@@ -75,10 +77,10 @@ describe('ArrayNode - _compile', () => {
 
   it('evaluates to a matrix when config.matrix !== "Array"', () => {
     // math.config.matrix === 'Matrix' → calls math.matrix(array)
-    const createdMatrices: any[] = [];
+    const createdMatrices: Array<{ isMatrix: boolean; data: unknown[] }> = [];
     const math = {
       config: { matrix: 'Matrix' },
-      matrix: (arr: any[]) => {
+      matrix: (arr: unknown[]) => {
         const m = { isMatrix: true, data: arr };
         createdMatrices.push(m);
         return m;
@@ -98,7 +100,7 @@ describe('ArrayNode - forEach', () => {
     const c1 = makeConst(1);
     const c2 = makeConst(2);
     const node = new ArrayNode([c1, c2]);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: unknown; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].child).toBe(c1);
@@ -109,7 +111,7 @@ describe('ArrayNode - forEach', () => {
 
   it('calls callback with parent reference', () => {
     const node = new ArrayNode([makeConst(5)]);
-    let capturedParent: any = null;
+    let capturedParent: unknown = null;
     node.forEach((_child, _path, parent) => {
       capturedParent = parent;
     });
@@ -118,7 +120,7 @@ describe('ArrayNode - forEach', () => {
 
   it('does not call callback for empty items', () => {
     const node = new ArrayNode([]);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.forEach((child) => visited.push(child));
     expect(visited).toHaveLength(0);
   });
@@ -140,7 +142,7 @@ describe('ArrayNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new ArrayNode([makeConst(1)]);
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -250,7 +252,7 @@ describe('ArrayNode - traverse', () => {
     const c1 = makeConst(1);
     const c2 = makeConst(2);
     const node = new ArrayNode([c1, c2]);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(3);
     expect(visited[0]).toBe(node);

@@ -3,23 +3,24 @@ import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createParenthesisNode } from '../src/node/ParenthesisNode.js';
 import { createOperatorNode } from '../src/node/OperatorNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ParenthesisNode = createParenthesisNode({ Node });
 const _OperatorNode = createOperatorNode({ Node });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
-function makeParen(content: any) {
+function makeParen(content: MathNode) {
   return new ParenthesisNode(content);
 }
 
@@ -41,11 +42,13 @@ describe('ParenthesisNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((makeParen(makeConst(1)) as any).isNode).toBe(true);
+    expect((makeParen(makeConst(1)) as unknown as { isNode: boolean }).isNode).toBe(true);
   });
 
   it('throws when content is not a node', () => {
-    expect(() => makeParen(42 as any)).toThrow('Node expected for parameter "content"');
+    expect(() => makeParen(42 as unknown as MathNode)).toThrow(
+      'Node expected for parameter "content"'
+    );
   });
 });
 
@@ -86,7 +89,7 @@ describe('ParenthesisNode - forEach', () => {
   it('calls callback once for the content with path "content"', () => {
     const inner = makeConst(3);
     const node = makeParen(inner);
-    const visited: Array<{ child: any; path: string }> = [];
+    const visited: Array<{ child: MathNode; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(1);
     expect(visited[0].child).toBe(inner);
@@ -99,7 +102,7 @@ describe('ParenthesisNode - map', () => {
     const inner = makeConst(1);
     const node = makeParen(inner);
     const replacement = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => replacement);
+    const mapped = node.map((_child, _path, _parent) => replacement);
     expect(mapped).not.toBe(node);
     expect(mapped.content).toBe(replacement);
     expect(mapped.isParenthesisNode).toBe(true);
@@ -110,7 +113,7 @@ describe('ParenthesisNode - clone', () => {
   it('creates a shallow copy with same content ref', () => {
     const inner = makeConst(5);
     const node = makeParen(inner);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.content).toBe(inner);
     expect(cloned.isParenthesisNode).toBe(true);
@@ -203,7 +206,7 @@ describe('ParenthesisNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(makeParen(makeConst(1)).equals(null as any)).toBe(false);
+    expect(makeParen(makeConst(1)).equals(null)).toBe(false);
   });
 });
 
@@ -211,7 +214,7 @@ describe('ParenthesisNode - traverse', () => {
   it('visits root and inner content', () => {
     const inner = makeConst(1);
     const node = makeParen(inner);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(2);
     expect(visited[0]).toBe(node);

@@ -12,8 +12,11 @@ import { createHelp } from '../src/function/help.js';
  * signature strings these factories actually use.
  */
 function makeTyped() {
-  return function typed(_name: string, signatures: Record<string, (...args: any[]) => any>) {
-    function matchesType(value: any, type: string): boolean {
+  return function typed(
+    _name: string,
+    signatures: Record<string, unknown>
+  ): (...args: unknown[]) => unknown {
+    function matchesType(value: unknown, type: string): boolean {
       type = type.trim();
       if (type === 'any') return true;
       if (type === 'string') return typeof value === 'string';
@@ -23,19 +26,20 @@ function makeTyped() {
       if (type === 'Matrix') return false;
       return false;
     }
-    function matchesUnion(value: any, union: string): boolean {
+    function matchesUnion(value: unknown, union: string): boolean {
       return union.split('|').some((t) => matchesType(value, t));
     }
-    const dispatcher = function (...args: any[]): any {
+    const dispatcher = function (...args: unknown[]): unknown {
       for (const sig of Object.keys(signatures)) {
+        const impl = signatures[sig] as (...args: unknown[]) => unknown;
         if (sig === '') {
-          if (args.length === 0) return signatures[sig]();
+          if (args.length === 0) return impl();
           continue;
         }
         const parts = sig.split(',').map((p) => p.trim());
         if (parts.length !== args.length) continue;
         if (parts.every((p, i) => matchesUnion(args[i], p))) {
-          return signatures[sig](...args);
+          return impl(...args);
         }
       }
       throw new TypeError(`No matching signature for arguments in ${_name}`);
@@ -55,11 +59,11 @@ function makeParse() {
     return {
       compile() {
         return {
-          evaluate(scope?: any) {
+          evaluate(scope?: Map<string, unknown> | Record<string, unknown>): unknown {
             if (expr === 'a*b') {
-              const a = scope?.get ? scope.get('a') : scope?.a;
-              const b = scope?.get ? scope.get('b') : scope?.b;
-              return a * b;
+              const a = scope instanceof Map ? scope.get('a') : scope?.a;
+              const b = scope instanceof Map ? scope.get('b') : scope?.b;
+              return (a as number) * (b as number);
             }
             if (expr in table) return table[expr];
             // numeric literal
@@ -83,7 +87,7 @@ describe('function/compile factory', () => {
   });
 
   it('compiles an array of expressions (deepMap)', () => {
-    const codes = compile(['2+3', 'sqrt(4)'] as any);
+    const codes = compile(['2+3', 'sqrt(4)']);
     expect(codes[0].evaluate()).toBe(5);
     expect(codes[1].evaluate()).toBe(2);
   });
@@ -107,11 +111,11 @@ describe('function/evaluate factory', () => {
   });
 
   it('evaluates an array of expressions (deepMap)', () => {
-    expect(evaluate(['2+3', 'sqrt(4)'] as any)).toEqual([5, 2]);
+    expect(evaluate(['2+3', 'sqrt(4)'])).toEqual([5, 2]);
   });
 
   it('evaluates an array of expressions with a scope', () => {
-    expect(evaluate(['2+3'] as any, {})).toEqual([5]);
+    expect(evaluate(['2+3'], {})).toEqual([5]);
   });
 });
 
@@ -136,8 +140,8 @@ describe('function/help factory', () => {
   const typed = makeTyped();
 
   class FakeHelp {
-    doc: any;
-    constructor(doc: any) {
+    doc: unknown;
+    constructor(doc: unknown) {
       this.doc = doc;
     }
   }

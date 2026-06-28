@@ -10,16 +10,16 @@ import { parse } from './helpers/bootstrap.js';
  * LaTeX/HTML/string formatting branches, building nodes from source factories
  * against a small custom math scope so we control rawArgs + safe-method access.
  */
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 
 // A safe-method-friendly math scope: add an own-enumerable rawArgs operator fn.
 const rawCollect = Object.assign(
-  function rawCollect(nodes: any[]) {
+  function rawCollect(nodes: unknown[]) {
     return nodes.length;
   },
   { rawArgs: true }
 );
-const math: Record<string, any> = {
+const math: Record<string, unknown> = {
   add: (...xs: number[]) => xs.reduce((a, b) => a + b, 0),
   unaryMinus: (a: number) => -a,
   multiply: (...xs: number[]) => xs.reduce((a, b) => a * b, 1),
@@ -32,13 +32,20 @@ const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math, Node });
 const OperatorNode = createOperatorNode({ Node });
 
-const c = (v: any) => new ConstantNode(v);
+const c = (v: unknown) => new ConstantNode(v);
 const s = (n: string) => new SymbolNode(n);
 
 describe('OperatorNode._compile - rawArgs branch', () => {
   it('passes unevaluated node args to a rawArgs operator function', () => {
     const node = new OperatorNode('@', 'rawCollect', [c(1), c(2), c(3)]);
-    const fn = (node as any)._compile(math, {});
+    const fn = (
+      node as unknown as {
+        _compile: (
+          math: Record<string, unknown>,
+          argNames: Record<string, unknown>
+        ) => (...a: unknown[]) => unknown;
+      }
+    )._compile(math, {});
     // rawCollect returns the number of raw arg nodes
     expect(fn(new Map(), {}, undefined)).toBe(3);
   });

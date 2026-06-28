@@ -53,7 +53,7 @@ describe('stringify', () => {
   });
 
   it('handles numbers by converting to string first', () => {
-    expect(stringify(42 as any)).toBe('"42"');
+    expect(stringify(42)).toBe('"42"');
   });
 
   it('handles empty string', () => {
@@ -84,7 +84,7 @@ describe('escape', () => {
   });
 
   it('converts non-string values via String()', () => {
-    expect(escape(42 as any)).toBe('42');
+    expect(escape(42)).toBe('42');
   });
 });
 
@@ -105,11 +105,11 @@ describe('compareText', () => {
   });
 
   it('throws when x is not a string', () => {
-    expect(() => compareText(42 as any, 'hello')).toThrow('Unexpected type');
+    expect(() => compareText(42, 'hello')).toThrow('Unexpected type');
   });
 
   it('throws when y is not a string', () => {
-    expect(() => compareText('hello', 42 as any)).toThrow('Unexpected type');
+    expect(() => compareText('hello', 42)).toThrow('Unexpected type');
   });
 
   it('handles empty strings', () => {
@@ -148,7 +148,7 @@ describe('format (string dispatcher)', () => {
   });
 
   it('formats a function with .syntax property', () => {
-    const fn: any = () => {};
+    const fn: { (): void; syntax?: string } = () => {};
     fn.syntax = 'f(x)';
     expect(format(fn, {})).toBe('f(x)');
   });
@@ -174,7 +174,7 @@ describe('format (string dispatcher)', () => {
   });
 
   it('uses object.format(options) when available', () => {
-    const obj = { format: (opts: any) => `formatted:${opts.x}` };
+    const obj = { format: (opts: { x: number }) => `formatted:${opts.x}` };
     expect(format(obj, { x: 42 })).toBe('formatted:42');
   });
 });

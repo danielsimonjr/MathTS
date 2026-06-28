@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { math } from './helpers/bootstrap.js';
 import { createFunctionNode } from '../src/node/FunctionNode.js';
-import { createNode } from '../src/node/Node.js';
+import { createNode, type MathNode } from '../src/node/Node.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createAccessorNode } from '../src/node/AccessorNode.js';
@@ -17,9 +17,29 @@ import { createFunctionAssignmentNode } from '../src/node/FunctionAssignmentNode
  * the fully-populated math scope from the functions package (it provides
  * `subset`, `size`, `typed`, and every math function used by `_compile`/`_toTex`).
  */
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+/**
+ * The math-namespace view the source node constructors depend on: the function
+ * deps (`subset`, `size`, `typed`) are named precisely; everything else
+ * (math functions/constants captured during compile/toTex) is `unknown`.
+ */
+interface MathScope {
+  subset: (...args: unknown[]) => unknown;
+  size: (value: unknown) => number[];
+  typed: (...args: unknown[]) => unknown;
+  [key: string]: unknown;
+}
 
-function buildNodes(customMath: Record<string, any>) {
+/** A rawArgs handler: receives unevaluated arg nodes, flagged via `rawArgs`. */
+type RawArgsHandler = ((nodes: unknown[]) => unknown) & { rawArgs?: boolean };
+
+/** Minimal node view exposing the `args` list read by custom toTex converters. */
+interface NodeWithArgs {
+  args: unknown[];
+}
+
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
+
+function buildNodes(customMath: MathScope) {
   const Node = createNode({ mathWithTransform: customMath });
   const SymbolNode = createSymbolNode({ math: customMath, Node });
   const ConstantNode = createConstantNode({ Node, isBounded });
@@ -47,9 +67,9 @@ function buildNodes(customMath: Record<string, any>) {
 const N = buildNodes(math);
 const { SymbolNode, ConstantNode, FunctionNode, AccessorNode, IndexNode, ParenthesisNode } = N;
 
-const c = (v: any) => new ConstantNode(v);
+const c = (v: unknown) => new ConstantNode(v);
 const s = (name: string) => new SymbolNode(name);
-const fn = (name: string, args: any[]) => new FunctionNode(s(name), args);
+const fn = (name: string, args: MathNode[]) => new FunctionNode(s(name), args);
 
 // ── toTex via real latexFunctions table ───────────────────────────────────────
 
@@ -147,7 +167,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = {
       ...math,
       fnconv: Object.assign((x: number) => x, {
-        toTex: (node: any) => 'FNCONV(' + node.args.length + ')',
+        toTex: (node: NodeWithArgs) => 'FNCONV(' + node.args.length + ')',
       }),
     };
     const b = buildNodes(m);
@@ -176,7 +196,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = {
       ...math,
       objfn: Object.assign((x: number) => x, {
-        toTex: { 1: (node: any) => 'OBJFN1[' + node.args.length + ']' },
+        toTex: { 1: (node: NodeWithArgs) => 'OBJFN1[' + node.args.length + ']' },
       }),
     };
     const b = buildNodes(m);
@@ -195,7 +215,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, badnum: Object.assign((x: number) => x, { toTex: '${myNum}' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('badnum'), [new b.ConstantNode(1)]);
-    (node as any).myNum = 42;
+    (node as unknown as { myNum: number }).myNum = 42;
     expect(() => node.toTex()).toThrow(TypeError);
   });
 
@@ -203,7 +223,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, badarr: Object.assign((x: number) => x, { toTex: '${badList}' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('badarr'), [new b.ConstantNode(1)]);
-    (node as any).badList = [123];
+    (node as unknown as { badList: number[] }).badList = [123];
     expect(() => node.toTex()).toThrow(/is not a Node/);
   });
 
@@ -211,7 +231,10 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, listfn: Object.assign((x: number) => x, { toTex: '[${myArgs}]' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('listfn'), [new b.ConstantNode(1)]);
-    (node as any).myArgs = [new b.ConstantNode(7), new b.ConstantNode(8)];
+    (node as unknown as { myArgs: MathNode[] }).myArgs = [
+      new b.ConstantNode(7),
+      new b.ConstantNode(8),
+    ];
     const tex = node.toTex();
     expect(tex).toContain('7');
     expect(tex).toContain('8');
@@ -222,7 +245,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, nodeprop: Object.assign((x: number) => x, { toTex: 'NP{${myNode}}' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('nodeprop'), [new b.ConstantNode(1)]);
-    (node as any).myNode = new b.ConstantNode(99);
+    (node as unknown as { myNode: MathNode }).myNode = new b.ConstantNode(99);
     expect(node.toTex()).toContain('99');
   });
 
@@ -230,7 +253,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, objprop: Object.assign((x: number) => x, { toTex: '${myObj}' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('objprop'), [new b.ConstantNode(1)]);
-    (node as any).myObj = { plain: true };
+    (node as unknown as { myObj: { plain: boolean } }).myObj = { plain: true };
     expect(() => node.toTex()).toThrow(/has to be a Node, String or array of Nodes/);
   });
 
@@ -245,7 +268,7 @@ describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
     const m = { ...math, idxbad: Object.assign((x: number) => x, { toTex: '${myList[0]}' }) };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('idxbad'), [new b.ConstantNode(1)]);
-    (node as any).myList = ['not-a-node'];
+    (node as unknown as { myList: string[] }).myList = ['not-a-node'];
     expect(() => node.toTex()).toThrow(/is not a Node/);
   });
 });
@@ -278,7 +301,7 @@ describe('FunctionNode - _compile (arg count switch)', () => {
 
 describe('FunctionNode - _compile (rawArgs)', () => {
   it('passes unevaluated nodes to a rawArgs function (static)', () => {
-    const raw = Object.assign((nodes: any[]) => nodes.length, {}) as any;
+    const raw: RawArgsHandler = Object.assign((nodes: unknown[]) => nodes.length, {});
     raw.rawArgs = true;
     const m = { ...math, rawfn: raw };
     const b = buildNodes(m);
@@ -290,24 +313,24 @@ describe('FunctionNode - _compile (rawArgs)', () => {
   });
 
   it('rawArgs function resolved from scope is invoked raw', () => {
-    const raw = Object.assign((nodes: any[]) => nodes.length, {}) as any;
+    const raw: RawArgsHandler = Object.assign((nodes: unknown[]) => nodes.length, {});
     raw.rawArgs = true;
     const m = { ...math, rawfn2: raw };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('rawfn2'), [new b.ConstantNode(1)]);
-    const scopeRaw = Object.assign((nodes: any[]) => nodes.length * 10, {}) as any;
+    const scopeRaw: RawArgsHandler = Object.assign((nodes: unknown[]) => nodes.length * 10, {});
     scopeRaw.rawArgs = true;
-    const scope = new Map<string, any>([['rawfn2', scopeRaw]]);
+    const scope = new Map<string, unknown>([['rawfn2', scopeRaw]]);
     expect(node._compile(m, {})(scope, {}, null)).toBe(10);
   });
 
   it('rawArgs static fn overridden in scope by non-raw fn evaluates regularly', () => {
-    const raw = Object.assign((_nodes: any[]) => -1, {}) as any;
+    const raw: RawArgsHandler = Object.assign((_nodes: unknown[]) => -1, {});
     raw.rawArgs = true;
     const m = { ...math, rawfn3: raw };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('rawfn3'), [new b.ConstantNode(5)]);
-    const scope = new Map<string, any>([['rawfn3', (x: number) => x * 2]]);
+    const scope = new Map<string, unknown>([['rawfn3', (x: number) => x * 2]]);
     expect(node._compile(m, {})(scope, {}, null)).toBe(10);
   });
 });
@@ -324,7 +347,7 @@ describe('FunctionNode - _compile (arg-name function)', () => {
   it('invokes a rawArgs function passed via argNames', () => {
     const node = fn('g', [c(2), c(3)]);
     const compiled = node._compile(math, { g: true });
-    const rawG = Object.assign((nodes: any[]) => nodes.length, {}) as any;
+    const rawG: RawArgsHandler = Object.assign((nodes: unknown[]) => nodes.length, {});
     rawG.rawArgs = true;
     expect(compiled(new Map(), { g: rawG }, null)).toBe(2);
   });
@@ -360,9 +383,9 @@ describe('FunctionNode - _compile (accessor fn with object property)', () => {
     const accessor = new AccessorNode(s('obj'), indexNode);
     const node = new FunctionNode(accessor, [c(1), c(2)]);
     const compiled = node._compile(math, {});
-    const rawm = Object.assign(function (this: any, nodes: any[]) {
+    const rawm: RawArgsHandler = Object.assign(function (nodes: unknown[]) {
       return nodes.length;
-    }, {}) as any;
+    }, {});
     rawm.rawArgs = true;
     expect(compiled(new Map([['obj', { rawm }]]), {}, null)).toBe(2);
   });
@@ -390,7 +413,7 @@ describe('FunctionNode - _compile (dynamically resolved fn)', () => {
     // rawArgs function -> exercises the dynamic-branch rawArgs path.
     const node = new FunctionNode(new ParenthesisNode(s('dynraw')), [c(1), c(2)]);
     const compiled = node._compile(math, {});
-    const dynraw = Object.assign((nodes: any[]) => nodes.length, {}) as any;
+    const dynraw: RawArgsHandler = Object.assign((nodes: unknown[]) => nodes.length, {});
     dynraw.rawArgs = true;
     expect(compiled(new Map([['dynraw', dynraw]]), {}, null)).toBe(2);
   });
@@ -444,20 +467,22 @@ describe('FunctionNode - structural', () => {
 
   it('map transforms children and returns a new node', () => {
     const node = fn('abs', [c(-5)]);
-    const mapped = node.map((child: any) => child);
+    const mapped = node.map((child: MathNode) => child);
     expect(mapped).not.toBe(node);
     expect(mapped.isFunctionNode).toBe(true);
   });
 
   it('map throws when callback returns a non-Node', () => {
     const node = fn('abs', [c(1)]);
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(/must return a Node/);
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
+      /must return a Node/
+    );
   });
 
   it('forEach visits fn and each arg', () => {
     const node = fn('add', [c(1), c(2)]);
     const visited: string[] = [];
-    node.forEach((_child: any, path: string) => visited.push(path));
+    node.forEach((_child: MathNode, path: string) => visited.push(path));
     expect(visited).toEqual(['fn', 'args[0]', 'args[1]']);
   });
 
@@ -467,7 +492,7 @@ describe('FunctionNode - structural', () => {
 
   it('_toString formats a FunctionAssignmentNode fn in parentheses', () => {
     const fa = new N.FunctionAssignmentNode('inc', ['x'], fn('add', [s('x'), c(1)]));
-    const node = new FunctionNode(fa as any, [c(5)]);
+    const node = new FunctionNode(fa as unknown as MathNode, [c(5)]);
     // fn part should be wrapped in parens in the string form
     expect(node.toString()).toContain('(');
   });

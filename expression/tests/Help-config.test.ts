@@ -9,15 +9,30 @@ import { createHelpClass } from '../src/Help.js';
  * 'doConfig' example actually invoke `scope.config(...)`, which flips
  * `configChanged` to true and triggers the config-restore evaluate() call.
  */
+/** Structural type for the Help class returned by createHelpClass. */
+interface HelpInstance {
+  type: string;
+  isHelp: boolean;
+  doc: Record<string, unknown>;
+  toString(): string;
+  valueOf(): string;
+  toJSON(): Record<string, unknown>;
+}
+interface HelpConstructor {
+  (doc?: unknown): HelpInstance;
+  new (doc?: unknown): HelpInstance;
+  fromJSON(json: Record<string, unknown>): HelpInstance;
+}
+
 describe('Help.toString - config-changing examples', () => {
   const calls: string[] = [];
 
-  function evaluate(expr: string, scope?: Record<string, any>): any {
+  function evaluate(expr: string, scope?: Record<string, unknown>): unknown {
     calls.push(expr);
     if (expr === 'config()') return { number: 'number' };
     if (expr === 'doConfig') {
       // simulate an example that changes config via the provided scope.config
-      return scope!.config({ number: 'BigNumber' });
+      return (scope!.config as (cfg: unknown) => unknown)({ number: 'BigNumber' });
     }
     if (expr === 'config(newConfig)') return scope?.newConfig;
     if (expr === 'config(originalConfig)') return scope?.originalConfig;
@@ -26,7 +41,7 @@ describe('Help.toString - config-changing examples', () => {
     return undefined;
   }
 
-  const Help = createHelpClass({ evaluate }) as any;
+  const Help = createHelpClass({ evaluate }) as unknown as HelpConstructor;
 
   it('restores config after a config-changing example', () => {
     calls.length = 0;

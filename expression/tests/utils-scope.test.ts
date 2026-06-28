@@ -20,20 +20,20 @@ describe('createSubScope', () => {
 
   it('can read keys from the args (b partition)', () => {
     const parent = new Map<string, number>();
-    const sub = createSubScope(parent, { y: 99 } as any);
+    const sub = createSubScope(parent, { y: 99 });
     expect(sub.get('y')).toBe(99);
   });
 
   it('args keys shadow parent keys', () => {
     const parent = new Map<string, number>([['x', 1]]);
-    const sub = createSubScope(parent, { x: 42 } as any);
+    const sub = createSubScope(parent, { x: 42 });
     // x is in bKeys, so reads from b (the ObjectWrappingMap wrapping args)
     expect(sub.get('x')).toBe(42);
   });
 
   it('writes to b partition for arg keys', () => {
     const parent = new Map<string, number>([['x', 1]]);
-    const sub = createSubScope(parent, { y: 5 } as any);
+    const sub = createSubScope(parent, { y: 5 });
     sub.set('y', 99);
     // parent should not be affected
     expect(parent.has('y')).toBe(false);
@@ -42,15 +42,15 @@ describe('createSubScope', () => {
 
   it('writes to a partition (parent) for non-arg keys', () => {
     const parent = new Map<string, number>();
-    const sub = createSubScope(parent, { y: 5 } as any);
-    sub.set('z', 77 as any);
+    const sub = createSubScope(parent, { y: 5 });
+    sub.set('z', 77);
     // z is not in bKeys, goes to a (parent)
     expect(parent.get('z')).toBe(77);
   });
 
   it('handles multiple arg keys', () => {
     const parent = new Map<string, number>();
-    const sub = createSubScope(parent, { a: 1, b: 2, c: 3 } as any);
+    const sub = createSubScope(parent, { a: 1, b: 2, c: 3 });
     expect(sub.get('a')).toBe(1);
     expect(sub.get('b')).toBe(2);
     expect(sub.get('c')).toBe(3);

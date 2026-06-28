@@ -9,17 +9,32 @@ import { evaluate, parse } from '../../functions/src/factories/evaluate.js';
  *  - toJSON() throwing on an external (non-expression) function
  *  - isExpressionFunction helper (both branches)
  */
-function buildParser() {
-  function parserEvaluate(expr: string | string[], scope: any): any {
-    const plainScope: Record<string, any> = {};
+/** The subset of the Parser instance surface exercised by these tests. */
+interface ParserInstance {
+  set(name: string, value: unknown): unknown;
+  get(name: string): unknown;
+  toJSON(): {
+    mathjs: string;
+    variables: Record<string, unknown>;
+    functions: Record<string, string>;
+  };
+}
+
+interface ParserConstructor {
+  new (): ParserInstance;
+}
+
+function buildParser(): ParserConstructor {
+  function parserEvaluate(expr: string | string[], scope?: Map<string, unknown>): unknown {
+    const plainScope: Record<string, unknown> = {};
     if (scope && typeof scope.forEach === 'function') {
-      scope.forEach((v: any, k: string) => {
+      scope.forEach((v, k) => {
         plainScope[k] = v;
       });
     }
     return evaluate(expr as string, plainScope);
   }
-  return createParserClass({ evaluate: parserEvaluate, parse }) as any;
+  return createParserClass({ evaluate: parserEvaluate, parse }) as unknown as ParserConstructor;
 }
 
 const ParserClass = buildParser();

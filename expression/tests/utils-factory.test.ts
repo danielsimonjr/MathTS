@@ -98,7 +98,7 @@ describe('factory', () => {
   });
 
   it('throws when a required dep is missing', () => {
-    const f = factory('f', ['required'], ({ required }: any) => required);
+    const f = factory('f', ['required'], ({ required }: { required: unknown }) => required);
     expect(() => f({ notRequired: true })).toThrow('Cannot create function "f"');
   });
 
@@ -114,7 +114,7 @@ describe('factory', () => {
   });
 
   it('handles optional deps: does not pass missing optional ones to create', () => {
-    const f = factory('f', ['?opt'], (deps: any) => Object.keys(deps));
+    const f = factory('f', ['?opt'], (deps: Record<string, unknown>) => Object.keys(deps));
     const result = f({ unrelated: 1 });
     // 'opt' is optional and missing, so deps should not include it
     expect(result).not.toContain('opt');
@@ -127,7 +127,7 @@ describe('factory', () => {
 describe('sortFactories', () => {
   it('places a factory before another that depends on it', () => {
     const fA = factory('a', [], () => 'a');
-    const fB = factory('b', ['a'], ({ a }: any) => a + 'b');
+    const fB = factory('b', ['a'], ({ a }: { a: string }) => a + 'b');
     const sorted = sortFactories([fB, fA]);
     const names = (sorted as (typeof fA)[]).map((f) => f.fn);
     expect(names.indexOf('a')).toBeLessThan(names.indexOf('b'));
@@ -142,8 +142,8 @@ describe('sortFactories', () => {
   });
 
   it('handles circular dependency without infinite loop', () => {
-    const fA = factory('a', ['b'], ({ b }: any) => b);
-    const fB = factory('b', ['a'], ({ a }: any) => a);
+    const fA = factory('a', ['b'], ({ b }: { b: unknown }) => b);
+    const fB = factory('b', ['a'], ({ a }: { a: unknown }) => a);
     // Should not throw or loop infinitely
     expect(() => sortFactories([fA, fB])).not.toThrow();
   });
@@ -154,7 +154,7 @@ describe('sortFactories', () => {
 // ---------------------------------------------------------------------------
 describe('create', () => {
   it('runs sorted factories against scope and returns scope', () => {
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     const fA = factory('a', [], () => {
       scope['a'] = 42;
       return 42;

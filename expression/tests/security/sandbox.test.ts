@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { compile } from '../../src/compiler/compile.js';
 import { createEvaluate } from '../../src/evaluator/evaluate.js';
+import type { MathNode } from '../../src/node/Node.js';
 
 /**
  * Security regression tests — these validate the sandbox restored to the
@@ -14,19 +15,19 @@ import { createEvaluate } from '../../src/evaluator/evaluate.js';
  */
 
 // -- Mock node helpers --
-function constantNode(value: any) {
+function constantNode(value: unknown) {
   return { type: 'ConstantNode', isConstantNode: true, value };
 }
 function symbolNode(name: string) {
   return { type: 'SymbolNode', isSymbolNode: true, name };
 }
-function _arrayNode(items: any[]) {
+function _arrayNode(items: unknown[]) {
   return { type: 'ArrayNode', isArrayNode: true, items };
 }
-function objectNode(properties: Record<string, any>) {
+function objectNode(properties: Record<string, unknown>) {
   return { type: 'ObjectNode', isObjectNode: true, properties };
 }
-function functionNode(fnName: string, args: any[]) {
+function functionNode(fnName: string, args: unknown[]) {
   return {
     type: 'FunctionNode',
     isFunctionNode: true,
@@ -37,7 +38,7 @@ function functionNode(fnName: string, args: any[]) {
     },
   };
 }
-function functionAssignmentNode(name: string, params: string[], expr: any) {
+function functionAssignmentNode(name: string, params: string[], expr: unknown) {
   return {
     type: 'FunctionAssignmentNode',
     isFunctionAssignmentNode: true,
@@ -46,7 +47,7 @@ function functionAssignmentNode(name: string, params: string[], expr: any) {
     expr,
   };
 }
-function assignmentNode(name: string, value: any) {
+function assignmentNode(name: string, value: unknown) {
   return {
     type: 'AssignmentNode',
     isAssignmentNode: true,
@@ -55,7 +56,7 @@ function assignmentNode(name: string, value: any) {
     name,
   };
 }
-function propertyAccessor(object: any, prop: string) {
+function propertyAccessor(object: unknown, prop: string) {
   return {
     type: 'AccessorNode',
     isAccessorNode: true,
@@ -66,7 +67,7 @@ function propertyAccessor(object: any, prop: string) {
     },
   };
 }
-function propertyAssignment(targetObj: any, prop: string, value: any) {
+function propertyAssignment(targetObj: unknown, prop: string, value: unknown) {
   return {
     type: 'AssignmentNode',
     isAssignmentNode: true,
@@ -83,7 +84,7 @@ function propertyAssignment(targetObj: any, prop: string, value: any) {
   };
 }
 
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   multiply: (a: number, b: number) => a * b,
 };
@@ -94,7 +95,7 @@ describe('security: sandbox via tree-walking compiler', () => {
     // arr.constructor — should throw because constructor is on Object.prototype
     const arrSym = symbolNode('arr');
     const node = propertyAccessor(arrSym, 'constructor');
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(() => compiled.evaluate({ arr: [1, 2, 3] })).toThrow(/No access to property/);
   });
 
@@ -104,14 +105,14 @@ describe('security: sandbox via tree-walking compiler', () => {
       propertyAccessor(symbolNode('arr'), 'constructor'),
       'constructor'
     );
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(() => compiled.evaluate({ arr: [1, 2, 3] })).toThrow();
   });
 
   it('blocks __proto__ assignment (prototype pollution)', () => {
     // obj.__proto__ = something — must throw, must NOT mutate Object.prototype
     const node = propertyAssignment(symbolNode('obj'), '__proto__', constantNode({ polluted: 1 }));
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(() => compiled.evaluate({ obj: {} })).toThrow(/No access to property/);
     // confirm prototype is untouched
     expect(({} as any).polluted).toBeUndefined();
@@ -129,7 +130,7 @@ describe('security: sandbox via tree-walking compiler', () => {
       writable: true,
     });
     const node = objectNode(props);
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(() => compiled.evaluate()).toThrow(/No access to property/);
     expect(({} as any).polluted).toBeUndefined();
   });
@@ -137,7 +138,7 @@ describe('security: sandbox via tree-walking compiler', () => {
   it('blocks .call / .apply method access on function values', () => {
     // fn.call — should throw, "call" lives on Function.prototype
     const node = propertyAccessor(symbolNode('fn'), 'call');
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(() =>
       compiled.evaluate({
         fn: function () {
@@ -149,7 +150,7 @@ describe('security: sandbox via tree-walking compiler', () => {
 
   it('allows whitelisted .length on arrays', () => {
     const node = propertyAccessor(symbolNode('arr'), 'length');
-    const compiled = compile(node, mathScope);
+    const compiled = compile(node as unknown as MathNode, mathScope);
     expect(compiled.evaluate({ arr: [1, 2, 3] })).toBe(3);
   });
 
@@ -158,7 +159,7 @@ describe('security: sandbox via tree-walking compiler', () => {
       sum: constantNode(3),
       label: constantNode('ok'),
     });
-    expect(compile(node, mathScope).evaluate()).toEqual({ sum: 3, label: 'ok' });
+    expect(compile(node as unknown as MathNode, mathScope).evaluate()).toEqual({ sum: 3, label: 'ok' });
   });
 });
 
@@ -167,8 +168,8 @@ describe('security: pre-compile AST validator (default-safe)', () => {
   // The validator lives in evaluate.ts and runs by default. It must reject
   // assignment / function-assignment / forbidden-function nodes unless the
   // caller explicitly sets `unsafe: true`.
-  function mockParseFromNode(node: any) {
-    return () => node;
+  function mockParseFromNode(node: unknown): (expr: string) => MathNode {
+    return () => node as unknown as MathNode;
   }
 
   it('rejects FunctionAssignmentNode by default (f(x) = x.constructor)', () => {
@@ -178,19 +179,19 @@ describe('security: pre-compile AST validator (default-safe)', () => {
       ['x'],
       propertyAccessor(symbolNode('x'), 'constructor')
     );
-    const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
+    const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
     expect(() => evaluate('any')).toThrow(/disabled|unsafe|FunctionAssignment/i);
   });
 
   it('rejects AssignmentNode by default', () => {
     const expr = assignmentNode('x', constantNode(5));
-    const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
+    const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
     expect(() => evaluate('x = 5')).toThrow(/disabled|unsafe|Assignment/i);
   });
 
   it('rejects forbidden function calls (import)', () => {
     const expr = functionNode('import', [constantNode('anything')]);
-    const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
+    const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
     expect(() => evaluate('import(...)')).toThrow(/forbidden|disabled|unsafe/i);
   });
 
@@ -207,15 +208,15 @@ describe('security: pre-compile AST validator (default-safe)', () => {
     ];
     for (const fnName of forbidden) {
       const expr = functionNode(fnName, [constantNode(1)]);
-      const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
+      const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
       expect(() => evaluate(fnName)).toThrow();
     }
   });
 
   it('allows assignments / function-assignments under unsafe: true', () => {
     const expr = assignmentNode('x', constantNode(5));
-    const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
-    expect(() => evaluate('x = 5', undefined as any, { unsafe: true } as any)).not.toThrow();
+    const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
+    expect(() => evaluate('x = 5', undefined, { unsafe: true })).not.toThrow();
   });
 
   it('still permits ordinary arithmetic (sanity)', () => {
@@ -226,7 +227,7 @@ describe('security: pre-compile AST validator (default-safe)', () => {
       fn: 'add',
       args: [constantNode(2), constantNode(3)],
     };
-    const evaluate = createEvaluate(mockParseFromNode(expr) as any, mathScope);
+    const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
     expect(evaluate('2+3')).toBe(5);
   });
 });

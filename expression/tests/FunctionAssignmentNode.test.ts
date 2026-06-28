@@ -3,11 +3,12 @@ import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createFunctionAssignmentNode } from '../src/node/FunctionAssignmentNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {};
+const mathScope: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 
@@ -32,7 +33,7 @@ const FunctionAssignmentNode = createFunctionAssignmentNode({
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -80,23 +81,25 @@ describe('FunctionAssignmentNode - construction & identity', () => {
   });
 
   it('static name is FunctionAssignmentNode', () => {
-    expect((FunctionAssignmentNode as any).name).toBe('FunctionAssignmentNode');
+    expect((FunctionAssignmentNode as unknown as { name: string }).name).toBe(
+      'FunctionAssignmentNode'
+    );
   });
 
   it('throws when name is not a string', () => {
-    expect(() => new FunctionAssignmentNode(42 as any, ['x'], makeConst(1))).toThrow(
+    expect(() => new FunctionAssignmentNode(42 as unknown as string, ['x'], makeConst(1))).toThrow(
       'String expected for parameter "name"'
     );
   });
 
   it('throws when params is not an array', () => {
-    expect(() => new FunctionAssignmentNode('f', 'x' as any, makeConst(1))).toThrow(
+    expect(() => new FunctionAssignmentNode('f', 'x' as unknown as string[], makeConst(1))).toThrow(
       'Array containing strings or objects expected'
     );
   });
 
   it('throws when expr is not a Node', () => {
-    expect(() => new FunctionAssignmentNode('f', ['x'], 42 as any)).toThrow(
+    expect(() => new FunctionAssignmentNode('f', ['x'], 42 as unknown as MathNode)).toThrow(
       'Node expected for parameter "expr"'
     );
   });
@@ -152,7 +155,7 @@ describe('FunctionAssignmentNode - _compile', () => {
   it('attaches syntax and expr string to the returned function', () => {
     const node = new FunctionAssignmentNode('f', ['x'], makeConst(1));
     const scope = new Map();
-    const f: any = node._compile({}, {})(scope, {}, null);
+    const f = node._compile({}, {})(scope, {}, null) as { syntax: string; expr: string };
     expect(f.syntax).toBe('f(x)');
     expect(typeof f.expr).toBe('string');
   });
@@ -162,7 +165,7 @@ describe('FunctionAssignmentNode - forEach', () => {
   it('calls callback once for expr', () => {
     const expr = makeConst(1);
     const node = new FunctionAssignmentNode('f', ['x'], expr);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(1);
     expect(visited[0].child).toBe(expr);
@@ -185,7 +188,7 @@ describe('FunctionAssignmentNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new FunctionAssignmentNode('f', ['x'], makeConst(1));
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });

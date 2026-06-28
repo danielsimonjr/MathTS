@@ -9,6 +9,7 @@ import {
   traverse,
 } from '../src/utils/object.js';
 import { sortFactories, factory, isFactory } from '../src/utils/factory.js';
+import type { LegacyFactory } from '../src/utils/factory.js';
 
 // ---------------------------------------------------------------------------
 // utils/string.format - BigNumber and Fraction branches
@@ -50,7 +51,7 @@ describe('string format - non-number value branches', () => {
   });
 
   it('uses an object format() method when present', () => {
-    const obj = { format: (_o: any) => 'CUSTOM_FORMAT' };
+    const obj = { format: (_o: unknown) => 'CUSTOM_FORMAT' };
     expect(format(obj, {})).toBe('CUSTOM_FORMAT');
   });
 
@@ -86,11 +87,11 @@ describe('object utils - extra branches', () => {
   });
 
   it('deepExtend merges nested objects and arrays', () => {
-    const a: any = { nested: { x: 1 }, list: [{ p: 1 }] };
-    const b: any = { nested: { y: 2 }, list: [{ q: 2 }], extra: [1, 2] };
+    const a: Record<string, unknown> = { nested: { x: 1 }, list: [{ p: 1 }] };
+    const b: Record<string, unknown> = { nested: { y: 2 }, list: [{ q: 2 }], extra: [1, 2] };
     deepExtend(a, b);
     expect(a.nested).toEqual({ x: 1, y: 2 });
-    expect(a.list[0]).toEqual({ p: 1, q: 2 });
+    expect((a.list as unknown[])[0]).toEqual({ p: 1, q: 2 });
     expect(a.extra).toEqual([1, 2]);
   });
 

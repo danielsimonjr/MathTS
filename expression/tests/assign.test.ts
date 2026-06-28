@@ -29,7 +29,7 @@ function makeSimpleNumericIndex(i: number) {
 
 // Simple 1D array subset for assignment
 const mockMatrix = {
-  subset(data: any[], index: any, value: any) {
+  subset(data: unknown[], index: { _i: number }, value: unknown) {
     const result = [...data];
     result[index._i] = value;
     return {
@@ -39,13 +39,13 @@ const mockMatrix = {
 };
 
 // subset for strings: replace char at index
-function mockSubset(obj: any, index: any, value: any): any {
+function mockSubset(obj: unknown, index: unknown, value: unknown): unknown {
   if (typeof obj === 'string') {
-    const i = index._i;
-    return obj.substring(0, i) + value + obj.substring(i + 1);
+    const i = (index as { _i: number })._i;
+    return obj.substring(0, i) + String(value) + obj.substring(i + 1);
   }
   if (Array.isArray(obj)) {
-    return mockMatrix.subset(obj, index, value).valueOf();
+    return mockMatrix.subset(obj, index as { _i: number }, value).valueOf();
   }
   throw new Error('Not supported by mock subset');
 }
@@ -64,7 +64,7 @@ describe('assign - plain object property assignment', () => {
   });
 
   it('assigns a new property to a plain object', () => {
-    const obj: Record<string, any> = {};
+    const obj: Record<string, unknown> = {};
     const index = makeObjectIndex('newProp');
     const result = assign(obj, index, 'hello');
     expect(result).toBe(obj);
@@ -72,7 +72,7 @@ describe('assign - plain object property assignment', () => {
   });
 
   it('assigns an object value as property', () => {
-    const obj: Record<string, any> = {};
+    const obj: Record<string, unknown> = {};
     const index = makeObjectIndex('nested');
     const value = { a: 1, b: 2 };
     assign(obj, index, value);
@@ -126,9 +126,9 @@ describe('assign - string assignment via subset', () => {
 
 describe('assign - Matrix-like object (has .subset method)', () => {
   it('calls the .subset method on Matrix-like objects', () => {
-    const calls: Array<{ index: any; value: any }> = [];
+    const calls: Array<{ index: unknown; value: unknown }> = [];
     const matrix = {
-      subset(index: any, value: any) {
+      subset(index: unknown, value: unknown) {
         calls.push({ index, value });
         return matrix; // fluent
       },

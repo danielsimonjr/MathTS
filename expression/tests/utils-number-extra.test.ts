@@ -9,6 +9,7 @@ import {
   splitNumber,
   normalizeFormatOptions,
 } from '../src/utils/number.js';
+import type { FormatOptions } from '../src/utils/number.js';
 // importing print pulls in the (single-line) regex module so it is measured.
 import { printTemplate } from '../src/utils/print.js';
 
@@ -27,31 +28,31 @@ class FakeBigNumber {
     return this._v;
   }
 }
-(FakeBigNumber.prototype as any).isBigNumber = true;
+(FakeBigNumber.prototype as { isBigNumber?: boolean }).isBigNumber = true;
 const fbn = (v: number) => new FakeBigNumber(v);
 
 describe('number normalizeFormatOptions - BigNumber-typed branches', () => {
   it('accepts a BigNumber as the whole options (precision)', () => {
-    expect(normalizeFormatOptions(fbn(4) as any).precision).toBe(4);
+    expect(normalizeFormatOptions(fbn(4) as unknown as FormatOptions).precision).toBe(4);
   });
 
   it('accepts a BigNumber precision inside an options object', () => {
-    expect(normalizeFormatOptions({ precision: fbn(3) as any }).precision).toBe(3);
+    expect(normalizeFormatOptions({ precision: fbn(3) as unknown as number }).precision).toBe(3);
   });
 
   it('accepts a BigNumber wordSize inside an options object', () => {
-    expect(normalizeFormatOptions({ notation: 'hex', wordSize: fbn(8) as any }).wordSize).toBe(8);
+    expect(normalizeFormatOptions({ notation: 'hex', wordSize: fbn(8) as unknown as number }).wordSize).toBe(8);
   });
 });
 
 describe('number format - BigNumber lowerExp/upperExp (_toNumberOrDefault)', () => {
   it('uses a BigNumber upperExp via _toNumberOrDefault', () => {
-    const result = format(1e7, { upperExp: fbn(2) as any });
+    const result = format(1e7, { upperExp: fbn(2) as unknown as number });
     expect(result).toMatch(/e/);
   });
 
   it('uses a BigNumber lowerExp via _toNumberOrDefault', () => {
-    const result = format(0.01, { lowerExp: fbn(-1) as any });
+    const result = format(0.01, { lowerExp: fbn(-1) as unknown as number });
     expect(result).toMatch(/e/);
   });
 });
@@ -133,13 +134,13 @@ describe('number normalizeFormatOptions - numeric inputs', () => {
    */
 
   it('throws on a non-numeric precision', () => {
-    expect(() => normalizeFormatOptions({ precision: 'x' as any })).toThrow(
+    expect(() => normalizeFormatOptions({ precision: 'x' as unknown as number })).toThrow(
       'Option "precision" must be a number or BigNumber'
     );
   });
 
   it('throws on a non-numeric wordSize', () => {
-    expect(() => normalizeFormatOptions({ wordSize: 'x' as any })).toThrow(
+    expect(() => normalizeFormatOptions({ wordSize: 'x' as unknown as number })).toThrow(
       'Option "wordSize" must be a number or BigNumber'
     );
   });
@@ -147,7 +148,7 @@ describe('number normalizeFormatOptions - numeric inputs', () => {
 
 describe('number toEngineering / toExponential / toPrecision edge cases', () => {
   it('toEngineering pads coefficients without precision', () => {
-    expect(toEngineering(100000000, undefined as any)).toMatch(/e\+?6/);
+    expect(toEngineering(100000000, undefined)).toMatch(/e\+?6/);
   });
 
   it('toEngineering with explicit precision adds sig figs', () => {
@@ -178,7 +179,7 @@ describe('number toEngineering / toExponential / toPrecision edge cases', () => 
   });
 
   it('toPrecision prepends zeros for non-positive precision path', () => {
-    const r = toPrecision(123, 0 as any);
+    const r = toPrecision(123, 0);
     expect(r).toBeTypeOf('string');
   });
 

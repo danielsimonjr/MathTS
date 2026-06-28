@@ -1,24 +1,25 @@
 import { describe, it, expect } from 'vitest';
 import { compile } from '../src/compiler/compile.js';
+import type { MathNode } from '../src/node/Node.js';
 
 /**
  * Create mock AST nodes that match the structure produced by the parser.
  * Each node has `is<Type>Node: true` and the relevant properties.
  */
 
-function constantNode(value: any) {
-  return { type: 'ConstantNode', isConstantNode: true, value };
+function constantNode(value: unknown): MathNode {
+  return { type: 'ConstantNode', isConstantNode: true, value } as unknown as MathNode;
 }
 
-function symbolNode(name: string) {
-  return { type: 'SymbolNode', isSymbolNode: true, name };
+function symbolNode(name: string): MathNode {
+  return { type: 'SymbolNode', isSymbolNode: true, name } as unknown as MathNode;
 }
 
-function operatorNode(op: string, fn: string, args: any[]) {
-  return { type: 'OperatorNode', isOperatorNode: true, op, fn, args };
+function operatorNode(op: string, fn: string, args: MathNode[]): MathNode {
+  return { type: 'OperatorNode', isOperatorNode: true, op, fn, args } as unknown as MathNode;
 }
 
-function functionNode(fnName: string, args: any[]) {
+function functionNode(fnName: string, args: MathNode[]): MathNode {
   return {
     type: 'FunctionNode',
     isFunctionNode: true,
@@ -27,66 +28,66 @@ function functionNode(fnName: string, args: any[]) {
     get name() {
       return fnName;
     },
-  };
+  } as unknown as MathNode;
 }
 
-function parenthesisNode(content: any) {
-  return { type: 'ParenthesisNode', isParenthesisNode: true, content };
+function parenthesisNode(content: MathNode): MathNode {
+  return { type: 'ParenthesisNode', isParenthesisNode: true, content } as unknown as MathNode;
 }
 
-function arrayNode(items: any[]) {
-  return { type: 'ArrayNode', isArrayNode: true, items };
+function arrayNode(items: MathNode[]): MathNode {
+  return { type: 'ArrayNode', isArrayNode: true, items } as unknown as MathNode;
 }
 
-function assignmentNode(name: string, value: any) {
+function assignmentNode(name: string, value: MathNode): MathNode {
   return {
     type: 'AssignmentNode',
     isAssignmentNode: true,
     object: symbolNode(name),
     value,
     name,
-  };
+  } as unknown as MathNode;
 }
 
-function blockNode(blocks: Array<{ node: any; visible: boolean }>) {
-  return { type: 'BlockNode', isBlockNode: true, blocks };
+function blockNode(blocks: Array<{ node: MathNode; visible: boolean }>): MathNode {
+  return { type: 'BlockNode', isBlockNode: true, blocks } as unknown as MathNode;
 }
 
-function conditionalNode(condition: any, trueExpr: any, falseExpr: any) {
+function conditionalNode(condition: MathNode, trueExpr: MathNode, falseExpr: MathNode): MathNode {
   return {
     type: 'ConditionalNode',
     isConditionalNode: true,
     condition,
     trueExpr,
     falseExpr,
-  };
+  } as unknown as MathNode;
 }
 
-function objectNode(properties: Record<string, any>) {
-  return { type: 'ObjectNode', isObjectNode: true, properties };
+function objectNode(properties: Record<string, MathNode>): MathNode {
+  return { type: 'ObjectNode', isObjectNode: true, properties } as unknown as MathNode;
 }
 
-function relationalNode(conditionals: string[], params: any[]) {
+function relationalNode(conditionals: string[], params: MathNode[]): MathNode {
   return {
     type: 'RelationalNode',
     isRelationalNode: true,
     conditionals,
     params,
-  };
+  } as unknown as MathNode;
 }
 
-function functionAssignmentNode(name: string, params: string[], expr: any) {
+function functionAssignmentNode(name: string, params: string[], expr: MathNode): MathNode {
   return {
     type: 'FunctionAssignmentNode',
     isFunctionAssignmentNode: true,
     name,
     params,
     expr,
-  };
+  } as unknown as MathNode;
 }
 
 // Standard math scope for tests
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   subtract: (a: number, b: number) => a - b,
   multiply: (a: number, b: number) => a * b,
@@ -313,7 +314,7 @@ describe('compile - ArrayNode', () => {
 describe('compile - AssignmentNode', () => {
   it('should assign a value to a variable', () => {
     const node = assignmentNode('x', constantNode(42));
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     const result = compile(node, mathScope).evaluate(scope);
     expect(result).toBe(42);
     // The scope should have been updated (via ObjectWrappingMap internally)
@@ -322,7 +323,7 @@ describe('compile - AssignmentNode', () => {
   it('should assign an expression result', () => {
     const expr = operatorNode('+', 'add', [constantNode(2), constantNode(3)]);
     const node = assignmentNode('result', expr);
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     expect(compile(node, mathScope).evaluate(scope)).toBe(5);
   });
 });
@@ -427,7 +428,7 @@ describe('compile - FunctionAssignmentNode', () => {
     // f(x) = x * 2
     const expr = operatorNode('*', 'multiply', [symbolNode('x'), constantNode(2)]);
     const node = functionAssignmentNode('f', ['x'], expr);
-    const scope: Record<string, any> = {};
+    const scope: Record<string, unknown> = {};
     const fn = compile(node, mathScope).evaluate(scope);
     expect(typeof fn).toBe('function');
     expect(fn(5)).toBe(10);
@@ -492,6 +493,6 @@ describe('compile - CompiledExpression reuse', () => {
 describe('compile - error handling', () => {
   it('should throw for unknown node types', () => {
     const unknownNode = { type: 'UnknownNode' };
-    expect(() => compile(unknownNode, mathScope)).toThrow('Unknown node type');
+    expect(() => compile(unknownNode as unknown as MathNode, mathScope)).toThrow('Unknown node type');
   });
 });

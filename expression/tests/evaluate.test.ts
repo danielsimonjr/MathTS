@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { MathNode } from '../src/node/Node.js';
 import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js';
 
 /**
@@ -8,19 +9,19 @@ import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js'
  * The mock parser produces AST nodes matching the same structure as createParse.
  */
 
-function constantNode(value: any) {
-  return { type: 'ConstantNode', isConstantNode: true, value };
+function constantNode(value: unknown): MathNode {
+  return { type: 'ConstantNode', isConstantNode: true, value } as unknown as MathNode;
 }
 
-function symbolNode(name: string) {
-  return { type: 'SymbolNode', isSymbolNode: true, name };
+function symbolNode(name: string): MathNode {
+  return { type: 'SymbolNode', isSymbolNode: true, name } as unknown as MathNode;
 }
 
-function operatorNode(op: string, fn: string, args: any[]) {
-  return { type: 'OperatorNode', isOperatorNode: true, op, fn, args };
+function operatorNode(op: string, fn: string, args: unknown[]): MathNode {
+  return { type: 'OperatorNode', isOperatorNode: true, op, fn, args } as unknown as MathNode;
 }
 
-function functionNode(fnName: string, args: any[]) {
+function functionNode(fnName: string, args: unknown[]): MathNode {
   return {
     type: 'FunctionNode',
     isFunctionNode: true,
@@ -29,7 +30,7 @@ function functionNode(fnName: string, args: any[]) {
     get name() {
       return fnName;
     },
-  };
+  } as unknown as MathNode;
 }
 
 /**
@@ -40,7 +41,7 @@ function functionNode(fnName: string, args: any[]) {
  * - Symbols: 'pi', 'x'
  */
 function createMockParser() {
-  return function mockParse(expr: string): any {
+  return function mockParse(expr: string): MathNode {
     expr = expr.trim();
 
     // Number
@@ -89,7 +90,7 @@ function createMockParser() {
   };
 }
 
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   subtract: (a: number, b: number) => a - b,
   multiply: (a: number, b: number) => a * b,

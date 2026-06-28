@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { MathNode } from '../src/node/Node.js';
 import { parse, OperatorNode, ConstantNode, SymbolNode } from './helpers/bootstrap.js';
 
 /**
@@ -33,15 +34,19 @@ describe('OperatorNode - constructor & identity', () => {
   });
 
   it('throws when op is not a string', () => {
-    expect(() => new OperatorNode(1 as any, 'f', [])).toThrow('string expected for parameter "op"');
+    expect(() => new OperatorNode(1 as unknown as string, 'f', [])).toThrow(
+      'string expected for parameter "op"'
+    );
   });
 
   it('throws when fn is not a string', () => {
-    expect(() => new OperatorNode('+', 1 as any, [])).toThrow('string expected for parameter "fn"');
+    expect(() => new OperatorNode('+', 1 as unknown as string, [])).toThrow(
+      'string expected for parameter "fn"'
+    );
   });
 
   it('throws when args contains non-Nodes', () => {
-    expect(() => new OperatorNode('+', 'add', [1 as any])).toThrow(
+    expect(() => new OperatorNode('+', 'add', [1 as unknown as MathNode])).toThrow(
       'Array containing Nodes expected for parameter "args"'
     );
   });
@@ -292,8 +297,8 @@ describe('OperatorNode - structural helpers', () => {
     const a = new ConstantNode(1);
     const b = new ConstantNode(2);
     const n = new OperatorNode('+', 'add', [a, b]);
-    const seen: { child: any; path: string }[] = [];
-    n.forEach((child: any, path: string) => seen.push({ child, path }));
+    const seen: { child: MathNode; path: string }[] = [];
+    n.forEach((child: MathNode, path: string) => seen.push({ child, path }));
     expect(seen).toHaveLength(2);
     expect(seen[0].child).toBe(a);
     expect(seen[0].path).toBe('args[0]');
@@ -303,7 +308,7 @@ describe('OperatorNode - structural helpers', () => {
   it('map returns a new OperatorNode with transformed args', () => {
     const n = new OperatorNode('+', 'add', [new ConstantNode(1), new ConstantNode(2)]);
     const replacement = new ConstantNode(99);
-    const mapped = n.map((child: any, path: string) =>
+    const mapped = n.map((child: MathNode, path: string) =>
       path === 'args[0]' ? replacement : child
     );
     expect(mapped).not.toBe(n);

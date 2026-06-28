@@ -4,14 +4,14 @@ import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   pi: Math.PI,
   e: Math.E,
   add: (a: number, b: number) => a + b,
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 
@@ -32,11 +32,13 @@ describe('SymbolNode - construction & identity', () => {
   });
 
   it('is also a Node (isNode = true)', () => {
-    expect((new SymbolNode('x') as any).isNode).toBe(true);
+    expect((new SymbolNode('x') as unknown as { isNode: boolean }).isNode).toBe(true);
   });
 
   it('throws when name is not a string', () => {
-    expect(() => new (SymbolNode as any)(42)).toThrow('String expected for parameter "name"');
+    expect(() => new (SymbolNode as unknown as new (...args: unknown[]) => unknown)(42)).toThrow(
+      'String expected for parameter "name"'
+    );
   });
 });
 
@@ -44,14 +46,14 @@ describe('SymbolNode - _compile: resolving from math scope', () => {
   it('returns math scope value when present', () => {
     const node = new SymbolNode('pi');
     const fn = node._compile(mathScope, {});
-    const scope = new Map<string, any>();
+    const scope = new Map<string, unknown>();
     expect(fn(scope, {}, null)).toBeCloseTo(Math.PI);
   });
 
   it('prefers user scope over math scope', () => {
     const node = new SymbolNode('pi');
     const fn = node._compile(mathScope, {});
-    const scope = new Map<string, any>([['pi', 3]]);
+    const scope = new Map<string, unknown>([['pi', 3]]);
     expect(fn(scope, {}, null)).toBe(3);
   });
 });
@@ -60,7 +62,7 @@ describe('SymbolNode - _compile: resolving from argNames', () => {
   it('reads from args when name is in argNames', () => {
     const node = new SymbolNode('x');
     const fn = node._compile(mathScope, { x: true });
-    const scope = new Map<string, any>();
+    const scope = new Map<string, unknown>();
     const result = fn(scope, { x: 42 }, null);
     expect(result).toBe(42);
   });
@@ -70,7 +72,7 @@ describe('SymbolNode - _compile: undefined symbol', () => {
   it('throws for an undefined symbol', () => {
     const node = new SymbolNode('unknownVar');
     const fn = node._compile(mathScope, {});
-    const scope = new Map<string, any>();
+    const scope = new Map<string, unknown>();
     expect(() => fn(scope, {}, null)).toThrow('Undefined symbol unknownVar');
   });
 });
@@ -78,7 +80,7 @@ describe('SymbolNode - _compile: undefined symbol', () => {
 describe('SymbolNode - forEach / map / clone', () => {
   it('forEach calls callback for no children', () => {
     const node = new SymbolNode('x');
-    const visited: any[] = [];
+    const visited: Array<{ child: unknown; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(0);
   });
@@ -188,20 +190,20 @@ describe('SymbolNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(new SymbolNode('x').equals(null as any)).toBe(false);
+    expect(new SymbolNode('x').equals(null)).toBe(false);
   });
 
   it('not equal to a ConstantNode', () => {
     const s = new SymbolNode('x');
     const c = new ConstantNode(42);
-    expect(s.equals(c as any)).toBe(false);
+    expect(s.equals(c as unknown as typeof s)).toBe(false);
   });
 });
 
 describe('SymbolNode - traverse', () => {
   it('traverse visits only the node itself (no children)', () => {
     const node = new SymbolNode('x');
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(1);
     expect(visited[0]).toBe(node);
@@ -210,6 +212,8 @@ describe('SymbolNode - traverse', () => {
 
 describe('SymbolNode - getIdentifier', () => {
   it('returns SymbolNode type identifier', () => {
-    expect((new SymbolNode('x') as any).getIdentifier()).toBe('SymbolNode');
+    expect(
+      (new SymbolNode('x') as unknown as { getIdentifier: () => string }).getIdentifier()
+    ).toBe('SymbolNode');
   });
 });

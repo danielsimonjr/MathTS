@@ -4,11 +4,12 @@ import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createIndexNode } from '../src/node/IndexNode.js';
 import { createAssignmentNode } from '../src/node/AssignmentNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {};
+const mathScope: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const IndexNode = createIndexNode({ Node, size: () => [] });
@@ -20,7 +21,7 @@ const AssignmentNode = createAssignmentNode({
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -58,11 +59,11 @@ describe('AssignmentNode - construction & identity', () => {
   });
 
   it('static name is AssignmentNode', () => {
-    expect((AssignmentNode as any).name).toBe('AssignmentNode');
+    expect((AssignmentNode as unknown as { name: string }).name).toBe('AssignmentNode');
   });
 
   it('throws when object is not a SymbolNode or AccessorNode', () => {
-    expect(() => new AssignmentNode(makeConst(1) as any, makeConst(2))).toThrow(
+    expect(() => new AssignmentNode(makeConst(1), makeConst(2))).toThrow(
       'SymbolNode or AccessorNode expected as "object"'
     );
   });
@@ -78,7 +79,7 @@ describe('AssignmentNode - construction & identity', () => {
     // Passing a SymbolNode as index triggers "IndexNode expected as index" first.
     // To test "value not a Node" we need a valid IndexNode and an invalid value.
     const validIdx = makeObjIndex('foo');
-    expect(() => new AssignmentNode(makeSym('x'), validIdx, 42 as any)).toThrow(
+    expect(() => new AssignmentNode(makeSym('x'), validIdx, 42 as unknown as MathNode)).toThrow(
       'Node expected as "value"'
     );
   });
@@ -119,7 +120,7 @@ describe('AssignmentNode - forEach', () => {
     const sym = makeSym('x');
     const val = makeConst(5);
     const node = new AssignmentNode(sym, val);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].child).toBe(sym);
@@ -133,7 +134,7 @@ describe('AssignmentNode - forEach', () => {
     const idx = makeObjIndex('prop');
     const val = makeConst(42);
     const node = new AssignmentNode(sym, idx, val);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(3);
     expect(visited[0].path).toBe('object');
@@ -157,7 +158,7 @@ describe('AssignmentNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new AssignmentNode(makeSym('x'), makeConst(1));
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });

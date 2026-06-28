@@ -6,27 +6,27 @@ import { createIndexNode } from '../src/node/IndexNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 // Minimal index function: returns a mock index object
-function _makeIndex(...dims: any[]) {
+function _makeIndex(...dims: unknown[]) {
   return { dimensions: dims, isIndex: true, isObjectProperty: () => false };
 }
 
-const mathScope: Record<string, any> = {
-  index: (...dims: any[]) => ({ dimensions: dims, isObjectIndex: true }),
+const mathScope: Record<string, unknown> = {
+  index: (...dims: unknown[]) => ({ dimensions: dims, isObjectIndex: true }),
 };
 
-const sizeFn = (value: any): number[] => {
+const sizeFn = (value: unknown): number[] => {
   if (Array.isArray(value)) return [value.length];
   if (typeof value === 'string') return [value.length];
   return [];
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const IndexNode = createIndexNode({ Node, size: sizeFn });
 
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -51,7 +51,7 @@ describe('IndexNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((new IndexNode([makeConst(1)]) as any).isNode).toBe(true);
+    expect((new IndexNode([makeConst(1)]) as unknown as { isNode: boolean }).isNode).toBe(true);
   });
 
   it('dotNotation defaults to false', () => {
@@ -59,7 +59,7 @@ describe('IndexNode - construction & identity', () => {
   });
 
   it('throws when dimensions contains non-nodes', () => {
-    expect(() => new IndexNode([42 as any])).toThrow(
+    expect(() => new IndexNode([42 as unknown as ReturnType<typeof makeConst>])).toThrow(
       'Array containing Nodes expected for parameter "dimensions"'
     );
   });
@@ -129,7 +129,7 @@ describe('IndexNode - forEach', () => {
     const d0 = makeConst(1);
     const d1 = makeConst(2);
     const node = new IndexNode([d0, d1]);
-    const visited: Array<{ child: any; path: string }> = [];
+    const visited: Array<{ child: unknown; path: string }> = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(2);
     expect(visited[0].path).toBe('dimensions[0]');
@@ -144,7 +144,7 @@ describe('IndexNode - map', () => {
     const d0 = makeConst(1);
     const node = new IndexNode([d0]);
     const replacement = makeConst(99);
-    const mapped: any = node.map((_child, _path, _parent) => replacement);
+    const mapped = node.map((_child, _path, _parent) => replacement);
     expect(mapped).not.toBe(node);
     expect(mapped.dimensions[0]).toBe(replacement);
     expect(mapped.dotNotation).toBe(false);
@@ -152,7 +152,9 @@ describe('IndexNode - map', () => {
 
   it('throws when callback returns non-node', () => {
     const node = new IndexNode([makeConst(0)]);
-    expect(() => node.map((_child) => ({ notANode: true }) as any)).toThrow(
+    expect(() =>
+      node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -163,7 +165,7 @@ describe('IndexNode - clone', () => {
     const d0 = makeConst(1);
     const d1 = makeConst(2);
     const node = new IndexNode([d0, d1]);
-    const cloned: any = node.clone();
+    const cloned = node.clone();
     expect(cloned).not.toBe(node);
     expect(cloned.dimensions[0]).toBe(d0);
     expect(cloned.dimensions[1]).toBe(d1);
@@ -260,7 +262,7 @@ describe('IndexNode - equals', () => {
   });
 
   it('not equal to null', () => {
-    expect(new IndexNode([makeConst(0)]).equals(null as any)).toBe(false);
+    expect(new IndexNode([makeConst(0)]).equals(null)).toBe(false);
   });
 });
 
@@ -269,7 +271,7 @@ describe('IndexNode - traverse', () => {
     const d0 = makeConst(1);
     const d1 = makeConst(2);
     const node = new IndexNode([d0, d1]);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(3); // root + 2 dims
     expect(visited[0]).toBe(node);

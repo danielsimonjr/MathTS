@@ -31,16 +31,16 @@ import { createBlockNode } from '../../src/node/BlockNode.js';
 import { createParse } from '../../src/parse.js';
 import { createEvaluate } from '../../src/evaluator/evaluate.js';
 
-const fScope = factoryScope as Record<string, any>;
+const fScope = factoryScope as Record<string, unknown>;
 
 // ---------------------------------------------------------------------------
 // Build the math scope: functions + typed functions + constants. This is what
 // the source nodes capture as their `math` namespace for compile / toTex.
 // ---------------------------------------------------------------------------
-const math: Record<string, any> = {
+const math: Record<string, unknown> = {
   ...fScope,
-  ...(activatedFactories as Record<string, any>),
-  ...(typedFns as Record<string, any>),
+  ...(activatedFactories as Record<string, unknown>),
+  ...(typedFns as Record<string, unknown>),
   pi: Math.PI,
   e: Math.E,
   tau: 2 * Math.PI,
@@ -54,7 +54,7 @@ const math: Record<string, any> = {
 const mathWithTransform = math;
 math.mathWithTransform = mathWithTransform;
 
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const subset = fScope.subset;
 const size = fScope.size;
 const matrix = fScope.matrix;
@@ -64,15 +64,20 @@ const baseTyped = fScope.typed;
 // conversion on the shared typed instance. Our source `createParse` tries to
 // register it again, which throws "already a conversion". Wrap typed so that
 // the duplicate registration is tolerated; everything else delegates through.
-const typed: any = function (...args: any[]) {
-  return baseTyped(...args);
-};
+interface TypedShim {
+  (...args: unknown[]): unknown;
+  addConversion: (...args: unknown[]) => unknown;
+  [key: string]: unknown;
+}
+const typed = function (...args: unknown[]): unknown {
+  return (baseTyped as (...a: unknown[]) => unknown)(...args);
+} as unknown as TypedShim;
 // Delegate all other typed methods/properties to the real instance via the
 // prototype chain (avoids copying getter-only own props).
-Object.setPrototypeOf(typed, baseTyped);
-typed.addConversion = (...args: any[]) => {
+Object.setPrototypeOf(typed, baseTyped as object);
+typed.addConversion = (...args: unknown[]): unknown => {
   try {
-    return baseTyped.addConversion(...args);
+    return (baseTyped as { addConversion: (...a: unknown[]) => unknown }).addConversion(...args);
   } catch (e) {
     if (e instanceof Error && /already a conversion/.test(e.message)) return undefined;
     throw e;

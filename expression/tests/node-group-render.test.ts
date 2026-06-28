@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
+import type { MathNode, StringOptions } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createOperatorNode } from '../src/node/OperatorNode.js';
@@ -21,8 +22,20 @@ import { createConditionalNode } from '../src/node/ConditionalNode.js';
  * never bypassed.
  */
 
+/** Structural view of the mock Index object produced by the `index` factory. */
+interface MockIndex {
+  isIndex?: boolean;
+  dimensions?: unknown[];
+}
+
+/** White-box view of the subtype fields read off base `MathNode` values here. */
+interface NodeView {
+  isSymbolNode?: boolean;
+  name?: string;
+}
+
 // ── Shared bootstrap ─────────────────────────────────────────────────────────
-const mathScope: Record<string, any> = {
+const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
   subtract: (a: number, b: number) => a - b,
   multiply: (a: number, b: number) => a * b,
@@ -32,17 +45,17 @@ const mathScope: Record<string, any> = {
   smaller: (a: number, b: number) => a < b,
   pi: Math.PI,
   // a real `index` factory so IndexNode._compile produces something usable
-  index: (...dims: any[]) => ({ isIndex: true, dimensions: dims }),
+  index: (...dims: unknown[]) => ({ isIndex: true, dimensions: dims }),
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const OperatorNode = createOperatorNode({ Node });
 const ConditionalNode = createConditionalNode({ Node });
 
-const sizeFn = (value: any): number[] => {
+const sizeFn = (value: unknown): number[] => {
   if (Array.isArray(value)) return [value.length];
   if (typeof value === 'string') return [value.length];
   return [];
@@ -50,26 +63,28 @@ const sizeFn = (value: any): number[] => {
 const IndexNode = createIndexNode({ Node, size: sizeFn });
 
 // subset/access for AccessorNode + AssignmentNode matrix paths.
-const subset = (obj: any, idx: any, replacement?: any) => {
+const subset = (obj: unknown, idx: unknown, replacement?: unknown): unknown => {
   // idx is the mock Index object { isIndex, dimensions:[i] }
-  const i = idx && idx.dimensions ? idx.dimensions[0] : idx;
+  const index = idx as MockIndex;
+  const i = (index && index.dimensions ? index.dimensions[0] : idx) as PropertyKey;
+  const target = obj as Record<PropertyKey, unknown>;
   if (replacement !== undefined) {
-    obj[i] = replacement;
-    return obj;
+    target[i] = replacement;
+    return target;
   }
-  return obj[i];
+  return target[i];
 };
 const AccessorNode = createAccessorNode({ subset, Node });
 const AssignmentNode = createAssignmentNode({ subset, Node });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-function c(v: any) {
+function c(v: unknown) {
   return new ConstantNode(v);
 }
 function s(name: string) {
   return new SymbolNode(name);
 }
-function op(o: string, fn: string, args: any[]) {
+function op(o: string, fn: string, args: MathNode[]) {
   return new OperatorNode(o, fn, args);
 }
 /** An IndexNode that represents a matrix index like [2]. */
@@ -99,7 +114,7 @@ class MockBigNumber {
     return this.v;
   }
 }
-(MockBigNumber.prototype as any).isBigNumber = true;
+MockBigNumber.prototype.isBigNumber = true;
 
 class MockComplex {
   re: number;
@@ -109,7 +124,7 @@ class MockComplex {
     this.im = im;
   }
 }
-(MockComplex.prototype as any).isComplex = true;
+(MockComplex.prototype as MockComplex & { isComplex: boolean }).isComplex = true;
 
 class MockUnit {
   value: number;
@@ -117,11 +132,11 @@ class MockUnit {
     this.value = value;
   }
 }
-(MockUnit.prototype as any).isUnit = true;
+(MockUnit.prototype as MockUnit & { isUnit: boolean }).isUnit = true;
 
 // Minimal scope used by compiled nodes (a Map with has/get/set).
-function scopeMap(init: Record<string, any> = {}) {
-  return new Map<string, any>(Object.entries(init));
+function scopeMap(init: Record<string, unknown> = {}) {
+  return new Map<string, unknown>(Object.entries(init));
 }
 
 // ── AssignmentNode ────────────────────────────────────────────────────────────
@@ -223,17 +238,17 @@ describe('AssignmentNode — rendering', () => {
 
 describe('AssignmentNode — name getter & validation', () => {
   it('name returns object name for simple assignment', () => {
-    expect((new AssignmentNode(s('foo'), c(1)) as any).name).toBe('foo');
+    expect(new AssignmentNode(s('foo'), c(1)).name).toBe('foo');
   });
   it('name returns property name for object-property assignment', () => {
-    expect((new AssignmentNode(s('a'), dotIndex('bar'), c(1)) as any).name).toBe('bar');
+    expect(new AssignmentNode(s('a'), dotIndex('bar'), c(1)).name).toBe('bar');
   });
   it('name returns "" for matrix-index assignment', () => {
-    expect((new AssignmentNode(s('a'), matIndex(2), c(1)) as any).name).toBe('');
+    expect(new AssignmentNode(s('a'), matIndex(2), c(1)).name).toBe('');
   });
 
   it('throws when object is neither Symbol nor Accessor', () => {
-    expect(() => new AssignmentNode(c(1) as any, c(2))).toThrow(
+    expect(() => new AssignmentNode(c(1), c(2))).toThrow(
       'SymbolNode or AccessorNode expected as "object"'
     );
   });
@@ -241,12 +256,14 @@ describe('AssignmentNode — name getter & validation', () => {
     expect(() => new AssignmentNode(s('end'), c(2))).toThrow('Cannot assign to symbol "end"');
   });
   it('throws when index is not an IndexNode', () => {
-    expect(() => new AssignmentNode(s('a'), c(1) as any, c(2))).toThrow(
+    expect(() => new AssignmentNode(s('a'), c(1), c(2))).toThrow(
       'IndexNode expected as "index"'
     );
   });
   it('throws when value is not a Node', () => {
-    expect(() => new AssignmentNode(s('a'), 42 as any)).toThrow('Node expected as "value"');
+    expect(() => new AssignmentNode(s('a'), 42 as unknown as MathNode)).toThrow(
+      'Node expected as "value"'
+    );
   });
 });
 
@@ -260,18 +277,18 @@ describe('AssignmentNode — structural helpers', () => {
   it('forEach visits object and value (no index)', () => {
     const node = new AssignmentNode(s('a'), c(5));
     const paths: string[] = [];
-    node.forEach((_child: any, path: string) => paths.push(path));
+    node.forEach((_child: MathNode, path: string) => paths.push(path));
     expect(paths).toEqual(['object', 'value']);
   });
   it('forEach visits object, index and value (with index)', () => {
     const node = new AssignmentNode(s('a'), dotIndex('b'), c(5));
     const paths: string[] = [];
-    node.forEach((_child: any, path: string) => paths.push(path));
+    node.forEach((_child: MathNode, path: string) => paths.push(path));
     expect(paths).toEqual(['object', 'index', 'value']);
   });
   it('map rebuilds the node', () => {
     const node = new AssignmentNode(s('a'), dotIndex('b'), c(5));
-    const mapped = node.map((child: any) => child);
+    const mapped = node.map((child: MathNode) => child);
     expect(mapped.isAssignmentNode).toBe(true);
     expect(mapped.equals(node)).toBe(true);
   });
@@ -370,23 +387,23 @@ describe('AccessorNode — rendering', () => {
   it('clone and map preserve structure', () => {
     const node = new AccessorNode(s('obj'), dotIndex('prop'));
     expect(node.clone().equals(node)).toBe(true);
-    expect(node.map((c2: any) => c2).equals(node)).toBe(true);
+    expect(node.map((c2: MathNode) => c2).equals(node)).toBe(true);
   });
   it('forEach visits object and index', () => {
     const node = new AccessorNode(s('obj'), dotIndex('prop'));
     const paths: string[] = [];
-    node.forEach((_child: any, path: string) => paths.push(path));
+    node.forEach((_child: MathNode, path: string) => paths.push(path));
     expect(paths).toEqual(['object', 'index']);
   });
   it('name getter returns the property name and "" for matrix index', () => {
-    expect((new AccessorNode(s('obj'), dotIndex('prop')) as any).name).toBe('prop');
-    expect((new AccessorNode(s('a'), matIndex(2)) as any).name).toBe('');
+    expect(new AccessorNode(s('obj'), dotIndex('prop')).name).toBe('prop');
+    expect(new AccessorNode(s('a'), matIndex(2)).name).toBe('');
   });
   it('constructor validation', () => {
-    expect(() => new AccessorNode(42 as any, dotIndex('x'))).toThrow(
+    expect(() => new AccessorNode(42 as unknown as MathNode, dotIndex('x'))).toThrow(
       'Node expected for parameter "object"'
     );
-    expect(() => new AccessorNode(s('a'), c(1) as any)).toThrow(
+    expect(() => new AccessorNode(s('a'), c(1))).toThrow(
       'IndexNode expected for parameter "index"'
     );
   });
@@ -432,14 +449,14 @@ describe('IndexNode — object property vs matrix index', () => {
   it('clone / map / forEach', () => {
     const idx = matIndex(1, 2);
     expect(idx.clone().dimensions.length).toBe(2);
-    expect(idx.map((c2: any) => c2).dimensions.length).toBe(2);
+    expect(idx.map((c2: MathNode) => c2).dimensions.length).toBe(2);
     const paths: string[] = [];
-    idx.forEach((_c: any, p: string) => paths.push(p));
+    idx.forEach((_c: MathNode, p: string) => paths.push(p));
     expect(paths).toEqual(['dimensions[0]', 'dimensions[1]']);
   });
 
   it('constructor rejects non-Node dimensions', () => {
-    expect(() => new IndexNode([42 as any])).toThrow(
+    expect(() => new IndexNode([42 as unknown as MathNode])).toThrow(
       'Array containing Nodes expected for parameter "dimensions"'
     );
   });
@@ -482,10 +499,10 @@ describe('IndexNode — object property vs matrix index', () => {
 // ── ConditionalNode ───────────────────────────────────────────────────────────
 
 describe('ConditionalNode — compile & evaluate (testCondition branches)', () => {
-  function build(cond: any) {
+  function build(cond: unknown) {
     return new ConditionalNode(c(cond), c('y'), c('n'));
   }
-  function run(cond: any) {
+  function run(cond: unknown) {
     return build(cond)._compile(mathScope, {})(scopeMap(), {}, undefined);
   }
 
@@ -518,7 +535,7 @@ describe('ConditionalNode — compile & evaluate (testCondition branches)', () =
     expect(run(undefined)).toBe('n');
   });
   it('unsupported condition type throws', () => {
-    expect(() => run({} as any)).toThrow('Unsupported type of condition');
+    expect(() => run({})).toThrow('Unsupported type of condition');
   });
 });
 
@@ -568,9 +585,9 @@ describe('ConditionalNode — rendering', () => {
   it('clone / map / forEach / toJSON / fromJSON', () => {
     const node = new ConditionalNode(s('a'), c(1), c(2));
     expect(node.clone().equals(node)).toBe(true);
-    expect(node.map((c2: any) => c2).equals(node)).toBe(true);
+    expect(node.map((c2: MathNode) => c2).equals(node)).toBe(true);
     const paths: string[] = [];
-    node.forEach((_c: any, p: string) => paths.push(p));
+    node.forEach((_c: MathNode, p: string) => paths.push(p));
     expect(paths).toEqual(['condition', 'trueExpr', 'falseExpr']);
     const json = node.toJSON();
     expect(json.mathjs).toBe('ConditionalNode');
@@ -578,13 +595,13 @@ describe('ConditionalNode — rendering', () => {
   });
 
   it('constructor validation', () => {
-    expect(() => new ConditionalNode(42 as any, c(1), c(2))).toThrow(
+    expect(() => new ConditionalNode(42 as unknown as MathNode, c(1), c(2))).toThrow(
       'Parameter condition must be a Node'
     );
-    expect(() => new ConditionalNode(c(1), 42 as any, c(2))).toThrow(
+    expect(() => new ConditionalNode(c(1), 42 as unknown as MathNode, c(2))).toThrow(
       'Parameter trueExpr must be a Node'
     );
-    expect(() => new ConditionalNode(c(1), c(2), 42 as any)).toThrow(
+    expect(() => new ConditionalNode(c(1), c(2), 42 as unknown as MathNode)).toThrow(
       'Parameter falseExpr must be a Node'
     );
   });
@@ -649,7 +666,7 @@ describe('ConstantNode — rendering for all value types', () => {
 
   it('map returns a clone (no children)', () => {
     const n = c(42);
-    expect(n.map((c2: any) => c2).equals(n)).toBe(true);
+    expect(n.map((c2: MathNode) => c2).equals(n)).toBe(true);
   });
 
   it('forEach visits nothing', () => {
@@ -689,28 +706,29 @@ describe('Node base class — wrappers and helpers', () => {
 
   it('transform replaces a matching node', () => {
     const node = op('+', 'add', [s('x'), c(1)]);
-    const replaced = node.transform((n: any) =>
-      n.isSymbolNode && n.name === 'x' ? c(10) : n
-    );
+    const replaced = node.transform((n: MathNode) => {
+      const nv = n as unknown as NodeView;
+      return nv.isSymbolNode && nv.name === 'x' ? c(10) : n;
+    });
     expect(replaced.evaluate()).toBe(11);
   });
 
   it('filter finds matching nodes', () => {
     const node = op('+', 'add', [op('+', 'add', [s('x'), s('x')]), s('y')]);
-    const xs = node.filter((n: any) => n.isSymbolNode && n.name === 'x');
+    const xs = node.filter((n: NodeView) => !!(n.isSymbolNode && n.name === 'x'));
     expect(xs.length).toBe(2);
   });
 
   it('traverse visits every node', () => {
     const node = op('+', 'add', [c(1), c(2)]);
-    const visited: any[] = [];
-    node.traverse((n: any) => visited.push(n));
+    const visited: MathNode[] = [];
+    node.traverse((n: MathNode) => visited.push(n));
     expect(visited.length).toBe(3);
   });
 
   it('_ifNode error: map callback returning a non-Node throws', () => {
     const node = op('+', 'add', [s('a'), s('b')]);
-    expect(() => node.map(() => 'not a node' as any)).toThrow(
+    expect(() => node.map(() => 'not a node' as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -724,7 +742,7 @@ describe('Node base class — wrappers and helpers', () => {
   });
 
   it('_getCustomString throws for an invalid handler type', () => {
-    expect(() => c(1).toString({ handler: 'bad' as any })).toThrow(
+    expect(() => c(1).toString({ handler: 'bad' } as unknown as StringOptions)).toThrow(
       'Object or function expected as callback'
     );
   });
@@ -749,7 +767,7 @@ describe('Node base class — wrappers and helpers', () => {
     const bare = new Node();
     expect(() => bare._compile(mathScope, {})).toThrow('Method _compile must be implemented');
     expect(() => bare.forEach(() => {})).toThrow('Cannot run forEach on a Node interface');
-    expect(() => bare.map((x: any) => x)).toThrow('Cannot run map on a Node interface');
+    expect(() => bare.map((x: MathNode) => x)).toThrow('Cannot run map on a Node interface');
     expect(() => bare.clone()).toThrow('Cannot clone a Node interface');
     expect(() => bare._toString()).toThrow('_toString not implemented');
     expect(() => bare._toHTML()).toThrow('_toHTML not implemented');

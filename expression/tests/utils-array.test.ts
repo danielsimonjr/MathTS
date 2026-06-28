@@ -37,7 +37,7 @@ import {
 describe('arraySize', () => {
   it('returns [] for a scalar-like non-array', () => {
     // scalar (not an array) – size is []
-    expect(arraySize(42 as any)).toEqual([]);
+    expect(arraySize(42)).toEqual([]);
   });
 
   it('returns [n] for a 1-D array', () => {
@@ -150,7 +150,7 @@ describe('resize', () => {
   });
 
   it('throws when size is not an array', () => {
-    expect(() => resize([1, 2], 3 as any)).toThrow('Array expected');
+    expect(() => resize([1, 2], 3 as unknown as number[])).toThrow('Array expected');
   });
 
   it('throws when size is empty', () => {
@@ -266,7 +266,7 @@ describe('unsqueeze', () => {
 
   it('adds inner dimensions to scalars', () => {
     // unsqueeze scalar to 1-D with desired dims=1
-    const result = unsqueeze(5 as any, 1);
+    const result = unsqueeze(5, 1);
     expect(result).toEqual([5]);
   });
 });
@@ -305,11 +305,11 @@ describe('flatten', () => {
 
   it('returns the value wrapped in array when not an array', () => {
     // non-array is returned as-is in T[] form
-    expect(flatten(42 as any)).toBe(42 as any);
+    expect(flatten(42) as unknown).toBe(42);
   });
 
   it('throws when second arg is not boolean', () => {
-    expect(() => flatten([[1]], 'yes' as any)).toThrow('Boolean expected');
+    expect(() => flatten([[1]], 'yes' as unknown as boolean)).toThrow('Boolean expected');
   });
 
   it('uses rectangular fast path when isRectangular=true', () => {
@@ -401,7 +401,7 @@ describe('identify', () => {
   });
 
   it('throws for non-array', () => {
-    expect(() => identify(42 as any)).toThrow('Array input expected');
+    expect(() => identify(42 as unknown as never[])).toThrow('Array input expected');
   });
 });
 
@@ -416,7 +416,7 @@ describe('generalize', () => {
   });
 
   it('throws for non-array', () => {
-    expect(() => generalize(42 as any)).toThrow('Array input expected');
+    expect(() => generalize(42 as unknown as never[])).toThrow('Array input expected');
   });
 });
 
@@ -425,17 +425,17 @@ describe('generalize', () => {
 // ---------------------------------------------------------------------------
 describe('getArrayDataType', () => {
   it('returns the type of homogeneous elements', () => {
-    const typeOf = (v: any) => typeof v;
+    const typeOf = (v: unknown) => typeof v;
     expect(getArrayDataType([1, 2, 3], typeOf)).toBe('number');
   });
 
   it('returns "mixed" for heterogeneous elements', () => {
-    const typeOf = (v: any) => typeof v;
+    const typeOf = (v: unknown) => typeof v;
     expect(getArrayDataType([1, 'hello'], typeOf)).toBe('mixed');
   });
 
   it('returns undefined for an inconsistent jagged array', () => {
-    const typeOf = (v: any) => typeof v;
+    const typeOf = (v: unknown) => typeof v;
     // row lengths differ
     const result = getArrayDataType([[1, 2], [3]], typeOf);
     expect(result).toBeUndefined();

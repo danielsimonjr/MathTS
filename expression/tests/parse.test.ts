@@ -35,11 +35,18 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 // `typed.addConversion({ from: 'string', to: 'Node', ... })` succeeds.
 // We must do this before calling createParse.
 try {
-  (mathTyped as any).addType(
+  (
+    mathTyped as unknown as {
+      addType: (
+        t: { name: string; test: (x: unknown) => boolean },
+        b: boolean
+      ) => void;
+    }
+  ).addType(
     {
       name: 'Node',
       test: (x: unknown): boolean =>
-        typeof x === 'object' && x !== null && (x as any).isNode === true,
+        typeof x === 'object' && x !== null && (x as { isNode?: unknown }).isNode === true,
     },
     false
   );
@@ -77,7 +84,7 @@ class ResultSet {
 }
 
 // Build node classes from the factory chain
-const mathScope: Record<string, any> = {};
+const mathScope: Record<string, unknown> = {};
 
 const _Node = createNode({ mathWithTransform: mathScope });
 const _ArrayNode = createArrayNode({ Node: _Node });
@@ -158,7 +165,46 @@ const parse = createParse({
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function nodeType(node: any): string {
+interface ParsedNode {
+  type: string;
+  value: unknown;
+  name: string;
+  fn: string | { name: string };
+  op: string;
+  args: ParsedNode[];
+  params: string[];
+  conditionals: string[];
+  expr: ParsedNode;
+  object: ParsedNode;
+  content: ParsedNode;
+  condition: ParsedNode;
+  trueExpr: ParsedNode;
+  falseExpr: ParsedNode;
+  start: ParsedNode;
+  step: ParsedNode;
+  end: ParsedNode;
+  items: ParsedNode[];
+  properties: Record<string, ParsedNode>;
+  blocks: Array<{ visible: boolean }>;
+}
+
+interface ParseStatics {
+  isDigit(c: string): boolean;
+  isDigitDot(c: string): boolean;
+  isWhitespace(c: string, nestingLevel: number): boolean;
+  isDecimalMark(c: string, next: string): boolean;
+  isValidLatinOrGreek(c: string): boolean;
+  isAlpha(c: string, prev: string, next: string): boolean;
+  isValidMathSymbol(high: string, low: string): boolean;
+}
+
+interface CreateParseMeta {
+  fn: string;
+  isFactory: boolean;
+  dependencies: string[];
+}
+
+function nodeType(node: { type: string }): string {
   return node.type;
 }
 
@@ -174,15 +220,15 @@ describe('createParse – factory metadata', () => {
   });
 
   it('createParse.fn is "parse"', () => {
-    expect((createParse as any).fn).toBe('parse');
+    expect((createParse as unknown as CreateParseMeta).fn).toBe('parse');
   });
 
   it('createParse.isFactory is true', () => {
-    expect((createParse as any).isFactory).toBe(true);
+    expect((createParse as unknown as CreateParseMeta).isFactory).toBe(true);
   });
 
   it('createParse.dependencies includes required deps', () => {
-    const deps: string[] = (createParse as any).dependencies;
+    const deps: string[] = (createParse as unknown as CreateParseMeta).dependencies;
     expect(deps).toContain('typed');
     expect(deps).toContain('numeric');
     expect(deps).toContain('ConstantNode');
@@ -199,37 +245,37 @@ describe('createParse – factory metadata', () => {
 
 describe('parse – numeric literals', () => {
   it('parses integer into ConstantNode', () => {
-    const node = parse('42') as any;
+    const node = parse('42') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(42);
   });
 
   it('parses zero', () => {
-    const node = parse('0') as any;
+    const node = parse('0') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(0);
   });
 
   it('parses a floating-point number', () => {
-    const node = parse('3.14') as any;
+    const node = parse('3.14') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBeCloseTo(3.14);
   });
 
   it('parses scientific notation 1.5e3', () => {
-    const node = parse('1.5e3') as any;
+    const node = parse('1.5e3') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(1500);
   });
 
   it('parses scientific notation with negative exponent 2.5e-2', () => {
-    const node = parse('2.5e-2') as any;
+    const node = parse('2.5e-2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBeCloseTo(0.025);
   });
 
   it('parses negative number -5 via unary minus', () => {
-    const node = parse('-5') as any;
+    const node = parse('-5') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('unaryMinus');
     expect(nodeType(node.args[0])).toBe('ConstantNode');
@@ -237,7 +283,7 @@ describe('parse – numeric literals', () => {
   });
 
   it('parses unary plus +3', () => {
-    const node = parse('+3') as any;
+    const node = parse('+3') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('unaryPlus');
   });
@@ -247,31 +293,31 @@ describe('parse – numeric literals', () => {
 
 describe('parse – boolean and special constants', () => {
   it('parses true into ConstantNode(true)', () => {
-    const node = parse('true') as any;
+    const node = parse('true') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(true);
   });
 
   it('parses false into ConstantNode(false)', () => {
-    const node = parse('false') as any;
+    const node = parse('false') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(false);
   });
 
   it('parses null into ConstantNode(null)', () => {
-    const node = parse('null') as any;
+    const node = parse('null') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBeNull();
   });
 
   it('parses undefined into ConstantNode(undefined)', () => {
-    const node = parse('undefined') as any;
+    const node = parse('undefined') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBeUndefined();
   });
 
   it('parses empty string into ConstantNode(undefined)', () => {
-    const node = parse('') as any;
+    const node = parse('') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBeUndefined();
   });
@@ -281,29 +327,29 @@ describe('parse – boolean and special constants', () => {
 
 describe('parse – string literals', () => {
   it('parses double-quoted string into ConstantNode', () => {
-    const node = parse('"hello"') as any;
+    const node = parse('"hello"') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe('hello');
   });
 
   it('parses single-quoted string into ConstantNode', () => {
-    const node = parse("'world'") as any;
+    const node = parse("'world'") as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe('world');
   });
 
   it('parses escaped newline in string', () => {
-    const node = parse('"line1\\nline2"') as any;
+    const node = parse('"line1\\nline2"') as unknown as ParsedNode;
     expect(node.value).toBe('line1\nline2');
   });
 
   it('parses escaped tab in string', () => {
-    const node = parse('"a\\tb"') as any;
+    const node = parse('"a\\tb"') as unknown as ParsedNode;
     expect(node.value).toBe('a\tb');
   });
 
   it('parses unicode escape sequence in string', () => {
-    const node = parse('"\\u0041"') as any;
+    const node = parse('"\\u0041"') as unknown as ParsedNode;
     expect(node.value).toBe('A');
   });
 });
@@ -312,25 +358,25 @@ describe('parse – string literals', () => {
 
 describe('parse – symbol nodes', () => {
   it('parses variable name x into SymbolNode', () => {
-    const node = parse('x') as any;
+    const node = parse('x') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('SymbolNode');
     expect(node.name).toBe('x');
   });
 
   it('parses underscore-prefixed variable', () => {
-    const node = parse('_myVar') as any;
+    const node = parse('_myVar') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('SymbolNode');
     expect(node.name).toBe('_myVar');
   });
 
   it('parses dollar-prefixed variable', () => {
-    const node = parse('$val') as any;
+    const node = parse('$val') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('SymbolNode');
     expect(node.name).toBe('$val');
   });
 
   it('parses multi-character identifier', () => {
-    const node = parse('alpha123') as any;
+    const node = parse('alpha123') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('SymbolNode');
     expect(node.name).toBe('alpha123');
   });
@@ -340,7 +386,7 @@ describe('parse – symbol nodes', () => {
 
 describe('parse – arithmetic operators', () => {
   it('parses addition "1 + 2"', () => {
-    const node = parse('1 + 2') as any;
+    const node = parse('1 + 2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.op).toBe('+');
     expect(node.fn).toBe('add');
@@ -349,7 +395,7 @@ describe('parse – arithmetic operators', () => {
   });
 
   it('parses subtraction "5 - 3"', () => {
-    const node = parse('5 - 3') as any;
+    const node = parse('5 - 3') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('subtract');
     expect(node.args[0].value).toBe(5);
@@ -357,19 +403,19 @@ describe('parse – arithmetic operators', () => {
   });
 
   it('parses multiplication "4 * 7"', () => {
-    const node = parse('4 * 7') as any;
+    const node = parse('4 * 7') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('multiply');
   });
 
   it('parses division "10 / 2"', () => {
-    const node = parse('10 / 2') as any;
+    const node = parse('10 / 2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('divide');
   });
 
   it('parses power "2 ^ 3"', () => {
-    const node = parse('2 ^ 3') as any;
+    const node = parse('2 ^ 3') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('pow');
     expect(node.args[0].value).toBe(2);
@@ -377,14 +423,14 @@ describe('parse – arithmetic operators', () => {
   });
 
   it('parses modulo "10 mod 3"', () => {
-    const node = parse('10 mod 3') as any;
+    const node = parse('10 mod 3') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('mod');
   });
 
   it('parses percent operator "50 %"', () => {
     // Unary %, which is parsed as 50 / 100
-    const node = parse('50%') as any;
+    const node = parse('50%') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('divide');
   });
@@ -394,7 +440,7 @@ describe('parse – arithmetic operators', () => {
 
 describe('parse – operator precedence', () => {
   it('"2 + 3 * 4" respects multiplication before addition', () => {
-    const node = parse('2 + 3 * 4') as any;
+    const node = parse('2 + 3 * 4') as unknown as ParsedNode;
     expect(node.fn).toBe('add');
     // Right operand must be the multiply node
     expect(node.args[1].fn).toBe('multiply');
@@ -402,20 +448,20 @@ describe('parse – operator precedence', () => {
 
   it('"2 ^ 3 ^ 2" is right-associative for power', () => {
     // Should parse as 2 ^ (3 ^ 2)
-    const node = parse('2 ^ 3 ^ 2') as any;
+    const node = parse('2 ^ 3 ^ 2') as unknown as ParsedNode;
     expect(node.fn).toBe('pow');
     expect(node.args[1].fn).toBe('pow');
   });
 
   it('unary minus binds tighter than addition: -3 + 4', () => {
-    const node = parse('-3 + 4') as any;
+    const node = parse('-3 + 4') as unknown as ParsedNode;
     expect(node.fn).toBe('add');
     expect(node.args[0].fn).toBe('unaryMinus');
   });
 
   it('"1 - 2 + 3" is left-associative', () => {
     // Should parse as (1 - 2) + 3
-    const node = parse('1 - 2 + 3') as any;
+    const node = parse('1 - 2 + 3') as unknown as ParsedNode;
     expect(node.fn).toBe('add');
     expect(node.args[0].fn).toBe('subtract');
   });
@@ -425,20 +471,20 @@ describe('parse – operator precedence', () => {
 
 describe('parse – parentheses', () => {
   it('produces a ParenthesisNode for "(1 + 2)"', () => {
-    const node = parse('(1 + 2)') as any;
+    const node = parse('(1 + 2)') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ParenthesisNode');
     expect(nodeType(node.content)).toBe('OperatorNode');
   });
 
   it('parentheses change precedence: "(2 + 3) * 4"', () => {
-    const node = parse('(2 + 3) * 4') as any;
+    const node = parse('(2 + 3) * 4') as unknown as ParsedNode;
     expect(node.fn).toBe('multiply');
     expect(nodeType(node.args[0])).toBe('ParenthesisNode');
     expect(node.args[0].content.fn).toBe('add');
   });
 
   it('nested parentheses', () => {
-    const node = parse('((7))') as any;
+    const node = parse('((7))') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ParenthesisNode');
     expect(nodeType(node.content)).toBe('ParenthesisNode');
   });
@@ -448,33 +494,33 @@ describe('parse – parentheses', () => {
 
 describe('parse – function calls', () => {
   it('parses "sin(x)" into a FunctionNode', () => {
-    const node = parse('sin(x)') as any;
+    const node = parse('sin(x)') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionNode');
-    expect(node.fn.name).toBe('sin');
+    expect((node.fn as { name: string }).name).toBe('sin');
     expect(node.args.length).toBe(1);
     expect(nodeType(node.args[0])).toBe('SymbolNode');
     expect(node.args[0].name).toBe('x');
   });
 
   it('parses zero-argument call "f()"', () => {
-    const node = parse('f()') as any;
+    const node = parse('f()') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionNode');
     expect(node.args.length).toBe(0);
   });
 
   it('parses multi-argument call "max(1, 2, 3)"', () => {
-    const node = parse('max(1, 2, 3)') as any;
+    const node = parse('max(1, 2, 3)') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionNode');
-    expect(node.fn.name).toBe('max');
+    expect((node.fn as { name: string }).name).toBe('max');
     expect(node.args.length).toBe(3);
   });
 
   it('parses nested function calls "sqrt(abs(x))"', () => {
-    const node = parse('sqrt(abs(x))') as any;
+    const node = parse('sqrt(abs(x))') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionNode');
-    expect(node.fn.name).toBe('sqrt');
+    expect((node.fn as { name: string }).name).toBe('sqrt');
     expect(nodeType(node.args[0])).toBe('FunctionNode');
-    expect(node.args[0].fn.name).toBe('abs');
+    expect((node.args[0].fn as { name: string }).name).toBe('abs');
   });
 });
 
@@ -482,17 +528,17 @@ describe('parse – function calls', () => {
 
 describe('parse – variable assignment', () => {
   it('parses "x = 5" into AssignmentNode', () => {
-    const node = parse('x = 5') as any;
+    const node = parse('x = 5') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('AssignmentNode');
     expect(node.object.name).toBe('x');
-    expect(node.value.value).toBe(5);
+    expect((node.value as ParsedNode).value).toBe(5);
   });
 
   it('parses "a = b + 1"', () => {
-    const node = parse('a = b + 1') as any;
+    const node = parse('a = b + 1') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('AssignmentNode');
     expect(node.object.name).toBe('a');
-    expect(nodeType(node.value)).toBe('OperatorNode');
+    expect(nodeType(node.value as ParsedNode)).toBe('OperatorNode');
   });
 });
 
@@ -500,7 +546,7 @@ describe('parse – variable assignment', () => {
 
 describe('parse – function assignment', () => {
   it('parses "f(x) = x^2" into FunctionAssignmentNode', () => {
-    const node = parse('f(x) = x^2') as any;
+    const node = parse('f(x) = x^2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionAssignmentNode');
     expect(node.name).toBe('f');
     expect(node.params).toEqual(['x']);
@@ -509,7 +555,7 @@ describe('parse – function assignment', () => {
   });
 
   it('parses multi-param function assignment "g(a, b) = a + b"', () => {
-    const node = parse('g(a, b) = a + b') as any;
+    const node = parse('g(a, b) = a + b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('FunctionAssignmentNode');
     expect(node.name).toBe('g');
     expect(node.params).toEqual(['a', 'b']);
@@ -520,7 +566,7 @@ describe('parse – function assignment', () => {
 
 describe('parse – block sequences', () => {
   it('parses "a; b" into BlockNode with two entries', () => {
-    const node = parse('a; b') as any;
+    const node = parse('a; b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('BlockNode');
     expect(node.blocks.length).toBe(2);
     expect(node.blocks[0].visible).toBe(false);
@@ -528,7 +574,7 @@ describe('parse – block sequences', () => {
   });
 
   it('parses newline-separated "a\\nb" into BlockNode', () => {
-    const node = parse('a\nb') as any;
+    const node = parse('a\nb') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('BlockNode');
     expect(node.blocks.length).toBe(2);
     // newline: both blocks visible
@@ -537,7 +583,7 @@ describe('parse – block sequences', () => {
   });
 
   it('parses three expressions separated by semicolons', () => {
-    const node = parse('a; b; c') as any;
+    const node = parse('a; b; c') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('BlockNode');
     expect(node.blocks.length).toBe(3);
   });
@@ -547,7 +593,7 @@ describe('parse – block sequences', () => {
 
 describe('parse – conditional operator', () => {
   it('parses "x > 0 ? 1 : -1" into ConditionalNode', () => {
-    const node = parse('x > 0 ? 1 : -1') as any;
+    const node = parse('x > 0 ? 1 : -1') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConditionalNode');
     expect(nodeType(node.condition)).toBe('OperatorNode');
     expect(node.condition.fn).toBe('larger');
@@ -556,7 +602,7 @@ describe('parse – conditional operator', () => {
   });
 
   it('parses nested ternary (right-associative)', () => {
-    const node = parse('a ? b : c ? d : e') as any;
+    const node = parse('a ? b : c ? d : e') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConditionalNode');
     // The false branch should be another ConditionalNode
     expect(nodeType(node.falseExpr)).toBe('ConditionalNode');
@@ -567,38 +613,38 @@ describe('parse – conditional operator', () => {
 
 describe('parse – comparison operators', () => {
   it('parses "a == b" with fn "equal"', () => {
-    const node = parse('a == b') as any;
+    const node = parse('a == b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('equal');
   });
 
   it('parses "a != b" with fn "unequal"', () => {
-    const node = parse('a != b') as any;
+    const node = parse('a != b') as unknown as ParsedNode;
     expect(node.fn).toBe('unequal');
   });
 
   it('parses "a < b" with fn "smaller"', () => {
-    const node = parse('a < b') as any;
+    const node = parse('a < b') as unknown as ParsedNode;
     expect(node.fn).toBe('smaller');
   });
 
   it('parses "a > b" with fn "larger"', () => {
-    const node = parse('a > b') as any;
+    const node = parse('a > b') as unknown as ParsedNode;
     expect(node.fn).toBe('larger');
   });
 
   it('parses "a <= b" with fn "smallerEq"', () => {
-    const node = parse('a <= b') as any;
+    const node = parse('a <= b') as unknown as ParsedNode;
     expect(node.fn).toBe('smallerEq');
   });
 
   it('parses "a >= b" with fn "largerEq"', () => {
-    const node = parse('a >= b') as any;
+    const node = parse('a >= b') as unknown as ParsedNode;
     expect(node.fn).toBe('largerEq');
   });
 
   it('parses chained comparison "1 < x < 10" into RelationalNode', () => {
-    const node = parse('1 < x < 10') as any;
+    const node = parse('1 < x < 10') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('RelationalNode');
     expect(node.conditionals).toEqual(['smaller', 'smaller']);
     expect(node.params.length).toBe(3);
@@ -609,26 +655,26 @@ describe('parse – comparison operators', () => {
 
 describe('parse – logical operators', () => {
   it('parses "a and b" into OperatorNode:and', () => {
-    const node = parse('a and b') as any;
+    const node = parse('a and b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('and');
     expect(node.args.length).toBe(2);
   });
 
   it('parses "a or b" into OperatorNode:or', () => {
-    const node = parse('a or b') as any;
+    const node = parse('a or b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('or');
   });
 
   it('parses "a xor b" into OperatorNode:xor', () => {
-    const node = parse('a xor b') as any;
+    const node = parse('a xor b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('xor');
   });
 
   it('parses "not a" into OperatorNode:not', () => {
-    const node = parse('not a') as any;
+    const node = parse('not a') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('not');
     expect(node.args.length).toBe(1);
@@ -639,31 +685,31 @@ describe('parse – logical operators', () => {
 
 describe('parse – bitwise operators', () => {
   it('parses "a & b" into OperatorNode:bitAnd', () => {
-    const node = parse('a & b') as any;
+    const node = parse('a & b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('bitAnd');
   });
 
   it('parses "a | b" into OperatorNode:bitOr', () => {
-    const node = parse('a | b') as any;
+    const node = parse('a | b') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('bitOr');
   });
 
   it('parses "~a" into OperatorNode:bitNot', () => {
-    const node = parse('~a') as any;
+    const node = parse('~a') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('bitNot');
   });
 
   it('parses "a << 2" into OperatorNode:leftShift', () => {
-    const node = parse('a << 2') as any;
+    const node = parse('a << 2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('leftShift');
   });
 
   it('parses "a >> 2" into OperatorNode:rightArithShift', () => {
-    const node = parse('a >> 2') as any;
+    const node = parse('a >> 2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('rightArithShift');
   });
@@ -673,14 +719,14 @@ describe('parse – bitwise operators', () => {
 
 describe('parse – range expressions', () => {
   it('parses "1:5" into RangeNode', () => {
-    const node = parse('1:5') as any;
+    const node = parse('1:5') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('RangeNode');
     expect(node.start.value).toBe(1);
     expect(node.end.value).toBe(5);
   });
 
   it('parses "1:2:10" (start:step:end) into RangeNode with step', () => {
-    const node = parse('1:2:10') as any;
+    const node = parse('1:2:10') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('RangeNode');
     expect(node.start.value).toBe(1);
     expect(node.step.value).toBe(2);
@@ -692,13 +738,13 @@ describe('parse – range expressions', () => {
 
 describe('parse – array literals', () => {
   it('parses empty array "[]" into ArrayNode', () => {
-    const node = parse('[]') as any;
+    const node = parse('[]') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ArrayNode');
     expect(node.items.length).toBe(0);
   });
 
   it('parses "[1, 2, 3]" into ArrayNode with 3 items', () => {
-    const node = parse('[1, 2, 3]') as any;
+    const node = parse('[1, 2, 3]') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ArrayNode');
     expect(node.items.length).toBe(3);
     expect(node.items[0].value).toBe(1);
@@ -706,7 +752,7 @@ describe('parse – array literals', () => {
   });
 
   it('parses 2D matrix "[1, 2; 3, 4]"', () => {
-    const node = parse('[1, 2; 3, 4]') as any;
+    const node = parse('[1, 2; 3, 4]') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ArrayNode');
     // Outer array has 2 rows
     expect(node.items.length).toBe(2);
@@ -719,7 +765,7 @@ describe('parse – array literals', () => {
 
 describe('parse – object literals', () => {
   it('parses "{a: 1, b: 2}" into ObjectNode', () => {
-    const node = parse('{a: 1, b: 2}') as any;
+    const node = parse('{a: 1, b: 2}') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ObjectNode');
     expect(Object.keys(node.properties)).toContain('a');
     expect(Object.keys(node.properties)).toContain('b');
@@ -728,7 +774,7 @@ describe('parse – object literals', () => {
   });
 
   it('parses object with string key', () => {
-    const node = parse('{"key": 42}') as any;
+    const node = parse('{"key": 42}') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ObjectNode');
     expect(node.properties['key'].value).toBe(42);
   });
@@ -738,19 +784,19 @@ describe('parse – object literals', () => {
 
 describe('parse – index access', () => {
   it('parses "a[1]" into AccessorNode', () => {
-    const node = parse('a[1]') as any;
+    const node = parse('a[1]') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('AccessorNode');
     expect(node.object.name).toBe('a');
   });
 
   it('parses dot access "obj.prop" into AccessorNode', () => {
-    const node = parse('obj.prop') as any;
+    const node = parse('obj.prop') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('AccessorNode');
     expect(node.object.name).toBe('obj');
   });
 
   it('parses chained access "a.b.c"', () => {
-    const node = parse('a.b.c') as any;
+    const node = parse('a.b.c') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('AccessorNode');
     // The innermost accessor wraps the outermost one
     expect(nodeType(node.object)).toBe('AccessorNode');
@@ -761,19 +807,19 @@ describe('parse – index access', () => {
 
 describe('parse – whitespace tolerance', () => {
   it('handles leading/trailing spaces', () => {
-    const node = parse('  42  ') as any;
+    const node = parse('  42  ') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ConstantNode');
     expect(node.value).toBe(42);
   });
 
   it('handles tabs around operator', () => {
-    const node = parse('1\t+\t2') as any;
+    const node = parse('1\t+\t2') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('add');
   });
 
   it('handles multiple spaces between tokens', () => {
-    const node = parse('x   *   y') as any;
+    const node = parse('x   *   y') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('OperatorNode');
     expect(node.fn).toBe('multiply');
   });
@@ -783,7 +829,7 @@ describe('parse – whitespace tolerance', () => {
 
 describe('parse – array of expressions', () => {
   it('parses an array of expression strings into an array of nodes', () => {
-    const nodes = parse(['1 + 2', 'x', 'sin(a)']) as any[];
+    const nodes = parse(['1 + 2', 'x', 'sin(a)']) as unknown as ParsedNode[];
     expect(Array.isArray(nodes)).toBe(true);
     expect(nodes.length).toBe(3);
     expect(nodeType(nodes[0])).toBe('OperatorNode');
@@ -832,55 +878,55 @@ describe('parse – error handling', () => {
 
 describe('parse – static helpers', () => {
   it('parse.isDigit identifies digits 0-9', () => {
-    expect((parse as any).isDigit('0')).toBe(true);
-    expect((parse as any).isDigit('9')).toBe(true);
-    expect((parse as any).isDigit('a')).toBe(false);
+    expect((parse as unknown as ParseStatics).isDigit('0')).toBe(true);
+    expect((parse as unknown as ParseStatics).isDigit('9')).toBe(true);
+    expect((parse as unknown as ParseStatics).isDigit('a')).toBe(false);
   });
 
   it('parse.isDigitDot identifies digits and dots', () => {
-    expect((parse as any).isDigitDot('5')).toBe(true);
-    expect((parse as any).isDigitDot('.')).toBe(true);
-    expect((parse as any).isDigitDot('x')).toBe(false);
+    expect((parse as unknown as ParseStatics).isDigitDot('5')).toBe(true);
+    expect((parse as unknown as ParseStatics).isDigitDot('.')).toBe(true);
+    expect((parse as unknown as ParseStatics).isDigitDot('x')).toBe(false);
   });
 
   it('parse.isWhitespace: space and tab are whitespace', () => {
-    expect((parse as any).isWhitespace(' ', 0)).toBe(true);
-    expect((parse as any).isWhitespace('\t', 0)).toBe(true);
+    expect((parse as unknown as ParseStatics).isWhitespace(' ', 0)).toBe(true);
+    expect((parse as unknown as ParseStatics).isWhitespace('\t', 0)).toBe(true);
   });
 
   it('parse.isWhitespace: newline at nesting 0 is NOT whitespace', () => {
-    expect((parse as any).isWhitespace('\n', 0)).toBe(false);
+    expect((parse as unknown as ParseStatics).isWhitespace('\n', 0)).toBe(false);
   });
 
   it('parse.isWhitespace: newline inside params (nesting>0) IS whitespace', () => {
-    expect((parse as any).isWhitespace('\n', 1)).toBe(true);
+    expect((parse as unknown as ParseStatics).isWhitespace('\n', 1)).toBe(true);
   });
 
   it('parse.isDecimalMark: dot before digit is decimal', () => {
-    expect((parse as any).isDecimalMark('.', '5')).toBe(true);
+    expect((parse as unknown as ParseStatics).isDecimalMark('.', '5')).toBe(true);
   });
 
   it('parse.isDecimalMark: dot before * / ^ is NOT decimal', () => {
-    expect((parse as any).isDecimalMark('.', '*')).toBe(false);
-    expect((parse as any).isDecimalMark('.', '/')).toBe(false);
-    expect((parse as any).isDecimalMark('.', '^')).toBe(false);
+    expect((parse as unknown as ParseStatics).isDecimalMark('.', '*')).toBe(false);
+    expect((parse as unknown as ParseStatics).isDecimalMark('.', '/')).toBe(false);
+    expect((parse as unknown as ParseStatics).isDecimalMark('.', '^')).toBe(false);
   });
 
   it('parse.isValidLatinOrGreek: letters, underscore, dollar', () => {
-    expect((parse as any).isValidLatinOrGreek('a')).toBe(true);
-    expect((parse as any).isValidLatinOrGreek('Z')).toBe(true);
-    expect((parse as any).isValidLatinOrGreek('_')).toBe(true);
-    expect((parse as any).isValidLatinOrGreek('$')).toBe(true);
-    expect((parse as any).isValidLatinOrGreek('1')).toBe(false);
-    expect((parse as any).isValidLatinOrGreek(' ')).toBe(false);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek('a')).toBe(true);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek('Z')).toBe(true);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek('_')).toBe(true);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek('$')).toBe(true);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek('1')).toBe(false);
+    expect((parse as unknown as ParseStatics).isValidLatinOrGreek(' ')).toBe(false);
   });
 
   it('parse.isAlpha: delegates to isValidLatinOrGreek for simple chars', () => {
-    expect((parse as any).isAlpha('x', '', '')).toBe(true);
-    expect((parse as any).isAlpha('1', '', '')).toBe(false);
+    expect((parse as unknown as ParseStatics).isAlpha('x', '', '')).toBe(true);
+    expect((parse as unknown as ParseStatics).isAlpha('1', '', '')).toBe(false);
   });
 
   it('parse.isValidMathSymbol: rejects non-surrogate characters', () => {
-    expect((parse as any).isValidMathSymbol('a', 'b')).toBe(false);
+    expect((parse as unknown as ParseStatics).isValidMathSymbol('a', 'b')).toBe(false);
   });
 });

@@ -67,7 +67,7 @@ describe('clone (object)', () => {
 
   it('throws for unknown types', () => {
     // A Symbol cannot be cloned
-    expect(() => clone(Symbol('x') as any)).toThrow();
+    expect(() => clone(Symbol('x'))).toThrow();
   });
 });
 
@@ -90,15 +90,15 @@ describe('mapObject', () => {
 // ---------------------------------------------------------------------------
 describe('extend', () => {
   it('copies own properties from b to a', () => {
-    const a = { x: 1 };
-    const result = extend(a as any, { y: 2, z: 3 } as any);
+    const a: Record<string, unknown> = { x: 1 };
+    const result: Record<string, unknown> = extend(a, { y: 2, z: 3 });
     expect(result).toEqual({ x: 1, y: 2, z: 3 });
     expect(result).toBe(a);
   });
 
   it('overwrites existing properties', () => {
-    const a: any = { x: 1, y: 10 };
-    extend(a, { y: 99 } as any);
+    const a: Record<string, unknown> = { x: 1, y: 10 };
+    extend(a, { y: 99 });
     expect(a.y).toBe(99);
   });
 });
@@ -108,41 +108,41 @@ describe('extend', () => {
 // ---------------------------------------------------------------------------
 describe('deepExtend', () => {
   it('merges nested plain objects', () => {
-    const a: any = { nested: { x: 1 } };
+    const a: Record<string, unknown> = { nested: { x: 1 } };
     deepExtend(a, { nested: { y: 2 } });
     expect(a.nested).toEqual({ x: 1, y: 2 });
   });
 
   it('overwrites non-object values', () => {
-    const a: any = { x: 1 };
+    const a: Record<string, unknown> = { x: 1 };
     deepExtend(a, { x: 99 });
     expect(a.x).toBe(99);
   });
 
   it('deep extends array values in b', () => {
-    const a: any = {};
+    const a: Record<string, unknown> = {};
     deepExtend(a, { arr: [1, 2] });
     expect(a).toEqual({ arr: [1, 2] });
   });
 
   it('deep extends array values over existing array values in a', () => {
-    const a: any = { arr: [1, 2] };
+    const a: Record<string, unknown> = { arr: [1, 2] };
     deepExtend(a, { arr: [3, 4, 5] });
     expect(a).toEqual({ arr: [3, 4, 5] });
   });
 
   it('deep extends arrays with nested objects', () => {
-    const a: any = { arr: [{ x: 1 }] };
+    const a: Record<string, unknown> = { arr: [{ x: 1 }] };
     deepExtend(a, { arr: [{ y: 2 }] });
     expect(a).toEqual({ arr: [{ x: 1, y: 2 }] });
   });
 
   it('throws when b itself is an array and a is not', () => {
-    expect(() => deepExtend({} as any, [1, 2] as any)).toThrow('Cannot extend an object with an array');
+    expect(() => deepExtend({}, [1, 2])).toThrow('Cannot extend an object with an array');
   });
 
   it('deep extends when both a and b are arrays', () => {
-    const a: any = [1, 2];
+    const a = [1, 2];
     deepExtend(a, [3, 4, 5]);
     expect(a).toEqual([3, 4, 5]);
   });
@@ -311,12 +311,12 @@ describe('get (object)', () => {
 
   it('retrieves a nested property via dot path', () => {
     const obj = { a: { b: { c: 42 } } };
-    expect(get(obj as any, 'a.b.c')).toBe(42);
+    expect(get(obj, 'a.b.c')).toBe(42);
   });
 
   it('retrieves a nested property via array path', () => {
     const obj = { a: { b: 99 } };
-    expect(get(obj as any, ['a', 'b'])).toBe(99);
+    expect(get(obj, ['a', 'b'])).toBe(99);
   });
 
   it('returns undefined for missing keys', () => {
@@ -329,21 +329,21 @@ describe('get (object)', () => {
 // ---------------------------------------------------------------------------
 describe('set (object)', () => {
   it('sets a top-level property', () => {
-    const obj: any = {};
+    const obj: Record<string, unknown> = {};
     set(obj, 'x', 42);
     expect(obj.x).toBe(42);
   });
 
   it('sets a nested property, creating intermediate objects', () => {
-    const obj: any = {};
+    const obj: Record<string, unknown> = {};
     set(obj, 'a.b.c', 99);
-    expect(obj.a.b.c).toBe(99);
+    expect((obj as { a: { b: { c: number } } }).a.b.c).toBe(99);
   });
 
   it('sets a property via array path', () => {
-    const obj: any = {};
+    const obj: Record<string, unknown> = {};
     set(obj, ['m', 'n'], 7);
-    expect(obj.m.n).toBe(7);
+    expect((obj as { m: { n: number } }).m.n).toBe(7);
   });
 });
 
@@ -353,17 +353,17 @@ describe('set (object)', () => {
 describe('pick', () => {
   it('picks the specified properties', () => {
     const obj = { a: 1, b: 2, c: 3 };
-    expect(pick(obj as any, ['a', 'c'])).toEqual({ a: 1, c: 3 });
+    expect(pick(obj, ['a', 'c'])).toEqual({ a: 1, c: 3 });
   });
 
   it('skips missing properties', () => {
     const obj = { a: 1 };
-    expect(pick(obj as any, ['a', 'z'])).toEqual({ a: 1 });
+    expect(pick(obj, ['a', 'z'])).toEqual({ a: 1 });
   });
 
   it('applies transform when provided', () => {
     const obj = { a: 5 };
-    const result = pick(obj as any, ['a'], (v) => (v as number) * 2);
+    const result = pick(obj, ['a'], (v) => (v as number) * 2);
     expect(result).toEqual({ a: 10 });
   });
 });
@@ -374,11 +374,11 @@ describe('pick', () => {
 describe('pickShallow', () => {
   it('picks top-level properties without deep traversal', () => {
     const obj = { a: 1, b: 2, c: 3 };
-    expect(pickShallow(obj as any, ['a', 'b'])).toEqual({ a: 1, b: 2 });
+    expect(pickShallow(obj, ['a', 'b'])).toEqual({ a: 1, b: 2 });
   });
 
   it('skips missing properties', () => {
     const obj = { a: 1 };
-    expect(pickShallow(obj as any, ['a', 'missing'])).toEqual({ a: 1 });
+    expect(pickShallow(obj, ['a', 'missing'])).toEqual({ a: 1 });
   });
 });

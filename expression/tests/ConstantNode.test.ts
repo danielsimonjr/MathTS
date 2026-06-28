@@ -3,9 +3,9 @@ import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathWithTransform: Record<string, any> = {};
+const mathWithTransform: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 
 // ── Tests ──────────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ describe('ConstantNode - construction & identity', () => {
   });
 
   it('static name is ConstantNode', () => {
-    expect((ConstantNode as any).name).toBe('ConstantNode');
+    expect((ConstantNode as unknown as { name: string }).name).toBe('ConstantNode');
   });
 });
 
@@ -78,7 +78,7 @@ describe('ConstantNode - clone & map', () => {
 
   it('forEach calls callback for no children', () => {
     const node = new ConstantNode(1);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(0);
   });
@@ -182,7 +182,7 @@ describe('ConstantNode - equals', () => {
 describe('ConstantNode - traverse', () => {
   it('traverse only visits the node itself (no children)', () => {
     const node = new ConstantNode(99);
-    const visited: any[] = [];
+    const visited: unknown[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(1);
     expect(visited[0]).toBe(node);

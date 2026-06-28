@@ -2,16 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createConditionalNode } from '../src/node/ConditionalNode.js';
+import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
-const mathWithTransform: Record<string, any> = {};
+const mathWithTransform: Record<string, unknown> = {};
 const Node = createNode({ mathWithTransform });
-const isBounded = (v: any): boolean => Number.isFinite(Number(v));
+const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ConditionalNode = createConditionalNode({ Node });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function makeConst(v: any) {
+function makeConst(v: unknown) {
   return new ConstantNode(v);
 }
 
@@ -41,23 +42,23 @@ describe('ConditionalNode - construction & identity', () => {
   });
 
   it('static name is ConditionalNode', () => {
-    expect((ConditionalNode as any).name).toBe('ConditionalNode');
+    expect((ConditionalNode as unknown as { name: string }).name).toBe('ConditionalNode');
   });
 
   it('throws when condition is not a Node', () => {
-    expect(() => new ConditionalNode(42 as any, makeConst(1), makeConst(2))).toThrow(
+    expect(() => new ConditionalNode(42 as unknown as MathNode, makeConst(1), makeConst(2))).toThrow(
       'Parameter condition must be a Node'
     );
   });
 
   it('throws when trueExpr is not a Node', () => {
-    expect(() => new ConditionalNode(makeConst(1), 'yes' as any, makeConst(2))).toThrow(
+    expect(() => new ConditionalNode(makeConst(1), 'yes' as unknown as MathNode, makeConst(2))).toThrow(
       'Parameter trueExpr must be a Node'
     );
   });
 
   it('throws when falseExpr is not a Node', () => {
-    expect(() => new ConditionalNode(makeConst(1), makeConst(2), null as any)).toThrow(
+    expect(() => new ConditionalNode(makeConst(1), makeConst(2), null as unknown as MathNode)).toThrow(
       'Parameter falseExpr must be a Node'
     );
   });
@@ -115,7 +116,7 @@ describe('ConditionalNode - forEach', () => {
     const yes = makeConst('yes');
     const no = makeConst('no');
     const node = new ConditionalNode(cond, yes, no);
-    const visited: { child: any; path: string }[] = [];
+    const visited: { child: MathNode; path: string }[] = [];
     node.forEach((child, path) => visited.push({ child, path }));
     expect(visited).toHaveLength(3);
     expect(visited[0].child).toBe(cond);
@@ -144,7 +145,7 @@ describe('ConditionalNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
-    expect(() => node.map(() => ({ notANode: true }) as any)).toThrow(
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );
   });
@@ -245,7 +246,7 @@ describe('ConditionalNode - traverse', () => {
     const yes = makeConst(2);
     const no = makeConst(3);
     const node = new ConditionalNode(cond, yes, no);
-    const visited: any[] = [];
+    const visited: MathNode[] = [];
     node.traverse((n) => visited.push(n));
     expect(visited).toHaveLength(4);
     expect(visited[0]).toBe(node);

@@ -5,7 +5,22 @@ import { createHelpClass } from '../src/Help.js';
 // createHelpClass needs only an `evaluate` function.
 // We provide a minimal mock that evaluates simple expressions.
 
-const _mockMathScope: Record<string, any> = {
+/** Structural type for the Help class returned by createHelpClass. */
+interface HelpInstance {
+  type: string;
+  isHelp: boolean;
+  doc: Record<string, unknown>;
+  toString(): string;
+  valueOf(): string;
+  toJSON(): Record<string, unknown>;
+}
+interface HelpConstructor {
+  (doc?: unknown): HelpInstance;
+  new (doc?: unknown): HelpInstance;
+  fromJSON(json: Record<string, unknown>): HelpInstance;
+}
+
+const _mockMathScope: Record<string, unknown> = {
   sin: Math.sin,
   cos: Math.cos,
   sqrt: Math.sqrt,
@@ -14,7 +29,7 @@ const _mockMathScope: Record<string, any> = {
 };
 
 // Simple mock evaluate: delegates to Function() for safety in tests
-function mockEvaluate(expr: string, _scope?: any): any {
+function mockEvaluate(expr: string, _scope?: Record<string, unknown>): unknown {
   if (expr === 'config()') return { precision: 14 };
   if (expr === '2 + 3') return 5;
   if (expr === 'sin(0)') return 0;
@@ -26,7 +41,7 @@ function mockEvaluate(expr: string, _scope?: any): any {
   return undefined;
 }
 
-const Help = createHelpClass({ evaluate: mockEvaluate }) as any;
+const Help = createHelpClass({ evaluate: mockEvaluate }) as unknown as HelpConstructor;
 
 // ─── Construction ─────────────────────────────────────────────────────────────
 
@@ -147,7 +162,7 @@ describe('Help - toString', () => {
       if (expr === '') return undefined;
       throw new Error('evaluation failed');
     };
-    const HelpWithThrow = createHelpClass({ evaluate: throwEvaluate }) as any;
+    const HelpWithThrow = createHelpClass({ evaluate: throwEvaluate }) as unknown as HelpConstructor;
     const h = new HelpWithThrow({ examples: ['bad_expr'] });
     // Should not throw, should include the error
     const str = h.toString();

@@ -10,7 +10,7 @@ import {
 // ─── Minimal node stubs ───────────────────────────────────────────────────────
 // These replicate just enough of the Node interface for the operator utilities.
 
-function opNode(fn: string, args: any[] = [], implicit = false) {
+function opNode(fn: string, args: unknown[] = [], implicit = false) {
   return {
     type: 'OperatorNode',
     isOperatorNode: true,
@@ -26,7 +26,7 @@ function opNode(fn: string, args: any[] = [], implicit = false) {
   };
 }
 
-function _constantNode(value: any) {
+function _constantNode(value: unknown) {
   return {
     type: 'ConstantNode',
     isConstantNode: true,
@@ -93,7 +93,7 @@ function conditionalNode() {
   };
 }
 
-function parenthesisNode(inner: any) {
+function parenthesisNode(inner: unknown) {
   return {
     type: 'ParenthesisNode',
     isParenthesisNode: true,
@@ -129,37 +129,37 @@ describe('operators - properties array', () => {
   it('contains an entry for OperatorNode:add with correct op', () => {
     const found = properties.find((group) => 'OperatorNode:add' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:add'].op).toBe('+');
+    expect(found!['OperatorNode:add'].op).toBe('+');
   });
 
   it('contains an entry for OperatorNode:multiply with correct op', () => {
     const found = properties.find((group) => 'OperatorNode:multiply' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:multiply'].op).toBe('*');
+    expect(found!['OperatorNode:multiply'].op).toBe('*');
   });
 
   it('contains an entry for OperatorNode:pow with correct op', () => {
     const found = properties.find((group) => 'OperatorNode:pow' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:pow'].op).toBe('^');
+    expect(found!['OperatorNode:pow'].op).toBe('^');
   });
 
   it('contains entry for OperatorNode:divide', () => {
     const found = properties.find((group) => 'OperatorNode:divide' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:divide'].op).toBe('/');
+    expect(found!['OperatorNode:divide'].op).toBe('/');
   });
 
   it('contains entry for OperatorNode:factorial', () => {
     const found = properties.find((group) => 'OperatorNode:factorial' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:factorial'].op).toBe('!');
+    expect(found!['OperatorNode:factorial'].op).toBe('!');
   });
 
   it('contains entry for OperatorNode:or with correct op', () => {
     const found = properties.find((group) => 'OperatorNode:or' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:or'].op).toBe('or');
+    expect(found!['OperatorNode:or'].op).toBe('or');
   });
 
   it('contains entry for RelationalNode', () => {
@@ -170,13 +170,13 @@ describe('operators - properties array', () => {
   it('contains entry for OperatorNode:mod', () => {
     const found = properties.find((group) => 'OperatorNode:mod' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:mod'].op).toBe('mod');
+    expect(found!['OperatorNode:mod'].op).toBe('mod');
   });
 
   it('contains entry for OperatorNode:unaryMinus', () => {
     const found = properties.find((group) => 'OperatorNode:unaryMinus' in group);
     expect(found).toBeDefined();
-    expect((found as any)['OperatorNode:unaryMinus'].op).toBe('-');
+    expect(found!['OperatorNode:unaryMinus'].op).toBe('-');
   });
 });
 
