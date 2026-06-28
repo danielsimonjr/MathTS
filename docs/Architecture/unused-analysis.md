@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-06-27
+**Generated**: 2026-06-28
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 471
+- **Potentially unused exports**: 483
 
 ## Potentially Unused Files
 
@@ -57,9 +57,12 @@ These exports are not imported by any other file in the codebase:
 
 ### `core/src/typed/mathts-typed.ts`
 
+- `MathTSTyped` (interface)
 - `TypeDef` (interface)
 - `ConversionDef` (interface)
 - `MathTSTypeDef` (interface)
+- `SignatureImpl` (type)
+- `SignatureRecord` (type)
 
 ### `core/src/types/bignumber.ts`
 
@@ -208,6 +211,11 @@ These exports are not imported by any other file in the codebase:
 - `EinsumSpec` (interface)
 - `NestedArray` (type)
 
+### `functions/src/algebra/simplify/util.ts`
+
+- `OpNodeLike` (interface)
+- `FuncNodeLike` (interface)
+
 ### `functions/src/algebra/solver/lsolveAll.ts`
 
 - `DenseMatrix` (interface)
@@ -279,10 +287,6 @@ These exports are not imported by any other file in the codebase:
 - `TypeDefinition` (type)
 - `createTyped` (constant)
 
-### `functions/src/error/ArgumentsError.ts`
-
-- `createArgumentsError` (function)
-
 ### `functions/src/error/IndexError.ts`
 
 - `createIndexError` (function)
@@ -304,7 +308,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `functions/src/matrix/utils/zerosAndOnes.ts`
 
-- `TypedFunction` (interface)
 - `BigNumberConstructor` (interface)
 - `BigNumber` (interface)
 - `MatrixConstructor` (interface)
@@ -397,7 +400,6 @@ These exports are not imported by any other file in the codebase:
 - `NestedArray` (type)
 - `MapCallback` (type)
 - `ForEachCallback` (type)
-- `ElementwiseOperation` (type)
 - `RangeForEachCallback` (type)
 - `RangeMapCallback` (type)
 
@@ -410,6 +412,16 @@ These exports are not imported by any other file in the codebase:
 ### `functions/src/type/unit/physicalConstants.ts`
 
 - `UnitInstance` (interface)
+
+### `functions/src/type/unit/unit-types.ts`
+
+- `ComplexConstructor` (interface)
+- `BigNumberConstructor` (interface)
+- `FractionConstructor` (interface)
+- `SubtractScalar` (interface)
+- `ComplexValue` (type)
+- `ScalarBinaryOp` (type)
+- `ScalarUnaryOp` (type)
 
 ### `functions/src/utils/array.ts`
 
@@ -469,7 +481,6 @@ These exports are not imported by any other file in the codebase:
 
 - `isPartitionedMap` (function)
 - `BigNumber` (interface)
-- `Complex` (interface)
 - `Fraction` (interface)
 - `Unit` (interface)
 - `DenseMatrix` (interface)
@@ -517,7 +528,6 @@ These exports are not imported by any other file in the codebase:
 - `roundDigits` (function)
 - `SplitValue` (interface)
 - `NumberTypeConfig` (interface)
-- `FormatOptions` (interface)
 - `NormalizedFormatOptions` (interface)
 
 ### `functions/src/utils/object.ts`
@@ -536,6 +546,7 @@ These exports are not imported by any other file in the codebase:
 
 - `stringify` (function)
 - `escape` (function)
+- `GeneralFormatOptions` (type)
 
 ### `functions/src/wasm/bitwise/wasm-bridge.ts`
 
@@ -614,7 +625,6 @@ These exports are not imported by any other file in the codebase:
 ### `expression/src/node/Node.ts`
 
 - `CompiledExpression` (interface)
-- `StringOptions` (interface)
 
 ### `expression/src/utils/array.ts`
 
@@ -744,8 +754,6 @@ These exports are not imported by any other file in the codebase:
 - `nearlyEqual` (function)
 - `copysign` (function)
 - `SplitValue` (interface)
-- `NumberTypeConfig` (interface)
-- `FormatOptions` (interface)
 - `NormalizedFormatOptions` (interface)
 - `sign` (constant)
 - `log2` (constant)
@@ -799,6 +807,25 @@ These exports are not imported by any other file in the codebase:
 ### `parallel/src/strategies/chunk.ts`
 
 - `memorySizeBytes` (function)
+
+### `workbook/src/doc.ts`
+
+- `DescribeDoc` (interface)
+
+### `workbook/src/edit.ts`
+
+- `RemoveResult` (interface)
+
+### `workbook/src/rpc.ts`
+
+- `JsonRpcRequest` (interface)
+- `JsonRpcResponse` (interface)
+- `JsonRpcEvent` (interface)
+- `HandleResult` (interface)
+
+### `workbook/src/session.ts`
+
+- `WorkbookEventLite` (interface)
 
 ### `workbook/src/types.ts`
 

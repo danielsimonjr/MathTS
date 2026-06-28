@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-06-27",
-    "totalFiles": 564,
+    "lastUpdated": "2026-06-28",
+    "totalFiles": 571,
     "totalModules": 69,
-    "totalExports": 3568
+    "totalExports": 3595
   },
   "entryPoints": [
     {
@@ -869,6 +869,7 @@
           "TypeRegistry"
         ],
         "interfaces": [
+          "MathTSTyped",
           "TypeDef",
           "ConversionDef",
           "MathTSTypeDef"
@@ -4163,6 +4164,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4188,6 +4196,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4213,6 +4228,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4250,6 +4272,13 @@
             "imports": [
               "createCsLu"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4530,15 +4559,17 @@
           {
             "file": "../../utils/node.js",
             "imports": [
-              "MathNode",
-              "FunctionNode",
-              "OperatorNode"
+              "MathNode"
             ],
             "typeOnly": true
           }
         ],
         "exports": [
           "createUtil"
+        ],
+        "interfaces": [
+          "OpNodeLike",
+          "FuncNodeLike"
         ],
         "constants": [
           "createUtil"
@@ -4561,7 +4592,10 @@
           {
             "file": "../../utils/node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "OperatorNode",
+              "FunctionNode",
+              "ParenthesisNode"
             ],
             "typeOnly": true
           },
@@ -4645,7 +4679,8 @@
               "ArrayNode",
               "AccessorNode",
               "IndexNode",
-              "ObjectNode"
+              "ObjectNode",
+              "FunctionNode"
             ],
             "typeOnly": true
           },
@@ -4713,12 +4748,14 @@
               "MathNode",
               "ConstantNode",
               "ArrayNode",
-              "AccessorNode",
-              "IndexNode",
-              "ObjectNode",
-              "OperatorNode",
-              "FunctionNode",
-              "ParenthesisNode"
+              "OperatorNode"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
             ],
             "typeOnly": true
           }
@@ -4771,6 +4808,13 @@
               "MathNode"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4802,6 +4846,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4874,6 +4925,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4905,6 +4963,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -5909,6 +5974,13 @@
             "typeOnly": true
           },
           {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "../type/matrix/utils/matAlgo02xDS0.js",
             "imports": [
               "createMatAlgo02xDS0"
@@ -5971,6 +6043,13 @@
             "typeOnly": true
           },
           {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "../type/matrix/utils/matAlgo02xDS0.js",
             "imports": [
               "createMatAlgo02xDS0"
@@ -6017,6 +6096,14 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction",
+              "ElementwiseOperation"
             ],
             "typeOnly": true
           },
@@ -6272,6 +6359,13 @@
             "typeOnly": true
           },
           {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "../core/config.js",
             "imports": [
               "ConfigOptions"
@@ -6309,12 +6403,6 @@
             ]
           },
           {
-            "file": "../error/ArgumentsError.js",
-            "imports": [
-              "ArgumentsError"
-            ]
-          },
-          {
             "file": "../wasm/WasmLoader.js",
             "imports": [
               "wasmLoader"
@@ -6343,6 +6431,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           },
@@ -6420,6 +6515,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           },
@@ -6714,6 +6816,13 @@
             "typeOnly": true
           },
           {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "../core/config.js",
             "imports": [
               "ConfigOptions"
@@ -6807,6 +6916,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           },
@@ -7139,6 +7255,13 @@
             "typeOnly": true
           },
           {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "../type/matrix/utils/matAlgo01xDSid.js",
             "imports": [
               "createMatAlgo01xDSid"
@@ -7436,6 +7559,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7542,6 +7672,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7602,6 +7739,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           }
@@ -7697,6 +7841,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7790,6 +7941,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7877,6 +8035,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7901,6 +8066,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           }
@@ -7931,6 +8103,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7957,6 +8136,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -7981,6 +8167,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           }
@@ -8013,6 +8206,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           }
@@ -8049,6 +8249,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -8079,6 +8286,16 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix",
+              "BigNumber",
+              "Fraction",
+              "Unit"
             ],
             "typeOnly": true
           }
@@ -8113,6 +8330,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -8143,6 +8367,15 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix",
+              "BigNumber",
+              "Fraction"
             ],
             "typeOnly": true
           }
@@ -8254,22 +8487,6 @@
       }
     },
     "functions/error": {
-      "functions/src/error/ArgumentsError.ts": {
-        "description": "Custom error type for wrong number of arguments",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "exports": [
-          "createArgumentsError",
-          "ArgumentsError"
-        ],
-        "classes": [
-          "ArgumentsError"
-        ],
-        "functions": [
-          "createArgumentsError"
-        ]
-      },
       "functions/src/error/DimensionError.ts": {
         "description": "Create a range error with the message:",
         "externalDependencies": [],
@@ -10700,6 +10917,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -10850,6 +11074,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -10904,6 +11135,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           }
@@ -10997,6 +11235,20 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -11021,6 +11273,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
             ],
             "typeOnly": true
           }
@@ -11049,6 +11308,20 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -11218,9 +11491,9 @@
             "file": "../types.js",
             "imports": [
               "TypedFunction",
-              "Matrix",
-              "MatrixConstructor"
-            ]
+              "Matrix"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -11246,6 +11519,13 @@
             "imports": [
               "isMatrix"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -11460,6 +11740,13 @@
             "imports": [
               "wasmLoader"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -11644,6 +11931,13 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12246,11 +12540,11 @@
             "imports": [
               "TypedFunction",
               "Matrix",
-              "MatrixConstructor",
               "BigNumber",
               "Complex",
               "Unit"
-            ]
+            ],
+            "typeOnly": true
           },
           {
             "file": "../core/config.js",
@@ -12320,6 +12614,13 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12501,6 +12802,20 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": [
+              "Index"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12614,13 +12929,19 @@
             "imports": [
               "resize"
             ]
+          },
+          {
+            "file": "../../core/function/typed.js",
+            "imports": [
+              "TypedFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
           "createZerosAndOnes"
         ],
         "interfaces": [
-          "TypedFunction",
           "BigNumberConstructor",
           "BigNumber",
           "MatrixConstructor",
@@ -13285,12 +13606,6 @@
             ]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": [
-              "wasmLoader"
-            ]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
@@ -13622,7 +13937,7 @@
         ]
       },
       "functions/src/probability/util/seededRNG.ts": {
-        "description": "@ts-ignore - seedrandom may not have type declarations",
+        "description": "Type for seedrandom function",
         "externalDependencies": [
           {
             "package": "seedrandom",
@@ -14440,6 +14755,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "IndexInterface"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -14480,6 +14802,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "IndexInterface"
             ],
             "typeOnly": true
           }
@@ -14556,6 +14885,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "IndexInterface"
             ],
             "typeOnly": true
           }
@@ -14734,6 +15070,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "IndexInterface"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -14773,6 +15116,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "IndexInterface"
             ],
             "typeOnly": true
           }
@@ -14914,6 +15264,13 @@
             "file": "../core/config.js",
             "imports": [
               "ConfigOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           }
@@ -15580,6 +15937,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -15638,6 +16002,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -15662,6 +16033,13 @@
             "file": "../core/function/typed.js",
             "imports": [
               "TypedFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
             ],
             "typeOnly": true
           }
@@ -15807,7 +16185,14 @@
       },
       "functions/src/trigonometry/acot.ts": {
         "description": "Calculate the inverse cotangent of a value, defined as `acot(x) = atan(1/x)`.",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -15853,7 +16238,14 @@
       },
       "functions/src/trigonometry/acoth.ts": {
         "description": "Calculate the inverse hyperbolic tangent of a value,",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -15906,7 +16298,14 @@
       },
       "functions/src/trigonometry/acsc.ts": {
         "description": "Calculate the inverse cosecant of a value, defined as `acsc(x) = asin(1/x)`.",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -15959,7 +16358,14 @@
       },
       "functions/src/trigonometry/acsch.ts": {
         "description": "Calculate the inverse hyperbolic cosecant of a value,",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -16005,7 +16411,14 @@
       },
       "functions/src/trigonometry/asec.ts": {
         "description": "Calculate the inverse secant of a value. Defined as `asec(x) = acos(1/x)`.",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -16058,7 +16471,14 @@
       },
       "functions/src/trigonometry/asech.ts": {
         "description": "Calculate the hyperbolic arcsecant of a value,",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "decimal.js",
+            "imports": [
+              "Decimal"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -16272,6 +16692,20 @@
             "file": "../type/matrix/types.js",
             "imports": [
               "AlgorithmFunction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/bignumber/BigNumber.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Matrix"
             ],
             "typeOnly": true
           }
@@ -18069,6 +18503,44 @@
           "createPlanckTemperature"
         ]
       },
+      "functions/src/type/unit/unit-types.ts": {
+        "description": "Shared TypeScript interfaces for the Unit factory (`Unit.ts`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": [
+              "Complex"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [],
+        "interfaces": [
+          "BigNumberValue",
+          "FractionValue",
+          "PrefixDef",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitJSON",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "SubtractScalar",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor"
+        ]
+      },
       "functions/src/type/unit/Unit.ts": {
         "description": "A unit can be constructed in the following ways:",
         "externalDependencies": [],
@@ -18118,6 +18590,33 @@
             "imports": [
               "warnOnce"
             ]
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": [
+              "BaseUnitDef",
+              "BigNumberValue",
+              "ConverterFn",
+              "CreateUnitDefObject",
+              "CreateUnitOptions",
+              "FractionValue",
+              "Numeric",
+              "ParseOptions",
+              "PrefixDef",
+              "PrefixTable",
+              "TypeConverters",
+              "UnitComponent",
+              "UnitConfig",
+              "UnitConstructor",
+              "UnitDef",
+              "UnitDependencies",
+              "UnitFormatOptions",
+              "UnitInstance",
+              "UnitJSON",
+              "UnitSystem",
+              "UnitSystemEntry"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -20380,7 +20879,7 @@
         ]
       },
       "functions/src/utils/bignumber/bitwise.ts": {
-        "description": "Bitwise and for Bignumbers",
+        "description": "Structural contract for the BigNumber values manipulated here. Captures the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -20429,7 +20928,7 @@
         ]
       },
       "functions/src/utils/bignumber/formatter.ts": {
-        "description": "Formats a BigNumber in a given base",
+        "description": "Structural contract for the BigNumber values handled by this formatter.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20444,7 +20943,8 @@
             "file": "../number.js",
             "imports": [
               "isInteger",
-              "normalizeFormatOptions"
+              "normalizeFormatOptions",
+              "FormatOptions"
             ]
           }
         ],
@@ -20563,6 +21063,13 @@
             "imports": [
               "nearlyEqual"
             ]
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "Complex"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -21469,6 +21976,13 @@
             "imports": [
               "factory"
             ]
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "BigNumber"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -21503,7 +22017,7 @@
         ]
       },
       "functions/src/utils/string.ts": {
-        "description": "Check if a text ends with a certain string.",
+        "description": "Formatting options accepted by the generic `format` helper. Extends the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -21518,7 +22032,8 @@
           {
             "file": "./number.js",
             "imports": [
-              "format"
+              "format",
+              "FormatOptions"
             ]
           },
           {
@@ -22165,6 +22680,13 @@
               "setSafeProperty",
               "getSafeMethod"
             ]
+          },
+          {
+            "file": "../node/Node.js",
+            "imports": [
+              "MathNode"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -22258,6 +22780,13 @@
             "imports": [
               "CompiledExpression",
               "Scope"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../node/Node.js",
+            "imports": [
+              "MathNode"
             ],
             "typeOnly": true
           }
@@ -22598,7 +23127,7 @@
         ]
       },
       "expression/src/operators.ts": {
-        "description": "Returns the first non-parenthesis internal node, but only",
+        "description": "Metadata for a single operator/node identifier in the precedence table.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -22623,6 +23152,9 @@
           "getAssociativity",
           "isAssociativeWith",
           "getOperator"
+        ],
+        "interfaces": [
+          "OperatorProperty"
         ],
         "functions": [
           "getPrecedence",
@@ -22667,6 +23199,13 @@
             "imports": [
               "safeNumberType"
             ]
+          },
+          {
+            "file": "./utils/number.js",
+            "imports": [
+              "NumberTypeConfig"
+            ],
+            "typeOnly": true
           },
           {
             "file": "./utils/object.js",
@@ -22770,7 +23309,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -22809,7 +23349,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -22869,7 +23410,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -22908,7 +23450,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -22950,7 +23493,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -22994,7 +23538,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -23057,7 +23602,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -23126,7 +23672,8 @@
           {
             "file": "./Node.js",
             "imports": [
-              "MathNode"
+              "MathNode",
+              "StringOptions"
             ],
             "typeOnly": true
           }
@@ -23674,7 +24221,7 @@
         ]
       },
       "expression/src/utils/bignumber/formatter.ts": {
-        "description": "Formats a BigNumber in a given base",
+        "description": "Constructor of a Decimal-like BigNumber value. Only the `new (value)` shape",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23689,7 +24236,8 @@
             "file": "../number.js",
             "imports": [
               "isInteger",
-              "normalizeFormatOptions"
+              "normalizeFormatOptions",
+              "FormatOptions"
             ]
           }
         ],
@@ -23950,7 +24498,7 @@
         ]
       },
       "expression/src/utils/latex.ts": {
-        "description": "@ts-ignore - escape-latex may not have type declarations",
+        "description": "@ts-expect-error - escape-latex may not have type declarations",
         "externalDependencies": [
           {
             "package": "escape-latex",
@@ -23966,6 +24514,13 @@
             "imports": [
               "hasOwnProperty"
             ]
+          },
+          {
+            "file": "../node/Node.js",
+            "imports": [
+              "MathNode"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -25641,6 +26196,102 @@
       }
     },
     "workbook": {
+      "workbook/src/contract.ts": {
+        "description": "Machine-contract constants shared by the CLI and the public API.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "SCHEMA_VERSION",
+          "VERSION",
+          "COMMAND_NAMES"
+        ],
+        "constants": [
+          "SCHEMA_VERSION",
+          "VERSION",
+          "COMMAND_NAMES"
+        ]
+      },
+      "workbook/src/doc.ts": {
+        "description": "The structured \"describe\" document model — shared by the `describe` CLI",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types",
+            "imports": [
+              "Workbook"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./graph",
+            "imports": [
+              "buildDependencyGraph",
+              "detectCycles"
+            ]
+          }
+        ],
+        "exports": [
+          "describeData"
+        ],
+        "interfaces": [
+          "DescribeDoc"
+        ],
+        "functions": [
+          "describeData"
+        ]
+      },
+      "workbook/src/edit.ts": {
+        "description": "Pure, immutable cell-mutation operations on a Workbook.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types",
+            "imports": [
+              "Workbook",
+              "Cell",
+              "CellType"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./parser",
+            "imports": [
+              "isValidIdentifier",
+              "SUPPORTED_CELL_TYPES"
+            ]
+          },
+          {
+            "file": "./graph",
+            "imports": [
+              "buildDependencyGraph",
+              "detectCycles"
+            ]
+          }
+        ],
+        "exports": [
+          "addCell",
+          "editCell",
+          "removeCell",
+          "moveCell",
+          "renameCell",
+          "setMetadata"
+        ],
+        "interfaces": [
+          "CellPosition",
+          "RemoveResult"
+        ],
+        "functions": [
+          "addCell",
+          "editCell",
+          "removeCell",
+          "moveCell",
+          "renameCell",
+          "setMetadata"
+        ]
+      },
       "workbook/src/executor.ts": {
         "description": "Workbook executor",
         "externalDependencies": [],
@@ -25663,7 +26314,8 @@
             "imports": [
               "buildDependencyGraph",
               "getDependents",
-              "detectCycles"
+              "detectCycles",
+              "getAncestors"
             ]
           },
           {
@@ -25697,6 +26349,27 @@
           "formatResult"
         ]
       },
+      "workbook/src/fs-atomic.ts": {
+        "description": "Atomic file write shared by the CLI write commands and the serve session.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "writeFileSync",
+              "renameSync",
+              "unlinkSync"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "writeFileAtomic"
+        ],
+        "functions": [
+          "writeFileAtomic"
+        ]
+      },
       "workbook/src/graph.ts": {
         "description": "Dependency graph management",
         "externalDependencies": [],
@@ -25716,6 +26389,7 @@
           "buildDependencyGraph",
           "topologicalSort",
           "getDependents",
+          "getAncestors",
           "toMermaid",
           "detectCycles"
         ],
@@ -25723,6 +26397,7 @@
           "buildDependencyGraph",
           "topologicalSort",
           "getDependents",
+          "getAncestors",
           "toMermaid",
           "detectCycles"
         ]
@@ -25749,6 +26424,7 @@
               "topologicalSort",
               "getDependents",
               "detectCycles",
+              "getAncestors",
               "toMermaid"
             ],
             "reExport": true
@@ -25767,6 +26443,40 @@
               "formatResult"
             ],
             "reExport": true
+          },
+          {
+            "file": "./edit",
+            "imports": [
+              "addCell",
+              "editCell",
+              "removeCell",
+              "moveCell",
+              "renameCell",
+              "setMetadata"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./contract",
+            "imports": [
+              "SCHEMA_VERSION",
+              "VERSION"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./session",
+            "imports": [
+              "Session"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./rpc",
+            "imports": [
+              "handleRequest"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -25778,11 +26488,21 @@
           "topologicalSort",
           "getDependents",
           "detectCycles",
+          "getAncestors",
           "toMermaid",
           "WorkbookExecutor",
           "createExecutor",
           "formatResult",
-          "VERSION"
+          "addCell",
+          "editCell",
+          "removeCell",
+          "moveCell",
+          "renameCell",
+          "setMetadata",
+          "SCHEMA_VERSION",
+          "VERSION",
+          "Session",
+          "handleRequest"
         ],
         "reExported": [
           "parseWorkbook",
@@ -25793,13 +26513,50 @@
           "topologicalSort",
           "getDependents",
           "detectCycles",
+          "getAncestors",
           "toMermaid",
           "WorkbookExecutor",
           "createExecutor",
-          "formatResult"
+          "formatResult",
+          "addCell",
+          "editCell",
+          "removeCell",
+          "moveCell",
+          "renameCell",
+          "setMetadata",
+          "SCHEMA_VERSION",
+          "VERSION",
+          "Session",
+          "handleRequest"
+        ]
+      },
+      "workbook/src/introspect.ts": {
+        "description": "Engine introspection shared by the CLI (`capabilities`, `functions`) and the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./contract",
+            "imports": [
+              "VERSION",
+              "SCHEMA_VERSION",
+              "COMMAND_NAMES"
+            ]
+          },
+          {
+            "file": "./parser",
+            "imports": [
+              "SUPPORTED_CELL_TYPES"
+            ]
+          }
         ],
-        "constants": [
-          "VERSION"
+        "exports": [
+          "listFunctions",
+          "capabilitiesInfo"
+        ],
+        "functions": [
+          "listFunctions",
+          "capabilitiesInfo"
         ]
       },
       "workbook/src/parser.ts": {
@@ -25836,14 +26593,141 @@
         "exports": [
           "detectCellType",
           "CELL_TYPE_KEYS",
+          "SUPPORTED_CELL_TYPES",
+          "isValidIdentifier",
           "parseWorkbook",
           "serializeWorkbook",
           "stripOutputs"
         ],
         "functions": [
+          "isValidIdentifier",
           "parseWorkbook",
           "serializeWorkbook",
           "stripOutputs"
+        ],
+        "constants": [
+          "SUPPORTED_CELL_TYPES"
+        ]
+      },
+      "workbook/src/rpc.ts": {
+        "description": "Pure JSON-RPC 2.0 router for `mtsw serve`. `handleRequest(session, request)`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./session",
+            "imports": [
+              "Session"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./introspect",
+            "imports": [
+              "capabilitiesInfo",
+              "listFunctions"
+            ]
+          },
+          {
+            "file": "./doc",
+            "imports": [
+              "describeData"
+            ]
+          },
+          {
+            "file": "./types",
+            "imports": [
+              "CellType"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./edit",
+            "imports": [
+              "CellPosition"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "CODE",
+          "handleRequest"
+        ],
+        "interfaces": [
+          "JsonRpcRequest",
+          "JsonRpcResponse",
+          "JsonRpcEvent",
+          "HandleResult"
+        ],
+        "functions": [
+          "handleRequest"
+        ]
+      },
+      "workbook/src/session.ts": {
+        "description": "In-memory editing/execution session for a single workbook — the stateful",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./types",
+            "imports": [
+              "Workbook",
+              "Cell",
+              "CellResult",
+              "RunResult",
+              "CellType"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./parser",
+            "imports": [
+              "parseWorkbook",
+              "serializeWorkbook"
+            ]
+          },
+          {
+            "file": "./executor",
+            "imports": [
+              "WorkbookExecutor"
+            ]
+          },
+          {
+            "file": "./graph",
+            "imports": [
+              "buildDependencyGraph",
+              "getAncestors",
+              "getDependents"
+            ]
+          },
+          {
+            "file": "./fs-atomic",
+            "imports": [
+              "writeFileAtomic"
+            ]
+          },
+          {
+            "file": "./edit",
+            "imports": [
+              "* as edit"
+            ]
+          }
+        ],
+        "exports": [
+          "Session"
+        ],
+        "classes": [
+          "Session"
+        ],
+        "interfaces": [
+          "WorkbookEventLite"
         ]
       },
       "workbook/src/types.ts": {
@@ -28490,7 +29374,6 @@
       {
         "name": "Functions/error",
         "files": [
-          "functions/src/error/ArgumentsError.ts",
           "functions/src/error/DimensionError.ts",
           "functions/src/error/IndexError.ts",
           "functions/src/error/MathjsError.ts"
@@ -28766,6 +29649,7 @@
           "functions/src/type/unit/function/splitUnit.ts",
           "functions/src/type/unit/function/unit.ts",
           "functions/src/type/unit/physicalConstants.ts",
+          "functions/src/type/unit/unit-types.ts",
           "functions/src/type/unit/Unit.ts"
         ]
       },
@@ -29052,11 +29936,18 @@
       {
         "name": "Workbook",
         "files": [
+          "workbook/src/contract.ts",
+          "workbook/src/doc.ts",
+          "workbook/src/edit.ts",
           "workbook/src/executor.ts",
           "workbook/src/formatter.ts",
+          "workbook/src/fs-atomic.ts",
           "workbook/src/graph.ts",
           "workbook/src/index.ts",
+          "workbook/src/introspect.ts",
           "workbook/src/parser.ts",
+          "workbook/src/rpc.ts",
+          "workbook/src/session.ts",
           "workbook/src/types.ts",
           "workbook/src/yaml-safe.ts"
         ]
@@ -29118,21 +30009,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 564,
+    "totalTypeScriptFiles": 571,
     "totalModules": 69,
-    "totalLinesOfCode": 148455,
-    "totalExports": 3568,
+    "totalLinesOfCode": 151116,
+    "totalExports": 3595,
     "totalClasses": 49,
-    "totalInterfaces": 315,
-    "totalFunctions": 1355,
-    "totalTypeGuards": 131,
+    "totalInterfaces": 347,
+    "totalFunctions": 1367,
+    "totalTypeGuards": 132,
     "totalEnums": 0,
-    "totalConstants": 1124,
-    "totalReExports": 1081,
-    "totalTypeOnlyImports": 356,
+    "totalConstants": 1127,
+    "totalReExports": 1092,
+    "totalTypeOnlyImports": 431,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 471
+    "unusedExportsCount": 483
   }
 }

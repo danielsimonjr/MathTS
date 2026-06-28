@@ -1,11 +1,11 @@
 {
-  "generated": "2026-06-27",
+  "generated": "2026-06-28",
   "total": 218,
   "acceleratedCount": 39,
   "parallelOnlyCount": 52,
   "jsOnlyCount": 127,
-  "bundledBackend": "assemblyscript",
-  "wasmEffectiveCount": 39,
+  "bundledBackend": "unknown",
+  "wasmEffectiveCount": 0,
   "jsFallbackCount": 0,
   "accelerated": [
     {
@@ -15,7 +15,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "airyAi",
@@ -24,7 +24,7 @@
       "dispatch": [
         "airyAiDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "airyBi",
@@ -33,7 +33,7 @@
       "dispatch": [
         "airyBiDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atan",
@@ -42,7 +42,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atanh",
@@ -51,7 +51,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ",
@@ -60,7 +60,7 @@
       "dispatch": [
         "besselJDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ0",
@@ -69,7 +69,7 @@
       "dispatch": [
         "besselJ0Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ1",
@@ -78,7 +78,7 @@
       "dispatch": [
         "besselJ1Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY",
@@ -87,7 +87,7 @@
       "dispatch": [
         "besselYDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY0",
@@ -96,7 +96,7 @@
       "dispatch": [
         "besselY0Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY1",
@@ -105,7 +105,7 @@
       "dispatch": [
         "besselY1Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRC",
@@ -114,7 +114,7 @@
       "dispatch": [
         "carlsonRCDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRD",
@@ -123,7 +123,7 @@
       "dispatch": [
         "carlsonRDDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRF",
@@ -132,7 +132,7 @@
       "dispatch": [
         "carlsonRFDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRJ",
@@ -141,7 +141,7 @@
       "dispatch": [
         "carlsonRJDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cos",
@@ -150,7 +150,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cot",
@@ -159,7 +159,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "csc",
@@ -168,7 +168,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticE",
@@ -177,7 +177,7 @@
       "dispatch": [
         "ellipticEDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticEIncomplete",
@@ -186,7 +186,7 @@
       "dispatch": [
         "ellipticEIncompleteDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticF",
@@ -195,7 +195,7 @@
       "dispatch": [
         "ellipticFIncompleteDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticK",
@@ -204,7 +204,7 @@
       "dispatch": [
         "ellipticKDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticPi",
@@ -213,7 +213,7 @@
       "dispatch": [
         "ellipticPiIncompleteDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "erfc",
@@ -222,7 +222,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "exp",
@@ -231,7 +231,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "expm1",
@@ -240,7 +240,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "lgamma",
@@ -249,7 +249,7 @@
       "dispatch": [
         "lgammaDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log",
@@ -258,7 +258,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log10",
@@ -267,7 +267,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log1p",
@@ -276,7 +276,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log2",
@@ -285,7 +285,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "noncentralChi2PDF",
@@ -294,7 +294,7 @@
       "dispatch": [
         "lgammaDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMedian",
@@ -303,7 +303,7 @@
       "dispatch": [
         "sortF64Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatQuantile",
@@ -312,7 +312,7 @@
       "dispatch": [
         "sortF64Dispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sec",
@@ -321,7 +321,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sin",
@@ -330,7 +330,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sinh",
@@ -339,7 +339,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "tan",
@@ -348,7 +348,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "tanh",
@@ -357,7 +357,7 @@
       "dispatch": [
         "elementwiseUnaryDispatch"
       ],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     }
   ],
   "parallelOnly": [
