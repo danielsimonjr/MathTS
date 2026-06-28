@@ -2077,7 +2077,7 @@ export function curl(exprs: string[], vars: string[], scope: Record<string, f64>
 
 function iltEvalAt(node: MathNode, sVar: string, val: f64): f64 | null {
   try {
-    const result = (node as any).evaluate({ [sVar]: val });
+    const result = node.evaluate({ [sVar]: val });
     if (typeof result === 'number' && isFinite(result)) return result;
     return null;
   } catch {
@@ -2331,7 +2331,7 @@ function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string
     simplified = node;
   }
 
-  const nodeAny = simplified as any;
+  const nodeAny = simplified;
 
   if (nodeAny.type === 'OperatorNode' && nodeAny.op === '+') {
     const left = _inverseLaplaceNode(nodeAny.args[0], sVar, tVar);
@@ -2457,7 +2457,6 @@ function _casSimplifyOne(expr: string): string {
   if (numericPattern.test(r)) {
     try {
       const jsExpr = r.replace(/\^/g, '**');
-      // eslint-disable-next-line no-new-func
       const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
       if (typeof val === 'number' && isFinite(val)) return String(val);
     } catch {
@@ -2876,7 +2875,6 @@ export function casSimplify(
       if (/^[\d\s+\-*/().^]+$/.test(r)) {
         try {
           const jsExpr = r.replace(/\^/g, '**');
-          // eslint-disable-next-line no-new-func
           const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
           if (typeof val === 'number' && isFinite(val as number)) return String(val);
         } catch {

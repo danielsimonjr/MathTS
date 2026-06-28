@@ -19,7 +19,26 @@
 import { hasOwnProperty } from '../utils/object.js';
 import { isConstantNode, isParenthesisNode, rule2Node } from '../utils/is.js';
 
-export const properties = [
+/** Precedence/associativity metadata for a single operator identifier. */
+interface OperatorProperty {
+  op?: string;
+  associativity?: string;
+  associativeWith?: string[];
+  latexParens?: boolean;
+  latexLeftParens?: boolean;
+  latexRightParens?: boolean;
+}
+
+/** Minimal node shape used for precedence/associativity computations. */
+interface OperatorNodeLike {
+  getContent(): OperatorNodeLike;
+  getIdentifier(): string;
+  args: OperatorNodeLike[];
+  implicit?: boolean;
+  content?: OperatorNodeLike;
+}
+
+export const properties: Array<Record<string, OperatorProperty>> = [
   {
     // assignment
     AssignmentNode: {},
@@ -40,7 +59,7 @@ export const properties = [
     'OperatorNode:or': {
       op: 'or',
       associativity: 'left',
-      associativeWith: [] as any[] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -48,7 +67,7 @@ export const properties = [
     'OperatorNode:xor': {
       op: 'xor',
       associativity: 'left',
-      associativeWith: [] as any[] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -56,7 +75,7 @@ export const properties = [
     'OperatorNode:and': {
       op: 'and',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -64,7 +83,7 @@ export const properties = [
     'OperatorNode:bitOr': {
       op: '|',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -72,7 +91,7 @@ export const properties = [
     'OperatorNode:bitXor': {
       op: '^|',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -80,7 +99,7 @@ export const properties = [
     'OperatorNode:bitAnd': {
       op: '&',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -88,36 +107,36 @@ export const properties = [
     'OperatorNode:equal': {
       op: '==',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:unequal': {
       op: '!=',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:smaller': {
       op: '<',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:larger': {
       op: '>',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:smallerEq': {
       op: '<=',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:largerEq': {
       op: '>=',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     RelationalNode: {
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -125,17 +144,17 @@ export const properties = [
     'OperatorNode:leftShift': {
       op: '<<',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:rightArithShift': {
       op: '>>',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:rightLogShift': {
       op: '>>>',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -143,7 +162,7 @@ export const properties = [
     'OperatorNode:to': {
       op: 'to',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -160,7 +179,7 @@ export const properties = [
     'OperatorNode:subtract': {
       op: '-',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -178,7 +197,7 @@ export const properties = [
     'OperatorNode:divide': {
       op: '/',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
       latexLeftParens: false,
       latexRightParens: false,
       latexParens: false,
@@ -199,12 +218,12 @@ export const properties = [
     'OperatorNode:dotDivide': {
       op: './',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
     'OperatorNode:mod': {
       op: 'mod',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -243,7 +262,7 @@ export const properties = [
     'OperatorNode:pow': {
       op: '^',
       associativity: 'right',
-      associativeWith: [] as any[],
+      associativeWith: [],
       latexRightParens: false,
       // the exponent doesn't need parentheses in
       // LaTeX because it's 2 dimensional
@@ -252,7 +271,7 @@ export const properties = [
     'OperatorNode:dotPow': {
       op: '.^',
       associativity: 'right',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -260,7 +279,7 @@ export const properties = [
     'OperatorNode:nullish': {
       op: '??',
       associativity: 'left',
-      associativeWith: [] as any[],
+      associativeWith: [],
     },
   },
   {
@@ -286,10 +305,13 @@ export const properties = [
  * @param {string} parenthesis
  * @return {Node}
  */
-function unwrapParen(_node: any, parenthesis: any) {
+function unwrapParen(
+  _node: OperatorNodeLike,
+  parenthesis: string | undefined
+): OperatorNodeLike {
   if (!parenthesis || parenthesis !== 'auto') return _node;
   let node = _node;
-  while (isParenthesisNode(node)) node = (node as any).content;
+  while (isParenthesisNode(node)) node = node.content as OperatorNodeLike;
   return node;
 }
 
@@ -304,7 +326,12 @@ function unwrapParen(_node: any, parenthesis: any) {
  * @param {Node} parent (for determining context for implicit multiplication)
  * @return {number | null}
  */
-export function getPrecedence(_node: any, parenthesis: any, implicit: any, parent: any) {
+export function getPrecedence(
+  _node: OperatorNodeLike,
+  parenthesis: string | undefined,
+  implicit?: string,
+  parent?: OperatorNodeLike
+): number | null {
   let node = _node;
   if (parenthesis !== 'keep') {
     // ParenthesisNodes are only ignored when not in 'keep' mode
@@ -320,18 +347,18 @@ export function getPrecedence(_node: any, parenthesis: any, implicit: any, paren
   }
   // Bump up precedence of implicit multiplication, except when preceded
   // by a "Rule 2" fraction ( [unaryOp]constant / constant )
-  if (identifier === 'OperatorNode:multiply' && (node as any).implicit && implicit !== 'show') {
+  if (identifier === 'OperatorNode:multiply' && node.implicit && implicit !== 'show') {
     const leftArg = unwrapParen(node.args[0], parenthesis);
     if (
       !(
         isConstantNode(leftArg) &&
         parent &&
         parent.getIdentifier() === 'OperatorNode:divide' &&
-        rule2Node(unwrapParen(parent.args[0], parenthesis))
+        rule2Node(unwrapParen(parent.args[0], parenthesis) as unknown as Parameters<typeof rule2Node>[0])
       ) &&
       !(
         leftArg.getIdentifier() === 'OperatorNode:divide' &&
-        rule2Node(unwrapParen(leftArg.args[0], parenthesis)) &&
+        rule2Node(unwrapParen(leftArg.args[0], parenthesis) as unknown as Parameters<typeof rule2Node>[0]) &&
         isConstantNode(unwrapParen(leftArg.args[1], parenthesis))
       )
     ) {
@@ -353,7 +380,10 @@ export function getPrecedence(_node: any, parenthesis: any, implicit: any, paren
  * @return {string|null}
  * @throws {Error}
  */
-export function getAssociativity(_node: any, parenthesis: any) {
+export function getAssociativity(
+  _node: OperatorNodeLike,
+  parenthesis: string | undefined
+): string | null {
   let node = _node;
   if (parenthesis !== 'keep') {
     // ParenthesisNodes are only ignored when not in 'keep' mode
@@ -365,7 +395,7 @@ export function getAssociativity(_node: any, parenthesis: any) {
     // node isn't in the list
     return null;
   }
-  const property = (properties[index] as any)[identifier];
+  const property = properties[index][identifier];
 
   if (hasOwnProperty(property, 'associativity')) {
     if (property.associativity === 'left') {
@@ -393,7 +423,11 @@ export function getAssociativity(_node: any, parenthesis: any) {
  * @param {string} parenthesis
  * @return {boolean | null}
  */
-export function isAssociativeWith(nodeA: any, nodeB: any, parenthesis: any) {
+export function isAssociativeWith(
+  nodeA: OperatorNodeLike,
+  nodeB: OperatorNodeLike,
+  parenthesis: string | undefined
+): boolean | null {
   // ParenthesisNodes are only ignored when not in 'keep' mode
   const a = parenthesis !== 'keep' ? nodeA.getContent() : nodeA;
   const b = parenthesis !== 'keep' ? nodeA.getContent() : nodeB;
@@ -404,7 +438,7 @@ export function isAssociativeWith(nodeA: any, nodeB: any, parenthesis: any) {
     // node isn't in the list
     return null;
   }
-  const property = (properties[index] as any)[identifierA];
+  const property = properties[index][identifierA];
 
   if (hasOwnProperty(property, 'associativeWith') && property.associativeWith instanceof Array) {
     for (let i = 0; i < property.associativeWith.length; i++) {
@@ -428,11 +462,11 @@ export function isAssociativeWith(nodeA: any, nodeB: any, parenthesis: any) {
  * @param {string} Function name
  * @return {string | null} Associated operator symbol, if any
  */
-export function getOperator(fn: any) {
+export function getOperator(fn: string): string | null {
   const identifier = 'OperatorNode:' + fn;
   for (const group of properties) {
     if (identifier in group) {
-      return (group as any)[identifier].op;
+      return group[identifier].op ?? null;
     }
   }
   return null;

@@ -854,7 +854,6 @@ export function reduce(expr: string): string {
   try {
     if (/^[\d\s+\-*/().^]+$/.test(trimmed)) {
       const jsExpr = trimmed.replace(/\^/g, '**');
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
       const result = Function('"use strict"; return (' + jsExpr + ')')();
       if (typeof result === 'number' && isFinite(result)) {
         return String(result);

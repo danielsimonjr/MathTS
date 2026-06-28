@@ -932,7 +932,7 @@ export class WasmLoader {
         totalMs: performance.now() - totalStart,
         fromCache: true,
       };
-      return instance.exports as any as WasmModule;
+      return instance.exports as unknown as WasmModule;
     }
 
     if (this.isNode) {
@@ -996,7 +996,7 @@ export class WasmLoader {
       fromCache: false,
     };
 
-    return instance.exports as any as WasmModule;
+    return instance.exports as unknown as WasmModule;
   }
 
   private async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
@@ -1018,7 +1018,7 @@ export class WasmLoader {
         totalMs: performance.now() - totalStart,
         fromCache: false,
       };
-      return result.instance.exports as any as WasmModule;
+      return result.instance.exports as unknown as WasmModule;
     }
 
     // Manifest-present (or older browser): fetch buffer, verify, compile.
@@ -1045,7 +1045,7 @@ export class WasmLoader {
       fromCache: false,
     };
 
-    return instance.exports as any as WasmModule;
+    return instance.exports as unknown as WasmModule;
   }
 
   private getImports(): WebAssembly.Imports {
@@ -1057,8 +1057,8 @@ export class WasmLoader {
         },
         seed: () => Date.now(),
       },
-      Math: Math as any,
-      Date: Date as any,
+      Math: Math as unknown as WebAssembly.ModuleImports,
+      Date: Date as unknown as WebAssembly.ModuleImports,
     };
   }
 
