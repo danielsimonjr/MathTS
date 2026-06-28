@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO: This file needs comprehensive TypeScript typing for constant node manipulation
 import {
   isFraction,
   isMatrix,
@@ -14,17 +12,66 @@ import { factory } from '../utils/factory.js';
 import { safeNumberType } from '../utils/number.js';
 import { createUtil } from './simplify/util.js';
 import { noBignumber, noFraction } from '../utils/noop.js';
-import type {
-  MathNode,
-  ConstantNode,
-  ArrayNode,
-  AccessorNode,
-  IndexNode,
-  ObjectNode,
-  OperatorNode,
-  FunctionNode,
-  ParenthesisNode,
-} from '../utils/node.js';
+import type { MathNode, ConstantNode, ArrayNode, OperatorNode } from '../utils/node.js';
+import type { TypedFunction } from '../core/function/typed.js';
+
+/** A Fraction-like runtime value (fraction.js) */
+interface FractionLike {
+  n: bigint;
+  d: bigint;
+  s: number;
+  valueOf(): number;
+}
+/** Simplification options */
+type Options = {
+  context?: Record<string, Record<string, boolean>>;
+  exactFractions?: boolean;
+  fractionsLimit?: number;
+};
+/** Builds a binary OperatorNode/FunctionNode from child nodes */
+type MakeNode = (args: MathNode[]) => MathNode;
+/** A math function in the transform set (callable with an optional rawArgs flag) */
+type TransformFn = ((...args: unknown[]) => unknown) & { rawArgs?: boolean };
+
+/** Minimal runtime shapes for node fields not exposed by the is.ts guard types */
+interface ConstNode extends MathNode {
+  value: unknown;
+}
+interface ArrNode extends MathNode {
+  items: MathNode[];
+}
+interface IdxNode extends MathNode {
+  dimensions: MathNode[];
+}
+interface ObjNode extends MathNode {
+  properties: Record<string, MathNode>;
+}
+interface OpNodeLike extends MathNode {
+  op: string;
+  fn: string;
+  args: MathNode[];
+  isUnary(): boolean;
+}
+interface FuncNodeLike extends MathNode {
+  name: string;
+  args: MathNode[];
+}
+interface ParenNodeLike extends MathNode {
+  content: MathNode;
+}
+interface AccNodeLike extends MathNode {
+  object: MathNode;
+  index: MathNode;
+}
+
+type OperatorNodeCtor = new (op: string, fn: string, args: MathNode[]) => OperatorNode;
+type FunctionNodeCtor = new (name: string, args: MathNode[]) => MathNode;
+type ConstantNodeCtor = new (value?: unknown) => ConstantNode;
+type ArrayNodeCtor = new (items: MathNode[]) => ArrayNode;
+type AccessorNodeCtor = new (object: MathNode, index: MathNode) => MathNode;
+type IndexNodeCtor = new (dimensions: MathNode[]) => MathNode;
+type ObjectNodeCtor = new (properties: Record<string, MathNode>) => MathNode;
+type SymbolNodeCtor = new (name: string) => MathNode;
 
 const name = 'simplifyConstant';
 const dependencies = [
@@ -67,22 +114,22 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     OperatorNode,
     SymbolNode,
   }: {
-    typed: any;
-    config: any;
-    mathWithTransform: any;
-    matrix: any;
+    typed: TypedFunction;
+    config: { number?: string };
+    mathWithTransform: Record<string, TransformFn>;
+    matrix: (data: unknown) => unknown;
     parse: (expr: string) => MathNode;
-    isBounded: any;
-    fraction: any;
-    bignumber: any;
-    AccessorNode: any;
-    ArrayNode: any;
-    ConstantNode: any;
-    FunctionNode: any;
-    IndexNode: any;
-    ObjectNode: any;
-    OperatorNode: any;
-    SymbolNode: any;
+    isBounded: (n: unknown) => boolean;
+    fraction?: (n: unknown) => FractionLike;
+    bignumber?: (v: unknown) => unknown;
+    AccessorNode: AccessorNodeCtor;
+    ArrayNode: ArrayNodeCtor;
+    ConstantNode: ConstantNodeCtor;
+    FunctionNode: FunctionNodeCtor;
+    IndexNode: IndexNodeCtor;
+    ObjectNode: ObjectNodeCtor;
+    OperatorNode: OperatorNodeCtor;
+    SymbolNode: SymbolNodeCtor;
   }) => {
     const { isCommutative, isAssociative, allChildren, createMakeNodeFunction } = createUtil({
       FunctionNode,
@@ -120,18 +167,18 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     const simplifyConstant = typed('simplifyConstant', {
       string: (expr: string) => _ensureNode(foldFraction(parse(expr), {})),
 
-      'string, Object': function (expr: string, options: any) {
+      'string, Object': function (expr: string, options: Options) {
         return _ensureNode(foldFraction(parse(expr), options));
       },
 
       Node: (node: MathNode) => _ensureNode(foldFraction(node, {})),
 
-      'Node, Object': function (expr: MathNode, options: any) {
+      'Node, Object': function (expr: MathNode, options: Options) {
         return _ensureNode(foldFraction(expr, options));
       },
-    });
+    }) as unknown as (expr: unknown, options?: Options) => MathNode;
 
-    function _removeFractions(thing: any): any {
+    function _removeFractions(thing: unknown): unknown {
       if (isFraction(thing)) {
         return thing.valueOf();
       }
@@ -144,7 +191,7 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       return thing;
     }
 
-    function _eval(fnname: string, args: any[], options: any): any {
+    function _eval(fnname: string, args: unknown[], options: Options): unknown {
       try {
         return mathWithTransform[fnname].apply(null, args);
       } catch {
@@ -162,7 +209,7 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
         return new ConstantNode(n);
       },
-      BigNumber: function (n: any): MathNode {
+      BigNumber: function (n: number): MathNode {
         if (n < 0) {
           return unaryMinusNode(new ConstantNode(-n));
         }
@@ -174,27 +221,27 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
         return new ConstantNode(n);
       },
-      Complex: function (_s: any): never {
+      Complex: function (_s: unknown): never {
         throw new Error('Cannot convert Complex number to Node');
       },
       string: function (s: string): ConstantNode {
         return new ConstantNode(s);
       },
-      Matrix: function (m: any): ArrayNode {
-        return new ArrayNode(m.valueOf().map((e: any) => _toNode(e)));
+      Matrix: function (m: { valueOf(): unknown[] }): ArrayNode {
+        return new ArrayNode(m.valueOf().map((e: unknown) => _toNode(e)));
       },
-    });
+    }) as unknown as (value: unknown) => MathNode;
 
-    function _ensureNode(thing: any): MathNode {
+    function _ensureNode(thing: unknown): MathNode {
       if (isNode(thing)) {
-        return thing;
+        return thing as unknown as MathNode;
       }
       return _toNode(thing);
     }
 
     // convert a number to a fraction only if it can be expressed exactly,
     // and when both numerator and denominator are small enough
-    function _exactFraction(n: any, options: any): any {
+    function _exactFraction(n: unknown, options: Options): unknown {
       const exactFractions = options && options.exactFractions !== false;
       if (exactFractions && isBounded(n) && fraction) {
         const f = fraction(n);
@@ -211,8 +258,8 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     // Convert numbers to a preferred number type in preference order: Fraction, number, Complex
     // BigNumbers are left alone
     const _toNumber = typed({
-      'string, Object': function (s: string, options: any): any {
-        const numericType = safeNumberType(s, config);
+      'string, Object': function (s: string, options: Options): unknown {
+        const numericType = safeNumberType(s, config as Parameters<typeof safeNumberType>[1]);
 
         if (numericType === 'BigNumber') {
           if (bignumber === undefined) {
@@ -232,45 +279,45 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
       },
 
-      'Fraction, Object': function (s: any, _options: any): any {
+      'Fraction, Object': function (s: FractionLike, _options: Options): unknown {
         return s;
       }, // we don't need options here
 
-      'BigNumber, Object': function (s: any, _options: any): any {
+      'BigNumber, Object': function (s: unknown, _options: Options): unknown {
         return s;
       }, // we don't need options here
 
-      'number, Object': function (s: number, options: any): any {
+      'number, Object': function (s: number, options: Options): unknown {
         return _exactFraction(s, options);
       },
 
-      'bigint, Object': function (s: bigint, _options: any): bigint {
+      'bigint, Object': function (s: bigint, _options: Options): bigint {
         return s;
       },
 
-      'Complex, Object': function (s: any, options: any): any {
+      'Complex, Object': function (s: { re: number; im: number }, options: Options): unknown {
         if (s.im !== 0) {
           return s;
         }
         return _exactFraction(s.re, options);
       },
 
-      'Matrix, Object': function (s: any, options: any): any {
+      'Matrix, Object': function (s: { valueOf(): unknown }, options: Options): unknown {
         return matrix(_exactFraction(s.valueOf(), options));
       },
 
-      'Array, Object': function (s: any[], options: any): any {
+      'Array, Object': function (s: unknown[], options: Options): unknown {
         return s.map((item) => _exactFraction(item, options));
       },
-    });
+    }) as unknown as (value: unknown, options: Options) => unknown;
 
     function unaryMinusNode(n: MathNode): OperatorNode {
       return new OperatorNode('-', 'unaryMinus', [n]);
     }
 
-    function _fractionToNode(f: any): MathNode {
+    function _fractionToNode(f: FractionLike): MathNode {
       // note: we convert away from bigint values, because bigint values gives issues with divisions: 1n/2n=0n and not 0.5
-      const fromBigInt = (value: bigint): any =>
+      const fromBigInt = (value: bigint): unknown =>
         config.number === 'BigNumber' && bignumber ? bignumber(value) : Number(value);
 
       // Convert sign to BigInt to avoid "Cannot mix BigInt and other types" error
@@ -287,13 +334,13 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     }
 
     /* Handles constant indexing of ArrayNodes, matrices, and ObjectNodes */
-    function _foldAccessor(obj: any, index: any, options: any): MathNode {
+    function _foldAccessor(obj: unknown, index: unknown, options: Options): MathNode {
       if (!isIndexNode(index)) {
         // don't know what to do with that...
         return new AccessorNode(_ensureNode(obj), _ensureNode(index));
       }
       if (isArrayNode(obj) || isMatrix(obj)) {
-        const remainingDims = Array.from(index.dimensions);
+        const remainingDims = Array.from((index as unknown as IdxNode).dimensions);
         /* We will resolve constant indices one at a time, looking
          * just in the first or second dimensions because (a) arrays
          * of more than two dimensions are likely rare, and (b) pulling
@@ -301,13 +348,13 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
          * The price is that we miss simplifying [..3d array][x,y,1]
          */
         while (remainingDims.length > 0) {
-          if (isConstantNode(remainingDims[0]) && typeof remainingDims[0].value !== 'string') {
-            const first = _toNumber(remainingDims.shift()!.value, options);
+          if (isConstantNode(remainingDims[0]) && typeof (remainingDims[0] as unknown as ConstNode).value !== 'string') {
+            const first = _toNumber((remainingDims.shift()! as unknown as ConstNode).value, options) as number;
             if (isArrayNode(obj)) {
-              obj = obj.items[first - 1];
+              obj = (obj as unknown as ArrNode).items[first - 1];
             } else {
               // matrix
-              obj = obj.valueOf()[first - 1];
+              obj = (obj as { valueOf(): unknown[] }).valueOf()[first - 1];
               if (obj instanceof Array) {
                 obj = matrix(obj);
               }
@@ -315,16 +362,16 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           } else if (
             remainingDims.length > 1 &&
             isConstantNode(remainingDims[1]) &&
-            typeof remainingDims[1].value !== 'string'
+            typeof (remainingDims[1] as unknown as ConstNode).value !== 'string'
           ) {
-            const second = _toNumber(remainingDims[1].value, options);
-            const tryItems: any[] = [];
-            const fromItems = isArrayNode(obj) ? obj.items : obj.valueOf();
+            const second = _toNumber((remainingDims[1] as unknown as ConstNode).value, options) as number;
+            const tryItems: MathNode[] = [];
+            const fromItems = isArrayNode(obj) ? (obj as unknown as ArrNode).items : (obj as { valueOf(): unknown[] }).valueOf();
             for (const item of fromItems) {
               if (isArrayNode(item)) {
-                tryItems.push(item.items[second - 1]);
+                tryItems.push((item as unknown as ArrNode).items[second - 1]);
               } else if (isMatrix(obj)) {
-                tryItems.push(item[second - 1]);
+                tryItems.push((item as unknown[])[second - 1] as MathNode);
               } else {
                 break;
               }
@@ -346,31 +393,31 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
             break;
           }
         }
-        if (remainingDims.length === index.dimensions.length) {
+        if (remainingDims.length === (index as unknown as IdxNode).dimensions.length) {
           /* No successful constant indexing */
-          return new AccessorNode(_ensureNode(obj), index);
+          return new AccessorNode(_ensureNode(obj), index as unknown as MathNode);
         }
         if (remainingDims.length > 0) {
           /* Indexed some but not all dimensions */
           index = new IndexNode(remainingDims);
-          return new AccessorNode(_ensureNode(obj), index);
+          return new AccessorNode(_ensureNode(obj), index as unknown as MathNode);
         }
         /* All dimensions were constant, access completely resolved */
-        return obj;
+        return obj as MathNode;
       }
       if (
         isObjectNode(obj) &&
-        index.dimensions.length === 1 &&
-        isConstantNode(index.dimensions[0])
+        (index as unknown as IdxNode).dimensions.length === 1 &&
+        isConstantNode((index as unknown as IdxNode).dimensions[0])
       ) {
-        const key = index.dimensions[0].value;
-        if (key in obj.properties) {
-          return obj.properties[key];
+        const key = ((index as unknown as IdxNode).dimensions[0] as unknown as ConstNode).value as string;
+        if (key in (obj as unknown as ObjNode).properties) {
+          return (obj as unknown as ObjNode).properties[key];
         }
         return new ConstantNode(); // undefined
       }
       /* Don't know how to index this sort of obj, at least not with this index */
-      return new AccessorNode(_ensureNode(obj), index);
+      return new AccessorNode(_ensureNode(obj), index as unknown as MathNode);
     }
 
     /*
@@ -383,13 +430,13 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
      * if args.length is 1, returns args[0]
      * @return - Either a Node representing a binary expression or Fraction
      */
-    function foldOp(fn: string, args: any[], makeNode: any, options: any): any {
+    function foldOp(fn: string, args: unknown[], makeNode: MakeNode, options: Options): unknown {
       const first = args.shift();
 
       // In the following reduction, sofar always has one of the three following
       // forms: [NODE], [CONSTANT], or [NODE, CONSTANT]
       const reduction = args.reduce(
-        (sofar: any[], next: any) => {
+        (sofar: unknown[], next: unknown) => {
           if (!isNode(next)) {
             const last = sofar.pop();
 
@@ -409,7 +456,7 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           // Encountered a Node, or failed folding --
           // collapse everything so far into a single tree:
           sofar.push(_ensureNode(sofar.pop()));
-          const newtree = sofar.length === 1 ? sofar[0] : makeNode(sofar);
+          const newtree = sofar.length === 1 ? (sofar[0] as MathNode) : makeNode(sofar as MathNode[]);
           return [makeNode([newtree, _ensureNode(next)])];
         },
         [first]
@@ -419,130 +466,85 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         return reduction[0];
       }
       // Might end up with a tree and a constant at the end:
-      return makeNode([reduction[0], _toNode(reduction[1])]);
+      return makeNode([reduction[0] as MathNode, _toNode(reduction[1])]);
     }
 
     // destroys the original node and returns a folded one
-    function foldFraction(node: MathNode, options: any): any {
+    function foldFraction(node: MathNode, options: Options): unknown {
       switch (node.type) {
         case 'SymbolNode':
           return node;
         case 'ConstantNode':
-          switch (typeof (node as ConstantNode).value) {
+          switch (typeof (node as unknown as ConstNode).value) {
             case 'number':
-              return _toNumber((node as ConstantNode).value, options);
+              return _toNumber((node as unknown as ConstNode).value, options);
             case 'bigint':
-              return _toNumber((node as ConstantNode).value, options);
+              return _toNumber((node as unknown as ConstNode).value, options);
             case 'string':
-              return (node as ConstantNode).value;
+              return (node as unknown as ConstNode).value;
             default:
-              if (!isNaN((node as ConstantNode).value))
-                return _toNumber((node as ConstantNode).value, options);
+              if (!isNaN((node as unknown as ConstNode).value))
+                return _toNumber((node as unknown as ConstNode).value, options);
           }
           return node;
         case 'FunctionNode':
           if (
-            mathWithTransform[(node as FunctionNode).name] &&
-            mathWithTransform[(node as FunctionNode).name].rawArgs
+            mathWithTransform[(node as unknown as FuncNodeLike).name] &&
+            mathWithTransform[(node as unknown as FuncNodeLike).name].rawArgs
           ) {
             return node;
           }
           {
             // Process operators as OperatorNode
             const operatorFunctions = ['add', 'multiply'];
-            if (!operatorFunctions.includes((node as FunctionNode).name)) {
-              const args = (node as FunctionNode).args.map((arg: MathNode) =>
+            if (!operatorFunctions.includes((node as unknown as FuncNodeLike).name)) {
+              const args = (node as unknown as FuncNodeLike).args.map((arg: MathNode) =>
                 foldFraction(arg, options)
               );
 
               // If all args are numbers
               if (!args.some(isNode)) {
                 try {
-                  return _eval((node as FunctionNode).name, args, options);
-                } catch {}
+                  return _eval((node as unknown as FuncNodeLike).name, args, options);
+                } catch {
+                  // evaluation failed; fall back to building a symbolic node below
+                }
               }
 
               // Size of a matrix does not depend on entries
               if (
-                (node as FunctionNode).name === 'size' &&
+                (node as unknown as FuncNodeLike).name === 'size' &&
                 args.length === 1 &&
                 isArrayNode(args[0])
               ) {
                 const sz: number[] = [];
-                let section = args[0];
+                let section: MathNode = args[0] as unknown as MathNode;
                 while (isArrayNode(section)) {
-                  sz.push(section.items.length);
-                  section = section.items[0];
+                  sz.push((section as unknown as ArrNode).items.length);
+                  section = (section as unknown as ArrNode).items[0];
                 }
                 return matrix(sz);
               }
 
               // Convert all args to nodes and construct a symbolic function call
-              return new FunctionNode((node as FunctionNode).name, args.map(_ensureNode));
-            } else {
-              // treat as operator
+              return new FunctionNode((node as unknown as FuncNodeLike).name, args.map(_ensureNode));
             }
+            // operator function (add/multiply): fold like an OperatorNode
+            return _foldOperatorNode(node, options);
           }
-        /* falls through */
-        case 'OperatorNode': {
-          const fn = (node as OperatorNode).fn.toString();
-          let args: any[];
-          let res: any;
-          const makeNode = createMakeNodeFunction(node as any);
-          if (isOperatorNode(node) && node.isUnary()) {
-            args = [foldFraction(node.args[0], options)];
-            if (!isNode(args[0])) {
-              res = _eval(fn, args, options);
-            } else {
-              res = makeNode(args);
-            }
-          } else if (isAssociative(node, options.context)) {
-            args = allChildren(node as any, options.context);
-            args = args.map((arg: MathNode) => foldFraction(arg, options));
-
-            if (isCommutative(fn, options.context)) {
-              // commutative binary operator
-              const consts: any[] = [];
-              const vars: any[] = [];
-
-              for (let i = 0; i < args.length; i++) {
-                if (!isNode(args[i])) {
-                  consts.push(args[i]);
-                } else {
-                  vars.push(args[i]);
-                }
-              }
-
-              if (consts.length > 1) {
-                res = foldOp(fn, consts, makeNode, options);
-                vars.unshift(res);
-                res = foldOp(fn, vars, makeNode, options);
-              } else {
-                // we won't change the children order since it's not neccessary
-                res = foldOp(fn, args, makeNode, options);
-              }
-            } else {
-              // non-commutative binary operator
-              res = foldOp(fn, args, makeNode, options);
-            }
-          } else {
-            // non-associative binary operator
-            args = (node as OperatorNode).args.map((arg: MathNode) => foldFraction(arg, options));
-            res = foldOp(fn, args, makeNode, options);
-          }
-          return res;
-        }
+        case 'OperatorNode':
+          return _foldOperatorNode(node, options);
         case 'ParenthesisNode':
           // remove the uneccessary parenthesis
-          return foldFraction((node as ParenthesisNode).content, options);
+          return foldFraction((node as unknown as ParenNodeLike).content, options);
         case 'AccessorNode':
           return _foldAccessor(
-            foldFraction((node as AccessorNode).object, options),
-            foldFraction((node as AccessorNode).index, options),
+            foldFraction((node as unknown as AccNodeLike).object, options),
+            foldFraction((node as unknown as AccNodeLike).index, options),
             options
           );
         case 'ArrayNode': {
-          const foldItems = (node as ArrayNode).items.map((item: MathNode) =>
+          const foldItems = (node as unknown as ArrNode).items.map((item: MathNode) =>
             foldFraction(item, options)
           );
           if (foldItems.some(isNode)) {
@@ -553,13 +555,13 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
         case 'IndexNode': {
           return new IndexNode(
-            (node as IndexNode).dimensions.map((n: MathNode) => simplifyConstant(n, options))
+            (node as unknown as IdxNode).dimensions.map((n: MathNode) => simplifyConstant(n, options))
           );
         }
         case 'ObjectNode': {
           const foldProps: Record<string, MathNode> = {};
-          for (const prop in (node as ObjectNode).properties) {
-            foldProps[prop] = simplifyConstant((node as ObjectNode).properties[prop], options);
+          for (const prop in (node as unknown as ObjNode).properties) {
+            foldProps[prop] = simplifyConstant((node as unknown as ObjNode).properties[prop], options);
           }
           return new ObjectNode(foldProps);
         }
@@ -576,6 +578,61 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         default:
           throw new Error(`Unimplemented node type in simplifyConstant: ${node.type}`);
       }
+    }
+
+    // Fold an OperatorNode (or an add/multiply FunctionNode treated as an operator)
+    function _foldOperatorNode(node: MathNode, options: Options): unknown {
+      const fn = (node as unknown as OpNodeLike).fn.toString();
+      let args: unknown[];
+      let res: unknown;
+      const makeNode = createMakeNodeFunction(
+        node as unknown as Parameters<typeof createMakeNodeFunction>[0]
+      );
+      if (isOperatorNode(node) && (node as unknown as OpNodeLike).isUnary()) {
+        args = [foldFraction((node as unknown as OpNodeLike).args[0], options)];
+        if (!isNode(args[0])) {
+          res = _eval(fn, args, options);
+        } else {
+          res = makeNode(args as MathNode[]);
+        }
+      } else if (isAssociative(node, options.context)) {
+        args = allChildren(
+          node as MathNode & { args?: MathNode[]; op?: string },
+          options.context as Record<string, Record<string, boolean>>
+        );
+        args = args.map((arg) => foldFraction(arg as MathNode, options));
+
+        if (isCommutative(fn, options.context)) {
+          // commutative binary operator
+          const consts: unknown[] = [];
+          const vars: unknown[] = [];
+
+          for (let i = 0; i < args.length; i++) {
+            if (!isNode(args[i])) {
+              consts.push(args[i]);
+            } else {
+              vars.push(args[i]);
+            }
+          }
+
+          if (consts.length > 1) {
+            res = foldOp(fn, consts, makeNode, options);
+            vars.unshift(res);
+            res = foldOp(fn, vars, makeNode, options);
+          } else {
+            // we won't change the children order since it's not neccessary
+            res = foldOp(fn, args, makeNode, options);
+          }
+        } else {
+          // non-commutative binary operator
+          res = foldOp(fn, args, makeNode, options);
+        }
+      } else {
+        // non-associative binary operator
+        args = (node as unknown as OpNodeLike).args.map((arg: MathNode) => foldFraction(arg, options));
+        res = foldOp(fn, args, makeNode, options);
+      }
+      return res;
     }
 
     return simplifyConstant;

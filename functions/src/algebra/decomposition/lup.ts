@@ -88,7 +88,6 @@ interface SparseMatrixConstructor {
 }
 
 interface Spa {
-  new (): Spa;
   set(i: number, value: unknown): void;
   get(i: number): unknown;
   accumulate(i: number, value: unknown): void;
