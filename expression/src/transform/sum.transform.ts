@@ -3,15 +3,15 @@ import { errorTransform } from './utils/errorTransform.js';
 import { createSum } from '../../function/statistics/sum.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  config: any;
-  add: (...args: any[]) => any;
-  numeric: (...args: any[]) => any;
+  config: Record<string, unknown>;
+  add: (...args: unknown[]) => unknown;
+  numeric: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -31,7 +31,7 @@ export const createSumTransform = /* #__PURE__ */ factory(
     const sum = createSum({ typed, config, add, numeric });
 
     return typed(name, {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {

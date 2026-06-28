@@ -3,15 +3,15 @@ import { factory } from '../utils/factory.js';
 import { createColumn } from '../../function/matrix/column.js';
 import { isNumber } from '../utils/is.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  Index: any;
-  matrix: (...args: any[]) => any;
-  range: (...args: any[]) => any;
+  Index: new (...args: unknown[]) => unknown;
+  matrix: (...args: unknown[]) => unknown;
+  range: (...args: unknown[]) => unknown;
 }
 
 const name = 'column';
@@ -32,7 +32,7 @@ export const createColumnTransform = /* #__PURE__ */ factory(
 
     // @see: comment of column itself
     return typed('column', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         // change last argument from zero-based to one-based
         const lastIndex = args.length - 1;
         const last = args[lastIndex];

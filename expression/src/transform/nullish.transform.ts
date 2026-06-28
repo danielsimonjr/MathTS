@@ -2,8 +2,8 @@ import { createNullish } from '../../function/logical/nullish.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -11,20 +11,20 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  size: (...args: any[]) => any;
-  flatten: (...args: any[]) => any;
-  deepEqual: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  size: (...args: unknown[]) => unknown;
+  flatten: (...args: unknown[]) => unknown;
+  deepEqual: (...args: unknown[]) => unknown;
 }
 
 const name = 'nullish';
@@ -36,7 +36,7 @@ export const createNullishTransform = /* #__PURE__ */ factory(
   ({ typed, matrix, size, flatten, deepEqual }: Dependencies) => {
     const nullish = createNullish({ typed, matrix, size, flatten, deepEqual });
 
-    function nullishTransform(args: Node[], math: any, scope: any): any {
+    function nullishTransform(args: Node[], math: unknown, scope: unknown): unknown {
       const left = args[0].compile().evaluate(scope);
 
       // If left is not a collection and not nullish, short-circuit and return it

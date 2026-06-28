@@ -3,8 +3,8 @@ import { createStd } from '../../function/statistics/std.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
@@ -31,7 +31,7 @@ export const createStdTransform = /* #__PURE__ */ factory(
     const std = createStd({ typed, map, sqrt, variance });
 
     return typed('std', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {

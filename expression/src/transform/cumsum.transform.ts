@@ -3,14 +3,14 @@ import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { createCumSum } from '../../function/statistics/cumsum.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  add: (...args: any[]) => any;
-  unaryPlus: (...args: any[]) => any;
+  add: (...args: unknown[]) => unknown;
+  unaryPlus: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -30,14 +30,14 @@ export const createCumSumTransform = /* #__PURE__ */ factory(
     const cumsum = createCumSum({ typed, add, unaryPlus });
 
     return typed(name, {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         // change last argument dim from one-based to zero-based
         if (args.length === 2 && isCollection(args[0])) {
           const dim = args[1];
           if (isNumber(dim)) {
             args[1] = dim - 1;
           } else if (isBigNumber(dim)) {
-            args[1] = (dim as any).minus(1);
+            args[1] = (dim as { minus(n: number): unknown }).minus(1);
           }
         }
 

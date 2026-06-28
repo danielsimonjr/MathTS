@@ -3,16 +3,16 @@ import { errorTransform } from './utils/errorTransform.js';
 import { createDiff } from '../../function/matrix/diff.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  subtract: (...args: any[]) => any;
-  number: (...args: any[]) => any;
-  bignumber: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  subtract: (...args: unknown[]) => unknown;
+  number: (...args: unknown[]) => unknown;
+  bignumber: (...args: unknown[]) => unknown;
 }
 
 const name = 'diff';
@@ -31,7 +31,7 @@ export const createDiffTransform = /* #__PURE__ */ factory(
      * This transform creates a range which includes the end value
      */
     return typed(name, {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {

@@ -4,8 +4,8 @@ import { createMap } from '../../function/matrix/map.js';
 import { compileInlineExpression } from './utils/compileInlineExpression.js';
 import { createTransformCallback } from './utils/transformCallback.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -13,11 +13,11 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
@@ -41,7 +41,7 @@ export const createMapTransform = /* #__PURE__ */ factory(
     const map = createMap({ typed });
     const transformCallback = createTransformCallback({ typed });
 
-    function mapTransform(args: Node[], math: any, scope: any): any {
+    function mapTransform(args: Node[], math: unknown, scope: unknown): unknown {
       if (args.length === 0) {
         return map();
       }
@@ -51,7 +51,7 @@ export const createMapTransform = /* #__PURE__ */ factory(
       }
       const N = args.length - 1;
       let X = args.slice(0, N);
-      let callback: any = args[N];
+      let callback: unknown = args[N];
       X = X.map((arg) => _compileAndEvaluate(arg, scope));
 
       if (callback) {
@@ -65,7 +65,7 @@ export const createMapTransform = /* #__PURE__ */ factory(
       }
       return map(...X, transformCallback(callback, N));
 
-      function _compileAndEvaluate(arg: Node, scope: any): any {
+      function _compileAndEvaluate(arg: Node, scope: unknown): unknown {
         return arg.compile().evaluate(scope);
       }
     }

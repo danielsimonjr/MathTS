@@ -2,14 +2,14 @@ import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { createSubset } from '../../function/matrix/subset.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  zeros: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  zeros: (...args: unknown[]) => unknown;
   add: TypedFunction;
 }
 
@@ -29,7 +29,7 @@ export const createSubsetTransform = /* #__PURE__ */ factory(
      * This transform creates a range which includes the end value
      */
     return typed('subset', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         try {
           return subset(...args);
         } catch (err) {

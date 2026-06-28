@@ -2,24 +2,24 @@ import { factory } from '../utils/factory.js';
 import { createQuantileSeq } from '../../function/statistics/quantileSeq.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  bignumber: (...args: any[]) => any;
-  add: (...args: any[]) => any;
-  subtract: (...args: any[]) => any;
-  divide: (...args: any[]) => any;
-  multiply: (...args: any[]) => any;
-  partitionSelect: (...args: any[]) => any;
-  compare: (...args: any[]) => any;
-  isInteger: (x: any) => boolean;
-  smaller: (...args: any[]) => any;
-  smallerEq: (...args: any[]) => any;
-  larger: (...args: any[]) => any;
-  mapSlices: (...args: any[]) => any;
+  bignumber: (...args: unknown[]) => unknown;
+  add: (...args: unknown[]) => unknown;
+  subtract: (...args: unknown[]) => unknown;
+  divide: (...args: unknown[]) => unknown;
+  multiply: (...args: unknown[]) => unknown;
+  partitionSelect: (...args: unknown[]) => unknown;
+  compare: (...args: unknown[]) => unknown;
+  isInteger: (x: unknown) => boolean;
+  smaller: (...args: unknown[]) => unknown;
+  smallerEq: (...args: unknown[]) => unknown;
+  larger: (...args: unknown[]) => unknown;
+  mapSlices: (...args: unknown[]) => unknown;
 }
 
 const name = 'quantileSeq';
@@ -82,28 +82,28 @@ export const createQuantileSeqTransform = /* #__PURE__ */ factory(
 
     return typed('quantileSeq', {
       'Array | Matrix, number | BigNumber': quantileSeq,
-      'Array | Matrix, number | BigNumber, number': (arr: any, prob: any, dim: number) =>
+      'Array | Matrix, number | BigNumber, number': (arr: unknown, prob: unknown, dim: number) =>
         quantileSeq(arr, prob, dimToZeroBase(dim)),
       'Array | Matrix, number | BigNumber, boolean': quantileSeq,
       'Array | Matrix, number | BigNumber, boolean, number': (
-        arr: any,
-        prob: any,
+        arr: unknown,
+        prob: unknown,
         sorted: boolean,
         dim: number
       ) => quantileSeq(arr, prob, sorted, dimToZeroBase(dim)),
       'Array | Matrix, Array | Matrix': quantileSeq,
-      'Array | Matrix, Array | Matrix, number': (data: any, prob: any, dim: number) =>
+      'Array | Matrix, Array | Matrix, number': (data: unknown, prob: unknown, dim: number) =>
         quantileSeq(data, prob, dimToZeroBase(dim)),
       'Array | Matrix, Array | Matrix, boolean': quantileSeq,
       'Array | Matrix, Array | Matrix, boolean, number': (
-        data: any,
-        prob: any,
+        data: unknown,
+        prob: unknown,
         sorted: boolean,
         dim: number
       ) => quantileSeq(data, prob, sorted, dimToZeroBase(dim)),
     });
 
-    function dimToZeroBase(dim: number): any {
+    function dimToZeroBase(dim: number): unknown {
       // TODO: find a better way, maybe lastDimToZeroBase could apply to more cases.
       return lastDimToZeroBase([[], dim])[1];
     }

@@ -3,8 +3,8 @@ import { errorTransform } from './utils/errorTransform.js';
 import { createVariance } from '../../function/statistics/variance.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
@@ -14,7 +14,7 @@ interface Dependencies {
   multiply: TypedFunction;
   divide: TypedFunction;
   mapSlices: TypedFunction;
-  isNaN: (x: any) => boolean;
+  isNaN: (x: unknown) => boolean;
 }
 
 const name = 'variance';
@@ -42,7 +42,7 @@ export const createVarianceTransform = /* #__PURE__ */ factory(
     });
 
     return typed(name, {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {

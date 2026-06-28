@@ -2,8 +2,8 @@ import { createBitOr } from '../../function/bitwise/bitOr.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -11,20 +11,20 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  equalScalar: (...args: any[]) => any;
-  DenseMatrix: any;
-  concat: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  equalScalar: (...args: unknown[]) => unknown;
+  DenseMatrix: new (...args: unknown[]) => unknown;
+  concat: (...args: unknown[]) => unknown;
 }
 
 const name = 'bitOr';
@@ -36,7 +36,7 @@ export const createBitOrTransform = /* #__PURE__ */ factory(
   ({ typed, matrix, equalScalar, DenseMatrix, concat }: Dependencies) => {
     const bitOr = createBitOr({ typed, matrix, equalScalar, DenseMatrix, concat });
 
-    function bitOrTransform(args: Node[], math: any, scope: any): any {
+    function bitOrTransform(args: Node[], math: unknown, scope: unknown): unknown {
       const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1)) {
         if (isNaN(condition1)) {

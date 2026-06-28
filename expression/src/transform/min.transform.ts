@@ -3,16 +3,16 @@ import { errorTransform } from './utils/errorTransform.js';
 import { createMin } from '../../function/statistics/min.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  config: any;
-  numeric: (...args: any[]) => any;
-  smaller: (...args: any[]) => any;
-  isNaN: (x: any) => boolean;
+  config: Record<string, unknown>;
+  numeric: (...args: unknown[]) => unknown;
+  smaller: (...args: unknown[]) => unknown;
+  isNaN: (x: unknown) => boolean;
 }
 
 const name = 'min';
@@ -32,7 +32,7 @@ export const createMinTransform = /* #__PURE__ */ factory(
      * from one-based to zero based
      */
     return typed('min', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {

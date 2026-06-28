@@ -1,23 +1,23 @@
 import { factory } from '../utils/factory.js';
 import { createRange } from '../../function/matrix/range.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  config: any;
-  matrix?: (...args: any[]) => any;
-  bignumber?: (...args: any[]) => any;
+  config: Record<string, unknown>;
+  matrix?: (...args: unknown[]) => unknown;
+  bignumber?: (...args: unknown[]) => unknown;
   equal: TypedFunction;
   smaller: TypedFunction;
   smallerEq: TypedFunction;
   larger: TypedFunction;
   largerEq: TypedFunction;
   add: TypedFunction;
-  isZero: (x: any) => boolean;
-  isPositive: (x: any) => boolean;
+  isZero: (x: unknown) => boolean;
+  isPositive: (x: unknown) => boolean;
 }
 
 const name = 'range';
@@ -75,7 +75,7 @@ export const createRangeTransform = /* #__PURE__ */ factory(
      * This transform creates a range which includes the end value
      */
     return typed('range', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         const lastIndex = args.length - 1;
         const last = args[lastIndex];
         if (typeof last !== 'boolean') {

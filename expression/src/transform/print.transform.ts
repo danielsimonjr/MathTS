@@ -2,15 +2,15 @@ import { createPrint } from '../../function/string/print.js';
 import { factory } from '../utils/factory.js';
 import { printTemplate } from '../utils/print.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  zeros: (...args: any[]) => any;
-  add: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  zeros: (...args: unknown[]) => unknown;
+  add: (...args: unknown[]) => unknown;
 }
 
 const name = 'print';
@@ -22,13 +22,13 @@ export const createPrintTransform = /* #__PURE__ */ factory(
   ({ typed, matrix, zeros, add }: Dependencies) => {
     const print = createPrint({ typed, matrix, zeros, add });
     return typed(name, {
-      'string, Object | Array': function (template: string, values: any): string {
+      'string, Object | Array': function (template: string, values: unknown): string {
         return print(_convertTemplateToZeroBasedIndex(template), values);
       },
       'string, Object | Array, number | Object': function (
         template: string,
-        values: any,
-        options: any
+        values: unknown,
+        options: unknown
       ): string {
         return print(_convertTemplateToZeroBasedIndex(template), values, options);
       },
@@ -38,7 +38,7 @@ export const createPrintTransform = /* #__PURE__ */ factory(
       return template.replace(printTemplate, (x: string) => {
         const parts = x.slice(1).split('.');
         const result = parts.map(function (part) {
-          if (!isNaN(part as any) && part.length > 0) {
+          if (!isNaN(Number(part)) && part.length > 0) {
             return parseInt(part) - 1;
           } else {
             return part;

@@ -4,8 +4,8 @@ import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
 import { compileInlineExpression } from './utils/compileInlineExpression.js';
 import { createTransformCallback } from './utils/transformCallback.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -13,11 +13,11 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
@@ -39,7 +39,7 @@ export const createFilterTransform = /* #__PURE__ */ factory(
      * This transform adds support for equations as test function for math.filter,
      * so you can do something like 'filter([3, -2, 5], x > 0)'.
      */
-    function filterTransform(args: Node[], math: any, scope: any): any {
+    function filterTransform(args: Node[], math: unknown, scope: unknown): unknown {
       const filter = createFilter({ typed });
       const transformCallback = createTransformCallback({ typed });
 
@@ -53,7 +53,7 @@ export const createFilterTransform = /* #__PURE__ */ factory(
       }
 
       const N = args.length - 1;
-      let callback: any = args[N];
+      let callback: unknown = args[N];
 
       if (x) {
         x = _compileAndEvaluate(x, scope);
@@ -73,7 +73,7 @@ export const createFilterTransform = /* #__PURE__ */ factory(
     }
     filterTransform.rawArgs = true;
 
-    function _compileAndEvaluate(arg: Node, scope: any): any {
+    function _compileAndEvaluate(arg: Node, scope: unknown): unknown {
       return arg.compile().evaluate(scope);
     }
 

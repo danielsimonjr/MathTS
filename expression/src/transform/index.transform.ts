@@ -2,13 +2,13 @@ import { isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange } from '../
 import { factory } from '../utils/factory.js';
 
 interface IndexClass {
-  new (...args: any[]): any;
-  apply(instance: any, args: any[]): void;
+  new (...args: unknown[]): unknown;
+  apply(instance: unknown, args: unknown[]): void;
 }
 
 interface Dependencies {
   Index: IndexClass;
-  getMatrixDataType: (matrix: any) => string;
+  getMatrixDataType: (matrix: unknown) => string;
 }
 
 const name = 'index';
@@ -24,8 +24,8 @@ export const createIndexTransform = /* #__PURE__ */ factory(
      *
      * This transform creates a one-based index instead of a zero-based index
      */
-    return function indexTransform(...args: any[]): any {
-      const transformedArgs: any[] = [];
+    return function indexTransform(...args: unknown[]): unknown {
+      const transformedArgs: unknown[] = [];
       for (let i = 0, ii = args.length; i < ii; i++) {
         let arg = args[i];
 
@@ -33,20 +33,22 @@ export const createIndexTransform = /* #__PURE__ */ factory(
         if (isRange(arg)) {
           arg.start--;
           arg.end -= arg.step > 0 ? 0 : 2;
-        } else if (arg && arg.isSet === true) {
-          arg = arg.map(function (v: any): any {
+        } else if (arg && (arg as { isSet?: boolean }).isSet === true) {
+          arg = (arg as { map(cb: (v: number) => number): unknown }).map(function (v: number): number {
             return v - 1;
           });
         } else if (isArray(arg) || isMatrix(arg)) {
           if (getMatrixDataType(arg) !== 'boolean') {
-            arg = (arg as any).map(function (v: any): any {
+            arg = (arg as { map(cb: (v: number) => number): unknown }).map(function (
+              v: number
+            ): number {
               return v - 1;
             });
           }
         } else if (isNumber(arg) || isBigInt(arg)) {
           arg--;
         } else if (isBigNumber(arg)) {
-          arg = (arg as any).toNumber() - 1;
+          arg = (arg as { toNumber(): number }).toNumber() - 1;
         } else if (typeof arg === 'string') {
           // leave as is
         } else {

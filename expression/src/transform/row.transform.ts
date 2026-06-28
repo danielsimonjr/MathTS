@@ -3,15 +3,15 @@ import { createRow } from '../../function/matrix/row.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { isNumber } from '../utils/is.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  Index: any;
-  matrix: (...args: any[]) => any;
-  range: (...args: any[]) => any;
+  Index: new (...args: unknown[]) => unknown;
+  matrix: (...args: unknown[]) => unknown;
+  range: (...args: unknown[]) => unknown;
 }
 
 const name = 'row';
@@ -32,7 +32,7 @@ export const createRowTransform = /* #__PURE__ */ factory(
 
     // @see: comment of row itself
     return typed('row', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         // change last argument from zero-based to one-based
         const lastIndex = args.length - 1;
         const last = args[lastIndex];

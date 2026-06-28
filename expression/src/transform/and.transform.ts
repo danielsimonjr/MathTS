@@ -2,8 +2,8 @@ import { createAnd } from '../../function/logical/and.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -11,21 +11,21 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  equalScalar: (...args: any[]) => any;
-  zeros: (...args: any[]) => any;
-  not: (...args: any[]) => any;
-  concat: (...args: any[]) => any;
+  matrix: (...args: unknown[]) => unknown;
+  equalScalar: (...args: unknown[]) => unknown;
+  zeros: (...args: unknown[]) => unknown;
+  not: (...args: unknown[]) => unknown;
+  concat: (...args: unknown[]) => unknown;
 }
 
 const name = 'and';
@@ -37,7 +37,7 @@ export const createAndTransform = /* #__PURE__ */ factory(
   ({ typed, matrix, equalScalar, zeros, not, concat }: Dependencies) => {
     const and = createAnd({ typed, matrix, equalScalar, zeros, not, concat });
 
-    function andTransform(args: Node[], math: any, scope: any): any {
+    function andTransform(args: Node[], math: unknown, scope: unknown): unknown {
       const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1) && !and(condition1, true)) {
         return false;

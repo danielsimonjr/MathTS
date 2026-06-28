@@ -4,8 +4,8 @@ import { factory } from '../utils/factory.js';
 import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
 import { compileInlineExpression } from './utils/compileInlineExpression.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Node {
@@ -13,11 +13,11 @@ interface Node {
 }
 
 interface CompiledExpression {
-  evaluate(scope: any): any;
+  evaluate(scope: unknown): unknown;
 }
 
 interface TransformFunction {
-  (args: Node[], math: any, scope: any): any;
+  (args: Node[], math: unknown, scope: unknown): unknown;
   rawArgs?: boolean;
 }
 
@@ -40,7 +40,7 @@ export const createForEachTransform = /* #__PURE__ */ factory(
      */
     const forEach = createForEach({ typed });
     const transformCallback = createTransformCallback({ typed });
-    function forEachTransform(args: Node[], math: any, scope: any): any {
+    function forEachTransform(args: Node[], math: unknown, scope: unknown): unknown {
       if (args.length === 0) {
         return forEach();
       }
@@ -51,7 +51,7 @@ export const createForEachTransform = /* #__PURE__ */ factory(
       }
 
       const N = args.length - 1;
-      let callback: any = args[N];
+      let callback: unknown = args[N];
 
       if (x) {
         x = _compileAndEvaluate(x, scope);
@@ -71,7 +71,7 @@ export const createForEachTransform = /* #__PURE__ */ factory(
     }
     forEachTransform.rawArgs = true;
 
-    function _compileAndEvaluate(arg: Node, scope: any): any {
+    function _compileAndEvaluate(arg: Node, scope: unknown): unknown {
       return arg.compile().evaluate(scope);
     }
     return forEachTransform as TransformFunction;

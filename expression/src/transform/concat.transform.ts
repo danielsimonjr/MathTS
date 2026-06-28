@@ -3,15 +3,15 @@ import { errorTransform } from './utils/errorTransform.js';
 import { factory } from '../utils/factory.js';
 import { createConcat } from '../../function/matrix/concat.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
-  find(func: any, signature: string[]): TypedFunction<T>;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
+  find(func: unknown, signature: string[]): TypedFunction<T>;
 }
 
 interface Dependencies {
   typed: TypedFunction;
-  matrix: (...args: any[]) => any;
-  isInteger: (x: any) => boolean;
+  matrix: (...args: unknown[]) => unknown;
+  isInteger: (x: unknown) => boolean;
 }
 
 const name = 'concat';
@@ -31,14 +31,14 @@ export const createConcatTransform = /* #__PURE__ */ factory(
      * from one-based to zero based
      */
     return typed('concat', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         // change last argument from one-based to zero-based
         const lastIndex = args.length - 1;
         const last = args[lastIndex];
         if (isNumber(last)) {
           args[lastIndex] = last - 1;
         } else if (isBigNumber(last)) {
-          args[lastIndex] = (last as any).minus(1);
+          args[lastIndex] = (last as { minus(n: number): unknown }).minus(1);
         }
 
         try {

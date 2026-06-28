@@ -3,8 +3,8 @@ import { errorTransform } from './utils/errorTransform.js';
 import { createMean } from '../../function/statistics/mean.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
 }
 
 interface Dependencies {
@@ -30,7 +30,7 @@ export const createMeanTransform = /* #__PURE__ */ factory(
      * from one-based to zero based
      */
     return typed('mean', {
-      '...any': function (args: any[]): any {
+      '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);
 
         try {
