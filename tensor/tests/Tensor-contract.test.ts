@@ -127,7 +127,6 @@ describe('Tensor.contract — prime-level distinction', () => {
 
   it('i.prime() only contracts with another i.prime()', () => {
     const i = idx(3, 'i');
-    const j = idx(4, 'j');
     const k = idx(5, 'k');
     const ip = i.prime();
 
@@ -274,7 +273,6 @@ describe('Tensor.contract — error cases', () => {
     const A = make3x4([i, j]);
 
     // B: shape [3, 5] with axis 0 = j but dim=3 ≠ 4
-    const jWrongDim = new Index(3, { name: 'j' });
     // We need the same id as j to get a match; we'll use replaceIndex trick:
     // Actually, to create a dimension-mismatch we need same id but different dim.
     // Index doesn't expose a way to do that via public API alone.

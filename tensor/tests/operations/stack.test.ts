@@ -31,12 +31,6 @@ function arr(values: number[]): Float64Array {
   return new Float64Array(values);
 }
 
-function maxAbsDiff(a: Float64Array, b: Float64Array): number {
-  let max = 0;
-  for (let i = 0; i < a.length; i++) max = Math.max(max, Math.abs(a[i] - b[i]));
-  return max;
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
