@@ -1,5 +1,36 @@
 import { isBigNumber, isNumber } from '../is.js';
-import { isInteger, normalizeFormatOptions } from '../number.js';
+import { isInteger, normalizeFormatOptions, type FormatOptions } from '../number.js';
+
+/**
+ * Structural contract for the BigNumber values handled by this formatter.
+ * Captures exactly the methods/properties used here. The configured BigNumber
+ * implementation (e.g. decimal.js) provides these; the project's `BigNumber`
+ * type alias points at a minimal local Decimal that does not declare them all,
+ * so we model the runtime contract explicitly.
+ */
+interface BigNumberValue {
+  e: number;
+  constructor: new (value: number | string) => BigNumberValue;
+  isFinite(): boolean;
+  isNaN(): boolean;
+  isZero(): boolean;
+  isInteger(): boolean;
+  gt(other: number | BigNumberValue): boolean;
+  greaterThan(other: number | BigNumberValue): boolean;
+  lessThan(other: number | BigNumberValue): boolean;
+  add(other: number | BigNumberValue): BigNumberValue;
+  sub(other: number | BigNumberValue): BigNumberValue;
+  mul(other: number | BigNumberValue): BigNumberValue;
+  pow(exp: number | BigNumberValue): BigNumberValue;
+  toNumber(): number;
+  toFixed(places?: number): string;
+  toExponential(places?: number): string;
+  toPrecision(sd?: number): string;
+  toSignificantDigits(sd?: number): BigNumberValue;
+  toBinary(): string;
+  toOctal(): string;
+  toHexadecimal(): string;
+}
 
 /**
  * Formats a BigNumber in a given base
@@ -8,7 +39,7 @@ import { isInteger, normalizeFormatOptions } from '../number.js';
  * @param {number} size
  * @returns {string}
  */
-function formatBigNumberToBase(n: any, base: any, size: any) {
+function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): string {
   const BigNumberCtor = n.constructor;
   const big2 = new BigNumberCtor(2);
   let suffix = '';
@@ -123,66 +154,71 @@ function formatBigNumberToBase(n: any, base: any, size: any) {
  * @param {Object | Function | number | BigNumber} [options]
  * @return {string} str The formatted value
  */
-export function format(value: any, options: any) {
+export function format(value: unknown, options?: unknown): string {
+  const v = value as BigNumberValue;
   if (typeof options === 'function') {
     // handle format(value, fn)
-    return options(value);
+    return (options as (value: unknown) => string)(value);
   }
 
   // handle special cases
-  if (!value.isFinite()) {
-    return value.isNaN() ? 'NaN' : value.gt(0) ? 'Infinity' : '-Infinity';
+  if (!v.isFinite()) {
+    return v.isNaN() ? 'NaN' : v.gt(0) ? 'Infinity' : '-Infinity';
   }
 
-  const { notation, precision, wordSize } = normalizeFormatOptions(options);
+  const { notation, precision, wordSize } = normalizeFormatOptions(
+    options as FormatOptions | number | undefined
+  );
 
   // handle the various notations
   switch (notation) {
     case 'fixed':
-      return toFixed(value, precision);
+      return toFixed(v, precision);
 
     case 'exponential':
-      return toExponential(value, precision);
+      return toExponential(v, precision);
 
     case 'engineering':
-      return toEngineering(value, precision);
+      return toEngineering(v, precision);
 
     case 'bin':
-      return formatBigNumberToBase(value, 2, wordSize);
+      return formatBigNumberToBase(v, 2, wordSize);
 
     case 'oct':
-      return formatBigNumberToBase(value, 8, wordSize);
+      return formatBigNumberToBase(v, 8, wordSize);
 
     case 'hex':
-      return formatBigNumberToBase(value, 16, wordSize);
+      return formatBigNumberToBase(v, 16, wordSize);
 
     case 'auto': {
       // determine lower and upper bound for exponential notation.
       // TODO: implement support for upper and lower to be BigNumbers themselves
-      const lowerExp = _toNumberOrDefault(options?.lowerExp, -3);
-      const upperExp = _toNumberOrDefault(options?.upperExp, 5);
+      const optionsObj = options as { lowerExp?: unknown; upperExp?: unknown } | undefined;
+      const lowerExp = _toNumberOrDefault(optionsObj?.lowerExp, -3);
+      const upperExp = _toNumberOrDefault(optionsObj?.upperExp, 5);
 
       // handle special case zero
-      if (value.isZero()) return '0';
+      if (v.isZero()) return '0';
 
       // determine whether or not to output exponential notation
       let str;
-      const rounded = value.toSignificantDigits(precision);
+      const rounded = v.toSignificantDigits(precision);
       const exp = rounded.e;
       if (exp >= lowerExp && exp < upperExp) {
         // normal number notation
         str = rounded.toFixed();
       } else {
         // exponential notation
-        str = toExponential(value, precision);
+        str = toExponential(v, precision);
       }
 
       // remove trailing zeros after the decimal point
-      return str.replace(/((\.\d*?)(0+))($|e)/, function () {
-        const digits = arguments[2];
-        const e = arguments[4];
-        return digits !== '.' ? digits + e : e;
-      });
+      return str.replace(
+        /((\.\d*?)(0+))($|e)/,
+        function (_match: string, _g1: string, digits: string, _g3: string, e: string): string {
+          return digits !== '.' ? digits + e : e;
+        }
+      );
     }
     default:
       throw new Error(
@@ -199,7 +235,7 @@ export function format(value: any, options: any) {
  * @param {BigNumber} value
  * @param {number} [precision]        Optional number of significant figures to return.
  */
-export function toEngineering(value: any, precision: any) {
+export function toEngineering(value: BigNumberValue, precision?: number): string {
   // find nearest lower multiple of 3 for exponent
   const e = value.e;
   const newExp = e % 3 === 0 ? e : e < 0 ? e - 3 - (e % 3) : e - (e % 3);
@@ -209,8 +245,8 @@ export function toEngineering(value: any, precision: any) {
 
   let valueStr = valueWithoutExp.toPrecision(precision);
   if (valueStr.includes('e')) {
-    const BigNumber = value.constructor;
-    valueStr = new BigNumber(valueStr).toFixed();
+    const BigNumberCtor = value.constructor;
+    valueStr = new BigNumberCtor(valueStr).toFixed();
   }
 
   return valueStr + 'e' + (e >= 0 ? '+' : '') + newExp.toString();
@@ -224,7 +260,7 @@ export function toEngineering(value: any, precision: any) {
  *                              is used.
  * @returns {string} str
  */
-export function toExponential(value: any, precision: any) {
+export function toExponential(value: BigNumberValue, precision?: number): string {
   if (precision !== undefined) {
     return value.toExponential(precision - 1); // Note the offset of one
   } else {
@@ -238,15 +274,15 @@ export function toExponential(value: any, precision: any) {
  * @param {number} [precision=undefined] Optional number of decimals after the
  *                                       decimal point. Undefined by default.
  */
-export function toFixed(value: any, precision: any) {
+export function toFixed(value: BigNumberValue, precision?: number): string {
   return value.toFixed(precision);
 }
 
-function _toNumberOrDefault(value: any, defaultValue: any) {
+function _toNumberOrDefault(value: unknown, defaultValue: number): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as any).toNumber();
+    return (value as unknown as BigNumberValue).toNumber();
   } else {
     return defaultValue;
   }

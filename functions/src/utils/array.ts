@@ -97,7 +97,7 @@ export function validate<T>(array: NestedArray<T>, size: number[]): void {
  * @param {Index} index  Index with the source information to validate
  * @throws DimensionError
  */
-export function validateIndexSourceSize(value: any[] | Matrix, index: Index): void {
+export function validateIndexSourceSize(value: unknown[] | Matrix, index: Index): void {
   const valueSize = (value as Matrix).isMatrix ? (value as Matrix)._size! : arraySize(value);
   const sourceSize = index._sourceSize!;
   // checks if the source size is not null and matches the valueSize
@@ -120,7 +120,7 @@ export function validateIndex(index: number | undefined, length?: number): void 
       throw new TypeError('Index must be an integer (value: ' + index + ')');
     }
     if (index < 0 || (typeof length === 'number' && index >= length)) {
-      throw new IndexError(index, length) as any;
+      throw new IndexError(index, length);
     }
   }
 }
@@ -162,7 +162,7 @@ export function isEmptyIndex(index: Index): boolean {
  *                              set.
  * @return {Array} array         The resized array
  */
-export function resize<T = any>(
+export function resize<T = unknown>(
   array: T | T[] | NestedArray<T>,
   size: number[],
   defaultValue?: T
@@ -269,7 +269,7 @@ function _resize<T>(array: NestedArray<T>[], size: number[], dim: number, defaul
  * @throws {DimensionError}       If the product of the new dimension sizes does
  *                                not equal that of the old ones
  */
-export function reshape<T = any>(array: NestedArray<T>, sizes: number[]): NestedArray<T> {
+export function reshape<T = unknown>(array: NestedArray<T>, sizes: number[]): NestedArray<T> {
   const flatArray = flatten(array, true); // since it has rectangular
   const currentLength = flatArray.length;
 
@@ -660,7 +660,10 @@ export function generalize<T>(a: IdentifiedValue<T>[]): T[] {
  * @param {function} typeOf   Callback function to use to determine the type of a value
  * @return {string}
  */
-export function getArrayDataType(array: any[], typeOf: (value: any) => string): string | undefined {
+export function getArrayDataType(
+  array: unknown[],
+  typeOf: (value: unknown) => string
+): string | undefined {
   let type: string | undefined; // to hold type info
   let length = 0; // to hold length value to ensure it has consistent sizes
 

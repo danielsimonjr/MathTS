@@ -1,13 +1,33 @@
 import { isBigNumber, isString, typeOf } from './is.js';
-import { format as formatNumber } from './number.js';
+import { format as formatNumber, type FormatOptions } from './number.js';
 import { format as formatBigNumber } from './bignumber/formatter.js';
+
+/**
+ * Formatting options accepted by the generic `format` helper. Extends the
+ * numeric {@link FormatOptions} with the string-level `truncate` and the
+ * fraction rendering mode, or is a precision number, or a custom formatter.
+ */
+export type GeneralFormatOptions =
+  | number
+  | ((value: unknown) => string)
+  | (FormatOptions & {
+      truncate?: number;
+      fraction?: 'ratio' | 'decimal';
+    });
+
+/** Duck-typed shape of an object that can render itself to a string. */
+interface FormattableObject {
+  format?: (options?: unknown) => string;
+  toString: (options?: unknown) => string;
+  [key: string]: unknown;
+}
 
 /**
  * Check if a text ends with a certain string.
  * @param {string} text
  * @param {string} search
  */
-export function endsWith(text: any, search: any) {
+export function endsWith(text: string, search: string): boolean {
   const start = text.length - search.length;
   const end = text.length;
   return text.substring(start, end) === search;
@@ -51,22 +71,20 @@ export function endsWith(text: any, search: any) {
  *     have been more, they are deleted and replaced by an ellipsis).
  * @return {string} str
  */
-export function format(value: any, options: any): string {
+export function format(value: unknown, options?: unknown): string {
   const result: string = _format(value, options);
-  if (
-    options &&
-    typeof options === 'object' &&
-    'truncate' in options &&
-    result.length > options.truncate
-  ) {
-    return result.substring(0, options.truncate - 3) + '...';
+  if (options && typeof options === 'object' && 'truncate' in options) {
+    const truncate = (options as { truncate?: number }).truncate;
+    if (typeof truncate === 'number' && result.length > truncate) {
+      return result.substring(0, truncate - 3) + '...';
+    }
   }
   return result;
 }
 
-function _format(value: any, options: any): string {
+function _format(value: unknown, options?: unknown): string {
   if (typeof value === 'number') {
-    return formatNumber(value, options);
+    return formatNumber(value, options as GeneralFormatOptions);
   }
 
   if (isBigNumber(value)) {
@@ -76,7 +94,7 @@ function _format(value: any, options: any): string {
   // note: we use unsafe duck-typing here to check for Fractions, this is
   // ok here since we're only invoking toString or concatenating its values
   if (looksLikeFraction(value)) {
-    if (!options || options.fraction !== 'decimal') {
+    if (!options || (options as { fraction?: string }).fraction !== 'decimal') {
       // output as ratio, like '1/3'
       // Convert sign to BigInt to avoid "Cannot mix BigInt and other types" error
       // when n is a BigInt (as in local Fraction implementation)
@@ -98,18 +116,20 @@ function _format(value: any, options: any): string {
   }
 
   if (typeof value === 'function') {
-    return value.syntax ? String(value.syntax) : 'function';
+    const syntax = (value as { syntax?: unknown }).syntax;
+    return syntax ? String(syntax) : 'function';
   }
 
   if (value && typeof value === 'object') {
-    if (typeof value.format === 'function') {
-      return value.format(options);
-    } else if (value && value.toString(options) !== {}.toString()) {
+    const obj = value as FormattableObject;
+    if (typeof obj.format === 'function') {
+      return obj.format(options);
+    } else if (obj.toString(options) !== {}.toString()) {
       // this object has a non-native toString method, use that one
-      return value.toString(options);
+      return obj.toString(options);
     } else {
-      const entries = Object.keys(value).map((key) => {
-        return stringify(key) + ': ' + format(value[key], options);
+      const entries = Object.keys(obj).map((key) => {
+        return stringify(key) + ': ' + format(obj[key], options);
       });
 
       return '{' + entries.join(', ') + '}';
@@ -125,7 +145,7 @@ function _format(value: any, options: any): string {
  * @param {*} value
  * @return {string}
  */
-export function stringify(value: any) {
+export function stringify(value: unknown): string {
   const text = String(value);
   let escaped = '';
   let i = 0;
@@ -153,7 +173,7 @@ const controlCharacters = {
  * @param {*} value
  * @return {string}
  */
-export function escape(value: any) {
+export function escape(value: unknown): string {
   let text = String(value);
   text = text
     .replace(/&/g, '&amp;')
@@ -175,7 +195,7 @@ export function escape(value: any) {
  *                                                options.
  * @returns {string} str
  */
-function formatArray(array: any, options: any) {
+function formatArray(array: unknown, options?: unknown): string {
   if (Array.isArray(array)) {
     let str = '[';
     const len = array.length;
@@ -197,13 +217,14 @@ function formatArray(array: any, options: any) {
  * @param {*} value
  * @return {boolean}
  */
-function looksLikeFraction(value: any) {
+function looksLikeFraction(value: unknown): value is { s: bigint; n: bigint; d: bigint } {
+  const frac = value as { s?: unknown; n?: unknown; d?: unknown } | null;
   return (
-    (value &&
-      typeof value === 'object' &&
-      typeof value.s === 'bigint' &&
-      typeof value.n === 'bigint' &&
-      typeof value.d === 'bigint') ||
+    (!!frac &&
+      typeof frac === 'object' &&
+      typeof frac.s === 'bigint' &&
+      typeof frac.n === 'bigint' &&
+      typeof frac.d === 'bigint') ||
     false
   );
 }
@@ -214,7 +235,7 @@ function looksLikeFraction(value: any) {
  * @param {string} y
  * @returns {number}
  */
-export function compareText(x: any, y: any) {
+export function compareText(x: unknown, y: unknown): number {
   // we don't want to convert numbers to string, only accept string input
   if (!isString(x)) {
     throw new TypeError(
