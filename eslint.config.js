@@ -13,6 +13,16 @@ export default tseslint.config(
       '**/*.js',
       '**/*.mjs',
       '**/*.cjs',
+      // AssemblyScript source: compiled + type-checked by `asc` (npm run
+      // build:wasm) and exercised by `npm run test:wasm`, NOT by
+      // typescript-eslint — which cannot even parse AS syntax (`@inline`/
+      // `@operator` decorators, `i32`/`f64`/`usize`/`v128` value types).
+      // The real-TS loader bindings under assembly/src/bindings/ stay linted.
+      'assembly/src/*.ts',
+      'assembly/src/algebra/**',
+      'assembly/src/ops/**',
+      'assembly/src/env/**',
+      'assembly/src/types/**',
     ],
   },
   {

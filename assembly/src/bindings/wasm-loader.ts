@@ -16,7 +16,7 @@ interface WasmManifest {
 
 async function sha384Base64(buffer: ArrayBuffer | Uint8Array): Promise<string> {
   const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-  const isNode = typeof process !== 'undefined' && (process as any).versions?.node !== undefined;
+  const isNode = typeof process !== 'undefined' && (process as { versions?: { node?: string } }).versions?.node !== undefined;
   let digest: Uint8Array;
   if (isNode) {
     const { createHash } = await import('crypto');
@@ -36,13 +36,13 @@ async function sha384Base64(buffer: ArrayBuffer | Uint8Array): Promise<string> {
   const b64 =
     typeof btoa === 'function'
       ? btoa(bin)
-      : (globalThis as any).Buffer.from(digest).toString('base64');
+      : (globalThis as { Buffer: { from(data: Uint8Array): { toString(encoding: string): string } } }).Buffer.from(digest).toString('base64');
   return `sha384-${b64}`;
 }
 
 async function loadManifest(wasmPath: string): Promise<WasmManifest | null> {
   const manifestPath = wasmPath.replace(/[^/\\]+$/, 'wasm-manifest.json');
-  const isNode = typeof process !== 'undefined' && (process as any).versions?.node !== undefined;
+  const isNode = typeof process !== 'undefined' && (process as { versions?: { node?: string } }).versions?.node !== undefined;
   try {
     if (isNode) {
       const fs = await import('fs');
@@ -227,7 +227,7 @@ function createImports(): WebAssembly.Imports {
       },
 
       // Trace for debugging (optional)
-      trace(messagePtr: number, numArgs: number): void {
+      trace(_messagePtr: number, _numArgs: number): void {
         // Debug tracing - can be implemented if needed
       },
 
