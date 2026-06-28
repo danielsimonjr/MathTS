@@ -40,7 +40,7 @@ import {
   Infinity_,
   NaN_,
 } from '../src/shims.js';
-import { Complex, DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-core';
+import { Complex } from '@danielsimonjr/mathts-core';
 
 describe('Inverse trig functions', () => {
   it('asin should wrap Math.asin', () => {
@@ -178,19 +178,19 @@ describe('det() edge cases', () => {
 
 describe('Complex error cases', () => {
   it('conj should throw for non-Complex', () => {
-    expect(() => conj(5 as any)).toThrow('Expected Complex number');
+    expect(() => conj(5 as unknown as Complex)).toThrow('Expected Complex number');
   });
 
   it('re should throw for non-number/non-Complex', () => {
-    expect(() => re('bad' as any)).toThrow('Expected Complex or number');
+    expect(() => re('bad' as unknown as number)).toThrow('Expected Complex or number');
   });
 
   it('im should throw for non-number/non-Complex', () => {
-    expect(() => im('bad' as any)).toThrow('Expected Complex or number');
+    expect(() => im('bad' as unknown as number)).toThrow('Expected Complex or number');
   });
 
   it('arg should throw for non-Complex', () => {
-    expect(() => arg(5 as any)).toThrow('Expected Complex number');
+    expect(() => arg(5 as unknown as Complex)).toThrow('Expected Complex number');
   });
 });
 

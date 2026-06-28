@@ -4,7 +4,7 @@
  * Tests for the mathjs compatibility layer.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   create,
   all,
