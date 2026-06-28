@@ -9,8 +9,58 @@ import {
 } from './utils/is.js';
 import { deepMap } from './utils/collection.js';
 import { safeNumberType } from './utils/number.js';
+import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
 import type { MathNode } from './node/Node.js';
+
+/** An AST node constructor injected as a factory dependency. The mathjs node
+ *  constructors accept heterogeneous positional args and all yield a MathNode. */
+type NodeConstructor = new (...args: unknown[]) => MathNode;
+
+/** A node carrying an optional parsed comment (attached during block parsing). */
+type CommentableNode = MathNode & { comment?: string };
+
+/** The typed-dispatch `parse` function plus the character-class helpers the
+ *  tokenizer hangs off it. */
+interface ParseFunction {
+  (expr: string | string[], options?: ParseOptions): MathNode | MathNode[];
+  isAlpha(c: string, cPrev: string, cNext: string): boolean;
+  isValidLatinOrGreek(c: string): boolean;
+  isValidMathSymbol(high: string, low: string): boolean;
+  isWhitespace(c: string, nestingLevel: number): boolean;
+  isDecimalMark(c: string, cNext: string): boolean;
+  isDigitDot(c: string): boolean;
+  isDigit(c: string): boolean;
+}
+
+/** The injected typed-function builder used to assemble `parse`. */
+interface TypedFunction {
+  (name: string, signatures: Record<string, unknown>): ParseFunction;
+  addConversion(conversion: { from: string; to: string; convert: unknown }): void;
+}
+
+/** Factory dependencies for createParse (typed builder, numeric parser,
+ *  config, and the AST node constructors). */
+interface ParseDependencies {
+  typed: TypedFunction;
+  numeric: (value: string, type: string) => unknown;
+  config: NumberTypeConfig;
+  AccessorNode: NodeConstructor;
+  ArrayNode: NodeConstructor;
+  AssignmentNode: NodeConstructor;
+  BlockNode: NodeConstructor;
+  ConditionalNode: NodeConstructor;
+  ConstantNode: NodeConstructor;
+  FunctionAssignmentNode: NodeConstructor;
+  FunctionNode: NodeConstructor;
+  IndexNode: NodeConstructor;
+  ObjectNode: NodeConstructor;
+  OperatorNode: NodeConstructor;
+  ParenthesisNode: NodeConstructor;
+  RangeNode: NodeConstructor;
+  RelationalNode: NodeConstructor;
+  SymbolNode: NodeConstructor;
+}
 
 const name = 'parse';
 const dependencies = [
@@ -43,7 +93,7 @@ enum TOKENTYPE {
 }
 
 interface ParserState {
-  extraNodes: Record<string, any>;
+  extraNodes: Record<string, NodeConstructor>;
   expression: string;
   comment: string;
   index: number;
@@ -54,7 +104,7 @@ interface ParserState {
 }
 
 interface ParseOptions {
-  nodes?: Record<string, any>;
+  nodes?: Record<string, NodeConstructor>;
 }
 
 export const createParse = /* #__PURE__ */ factory(
@@ -79,7 +129,7 @@ export const createParse = /* #__PURE__ */ factory(
     RangeNode,
     RelationalNode,
     SymbolNode,
-  }: any) => {
+  }: ParseDependencies) => {
     /**
      * Parse an expression. Returns a node tree, which can be evaluated by
      * invoking node.evaluate() or transformed into a functional object via node.compile().
@@ -124,7 +174,7 @@ export const createParse = /* #__PURE__ */ factory(
       string: function (expression: string): MathNode {
         return parseStart(expression, {});
       },
-      'Array | Matrix': function (expressions: any): any {
+      'Array | Matrix': function (expressions: unknown) {
         return parseMultiple(expressions, {});
       },
       'string, Object': function (expression: string, options: ParseOptions): MathNode {
@@ -135,15 +185,18 @@ export const createParse = /* #__PURE__ */ factory(
       'Array | Matrix, Object': parseMultiple,
     });
 
-    function parseMultiple(expressions: any, options: ParseOptions = {}): any {
+    function parseMultiple(expressions: unknown, options: ParseOptions = {}) {
       const extraNodes = options.nodes !== undefined ? options.nodes : {};
 
       // parse an array or matrix with expressions
-      return deepMap(expressions, function (elem: any) {
-        if (typeof elem !== 'string') throw new TypeError('String expected');
+      return deepMap(
+        expressions as Parameters<typeof deepMap>[0],
+        function (elem: unknown): MathNode {
+          if (typeof elem !== 'string') throw new TypeError('String expected');
 
-        return parseStart(elem, extraNodes);
-      });
+          return parseStart(elem, extraNodes);
+        }
+      );
     }
 
     // map with all delimiters
@@ -202,7 +255,7 @@ export const createParse = /* #__PURE__ */ factory(
       not: true,
     };
 
-    const CONSTANTS: Record<string, any> = {
+    const CONSTANTS: Record<string, boolean | null | undefined> = {
       true: true,
       false: false,
       null: null,
@@ -635,7 +688,7 @@ export const createParse = /* #__PURE__ */ factory(
      * @return {Node} node
      * @private
      */
-    function parseStart(expression: string, extraNodes: Record<string, any>): MathNode {
+    function parseStart(expression: string, extraNodes: Record<string, NodeConstructor>): MathNode {
       const state = initialState();
       Object.assign(state, { expression, extraNodes });
       getToken(state);
@@ -673,7 +726,7 @@ export const createParse = /* #__PURE__ */ factory(
       if (state.token !== '' && state.token !== '\n' && state.token !== ';') {
         node = parseAssignment(state);
         if (state.comment) {
-          (node as any).comment = state.comment;
+          (node as CommentableNode).comment = state.comment;
         }
       }
 
@@ -688,7 +741,7 @@ export const createParse = /* #__PURE__ */ factory(
         if (state.token !== '\n' && state.token !== ';' && state.token !== '') {
           node = parseAssignment(state);
           if (state.comment) {
-            (node as any).comment = state.comment;
+            (node as CommentableNode).comment = state.comment;
           }
 
           visible = state.token !== ';';
@@ -704,7 +757,7 @@ export const createParse = /* #__PURE__ */ factory(
           // narrowed to MathNode after this assignment.
           node = new ConstantNode(undefined) as MathNode;
           if (state.comment) {
-            (node as any).comment = state.comment;
+            (node as CommentableNode).comment = state.comment;
           }
         }
 
@@ -731,27 +784,36 @@ export const createParse = /* #__PURE__ */ factory(
       if (state.token === '=') {
         if (isSymbolNode(node)) {
           // parse a variable assignment like 'a = 2/3'
-          name = (node as any).name;
+          name = (node as unknown as { name: string }).name;
           getTokenSkipNewline(state);
           value = parseAssignment(state);
           return new AssignmentNode(new SymbolNode(name), value);
         } else if (isAccessorNode(node)) {
           // parse a matrix subset assignment like 'A[1,2] = 4'
-          if ((node as any).optionalChaining) {
+          const accessor = node as unknown as {
+            optionalChaining?: boolean;
+            object: MathNode;
+            index: MathNode;
+          };
+          if (accessor.optionalChaining) {
             throw createSyntaxError(state, 'Cannot assign to optional chain');
           }
           getTokenSkipNewline(state);
           value = parseAssignment(state);
-          return new AssignmentNode((node as any).object, (node as any).index, value);
-        } else if (isFunctionNode(node) && isSymbolNode((node as any).fn)) {
+          return new AssignmentNode(accessor.object, accessor.index, value);
+        } else if (
+          isFunctionNode(node) &&
+          isSymbolNode((node as unknown as { fn: MathNode }).fn)
+        ) {
           // parse function assignment like 'f(x) = x^2'
           valid = true;
           args = [];
 
-          name = (node as any).name;
-          (node as any).args.forEach(function (arg: any, index: number) {
+          const fnNode = node as unknown as { name: string; args: MathNode[] };
+          name = fnNode.name;
+          fnNode.args.forEach(function (arg: MathNode, index: number) {
             if (isSymbolNode(arg)) {
-              args[index] = (arg as any).name;
+              args[index] = (arg as unknown as { name: string }).name;
             } else {
               valid = false;
             }
@@ -1095,7 +1157,7 @@ export const createParse = /* #__PURE__ */ factory(
 
         getTokenSkipNewline(state);
         const rightNode = parseMultiplyDivideModulus(state);
-        if ((rightNode as any).isPercentage) {
+        if ((rightNode as MathNode & { isPercentage?: boolean }).isPercentage) {
           params = [node, new OperatorNode('*', 'multiply', [node, rightNode])];
         } else {
           params = [node, rightNode];
@@ -1163,11 +1225,11 @@ export const createParse = /* #__PURE__ */ factory(
           (state.token === 'in' && isConstantNode(node)) ||
           (state.token === 'in' &&
             isOperatorNode(node) &&
-            (node as any).fn === 'unaryMinus' &&
-            isConstantNode((node as any).args[0])) ||
+            (node as unknown as { fn: string }).fn === 'unaryMinus' &&
+            isConstantNode((node as unknown as { args: MathNode[] }).args[0])) ||
           (state.tokenType === TOKENTYPE.NUMBER &&
             !isConstantNode(last) &&
-            (!isOperatorNode(last) || (last as any).op === '!')) ||
+            (!isOperatorNode(last) || (last as unknown as { op: string }).op === '!')) ||
           state.token === '('
         ) {
           // parse implicit multiplication
@@ -1708,14 +1770,16 @@ export const createParse = /* #__PURE__ */ factory(
             getToken(state);
 
             // check if the number of columns matches in all rows
-            cols = (params[0] as any).items.length;
+            const rowItems = (row: MathNode): MathNode[] =>
+              (row as MathNode & { items: MathNode[] }).items;
+            cols = rowItems(params[0]).length;
             for (let r = 1; r < rows; r++) {
-              if ((params[r] as any).items.length !== cols) {
+              if (rowItems(params[r]).length !== cols) {
                 throw createError(
                   state,
                   'Column dimensions mismatch ' +
                     '(' +
-                    (params[r] as any).items.length +
+                    rowItems(params[r]).length +
                     ' !== ' +
                     cols +
                     ')'
@@ -1785,7 +1849,7 @@ export const createParse = /* #__PURE__ */ factory(
           if ((state.token as string) !== '}') {
             // parse key
             if ((state.token as string) === '"' || (state.token as string) === "'") {
-              key = parseStringToken(state, state.token as any);
+              key = parseStringToken(state, state.token as '"' | "'");
             } else if (
               state.tokenType === TOKENTYPE.SYMBOL ||
               (state.tokenType === TOKENTYPE.DELIMITER && state.token in NAMED_DELIMITERS)
@@ -1919,7 +1983,9 @@ export const createParse = /* #__PURE__ */ factory(
      */
     function createSyntaxError(state: ParserState, message: string): SyntaxError {
       const c = col(state);
-      const error: any = new SyntaxError(message + ' (char ' + c + ')');
+      const error = new SyntaxError(message + ' (char ' + c + ')') as SyntaxError & {
+        char: number;
+      };
       error.char = c;
 
       return error;
@@ -1934,7 +2000,9 @@ export const createParse = /* #__PURE__ */ factory(
      */
     function createError(state: ParserState, message: string): Error {
       const c = col(state);
-      const error: any = new SyntaxError(message + ' (char ' + c + ')');
+      const error = new SyntaxError(message + ' (char ' + c + ')') as SyntaxError & {
+        char: number;
+      };
       error.char = c;
 
       return error;

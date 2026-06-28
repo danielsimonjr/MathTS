@@ -5,10 +5,37 @@ import { createEmptyMap, toObject } from './utils/map.js';
 const name = 'Parser';
 const dependencies = ['evaluate', 'parse'] as const;
 
+/** The injected `evaluate` dependency: parse + evaluate against a scope map. */
+type EvaluateFn = (expr: string | string[], scope?: Map<string, unknown>) => unknown;
+
+/** The subset of the injected `parse` dependency used by the Parser class. */
+interface ParseFn {
+  isAlpha(c: string, cPrev: string, cNext: string): boolean;
+  isDigit(c: string): boolean;
+}
+
+/** Runtime shape of a Parser instance (holds its own variable scope plus the
+ *  prototype methods used internally, e.g. by `fromJSON`). */
+interface ParserInstance {
+  scope: Map<string, unknown>;
+  evaluate(expr: string | string[]): unknown;
+  get(name: string): unknown;
+  getAll(): Record<string, unknown>;
+  getAllAsMap(): Map<string, unknown>;
+  set(name: string, value: unknown): unknown;
+  remove(name: string): void;
+  clear(): void;
+  toJSON(): {
+    mathjs: string;
+    variables: Record<string, unknown>;
+    functions: Record<string, string>;
+  };
+}
+
 export const createParserClass = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
-  ({ evaluate, parse }: { evaluate: any; parse: any }) => {
+  ({ evaluate, parse }: { evaluate: EvaluateFn; parse: ParseFn }) => {
     /**
      * @constructor Parser
      * Parser contains methods to evaluate or parse expressions, and has a number
@@ -57,7 +84,7 @@ export const createParserClass = /* #__PURE__ */ factory(
      *    parser.clear()
      *
      */
-    function Parser(this: any) {
+    function Parser(this: ParserInstance) {
       if (!(this instanceof Parser)) {
         throw new SyntaxError('Constructor must be called with the new operator');
       }
@@ -81,7 +108,7 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @return {*} result     The result, or undefined when the expression was empty
      * @throws {Error}
      */
-    Parser.prototype.evaluate = function (this: any, expr: string | string[]): any {
+    Parser.prototype.evaluate = function (this: ParserInstance, expr: string | string[]): unknown {
       // TODO: validate arguments
       return evaluate(expr, this.scope);
     };
@@ -92,18 +119,16 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @param {string} name
      * @return {* | undefined} value
      */
-    Parser.prototype.get = function (this: any, name: string): any {
+    Parser.prototype.get = function (this: ParserInstance, name: string): unknown {
       // TODO: validate arguments
-      if (this.scope.has(name)) {
-        return this.scope.get(name);
-      }
+      return this.scope.has(name) ? this.scope.get(name) : undefined;
     };
 
     /**
      * Get a map with all defined variables
      * @return {Object} values
      */
-    Parser.prototype.getAll = function (this: any): Record<string, any> {
+    Parser.prototype.getAll = function (this: ParserInstance): Record<string, unknown> {
       return toObject(this.scope);
     };
 
@@ -111,7 +136,7 @@ export const createParserClass = /* #__PURE__ */ factory(
      * Get a map with all defined variables
      * @return {Map} values
      */
-    Parser.prototype.getAllAsMap = function (this: any): Map<string, any> {
+    Parser.prototype.getAllAsMap = function (this: ParserInstance): Map<string, unknown> {
       return this.scope;
     };
 
@@ -139,7 +164,7 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @param {string} name
      * @param {* | undefined} value
      */
-    Parser.prototype.set = function (this: any, name: string, value: any): any {
+    Parser.prototype.set = function (this: ParserInstance, name: string, value: unknown): unknown {
       if (!isValidVariableName(name)) {
         throw new Error(
           `Invalid variable name: '${name}'. Variable names must follow the specified rules.`
@@ -153,25 +178,25 @@ export const createParserClass = /* #__PURE__ */ factory(
      * Remove a variable from the parsers scope
      * @param {string} name
      */
-    Parser.prototype.remove = function (this: any, name: string): void {
+    Parser.prototype.remove = function (this: ParserInstance, name: string): void {
       this.scope.delete(name);
     };
 
     /**
      * Clear the scope with variables and functions
      */
-    Parser.prototype.clear = function (this: any): void {
+    Parser.prototype.clear = function (this: ParserInstance): void {
       this.scope.clear();
     };
 
-    Parser.prototype.toJSON = function (this: any): {
+    Parser.prototype.toJSON = function (this: ParserInstance): {
       mathjs: string;
-      variables: Record<string, any>;
+      variables: Record<string, unknown>;
       functions: Record<string, string>;
     } {
       const json = {
         mathjs: 'Parser',
-        variables: {} as Record<string, any>,
+        variables: {} as Record<string, unknown>,
         functions: {} as Record<string, string>,
       };
 
@@ -191,10 +216,10 @@ export const createParserClass = /* #__PURE__ */ factory(
     };
 
     Parser.fromJSON = function (json: {
-      variables?: Record<string, any>;
+      variables?: Record<string, unknown>;
       functions?: Record<string, string>;
-    }): any {
-      const parser = new (Parser as any)();
+    }): ParserInstance {
+      const parser = new (Parser as unknown as new () => ParserInstance)();
 
       Object.entries(json.variables || {}).forEach(([name, value]) => parser.set(name, value));
       Object.entries(json.functions || {}).forEach(([_name, fn]) => parser.evaluate(fn));
