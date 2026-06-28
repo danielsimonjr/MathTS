@@ -4,36 +4,36 @@ import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
 
 // Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T;
+interface TypedFunction<T = unknown> {
+  (...args: unknown[]): T;
   // A typed function always exposes its signature map.
-  signatures: Record<string, Function>;
+  signatures: Record<string, (...args: unknown[]) => unknown>;
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][];
+  _data: unknown[] | unknown[][];
   _size: number[];
   _datatype?: string;
   storage(): 'dense';
   size(): number[];
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface SparseMatrix {
-  _values?: any[];
+  _values?: unknown[];
   _index?: number[];
   _ptr?: number[];
   _size: number[];
   _datatype?: string;
   storage(): 'sparse';
   size(): number[];
-  valueOf(): any[] | any[][];
+  valueOf(): unknown[] | unknown[][];
 }
 
 type Matrix = DenseMatrix | SparseMatrix;
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface NodeOperations {
@@ -147,31 +147,46 @@ export const createDivide = /* #__PURE__ */ factory(
           // =========================================================================
 
           'Array | Matrix, Array | Matrix': function (
-            x: any[] | Matrix,
-            y: any[] | Matrix
-          ): any[] | Matrix {
+            x: unknown[] | Matrix,
+            y: unknown[] | Matrix
+          ): unknown[] | Matrix {
             // TODO: implement matrix right division using pseudo inverse
             // https://www.mathworks.nl/help/matlab/ref/mrdivide.html
             // https://www.gnu.org/software/octave/doc/interpreter/Arithmetic-Ops.html
             // https://stackoverflow.com/questions/12263932/how-does-gnu-octave-matrix-division-work-getting-unexpected-behaviour
-            return multiply(x, inv(y));
+            return multiply(x, inv(y)) as unknown[] | Matrix;
           },
 
-          'DenseMatrix, any': function (x: DenseMatrix, y: any): DenseMatrix {
-            return matAlgo14xDs(x as any, y, divideScalar, false) as unknown as DenseMatrix;
+          'DenseMatrix, any': function (x: DenseMatrix, y: unknown): DenseMatrix {
+            return matAlgo14xDs(
+              x as unknown as Parameters<typeof matAlgo14xDs>[0],
+              y,
+              divideScalar,
+              false
+            ) as unknown as DenseMatrix;
           },
 
-          'SparseMatrix, any': function (x: SparseMatrix, y: any): SparseMatrix {
-            return matAlgo11xS0s(x as any, y, divideScalar, false) as unknown as SparseMatrix;
+          'SparseMatrix, any': function (x: SparseMatrix, y: unknown): SparseMatrix {
+            return matAlgo11xS0s(
+              x as unknown as Parameters<typeof matAlgo11xS0s>[0],
+              y,
+              divideScalar,
+              false
+            ) as unknown as SparseMatrix;
           },
 
-          'Array, any': function (x: any[], y: any): any[] {
+          'Array, any': function (x: unknown[], y: unknown): unknown[] {
             // use matrix implementation
-            return matAlgo14xDs(matrix(x) as any, y, divideScalar, false).valueOf() as any[];
+            return matAlgo14xDs(
+              matrix(x) as unknown as Parameters<typeof matAlgo14xDs>[0],
+              y,
+              divideScalar,
+              false
+            ).valueOf() as unknown[];
           },
 
-          'any, Array | Matrix': function (x: any, y: any[] | Matrix): any[] | Matrix {
-            return multiply(x, inv(y));
+          'any, Array | Matrix': function (x: unknown, y: unknown[] | Matrix): unknown[] | Matrix {
+            return multiply(x, inv(y)) as unknown[] | Matrix;
           },
         },
         divideScalar.signatures

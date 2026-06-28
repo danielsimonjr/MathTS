@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js';
@@ -58,6 +59,16 @@ export const createNthRoot = /* #__PURE__ */ factory(
       concat,
     });
 
+    // `typed.referTo` is published as `referTo(...names, callback)` but the
+    // local TypedFunction type models it in curried form; bind it to its real
+    // (signature, callback) call signature here.
+    const referTo = typed.referTo as unknown as (
+      signature: string,
+      callback: (
+        ...refs: Array<(...args: unknown[]) => unknown>
+      ) => (...args: never[]) => unknown
+    ) => (...args: unknown[]) => unknown;
+
     /**
      * Calculate the nth root of a value.
      * The principal nth root of a positive real number A, is the positive real
@@ -97,67 +108,87 @@ export const createNthRoot = /* #__PURE__ */ factory(
         number: nthRootNumber,
         'number, number': nthRootNumber,
 
-        BigNumber: (x: any): any => _bigNthRoot(x, new BigNumber(2)),
+        BigNumber: (x: BigNumberType): BigNumberType | number => _bigNthRoot(x, new BigNumber(2)),
         'BigNumber, BigNumber': _bigNthRoot,
 
         Complex: complexErr,
         'Complex, number': complexErr,
 
-        Array: (typed as any).referTo(
+        Array: referTo(
           'DenseMatrix,number',
-          (selfDn: any) =>
-            (x: any): any =>
-              selfDn((matrix as any)(x), 2).valueOf()
+          (selfDn: (...args: unknown[]) => unknown) =>
+            (x: unknown): unknown =>
+              (selfDn(matrix(x), 2) as MatrixType).valueOf()
         ),
-        DenseMatrix: (typed as any).referTo(
+        DenseMatrix: referTo(
           'DenseMatrix,number',
-          (selfDn: any) =>
-            (x: any): any =>
+          (selfDn: (...args: unknown[]) => unknown) =>
+            (x: unknown): unknown =>
               selfDn(x, 2)
         ),
-        SparseMatrix: (typed as any).referTo(
+        SparseMatrix: referTo(
           'SparseMatrix,number',
-          (selfSn: any) =>
-            (x: any): any =>
+          (selfSn: (...args: unknown[]) => unknown) =>
+            (x: unknown): unknown =>
               selfSn(x, 2)
         ),
 
-        'SparseMatrix, SparseMatrix': typed.referToSelf((self: any) => (x: any, y: any): any => {
-          // density must be one (no zeros in matrix)
-          if (y.density() === 1) {
-            // sparse + sparse
-            return matAlgo06xS0S0(x, y, self);
-          } else {
-            // throw exception
-            throw new Error('Root must be non-zero');
-          }
-        }),
+        'SparseMatrix, SparseMatrix': typed.referToSelf(
+          (self: TypedFunction) =>
+            (x: MatrixType, y: MatrixType): unknown => {
+              // density must be one (no zeros in matrix)
+              if (y.density() === 1) {
+                // sparse + sparse
+                return matAlgo06xS0S0(
+                  x as unknown as Parameters<typeof matAlgo06xS0S0>[0],
+                  y as unknown as Parameters<typeof matAlgo06xS0S0>[1],
+                  self
+                );
+              } else {
+                // throw exception
+                throw new Error('Root must be non-zero');
+              }
+            }
+        ),
 
-        'DenseMatrix, SparseMatrix': typed.referToSelf((self: any) => (x: any, y: any): any => {
-          // density must be one (no zeros in matrix)
-          if (y.density() === 1) {
-            // dense + sparse
-            return matAlgo01xDSid(x, y, self, false);
-          } else {
-            // throw exception
-            throw new Error('Root must be non-zero');
-          }
-        }),
+        'DenseMatrix, SparseMatrix': typed.referToSelf(
+          (self: TypedFunction) =>
+            (x: MatrixType, y: MatrixType): unknown => {
+              // density must be one (no zeros in matrix)
+              if (y.density() === 1) {
+                // dense + sparse
+                return matAlgo01xDSid(
+                  x as unknown as Parameters<typeof matAlgo01xDSid>[0],
+                  y as unknown as Parameters<typeof matAlgo01xDSid>[1],
+                  self,
+                  false
+                );
+              } else {
+                // throw exception
+                throw new Error('Root must be non-zero');
+              }
+            }
+        ),
 
-        'Array, SparseMatrix': (typed as any).referTo(
+        'Array, SparseMatrix': referTo(
           'DenseMatrix,SparseMatrix',
-          (selfDS: any) =>
-            (x: any, y: any): any =>
-              selfDS((matrix as any)(x), y)
+          (selfDS: (...args: unknown[]) => unknown) =>
+            (x: unknown, y: unknown): unknown =>
+              selfDS(matrix(x), y)
         ),
 
         'number | BigNumber, SparseMatrix': typed.referToSelf(
-          (self: any) =>
-            (x: any, y: any): any => {
+          (self: TypedFunction) =>
+            (x: number | BigNumberType, y: MatrixType): unknown => {
               // density must be one (no zeros in matrix)
               if (y.density() === 1) {
                 // sparse - scalar
-                return matAlgo11xS0s(y, x, self, true);
+                return matAlgo11xS0s(
+                  y as unknown as Parameters<typeof matAlgo11xS0s>[0],
+                  x,
+                  self,
+                  true
+                );
               } else {
                 // throw exception
                 throw new Error('Root must be non-zero');
@@ -167,8 +198,8 @@ export const createNthRoot = /* #__PURE__ */ factory(
       },
       matrixAlgorithmSuite({
         scalar: 'number | BigNumber',
-        SD: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any,
+        SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
         sS: false,
       })
     ) as TypedFunction;
