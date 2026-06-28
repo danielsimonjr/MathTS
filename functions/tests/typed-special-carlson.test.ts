@@ -22,7 +22,7 @@
  *   F(0, m) = 0, E(0, m) = 0 (boundary at phi=0)
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   carlsonRCJS,
   carlsonRFJS,
@@ -44,6 +44,25 @@ import {
 const TOL = 1e-9;
 const TOL_AGREE = 1e-12;
 const PI = Math.PI;
+
+// ---------------------------------------------------------------------------
+// De-flake: warm the typed-module dynamic import once, up front.
+//
+// Suite 10 reaches the typed wrappers via `await import('../src/typed/
+// special.js')`. The *first* such import transforms + evaluates a large
+// dependency graph (typed-function + core); measured at ~4.6s of esbuild work
+// even on an idle machine. Under heavy concurrent CPU load that first import
+// alone can exceed Vitest's 5000ms per-test timeout, intermittently failing
+// whichever typed scalar test triggers it first (e.g. "carlsonRC typed scalar:
+// RC(0, 1) = π/2"). Warming it here, with a generous hook timeout, moves the
+// one-time compile cost out of any per-test deadline so every `await import()`
+// below resolves from cache and its assertion runs against a ready module
+// deterministically. No assertion is changed; this only removes the
+// load-induced timeout race.
+// ---------------------------------------------------------------------------
+beforeAll(async () => {
+  await import('../src/typed/special.js');
+}, 120_000);
 
 // ---------------------------------------------------------------------------
 // Suite 1 — RC known values

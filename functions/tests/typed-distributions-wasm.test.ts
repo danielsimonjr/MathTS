@@ -13,7 +13,7 @@
  *     lgammaDispatch — tested implicitly by the correctness checks.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { WASM_SPECIAL_THRESHOLD } from '../src/wasm/special/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -51,6 +51,25 @@ function refLgamma(x: number): number {
 
 const TOL = 1e-10;
 const TOL_AGREE = 1e-12;
+
+// ---------------------------------------------------------------------------
+// De-flake: warm the typed-module dynamic import once, up front.
+//
+// Every suite reaches the typed PDFs via `await import('../src/typed/
+// distributions.js')`. The *first* such import transforms + evaluates a large
+// dependency graph (typed-function + core); measured at several seconds of
+// esbuild work even on an idle machine. Under heavy concurrent CPU load that
+// first import alone can exceed Vitest's 5000ms per-test timeout,
+// intermittently failing whichever scalar test triggers it first (e.g.
+// "betaPDF(0.5, 2, 2) = 1.5 (scalar)"). Warming it here, with a generous hook
+// timeout, moves the one-time compile cost out of any per-test deadline so
+// every `await import()` below resolves from cache and its assertion runs
+// against a ready module deterministically. No assertion is changed; this only
+// removes the load-induced timeout race.
+// ---------------------------------------------------------------------------
+beforeAll(async () => {
+  await import('../src/typed/distributions.js');
+}, 120_000);
 
 // ===========================================================================
 // Suite 1 — betaPDF

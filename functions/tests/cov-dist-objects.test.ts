@@ -44,64 +44,103 @@ function arrMean(a: Float64Array): number {
 
 // ===========================================================================
 // Worker-dispatch path: pool initialized + n ≥ DIST_WORKER_THRESHOLD
+//
+// De-flake note: every test below dispatches ≥100k samples to the worker pool.
+// The results are deterministic for a given seed (the fan-out derives per-chunk
+// seeds from the base seed), and the mean tolerances are statistically generous
+// — e.g. for normal(3,2) over 100k samples the standard error of the mean is
+// σ/√n = 2/√100000 ≈ 0.0063, so the toBeCloseTo(3, 0) bound (|mean−3| < 0.5) is
+// ~79 standard errors wide and never fails on variance. The only load-sensitive
+// failure mode is wall-clock: under heavy CPU contention the worker spin-up +
+// fan-out round-trip can exceed Vitest's 5000ms per-test default. The pool is
+// awaited ready in beforeAll, and the hooks + worker tests carry an explicit,
+// generous timeout so a slow-but-correct parallel run is not killed mid-flight.
+// No assertion or tolerance is changed.
 // ===========================================================================
+const POOL_HOOK_TIMEOUT = 120_000;
+const WORKER_TEST_TIMEOUT = 60_000;
+
 describe('dist-objects — worker-dispatch sampleN (pool ready, n ≥ threshold)', () => {
   beforeAll(async () => {
     await computePool.initialize();
-  });
+  }, POOL_HOOK_TIMEOUT);
 
   afterAll(async () => {
     await computePool.terminate();
-  });
+  }, POOL_HOOK_TIMEOUT);
 
   it('computePool is ready after initialize', () => {
     expect(computePool.isReady()).toBe(true);
     expect(DIST_WORKER_THRESHOLD).toBe(100_000);
   });
 
-  it('normalDist.sampleN fans out across workers; mean ≈ mu', async () => {
-    const d = normalDist(3, 2);
-    const samples = await d.sampleN(DIST_WORKER_THRESHOLD, { seed: 101 });
-    expect(samples).toBeInstanceOf(Float64Array);
-    expect(samples.length).toBe(DIST_WORKER_THRESHOLD);
-    expect(arrMean(samples)).toBeCloseTo(3, 0);
-  });
+  it(
+    'normalDist.sampleN fans out across workers; mean ≈ mu',
+    async () => {
+      const d = normalDist(3, 2);
+      const samples = await d.sampleN(DIST_WORKER_THRESHOLD, { seed: 101 });
+      expect(samples).toBeInstanceOf(Float64Array);
+      expect(samples.length).toBe(DIST_WORKER_THRESHOLD);
+      expect(arrMean(samples)).toBeCloseTo(3, 0);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 
-  it('gammaDist.sampleN worker path; mean ≈ shape*scale', async () => {
-    const d = gammaDist(2, 1);
-    const samples = await d.sampleN(120_000, { seed: 7 });
-    expect(samples.length).toBe(120_000);
-    expect(arrMean(samples)).toBeCloseTo(2, 0);
-  });
+  it(
+    'gammaDist.sampleN worker path; mean ≈ shape*scale',
+    async () => {
+      const d = gammaDist(2, 1);
+      const samples = await d.sampleN(120_000, { seed: 7 });
+      expect(samples.length).toBe(120_000);
+      expect(arrMean(samples)).toBeCloseTo(2, 0);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 
-  it('betaDist.sampleN worker path; mean ≈ a/(a+b)', async () => {
-    const d = betaDist(2, 5);
-    const samples = await d.sampleN(120_000, { seed: 9 });
-    expect(samples.length).toBe(120_000);
-    expect(arrMean(samples)).toBeCloseTo(2 / 7, 1);
-  });
+  it(
+    'betaDist.sampleN worker path; mean ≈ a/(a+b)',
+    async () => {
+      const d = betaDist(2, 5);
+      const samples = await d.sampleN(120_000, { seed: 9 });
+      expect(samples.length).toBe(120_000);
+      expect(arrMean(samples)).toBeCloseTo(2 / 7, 1);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 
-  it('tDist.sampleN worker path returns finite-dominated array', async () => {
-    const d = tDist(5);
-    const samples = await d.sampleN(120_000, { seed: 11 });
-    expect(samples.length).toBe(120_000);
-    // Median of Student-t is 0; most mass is near 0.
-    expect(Math.abs(arrMean(samples))).toBeLessThan(0.5);
-  });
+  it(
+    'tDist.sampleN worker path returns finite-dominated array',
+    async () => {
+      const d = tDist(5);
+      const samples = await d.sampleN(120_000, { seed: 11 });
+      expect(samples.length).toBe(120_000);
+      // Median of Student-t is 0; most mass is near 0.
+      expect(Math.abs(arrMean(samples))).toBeLessThan(0.5);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 
-  it('exponentialDist.sampleN worker path; mean ≈ 1/lambda', async () => {
-    const d = exponentialDist(2);
-    const samples = await d.sampleN(120_000, { seed: 13 });
-    expect(samples.length).toBe(120_000);
-    expect(arrMean(samples)).toBeCloseTo(0.5, 1);
-  });
+  it(
+    'exponentialDist.sampleN worker path; mean ≈ 1/lambda',
+    async () => {
+      const d = exponentialDist(2);
+      const samples = await d.sampleN(120_000, { seed: 13 });
+      expect(samples.length).toBe(120_000);
+      expect(arrMean(samples)).toBeCloseTo(0.5, 1);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 
-  it('workerCount override clamps to n (effectiveK path)', async () => {
-    const d = normalDist(0, 1);
-    // workerCount huge but clamped to min(K, n); still valid output.
-    const samples = await d.sampleN(DIST_WORKER_THRESHOLD, { seed: 1, workerCount: 3 });
-    expect(samples.length).toBe(DIST_WORKER_THRESHOLD);
-  });
+  it(
+    'workerCount override clamps to n (effectiveK path)',
+    async () => {
+      const d = normalDist(0, 1);
+      // workerCount huge but clamped to min(K, n); still valid output.
+      const samples = await d.sampleN(DIST_WORKER_THRESHOLD, { seed: 1, workerCount: 3 });
+      expect(samples.length).toBe(DIST_WORKER_THRESHOLD);
+    },
+    WORKER_TEST_TIMEOUT
+  );
 });
 
 // ===========================================================================

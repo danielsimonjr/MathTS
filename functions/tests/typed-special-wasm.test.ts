@@ -74,6 +74,26 @@ function linspace(lo: number, hi: number, n: number): Float64Array {
 }
 
 // ---------------------------------------------------------------------------
+// De-flake: warm the typed-module dynamic import once, up front.
+//
+// The suites below reach the typed wrappers via `await import('../src/typed/
+// special.js')`. The *first* such import transforms + evaluates a large
+// dependency graph (typed-function + core); measured at ~4.6s of esbuild work
+// even on an idle machine. Under heavy concurrent CPU load that first import
+// alone can exceed Vitest's 5000ms per-test timeout, intermittently failing
+// whichever scalar test happens to trigger it first (e.g. "besselJ0 typed
+// scalar overload is unchanged"). Warming it here, with a generous hook
+// timeout, moves the one-time compile cost out of any per-test deadline so the
+// module is already in the registry — every `await import()` below then
+// resolves from cache and its assertion runs against a ready module
+// deterministically. No assertion is changed; this only removes the
+// load-induced timeout race.
+// ---------------------------------------------------------------------------
+beforeAll(async () => {
+  await import('../src/typed/special.js');
+}, 120_000);
+
+// ---------------------------------------------------------------------------
 // Section 1 — JS fallback correctness (known values)
 // ---------------------------------------------------------------------------
 

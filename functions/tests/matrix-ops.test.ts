@@ -677,6 +677,18 @@ describe('jordanForm', () => {
 // threshold lowered, and check it agrees with the sequential path.
 // =============================================================================
 
+// De-flake note: these three tests dispatch real work to the worker pool. The
+// values are deterministic (a parallel matmul/decomposition agrees with the
+// sequential path to the stated tolerance regardless of how chunks are
+// scheduled), so the only load-sensitive failure mode is the wall-clock cost of
+// the worker round-trip: under heavy concurrent CPU contention the pool spin-up
+// and chunk dispatch can exceed Vitest's 5000ms per-test default. The pool is
+// awaited ready in beforeAll, and the hooks + worker-dispatch tests carry an
+// explicit, generous timeout so a slow-but-correct parallel run is not killed
+// mid-flight. No assertion or tolerance is changed.
+const POOL_HOOK_TIMEOUT = 120_000;
+const PARALLEL_TEST_TIMEOUT = 60_000;
+
 describe('matrix-ops parallel matmul path', () => {
   // A 24x24 diagonally dominant (well-conditioned) matrix.
   const n = 24;
@@ -697,25 +709,37 @@ describe('matrix-ops parallel matmul path', () => {
     await computePool.initialize();
     // n*n = 576 -> crosses this lowered threshold and offloads to workers.
     computePool.updateConfig({ thresholdElements: 100, chunkSize: 256 });
-  });
+  }, POOL_HOOK_TIMEOUT);
 
   afterAll(async () => {
     computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
     await computePool.terminate();
-  });
+  }, POOL_HOOK_TIMEOUT);
 
-  it('matrixPower agrees with the sequential path', async () => {
-    const parPow = await matrixPower(A, 5);
-    expectMatrixClose(parPow, seqPow, 1e-9);
-  });
+  it(
+    'matrixPower agrees with the sequential path',
+    async () => {
+      const parPow = await matrixPower(A, 5);
+      expectMatrixClose(parPow, seqPow, 1e-9);
+    },
+    PARALLEL_TEST_TIMEOUT
+  );
 
-  it('characteristicPolynomial agrees with the sequential path', async () => {
-    const parChar = await characteristicPolynomial(A);
-    expectArrayClose(parChar, seqChar, 1e-6);
-  });
+  it(
+    'characteristicPolynomial agrees with the sequential path',
+    async () => {
+      const parChar = await characteristicPolynomial(A);
+      expectArrayClose(parChar, seqChar, 1e-6);
+    },
+    PARALLEL_TEST_TIMEOUT
+  );
 
-  it('polarDecomposition agrees with the sequential path', async () => {
-    const parPolar = await polarDecomposition(A);
-    expectMatrixClose(parPolar.P, seqPolarP, 1e-9);
-  });
+  it(
+    'polarDecomposition agrees with the sequential path',
+    async () => {
+      const parPolar = await polarDecomposition(A);
+      expectMatrixClose(parPolar.P, seqPolarP, 1e-9);
+    },
+    PARALLEL_TEST_TIMEOUT
+  );
 });
