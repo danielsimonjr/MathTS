@@ -23,6 +23,11 @@ export default tseslint.config(
       'assembly/src/ops/**',
       'assembly/src/env/**',
       'assembly/src/types/**',
+      // Ambient TYPE-DECLARATION files (.d.ts): type-only surface checked by
+      // tsc, with no implementation. eslint's impl rules (no-unused-vars on
+      // ambient aliases, no-explicit-any on upstream API shapes) don't
+      // meaningfully apply. Implementation .ts (src AND tests) stays linted.
+      '**/*.d.ts',
     ],
   },
   {
