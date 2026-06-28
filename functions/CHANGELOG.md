@@ -18,6 +18,28 @@
   the repo relies on (tightening it would require annotating every factory's
   deps object).
 
+### Changed — eslint `no-explicit-any`/other cleanup (subset-3, completes `functions/src`)
+
+- Drove the remaining `functions/src` dirs to zero eslint warnings:
+  `factories` (354), `expression` (43), `bitwise` (40), `logical` (32),
+  `trigonometry` (15), `statistics` (11), `error` (8), `set`, `signal`,
+  `wasm`, `typed`, `combinatorics`, `string`, `unit`, `probability`,
+  `relational`, and root `types.ts`. Behavior-preserving (no logic changes);
+  the functions suite stays green (2902 pass / 41 skip) and `tsc --noEmit` is 0.
+- Honest replacements throughout: `factoryScope as any` → `as Parameters<typeof
+  createX>[0]`; matrix-algorithm casts → `as unknown as AlgorithmFunction` /
+  `Parameters<typeof matAlgoX>[n]`; empty-object-type placeholders → real
+  `BigNumber`/`Matrix`/`IndexInterface` types; sparse matrix element values →
+  `unknown`; `expression/operators` precedence table → structural
+  `OperatorProperty`/`OperatorNodeLike` types; `BigNumber` trig methods typed via
+  the inherited `decimal.js` surface; `Error.captureStackTrace` via a narrow
+  local interface.
+- Removed redundant suppressions: stale `@ts-ignore` on `seedrandom` /
+  `javascript-natural-sort` imports (already typed by `types/modules.d.ts`) and
+  unused `eslint-disable` directives in `typed/cas.ts` / `typed/algebra.ts`.
+- `type/unit/Unit.ts` deliberately left untouched (still `@ts-nocheck`) for its
+  dedicated typing pass.
+
 ## 0.2.14
 
 ### Added — WASM acceleration tripled (3-tier gap-fill, effective-wasm 6 → 18)
