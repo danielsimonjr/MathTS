@@ -15,7 +15,6 @@ import {
   createSafeConversionDef,
   createSymbolTypeDef,
   createRobustTypeDef,
-  typed,
   create,
 } from '../src/index.js';
 
