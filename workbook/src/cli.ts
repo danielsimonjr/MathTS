@@ -10,11 +10,12 @@
 
 import { readFileSync, writeFileSync, lstatSync, realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { basename } from 'node:path';
 import { createInterface } from 'node:readline';
 import { writeFileAtomic } from './fs-atomic';
 import { Session } from './session';
 import { handleRequest, type JsonRpcRequest } from './rpc';
-import { parseWorkbook, serializeWorkbook, stripOutputs } from './parser';
+import { parseWorkbook, serializeWorkbook, stripOutputs, importWorkbook } from './parser';
 import { createExecutor } from './executor';
 import { buildDependencyGraph, detectCycles, toMermaid } from './graph';
 import { formatResult } from './formatter';
@@ -57,7 +58,12 @@ Usage:
   mtsw validate <file> [--json]             Validate structure (ids, deps, cycles)
   mtsw graph <file> [-f mermaid]            Print the dependency graph
   mtsw strip <file> [-w|--write]            Strip outputs (stdout, or -w to rewrite)
-  mtsw new <name> [-t basic] [--force]      Scaffold a new <name>.mtsw
+  mtsw new <name> [-t basic|empty|chart] [--empty] [-o <path>] [--force]
+                                            Scaffold a new workbook (-o for any path)
+  mtsw import [<file>] [-o out.mtsw] [--json]
+                                            Build a .mtsw from a JSON/YAML doc
+                                            ({metadata,cells:[{id,type,content,dependsOn}]};
+                                            file or stdin; stdout if no -o)
   mtsw capabilities [--json]                Engine version + feature flags
   mtsw templates [--json]                   List scaffold templates
   mtsw cell <verb> <file> ...               Edit cells (atomic, in-place):
@@ -306,6 +312,44 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
 }
 
 /** Parse errors + dependency cycles — the canonical "problems" set. */
+/** Validate `visualization` cells' chart specs (shape + data references). */
+function validateChartSpecs(workbook: Workbook): string[] {
+  const problems: string[] = [];
+  const ids = new Set(workbook.cells.map((c) => c.id));
+  for (const cell of workbook.cells) {
+    if (cell.type !== 'visualization') continue;
+    let spec: unknown;
+    try {
+      spec = parseYamlHardened(cell.content);
+    } catch (error) {
+      problems.push(`Cell "${cell.id}": invalid chart spec (${errMessage(error)})`);
+      continue;
+    }
+    if (!spec || typeof spec !== 'object' || Array.isArray(spec)) {
+      problems.push(`Cell "${cell.id}": chart spec must be a mapping with type/x/y`);
+      continue;
+    }
+    const s = spec as Record<string, unknown>;
+    if (s.type !== undefined && !['line', 'scatter', 'bar'].includes(String(s.type))) {
+      problems.push(`Cell "${cell.id}": chart type must be line|scatter|bar`);
+    }
+    for (const axis of ['x', 'y'] as const) {
+      const a = s[axis];
+      if (!a || typeof a !== 'object') {
+        problems.push(`Cell "${cell.id}": chart "${axis}" must be a mapping with a "data" field`);
+        continue;
+      }
+      const data = (a as Record<string, unknown>).data;
+      if (data === undefined) {
+        problems.push(`Cell "${cell.id}": chart ${axis}.data is required`);
+      } else if (typeof data === 'string' && !ids.has(data)) {
+        problems.push(`Cell "${cell.id}": chart ${axis}.data references unknown cell "${data}"`);
+      }
+    }
+  }
+  return problems;
+}
+
 function computeProblems(parsed: ParseResult): string[] {
   const problems: string[] = [...(parsed.errors ?? [])];
   if (parsed.success && parsed.workbook) {
@@ -313,6 +357,7 @@ function computeProblems(parsed: ParseResult): string[] {
     for (const cycle of detectCycles(graph)) {
       problems.push(`Dependency cycle: ${cycle.join(' -> ')}`);
     }
+    problems.push(...validateChartSpecs(parsed.workbook));
   }
   return problems;
 }
@@ -502,8 +547,24 @@ function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null
           lookup(spec?.x?.data),
           lookup(spec?.y?.data)
         );
-      } catch {
+        // Diagnostic: flag data references that didn't resolve to a value, so an
+        // empty chart explains itself instead of silently showing "no data".
+        const unresolved: string[] = [];
+        for (const ref of [spec?.x?.data, spec?.y?.data]) {
+          if (typeof ref !== 'string') continue;
+          if (byId) {
+            const r = byId.get(ref);
+            if (!r || r.status === 'error' || r.status === 'fail') unresolved.push(ref);
+          } else if (workbook.cells.find((x) => x.id === ref)?.output === undefined) {
+            unresolved.push(ref);
+          }
+        }
+        if (unresolved.length > 0) {
+          rc.note = `chart data did not resolve: ${unresolved.join(', ')}${byId ? '' : ' (try without --no-run)'}`;
+        }
+      } catch (error) {
         rc.chartSvg = renderChart({}, [], []); // "no data" placeholder
+        rc.note = `invalid chart spec: ${errMessage(error)}`;
       }
       return rc;
     }
@@ -725,8 +786,41 @@ export function stripCommand(args: string[]): CommandResult {
   return { stdout: yaml, stderr: '', exitCode: 0 };
 }
 
+const EMPTY_TEMPLATE = `version: "1.0"
+metadata:
+  title: "<NAME>"
+runtime:
+  engine: mathts
+  execution: reactive
+cells: []
+`;
+
+const CHART_TEMPLATE = `version: "1.0"
+metadata:
+  title: "<NAME>"
+runtime:
+  engine: mathts
+  execution: reactive
+cells:
+  - data: "[1, 2, 3, 4]"
+    id: xs
+
+  - data: "[1, 4, 9, 16]"
+    id: ys
+
+  - visualization: |
+      type: line
+      title: "Sample chart"
+      x: { label: "x", data: xs }
+      y: { label: "y", data: ys }
+    id: chart
+    depends_on: [xs, ys]
+`;
+
 const TEMPLATES: Record<string, { content: string; description: string }> = {
   basic: { content: BASIC_TEMPLATE, description: 'Markdown intro + a code cell + a passing test cell' },
+  empty: { content: EMPTY_TEMPLATE, description: 'A blank workbook (no cells)' },
+  chart: { content: CHART_TEMPLATE, description: 'A line chart over two data cells (visualization example)' },
 };
 
 /** Windows reserved device names (case-insensitive), which cannot be filenames. */
@@ -737,23 +831,11 @@ const RESERVED_DEVICE_NAMES = new Set([
 ]);
 
 export function newCommand(args: string[]): CommandResult {
+  const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
   const name = firstPositional(args);
-  if (!name) {
-    return { stdout: '', stderr: 'Usage: mtsw new <name> [-t basic] [--force]', exitCode: 1 };
-  }
-
-  // Path-traversal guard: a bare name only (no separators/colons/control chars,
-  // not absolute). Colons matter on Windows where `C:foo` is drive-relative and
-  // escapes isAbsolute().
-  if (!/^[A-Za-z0-9._-]+$/.test(name)) {
-    return {
-      stdout: '',
-      stderr: `Invalid name '${name}': must be a bare filename (no path separators, colons, or control characters)`,
-      exitCode: 1,
-    };
-  }
-
-  const templateName = flagValue(args, '-t') ?? flagValue(args, '--template') ?? 'basic';
+  const templateName = args.includes('--empty')
+    ? 'empty'
+    : flagValue(args, '-t') ?? flagValue(args, '--template') ?? 'basic';
   const template = TEMPLATES[templateName];
   if (!template) {
     return {
@@ -763,11 +845,36 @@ export function newCommand(args: string[]): CommandResult {
     };
   }
 
-  const bare = name.endsWith('.mtsw') ? name.slice(0, -'.mtsw'.length) : name;
-  if (bare === '' || bare === '.' || bare === '..' || RESERVED_DEVICE_NAMES.has(bare.toUpperCase())) {
-    return { stdout: '', stderr: `Invalid name '${name}'`, exitCode: 1 };
+  let target: string;
+  let bare: string;
+  if (outPath) {
+    // Explicit path (like `export -o`): the caller opts into any location.
+    target = outPath.endsWith('.mtsw') ? outPath : `${outPath}.mtsw`;
+    bare = basename(target).slice(0, -'.mtsw'.length);
+  } else {
+    if (!name) {
+      return {
+        stdout: '',
+        stderr: 'Usage: mtsw new <name> [-t basic|empty|chart] [--empty] [-o <path>] [--force]',
+        exitCode: 1,
+      };
+    }
+    // Bare-name path-traversal guard (no separators/colons/control chars,
+    // not absolute). Colons matter on Windows where `C:foo` is drive-relative.
+    if (!/^[A-Za-z0-9._-]+$/.test(name)) {
+      return {
+        stdout: '',
+        stderr: `Invalid name '${name}': must be a bare filename — or use -o <path> for an explicit location`,
+        exitCode: 1,
+      };
+    }
+    bare = name.endsWith('.mtsw') ? name.slice(0, -'.mtsw'.length) : name;
+    if (bare === '' || bare === '.' || bare === '..' || RESERVED_DEVICE_NAMES.has(bare.toUpperCase())) {
+      return { stdout: '', stderr: `Invalid name '${name}'`, exitCode: 1 };
+    }
+    target = `${bare}.mtsw`;
   }
-  const target = `${bare}.mtsw`;
+
   const content = template.content.replace(/<NAME>/g, bare);
   const force = args.includes('--force');
 
@@ -795,6 +902,47 @@ export function newCommand(args: string[]): CommandResult {
   }
 
   return { stdout: `Created ${target}`, stderr: '', exitCode: 0 };
+}
+
+export function importCommand(args: string[]): CommandResult {
+  const json = args.includes('--json');
+  const fail = (problems: string[]): CommandResult =>
+    json
+      ? { stdout: jsonEnvelope('import', false, null, problems), stderr: '', exitCode: 1 }
+      : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
+
+  const file = firstPositional(args);
+  let input: string;
+  if (!file || file === '-') {
+    if (process.stdin.isTTY) return fail(['Provide an input file, or pipe JSON/YAML to stdin']);
+    try {
+      input = readFileSync(0, 'utf-8');
+    } catch (error) {
+      return fail([`Failed to read stdin: ${errMessage(error)}`]);
+    }
+  } else {
+    const read = readFile(file);
+    if (read.error) return fail([read.error]);
+    input = read.content!;
+  }
+
+  const result = importWorkbook(input);
+  if (!result.success || !result.workbook) return fail(result.errors ?? ['Import failed']);
+  const content = serializeWorkbook(result.workbook);
+  const count = result.workbook.cells.length;
+
+  const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
+  if (outPath) {
+    try {
+      writeFileAtomic(outPath, content);
+    } catch (error) {
+      return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
+    }
+    if (json) return { stdout: jsonEnvelope('import', true, { path: outPath, cells: count }, []), stderr: '', exitCode: 0 };
+    return { stdout: '', stderr: `Imported ${count} cell(s) -> ${outPath}`, exitCode: 0 };
+  }
+  if (json) return { stdout: jsonEnvelope('import', true, { content, cells: count }, []), stderr: '', exitCode: 0 };
+  return { stdout: content, stderr: '', exitCode: 0 };
 }
 
 /** All non-flag positional args, skipping value-flag values. */
@@ -1007,6 +1155,8 @@ export async function dispatch(argv: string[]): Promise<CommandResult> {
         return functionsCommand(rest);
       case 'meta':
         return metaCommand(rest);
+      case 'import':
+        return importCommand(rest);
       case 'export':
         return exportCommand(rest);
       case 'serve':

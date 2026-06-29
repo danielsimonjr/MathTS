@@ -14,5 +14,5 @@ export const VERSION = '0.1.0';
 /** Canonical dispatchable command list (advertised by `capabilities`; a test guards drift). */
 export const COMMAND_NAMES = [
   'run', 'describe', 'validate', 'graph', 'strip', 'new',
-  'capabilities', 'templates', 'cell', 'serve', 'functions', 'meta', 'export',
+  'capabilities', 'templates', 'cell', 'serve', 'functions', 'meta', 'import', 'export',
 ] as const;

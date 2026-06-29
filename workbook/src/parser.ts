@@ -4,7 +4,8 @@
 
 import { stringify as stringifyYaml } from 'yaml';
 import { parseYamlHardened, findPollutionKeys } from './yaml-safe';
-import type { Workbook, ParseResult, CellType, Cell, RuntimeConfig } from './types';
+import { buildDependencyGraph, detectCycles } from './graph';
+import type { Workbook, ParseResult, CellType, Cell, RuntimeConfig, WorkbookMetadata } from './types';
 
 /**
  * Canonical cell-type keys, in detection-precedence order. Shared between the
@@ -272,3 +273,68 @@ export function stripOutputs(workbook: Workbook): Workbook {
 }
 
 export { detectCellType, CELL_TYPE_KEYS };
+
+/**
+ * Build a validated Workbook from a structured document (JSON or YAML — YAML is
+ * a JSON superset, so both parse). Accepts the friendly, `describe`-style shape
+ * `{ metadata?, runtime?, version?, cells: [{ id, type, content, dependsOn? }] }`
+ * (the inverse of `describe --json`), normalizes each cell to the `.mtsw` shape,
+ * then round-trips through serialize + parse so all the usual validation
+ * (identifier ids, uniqueness, supported types, existing deps, no cycle,
+ * prototype-pollution) is reused. Returns a ParseResult.
+ */
+export function importWorkbook(input: string): ParseResult {
+  let obj: unknown;
+  try {
+    obj = parseYamlHardened(input);
+  } catch (error) {
+    return { success: false, errors: [`Invalid JSON/YAML: ${error instanceof Error ? error.message : String(error)}`] };
+  }
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return { success: false, errors: ['Input must be an object with a "cells" array'] };
+  }
+  const root = obj as Record<string, unknown>;
+  if (!Array.isArray(root.cells)) {
+    return { success: false, errors: ['Input must have a "cells" array'] };
+  }
+
+  const errors: string[] = [];
+  const cells: Cell[] = [];
+  root.cells.forEach((raw, index) => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      errors.push(`Cell at index ${index}: must be an object`);
+      return;
+    }
+    const c = raw as Record<string, unknown>;
+    const id = typeof c.id === 'string' ? c.id : '';
+    const type = typeof c.type === 'string' ? c.type : '';
+    const content = typeof c.content === 'string' ? c.content : c.content == null ? '' : String(c.content);
+    const depsRaw = Array.isArray(c.dependsOn) ? c.dependsOn : Array.isArray(c.depends_on) ? c.depends_on : undefined;
+    const dependsOn = depsRaw?.map((d) => String(d));
+    const cell: Cell = { id, type: type as CellType, content };
+    if (dependsOn && dependsOn.length > 0) cell.dependsOn = dependsOn;
+    cells.push(cell);
+  });
+  if (errors.length > 0) return { success: false, errors };
+
+  const metadata =
+    root.metadata && typeof root.metadata === 'object' && !Array.isArray(root.metadata)
+      ? (root.metadata as WorkbookMetadata)
+      : {};
+  const runtime =
+    root.runtime && typeof root.runtime === 'object' && !Array.isArray(root.runtime)
+      ? (root.runtime as RuntimeConfig)
+      : ({ engine: 'mathts', execution: 'reactive' } as RuntimeConfig);
+  const version = typeof root.version === 'string' ? root.version : '1.0';
+
+  const workbook: Workbook = { version, metadata, runtime, cells };
+  // Validate structure by round-tripping through serialize + parse...
+  const parsed = parseWorkbook(serializeWorkbook(workbook));
+  if (!parsed.success || !parsed.workbook) return parsed;
+  // ...then reject dependency cycles (parseWorkbook validates refs, not cycles).
+  const cycles = detectCycles(buildDependencyGraph(parsed.workbook.cells));
+  if (cycles.length > 0) {
+    return { success: false, errors: cycles.map((c) => `Dependency cycle: ${c.join(' -> ')}`) };
+  }
+  return parsed;
+}

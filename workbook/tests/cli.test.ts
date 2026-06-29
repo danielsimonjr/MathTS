@@ -202,6 +202,7 @@ describe('cli envelope robustness', () => {
     const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
     for (const name of env.data.commands as string[]) {
       if (name === 'serve') continue; // long-running stdio loop; covered by the serve smoke
+      if (name === 'import') continue; // reads stdin with no args; covered by authoring tests
       // No extra arg → each command hits its own usage/output path, never the
       // "Unknown command" branch, and (importantly) `new` creates no file.
       const r = await dispatch([name]);

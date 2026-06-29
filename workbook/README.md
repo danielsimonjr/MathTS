@@ -59,6 +59,15 @@ mtsw functions --json                  # functions/constants cells can call (aut
 mtsw meta get example.mtsw             # show workbook metadata
 mtsw meta set example.mtsw --title "My Notebook" --author Ada --tags physics,demo
 
+# Scaffold a workbook (templates: basic | empty | chart; -o writes to any path).
+mtsw new notebook                        # notebook.mtsw in the CWD (basic template)
+mtsw new draft --empty -o docs/draft.mtsw    # blank workbook at an explicit path
+mtsw new demo -t chart                       # a line-chart example workbook
+
+# Build a whole .mtsw from a JSON/YAML document (the inverse of `describe --json`).
+echo '{"cells":[{"id":"a","type":"code","content":"6 * 7"}]}' | mtsw import -o out.mtsw
+mtsw import doc.json --json               # validates (ids/deps/cycles); stdout if no -o
+
 # Render to a self-contained HTML document (runs first, then renders).
 mtsw export example.mtsw -o example.html     # one offline file; stdout if no -o
 mtsw export example.mtsw --no-run            # render cached outputs without executing

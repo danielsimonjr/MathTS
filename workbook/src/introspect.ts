@@ -27,12 +27,25 @@ export function listFunctions(): { functions: string[]; constants: string[] } {
   return functionsCache;
 }
 
+/** Per-cell-type content schema, for discoverability (esp. the chart spec). */
+const CELL_SCHEMAS: Record<string, string> = {
+  code: 'MathTS expression; the cell output is its evaluated value',
+  markdown: 'Markdown text (rendered to HTML on export)',
+  equation: 'MathTS expression syntax, rendered to MathML on export (display-only)',
+  test: 'Boolean MathTS expression; true = pass, false = fail',
+  data: 'A YAML/JSON literal value (e.g. a numeric array)',
+  visualization:
+    'YAML chart spec: { type: line|scatter|bar, title?, x: {label?, data}, y: {label?, data} }; ' +
+    'data = a dependency cell id (numeric array) or an inline array',
+};
+
 /** Capabilities payload — version, cell types, command list, feature flags. */
 export function capabilitiesInfo(): {
   name: string;
   version: string;
   schemaVersion: typeof SCHEMA_VERSION;
   cellTypes: { supported: string[]; deferred: string[] };
+  cellSchemas: Record<string, string>;
   commands: string[];
   features: Record<string, boolean>;
 } {
@@ -42,8 +55,9 @@ export function capabilitiesInfo(): {
     schemaVersion: SCHEMA_VERSION,
     cellTypes: {
       supported: [...SUPPORTED_CELL_TYPES],
-      deferred: ['tensor', 'equation', 'visualization', 'export'],
+      deferred: ['tensor', 'export'],
     },
+    cellSchemas: CELL_SCHEMAS,
     commands: [...COMMAND_NAMES],
     features: {
       json: true,
@@ -53,6 +67,8 @@ export function capabilitiesInfo(): {
       serve: true,
       incremental: true,
       functions: true,
+      import: true,
+      export: true,
     },
   };
 }

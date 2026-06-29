@@ -24,6 +24,8 @@ export interface RenderCell {
   passed?: boolean;
   /** For `chart` cells: pre-rendered inline SVG. */
   chartSvg?: string;
+  /** Optional diagnostic note (e.g. a chart whose data didn't resolve). */
+  note?: string;
 }
 
 export interface RenderDoc {
@@ -99,8 +101,11 @@ function renderCell(cell: RenderCell, parse?: (expr: string) => unknown): string
       const val = cell.error !== undefined ? esc(cell.error) : esc(cell.output ?? '');
       return `<figure class="cell cell-data">${cap}<pre><code>${val}</code></pre></figure>`;
     }
-    case 'chart':
-      return `<figure class="cell cell-chart">${cap}${cell.chartSvg ?? '<p class="note">no chart</p>'}</figure>`;
+    case 'chart': {
+      // Note is a <p>, not a second <figcaption> (a <figure> permits only one).
+      const note = cell.note ? `<p class="note">⚠ ${esc(cell.note)}</p>` : '';
+      return `<figure class="cell cell-chart">${cap}${cell.chartSvg ?? '<p class="note">no chart</p>'}${note}</figure>`;
+    }
     default:
       return `<figure class="cell"><pre><code>${esc(cell.content)}</code></pre></figure>`;
   }
