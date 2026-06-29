@@ -10,7 +10,7 @@
  * HTML-escaped before embedding.
  */
 
-import { toMathML, mathMLError } from './toMathML.js';
+import { mathMLDocument, mathMLError } from './utils/mathml.js';
 import { markdownToHtml } from './markdown.js';
 
 export interface RenderCell {
@@ -55,7 +55,7 @@ function renderEquation(content: string, parse?: (expr: string) => unknown): str
     math = mathMLError(content);
   } else {
     try {
-      math = toMathML(parse(content));
+      math = mathMLDocument(parse(content) as { toMathML(): string });
     } catch {
       math = mathMLError(content);
     }

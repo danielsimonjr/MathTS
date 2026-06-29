@@ -11,6 +11,7 @@ import { getSafeProperty, getSafeMethod } from '../utils/customs.js';
 import { createSubScope } from '../utils/scope.js';
 import { factory } from '../utils/factory.js';
 import { defaultTemplate, latexFunctions } from '../utils/latex.js';
+import { toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'FunctionNode';
@@ -570,6 +571,24 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
+      _toMathML(): string {
+        const fnNode = this.fn as unknown as { name?: string };
+        const name = fnNode.name ?? String(this.fn);
+        const args = this.args;
+        if (name === 'sqrt' && args.length === 1) return `<msqrt>${args[0].toMathML()}</msqrt>`;
+        if (name === 'cbrt' && args.length === 1) {
+          return `<mroot><mrow>${args[0].toMathML()}</mrow><mn>3</mn></mroot>`;
+        }
+        if (name === 'nthRoot' && args.length === 2) {
+          return `<mroot><mrow>${args[0].toMathML()}</mrow><mrow>${args[1].toMathML()}</mrow></mroot>`;
+        }
+        if (name === 'abs' && args.length === 1) {
+          return `<mrow><mo>|</mo>${args[0].toMathML()}<mo>|</mo></mrow>`;
+        }
+        const inner = args.map((a) => a.toMathML()).join('<mo>,</mo>');
+        return `<mrow>${toMathMLSymbol(name)}<mo>&#x2061;</mo><mrow><mo>(</mo>${inner}<mo>)</mo></mrow></mrow>`;
+      }
+
       _toTex(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
           // get LaTeX of the arguments

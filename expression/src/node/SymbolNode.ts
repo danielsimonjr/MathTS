@@ -2,6 +2,7 @@ import { escape } from '../utils/string.js';
 import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import { toSymbol } from '../utils/latex.js';
+import { toMathMLSymbol } from '../utils/mathml.js';
 
 // Type definitions
 interface Node {
@@ -223,6 +224,10 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
+      _toMathML(): string {
+        return toMathMLSymbol(this.name);
+      }
+
       _toTex(_options?: StringOptions): string {
         let isUnit = false;
         if (typeof math[this.name] === 'undefined' && isValuelessUnit(this.name)) {

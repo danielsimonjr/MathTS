@@ -5,6 +5,7 @@ import { escape } from '../utils/string.js';
 import { getSafeProperty, isSafeMethod } from '../utils/customs.js';
 import { getAssociativity, getPrecedence, isAssociativeWith, properties } from '../operators.js';
 import { latexOperators } from '../utils/latex.js';
+import { escapeMathML, inlineOperator, parenthesizeLower } from '../utils/mathml.js';
 import { factory } from '../utils/factory.js';
 
 // Type definitions
@@ -17,6 +18,7 @@ interface Node {
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
+  toMathML: () => string;
   type: string;
 }
 
@@ -779,6 +781,39 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
+      _toMathML(): string {
+        const fn = this.fn;
+        const args = this.args;
+        if (fn === 'divide' && args.length === 2) {
+          return `<mfrac><mrow>${args[0].toMathML()}</mrow><mrow>${args[1].toMathML()}</mrow></mfrac>`;
+        }
+        if (fn === 'pow' && args.length === 2) {
+          return `<msup><mrow>${args[0].toMathML()}</mrow><mrow>${args[1].toMathML()}</mrow></msup>`;
+        }
+        // Wrap a child operator of lower precedence in visual parens.
+        const child = (arg: Node): string =>
+          parenthesizeLower(arg.toMathML(), isOperatorNode(arg) ? (arg as unknown as { fn: string }).fn : undefined, fn);
+        if (args.length === 1) {
+          const op = this.op === '-' || this.op === '+' ? this.op : escapeMathML(this.op);
+          const operand = child(args[0]);
+          // Postfix when left-associative (factorial `5!`, ctranspose `A'`),
+          // prefix otherwise (unaryMinus `-x`, not) — mirrors `_toHTML`.
+          return getAssociativity(this, 'keep') === 'right'
+            ? `<mrow><mo>${op}</mo>${operand}</mrow>`
+            : `<mrow>${operand}<mo>${op}</mo></mrow>`;
+        }
+        if (args.length >= 2) {
+          const opMml =
+            fn === 'multiply'
+              ? this.implicit
+                ? '<mo>&#x2062;</mo>'
+                : '<mo>&#x22C5;</mo>'
+              : inlineOperator(fn, this.op);
+          return `<mrow>${args.map(child).join(opMml)}</mrow>`;
+        }
+        return `<mtext>${escapeMathML(this.toString())}</mtext>`;
+      }
+
       _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const implicit = options && options.implicit ? options.implicit : 'hide';

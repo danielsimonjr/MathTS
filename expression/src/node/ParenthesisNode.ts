@@ -8,6 +8,7 @@ interface Node {
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
+  toMathML: () => string;
 }
 
 type CompileFunction = (
@@ -177,6 +178,10 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @return {string} str
        * @override
        */
+      _toMathML(): string {
+        return `<mrow><mo>(</mo>${this.content.toMathML()}<mo>)</mo></mrow>`;
+      }
+
       _toTex(options?: StringOptions): string {
         if (
           !options ||

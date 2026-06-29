@@ -1,5 +1,5 @@
 import { isNode } from '../utils/is.js';
-import { toMathML as renderMathML } from '../toMathML.js';
+import { escapeMathML } from '../utils/mathml.js';
 
 import { keywords } from '../keywords.js';
 import { deepStrictEqual } from '../utils/object.js';
@@ -369,12 +369,27 @@ export const createNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Render this node to a self-contained MathML `<math>` element. Sits
-       * alongside `toTex`/`toHTML`; browsers typeset MathML natively.
+       * Render this node to a MathML fragment (the MathML analog of `toTex`).
+       * Like `toTex`, this returns the body — wrap it in a `<math>` element with
+       * `mathMLDocument(node)` to render. Never throws: a failing node degrades
+       * to an escaped `<merror>` fragment.
        * @return {string}
        */
       toMathML(): string {
-        return renderMathML(this);
+        try {
+          return this._toMathML();
+        } catch {
+          return '<merror><mtext>render error</mtext></merror>';
+        }
+      }
+
+      /**
+       * Internal MathML generator. Overridden by the node types that render as
+       * typeset math; the base falls back to escaped text (best-effort display),
+       * rather than throwing like `_toTex`, so unhandled nodes degrade gracefully.
+       */
+      _toMathML(): string {
+        return `<mtext>${escapeMathML(this._toString())}</mtext>`;
       }
 
       /**

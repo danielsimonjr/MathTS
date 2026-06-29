@@ -56,7 +56,32 @@ node.type                    // string: 'OperatorNode', 'FunctionNode', etc.
 node.toString()              // infix string representation
 node.toTex()                 // LaTeX string representation
 node.toHTML()                // HTML string with CSS class spans
+node.toMathML()              // MathML fragment (browsers typeset natively)
 node.equals(other: Node)     // deep equality check
+```
+
+### Rendering generators
+
+`toMathML()` is a per-node serializer alongside `toTex()`/`toHTML()` — it returns
+a MathML *fragment* (like `toTex()` returns a LaTeX fragment). Wrap it in a
+`<math>` element to render. Zero external dependencies; MathML is typeset
+natively by modern browsers.
+
+```typescript
+import {
+  mathMLDocument, // wrap a node's fragment in a <math> element
+  mathMLError,    // a <math><merror> for a parse/render failure
+  markdownToHtml, // minimal, XSS-safe Markdown -> HTML
+  renderChart,    // numeric data series -> inline SVG (line | scatter | bar)
+  toHTML, toCSS,  // assemble a { cells, metadata } document -> self-contained HTML5
+} from '@danielsimonjr/mathts-expression';
+
+const node = parse('c = 1 / sqrt(eps0 * mu0)');
+node.toMathML();            // '<mrow><mi>c</mi><mo>=</mo><mfrac>...</mfrac></mrow>'
+mathMLDocument(node);       // '<math xmlns="..." display="block">...</math>'
+
+renderChart({ type: 'line', title: 'f(x)' }, [1, 2, 3], [1, 4, 9]); // '<svg ...>...</svg>'
+markdownToHtml('# Title\n\n**bold**');                              // '<h1>Title</h1>...'
 ```
 
 ### Traversal

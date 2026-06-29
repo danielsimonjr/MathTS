@@ -2,6 +2,7 @@ import { getPrecedence } from '../operators.js';
 import { escape } from '../utils/string.js';
 import { getSafeProperty } from '../utils/customs.js';
 import { latexOperators } from '../utils/latex.js';
+import { escapeMathML, inlineOperator } from '../utils/mathml.js';
 import { factory } from '../utils/factory.js';
 
 // Type definitions
@@ -11,6 +12,7 @@ interface Node {
   toString: (options?: StringOptions) => string;
   toHTML: (options?: StringOptions) => string;
   toTex: (options?: StringOptions) => string;
+  toMathML: () => string;
 }
 
 type CompileFunction = (
@@ -269,6 +271,19 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
+      _toMathML(): string {
+        const params = this.params;
+        const conds = this.conditionals;
+        if (params.length >= 2 && conds.length === params.length - 1) {
+          let out = params[0].toMathML();
+          for (let i = 0; i < conds.length; i++) {
+            out += `${inlineOperator(conds[i], conds[i])}${params[i + 1].toMathML()}`;
+          }
+          return `<mrow>${out}</mrow>`;
+        }
+        return `<mtext>${escapeMathML(this.toString())}</mtext>`;
+      }
+
       _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         // `this` is the RelationalNode being rendered (a registered operator),

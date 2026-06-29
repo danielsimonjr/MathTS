@@ -18,7 +18,9 @@ export * from './evaluator/index.js';
 
 // Rendering generators (alongside node .toTex()/.toHTML()): MathML, Markdown,
 // SVG charts, and self-contained HTML document assembly. Zero external deps.
-export { toMathML, mathMLError } from './toMathML.js';
+// `toMathML` is a per-node method (like `toTex`); these are the supporting
+// helpers for wrapping a node's fragment in a <math> document / a parse error.
+export { mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol } from './utils/mathml.js';
 export { markdownToHtml } from './markdown.js';
 export { renderChart } from './svg.js';
 export type { ChartSpec } from './svg.js';

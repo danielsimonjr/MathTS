@@ -4,6 +4,7 @@ import { factory } from '../utils/factory.js';
 import { accessFactory } from './utils/access.js';
 import { assignFactory } from './utils/assign.js';
 import { getPrecedence } from '../operators.js';
+import { escapeMathML, toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'AssignmentNode';
@@ -370,6 +371,17 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string}
        */
+      _toMathML(): string {
+        const obj = this.object;
+        // Simple `symbol = value` only; an indexed LHS (`a[2] = 3`) carries an
+        // `index` we don't render, so fall back to text rather than drop it.
+        if (obj && isSymbolNode(obj) && !this.index && this.value) {
+          const name = (obj as unknown as { name: string }).name;
+          return `<mrow>${toMathMLSymbol(name)}<mo>=</mo>${this.value.toMathML()}</mrow>`;
+        }
+        return `<mtext>${escapeMathML(this.toString())}</mtext>`;
+      }
+
       _toTex(options?: StringOptions): string {
         const object = this.object.toTex(options);
         const index = this.index ? this.index.toTex(options) : '';

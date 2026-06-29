@@ -1,6 +1,7 @@
 import { format } from '../utils/string.js';
 import { typeOf } from '../utils/is.js';
 import { escapeLatex } from '../utils/latex.js';
+import { constantToMathML } from '../utils/mathml.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode, StringOptions } from './Node.js';
 
@@ -155,6 +156,10 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @param {Object} options
        * @return {string} str
        */
+      _toMathML(): string {
+        return constantToMathML(this.value);
+      }
+
       _toTex(options?: StringOptions): string {
         const value = this._toString(options);
         const type = typeOf(this.value);
