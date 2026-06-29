@@ -624,7 +624,7 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 
 **Open:**
 
-- [ ] **Publish `@danielsimonjr/mathts-expression`** (the `.toMathML` + MathML helpers — its `toTex`-mirroring shape is release-ready). Prep: bump 0.2.4 → 0.3.0, generate CHANGELOG, detangle the changesets so only `expression` versions (the 7 `workbook` changesets stay queued), add generator docs to its README. Publish itself needs Daniel's 2FA.
+- [x] **Published `@danielsimonjr/mathts-expression@0.3.0`** (2026-06-29, release commit `221f7f4`, tag `@danielsimonjr/mathts-expression@0.3.0` + GitHub release) — `Node.toMathML()` + `mathMLDocument`/`mathMLError`/`escapeMathML`/`toMathMLSymbol`. Bumped 0.2.4 → 0.3.0; CHANGELOG + README generator docs; the 2 mixed changesets detangled to workbook-only so only `expression` versioned. Verified live on npm (`dist-tags.latest = 0.3.0`).
 - [ ] **Workbook package is NOT release-ready** (explicit, 2026-06-29) — hold `@danielsimonjr/mathts-workbook` until further notice.
 - [ ] **Electron GUI** — the eventual app, pure presentation over the CLI/serve contract (`electron-vite-react` base).
 - [ ] Deferred capabilities: `--expect-hash` optimistic lock · multi-doc serve · mid-run event streaming · PDF/markdown/ipynb export · SVG math typesetting (vs MathML) · interactive (JS) charts · worker-thread run timeout (sandboxed exec is currently synchronous, no hard timeout).
