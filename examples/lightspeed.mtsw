@@ -1,103 +1,96 @@
 version: "1.0"
-
 metadata:
-  title: "Deriving the Speed of Light in a Vacuum"
-  author: "MathTS Workbook"
-  description: "A live, self-verifying derivation of c via Maxwell's relation and a wavelength-frequency cross-check, with rendered equations and a chart — all MathTS-native."
-  tags: [physics, electromagnetism, constants, derivation]
-
+  title: Deriving the Speed of Light in a Vacuum
+  author: MathTS Workbook
+  description: A live, self-verifying derivation of c via the Maxwell relation and a wavelength-frequency cross-check, with rendered equations and a chart - all MathTS-native.
+  tags:
+    - physics
+    - electromagnetism
+    - constants
+    - derivation
 runtime:
   engine: mathts
   execution: reactive
-
 cells:
   - markdown: |
       # Deriving the Speed of Light in a Vacuum
 
-      The speed of light **c** follows from two electromagnetic constants of
-      free space — the vacuum permittivity **ε₀** and the vacuum permeability
-      **μ₀** — via Maxwell's relation:
+      The speed of light **c** follows from two electromagnetic constants of free
+      space - the vacuum permittivity **ε₀** and the vacuum permeability **μ₀** -
+      via the Maxwell relation:
     id: intro
-
-  - equation: "c = 1 / sqrt(epsilon_0 * mu_0)"
+  - equation: c = 1 / sqrt(epsilon_0 * mu_0)
     id: maxwellEq
-
   - markdown: |
       ## 1. Maxwell's relation
 
       ε₀ and μ₀ in SI units (MathTS's `electricConstant` and `magneticConstant`):
     id: maxwellIntro
-
   - code: "8.8541878128e-12"
     id: eps0
-
   - code: "1.25663706212e-6"
     id: mu0
-
-  - code: "1 / sqrt(eps0 * mu0)"
+  - code: 1 / sqrt(eps0 * mu0)
     id: cMaxwell
-    depends_on: [eps0, mu0]
-
+    depends_on:
+      - eps0
+      - mu0
   - code: "299792458"
     id: cDefined
-
-  - test: "abs(cMaxwell - cDefined) / cDefined < 1e-6"
+  - test: abs(cMaxwell - cDefined) / cDefined < 1e-6
     id: checkMaxwell
-    depends_on: [cMaxwell, cDefined]
-
+    depends_on:
+      - cMaxwell
+      - cDefined
   - markdown: |
-      ## 2. Wavelength–frequency cross-check
+      ## 2. Wavelength-frequency cross-check
 
       In vacuum, every wave satisfies c = λ·ν:
     id: lambdaNuIntro
-
-  - equation: "c = lambda * nu"
+  - equation: c = lambda * nu
     id: lambdaNuEq
-
-  - markdown: |
-      A HeNe laser line: λ ≈ 632.8 nm, ν ≈ 4.738×10¹⁴ Hz.
+  - markdown: "A HeNe laser line: λ ≈ 632.8 nm, ν ≈ 4.738e14 Hz."
     id: heneNote
-
   - code: "632.8e-9"
     id: lambda
-
   - code: "4.738e14"
     id: nu
-
-  - code: "lambda * nu"
+  - code: lambda * nu
     id: cLambdaNu
-    depends_on: [lambda, nu]
-
-  - test: "abs(cLambdaNu - cDefined) / cDefined < 0.01"
+    depends_on:
+      - lambda
+      - nu
+  - test: abs(cLambdaNu - cDefined) / cDefined < 0.01
     id: checkLambdaNu
-    depends_on: [cLambdaNu, cDefined]
-
+    depends_on:
+      - cLambdaNu
+      - cDefined
   - markdown: |
       ## 3. Dispersion-free vacuum
 
       Across the visible spectrum, frequency is exactly inverse to wavelength
       (ν = c/λ), since c is constant:
     id: chartIntro
-
   - data: "[4.0e-7, 5.0e-7, 6.0e-7, 7.0e-7]"
     id: lambdas
-
-  - code: "cDefined ./ lambdas"
+  - code: cDefined ./ lambdas
     id: nus
-    depends_on: [cDefined, lambdas]
-
+    depends_on:
+      - cDefined
+      - lambdas
   - visualization: |
       type: line
       title: "Vacuum: frequency vs wavelength (ν = c/λ)"
       x: { label: "wavelength λ (m)", data: lambdas }
       y: { label: "frequency ν (Hz)", data: nus }
     id: dispersionChart
-    depends_on: [lambdas, nus]
-
+    depends_on:
+      - lambdas
+      - nus
   - markdown: |
       ## Conclusion
 
-      Both routes reproduce **c = 299,792,458 m/s** — Maxwell's relation to
-      floating-point precision and λ·ν to measurement tolerance — and the green
+      Both routes reproduce **c = 299,792,458 m/s** - the Maxwell relation to
+      floating-point precision and λ·ν to measurement tolerance - and the green
       `test` cells make the document self-verifying.
     id: conclusion
