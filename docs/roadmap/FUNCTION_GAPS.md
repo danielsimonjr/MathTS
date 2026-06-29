@@ -1,10 +1,12 @@
 # Proposal: Function & Auxiliary-Function Gaps
 
 **Author:** MathTS maintenance
-**Date:** 2026-05-24
-**Status:** Proposed
+**Date:** 2026-05-24 · **Refreshed:** 2026-06-29 (see [§7 — Deep re-analysis](#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6))
+**Status:** Original three slices ✅ landed (commit `1bfad1e`); §7 tracks a fresh batch of gaps surfaced by the 2026-06-29 re-analysis.
 **Target packages:** `@danielsimonjr/mathts-autograd`, `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-tensor`
 **Companion analysis:** Based on the 2026-05-24 dep-graph audit of `docs/Architecture/`. Three categories of gaps were identified — promotion gaps, acceleration gaps, cross-cutting infrastructure gaps. This proposal scopes the three highest-leverage adds from that audit.
+
+> **Note (2026-06-29):** Sections 0–6 below are the **original proposal**, now fully landed. The companion [`FUNCTION_GAPS_AUDIT.md`](./FUNCTION_GAPS_AUDIT.md) declared "no open gaps" as of Wave 6. A fresh four-dimension re-analysis on 2026-06-29 — type-dispatch breadth, mathjs canonical-name parity, expression/workbook parity, and external-oracle correctness coverage — found that while MathTS is functionally **complete** (no missing functions, full parser parity), it has real **dispatch-breadth, external-grounding, and cosmetic** gaps. Those are catalogued in **[§7](#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6)**.
 
 ---
 
@@ -295,3 +297,84 @@ Specific acceptance:
 - Slice 1: gradient-check against finite-difference within `1e-7` for every new method.
 - Slice 2: every promoted function callable via `import { arg, conj, …, setUnion, … } from '@danielsimonjr/mathts-functions'`. The factory-collision rewrite leaves no `TS2308` ambiguous re-export errors.
 - Slice 3: every decomposition reconstructs the input to `1e-9`. Symmetric-eig fast-path takes a measurably different code path than the general-eig path (same numerical result, different internal routine).
+
+---
+
+## 7. Deep re-analysis (2026-06-29) — new gaps post-Wave-6
+
+**Method.** Four parallel evidence-gathering passes over the current `main` (HEAD `dd23b25`), each on an independent dimension, with every concrete claim backed by a `file:line` citation and spot-verified against the **built** packages (`functions/dist`, `matrix/dist`). mathjs is not installed, so mathjs-side claims are marked `[confident]` / `[verify-upstream]`.
+
+1. **Type-dispatch breadth** — which `functions/src/typed/*.ts` functions are narrower than their mathjs equivalents.
+2. **mathjs canonical-name parity** — mathjs functions with no MathTS export under the mathjs spelling.
+3. **Expression / parser / workbook parity** — language features, AST nodes, serialization, sandbox.
+4. **External-oracle correctness coverage** — numeric surfaces the [2026-06-29 math-correctness audit](../../MATH_CORRECTNESS_AUDIT_2026-06-29.md) did *not* ground against mpmath/scipy/numpy.
+
+**Headline.** MathTS is functionally **complete** — *zero* missing functions (name-level mathjs parity is total) and *full* expression-parser parity (all 15 node types, all language features, 4 serialization formats, sandbox invariant intact). The library is **wide but unevenly deep**: the real gaps are one layer down — **dispatch breadth** (types not wired into operators), **external grounding** (whole categories tested only against their own implementation), and **cosmetic** (factory-only aliases, two stale doc lines). None block any documented use case; they are parity-ratchet and trust-hardening work.
+
+### G1 — Type-dispatch breadth gaps (class A, `functions/src/typed/`)
+
+The four core binary ops (`add`/`subtract`/`multiply`/`divide`) carry 5 numeric types + mixed coercion (`arithmetic.ts:51-191`), but three systematic holes remain. **Caveat checked:** these were verified against the *built* package (so the activated `factories/` layer is included) — e.g. `smaller(unit, unit)` throws *"expected: number or bigint or Fraction…"* (no `Unit` in the dispatch table), confirming the gap is real and not masked by factories.
+
+| # | Gap | Evidence | mathjs |
+| - | --- | -------- | ------ |
+| G1a | **No `Unit` in arithmetic/comparison operators.** `add`/`subtract`/`multiply`/`divide` and `smaller`/`larger`/`equal`/`compare` reject `Unit`. `unit.ts` provides only `to`/`toBest`. | `add(5cm,2cm)` and `smaller(5cm,2cm)` throw on built pkg; `arithmetic.ts:51,798-854` | Unit arithmetic + comparison (`5 cm + 3 mm`, `5 cm > 40 mm`) is a flagship feature `[confident]` |
+| G1b | **Comparison operators are number/bigint/Fraction/BigNumber-only** — no `Complex` (for `equal`), no `Unit`, no `Array`/`Matrix` broadcasting. (The richer `equalScalar` in `relational.ts:144` is a separate, unwired function.) | `arithmetic.ts:798-854` | mathjs `compare`/`equal` accept Unit, Array/Matrix, mixed numeric `[confident]` |
+| G1c | **Entire `statistics.ts` is number/Float64Array/Array-only** (~18 reductions: `sum`/`mean`/`std`/`variance`/`median`/`prod`/`quantile`…). | `statistics.ts:185-217` | mathjs `sum`/`mean`/`prod`/`std`/`median` accept BigNumber/Fraction; sum/mean/prod accept Complex `[confident]` — but MathTS's parallel-first Float64Array design is a deliberate trade-off |
+| G1d | **`round`/`floor`/`ceil`/`fix` lack `Complex` + `Unit`; `sign` lacks `Complex`; `atan2`/`gcd`/`lcm`/`log1p`/`expm1` are narrower** than mathjs. | `arithmetic.ts:526-605,273-289,624-661,482-517`; `trigonometry.ts:228` | `[confident]` |
+| G1e | **Internal inconsistency:** `acsc`/`asec`/`acot` accept `number`+`Complex` but **not** `BigNumber`, while the forward `csc`/`sec`/`cot` *do* have a BigNumber path. | `trigonometry.ts:235-254` | cheap to close; pure consistency fix |
+
+~30–40 typed functions are narrower than their mathjs counterparts (≈18 in statistics, ≈12 in the comparison/round/gcd cluster, the rest in trig). **Correctly number-only (no action):** nearly all of `special.ts` (Bessel/Airy/elliptic/Carlson/Fresnel — mathjs has no equivalent, so number+Float64Array is already a *superset*), the number-theory adds in `combinatorics.ts`, and `bitwise.ts` (already matches mathjs).
+
+### G2 — mathjs canonical-name aliases (class A, cosmetic)
+
+Name-level API parity is otherwise **total** (≈210 canonical mathjs functions checked against the combined 869-name export set of `functions`+`matrix`+`expression`; zero functionally absent). Six canonical names are only reachable under a `factory_`-prefixed or renamed export — a mathjs user calling `math.<name>` would not find them. Verified on built pkg (`cumsum`/`ctranspose`/`index`/`apply` all `undefined` bare; `factory_cumsum` present):
+
+| mathjs name | MathTS export today |
+| ----------- | ------------------- |
+| `cumsum` | `factory_cumsum` only |
+| `ctranspose` | `factory_ctranspose` only |
+| `createUnit` | `factory_createUnit` only |
+| `apply` | `mapSlices` |
+| `index` | `indexFn` |
+| `help` | `createHelpClass` |
+
+**Fix:** add 6 bare-name re-export aliases → 100% canonical-name coverage. ~10 LOC + a parity test.
+
+### G3 — External-oracle correctness coverage (extends the 2026-06-29 audit)
+
+The [math-correctness audit](../../MATH_CORRECTNESS_AUDIT_2026-06-29.md) externally grounded **41 functions, real arguments only**. The surfaces below currently rest on **self-referential** tests (assertions derived from the same constants/helpers they verify — a shared misunderstanding passes both sides). Ranked by risk:
+
+| # | Surface | Why it's a gap | Evidence | Scope |
+| - | ------- | -------------- | -------- | ----- |
+| **G3a** | **Probability distribution CDF/quantile vs `scipy.stats`** — *highest risk.* 10 dists in `distributions.ts` + 12 in `dist-objects.ts`; tests check only sum-to-1, monotonicity, and `cdf(quantile(p))≈p`. The incomplete-beta/gamma helpers are re-implemented **inline in the tests**, so a tail error passes both sides. | `distributions.ts:187-694`, `dist-objects.ts:322-1034`; `typed-distributions-wasm.test.ts:31-50` | ~2–3d; extend `tools/math-correctness-audit/` with one `reg(...)` per CDF/ppf |
+| **G3b** | **Complex-valued `zeta`/`gamma`/`lgamma`** — the audit used real args only; these 3 have a `Complex` branch and `zeta`'s source self-documents only **~6-digit** complex accuracy, entirely unverified. | `special/zeta.ts:136,167`; `probability/gamma.ts:51,86`; `probability/lgamma.ts` | ~1d; mpmath complex oracle |
+| **G3c** | **Decomposition *factors* vs LAPACK/scipy** — QR/LU/Cholesky tests check reconstruction + structure only; expm/logm/sqrtm/pinv check round-trip/axioms only. Wrong-but-self-consistent factors (sign/pivot conventions) would pass. The audit checked `det`/`norm`/`singularValues`/`eigvals` *values*, no factor matrices. | `matrix/tests/operations/{qr,lu,cholesky,expm,logm,sqrtm,pinv}.test.ts` | ~2d; pin a few scipy reference factors with fixed sign/pivot normalization |
+| **G3d** | **CAS / symbolic vs sympy** — `cas.ts` 28 ops (derivative/integrate/simplify/limit/solve/laplace/groebner); tests are 100% author-expected string matches, zero symbolic oracle. | `cas.ts:157-1324`; `cas.test.ts:52,209` | ~2–3d; sympy `simplify(a-b)==0` harness |
+| **G3e** | **Units numeric kernel external table** — conversion constants are standards-sourced but no test pins them to an external NIST/CODATA table; every assertion is `1/0.3048`-style self-derivation. A 10%-wrong factor would still pass. | `core/src/types/unit-definitions.ts:102,115,133,154`; `unit.test.ts:215-246` | ~1d; hard-code ~25 reference conversions + 3 temp anchors |
+
+### G4 — Residual infrastructure (class C)
+
+| # | Item | Status | Evidence |
+| - | ---- | ------ | -------- |
+| **G4a** | **`TapedTensor.pow(taped, taped)`** — variable-exponent AD (both inputs on tape). Only `pow(k: number)` exists. | **OPEN** (the one genuinely-open infra item) | `autograd/src/tape.ts:1057-1077` (docstring at `:1060` defers it) — ~30–40 LOC; adjoints `dA = dY·b·A^(b−1)`, `dB = dY·A^b·ln(A)` with an `A>0` / NaN policy |
+| **G4b** | **`ComputePool.tensordot`** — the audit doc marks this "⏳ pending" but it is **fully implemented** (worker dispatch via `tensordotChunk`, threshold 8 192). Stale-doc only. | **CLOSED** | `parallel/src/ComputePool.ts:1061-1171,179`; audit-doc row fixed in this pass |
+| **G4c** | **Dead `matrix/src/matrix.ts`** — abstract `Matrix` base with four `throw new Error('… not yet implemented')` statics; **not exported, not imported anywhere** (`index.ts` re-exports only `parallel-matrix.js`). | cleanup | removed in this pass (verified zero importers repo-wide) |
+
+### G5 — Workbook deferred capabilities (presentation/IO, already tracked)
+
+Not language gaps — the expression core is at full parity. Tracked at `TODO.md` (Scientific Workbook section): Electron GUI, `--expect-hash` optimistic lock, multi-doc serve, mid-run event streaming, PDF/markdown/ipynb export, SVG math typesetting, interactive JS charts, and a **hard run timeout** (the workbook sandbox exec is currently synchronous). One stale-doc defect found and fixed in this pass: `CLAUDE.md` claimed `serializeWorkbook` was "still deferred" — it shipped in `9d978f5` (`workbook/src/parser.ts:240`) and is used in 7 CLI sites.
+
+### Sequencing (ranked by leverage / risk)
+
+| Rank | Item | Class | Effort | Why |
+| ---- | ---- | ----- | ------ | --- |
+| 1 | **G3a** — distribution CDF/quantile vs scipy.stats | correctness | ~2–3d | Largest untested numeric surface; shared inline incomplete-beta/gamma is a classic shared-misunderstanding trap |
+| 2 | **G1a** — `Unit` in arithmetic/comparison operators | dispatch | ~2–3d | Highest user-visible parity gap; flagship mathjs feature entirely absent from the operator layer |
+| 3 | **G3b** — complex `zeta`/`gamma`/`lgamma` oracle | correctness | ~1d | `zeta` self-documents ~6-digit complex accuracy, unverified |
+| 4 | **G2** — 6 canonical-name aliases | cosmetic | ~10 LOC | Cheap; closes 100% name parity |
+| 5 | **G4a** — `TapedTensor.pow(taped, taped)` | infra | ~30–40 LOC | Only genuinely-open infra item; well-specified |
+| 6 | **G1e** — `acsc`/`asec`/`acot` BigNumber | consistency | trivial | Closes an internal inconsistency at near-zero cost |
+| 7 | **G3c / G3d / G3e** — decomposition-factor / CAS-sympy / units external-table oracles | correctness | ~2d / ~2–3d / ~1d | Trust-hardening; lower risk (constants standards-sourced, CAS output simple) |
+| 8 | **G1c / G1d** — broaden statistics / round / gcd type signatures | dispatch | variable | Parity ratchet; statistics breadth is partly a deliberate Float64Array trade-off |
+
+**What is explicitly NOT a gap** (verified this pass): every canonical mathjs *function* (name-level), the full expression language + all 15 AST node types + 4 serialization formats, the expression security sandbox, and the special-functions file's number-only typing (it's a superset of mathjs there).

@@ -7,6 +7,8 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 >
 > **Roadmap status (2026-05-24):** ✅ The entire `FUNCTION_GAPS_AUDIT.md` gap-closure roadmap is **closed** — all 6 waves (38 slices) landed across ~36 commits. Effective coverage 100% on active code; 0 circular deps; pipeline 19/19 green; 6308 vitest + 172 WASM integration tests pass / 7 skipped / zero regressions.
+>
+> **Gap re-analysis (2026-06-29):** A fresh four-dimension pass (type-dispatch breadth · mathjs name parity · expression/workbook parity · external-oracle correctness) found MathTS functionally **complete** (no missing functions, full parser parity) but **wide-not-deep**: real gaps are dispatch breadth (no `Unit` in operators), external grounding (distribution CDFs / CAS / decomposition factors tested only self-referentially), and cosmetic (6 factory-only aliases). Full catalogue + ranked sequencing: [`docs/roadmap/FUNCTION_GAPS.md` §7](docs/roadmap/FUNCTION_GAPS.md#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6). Top 3: distribution CDF/quantile vs scipy.stats · `Unit` operator dispatch · complex `zeta`/`gamma`/`lgamma` oracle.
 
 ## 🎯 Open Actions
 

@@ -175,7 +175,7 @@ Headless runtime for YAML notebooks (`.mtsw` files). Code/test cells evaluate
 separate future project. Key source files in `workbook/src/`:
 
 - `types.ts` - `Workbook`, `Cell`, `DependencyGraph`, `CellResult`, `RunResult`
-- `parser.ts` - `.mtsw` → `Workbook` (validates ids/types/deps); `serializeWorkbook` still deferred
+- `parser.ts` - `.mtsw` → `Workbook` (validates ids/types/deps); `serializeWorkbook` (round-trip serialize, commit `9d978f5`) + `importWorkbook`
 - `yaml-safe.ts` - shared hardened YAML parse (core schema, merges off) + prototype-pollution guard, used by parser and data cells
 - `graph.ts` - dependency resolution, topological sort, cycle detection, `toMermaid`
 - `executor.ts` - `WorkbookExecutor`: `runCell`/`runAll` (event stream, throws on error) and `runReport` (continue-on-error, structured report); `test` cells are boolean assertions
