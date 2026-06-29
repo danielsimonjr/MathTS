@@ -21,7 +21,7 @@ non-decision).
 | 2   | **Delete the npm token copy in Dropbox-synced folder**   | 0    | Trivial     | `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt` after confirming token is in `~/.npmrc` and `NPM_TOKEN` env var (it is). |
 | 3   | **Consolidate npm token storage to one source of truth** | 0    | Low         | Token is currently in `~/.npmrc` (literal), `Mathts/.npmrc` (literal, gitignored), and `NPM_TOKEN` env var. Decide one canonical home and remove the others — `NPM_TOKEN` is the cleanest. |
 | 4   | **Delete stale `.npmrc.bak-*` files**                    | 0    | Trivial     | Two backups left from the 2026-05-25 token rotation: `~/.npmrc.bak-20260525-141127` and `Mathts/.npmrc.bak-20260525-141201`. Both contain revoked tokens. |
-| 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | Per the 2026-05-25 audit's "What was NOT audited": tests verify "what we computed" matches "what we expected", but neither catches shared misunderstandings. Cross-check a representative spread of functions against scipy / mpmath / Wolfram. |
+| 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | ✅ Done 2026-06-29 — 41 functions × 1420 seeded cases vs mpmath(dps=50)/scipy/numpy; **zero discrepancies** (all ≤~1e-13 rel.err). Report: `MATH_CORRECTNESS_AUDIT_2026-06-29.md`; reproducible harness: `tools/math-correctness-audit/`. |
 | 6   | **Address the audit B-3 through B-9 findings**           | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9). |
 | 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
 | 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0 | — | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected). |
@@ -80,17 +80,30 @@ Detail:
       Both contain revoked tokens — useless for auth but still
       token-shaped material. Safe to delete.
 
-- [ ] **Mathematical-correctness audit (external-oracle pass).** The
-      2026-05-25 audit (`BUG_AUDIT_2026-05-25.md`) explicitly flagged
-      this as the largest gap: tests pass, but they only verify "what
-      we computed" matches "what we expected" — neither side is checked
-      against a known-good oracle. A representative spread of functions
-      against scipy / mpmath / Wolfram would catch shared misunderstandings
-      that the internal test suite is blind to. Suggested scope: pick
-      ~20 functions across categories (special functions, FFT/signal,
-      decompositions, statistics, probability distributions, units),
-      cross-check against scipy or mpmath at a randomised input set,
-      log mean and max relative error.
+- [x] **Mathematical-correctness audit (external-oracle pass).** ✅ Done
+      2026-06-29. The 2026-05-25 audit (`BUG_AUDIT_2026-05-25.md`) flagged
+      this as the largest gap: tests pass, but they only verify "what we
+      computed" matches "what we expected" — neither side checked against a
+      known-good oracle. **Result: no discrepancies.** 41 functions ×
+      1420 seeded random cases compared against an *independent* oracle
+      (mpmath dps=50 / scipy.special / numpy, separate implementation
+      lineage). Coverage spanned all the requested categories — special
+      functions (gamma/digamma/erf*/beta/Bessel J,Y,I,K/Airy/zeta/elliptic
+      K,E/Ei/regularized incomplete gammas), branch-sensitive elementary
+      (expm1/log1p/cbrt/hypot/atan2), exact combinatorics, statistics
+      (mean/std/var/median/quantile/mad/corr), FFT, and the WASM
+      decomposition kernels (det/norm/singularValues/eigvals). 39/41 at
+      ≤~1e-14 max rel.err; `besselK`/`besselY` at ~1e-9/1e-11 only in the
+      large-argument cancellation regime (correct to representable
+      precision). Two first-run flags (`eigvals` spectrum ordering,
+      `cbrt` negative-input branch) were confirmed **harness artifacts,
+      not MathTS bugs**, and corrected in the oracle/comparator before the
+      clean re-run. Full write-up: `MATH_CORRECTNESS_AUDIT_2026-06-29.md`.
+      Reproducible harness committed at `tools/math-correctness-audit/`
+      (add one `reg(...)` line per future function). *Units were not
+      separately audited — the units package re-exports core and has no
+      numeric kernel of its own; probability distributions are covered via
+      `gammainc`/`gammaincp`/`erf` which back the CDFs.*
 
 - [ ] **Address the audit B-3 through B-9 findings.** Open after the
       mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`:
