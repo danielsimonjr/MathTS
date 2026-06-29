@@ -16,16 +16,11 @@ export * from './Help.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';
 
-// Rendering generators (alongside node .toTex()/.toHTML()): MathML, Markdown,
-// SVG charts, and self-contained HTML document assembly. Zero external deps.
-// `toMathML` is a per-node method (like `toTex`); these are the supporting
-// helpers for wrapping a node's fragment in a <math> document / a parse error.
+// MathML serialization (alongside node .toTex()/.toHTML()): `toMathML` is a
+// per-node method; these are the helpers to wrap a node's fragment in a <math>
+// document / report a parse error. (Document/chart/markdown rendering lives in
+// the workbook package, where the .mtsw document model is.)
 export { mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol } from './utils/mathml.js';
-export { markdownToHtml } from './markdown.js';
-export { renderChart } from './svg.js';
-export type { ChartSpec } from './svg.js';
-export { toHTML, toCSS } from './html.js';
-export type { RenderDoc, RenderCell, ToHtmlOptions } from './html.js';
 
 // Node constructors (for bootstrapping parse outside the expression package)
 export { createNode } from './node/Node.js';

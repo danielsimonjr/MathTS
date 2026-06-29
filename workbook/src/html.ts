@@ -10,7 +10,7 @@
  * HTML-escaped before embedding.
  */
 
-import { mathMLDocument, mathMLError } from './utils/mathml.js';
+import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
 import { markdownToHtml } from './markdown.js';
 
 export interface RenderCell {

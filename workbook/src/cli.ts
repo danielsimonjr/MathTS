@@ -26,8 +26,9 @@ import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from
 import type { CellPosition } from './edit';
 import type { CellResult, Workbook, ParseResult, CellType } from './types';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
-import { toHTML, renderChart } from '@danielsimonjr/mathts-expression';
-import type { RenderDoc, RenderCell } from '@danielsimonjr/mathts-expression';
+import { toHTML } from './html';
+import { renderChart } from './svg';
+import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
 
 /**

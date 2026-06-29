@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parse } from './helpers/bootstrap.js';
+import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML, toCSS } from '../src/html.js';
 import type { RenderCell, RenderDoc } from '../src/html.js';
+
+// The wired expression parser (workbook's parse source); namespace access dodges
+// the named-import type resolution quirk for `parse` across the package boundary.
+const parse = (mathFunctions as unknown as { parse: (expr: string) => unknown }).parse;
 
 function doc(cells: RenderCell[], meta: Partial<RenderDoc> = {}): RenderDoc {
   return { title: 'Test Doc', cells, ...meta };
