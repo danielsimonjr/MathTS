@@ -256,7 +256,7 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 
 ## Versioning
 
-Uses [Changesets](https://github.com/changesets/changesets) for version management. Config in `.changeset/config.json` with `"access": "public"`. Do NOT run `npm publish` autonomously — it requires 2FA.
+Uses [Changesets](https://github.com/changesets/changesets) for version management. Config in `.changeset/config.json` with `"access": "public"`.
 
 ## Turbo Caching
 
