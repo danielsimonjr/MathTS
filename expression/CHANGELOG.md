@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-expression
 
+## 0.3.0
+
+### Minor Changes
+
+- **`Node.toMathML()` — MathML serialization, alongside `.toTex()`/`.toHTML()`.** A per-node serializer method (each node implements `_toMathML()`; shared helpers in `utils/mathml.ts`) that renders an expression AST to a MathML fragment, which browsers typeset natively — zero external dependencies. Supporting helpers: `mathMLDocument(node)` wraps a fragment in a self-contained `<math>` element, `mathMLError(src)` reports a parse failure, and `escapeMathML` / `toMathMLSymbol` are exported for reuse.
+
+  Renders fractions, powers, roots, `abs`, sub/superscripts, a full Greek-letter map, scientific-notation numbers (`8.85e-12` → mantissa × 10⁻¹²), prefix **and** postfix unary operators (`5!`), assignments, and chained relationals — with precedence-aware grouping. All text is escaped, and it never throws (an unhandled node or a render error degrades to `<mtext>`/`<merror>`).
+
 ## 0.2.4
 
 ### Patch Changes

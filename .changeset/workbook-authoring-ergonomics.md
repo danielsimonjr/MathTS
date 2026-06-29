@@ -1,6 +1,5 @@
 ---
 "@danielsimonjr/mathts-workbook": minor
-"@danielsimonjr/mathts-expression": patch
 ---
 
 CLI authoring ergonomics for the Workbook.

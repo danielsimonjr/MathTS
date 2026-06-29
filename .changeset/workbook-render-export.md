@@ -1,5 +1,4 @@
 ---
-"@danielsimonjr/mathts-expression": minor
 "@danielsimonjr/mathts-workbook": minor
 ---
 
