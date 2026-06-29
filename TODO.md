@@ -605,6 +605,30 @@ Detail:
       fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
       compile-time shape inference in the TS type system.
 
+## 📓 Scientific Workbook (`.mtsw`)
+
+Headless notebook CLI/runtime in the `workbook` package + MathML serialization in
+`expression`. The GUI sits on top of the CLI (every GUI op is a CLI op).
+
+**Done — slices 1-10 (all on `main`):**
+
+- [x] **Slice 1** `2031219` — `mtsw run`/`validate`/`graph`; sandboxed MathTS-expression cells, non-transitive deps, boolean `test` cells.
+- [x] **Slice 2** `9d978f5` — round-trip `serializeWorkbook` + `strip`/`new`/`run --write` (atomic).
+- [x] **Slice 3** `20bb88c` — `--json` read-contract: `describe`/`run --cell`/`capabilities`/`templates` (cycle/BigInt-safe envelope).
+- [x] **Slice 4** `70b580e` — cell mutation: `cell add`/`edit`/`rm`/`move`/`rename` (atomic, cycle-rejecting).
+- [x] **Slice 5** `d8318f7` — `mtsw serve` (single-doc JSON-RPC/stdio) + incremental re-execution + `functions`/`meta`.
+- [x] **Slices 6-7** `b2d83b1`/`d6619c8` — self-contained HTML export: `Node.toMathML()`, charts, `mtsw export`; `equation`+`visualization` cells; `examples/lightspeed.mtsw` (self-verifying c derivation + chart).
+- [x] **Slice 8** `97a88c9` — authoring ergonomics: `mtsw import` (JSON/YAML doc), `new --empty`/`-t chart`/`-o`, chart-spec validation, `capabilities` cellSchemas.
+- [x] **Slice 9** `4536de4` — refactor `toMathML` to mirror `.toTex` (per-node `_toMathML()` + `utils/mathml.ts`).
+- [x] **Slice 10** `331cbf2` — move document renderers (`toHTML`/`toCSS`/`renderChart`/`markdownToHtml`) `expression` → `workbook`; `expression` public surface is now math-serialization only.
+
+**Open:**
+
+- [ ] **Publish `@danielsimonjr/mathts-expression`** (the `.toMathML` + MathML helpers — its `toTex`-mirroring shape is release-ready). Prep: bump 0.2.4 → 0.3.0, generate CHANGELOG, detangle the changesets so only `expression` versions (the 7 `workbook` changesets stay queued), add generator docs to its README. Publish itself needs Daniel's 2FA.
+- [ ] **Workbook package is NOT release-ready** (explicit, 2026-06-29) — hold `@danielsimonjr/mathts-workbook` until further notice.
+- [ ] **Electron GUI** — the eventual app, pure presentation over the CLI/serve contract (`electron-vite-react` base).
+- [ ] Deferred capabilities: `--expect-hash` optimistic lock · multi-doc serve · mid-run event streaming · PDF/markdown/ipynb export · SVG math typesetting (vs MathML) · interactive (JS) charts · worker-thread run timeout (sandboxed exec is currently synchronous, no hard timeout).
+
 ## ✅ Completed
 
 ### 2026-06-27 session — Rust removal · dormant purge · strict mode · lint cleanup
