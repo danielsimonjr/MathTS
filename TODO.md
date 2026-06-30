@@ -61,8 +61,13 @@ non-decision).
 >   to the WASM tier by size; `parallelFFT` is the separate worker tier.
 > - **GC15** — added the JAX-style `grad` / `valueAndGrad` / `derivative` / `jacobian`
 >   ergonomic AD bridge (plain numbers in/out, function written in AD-aware
->   TapedTensor ops). Differentiating arbitrary `functions/` ops via dual-number
->   overloading remains a separate, larger effort.
+>   TapedTensor ops). **Extended 2026-06-30:** the larger follow-up — dual-number
+>   overloading so `grad` flows through the *plain* `functions/` ops — is done:
+>   a scalar `Dual` type (core, registered for typed dispatch) + `Dual` signatures
+>   on the elementary functions (add/sub/mul/div/pow/sin/cos/tan/exp/log/sqrt/…),
+>   with `derivativeAt`/`valueAndDerivativeAt`/`gradientAt` entry points. So
+>   `derivativeAt(x => multiply(sin(x), x), 2)` differentiates the ordinary
+>   functions API exactly (forward-mode), no TapedTensor needed.
 >
 > GC16's statistics-wide type breadth left as a deliberate parallel-first design
 > choice. GC11's decomposition-factor / CAS-sympy oracles are further extensions of
