@@ -354,3 +354,26 @@ describe('Fraction', () => {
     });
   });
 });
+
+describe('Fraction: non-integer number constructor (regression)', () => {
+  // Regression: `new Fraction(0.25)` previously called BigInt(0.25) and threw
+  // "cannot be converted to a BigInt", which broke the CAS simplify/derivative for
+  // any fractional coefficient (e.g. derivative('x^4/4','x')). The constructor now
+  // decomposes non-integer numbers into an exact integer ratio.
+  it('constructs an exact ratio from a non-integer number', () => {
+    expect(new Fraction(0.25).toString()).toBe('1/4');
+    expect(new Fraction(0.5).toString()).toBe('1/2');
+    expect(new Fraction(-0.75).toString()).toBe('-3/4');
+  });
+
+  it('handles non-integer numerator and denominator together', () => {
+    expect(new Fraction(0.25, 0.5).toString()).toBe('1/2');
+    expect(new Fraction(1.5, 0.5).toString()).toBe('3'); // 1.5 / 0.5 = 3
+  });
+
+  it('leaves integer and bigint construction unchanged', () => {
+    expect(new Fraction(3, 4).toString()).toBe('3/4');
+    expect(new Fraction(3n, 4n).toString()).toBe('3/4');
+    expect(new Fraction(6, 4).toString()).toBe('3/2'); // reduces
+  });
+});

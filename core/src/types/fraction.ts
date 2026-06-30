@@ -37,8 +37,19 @@ export class Fraction implements IFraction {
   readonly denominator: bigint;
 
   constructor(numerator: bigint | number | string, denominator: bigint | number | string = 1n) {
-    let num = typeof numerator === 'bigint' ? numerator : BigInt(numerator);
-    let den = typeof denominator === 'bigint' ? denominator : BigInt(denominator);
+    // Decompose each argument into an exact integer ratio so that non-integer
+    // numbers work too: `new Fraction(0.25)` → 1/4 (previously `BigInt(0.25)` threw).
+    const toRatio = (x: bigint | number | string): [bigint, bigint] => {
+      if (typeof x === 'number' && !Number.isInteger(x)) {
+        const f = Fraction.fromNumber(x);
+        return [f.numerator, f.denominator];
+      }
+      return [typeof x === 'bigint' ? x : BigInt(x), 1n];
+    };
+    const [pn, qn] = toRatio(numerator);
+    const [pd, qd] = toRatio(denominator);
+    let num = pn * qd;
+    let den = qn * pd;
 
     if (den === 0n) {
       throw new Error('Fraction denominator cannot be zero');
