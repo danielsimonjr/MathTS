@@ -141,6 +141,9 @@ export type { OptimizeResult, LMResult } from './optimization-extra.js';
 export { kmeans, spectralClustering } from './clustering-extra.js';
 export type { KMeansResult } from './clustering-extra.js';
 
+// Gap-analysis Wave D — symbolic indefinite integration (complements numeric integrate).
+export { symbolicIntegral } from './cas-integration.js';
+
 // Gap-analysis Wave D — digital filter design + application (vs scipy.signal).
 export { firwin, butter, lfilter, lfilterZi, filtfilt } from './signal-filter-extra.js';
 
