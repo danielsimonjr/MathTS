@@ -45,8 +45,16 @@ reference "complete" scientific-computing surface.
 > eigenvalues for every non-symmetric matrix** — even upper-triangular ones (diagonal
 > eigenvalues). Root-caused and fixed: the public `eigs` now routes numeric square
 > matrices through the native orthes/hqr2 solver (correct for symmetric/non-symmetric/
-> complex spectra; regression in `eigs-correctness.test.ts`). Remaining Wave C: `hessian`,
-> graph `laplacianMatrix` + spectral, `slerp`/`quaternion`. Wave D remains.
+> complex spectra; regression in `eigs-correctness.test.ts`).
+>
+> **Wave C (part 2) ✅ landed (2026-06-30).** The remaining structural bridges,
+> verified (7/7): `hessian` (numeric central-difference, bridge C3, vs analytic),
+> `laplacianMatrix` (combinatorial + normalized, bridge C6, enables spectral methods
+> via `eigs`), `slerp` and the quaternion algebra (`quaternionMultiply`/`Conjugate`/
+> `Normalize`/`FromAxisAngle`/`Rotate`/`ToRotationMatrix`, bridge C7, vs
+> scipy.spatial.transform.Rotation). **Wave C complete.** Wave D (filter design, named
+> optimizers + Levenberg–Marquardt, generalized eig/qz, distribution breadth, symbolic
+> integration, time-series, regression, spectral clustering) remains.
 
 ---
 

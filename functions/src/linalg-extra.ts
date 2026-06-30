@@ -74,6 +74,30 @@ export function companion(coeffs: Vec): number[][] {
 }
 
 /**
+ * Graph Laplacian of an adjacency matrix (bridge graph ↔ linear algebra — spectral
+ * graph theory). Combinatorial `L = D − A` by default (D = diagonal degree matrix);
+ * with `{ normalized: true }`, the symmetric normalized Laplacian
+ * `L_sym = I − D^(−1/2) A D^(−1/2)`. Eigen-analysis of `L` (via `eigs`) gives the
+ * Fiedler vector / spectral clustering.
+ */
+export function laplacianMatrix(
+  adjacency: readonly number[][],
+  opts: { normalized?: boolean } = {}
+): number[][] {
+  const n = adjacency.length;
+  const deg = adjacency.map((row) => row.reduce((s, v) => s + v, 0));
+  if (opts.normalized) {
+    const inv = deg.map((d) => (d > 0 ? 1 / Math.sqrt(d) : 0));
+    return Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0) - inv[i] * adjacency[i][j] * inv[j])
+    );
+  }
+  return Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (i === j ? deg[i] : 0) - adjacency[i][j])
+  );
+}
+
+/**
  * Natural log of the absolute determinant via LU (the `logabsdet` component of
  * `numpy.linalg.slogdet`), stable where `log(det(A))` would overflow. Returns
  * `{ sign, value }` with `det = sign · exp(value)`.

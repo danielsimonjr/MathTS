@@ -89,11 +89,34 @@ export type {
   FisherExactResult,
 } from './hypothesis-extra.js';
 
-// Gap-analysis Wave C — structured-matrix constructors + logdet (bridges C2, C5).
-export { tril, triu, vander, toeplitz, circulant, companion, logdet } from './linalg-extra.js';
+// Gap-analysis Wave C — structured-matrix constructors + logdet + graph Laplacian
+// (bridges C2, C5, C6).
+export {
+  tril,
+  triu,
+  vander,
+  toeplitz,
+  circulant,
+  companion,
+  logdet,
+  laplacianMatrix,
+} from './linalg-extra.js';
 
-// Gap-analysis Wave C — geodesy (bridge C7).
-export { haversine, EARTH_RADIUS_KM } from './geometry-extra.js';
+// Gap-analysis Wave C — numeric Hessian (bridge C3).
+export { hessian } from './calculus-extra.js';
+
+// Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
+export {
+  haversine,
+  EARTH_RADIUS_KM,
+  slerp,
+  quaternionMultiply,
+  quaternionConjugate,
+  quaternionNormalize,
+  quaternionFromAxisAngle,
+  quaternionRotate,
+  quaternionToRotationMatrix,
+} from './geometry-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
