@@ -77,6 +77,15 @@ export {
   gammaQuantile,
   betaCDF,
   betaQuantile,
+  cauchyPDF,
+  cauchyCDF,
+  cauchyQuantile,
+  laplacePDF,
+  laplaceCDF,
+  laplaceQuantile,
+  logisticPDF,
+  logisticCDF,
+  logisticQuantile,
 } from './distribution-functions.js';
 
 // Gap-analysis Wave B — additional hypothesis tests (bridge C9).
@@ -100,6 +109,7 @@ export {
   companion,
   logdet,
   laplacianMatrix,
+  generalizedEig,
 } from './linalg-extra.js';
 
 // Gap-analysis Wave C — numeric Hessian (bridge C3); Wave D — numeric gradient.

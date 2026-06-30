@@ -58,9 +58,15 @@ reference "complete" scientific-computing surface.
 > OLS regression, verified vs NumPy/SciPy (12/12): `movingAverage`, `ewma`, `detrend`
 > (vs scipy.signal.detrend), `acf` (`timeseries-extra.ts`); `gradient` (numpy.gradient,
 > non-uniform second-order, `calculus-extra.ts`); `linearRegression` (vs
-> scipy.stats.linregress, reuses `studentTCDF`, `regression-extra.ts`). Remaining Wave D
-> (higher complexity): generalized eig/qz, distribution breadth, named optimizers +
-> Levenberg–Marquardt, filter design, symbolic integration, spectral clustering.
+> scipy.stats.linregress, reuses `studentTCDF`, `regression-extra.ts`).
+>
+> **Wave D (batch 2) ✅ landed (2026-06-30).** Generalized eigenproblem + distribution
+> breadth, SciPy-verified (10/10): `generalizedEig` (`A x = λ B x` via `B⁻¹A`, reuses
+> `inv`+`multiply`+`eigs`, vs scipy.linalg.eig(A,B)) and the `cauchy`/`laplace`/`logistic`
+> PDF/CDF/quantile families (closed forms, vs scipy.stats). **Remaining (highest
+> complexity, each a focused effort):** named optimizers + Levenberg–Marquardt, IIR/FIR
+> filter design (`butter`/`firwin`/`filtfilt`), symbolic integration, spectral clustering
+> (needs k-means), `tukeyHSD` (needs studentized-range distribution), `qz`.
 
 ---
 

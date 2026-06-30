@@ -8,9 +8,33 @@
  * Gaussian likelihoods (stats).
  */
 import { DenseMatrix, lu } from '@danielsimonjr/mathts-matrix';
+import { inv as _invRaw, eigs as _eigsRaw } from './factories/index.js';
+import { multiply as _multiplyRaw } from './typed/arithmetic.js';
+
+const _inv = _invRaw as unknown as (m: number[][]) => number[][];
+const _eigs = _eigsRaw as unknown as (m: number[][]) => {
+  values: Array<number | { re: number; im: number }>;
+  eigenvectors?: unknown;
+};
+const _multiply = _multiplyRaw as unknown as (a: number[][], b: number[][]) => number[][];
 
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
+
+/**
+ * Generalized eigenvalues of the pencil `A x = λ B x` (B nonsingular), via the
+ * eigendecomposition of `B⁻¹A` — reusing `inv`, `multiply`, and the corrected
+ * `eigs`. Eigenvalues match `scipy.linalg.eig(A, B)`. For ill-conditioned `B`
+ * prefer a QZ solver (not yet available).
+ */
+export function generalizedEig(
+  A: readonly number[][],
+  B: readonly number[][]
+): { values: Array<number | { re: number; im: number }>; eigenvectors?: unknown } {
+  const Binv = _inv(B as number[][]);
+  const M = _multiply(Binv, A as number[][]);
+  return _eigs(M);
+}
 
 /** Lower-triangular part of `A`, zeroing entries above the `k`-th diagonal. */
 export function tril(A: readonly number[][], k = 0): number[][] {
