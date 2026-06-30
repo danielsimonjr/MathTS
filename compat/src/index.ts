@@ -18,6 +18,7 @@
  */
 
 import { shims } from './shims.js';
+import { createChain, type Chain } from './chain.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -66,6 +67,9 @@ export interface MathInstance {
    * `unknown` and can be narrowed by the caller.
    */
   [name: string]: unknown;
+
+  /** Fluent chain: `math.chain(x).add(3).done()`. */
+  chain: (value: unknown) => Chain;
 
   // Configuration
   config: (newConfig?: Partial<MathJSConfig>) => MathJSConfig;
@@ -176,7 +180,7 @@ export function create(
 ): MathInstance {
   const currentConfig: MathJSConfig = { ...defaultConfig, ...config };
 
-  return {
+  const instance: MathInstance = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...factories,
@@ -268,7 +272,18 @@ export function create(
     SQRT1_2: shims.SQRT1_2,
     Infinity: shims.Infinity,
     NaN: shims.NaN,
+
+    // Placeholder; rebound below once `instance` exists so chain methods can
+    // resolve against the full surfaced namespace.
+    chain: (() => {
+      throw new Error('chain not initialized');
+    }) as MathInstance['chain'],
   };
+
+  // GC12 — fluent chain API (math.chain(x).add(3).done()).
+  instance.chain = createChain(instance as Record<string, unknown>);
+
+  return instance;
 }
 
 /**
