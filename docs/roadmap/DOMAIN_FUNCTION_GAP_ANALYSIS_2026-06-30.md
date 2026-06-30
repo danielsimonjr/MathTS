@@ -26,9 +26,15 @@ reference "complete" scientific-computing surface.
 > `studentTCDF`/`studentTQuantile`, `chiSquaredCDF`/`chiSquaredQuantile`, `fCDF`/`fQuantile`,
 > `gammaCDF`/`gammaQuantile`, `betaCDF`/`betaQuantile` (`distribution-functions.ts`, thin
 > wrappers over the existing distribution objects) and `fTest`, `jarqueBera`
-> (`hypothesis-extra.ts`, reusing `variance` + Wave A `skewness`/`kurtosis`). Remaining
-> Wave B (medium complexity): `kruskalWallis`, `wilcoxon`, `fisherExact`, `tukeyHSD`.
-> Waves C–D below remain.
+> (`hypothesis-extra.ts`, reusing `variance` + Wave A `skewness`/`kurtosis`).
+>
+> **Wave B (part 2) ✅ landed (2026-06-30).** Rank-based + exact tests, SciPy-verified
+> (6/6): `rankdata` (the reusable ranking primitive — a P2 stats gap itself),
+> `kruskalWallis` (tie-corrected, reuses `rankdata` + `chiSquaredCDF`), `wilcoxon`
+> (signed-rank, normal approx + continuity correction, reuses `rankdata` + `normalCDF`),
+> `fisherExact` (2×2, stable log-hypergeometric via `lgamma`). **`tukeyHSD` deferred** —
+> it needs the studentized-range (q) distribution, which the library does not yet have;
+> add that distribution first (Wave C/D). Waves C–D below otherwise remain.
 
 ---
 

@@ -37,6 +37,25 @@ function centralMoment(x: number[], k: number): number {
   return acc / x.length;
 }
 
+/**
+ * Ranks of the data with tie handling (SciPy `rankdata`, default `'average'`):
+ * tied values receive the mean of the ranks they span. Ranks are 1-based.
+ */
+export function rankdata(x: Vec): number[] {
+  const a = arr(x);
+  const n = a.length;
+  const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => a[i] - a[j]);
+  const ranks = new Array<number>(n);
+  for (let i = 0; i < n; ) {
+    let j = i;
+    while (j < n && a[order[j]] === a[order[i]]) j++;
+    const avg = (i + 1 + j) / 2; // mean of 1-based ranks i+1 … j
+    for (let k = i; k < j; k++) ranks[order[k]] = avg;
+    i = j;
+  }
+  return ranks;
+}
+
 /** Geometric mean: `exp(mean(ln x))` (stable form). All entries must be > 0. */
 export function gmean(x: Vec): number {
   const a = arr(x);

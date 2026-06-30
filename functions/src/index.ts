@@ -49,6 +49,7 @@ export {
   zscore,
   cov,
   corrcoef,
+  rankdata,
 } from './descriptive-stats.js';
 
 // Gap-analysis Wave A — elementwise / cumulative / log-domain primitives.
@@ -79,8 +80,14 @@ export {
 } from './distribution-functions.js';
 
 // Gap-analysis Wave B — additional hypothesis tests (bridge C9).
-export { fTest, jarqueBera } from './hypothesis-extra.js';
-export type { FTestResult, JarqueBeraResult } from './hypothesis-extra.js';
+export { fTest, jarqueBera, kruskalWallis, wilcoxon, fisherExact } from './hypothesis-extra.js';
+export type {
+  FTestResult,
+  JarqueBeraResult,
+  KruskalResult,
+  WilcoxonResult,
+  FisherExactResult,
+} from './hypothesis-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
