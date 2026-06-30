@@ -1453,6 +1453,16 @@ export const boolean = (x?: unknown): boolean => Boolean(x);
 export const bigint = (x?: unknown): bigint => BigInt((x ?? 0) as never);
 
 // ---------------------------------------------------------------------------
+// GC4 — mathjs canonical-name aliases. These functions exist but were only
+// exported under a `factory_`-prefixed or renamed identifier; alias the bare
+// mathjs spellings so `import { cumsum } from '...'` resolves.
+// ---------------------------------------------------------------------------
+export const cumsum = factory_cumsum;
+export const ctranspose = factory_ctranspose;
+export const createUnit = factory_createUnit;
+export { mapSlices as apply, indexFn as index };
+
+// ---------------------------------------------------------------------------
 // Update mathWithTransform with all activated factories
 // ---------------------------------------------------------------------------
 Object.assign(_mathWithTransform, factoryScope);

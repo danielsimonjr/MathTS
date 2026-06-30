@@ -13,6 +13,7 @@ export * from './parse.js';
 export * from './Parser.js';
 export { createParser } from './function/parser.js';
 export * from './Help.js';
+export { embeddedDocs } from './embeddedDocs/embeddedDocs.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';
 
