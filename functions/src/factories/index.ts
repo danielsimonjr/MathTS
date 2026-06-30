@@ -375,6 +375,7 @@ import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
 import { createCount } from '../matrix/count.js';
 import { createTrace } from '../matrix/trace.js';
 import { createDet } from '../matrix/det.js';
+import { acceleratedDet } from '../matrix/native-accel.js';
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
@@ -424,8 +425,14 @@ factoryScope.trace = trace;
 // so binding `multiply` to `multiplyScalar` is correct for scalar-element
 // matrices — full `multiply` would only add block-matrix support.
 factoryScope.multiply = factoryScope.multiplyScalar;
-export const det = createDet(factoryScope as Parameters<typeof createDet>[0]);
-factoryScope.det = det;
+const factoryDet = createDet(factoryScope as Parameters<typeof createDet>[0]);
+factoryScope.det = factoryDet;
+// Public `det` accelerates large numeric square matrices via native Float64Array
+// LU (factory path is pure-JS over boxed number[][], ~90ms for 80×80). Falls back
+// to the factory for small / non-numeric / non-square inputs. Internal factory
+// consumers (e.g. inv) keep using `factoryScope.det` unchanged.
+export const det = ((m: unknown) =>
+  acceleratedDet(m, factoryDet as unknown as (x: unknown) => unknown)) as unknown as typeof factoryDet;
 
 // reshape needs isInteger — provide a simple stub
 factoryScope.isInteger = (x: unknown) => typeof x === 'number' && Number.isInteger(x);
