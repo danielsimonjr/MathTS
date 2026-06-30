@@ -36,6 +36,32 @@ export { help } from './help.js';
 // Forward-mode AD over the plain functions surface (Dual-number overloading).
 export { derivativeAt, valueAndDerivativeAt, gradientAt } from './grad-forward.js';
 export type { DualFn } from './grad-forward.js';
+
+// Gap-analysis Wave A — descriptive-statistics composites (reuse mean/std/quantileSeq).
+export {
+  gmean,
+  hmean,
+  moment,
+  skewness,
+  kurtosis,
+  iqr,
+  sem,
+  zscore,
+  cov,
+  corrcoef,
+} from './descriptive-stats.js';
+
+// Gap-analysis Wave A — elementwise / cumulative / log-domain primitives.
+export {
+  clamp,
+  sigmoid,
+  logsumexp,
+  softmax,
+  cumprod,
+  cummax,
+  cummin,
+  cumtrapz,
+} from './numeric-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this

@@ -13,6 +13,14 @@
 **Date:** 2026-06-30 · **Bar for comparison:** SciPy / NumPy / SymPy / mathjs as the
 reference "complete" scientific-computing surface.
 
+> **Implementation status — Wave A ✅ landed (2026-06-30).** 18 functions added,
+> all verified against a SciPy/NumPy oracle (21/21 to 1e-9): `gmean`, `hmean`,
+> `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`
+> (`functions/src/descriptive-stats.ts`) and `clamp`, `sigmoid`, `logsumexp`,
+> `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz` (`functions/src/numeric-extra.ts`).
+> Each is a composition over existing primitives (`mean`/`std`/`variance`/`sum`/
+> `max`/`quantileSeq`) — no reduction was re-implemented. Waves B–D below remain.
+
 ---
 
 ## Executive Summary
