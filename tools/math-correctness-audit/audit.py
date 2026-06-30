@@ -172,12 +172,12 @@ def rand_arr(r, lo=15, hi=50, scale=10.0):
 reg("mean", "functions", "real",
     lambda r: [[rand_arr(r)] for _ in range(30)],
     lambda a: f(np.mean(a[0])))
-reg("std", "functions", "real",  # population ddof=0
+reg("std", "functions", "real",  # unbiased ddof=1 (mathjs default; GC1)
     lambda r: [[rand_arr(r)] for _ in range(30)],
-    lambda a: f(np.std(a[0], ddof=0)))
-reg("variance", "functions", "real",  # population ddof=0
+    lambda a: f(np.std(a[0], ddof=1)))
+reg("variance", "functions", "real",  # unbiased ddof=1 (mathjs default; GC1)
     lambda r: [[rand_arr(r)] for _ in range(30)],
-    lambda a: f(np.var(a[0], ddof=0)))
+    lambda a: f(np.var(a[0], ddof=1)))
 reg("median", "functions", "real",
     lambda r: [[rand_arr(r)] for _ in range(30)],
     lambda a: f(np.median(a[0])))

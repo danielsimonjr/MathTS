@@ -301,9 +301,12 @@ describe('arithmetic — number scalar edge branches', () => {
     expect(mean([2, 4, 6])).toBe(4);
     expect(mean([])).toBeNaN();
     expect(sum([])).toBe(0);
-    expect(variance([2, 4, 6])).toBeCloseTo(8 / 3, 10);
+    // Default normalization is unbiased (÷(n-1)), matching mathjs: m2=8, n=3 → 4.
+    expect(variance([2, 4, 6])).toBeCloseTo(4, 10);
+    expect(variance([2, 4, 6], 'uncorrected')).toBeCloseTo(8 / 3, 10); // population path
     expect(variance([])).toBeNaN();
-    expect(std([2, 4, 6])).toBeCloseTo(Math.sqrt(8 / 3), 10);
+    expect(std([2, 4, 6])).toBeCloseTo(2, 10);
+    expect(std([2, 4, 6], 'uncorrected')).toBeCloseTo(Math.sqrt(8 / 3), 10);
     expect(std([])).toBeNaN();
     expect(dot([1, 2, 3], [4, 5, 6])).toBe(32);
     expect(() => dot([1, 2], [1, 2, 3])).toThrow(/lengths must match/);

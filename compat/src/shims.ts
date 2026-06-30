@@ -252,8 +252,10 @@ export const sum = _sum;
 export const mean = _mean;
 
 // std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
-// functions-package versions default to population (÷N) and reject a
-// normalization argument, so compat overrides them for mathjs parity.
+// functions-package versions now also default to unbiased and accept a
+// normalization argument (GC1), but compat keeps a self-contained override so it
+// can flatten DenseMatrix / nested-array inputs that the typed Array/Float64Array
+// signatures don't cover.
 type Normalization = 'unbiased' | 'uncorrected' | 'biased';
 
 function toNumericArray(data: unknown): number[] {

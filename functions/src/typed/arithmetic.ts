@@ -939,50 +939,84 @@ export const mean = mathTyped('mean', {
 });
 
 /**
- * Variance with parallel array support
+ * Variance normalization, matching mathjs's `variance(array, normalization)`:
+ *   - 'unbiased'    → sum2 / (n - 1)   (sample variance; mathjs DEFAULT)
+ *   - 'uncorrected' → sum2 / n         (population variance)
+ *   - 'biased'      → sum2 / (n + 1)
+ */
+export type VarNormalization = 'unbiased' | 'uncorrected' | 'biased';
+
+/** Sum of squared deviations from the mean (Welford), then normalized. */
+function varianceFromM2(m2: f64, n: i32, norm: VarNormalization): f64 {
+  if (n === 0) return NaN;
+  switch (norm) {
+    case 'biased':
+      return m2 / (n + 1);
+    case 'uncorrected':
+      return m2 / n;
+    case 'unbiased':
+    default:
+      // mathjs returns 0 (not NaN) for a single value under unbiased.
+      return n > 1 ? m2 / (n - 1) : 0;
+  }
+}
+
+function m2OfArray(arr: f64[]): f64 {
+  let m: f64 = 0;
+  let m2: f64 = 0;
+  for (let i: i32 = 0; i < arr.length; i++) {
+    const delta: f64 = arr[i] - m;
+    m += delta / (i + 1);
+    const delta2: f64 = arr[i] - m;
+    m2 += delta * delta2;
+  }
+  return m2;
+}
+
+/**
+ * Variance with parallel array support.
+ *
+ * Defaults to **unbiased** (sample, ÷(n-1)) to match mathjs and the
+ * `parallelStatVariance` variant. An optional normalization argument selects
+ * 'unbiased' | 'uncorrected' (population) | 'biased'. See VarNormalization.
  */
 export const variance = mathTyped('variance', {
-  Array: (arr: f64[]): f64 => {
-    if (arr.length === 0) return NaN;
-    let m: f64 = 0;
-    let m2: f64 = 0;
-    for (let i: i32 = 0; i < arr.length; i++) {
-      const delta: f64 = arr[i] - m;
-      m += delta / (i + 1);
-      const delta2: f64 = arr[i] - m;
-      m2 += delta * delta2;
-    }
-    return m2 / arr.length;
-  },
+  Array: (arr: f64[]): f64 => varianceFromM2(m2OfArray(arr), arr.length, 'unbiased'),
+  'Array, string': (arr: f64[], norm: string): f64 =>
+    varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization),
 
-  // Parallel Float64Array variance
+  // Parallel Float64Array variance. computePool returns POPULATION variance
+  // (sum2/n); recover sum2 = pop·n and renormalize for the requested convention.
   Float64Array: async (a: Float64Array): Promise<f64> => {
     const result = await computePool.variance(a);
-    return result.result.variance;
+    return varianceFromM2(result.result.variance * a.length, a.length, 'unbiased');
+  },
+  'Float64Array, string': async (a: Float64Array, norm: string): Promise<f64> => {
+    const result = await computePool.variance(a);
+    return varianceFromM2(result.result.variance * a.length, a.length, norm as VarNormalization);
   },
 });
 
 /**
- * Standard deviation with parallel array support
+ * Standard deviation with parallel array support — sqrt of {@link variance};
+ * defaults to **unbiased** and accepts the same normalization argument.
  */
 export const std = mathTyped('std', {
-  Array: (arr: f64[]): f64 => {
-    if (arr.length === 0) return NaN;
-    let m: f64 = 0;
-    let m2: f64 = 0;
-    for (let i: i32 = 0; i < arr.length; i++) {
-      const delta: f64 = arr[i] - m;
-      m += delta / (i + 1);
-      const delta2: f64 = arr[i] - m;
-      m2 += delta * delta2;
-    }
-    return Math.sqrt(m2 / arr.length);
-  },
+  Array: (arr: f64[]): f64 => Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, 'unbiased')),
+  'Array, string': (arr: f64[], norm: string): f64 =>
+    Math.sqrt(varianceFromM2(m2OfArray(arr), arr.length, norm as VarNormalization)),
 
-  // Parallel Float64Array std
+  // Parallel Float64Array std — derive from the (renormalized) variance so the
+  // convention matches the Array path and parallelStatStd.
   Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.std(a);
-    return result.result;
+    const result = await computePool.variance(a);
+    return Math.sqrt(varianceFromM2(result.result.variance * a.length, a.length, 'unbiased'));
+  },
+  'Float64Array, string': async (a: Float64Array, norm: string): Promise<f64> => {
+    const result = await computePool.variance(a);
+    return Math.sqrt(
+      varianceFromM2(result.result.variance * a.length, a.length, norm as VarNormalization)
+    );
   },
 });
 

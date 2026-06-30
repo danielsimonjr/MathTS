@@ -190,13 +190,14 @@ describe('Parallel Arithmetic Functions', () => {
       });
 
       it('should compute variance of array', () => {
-        // Variance of [1, 2, 3, 4, 5] = 2
-        expect(parallelVariance([1, 2, 3, 4, 5])).toBe(2);
+        // [1,2,3,4,5]: m2=10, unbiased default ÷(n-1)=10/4=2.5 (mathjs parity, GC1)
+        expect(parallelVariance([1, 2, 3, 4, 5])).toBe(2.5);
+        expect(parallelVariance([1, 2, 3, 4, 5], 'uncorrected')).toBe(2); // population
       });
 
       it('should compute std of array', () => {
-        // sqrt(2) ≈ 1.414
-        expect(parallelStd([1, 2, 3, 4, 5])).toBeCloseTo(Math.sqrt(2), 10);
+        expect(parallelStd([1, 2, 3, 4, 5])).toBeCloseTo(Math.sqrt(2.5), 10);
+        expect(parallelStd([1, 2, 3, 4, 5], 'uncorrected')).toBeCloseTo(Math.sqrt(2), 10);
       });
 
       it('should compute min of array', () => {
@@ -338,14 +339,15 @@ describe('Parallel Arithmetic Functions', () => {
 
       it('should compute variance of Float64Array in parallel', async () => {
         const a = new Float64Array([1, 2, 3, 4, 5]);
+        // unbiased default ÷(n-1)=10/4=2.5 (GC1)
         const result = await parallelVariance(a);
-        expect(result).toBeCloseTo(2, 5);
+        expect(result).toBeCloseTo(2.5, 5);
       });
 
       it('should compute std of Float64Array in parallel', async () => {
         const a = new Float64Array([1, 2, 3, 4, 5]);
         const result = await parallelStd(a);
-        expect(result).toBeCloseTo(Math.sqrt(2), 5);
+        expect(result).toBeCloseTo(Math.sqrt(2.5), 5);
       });
 
       it('should compute min of Float64Array in parallel', async () => {
