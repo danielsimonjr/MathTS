@@ -19,7 +19,16 @@ reference "complete" scientific-computing surface.
 > (`functions/src/descriptive-stats.ts`) and `clamp`, `sigmoid`, `logsumexp`,
 > `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz` (`functions/src/numeric-extra.ts`).
 > Each is a composition over existing primitives (`mean`/`std`/`variance`/`sum`/
-> `max`/`quantileSeq`) — no reduction was re-implemented. Waves B–D below remain.
+> `max`/`quantileSeq`) — no reduction was re-implemented.
+>
+> **Wave B — in progress (2026-06-30).** Bridge **C4** (standalone distribution
+> surface) + low-complexity tests landed, all SciPy-verified (13/13): `normalQuantile`,
+> `studentTCDF`/`studentTQuantile`, `chiSquaredCDF`/`chiSquaredQuantile`, `fCDF`/`fQuantile`,
+> `gammaCDF`/`gammaQuantile`, `betaCDF`/`betaQuantile` (`distribution-functions.ts`, thin
+> wrappers over the existing distribution objects) and `fTest`, `jarqueBera`
+> (`hypothesis-extra.ts`, reusing `variance` + Wave A `skewness`/`kurtosis`). Remaining
+> Wave B (medium complexity): `kruskalWallis`, `wilcoxon`, `fisherExact`, `tukeyHSD`.
+> Waves C–D below remain.
 
 ---
 

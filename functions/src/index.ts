@@ -62,6 +62,25 @@ export {
   cummin,
   cumtrapz,
 } from './numeric-extra.js';
+
+// Gap-analysis Wave B — standalone distribution CDF/quantile surface (bridge C4).
+export {
+  normalQuantile,
+  studentTCDF,
+  studentTQuantile,
+  chiSquaredCDF,
+  chiSquaredQuantile,
+  fCDF,
+  fQuantile,
+  gammaCDF,
+  gammaQuantile,
+  betaCDF,
+  betaQuantile,
+} from './distribution-functions.js';
+
+// Gap-analysis Wave B — additional hypothesis tests (bridge C9).
+export { fTest, jarqueBera } from './hypothesis-extra.js';
+export type { FTestResult, JarqueBeraResult } from './hypothesis-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
