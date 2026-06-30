@@ -112,6 +112,16 @@ function mapCell(raw: unknown, index: number, errors: string[]): Cell {
   const type: CellType = presentTypeKeys[0] ?? 'code';
   const content = presentTypeKeys[0] ? toContent(raw[presentTypeKeys[0]]) : '';
 
+  // Reserved-but-not-yet-supported types (e.g. `tensor`, `export`) are valid
+  // keys but have no executor — reject them at parse time with a clear message
+  // rather than letting them throw "Unsupported cell type" mid-run.
+  if (presentTypeKeys[0] && !SUPPORTED_CELL_TYPES.includes(type)) {
+    errors.push(
+      `Cell "${id}": type '${type}' is reserved but not yet supported ` +
+        `(supported: ${SUPPORTED_CELL_TYPES.join(', ')})`
+    );
+  }
+
   let dependsOn: string[] | undefined;
   if (raw.depends_on !== undefined) {
     if (!Array.isArray(raw.depends_on)) {
