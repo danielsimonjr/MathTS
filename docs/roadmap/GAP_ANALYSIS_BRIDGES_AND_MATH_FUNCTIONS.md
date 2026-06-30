@@ -4,6 +4,23 @@
 **Revision 2**: 2026-05-20 — re-based on a corrected, complete function
 inventory after rewriting `docs/reference/functions.md` to match the actual
 package exports (see Part 1 / Part 3.5).
+**Revision 3**: 2026-06-29 — full re-validation of all 10 bridges + the
+function surface against current `main` (HEAD `45ebe78`), after the Workbook
+workstream and the 2026-06-27 dormant purge. **Most of this report's severe
+gaps are now closed.** Sections below (Parts 1–4) are preserved as the
+2026-05-20 baseline; **[Part 5](#part-5--revision-3-re-validation-2026-06-29)
+carries the current status and the new gaps.** When the two disagree, Part 5
+wins.
+
+> **Revision 3 TL;DR.** Of the five material gaps in the original scorecard,
+> **three are resolved** (B5 compat, B7 workbook, B3 FFT-fallback), **one is
+> half-built** (B8 tensor/autograd), and **one persists** (B2 matrix factory
+> bridge). Every Part-3 *user-facing* function gap is closed — the 52 physical
+> constants, the 10 type-conversion functions, `isInteger`, stateful
+> `parser()`, and public JSON `reviver`/`replacer` are all wired; dormant
+> factories fell 102 → 39 (now all internal-by-design). The export surface grew
+> ~518 → **735**. The genuinely-open work is now a *different, smaller* set —
+> see [Part 5 §New gaps](#new-gaps-surfaced-by-this-re-validation).
 **Scope**: Whole monorepo — integration "bridges" between packages, and the
 mathematical-function surface area (active / dormant / missing).
 **Canonical function inventory**: `docs/reference/functions.md` (now current).
@@ -30,6 +47,10 @@ each subsystem reach it does not. Seven of the codebase's ten integration points
 are healthy; five carry material gaps, three of them severe.
 
 ### Scorecard
+
+> ⚠️ **This scorecard is the 2026-05-20 baseline.** For current status see the
+> [Revision 3 updated scorecard](#updated-scorecard) — B5/B7 are now Healthy,
+> B3 FFT-fallback is resolved, B8 is Partial, only B2 persists.
 
 | #   | Bridge                                      | Status         | Completeness |
 | --- | ------------------------------------------- | -------------- | ------------ |
@@ -409,3 +430,97 @@ not the source tree, as the API contract — and keep it in sync (roadmap item 1
 `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`,
 `secondRadiation`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`,
 `vacuumImpedance`, `weakMixingAngle`, `wienDisplacement`.
+
+> **Revision 3 (2026-06-29):** all 52 of these now export from the `functions`
+> package as `Unit` (or `number` for dimensionless `fineStructure`). Verified by
+> probing `functions/dist/index.js`: `PRESENT 52 / MISSING 0`. Wired via
+> `functions/src/type/unit/physicalConstants.ts` + `factories/index.ts:1370-1387`.
+> **This appendix is closed.**
+
+---
+
+## Part 5 — Revision 3 re-validation (2026-06-29)
+
+Method: five parallel evidence passes over current `main` (HEAD `45ebe78`), each
+re-checking one bridge cluster against the 2026-05-20 claims with `file:line`
+citations and live probes of the **built** packages. Consequential new findings
+(variance divergence, workbook cell types, functions.md drift) were
+orchestrator-verified by direct execution. mathjs-side claims marked
+`[confident]`.
+
+### Updated scorecard
+
+| #   | Bridge                              | 2026-05-20     | 2026-06-29           | What changed |
+| --- | ----------------------------------- | -------------- | -------------------- | ------------ |
+| B1  | typed-function type registration    | Healthy 100%   | Healthy 100%         | unchanged |
+| B2  | Matrix factory bridge               | **Weak ~65%**  | **Weak ~65%** (persists) | factory matrix ops still pure-JS on boxed `number[][]`; det/reshape stubs still captured; bridge `SparseMatrix.map` still skips structural zeros |
+| B3  | Matrix backend selection            | Healthy ~95%   | **Healthy ~100%**    | the "JS FFT fallback not implemented" throw is **gone** — real `fftJS` exists (`matrix/src/backends/wasm/fft-wasm.ts:119,264`) |
+| B4  | WASM loaders                        | Healthy ~95%   | Healthy ~95%         | SHA-384 verify still enforced before compile (`WasmLoader.ts:733,783`; `integrity.ts:131-135`) |
+| B5  | `compat` package                    | **Severe ~25%**| **Healthy ~90%** ✅  | rewritten: `all` spreads the full namespace (735 keys); `create(all)` exposes **665 callable functions** (`index.ts:173-183,279`) |
+| B6  | expression ↔ functions scope        | Healthy 100%   | Healthy 100%         | unchanged |
+| B7  | workbook ↔ expression/functions     | **Severe ~10%**| **Healthy ~95%** ✅  | cells run through `evaluate()` + sandbox; `executeData` uses hardened YAML (`executor.ts:170,180,192-196`) — `new Function` gone |
+| B8  | tensor ↔ autograd ↔ matrix/functions| **Severe ~0%** | **Partial ~50%**     | Tensor↔DenseMatrix converters + tensor→matrix decomposition delegation + rich *native* AD landed; still no WASM compute path, no functions/ AD bridge |
+| B9  | parallel ↔ typed functions          | **Weak ~40%**  | **Improved ~70%**    | plain `sum`/`mean`/`std` auto-dispatch by type+size; 15 typed files route to the pool; FFT still parallel-only-named, `numeric` unaccelerated |
+| B10 | AssemblyScript WASM                 | Healthy ~95%   | Healthy ~95%         | unchanged |
+
+### Function surface — every user-facing Part-3 gap is closed
+
+| Part-3 claim | Status | Evidence |
+| ------------ | ------ | -------- |
+| 52 physical constants entirely missing | **RESOLVED** | 52/52 export as `Unit`/`number`; `physicalConstants.ts` + `factories/index.ts:1370-1387` |
+| Type-conversion fns not exported (`complex`/`matrix`/…) | **RESOLVED** | all 10 export as functions; built-pkg probe |
+| `isInteger` not exported (inline stub) | **RESOLVED** | `factories/index.ts:475,491-492` real `createIsInteger` replaces the stub |
+| Stateful `parser()` missing | **RESOLVED** | `evaluate.ts:119` `parser()` with live scope (`Parser` *class* still absent — by design) |
+| JSON `reviver`/`replacer` identity stub | **RESOLVED (public)** | `evaluate.ts:155,168` real `replacer`/`reviver`; internal `factoryScope.replacer` identity stub persists (`index.ts:999`) |
+| 102 dormant factories | **OBSOLETE** | dormant fell 102 → **39**, now *all* internal-by-design (MatAlgo helpers, `*Number` variants, BigNumber-constant factories, type-class ctors); **zero user-facing gap** |
+| Counts: ~518 exports / 17 typed modules | **CHANGED** | now **735** exports / **28** typed modules (+11 domains: bitwise, complex, fused, gpu, logical, parallel-map, probability, relational, set, string, unit) |
+
+### Part-4 remediation roadmap — status
+
+7 DONE, 2 partial, 1 open, 1 persists:
+
+| # | Item | Status |
+| - | ---- | ------ |
+| 1 | Workbook through `evaluate()`, remove `new Function` | **✅ DONE** (`executor.ts:170`) |
+| 2 | Activate 52 physical constants | **✅ DONE** |
+| 3 | Make `compat` real | **✅ DONE** (665 fns via `create(all)`) |
+| 4 | Matrix factories through native `DenseMatrix`/`BackendManager` | **❌ OPEN** (= B2 below) |
+| 5 | Replace `det`/`reshape`/`isInteger` stubs | **⚠️ PARTIAL** — `isInteger` real & exported; but `det`/`reshape` still *capture* the scalar/inline stubs at factory-creation time (`index.ts:426-432` created before the tier-12 upgrade at `:1072-1074`) |
+| 6 | Tensor↔DenseMatrix converters; autograd over functions ops | **⚠️ PARTIAL** — converters DONE (`Tensor.ts:113,123`); autograd-over-`functions` OPEN (no `functions` edge in `autograd/`) |
+| 7 | Transparent size-based parallel dispatch | **⚠️ PARTIAL** — arithmetic/stats auto-dispatch; signal/FFT & `numeric` do not |
+| 8 | `executeData()` YAML/JSON parsing | **✅ DONE** (`executor.ts:192-196`) |
+| 9 | Stateful `Parser`; JSON reviver/replacer; type-conversion exports | **✅ DONE** |
+| 10 | JS FFT fallback in matrix WASM bridge | **✅ DONE** (`fft-wasm.ts:264`) |
+| 11 | Generate/CI-check `functions.md` from the export surface | **❌ OPEN** (still hand-maintained; drifted again — see below) |
+
+### New gaps surfaced by this re-validation
+
+The original roadmap's residual is now a *different, smaller* set. Ranked by leverage / risk:
+
+| # | Gap | Severity | Evidence |
+| - | --- | -------- | -------- |
+| **N1** | **`docs/reference/functions.md` drifted again** — of 735 exports, ~40 *user-facing* functions are undocumented (`pageRank`, `betweennessCentrality`, `convexHull3D`, `carlsonRF/RD/RJ`, `casDerivative/Expand/Factor/Simplify`, `chebyshevFit`, `legendreFit`, `welchPSD/bartlettPSD/multiTaperPSD`, `goertzel`, `chirpZTransform`, `matrixExpm/Logm/Sqrtm`, `singularValues`, `betaPDF/gammaPDF/studentTPDF/noncentralChi2PDF`). No generator exists — roadmap item 11 was never built, so this is the *recurring* failure mode Revision 2 warned about. | **High** (the one open roadmap item, and self-perpetuating) | spot-checked 5/5 missing; no `docs:functions` script in `package.json`/`tools/`/CI |
+| **N2** | **`variance` ≠ `parallelStatVariance` normalization.** Plain `variance([1,2,3,4]) = 1.25` (population) but `parallelStatVariance(...) = 1.6667` (sample). A user switching to the "parallel" variant for speed silently gets a *different statistical answer*. | **High** (correctness footgun) | orchestrator-executed; `arithmetic.ts:~961` (pop) vs `statistics.ts:~125` (sample) |
+| **N3** | **B2 persists — factory matrix ops are pure-JS on boxed `number[][]`.** `toNative()`/`fromNative()` exist (`matrix-bridge.ts:309,314`) but **no activated factory calls them** (only the bridge's own `multiply`/`transpose`). `det`/`inv`/`eigs`/`lup`/`qr`/`expm`/`fft` get no WASM/GPU acceleration. | **Medium-High** (the surviving severe-ish gap) | grep: `toNative`/`fromNative` have zero factory call sites |
+| **N4** | **`compat` config is inert.** `config({number:'BigNumber', matrix:'Array', precision, randomSeed})` stores the object but **nothing reads it** — a no-op vs mathjs, where config drives output/parse types. | Medium | `compat/src/index.ts:185-190`; no consumer |
+| **N5** | **`compat` type defs frozen at ~22 fns + no `chain` API.** `functions.d.ts` declares ~22 of the 665 runtime functions; the rest type as `unknown` (usable, untyped). `math.chain(x).add(3).done()` fluent API absent. | Medium | `compat/src/functions.d.ts:8-96`; no `chain` key `[confident]` mathjs-has-it |
+| **N6** | **Tensor decompositions bypass the existing WASM path.** `tensor/src/operations/svd.ts` imports matrix's *synchronous JS* `svd`, not the already-built async `svdWasm` (`matrix/src/operations/svd-wasm.ts:50`). Same for `eig`/`lu`/`cholesky`/`qr`. Closing B8.4's compute-path gap is mostly *wiring code that already exists*. | Medium | grep: tensor imports sync entry points only |
+| **N7** | **`ThresholdDispatcher` is orphaned.** A category-based `ThresholdDispatcher` (`parallel/src/strategies/threshold.ts:86`) exists but is **not** wired into typed functions (zero hits in `functions/src`); the typed layer uses a *separate* `ComputePool.shouldParallelize` path. Two threshold mechanisms coexist — consolidation candidate. | Low-Medium | grep: `ThresholdDispatcher` unreferenced outside its own tests |
+| **N8** | **Workbook `tensor` + `export` cell types throw.** Both are in `CELL_TYPE_KEYS` (`parser.ts:14-23`) but absent from `SUPPORTED_CELL_TYPES` (`parser.ts:37`) → "Unsupported cell type". The B8 Tensor work has no workbook surface. | Low | orchestrator-verified |
+| **N9** | **Latent B2 foot-guns with no regression test.** (a) Stub-capture ordering: a future reorder of `factories/index.ts` could silently give `det`/`reshape` real-or-stub deps with nothing asserting it; (b) the bridge `SparseMatrix.map` skipping structural zeros (`matrix-bridge.ts:624-657`) has no test pinning the wrong behavior (the *native* `SparseMatrix.map` is correct, `SparseMatrix.ts:894-911`). | Low | no asserting tests found |
+| **N10** | **`autograd` is still walled off from `functions/`** and `tensor` is still a single-consumer package (only `autograd` imports it). Rich *native* AD exists (`tape.ts` sin/cos/exp/svd/eig/…) but `grad` cannot flow through any `functions/` op or `evaluate`. | Low (architectural) | no `functions` edge in `autograd/package.json` |
+
+### Revised remediation (residual only)
+
+| # | Item | Maps to | Effort | Priority |
+| - | ---- | ------- | ------ | -------- |
+| R1 | Build a `functions.md` generator from the export surface + CI drift-check | N1 / item 11 | S | **P0** (recurring, cheap, unblocks doc trust) |
+| R2 | Reconcile `variance`/`std`/`parallelStat*` normalization (pick population-vs-sample convention, document, align) | N2 | S | **P0** (silent correctness) |
+| R3 | Route factory matrix ops through native `DenseMatrix` + `BackendManager` | N3 / item 4 | L | P1 |
+| R4 | Wire tensor decompositions to the existing `*Wasm` async primitives | N6 | M | P1 |
+| R5 | Make `compat` config drive behavior; widen `functions.d.ts`; add `chain` | N4,N5 | M | P2 |
+| R6 | Support (or explicitly reject at parse time) workbook `tensor`/`export` cells; add B2 regression tests | N8,N9 | S | P2 |
+| R7 | Consolidate the two parallel-threshold mechanisms; extend transparent dispatch to FFT/`numeric` | N7 / item 7 | M | P3 |
+| R8 | A `functions/`↔`autograd` AD bridge (or document the boundary as intentional) | N10 / item 6 | L | P3 |
+
+**Bottom line.** The 2026-05-20 analysis was right about *where* the gaps were, and the intervening work closed the three biggest (compat, workbook, FFT-fallback) plus the entire user-facing function backlog. What remains is **B2 (matrix-factory acceleration)**, a **recurring documentation-drift** problem (N1), one **silent correctness divergence** (N2), and a cluster of **"wiring that already exists" gaps** (N6, N7) — a much healthier position than the original five-severe-gaps scorecard.
