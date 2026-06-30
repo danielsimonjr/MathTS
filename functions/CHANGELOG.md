@@ -1,5 +1,28 @@
 # @danielsimonjr/mathts-functions
 
+## 0.5.0
+
+### Minor Changes
+
+- Named mathematical constants are now real exports + evaluator symbols.
+
+  `docs/reference/constants.md` documented `import { PI, E, PHI, TAU } from
+'@danielsimonjr/mathts-core'`, but those were never exported. They exist now:
+
+  - **core**: new named exports `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`,
+    `LN10`, `LOG2E`, `LOG10E` (plain numbers). The imaginary unit `I` and the
+    type-specific constants (`COMPLEX_*`, `BIGNUMBER_*`, `FRACTION_*`) are unchanged.
+  - **functions**: the expression-evaluator scope gains `phi`, the imaginary unit
+    `i`, and `SQRT2` / `SQRT1_2` / `LN2` / `LN10` / `LOG2E` / `LOG10E` (it already had
+    `pi`/`e`/`tau`). So `evaluate('phi')` → 1.618…, `evaluate('2 + 3*i')` → Complex(2, 3).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.3.0
+  - @danielsimonjr/mathts-expression@0.4.2
+  - @danielsimonjr/mathts-matrix@0.1.12
+
 ## 0.4.0
 
 ### Minor Changes
