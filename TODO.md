@@ -32,6 +32,17 @@ non-decision).
 
 ### 🔭 Gap-closure backlog (from the 2026-06-29 re-analyses)
 
+> **Status (2026-06-29):** 13 of 16 implemented, verified green (4,644 tests, 0
+> regressions), and landed. ✅ GC1–GC6, GC8–GC13, GC16. **GC3 fixed a real bug**
+> (normal/log-normal CDF+quantile tail accuracy, found via the scipy oracle).
+> Remaining (the L-effort / architectural tail): **GC7** (factory matrix ops →
+> native DenseMatrix/BackendManager; blocked by factory dep-capture ordering),
+> **GC14** (transparent FFT dispatch needs sync-`Complex[]` vs parallel-`{real,imag}`
+> output-contract unification + threshold-mechanism merge), **GC15** (functions↔
+> autograd AD bridge). GC16's statistics-wide breadth left as a deliberate
+> parallel-first design choice (see commit). GC11's decomposition-factor / CAS-sympy
+> oracles are further extensions of the same harness.
+
 Consolidated, deduplicated, and prioritized from the two refreshed reports —
 [`FUNCTION_GAPS.md` §7](docs/roadmap/FUNCTION_GAPS.md#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6)
 (type-dispatch / parity / correctness-coverage) and
