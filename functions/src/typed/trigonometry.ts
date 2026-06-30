@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
@@ -35,6 +35,7 @@ export const sin = mathTyped('sin', {
   number: (a: f64): f64 => Math.sin(a),
   Complex: (a: Complex): Complex => a.sin(),
   BigNumber: (a: BigNumber): BigNumber => a.sin(),
+  Dual: (a: Dual): Dual => a.sin(),
 
   // Parallel Float64Array sin
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -52,6 +53,7 @@ export const cos = mathTyped('cos', {
   number: (a: f64): f64 => Math.cos(a),
   Complex: (a: Complex): Complex => a.cos(),
   BigNumber: (a: BigNumber): BigNumber => a.cos(),
+  Dual: (a: Dual): Dual => a.cos(),
 
   // Parallel Float64Array cos
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -69,6 +71,7 @@ export const tan = mathTyped('tan', {
   number: (a: f64): f64 => Math.tan(a),
   Complex: (a: Complex): Complex => a.tan(),
   BigNumber: (a: BigNumber): BigNumber => a.tan(),
+  Dual: (a: Dual): Dual => a.tan(),
 
   // Parallel Float64Array tan
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {

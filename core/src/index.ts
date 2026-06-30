@@ -31,6 +31,9 @@ export {
   COMPLEX_NEG_ONE,
 } from './types/complex.js';
 
+// Dual numbers (forward-mode automatic differentiation)
+export { Dual, isDual } from './types/dual.js';
+
 // Fractions (exact rationals)
 export {
   Fraction,

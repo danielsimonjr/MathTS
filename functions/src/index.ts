@@ -32,6 +32,10 @@ export { evaluate, compileExpr, parse, parser, reviver, replacer } from './facto
 
 // GC4 — mathjs canonical `help(search)` export (Help class + embedded docs).
 export { help } from './help.js';
+
+// Forward-mode AD over the plain functions surface (Dual-number overloading).
+export { derivativeAt, valueAndDerivativeAt, gradientAt } from './grad-forward.js';
+export type { DualFn } from './grad-forward.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this

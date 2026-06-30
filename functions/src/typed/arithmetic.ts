@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber, Unit } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, Fraction, BigNumber, Unit, Dual } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
@@ -62,6 +62,11 @@ export const add = mathTyped('add', {
 
   // Unit arithmetic (mathjs parity): same-dimension units add (e.g. 5 cm + 3 mm).
   'Unit, Unit': (a: Unit, b: Unit): Unit => a.add(b),
+
+  // Dual numbers (forward-mode AD).
+  'Dual, Dual': (a: Dual, b: Dual): Dual => a.add(b),
+  'Dual, number': (a: Dual, b: f64): Dual => a.add(Dual.constant(b)),
+  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).add(b),
 
   // Mixed type operations (auto-coercion via conversions)
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
@@ -115,6 +120,11 @@ export const subtract = mathTyped('subtract', {
   // Unit subtraction (same dimension): 5 cm − 3 mm.
   'Unit, Unit': (a: Unit, b: Unit): Unit => a.sub(b),
 
+  // Dual numbers (forward-mode AD).
+  'Dual, Dual': (a: Dual, b: Dual): Dual => a.sub(b),
+  'Dual, number': (a: Dual, b: f64): Dual => a.sub(Dual.constant(b)),
+  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).sub(b),
+
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).subtract(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.subtract(Complex.fromNumber(b)),
 
@@ -153,6 +163,11 @@ export const multiply = mathTyped('multiply', {
   'Unit, Unit': (a: Unit, b: Unit): Unit => a.mul(b),
   'Unit, number': (a: Unit, b: f64): Unit => a.mul(b),
   'number, Unit': (a: f64, b: Unit): Unit => b.mul(a),
+
+  // Dual numbers (forward-mode AD).
+  'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
+  'Dual, number': (a: Dual, b: f64): Dual => a.mul(Dual.constant(b)),
+  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).mul(b),
 
   // Matrix × matrix (2-D arrays) routed through the native DenseMatrix +
   // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
@@ -230,6 +245,11 @@ export const divide = mathTyped('divide', {
   'Unit, Unit': (a: Unit, b: Unit): Unit => a.div(b),
   'Unit, number': (a: Unit, b: f64): Unit => a.div(b),
 
+  // Dual numbers (forward-mode AD).
+  'Dual, Dual': (a: Dual, b: Dual): Dual => a.div(b),
+  'Dual, number': (a: Dual, b: f64): Dual => a.div(Dual.constant(b)),
+  'number, Dual': (a: f64, b: Dual): Dual => Dual.constant(a).div(b),
+
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).divide(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.divide(Complex.fromNumber(b)),
 
@@ -288,6 +308,7 @@ export const abs = mathTyped('abs', {
   Complex: (a: Complex): f64 => a.abs(),
   Fraction: (a: Fraction): Fraction => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
+  Dual: (a: Dual): Dual => a.abs(),
 
   // Parallel array abs
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -339,6 +360,9 @@ export const pow = mathTyped('pow', {
   'Fraction, number': (a: Fraction, b: f64): Fraction => a.pow(Math.floor(b)),
   'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.pow(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.pow(b.valueOf()),
+  // Dual numbers (forward-mode AD): constant or variable exponent.
+  'Dual, number': (a: Dual, b: f64): Dual => a.powConst(b),
+  'Dual, Dual': (a: Dual, b: Dual): Dual => a.pow(b),
 });
 
 /**
@@ -353,6 +377,7 @@ export const sqrt = mathTyped('sqrt', {
   },
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber => a.sqrt(),
+  Dual: (a: Dual): Dual => a.sqrt(),
 
   // Parallel array sqrt
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -370,6 +395,7 @@ export const square = mathTyped('square', {
   Complex: (a: Complex): Complex => a.multiply(a),
   Fraction: (a: Fraction): Fraction => a.multiply(a),
   BigNumber: (a: BigNumber): BigNumber => a.multiply(a),
+  Dual: (a: Dual): Dual => a.square(),
 
   // Parallel array square
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -387,6 +413,7 @@ export const cube = mathTyped('cube', {
   Complex: (a: Complex): Complex => a.multiply(a).multiply(a),
   Fraction: (a: Fraction): Fraction => a.multiply(a).multiply(a),
   BigNumber: (a: BigNumber): BigNumber => a.multiply(a).multiply(a),
+  Dual: (a: Dual): Dual => a.powConst(3),
 
   // Parallel array cube
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -407,6 +434,7 @@ export const cbrt = mathTyped('cbrt', {
   number: (a: f64): f64 => Math.cbrt(a),
   Complex: (a: Complex): Complex => a.pow(1 / 3),
   BigNumber: (a: BigNumber): BigNumber => a.cbrt(),
+  Dual: (a: Dual): Dual => a.powConst(1 / 3),
 
   // Parallel array cbrt
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -440,6 +468,7 @@ export const exp = mathTyped('exp', {
   number: (a: f64): f64 => Math.exp(a),
   Complex: (a: Complex): Complex => a.exp(),
   BigNumber: (a: BigNumber): BigNumber => a.exp(),
+  Dual: (a: Dual): Dual => a.exp(),
 
   // Parallel array exp
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -457,6 +486,7 @@ export const log = mathTyped('log', {
   number: (a: f64): f64 => Math.log(a),
   Complex: (a: Complex): Complex => a.log(),
   BigNumber: (a: BigNumber): BigNumber => a.ln(),
+  Dual: (a: Dual): Dual => a.log(),
   'number, number': (a: f64, base: f64): f64 => Math.log(a) / Math.log(base),
 
   // Parallel array log

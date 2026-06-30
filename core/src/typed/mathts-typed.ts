@@ -61,6 +61,7 @@ export function isTypedWasmAvailable(): boolean {
 }
 
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
+import { isDual } from '../types/dual.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 
@@ -271,6 +272,7 @@ export const MATHTS_TYPES: MathTSTypeDef[] = [
 
   // Other types
   { name: 'Unit', test: isUnit },
+  { name: 'Dual', test: isDual },
 ];
 
 // =============================================================================
