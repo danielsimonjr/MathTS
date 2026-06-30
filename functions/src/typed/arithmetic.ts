@@ -13,6 +13,7 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Unit } from '@danielsimonjr/mathts-core';
+import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
@@ -152,6 +153,21 @@ export const multiply = mathTyped('multiply', {
   'Unit, Unit': (a: Unit, b: Unit): Unit => a.mul(b),
   'Unit, number': (a: Unit, b: f64): Unit => a.mul(b),
   'number, Unit': (a: f64, b: Unit): Unit => b.mul(a),
+
+  // Matrix × matrix (2-D arrays) routed through the native DenseMatrix +
+  // BackendManager — i.e. WASM/GPU acceleration for large matrices (GC7).
+  // Previously `multiply(2DArray, 2DArray)` threw; this is additive. Non-2-D
+  // Array operands throw a clear message pointing at the right primitive.
+  'Array, Array': (a: unknown[], b: unknown[]): number[][] => {
+    if (!Array.isArray(a[0]) || !Array.isArray(b[0])) {
+      throw new TypeError(
+        'multiply(Array, Array) requires two 2-D matrices; use dot() for vector dot products'
+      );
+    }
+    const A = DenseMatrix.fromArray(a as number[][]);
+    const B = DenseMatrix.fromArray(b as number[][]);
+    return backendManager.multiply(A, B).toArray();
+  },
 
   'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
   'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
