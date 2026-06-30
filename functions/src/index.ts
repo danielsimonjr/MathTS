@@ -122,6 +122,14 @@ export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 export { linearRegression } from './regression-extra.js';
 export type { LinregressResult } from './regression-extra.js';
 
+// Gap-analysis Wave D — named optimizers + nonlinear least squares.
+export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
+export type { OptimizeResult, LMResult } from './optimization-extra.js';
+
+// Gap-analysis Wave D — clustering (kmeans + spectral, reuse laplacianMatrix + eigs).
+export { kmeans, spectralClustering } from './clustering-extra.js';
+export type { KMeansResult } from './clustering-extra.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,
