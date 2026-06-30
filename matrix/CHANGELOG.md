@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-parallel@0.3.0
+
 ## 0.1.9
 
 ### Changed
@@ -92,7 +99,6 @@
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-
 
 ## 0.1.3
 

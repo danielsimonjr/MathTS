@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-ast
 
+## 0.1.3
+
+### Patch Changes
+
+- Fix stale `@danielsimonjr/mathts-expression` dependency range (`^0.2.4` → `^0.4.0`) so the re-export ships the current expression package.
+
+
 ## 0.1.2
 
 ### Patch Changes

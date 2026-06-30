@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.3.0
+
+### Minor Changes
+
+- - **feat (GC9):** `TapedTensor.pow(taped, taped)` — variable-exponent reverse-mode AD.
+  - **feat (GC15):** JAX-style `grad` / `valueAndGrad` / `derivative` / `jacobian` —
+    ergonomic autodiff over plain numbers / Float64Arrays (function written in
+    AD-aware TapedTensor ops).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-tensor@0.2.0
+
 ## 0.2.0
 
 ### Minor Changes

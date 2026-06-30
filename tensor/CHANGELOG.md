@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.0
+
+### Minor Changes
+
+- - **feat (GC8):** `tensorSvdWasm` / `tensorEigWasm` — async tensor decompositions
+    routed through the AssemblyScript WASM kernels (same result as the sync variants,
+    accelerated for large matricisations).
+
+### Patch Changes
+
+- @danielsimonjr/mathts-matrix@0.1.10
+
 ## 0.1.3
 
 ### Patch Changes
@@ -24,4 +36,3 @@
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-

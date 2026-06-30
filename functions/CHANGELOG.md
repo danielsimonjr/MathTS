@@ -1,5 +1,35 @@
 # @danielsimonjr/mathts-functions
 
+## 0.3.0
+
+### Minor Changes
+
+- Gap-closure batch (GC1–GC16):
+
+  - **fix (GC3):** accurate normal/log-normal CDF + quantile. The previous
+    Abramowitz-&-Stegun erf approximation collapsed in the tails (`normalCDF(-5)`
+    was 3-digit); now ~15-digit via the package's accurate `erfc` + an Acklam/Halley
+    inverse-normal. Affects `normalDist`, `logNormalDist`, and `normalCDF`.
+  - **fix (GC1):** `variance`/`std` now default to **unbiased** (mathjs parity) and
+    accept a `normalization` argument, matching `parallelStatVariance`/`Std`.
+  - **feat (GC4):** canonical-name aliases `cumsum`/`ctranspose`/`createUnit`/`apply`/
+    `index`, and a real `help(search)`.
+  - **feat (GC5):** `Unit` support in `add`/`subtract`/`multiply`/`divide` and the
+    comparison operators (`5 cm + 3 mm`, `5 cm > 40 mm`).
+  - **feat (GC6):** complex-argument `lgamma`.
+  - **feat (GC7):** accelerated `multiply(2D, 2D)` via native DenseMatrix + BackendManager.
+  - **feat (GC10):** `BigNumber` path for `acsc`/`asec`/`acot`.
+  - **feat (GC16):** `Complex` for `round`/`floor`/`ceil`/`fix`/`sign`; `BigNumber` for
+    `gcd`/`lcm`/`atan2`.
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @danielsimonjr/mathts-expression@0.4.0
+  - @danielsimonjr/mathts-parallel@0.3.0
+  - @danielsimonjr/mathts-matrix@0.1.10
+
 ## Unreleased
 
 ### Changed — eslint `no-explicit-any`/`no-unsafe-function-type` cleanup (subset-2)
@@ -27,7 +57,7 @@
   `relational`, and root `types.ts`. Behavior-preserving (no logic changes);
   the functions suite stays green (2902 pass / 41 skip) and `tsc --noEmit` is 0.
 - Honest replacements throughout: `factoryScope as any` → `as Parameters<typeof
-  createX>[0]`; matrix-algorithm casts → `as unknown as AlgorithmFunction` /
+createX>[0]`; matrix-algorithm casts → `as unknown as AlgorithmFunction` /
   `Parameters<typeof matAlgoX>[n]`; empty-object-type placeholders → real
   `BigNumber`/`Matrix`/`IndexInterface` types; sparse matrix element values →
   `unknown`; `expression/operators` precedence table → structural
@@ -45,11 +75,11 @@
 ### Added — WASM acceleration tripled (3-tier gap-fill, effective-wasm 6 → 18)
 
 - **Tier 1 — 11 more transcendentals WASM-accelerated:** `atan, sinh, tanh,
-  atanh, expm1, log1p, log2, log10, sec, csc, cot` over `Float64Array` ≥ 1024 now
+atanh, expm1, log1p, log2, log10, sec, csc, cot` over `Float64Array` ≥ 1024 now
   dispatch to new Rust `simd_*_array` kernels — benchmark-confirmed 1.4–5× over
   JS incl. the JS↔wasm copy (`npm run bench:transcendental`). Measured losers
   left on JS (hardware-fast / fast-JS): `sqrt, cbrt, asin, acos, cosh, asinh,
-  acosh`.
+acosh`.
 - **Tier 2 — `erfc` WASM-accelerated:** ~5–7× (its JS is a continued-fraction
   scalar, far costlier than `Math.*`). Verified <1e-12 vs the JS scalar.
 - **Tier 3 — op-fusion:** new `fuseUnaryChain(ops, xs)` keeps an array resident
@@ -125,7 +155,7 @@ kernel path, and the wasm-bridge JS fallback (`src/wasm/special/wasm-bridge.ts`)
 - **`besselJ` recurrence**: upward recurrence is unstable for n > x — those
   cases now use Miller's backward recurrence (was: forward whenever n <= 20,
   giving up to ~1e-3 error, e.g. J5(1)); fixed a Miller off-by-one that
-  returned J_{n+1}.
+  returned J\_{n+1}.
 - **`besselK`**: replaced A&S polynomial approximations (~1e-8) with the
   DLMF 10.31.2 ascending series + asymptotic.
 - **Airy Ai/Bi**: the asymptotic-coefficient recurrence omitted the (2k-1)
@@ -237,7 +267,6 @@ No public API changes.
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-
 
 ## 0.2.1
 

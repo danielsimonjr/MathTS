@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.3.0
+
+### Minor Changes
+
+- - **feat (GC14):** export `DEFAULT_THRESHOLD_BY_OP` as the canonical, benchmark-tuned
+    per-op parallelization-threshold source of truth; `ThresholdDispatcher` now derives
+    its overlapping `matmul` threshold from it (was 10000, now the canonical 4096) so
+    the two threshold mechanisms cannot silently diverge.
+
 ## 0.2.2
 
 ### Patch Changes
@@ -31,7 +40,6 @@
 ### Patch Changes
 
 - Pin `@danielsimonjr/mathts-workerpool` to an exact version instead of `*`, so a matched package set always installs together.
-
 
 ## 0.2.0
 

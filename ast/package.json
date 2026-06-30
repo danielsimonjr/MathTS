@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-ast",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Standalone AST node constructors for MathTS expressions, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.1.4",
-    "@danielsimonjr/mathts-expression": "^0.2.4",
+    "@danielsimonjr/mathts-expression": "^0.4.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {

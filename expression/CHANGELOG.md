@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-expression
 
+## 0.4.0
+
+### Minor Changes
+
+- - **feat (GC4):** export `embeddedDocs` (enables the `help()` function in the
+    functions package).
+
 ## 0.3.0
 
 ### Minor Changes
@@ -54,7 +61,6 @@
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-
 
 ## 0.2.0
 
