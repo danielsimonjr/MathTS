@@ -34,7 +34,19 @@ reference "complete" scientific-computing surface.
 > (signed-rank, normal approx + continuity correction, reuses `rankdata` + `normalCDF`),
 > `fisherExact` (2×2, stable log-hypergeometric via `lgamma`). **`tukeyHSD` deferred** —
 > it needs the studentized-range (q) distribution, which the library does not yet have;
-> add that distribution first (Wave C/D). Waves C–D below otherwise remain.
+> add that distribution first (Wave C/D).
+>
+> **Wave C (part 1) ✅ landed (2026-06-30).** Structured-matrix constructors + logdet
+> (bridges C2/C5) and geodesy (C7), all NumPy/SciPy-verified (10/10): `tril`, `triu`,
+> `vander`, `toeplitz`, `circulant`, `companion`, `logdet` (`linalg-extra.ts`, `logdet`
+> reuses the matrix LU) and `haversine` (`geometry-extra.ts`, reuses `toRadians`).
+> **Bug found + fixed along the way:** the `companion` cross-check (eigenvalues should
+> be the polynomial roots) revealed that the mathjs factory `eigs` returns **wrong
+> eigenvalues for every non-symmetric matrix** — even upper-triangular ones (diagonal
+> eigenvalues). Root-caused and fixed: the public `eigs` now routes numeric square
+> matrices through the native orthes/hqr2 solver (correct for symmetric/non-symmetric/
+> complex spectra; regression in `eigs-correctness.test.ts`). Remaining Wave C: `hessian`,
+> graph `laplacianMatrix` + spectral, `slerp`/`quaternion`. Wave D remains.
 
 ---
 

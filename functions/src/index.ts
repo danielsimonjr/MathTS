@@ -88,6 +88,12 @@ export type {
   WilcoxonResult,
   FisherExactResult,
 } from './hypothesis-extra.js';
+
+// Gap-analysis Wave C — structured-matrix constructors + logdet (bridges C2, C5).
+export { tril, triu, vander, toeplitz, circulant, companion, logdet } from './linalg-extra.js';
+
+// Gap-analysis Wave C — geodesy (bridge C7).
+export { haversine, EARTH_RADIUS_KM } from './geometry-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
