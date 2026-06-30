@@ -17,8 +17,15 @@ import { dirname, resolve } from 'node:path';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
 const DOC = resolve(REPO, 'docs', 'reference', 'functions.md');
+const HTML = resolve(REPO, 'docs', 'reference', 'functions.html');
 const BEGIN = '<!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->';
 const END = '<!-- END GENERATED EXPORT INDEX -->';
+// functions.html is a self-rendering page: it embeds the raw markdown in a
+// <script id="md" type="text/markdown"> block and renders it client-side. Keep
+// that embedded copy in sync with functions.md (each non-blank line indented 6
+// spaces to match the surrounding HTML, as the page dedents before rendering).
+const MD_OPEN = '<script id="md" type="text/markdown">';
+const MD_CLOSE = '</script>';
 
 const mod = await import(pathToFileURL(resolve(REPO, 'functions', 'dist', 'index.js')).href);
 
@@ -92,32 +99,71 @@ out += `### Namespace aggregates (${CATEGORY_NS.length})\n\n`;
 out += `Per-category objects bundling the functions above.\n\n${code(CATEGORY_NS)}\n\n`;
 out += `${END}`;
 
+// Compare/emit line-ending-agnostically: on a Windows checkout the on-disk files
+// may be CRLF (git autocrlf) while generated content is LF, which would otherwise
+// report a false "stale" and churn line endings on every run.
+const norm = (s) => s.replace(/\r\n/g, '\n');
+const check = process.argv.includes('--check');
+
+// --- functions.md: splice the regenerated export index into place ---
 const doc = readFileSync(DOC, 'utf8');
 const bi = doc.indexOf(BEGIN);
 const ei = doc.indexOf(END);
-if (bi === -1 || ei === -1) {
-  // First run: append the generated block at the end of the file.
-  const next = `${doc.replace(/\s*$/, '')}\n\n## Complete export index\n\n${out}\n`;
-  finish(doc, next);
-} else {
-  const next = doc.slice(0, bi) + out + doc.slice(ei + END.length);
-  finish(doc, next);
-}
+const mdNext =
+  bi === -1 || ei === -1
+    ? `${doc.replace(/\s*$/, '')}\n\n## Complete export index\n\n${out}\n` // first run: append
+    : doc.slice(0, bi) + out + doc.slice(ei + END.length);
+const mdStale = norm(mdNext) !== norm(doc);
 
-function finish(prev, next) {
-  const check = process.argv.includes('--check');
-  if (next === prev) {
-    console.log('functions.md export index is up to date.');
-    return;
+// --- functions.html: re-embed the up-to-date markdown into its <script id="md"> ---
+const html = readFileSync(HTML, 'utf8');
+const htmlNext = embedMarkdown(html, mdNext);
+const htmlStale = norm(htmlNext) !== norm(html);
+
+if (check) {
+  if (!mdStale && !htmlStale) {
+    console.log('functions.md + functions.html are up to date.');
+    process.exit(0);
   }
-  if (check) {
-    // Report what's missing for a useful CI failure.
-    const documented = new Set([...prev.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+  if (mdStale) {
+    const documented = new Set([...doc.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
     const missing = Object.keys(mod).filter((n) => !documented.has(n));
     console.error('functions.md export index is STALE. Run `npm run docs:functions`.');
     if (missing.length) console.error(`Undocumented exports (${missing.length}): ${missing.join(', ')}`);
-    process.exit(1);
   }
-  writeFileSync(DOC, next);
-  console.log(`Wrote functions.md export index (${Object.keys(mod).length} exports).`);
+  if (htmlStale) {
+    console.error('functions.html embedded markdown is STALE. Run `npm run docs:functions`.');
+  }
+  process.exit(1);
+}
+
+writeIfStale(DOC, doc, mdNext, mdStale, `functions.md export index (${Object.keys(mod).length} exports)`);
+writeIfStale(HTML, html, htmlNext, htmlStale, 'functions.html embedded markdown');
+
+/** Replace the body of `<script id="md" type="text/markdown">…</script>` with `md`,
+ *  indenting each non-blank line 6 spaces to match the page (it dedents at render). */
+function embedMarkdown(htmlRaw, md) {
+  const h = norm(htmlRaw);
+  const open = h.indexOf(MD_OPEN);
+  if (open === -1) throw new Error(`functions.html: cannot find ${MD_OPEN}`);
+  const bodyStart = open + MD_OPEN.length;
+  const close = h.indexOf(MD_CLOSE, bodyStart);
+  if (close === -1) throw new Error(`functions.html: cannot find ${MD_CLOSE} after the md block`);
+  const indented = norm(md)
+    .replace(/\s+$/, '')
+    .split('\n')
+    .map((l) => (l === '' ? '' : '      ' + l))
+    .join('\n');
+  return `${h.slice(0, bodyStart)}\n${indented}\n    ${h.slice(close)}`;
+}
+
+/** Write `next` to `file` preserving the original file's dominant EOL; no-op if unchanged. */
+function writeIfStale(file, prev, next, stale, label) {
+  if (!stale) {
+    console.log(`${label} is up to date.`);
+    return;
+  }
+  const eol = prev.includes('\r\n') ? '\r\n' : '\n';
+  writeFileSync(file, eol === '\r\n' ? norm(next).replace(/\n/g, '\r\n') : norm(next));
+  console.log(`Wrote ${label}.`);
 }
