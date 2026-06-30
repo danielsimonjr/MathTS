@@ -8,13 +8,16 @@
  * for the cases that matter.
  *
  * Design contract: these helpers can never be *less* correct than the factory
- * implementation. They only engage for large, square, all-numeric matrices; for
- * anything else (small, non-numeric, non-square, or any native-side error) they
- * fall back to the supplied factory function. The one special case — native LU
- * throwing on a singular matrix — is handled correctly (a singular matrix has
- * det 0), verified against numpy.
+ * implementation. The `det`/`inv` helpers engage only for large square all-numeric
+ * matrices (performance); `correctEigs` engages for *any* numeric square matrix
+ * (correctness — the factory `eigs` is simply wrong for non-symmetric input). For
+ * anything else (non-numeric, non-square, or any native-side error) they fall back
+ * to the supplied factory function. The one special case — native LU throwing on a
+ * singular matrix — is handled correctly (a singular matrix has det 0), verified
+ * against numpy.
  */
-import { DenseMatrix, lu } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, lu, eig } from '@danielsimonjr/mathts-matrix';
+import { Complex } from '@danielsimonjr/mathts-core';
 
 /** Below this dimension the factory path is already sub-millisecond; native
  *  conversion overhead isn't worth it and the well-tested factory path runs. */
@@ -113,5 +116,57 @@ export function acceleratedInv<T>(a: unknown, factoryInv: (m: unknown) => T): T 
     return inv as unknown as T;
   } catch {
     return factoryInv(a); // singular / any native failure → proven factory path
+  }
+}
+
+const EIG_IM_TOL = 1e-10;
+
+/** True for a square `number[][]` of any size ≥ 1. */
+export function isNumericSquare(a: unknown): a is number[][] {
+  if (!Array.isArray(a) || a.length === 0) return false;
+  const n = a.length;
+  for (const row of a) {
+    if (!Array.isArray(row) || row.length !== n) return false;
+    for (let j = 0; j < n; j++) if (typeof row[j] !== 'number') return false;
+  }
+  return true;
+}
+
+/**
+ * Correct eigendecomposition for the public `eigs`.
+ *
+ * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
+ * non-symmetric matrix — even trivial upper-triangular ones, whose eigenvalues
+ * are just the diagonal (e.g. [[2,1,0],[0,3,1],[0,0,4]] → [1.27, 3, 4.73]). The
+ * native `@danielsimonjr/mathts-matrix` `eig` (JAMA orthes/hqr2) is correct for
+ * symmetric, non-symmetric, and complex spectra (verified vs numpy), so route all
+ * numeric square matrices through it and emit the factory's `{ values,
+ * eigenvectors }` shape. Non-(numeric square) inputs and any native error fall
+ * back to the factory.
+ */
+export function correctEigs(
+  a: unknown,
+  options: { eigenvectors?: boolean } | undefined,
+  factoryEigs: (m: unknown, o?: unknown) => unknown
+): unknown {
+  const toFactory = (): unknown => (options === undefined ? factoryEigs(a) : factoryEigs(a, options));
+  if (!isNumericSquare(a)) return toFactory();
+  const wantVectors = options?.eigenvectors !== false;
+  try {
+    const ne = eig(a, { computeVectors: wantVectors }) as {
+      values: Array<{ re: number; im: number }>;
+      vectors: number[][];
+    };
+    const pairs = ne.values.map((v, i) => ({
+      value: (Math.abs(v.im) < EIG_IM_TOL ? v.re : new Complex(v.re, v.im)) as number | Complex,
+      vector: ne.vectors[i],
+    }));
+    const reOf = (x: number | Complex): number => (typeof x === 'number' ? x : x.re);
+    const imOf = (x: number | Complex): number => (typeof x === 'number' ? 0 : x.im);
+    pairs.sort((p, q) => reOf(p.value) - reOf(q.value) || imOf(p.value) - imOf(q.value));
+    const values = pairs.map((p) => p.value);
+    return wantVectors ? { values, eigenvectors: pairs } : { values };
+  } catch {
+    return toFactory();
   }
 }

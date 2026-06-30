@@ -375,7 +375,7 @@ import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
 import { createCount } from '../matrix/count.js';
 import { createTrace } from '../matrix/trace.js';
 import { createDet } from '../matrix/det.js';
-import { acceleratedDet, acceleratedInv } from '../matrix/native-accel.js';
+import { acceleratedDet, acceleratedInv, correctEigs } from '../matrix/native-accel.js';
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
@@ -1250,8 +1250,14 @@ import { createStd } from '../statistics/std.js';
 import { createSetSymDifference } from '../set/setSymDifference.js';
 import { createSimplify } from '../algebra/simplify.js';
 
-export const eigs = createEigs(factoryScope as Parameters<typeof createEigs>[0]);
-factoryScope.eigs = eigs;
+const factoryEigs = createEigs(factoryScope as Parameters<typeof createEigs>[0]);
+factoryScope.eigs = factoryEigs;
+// The mathjs factory `eigs` returns WRONG eigenvalues for every non-symmetric
+// matrix (even triangular ones). Route the public `eigs` through the native
+// orthes/hqr2 solver, which is correct for symmetric/non-symmetric/complex spectra;
+// non-numeric inputs delegate to the factory. Internal consumers keep factoryScope.
+export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean }) =>
+  correctEigs(m, opts, factoryEigs as unknown as (x: unknown, o?: unknown) => unknown)) as unknown as typeof factoryEigs;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;
