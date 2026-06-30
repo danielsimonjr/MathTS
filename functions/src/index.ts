@@ -102,8 +102,15 @@ export {
   laplacianMatrix,
 } from './linalg-extra.js';
 
-// Gap-analysis Wave C — numeric Hessian (bridge C3).
-export { hessian } from './calculus-extra.js';
+// Gap-analysis Wave C — numeric Hessian (bridge C3); Wave D — numeric gradient.
+export { hessian, gradient } from './calculus-extra.js';
+
+// Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
+export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
+
+// Gap-analysis Wave D — OLS regression (bridge statistics ↔ linear algebra).
+export { linearRegression } from './regression-extra.js';
+export type { LinregressResult } from './regression-extra.js';
 
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {

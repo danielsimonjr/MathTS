@@ -52,9 +52,15 @@ reference "complete" scientific-computing surface.
 > `laplacianMatrix` (combinatorial + normalized, bridge C6, enables spectral methods
 > via `eigs`), `slerp` and the quaternion algebra (`quaternionMultiply`/`Conjugate`/
 > `Normalize`/`FromAxisAngle`/`Rotate`/`ToRotationMatrix`, bridge C7, vs
-> scipy.spatial.transform.Rotation). **Wave C complete.** Wave D (filter design, named
-> optimizers + Levenberg–Marquardt, generalized eig/qz, distribution breadth, symbolic
-> integration, time-series, regression, spectral clustering) remains.
+> scipy.spatial.transform.Rotation). **Wave C complete.**
+>
+> **Wave D (batch 1) ✅ landed (2026-06-30).** Time-series basics + numeric gradient +
+> OLS regression, verified vs NumPy/SciPy (12/12): `movingAverage`, `ewma`, `detrend`
+> (vs scipy.signal.detrend), `acf` (`timeseries-extra.ts`); `gradient` (numpy.gradient,
+> non-uniform second-order, `calculus-extra.ts`); `linearRegression` (vs
+> scipy.stats.linregress, reuses `studentTCDF`, `regression-extra.ts`). Remaining Wave D
+> (higher complexity): generalized eig/qz, distribution breadth, named optimizers +
+> Levenberg–Marquardt, filter design, symbolic integration, spectral clustering.
 
 ---
 
