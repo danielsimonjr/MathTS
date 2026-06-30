@@ -1,5 +1,33 @@
 # @danielsimonjr/mathts-core
 
+## 0.2.0
+
+### Minor Changes
+
+- Matrix-factory acceleration + a matrix eigensolver correctness fix + forward-mode AD.
+
+  **fix(matrix): eig — wrong eigenvalues for symmetric matrices with structural zeros.**
+  The symmetric-only Givens/Wilkinson eigenvalue path returned grossly wrong
+  eigenvalues for symmetric matrices with off-diagonal zeros (e.g. the tridiagonal
+  `[[2,-1,0],[-1,2,-1],[0,-1,2]]` gave `[19.05, 2, 0.94]` — sum 22 ≠ trace 6 —
+  instead of `[0.586, 2, 3.414]`). Fixed by routing all matrices through the robust
+  JAMA orthes/hqr2 solver (verified vs numpy). This also repairs latent wrong
+  results in `tensorEig`/`tensorEigWasm`. Note: eigenvectors for symmetric input now
+  follow the general solver's convention (they are sign-ambiguous; A·v = λ·v holds).
+
+  **perf(functions): det / inv accelerated.** Large (≥8×8) numeric square matrices
+  now route `det` (~20× on 80×80) and `inv` (~9×) through the native Float64Array
+  LU instead of boxed `number[][]`. numpy-verified; small / non-numeric / singular
+  inputs fall back to the factory unchanged.
+
+  **feat(functions + core): forward-mode automatic differentiation.** A new scalar
+  `Dual` type (core, registered for typed dispatch) plus `Dual` signatures on the
+  elementary functions (add/sub/mul/div/pow/sin/cos/tan/exp/log/sqrt/square/cube/
+  cbrt/abs) make the ordinary functions API differentiable. New entry points
+  `derivativeAt` / `valueAndDerivativeAt` / `gradientAt`:
+
+      derivativeAt((x) => multiply(sin(x), x), 2)   // sin(2) + 2·cos(2), exact
+
 ## 0.1.5
 
 ### Patch Changes
@@ -23,7 +51,6 @@
 ### Patch Changes
 
 - Re-export `Unit` from the published build. `core@0.1.2` shipped to npm without `Unit` in its entry export block (the committed `dist` predated the Unit-export commit and was not rebuilt before publish), so downstream `@danielsimonjr/mathts-functions` hit `Unit is undefined`. Rebuilt so `dist/index.js` and `dist/index.d.ts` export `Unit` (`new Unit()`, `.to()`, `.toBest()`, `.value`, `.type`). Added a regression test that asserts the export against the built artifact so this cannot silently regress before a publish.
-
 
 ## 0.1.1
 
