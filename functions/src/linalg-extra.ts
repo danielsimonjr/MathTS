@@ -8,7 +8,7 @@
  * Gaussian likelihoods (stats).
  */
 import { DenseMatrix, lu } from '@danielsimonjr/mathts-matrix';
-import { inv as _invRaw, eigs as _eigsRaw } from './factories/index.js';
+import { inv as _invRaw, eigs as _eigsRaw, qr as _qrRaw } from './factories/index.js';
 import { multiply as _multiplyRaw } from './typed/arithmetic.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
@@ -17,6 +17,47 @@ const _eigs = _eigsRaw as unknown as (m: number[][]) => {
   eigenvectors?: unknown;
 };
 const _multiply = _multiplyRaw as unknown as (a: number[][], b: number[][]) => number[][];
+const _qr = _qrRaw as unknown as (m: number[][]) => { Q: number[][]; R: number[][] };
+
+const transposeArr = (A: number[][]): number[][] => A[0].map((_, j) => A.map((r) => r[j]));
+const identityArr = (n: number): number[][] =>
+  Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+
+/**
+ * Real Schur decomposition `M = U S Uᵀ` (U orthogonal, S quasi-upper-triangular) via
+ * shifted QR iteration with deflation, reusing the working `qr`. Robust for real
+ * spectra (the case `qz` needs); the orthogonal similarity `M = U S Uᵀ` holds exactly
+ * regardless of convergence.
+ */
+function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
+  const n = M.length;
+  let A = M.map((r) => r.slice());
+  let U = identityArr(n);
+  let m = n;
+  for (let iter = 0; iter < 8000 && m > 1; iter++) {
+    if (Math.abs(A[m - 1][m - 2]) < 1e-14 * (Math.abs(A[m - 2][m - 2]) + Math.abs(A[m - 1][m - 1]))) {
+      A[m - 1][m - 2] = 0;
+      m--;
+      continue;
+    }
+    // Wilkinson shift from the trailing 2×2 block (eigenvalue nearest A[m-1][m-1])
+    const a = A[m - 2][m - 2];
+    const b = A[m - 2][m - 1];
+    const c = A[m - 1][m - 2];
+    const d = A[m - 1][m - 1];
+    const delta = (a - d) / 2;
+    const disc = delta * delta + b * c;
+    const s =
+      disc >= 0
+        ? d - (Math.sign(delta) || 1) * (b * c) / (Math.abs(delta) + Math.sqrt(disc))
+        : d; // complex 2×2 → Rayleigh (the block stays a 2×2 conjugate pair)
+    const As = A.map((r, i) => r.map((v, j) => v - (i === j ? s : 0)));
+    const { Q, R } = _qr(As);
+    A = _multiply(R, Q).map((r, i) => r.map((v, j) => v + (i === j ? s : 0))); // R·Q + sI
+    U = _multiply(U, Q);
+  }
+  return { U, S: A };
+}
 
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
@@ -153,4 +194,25 @@ export function logdet(A: readonly number[][]): { sign: number; value: number } 
     value += Math.log(Math.abs(u));
   }
   return { sign, value };
+}
+
+/**
+ * Generalized (QZ) Schur decomposition of the pencil `(A, B)` with `B` nonsingular:
+ * returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with
+ * `A = Q·AA·Zᵀ` and `B = Q·BB·Zᵀ`. Built from the real Schur of `B⁻¹A` (= Z S Zᵀ) and
+ * the QR of `B·Z` (= Q·BB): then `AA = Qᵀ·A·Z`. Robust for real spectra; matches the
+ * decomposition contract of `scipy.linalg.qz` (the factors are not unique).
+ */
+export function qz(
+  A: readonly number[][],
+  B: readonly number[][]
+): { AA: number[][]; BB: number[][]; Q: number[][]; Z: number[][] } {
+  const Aa = A as number[][];
+  const Bb = B as number[][];
+  const M = _multiply(_inv(Bb), Aa);
+  const { U: Z } = realSchur(M); // M = Z S Zᵀ
+  const { Q, R } = _qr(_multiply(Bb, Z)); // B·Z = Q·R  ⇒ BB = Qᵀ·B·Z = R
+  const Qt = transposeArr(Q);
+  const AA = _multiply(_multiply(Qt, Aa), Z); // Qᵀ·A·Z
+  return { AA, BB: R, Q, Z };
 }

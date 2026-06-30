@@ -120,6 +120,7 @@ export {
   logdet,
   laplacianMatrix,
   generalizedEig,
+  qz,
 } from './linalg-extra.js';
 
 // Gap-analysis Wave C — numeric Hessian (bridge C3); Wave D — numeric gradient.
