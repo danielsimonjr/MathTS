@@ -15,7 +15,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
+import { gammaG, gammaP } from '../plain/number/index.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { mapArray, kernelSource } from './parallel-map.js';
 import {
@@ -591,8 +592,37 @@ export const erfi = mathTyped('erfi', {
  * @param x - Input value, or Float64Array of values
  * @returns log(|Γ(x)|)
  */
+/**
+ * Principal-branch complex log-gamma via the Lanczos approximation (GC6).
+ *
+ * Matches mpmath.loggamma for Re(z) > 0; for Re(z) < 0.5 it uses Euler's
+ * reflection. Uses the same Lanczos coefficients as the complex `gamma`, so the
+ * two agree (lgamma(z) = log Γ(z) on this branch). Valid on the principal sheet;
+ * for very large |Im(z)| the analytic continuation may differ by 2πi from
+ * naive log(Γ(z)) — this evaluates the log-gamma series directly to avoid that.
+ */
+function lgammaComplex(z: Complex): Complex {
+  if (z.re < 0.5) {
+    // Reflection: lgamma(z) = log(π) − log(sin(πz)) − lgamma(1 − z)
+    const piZ = new Complex(Math.PI * z.re, Math.PI * z.im);
+    const refl = lgammaComplex(new Complex(1 - z.re, -z.im));
+    return new Complex(Math.log(Math.PI), 0).sub(piZ.sin().log()).sub(refl);
+  }
+  const zc = new Complex(z.re - 1, z.im);
+  let x: Complex = new Complex(gammaP[0], 0);
+  for (let i = 1; i < gammaP.length; i++) {
+    x = x.add(new Complex(gammaP[i], 0).div(zc.add(new Complex(i, 0))));
+  }
+  const t = new Complex(zc.re + gammaG + 0.5, zc.im);
+  // 0.5·ln(2π) + (z+0.5)·ln(t) − t + ln(x)
+  const halfLog2Pi = new Complex(0.5 * Math.log(2 * Math.PI), 0);
+  const term = zc.add(new Complex(0.5, 0)).mul(t.log());
+  return halfLog2Pi.add(term).sub(t).add(x.log());
+}
+
 export const lgamma = mathTyped('lgamma', {
   number: _lgamma,
+  Complex: lgammaComplex,
   Float64Array: (x: Float64Array): Promise<Float64Array> => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return Promise.resolve(lgammaDispatch(x));

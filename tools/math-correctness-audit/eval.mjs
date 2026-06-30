@@ -10,7 +10,14 @@ const url = (p) => pathToFileURL(resolve(REPO, ...p)).href;
 
 const fns = await import(url(["functions", "dist", "index.js"]));
 const mat = await import(url(["matrix", "dist", "index.js"]));
+const core = await import(url(["core", "dist", "index.js"]));
 const libOf = (pkg) => (pkg === "matrix" ? mat : fns);
+
+// Convert audit args to runtime values: a {re,im} object becomes a Complex.
+const toArg = (a) =>
+  a && typeof a === "object" && !Array.isArray(a) && "re" in a && "im" in a
+    ? new core.Complex(a.re, a.im)
+    : a;
 
 // Serialize a MathTS result into the JSON shape the oracle uses.
 function ser(v, kind) {
@@ -32,13 +39,14 @@ const { cases } = JSON.parse(readFileSync(resolve(HERE, "inputs.json"), "utf8"))
 const results = [];
 for (const c of cases) {
   const lib = libOf(c.pkg);
-  const fn = lib[c.fn];
+  const fnName = c.call ?? c.fn; // `call` lets a complex variant reuse the real export
+  const fn = lib[fnName];
   if (typeof fn !== "function") {
     results.push({ id: c.id, value: null, error: `not a function in ${c.pkg}` });
     continue;
   }
   try {
-    const out = fn(...c.args);
+    const out = fn(...c.args.map(toArg));
     results.push({ id: c.id, value: ser(out, c.kind), error: null });
   } catch (e) {
     results.push({ id: c.id, value: null, error: String(e?.message ?? e) });

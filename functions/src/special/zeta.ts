@@ -96,7 +96,11 @@ export const createZeta = /* #__PURE__ */ factory(
      *
      * Implementation and slight modification by Anik Patel
      *
-     * Note: the implementation is accurate up to about 6 digits.
+     * Accuracy (GC6, verified 2026-06-29 against mpmath dps=50): ~12-14
+     * significant digits for complex arguments, including the critical strip
+     * (Re ∈ [0.3, 0.7], |Im| up to ~40). An earlier note here said "about 6
+     * digits"; that was pessimistic — the audit harness
+     * (tools/math-correctness-audit) measures max rel.err ~1.8e-14.
      *
      * Syntax:
      *

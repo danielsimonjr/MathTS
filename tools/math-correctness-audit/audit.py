@@ -60,8 +60,11 @@ def f(x):
 
 REG = []
 
-def reg(name, pkg, kind, sample, oracle, note=""):
-    REG.append(dict(name=name, pkg=pkg, kind=kind, sample=sample, oracle=oracle, note=note))
+def reg(name, pkg, kind, sample, oracle, note="", call=None):
+    # `call` (optional) is the real export name when `name` is a display label
+    # (e.g. a complex-argument variant 'zetaC' that calls the real 'zeta').
+    REG.append(dict(name=name, pkg=pkg, kind=kind, sample=sample, oracle=oracle,
+                    note=note, call=call or name))
 
 U = lambda rng, a, b, n: [float(x) for x in rng.uniform(a, b, n)]
 
@@ -123,6 +126,27 @@ reg("gammainc", "functions", "real",  # lower regularized P(a,x)
 reg("gammaincp", "functions", "real",  # upper regularized Q(a,x)
     lambda r: [[s, x] for s, x in zip(U(r, 0.5, 6.0, 40), U(r, 0.1, 10.0, 40))],
     lambda a: f(mp.gammainc(a[0], a[1], mp.inf, regularized=True)))
+
+# ---- Complex-argument special functions (GC6) ----
+# The earlier audit used real arguments only. zeta/gamma/lgamma have Complex
+# branches; oracle is mpmath at the same complex points. A {re,im} arg dict is
+# turned into a Complex by eval.mjs; `call=` reuses the real export name.
+def csample(r, re_lo, re_hi, im_lo, im_hi, n):
+    return [[{"re": float(re), "im": float(im)}]
+            for re, im in zip(r.uniform(re_lo, re_hi, n), r.uniform(im_lo, im_hi, n))]
+
+def cmpc(a):
+    return mp.mpc(a[0]["re"], a[0]["im"])
+
+reg("zeta(complex)", "functions", "complex",
+    lambda r: csample(r, 1.5, 6.0, -12.0, 12.0, 30),
+    lambda a: complex(mp.zeta(cmpc(a))), call="zeta")
+reg("gamma(complex)", "functions", "complex",
+    lambda r: csample(r, 0.5, 5.0, -4.0, 4.0, 30),
+    lambda a: complex(mp.gamma(cmpc(a))), call="gamma")
+reg("lgamma(complex)", "functions", "complex",
+    lambda r: csample(r, 0.5, 5.0, -4.0, 4.0, 30),
+    lambda a: complex(mp.loggamma(cmpc(a))), call="lgamma")
 
 # ---- Elementary, precision-sensitive ----
 def tiny_and_normal(r, n):
@@ -244,7 +268,8 @@ def cmd_gen():
     cid = 0
     for spec in REG:
         for args in spec["sample"](rng):
-            cases.append(dict(id=cid, fn=spec["name"], pkg=spec["pkg"], kind=spec["kind"], args=args))
+            cases.append(dict(id=cid, fn=spec["name"], call=spec["call"], pkg=spec["pkg"],
+                              kind=spec["kind"], args=args))
             try:
                 ov = spec["oracle"](args)
                 oracle[str(cid)] = ser(ov)
