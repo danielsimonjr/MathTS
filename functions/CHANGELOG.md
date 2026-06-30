@@ -1,5 +1,34 @@
 # @danielsimonjr/mathts-functions
 
+## 0.6.0
+
+### Minor Changes
+
+- Domain gap-analysis Waves A–D: ~69 new math/scientific functions + an eigs correctness fix.
+
+  All verified against a NumPy/SciPy oracle; each is a thin composition over existing
+  primitives (no reduction re-implemented).
+
+  - **Descriptive stats**: `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`,
+    `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`.
+  - **Elementwise / cumulative / log-domain**: `clamp`, `sigmoid`, `logsumexp`,
+    `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`.
+  - **Distribution surface**: standalone `normalQuantile`, `studentTCDF/Quantile`,
+    `chiSquaredCDF/Quantile`, `fCDF/Quantile`, `gammaCDF/Quantile`, `betaCDF/Quantile`,
+    plus the `cauchy`/`laplace`/`logistic` PDF/CDF/quantile families.
+  - **Hypothesis tests**: `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`.
+  - **Linear algebra**: `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`,
+    `logdet`, `laplacianMatrix`, `generalizedEig`.
+  - **Calculus**: `hessian`, numeric `gradient`.
+  - **Geometry / geodesy**: `haversine`, `slerp`, quaternion algebra
+    (`quaternionMultiply`/`Conjugate`/`Normalize`/`FromAxisAngle`/`Rotate`/`ToRotationMatrix`).
+  - **Time series & regression**: `movingAverage`, `ewma`, `detrend`, `acf`,
+    `linearRegression`.
+
+  **fix: `eigs` returned wrong eigenvalues for every non-symmetric matrix** (even
+  upper-triangular ones). The public `eigs` now routes numeric square matrices through
+  the correct native orthes/hqr2 solver (symmetric/non-symmetric/complex spectra).
+
 ## 0.5.0
 
 ### Minor Changes
