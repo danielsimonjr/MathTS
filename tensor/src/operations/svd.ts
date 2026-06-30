@@ -16,7 +16,8 @@
  */
 
 import { Tensor } from '../Tensor.js';
-import { svd } from '@danielsimonjr/mathts-matrix';
+import { svd, svdWasm } from '@danielsimonjr/mathts-matrix';
+import type { SVDResult } from '@danielsimonjr/mathts-matrix';
 
 export interface TensorSvdOpts {
   /** If set, keep at most `maxdim` singular values. */
@@ -58,14 +59,18 @@ export interface TensorSvdResult {
  *                   the layout of the U output tensor.
  * @param opts     - Optional truncation / naming settings.
  */
-export function tensorSvd(
-  t: Tensor,
-  rowAxes: ReadonlyArray<number>,
-  opts?: TensorSvdOpts
-): TensorSvdResult {
+interface SvdPrep {
+  matrix: number[][];
+  rowDims: number[];
+  colDims: number[];
+  numRows: number;
+  numCols: number;
+}
+
+/** Validate axes, permute, and reshape to the 2-D matrix the SVD routine wants. */
+function prepareSvdMatrix(t: Tensor, rowAxes: ReadonlyArray<number>): SvdPrep {
   const rank = t.shape.length;
 
-  // --- Validate rowAxes ---
   for (const ax of rowAxes) {
     if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
       throw new RangeError(
@@ -87,28 +92,24 @@ export function tensorSvd(
     throw new Error('tensorSvd: rowAxes is empty — at least one axis must be assigned to U');
   }
 
-  // --- Permute so row axes come first, then col axes ---
-  // perm[i] is the original axis that goes to position i after permutation.
   const perm = [...rowAxes, ...colAxes];
-
   const permuted = t.transpose(perm);
 
-  // Shapes after permutation
   const rowDims = rowAxes.map((ax) => t.shape[ax]);
   const colDims = colAxes.map((ax) => t.shape[ax]);
-
   const numRows = rowDims.reduce((a, b) => a * b, 1);
   const numCols = colDims.reduce((a, b) => a * b, 1);
 
-  // --- Reshape to 2-D matrix (row-major; data already in correct order) ---
-  // Build a number[][] for the SVD routine.
   const matrix: number[][] = Array.from({ length: numRows }, (_, i) =>
     Array.from({ length: numCols }, (_, j) => permuted.data[i * numCols + j])
   );
 
-  // --- Call the existing DenseMatrix SVD primitive ---
-  const result = svd(matrix, { tolerance: 1e-12 });
+  return { matrix, rowDims, colDims, numRows, numCols };
+}
 
+/** Truncate the SVD result and build the output Tensors. Shared by sync + WASM paths. */
+function finishSvd(result: SVDResult, prep: SvdPrep, opts?: TensorSvdOpts): TensorSvdResult {
+  const { rowDims, colDims, numRows, numCols } = prep;
   // result.U is (numRows × numRows), result.V is (numCols × numCols),
   // result.S is an array of min(numRows, numCols) values in descending order.
   const { U: fullU, S: allS, V: fullV } = result;
@@ -173,4 +174,31 @@ export function tensorSvd(
     truncatedDim,
     truncationError,
   };
+}
+
+/**
+ * Truncated tensor SVD using the pure-JS DenseMatrix SVD primitive (synchronous).
+ */
+export function tensorSvd(
+  t: Tensor,
+  rowAxes: ReadonlyArray<number>,
+  opts?: TensorSvdOpts
+): TensorSvdResult {
+  const prep = prepareSvdMatrix(t, rowAxes);
+  return finishSvd(svd(prep.matrix, { tolerance: 1e-12 }), prep, opts);
+}
+
+/**
+ * Truncated tensor SVD routed through the AssemblyScript WASM SVD kernel
+ * (`svdWasm`) — the same result as {@link tensorSvd} but accelerated for large
+ * matricisations. Async because WASM instantiation is async; falls back to JS
+ * inside `svdWasm` when no binary is available.
+ */
+export async function tensorSvdWasm(
+  t: Tensor,
+  rowAxes: ReadonlyArray<number>,
+  opts?: TensorSvdOpts
+): Promise<TensorSvdResult> {
+  const prep = prepareSvdMatrix(t, rowAxes);
+  return finishSvd(await svdWasm(prep.matrix, { tolerance: 1e-12 }), prep, opts);
 }

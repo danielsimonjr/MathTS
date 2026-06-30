@@ -7,7 +7,7 @@ export type { NestedArray, EinsumSpec } from './Tensor';
 //   Phase 3: randomTensor — uniform / normal / orthogonal random constructors
 export { Index, idx } from './named-index';
 export type { IndexOpts } from './named-index';
-export { tensorSvd } from './operations/svd';
+export { tensorSvd, tensorSvdWasm } from './operations/svd';
 export type { TensorSvdOpts, TensorSvdResult } from './operations/svd';
 export { randomTensor } from './operations/random';
 export type { RandomTensorOpts } from './operations/random';
@@ -23,7 +23,7 @@ export { tensorLU } from './operations/lu';
 export type { TensorLUOpts, TensorLUResult } from './operations/lu';
 export { tensorCholesky } from './operations/cholesky';
 export type { TensorCholeskyOpts, TensorCholeskyResult } from './operations/cholesky';
-export { tensorEig } from './operations/eig';
+export { tensorEig, tensorEigWasm } from './operations/eig';
 export type { TensorEigOpts, TensorEigResult } from './operations/eig';
 
 // Slice 2.4: tensorPinv + tensorSolve + tensorKron

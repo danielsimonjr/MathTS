@@ -19,7 +19,8 @@
  */
 
 import { Tensor } from '../Tensor.js';
-import { eig as matrixEig } from '@danielsimonjr/mathts-matrix';
+import { eig as matrixEig, eigWasm } from '@danielsimonjr/mathts-matrix';
+import type { EigResult } from '@danielsimonjr/mathts-matrix';
 
 export interface TensorEigOpts {
   /** Hint that the input is symmetric; routes through a stable real-eigenvalue path. */
@@ -50,16 +51,14 @@ export interface TensorEigResult {
  *                   2-D matrix. The remaining axes form the column dimension.
  * @param opts     - Optional symmetric hint + computeVectors flag.
  */
-export function tensorEig(
+/** Validate axes, permute to a square 2-D matrix, optionally symmetrize. */
+function prepareEigMatrix(
   t: Tensor,
   rowAxes: ReadonlyArray<number>,
-  opts?: TensorEigOpts
-): TensorEigResult {
+  symmetricHint: boolean
+): { matrix2D: number[][]; n: number } {
   const rank = t.shape.length;
-  const computeVectors = opts?.computeVectors ?? true;
-  const symmetricHint = opts?.symmetric ?? false;
 
-  // --- Validate rowAxes ---
   for (const ax of rowAxes) {
     if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
       throw new RangeError(
@@ -93,20 +92,16 @@ export function tensorEig(
     throw new Error(`tensorEig: reshaped matrix must be square (got ${numRows}×${numCols})`);
   }
 
-  // --- Permute and reshape to 2-D ---
   const perm = [...rowAxes, ...colAxes];
   const permuted = t.transpose(perm);
   const n = numRows;
 
-  // Convert to nested array for the matrix eig primitive.
   const matrix2D: number[][] = Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => permuted.data[i * n + j])
   );
 
-  // If the caller hints `symmetric: true`, symmetrize the matrix before
-  // dispatch to guarantee the symmetric-routing path inside the matrix
-  // primitive. This also nullifies floating-point noise that might cause
-  // the internal isSymmetric() check to flip.
+  // `symmetric: true` symmetrizes to guarantee the symmetric-routing path and
+  // nullify FP noise that might flip the internal isSymmetric() check.
   if (symmetricHint) {
     for (let i = 0; i < n; i++) {
       for (let j = i + 1; j < n; j++) {
@@ -117,8 +112,17 @@ export function tensorEig(
     }
   }
 
-  // --- Call matrix eig primitive ---
-  const { values, vectors } = matrixEig(matrix2D, { computeVectors });
+  return { matrix2D, n };
+}
+
+/** Build eigenvalue/eigenvector Tensors from a matrix EigResult. Shared sync + WASM. */
+function finishEig(
+  eigResult: EigResult,
+  n: number,
+  computeVectors: boolean,
+  symmetricHint: boolean
+): TensorEigResult {
+  const { values, vectors } = eigResult;
 
   // --- Build eigenvalue Tensors ---
   const reData = new Float64Array(n);
@@ -153,4 +157,35 @@ export function tensorEig(
   }
 
   return result;
+}
+
+/**
+ * Tensor eigendecomposition using the pure-JS matrix eig primitive (synchronous).
+ */
+export function tensorEig(
+  t: Tensor,
+  rowAxes: ReadonlyArray<number>,
+  opts?: TensorEigOpts
+): TensorEigResult {
+  const computeVectors = opts?.computeVectors ?? true;
+  const symmetricHint = opts?.symmetric ?? false;
+  const { matrix2D, n } = prepareEigMatrix(t, rowAxes, symmetricHint);
+  return finishEig(matrixEig(matrix2D, { computeVectors }), n, computeVectors, symmetricHint);
+}
+
+/**
+ * Tensor eigendecomposition routed through the AssemblyScript WASM eig kernel
+ * (`eigWasm`) — same result as {@link tensorEig}, accelerated for large
+ * matricisations. Async (WASM instantiation); `eigWasm` falls back to JS when no
+ * binary is available.
+ */
+export async function tensorEigWasm(
+  t: Tensor,
+  rowAxes: ReadonlyArray<number>,
+  opts?: TensorEigOpts
+): Promise<TensorEigResult> {
+  const computeVectors = opts?.computeVectors ?? true;
+  const symmetricHint = opts?.symmetric ?? false;
+  const { matrix2D, n } = prepareEigMatrix(t, rowAxes, symmetricHint);
+  return finishEig(await eigWasm(matrix2D, { computeVectors }), n, computeVectors, symmetricHint);
 }
