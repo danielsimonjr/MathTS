@@ -60,11 +60,13 @@ def f(x):
 
 REG = []
 
-def reg(name, pkg, kind, sample, oracle, note="", call=None):
-    # `call` (optional) is the real export name when `name` is a display label
-    # (e.g. a complex-argument variant 'zetaC' that calls the real 'zeta').
+def reg(name, pkg, kind, sample, oracle, note="", call=None, method=None, ctor_arity=0):
+    # `call` (optional) is the real export name when `name` is a display label.
+    # `method`/`ctor_arity` describe a distribution object call:
+    #   dist(args[:ctor_arity]).method(args[ctor_arity:]).
     REG.append(dict(name=name, pkg=pkg, kind=kind, sample=sample, oracle=oracle,
-                    note=note, call=call or name))
+                    note=note, call=call or (name.split(".")[0] if method else name),
+                    method=method, ctor_arity=ctor_arity))
 
 U = lambda rng, a, b, n: [float(x) for x in rng.uniform(a, b, n)]
 
@@ -147,6 +149,49 @@ reg("gamma(complex)", "functions", "complex",
 reg("lgamma(complex)", "functions", "complex",
     lambda r: csample(r, 0.5, 5.0, -4.0, 4.0, 30),
     lambda a: complex(mp.loggamma(cmpc(a))), call="lgamma")
+
+# ---- Probability distribution CDF/quantile vs scipy.stats (GC3) ----
+# Object-factory API: dist(ctor…).cdf(x) / .quantile(p). args = ctor params + x|p.
+# Conventions pinned empirically: gammaDist(a, rate) → scipy.gamma(a, scale=1/rate).
+def _dist_cdf(r, samp):
+    return [samp(r) for _ in range(30)]
+
+reg("normalDist.cdf", "functions", "real", method="cdf", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(-2, 2)), float(r.uniform(0.5, 3)),
+                                              float(r.uniform(-6, 6))]),
+    oracle=lambda a: f(st.norm(a[0], a[1]).cdf(a[2])))
+reg("betaDist.cdf", "functions", "real", method="cdf", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(0.5, 5)), float(r.uniform(0.5, 5)),
+                                             float(r.uniform(0.01, 0.99))]),
+    oracle=lambda a: f(st.beta(a[0], a[1]).cdf(a[2])))
+reg("gammaDist.cdf", "functions", "real", method="cdf", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(0.5, 6)), float(r.uniform(0.5, 3)),
+                                             float(r.uniform(0.1, 12))]),
+    oracle=lambda a: f(st.gamma(a[0], scale=1.0 / a[1]).cdf(a[2])))  # b = rate
+reg("chiSquaredDist.cdf", "functions", "real", method="cdf", ctor_arity=1,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.integers(1, 12)), float(r.uniform(0.1, 20))]),
+    oracle=lambda a: f(st.chi2(a[0]).cdf(a[1])))
+reg("tDist.cdf", "functions", "real", method="cdf", ctor_arity=1,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.integers(1, 30)), float(r.uniform(-4, 4))]),
+    oracle=lambda a: f(st.t(a[0]).cdf(a[1])))
+reg("fDist.cdf", "functions", "real", method="cdf", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.integers(1, 12)), float(r.integers(2, 15)),
+                                             float(r.uniform(0.1, 6))]),
+    oracle=lambda a: f(st.f(a[0], a[1]).cdf(a[2])))
+
+# Quantile / ppf round-trip vs scipy
+reg("normalDist.quantile", "functions", "real", method="quantile", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(-2, 2)), float(r.uniform(0.5, 3)),
+                                             float(r.uniform(0.02, 0.98))]),
+    oracle=lambda a: f(st.norm(a[0], a[1]).ppf(a[2])))
+reg("betaDist.quantile", "functions", "real", method="quantile", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(0.8, 5)), float(r.uniform(0.8, 5)),
+                                             float(r.uniform(0.05, 0.95))]),
+    oracle=lambda a: f(st.beta(a[0], a[1]).ppf(a[2])))
+reg("gammaDist.quantile", "functions", "real", method="quantile", ctor_arity=2,
+    sample=lambda r: _dist_cdf(r, lambda r: [float(r.uniform(0.8, 6)), float(r.uniform(0.5, 3)),
+                                             float(r.uniform(0.05, 0.95))]),
+    oracle=lambda a: f(st.gamma(a[0], scale=1.0 / a[1]).ppf(a[2])))
 
 # ---- Elementary, precision-sensitive ----
 def tiny_and_normal(r, n):
@@ -269,7 +314,8 @@ def cmd_gen():
     for spec in REG:
         for args in spec["sample"](rng):
             cases.append(dict(id=cid, fn=spec["name"], call=spec["call"], pkg=spec["pkg"],
-                              kind=spec["kind"], args=args))
+                              kind=spec["kind"], args=args,
+                              method=spec["method"], ctorArity=spec["ctor_arity"]))
             try:
                 ov = spec["oracle"](args)
                 oracle[str(cid)] = ser(ov)

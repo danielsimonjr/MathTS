@@ -24,6 +24,7 @@
  */
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { erfcScalar } from './special.js';
 
 // =============================================================================
 // Type Definitions
@@ -91,35 +92,57 @@ export interface Distribution {
 const SQRT_2PI = Math.sqrt(2 * Math.PI);
 
 /**
- * Error function erf(x) using Abramowitz & Stegun rational approximation.
+ * Standard-normal CDF Φ(z) = ½·erfc(−z/√2), using the package's accurate
+ * `erfcScalar` (continued-fraction tail) so deep tails stay precise — the old
+ * Abramowitz-&-Stegun `_erf` was only ~7 digits and collapsed to 0 in the tail.
  */
-function _erf(x: f64): f64 {
-  if (x === 0) return 0;
-  const sign = x < 0 ? -1 : 1;
-  const a = Math.abs(x);
-  const t = 1.0 / (1.0 + 0.3275911 * a);
-  const y =
-    1.0 -
-    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
-      t *
-      Math.exp(-a * a);
-  return sign * y;
+function _normalCdfStd(z: f64): f64 {
+  return 0.5 * erfcScalar(-z / Math.SQRT2);
 }
 
 /**
- * Inverse error function using rational approximation.
+ * Inverse standard-normal Φ⁻¹(p) via Acklam's rational approximation refined by
+ * one Halley step against the accurate CDF — full double precision (~1e-15),
+ * replacing the old Winitzki `_erfInv` (~1e-3).
  */
-function _erfInv(x: f64): f64 {
-  if (x <= -1) return -Infinity;
-  if (x >= 1) return Infinity;
-  if (x === 0) return 0;
-
-  const a = 0.147;
-  const lnTerm = Math.log(1 - x * x);
-  const t1 = 2 / (Math.PI * a) + lnTerm / 2;
-  const t2 = lnTerm / a;
-  const sign = x < 0 ? -1 : 1;
-  return sign * Math.sqrt(Math.sqrt(t1 * t1 - t2) - t1);
+function _normalQuantileStd(p: f64): f64 {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  const a = [
+    -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.38357751867269e2,
+    -3.066479806614716e1, 2.506628277459239e0,
+  ];
+  const b = [
+    -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1,
+    -1.328068155288572e1,
+  ];
+  const c = [
+    -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838e0, -2.549732539343734e0,
+    4.374664141464968e0, 2.938163982698783e0,
+  ];
+  const d = [
+    7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996e0, 3.754408661907416e0,
+  ];
+  const pLow = 0.02425;
+  let x: f64;
+  if (p < pLow) {
+    const q = Math.sqrt(-2 * Math.log(p));
+    x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  } else if (p <= 1 - pLow) {
+    const q = p - 0.5;
+    const r = q * q;
+    x = ((((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q) /
+      (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  } else {
+    const q = Math.sqrt(-2 * Math.log(1 - p));
+    x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  // One Halley refinement: e = Φ(x) − p, u = e·√(2π)·exp(x²/2).
+  const e = _normalCdfStd(x) - p;
+  const u = e * Math.sqrt(2 * Math.PI) * Math.exp((x * x) / 2);
+  return x - u / (1 + (x * u) / 2);
 }
 
 /**
@@ -323,8 +346,8 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   if (sigma <= 0) throw new Error('normalDist: sigma must be positive');
   return {
     pdf: (x: f64) => Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * SQRT_2PI),
-    cdf: (x: f64) => 0.5 * (1 + _erf((x - mu) / (sigma * Math.SQRT2))),
-    quantile: (p: f64) => mu + sigma * Math.SQRT2 * _erfInv(2 * p - 1),
+    cdf: (x: f64) => _normalCdfStd((x - mu) / sigma),
+    quantile: (p: f64) => mu + sigma * _normalQuantileStd(p),
     mean: mu,
     variance: sigma * sigma,
     sample: () => {
@@ -812,12 +835,12 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
-      return 0.5 * (1 + _erf((Math.log(x) - mu) / (sigma * Math.SQRT2)));
+      return _normalCdfStd((Math.log(x) - mu) / sigma);
     },
     quantile: (p: f64) => {
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
-      return Math.exp(mu + sigma * Math.SQRT2 * _erfInv(2 * p - 1));
+      return Math.exp(mu + sigma * _normalQuantileStd(p));
     },
     mean: Math.exp(mu + (sigma * sigma) / 2),
     variance: (Math.exp(sigma * sigma) - 1) * Math.exp(2 * mu + sigma * sigma),

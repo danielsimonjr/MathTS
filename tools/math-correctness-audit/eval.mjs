@@ -46,7 +46,15 @@ for (const c of cases) {
     continue;
   }
   try {
-    const out = fn(...c.args.map(toArg));
+    let out;
+    if (c.method) {
+      // Distribution object call: dist(ctorArgs).method(methodArgs).
+      const arity = c.ctorArity ?? 0;
+      const obj = fn(...c.args.slice(0, arity).map(toArg));
+      out = obj[c.method](...c.args.slice(arity).map(toArg));
+    } else {
+      out = fn(...c.args.map(toArg));
+    }
     results.push({ id: c.id, value: ser(out, c.kind), error: null });
   } catch (e) {
     results.push({ id: c.id, value: null, error: String(e?.message ?? e) });

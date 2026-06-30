@@ -56,19 +56,44 @@ function _lgammaD(x: f64): f64 {
 }
 
 /**
- * Error function erf(x) using Abramowitz & Stegun rational approximation.
+ * Complementary error function erfc(x), accurate to ~1e-16 and tail-safe.
+ * Self-contained (only `Math`) so it serializes into worker kernels: Taylor
+ * series for |x| < 1.5 (where erfc ≈ O(1), no cancellation), Abramowitz-&-Stegun
+ * 7.1.14 continued fraction for larger x (computes the small tail DIRECTLY,
+ * avoiding the 1−erf cancellation that made the old rational `_erf` collapse to
+ * 0 in the tail). Mirrors `erfcScalar` in special.ts.
  */
-function _erf(x: f64): f64 {
-  if (x === 0) return 0;
-  const sign = x < 0 ? -1 : 1;
-  const a = Math.abs(x);
-  const t = 1.0 / (1.0 + 0.3275911 * a);
-  const y =
-    1.0 -
-    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
-      t *
-      Math.exp(-a * a);
-  return sign * y;
+function _erfc(x: f64): f64 {
+  if (!isFinite(x)) return x > 0 ? 0 : 2;
+  if (x < 0) return 2 - _erfc(-x); // erfc(-x) = 2 - erfc(x)
+  if (x < 1.5) {
+    const c = 2 / Math.sqrt(Math.PI);
+    let sum: f64 = x;
+    let term: f64 = x;
+    for (let n = 1; n < 80; n++) {
+      term *= (-x * x) / n;
+      const inc = term / (2 * n + 1);
+      sum += inc;
+      if (Math.abs(inc) < Math.abs(sum) * 1e-17) break;
+    }
+    return 1 - c * sum;
+  }
+  const tiny = 1e-300;
+  let f: f64 = x;
+  let C: f64 = f;
+  let D: f64 = 0;
+  for (let i = 1; i <= 300; i++) {
+    const ai = i / 2;
+    D = x + ai * D;
+    if (D === 0) D = tiny;
+    D = 1 / D;
+    C = x + ai / C;
+    if (C === 0) C = tiny;
+    const delta = C * D;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-16) break;
+  }
+  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f;
 }
 
 /**
@@ -118,7 +143,8 @@ function normalPDFScalar(x: f64, mu: f64, sigma: f64): f64 {
 /** Normal CDF at x with mean mu and standard deviation sigma. */
 function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
   if (sigma <= 0) return NaN;
-  return 0.5 * (1 + _erf((x - mu) / (sigma * Math.SQRT2)));
+  // Φ(z) = ½·erfc(−z/√2); erfc form keeps the deep tails precise.
+  return 0.5 * _erfc((mu - x) / (sigma * Math.SQRT2));
 }
 
 /** Exponential PDF at x with rate lambda. */
@@ -222,13 +248,13 @@ export const normalCDF = mathTyped('normalCDF', {
     mapArray(
       x,
       (v) => normalCDFScalar(v, 0, 1),
-      () => kernelSource([_erf, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
+      () => kernelSource([_erfc, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
     ),
   'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalCDFScalar(v, mu, sigma),
-      () => kernelSource([_erf, normalCDFScalar], `(x) => normalCDFScalar(x, ${mu}, ${sigma})`)
+      () => kernelSource([_erfc, normalCDFScalar], `(x) => normalCDFScalar(x, ${mu}, ${sigma})`)
     ),
 });
 
