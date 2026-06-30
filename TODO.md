@@ -36,6 +36,13 @@ non-decision).
 > 0 regressions), and landed. **GC3 fixed a real bug** (normal/log-normal CDF+
 > quantile tail accuracy, found via the scipy oracle).
 >
+> ✅ **Released to npm (2026-06-30):** functions@0.3.0 (incl. the GC3 fix),
+> expression@0.4.0, parallel@0.3.0, autograd@0.3.0, tensor@0.2.0, compat@0.2.0,
+> plus dependency-cascade patches (matrix@0.1.10, arithmetic/trigonometry/
+> statistics/signal@0.1.4) and a stale-range fix for ast/evaluator/parser. 14
+> packages published; git tags pushed. `workbook` held (added to changeset
+> `ignore`; its 7 staged changesets remain parked).
+>
 > Scope notes on the harder three (delivered as the right-sized correct slice):
 > - **GC7** — `multiply(2D, 2D)` (previously threw) now routes through native
 >   DenseMatrix + BackendManager (WASM/GPU). The full rewire of every activated
