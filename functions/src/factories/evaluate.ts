@@ -12,7 +12,18 @@ import {
   createEvaluate,
   compileExpression as _compileExpression,
 } from '@danielsimonjr/mathts-expression';
-import { Complex, Fraction } from '@danielsimonjr/mathts-core';
+import {
+  Complex,
+  Fraction,
+  I,
+  PHI,
+  SQRT2,
+  SQRT1_2,
+  LN2,
+  LN10,
+  LOG2E,
+  LOG10E,
+} from '@danielsimonjr/mathts-core';
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
@@ -36,6 +47,14 @@ const mathScope: Record<string, unknown> = {
   pi: Math.PI,
   e: Math.E,
   tau: 2 * Math.PI,
+  phi: PHI,
+  i: I,
+  SQRT2,
+  SQRT1_2,
+  LN2,
+  LN10,
+  LOG2E,
+  LOG10E,
   Infinity: Infinity,
   NaN: NaN,
   null: null,

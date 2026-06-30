@@ -34,6 +34,9 @@ export {
 // Dual numbers (forward-mode automatic differentiation)
 export { Dual, isDual } from './types/dual.js';
 
+// Named mathematical constants (plain numbers): PI, E, TAU, PHI, SQRT2, …
+export { PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E } from './constants.js';
+
 // Fractions (exact rationals)
 export {
   Fraction,

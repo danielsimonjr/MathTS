@@ -11,13 +11,17 @@ Math.sin(PI / 4); // 0.7071067811865476
 E ** 2; // 7.38905609893065
 ```
 
-For use inside expression strings, the constants are also in the expression evaluator scope:
+For use inside expression strings, the constants are also in the expression
+evaluator scope under their conventional symbols — `pi`, `e`, `tau`, `phi`, the
+imaginary unit `i`, and `SQRT2` / `SQRT1_2` / `LN2` / `LN10` / `LOG2E` / `LOG10E`:
 
 ```typescript
 import { evaluate } from '@danielsimonjr/mathts-functions';
 
 evaluate('sin(pi / 4)'); // 0.7071067811865476
 evaluate('e ^ 2'); // 7.38905609893065
+evaluate('phi'); // 1.618033988749895
+evaluate('2 + 3 * i'); // Complex(2, 3)
 ```
 
 ## Constant Table
@@ -35,9 +39,10 @@ evaluate('e ^ 2'); // 7.38905609893065
 | ln(10)    | `LN10`      | Natural logarithm of 10                   | `2.302585092994046`  |
 | log2(e)   | `LOG2E`     | Base-2 logarithm of e                     | `1.4426950408889634` |
 | log10(e)  | `LOG10E`    | Base-10 logarithm of e                    | `0.4342944819032518` |
-| Infinity  | `Infinity`  | Positive infinity                         | `Infinity`           |
-| NaN       | `NaN`       | Not a Number                              | `NaN`                |
-| null      | `null`      | Null value                                | `null`               |
+
+> `Infinity`, `NaN`, `null`, `true`, and `false` are JavaScript language
+> globals/literals — they are **not** imported from this package, but they are
+> available as symbols inside the expression-evaluator scope (below).
 
 ## Physical Constants
 
