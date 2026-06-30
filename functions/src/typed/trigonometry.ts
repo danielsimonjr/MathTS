@@ -235,6 +235,8 @@ export const atan2 = mathTyped('atan2', {
 export const acsc = mathTyped('acsc', {
   number: (a: number) => Math.asin(1 / a),
   Complex: (a: Complex) => a.inverse().asin(),
+  // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
+  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
 });
 
 /**
@@ -243,6 +245,8 @@ export const acsc = mathTyped('acsc', {
 export const asec = mathTyped('asec', {
   number: (a: number) => Math.acos(1 / a),
   Complex: (a: Complex) => a.inverse().acos(),
+  // BigNumber: asec(a) = acos(1/a).
+  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),
 });
 
 /**
@@ -251,6 +255,8 @@ export const asec = mathTyped('asec', {
 export const acot = mathTyped('acot', {
   number: (a: number) => Math.atan(1 / a),
   Complex: (a: Complex) => a.inverse().atan(),
+  // BigNumber: acot(a) = atan(1/a).
+  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).atan(),
 });
 
 // =============================================================================
