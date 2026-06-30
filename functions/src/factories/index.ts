@@ -375,7 +375,7 @@ import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
 import { createCount } from '../matrix/count.js';
 import { createTrace } from '../matrix/trace.js';
 import { createDet } from '../matrix/det.js';
-import { acceleratedDet } from '../matrix/native-accel.js';
+import { acceleratedDet, acceleratedInv } from '../matrix/native-accel.js';
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
@@ -511,8 +511,13 @@ factoryScope.resize = resize;
 export const subset = createSubset(factoryScope as Parameters<typeof createSubset>[0]);
 factoryScope.subset = subset;
 
-export const inv = createInv(factoryScope as Parameters<typeof createInv>[0]);
-factoryScope.inv = inv;
+const factoryInv = createInv(factoryScope as Parameters<typeof createInv>[0]);
+factoryScope.inv = factoryInv;
+// Public `inv` accelerates large numeric square matrices via native LU-solve
+// (factory path is pure-JS over boxed number[][], ~144ms for 80×80). Singular
+// and all other inputs delegate to the factory unchanged.
+export const inv = ((m: unknown) =>
+  acceleratedInv(m, factoryInv as unknown as (x: unknown) => unknown)) as unknown as typeof factoryInv;
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);
