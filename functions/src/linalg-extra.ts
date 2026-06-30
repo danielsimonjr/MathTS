@@ -47,10 +47,11 @@ function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
     const d = A[m - 1][m - 1];
     const delta = (a - d) / 2;
     const disc = delta * delta + b * c;
+    const denom = Math.abs(delta) + Math.sqrt(Math.abs(disc));
     const s =
-      disc >= 0
-        ? d - (Math.sign(delta) || 1) * (b * c) / (Math.abs(delta) + Math.sqrt(disc))
-        : d; // complex 2×2 → Rayleigh (the block stays a 2×2 conjugate pair)
+      disc >= 0 && denom > 1e-300
+        ? d - ((Math.sign(delta) || 1) * (b * c)) / denom
+        : d; // complex 2×2, or a degenerate block → Rayleigh shift (avoids 0/0 → NaN)
     const As = A.map((r, i) => r.map((v, j) => v - (i === j ? s : 0)));
     const { Q, R } = _qr(As);
     A = _multiply(R, Q).map((r, i) => r.map((v, j) => v + (i === j ? s : 0))); // R·Q + sI
