@@ -45,9 +45,16 @@ non-decision).
 >
 > Scope notes on the harder three (delivered as the right-sized correct slice):
 > - **GC7** — `multiply(2D, 2D)` (previously threw) now routes through native
->   DenseMatrix + BackendManager (WASM/GPU). The full rewire of every activated
->   matrix *factory* (det/inv/eigs) onto toNative/fromNative remains a larger
->   follow-up (factory dep-capture ordering).
+>   DenseMatrix + BackendManager (WASM/GPU). **Extended 2026-06-30:** `det`
+>   (~20× on 80×80) and `inv` (~9×) now route large numeric square matrices
+>   through native Float64Array LU; numpy-verified, fall back to the factory for
+>   small/non-numeric/singular. `eigs` was investigated and stays on the
+>   (correct) factory path — the attempt surfaced a **real correctness bug in
+>   the matrix eigensolver** (symmetric tridiagonals returned wrong eigenvalues,
+>   e.g. sum 22 ≠ trace 6), now fixed at root (route symmetric → JAMA
+>   orthes/hqr2); that fix removed the fast-but-wrong symmetric path, so there's
+>   no sync speedup left to capture for eigs. det/inv tier-3 factory dep-capture
+>   ordering is untouched (only the public exports are wrapped).
 > - **GC14** — consolidated the two threshold mechanisms onto ComputePool's
 >   canonical `DEFAULT_THRESHOLD_BY_OP` (single source of truth; `ThresholdDispatcher`
 >   derives matmul from it). Corrected a stale claim: `fft` already auto-dispatches
