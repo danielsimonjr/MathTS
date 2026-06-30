@@ -30,7 +30,39 @@ non-decision).
 | 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
 | 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0 | — | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected). |
 
-Detail:
+### 🔭 Gap-closure backlog (from the 2026-06-29 re-analyses)
+
+Consolidated, deduplicated, and prioritized from the two refreshed reports —
+[`FUNCTION_GAPS.md` §7](docs/roadmap/FUNCTION_GAPS.md#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6)
+(type-dispatch / parity / correctness-coverage) and
+[`GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` Part 5](docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md#part-5--revision-3-re-validation-2026-06-29)
+(the 10 integration bridges). Effort key: **S** ≤ 1 day · **M** ≈ 2–5 days · **L** ≈ 1–2 weeks.
+Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
+
+| ID    | Action                                                                              | Source        | Effort | Priority | Why now |
+| ----- | ----------------------------------------------------------------------------------- | ------------- | ------ | -------- | ------- |
+| GC1   | **Reconcile `variance`/`std`/`parallelStat*` normalization**                        | N2            | S      | **P0**   | Silent correctness footgun: `variance`=population (1.25), `parallelStatVariance`=sample (1.667) for the same input |
+| GC2   | **`functions.md` generator + CI drift-check**                                       | N1·R1·item 11 | S      | **P0**   | ~40 user-facing fns undocumented; recurring failure mode — cheap and self-perpetuating if left |
+| GC3   | **Distribution CDF/quantile external-oracle audit vs `scipy.stats`**                | G3a           | M      | **P0**   | Largest untested numeric surface; inline incomplete-beta/gamma is a shared-misunderstanding trap. Extends `tools/math-correctness-audit/` |
+| GC4   | **Add 6 canonical-name aliases** (`cumsum`,`ctranspose`,`createUnit`,`apply`,`index`,`help`) | G2     | S      | **P1**   | ~10 LOC → 100% mathjs canonical-name parity |
+| GC5   | **Wire `Unit` into arithmetic + comparison operators**                              | G1a·G1b       | M      | **P1**   | Flagship mathjs feature entirely absent from the operator layer (`smaller(5cm,2cm)` throws) |
+| GC6   | **Complex-argument oracle for `zeta`/`gamma`/`lgamma`**                              | G3b           | S      | **P1**   | `zeta` self-documents only ~6-digit complex accuracy, unverified |
+| GC7   | **Route factory matrix ops through native `DenseMatrix` + `BackendManager`**        | N3·B2·item 4  | L      | **P1**   | The one persisting severe bridge gap — `det`/`inv`/`eigs`/`qr`/`expm` get no WASM/GPU accel |
+| GC8   | **Wire tensor decompositions to the existing `*Wasm` async primitives**             | N6·R4         | M      | **P1**   | `svdWasm`/etc. already exist; tensor imports the sync JS path — mostly wiring |
+| GC9   | **`TapedTensor.pow(taped, taped)`** (variable-exponent AD)                           | G4a           | S      | **P2**   | Only genuinely-open infra item; ~30–40 LOC; adjoints specified |
+| GC10  | **`acsc`/`asec`/`acot` BigNumber path** (match `csc`/`sec`/`cot`)                    | G1e           | trivial| **P2**   | Closes an internal inconsistency at near-zero cost |
+| GC11  | **Decomposition-factor + CAS-sympy + units external-table oracles**                 | G3c·G3d·G3e   | M+     | **P2**   | Trust-hardening: factors/symbolic/unit-constants tested only self-referentially |
+| GC12  | **`compat`: make `config` drive behavior · widen `functions.d.ts` · add `chain`**   | N4·N5·R5      | M      | **P2**   | `config()` is inert; type defs frozen at ~22 of 665 fns; no fluent `chain` API |
+| GC13  | **Workbook `tensor`/`export` cell support (or parse-time reject) + B2 regression tests** | N8·N9·R6 | S      | **P2**   | Both cell types declared but throw; B2 stub-capture + SparseMatrix.map have no asserting test |
+| GC14  | **Transparent size-based parallel dispatch for FFT/`numeric` + consolidate threshold mechanisms** | N7·R7·item 7 | M | **P3** | FFT still parallel-only-named; `numeric` unaccelerated; `ThresholdDispatcher` orphaned vs `ComputePool.shouldParallelize` |
+| GC15  | **`functions/`↔`autograd` AD bridge (or document the boundary as intentional)**     | N10·R8·item 6 | L      | **P3**   | `grad` can't flow through any `functions/` op or `evaluate`; native AD is rich but walled off |
+| GC16  | **Broaden `statistics`/`round`/`floor`/`ceil`/`fix`/`sign`/`gcd`/`atan2` type signatures** | G1c·G1d | variable | **P3** | Parity ratchet; statistics breadth is partly a deliberate Float64Array trade-off |
+
+**Recommended sequencing.** P0 first — GC1 (silent correctness) and GC2 (cheap, self-perpetuating doc gap) are both ~½-day; GC3 extends the existing oracle harness and closes the biggest untested numeric surface. Then P1 parity/accel (GC4 trivial; GC5/GC7 are the flagship feature + the surviving severe bridge gap; GC6/GC8 reuse machinery that already exists). P2/P3 are consistency, trust-hardening, and architectural — schedule after the correctness and parity gaps close.
+
+> Two of the highest-value items are **S-effort and address self-perpetuating problems**: GC1 (a cross-variant consistency test stops normalization drift) and GC2 (a generator + CI check stops `functions.md` drift — exactly what `GAP_ANALYSIS` Revision 2 recommended as item 11 but was never built).
+
+Detail — Open Actions items 1–8:
 
 - [x] **Cut a release for the `[Unreleased]` CHANGELOG section.** ✅ Done 2026-05-25.
       Six packages published to npm with matching GitHub Releases:
