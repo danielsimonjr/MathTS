@@ -18,7 +18,7 @@ import { ComputePool } from '../../src/ComputePool.js';
 describe('Threshold Dispatcher', () => {
   describe('DEFAULT_THRESHOLDS', () => {
     it('should have expected default values', () => {
-      expect(DEFAULT_THRESHOLDS.matmul).toBe(10000);
+      expect(DEFAULT_THRESHOLDS.matmul).toBe(4096); // canonical (DEFAULT_THRESHOLD_BY_OP.matmul)
       expect(DEFAULT_THRESHOLDS.elementwise).toBe(50000);
       expect(DEFAULT_THRESHOLDS.reduce).toBe(100000);
       expect(DEFAULT_THRESHOLDS.map).toBe(10000);
@@ -92,12 +92,12 @@ describe('Threshold Dispatcher', () => {
     });
 
     it('should return sequential for elements below threshold', () => {
-      const result = dispatcher.dispatch(5000, 'matmul'); // threshold is 10000
+      const result = dispatcher.dispatch(2000, 'matmul'); // canonical matmul threshold is 4096
 
       expect(result.mode).toBe('sequential');
       expect(result.reason).toContain('below threshold');
-      expect(result.threshold).toBe(10000);
-      expect(result.elementCount).toBe(5000);
+      expect(result.threshold).toBe(4096);
+      expect(result.elementCount).toBe(2000);
     });
 
     it('should return parallel for elements above threshold', () => {
@@ -108,9 +108,9 @@ describe('Threshold Dispatcher', () => {
     });
 
     it('should use operation-specific thresholds', () => {
-      // matmul threshold is 10000
-      expect(dispatcher.dispatch(8000, 'matmul').mode).toBe('sequential');
-      expect(dispatcher.dispatch(15000, 'matmul').mode).toBe('parallel');
+      // matmul threshold is 4096 (canonical, from DEFAULT_THRESHOLD_BY_OP)
+      expect(dispatcher.dispatch(2000, 'matmul').mode).toBe('sequential');
+      expect(dispatcher.dispatch(8000, 'matmul').mode).toBe('parallel');
 
       // elementwise threshold is 50000
       expect(dispatcher.dispatch(40000, 'elementwise').mode).toBe('sequential');
@@ -143,7 +143,7 @@ describe('Threshold Dispatcher', () => {
     });
 
     it('should return false below threshold', () => {
-      expect(dispatcher.shouldParallelize(5000, 'matmul')).toBe(false);
+      expect(dispatcher.shouldParallelize(2000, 'matmul')).toBe(false); // canonical matmul = 4096
     });
 
     it('should return true above threshold', () => {

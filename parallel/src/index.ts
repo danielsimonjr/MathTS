@@ -16,6 +16,7 @@ export {
   computePool,
   Transfer,
   DEFAULT_POOL_CONFIG,
+  DEFAULT_THRESHOLD_BY_OP,
   resolveOpThreshold,
 } from './ComputePool.js';
 

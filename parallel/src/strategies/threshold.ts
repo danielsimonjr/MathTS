@@ -7,7 +7,18 @@
  * @packageDocumentation
  */
 
-import { computePool, ComputePool } from '../ComputePool.js';
+import { computePool, ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../ComputePool.js';
+
+/**
+ * Pull a numeric per-op threshold from the canonical {@link DEFAULT_THRESHOLD_BY_OP}
+ * map, falling back to `fallback` when the op is absent or set to a non-numeric
+ * mode ('never'/'always'). Keeps the category defaults below sourced from the
+ * same benchmark-tuned numbers ComputePool uses.
+ */
+function opThreshold(op: string, fallback: number): number {
+  const raw = (DEFAULT_THRESHOLD_BY_OP as Record<string, number | string>)[op];
+  return typeof raw === 'number' ? raw : fallback;
+}
 
 /**
  * Operation categories for threshold selection
@@ -42,19 +53,22 @@ export interface ThresholdConfig {
 }
 
 /**
- * Default thresholds optimized for typical hardware
+ * Default category-level thresholds.
  *
- * These thresholds account for worker creation overhead vs computation benefit.
- * Smaller thresholds for compute-intensive operations (matmul, decomposition).
- * Larger thresholds for memory-bound operations (elementwise, reduce).
+ * NOTE: `ComputePool.shouldParallelize` (op-level, {@link DEFAULT_THRESHOLD_BY_OP})
+ * is the authority the typed functions dispatch through. This category map is a
+ * coarser helper; where a category overlaps a tuned op (matmul) its value is
+ * derived from the canonical const so the two cannot diverge. The remaining
+ * categories (no single ComputePool op equivalent — many are 'never') keep
+ * heuristic defaults for compute-vs-memory-bound work.
  */
 export const DEFAULT_THRESHOLDS: ThresholdConfig = {
-  matmul: 10000, // ~100x100 matrix
-  elementwise: 50000, // ~50K elements
+  matmul: opThreshold('matmul', 4096), // canonical: DEFAULT_THRESHOLD_BY_OP.matmul
+  elementwise: 50000, // ~50K elements (memory-bound; ComputePool ops mostly 'never')
   reduce: 100000, // ~100K elements
   map: 10000, // ~10K elements
   sort: 5000, // ~5K elements
-  decomposition: 2500, // ~50x50 matrix
+  decomposition: 2500, // ~50x50 matrix (no single canonical op; heuristic)
   general: 50000, // Default ~50K
 };
 

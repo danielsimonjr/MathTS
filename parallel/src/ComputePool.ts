@@ -159,7 +159,14 @@ export interface ComputePoolConfig {
  *  'always' → 0                        (always parallelize when pool is ready)
  *  number   → minimum element count before dispatching to workers
  */
-const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
+/**
+ * Canonical, benchmark-tuned per-op parallelization thresholds. This is the
+ * single source of truth consulted by `ComputePool.shouldParallelize` — the
+ * authority the typed functions actually dispatch through. The coarser
+ * category-level {@link ThresholdDispatcher} derives its overlapping values
+ * (e.g. matmul) from here so the two cannot silently diverge.
+ */
+export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   // element-wise: overhead dominates at all tested sizes
   add: 'never',
   subtract: 'never',
