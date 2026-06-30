@@ -1055,22 +1055,60 @@ export class TapedTensor {
   }
 
   /**
-   * Elementwise fixed-exponent power: x^k.
+   * Elementwise power: x^k.
    *
-   * Only fixed (non-TapedTensor) exponents are supported. Variable-exponent
-   * pow(taped, taped) is a follow-up slice.
+   * `k` may be a fixed `number` (constant exponent) or a `TapedTensor`
+   * (variable exponent, both inputs on the tape).
    *
-   * Adjoint: dX = dY · k · x^(k−1)
+   * Adjoints, for y = a^b:
+   *   - fixed exponent k:   dA = dY · k · a^(k−1)
+   *   - variable exponent:  dA = dY · b · a^(b−1),   dB = dY · a^b · ln(a)
+   *   - aliased a^a:         dA = dY · a^a · (ln a + 1)
+   *
+   * The dB term needs ln(a); for a ≤ 0 it is mathematically undefined and
+   * yields NaN/−Inf, honestly signalling non-differentiability w.r.t. the
+   * exponent rather than masking it.
    */
-  pow(k: number): TapedTensor {
-    const out = new Float64Array(this.primal.length);
-    for (let i = 0; i < out.length; i++) out[i] = Math.pow(this.primal[i], k);
+  pow(k: number | TapedTensor): TapedTensor {
+    if (typeof k === 'number') {
+      const out = new Float64Array(this.primal.length);
+      for (let i = 0; i < out.length; i++) out[i] = Math.pow(this.primal[i], k);
 
-    const primalData = new Float64Array(this.primal);
+      const primalData = new Float64Array(this.primal);
+      const thisGradSlot = this.tape.getInputGrad(this.id)!;
+      const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+        for (let i = 0; i < outputGrad.length; i++) {
+          thisGradSlot[i] += outputGrad[i] * k * Math.pow(primalData[i], k - 1);
+        }
+      });
+      return new TapedTensor(this.shape, out, this.tape, id);
+    }
+
+    // Variable exponent: y = a^b, both on the tape.
+    const other = k;
+    this.checkSameShape(other, 'pow');
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.pow(this.primal[i], other.primal[i]);
+
+    const aPrimal = new Float64Array(this.primal);
+    const bPrimal = new Float64Array(other.primal);
+    const yPrimal = new Float64Array(out);
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
-    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+    const otherGradSlot = this.tape.getInputGrad(other.id)!;
+    const isAliased = this === other;
+    const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
       for (let i = 0; i < outputGrad.length; i++) {
-        thisGradSlot[i] += outputGrad[i] * k * Math.pow(primalData[i], k - 1);
+        const a = aPrimal[i];
+        const b = bPrimal[i];
+        const y = yPrimal[i];
+        const g = outputGrad[i];
+        if (isAliased) {
+          // d(a^a)/da = a^a · (ln a + 1)
+          thisGradSlot[i] += g * y * (Math.log(a) + 1);
+        } else {
+          thisGradSlot[i] += g * b * Math.pow(a, b - 1); // dA
+          otherGradSlot[i] += g * y * Math.log(a); // dB
+        }
       }
     });
     return new TapedTensor(this.shape, out, this.tape, id);
