@@ -6,17 +6,29 @@
  * re-deriving statistics or tail probabilities. Results follow the existing
  * `{ statistic, pValue, … }` shape used in `typed/hypothesis.ts`.
  */
-import { variance as _variance } from './typed/arithmetic.js';
+import { variance as _variance, mean as _mean } from './typed/arithmetic.js';
 import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
 import { fCDF, chiSquaredCDF } from './distribution-functions.js';
-import { normalCDF as _normalCDF } from './typed/distributions.js';
+import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
 
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
+const mean = (x: number[]): number => _mean(x) as number;
 const normalCDF = (z: number): number => _normalCDF(z) as number;
+const normalPDF = (z: number): number => _normalPDF(z) as number;
 const lgamma = (n: number): number => _lgamma(n) as number;
+
+/** Composite Simpson quadrature (synchronous) — the package `romberg`/`gaussQuad`
+ *  are async parallel-first, unusable for the nested synchronous integration below. */
+function simpson(f: (x: number) => number, a: number, b: number, n = 512): number {
+  const m = n % 2 === 0 ? n : n + 1;
+  const h = (b - a) / m;
+  let s = f(a) + f(b);
+  for (let i = 1; i < m; i++) s += (i % 2 === 0 ? 2 : 4) * f(a + i * h);
+  return (s * h) / 3;
+}
 /** Σ(t³−t) over tie groups — the tie-correction term shared by rank tests. */
 function tieTerm(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
@@ -170,4 +182,82 @@ export function fisherExact(table: readonly [readonly number[], readonly number[
   }
   const oddsRatio = b * c === 0 ? Infinity : (a * d) / (b * c);
   return { oddsRatio, pValue: Math.min(1, p) };
+}
+
+// --- Studentized range distribution + Tukey's HSD (Wave D / remaining) ----------
+
+/** Probability that the range of `k` standard normals is ≤ `w` (the inner integral). */
+function rangeProb(w: number, k: number): number {
+  if (w <= 0) return 0;
+  const integrand = (z: number): number =>
+    k * normalPDF(z) * Math.pow(normalCDF(z) - normalCDF(z - w), k - 1);
+  return Math.min(1, Math.max(0, simpson(integrand, -8.5, 8.5, 240)));
+}
+
+/**
+ * CDF of the studentized range distribution with `k` groups and `df` degrees of
+ * freedom — `scipy.stats.studentized_range.cdf`. Integrates the range probability
+ * against the χ-scaled denominator density (synchronous Simpson + normalCDF/normalPDF).
+ */
+export function studentizedRangeCDF(q: number, k: number, df: number): number {
+  if (q <= 0) return 0;
+  if (!Number.isFinite(df)) return rangeProb(q, k);
+  const nu = df;
+  const logc = (nu / 2) * Math.log(nu) - (nu / 2 - 1) * Math.log(2) - lgamma(nu / 2);
+  const fU = (u: number): number => Math.exp(logc + (nu - 1) * Math.log(u) - (nu * u * u) / 2);
+  const umax = 1 + 12 / Math.sqrt(nu);
+  return Math.min(1, Math.max(0, simpson((u) => fU(u) * rangeProb(q * u, k), 1e-5, umax, 120)));
+}
+
+/** Quantile (inverse CDF) of the studentized range distribution, via bisection. */
+export function studentizedRangeQuantile(p: number, k: number, df: number): number {
+  let lo = 0;
+  let hi = 100;
+  for (let i = 0; i < 50; i++) {
+    const mid = (lo + hi) / 2;
+    if (studentizedRangeCDF(mid, k, df) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+export interface TukeyComparison {
+  groups: [number, number];
+  meanDifference: number;
+  qStatistic: number;
+  pValue: number;
+  reject: boolean;
+}
+
+/**
+ * Tukey's HSD (honestly significant difference) post-hoc test across `groups`.
+ * Pooled within-group variance, Tukey–Kramer standard errors for unbalanced groups;
+ * p-values from the studentized range distribution. Mirrors `scipy.stats.tukey_hsd`.
+ */
+export function tukeyHSD(groups: Vec[], alpha = 0.05): TukeyComparison[] {
+  const gs = groups.map(arr);
+  const k = gs.length;
+  const means = gs.map(mean);
+  const N = gs.reduce((s, g) => s + g.length, 0);
+  const dfErr = N - k;
+  // pooled mean square error
+  const sse = gs.reduce((s, g) => s + sampleVar(g) * (g.length - 1), 0);
+  const mse = sse / dfErr;
+  const qCrit = studentizedRangeQuantile(1 - alpha, k, dfErr);
+  const out: TukeyComparison[] = [];
+  for (let i = 0; i < k; i++) {
+    for (let j = i + 1; j < k; j++) {
+      const diff = means[i] - means[j];
+      const se = Math.sqrt((mse / 2) * (1 / gs[i].length + 1 / gs[j].length)); // Tukey–Kramer
+      const q = Math.abs(diff) / se;
+      out.push({
+        groups: [i, j],
+        meanDifference: diff,
+        qStatistic: q,
+        pValue: 1 - studentizedRangeCDF(q, k, dfErr),
+        reject: q > qCrit,
+      });
+    }
+  }
+  return out;
 }

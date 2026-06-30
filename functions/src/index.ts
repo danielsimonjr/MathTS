@@ -88,14 +88,24 @@ export {
   logisticQuantile,
 } from './distribution-functions.js';
 
-// Gap-analysis Wave B — additional hypothesis tests (bridge C9).
-export { fTest, jarqueBera, kruskalWallis, wilcoxon, fisherExact } from './hypothesis-extra.js';
+// Gap-analysis Wave B/D — additional hypothesis tests (bridge C9) + Tukey HSD.
+export {
+  fTest,
+  jarqueBera,
+  kruskalWallis,
+  wilcoxon,
+  fisherExact,
+  studentizedRangeCDF,
+  studentizedRangeQuantile,
+  tukeyHSD,
+} from './hypothesis-extra.js';
 export type {
   FTestResult,
   JarqueBeraResult,
   KruskalResult,
   WilcoxonResult,
   FisherExactResult,
+  TukeyComparison,
 } from './hypothesis-extra.js';
 
 // Gap-analysis Wave C — structured-matrix constructors + logdet + graph Laplacian
