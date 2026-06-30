@@ -63,10 +63,23 @@ reference "complete" scientific-computing surface.
 > **Wave D (batch 2) ✅ landed (2026-06-30).** Generalized eigenproblem + distribution
 > breadth, SciPy-verified (10/10): `generalizedEig` (`A x = λ B x` via `B⁻¹A`, reuses
 > `inv`+`multiply`+`eigs`, vs scipy.linalg.eig(A,B)) and the `cauchy`/`laplace`/`logistic`
-> PDF/CDF/quantile families (closed forms, vs scipy.stats). **Remaining (highest
-> complexity, each a focused effort):** named optimizers + Levenberg–Marquardt, IIR/FIR
-> filter design (`butter`/`firwin`/`filtfilt`), symbolic integration, spectral clustering
-> (needs k-means), `tukeyHSD` (needs studentized-range distribution), `qz`.
+> PDF/CDF/quantile families (closed forms, vs scipy.stats).
+>
+> **Wave D (final batch) ✅ landed (2026-06-30) — nothing deferred.** Every remaining
+> high-complexity item implemented and verified: optimizers `nelderMead`,
+> `gradientDescent`, `levenbergMarquardt`; clustering `kmeans`, `spectralClustering`
+> (reuse `laplacianMatrix` + `eigs`); filter design `firwin`, `butter`, `lfilter`,
+> `lfilterZi`, `filtfilt` (match scipy.signal to machine precision — `butter` via the
+> full zpk→bilinear→tf pipeline, `filtfilt` via scipy's `lfilter_zi` edge handling);
+> `studentizedRangeCDF`/`Quantile` + `tukeyHSD` (match scipy.stats); `qz` (generalized
+> Schur, self-contained Wilkinson-shifted-QR real Schur, recon ~1e-15); `symbolicIntegral`
+> (recursive antiderivative, each result verified by d/dx ∫f = f).
+>
+> **Two bugs fixed at root along the way** (Rule 2): `eigs` returned wrong eigenvalues
+> for every non-symmetric matrix (now routes through the correct native solver); and
+> core `Fraction(0.25)` threw `BigInt(0.25)`, silently breaking the CAS
+> `simplify`/`derivative` for *any* fractional coefficient — now decomposed to an exact
+> ratio. **Gap-closure implementation complete (744 → 828 exports).**
 
 ---
 

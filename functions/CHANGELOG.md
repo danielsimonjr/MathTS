@@ -1,5 +1,33 @@
 # @danielsimonjr/mathts-functions
 
+## 0.7.0
+
+### Minor Changes
+
+- Gap-analysis closure (no deferral): the remaining high-complexity functions + two root-cause bug fixes.
+
+  All verified against NumPy/SciPy or by self-consistency (d/dx ∫f = f).
+
+  **functions — new:**
+  - Optimizers: `nelderMead`, `gradientDescent`, `levenbergMarquardt`.
+  - Clustering: `kmeans`, `spectralClustering`.
+  - Digital filter design (vs scipy.signal): `firwin`, `butter`, `lfilter`, `lfilterZi`,
+    `filtfilt` — `butter` via the full zpk→bilinear→tf pipeline, `filtfilt` via scipy's
+    `lfilter_zi` steady-state edge handling (both to machine precision).
+  - `studentizedRangeCDF` / `studentizedRangeQuantile` + `tukeyHSD` (vs scipy.stats).
+  - `qz` (generalized Schur decomposition of a pencil).
+  - `symbolicIntegral` (symbolic indefinite integration over a useful subset).
+
+  **core — fix:** `new Fraction(0.25)` threw `BigInt(0.25)`, which silently broke the CAS
+  `simplify` and symbolic `derivative` for ANY fractional coefficient (e.g.
+  `derivative('x^4/4','x')`). The constructor now decomposes a non-integer number into an
+  exact integer ratio (`0.25` → `1/4`).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.3.1
+
 ## 0.6.0
 
 ### Minor Changes
