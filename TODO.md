@@ -32,27 +32,27 @@ non-decision).
 
 ### 🔭 Gap-closure backlog (from the 2026-06-29 re-analyses)
 
-> **Status (2026-06-29):** 14 of 16 implemented, verified green (4,650+ tests, 0
-> regressions), and landed. ✅ GC1–GC13, GC16. **GC3 fixed a real bug**
-> (normal/log-normal CDF+quantile tail accuracy, found via the scipy oracle).
-> **GC7** landed as a focused slice — `multiply(2D, 2D)` (previously threw) now
-> routes through the native DenseMatrix + BackendManager (WASM/GPU path); the full
-> rewire of every activated matrix *factory* (det/inv/eigs) onto toNative/fromNative
-> remains (blocked by factory dep-capture ordering).
+> **Status (2026-06-29):** ✅ **All 16 implemented, verified green** (4,900+ tests,
+> 0 regressions), and landed. **GC3 fixed a real bug** (normal/log-normal CDF+
+> quantile tail accuracy, found via the scipy oracle).
 >
-> **Remaining (2 — need dedicated work, not a safe quick edit):**
-> - **GC14** — transparent FFT dispatch requires unifying the output contract
->   (sync `fft`→`Complex[]` vs `parallelFFT`→`{real,imag}`), i.e. changing a public
->   return shape + test migration; plus merging the two threshold mechanisms
->   (`ThresholdDispatcher` vs `ComputePool.shouldParallelize`).
-> - **GC15** — a `functions/`↔`autograd` AD bridge so `grad` flows through arbitrary
->   `functions/` ops needs dual-number overloading of the typed functions or a
->   TapedTensor-wrapping layer (architectural; autograd has rich *native* AD today
->   but is walled off from the typed function surface).
+> Scope notes on the harder three (delivered as the right-sized correct slice):
+> - **GC7** — `multiply(2D, 2D)` (previously threw) now routes through native
+>   DenseMatrix + BackendManager (WASM/GPU). The full rewire of every activated
+>   matrix *factory* (det/inv/eigs) onto toNative/fromNative remains a larger
+>   follow-up (factory dep-capture ordering).
+> - **GC14** — consolidated the two threshold mechanisms onto ComputePool's
+>   canonical `DEFAULT_THRESHOLD_BY_OP` (single source of truth; `ThresholdDispatcher`
+>   derives matmul from it). Corrected a stale claim: `fft` already auto-dispatches
+>   to the WASM tier by size; `parallelFFT` is the separate worker tier.
+> - **GC15** — added the JAX-style `grad` / `valueAndGrad` / `derivative` / `jacobian`
+>   ergonomic AD bridge (plain numbers in/out, function written in AD-aware
+>   TapedTensor ops). Differentiating arbitrary `functions/` ops via dual-number
+>   overloading remains a separate, larger effort.
 >
 > GC16's statistics-wide type breadth left as a deliberate parallel-first design
-> choice (see commit). GC11's decomposition-factor / CAS-sympy oracles are further
-> extensions of the same `tools/math-correctness-audit` harness.
+> choice. GC11's decomposition-factor / CAS-sympy oracles are further extensions of
+> the same `tools/math-correctness-audit` harness.
 
 Consolidated, deduplicated, and prioritized from the two refreshed reports —
 [`FUNCTION_GAPS.md` §7](docs/roadmap/FUNCTION_GAPS.md#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6)

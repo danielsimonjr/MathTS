@@ -15,3 +15,5 @@ export { DualTensor } from './dual-tensor.js';
 export { forwardGrad } from './forward-grad.js';
 export { Tape, TapedTensor } from './tape.js';
 export { reverseGrad } from './reverse-grad.js';
+export { grad, valueAndGrad, derivative, jacobian } from './grad.js';
+export type { ScalarFn, NumericInput } from './grad.js';
