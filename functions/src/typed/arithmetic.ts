@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, Fraction, BigNumber, Unit } from '@danielsimonjr/mathts-core';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
@@ -58,6 +58,9 @@ export const add = mathTyped('add', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.add(b),
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.add(b),
+
+  // Unit arithmetic (mathjs parity): same-dimension units add (e.g. 5 cm + 3 mm).
+  'Unit, Unit': (a: Unit, b: Unit): Unit => a.add(b),
 
   // Mixed type operations (auto-coercion via conversions)
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
@@ -108,6 +111,9 @@ export const subtract = mathTyped('subtract', {
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.subtract(b),
 
+  // Unit subtraction (same dimension): 5 cm − 3 mm.
+  'Unit, Unit': (a: Unit, b: Unit): Unit => a.sub(b),
+
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).subtract(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.subtract(Complex.fromNumber(b)),
 
@@ -141,6 +147,11 @@ export const multiply = mathTyped('multiply', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.multiply(b),
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.multiply(b),
+
+  // Unit multiplication / scaling (mathjs parity).
+  'Unit, Unit': (a: Unit, b: Unit): Unit => a.mul(b),
+  'Unit, number': (a: Unit, b: f64): Unit => a.mul(b),
+  'number, Unit': (a: f64, b: Unit): Unit => b.mul(a),
 
   'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
   'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
@@ -198,6 +209,10 @@ export const divide = mathTyped('divide', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.divide(b),
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.divide(b),
+
+  // Unit division / scaling (mathjs parity). Unit ÷ Unit may be dimensionless.
+  'Unit, Unit': (a: Unit, b: Unit): Unit => a.div(b),
+  'Unit, number': (a: Unit, b: f64): Unit => a.div(b),
 
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).divide(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.divide(Complex.fromNumber(b)),
@@ -795,12 +810,23 @@ export const tanh = mathTyped('tanh', {
 /**
  * Check if values are equal
  */
+// Unit comparison (mathjs parity): order by base-unit value once dimensions
+// match. Ordering across incompatible dimensions is an error; equality across
+// them is simply false.
+function unitCmp(a: Unit, b: Unit): i32 {
+  if (!a.dimensionsEqual(b)) {
+    throw new Error('Cannot compare units with different dimensions');
+  }
+  return a.value > b.value ? 1 : a.value < b.value ? -1 : 0;
+}
+
 export const equal = mathTyped('equal', {
   'number, number': (a: f64, b: f64): boolean => a === b,
   'bigint, bigint': (a: i64, b: i64): boolean => a === b,
   'Complex, Complex': (a: Complex, b: Complex): boolean => a.equals(b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.equals(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.equals(b),
+  'Unit, Unit': (a: Unit, b: Unit): boolean => a.dimensionsEqual(b) && a.value === b.value,
 });
 
 /**
@@ -811,6 +837,7 @@ export const smaller = mathTyped('smaller', {
   'bigint, bigint': (a: i64, b: i64): boolean => a < b,
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
+  'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) < 0,
 });
 
 /**
@@ -821,6 +848,7 @@ export const larger = mathTyped('larger', {
   'bigint, bigint': (a: i64, b: i64): boolean => a > b,
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
+  'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,
 });
 
 /**
@@ -831,6 +859,7 @@ export const smallerEq = mathTyped('smallerEq', {
   'bigint, bigint': (a: i64, b: i64): boolean => a <= b,
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) <= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) <= 0,
+  'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) <= 0,
 });
 
 /**
@@ -841,6 +870,7 @@ export const largerEq = mathTyped('largerEq', {
   'bigint, bigint': (a: i64, b: i64): boolean => a >= b,
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) >= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) >= 0,
+  'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) >= 0,
 });
 
 /**
@@ -851,6 +881,7 @@ export const compare = mathTyped('compare', {
   'bigint, bigint': (a: i64, b: i64): i32 => (a > b ? 1 : a < b ? -1 : 0),
   'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),
+  'Unit, Unit': (a: Unit, b: Unit): i32 => unitCmp(a, b),
 });
 
 // =============================================================================
