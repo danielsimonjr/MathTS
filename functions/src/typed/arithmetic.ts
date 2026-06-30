@@ -290,6 +290,11 @@ export const sign = mathTyped('sign', {
   bigint: (a: i64): i64 => (a > 0n ? 1n : a < 0n ? -1n : 0n),
   Fraction: (a: Fraction): Fraction => new Fraction(BigInt(a.sign()), 1n),
   BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(a.sign()),
+  // sign(z) = z/|z| (unit-modulus complex); sign(0) = 0 (mathjs parity).
+  Complex: (a: Complex): Complex => {
+    const m = Math.hypot(a.re, a.im);
+    return m === 0 ? new Complex(0, 0) : new Complex(a.re / m, a.im / m);
+  },
 
   // Parallel array sign
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -542,6 +547,7 @@ export const round = mathTyped('round', {
   number: (a: f64): f64 => Math.round(a),
   Fraction: (a: Fraction): Fraction => a.round(),
   BigNumber: (a: BigNumber): BigNumber => a.round(),
+  Complex: (a: Complex): Complex => new Complex(Math.round(a.re), Math.round(a.im)),
   'number, number': (a: f64, decimals: f64): f64 => {
     const factor = Math.pow(10, decimals);
     return Math.round(a * factor) / factor;
@@ -566,6 +572,7 @@ export const floor = mathTyped('floor', {
   number: (a: f64): f64 => Math.floor(a),
   Fraction: (a: Fraction): Fraction => a.floor(),
   BigNumber: (a: BigNumber): BigNumber => a.floor(),
+  Complex: (a: Complex): Complex => new Complex(Math.floor(a.re), Math.floor(a.im)),
 
   // Parallel array floor
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -586,6 +593,7 @@ export const ceil = mathTyped('ceil', {
   number: (a: f64): f64 => Math.ceil(a),
   Fraction: (a: Fraction): Fraction => a.ceil(),
   BigNumber: (a: BigNumber): BigNumber => a.ceil(),
+  Complex: (a: Complex): Complex => new Complex(Math.ceil(a.re), Math.ceil(a.im)),
 
   // Parallel array ceil
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -606,6 +614,7 @@ export const fix = mathTyped('fix', {
   number: (a: f64): f64 => Math.trunc(a),
   Fraction: (a: Fraction): Fraction => a.trunc(),
   BigNumber: (a: BigNumber): BigNumber => a.trunc(),
+  Complex: (a: Complex): Complex => new Complex(Math.trunc(a.re), Math.trunc(a.im)),
 
   // Parallel array fix (truncate toward zero, matching the 'number' overload)
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -657,6 +666,16 @@ export const gcd = mathTyped('gcd', {
     }
     return a;
   },
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    let x = a.abs();
+    let y = b.abs();
+    while (!y.isZero()) {
+      const t = y;
+      y = x.mod(y);
+      x = t;
+    }
+    return x;
+  },
 });
 
 /**
@@ -672,6 +691,11 @@ export const lcm = mathTyped('lcm', {
     const absA = a < 0n ? -a : a;
     const absB = b < 0n ? -b : b;
     return (absA * absB) / g;
+  },
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    const g = gcd(a, b) as BigNumber;
+    if (g.isZero()) return BigNumber.fromNumber(0);
+    return a.abs().multiply(b.abs()).divide(g);
   },
 });
 

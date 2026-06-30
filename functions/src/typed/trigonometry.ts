@@ -227,6 +227,7 @@ export const atan = mathTyped('atan', {
  */
 export const atan2 = mathTyped('atan2', {
   'number, number': (y: number, x: number) => Math.atan2(y, x),
+  'BigNumber, BigNumber': (y: BigNumber, x: BigNumber): BigNumber => y.atan2(x),
 });
 
 /**
