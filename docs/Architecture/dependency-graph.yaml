@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-01'
-  totalFiles: 846
+  totalFiles: 847
   totalModules: 70
-  totalExports: 4099
+  totalExports: 4101
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -292,6 +292,10 @@ modules:
             - Dual
             - isDual
           reExport: true
+        - file: ./types/dual-rules.js
+          imports:
+            - DUAL_UNARY_RULES
+          reExport: true
         - file: ./constants.js
           imports:
             - PI
@@ -397,6 +401,7 @@ modules:
         - COMPLEX_NEG_ONE
         - Dual
         - isDual
+        - DUAL_UNARY_RULES
         - PI
         - E
         - TAU
@@ -478,6 +483,7 @@ modules:
         - COMPLEX_NEG_ONE
         - Dual
         - isDual
+        - DUAL_UNARY_RULES
         - PI
         - E
         - TAU
@@ -913,11 +919,27 @@ modules:
         - COMPLEX_ZERO
         - COMPLEX_ONE
         - COMPLEX_NEG_ONE
+    core/src/types/dual-rules.ts:
+      description: Canonical elementary-function derivative rules for forward-mode automatic
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - DUAL_UNARY_RULES
+      interfaces:
+        - DualUnaryRule
+      constants:
+        - DUAL_UNARY_RULES
     core/src/types/dual.ts:
       description: Dual number for forward-mode automatic differentiation.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./dual-rules.js
+          imports:
+            - DUAL_UNARY_RULES
+            - DualUnaryRule
       workspaceDependencies: []
       exports:
         - isDual
@@ -3288,6 +3310,11 @@ modules:
           directory: tensor
           imports:
             - Tensor
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - DUAL_UNARY_RULES
+            - DualUnaryRule
       exports:
         - DualTensor
       classes:
@@ -16062,76 +16089,94 @@ modules:
         - noIndex
         - noSubset
     functions/src/utils/number.ts:
-      description: Split value representation with sign, coefficients, and exponent
+      description: Number formatting, parsing, and Math polyfills.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./is.js
+        - file: '@danielsimonjr/mathts-core/internal'
           imports:
-            - isBigNumber
-            - isNumber
-            - isObject
+            - acosh
+            - asinh
+            - atanh
+            - cbrt
+            - copysign
+            - cosh
+            - digits
+            - expm1
+            - format
+            - isInteger
+            - isPowZeroAtInfinity
+            - log10
+            - log1p
+            - log2
+            - nearlyEqual
+            - normalizeFormatOptions
+            - roundDigits
+            - safeNumberType
+            - sign
+            - sinh
+            - splitNumber
+            - tanh
+            - toEngineering
+            - toExponential
+            - toFixed
+            - toPrecision
+          reExport: true
       workspaceDependencies: []
       exports:
-        - sign
-        - log2
-        - log10
-        - log1p
-        - cbrt
-        - expm1
         - acosh
         - asinh
         - atanh
+        - cbrt
+        - copysign
         - cosh
-        - sinh
-        - tanh
-        - isInteger
-        - safeNumberType
-        - isPowZeroAtInfinity
-        - format
-        - normalizeFormatOptions
-        - splitNumber
-        - toEngineering
-        - toFixed
-        - toExponential
-        - toPrecision
-        - roundDigits
         - digits
-        - nearlyEqual
-        - copysign
-      interfaces:
-        - SplitValue
-        - NumberTypeConfig
-        - FormatOptions
-        - NormalizedFormatOptions
-      functions:
-        - isInteger
-        - safeNumberType
-        - isPowZeroAtInfinity
+        - expm1
         - format
-        - normalizeFormatOptions
-        - splitNumber
-        - toEngineering
-        - toFixed
-        - toExponential
-        - toPrecision
-        - roundDigits
-        - digits
-        - nearlyEqual
-        - copysign
-      constants:
-        - sign
-        - log2
+        - isInteger
+        - isPowZeroAtInfinity
         - log10
         - log1p
-        - cbrt
-        - expm1
+        - log2
+        - nearlyEqual
+        - normalizeFormatOptions
+        - roundDigits
+        - safeNumberType
+        - sign
+        - sinh
+        - splitNumber
+        - tanh
+        - toEngineering
+        - toExponential
+        - toFixed
+        - toPrecision
+      reExported:
         - acosh
         - asinh
         - atanh
+        - cbrt
+        - copysign
         - cosh
+        - digits
+        - expm1
+        - format
+        - isInteger
+        - isPowZeroAtInfinity
+        - log10
+        - log1p
+        - log2
+        - nearlyEqual
+        - normalizeFormatOptions
+        - roundDigits
+        - safeNumberType
+        - sign
         - sinh
+        - splitNumber
         - tanh
+        - toEngineering
+        - toExponential
+        - toFixed
+        - toPrecision
     functions/src/utils/numeric.ts:
       description: 'Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.'
       externalDependencies: []
@@ -16153,47 +16198,61 @@ modules:
       constants:
         - createNumeric
     functions/src/utils/object.ts:
-      description: Clone an object
+      description: Object cloning, extension, deep-equality, and traversal helpers.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./is.js
+        - file: '@danielsimonjr/mathts-core/internal'
           imports:
-            - isBigNumber
-            - isObject
+            - canDefineProperty
+            - clone
+            - deepExtend
+            - deepFlatten
+            - deepStrictEqual
+            - extend
+            - get
+            - hasOwnProperty
+            - isLegacyFactory
+            - lazy
+            - mapObject
+            - pick
+            - pickShallow
+            - set
+            - traverse
+          reExport: true
       workspaceDependencies: []
       exports:
-        - clone
-        - mapObject
-        - extend
-        - deepExtend
-        - deepStrictEqual
-        - deepFlatten
         - canDefineProperty
-        - lazy
-        - traverse
+        - clone
+        - deepExtend
+        - deepFlatten
+        - deepStrictEqual
+        - extend
+        - get
         - hasOwnProperty
         - isLegacyFactory
-        - get
-        - set
+        - lazy
+        - mapObject
         - pick
         - pickShallow
-      functions:
-        - clone
-        - mapObject
-        - extend
-        - deepExtend
-        - deepStrictEqual
-        - deepFlatten
-        - canDefineProperty
-        - lazy
+        - set
         - traverse
+      reExported:
+        - canDefineProperty
+        - clone
+        - deepExtend
+        - deepFlatten
+        - deepStrictEqual
+        - extend
+        - get
         - hasOwnProperty
         - isLegacyFactory
-        - get
-        - set
+        - lazy
+        - mapObject
         - pick
         - pickShallow
+        - set
+        - traverse
     functions/src/utils/optimizeCallback.ts:
       description: Simplifies a callback function by reducing its complexity and potentially improving its performance.
       externalDependencies:
@@ -21468,116 +21527,147 @@ modules:
         - mathMLDocument
         - mathMLError
     expression/src/utils/number.ts:
-      description: Split value representation with sign, coefficients, and exponent
+      description: Number formatting, parsing, and Math polyfills.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./is.js
+        - file: '@danielsimonjr/mathts-core/internal'
           imports:
-            - isBigNumber
-            - isNumber
-            - isObject
+            - acosh
+            - asinh
+            - atanh
+            - cbrt
+            - copysign
+            - cosh
+            - digits
+            - expm1
+            - format
+            - isInteger
+            - log10
+            - log1p
+            - log2
+            - nearlyEqual
+            - normalizeFormatOptions
+            - roundDigits
+            - safeNumberType
+            - sign
+            - sinh
+            - splitNumber
+            - tanh
+            - toEngineering
+            - toExponential
+            - toFixed
+            - toPrecision
+          reExport: true
       workspaceDependencies: []
       exports:
-        - sign
-        - log2
-        - log10
-        - log1p
-        - cbrt
-        - expm1
         - acosh
         - asinh
         - atanh
+        - cbrt
+        - copysign
         - cosh
-        - sinh
-        - tanh
-        - isInteger
-        - safeNumberType
-        - format
-        - normalizeFormatOptions
-        - splitNumber
-        - toEngineering
-        - toFixed
-        - toExponential
-        - toPrecision
-        - roundDigits
         - digits
-        - nearlyEqual
-        - copysign
-      interfaces:
-        - SplitValue
-        - NumberTypeConfig
-        - FormatOptions
-        - NormalizedFormatOptions
-      functions:
-        - isInteger
-        - safeNumberType
+        - expm1
         - format
-        - normalizeFormatOptions
-        - splitNumber
-        - toEngineering
-        - toFixed
-        - toExponential
-        - toPrecision
-        - roundDigits
-        - digits
-        - nearlyEqual
-        - copysign
-      constants:
-        - sign
-        - log2
+        - isInteger
         - log10
         - log1p
-        - cbrt
-        - expm1
+        - log2
+        - nearlyEqual
+        - normalizeFormatOptions
+        - roundDigits
+        - safeNumberType
+        - sign
+        - sinh
+        - splitNumber
+        - tanh
+        - toEngineering
+        - toExponential
+        - toFixed
+        - toPrecision
+      reExported:
         - acosh
         - asinh
         - atanh
+        - cbrt
+        - copysign
         - cosh
+        - digits
+        - expm1
+        - format
+        - isInteger
+        - log10
+        - log1p
+        - log2
+        - nearlyEqual
+        - normalizeFormatOptions
+        - roundDigits
+        - safeNumberType
+        - sign
         - sinh
+        - splitNumber
         - tanh
+        - toEngineering
+        - toExponential
+        - toFixed
+        - toPrecision
     expression/src/utils/object.ts:
-      description: Clone an object
+      description: Object cloning, extension, deep-equality, and traversal helpers.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./is.js
+        - file: '@danielsimonjr/mathts-core/internal'
           imports:
-            - isBigNumber
-            - isObject
+            - canDefineProperty
+            - clone
+            - deepExtend
+            - deepFlatten
+            - deepStrictEqual
+            - extend
+            - get
+            - hasOwnProperty
+            - isLegacyFactory
+            - lazy
+            - mapObject
+            - pick
+            - pickShallow
+            - set
+            - traverse
+          reExport: true
       workspaceDependencies: []
       exports:
-        - clone
-        - mapObject
-        - extend
-        - deepExtend
-        - deepStrictEqual
-        - deepFlatten
         - canDefineProperty
-        - lazy
-        - traverse
+        - clone
+        - deepExtend
+        - deepFlatten
+        - deepStrictEqual
+        - extend
+        - get
         - hasOwnProperty
         - isLegacyFactory
-        - get
-        - set
+        - lazy
+        - mapObject
         - pick
         - pickShallow
-      functions:
-        - clone
-        - mapObject
-        - extend
-        - deepExtend
-        - deepStrictEqual
-        - deepFlatten
-        - canDefineProperty
-        - lazy
+        - set
         - traverse
+      reExported:
+        - canDefineProperty
+        - clone
+        - deepExtend
+        - deepFlatten
+        - deepStrictEqual
+        - extend
+        - get
         - hasOwnProperty
         - isLegacyFactory
-        - get
-        - set
+        - lazy
+        - mapObject
         - pick
         - pickShallow
+        - set
+        - traverse
     expression/src/utils/scope.ts:
       description: Create a new scope which can access the parent scope,
       externalDependencies: []
@@ -25880,6 +25970,7 @@ dependencyGraph:
       files:
         - core/src/types/bignumber.ts
         - core/src/types/complex.ts
+        - core/src/types/dual-rules.ts
         - core/src/types/dual.ts
         - core/src/types/fraction.ts
         - core/src/types/interfaces.ts
@@ -26843,19 +26934,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 846
+  totalTypeScriptFiles: 847
   totalModules: 70
-  totalLinesOfCode: 158032
-  totalExports: 4099
+  totalLinesOfCode: 155569
+  totalExports: 4101
   totalClasses: 50
-  totalInterfaces: 358
-  totalFunctions: 1461
-  totalTypeGuards: 135
+  totalInterfaces: 351
+  totalFunctions: 1404
+  totalTypeGuards: 130
   totalEnums: 0
-  totalConstants: 1417
-  totalReExports: 1204
+  totalConstants: 1394
+  totalReExports: 1286
   totalTypeOnlyImports: 431
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 501
+  unusedExportsCount: 452

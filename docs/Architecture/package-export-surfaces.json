@@ -519,6 +519,7 @@
       "DIMENSIONLESS",
       "DimensionMismatchError",
       "Dual",
+      "DUAL_UNARY_RULES",
       "E",
       "Fraction",
       "FRACTION_HALF",

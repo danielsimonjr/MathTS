@@ -98,7 +98,7 @@ The codebase is organized into the following modules:
 - **core**: 2 files
 - **core/factory**: 2 files
 - **core/typed**: 3 files
-- **core/types**: 8 files
+- **core/types**: 9 files
 - **matrix/backends**: 19 files
 - **matrix**: 4 files
 - **matrix/operations**: 14 files
@@ -174,10 +174,10 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 2              | 3               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 15             | 12              |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 16             | 13              |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
-| `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`                                                                                                     | 6              | 0               |
+| `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 391            | 10              |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
@@ -225,6 +225,7 @@ graph LR
     P3 --> P2
     P4 --> P3
     P5 --> P4
+    P5 --> P2
     P6 --> P7
     P6 --> P2
     P6 --> P3
@@ -323,6 +324,7 @@ graph LR
 |------|---------|------|
 | `./types/complex.js` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE` | Re-export |
 | `./types/dual.js` | `Dual, isDual` | Re-export |
+| `./types/dual-rules.js` | `DUAL_UNARY_RULES` | Re-export |
 | `./constants.js` | `PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E` | Re-export |
 | `./types/fraction.js` | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER` | Re-export |
 | `./types/bignumber.js` | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` | Re-export |
@@ -335,7 +337,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Dual`, `isDual`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
 
 ---
 
@@ -469,7 +471,22 @@ graph LR
 
 ---
 
+### `core/src/types/dual-rules.ts` - Canonical elementary-function derivative rules for forward-mode automatic
+
+**Exports:**
+
+- Interfaces: `DualUnaryRule`
+- Types: `DualUnaryRuleName`
+- Constants: `DUAL_UNARY_RULES`
+
+---
+
 ### `core/src/types/dual.ts` - Dual number for forward-mode automatic differentiation.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./dual-rules.js` | `DUAL_UNARY_RULES, DualUnaryRule` | Import |
 
 **Exports:**
 
@@ -1611,6 +1628,7 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `@danielsimonjr/mathts-tensor` | `Tensor` |
+| `@danielsimonjr/mathts-core` | `DUAL_UNARY_RULES, DualUnaryRule` |
 
 **Exports:**
 
@@ -8069,18 +8087,16 @@ graph LR
 
 ---
 
-### `functions/src/utils/number.ts` - Split value representation with sign, coefficients, and exponent
+### `functions/src/utils/number.ts` - Number formatting, parsing, and Math polyfills.
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.js` | `isBigNumber, isNumber, isObject` | Import |
+| `@danielsimonjr/mathts-core/internal` | `acosh, asinh, atanh, cbrt, copysign, cosh, digits, expm1, format, isInteger, isPowZeroAtInfinity, log10, log1p, log2, nearlyEqual, normalizeFormatOptions, roundDigits, safeNumberType, sign, sinh, splitNumber, tanh, toEngineering, toExponential, toFixed, toPrecision` | Re-export |
 
 **Exports:**
 
-- Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
-- Functions: `isInteger`, `safeNumberType`, `isPowZeroAtInfinity`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
-- Constants: `sign`, `log2`, `log10`, `log1p`, `cbrt`, `expm1`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
+- Re-exports: `acosh`, `asinh`, `atanh`, `cbrt`, `copysign`, `cosh`, `digits`, `expm1`, `format`, `isInteger`, `isPowZeroAtInfinity`, `log10`, `log1p`, `log2`, `nearlyEqual`, `normalizeFormatOptions`, `roundDigits`, `safeNumberType`, `sign`, `sinh`, `splitNumber`, `tanh`, `toEngineering`, `toExponential`, `toFixed`, `toPrecision`
 
 ---
 
@@ -8099,16 +8115,16 @@ graph LR
 
 ---
 
-### `functions/src/utils/object.ts` - Clone an object
+### `functions/src/utils/object.ts` - Object cloning, extension, deep-equality, and traversal helpers.
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.js` | `isBigNumber, isObject` | Import |
+| `@danielsimonjr/mathts-core/internal` | `canDefineProperty, clone, deepExtend, deepFlatten, deepStrictEqual, extend, get, hasOwnProperty, isLegacyFactory, lazy, mapObject, pick, pickShallow, set, traverse` | Re-export |
 
 **Exports:**
 
-- Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
+- Re-exports: `canDefineProperty`, `clone`, `deepExtend`, `deepFlatten`, `deepStrictEqual`, `extend`, `get`, `hasOwnProperty`, `isLegacyFactory`, `lazy`, `mapObject`, `pick`, `pickShallow`, `set`, `traverse`
 
 ---
 
@@ -11362,31 +11378,29 @@ graph LR
 
 ---
 
-### `expression/src/utils/number.ts` - Split value representation with sign, coefficients, and exponent
+### `expression/src/utils/number.ts` - Number formatting, parsing, and Math polyfills.
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.js` | `isBigNumber, isNumber, isObject` | Import |
+| `@danielsimonjr/mathts-core/internal` | `acosh, asinh, atanh, cbrt, copysign, cosh, digits, expm1, format, isInteger, log10, log1p, log2, nearlyEqual, normalizeFormatOptions, roundDigits, safeNumberType, sign, sinh, splitNumber, tanh, toEngineering, toExponential, toFixed, toPrecision` | Re-export |
 
 **Exports:**
 
-- Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
-- Functions: `isInteger`, `safeNumberType`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
-- Constants: `sign`, `log2`, `log10`, `log1p`, `cbrt`, `expm1`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
+- Re-exports: `acosh`, `asinh`, `atanh`, `cbrt`, `copysign`, `cosh`, `digits`, `expm1`, `format`, `isInteger`, `log10`, `log1p`, `log2`, `nearlyEqual`, `normalizeFormatOptions`, `roundDigits`, `safeNumberType`, `sign`, `sinh`, `splitNumber`, `tanh`, `toEngineering`, `toExponential`, `toFixed`, `toPrecision`
 
 ---
 
-### `expression/src/utils/object.ts` - Clone an object
+### `expression/src/utils/object.ts` - Object cloning, extension, deep-equality, and traversal helpers.
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.js` | `isBigNumber, isObject` | Import |
+| `@danielsimonjr/mathts-core/internal` | `canDefineProperty, clone, deepExtend, deepFlatten, deepStrictEqual, extend, get, hasOwnProperty, isLegacyFactory, lazy, mapObject, pick, pickShallow, set, traverse` | Re-export |
 
 **Exports:**
 
-- Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
+- Re-exports: `canDefineProperty`, `clone`, `deepExtend`, `deepFlatten`, `deepStrictEqual`, `extend`, `get`, `hasOwnProperty`, `isLegacyFactory`, `lazy`, `mapObject`, `pick`, `pickShallow`, `set`, `traverse`
 
 ---
 
@@ -12347,7 +12361,7 @@ graph LR
 | `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
 | `functions/src/factories/index`                        | 244 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 199 files  |
-| `functions/src/utils/is`                               | 0 files      | 66 files   |
+| `functions/src/utils/is`                               | 0 files      | 64 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/core/config`                            | 0 files      | 52 files   |
@@ -12362,8 +12376,8 @@ graph LR
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
 | `expression/src/index`                                 | 27 files     | 0 files    |
 | `assembly/src/index`                                   | 26 files     | 0 files    |
-| `expression/src/utils/is`                              | 0 files      | 25 files   |
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 20 files   |
+| `expression/src/utils/is`                              | 0 files      | 23 files   |
 | `expression/src/utils/factory`                         | 2 files      | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -12438,635 +12452,636 @@ graph TD
     subgraph Core/types
         N10[bignumber]
         N11[complex]
-        N12[dual]
-        N13[fraction]
-        N14[interfaces]
-        N15[unit-definitions]
-        N16[unit-prefixes]
-        N17[unit]
+        N12[dual-rules]
+        N13[dual]
+        N14[fraction]
+        N15[interfaces]
+        N16[unit-definitions]
+        N17[unit-prefixes]
+        N18[unit]
     end
 
     subgraph Matrix/backends
-        N18[Backend]
-        N19[BackendManager]
-        N20[BatchExecutor]
-        N21[BufferPool]
-        N22[detect]
-        N23[GPUContext]
-        N24[index]
-        N25[ShaderManager]
-        N26[Sync]
-        N27[GPUBackend]
-        N28[...9 more]
+        N19[Backend]
+        N20[BackendManager]
+        N21[BatchExecutor]
+        N22[BufferPool]
+        N23[detect]
+        N24[GPUContext]
+        N25[index]
+        N26[ShaderManager]
+        N27[Sync]
+        N28[GPUBackend]
+        N29[...9 more]
     end
 
     subgraph Matrix
-        N29[config]
-        N30[index]
-        N31[parallel-matrix]
-        N32[typed-operations]
+        N30[config]
+        N31[index]
+        N32[parallel-matrix]
+        N33[typed-operations]
     end
 
     subgraph Matrix/operations
-        N33[cholesky]
-        N34[common]
-        N35[eig-wasm]
-        N36[eig]
-        N37[expm]
-        N38[index]
-        N39[logm]
-        N40[lu]
-        N41[pinv]
-        N42[qr]
-        N43[...4 more]
+        N34[cholesky]
+        N35[common]
+        N36[eig-wasm]
+        N37[eig]
+        N38[expm]
+        N39[index]
+        N40[logm]
+        N41[lu]
+        N42[pinv]
+        N43[qr]
+        N44[...4 more]
     end
 
     subgraph Matrix/types
-        N44[arithmetic]
-        N45[reduction]
-        N46[DenseMatrix]
-        N47[index]
-        N48[Matrix]
-        N49[SparseMatrix]
+        N45[arithmetic]
+        N46[reduction]
+        N47[DenseMatrix]
+        N48[index]
+        N49[Matrix]
+        N50[SparseMatrix]
     end
 
     subgraph Tensor
-        N50[contraction-sequence]
-        N51[index]
-        N52[named-index]
-        N53[Tensor]
+        N51[contraction-sequence]
+        N52[index]
+        N53[named-index]
+        N54[Tensor]
     end
 
     subgraph Tensor/operations
-        N54[cholesky]
-        N55[concatenate]
-        N56[eig]
-        N57[flip]
-        N58[gather]
-        N59[kron]
-        N60[lu]
-        N61[pad]
-        N62[pinv]
-        N63[qr]
-        N64[...7 more]
+        N55[cholesky]
+        N56[concatenate]
+        N57[eig]
+        N58[flip]
+        N59[gather]
+        N60[kron]
+        N61[lu]
+        N62[pad]
+        N63[pinv]
+        N64[qr]
+        N65[...7 more]
     end
 
     subgraph Autograd
-        N65[dual-tensor]
-        N66[forward-grad]
-        N67[grad]
-        N68[index]
-        N69[reverse-grad]
-        N70[tape]
+        N66[dual-tensor]
+        N67[forward-grad]
+        N68[grad]
+        N69[index]
+        N70[reverse-grad]
+        N71[tape]
     end
 
     subgraph Functions/algebra
-        N71[lup]
-        N72[qr]
-        N73[schur]
-        N74[slu]
-        N75[derivative]
-        N76[leafCount]
-        N77[lyap]
-        N78[polynomialRoot]
-        N79[rationalize]
-        N80[resolve]
-        N81[...35 more]
+        N72[lup]
+        N73[qr]
+        N74[schur]
+        N75[slu]
+        N76[derivative]
+        N77[leafCount]
+        N78[lyap]
+        N79[polynomialRoot]
+        N80[rationalize]
+        N81[resolve]
+        N82[...35 more]
     end
 
     subgraph Functions/arithmetic
-        N82[abs]
-        N83[addScalar]
-        N84[cbrt]
-        N85[ceil]
-        N86[cube]
-        N87[divide]
-        N88[divideScalar]
-        N89[dotDivide]
-        N90[dotMultiply]
-        N91[dotPow]
-        N92[...28 more]
+        N83[abs]
+        N84[addScalar]
+        N85[cbrt]
+        N86[ceil]
+        N87[cube]
+        N88[divide]
+        N89[divideScalar]
+        N90[dotDivide]
+        N91[dotMultiply]
+        N92[dotPow]
+        N93[...28 more]
     end
 
     subgraph Functions/bitwise
-        N93[bitAnd]
-        N94[bitNot]
-        N95[bitOr]
-        N96[bitXor]
-        N97[leftShift]
-        N98[rightArithShift]
-        N99[rightLogShift]
-        N100[useMatrixForArrayScalar]
+        N94[bitAnd]
+        N95[bitNot]
+        N96[bitOr]
+        N97[bitXor]
+        N98[leftShift]
+        N99[rightArithShift]
+        N100[rightLogShift]
+        N101[useMatrixForArrayScalar]
     end
 
     subgraph Functions
-        N101[calculus-extra]
-        N102[cas-integration]
-        N103[clustering-extra]
-        N104[descriptive-stats]
-        N105[distribution-functions]
-        N106[geometry-extra]
-        N107[grad-forward]
-        N108[help]
-        N109[hypothesis-extra]
-        N110[index]
-        N111[...7 more]
+        N102[calculus-extra]
+        N103[cas-integration]
+        N104[clustering-extra]
+        N105[descriptive-stats]
+        N106[distribution-functions]
+        N107[geometry-extra]
+        N108[grad-forward]
+        N109[help]
+        N110[hypothesis-extra]
+        N111[index]
+        N112[...7 more]
     end
 
     subgraph Functions/combinatorics
-        N112[bellNumbers]
-        N113[catalan]
-        N114[composition]
-        N115[stirlingS2]
+        N113[bellNumbers]
+        N114[catalan]
+        N115[composition]
+        N116[stirlingS2]
     end
 
     subgraph Functions/complex
-        N116[arg]
-        N117[conj]
-        N118[im]
-        N119[re]
+        N117[arg]
+        N118[conj]
+        N119[im]
+        N120[re]
     end
 
     subgraph Functions/core
-        N120[config]
-        N121[typed]
+        N121[config]
+        N122[typed]
     end
 
     subgraph Functions/error
-        N122[DimensionError]
-        N123[IndexError]
-        N124[MathjsError]
+        N123[DimensionError]
+        N124[IndexError]
+        N125[MathjsError]
     end
 
     subgraph Functions/expression
-        N125[operators]
+        N126[operators]
     end
 
     subgraph Functions/factories
-        N126[evaluate]
-        N127[index]
-        N128[matrix-bridge]
-        N129[scope]
+        N127[evaluate]
+        N128[index]
+        N129[matrix-bridge]
+        N130[scope]
     end
 
     subgraph Functions/geometry
-        N130[distance]
-        N131[intersect]
+        N131[distance]
+        N132[intersect]
     end
 
     subgraph Functions/logical
-        N132[and]
-        N133[not]
-        N134[nullish]
-        N135[or]
-        N136[xor]
+        N133[and]
+        N134[not]
+        N135[nullish]
+        N136[or]
+        N137[xor]
     end
 
     subgraph Functions/matrix
-        N137[column]
-        N138[concat]
-        N139[count]
-        N140[cross]
-        N141[ctranspose]
-        N142[det]
-        N143[diag]
-        N144[diff]
-        N145[dot]
-        N146[complexEigs]
-        N147[...36 more]
+        N138[column]
+        N139[concat]
+        N140[count]
+        N141[cross]
+        N142[ctranspose]
+        N143[det]
+        N144[diag]
+        N145[diff]
+        N146[dot]
+        N147[complexEigs]
+        N148[...36 more]
     end
 
     subgraph Functions/numeric
-        N148[solveODE]
+        N149[solveODE]
     end
 
     subgraph Functions/plain
-        N149[arithmetic]
-        N150[bitwise]
-        N151[combinations]
-        N152[constants]
-        N153[index]
-        N154[logical]
-        N155[probability]
-        N156[relational]
-        N157[trigonometry]
-        N158[utils]
+        N150[arithmetic]
+        N151[bitwise]
+        N152[combinations]
+        N153[constants]
+        N154[index]
+        N155[logical]
+        N156[probability]
+        N157[relational]
+        N158[trigonometry]
+        N159[utils]
     end
 
     subgraph Functions/probability
-        N159[bernoulli]
-        N160[combinations]
-        N161[combinationsWithRep]
-        N162[factorial]
-        N163[gamma]
-        N164[kldivergence]
-        N165[lgamma]
-        N166[multinomial]
-        N167[permutations]
-        N168[pickRandom]
-        N169[...4 more]
+        N160[bernoulli]
+        N161[combinations]
+        N162[combinationsWithRep]
+        N163[factorial]
+        N164[gamma]
+        N165[kldivergence]
+        N166[lgamma]
+        N167[multinomial]
+        N168[permutations]
+        N169[pickRandom]
+        N170[...4 more]
     end
 
     subgraph Functions/relational
-        N170[compare]
-        N171[compareNatural]
-        N172[compareText]
-        N173[compareUnits]
-        N174[deepEqual]
-        N175[equal]
-        N176[equalScalar]
-        N177[equalText]
-        N178[larger]
-        N179[largerEq]
-        N180[...3 more]
+        N171[compare]
+        N172[compareNatural]
+        N173[compareText]
+        N174[compareUnits]
+        N175[deepEqual]
+        N176[equal]
+        N177[equalScalar]
+        N178[equalText]
+        N179[larger]
+        N180[largerEq]
+        N181[...3 more]
     end
 
     subgraph Functions/set
-        N181[setCartesian]
-        N182[setDifference]
-        N183[setDistinct]
-        N184[setIntersect]
-        N185[setIsSubset]
-        N186[setMultiplicity]
-        N187[setPowerset]
-        N188[setSize]
-        N189[setSymDifference]
-        N190[setUnion]
+        N182[setCartesian]
+        N183[setDifference]
+        N184[setDistinct]
+        N185[setIntersect]
+        N186[setIsSubset]
+        N187[setMultiplicity]
+        N188[setPowerset]
+        N189[setSize]
+        N190[setSymDifference]
+        N191[setUnion]
     end
 
     subgraph Functions/signal
-        N191[freqz]
-        N192[zpk2tf]
+        N192[freqz]
+        N193[zpk2tf]
     end
 
     subgraph Functions/special
-        N193[erf]
-        N194[zeta]
+        N194[erf]
+        N195[zeta]
     end
 
     subgraph Functions/statistics
-        N195[corr]
-        N196[cumsum]
-        N197[mad]
-        N198[max]
-        N199[mean]
-        N200[median]
-        N201[min]
-        N202[mode]
-        N203[prod]
-        N204[quantileSeq]
-        N205[...4 more]
+        N196[corr]
+        N197[cumsum]
+        N198[mad]
+        N199[max]
+        N200[mean]
+        N201[median]
+        N202[min]
+        N203[mode]
+        N204[prod]
+        N205[quantileSeq]
+        N206[...4 more]
     end
 
     subgraph Functions/string
-        N206[bin]
-        N207[format]
-        N208[hex]
-        N209[oct]
-        N210[print]
+        N207[bin]
+        N208[format]
+        N209[hex]
+        N210[oct]
+        N211[print]
     end
 
     subgraph Functions/trigonometry
-        N211[acos]
-        N212[acosh]
-        N213[acot]
-        N214[acoth]
-        N215[acsc]
-        N216[acsch]
-        N217[asec]
-        N218[asech]
-        N219[asin]
-        N220[asinh]
-        N221[...16 more]
+        N212[acos]
+        N213[acosh]
+        N214[acot]
+        N215[acoth]
+        N216[acsc]
+        N217[acsch]
+        N218[asec]
+        N219[asech]
+        N220[asin]
+        N221[asinh]
+        N222[...16 more]
     end
 
     subgraph Functions/type
-        N222[BigNumber]
-        N223[Chain]
-        N224[chain]
-        N225[Complex]
-        N226[FibonacciHeap]
-        N227[index]
-        N228[ImmutableDenseMatrix]
-        N229[MatrixIndex]
-        N230[Spa]
-        N231[types]
-        N232[...23 more]
+        N223[BigNumber]
+        N224[Chain]
+        N225[chain]
+        N226[Complex]
+        N227[FibonacciHeap]
+        N228[index]
+        N229[ImmutableDenseMatrix]
+        N230[MatrixIndex]
+        N231[Spa]
+        N232[types]
+        N233[...23 more]
     end
 
     subgraph Functions/typed
-        N233[algebra]
-        N234[arithmetic]
-        N235[bitwise]
-        N236[cas]
-        N237[combinatorics]
-        N238[complex]
-        N239[dist-objects]
-        N240[distributions]
-        N241[fused]
-        N242[geometry]
-        N243[...20 more]
+        N234[algebra]
+        N235[arithmetic]
+        N236[bitwise]
+        N237[cas]
+        N238[combinatorics]
+        N239[complex]
+        N240[dist-objects]
+        N241[distributions]
+        N242[fused]
+        N243[geometry]
+        N244[...20 more]
     end
 
     subgraph Functions/unit
-        N244[to]
-        N245[toBest]
+        N245[to]
+        N246[toBest]
     end
 
     subgraph Functions/utils
-        N246[array]
-        N247[bigint]
-        N248[bitwise]
-        N249[constants]
-        N250[formatter]
-        N251[nearlyEqual]
-        N252[clone]
-        N253[collection]
-        N254[complex]
-        N255[customs]
-        N256[...28 more]
+        N247[array]
+        N248[bigint]
+        N249[bitwise]
+        N250[constants]
+        N251[formatter]
+        N252[nearlyEqual]
+        N253[clone]
+        N254[collection]
+        N255[complex]
+        N256[customs]
+        N257[...28 more]
     end
 
     subgraph Functions/wasm
-        N257[wasm-bridge]
-        N258[common]
-        N259[wasm-bridge]
-        N260[integrity]
-        N261[wasm-bridge]
+        N258[wasm-bridge]
+        N259[common]
+        N260[wasm-bridge]
+        N261[integrity]
         N262[wasm-bridge]
-        N263[resolve]
-        N264[wasm-bridge]
+        N263[wasm-bridge]
+        N264[resolve]
         N265[wasm-bridge]
-        N266[scalars]
-        N267[...2 more]
+        N266[wasm-bridge]
+        N267[scalars]
+        N268[...2 more]
     end
 
     subgraph Expression/compiler
-        N268[compile]
-        N269[index]
+        N269[compile]
+        N270[index]
     end
 
     subgraph Expression/embeddedDocs
-        N270[e]
-        N271[false]
-        N272[i]
-        N273[Infinity]
-        N274[LN10]
-        N275[LN2]
-        N276[LOG10E]
-        N277[LOG2E]
-        N278[NaN]
-        N279[null]
-        N280[...244 more]
+        N271[e]
+        N272[false]
+        N273[i]
+        N274[Infinity]
+        N275[LN10]
+        N276[LN2]
+        N277[LOG10E]
+        N278[LOG2E]
+        N279[NaN]
+        N280[null]
+        N281[...244 more]
     end
 
     subgraph Expression/error
-        N281[DimensionError]
-        N282[IndexError]
-        N283[MathjsError]
+        N282[DimensionError]
+        N283[IndexError]
+        N284[MathjsError]
     end
 
     subgraph Expression/evaluator
-        N284[evaluate]
-        N285[index]
+        N285[evaluate]
+        N286[index]
     end
 
     subgraph Expression/function
-        N286[parser]
+        N287[parser]
     end
 
     subgraph Expression
-        N287[Help]
-        N288[index]
-        N289[keywords]
-        N290[operators]
-        N291[parse]
-        N292[Parser]
-        N293[types]
+        N288[Help]
+        N289[index]
+        N290[keywords]
+        N291[operators]
+        N292[parse]
+        N293[Parser]
+        N294[types]
     end
 
     subgraph Expression/node
-        N294[AccessorNode]
-        N295[ArrayNode]
-        N296[AssignmentNode]
-        N297[BlockNode]
-        N298[ConditionalNode]
-        N299[ConstantNode]
-        N300[FunctionAssignmentNode]
-        N301[FunctionNode]
-        N302[IndexNode]
-        N303[Node]
-        N304[...8 more]
+        N295[AccessorNode]
+        N296[ArrayNode]
+        N297[AssignmentNode]
+        N298[BlockNode]
+        N299[ConditionalNode]
+        N300[ConstantNode]
+        N301[FunctionAssignmentNode]
+        N302[FunctionNode]
+        N303[IndexNode]
+        N304[Node]
+        N305[...8 more]
     end
 
     subgraph Expression/transform
-        N305[errorTransform]
+        N306[errorTransform]
     end
 
     subgraph Expression/utils
-        N306[array]
-        N307[formatter]
-        N308[collection]
-        N309[customs]
-        N310[factory]
-        N311[is]
-        N312[latex]
-        N313[map]
-        N314[mathml]
-        N315[number]
-        N316[...4 more]
+        N307[array]
+        N308[formatter]
+        N309[collection]
+        N310[customs]
+        N311[factory]
+        N312[is]
+        N313[latex]
+        N314[map]
+        N315[mathml]
+        N316[number]
+        N317[...4 more]
     end
 
     subgraph Parser
-        N317[index]
-    end
-
-    subgraph Units
         N318[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N319[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N320[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N321[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N322[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N323[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N324[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N325[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N326[index]
     end
 
+    subgraph Signal
+        N327[index]
+    end
+
     subgraph Parallel
-        N327[ComputePool]
-        N328[index]
+        N328[ComputePool]
+        N329[index]
     end
 
     subgraph Parallel/operations
-        N329[elementwise]
-        N330[index]
-        N331[map]
-        N332[matmul]
-        N333[reduce]
+        N330[elementwise]
+        N331[index]
+        N332[map]
+        N333[matmul]
+        N334[reduce]
     end
 
     subgraph Parallel/ops
-        N334[bitwise]
+        N335[bitwise]
     end
 
     subgraph Parallel/strategies
-        N335[chunk]
-        N336[index]
-        N337[threshold]
+        N336[chunk]
+        N337[index]
+        N338[threshold]
     end
 
     subgraph Workbook
-        N338[contract]
-        N339[doc]
-        N340[edit]
-        N341[executor]
-        N342[formatter]
-        N343[fs-atomic]
-        N344[graph]
-        N345[index]
-        N346[introspect]
-        N347[parser]
-        N348[...4 more]
+        N339[contract]
+        N340[doc]
+        N341[edit]
+        N342[executor]
+        N343[formatter]
+        N344[fs-atomic]
+        N345[graph]
+        N346[index]
+        N347[introspect]
+        N348[parser]
+        N349[...4 more]
     end
 
     subgraph Assembly/algebra
-        N349[decomposition]
+        N350[decomposition]
     end
 
     subgraph Assembly
-        N350[elementwise]
-        N351[index]
-        N352[poly]
-        N353[signal]
-        N354[sort]
-        N355[special]
-        N356[tridiag]
+        N351[elementwise]
+        N352[index]
+        N353[poly]
+        N354[signal]
+        N355[sort]
+        N356[special]
+        N357[tridiag]
     end
 
     subgraph Assembly/ops
-        N357[approx]
-        N358[array]
-        N359[bitwise]
-        N360[complex-array]
-        N361[complex-ops]
-        N362[curvefit]
-        N363[eig]
-        N364[fft]
-        N365[linalg]
-        N366[matrix]
-        N367[...8 more]
+        N358[approx]
+        N359[array]
+        N360[bitwise]
+        N361[complex-array]
+        N362[complex-ops]
+        N363[curvefit]
+        N364[eig]
+        N365[fft]
+        N366[linalg]
+        N367[matrix]
+        N368[...8 more]
     end
 
     subgraph Assembly/types
-        N368[complex]
+        N369[complex]
     end
 
     subgraph Compat
-        N369[chain]
-        N370[index]
-        N371[shims]
+        N370[chain]
+        N371[index]
+        N372[shims]
     end
 
     N2 --> N1
     N5 --> N8
     N6 --> N5
     N4 --> N11
+    N4 --> N13
     N4 --> N12
     N4 --> N3
-    N4 --> N13
+    N4 --> N14
     N4 --> N10
-    N4 --> N17
-    N4 --> N15
+    N4 --> N18
     N4 --> N16
+    N4 --> N17
     N4 --> N7
     N4 --> N6
     N7 --> N8
     N7 --> N9
     N8 --> N11
-    N8 --> N12
     N8 --> N13
+    N8 --> N14
     N8 --> N10
     N9 --> N11
-    N9 --> N13
+    N9 --> N14
     N9 --> N10
-    N10 --> N14
-    N11 --> N14
-    N13 --> N14
-    N17 --> N15
-    N17 --> N16
-    N18 --> N46
-    N19 --> N46
-    N19 --> N18
-    N19 --> N29
-    N20 --> N23
-    N20 --> N25
-    N20 --> N21
-    N21 --> N23
-    N23 --> N22
-    N24 --> N22
+    N10 --> N15
+    N11 --> N15
+    N13 --> N12
+    N14 --> N15
+    N18 --> N16
+    N18 --> N17
+    N19 --> N47
+    N20 --> N47
+    N20 --> N19
+    N20 --> N30
+    N21 --> N24
+    N21 --> N26
+    N21 --> N22
+    N22 --> N24
     N24 --> N23
-    N24 --> N21
-    N24 --> N25
-    N24 --> N20
-    N24 --> N26
     N25 --> N23
-    N26 --> N23
-    N26 --> N21
+    N25 --> N24
+    N25 --> N22
+    N25 --> N26
+    N25 --> N21
+    N25 --> N27
+    N26 --> N24
     N27 --> N24
-    N29 --> N18
-    N30 --> N47
-    N30 --> N38
-    N30 --> N32
-    N30 --> N31
-    N33 --> N46
-    N35 --> N36
-    N35 --> N34
-    N36 --> N34
-    N37 --> N46
-    N37 --> N34
-    N38 --> N36
+    N27 --> N22
+    N28 --> N25
+    N30 --> N19
+    N31 --> N48
+    N31 --> N39
+    N31 --> N33
+    N31 --> N32
+    N34 --> N47
+    N36 --> N37
+    N36 --> N35
+    N37 --> N35
+    N38 --> N47
     N38 --> N35
-    N38 --> N41
-    N38 --> N42
-    N38 --> N40
-    N38 --> N33
-    N38 --> N37
-    N38 --> N39
-    N39 --> N46
+    N39 --> N37
     N39 --> N36
+    N39 --> N42
+    N39 --> N43
+    N39 --> N41
     N39 --> N34
-    N40 --> N46
-    N41 --> N46
-    N42 --> N46
-    N31 --> N46
-    N32 --> N46
-    N44 --> N46
-    N44 --> N48
+    N39 --> N38
+    N39 --> N40
+    N40 --> N47
+    N40 --> N37
+    N40 --> N35
+    N41 --> N47
+    N42 --> N47
+    N43 --> N47
+    N32 --> N47
+    N33 --> N47
 ```
 
 ---
@@ -13077,15 +13092,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 846    |
+| Total TypeScript Files  | 847    |
 | Total Modules           | 70     |
-| Total Lines of Code     | 158032 |
-| Total Exports           | 4099   |
-| Total Re-exports        | 1204   |
+| Total Lines of Code     | 155569 |
+| Total Exports           | 4101   |
+| Total Re-exports        | 1286   |
 | Total Classes           | 50     |
-| Total Interfaces        | 358    |
-| Total Functions         | 1461   |
-| Total Type Guards       | 135    |
+| Total Interfaces        | 351    |
+| Total Functions         | 1404   |
+| Total Type Guards       | 130    |
 | Total Enums             | 0      |
 | Type-only Imports       | 431    |
 | Runtime Circular Deps   | 0      |

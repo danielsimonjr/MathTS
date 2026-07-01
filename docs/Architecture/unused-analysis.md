@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 501
+- **Potentially unused exports**: 452
 
 ## Potentially Unused Files
 
@@ -67,6 +67,10 @@ These exports are not imported by any other file in the codebase:
 
 - `BigNumberConfig` (interface)
 - `RoundingMode` (type)
+
+### `core/src/types/dual-rules.ts`
+
+- `DualUnaryRuleName` (type)
 
 ### `core/src/types/interfaces.ts`
 
@@ -556,28 +560,6 @@ These exports are not imported by any other file in the codebase:
 - `noIndex` (function)
 - `noSubset` (function)
 
-### `functions/src/utils/number.ts`
-
-- `toEngineering` (function)
-- `toExponential` (function)
-- `toPrecision` (function)
-- `roundDigits` (function)
-- `SplitValue` (interface)
-- `NumberTypeConfig` (interface)
-- `NormalizedFormatOptions` (interface)
-
-### `functions/src/utils/object.ts`
-
-- `mapObject` (function)
-- `deepExtend` (function)
-- `deepFlatten` (function)
-- `canDefineProperty` (function)
-- `traverse` (function)
-- `isLegacyFactory` (function)
-- `get` (function)
-- `set` (function)
-- `pick` (function)
-
 ### `functions/src/utils/string.ts`
 
 - `stringify` (function)
@@ -782,46 +764,6 @@ These exports are not imported by any other file in the codebase:
 
 - `numberToMathML` (function)
 - `operatorPrecedence` (function)
-
-### `expression/src/utils/number.ts`
-
-- `splitNumber` (function)
-- `toEngineering` (function)
-- `toFixed` (function)
-- `toExponential` (function)
-- `toPrecision` (function)
-- `roundDigits` (function)
-- `digits` (function)
-- `nearlyEqual` (function)
-- `copysign` (function)
-- `SplitValue` (interface)
-- `NormalizedFormatOptions` (interface)
-- `sign` (constant)
-- `log2` (constant)
-- `log10` (constant)
-- `log1p` (constant)
-- `cbrt` (constant)
-- `expm1` (constant)
-- `acosh` (constant)
-- `asinh` (constant)
-- `atanh` (constant)
-- `cosh` (constant)
-- `sinh` (constant)
-- `tanh` (constant)
-
-### `expression/src/utils/object.ts`
-
-- `mapObject` (function)
-- `extend` (function)
-- `deepExtend` (function)
-- `deepFlatten` (function)
-- `canDefineProperty` (function)
-- `lazy` (function)
-- `traverse` (function)
-- `isLegacyFactory` (function)
-- `get` (function)
-- `set` (function)
-- `pick` (function)
 
 ### `expression/src/utils/string.ts`
 

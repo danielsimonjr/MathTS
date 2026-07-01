@@ -309,15 +309,15 @@ See [typed-function documentation](https://github.com/josdejong/typed-function) 
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (80 exports).
+> `@danielsimonjr/mathts-core` (81 exports).
 
 ### Functions (32)
 
 `create`, `createFactory`, `createMathTSTyped`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `registerNativeTypes`, `typed`, `UnitParseError`
 
-### Constants & values (41)
+### Constants & values (42)
 
-`ALL_UNITS`, `BASE_UNITS`, `BEST_PREFIXES`, `BIGNUMBER_E`, `BIGNUMBER_LN10`, `BIGNUMBER_LN2`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_TEN`, `BIGNUMBER_ZERO`, `COMPLEX_NEG_ONE`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `DEFAULT_CONFIG`, `DERIVED_UNITS`, `DIMENSIONLESS`, `E`, `FRACTION_HALF`, `FRACTION_NEG_ONE`, `FRACTION_ONE`, `FRACTION_QUARTER`, `FRACTION_THIRD`, `FRACTION_ZERO`, `I`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `math`, `MATHTS_CONVERSIONS`, `MATHTS_TYPES`, `PHI`, `PI`, `registry`, `SI_PREFIXES`, `SQRT1_2`, `SQRT2`, `TAU`, `UNIT_ALIASES`, `VERSION`
+`ALL_UNITS`, `BASE_UNITS`, `BEST_PREFIXES`, `BIGNUMBER_E`, `BIGNUMBER_LN10`, `BIGNUMBER_LN2`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_TEN`, `BIGNUMBER_ZERO`, `COMPLEX_NEG_ONE`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `DEFAULT_CONFIG`, `DERIVED_UNITS`, `DIMENSIONLESS`, `DUAL_UNARY_RULES`, `E`, `FRACTION_HALF`, `FRACTION_NEG_ONE`, `FRACTION_ONE`, `FRACTION_QUARTER`, `FRACTION_THIRD`, `FRACTION_ZERO`, `I`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `math`, `MATHTS_CONVERSIONS`, `MATHTS_TYPES`, `PHI`, `PI`, `registry`, `SI_PREFIXES`, `SQRT1_2`, `SQRT2`, `TAU`, `UNIT_ALIASES`, `VERSION`
 
 ### Classes & types (7)
 

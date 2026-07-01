@@ -118,16 +118,25 @@ accelerated packages) once; every other package imports it so speedups propagate
 one thing to maintain (see memory `project-all-libraries-build-on-core`).
 
 - ✅ **autograd ↔ core `Dual`** — shared `DUAL_UNARY_RULES` table in core; both scalar `Dual`
-  and tensor `DualTensor` consume it; autograd's dead `core` dep now live.
-- ⬜ **tensor dead-`core`-dep** — real-valued, delegates linalg to matrix; either use core's
-  constants (`Math.PI` → core) or drop the unused declaration.
-- ⬜ **expression → core** — routes its local `utils/is.js` type guards + `utils/bignumber/`
-  through core instead of reimplementing (verify no cycle: `expression → core` is acyclic).
-- ⬜ **remaining findings** — from the cross-package duplication audit (matrix, functions
-  synced-mathjs mirror, workbook, compat, parallel). Work highest value / lowest risk first.
-- ⬜ **regen dep-graph once at sweep end** — each consolidation adds/moves a workspace edge
-  (e.g. autograd→core now real in source); batch a single `npm run docs:deps` when edges settle
-  rather than regenerating per commit.
+  and tensor `DualTensor` consume it; autograd's dead `core` dep now live. (47fc3b6)
+- ✅ **core `/internal` subpath** — `@danielsimonjr/mathts-core/internal` (2nd tsup entry) exposes
+  shared number/object utils without bloating core's main API; core reconciled to superset. (8553927)
+- ✅ **functions + expression `number.ts`/`object.ts` → core/internal** — thin re-export shims;
+  full suites green (functions 3087, expression 1980). (c07f324, 06cbc2c)
+- ❌ **`is.ts` — decided AGAINST consolidating.** Type guards are called in hot numerical loops;
+  V8 inlines package-local guards but NOT across a module boundary. A cross-module re-export shim
+  slowed the studentized-range/Tukey Simpson integration ~40% (tipped `gap-tukey.test.ts` past its
+  5s timeout). Guards are trivial 1-liners (low DRY value) vs a real perf cost → **keep per-package.**
+  Lesson: hot-path helpers must stay inlinable; only consolidate cold utilities.
+- ⬜ **`is.ts` alternative (optional):** if the DRY of is.ts is still wanted, the only perf-safe path
+  is `noExternal`-bundling core's guards inline into functions/expression (source stays single, built
+  bundle inlines). More build complexity; low priority given the guards' triviality.
+- ✅ **tensor — non-task.** Real-valued `Float64Array`; delegates linalg to matrix; uses `Math.*`
+  (the primitive). Reinvents nothing core provides; core dep is transitive-via-matrix.
+- ⬜ **remaining audit findings** (matrix, functions synced-mathjs mirror, workbook, compat, parallel):
+  mostly the same synced-util layer; apply the same rule — cold utils OK to consolidate, hot-path stays local.
+- ⬜ **regen dep-graph once at sweep end** — the `autograd → core` source edge is now real; run a single
+  `npm run docs:deps` (build:wasm first) when edges settle.
 
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
