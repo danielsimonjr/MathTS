@@ -14,7 +14,7 @@
  *
  * To cover a new package, add a row to TARGETS.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -267,8 +267,10 @@ function embedMarkdown(htmlRaw, md) {
 
 // --- Build the desired content for every tracked doc file ------------------------
 const jobs = []; // { file, prev, next, label, isMd }
+let functionsSurface = null; // runtime dist Object.keys of the functions package
 for (const t of TARGETS) {
   const mod = await import(pathToFileURL(resolve(REPO, t.pkg, 'dist', 'index.js')).href);
+  if (t.pkg === 'functions') functionsSurface = Object.keys(mod);
   // Packages with a curated reference doc (functions) group their index by
   // mathematical domain, derived from that doc's `##` sections + DOMAIN_SUPPLEMENT.
   const domains = t.refDoc
@@ -291,12 +293,36 @@ for (const t of TARGETS) {
   }
 }
 
+// --- Cross-validate the shipped functions surface against the dep-graph's
+// independent static-source inventory. A name in the runtime `dist` with no source
+// origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
+// accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
+// absent the reconciliation is skipped (not failed) so this check stays self-contained.
+const SURFACES = resolve(REPO, 'docs', 'Architecture', 'package-export-surfaces.json');
+let reconcile = { skipped: true, orphans: [] };
+if (functionsSurface && existsSync(SURFACES)) {
+  const { surfaces } = JSON.parse(readFileSync(SURFACES, 'utf8'));
+  const source = new Set(surfaces?.functions ?? []);
+  reconcile = {
+    skipped: false,
+    orphans: functionsSurface.filter((n) => !source.has(n)).sort((a, b) => a.localeCompare(b)),
+  };
+}
+const reconcileMsg = reconcile.skipped
+  ? 'functions surface reconciliation: SKIPPED (run `npm run docs:deps` to emit package-export-surfaces.json).'
+  : reconcile.orphans.length
+    ? `functions surface reconciliation: ${reconcile.orphans.length} shipped export(s) have no ` +
+      `source origin in the dep-graph inventory — real drift, or run \`npm run docs:deps\` to ` +
+      `refresh: ${reconcile.orphans.join(', ')}`
+    : `functions surface reconciles: all ${functionsSurface?.length ?? 0} shipped exports have a source origin.`;
+
 const check = process.argv.includes('--check');
 const stale = jobs.filter((j) => norm(j.next) !== norm(j.prev));
 
 if (check) {
-  if (!stale.length) {
+  if (!stale.length && !reconcile.orphans.length) {
     console.log(`All ${jobs.length} generated doc blocks are up to date.`);
+    console.log(reconcileMsg);
     process.exit(0);
   }
   for (const j of stale) {
@@ -309,6 +335,7 @@ if (check) {
       if (missing.length) console.error(`  Undocumented names (${missing.length}): ${missing.join(', ')}`);
     }
   }
+  if (reconcile.orphans.length) console.error(reconcileMsg);
   process.exit(1);
 }
 
@@ -321,3 +348,4 @@ for (const j of jobs) {
   writeFileSync(j.file, eol === '\r\n' ? norm(j.next).replace(/\n/g, '\r\n') : norm(j.next));
   console.log(`Wrote ${j.label}.`);
 }
+console.log(reconcileMsg);

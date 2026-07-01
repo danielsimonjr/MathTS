@@ -801,12 +801,17 @@ function parseFile(filePath: string): ParsedFile {
   }
 
   // Parse exports
-  // Named exports: export { foo, bar }
+  // Named exports: `export { foo, bar as baz }` — record the *exported* name
+  // (the alias after `as`), not the local name, so the inventory reflects the
+  // public surface (`export { mapSlices as apply }` exports `apply`, not `mapSlices`).
   const namedExportRegex = /export\s*{\s*([^}]+)\s*}/g;
   while ((match = namedExportRegex.exec(code)) !== null) {
     const exports = match[1]
       .split(',')
-      .map((s) => cleanExportName(s.split(' as ')[0]))
+      .map((s) => {
+        const parts = s.split(' as ');
+        return cleanExportName(parts[parts.length - 1]);
+      })
       .filter(Boolean);
     result.exports.named.push(...exports);
   }
@@ -2407,7 +2412,8 @@ function analyzeWasmRuntime(rootDir: string): {
 function categorizeWasmExport(name: string): string {
   if (/^array_/.test(name)) return 'Array';
   if (/^matrix_/.test(name)) return 'Matrix';
-  if (/^complex/.test(name)) return /(_array|Array)/.test(name) ? 'Complex array' : 'Complex scalar';
+  if (/^complex/.test(name))
+    return /(_array|Array)/.test(name) ? 'Complex array' : 'Complex scalar';
   if (/^(fft|ifft|rfft|irfft)$/.test(name)) return 'FFT';
   return 'Scalar & special (f64)';
 }
@@ -2456,8 +2462,16 @@ function probeWasmBinary(rootDir: string): WasmBinaryProbe | null {
   }
   const fns = ex.filter((e) => e.kind === 'function');
   const cats = new Map<string, number>();
-  for (const f of fns) cats.set(categorizeWasmExport(f.name), (cats.get(categorizeWasmExport(f.name)) ?? 0) + 1);
-  const ORDER = ['Scalar & special (f64)', 'Array', 'Matrix', 'Complex scalar', 'Complex array', 'FFT'];
+  for (const f of fns)
+    cats.set(categorizeWasmExport(f.name), (cats.get(categorizeWasmExport(f.name)) ?? 0) + 1);
+  const ORDER = [
+    'Scalar & special (f64)',
+    'Array',
+    'Matrix',
+    'Complex scalar',
+    'Complex array',
+    'FFT',
+  ];
   const byCategory = [
     ...ORDER.filter((c) => cats.has(c)),
     ...[...cats.keys()].filter((c) => !ORDER.includes(c)).sort(),
@@ -2808,6 +2822,31 @@ async function main(): Promise<void> {
   console.log(
     `Written: docs/Architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`
   );
+
+  // Per-package source-export surface — the union of exported names across each
+  // workspace package's own source files (alias-corrected). This is the independent
+  // static-source ground truth that `generate-functions-reference.mjs --check`
+  // reconciles the runtime `dist` surface against (a shipped name with no source
+  // origin here is real drift). See docs/reference cross-validation.
+  const pkgOf = (moduleKey: string): string =>
+    moduleKey.startsWith('packages/')
+      ? moduleKey.split('/').slice(0, 2).join('/')
+      : moduleKey.split('/')[0];
+  const surfaceSets: Record<string, Set<string>> = {};
+  for (const [mkey, filesObj] of Object.entries(modules)) {
+    const pkg = pkgOf(mkey);
+    surfaceSets[pkg] ??= new Set<string>();
+    for (const f of Object.values(filesObj))
+      for (const n of f.exports.named) surfaceSets[pkg].add(n);
+  }
+  const surfaces: Record<string, string[]> = {};
+  for (const pkg of Object.keys(surfaceSets).sort())
+    surfaces[pkg] = [...surfaceSets[pkg]].sort((a, b) => a.localeCompare(b));
+  writeFileSync(
+    join(OUTPUT_DIR, 'package-export-surfaces.json'),
+    JSON.stringify({ generated: new Date().toISOString().split('T')[0], surfaces }, null, 2)
+  );
+  console.log('Written: docs/Architecture/package-export-surfaces.json');
 
   // Test coverage analysis (when --include-tests is specified)
   let testCoverage: TestCoverageAnalysis | null = null;

@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: "2026-07-01"
+  lastUpdated: '2026-07-01'
   totalFiles: 846
   totalModules: 70
-  totalExports: 4088
+  totalExports: 4099
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -85,7 +85,7 @@ modules:
             - create
           reExport: true
       exports:
-        - default
+        - typed
         - create
         - TYPED_FUNCTION_TYPE
         - isNumber
@@ -120,6 +120,7 @@ modules:
         - createRobustTypeDef
         - NoMatchingSignatureError
         - TypeConversionError
+        - default
       reExported:
         - default
         - create
@@ -420,7 +421,7 @@ modules:
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
         - Unit
-        - isUnit
+        - isUnitValue
         - DimensionMismatchError
         - UnitParseError
         - DIMENSIONLESS
@@ -453,6 +454,7 @@ modules:
         - isMatrix
         - isDenseMatrix
         - isSparseMatrix
+        - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
         - registerNativeTypes
@@ -1727,17 +1729,21 @@ modules:
         - isAtomicsAvailable
         - clearFeatureCache
         - getCachedFeatures
-        - fft
-        - ifft
-        - rfft
+        - wasmFFT
+        - wasmIFFT
+        - wasmRFFT
         - fftJS
-        - convolve
+        - wasmConvolve
         - powerSpectrum
         - magnitudeSpectrum
         - phaseSpectrum
         - isPowerOf2
         - nextPowerOf2
         - isWasmFFTAvailable
+        - fft
+        - ifft
+        - rfft
+        - convolve
       reExported:
         - detectWasmFeatures
         - isWasmAvailable
@@ -1862,31 +1868,31 @@ modules:
       internalDependencies:
         - file: ./types/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./backends/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./operations/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./typed-operations.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./parallel-matrix.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./types/index.js"
-        - "* from ./backends/index.js"
-        - "* from ./operations/index.js"
-        - "* from ./typed-operations.js"
-        - "* from ./parallel-matrix.js"
+        - '* from ./types/index.js'
+        - '* from ./backends/index.js'
+        - '* from ./operations/index.js'
+        - '* from ./typed-operations.js'
+        - '* from ./parallel-matrix.js'
     matrix/src/parallel-matrix.ts:
       description: Parallel-First Matrix Operations
       externalDependencies: []
@@ -2264,6 +2270,7 @@ modules:
         - eigvalsWasm
         - spectralRadiusWasm
         - svdWasm
+        - matrixPinv
         - PinvOptions
         - qr
         - QRResult
@@ -2553,10 +2560,10 @@ modules:
             - SliceSpec
         - file: ./dense/arithmetic.js
           imports:
-            - "* as arithmetic"
+            - '* as arithmetic'
         - file: ./dense/reduction.js
           imports:
-            - "* as reduction"
+            - '* as reduction'
       exports:
         - isDenseMatrix
         - DenseMatrix
@@ -3505,9 +3512,10 @@ modules:
           reExport: true
       exports:
         - isConstantNode
-        - isSymbolNode
+        - isVariableNode
         - isNumericNode
         - isConstantExpression
+        - isSymbolNode
       reExported:
         - isConstantNode
         - isSymbolNode
@@ -4589,7 +4597,7 @@ modules:
       constants:
         - createGcd
     functions/src/arithmetic/hypot.ts:
-      description: "Calculate the hypotenuse of a list with values. The hypotenuse is defined as:"
+      description: 'Calculate the hypotenuse of a list with values. The hypotenuse is defined as:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4998,7 +5006,7 @@ modules:
       constants:
         - createRound
     functions/src/arithmetic/sign.ts:
-      description: "Compute the sign of a value. The sign of a value x is:"
+      description: 'Compute the sign of a value. The sign of a value x is:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5782,15 +5790,15 @@ modules:
       internalDependencies:
         - file: ./typed/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./typed/cas.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./factories/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./typed/unit.js
           imports:
@@ -6037,9 +6045,9 @@ modules:
         - quaternionRotate
         - quaternionToRotationMatrix
       reExported:
-        - "* from ./typed/index.js"
-        - "* from ./typed/cas.js"
-        - "* from ./factories/index.js"
+        - '* from ./typed/index.js'
+        - '* from ./typed/cas.js'
+        - '* from ./factories/index.js'
         - to
         - toBest
         - evaluate
@@ -6292,7 +6300,7 @@ modules:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
         The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose
-        union is 
+        union is
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6549,7 +6557,7 @@ modules:
         - createTyped
   functions/error:
     functions/src/error/DimensionError.ts:
-      description: "Create a range error with the message:"
+      description: 'Create a range error with the message:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -6616,10 +6624,10 @@ modules:
             - factoryScope
         - file: ./index.js
           imports:
-            - "* as activatedFactories"
+            - '* as activatedFactories'
         - file: ../typed/index.js
           imports:
-            - "* as typedFns"
+            - '* as typedFns'
       exports:
         - parse
         - evaluate
@@ -7429,8 +7437,8 @@ modules:
             - createEfimovFactor
             - createFermiCoupling
       exports:
-        - mapSlices
-        - indexFn
+        - apply
+        - index
         - addScalar
         - multiplyScalar
         - subtractScalar
@@ -7512,6 +7520,7 @@ modules:
         - factory_equal
         - isInteger
         - concat
+        - mapSlices
         - resize
         - subset
         - inv
@@ -7601,6 +7610,7 @@ modules:
         - polynomialRoot
         - solveODE
         - zeta
+        - indexFn
         - eigs
         - lusolve
         - corr
@@ -7968,7 +7978,7 @@ modules:
         - factoryScope
   functions/geometry:
     functions/src/geometry/distance.ts:
-      description: "Calculates:"
+      description: 'Calculates:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9171,7 +9181,7 @@ modules:
       constants:
         - createSubset
     functions/src/matrix/trace.ts:
-      description: "Calculate the trace of a matrix: the sum of the elements on the main"
+      description: 'Calculate the trace of a matrix: the sum of the elements on the main'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9423,51 +9433,51 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./bitwise.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./combinations.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./constants.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./logical.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./relational.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./probability.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./utils.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./arithmetic.js"
-        - "* from ./bitwise.js"
-        - "* from ./combinations.js"
-        - "* from ./constants.js"
-        - "* from ./logical.js"
-        - "* from ./relational.js"
-        - "* from ./probability.js"
-        - "* from ./trigonometry.js"
-        - "* from ./utils.js"
+        - '* from ./arithmetic.js'
+        - '* from ./bitwise.js'
+        - '* from ./combinations.js'
+        - '* from ./constants.js'
+        - '* from ./logical.js'
+        - '* from ./relational.js'
+        - '* from ./probability.js'
+        - '* from ./trigonometry.js'
+        - '* from ./utils.js'
     functions/src/plain/number/logical.ts:
       description: logical module
       externalDependencies: []
@@ -9484,7 +9494,7 @@ modules:
         - xorNumber
         - andNumber
     functions/src/plain/number/probability.ts:
-      description: "TODO: comment on the variables g and p"
+      description: 'TODO: comment on the variables g and p'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10395,7 +10405,7 @@ modules:
       constants:
         - createSetCartesian
     functions/src/set/setDifference.ts:
-      description: "Create the difference of two (multi)sets: every element of set1, that is not the element of set2."
+      description: 'Create the difference of two (multi)sets: every element of set1, that is not the element of set2.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -12080,7 +12090,7 @@ modules:
       constants:
         - createSpaClass
     functions/src/type/matrix/types.ts:
-      description: "Type Philosophy:"
+      description: 'Type Philosophy:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -12720,7 +12730,7 @@ modules:
         - UnitInstance
         - UnitConstructor
     functions/src/type/unit/Unit.ts:
-      description: "A unit can be constructed in the following ways:"
+      description: 'A unit can be constructed in the following ways:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13506,107 +13516,107 @@ modules:
             - typedUnit
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./statistics.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./signal.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./bitwise.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./logical.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./complex.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./set.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./special.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./fused.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./distributions.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./geometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./algebra.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./integration.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./interpolation.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./numeric.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./combinatorics.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./graph.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./dist-objects.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./hypothesis.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./matrix-ops.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./gpu.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./relational.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./string.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./probability.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./unit.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./arithmetic.js
           imports:
@@ -13691,32 +13701,32 @@ modules:
         - typedUnit
         - typedFunctions
       reExported:
-        - "* from ./arithmetic.js"
-        - "* from ./trigonometry.js"
-        - "* from ./statistics.js"
-        - "* from ./signal.js"
-        - "* from ./bitwise.js"
-        - "* from ./logical.js"
-        - "* from ./complex.js"
-        - "* from ./set.js"
-        - "* from ./special.js"
-        - "* from ./fused.js"
-        - "* from ./distributions.js"
-        - "* from ./geometry.js"
-        - "* from ./algebra.js"
-        - "* from ./integration.js"
-        - "* from ./interpolation.js"
-        - "* from ./numeric.js"
-        - "* from ./combinatorics.js"
-        - "* from ./graph.js"
-        - "* from ./dist-objects.js"
-        - "* from ./hypothesis.js"
-        - "* from ./matrix-ops.js"
-        - "* from ./gpu.js"
-        - "* from ./relational.js"
-        - "* from ./string.js"
-        - "* from ./probability.js"
-        - "* from ./unit.js"
+        - '* from ./arithmetic.js'
+        - '* from ./trigonometry.js'
+        - '* from ./statistics.js'
+        - '* from ./signal.js'
+        - '* from ./bitwise.js'
+        - '* from ./logical.js'
+        - '* from ./complex.js'
+        - '* from ./set.js'
+        - '* from ./special.js'
+        - '* from ./fused.js'
+        - '* from ./distributions.js'
+        - '* from ./geometry.js'
+        - '* from ./algebra.js'
+        - '* from ./integration.js'
+        - '* from ./interpolation.js'
+        - '* from ./numeric.js'
+        - '* from ./combinatorics.js'
+        - '* from ./graph.js'
+        - '* from ./dist-objects.js'
+        - '* from ./hypothesis.js'
+        - '* from ./matrix-ops.js'
+        - '* from ./gpu.js'
+        - '* from ./relational.js'
+        - '* from ./string.js'
+        - '* from ./probability.js'
+        - '* from ./unit.js'
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -14831,7 +14841,7 @@ modules:
       constants:
         - createHasNumericValue
     functions/src/utils/is.ts:
-      description: "Test whether a value is a collection: an Array or Matrix"
+      description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -15042,7 +15052,7 @@ modules:
       constants:
         - createIsNaN
     functions/src/utils/isNegative.ts:
-      description: "Test whether a value is negative: smaller than zero."
+      description: 'Test whether a value is negative: smaller than zero.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15097,7 +15107,7 @@ modules:
       constants:
         - createIsNumeric
     functions/src/utils/isPositive.ts:
-      description: "Test whether a value is positive: larger than zero."
+      description: 'Test whether a value is positive: larger than zero.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15129,7 +15139,7 @@ modules:
       constants:
         - createIsPositive
     functions/src/utils/isPrime.ts:
-      description: "Test whether a value is prime: has no divisors other than itself and one."
+      description: 'Test whether a value is prime: has no divisors other than itself and one.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15309,7 +15319,7 @@ modules:
         - sinh
         - tanh
     functions/src/utils/numeric.ts:
-      description: "Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction."
+      description: 'Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15507,7 +15517,7 @@ modules:
       constants:
         - WASM_BITWISE_THRESHOLD
     functions/src/wasm/bridges/common.ts:
-      description: "Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,"
+      description: 'Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19019,7 +19029,7 @@ modules:
         - typeOfDocs
   expression/error:
     expression/src/error/DimensionError.ts:
-      description: "Create a range error with the message:"
+      description: 'Create a range error with the message:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -19134,35 +19144,35 @@ modules:
       internalDependencies:
         - file: ./types.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./keywords.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./operators.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./parse.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./Parser.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./Help.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./compiler/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./evaluator/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./function/parser.js
           imports:
@@ -19267,14 +19277,14 @@ modules:
         - createRelationalNode
         - createSymbolNode
       reExported:
-        - "* from ./types.js"
-        - "* from ./keywords.js"
-        - "* from ./operators.js"
-        - "* from ./parse.js"
-        - "* from ./Parser.js"
-        - "* from ./Help.js"
-        - "* from ./compiler/index.js"
-        - "* from ./evaluator/index.js"
+        - '* from ./types.js'
+        - '* from ./keywords.js'
+        - '* from ./operators.js'
+        - '* from ./parse.js'
+        - '* from ./Parser.js'
+        - '* from ./Help.js'
+        - '* from ./compiler/index.js'
+        - '* from ./evaluator/index.js'
         - createParser
         - embeddedDocs
         - mathMLDocument
@@ -19872,7 +19882,7 @@ modules:
       constants:
         - createSymbolNode
     expression/src/node/utils/access.ts:
-      description: "Retrieve part of an object:"
+      description: 'Retrieve part of an object:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19887,7 +19897,7 @@ modules:
       functions:
         - accessFactory
     expression/src/node/utils/assign.ts:
-      description: "Replace part of an object:"
+      description: 'Replace part of an object:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -20113,7 +20123,7 @@ modules:
         - isOptionalDependency
         - stripOptionalNotation
     expression/src/utils/is.ts:
-      description: "Test whether a value is a collection: an Array or Matrix"
+      description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -20240,7 +20250,7 @@ modules:
       constants:
         - isArray
     expression/src/utils/latex.ts:
-      description: "@ts-expect-error - escape-latex may not have type declarations"
+      description: '@ts-expect-error - escape-latex may not have type declarations'
       externalDependencies:
         - package: escape-latex
           imports:
@@ -21675,7 +21685,7 @@ modules:
         - chunkArray
         - mergeFloat64Chunks
         - mergeArrayChunks
-        - shouldParallelize
+        - shouldChunkParallelize
         - partitionRange
         - partition2D
         - ChunkOptions
@@ -21683,6 +21693,7 @@ modules:
         - ChunkInfo
         - ThresholdDispatcher
         - thresholdDispatcher
+        - shouldParallelize
         - dispatch
         - calculateChunks
         - DEFAULT_THRESHOLDS
@@ -22074,7 +22085,7 @@ modules:
             - CellPosition
           typeOnly: true
       exports:
-        - CODE
+        - JSON_RPC_CODES
         - handleRequest
       interfaces:
         - JsonRpcRequest
@@ -22116,7 +22127,7 @@ modules:
             - writeFileAtomic
         - file: ./edit
           imports:
-            - "* as edit"
+            - '* as edit'
       exports:
         - Session
       classes:
@@ -22158,7 +22169,7 @@ modules:
         - assertNoPollution
   assembly/algebra:
     assembly/src/algebra/decomposition.ts:
-      description: "Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant."
+      description: 'Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -23389,7 +23400,7 @@ modules:
         - divided_difference_f64
   assembly/ops:
     assembly/src/ops/approx.ts:
-      description: "Rational approximation — AssemblyScript fallback: partial-fraction"
+      description: 'Rational approximation — AssemblyScript fallback: partial-fraction'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -23714,7 +23725,7 @@ modules:
         - rfft
         - powerSpectrum
     assembly/src/ops/linalg.ts:
-      description: "Extra linear-algebra kernels — AssemblyScript fallback: reduced row"
+      description: 'Extra linear-algebra kernels — AssemblyScript fallback: reduced row'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -23843,7 +23854,7 @@ modules:
         - integerDigits
         - chineseRemainder
     assembly/src/ops/optimization.ts:
-      description: "Optimization kernels — AssemblyScript fallback: linear programming"
+      description: 'Optimization kernels — AssemblyScript fallback: linear programming'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -24100,7 +24111,7 @@ modules:
             - Chain
         - file: ./shims.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports:
         - Complex
@@ -24121,7 +24132,7 @@ modules:
         - all
         - create
       reExported:
-        - "* from ./shims.js"
+        - '* from ./shims.js'
         - Complex
         - Fraction
         - BigNumber
@@ -25278,7 +25289,7 @@ statistics:
   totalTypeScriptFiles: 846
   totalModules: 70
   totalLinesOfCode: 158032
-  totalExports: 4088
+  totalExports: 4099
   totalClasses: 50
   totalInterfaces: 358
   totalFunctions: 1461

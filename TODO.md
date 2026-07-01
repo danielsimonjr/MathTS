@@ -96,6 +96,13 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > `.wasm` via `WebAssembly.Module.exports()` and emits a "WASM binary exports" section
 > into `wasm-pairing.md`; §6a references it. Run `npm run build:wasm` before
 > `npm run docs:deps` so the binary exists to probe (graceful "not built" note otherwise).
+> **Functions doc surface cross-validated (2026-07-01):** the two independent
+> "what-exports-exist" derivations (functions.md's runtime `dist` `Object.keys` vs the
+> dep-graph's static source AST) now reconcile. Fixed an aliased-export blind spot in
+> `create-dependency-graph` (`export { X as Y }` recorded `X`, now records `Y`); the tool
+> emits `package-export-surfaces.json`; `docs:functions:check` fails if any shipped export
+> lacks a source origin (first run clean: 828/828). Run `npm run docs:deps` alongside
+> `npm run docs:functions` to keep both in sync.
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

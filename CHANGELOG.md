@@ -156,6 +156,30 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — cross-validate the functions doc surface against the dep-graph (two independent tools, one truth)
+
+The functions docs (runtime `Object.keys(functions/dist/index.js)`) and the dependency
+graph (static source AST) independently derive "what exports exist" but never checked
+each other. Wired them together:
+
+- **Fixed an aliased-export blind spot in `create-dependency-graph`.** Its named-export
+  regex recorded the _local_ name, so `export { mapSlices as apply, indexFn as index }`
+  was logged as `mapSlices`/`indexFn`, not the shipped `apply`/`index`. Now it records
+  the exported (alias) name — improving export accuracy across every package's inventory
+  (this was surfaced precisely by the reconcile below flagging `apply`/`index` as the
+  only two shipped names with no source origin).
+- **The dep-graph tool now emits `docs/Architecture/package-export-surfaces.json`** — the
+  per-package union of source export names (the independent static-source ground truth).
+- **`docs:functions:check` now reconciles** the shipped functions surface against that
+  inventory: every shipped runtime export must have a source origin. A name in `dist`
+  with none is real drift (stale dist, an accidental export) and **fails the check**
+  (exit 1, names the orphan); it degrades gracefully if the surfaces file is absent.
+  First run is clean: **all 828 shipped exports reconcile.** Verified the fail path
+  (a simulated orphan → exit 1) and the pass path.
+
+To keep both in sync after changing the functions surface, run `npm run docs:deps`
+(refresh the surfaces) alongside `npm run docs:functions`.
+
 ### Changed (2026-07-01) — drift-guard the WASM binary export counts (generated, not hand-maintained)
 
 `ARCHITECTURE.md` §6a hand-carried the AssemblyScript binary's export counts (318
