@@ -24,6 +24,9 @@ import {
   detrend,
   linearRegression,
   kmeans,
+  butter,
+  firwin,
+  lfilterZi,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -239,5 +242,28 @@ describe('clustering-extra — validation & convergence signal', () => {
     expect(r.converged).toBe(true); // was undefined — no signal
     expect(r.iterations).toBeGreaterThanOrEqual(1);
     expect(r.iterations).toBeLessThanOrEqual(100);
+  });
+});
+
+describe('signal-filter-extra — degenerate input guards', () => {
+  it('butter validates order N and cutoff Wn (0 < Wn < 1)', () => {
+    expect(() => butter(0, 0.25)).toThrow(/positive integer|order/i);
+    expect(() => butter(2, 0)).toThrow(/Wn/i);
+    expect(() => butter(2, 1)).toThrow(/Wn/i);
+    expect(() => butter(2, 1.5)).toThrow(/Wn/i);
+    const { b, a } = butter(2, 0.25); // happy path
+    expect(b.every(Number.isFinite)).toBe(true);
+    expect(a[0]).toBeCloseTo(1, 6);
+  });
+
+  it('firwin validates numtaps and rejects a degenerate (zero-sum) design', () => {
+    expect(() => firwin(1, 0.5)).toThrow(/numtaps|>= 2/i);
+    expect(() => firwin(5, 0)).toThrow(/degenerate|sum/i); // cutoff 0 → all taps 0 → 0/0
+    expect(firwin(5, 0.5).length).toBe(5); // happy path
+  });
+
+  it('lfilterZi gives a clear error for a filter with a pole at z=1', () => {
+    // a = [1, -1] is a pure accumulator: (I − Aᵀ) is singular.
+    expect(() => lfilterZi([1], [1, -1])).toThrow(/singular|pole|z=1|undefined/i);
   });
 });

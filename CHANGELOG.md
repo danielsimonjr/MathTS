@@ -134,6 +134,13 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   from one that hit `maxIter` still moving; `kmeans` validates empty `data` (was a
   cryptic `TypeError` on `data[0]`) and rejects non-integer / `<1` `k` (was a silent
   single-cluster result).
+- **`functions/src/signal-filter-extra.ts`**: `butter` validates the order (`N≥1`)
+  and cutoff (`0<Wn<1`) — at `Wn=1`, `tan(π/2)≈1.6e16` (not `Infinity`) produced
+  finite-but-nonsense coefficients silently, and `Wn>1` gave plausible-looking wholly
+  wrong ones; `firwin` requires `numtaps≥2` (was `2πn/0=NaN` taps) and throws on a
+  degenerate zero-sum design (`cutoff≈0` → `0/0`); `lfilterZi` reports a clear
+  pole-at-`z=1` / non-finite-steady-state error instead of leaking `inv`'s cryptic
+  "determinant is zero" when `(I−Aᵀ)` is singular.
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

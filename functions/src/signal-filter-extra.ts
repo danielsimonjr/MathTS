@@ -21,6 +21,8 @@ const sinc = (x: number): number => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math
  * default window. `cutoff` is normalized to Nyquist (1 = Nyquist).
  */
 export function firwin(numtaps: number, cutoff: number): number[] {
+  if (!Number.isInteger(numtaps) || numtaps < 2)
+    throw new Error('firwin: numtaps must be an integer >= 2');
   const M = numtaps - 1;
   const h = new Array<number>(numtaps);
   for (let n = 0; n <= M; n++) {
@@ -28,6 +30,8 @@ export function firwin(numtaps: number, cutoff: number): number[] {
     h[n] = cutoff * sinc(cutoff * (n - M / 2)) * w;
   }
   const s = h.reduce((a, b) => a + b, 0);
+  if (Math.abs(s) < 1e-12)
+    throw new Error('firwin: degenerate design — taps sum to ~0 (cutoff at/near 0)');
   return h.map((v) => v / s); // scale to unit gain at DC
 }
 
@@ -84,8 +88,19 @@ export function lfilterZi(b: Vec, a: Vec): number[] {
     Array.from({ length: n - 1 }, (_, j) => (i === j ? 1 : 0) - C[j][i])
   ); // I − Aᵀ
   const B = Array.from({ length: n - 1 }, (_, i) => bb[i + 1] - aa[i + 1] * bb[0]);
-  const Minv = _inv(M);
-  return Minv.map((row) => row.reduce((s, v, k) => s + v * B[k], 0));
+  let Minv: number[][];
+  try {
+    Minv = _inv(M);
+  } catch {
+    // (I − Aᵀ) is singular ⇔ the denominator has a root at z = 1 (a pure integrator /
+    // marginally-stable filter); the steady state is undefined. Fail with a clear message
+    // instead of leaking inv's cryptic "determinant is zero".
+    throw new Error('lfilterZi: filter has a pole at z=1 (singular I − Aᵀ); steady-state zi is undefined');
+  }
+  const zi = Minv.map((row) => row.reduce((s, v, k) => s + v * B[k], 0));
+  if (zi.some((v) => !Number.isFinite(v)))
+    throw new Error('lfilterZi: non-finite steady state (unstable or marginally-stable filter)');
+  return zi;
 }
 
 /**
@@ -143,6 +158,9 @@ function polyFromRoots(roots: Complex[]): number[] {
  * (`btype='low'`, the common case). Matches `scipy.signal.butter(N, Wn)`.
  */
 export function butter(N: number, Wn: number): { b: number[]; a: number[] } {
+  if (!Number.isInteger(N) || N < 1) throw new Error('butter: order N must be a positive integer');
+  if (!(Wn > 0 && Wn < 1))
+    throw new Error('butter: Wn must satisfy 0 < Wn < 1 (normalized to Nyquist)');
   // analog prototype poles (buttap): pₖ = −exp(jπ·mₖ/(2N)), mₖ = −N+1, −N+3, …, N−1
   const ap: Complex[] = [];
   for (let k = 0; k < N; k++) {
