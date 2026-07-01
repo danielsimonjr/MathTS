@@ -61,7 +61,9 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > guards clean, one dead `kruskalWallis` branch removed) + full re-verify (step 8:
 > 3086 tests / 28-28 typecheck / 0 eslint) done; `studentizedRangeQuantile` 60→45
 > bisections so the nested-Simpson solve fits the 5 s test timeout under load.
-> Next: patch release (functions).
+> **✅ Released `functions@0.8.0`** (minor) + dependents (arithmetic/trigonometry/
+> statistics/signal@0.1.9, compat@0.2.5); core unchanged, workbook held. Verified
+> live via `npm view`. Retroactive review + simplify pass complete.
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail
