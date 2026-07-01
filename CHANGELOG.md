@@ -116,6 +116,11 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   interpolation weights explode to ~1e15 — the path is genuinely undefined), while
   keeping the near-parallel → lerp fallback; `quaternionNormalize` throws on a
   zero-magnitude quaternion (was a `NaN` vector).
+- **`functions/src/timeseries-extra.ts`**: `acf` throws on a zero-variance
+  (constant) series (was `0/0=NaN` at every lag) and validates `nlags∈[0,n)` (was
+  silent trailing zeros for `nlags≥n`); `ewma` throws on empty input (was
+  `[undefined]`); `detrend('linear')` returns zeros — the exact-fit residual — for
+  `<2` points instead of a `NaN`-poisoned output.
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

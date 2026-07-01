@@ -35,6 +35,7 @@ export function movingAverage(x: Vec, w: number): number[] {
 export function ewma(x: Vec, alpha: number): number[] {
   const a = arr(x);
   if (alpha <= 0 || alpha > 1) throw new Error('ewma: alpha must be in (0, 1]');
+  if (a.length === 0) throw new Error('ewma: input series is empty');
   const out = new Array<number>(a.length);
   let prev = a[0];
   out[0] = prev;
@@ -56,6 +57,9 @@ export function detrend(x: Vec, type: 'linear' | 'constant' = 'linear'): number[
     const m = mean(a);
     return a.map((v) => v - m);
   }
+  // A linear fit needs ≥2 points; for 0 or 1 points the exact fit leaves zero
+  // residual (was slope = 0/0 = NaN poisoning the whole output).
+  if (n < 2) return a.map(() => 0);
   // linear least-squares fit y = slope·t + intercept, t = 0..n−1
   const t = Array.from({ length: n }, (_, i) => i);
   const mt = mean(t);
@@ -78,10 +82,13 @@ export function detrend(x: Vec, type: 'linear' | 'constant' = 'linear'): number[
 export function acf(x: Vec, nlags: number): number[] {
   const a = arr(x);
   const n = a.length;
+  if (nlags < 0 || nlags >= n)
+    throw new Error(`acf: nlags ${nlags} out of range for series length ${n}`);
   const m = mean(a);
   const dev = a.map((v) => v - m);
   let c0 = 0;
   for (let i = 0; i < n; i++) c0 += dev[i] * dev[i];
+  if (c0 === 0) throw new Error('acf: series has zero variance');
   const out = new Array<number>(nlags + 1);
   for (let k = 0; k <= nlags; k++) {
     let ck = 0;

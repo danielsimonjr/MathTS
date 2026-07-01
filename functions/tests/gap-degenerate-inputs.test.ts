@@ -19,6 +19,9 @@ import {
   companion,
   slerp,
   quaternionNormalize,
+  acf,
+  ewma,
+  detrend,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -165,5 +168,26 @@ describe('geometry-extra — degenerate input guards', () => {
   it('quaternionNormalize throws on a zero-magnitude quaternion', () => {
     expect(() => quaternionNormalize([0, 0, 0, 0])).toThrow(/zero-magnitude|zero/i);
     expect(quaternionNormalize([1, 1, 1, 1])[0]).toBeCloseTo(0.5, 10);
+  });
+});
+
+describe('timeseries-extra — degenerate input guards', () => {
+  it('acf throws on a zero-variance series and out-of-range nlags', () => {
+    expect(() => acf([5, 5, 5, 5], 2)).toThrow(/zero variance/i);
+    expect(() => acf([1, 2, 3], 3)).toThrow(/out of range|nlags/i); // nlags >= n
+    expect(() => acf([1, 2, 3], -1)).toThrow(/out of range|nlags/i);
+    expect(acf([1, 2, 3, 4, 5], 2)[0]).toBeCloseTo(1, 10); // acf[0] = 1
+  });
+
+  it('ewma throws on empty input', () => {
+    expect(() => ewma([], 0.5)).toThrow(/empty/i);
+    expect(ewma([1, 2, 3], 0.5)).toEqual([1, 1.5, 2.25]); // happy path
+  });
+
+  it('detrend linear returns zeros (no NaN) for <2 points', () => {
+    expect(detrend([5], 'linear')).toEqual([0]); // exact-fit residual, was [NaN]
+    expect(detrend([], 'linear')).toEqual([]);
+    const d = detrend([1, 2, 3, 4], 'linear'); // happy path removes the trend
+    d.forEach((v) => expect(Math.abs(v)).toBeLessThan(1e-10));
   });
 });
