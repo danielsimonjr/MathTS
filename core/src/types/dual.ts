@@ -9,8 +9,13 @@
  *     // sin(2)·1 + 2·cos(2)  — exact, no finite differences
  *
  * The derivative rules live here as methods so the typed-function signatures in
- * the `functions` package are one-liners (e.g. `Dual: (a) => a.sin()`).
+ * the `functions` package are one-liners (e.g. `Dual: (a) => a.sin()`). The
+ * elementary-function rules themselves come from the shared
+ * {@link DUAL_UNARY_RULES} table so the scalar `Dual` and autograd's tensor
+ * `DualTensor` apply exactly the same chain rules (no reinvention).
  */
+import { DUAL_UNARY_RULES, type DualUnaryRule } from './dual-rules.js';
+
 export class Dual {
   /** Function value (the real part). */
   readonly value: number;
@@ -61,42 +66,45 @@ export class Dual {
   }
 
   // --- elementary functions ------------------------------------------------
+  // Each applies the shared chain rule (value, deriv) ↦ (f(v), deriv·f′(v))
+  // using the canonical rule from `DUAL_UNARY_RULES`, so the scalar and tensor
+  // AD paths can never drift apart.
+  private unary(rule: DualUnaryRule): Dual {
+    const y = rule.primal(this.value);
+    return new Dual(y, this.deriv * rule.deriv(this.value, y));
+  }
   sin(): Dual {
-    return new Dual(Math.sin(this.value), this.deriv * Math.cos(this.value));
+    return this.unary(DUAL_UNARY_RULES.sin);
   }
   cos(): Dual {
-    return new Dual(Math.cos(this.value), -this.deriv * Math.sin(this.value));
+    return this.unary(DUAL_UNARY_RULES.cos);
   }
   tan(): Dual {
-    const c = Math.cos(this.value);
-    return new Dual(Math.tan(this.value), this.deriv / (c * c));
+    return this.unary(DUAL_UNARY_RULES.tan);
   }
   exp(): Dual {
-    const e = Math.exp(this.value);
-    return new Dual(e, this.deriv * e);
+    return this.unary(DUAL_UNARY_RULES.exp);
   }
   log(): Dual {
-    return new Dual(Math.log(this.value), this.deriv / this.value);
+    return this.unary(DUAL_UNARY_RULES.log);
   }
   sqrt(): Dual {
-    const s = Math.sqrt(this.value);
-    return new Dual(s, this.deriv / (2 * s));
+    return this.unary(DUAL_UNARY_RULES.sqrt);
   }
   square(): Dual {
-    return new Dual(this.value * this.value, 2 * this.value * this.deriv);
+    return this.unary(DUAL_UNARY_RULES.square);
   }
   abs(): Dual {
-    return new Dual(Math.abs(this.value), this.deriv * Math.sign(this.value));
+    return this.unary(DUAL_UNARY_RULES.abs);
   }
   sinh(): Dual {
-    return new Dual(Math.sinh(this.value), this.deriv * Math.cosh(this.value));
+    return this.unary(DUAL_UNARY_RULES.sinh);
   }
   cosh(): Dual {
-    return new Dual(Math.cosh(this.value), this.deriv * Math.sinh(this.value));
+    return this.unary(DUAL_UNARY_RULES.cosh);
   }
   tanh(): Dual {
-    const t = Math.tanh(this.value);
-    return new Dual(t, this.deriv * (1 - t * t));
+    return this.unary(DUAL_UNARY_RULES.tanh);
   }
 
   toString(): string {

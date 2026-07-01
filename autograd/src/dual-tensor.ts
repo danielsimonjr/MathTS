@@ -14,6 +14,7 @@
  * @packageDocumentation
  */
 import { Tensor } from '@danielsimonjr/mathts-tensor';
+import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
 
 export class DualTensor {
   readonly shape: ReadonlyArray<number>;
@@ -172,55 +173,60 @@ export class DualTensor {
     return new DualTensor(this.shape, p, t);
   }
 
+  /**
+   * Apply a shared elementary rule from core's `DUAL_UNARY_RULES` element-wise.
+   * Sourcing `primal`/`deriv` from the canonical table (rather than inline
+   * `Math.*`) keeps this AD path and the scalar `Dual` in lock-step and lets a
+   * future accelerated `primal` in the standard layer propagate here for free —
+   * the loop still calls plain scalar functions, so it stays allocation-free.
+   */
+  private _rule(rule: DualUnaryRule): DualTensor {
+    return this._unaryElementwise(rule.primal, rule.deriv);
+  }
+
   /** Exponential. f'(x) = eˣ = y. */
   exp(): DualTensor {
-    return this._unaryElementwise(Math.exp, (_x, y) => y);
+    return this._rule(DUAL_UNARY_RULES.exp);
   }
 
   /** Natural logarithm. f'(x) = 1/x. */
   log(): DualTensor {
-    return this._unaryElementwise(Math.log, (x) => 1 / x);
+    return this._rule(DUAL_UNARY_RULES.log);
   }
 
   /** Sine. f'(x) = cos(x). */
   sin(): DualTensor {
-    return this._unaryElementwise(Math.sin, (x) => Math.cos(x));
+    return this._rule(DUAL_UNARY_RULES.sin);
   }
 
   /** Cosine. f'(x) = −sin(x). */
   cos(): DualTensor {
-    return this._unaryElementwise(Math.cos, (x) => -Math.sin(x));
+    return this._rule(DUAL_UNARY_RULES.cos);
   }
 
   /** Tangent. f'(x) = 1/cos²(x). */
   tan(): DualTensor {
-    return this._unaryElementwise(Math.tan, (x) => 1 / (Math.cos(x) * Math.cos(x)));
+    return this._rule(DUAL_UNARY_RULES.tan);
   }
 
   /** Square root. f'(x) = 1/(2·y) where y = √x. */
   sqrt(): DualTensor {
-    return this._unaryElementwise(Math.sqrt, (_x, y) => 1 / (2 * y));
+    return this._rule(DUAL_UNARY_RULES.sqrt);
   }
 
   /** Square (x²). f'(x) = 2x. */
   square(): DualTensor {
-    return this._unaryElementwise(
-      (x) => x * x,
-      (x) => 2 * x
-    );
+    return this._rule(DUAL_UNARY_RULES.square);
   }
 
   /** Reciprocal (1/x). f'(x) = −1/x². */
   reciprocal(): DualTensor {
-    return this._unaryElementwise(
-      (x) => 1 / x,
-      (x) => -1 / (x * x)
-    );
+    return this._rule(DUAL_UNARY_RULES.reciprocal);
   }
 
   /** Absolute value. f'(x) = sign(x) (subgradient 0 at exact zero). */
   abs(): DualTensor {
-    return this._unaryElementwise(Math.abs, (x) => Math.sign(x));
+    return this._rule(DUAL_UNARY_RULES.abs);
   }
 
   /** Fixed-exponent power x^k. f'(x) = k·x^(k−1). */
@@ -233,77 +239,77 @@ export class DualTensor {
 
   /** Hyperbolic sine. f'(x) = cosh(x). */
   sinh(): DualTensor {
-    return this._unaryElementwise(Math.sinh, (x) => Math.cosh(x));
+    return this._rule(DUAL_UNARY_RULES.sinh);
   }
 
   /** Hyperbolic cosine. f'(x) = sinh(x). */
   cosh(): DualTensor {
-    return this._unaryElementwise(Math.cosh, (x) => Math.sinh(x));
+    return this._rule(DUAL_UNARY_RULES.cosh);
   }
 
   /** Hyperbolic tangent. f'(x) = 1 − tanh²(x) = 1 − y². */
   tanh(): DualTensor {
-    return this._unaryElementwise(Math.tanh, (_x, y) => 1 - y * y);
+    return this._rule(DUAL_UNARY_RULES.tanh);
   }
 
   /** Arcsine. f'(x) = 1/√(1 − x²). */
   asin(): DualTensor {
-    return this._unaryElementwise(Math.asin, (x) => 1 / Math.sqrt(1 - x * x));
+    return this._rule(DUAL_UNARY_RULES.asin);
   }
 
   /** Arccosine. f'(x) = −1/√(1 − x²). */
   acos(): DualTensor {
-    return this._unaryElementwise(Math.acos, (x) => -1 / Math.sqrt(1 - x * x));
+    return this._rule(DUAL_UNARY_RULES.acos);
   }
 
   /** Arctangent. f'(x) = 1/(1 + x²). */
   atan(): DualTensor {
-    return this._unaryElementwise(Math.atan, (x) => 1 / (1 + x * x));
+    return this._rule(DUAL_UNARY_RULES.atan);
   }
 
   /** Inverse hyperbolic sine. f'(x) = 1/√(x² + 1). */
   asinh(): DualTensor {
-    return this._unaryElementwise(Math.asinh, (x) => 1 / Math.sqrt(x * x + 1));
+    return this._rule(DUAL_UNARY_RULES.asinh);
   }
 
   /** Inverse hyperbolic cosine (x ≥ 1). f'(x) = 1/√(x² − 1). */
   acosh(): DualTensor {
-    return this._unaryElementwise(Math.acosh, (x) => 1 / Math.sqrt(x * x - 1));
+    return this._rule(DUAL_UNARY_RULES.acosh);
   }
 
   /** Inverse hyperbolic tangent (|x| < 1). f'(x) = 1/(1 − x²). */
   atanh(): DualTensor {
-    return this._unaryElementwise(Math.atanh, (x) => 1 / (1 - x * x));
+    return this._rule(DUAL_UNARY_RULES.atanh);
   }
 
   /** Base-2 logarithm. f'(x) = 1/(x·ln2). */
   log2(): DualTensor {
-    return this._unaryElementwise(Math.log2, (x) => 1 / (x * Math.LN2));
+    return this._rule(DUAL_UNARY_RULES.log2);
   }
 
   /** Base-10 logarithm. f'(x) = 1/(x·ln10). */
   log10(): DualTensor {
-    return this._unaryElementwise(Math.log10, (x) => 1 / (x * Math.LN10));
+    return this._rule(DUAL_UNARY_RULES.log10);
   }
 
   /** log(1 + x). f'(x) = 1/(1 + x). */
   log1p(): DualTensor {
-    return this._unaryElementwise(Math.log1p, (x) => 1 / (1 + x));
+    return this._rule(DUAL_UNARY_RULES.log1p);
   }
 
   /** exp(x) − 1. f'(x) = eˣ = y + 1. */
   expm1(): DualTensor {
-    return this._unaryElementwise(Math.expm1, (_x, y) => y + 1);
+    return this._rule(DUAL_UNARY_RULES.expm1);
   }
 
   /** Cube root. f'(x) = 1/(3·y²) where y = x^(1/3) (→∞ at x = 0). */
   cbrt(): DualTensor {
-    return this._unaryElementwise(Math.cbrt, (_x, y) => 1 / (3 * y * y));
+    return this._rule(DUAL_UNARY_RULES.cbrt);
   }
 
   /** Sign (−1/0/+1). f'(x) = 0 almost everywhere. */
   sign(): DualTensor {
-    return this._unaryElementwise(Math.sign, () => 0);
+    return this._rule(DUAL_UNARY_RULES.sign);
   }
 
   /**

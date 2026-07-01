@@ -86,7 +86,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > the doc commit message).
 > **Architecture docs refreshed (2026-07-01):** ran `npm run docs:deps` and reconciled
 > every hand-written `docs/Architecture/` doc (ARCHITECTURE/OVERVIEW/API/DATAFLOW/
-> WASM*ACCELERATION/COVERAGE_POLICY) to the generated 2026-07-01 reports — 846 files /
+> WASM\*ACCELERATION/COVERAGE_POLICY) to the generated 2026-07-01 reports — 846 files /
 > 158,032 LOC / 4,088 exports / 0 runtime cycles; dormant-mirror framing removed;
 > functions 828 exports; WASM 39/52/127 of 218; coverage 35.8% raw / 97.5% effective.
 > All figures verified vs the reports / package.json / fresh test re-runs.
@@ -110,6 +110,25 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > (serialize the field + render a Workspace block); now 64/846 files show them.
 > Investigation finding: tensor reuses matrix decompositions, autograd builds on tensor —
 > not reinventing; the open item is B8 (element-wise/AD not on the WASM/functions layer).
+
+### "All libraries build on core" consolidation sweep (started 2026-07-01)
+
+Standing principle: keep the fast/correct implementation in the standard layer (core + its
+accelerated packages) once; every other package imports it so speedups propagate and there's
+one thing to maintain (see memory `project-all-libraries-build-on-core`).
+
+- ✅ **autograd ↔ core `Dual`** — shared `DUAL_UNARY_RULES` table in core; both scalar `Dual`
+  and tensor `DualTensor` consume it; autograd's dead `core` dep now live.
+- ⬜ **tensor dead-`core`-dep** — real-valued, delegates linalg to matrix; either use core's
+  constants (`Math.PI` → core) or drop the unused declaration.
+- ⬜ **expression → core** — routes its local `utils/is.js` type guards + `utils/bignumber/`
+  through core instead of reimplementing (verify no cycle: `expression → core` is acyclic).
+- ⬜ **remaining findings** — from the cross-package duplication audit (matrix, functions
+  synced-mathjs mirror, workbook, compat, parallel). Work highest value / lowest risk first.
+- ⬜ **regen dep-graph once at sweep end** — each consolidation adds/moves a workspace edge
+  (e.g. autograd→core now real in source); batch a single `npm run docs:deps` when edges settle
+  rather than regenerating per commit.
+
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail
@@ -121,7 +140,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **Known limitation — `realSchur`/`qz` performance cliff (surfaced 2026-06-30).**
 > `realSchur` uses single-shift QR with only 1×1 deflation. For complex-conjugate or
 > equal-modulus spectra it cannot deflate the trailing 2×2 and burns its full 8000-iter
-> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns \_correct* quasi-triangular
+> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns \_correct\* quasi-triangular
 > output (verified: 3 complex-spectrum pencils reconstruct to 0 error). So this is a
 > perf issue, not the silent-wrong-output the review predicted. A Francis double-shift
 > with 2×2 block deflation (+ Hessenberg pre-reduction) would fix both the speed and give

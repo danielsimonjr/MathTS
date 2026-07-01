@@ -156,6 +156,22 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — consolidate forward-mode AD rules onto core (autograd stops reinventing them)
+
+First step of the standing "all libraries build on core" principle: keep the
+implementation in the standard layer once and let it propagate, without duplication.
+`autograd`'s `DualTensor` hardcoded the forward-mode AD chain rules
+(`_unaryElementwise(Math.sin, x => Math.cos(x))`, …), duplicating the identical rules in
+`core`'s scalar `Dual`. Extracted a single shared table `DUAL_UNARY_RULES`
+(`core/src/types/dual-rules.ts`, 24 elementary functions as `{primal, deriv}` pairs);
+both `core`'s `Dual` and `autograd`'s `DualTensor` now apply rules from it. This also
+**wires up autograd's previously-dead `core` dependency** (it declared `core` but never
+imported it). autograd's element-wise loop stays allocation-free (it still calls plain
+scalar functions), and the table is the propagation path — a future accelerated `primal`
+(WASM/SIMD batch kernel) in the standard layer flows to every consumer without changing
+the contract. Verified: new rule-table test with a finite-difference cross-check of all 24
+derivatives (4/4); autograd 258/258; `functions` forward-mode AD 16/16; typecheck 9/9.
+
 ### Fixed (2026-07-01) — dep-graph dropped cross-package (workspace) edges from its per-file output
 
 Investigating whether `tensor`/`autograd` reuse primitives or reinvent them surfaced a

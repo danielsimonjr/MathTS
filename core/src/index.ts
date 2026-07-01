@@ -33,6 +33,9 @@ export {
 
 // Dual numbers (forward-mode automatic differentiation)
 export { Dual, isDual } from './types/dual.js';
+// Shared elementary-function derivative table (used by Dual + autograd's DualTensor)
+export { DUAL_UNARY_RULES } from './types/dual-rules.js';
+export type { DualUnaryRule, DualUnaryRuleName } from './types/dual-rules.js';
 
 // Named mathematical constants (plain numbers): PI, E, TAU, PHI, SQRT2, …
 export { PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E } from './constants.js';
