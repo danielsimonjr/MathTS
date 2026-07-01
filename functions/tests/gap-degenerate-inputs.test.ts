@@ -22,6 +22,7 @@ import {
   acf,
   ewma,
   detrend,
+  linearRegression,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -189,5 +190,16 @@ describe('timeseries-extra — degenerate input guards', () => {
     expect(detrend([], 'linear')).toEqual([]);
     const d = detrend([1, 2, 3, 4], 'linear'); // happy path removes the trend
     d.forEach((v) => expect(Math.abs(v)).toBeLessThan(1e-10));
+  });
+});
+
+describe('regression-extra — degenerate input guards', () => {
+  it('linearRegression throws on <3 points and a zero-variance predictor', () => {
+    expect(() => linearRegression([1, 2], [3, 4])).toThrow(/at least 3|3 points/i);
+    expect(() => linearRegression([5, 5, 5], [1, 2, 3])).toThrow(/zero variance/i);
+    const r = linearRegression([1, 2, 3, 4], [2, 4, 6, 8]); // happy path: y = 2x
+    expect(r.slope).toBeCloseTo(2, 10);
+    expect(r.intercept).toBeCloseTo(0, 10);
+    expect(r.rValue).toBeCloseTo(1, 10);
   });
 });

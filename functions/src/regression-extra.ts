@@ -30,6 +30,8 @@ export function linearRegression(x: Vec, y: Vec): LinregressResult {
   const b = arr(y);
   const n = a.length;
   if (b.length !== n) throw new Error(`linearRegression: length mismatch ${n} vs ${b.length}`);
+  if (n < 3)
+    throw new Error('linearRegression: need at least 3 points for a slope significance test');
   const mx = mean(a);
   const my = mean(b);
   let sxx = 0;
@@ -42,6 +44,7 @@ export function linearRegression(x: Vec, y: Vec): LinregressResult {
     syy += dy * dy;
     sxy += dx * dy;
   }
+  if (sxx === 0) throw new Error('linearRegression: predictor x has zero variance');
   const slope = sxy / sxx;
   const intercept = my - slope * mx;
   const rValue = sxy / Math.sqrt(sxx * syy);

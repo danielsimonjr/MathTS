@@ -121,6 +121,9 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   silent trailing zeros for `nlags≥n`); `ewma` throws on empty input (was
   `[undefined]`); `detrend('linear')` returns zeros — the exact-fit residual — for
   `<2` points instead of a `NaN`-poisoned output.
+- **`functions/src/regression-extra.ts`**: `linearRegression` throws on `<3` points
+  (`df=n−2≤0` → `Infinity`/`NaN` std error) and on a zero-variance predictor
+  (`sxx=0` → `NaN` slope/`rValue`) — was a normal-looking result full of `NaN`.
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
