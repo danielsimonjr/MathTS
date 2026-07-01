@@ -1,16 +1,15 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-06-28
+**Generated**: 2026-07-01
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 483
+- **Potentially unused exports**: 501
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
-
 
 ## Potentially Unused Exports
 
@@ -211,6 +210,11 @@ These exports are not imported by any other file in the codebase:
 - `EinsumSpec` (interface)
 - `NestedArray` (type)
 
+### `autograd/src/grad.ts`
+
+- `ScalarFn` (type)
+- `NumericInput` (type)
+
 ### `functions/src/algebra/simplify/util.ts`
 
 - `OpNodeLike` (interface)
@@ -279,6 +283,10 @@ These exports are not imported by any other file in the codebase:
 - `name` (constant)
 - `dependencies` (constant)
 
+### `functions/src/clustering-extra.ts`
+
+- `KMeansResult` (interface)
+
 ### `functions/src/core/function/typed.ts`
 
 - `TypedSignatures` (type)
@@ -298,9 +306,28 @@ These exports are not imported by any other file in the codebase:
 - `isAssociativeWith` (function)
 - `properties` (constant)
 
+### `functions/src/grad-forward.ts`
+
+- `DualFn` (type)
+
+### `functions/src/hypothesis-extra.ts`
+
+- `FTestResult` (interface)
+- `JarqueBeraResult` (interface)
+- `KruskalResult` (interface)
+- `WilcoxonResult` (interface)
+- `FisherExactResult` (interface)
+- `TukeyComparison` (interface)
+
 ### `functions/src/matrix/expm.ts`
 
 - `Matrix` (interface)
+
+### `functions/src/matrix/native-accel.ts`
+
+- `isLargeNumericSquare` (function)
+- `isNumericSquare` (function)
+- `NATIVE_MATRIX_THRESHOLD` (constant)
 
 ### `functions/src/matrix/sqrtm.ts`
 
@@ -314,9 +341,18 @@ These exports are not imported by any other file in the codebase:
 - `Matrix` (interface)
 - `Config` (interface)
 
+### `functions/src/optimization-extra.ts`
+
+- `OptimizeResult` (interface)
+- `LMResult` (interface)
+
 ### `functions/src/probability/random.ts`
 
 - `createRandomNumber` (constant)
+
+### `functions/src/regression-extra.ts`
+
+- `LinregressResult` (interface)
 
 ### `functions/src/relational/compare.ts`
 
@@ -742,6 +778,11 @@ These exports are not imported by any other file in the codebase:
 - `assign` (function)
 - `isObjectWrappingMap` (function)
 
+### `expression/src/utils/mathml.ts`
+
+- `numberToMathML` (function)
+- `operatorPrecedence` (function)
+
 ### `expression/src/utils/number.ts`
 
 - `splitNumber` (function)
@@ -816,6 +857,10 @@ These exports are not imported by any other file in the codebase:
 
 - `RemoveResult` (interface)
 
+### `workbook/src/parser.ts`
+
+- `importWorkbook` (function)
+
 ### `workbook/src/rpc.ts`
 
 - `JsonRpcRequest` (interface)
@@ -829,7 +874,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `workbook/src/types.ts`
 
-- `WorkbookMetadata` (interface)
 - `ExecutionMode` (type)
 
 ### `assembly/src/types/complex.ts`
@@ -840,4 +884,3 @@ These exports are not imported by any other file in the codebase:
 - `COMPLEX_ONE` (constant)
 - `COMPLEX_I` (constant)
 - `COMPLEX_NEG_ONE` (constant)
-

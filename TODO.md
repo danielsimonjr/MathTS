@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-06-30
+Updated: 2026-07-01
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
@@ -84,6 +84,12 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > `.github/workflows/ci.yml` so drift fails CI is blocked by a workflow-edit security
 > guard — needs the maintainer to add the step (snippet in the 2026-07-01 CHANGELOG /
 > the doc commit message).
+> **Architecture docs refreshed (2026-07-01):** ran `npm run docs:deps` and reconciled
+> every hand-written `docs/Architecture/` doc (ARCHITECTURE/OVERVIEW/API/DATAFLOW/
+> WASM*ACCELERATION/COVERAGE_POLICY) to the generated 2026-07-01 reports — 846 files /
+> 158,032 LOC / 4,088 exports / 0 runtime cycles; dormant-mirror framing removed;
+> functions 828 exports; WASM 39/52/127 of 218; coverage 35.8% raw / 97.5% effective.
+> All figures verified vs the reports / package.json / fresh test re-runs.
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail
@@ -95,7 +101,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **Known limitation — `realSchur`/`qz` performance cliff (surfaced 2026-06-30).**
 > `realSchur` uses single-shift QR with only 1×1 deflation. For complex-conjugate or
 > equal-modulus spectra it cannot deflate the trailing 2×2 and burns its full 8000-iter
-> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns _correct_ quasi-triangular
+> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns \_correct* quasi-triangular
 > output (verified: 3 complex-spectrum pencils reconstruct to 0 error). So this is a
 > perf issue, not the silent-wrong-output the review predicted. A Francis double-shift
 > with 2×2 block deflation (+ Hessenberg pre-reduction) would fix both the speed and give

@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-06-26
+**Generated**: 2026-07-01
 
 ---
 
@@ -64,28 +64,28 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 `functions/src/index.ts` exports the typed layer (`functions/src/typed/`, 374+
 exports across 20 modules), the factory layer (`functions/src/factories/`), and
-the expression evaluator — roughly 672 exports total.
+the expression evaluator — roughly 828 exports total.
 
-### Arithmetic (54 exports)
+### Arithmetic (56 exports)
 
-| Group          | Functions                                                                                           |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| Basic          | `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`                                  |
-| Exponent/root  | `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1` |
-| Rounding       | `round`, `floor`, `ceil`, `fix`                                                                     |
-| Integer math   | `mod`, `gcd`, `lcm`, `xgcd`                                                                         |
-| Aggregation    | `abs`, `sign`, `norm`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`                        |
-| Hyperbolic     | `sinh`, `cosh`, `tanh`                                                                              |
-| Comparison     | `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`                                    |
-| Parallel utils | `shouldParallelize`, `getComputePool`                                                               |
-| Module         | `typedArithmetic`                                                                                   |
+| Group          | Functions                                                                                                      |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| Basic          | `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`                                             |
+| Exponent/root  | `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `sigmoid` |
+| Rounding       | `round`, `floor`, `ceil`, `fix`, `clamp`                                                                       |
+| Integer math   | `mod`, `gcd`, `lcm`, `xgcd`                                                                                    |
+| Aggregation    | `abs`, `sign`, `norm`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`                                   |
+| Hyperbolic     | `sinh`, `cosh`, `tanh`                                                                                         |
+| Comparison     | `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`                                               |
+| Parallel utils | `shouldParallelize`, `getComputePool`                                                                          |
+| Module         | `typedArithmetic`                                                                                              |
 
-### Trigonometry (20 exports)
+### Trigonometry (29 exports)
 
 `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`,
 `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
 
-### Statistics (25 exports)
+### Statistics (59 exports)
 
 All stat functions are parallel-first and return `Promise<ParallelResult<T>>` for array inputs.
 Variadic overloads (2–4 numbers) are synchronous.
@@ -94,33 +94,49 @@ Variadic overloads (2–4 numbers) are synchronous.
 `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`,
 `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`,
 `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`,
-`parallelStatHistogram`, `NormalizationType`, `typedStatistics`
+`parallelStatHistogram`, `parallelStatPercentile`, `NormalizationType`, `typedStatistics`
 
-(4 additional exports in v0.1.3+)
+Descriptive & time-series (gap-closure): `mean`, `median`, `mode`, `variance`,
+`std`, `sum`, `prod`, `min`, `max`, `quantileSeq`, `mad`, `corr`, `skewness`,
+`kurtosis`, `moment`, `cov`, `corrcoef`, `gmean`, `hmean`, `iqr`, `sem`, `zscore`,
+`rankdata`, `logsumexp`, `softmax`, `cumsum`, `cumprod`, `cummax`, `cummin`,
+`cumtrapz`, `movingAverage`, `ewma`, `detrend`, `acf`, `linearRegression`,
+`kmeans`, `spectralClustering`
 
-### Signal Processing (33 exports)
+### Signal Processing (44 exports)
 
 `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`,
 `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`,
 `autoCorrelation`, `groupDelay`, `unwrapPhase`, `stft`, window functions,
-and 20+ additional signal processing utilities. `typedSignal`
+FIR/IIR filtering: `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`;
+spectral estimation: `welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`,
+`chirpZTransform`; and 20+ additional signal processing utilities. `typedSignal`
 
-### Special Functions (29 exports)
+### Special Functions (42 exports)
 
 Higher-order mathematical functions not in standard mathjs.
 
 `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`,
 Legendre polynomials, Chebyshev polynomials, Laguerre polynomials, Riemann zeta,
-hypergeometric functions, and more. `typedSpecial`
+hypergeometric functions, Carlson elliptic integrals (`carlsonRC`, `carlsonRD`,
+`carlsonRF`, `carlsonRJ`), incomplete elliptic `ellipticEIncomplete`,
+`erfcScalar`, and more. `typedSpecial`
 
-### Distributions (11 exports)
+### Distributions (42 exports)
 
-Probability distribution functions (PDF, CDF, PMF).
+Probability distribution PDF/CDF/PMF/quantile and sampling functions.
 
-`normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`,
-`binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`
-
-(1 additional export in module)
+`normalPDF`, `normalCDF`, `normalQuantile`, `exponentialPDF`, `exponentialCDF`,
+`poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`,
+`jsDivergence`, `kldivergence`, `random`, `randomInt`, `pickRandom`, plus the
+full CDF/PDF/quantile surface for beta, gamma, chi-squared, F and Student-t
+(`betaCDF`/`betaPDF`/`betaQuantile`, `gammaCDF`/`gammaPDF`/`gammaQuantile`,
+`chiSquaredCDF`/`chiSquaredQuantile`, `fCDF`/`fQuantile`,
+`studentTCDF`/`studentTPDF`/`studentTQuantile`), the Cauchy/Laplace/logistic
+family (`cauchyCDF`/`cauchyPDF`/`cauchyQuantile`,
+`laplaceCDF`/`laplacePDF`/`laplaceQuantile`,
+`logisticCDF`/`logisticPDF`/`logisticQuantile`), `noncentralChi2PDF`, and the
+studentized range (`studentizedRangeCDF`, `studentizedRangeQuantile`).
 
 ### Integration (4 exports)
 
@@ -128,13 +144,14 @@ Numerical integration methods. All accept a callback `f: (x: number) => number`.
 
 `trapz`, `simpson`, `gaussQuad`, `romberg`
 
-### Interpolation (6 exports)
+### Interpolation (9 exports)
 
 Curve fitting and interpolation. Functions that return interpolant functions or fitted values.
 
-`linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`
+`linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`,
+`newtonInterp`, `chebyshevFit`, `legendreFit`
 
-### Combinatorics (21 exports)
+### Combinatorics (31 exports)
 
 Integer sequence and combinatorial functions.
 
@@ -142,16 +159,19 @@ Integer sequence and combinatorial functions.
 `partition`, Stirling numbers (first/second kind), Bell numbers, Catalan numbers,
 derangements, and more.
 
-### Geometry (31 exports)
+### Geometry (42 exports)
 
 2D and 3D geometric operations on number arrays.
 
 `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`,
 `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`,
 `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`,
-`intersectLines2D`, `intersectSegments2D`, Bezier curves, B-splines, Voronoi diagrams, and more.
+`intersectLines2D`, `intersectSegments2D`, `convexHull3D`, `haversine`, `slerp`,
+quaternion ops (`quaternionMultiply`, `quaternionRotate`, `quaternionNormalize`,
+`quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionToRotationMatrix`),
+Bezier curves, B-splines, Voronoi diagrams, and more.
 
-### Algebra (37 exports)
+### Algebra (46 exports)
 
 Polynomial and algebraic manipulation.
 
@@ -162,7 +182,7 @@ Polynomial and algebraic manipulation.
 `trigToExp`, `expToTrig`, `reduce`, `combine`, `complexExpand`, `normalForm`,
 `powerExpand`, `fullSimplify`, `eliminate`, `functionExpand`, `resultant`, `typedAlgebra`
 
-### CAS — Computer Algebra System (30 exports)
+### CAS — Computer Algebra System (36 exports)
 
 Symbolic calculus and computer algebra operations.
 
@@ -171,14 +191,16 @@ Symbolic calculus and computer algebra operations.
 `fourierSeries`, `zTransform`, `taylor`, `multivariateTaylor`, `series`,
 `seriesCoefficient`, `solve`, `implicitDiff`, `summation`, `symbolicProduct`,
 `assume`, `getAssumptions`, `clearAssumptions`, `asymptotic`, `groebnerBasis`,
-`minimalPolynomial`, `toRadicals`, `piecewise`, `odeGeneral`
+`minimalPolynomial`, `toRadicals`, `piecewise`, `odeGeneral`, `symbolicIntegral`,
+`inverseLaplaceTransform`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`
 
-### Graph Theory (8 exports)
+### Graph Theory (11 exports)
 
 Graph algorithms on adjacency matrix representations.
 
 `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`,
-`stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`
+`stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`,
+`pageRank`, `betweennessCentrality`, `eigenvectorCentrality`
 
 ### Distribution Objects (13 exports)
 
@@ -188,23 +210,26 @@ Statistical distribution factory functions returning objects with `pdf`, `cdf`, 
 `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`,
 `weibullDist`, `Distribution` (interface)
 
-### Hypothesis Tests (14 exports)
+### Hypothesis Tests (20 exports)
 
 Statistical hypothesis tests and multivariate analysis.
 
 `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`,
-`shapiroWilkTest`, `principalComponentAnalysis`, plus result interfaces:
+`shapiroWilkTest`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`,
+`tukeyHSD`, `principalComponentAnalysis`, plus result interfaces:
 `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`,
 `ShapiroWilkResult`, `PCAResult`
 
-### Numerical Methods (37 exports)
+### Numerical Methods (45 exports)
 
 Root-finding, optimization, linear systems, advanced interpolation, and curve fitting.
 
-`findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`,
-`nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`,
-`bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`,
-plus option interfaces: `FindRootOptions`, `MinimizeOptions`
+`findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `nelderMead`,
+`gradientDescent`, `levenbergMarquardt`, `leastSquares`, `nintegrate`, `simpsons`,
+`interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`,
+`rbfInterpolate`, `curvefit`, `expfit`, numerical differentiation `gradient`,
+`hessian`, `derivativeAt`, `gradientAt`, `valueAndDerivativeAt`, plus option
+interfaces: `FindRootOptions`, `MinimizeOptions`
 
 ---
 
@@ -390,12 +415,12 @@ the built `.wasm`.
 
 | Category                       | Function exports | Examples                                                           |
 | ------------------------------ | ---------------- | ------------------------------------------------------------------ |
-| Scalar f64                     | 79               | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`                          |
+| Scalar f64                     | 79               | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`                         |
 | Array ops                      | 54               | `array_add`, `array_dot`, `array_norm`, `array_sum`, `array_mean`  |
 | Matrix ops                     | 50               | `matrix_multiply`, `matrix_transpose`, `matrix_gemm`, `matrix_lu*` |
 | Complex scalar                 | 46               | `complex_add`, `complex_sin`, `complex_exp`, `complex_sqrt`        |
 | Complex array                  | 33               | `complex_array_add`, `complex_array_dot`, `complex_array_norm`     |
-| FFT                            | 2                | `fft`, `ifft`                                                       |
+| FFT                            | 2                | `fft`, `ifft`                                                      |
 | Special/poly/sort/signal/other | 54               | bessel/elliptic/carlson, `poly_mul`, `sort_f64`, window functions  |
 
 WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
@@ -404,16 +429,16 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 
 ## npm Scripts (WASM-related)
 
-| Script                  | Command                                            | Description                                          |
-| ----------------------- | -------------------------------------------------- | ---------------------------------------------------- |
-| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`    | Build the AssemblyScript WASM backend                |
-| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`       | AssemblyScript WASM tests                            |
-| `test:wasm:integration` | `vitest run tests/wasm/`                           | Cross-package WASM integration tests                |
-| `bench:wasm`            | `npx tsx tools/benchmark/wasm/run.ts`              | Full AssemblyScript-vs-JS benchmark suite            |
-| `bench:elementwise`     | `npx tsx tools/benchmark/wasm/elementwise.bench.ts`| Elementwise `array_<op>_ptr` kernels vs `Math.*`     |
-| `bench:special`         | `npx tsx tools/benchmark/wasm/special.bench.ts`    | Special-function kernels (bessel/lgamma/elliptic)    |
-| `bench:sort`            | `npx tsx tools/benchmark/wasm/sort.bench.ts`       | `sort_f64` introsort vs JS comparator sort           |
-| `bench:matrix`          | `npx tsx tools/benchmark/wasm/matrix.bench.ts`     | multiply / svd / eig / Welch-PSD (FFT) vs JS         |
+| Script                  | Command                                             | Description                                       |
+| ----------------------- | --------------------------------------------------- | ------------------------------------------------- |
+| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`     | Build the AssemblyScript WASM backend             |
+| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`        | AssemblyScript WASM tests                         |
+| `test:wasm:integration` | `vitest run tests/wasm/`                            | Cross-package WASM integration tests              |
+| `bench:wasm`            | `npx tsx tools/benchmark/wasm/run.ts`               | Full AssemblyScript-vs-JS benchmark suite         |
+| `bench:elementwise`     | `npx tsx tools/benchmark/wasm/elementwise.bench.ts` | Elementwise `array_<op>_ptr` kernels vs `Math.*`  |
+| `bench:special`         | `npx tsx tools/benchmark/wasm/special.bench.ts`     | Special-function kernels (bessel/lgamma/elliptic) |
+| `bench:sort`            | `npx tsx tools/benchmark/wasm/sort.bench.ts`        | `sort_f64` introsort vs JS comparator sort        |
+| `bench:matrix`          | `npx tsx tools/benchmark/wasm/matrix.bench.ts`      | multiply / svd / eig / Welch-PSD (FFT) vs JS      |
 
 The `tools/benchmark/wasm/` suite measures each AssemblyScript-accelerated path
 against its pure-JS fallback over a realistic full JS↔wasm round-trip (median of

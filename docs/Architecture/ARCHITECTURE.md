@@ -1,6 +1,6 @@
 # MathTS Architecture
 
-**Generated**: 2026-06-26
+**Generated**: 2026-07-01
 
 ## System Overview
 
@@ -9,18 +9,22 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package
 (`functions` emits its `.d.ts` tree via `tsc`). AssemblyScript (`assembly/`,
 the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
-- **555 reachable TypeScript files** (out of 1,459 total; 904 dormant synced from mathjs)
-- **148,610 lines of code** (reachable scope)
-- **3,464 total exports** (1,057 re-exports)
-- **253 test files** — 199 of 554 source files have direct (structural) test coverage
-  (35.9%); see the generated `TEST_COVERAGE.md`
+- **846 TypeScript files**, all reachable from package entry points (0 unused
+  files) — the dormant synced-from-mathjs mirror (455 files / ~58.6k LOC) was
+  deleted 2026-06-27, so there is now a single active graph, not a
+  reachable-vs-dormant split
+- **158,032 lines of code**
+- **4,088 total exports** (1,204 re-exports) — 50 classes, 358 interfaces, 1,461
+  functions, 135 type guards, 1,417 constants, 0 enums; 431 type-only imports
+- **320 test files** — 201 of 562 source files have direct (structural) test coverage
+  (35.8%); see the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** (2 type-only cycles remain, both in `matrix`)
 - **All 22 packages build, and all 21 TypeScript packages typecheck with 0
-  errors** under `tsc --noEmit`. (`functions` and the thin re-export packages use
-  `strict: false`; the core compute packages are strict. The 22nd package,
-  `assembly`, is AssemblyScript and is checked by `asc`.) `functions` now ships
-  TypeScript declarations (emitted via `tsc`); its formerly-noted ~700 type
-  errors were stale — the active graph is clean.
+  errors** under `tsc --noEmit`. Every package now compiles under `strict: true`
+  (`functions` and `expression` were the last holdouts, flipped 2026-06-27); no
+  package overrides `strict` to `false`. The 22nd package, `assembly`, is
+  AssemblyScript and is checked by `asc`. `functions` ships TypeScript
+  declarations (emitted via `tsc`); the active graph is clean.
 
 ## Package Dependency Graph
 
@@ -43,23 +47,23 @@ Focused re-export packages (leaf; each depends only on the package it re-exports
 
 ### Cross-Package Import Counts
 
-| Package   | Dependencies                                                                                                                                                                |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| core      | @danielsimonjr/mathts-core (1)                                                                                                                                              |
-| matrix    | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (3)                                                                                                          |
-| functions | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4)                                                                                                          |
-| parallel  | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1)                                                                                                    |
-| compat    | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
-| parser       | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
-| ast          | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
-| evaluator    | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
-| units        | @danielsimonjr/mathts-core (1)                                                                                                                                          |
-| numbers      | @danielsimonjr/mathts-core (1)                                                                                                                                          |
-| linalg       | @danielsimonjr/mathts-matrix (1)                                                                                                                                        |
-| arithmetic   | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
-| trigonometry | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
-| statistics   | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
-| signal       | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
+| Package      | Dependencies                                                                                                                                                                |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| core         | @danielsimonjr/mathts-core (1)                                                                                                                                              |
+| matrix       | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (3)                                                                                                          |
+| functions    | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4)                                                                                                          |
+| parallel     | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1)                                                                                                    |
+| compat       | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
+| parser       | @danielsimonjr/mathts-expression (1)                                                                                                                                        |
+| ast          | @danielsimonjr/mathts-expression (1)                                                                                                                                        |
+| evaluator    | @danielsimonjr/mathts-expression (1)                                                                                                                                        |
+| units        | @danielsimonjr/mathts-core (1)                                                                                                                                              |
+| numbers      | @danielsimonjr/mathts-core (1)                                                                                                                                              |
+| linalg       | @danielsimonjr/mathts-matrix (1)                                                                                                                                            |
+| arithmetic   | @danielsimonjr/mathts-functions (1)                                                                                                                                         |
+| trigonometry | @danielsimonjr/mathts-functions (1)                                                                                                                                         |
+| statistics   | @danielsimonjr/mathts-functions (1)                                                                                                                                         |
+| signal       | @danielsimonjr/mathts-functions (1)                                                                                                                                         |
 
 The 10 packages above are thin re-export entry points (one re-export each). The
 table omits other workspace packages (`tensor`, `autograd`, `workbook`, …) that
@@ -100,7 +104,7 @@ Three native numeric types with full method sets:
 | BigNumber | 96      | Arithmetic, comparison, rounding, **22 math methods** (sin, cos, exp, ln, etc. via Taylor series) |
 | Fraction  | 61      | Arithmetic, comparison, rounding, GCD/LCM                                                         |
 
-Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (230 total across codebase).
+Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (135 total across codebase).
 
 ### 2. Type Dispatch
 
@@ -113,17 +117,22 @@ DenseMatrix, SparseMatrix, Array.
 
 ### 3. Factory Pattern
 
-Two factory layers exist in the codebase:
+Two function layers coexist in `functions/`, both now wired into the single
+active graph reachable from `functions/src/index.ts`:
 
-| Layer                   | Location                    | Count                        | Status                |
-| ----------------------- | --------------------------- | ---------------------------- | --------------------- |
-| Native typed functions  | `functions/src/typed/`      | 20 files                     | Active, exported      |
-| Synced mathjs factories | `functions/src/<category>/` | 19 categories, 242 factories | Dormant, not exported |
+| Layer                      | Location                    | Status           |
+| -------------------------- | --------------------------- | ---------------- |
+| Native typed functions     | `functions/src/typed/`      | Active, exported |
+| Activated mathjs factories | `functions/src/<category>/` | Active, exported |
+
+The formerly-synced mathjs factories were **activated** — wired into the live
+graph via `functions/src/factories/index.ts` (2026-06-27) — so they are no longer
+a dormant, unexported layer; they are edited like any other source. The
+`@danielsimonjr/mathts-functions` package (released `functions@0.8.0`) now exports
+**828 names (686 callable functions)**.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
-
-**Leaf factories**: Subset of 242 synced factories with no unresolved dependencies (ready to activate).
 
 ### 4. Matrix Backends
 
@@ -177,15 +186,15 @@ AssemblyScript source files** under `assembly/src/`. (Verify with
 `WebAssembly.Module.exports()` on the built `.wasm`; rebuild via
 `npm run build:wasm`.)
 
-| Category             | Function exports |
-| -------------------- | ---------------- |
-| Scalar `f64`         | 79               |
-| Array                | 54               |
-| Matrix               | 50               |
-| Complex scalar       | 46               |
-| Complex array        | 33               |
-| FFT                  | 2                |
-| Special/poly/sort/signal/other | 54     |
+| Category                       | Function exports |
+| ------------------------------ | ---------------- |
+| Scalar `f64`                   | 79               |
+| Array                          | 54               |
+| Matrix                         | 50               |
+| Complex scalar                 | 46               |
+| Complex array                  | 33               |
+| FFT                            | 2                |
+| Special/poly/sort/signal/other | 54               |
 
 The binary is SHA-384 integrity-verified before instantiation and numerically
 verified to <1e-9 vs mpmath for the special-function kernels (see
@@ -270,16 +279,20 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 ### Integration Status
 
-| Metric                               | Value    |
-| ------------------------------------ | -------- |
-| Reachable files (from entry points)  | 555      |
-| Dormant files (synced, not exported) | 904      |
-| Total synced factories               | 242      |
-| Synced categories                    | 19       |
-| Type bridge                          | In place |
-| Factory bridge                       | In place |
+| Metric                              | Value                                  |
+| ----------------------------------- | -------------------------------------- |
+| Reachable files (from entry points) | 846                                    |
+| Unused files                        | 0                                      |
+| Synced mathjs factories             | Activated into live graph (2026-06-27) |
+| Synced categories                   | 19                                     |
+| Type bridge                         | In place                               |
+| Factory bridge                      | In place                               |
 
-### Activation Barriers
+### Activation Barriers (historical)
+
+The valuable synced factories have since been activated into the single live
+graph (2026-06-27), so the barriers below are historical context rather than
+open work:
 
 1. **Two typed-function instances** -- native (15 types, instanceof) vs. synced (40+ types, duck-typing). Bridge partially resolves this.
 2. **Matrix interface mismatch** -- native DenseMatrix is Float64Array-backed; synced factories expect nested Array with `._data`, `._size`, `.storage()`.
@@ -299,25 +312,27 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 
 ## Module Summary
 
-Source-file counts below are reachable (active) files; dormant synced files are
-excluded. The report counts 555 reachable TypeScript files total across all
-packages, 904 dormant, and 3,464 exports. The authoritative, always-current
-per-package breakdown is the generated `dependency-graph.json` /
-`DEPENDENCY_GRAPH.md` (regenerate with `tools/create-dependency-graph`); the
-table below is a point-in-time snapshot.
+Source-file counts below are the reachable files per package. The report counts
+**846 TypeScript files total** across all packages — all reachable from package
+entry points, **0 unused** — and **4,088 exports**; the dormant
+synced-from-mathjs mirror (455 files / ~58.6k LOC) was deleted 2026-06-27. The
+authoritative, always-current per-package breakdown is the generated
+`dependency-graph.json` / `DEPENDENCY_GRAPH.md` (regenerate with
+`tools/create-dependency-graph`); the table below is a point-in-time snapshot.
 
-| Package         | Active Files | Dormant Files |
-| --------------- | ------------ | ------------- |
-| core            | 10           | 85            |
-| matrix          | 34           | 4             |
-| tensor          | 2            | 0             |
-| autograd        | 5            | 0             |
-| functions       | 355          | 418           |
-| parallel        | 11           | 4             |
-| expression      | 45           | 382           |
-| workbook        | 5            | 2             |
-| compat          | 2            | 1             |
-| assembly (wasm) | 19           | 3             |
-| typed-function  | 1            | 1             |
-| workerpool      | 2            | 2             |
-| **Total**       | **491**      | **903**       |
+| Package                          | Reachable Files |
+| -------------------------------- | --------------- |
+| core                             | 15              |
+| matrix                           | 43              |
+| tensor                           | 21              |
+| autograd                         | 6               |
+| functions                        | 391             |
+| parallel                         | 11              |
+| expression                       | 302             |
+| workbook                         | 14              |
+| compat                           | 3               |
+| assembly (wasm)                  | 27              |
+| typed-function                   | 1               |
+| workerpool                       | 2               |
+| thin re-export packages (10 × 1) | 10              |
+| **Total**                        | **846**         |

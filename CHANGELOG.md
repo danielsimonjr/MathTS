@@ -156,6 +156,37 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — regenerated the dependency graph and reconciled the architecture docs
+
+Ran `npm run docs:deps` (regenerating `DEPENDENCY_GRAPH.md`, `unused-analysis.md`,
+`wasm-pairing.md`, and their JSON/YAML) and updated every hand-written doc under
+`docs/Architecture/` to the freshly-generated 2026-07-01 figures — most predated the
+2026-06-27 dormant-mirror purge and the gap-closure and were badly stale:
+
+- **`ARCHITECTURE.md`** / **`OVERVIEW.md`**: `555 reachable of 1,459 files / 904
+  dormant` → **846 files, 0 unused/dormant** (single active graph; the dormant
+  synced-from-mathjs mirror, 455 files / ~58.6k LOC, was deleted 2026-06-27);
+  `148,610` → **158,032 LOC**; `3,464 (1,057 re-exports)` → **4,088 exports (1,204
+  re-exports)**; added the 50 classes / 358 interfaces / 1,461 functions composition;
+  `0` → **0 runtime circular deps (2 type-only)**; rewrote the "two-layer /
+  dormant / synced-from-mathjs" framing to the activated-factory reality; per-package
+  file counts + versions refreshed (functions@0.8.0, etc.); type guards 230 → 135.
+- **`API.md`**: `~672` → **~828 exports**; every per-category count refreshed from the
+  generated export index (Statistics 25→59, Distributions 11→42, Signal 33→44,
+  Hypothesis 14→20, Geometry 31→42, Numerical Methods 37→45, Special 29→42, …).
+- **`WASM_ACCELERATION.md`**: reconciled to `wasm-pairing.md` — 218 typed functions,
+  **39 wasm / 52 parallel / 127 js-only**, and the runtime probe now shows **39/39
+  wasm-routed functions execute wasm, 0 fall back** (Airy now runs on the AS binary);
+  rebuilt the stale JS-only family sub-counts.
+- **`COVERAGE_POLICY.md`**: refreshed the coverage snapshot from the generated
+  `TEST_COVERAGE.md` — raw **35.8% (201/562)**, effective **97.5% (196/201)** as of
+  2026-06-27; corrected the functions-tests (1,774/51 → 3,086/124) and WASM-integration
+  (224/224 → 122 passing / 16 skipped) figures against a fresh re-run; rewrote the
+  `synced_mathjs_functions` exclusion rationale (activated, not dormant).
+- **`DATAFLOW.md`**: fixed a "dormant factories" factual error (they were activated).
+
+All figures verified against the generated reports / package.json / fresh test re-runs.
+
 ### Changed (2026-07-01) — `docs/reference/functions.md` curated tables document the gap-closure functions
 
 The rich curated domain sections at the top of the reference (with per-function

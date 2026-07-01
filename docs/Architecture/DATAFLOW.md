@@ -261,9 +261,11 @@ math.add(a, b)
      - Duck-typing is NOT used here (native path only)
   5. Returns typed result
 
-Note: Synced mathjs factories (functions/src/{arithmetic,algebra,...}/) are
-dormant — not exported from index.ts and not registered in FunctionRegistry.
-They require a separate createTyped instance and a different type hierarchy.
+Note: The valuable synced mathjs factories (functions/src/{arithmetic,algebra,
+type,utils,...}/) are **activated** — wired into the live graph via
+functions/src/factories/index.ts (re-exported from index.ts) and registered
+through the factory path. The dormant, unreachable synced remnant was deleted on
+2026-06-27 (see CLAUDE.md's "Syncing from mathjs" history).
 ```
 
 ---

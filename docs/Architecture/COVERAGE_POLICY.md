@@ -1,6 +1,6 @@
 # Test Coverage Policy
 
-**Last updated:** 2026-05-24
+**Last updated:** 2026-07-01
 **Machine-readable form:** [`coverage-policy.json`](./coverage-policy.json)
 **Consumed by:** [`tools/create-dependency-graph/`](../../tools/create-dependency-graph/)
 
@@ -9,12 +9,12 @@ numbers in `TEST_COVERAGE.md`:
 
 - **Raw coverage** — the fraction of source files (anywhere under any
   `src/`) that are directly imported by at least one `*.test.ts` file
-  Vitest can discover. As of 2026-05-24 this is **30.5 % (151 / 495)**.
+  Vitest can discover. As of 2026-06-27 (`TEST_COVERAGE.md`) this is **35.8 % (201 / 562)**.
 - **Effective coverage** — the same direct-import metric, but
   computed only over the **active hand-written code**. The denominator
   excludes files in the policy categories below — code that is
   intentionally not direct-tested because it is exercised through
-  another path. As of 2026-05-24 this is **100.0 % (148 / 148)**.
+  another path. As of 2026-06-27 (`TEST_COVERAGE.md`) this is **97.5 % (196 / 201)**.
 
 Both numbers are reported. Neither is hidden. The raw number is the
 true CDG measurement; the effective number is what callers usually
@@ -54,13 +54,18 @@ trigonometry, statistics, set, special, matrix, signal, combinatorics,
 complex, probability, string, geometry, unit, utils, plain, type,
 expression, error, numeric, core/function}/`.
 
-**Why it isn't direct-tested:** these files are mechanically synced
-from upstream `mathjs` by `~/.claude/scripts/sync_mathjs_to_mathts.py`
-(see `CLAUDE.md`'s "Syncing from mathjs" section). They are dormant —
-not exported from `functions/src/index.ts` directly. The active
-implementations live in `functions/src/typed/` and `functions/src/
-factories/`, which DO have direct tests (1,774 functions tests across
-51 test files at the time of writing).
+**Why it isn't direct-tested:** these are factory-pattern category
+implementations (`create*` factories) originally synced from upstream
+`mathjs` and since **activated** into the live graph via
+`functions/src/factories/index.ts` (reachable from
+`functions/src/index.ts`). They are exercised transitively through the
+public `functions/src/typed/` + `functions/src/factories/` surface
+rather than imported directly by a `*.test.ts`. (The `.ts→.ts` mathjs
+sync model is retired, and the dead, unreachable synced remnant that once
+sat alongside them — 455 files / ~58.6k LOC — was deleted 2026-06-27; see
+`CLAUDE.md`'s "Syncing from mathjs" section.) The active public surface
+has direct tests — 3,086 functions tests across 124 test files at the
+time of writing.
 
 **What would fail loudly:** every typed/ export has tests that exercise
 the underlying synced helpers transitively. A synced helper that breaks
@@ -76,7 +81,7 @@ direct tests.
 **Why it isn't direct-tested:** synced from the upstream WASM bindings.
 Exercised through the active bridge files above plus the cross-package
 WASM integration suite invoked by `npm run test:wasm:integration`
-(224 / 224 passing at the time of writing).
+(122 passing / 16 skipped at the time of writing).
 
 ### `synced_expression_utils`
 
@@ -114,7 +119,7 @@ A vitest `*.test.ts` cannot meaningfully import an `.ts` file that
 uses AssemblyScript-only syntax — the file won't parse in TypeScript's
 compiler. Exercised end-to-end by the cross-package WASM integration
 suite at `tests/wasm/` invoked by `npm run test:wasm:integration`
-(224 / 224 passing).
+(122 passing / 16 skipped).
 
 ### `type_only_barrels`
 

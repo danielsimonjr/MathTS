@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-06-28",
-    "totalFiles": 571,
-    "totalModules": 69,
-    "totalExports": 3595
+    "lastUpdated": "2026-07-01",
+    "totalFiles": 846,
+    "totalModules": 70,
+    "totalExports": 4088
   },
   "entryPoints": [
     {
@@ -317,93 +317,37 @@
         ]
       }
     },
-    "core/factory": {
-      "core/src/factory/factory.ts": {
-        "description": "MathTS Function Factory",
+    "core": {
+      "core/src/constants.ts": {
+        "description": "Named mathematical constants (plain `number`).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../typed/mathts-typed.js",
-            "imports": [
-              "TypedFunction",
-              "TypedInstance",
-              "SignatureFunction",
-              "ReferTo",
-              "ReferToSelf"
-            ],
-            "typeOnly": true
-          },
-          {
-            "file": "../typed/mathts-typed.js",
-            "imports": [
-              "mathTyped"
-            ]
-          }
-        ],
+        "internalDependencies": [],
         "exports": [
-          "DEFAULT_CONFIG",
-          "registry",
-          "math",
-          "createFactory",
-          "createTypedFunction",
-          "FunctionRegistry"
-        ],
-        "classes": [
-          "FunctionRegistry"
-        ],
-        "interfaces": [
-          "MathTSConfig",
-          "FactoryFunction",
-          "FactoryDependencies"
-        ],
-        "functions": [
-          "createFactory",
-          "createTypedFunction"
+          "PI",
+          "E",
+          "TAU",
+          "PHI",
+          "SQRT2",
+          "SQRT1_2",
+          "LN2",
+          "LN10",
+          "LOG2E",
+          "LOG10E"
         ],
         "constants": [
-          "DEFAULT_CONFIG",
-          "registry",
-          "math"
+          "PI",
+          "E",
+          "TAU",
+          "PHI",
+          "SQRT2",
+          "SQRT1_2",
+          "LN2",
+          "LN10",
+          "LOG2E",
+          "LOG10E"
         ]
       },
-      "core/src/factory/index.ts": {
-        "description": "Factory pattern exports",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./factory.js",
-            "imports": [
-              "FunctionRegistry",
-              "createFactory",
-              "createTypedFunction",
-              "registry",
-              "math",
-              "DEFAULT_CONFIG"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "FunctionRegistry",
-          "createFactory",
-          "createTypedFunction",
-          "registry",
-          "math",
-          "DEFAULT_CONFIG"
-        ],
-        "reExported": [
-          "FunctionRegistry",
-          "createFactory",
-          "createTypedFunction",
-          "registry",
-          "math",
-          "DEFAULT_CONFIG"
-        ]
-      }
-    },
-    "core": {
       "core/src/index.ts": {
         "description": "Core types and utilities for MathTS",
         "externalDependencies": [],
@@ -418,6 +362,30 @@
               "COMPLEX_ZERO",
               "COMPLEX_ONE",
               "COMPLEX_NEG_ONE"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./types/dual.js",
+            "imports": [
+              "Dual",
+              "isDual"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./constants.js",
+            "imports": [
+              "PI",
+              "E",
+              "TAU",
+              "PHI",
+              "SQRT2",
+              "SQRT1_2",
+              "LN2",
+              "LN10",
+              "LOG2E",
+              "LOG10E"
             ],
             "reExport": true
           },
@@ -532,6 +500,18 @@
           "COMPLEX_ZERO",
           "COMPLEX_ONE",
           "COMPLEX_NEG_ONE",
+          "Dual",
+          "isDual",
+          "PI",
+          "E",
+          "TAU",
+          "PHI",
+          "SQRT2",
+          "SQRT1_2",
+          "LN2",
+          "LN10",
+          "LOG2E",
+          "LOG10E",
           "Fraction",
           "isFraction",
           "FRACTION_ZERO",
@@ -601,6 +581,18 @@
           "COMPLEX_ZERO",
           "COMPLEX_ONE",
           "COMPLEX_NEG_ONE",
+          "Dual",
+          "isDual",
+          "PI",
+          "E",
+          "TAU",
+          "PHI",
+          "SQRT2",
+          "SQRT1_2",
+          "LN2",
+          "LN10",
+          "LOG2E",
+          "LOG10E",
           "Fraction",
           "isFraction",
           "FRACTION_ZERO",
@@ -664,6 +656,92 @@
         ],
         "constants": [
           "VERSION"
+        ]
+      }
+    },
+    "core/factory": {
+      "core/src/factory/factory.ts": {
+        "description": "MathTS Function Factory",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/mathts-typed.js",
+            "imports": [
+              "TypedFunction",
+              "TypedInstance",
+              "SignatureFunction",
+              "ReferTo",
+              "ReferToSelf"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../typed/mathts-typed.js",
+            "imports": [
+              "mathTyped"
+            ]
+          }
+        ],
+        "exports": [
+          "DEFAULT_CONFIG",
+          "registry",
+          "math",
+          "createFactory",
+          "createTypedFunction",
+          "FunctionRegistry"
+        ],
+        "classes": [
+          "FunctionRegistry"
+        ],
+        "interfaces": [
+          "MathTSConfig",
+          "FactoryFunction",
+          "FactoryDependencies"
+        ],
+        "functions": [
+          "createFactory",
+          "createTypedFunction"
+        ],
+        "constants": [
+          "DEFAULT_CONFIG",
+          "registry",
+          "math"
+        ]
+      },
+      "core/src/factory/index.ts": {
+        "description": "Factory pattern exports",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factory.js",
+            "imports": [
+              "FunctionRegistry",
+              "createFactory",
+              "createTypedFunction",
+              "registry",
+              "math",
+              "DEFAULT_CONFIG"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "FunctionRegistry",
+          "createFactory",
+          "createTypedFunction",
+          "registry",
+          "math",
+          "DEFAULT_CONFIG"
+        ],
+        "reExported": [
+          "FunctionRegistry",
+          "createFactory",
+          "createTypedFunction",
+          "registry",
+          "math",
+          "DEFAULT_CONFIG"
         ]
       }
     },
@@ -815,6 +893,12 @@
             "imports": [
               "Complex",
               "isComplex"
+            ]
+          },
+          {
+            "file": "../types/dual.js",
+            "imports": [
+              "isDual"
             ]
           },
           {
@@ -1019,6 +1103,22 @@
           "COMPLEX_ZERO",
           "COMPLEX_ONE",
           "COMPLEX_NEG_ONE"
+        ]
+      },
+      "core/src/types/dual.ts": {
+        "description": "Dual number for forward-mode automatic differentiation.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isDual",
+          "Dual"
+        ],
+        "classes": [
+          "Dual"
+        ],
+        "functions": [
+          "isDual"
         ]
       },
       "core/src/types/fraction.ts": {
@@ -2587,11 +2687,7 @@
             "file": "./common.js",
             "imports": [
               "isSymmetric",
-              "eye",
-              "cloneMatrix",
-              "householder",
-              "applyHouseholderLeft",
-              "applyHouseholderRight"
+              "eye"
             ]
           }
         ],
@@ -3351,7 +3447,8 @@
           {
             "file": "./operations/svd",
             "imports": [
-              "tensorSvd"
+              "tensorSvd",
+              "tensorSvdWasm"
             ],
             "reExport": true
           },
@@ -3393,7 +3490,8 @@
           {
             "file": "./operations/eig",
             "imports": [
-              "tensorEig"
+              "tensorEig",
+              "tensorEigWasm"
             ],
             "reExport": true
           },
@@ -3480,12 +3578,14 @@
           "Index",
           "idx",
           "tensorSvd",
+          "tensorSvdWasm",
           "randomTensor",
           "contractNetwork",
           "tensorQr",
           "tensorLU",
           "tensorCholesky",
           "tensorEig",
+          "tensorEigWasm",
           "tensorPinv",
           "tensorSolve",
           "tensorKron",
@@ -3503,12 +3603,14 @@
           "Index",
           "idx",
           "tensorSvd",
+          "tensorSvdWasm",
           "randomTensor",
           "contractNetwork",
           "tensorQr",
           "tensorLU",
           "tensorCholesky",
           "tensorEig",
+          "tensorEigWasm",
           "tensorPinv",
           "tensorSolve",
           "tensorKron",
@@ -3632,14 +3734,16 @@
           }
         ],
         "exports": [
-          "tensorEig"
+          "tensorEig",
+          "tensorEigWasm"
         ],
         "interfaces": [
           "TensorEigOpts",
           "TensorEigResult"
         ],
         "functions": [
-          "tensorEig"
+          "tensorEig",
+          "tensorEigWasm"
         ]
       },
       "tensor/src/operations/flip.ts": {
@@ -4013,14 +4117,16 @@
           }
         ],
         "exports": [
-          "tensorSvd"
+          "tensorSvd",
+          "tensorSvdWasm"
         ],
         "interfaces": [
           "TensorSvdOpts",
           "TensorSvdResult"
         ],
         "functions": [
-          "tensorSvd"
+          "tensorSvd",
+          "tensorSvdWasm"
         ]
       }
     },
@@ -4056,6 +4162,32 @@
           "forwardGrad"
         ]
       },
+      "autograd/src/grad.ts": {
+        "description": "GC15 — ergonomic, number-friendly autodiff bridge.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./tape.js",
+            "imports": [
+              "Tape",
+              "TapedTensor"
+            ]
+          }
+        ],
+        "exports": [
+          "valueAndGrad",
+          "grad",
+          "derivative",
+          "jacobian"
+        ],
+        "functions": [
+          "valueAndGrad",
+          "grad",
+          "derivative",
+          "jacobian"
+        ]
+      },
       "autograd/src/index.ts": {
         "description": "differentiation for the MathTS rank-N Tensor type.",
         "externalDependencies": [],
@@ -4089,6 +4221,16 @@
               "reverseGrad"
             ],
             "reExport": true
+          },
+          {
+            "file": "./grad.js",
+            "imports": [
+              "grad",
+              "valueAndGrad",
+              "derivative",
+              "jacobian"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -4096,14 +4238,22 @@
           "forwardGrad",
           "Tape",
           "TapedTensor",
-          "reverseGrad"
+          "reverseGrad",
+          "grad",
+          "valueAndGrad",
+          "derivative",
+          "jacobian"
         ],
         "reExported": [
           "DualTensor",
           "forwardGrad",
           "Tape",
           "TapedTensor",
-          "reverseGrad"
+          "reverseGrad",
+          "grad",
+          "valueAndGrad",
+          "derivative",
+          "jacobian"
         ]
       },
       "autograd/src/reverse-grad.ts": {
@@ -8085,6 +8235,960 @@
         ]
       }
     },
+    "functions": {
+      "functions/src/calculus-extra.ts": {
+        "description": "Calculus connectors (Wave C / bridge C3).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "gradient",
+          "hessian"
+        ],
+        "functions": [
+          "gradient",
+          "hessian"
+        ]
+      },
+      "functions/src/cas-integration.ts": {
+        "description": "Symbolic indefinite integration (Wave D / remaining). A recursive antiderivative",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "parse"
+            ]
+          },
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "evaluate"
+            ]
+          }
+        ],
+        "exports": [
+          "symbolicIntegral"
+        ],
+        "functions": [
+          "symbolicIntegral"
+        ]
+      },
+      "functions/src/clustering-extra.ts": {
+        "description": "Clustering (Wave D / remaining). `kmeans` (Lloyd) + `spectralClustering`, the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "eigs"
+            ]
+          },
+          {
+            "file": "./linalg-extra.js",
+            "imports": [
+              "laplacianMatrix"
+            ]
+          }
+        ],
+        "exports": [
+          "kmeans",
+          "spectralClustering"
+        ],
+        "interfaces": [
+          "KMeansResult"
+        ],
+        "functions": [
+          "kmeans",
+          "spectralClustering"
+        ]
+      },
+      "functions/src/descriptive-stats.ts": {
+        "description": "Descriptive-statistics composites (Wave A of the domain gap analysis).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "mean",
+              "std",
+              "sum"
+            ]
+          },
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "quantileSeq"
+            ]
+          }
+        ],
+        "exports": [
+          "rankdata",
+          "gmean",
+          "hmean",
+          "moment",
+          "skewness",
+          "kurtosis",
+          "iqr",
+          "sem",
+          "zscore",
+          "cov",
+          "corrcoef"
+        ],
+        "functions": [
+          "rankdata",
+          "gmean",
+          "hmean",
+          "moment",
+          "skewness",
+          "kurtosis",
+          "iqr",
+          "sem",
+          "zscore",
+          "cov",
+          "corrcoef"
+        ]
+      },
+      "functions/src/distribution-functions.ts": {
+        "description": "Standalone distribution CDF / quantile functions (Wave B / bridge C4).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/dist-objects.js",
+            "imports": [
+              "normalDist",
+              "tDist",
+              "chiSquaredDist",
+              "fDist",
+              "gammaDist",
+              "betaDist"
+            ]
+          }
+        ],
+        "exports": [
+          "normalQuantile",
+          "studentTCDF",
+          "studentTQuantile",
+          "chiSquaredCDF",
+          "chiSquaredQuantile",
+          "fCDF",
+          "fQuantile",
+          "gammaCDF",
+          "gammaQuantile",
+          "betaCDF",
+          "betaQuantile",
+          "cauchyPDF",
+          "cauchyCDF",
+          "cauchyQuantile",
+          "laplacePDF",
+          "laplaceCDF",
+          "laplaceQuantile",
+          "logisticPDF",
+          "logisticCDF",
+          "logisticQuantile"
+        ],
+        "constants": [
+          "normalQuantile",
+          "studentTCDF",
+          "studentTQuantile",
+          "chiSquaredCDF",
+          "chiSquaredQuantile",
+          "fCDF",
+          "fQuantile",
+          "gammaCDF",
+          "gammaQuantile",
+          "betaCDF",
+          "betaQuantile",
+          "cauchyPDF",
+          "cauchyCDF",
+          "cauchyQuantile",
+          "laplacePDF",
+          "laplaceCDF",
+          "laplaceQuantile",
+          "logisticPDF",
+          "logisticCDF",
+          "logisticQuantile"
+        ]
+      },
+      "functions/src/geometry-extra.ts": {
+        "description": "Geodesy / spherical-geometry connectors (Wave C / bridge C7).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/trigonometry.js",
+            "imports": [
+              "toRadians"
+            ]
+          }
+        ],
+        "exports": [
+          "EARTH_RADIUS_KM",
+          "haversine",
+          "slerp",
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix"
+        ],
+        "functions": [
+          "haversine",
+          "slerp",
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix"
+        ],
+        "constants": [
+          "EARTH_RADIUS_KM"
+        ]
+      },
+      "functions/src/grad-forward.ts": {
+        "description": "Forward-mode automatic differentiation over the plain functions surface.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "derivativeAt",
+          "valueAndDerivativeAt",
+          "gradientAt"
+        ],
+        "functions": [
+          "derivativeAt",
+          "valueAndDerivativeAt",
+          "gradientAt"
+        ]
+      },
+      "functions/src/help.ts": {
+        "description": "GC4 — `help(search)` mathjs-canonical export.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "evaluate"
+            ]
+          }
+        ],
+        "exports": [
+          "help"
+        ],
+        "functions": [
+          "help"
+        ]
+      },
+      "functions/src/hypothesis-extra.ts": {
+        "description": "Additional hypothesis tests (Wave B / bridge C9).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "variance",
+              "mean"
+            ]
+          },
+          {
+            "file": "./descriptive-stats.js",
+            "imports": [
+              "skewness",
+              "kurtosis",
+              "rankdata"
+            ]
+          },
+          {
+            "file": "./distribution-functions.js",
+            "imports": [
+              "fCDF",
+              "chiSquaredCDF"
+            ]
+          },
+          {
+            "file": "./typed/distributions.js",
+            "imports": [
+              "normalCDF",
+              "normalPDF"
+            ]
+          },
+          {
+            "file": "./typed/special.js",
+            "imports": [
+              "lgamma"
+            ]
+          }
+        ],
+        "exports": [
+          "fTest",
+          "jarqueBera",
+          "kruskalWallis",
+          "wilcoxon",
+          "fisherExact",
+          "studentizedRangeCDF",
+          "studentizedRangeQuantile",
+          "tukeyHSD"
+        ],
+        "interfaces": [
+          "FTestResult",
+          "JarqueBeraResult",
+          "KruskalResult",
+          "WilcoxonResult",
+          "FisherExactResult",
+          "TukeyComparison"
+        ],
+        "functions": [
+          "fTest",
+          "jarqueBera",
+          "kruskalWallis",
+          "wilcoxon",
+          "fisherExact",
+          "studentizedRangeCDF",
+          "studentizedRangeQuantile",
+          "tukeyHSD"
+        ]
+      },
+      "functions/src/index.ts": {
+        "description": "Mathematical functions for MathTS - arithmetic, algebra,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/index.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./typed/cas.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./typed/unit.js",
+            "imports": [
+              "to",
+              "toBest"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "evaluate",
+              "compileExpr",
+              "parse",
+              "parser",
+              "reviver",
+              "replacer"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./help.js",
+            "imports": [
+              "help"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./grad-forward.js",
+            "imports": [
+              "derivativeAt",
+              "valueAndDerivativeAt",
+              "gradientAt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./descriptive-stats.js",
+            "imports": [
+              "gmean",
+              "hmean",
+              "moment",
+              "skewness",
+              "kurtosis",
+              "iqr",
+              "sem",
+              "zscore",
+              "cov",
+              "corrcoef",
+              "rankdata"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./numeric-extra.js",
+            "imports": [
+              "clamp",
+              "sigmoid",
+              "logsumexp",
+              "softmax",
+              "cumprod",
+              "cummax",
+              "cummin",
+              "cumtrapz"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./distribution-functions.js",
+            "imports": [
+              "normalQuantile",
+              "studentTCDF",
+              "studentTQuantile",
+              "chiSquaredCDF",
+              "chiSquaredQuantile",
+              "fCDF",
+              "fQuantile",
+              "gammaCDF",
+              "gammaQuantile",
+              "betaCDF",
+              "betaQuantile",
+              "cauchyPDF",
+              "cauchyCDF",
+              "cauchyQuantile",
+              "laplacePDF",
+              "laplaceCDF",
+              "laplaceQuantile",
+              "logisticPDF",
+              "logisticCDF",
+              "logisticQuantile"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./hypothesis-extra.js",
+            "imports": [
+              "fTest",
+              "jarqueBera",
+              "kruskalWallis",
+              "wilcoxon",
+              "fisherExact",
+              "studentizedRangeCDF",
+              "studentizedRangeQuantile",
+              "tukeyHSD"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./linalg-extra.js",
+            "imports": [
+              "tril",
+              "triu",
+              "vander",
+              "toeplitz",
+              "circulant",
+              "companion",
+              "logdet",
+              "laplacianMatrix",
+              "generalizedEig",
+              "qz"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./calculus-extra.js",
+            "imports": [
+              "hessian",
+              "gradient"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./timeseries-extra.js",
+            "imports": [
+              "movingAverage",
+              "ewma",
+              "detrend",
+              "acf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./regression-extra.js",
+            "imports": [
+              "linearRegression"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./optimization-extra.js",
+            "imports": [
+              "nelderMead",
+              "gradientDescent",
+              "levenbergMarquardt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./clustering-extra.js",
+            "imports": [
+              "kmeans",
+              "spectralClustering"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./cas-integration.js",
+            "imports": [
+              "symbolicIntegral"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./signal-filter-extra.js",
+            "imports": [
+              "firwin",
+              "butter",
+              "lfilter",
+              "lfilterZi",
+              "filtfilt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./geometry-extra.js",
+            "imports": [
+              "haversine",
+              "EARTH_RADIUS_KM",
+              "slerp",
+              "quaternionMultiply",
+              "quaternionConjugate",
+              "quaternionNormalize",
+              "quaternionFromAxisAngle",
+              "quaternionRotate",
+              "quaternionToRotationMatrix"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "to",
+          "toBest",
+          "evaluate",
+          "compileExpr",
+          "parse",
+          "parser",
+          "reviver",
+          "replacer",
+          "help",
+          "derivativeAt",
+          "valueAndDerivativeAt",
+          "gradientAt",
+          "gmean",
+          "hmean",
+          "moment",
+          "skewness",
+          "kurtosis",
+          "iqr",
+          "sem",
+          "zscore",
+          "cov",
+          "corrcoef",
+          "rankdata",
+          "clamp",
+          "sigmoid",
+          "logsumexp",
+          "softmax",
+          "cumprod",
+          "cummax",
+          "cummin",
+          "cumtrapz",
+          "normalQuantile",
+          "studentTCDF",
+          "studentTQuantile",
+          "chiSquaredCDF",
+          "chiSquaredQuantile",
+          "fCDF",
+          "fQuantile",
+          "gammaCDF",
+          "gammaQuantile",
+          "betaCDF",
+          "betaQuantile",
+          "cauchyPDF",
+          "cauchyCDF",
+          "cauchyQuantile",
+          "laplacePDF",
+          "laplaceCDF",
+          "laplaceQuantile",
+          "logisticPDF",
+          "logisticCDF",
+          "logisticQuantile",
+          "fTest",
+          "jarqueBera",
+          "kruskalWallis",
+          "wilcoxon",
+          "fisherExact",
+          "studentizedRangeCDF",
+          "studentizedRangeQuantile",
+          "tukeyHSD",
+          "tril",
+          "triu",
+          "vander",
+          "toeplitz",
+          "circulant",
+          "companion",
+          "logdet",
+          "laplacianMatrix",
+          "generalizedEig",
+          "qz",
+          "hessian",
+          "gradient",
+          "movingAverage",
+          "ewma",
+          "detrend",
+          "acf",
+          "linearRegression",
+          "nelderMead",
+          "gradientDescent",
+          "levenbergMarquardt",
+          "kmeans",
+          "spectralClustering",
+          "symbolicIntegral",
+          "firwin",
+          "butter",
+          "lfilter",
+          "lfilterZi",
+          "filtfilt",
+          "haversine",
+          "EARTH_RADIUS_KM",
+          "slerp",
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix"
+        ],
+        "reExported": [
+          "* from ./typed/index.js",
+          "* from ./typed/cas.js",
+          "* from ./factories/index.js",
+          "to",
+          "toBest",
+          "evaluate",
+          "compileExpr",
+          "parse",
+          "parser",
+          "reviver",
+          "replacer",
+          "help",
+          "derivativeAt",
+          "valueAndDerivativeAt",
+          "gradientAt",
+          "gmean",
+          "hmean",
+          "moment",
+          "skewness",
+          "kurtosis",
+          "iqr",
+          "sem",
+          "zscore",
+          "cov",
+          "corrcoef",
+          "rankdata",
+          "clamp",
+          "sigmoid",
+          "logsumexp",
+          "softmax",
+          "cumprod",
+          "cummax",
+          "cummin",
+          "cumtrapz",
+          "normalQuantile",
+          "studentTCDF",
+          "studentTQuantile",
+          "chiSquaredCDF",
+          "chiSquaredQuantile",
+          "fCDF",
+          "fQuantile",
+          "gammaCDF",
+          "gammaQuantile",
+          "betaCDF",
+          "betaQuantile",
+          "cauchyPDF",
+          "cauchyCDF",
+          "cauchyQuantile",
+          "laplacePDF",
+          "laplaceCDF",
+          "laplaceQuantile",
+          "logisticPDF",
+          "logisticCDF",
+          "logisticQuantile",
+          "fTest",
+          "jarqueBera",
+          "kruskalWallis",
+          "wilcoxon",
+          "fisherExact",
+          "studentizedRangeCDF",
+          "studentizedRangeQuantile",
+          "tukeyHSD",
+          "tril",
+          "triu",
+          "vander",
+          "toeplitz",
+          "circulant",
+          "companion",
+          "logdet",
+          "laplacianMatrix",
+          "generalizedEig",
+          "qz",
+          "hessian",
+          "gradient",
+          "movingAverage",
+          "ewma",
+          "detrend",
+          "acf",
+          "linearRegression",
+          "nelderMead",
+          "gradientDescent",
+          "levenbergMarquardt",
+          "kmeans",
+          "spectralClustering",
+          "symbolicIntegral",
+          "firwin",
+          "butter",
+          "lfilter",
+          "lfilterZi",
+          "filtfilt",
+          "haversine",
+          "EARTH_RADIUS_KM",
+          "slerp",
+          "quaternionMultiply",
+          "quaternionConjugate",
+          "quaternionNormalize",
+          "quaternionFromAxisAngle",
+          "quaternionRotate",
+          "quaternionToRotationMatrix"
+        ]
+      },
+      "functions/src/linalg-extra.ts": {
+        "description": "Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "inv",
+              "eigs",
+              "qr"
+            ]
+          },
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "multiply"
+            ]
+          }
+        ],
+        "exports": [
+          "generalizedEig",
+          "tril",
+          "triu",
+          "vander",
+          "toeplitz",
+          "circulant",
+          "companion",
+          "laplacianMatrix",
+          "logdet",
+          "qz"
+        ],
+        "functions": [
+          "generalizedEig",
+          "tril",
+          "triu",
+          "vander",
+          "toeplitz",
+          "circulant",
+          "companion",
+          "laplacianMatrix",
+          "logdet",
+          "qz"
+        ]
+      },
+      "functions/src/numeric-extra.ts": {
+        "description": "Elementwise / cumulative / log-domain primitives (Wave A of the gap analysis).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "sum"
+            ]
+          }
+        ],
+        "exports": [
+          "clamp",
+          "sigmoid",
+          "logsumexp",
+          "softmax",
+          "cumprod",
+          "cummax",
+          "cummin",
+          "cumtrapz"
+        ],
+        "functions": [
+          "clamp",
+          "clamp",
+          "clamp",
+          "sigmoid",
+          "sigmoid",
+          "sigmoid",
+          "logsumexp",
+          "softmax",
+          "cumprod",
+          "cummax",
+          "cummin",
+          "cumtrapz"
+        ]
+      },
+      "functions/src/optimization-extra.ts": {
+        "description": "Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "inv"
+            ]
+          }
+        ],
+        "exports": [
+          "nelderMead",
+          "gradientDescent",
+          "levenbergMarquardt"
+        ],
+        "interfaces": [
+          "OptimizeResult",
+          "LMResult"
+        ],
+        "functions": [
+          "nelderMead",
+          "gradientDescent",
+          "levenbergMarquardt"
+        ]
+      },
+      "functions/src/regression-extra.ts": {
+        "description": "Ordinary least-squares regression (Wave D / regression primitives).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "mean"
+            ]
+          },
+          {
+            "file": "./distribution-functions.js",
+            "imports": [
+              "studentTCDF"
+            ]
+          }
+        ],
+        "exports": [
+          "linearRegression"
+        ],
+        "interfaces": [
+          "LinregressResult"
+        ],
+        "functions": [
+          "linearRegression"
+        ]
+      },
+      "functions/src/signal-filter-extra.ts": {
+        "description": "Digital filter design + application (Wave D / remaining). FIR window design",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "inv"
+            ]
+          },
+          {
+            "file": "./linalg-extra.js",
+            "imports": [
+              "companion"
+            ]
+          }
+        ],
+        "exports": [
+          "firwin",
+          "lfilter",
+          "lfilterZi",
+          "filtfilt",
+          "butter"
+        ],
+        "functions": [
+          "firwin",
+          "lfilter",
+          "lfilterZi",
+          "filtfilt",
+          "butter"
+        ]
+      },
+      "functions/src/timeseries-extra.ts": {
+        "description": "Time-series basics (Wave D) — a near-absent domain in the gap analysis.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./typed/arithmetic.js",
+            "imports": [
+              "mean"
+            ]
+          }
+        ],
+        "exports": [
+          "movingAverage",
+          "ewma",
+          "detrend",
+          "acf"
+        ],
+        "functions": [
+          "movingAverage",
+          "ewma",
+          "detrend",
+          "acf"
+        ]
+      },
+      "functions/src/types.ts": {
+        "description": "Type definitions re-exported for internal use",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "SparseMatrix",
+          "Unit",
+          "MatrixConstructor"
+        ]
+      }
+    },
     "functions/combinatorics": {
       "functions/src/combinatorics/bellNumbers.ts": {
         "description": "The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is ",
@@ -9200,6 +10304,14 @@
             ]
           },
           {
+            "file": "../matrix/native-accel.js",
+            "imports": [
+              "acceleratedDet",
+              "acceleratedInv",
+              "correctEigs"
+            ]
+          },
+          {
             "file": "../matrix/reshape.js",
             "imports": [
               "createReshape"
@@ -10133,6 +11245,8 @@
           }
         ],
         "exports": [
+          "mapSlices",
+          "indexFn",
           "addScalar",
           "multiplyScalar",
           "subtractScalar",
@@ -10214,7 +11328,6 @@
           "factory_equal",
           "isInteger",
           "concat",
-          "mapSlices",
           "resize",
           "subset",
           "inv",
@@ -10304,7 +11417,6 @@
           "polynomialRoot",
           "solveODE",
           "zeta",
-          "indexFn",
           "eigs",
           "lusolve",
           "corr",
@@ -10380,7 +11492,10 @@
           "number",
           "string",
           "boolean",
-          "bigint"
+          "bigint",
+          "cumsum",
+          "ctranspose",
+          "createUnit"
         ],
         "constants": [
           "addScalar",
@@ -10630,7 +11745,10 @@
           "number",
           "string",
           "boolean",
-          "bigint"
+          "bigint",
+          "cumsum",
+          "ctranspose",
+          "createUnit"
         ]
       },
       "functions/src/factories/matrix-bridge.ts": {
@@ -10775,91 +11893,6 @@
         ],
         "constants": [
           "createIntersect"
-        ]
-      }
-    },
-    "functions": {
-      "functions/src/index.ts": {
-        "description": "Mathematical functions for MathTS - arithmetic, algebra,",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./typed/index.js",
-            "imports": [
-              "*"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./typed/cas.js",
-            "imports": [
-              "*"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./factories/index.js",
-            "imports": [
-              "*"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./typed/unit.js",
-            "imports": [
-              "to",
-              "toBest"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./factories/evaluate.js",
-            "imports": [
-              "evaluate",
-              "compileExpr",
-              "parse",
-              "parser",
-              "reviver",
-              "replacer"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "to",
-          "toBest",
-          "evaluate",
-          "compileExpr",
-          "parse",
-          "parser",
-          "reviver",
-          "replacer"
-        ],
-        "reExported": [
-          "* from ./typed/index.js",
-          "* from ./typed/cas.js",
-          "* from ./factories/index.js",
-          "to",
-          "toBest",
-          "evaluate",
-          "compileExpr",
-          "parse",
-          "parser",
-          "reviver",
-          "replacer"
-        ]
-      },
-      "functions/src/types.ts": {
-        "description": "Type definitions re-exported for internal use",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "exports": [],
-        "interfaces": [
-          "SparseMatrix",
-          "Unit",
-          "MatrixConstructor"
         ]
       }
     },
@@ -12220,6 +13253,30 @@
         ],
         "constants": [
           "createMatrixFromRows"
+        ]
+      },
+      "functions/src/matrix/native-accel.ts": {
+        "description": "Native-accelerated fast paths for matrix factory functions.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "NATIVE_MATRIX_THRESHOLD",
+          "isLargeNumericSquare",
+          "acceleratedDet",
+          "acceleratedInv",
+          "isNumericSquare",
+          "correctEigs"
+        ],
+        "functions": [
+          "isLargeNumericSquare",
+          "acceleratedDet",
+          "acceleratedInv",
+          "isNumericSquare",
+          "correctEigs"
+        ],
+        "constants": [
+          "NATIVE_MATRIX_THRESHOLD"
         ]
       },
       "functions/src/matrix/ones.ts": {
@@ -19069,7 +20126,14 @@
         "description": "Distribution Objects",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./special.js",
+            "imports": [
+              "erfcScalar"
+            ]
+          }
+        ],
         "exports": [
           "DIST_WORKER_THRESHOLD",
           "normalDist",
@@ -20323,6 +21387,13 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "../plain/number/index.js",
+            "imports": [
+              "gammaG",
+              "gammaP"
+            ]
+          },
           {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": [
@@ -22721,6 +23792,4575 @@
         ]
       }
     },
+    "expression/embeddedDocs": {
+      "expression/src/embeddedDocs/constants/e.ts": {
+        "description": "e module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "eDocs"
+        ],
+        "constants": [
+          "eDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/false.ts": {
+        "description": "false module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "falseDocs"
+        ],
+        "constants": [
+          "falseDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/i.ts": {
+        "description": "i module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "iDocs"
+        ],
+        "constants": [
+          "iDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/Infinity.ts": {
+        "description": "Infinity module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "InfinityDocs"
+        ],
+        "constants": [
+          "InfinityDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/LN10.ts": {
+        "description": "LN10 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "LN10Docs"
+        ],
+        "constants": [
+          "LN10Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/LN2.ts": {
+        "description": "LN2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "LN2Docs"
+        ],
+        "constants": [
+          "LN2Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/LOG10E.ts": {
+        "description": "LOG10E module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "LOG10EDocs"
+        ],
+        "constants": [
+          "LOG10EDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/LOG2E.ts": {
+        "description": "LOG2E module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "LOG2EDocs"
+        ],
+        "constants": [
+          "LOG2EDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/NaN.ts": {
+        "description": "NaN module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "NaNDocs"
+        ],
+        "constants": [
+          "NaNDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/null.ts": {
+        "description": "null module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "nullDocs"
+        ],
+        "constants": [
+          "nullDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/phi.ts": {
+        "description": "phi module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "phiDocs"
+        ],
+        "constants": [
+          "phiDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/pi.ts": {
+        "description": "pi module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "piDocs"
+        ],
+        "constants": [
+          "piDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/SQRT1_2.ts": {
+        "description": "SQRT1_2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "SQRT12Docs"
+        ],
+        "constants": [
+          "SQRT12Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/SQRT2.ts": {
+        "description": "SQRT2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "SQRT2Docs"
+        ],
+        "constants": [
+          "SQRT2Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/tau.ts": {
+        "description": "tau module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "tauDocs"
+        ],
+        "constants": [
+          "tauDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/true.ts": {
+        "description": "true module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "trueDocs"
+        ],
+        "constants": [
+          "trueDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/constants/version.ts": {
+        "description": "version module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "versionDocs"
+        ],
+        "constants": [
+          "versionDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/bigint.ts": {
+        "description": "bigint module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bigintDocs"
+        ],
+        "constants": [
+          "bigintDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/bignumber.ts": {
+        "description": "bignumber module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bignumberDocs"
+        ],
+        "constants": [
+          "bignumberDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/boolean.ts": {
+        "description": "boolean module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "booleanDocs"
+        ],
+        "constants": [
+          "booleanDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/complex.ts": {
+        "description": "complex module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "complexDocs"
+        ],
+        "constants": [
+          "complexDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/createUnit.ts": {
+        "description": "createUnit module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "createUnitDocs"
+        ],
+        "constants": [
+          "createUnitDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/fraction.ts": {
+        "description": "fraction module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "fractionDocs"
+        ],
+        "constants": [
+          "fractionDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/index.ts": {
+        "description": "Entry point exporting 1 symbols",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "indexDocs"
+        ],
+        "constants": [
+          "indexDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/matrix.ts": {
+        "description": "matrix module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrixDocs"
+        ],
+        "constants": [
+          "matrixDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/number.ts": {
+        "description": "number module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "numberDocs"
+        ],
+        "constants": [
+          "numberDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/sparse.ts": {
+        "description": "sparse module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sparseDocs"
+        ],
+        "constants": [
+          "sparseDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/splitUnit.ts": {
+        "description": "splitUnit module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "splitUnitDocs"
+        ],
+        "constants": [
+          "splitUnitDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/string.ts": {
+        "description": "string module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "stringDocs"
+        ],
+        "constants": [
+          "stringDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/construction/unit.ts": {
+        "description": "unit module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "unitDocs"
+        ],
+        "constants": [
+          "unitDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/core/config.ts": {
+        "description": "config module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "configDocs"
+        ],
+        "constants": [
+          "configDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/core/import.ts": {
+        "description": "import module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "importDocs"
+        ],
+        "constants": [
+          "importDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/core/typed.ts": {
+        "description": "typed module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "typedDocs"
+        ],
+        "constants": [
+          "typedDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/embeddedDocs.ts": {
+        "description": "embeddedDocs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./constants/e.js",
+            "imports": [
+              "eDocs"
+            ]
+          },
+          {
+            "file": "./constants/false.js",
+            "imports": [
+              "falseDocs"
+            ]
+          },
+          {
+            "file": "./constants/i.js",
+            "imports": [
+              "iDocs"
+            ]
+          },
+          {
+            "file": "./constants/Infinity.js",
+            "imports": [
+              "InfinityDocs"
+            ]
+          },
+          {
+            "file": "./constants/LN10.js",
+            "imports": [
+              "LN10Docs"
+            ]
+          },
+          {
+            "file": "./constants/LN2.js",
+            "imports": [
+              "LN2Docs"
+            ]
+          },
+          {
+            "file": "./constants/LOG10E.js",
+            "imports": [
+              "LOG10EDocs"
+            ]
+          },
+          {
+            "file": "./constants/LOG2E.js",
+            "imports": [
+              "LOG2EDocs"
+            ]
+          },
+          {
+            "file": "./constants/NaN.js",
+            "imports": [
+              "NaNDocs"
+            ]
+          },
+          {
+            "file": "./constants/null.js",
+            "imports": [
+              "nullDocs"
+            ]
+          },
+          {
+            "file": "./constants/phi.js",
+            "imports": [
+              "phiDocs"
+            ]
+          },
+          {
+            "file": "./constants/pi.js",
+            "imports": [
+              "piDocs"
+            ]
+          },
+          {
+            "file": "./constants/SQRT1_2.js",
+            "imports": [
+              "SQRT12Docs"
+            ]
+          },
+          {
+            "file": "./constants/SQRT2.js",
+            "imports": [
+              "SQRT2Docs"
+            ]
+          },
+          {
+            "file": "./constants/tau.js",
+            "imports": [
+              "tauDocs"
+            ]
+          },
+          {
+            "file": "./constants/true.js",
+            "imports": [
+              "trueDocs"
+            ]
+          },
+          {
+            "file": "./constants/version.js",
+            "imports": [
+              "versionDocs"
+            ]
+          },
+          {
+            "file": "./construction/bignumber.js",
+            "imports": [
+              "bignumberDocs"
+            ]
+          },
+          {
+            "file": "./construction/bigint.js",
+            "imports": [
+              "bigintDocs"
+            ]
+          },
+          {
+            "file": "./construction/boolean.js",
+            "imports": [
+              "booleanDocs"
+            ]
+          },
+          {
+            "file": "./construction/complex.js",
+            "imports": [
+              "complexDocs"
+            ]
+          },
+          {
+            "file": "./construction/createUnit.js",
+            "imports": [
+              "createUnitDocs"
+            ]
+          },
+          {
+            "file": "./construction/fraction.js",
+            "imports": [
+              "fractionDocs"
+            ]
+          },
+          {
+            "file": "./construction/index.js",
+            "imports": [
+              "indexDocs"
+            ]
+          },
+          {
+            "file": "./construction/matrix.js",
+            "imports": [
+              "matrixDocs"
+            ]
+          },
+          {
+            "file": "./construction/number.js",
+            "imports": [
+              "numberDocs"
+            ]
+          },
+          {
+            "file": "./construction/sparse.js",
+            "imports": [
+              "sparseDocs"
+            ]
+          },
+          {
+            "file": "./construction/splitUnit.js",
+            "imports": [
+              "splitUnitDocs"
+            ]
+          },
+          {
+            "file": "./construction/string.js",
+            "imports": [
+              "stringDocs"
+            ]
+          },
+          {
+            "file": "./construction/unit.js",
+            "imports": [
+              "unitDocs"
+            ]
+          },
+          {
+            "file": "./core/config.js",
+            "imports": [
+              "configDocs"
+            ]
+          },
+          {
+            "file": "./core/import.js",
+            "imports": [
+              "importDocs"
+            ]
+          },
+          {
+            "file": "./core/typed.js",
+            "imports": [
+              "typedDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/derivative.js",
+            "imports": [
+              "derivativeDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/leafCount.js",
+            "imports": [
+              "leafCountDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/lsolve.js",
+            "imports": [
+              "lsolveDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/lsolveAll.js",
+            "imports": [
+              "lsolveAllDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/lup.js",
+            "imports": [
+              "lupDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/lusolve.js",
+            "imports": [
+              "lusolveDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/polynomialRoot.js",
+            "imports": [
+              "polynomialRootDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/qr.js",
+            "imports": [
+              "qrDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/rationalize.js",
+            "imports": [
+              "rationalizeDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/resolve.js",
+            "imports": [
+              "resolveDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/simplify.js",
+            "imports": [
+              "simplifyDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/simplifyConstant.js",
+            "imports": [
+              "simplifyConstantDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/simplifyCore.js",
+            "imports": [
+              "simplifyCoreDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/slu.js",
+            "imports": [
+              "sluDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/symbolicEqual.js",
+            "imports": [
+              "symbolicEqualDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/usolve.js",
+            "imports": [
+              "usolveDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/usolveAll.js",
+            "imports": [
+              "usolveAllDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/abs.js",
+            "imports": [
+              "absDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/add.js",
+            "imports": [
+              "addDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/cbrt.js",
+            "imports": [
+              "cbrtDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/ceil.js",
+            "imports": [
+              "ceilDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/cube.js",
+            "imports": [
+              "cubeDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/divide.js",
+            "imports": [
+              "divideDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/dotDivide.js",
+            "imports": [
+              "dotDivideDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/dotMultiply.js",
+            "imports": [
+              "dotMultiplyDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/dotPow.js",
+            "imports": [
+              "dotPowDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/exp.js",
+            "imports": [
+              "expDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/expm.js",
+            "imports": [
+              "expmDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/expm1.js",
+            "imports": [
+              "expm1Docs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/fix.js",
+            "imports": [
+              "fixDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/floor.js",
+            "imports": [
+              "floorDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/gcd.js",
+            "imports": [
+              "gcdDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/hypot.js",
+            "imports": [
+              "hypotDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/invmod.js",
+            "imports": [
+              "invmodDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/lcm.js",
+            "imports": [
+              "lcmDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/log.js",
+            "imports": [
+              "logDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/log10.js",
+            "imports": [
+              "log10Docs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/log1p.js",
+            "imports": [
+              "log1pDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/log2.js",
+            "imports": [
+              "log2Docs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/mod.js",
+            "imports": [
+              "modDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/multiply.js",
+            "imports": [
+              "multiplyDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/norm.js",
+            "imports": [
+              "normDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/nthRoot.js",
+            "imports": [
+              "nthRootDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/nthRoots.js",
+            "imports": [
+              "nthRootsDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/pow.js",
+            "imports": [
+              "powDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/round.js",
+            "imports": [
+              "roundDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/sign.js",
+            "imports": [
+              "signDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/sqrt.js",
+            "imports": [
+              "sqrtDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/sqrtm.js",
+            "imports": [
+              "sqrtmDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/sylvester.js",
+            "imports": [
+              "sylvesterDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/schur.js",
+            "imports": [
+              "schurDocs"
+            ]
+          },
+          {
+            "file": "./function/algebra/lyap.js",
+            "imports": [
+              "lyapDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/square.js",
+            "imports": [
+              "squareDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/subtract.js",
+            "imports": [
+              "subtractDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/unaryMinus.js",
+            "imports": [
+              "unaryMinusDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/unaryPlus.js",
+            "imports": [
+              "unaryPlusDocs"
+            ]
+          },
+          {
+            "file": "./function/arithmetic/xgcd.js",
+            "imports": [
+              "xgcdDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/bitAnd.js",
+            "imports": [
+              "bitAndDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/bitNot.js",
+            "imports": [
+              "bitNotDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/bitOr.js",
+            "imports": [
+              "bitOrDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/bitXor.js",
+            "imports": [
+              "bitXorDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/leftShift.js",
+            "imports": [
+              "leftShiftDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/rightArithShift.js",
+            "imports": [
+              "rightArithShiftDocs"
+            ]
+          },
+          {
+            "file": "./function/bitwise/rightLogShift.js",
+            "imports": [
+              "rightLogShiftDocs"
+            ]
+          },
+          {
+            "file": "./function/combinatorics/bellNumbers.js",
+            "imports": [
+              "bellNumbersDocs"
+            ]
+          },
+          {
+            "file": "./function/combinatorics/catalan.js",
+            "imports": [
+              "catalanDocs"
+            ]
+          },
+          {
+            "file": "./function/combinatorics/composition.js",
+            "imports": [
+              "compositionDocs"
+            ]
+          },
+          {
+            "file": "./function/combinatorics/stirlingS2.js",
+            "imports": [
+              "stirlingS2Docs"
+            ]
+          },
+          {
+            "file": "./function/complex/arg.js",
+            "imports": [
+              "argDocs"
+            ]
+          },
+          {
+            "file": "./function/complex/conj.js",
+            "imports": [
+              "conjDocs"
+            ]
+          },
+          {
+            "file": "./function/complex/im.js",
+            "imports": [
+              "imDocs"
+            ]
+          },
+          {
+            "file": "./function/complex/re.js",
+            "imports": [
+              "reDocs"
+            ]
+          },
+          {
+            "file": "./function/expression/evaluate.js",
+            "imports": [
+              "evaluateDocs"
+            ]
+          },
+          {
+            "file": "./function/expression/parser.js",
+            "imports": [
+              "parserDocs"
+            ]
+          },
+          {
+            "file": "./function/expression/parse.js",
+            "imports": [
+              "parseDocs"
+            ]
+          },
+          {
+            "file": "./function/expression/compile.js",
+            "imports": [
+              "compileDocs"
+            ]
+          },
+          {
+            "file": "./function/expression/help.js",
+            "imports": [
+              "helpDocs"
+            ]
+          },
+          {
+            "file": "./function/geometry/distance.js",
+            "imports": [
+              "distanceDocs"
+            ]
+          },
+          {
+            "file": "./function/geometry/intersect.js",
+            "imports": [
+              "intersectDocs"
+            ]
+          },
+          {
+            "file": "./function/logical/and.js",
+            "imports": [
+              "andDocs"
+            ]
+          },
+          {
+            "file": "./function/logical/not.js",
+            "imports": [
+              "notDocs"
+            ]
+          },
+          {
+            "file": "./function/logical/nullish.js",
+            "imports": [
+              "nullishDocs"
+            ]
+          },
+          {
+            "file": "./function/logical/or.js",
+            "imports": [
+              "orDocs"
+            ]
+          },
+          {
+            "file": "./function/logical/xor.js",
+            "imports": [
+              "xorDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/mapSlices.js",
+            "imports": [
+              "mapSlicesDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/column.js",
+            "imports": [
+              "columnDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/concat.js",
+            "imports": [
+              "concatDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/count.js",
+            "imports": [
+              "countDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/cross.js",
+            "imports": [
+              "crossDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/ctranspose.js",
+            "imports": [
+              "ctransposeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/det.js",
+            "imports": [
+              "detDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/diag.js",
+            "imports": [
+              "diagDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/diff.js",
+            "imports": [
+              "diffDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/dot.js",
+            "imports": [
+              "dotDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/eigs.js",
+            "imports": [
+              "eigsDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/filter.js",
+            "imports": [
+              "filterDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/flatten.js",
+            "imports": [
+              "flattenDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/forEach.js",
+            "imports": [
+              "forEachDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/getMatrixDataType.js",
+            "imports": [
+              "getMatrixDataTypeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/identity.js",
+            "imports": [
+              "identityDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/inv.js",
+            "imports": [
+              "invDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/pinv.js",
+            "imports": [
+              "pinvDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/kron.js",
+            "imports": [
+              "kronDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/map.js",
+            "imports": [
+              "mapDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/matrixFromColumns.js",
+            "imports": [
+              "matrixFromColumnsDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/matrixFromFunction.js",
+            "imports": [
+              "matrixFromFunctionDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/matrixFromRows.js",
+            "imports": [
+              "matrixFromRowsDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/ones.js",
+            "imports": [
+              "onesDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/partitionSelect.js",
+            "imports": [
+              "partitionSelectDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/range.js",
+            "imports": [
+              "rangeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/reshape.js",
+            "imports": [
+              "reshapeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/resize.js",
+            "imports": [
+              "resizeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/rotate.js",
+            "imports": [
+              "rotateDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/rotationMatrix.js",
+            "imports": [
+              "rotationMatrixDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/row.js",
+            "imports": [
+              "rowDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/size.js",
+            "imports": [
+              "sizeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/sort.js",
+            "imports": [
+              "sortDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/squeeze.js",
+            "imports": [
+              "squeezeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/subset.js",
+            "imports": [
+              "subsetDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/trace.js",
+            "imports": [
+              "traceDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/transpose.js",
+            "imports": [
+              "transposeDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/zeros.js",
+            "imports": [
+              "zerosDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/fft.js",
+            "imports": [
+              "fftDocs"
+            ]
+          },
+          {
+            "file": "./function/matrix/ifft.js",
+            "imports": [
+              "ifftDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/bernoulli.js",
+            "imports": [
+              "bernoulliDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/combinations.js",
+            "imports": [
+              "combinationsDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/combinationsWithRep.js",
+            "imports": [
+              "combinationsWithRepDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/factorial.js",
+            "imports": [
+              "factorialDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/gamma.js",
+            "imports": [
+              "gammaDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/lgamma.js",
+            "imports": [
+              "lgammaDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/kldivergence.js",
+            "imports": [
+              "kldivergenceDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/multinomial.js",
+            "imports": [
+              "multinomialDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/permutations.js",
+            "imports": [
+              "permutationsDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/pickRandom.js",
+            "imports": [
+              "pickRandomDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/random.js",
+            "imports": [
+              "randomDocs"
+            ]
+          },
+          {
+            "file": "./function/probability/randomInt.js",
+            "imports": [
+              "randomIntDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/compare.js",
+            "imports": [
+              "compareDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/compareNatural.js",
+            "imports": [
+              "compareNaturalDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/compareText.js",
+            "imports": [
+              "compareTextDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/deepEqual.js",
+            "imports": [
+              "deepEqualDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/equal.js",
+            "imports": [
+              "equalDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/equalText.js",
+            "imports": [
+              "equalTextDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/larger.js",
+            "imports": [
+              "largerDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/largerEq.js",
+            "imports": [
+              "largerEqDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/smaller.js",
+            "imports": [
+              "smallerDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/smallerEq.js",
+            "imports": [
+              "smallerEqDocs"
+            ]
+          },
+          {
+            "file": "./function/relational/unequal.js",
+            "imports": [
+              "unequalDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setCartesian.js",
+            "imports": [
+              "setCartesianDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setDifference.js",
+            "imports": [
+              "setDifferenceDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setDistinct.js",
+            "imports": [
+              "setDistinctDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setIntersect.js",
+            "imports": [
+              "setIntersectDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setIsSubset.js",
+            "imports": [
+              "setIsSubsetDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setMultiplicity.js",
+            "imports": [
+              "setMultiplicityDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setPowerset.js",
+            "imports": [
+              "setPowersetDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setSize.js",
+            "imports": [
+              "setSizeDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setSymDifference.js",
+            "imports": [
+              "setSymDifferenceDocs"
+            ]
+          },
+          {
+            "file": "./function/set/setUnion.js",
+            "imports": [
+              "setUnionDocs"
+            ]
+          },
+          {
+            "file": "./function/signal/zpk2tf.js",
+            "imports": [
+              "zpk2tfDocs"
+            ]
+          },
+          {
+            "file": "./function/signal/freqz.js",
+            "imports": [
+              "freqzDocs"
+            ]
+          },
+          {
+            "file": "./function/special/erf.js",
+            "imports": [
+              "erfDocs"
+            ]
+          },
+          {
+            "file": "./function/special/zeta.js",
+            "imports": [
+              "zetaDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/mad.js",
+            "imports": [
+              "madDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/max.js",
+            "imports": [
+              "maxDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/mean.js",
+            "imports": [
+              "meanDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/median.js",
+            "imports": [
+              "medianDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/min.js",
+            "imports": [
+              "minDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/mode.js",
+            "imports": [
+              "modeDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/prod.js",
+            "imports": [
+              "prodDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/quantileSeq.js",
+            "imports": [
+              "quantileSeqDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/std.js",
+            "imports": [
+              "stdDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/cumsum.js",
+            "imports": [
+              "cumSumDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/sum.js",
+            "imports": [
+              "sumDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/variance.js",
+            "imports": [
+              "varianceDocs"
+            ]
+          },
+          {
+            "file": "./function/statistics/corr.js",
+            "imports": [
+              "corrDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acos.js",
+            "imports": [
+              "acosDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acosh.js",
+            "imports": [
+              "acoshDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acot.js",
+            "imports": [
+              "acotDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acoth.js",
+            "imports": [
+              "acothDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acsc.js",
+            "imports": [
+              "acscDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/acsch.js",
+            "imports": [
+              "acschDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/asec.js",
+            "imports": [
+              "asecDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/asech.js",
+            "imports": [
+              "asechDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/asin.js",
+            "imports": [
+              "asinDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/asinh.js",
+            "imports": [
+              "asinhDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/atan.js",
+            "imports": [
+              "atanDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/atan2.js",
+            "imports": [
+              "atan2Docs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/atanh.js",
+            "imports": [
+              "atanhDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/cos.js",
+            "imports": [
+              "cosDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/cosh.js",
+            "imports": [
+              "coshDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/cot.js",
+            "imports": [
+              "cotDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/coth.js",
+            "imports": [
+              "cothDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/csc.js",
+            "imports": [
+              "cscDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/csch.js",
+            "imports": [
+              "cschDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/sec.js",
+            "imports": [
+              "secDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/sech.js",
+            "imports": [
+              "sechDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/sin.js",
+            "imports": [
+              "sinDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/sinh.js",
+            "imports": [
+              "sinhDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/tan.js",
+            "imports": [
+              "tanDocs"
+            ]
+          },
+          {
+            "file": "./function/trigonometry/tanh.js",
+            "imports": [
+              "tanhDocs"
+            ]
+          },
+          {
+            "file": "./function/units/to.js",
+            "imports": [
+              "toDocs"
+            ]
+          },
+          {
+            "file": "./function/units/toBest.js",
+            "imports": [
+              "toBestDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/bin.js",
+            "imports": [
+              "binDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/clone.js",
+            "imports": [
+              "cloneDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/format.js",
+            "imports": [
+              "formatDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/hasNumericValue.js",
+            "imports": [
+              "hasNumericValueDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/hex.js",
+            "imports": [
+              "hexDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isInteger.js",
+            "imports": [
+              "isIntegerDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isNaN.js",
+            "imports": [
+              "isNaNDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isBounded.js",
+            "imports": [
+              "isBoundedDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isFinite.js",
+            "imports": [
+              "isFiniteDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isNegative.js",
+            "imports": [
+              "isNegativeDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isNumeric.js",
+            "imports": [
+              "isNumericDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isPositive.js",
+            "imports": [
+              "isPositiveDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isPrime.js",
+            "imports": [
+              "isPrimeDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/isZero.js",
+            "imports": [
+              "isZeroDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/numeric.js",
+            "imports": [
+              "numericDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/oct.js",
+            "imports": [
+              "octDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/print.js",
+            "imports": [
+              "printDocs"
+            ]
+          },
+          {
+            "file": "./function/utils/typeOf.js",
+            "imports": [
+              "typeOfDocs"
+            ]
+          },
+          {
+            "file": "./function/numeric/solveODE.js",
+            "imports": [
+              "solveODEDocs"
+            ]
+          }
+        ],
+        "exports": [
+          "embeddedDocs"
+        ],
+        "constants": [
+          "embeddedDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/derivative.ts": {
+        "description": "derivative module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "derivativeDocs"
+        ],
+        "constants": [
+          "derivativeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/leafCount.ts": {
+        "description": "leafCount module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "leafCountDocs"
+        ],
+        "constants": [
+          "leafCountDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/lsolve.ts": {
+        "description": "lsolve module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lsolveDocs"
+        ],
+        "constants": [
+          "lsolveDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/lsolveAll.ts": {
+        "description": "lsolveAll module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lsolveAllDocs"
+        ],
+        "constants": [
+          "lsolveAllDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/lup.ts": {
+        "description": "lup module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lupDocs"
+        ],
+        "constants": [
+          "lupDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/lusolve.ts": {
+        "description": "lusolve module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lusolveDocs"
+        ],
+        "constants": [
+          "lusolveDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/lyap.ts": {
+        "description": "lyap module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lyapDocs"
+        ],
+        "constants": [
+          "lyapDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/polynomialRoot.ts": {
+        "description": "polynomialRoot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "polynomialRootDocs"
+        ],
+        "constants": [
+          "polynomialRootDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/qr.ts": {
+        "description": "qr module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "qrDocs"
+        ],
+        "constants": [
+          "qrDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/rationalize.ts": {
+        "description": "rationalize module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rationalizeDocs"
+        ],
+        "constants": [
+          "rationalizeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/resolve.ts": {
+        "description": "resolve module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "resolveDocs"
+        ],
+        "constants": [
+          "resolveDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/schur.ts": {
+        "description": "schur module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "schurDocs"
+        ],
+        "constants": [
+          "schurDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/simplify.ts": {
+        "description": "simplify module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "simplifyDocs"
+        ],
+        "constants": [
+          "simplifyDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/simplifyConstant.ts": {
+        "description": "simplifyConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "simplifyConstantDocs"
+        ],
+        "constants": [
+          "simplifyConstantDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/simplifyCore.ts": {
+        "description": "simplifyCore module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "simplifyCoreDocs"
+        ],
+        "constants": [
+          "simplifyCoreDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/slu.ts": {
+        "description": "slu module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sluDocs"
+        ],
+        "constants": [
+          "sluDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/sylvester.ts": {
+        "description": "sylvester module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sylvesterDocs"
+        ],
+        "constants": [
+          "sylvesterDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/symbolicEqual.ts": {
+        "description": "symbolicEqual module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "symbolicEqualDocs"
+        ],
+        "constants": [
+          "symbolicEqualDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/usolve.ts": {
+        "description": "usolve module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "usolveDocs"
+        ],
+        "constants": [
+          "usolveDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/algebra/usolveAll.ts": {
+        "description": "usolveAll module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "usolveAllDocs"
+        ],
+        "constants": [
+          "usolveAllDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/abs.ts": {
+        "description": "abs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "absDocs"
+        ],
+        "constants": [
+          "absDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/add.ts": {
+        "description": "add module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "addDocs"
+        ],
+        "constants": [
+          "addDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/cbrt.ts": {
+        "description": "cbrt module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cbrtDocs"
+        ],
+        "constants": [
+          "cbrtDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/ceil.ts": {
+        "description": "ceil module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "ceilDocs"
+        ],
+        "constants": [
+          "ceilDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/cube.ts": {
+        "description": "cube module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cubeDocs"
+        ],
+        "constants": [
+          "cubeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/divide.ts": {
+        "description": "divide module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "divideDocs"
+        ],
+        "constants": [
+          "divideDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/dotDivide.ts": {
+        "description": "dotDivide module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "dotDivideDocs"
+        ],
+        "constants": [
+          "dotDivideDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/dotMultiply.ts": {
+        "description": "dotMultiply module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "dotMultiplyDocs"
+        ],
+        "constants": [
+          "dotMultiplyDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/dotPow.ts": {
+        "description": "dotPow module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "dotPowDocs"
+        ],
+        "constants": [
+          "dotPowDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/exp.ts": {
+        "description": "exp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "expDocs"
+        ],
+        "constants": [
+          "expDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/expm.ts": {
+        "description": "expm module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "expmDocs"
+        ],
+        "constants": [
+          "expmDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/expm1.ts": {
+        "description": "expm1 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "expm1Docs"
+        ],
+        "constants": [
+          "expm1Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/fix.ts": {
+        "description": "fix module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "fixDocs"
+        ],
+        "constants": [
+          "fixDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/floor.ts": {
+        "description": "floor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "floorDocs"
+        ],
+        "constants": [
+          "floorDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/gcd.ts": {
+        "description": "gcd module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "gcdDocs"
+        ],
+        "constants": [
+          "gcdDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/hypot.ts": {
+        "description": "hypot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "hypotDocs"
+        ],
+        "constants": [
+          "hypotDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/invmod.ts": {
+        "description": "invmod module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "invmodDocs"
+        ],
+        "constants": [
+          "invmodDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/lcm.ts": {
+        "description": "lcm module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lcmDocs"
+        ],
+        "constants": [
+          "lcmDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/log.ts": {
+        "description": "log module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "logDocs"
+        ],
+        "constants": [
+          "logDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/log10.ts": {
+        "description": "log10 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "log10Docs"
+        ],
+        "constants": [
+          "log10Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/log1p.ts": {
+        "description": "log1p module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "log1pDocs"
+        ],
+        "constants": [
+          "log1pDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/log2.ts": {
+        "description": "log2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "log2Docs"
+        ],
+        "constants": [
+          "log2Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/mod.ts": {
+        "description": "mod module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "modDocs"
+        ],
+        "constants": [
+          "modDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/multiply.ts": {
+        "description": "multiply module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "multiplyDocs"
+        ],
+        "constants": [
+          "multiplyDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/norm.ts": {
+        "description": "norm module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "normDocs"
+        ],
+        "constants": [
+          "normDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/nthRoot.ts": {
+        "description": "nthRoot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "nthRootDocs"
+        ],
+        "constants": [
+          "nthRootDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/nthRoots.ts": {
+        "description": "nthRoots module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "nthRootsDocs"
+        ],
+        "constants": [
+          "nthRootsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/pow.ts": {
+        "description": "pow module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "powDocs"
+        ],
+        "constants": [
+          "powDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/round.ts": {
+        "description": "round module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "roundDocs"
+        ],
+        "constants": [
+          "roundDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/sign.ts": {
+        "description": "sign module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "signDocs"
+        ],
+        "constants": [
+          "signDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/sqrt.ts": {
+        "description": "sqrt module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sqrtDocs"
+        ],
+        "constants": [
+          "sqrtDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/sqrtm.ts": {
+        "description": "sqrtm module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sqrtmDocs"
+        ],
+        "constants": [
+          "sqrtmDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/square.ts": {
+        "description": "square module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "squareDocs"
+        ],
+        "constants": [
+          "squareDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/subtract.ts": {
+        "description": "subtract module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "subtractDocs"
+        ],
+        "constants": [
+          "subtractDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/unaryMinus.ts": {
+        "description": "unaryMinus module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "unaryMinusDocs"
+        ],
+        "constants": [
+          "unaryMinusDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/unaryPlus.ts": {
+        "description": "unaryPlus module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "unaryPlusDocs"
+        ],
+        "constants": [
+          "unaryPlusDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/arithmetic/xgcd.ts": {
+        "description": "xgcd module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "xgcdDocs"
+        ],
+        "constants": [
+          "xgcdDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/bitAnd.ts": {
+        "description": "bitAnd module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bitAndDocs"
+        ],
+        "constants": [
+          "bitAndDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/bitNot.ts": {
+        "description": "bitNot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bitNotDocs"
+        ],
+        "constants": [
+          "bitNotDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/bitOr.ts": {
+        "description": "bitOr module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bitOrDocs"
+        ],
+        "constants": [
+          "bitOrDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/bitXor.ts": {
+        "description": "bitXor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bitXorDocs"
+        ],
+        "constants": [
+          "bitXorDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/leftShift.ts": {
+        "description": "leftShift module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "leftShiftDocs"
+        ],
+        "constants": [
+          "leftShiftDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/rightArithShift.ts": {
+        "description": "rightArithShift module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rightArithShiftDocs"
+        ],
+        "constants": [
+          "rightArithShiftDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/bitwise/rightLogShift.ts": {
+        "description": "rightLogShift module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rightLogShiftDocs"
+        ],
+        "constants": [
+          "rightLogShiftDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/bellNumbers.ts": {
+        "description": "bellNumbers module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bellNumbersDocs"
+        ],
+        "constants": [
+          "bellNumbersDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/catalan.ts": {
+        "description": "catalan module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "catalanDocs"
+        ],
+        "constants": [
+          "catalanDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/composition.ts": {
+        "description": "composition module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "compositionDocs"
+        ],
+        "constants": [
+          "compositionDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts": {
+        "description": "stirlingS2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "stirlingS2Docs"
+        ],
+        "constants": [
+          "stirlingS2Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/complex/arg.ts": {
+        "description": "arg module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "argDocs"
+        ],
+        "constants": [
+          "argDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/complex/conj.ts": {
+        "description": "conj module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "conjDocs"
+        ],
+        "constants": [
+          "conjDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/complex/im.ts": {
+        "description": "im module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "imDocs"
+        ],
+        "constants": [
+          "imDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/complex/re.ts": {
+        "description": "re module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "reDocs"
+        ],
+        "constants": [
+          "reDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/expression/compile.ts": {
+        "description": "compile module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "compileDocs"
+        ],
+        "constants": [
+          "compileDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/expression/evaluate.ts": {
+        "description": "evaluate module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "evaluateDocs"
+        ],
+        "constants": [
+          "evaluateDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/expression/help.ts": {
+        "description": "help module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "helpDocs"
+        ],
+        "constants": [
+          "helpDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/expression/parse.ts": {
+        "description": "parse module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "parseDocs"
+        ],
+        "constants": [
+          "parseDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/expression/parser.ts": {
+        "description": "parser module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "parserDocs"
+        ],
+        "constants": [
+          "parserDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/geometry/distance.ts": {
+        "description": "distance module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "distanceDocs"
+        ],
+        "constants": [
+          "distanceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/geometry/intersect.ts": {
+        "description": "intersect module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "intersectDocs"
+        ],
+        "constants": [
+          "intersectDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/logical/and.ts": {
+        "description": "and module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "andDocs"
+        ],
+        "constants": [
+          "andDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/logical/not.ts": {
+        "description": "not module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "notDocs"
+        ],
+        "constants": [
+          "notDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/logical/nullish.ts": {
+        "description": "nullish module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "nullishDocs"
+        ],
+        "constants": [
+          "nullishDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/logical/or.ts": {
+        "description": "or module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "orDocs"
+        ],
+        "constants": [
+          "orDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/logical/xor.ts": {
+        "description": "xor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "xorDocs"
+        ],
+        "constants": [
+          "xorDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/column.ts": {
+        "description": "column module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "columnDocs"
+        ],
+        "constants": [
+          "columnDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/concat.ts": {
+        "description": "concat module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "concatDocs"
+        ],
+        "constants": [
+          "concatDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/count.ts": {
+        "description": "count module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "countDocs"
+        ],
+        "constants": [
+          "countDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/cross.ts": {
+        "description": "cross module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "crossDocs"
+        ],
+        "constants": [
+          "crossDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/ctranspose.ts": {
+        "description": "ctranspose module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "ctransposeDocs"
+        ],
+        "constants": [
+          "ctransposeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/det.ts": {
+        "description": "det module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "detDocs"
+        ],
+        "constants": [
+          "detDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/diag.ts": {
+        "description": "diag module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "diagDocs"
+        ],
+        "constants": [
+          "diagDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/diff.ts": {
+        "description": "diff module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "diffDocs"
+        ],
+        "constants": [
+          "diffDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/dot.ts": {
+        "description": "dot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "dotDocs"
+        ],
+        "constants": [
+          "dotDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/eigs.ts": {
+        "description": "eigs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "eigsDocs"
+        ],
+        "constants": [
+          "eigsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/fft.ts": {
+        "description": "fft module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "fftDocs"
+        ],
+        "constants": [
+          "fftDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/filter.ts": {
+        "description": "filter module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "filterDocs"
+        ],
+        "constants": [
+          "filterDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/flatten.ts": {
+        "description": "flatten module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "flattenDocs"
+        ],
+        "constants": [
+          "flattenDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/forEach.ts": {
+        "description": "forEach module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "forEachDocs"
+        ],
+        "constants": [
+          "forEachDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/getMatrixDataType.ts": {
+        "description": "getMatrixDataType module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "getMatrixDataTypeDocs"
+        ],
+        "constants": [
+          "getMatrixDataTypeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/identity.ts": {
+        "description": "identity module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "identityDocs"
+        ],
+        "constants": [
+          "identityDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/ifft.ts": {
+        "description": "ifft module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "ifftDocs"
+        ],
+        "constants": [
+          "ifftDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/inv.ts": {
+        "description": "inv module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "invDocs"
+        ],
+        "constants": [
+          "invDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/kron.ts": {
+        "description": "kron module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "kronDocs"
+        ],
+        "constants": [
+          "kronDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/map.ts": {
+        "description": "map module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "mapDocs"
+        ],
+        "constants": [
+          "mapDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/mapSlices.ts": {
+        "description": "mapSlices module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "mapSlicesDocs"
+        ],
+        "constants": [
+          "mapSlicesDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/matrixFromColumns.ts": {
+        "description": "matrixFromColumns module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrixFromColumnsDocs"
+        ],
+        "constants": [
+          "matrixFromColumnsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/matrixFromFunction.ts": {
+        "description": "matrixFromFunction module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrixFromFunctionDocs"
+        ],
+        "constants": [
+          "matrixFromFunctionDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/matrixFromRows.ts": {
+        "description": "matrixFromRows module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrixFromRowsDocs"
+        ],
+        "constants": [
+          "matrixFromRowsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/ones.ts": {
+        "description": "ones module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "onesDocs"
+        ],
+        "constants": [
+          "onesDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/partitionSelect.ts": {
+        "description": "partitionSelect module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "partitionSelectDocs"
+        ],
+        "constants": [
+          "partitionSelectDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/pinv.ts": {
+        "description": "pinv module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "pinvDocs"
+        ],
+        "constants": [
+          "pinvDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/range.ts": {
+        "description": "range module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rangeDocs"
+        ],
+        "constants": [
+          "rangeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/reshape.ts": {
+        "description": "reshape module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "reshapeDocs"
+        ],
+        "constants": [
+          "reshapeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/resize.ts": {
+        "description": "resize module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "resizeDocs"
+        ],
+        "constants": [
+          "resizeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/rotate.ts": {
+        "description": "rotate module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rotateDocs"
+        ],
+        "constants": [
+          "rotateDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/rotationMatrix.ts": {
+        "description": "rotationMatrix module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rotationMatrixDocs"
+        ],
+        "constants": [
+          "rotationMatrixDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/row.ts": {
+        "description": "row module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rowDocs"
+        ],
+        "constants": [
+          "rowDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/size.ts": {
+        "description": "size module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sizeDocs"
+        ],
+        "constants": [
+          "sizeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/sort.ts": {
+        "description": "sort module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sortDocs"
+        ],
+        "constants": [
+          "sortDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/squeeze.ts": {
+        "description": "squeeze module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "squeezeDocs"
+        ],
+        "constants": [
+          "squeezeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/subset.ts": {
+        "description": "subset module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "subsetDocs"
+        ],
+        "constants": [
+          "subsetDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/trace.ts": {
+        "description": "trace module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "traceDocs"
+        ],
+        "constants": [
+          "traceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/transpose.ts": {
+        "description": "transpose module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "transposeDocs"
+        ],
+        "constants": [
+          "transposeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/matrix/zeros.ts": {
+        "description": "zeros module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "zerosDocs"
+        ],
+        "constants": [
+          "zerosDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/numeric/solveODE.ts": {
+        "description": "solveODE module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "solveODEDocs"
+        ],
+        "constants": [
+          "solveODEDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/bernoulli.ts": {
+        "description": "bernoulli module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bernoulliDocs"
+        ],
+        "constants": [
+          "bernoulliDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/combinations.ts": {
+        "description": "combinations module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "combinationsDocs"
+        ],
+        "constants": [
+          "combinationsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/combinationsWithRep.ts": {
+        "description": "combinationsWithRep module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "combinationsWithRepDocs"
+        ],
+        "constants": [
+          "combinationsWithRepDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/factorial.ts": {
+        "description": "factorial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "factorialDocs"
+        ],
+        "constants": [
+          "factorialDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/gamma.ts": {
+        "description": "gamma module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "gammaDocs"
+        ],
+        "constants": [
+          "gammaDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/kldivergence.ts": {
+        "description": "kldivergence module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "kldivergenceDocs"
+        ],
+        "constants": [
+          "kldivergenceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/lgamma.ts": {
+        "description": "lgamma module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lgammaDocs"
+        ],
+        "constants": [
+          "lgammaDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/multinomial.ts": {
+        "description": "multinomial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "multinomialDocs"
+        ],
+        "constants": [
+          "multinomialDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/permutations.ts": {
+        "description": "permutations module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "permutationsDocs"
+        ],
+        "constants": [
+          "permutationsDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/pickRandom.ts": {
+        "description": "pickRandom module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "pickRandomDocs"
+        ],
+        "constants": [
+          "pickRandomDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/random.ts": {
+        "description": "random module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "randomDocs"
+        ],
+        "constants": [
+          "randomDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/probability/randomInt.ts": {
+        "description": "randomInt module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "randomIntDocs"
+        ],
+        "constants": [
+          "randomIntDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/compare.ts": {
+        "description": "compare module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "compareDocs"
+        ],
+        "constants": [
+          "compareDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/compareNatural.ts": {
+        "description": "compareNatural module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "compareNaturalDocs"
+        ],
+        "constants": [
+          "compareNaturalDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/compareText.ts": {
+        "description": "compareText module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "compareTextDocs"
+        ],
+        "constants": [
+          "compareTextDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/deepEqual.ts": {
+        "description": "deepEqual module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "deepEqualDocs"
+        ],
+        "constants": [
+          "deepEqualDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/equal.ts": {
+        "description": "equal module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "equalDocs"
+        ],
+        "constants": [
+          "equalDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/equalText.ts": {
+        "description": "equalText module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "equalTextDocs"
+        ],
+        "constants": [
+          "equalTextDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/larger.ts": {
+        "description": "larger module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "largerDocs"
+        ],
+        "constants": [
+          "largerDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/largerEq.ts": {
+        "description": "largerEq module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "largerEqDocs"
+        ],
+        "constants": [
+          "largerEqDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/smaller.ts": {
+        "description": "smaller module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "smallerDocs"
+        ],
+        "constants": [
+          "smallerDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/smallerEq.ts": {
+        "description": "smallerEq module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "smallerEqDocs"
+        ],
+        "constants": [
+          "smallerEqDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/relational/unequal.ts": {
+        "description": "unequal module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "unequalDocs"
+        ],
+        "constants": [
+          "unequalDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setCartesian.ts": {
+        "description": "setCartesian module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setCartesianDocs"
+        ],
+        "constants": [
+          "setCartesianDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setDifference.ts": {
+        "description": "setDifference module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setDifferenceDocs"
+        ],
+        "constants": [
+          "setDifferenceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setDistinct.ts": {
+        "description": "setDistinct module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setDistinctDocs"
+        ],
+        "constants": [
+          "setDistinctDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setIntersect.ts": {
+        "description": "setIntersect module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setIntersectDocs"
+        ],
+        "constants": [
+          "setIntersectDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setIsSubset.ts": {
+        "description": "setIsSubset module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setIsSubsetDocs"
+        ],
+        "constants": [
+          "setIsSubsetDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setMultiplicity.ts": {
+        "description": "setMultiplicity module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setMultiplicityDocs"
+        ],
+        "constants": [
+          "setMultiplicityDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setPowerset.ts": {
+        "description": "setPowerset module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setPowersetDocs"
+        ],
+        "constants": [
+          "setPowersetDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setSize.ts": {
+        "description": "setSize module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setSizeDocs"
+        ],
+        "constants": [
+          "setSizeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setSymDifference.ts": {
+        "description": "setSymDifference module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setSymDifferenceDocs"
+        ],
+        "constants": [
+          "setSymDifferenceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/set/setUnion.ts": {
+        "description": "setUnion module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setUnionDocs"
+        ],
+        "constants": [
+          "setUnionDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/signal/freqz.ts": {
+        "description": "freqz module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "freqzDocs"
+        ],
+        "constants": [
+          "freqzDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/signal/zpk2tf.ts": {
+        "description": "zpk2tf module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "zpk2tfDocs"
+        ],
+        "constants": [
+          "zpk2tfDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/special/erf.ts": {
+        "description": "erf module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "erfDocs"
+        ],
+        "constants": [
+          "erfDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/special/zeta.ts": {
+        "description": "zeta module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "zetaDocs"
+        ],
+        "constants": [
+          "zetaDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/corr.ts": {
+        "description": "corr module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "corrDocs"
+        ],
+        "constants": [
+          "corrDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/cumsum.ts": {
+        "description": "cumsum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cumSumDocs"
+        ],
+        "constants": [
+          "cumSumDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/mad.ts": {
+        "description": "mad module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "madDocs"
+        ],
+        "constants": [
+          "madDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/max.ts": {
+        "description": "max module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "maxDocs"
+        ],
+        "constants": [
+          "maxDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/mean.ts": {
+        "description": "mean module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "meanDocs"
+        ],
+        "constants": [
+          "meanDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/median.ts": {
+        "description": "median module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "medianDocs"
+        ],
+        "constants": [
+          "medianDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/min.ts": {
+        "description": "min module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "minDocs"
+        ],
+        "constants": [
+          "minDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/mode.ts": {
+        "description": "mode module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "modeDocs"
+        ],
+        "constants": [
+          "modeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/prod.ts": {
+        "description": "prod module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "prodDocs"
+        ],
+        "constants": [
+          "prodDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/quantileSeq.ts": {
+        "description": "quantileSeq module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "quantileSeqDocs"
+        ],
+        "constants": [
+          "quantileSeqDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/std.ts": {
+        "description": "std module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "stdDocs"
+        ],
+        "constants": [
+          "stdDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/sum.ts": {
+        "description": "sum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sumDocs"
+        ],
+        "constants": [
+          "sumDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/statistics/variance.ts": {
+        "description": "variance module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "varianceDocs"
+        ],
+        "constants": [
+          "varianceDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acos.ts": {
+        "description": "acos module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acosDocs"
+        ],
+        "constants": [
+          "acosDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acosh.ts": {
+        "description": "acosh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acoshDocs"
+        ],
+        "constants": [
+          "acoshDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acot.ts": {
+        "description": "acot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acotDocs"
+        ],
+        "constants": [
+          "acotDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acoth.ts": {
+        "description": "acoth module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acothDocs"
+        ],
+        "constants": [
+          "acothDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acsc.ts": {
+        "description": "acsc module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acscDocs"
+        ],
+        "constants": [
+          "acscDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/acsch.ts": {
+        "description": "acsch module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "acschDocs"
+        ],
+        "constants": [
+          "acschDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/asec.ts": {
+        "description": "asec module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "asecDocs"
+        ],
+        "constants": [
+          "asecDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/asech.ts": {
+        "description": "asech module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "asechDocs"
+        ],
+        "constants": [
+          "asechDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/asin.ts": {
+        "description": "asin module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "asinDocs"
+        ],
+        "constants": [
+          "asinDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/asinh.ts": {
+        "description": "asinh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "asinhDocs"
+        ],
+        "constants": [
+          "asinhDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/atan.ts": {
+        "description": "atan module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "atanDocs"
+        ],
+        "constants": [
+          "atanDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/atan2.ts": {
+        "description": "atan2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "atan2Docs"
+        ],
+        "constants": [
+          "atan2Docs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/atanh.ts": {
+        "description": "atanh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "atanhDocs"
+        ],
+        "constants": [
+          "atanhDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/cos.ts": {
+        "description": "cos module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cosDocs"
+        ],
+        "constants": [
+          "cosDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/cosh.ts": {
+        "description": "cosh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "coshDocs"
+        ],
+        "constants": [
+          "coshDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/cot.ts": {
+        "description": "cot module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cotDocs"
+        ],
+        "constants": [
+          "cotDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/coth.ts": {
+        "description": "coth module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cothDocs"
+        ],
+        "constants": [
+          "cothDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/csc.ts": {
+        "description": "csc module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cscDocs"
+        ],
+        "constants": [
+          "cscDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/csch.ts": {
+        "description": "csch module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cschDocs"
+        ],
+        "constants": [
+          "cschDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/sec.ts": {
+        "description": "sec module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "secDocs"
+        ],
+        "constants": [
+          "secDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/sech.ts": {
+        "description": "sech module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sechDocs"
+        ],
+        "constants": [
+          "sechDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/sin.ts": {
+        "description": "sin module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sinDocs"
+        ],
+        "constants": [
+          "sinDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/sinh.ts": {
+        "description": "sinh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sinhDocs"
+        ],
+        "constants": [
+          "sinhDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/tan.ts": {
+        "description": "tan module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "tanDocs"
+        ],
+        "constants": [
+          "tanDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/trigonometry/tanh.ts": {
+        "description": "tanh module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "tanhDocs"
+        ],
+        "constants": [
+          "tanhDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/units/to.ts": {
+        "description": "to module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "toDocs"
+        ],
+        "constants": [
+          "toDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/units/toBest.ts": {
+        "description": "toBest module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "toBestDocs"
+        ],
+        "constants": [
+          "toBestDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/bin.ts": {
+        "description": "bin module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "binDocs"
+        ],
+        "constants": [
+          "binDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/clone.ts": {
+        "description": "clone module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "cloneDocs"
+        ],
+        "constants": [
+          "cloneDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/format.ts": {
+        "description": "format module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "formatDocs"
+        ],
+        "constants": [
+          "formatDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/hasNumericValue.ts": {
+        "description": "hasNumericValue module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "hasNumericValueDocs"
+        ],
+        "constants": [
+          "hasNumericValueDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/hex.ts": {
+        "description": "hex module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "hexDocs"
+        ],
+        "constants": [
+          "hexDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isBounded.ts": {
+        "description": "isBounded module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isBoundedDocs"
+        ],
+        "constants": [
+          "isBoundedDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isFinite.ts": {
+        "description": "isFinite module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isFiniteDocs"
+        ],
+        "constants": [
+          "isFiniteDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isInteger.ts": {
+        "description": "isInteger module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isIntegerDocs"
+        ],
+        "constants": [
+          "isIntegerDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isNaN.ts": {
+        "description": "isNaN module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isNaNDocs"
+        ],
+        "constants": [
+          "isNaNDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isNegative.ts": {
+        "description": "isNegative module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isNegativeDocs"
+        ],
+        "constants": [
+          "isNegativeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isNumeric.ts": {
+        "description": "isNumeric module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isNumericDocs"
+        ],
+        "constants": [
+          "isNumericDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isPositive.ts": {
+        "description": "isPositive module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isPositiveDocs"
+        ],
+        "constants": [
+          "isPositiveDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isPrime.ts": {
+        "description": "isPrime module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isPrimeDocs"
+        ],
+        "constants": [
+          "isPrimeDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/isZero.ts": {
+        "description": "isZero module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "isZeroDocs"
+        ],
+        "constants": [
+          "isZeroDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/numeric.ts": {
+        "description": "numeric module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "numericDocs"
+        ],
+        "constants": [
+          "numericDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/oct.ts": {
+        "description": "oct module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "octDocs"
+        ],
+        "constants": [
+          "octDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/print.ts": {
+        "description": "print module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "printDocs"
+        ],
+        "constants": [
+          "printDocs"
+        ]
+      },
+      "expression/src/embeddedDocs/function/utils/typeOf.ts": {
+        "description": "typeOf module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "typeOfDocs"
+        ],
+        "constants": [
+          "typeOfDocs"
+        ]
+      }
+    },
     "expression/error": {
       "expression/src/error/DimensionError.ts": {
         "description": "Create a range error with the message:",
@@ -22955,6 +28595,23 @@
             "reExport": true
           },
           {
+            "file": "./embeddedDocs/embeddedDocs.js",
+            "imports": [
+              "embeddedDocs"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./utils/mathml.js",
+            "imports": [
+              "mathMLDocument",
+              "mathMLError",
+              "escapeMathML",
+              "toMathMLSymbol"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./node/Node.js",
             "imports": [
               "createNode"
@@ -23069,6 +28726,11 @@
         ],
         "exports": [
           "createParser",
+          "embeddedDocs",
+          "mathMLDocument",
+          "mathMLError",
+          "escapeMathML",
+          "toMathMLSymbol",
           "createNode",
           "createAccessorNode",
           "createArrayNode",
@@ -23096,6 +28758,11 @@
           "* from ./compiler/index.js",
           "* from ./evaluator/index.js",
           "createParser",
+          "embeddedDocs",
+          "mathMLDocument",
+          "mathMLError",
+          "escapeMathML",
+          "toMathMLSymbol",
           "createNode",
           "createAccessorNode",
           "createArrayNode",
@@ -23408,6 +29075,13 @@
             ]
           },
           {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "escapeMathML",
+              "toMathMLSymbol"
+            ]
+          },
+          {
             "file": "./Node.js",
             "imports": [
               "MathNode",
@@ -23527,6 +29201,12 @@
             "file": "../utils/latex.js",
             "imports": [
               "escapeLatex"
+            ]
+          },
+          {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "constantToMathML"
             ]
           },
           {
@@ -23670,6 +29350,12 @@
             ]
           },
           {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "toMathMLSymbol"
+            ]
+          },
+          {
             "file": "./Node.js",
             "imports": [
               "MathNode",
@@ -23742,6 +29428,12 @@
             "file": "../utils/is.js",
             "imports": [
               "isNode"
+            ]
+          },
+          {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "escapeMathML"
             ]
           },
           {
@@ -23879,6 +29571,14 @@
             ]
           },
           {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "escapeMathML",
+              "inlineOperator",
+              "parenthesizeLower"
+            ]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": [
               "factory"
@@ -23979,6 +29679,13 @@
             ]
           },
           {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "escapeMathML",
+              "inlineOperator"
+            ]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": [
               "factory"
@@ -24019,6 +29726,12 @@
             "file": "../utils/latex.js",
             "imports": [
               "toSymbol"
+            ]
+          },
+          {
+            "file": "../utils/mathml.js",
+            "imports": [
+              "toMathMLSymbol"
             ]
           }
         ],
@@ -24582,6 +30295,34 @@
           "toObject",
           "assign",
           "isObjectWrappingMap"
+        ]
+      },
+      "expression/src/utils/mathml.ts": {
+        "description": "MathML rendering helpers — the MathML analog of `utils/latex.ts`. Shared by",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "escapeMathML",
+          "toMathMLSymbol",
+          "numberToMathML",
+          "constantToMathML",
+          "operatorPrecedence",
+          "inlineOperator",
+          "parenthesizeLower",
+          "mathMLDocument",
+          "mathMLError"
+        ],
+        "functions": [
+          "escapeMathML",
+          "toMathMLSymbol",
+          "numberToMathML",
+          "constantToMathML",
+          "operatorPrecedence",
+          "inlineOperator",
+          "parenthesizeLower",
+          "mathMLDocument",
+          "mathMLError"
         ]
       },
       "expression/src/utils/number.ts": {
@@ -25382,6 +31123,7 @@
         ],
         "exports": [
           "Transfer",
+          "DEFAULT_THRESHOLD_BY_OP",
           "DEFAULT_POOL_CONFIG",
           "computePool",
           "resolveOpThreshold",
@@ -25400,6 +31142,7 @@
           "tensordotChunkKernel"
         ],
         "constants": [
+          "DEFAULT_THRESHOLD_BY_OP",
           "DEFAULT_POOL_CONFIG",
           "computePool"
         ]
@@ -25416,6 +31159,7 @@
               "computePool",
               "Transfer",
               "DEFAULT_POOL_CONFIG",
+              "DEFAULT_THRESHOLD_BY_OP",
               "resolveOpThreshold"
             ],
             "reExport": true
@@ -25505,6 +31249,7 @@
           "computePool",
           "Transfer",
           "DEFAULT_POOL_CONFIG",
+          "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
           "parallelMatmul",
           "parallelMatvec",
@@ -25573,6 +31318,7 @@
           "computePool",
           "Transfer",
           "DEFAULT_POOL_CONFIG",
+          "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
           "parallelMatmul",
           "parallelMatvec",
@@ -26165,7 +31911,8 @@
             "file": "../ComputePool.js",
             "imports": [
               "computePool",
-              "ComputePool"
+              "ComputePool",
+              "DEFAULT_THRESHOLD_BY_OP"
             ]
           }
         ],
@@ -26579,13 +32326,21 @@
             ]
           },
           {
+            "file": "./graph",
+            "imports": [
+              "buildDependencyGraph",
+              "detectCycles"
+            ]
+          },
+          {
             "file": "./types",
             "imports": [
               "Workbook",
               "ParseResult",
               "CellType",
               "Cell",
-              "RuntimeConfig"
+              "RuntimeConfig",
+              "WorkbookMetadata"
             ],
             "typeOnly": true
           }
@@ -26597,13 +32352,15 @@
           "isValidIdentifier",
           "parseWorkbook",
           "serializeWorkbook",
-          "stripOutputs"
+          "stripOutputs",
+          "importWorkbook"
         ],
         "functions": [
           "isValidIdentifier",
           "parseWorkbook",
           "serializeWorkbook",
-          "stripOutputs"
+          "stripOutputs",
+          "importWorkbook"
         ],
         "constants": [
           "SUPPORTED_CELL_TYPES"
@@ -28867,6 +34624,21 @@
       }
     },
     "compat": {
+      "compat/src/chain.ts": {
+        "description": "GC12 — mathjs-style fluent `chain` API.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "createChain"
+        ],
+        "interfaces": [
+          "Chain"
+        ],
+        "functions": [
+          "createChain"
+        ]
+      },
       "compat/src/index.ts": {
         "description": "mathjs Compatibility Layer",
         "externalDependencies": [],
@@ -28876,6 +34648,13 @@
             "file": "./shims.js",
             "imports": [
               "shims"
+            ]
+          },
+          {
+            "file": "./chain.js",
+            "imports": [
+              "createChain",
+              "Chain"
             ]
           },
           {
@@ -29104,16 +34883,17 @@
         ]
       },
       {
+        "name": "Core",
+        "files": [
+          "core/src/constants.ts",
+          "core/src/index.ts"
+        ]
+      },
+      {
         "name": "Core/factory",
         "files": [
           "core/src/factory/factory.ts",
           "core/src/factory/index.ts"
-        ]
-      },
-      {
-        "name": "Core",
-        "files": [
-          "core/src/index.ts"
         ]
       },
       {
@@ -29129,6 +34909,7 @@
         "files": [
           "core/src/types/bignumber.ts",
           "core/src/types/complex.ts",
+          "core/src/types/dual.ts",
           "core/src/types/fraction.ts",
           "core/src/types/interfaces.ts",
           "core/src/types/unit-definitions.ts",
@@ -29235,6 +35016,7 @@
         "files": [
           "autograd/src/dual-tensor.ts",
           "autograd/src/forward-grad.ts",
+          "autograd/src/grad.ts",
           "autograd/src/index.ts",
           "autograd/src/reverse-grad.ts",
           "autograd/src/tape.ts"
@@ -29347,6 +35129,28 @@
         ]
       },
       {
+        "name": "Functions",
+        "files": [
+          "functions/src/calculus-extra.ts",
+          "functions/src/cas-integration.ts",
+          "functions/src/clustering-extra.ts",
+          "functions/src/descriptive-stats.ts",
+          "functions/src/distribution-functions.ts",
+          "functions/src/geometry-extra.ts",
+          "functions/src/grad-forward.ts",
+          "functions/src/help.ts",
+          "functions/src/hypothesis-extra.ts",
+          "functions/src/index.ts",
+          "functions/src/linalg-extra.ts",
+          "functions/src/numeric-extra.ts",
+          "functions/src/optimization-extra.ts",
+          "functions/src/regression-extra.ts",
+          "functions/src/signal-filter-extra.ts",
+          "functions/src/timeseries-extra.ts",
+          "functions/src/types.ts"
+        ]
+      },
+      {
         "name": "Functions/combinatorics",
         "files": [
           "functions/src/combinatorics/bellNumbers.ts",
@@ -29402,13 +35206,6 @@
         ]
       },
       {
-        "name": "Functions",
-        "files": [
-          "functions/src/index.ts",
-          "functions/src/types.ts"
-        ]
-      },
-      {
         "name": "Functions/logical",
         "files": [
           "functions/src/logical/and.ts",
@@ -29448,6 +35245,7 @@
           "functions/src/matrix/matrixFromColumns.ts",
           "functions/src/matrix/matrixFromFunction.ts",
           "functions/src/matrix/matrixFromRows.ts",
+          "functions/src/matrix/native-accel.ts",
           "functions/src/matrix/ones.ts",
           "functions/src/matrix/partitionSelect.ts",
           "functions/src/matrix/pinv.ts",
@@ -29763,6 +35561,265 @@
         ]
       },
       {
+        "name": "Expression/embeddedDocs",
+        "files": [
+          "expression/src/embeddedDocs/constants/e.ts",
+          "expression/src/embeddedDocs/constants/false.ts",
+          "expression/src/embeddedDocs/constants/i.ts",
+          "expression/src/embeddedDocs/constants/Infinity.ts",
+          "expression/src/embeddedDocs/constants/LN10.ts",
+          "expression/src/embeddedDocs/constants/LN2.ts",
+          "expression/src/embeddedDocs/constants/LOG10E.ts",
+          "expression/src/embeddedDocs/constants/LOG2E.ts",
+          "expression/src/embeddedDocs/constants/NaN.ts",
+          "expression/src/embeddedDocs/constants/null.ts",
+          "expression/src/embeddedDocs/constants/phi.ts",
+          "expression/src/embeddedDocs/constants/pi.ts",
+          "expression/src/embeddedDocs/constants/SQRT1_2.ts",
+          "expression/src/embeddedDocs/constants/SQRT2.ts",
+          "expression/src/embeddedDocs/constants/tau.ts",
+          "expression/src/embeddedDocs/constants/true.ts",
+          "expression/src/embeddedDocs/constants/version.ts",
+          "expression/src/embeddedDocs/construction/bigint.ts",
+          "expression/src/embeddedDocs/construction/bignumber.ts",
+          "expression/src/embeddedDocs/construction/boolean.ts",
+          "expression/src/embeddedDocs/construction/complex.ts",
+          "expression/src/embeddedDocs/construction/createUnit.ts",
+          "expression/src/embeddedDocs/construction/fraction.ts",
+          "expression/src/embeddedDocs/construction/index.ts",
+          "expression/src/embeddedDocs/construction/matrix.ts",
+          "expression/src/embeddedDocs/construction/number.ts",
+          "expression/src/embeddedDocs/construction/sparse.ts",
+          "expression/src/embeddedDocs/construction/splitUnit.ts",
+          "expression/src/embeddedDocs/construction/string.ts",
+          "expression/src/embeddedDocs/construction/unit.ts",
+          "expression/src/embeddedDocs/core/config.ts",
+          "expression/src/embeddedDocs/core/import.ts",
+          "expression/src/embeddedDocs/core/typed.ts",
+          "expression/src/embeddedDocs/embeddedDocs.ts",
+          "expression/src/embeddedDocs/function/algebra/derivative.ts",
+          "expression/src/embeddedDocs/function/algebra/leafCount.ts",
+          "expression/src/embeddedDocs/function/algebra/lsolve.ts",
+          "expression/src/embeddedDocs/function/algebra/lsolveAll.ts",
+          "expression/src/embeddedDocs/function/algebra/lup.ts",
+          "expression/src/embeddedDocs/function/algebra/lusolve.ts",
+          "expression/src/embeddedDocs/function/algebra/lyap.ts",
+          "expression/src/embeddedDocs/function/algebra/polynomialRoot.ts",
+          "expression/src/embeddedDocs/function/algebra/qr.ts",
+          "expression/src/embeddedDocs/function/algebra/rationalize.ts",
+          "expression/src/embeddedDocs/function/algebra/resolve.ts",
+          "expression/src/embeddedDocs/function/algebra/schur.ts",
+          "expression/src/embeddedDocs/function/algebra/simplify.ts",
+          "expression/src/embeddedDocs/function/algebra/simplifyConstant.ts",
+          "expression/src/embeddedDocs/function/algebra/simplifyCore.ts",
+          "expression/src/embeddedDocs/function/algebra/slu.ts",
+          "expression/src/embeddedDocs/function/algebra/sylvester.ts",
+          "expression/src/embeddedDocs/function/algebra/symbolicEqual.ts",
+          "expression/src/embeddedDocs/function/algebra/usolve.ts",
+          "expression/src/embeddedDocs/function/algebra/usolveAll.ts",
+          "expression/src/embeddedDocs/function/arithmetic/abs.ts",
+          "expression/src/embeddedDocs/function/arithmetic/add.ts",
+          "expression/src/embeddedDocs/function/arithmetic/cbrt.ts",
+          "expression/src/embeddedDocs/function/arithmetic/ceil.ts",
+          "expression/src/embeddedDocs/function/arithmetic/cube.ts",
+          "expression/src/embeddedDocs/function/arithmetic/divide.ts",
+          "expression/src/embeddedDocs/function/arithmetic/dotDivide.ts",
+          "expression/src/embeddedDocs/function/arithmetic/dotMultiply.ts",
+          "expression/src/embeddedDocs/function/arithmetic/dotPow.ts",
+          "expression/src/embeddedDocs/function/arithmetic/exp.ts",
+          "expression/src/embeddedDocs/function/arithmetic/expm.ts",
+          "expression/src/embeddedDocs/function/arithmetic/expm1.ts",
+          "expression/src/embeddedDocs/function/arithmetic/fix.ts",
+          "expression/src/embeddedDocs/function/arithmetic/floor.ts",
+          "expression/src/embeddedDocs/function/arithmetic/gcd.ts",
+          "expression/src/embeddedDocs/function/arithmetic/hypot.ts",
+          "expression/src/embeddedDocs/function/arithmetic/invmod.ts",
+          "expression/src/embeddedDocs/function/arithmetic/lcm.ts",
+          "expression/src/embeddedDocs/function/arithmetic/log.ts",
+          "expression/src/embeddedDocs/function/arithmetic/log10.ts",
+          "expression/src/embeddedDocs/function/arithmetic/log1p.ts",
+          "expression/src/embeddedDocs/function/arithmetic/log2.ts",
+          "expression/src/embeddedDocs/function/arithmetic/mod.ts",
+          "expression/src/embeddedDocs/function/arithmetic/multiply.ts",
+          "expression/src/embeddedDocs/function/arithmetic/norm.ts",
+          "expression/src/embeddedDocs/function/arithmetic/nthRoot.ts",
+          "expression/src/embeddedDocs/function/arithmetic/nthRoots.ts",
+          "expression/src/embeddedDocs/function/arithmetic/pow.ts",
+          "expression/src/embeddedDocs/function/arithmetic/round.ts",
+          "expression/src/embeddedDocs/function/arithmetic/sign.ts",
+          "expression/src/embeddedDocs/function/arithmetic/sqrt.ts",
+          "expression/src/embeddedDocs/function/arithmetic/sqrtm.ts",
+          "expression/src/embeddedDocs/function/arithmetic/square.ts",
+          "expression/src/embeddedDocs/function/arithmetic/subtract.ts",
+          "expression/src/embeddedDocs/function/arithmetic/unaryMinus.ts",
+          "expression/src/embeddedDocs/function/arithmetic/unaryPlus.ts",
+          "expression/src/embeddedDocs/function/arithmetic/xgcd.ts",
+          "expression/src/embeddedDocs/function/bitwise/bitAnd.ts",
+          "expression/src/embeddedDocs/function/bitwise/bitNot.ts",
+          "expression/src/embeddedDocs/function/bitwise/bitOr.ts",
+          "expression/src/embeddedDocs/function/bitwise/bitXor.ts",
+          "expression/src/embeddedDocs/function/bitwise/leftShift.ts",
+          "expression/src/embeddedDocs/function/bitwise/rightArithShift.ts",
+          "expression/src/embeddedDocs/function/bitwise/rightLogShift.ts",
+          "expression/src/embeddedDocs/function/combinatorics/bellNumbers.ts",
+          "expression/src/embeddedDocs/function/combinatorics/catalan.ts",
+          "expression/src/embeddedDocs/function/combinatorics/composition.ts",
+          "expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts",
+          "expression/src/embeddedDocs/function/complex/arg.ts",
+          "expression/src/embeddedDocs/function/complex/conj.ts",
+          "expression/src/embeddedDocs/function/complex/im.ts",
+          "expression/src/embeddedDocs/function/complex/re.ts",
+          "expression/src/embeddedDocs/function/expression/compile.ts",
+          "expression/src/embeddedDocs/function/expression/evaluate.ts",
+          "expression/src/embeddedDocs/function/expression/help.ts",
+          "expression/src/embeddedDocs/function/expression/parse.ts",
+          "expression/src/embeddedDocs/function/expression/parser.ts",
+          "expression/src/embeddedDocs/function/geometry/distance.ts",
+          "expression/src/embeddedDocs/function/geometry/intersect.ts",
+          "expression/src/embeddedDocs/function/logical/and.ts",
+          "expression/src/embeddedDocs/function/logical/not.ts",
+          "expression/src/embeddedDocs/function/logical/nullish.ts",
+          "expression/src/embeddedDocs/function/logical/or.ts",
+          "expression/src/embeddedDocs/function/logical/xor.ts",
+          "expression/src/embeddedDocs/function/matrix/column.ts",
+          "expression/src/embeddedDocs/function/matrix/concat.ts",
+          "expression/src/embeddedDocs/function/matrix/count.ts",
+          "expression/src/embeddedDocs/function/matrix/cross.ts",
+          "expression/src/embeddedDocs/function/matrix/ctranspose.ts",
+          "expression/src/embeddedDocs/function/matrix/det.ts",
+          "expression/src/embeddedDocs/function/matrix/diag.ts",
+          "expression/src/embeddedDocs/function/matrix/diff.ts",
+          "expression/src/embeddedDocs/function/matrix/dot.ts",
+          "expression/src/embeddedDocs/function/matrix/eigs.ts",
+          "expression/src/embeddedDocs/function/matrix/fft.ts",
+          "expression/src/embeddedDocs/function/matrix/filter.ts",
+          "expression/src/embeddedDocs/function/matrix/flatten.ts",
+          "expression/src/embeddedDocs/function/matrix/forEach.ts",
+          "expression/src/embeddedDocs/function/matrix/getMatrixDataType.ts",
+          "expression/src/embeddedDocs/function/matrix/identity.ts",
+          "expression/src/embeddedDocs/function/matrix/ifft.ts",
+          "expression/src/embeddedDocs/function/matrix/inv.ts",
+          "expression/src/embeddedDocs/function/matrix/kron.ts",
+          "expression/src/embeddedDocs/function/matrix/map.ts",
+          "expression/src/embeddedDocs/function/matrix/mapSlices.ts",
+          "expression/src/embeddedDocs/function/matrix/matrixFromColumns.ts",
+          "expression/src/embeddedDocs/function/matrix/matrixFromFunction.ts",
+          "expression/src/embeddedDocs/function/matrix/matrixFromRows.ts",
+          "expression/src/embeddedDocs/function/matrix/ones.ts",
+          "expression/src/embeddedDocs/function/matrix/partitionSelect.ts",
+          "expression/src/embeddedDocs/function/matrix/pinv.ts",
+          "expression/src/embeddedDocs/function/matrix/range.ts",
+          "expression/src/embeddedDocs/function/matrix/reshape.ts",
+          "expression/src/embeddedDocs/function/matrix/resize.ts",
+          "expression/src/embeddedDocs/function/matrix/rotate.ts",
+          "expression/src/embeddedDocs/function/matrix/rotationMatrix.ts",
+          "expression/src/embeddedDocs/function/matrix/row.ts",
+          "expression/src/embeddedDocs/function/matrix/size.ts",
+          "expression/src/embeddedDocs/function/matrix/sort.ts",
+          "expression/src/embeddedDocs/function/matrix/squeeze.ts",
+          "expression/src/embeddedDocs/function/matrix/subset.ts",
+          "expression/src/embeddedDocs/function/matrix/trace.ts",
+          "expression/src/embeddedDocs/function/matrix/transpose.ts",
+          "expression/src/embeddedDocs/function/matrix/zeros.ts",
+          "expression/src/embeddedDocs/function/numeric/solveODE.ts",
+          "expression/src/embeddedDocs/function/probability/bernoulli.ts",
+          "expression/src/embeddedDocs/function/probability/combinations.ts",
+          "expression/src/embeddedDocs/function/probability/combinationsWithRep.ts",
+          "expression/src/embeddedDocs/function/probability/factorial.ts",
+          "expression/src/embeddedDocs/function/probability/gamma.ts",
+          "expression/src/embeddedDocs/function/probability/kldivergence.ts",
+          "expression/src/embeddedDocs/function/probability/lgamma.ts",
+          "expression/src/embeddedDocs/function/probability/multinomial.ts",
+          "expression/src/embeddedDocs/function/probability/permutations.ts",
+          "expression/src/embeddedDocs/function/probability/pickRandom.ts",
+          "expression/src/embeddedDocs/function/probability/random.ts",
+          "expression/src/embeddedDocs/function/probability/randomInt.ts",
+          "expression/src/embeddedDocs/function/relational/compare.ts",
+          "expression/src/embeddedDocs/function/relational/compareNatural.ts",
+          "expression/src/embeddedDocs/function/relational/compareText.ts",
+          "expression/src/embeddedDocs/function/relational/deepEqual.ts",
+          "expression/src/embeddedDocs/function/relational/equal.ts",
+          "expression/src/embeddedDocs/function/relational/equalText.ts",
+          "expression/src/embeddedDocs/function/relational/larger.ts",
+          "expression/src/embeddedDocs/function/relational/largerEq.ts",
+          "expression/src/embeddedDocs/function/relational/smaller.ts",
+          "expression/src/embeddedDocs/function/relational/smallerEq.ts",
+          "expression/src/embeddedDocs/function/relational/unequal.ts",
+          "expression/src/embeddedDocs/function/set/setCartesian.ts",
+          "expression/src/embeddedDocs/function/set/setDifference.ts",
+          "expression/src/embeddedDocs/function/set/setDistinct.ts",
+          "expression/src/embeddedDocs/function/set/setIntersect.ts",
+          "expression/src/embeddedDocs/function/set/setIsSubset.ts",
+          "expression/src/embeddedDocs/function/set/setMultiplicity.ts",
+          "expression/src/embeddedDocs/function/set/setPowerset.ts",
+          "expression/src/embeddedDocs/function/set/setSize.ts",
+          "expression/src/embeddedDocs/function/set/setSymDifference.ts",
+          "expression/src/embeddedDocs/function/set/setUnion.ts",
+          "expression/src/embeddedDocs/function/signal/freqz.ts",
+          "expression/src/embeddedDocs/function/signal/zpk2tf.ts",
+          "expression/src/embeddedDocs/function/special/erf.ts",
+          "expression/src/embeddedDocs/function/special/zeta.ts",
+          "expression/src/embeddedDocs/function/statistics/corr.ts",
+          "expression/src/embeddedDocs/function/statistics/cumsum.ts",
+          "expression/src/embeddedDocs/function/statistics/mad.ts",
+          "expression/src/embeddedDocs/function/statistics/max.ts",
+          "expression/src/embeddedDocs/function/statistics/mean.ts",
+          "expression/src/embeddedDocs/function/statistics/median.ts",
+          "expression/src/embeddedDocs/function/statistics/min.ts",
+          "expression/src/embeddedDocs/function/statistics/mode.ts",
+          "expression/src/embeddedDocs/function/statistics/prod.ts",
+          "expression/src/embeddedDocs/function/statistics/quantileSeq.ts",
+          "expression/src/embeddedDocs/function/statistics/std.ts",
+          "expression/src/embeddedDocs/function/statistics/sum.ts",
+          "expression/src/embeddedDocs/function/statistics/variance.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acos.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acosh.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acot.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acoth.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acsc.ts",
+          "expression/src/embeddedDocs/function/trigonometry/acsch.ts",
+          "expression/src/embeddedDocs/function/trigonometry/asec.ts",
+          "expression/src/embeddedDocs/function/trigonometry/asech.ts",
+          "expression/src/embeddedDocs/function/trigonometry/asin.ts",
+          "expression/src/embeddedDocs/function/trigonometry/asinh.ts",
+          "expression/src/embeddedDocs/function/trigonometry/atan.ts",
+          "expression/src/embeddedDocs/function/trigonometry/atan2.ts",
+          "expression/src/embeddedDocs/function/trigonometry/atanh.ts",
+          "expression/src/embeddedDocs/function/trigonometry/cos.ts",
+          "expression/src/embeddedDocs/function/trigonometry/cosh.ts",
+          "expression/src/embeddedDocs/function/trigonometry/cot.ts",
+          "expression/src/embeddedDocs/function/trigonometry/coth.ts",
+          "expression/src/embeddedDocs/function/trigonometry/csc.ts",
+          "expression/src/embeddedDocs/function/trigonometry/csch.ts",
+          "expression/src/embeddedDocs/function/trigonometry/sec.ts",
+          "expression/src/embeddedDocs/function/trigonometry/sech.ts",
+          "expression/src/embeddedDocs/function/trigonometry/sin.ts",
+          "expression/src/embeddedDocs/function/trigonometry/sinh.ts",
+          "expression/src/embeddedDocs/function/trigonometry/tan.ts",
+          "expression/src/embeddedDocs/function/trigonometry/tanh.ts",
+          "expression/src/embeddedDocs/function/units/to.ts",
+          "expression/src/embeddedDocs/function/units/toBest.ts",
+          "expression/src/embeddedDocs/function/utils/bin.ts",
+          "expression/src/embeddedDocs/function/utils/clone.ts",
+          "expression/src/embeddedDocs/function/utils/format.ts",
+          "expression/src/embeddedDocs/function/utils/hasNumericValue.ts",
+          "expression/src/embeddedDocs/function/utils/hex.ts",
+          "expression/src/embeddedDocs/function/utils/isBounded.ts",
+          "expression/src/embeddedDocs/function/utils/isFinite.ts",
+          "expression/src/embeddedDocs/function/utils/isInteger.ts",
+          "expression/src/embeddedDocs/function/utils/isNaN.ts",
+          "expression/src/embeddedDocs/function/utils/isNegative.ts",
+          "expression/src/embeddedDocs/function/utils/isNumeric.ts",
+          "expression/src/embeddedDocs/function/utils/isPositive.ts",
+          "expression/src/embeddedDocs/function/utils/isPrime.ts",
+          "expression/src/embeddedDocs/function/utils/isZero.ts",
+          "expression/src/embeddedDocs/function/utils/numeric.ts",
+          "expression/src/embeddedDocs/function/utils/oct.ts",
+          "expression/src/embeddedDocs/function/utils/print.ts",
+          "expression/src/embeddedDocs/function/utils/typeOf.ts"
+        ]
+      },
+      {
         "name": "Expression/error",
         "files": [
           "expression/src/error/DimensionError.ts",
@@ -29835,6 +35892,7 @@
           "expression/src/utils/is.ts",
           "expression/src/utils/latex.ts",
           "expression/src/utils/map.ts",
+          "expression/src/utils/mathml.ts",
           "expression/src/utils/number.ts",
           "expression/src/utils/object.ts",
           "expression/src/utils/scope.ts",
@@ -30002,6 +36060,7 @@
       {
         "name": "Compat",
         "files": [
+          "compat/src/chain.ts",
           "compat/src/index.ts",
           "compat/src/shims.ts"
         ]
@@ -30009,21 +36068,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 571,
-    "totalModules": 69,
-    "totalLinesOfCode": 151116,
-    "totalExports": 3595,
-    "totalClasses": 49,
-    "totalInterfaces": 347,
-    "totalFunctions": 1367,
-    "totalTypeGuards": 132,
+    "totalTypeScriptFiles": 846,
+    "totalModules": 70,
+    "totalLinesOfCode": 158032,
+    "totalExports": 4088,
+    "totalClasses": 50,
+    "totalInterfaces": 358,
+    "totalFunctions": 1461,
+    "totalTypeGuards": 135,
     "totalEnums": 0,
-    "totalConstants": 1127,
-    "totalReExports": 1092,
+    "totalConstants": 1417,
+    "totalReExports": 1204,
     "totalTypeOnlyImports": 431,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 483
+    "unusedExportsCount": 501
   }
 }
