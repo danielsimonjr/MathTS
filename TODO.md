@@ -143,6 +143,31 @@ one thing to maintain (see memory `project-all-libraries-build-on-core`).
   and imported hot-path guards — all legitimate, not duplication.
 - ✅ **regen dep-graph at sweep end** — `autograd → core` edge now real in the reports. (240a0dc)
 
+### Post-consolidation follow-ups (2026-07-01)
+
+Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual perf win).
+
+- ✅ **[hygiene] dep-graph tool fights prettier** — `docs:deps` now chains `docs:deps:format`
+  (`prettier --write` scoped to the tool's own outputs, not the coverage files it doesn't write),
+  so regenerated reports are format-stable. Verified prettier-clean + idempotent.
+- ⬜ **[hygiene] `gap-tukey.test.ts` timeout edge** — correct but slow (nested Simpson); flakes at 5s
+  under load, passes at 30s. Give the 3 slow tests an explicit `testTimeout` (legitimately expensive,
+  not masking) — root-cause is compute cost, not a bug.
+- ⬜ **[hygiene] stale-dist gotcha** — direct `vitest` resolves a package's built `dist`, not `src`;
+  a stale dist gives false failures (cost a 48-test false alarm this session). Document in AGENTS.md
+  testing section (rebuild or use `npm run test` via turbo, which depends on `^build`).
+- ⬜ **[guardrail] lock in the hot-vs-cold rule** — add a `// PERF: keep local` comment on
+  `functions`/`expression` `utils/is.ts` (cross-module guards defeat V8 inlining — the ~40% gap-tukey
+  regression), plus a perf-regression test asserting the guard hot-path stays under budget.
+- ⬜ **[B8 — the perf prize] size-thresholded batch elementary functions wired through the standard
+  layer.** Put a batch elementary-fn path in the standard layer (WASM/SIMD if the assembly kernels
+  support it, else a tight JS batch), dispatch by size (small → inlined `Math.*`, large → batch), and
+  route core `Dual` / autograd `DualTensor` / tensor element-wise through it so the speedup propagates.
+  Prove + benchmark on one function (`exp`) beating the `Math.*` loop above ~N elements, then generalize.
+- ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
+  from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
+  (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
+
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail
