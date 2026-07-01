@@ -64,15 +64,16 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **✅ Released `functions@0.8.0`** (minor) + dependents (arithmetic/trigonometry/
 > statistics/signal@0.1.9, compat@0.2.5); core unchanged, workbook held. Verified
 > live via `npm view`. Retroactive review + simplify pass complete.
-> **Doc drift (2026-07-01):** `docs/api/functions.md` had frozen at "158 exports"
-> (missing the ~89 gap-closure fns + 5 releases). Extended
-> `tools/generate-functions-reference.mjs` to emit + drift-check a generated
-> Complete-export-index block in it too (828 exports); `docs:functions:check` now
-> guards all three doc files. **Open:** add a `docs:functions:check` step to
-> `.github/workflows/ci.yml` (I was blocked by a workflow-edit guard) so drift fails
-> CI; and the sibling `docs/api/{compat,core,matrix,parallel}.md` are still frozen at
-> 2026-05-22 (out of scope for the functions generator — need their own generators or
-> a redirect to the per-package reference docs).
+> **Doc drift (2026-07-01):** the whole hand-written `docs/api/` tree had frozen at
+> 2026-05-22 (`functions.md` claimed "158 exports" vs the real 828, missing the ~89
+> gap-closure fns). Rewrote `tools/generate-functions-reference.mjs` table-driven to
+> emit + drift-check a generated Complete-export-index block into **all five** package
+> API docs (`functions` 828, `compat` 78, `core` 80, `matrix` 141, `parallel` 67) plus
+> the reference `.md`/`.html` — 7 generated blocks; `docs:functions:check` guards them
+> all. **Open (genuine wall, not deferral):** adding a `docs:functions:check` step to
+> `.github/workflows/ci.yml` so drift fails CI is blocked by a workflow-edit security
+> guard — needs the maintainer to add the step (snippet in the 2026-07-01 CHANGELOG /
+> the doc commit message).
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

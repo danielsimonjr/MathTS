@@ -156,20 +156,22 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
-### Changed (2026-07-01) — `docs/api/functions.md` drift-guarded via the generator
+### Changed (2026-07-01) — the whole `docs/api/` tree drift-guarded via the generator
 
-The hand-written `docs/api/functions.md` had frozen at "158 exports across 11 modules"
-(2026-05-22) while the real surface grew to 828 — it was missing the ~89 gap-closure
-functions and everything from five releases. `tools/generate-functions-reference.mjs`
-now emits and drift-checks a third file: it appends a generated **Complete export
-index** (every export grouped by module, with live counts) below the curated highlight
-tables, exactly as it already does for `docs/reference/functions.md`. `npm run
-docs:functions` regenerates all three (`docs/reference/functions.md` + `.html` +
-`docs/api/functions.md`); `npm run docs:functions:check` now fails if any of the three
-drifts, listing the undocumented exports. The curated per-domain tables + examples are
-kept as prose above the generated block. (Recommended follow-up, blocked here by a
-workflow-edit guard: add a `docs:functions:check` step to `.github/workflows/ci.yml`
-so drift fails CI, not just the local command.)
+The hand-written `docs/api/*.md` reference tree had all frozen at 2026-05-22 while the
+packages kept growing — `docs/api/functions.md` alone still claimed "158 exports across
+11 modules" against a real surface of 828, missing the ~89 gap-closure functions and
+five releases. `tools/generate-functions-reference.mjs` was rewritten table-driven to
+emit and drift-check a generated **Complete export index** (every export grouped by
+module, with live counts) into **all five** package API docs — `functions` (828),
+`compat` (78), `core` (80), `matrix` (141), `parallel` (67) — in addition to the
+canonical `docs/reference/functions.md` + its `.html` mirror (7 generated blocks total).
+`npm run docs:functions` regenerates them; `npm run docs:functions:check` fails if any
+drifts, listing the undocumented names. Curated prose/tables are preserved above the
+generated block; a "Complete export index" pointer was added to each doc header. Add a
+new package by appending one row to the generator's `TARGETS`. (One follow-up remains,
+blocked here by a workflow-edit security guard: add a `docs:functions:check` step to
+`.github/workflows/ci.yml` so drift fails CI, not only the local command.)
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
