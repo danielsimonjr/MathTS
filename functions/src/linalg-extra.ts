@@ -57,6 +57,18 @@ function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
     A = _multiply(R, Q).map((r, i) => r.map((v, j) => v + (i === j ? s : 0))); // R·Q + sI
     U = _multiply(U, Q);
   }
+  // Postcondition: S must be quasi-upper-triangular (2×2 blocks allowed for complex
+  // conjugate pairs). Single-shift QR converges for real and — empirically — complex
+  // spectra; but if it ever exits the iteration cap without reaching that form, fail
+  // loudly rather than silently returning a non-triangular S that would break qz's
+  // documented (quasi-)triangular contract.
+  for (let i = 2; i < n; i++) {
+    for (let j = 0; j < i - 1; j++) {
+      if (Math.abs(A[i][j]) > 1e-8 * (1 + Math.abs(A[i][i]) + Math.abs(A[j][j]))) {
+        throw new Error('realSchur: QR iteration failed to converge to (quasi-)triangular form');
+      }
+    }
+  }
   return { U, S: A };
 }
 
@@ -133,6 +145,7 @@ export function companion(coeffs: Vec): number[][] {
   const a = arr(coeffs);
   const n = a.length - 1;
   if (n < 1) throw new Error('companion: need at least 2 coefficients');
+  if (a[0] === 0) throw new Error('companion: leading coefficient must be nonzero');
   const C: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
   for (let j = 0; j < n; j++) C[0][j] = -a[j + 1] / a[0];
   for (let i = 1; i < n; i++) C[i][i - 1] = 1;

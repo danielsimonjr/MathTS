@@ -16,6 +16,7 @@ import {
   tukeyHSD,
   studentizedRangeCDF,
   studentizedRangeQuantile,
+  companion,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -134,5 +135,16 @@ describe('hypothesis-extra — degenerate input guards', () => {
   it('studentizedRangeCDF validates k>=2 and df>0', () => {
     expect(() => studentizedRangeCDF(3, 1, 20)).toThrow(/k .*2|groups/i);
     expect(() => studentizedRangeCDF(3, 4, 0)).toThrow(/df/i);
+  });
+});
+
+describe('linalg-extra — degenerate input guards', () => {
+  it('companion throws on a zero leading coefficient', () => {
+    expect(() => companion([0, 1, 2])).toThrow(/leading coefficient|nonzero/i);
+    // happy path: monic-normalization still works
+    expect(companion([2, -4, 2])).toEqual([
+      [2, -1],
+      [1, 0],
+    ]);
   });
 });

@@ -65,6 +65,25 @@ describe('qz — generalized Schur decomposition', () => {
     });
   }
 
+  it('two-complex-pair pencil: AA stays quasi-triangular (no silent non-convergent stall)', () => {
+    // companion of (x²+1)(x²+4) = x⁴+5x²+4: eigenvalues ±i, ±2i — two complex-conjugate
+    // pairs that single-shift QR cannot deflate. Must yield a quasi-triangular AA (2×2
+    // block deflation) or throw — never a silently non-triangular result.
+    const A = [
+      [0, -5, 0, -4],
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+    ];
+    const I = eye(4);
+    const { AA, BB, Q, Z } = qz(A, I);
+    expect(maxAbsDiff(mm(mm(Q, AA), T(Z)), A)).toBeLessThan(1e-9); // valid decomposition
+    expect(maxAbsDiff(BB, I)).toBeLessThan(1e-9);
+    // quasi-upper-triangular: nothing below the first subdiagonal
+    for (let i = 0; i < 4; i++)
+      for (let j = 0; j < i - 1; j++) expect(Math.abs(AA[i][j])).toBeLessThan(1e-9);
+  });
+
   it('B = I: AA is (quasi-)triangular and Q·AA·Zᵀ reconstructs A', () => {
     const A = [
       [6, -11, 6],

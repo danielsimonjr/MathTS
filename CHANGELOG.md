@@ -102,6 +102,15 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   clamped large quantiles; `studentizedRangeCDF` validates `k≥2`/`df>0` and extends
   its `umax` integration bound until the χ-density tail mass is captured (was a magic
   constant that biased the CDF low for small `df`).
+- **`functions/src/linalg-extra.ts`**: `companion` throws on a zero leading
+  coefficient (was `Infinity`/`NaN` entries feeding a garbage eigen-solve, numpy
+  parity). `realSchur` gained a quasi-triangularity postcondition that throws if the
+  QR iteration ever exits without reaching (quasi-)upper-triangular form, instead of
+  silently returning a non-triangular `S` that breaks `qz`'s contract — a defensive
+  guard: the reviewer-flagged silent-non-triangular output did **not** reproduce
+  across three complex-spectrum pencils (both companions and a cyclic permutation all
+  returned correct quasi-triangular output), so the residual risk is defensive, plus
+  a performance cliff on complex/equal-modulus spectra recorded in `TODO.md`.
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

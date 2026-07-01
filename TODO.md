@@ -54,7 +54,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > degenerate input. Hardening file-by-file as atomic commits (throw on invalid
 > input, scipy/numpy parity), tests in `functions/tests/gap-degenerate-inputs.test.ts`.
 > Progress (✅ = committed): descriptive-stats ✅ · numeric-extra ✅ · hypothesis-extra ✅ ·
-> linalg-extra (realSchur non-convergence + `companion` a[0]=0) · geometry-extra ·
+> linalg-extra ✅ (`companion` a[0]=0 guard + realSchur quasi-tri postcondition) · geometry-extra ·
 > timeseries-extra · regression-extra · optimization-extra · clustering-extra
 > (`kmeans` `converged` field) · signal-filter-extra (`butter` Wn range) ·
 > cas-integration. Then code-simplifier pass + re-verify + patch release.
@@ -66,6 +66,15 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > since the quantile calls the CDF 60×). Extreme parameter regimes may be
 > under-resolved; revisit with a Gauss–Kronrod or memoised adaptive scheme if a use
 > case needs it.
+> **Known limitation — `realSchur`/`qz` performance cliff (surfaced 2026-06-30).**
+> `realSchur` uses single-shift QR with only 1×1 deflation. For complex-conjugate or
+> equal-modulus spectra it cannot deflate the trailing 2×2 and burns its full 8000-iter
+> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns *correct* quasi-triangular
+> output (verified: 3 complex-spectrum pencils reconstruct to 0 error). So this is a
+> perf issue, not the silent-wrong-output the review predicted. A Francis double-shift
+> with 2×2 block deflation (+ Hessenberg pre-reduction) would fix both the speed and give
+> a formal convergence flag; deferred as out-of-contract (qz is documented "robust for
+> real spectra").
 
 ## 🎯 Open Actions
 
