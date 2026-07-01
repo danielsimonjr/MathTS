@@ -86,6 +86,11 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   `n` below its domain (`n≤2`/`n≤3`) instead of silently returning the biased
   estimator; `cov` throws when observations do not exceed `ddof`. Empty input
   stays graceful (`NaN`/`[]`, numpy parity) — the existing edge-case contract.
+- **`functions/src/numeric-extra.ts`**: `logsumexp`/`softmax` compute the max
+  with a spread-free O(n) loop instead of `Math.max(...arr)`, which threw
+  `RangeError: Maximum call stack size exceeded` on the large (~1e5+) log-probability
+  vectors these primitives exist to serve; `cumtrapz` throws on an abscissa array
+  shorter than `y` (was silent `NaN` poisoning every output).
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

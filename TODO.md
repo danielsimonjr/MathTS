@@ -53,7 +53,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > root cause: the new functions silently returned `NaN`/`Infinity`/garbage on
 > degenerate input. Hardening file-by-file as atomic commits (throw on invalid
 > input, scipy/numpy parity), tests in `functions/tests/gap-degenerate-inputs.test.ts`.
-> Progress (✅ = committed): descriptive-stats ✅ · numeric-extra · hypothesis-extra ·
+> Progress (✅ = committed): descriptive-stats ✅ · numeric-extra ✅ · hypothesis-extra ·
 > linalg-extra (realSchur non-convergence + `companion` a[0]=0) · geometry-extra ·
 > timeseries-extra · regression-extra · optimization-extra · clustering-extra
 > (`kmeans` `converged` field) · signal-filter-extra (`butter` Wn range) ·

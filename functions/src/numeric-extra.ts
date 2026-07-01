@@ -6,10 +6,22 @@
  * equivalent (only `cumsum` existed) and are written as plain O(n) scans.
  * See `docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md` (C1, Wave A).
  */
-import { max as _max, sum as _sum } from './typed/arithmetic.js';
+import { sum as _sum } from './typed/arithmetic.js';
 
 type Vec = readonly number[] | Float64Array;
 const toArr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
+
+/**
+ * Spread-free maximum. `Math.max(...arr)` throws `RangeError: Maximum call stack
+ * size exceeded` once the array exceeds the engine's argument limit (~1e5–1e6),
+ * so `logsumexp`/`softmax` — precisely the primitives applied to large
+ * log-probability vectors — must compute the max with an O(n) loop.
+ */
+const maxOf = (a: number[]): number => {
+  let m = -Infinity;
+  for (let i = 0; i < a.length; i++) if (a[i] > m) m = a[i];
+  return m;
+};
 
 /** Clamp a number — or each element of an array — to `[lo, hi]`. */
 export function clamp(x: number, lo: number, hi: number): number;
@@ -34,7 +46,7 @@ export function sigmoid(x: number | readonly number[]): number | number[] {
 export function logsumexp(x: Vec): number {
   const a = toArr(x);
   if (a.length === 0) return -Infinity;
-  const m = _max(a) as number;
+  const m = maxOf(a);
   if (!Number.isFinite(m)) return m; // all -Inf → -Inf; any +Inf → +Inf
   let acc = 0;
   for (let i = 0; i < a.length; i++) acc += Math.exp(a[i] - m);
@@ -45,7 +57,7 @@ export function logsumexp(x: Vec): number {
 export function softmax(x: Vec): number[] {
   const a = toArr(x);
   if (a.length === 0) return [];
-  const m = _max(a) as number;
+  const m = maxOf(a);
   const e = a.map((v) => Math.exp(v - m));
   const z = _sum(e) as number;
   return e.map((v) => v / z);
@@ -95,12 +107,17 @@ export function cummin(x: Vec): number[] {
 export function cumtrapz(y: Vec, x?: Vec | number): number[] {
   const a = toArr(y);
   const out = new Array<number>(a.length).fill(0);
-  const dxAt =
-    typeof x === 'number'
-      ? (_i: number) => x
-      : x !== undefined
-        ? ((xs) => (i: number) => xs[i + 1] - xs[i])(toArr(x))
-        : (_i: number) => 1;
+  let dxAt: (i: number) => number;
+  if (typeof x === 'number') {
+    dxAt = () => x;
+  } else if (x !== undefined) {
+    const xs = toArr(x);
+    if (xs.length < a.length)
+      throw new Error(`cumtrapz: abscissa x (length ${xs.length}) is shorter than y (length ${a.length})`);
+    dxAt = (i: number) => xs[i + 1] - xs[i];
+  } else {
+    dxAt = () => 1;
+  }
   let acc = 0;
   for (let i = 1; i < a.length; i++) {
     acc += ((a[i] + a[i - 1]) / 2) * dxAt(i - 1);

@@ -6,6 +6,9 @@ import {
   skewness,
   kurtosis,
   cov,
+  logsumexp,
+  softmax,
+  cumtrapz,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -60,5 +63,29 @@ describe('descriptive-stats — degenerate input guards', () => {
     expect(() => cov([[1, 2]])).toThrow(/ddof|observations/i); // 1 observation, ddof=1
     // happy path (sample covariance) still works
     expect(cov([1, 2, 3], [1, 2, 3])).toBeCloseTo(1, 10);
+  });
+});
+
+describe('numeric-extra — scaling / length guards', () => {
+  it('logsumexp handles very large vectors without RangeError (spread-free max)', () => {
+    // Math.max(...arr) on a 1e6-element array throws "Maximum call stack size
+    // exceeded" — these functions exist precisely for large log-prob vectors.
+    const n = 1_000_000;
+    const big = new Array(n).fill(0);
+    expect(logsumexp(big)).toBeCloseTo(Math.log(n), 6);
+  });
+
+  it('softmax handles very large vectors without RangeError', () => {
+    const n = 1_000_000;
+    const big = new Array(n).fill(0);
+    const s = softmax(big);
+    expect(s.length).toBe(n);
+    expect(s[0]).toBeCloseTo(1 / n, 12);
+  });
+
+  it('cumtrapz throws when the abscissa array is shorter than y', () => {
+    expect(() => cumtrapz([1, 2, 3, 4], [0, 1])).toThrow(/length|abscissa|x\b/i);
+    // happy path (unit and explicit spacing) still works
+    expect(cumtrapz([1, 2, 3], [0, 1, 2])).toEqual([0, 1.5, 4]);
   });
 });
