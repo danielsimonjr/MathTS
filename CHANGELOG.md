@@ -141,6 +141,13 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   degenerate zero-sum design (`cutoff≈0` → `0/0`); `lfilterZi` reports a clear
   pole-at-`z=1` / non-finite-steady-state error instead of leaking `inv`'s cryptic
   "determinant is zero" when `(I−Aᵀ)` is singular.
+- **`functions/src/cas-integration.ts`**: `symbolicIntegral` now returns its
+  documented `integral(expr, var)` marker for integrands with symbolic constant
+  coefficients (`a/x`, `x^n`) instead of leaking the evaluator's "Undefined symbol"
+  error — the two bare `evaluate()` calls route a non-numeric constant through
+  `NotIntegrable` via a new `evalConst` helper; `linearSlope` narrows its catch to
+  re-throw genuine evaluator errors rather than equating every failure with
+  "not linear".
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

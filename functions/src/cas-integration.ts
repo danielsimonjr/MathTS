@@ -31,6 +31,23 @@ const evaluate = _evaluateRaw as unknown as (s: string, scope?: Record<string, n
 
 class NotIntegrable extends Error {}
 
+/**
+ * Evaluate a constant sub-expression to a finite number. A symbolic constant (a free
+ * parameter like `a` or `n`) can't be reduced numerically — route that to NotIntegrable
+ * so `symbolicIntegral` returns its `integral(...)` marker instead of leaking the
+ * evaluator's "Undefined symbol" error, honoring the documented out-of-scope contract.
+ */
+function evalConst(s: string): number {
+  let v: number;
+  try {
+    v = evaluate(s);
+  } catch {
+    throw new NotIntegrable(`non-numeric constant ${s}`);
+  }
+  if (!Number.isFinite(v)) throw new NotIntegrable(`non-finite constant ${s}`);
+  return v;
+}
+
 /** Unwrap a ParenthesisNode to its content. */
 const unwrap = (n: Node): Node => (n.type === 'ParenthesisNode' && n.content ? unwrap(n.content) : n);
 
@@ -55,8 +72,12 @@ function linearSlope(u: string, x: string): number | null {
     const a2 = evaluate(u, { [x]: 5 }) - evaluate(u, { [x]: 4 });
     if (Math.abs(a1 - a2) < 1e-9 && Math.abs(a1) > 1e-12) return a1;
     return null;
-  } catch {
-    return null;
+  } catch (e) {
+    // A free symbol (u carries a parameter other than x) can't be evaluated → treat as
+    // "not linear" (→ out of scope → marker). A genuine evaluator error must NOT be
+    // silently equated with non-linearity; re-throw anything that isn't a free symbol.
+    if (e instanceof Error && /undefined symbol/i.test(e.message)) return null;
+    throw e;
   }
 }
 
@@ -92,7 +113,7 @@ function integrateNode(raw: Node, x: string): string {
         if (isConst(args[0], x)) {
           const a = linearSlope(args[1].toString(), x);
           if (a !== null) {
-            const k = evaluate(args[0].toString()) / a;
+            const k = evalConst(args[0].toString()) / a;
             return `${num(k)} * log(abs(${args[1].toString()}))`;
           }
         }
@@ -103,7 +124,7 @@ function integrateNode(raw: Node, x: string): string {
         const base = args[0];
         const exp = args[1];
         if (!isConst(exp, x)) throw new NotIntegrable('variable exponent');
-        const n = evaluate(exp.toString());
+        const n = evalConst(exp.toString());
         const a = linearSlope(base.toString(), x);
         if (a === null) throw new NotIntegrable('non-linear base');
         const b = `(${base.toString()})`;

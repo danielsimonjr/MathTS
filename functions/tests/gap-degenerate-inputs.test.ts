@@ -27,6 +27,7 @@ import {
   butter,
   firwin,
   lfilterZi,
+  symbolicIntegral,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -265,5 +266,14 @@ describe('signal-filter-extra — degenerate input guards', () => {
   it('lfilterZi gives a clear error for a filter with a pole at z=1', () => {
     // a = [1, -1] is a pure accumulator: (I − Aᵀ) is singular.
     expect(() => lfilterZi([1], [1, -1])).toThrow(/singular|pole|z=1|undefined/i);
+  });
+});
+
+describe('cas-integration — honors the integral(...) marker contract', () => {
+  it('symbolicIntegral returns a marker (not throw) for symbolic constant coefficients', () => {
+    // 'a' and 'n' are free parameters — out of scope, so return the unevaluated marker
+    // instead of leaking the evaluator's "Undefined symbol" error.
+    expect(symbolicIntegral('a/x')).toBe('integral(a/x, x)');
+    expect(symbolicIntegral('x^n')).toBe('integral(x^n, x)');
   });
 });
