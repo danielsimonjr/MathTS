@@ -70,6 +70,23 @@ Released to npm across two rounds — `functions@0.6.0` (Waves A–D + eigs fix)
 verified live by fresh install. Per-package detail in `functions/CHANGELOG.md` and
 `core/CHANGELOG.md`. Full regression: functions 3057 + core 658 + compat 134 pass.
 
+### Changed (2026-06-30) — degenerate-input hardening for the gap-closure functions (retroactive code-review pass)
+
+The ~89 gap-closure functions shipped without the dev-workflow code-review /
+silent-failure steps. A retroactive 7-reviewer pass found a single recurring
+root cause: they silently returned `NaN`/`Infinity`/garbage on structurally
+invalid or statistically degenerate input instead of failing loudly. Policy fix:
+throw a clear `Error` (matching the scipy/numpy semantics the docstrings claim),
+covered by `functions/tests/gap-degenerate-inputs.test.ts`.
+
+- **`functions/src/descriptive-stats.ts`**: `gmean`/`hmean` now throw on
+  non-positive entries (previously silent `NaN`); `zscore` throws on constant
+  (zero-std) input; `skewness`/`kurtosis` throw on constant input (variance 0)
+  and return `NaN` (SciPy parity) when the sample bias-correction is requested for
+  `n` below its domain (`n≤2`/`n≤3`) instead of silently returning the biased
+  estimator; `cov` throws when observations do not exceed `ddof`. Empty input
+  stays graceful (`NaN`/`[]`, numpy parity) — the existing edge-case contract.
+
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
 - Removed `@ts-nocheck` from the mathjs-derived Unit factory and resolved every

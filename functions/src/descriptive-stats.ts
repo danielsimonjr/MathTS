@@ -59,14 +59,16 @@ export function rankdata(x: Vec): number[] {
 /** Geometric mean: `exp(mean(ln x))` (stable form). All entries must be > 0. */
 export function gmean(x: Vec): number {
   const a = arr(x);
-  if (a.length === 0) return NaN;
+  if (a.length === 0) return NaN; // empty is undefined (graceful NaN, numpy parity)
+  if (a.some((v) => v <= 0)) throw new Error('gmean: all entries must be > 0');
   return Math.exp(mean(a.map(Math.log)));
 }
 
-/** Harmonic mean: `n / Σ(1/xᵢ)`. */
+/** Harmonic mean: `n / Σ(1/xᵢ)`. All entries must be > 0. */
 export function hmean(x: Vec): number {
   const a = arr(x);
-  if (a.length === 0) return NaN;
+  if (a.length === 0) return NaN; // empty is undefined (graceful NaN, numpy parity)
+  if (a.some((v) => v <= 0)) throw new Error('hmean: all entries must be > 0');
   return a.length / sum(a.map((v) => 1 / v));
 }
 
@@ -87,10 +89,13 @@ export function moment(x: Vec, k: number, central = true): number {
 export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
   const a = arr(x);
   const n = a.length;
-  const m2 = centralMoment(a, 2);
+  const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
+  if (m2 === 0) throw new Error('skewness: variance is zero (constant input); skewness undefined');
   const m3 = centralMoment(a, 3);
   const g1 = m3 / Math.pow(m2, 1.5);
-  if (opts.bias === false && n > 2) {
+  if (opts.bias === false) {
+    // Sample correction (SciPy G₁) is undefined for n ≤ 2 — SciPy returns nan.
+    if (n <= 2) return NaN;
     return (Math.sqrt(n * (n - 1)) / (n - 2)) * g1;
   }
   return g1;
@@ -104,10 +109,13 @@ export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
 export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}): number {
   const a = arr(x);
   const n = a.length;
-  const m2 = centralMoment(a, 2);
+  const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
+  if (m2 === 0) throw new Error('kurtosis: variance is zero (constant input); kurtosis undefined');
   const m4 = centralMoment(a, 4);
   let g2 = m4 / (m2 * m2); // Pearson's kurtosis
-  if (opts.bias === false && n > 3) {
+  if (opts.bias === false) {
+    // Sample correction is undefined for n ≤ 3 — SciPy returns nan.
+    if (n <= 3) return NaN;
     g2 = ((n - 1) / ((n - 2) * (n - 3))) * ((n + 1) * g2 - 3 * (n - 1)) + 3;
   }
   return opts.fisher === false ? g2 : g2 - 3;
@@ -132,8 +140,10 @@ export function sem(x: Vec): number {
  */
 export function zscore(x: Vec): number[] {
   const a = arr(x);
+  if (a.length === 0) return []; // empty in → empty out (graceful)
   const m = mean(a);
   const s = stdPop(a);
+  if (s === 0) throw new Error('zscore: standard deviation is zero (constant input)');
   return a.map((v) => (v - m) / s);
 }
 
@@ -148,6 +158,8 @@ export function cov(x: Vec | number[][], y?: Vec, ddof = 1): number | number[][]
     const a = arr(x as Vec);
     const b = arr(y);
     if (a.length !== b.length) throw new Error(`cov: length mismatch ${a.length} vs ${b.length}`);
+    if (a.length <= ddof)
+      throw new Error(`cov: need more than ddof=${ddof} observations (got n=${a.length})`);
     const ma = mean(a);
     const mb = mean(b);
     let acc = 0;
@@ -157,7 +169,9 @@ export function cov(x: Vec | number[][], y?: Vec, ddof = 1): number | number[][]
   // matrix form: rows = observations, columns = variables
   const M = (x as number[][]).map((r) => Array.from(r));
   const nObs = M.length;
-  const nVar = nObs > 0 ? M[0].length : 0;
+  if (nObs <= ddof)
+    throw new Error(`cov: need more than ddof=${ddof} observations (got n=${nObs})`);
+  const nVar = M[0].length;
   const cols = Array.from({ length: nVar }, (_, j) => M.map((r) => r[j]));
   const means = cols.map(mean);
   const out: number[][] = Array.from({ length: nVar }, () => new Array<number>(nVar).fill(0));
