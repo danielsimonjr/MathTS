@@ -91,6 +91,17 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   `RangeError: Maximum call stack size exceeded` on the large (~1e5+) log-probability
   vectors these primitives exist to serve; `cumtrapz` throws on an abscissa array
   shorter than `y` (was silent `NaN` poisoning every output).
+- **`functions/src/hypothesis-extra.ts`**: `fTest` throws on `<2` observations or
+  a zero-variance denominator (was `Infinity`/`NaN`); `jarqueBera` throws on `<2`
+  observations; `kruskalWallis` throws on fewer than 2 non-empty groups (removing
+  the `N³−N=0` tie-correction division-by-zero); `wilcoxon` throws on unequal-length
+  pairs and on all-zero differences, and computes `arr(y)` once instead of per
+  element; `tukeyHSD` throws on `<2` groups or non-positive residual df (was all-`NaN`
+  via `lgamma(0)`); `studentizedRangeQuantile` validates `p∈(0,1)` and brackets the
+  root by expanding `hi` geometrically instead of the fixed `[0,100]` that silently
+  clamped large quantiles; `studentizedRangeCDF` validates `k≥2`/`df>0` and extends
+  its `umax` integration bound until the χ-density tail mass is captured (was a magic
+  constant that biased the CDF low for small `df`).
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

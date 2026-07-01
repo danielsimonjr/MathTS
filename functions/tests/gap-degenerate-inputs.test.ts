@@ -9,6 +9,13 @@ import {
   logsumexp,
   softmax,
   cumtrapz,
+  fTest,
+  jarqueBera,
+  kruskalWallis,
+  wilcoxon,
+  tukeyHSD,
+  studentizedRangeCDF,
+  studentizedRangeQuantile,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -87,5 +94,45 @@ describe('numeric-extra — scaling / length guards', () => {
     expect(() => cumtrapz([1, 2, 3, 4], [0, 1])).toThrow(/length|abscissa|x\b/i);
     // happy path (unit and explicit spacing) still works
     expect(cumtrapz([1, 2, 3], [0, 1, 2])).toEqual([0, 1.5, 4]);
+  });
+});
+
+describe('hypothesis-extra — degenerate input guards', () => {
+  it('fTest throws on <2 observations or a zero-variance denominator', () => {
+    expect(() => fTest([1], [1, 2, 3])).toThrow(/at least 2|2 observations/i);
+    expect(() => fTest([1, 2, 3], [5, 5, 5])).toThrow(/zero variance/i);
+    expect(fTest([1, 2, 3, 4], [2, 4, 6, 8]).pValue).toBeGreaterThan(0); // happy path
+  });
+
+  it('jarqueBera throws on <2 observations', () => {
+    expect(() => jarqueBera([1])).toThrow(/at least 2|observations/i);
+  });
+
+  it('kruskalWallis throws on fewer than 2 non-empty groups', () => {
+    expect(() => kruskalWallis([1, 2, 3])).toThrow(/2 .*groups|at least 2/i);
+    expect(() => kruskalWallis([1, 2], [])).toThrow(/2 .*groups|at least 2/i);
+    expect(kruskalWallis([1, 2, 3], [4, 5, 6]).df).toBe(1); // happy path
+  });
+
+  it('wilcoxon throws on unequal-length pairs and all-zero differences', () => {
+    expect(() => wilcoxon([1, 2, 3], [1, 2])).toThrow(/equal length|length/i);
+    expect(() => wilcoxon([3, 3, 3], [3, 3, 3])).toThrow(/differences are zero|zero/i);
+  });
+
+  it('tukeyHSD throws on <2 groups or non-positive residual df', () => {
+    expect(() => tukeyHSD([[1, 2, 3]])).toThrow(/2 groups|at least 2/i);
+    expect(() => tukeyHSD([[1], [2], [3]])).toThrow(/residual df|df/i); // N=3,k=3,dfErr=0
+  });
+
+  it('studentizedRangeQuantile validates p in (0,1) and still inverts the CDF', () => {
+    expect(() => studentizedRangeQuantile(0, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+    expect(() => studentizedRangeQuantile(1, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+    expect(() => studentizedRangeQuantile(1.5, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+    expect(studentizedRangeQuantile(0.95, 4, 20)).toBeCloseTo(3.9582935609453833, 3);
+  });
+
+  it('studentizedRangeCDF validates k>=2 and df>0', () => {
+    expect(() => studentizedRangeCDF(3, 1, 20)).toThrow(/k .*2|groups/i);
+    expect(() => studentizedRangeCDF(3, 4, 0)).toThrow(/df/i);
   });
 });

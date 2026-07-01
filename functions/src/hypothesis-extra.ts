@@ -57,9 +57,13 @@ export interface FTestResult {
 export function fTest(x: Vec, y: Vec): FTestResult {
   const a = arr(x);
   const b = arr(y);
+  if (a.length < 2 || b.length < 2)
+    throw new Error('fTest: each sample needs at least 2 observations');
   const df1 = a.length - 1;
   const df2 = b.length - 1;
-  const statistic = sampleVar(a) / sampleVar(b);
+  const vb = sampleVar(b);
+  if (vb === 0) throw new Error('fTest: denominator sample has zero variance');
+  const statistic = sampleVar(a) / vb;
   const lower = fCDF(statistic, df1, df2);
   const pValue = 2 * Math.min(lower, 1 - lower);
   return { statistic, pValue, df1, df2 };
@@ -79,7 +83,8 @@ export interface JarqueBeraResult {
 export function jarqueBera(x: Vec): JarqueBeraResult {
   const a = arr(x);
   const n = a.length;
-  const s = skewness(a); // population (SciPy bias=true)
+  if (n < 2) throw new Error('jarqueBera: need at least 2 observations');
+  const s = skewness(a); // population (SciPy bias=true); throws on constant input
   const k = kurtosis(a); // excess
   const statistic = (n / 6) * (s * s + (k * k) / 4);
   const pValue = 1 - chiSquaredCDF(statistic, 2);
@@ -98,8 +103,10 @@ export interface KruskalResult {
  */
 export function kruskalWallis(...groups: Vec[]): KruskalResult {
   const arrs = groups.map(arr).filter((g) => g.length > 0);
+  if (arrs.length < 2) throw new Error('kruskalWallis: need at least 2 non-empty groups');
   const pooled = arrs.flat();
   const N = pooled.length;
+  if (N < 2) throw new Error('kruskalWallis: need at least 2 pooled observations');
   const ranks = rankdata(pooled);
   let offset = 0;
   let sumRanksSq = 0;
@@ -130,9 +137,13 @@ export interface WilcoxonResult {
  */
 export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   const a = arr(x);
-  const diffs = (y !== undefined ? arr(y) : null) ? a.map((v, i) => v - arr(y as Vec)[i]) : a;
+  const yy = y !== undefined ? arr(y) : undefined;
+  if (yy !== undefined && yy.length !== a.length)
+    throw new Error(`wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`);
+  const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
+  if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');
   const ranks = rankdata(d.map(Math.abs));
   let wPlus = 0;
   let wMinus = 0;
@@ -200,20 +211,35 @@ function rangeProb(w: number, k: number): number {
  * against the χ-scaled denominator density (synchronous Simpson + normalCDF/normalPDF).
  */
 export function studentizedRangeCDF(q: number, k: number, df: number): number {
+  if (!(k >= 2)) throw new Error('studentizedRangeCDF: k (number of groups) must be >= 2');
   if (q <= 0) return 0;
   if (!Number.isFinite(df)) return rangeProb(q, k);
+  if (!(df > 0)) throw new Error('studentizedRangeCDF: df must be > 0');
   const nu = df;
   const logc = (nu / 2) * Math.log(nu) - (nu / 2 - 1) * Math.log(2) - lgamma(nu / 2);
   const fU = (u: number): number => Math.exp(logc + (nu - 1) * Math.log(u) - (nu * u * u) / 2);
-  const umax = 1 + 12 / Math.sqrt(nu);
+  // Upper integration bound for the χ-scaled denominator density fU. The heuristic
+  // `1 + 12/√nu` under-covers the tail for small nu, which would silently bias the CDF
+  // low; extend umax until [1e-5, umax] captures ~all of fU's unit mass. This probe uses
+  // fU alone (cheap) — no nested rangeProb — so it does not blow up the hot path.
+  let umax = 1 + 12 / Math.sqrt(nu);
+  for (let iter = 0; iter < 20 && simpson(fU, 1e-5, umax, 120) < 1 - 1e-6; iter++) umax *= 1.5;
   return Math.min(1, Math.max(0, simpson((u) => fU(u) * rangeProb(q * u, k), 1e-5, umax, 120)));
 }
 
 /** Quantile (inverse CDF) of the studentized range distribution, via bisection. */
 export function studentizedRangeQuantile(p: number, k: number, df: number): number {
+  if (!(p > 0 && p < 1)) throw new Error('studentizedRangeQuantile: p must be in (0, 1)');
   let lo = 0;
-  let hi = 100;
-  for (let i = 0; i < 50; i++) {
+  // Bracket p by expanding hi geometrically until CDF(hi) >= p, rather than assuming a
+  // fixed [0, 100] that silently clamps large quantiles to ~100 (unconverged).
+  let hi = 1;
+  for (let iter = 0; studentizedRangeCDF(hi, k, df) < p; iter++) {
+    if (iter >= 60)
+      throw new Error(`studentizedRangeQuantile: failed to bracket p=${p} (CDF plateaued below p)`);
+    hi *= 2;
+  }
+  for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
     if (studentizedRangeCDF(mid, k, df) < p) lo = mid;
     else hi = mid;
@@ -237,9 +263,12 @@ export interface TukeyComparison {
 export function tukeyHSD(groups: Vec[], alpha = 0.05): TukeyComparison[] {
   const gs = groups.map(arr);
   const k = gs.length;
+  if (k < 2) throw new Error('tukeyHSD: need at least 2 groups');
   const means = gs.map(mean);
   const N = gs.reduce((s, g) => s + g.length, 0);
   const dfErr = N - k;
+  if (dfErr <= 0)
+    throw new Error('tukeyHSD: residual df must be > 0 (groups must hold more observations than groups)');
   // pooled mean square error
   const sse = gs.reduce((s, g) => s + sampleVar(g) * (g.length - 1), 0);
   const mse = sse / dfErr;
