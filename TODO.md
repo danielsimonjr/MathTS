@@ -57,8 +57,11 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > linalg-extra ✅ (`companion` a[0]=0 guard + realSchur quasi-tri postcondition) · geometry-extra ✅ ·
 > timeseries-extra ✅ · regression-extra ✅ · optimization-extra ✅ · clustering-extra ✅
 > (`kmeans` `converged` field) · signal-filter-extra ✅ (`butter` Wn range) ·
-> cas-integration ✅. All 11 hardening commits landed. Next: code-simplifier pass
-> (dev-workflow step 7) + full re-verify (step 8) + patch release.
+> cas-integration ✅. All 11 hardening commits landed. Code-simplifier (step 7:
+> guards clean, one dead `kruskalWallis` branch removed) + full re-verify (step 8:
+> 3086 tests / 28-28 typecheck / 0 eslint) done; `studentizedRangeQuantile` 60→45
+> bisections so the nested-Simpson solve fits the 5 s test timeout under load.
+> Next: patch release (functions).
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

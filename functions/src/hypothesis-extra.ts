@@ -106,7 +106,6 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
   if (arrs.length < 2) throw new Error('kruskalWallis: need at least 2 non-empty groups');
   const pooled = arrs.flat();
   const N = pooled.length;
-  if (N < 2) throw new Error('kruskalWallis: need at least 2 pooled observations');
   const ranks = rankdata(pooled);
   let offset = 0;
   let sumRanksSq = 0;
@@ -239,7 +238,10 @@ export function studentizedRangeQuantile(p: number, k: number, df: number): numb
       throw new Error(`studentizedRangeQuantile: failed to bracket p=${p} (CDF plateaued below p)`);
     hi *= 2;
   }
-  for (let i = 0; i < 60; i++) {
+  // 45 bisections give ~hi/2^45 ≈ 1e-13 resolution — far tighter than any practical
+  // tolerance, and each iteration is an expensive nested Simpson integral, so keep the
+  // count modest.
+  for (let i = 0; i < 45; i++) {
     const mid = (lo + hi) / 2;
     if (studentizedRangeCDF(mid, k, df) < p) lo = mid;
     else hi = mid;

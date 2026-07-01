@@ -149,6 +149,13 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   re-throw genuine evaluator errors rather than equating every failure with
   "not linear".
 
+The pass then ran dev-workflow step 7 (code-simplifier — guards judged clean, one
+dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): functions
+**3086 tests pass** / 42 skipped, **28/28** typecheck, **0** eslint. One follow-up:
+`studentizedRangeQuantile` dropped from 60 to 45 bisections (`~hi/2^45` resolution
+is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
+the default 5 s test timeout under full-suite parallel load.
+
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
 - Removed `@ts-nocheck` from the mathjs-derived Unit factory and resolved every

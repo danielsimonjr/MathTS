@@ -136,12 +136,19 @@ describe('hypothesis-extra — degenerate input guards', () => {
     expect(() => tukeyHSD([[1], [2], [3]])).toThrow(/residual df|df/i); // N=3,k=3,dfErr=0
   });
 
-  it('studentizedRangeQuantile validates p in (0,1) and still inverts the CDF', () => {
-    expect(() => studentizedRangeQuantile(0, 4, 20)).toThrow(/\(0, 1\)|p must/i);
-    expect(() => studentizedRangeQuantile(1, 4, 20)).toThrow(/\(0, 1\)|p must/i);
-    expect(() => studentizedRangeQuantile(1.5, 4, 20)).toThrow(/\(0, 1\)|p must/i);
-    expect(studentizedRangeQuantile(0.95, 4, 20)).toBeCloseTo(3.9582935609453833, 3);
-  });
+  // Longer timeout: the non-throwing quantile call runs a bisection of nested
+  // synchronous Simpson integrals, which is legitimately CPU-heavy under full-suite
+  // parallel load (the package's async quadrature can't be used in this sync path).
+  it(
+    'studentizedRangeQuantile validates p in (0,1) and still inverts the CDF',
+    () => {
+      expect(() => studentizedRangeQuantile(0, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+      expect(() => studentizedRangeQuantile(1, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+      expect(() => studentizedRangeQuantile(1.5, 4, 20)).toThrow(/\(0, 1\)|p must/i);
+      expect(studentizedRangeQuantile(0.95, 4, 20)).toBeCloseTo(3.9582935609453833, 3);
+    },
+    30000
+  );
 
   it('studentizedRangeCDF validates k>=2 and df>0', () => {
     expect(() => studentizedRangeCDF(3, 1, 20)).toThrow(/k .*2|groups/i);
