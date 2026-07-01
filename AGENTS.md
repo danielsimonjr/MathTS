@@ -16,16 +16,16 @@ human-facing overview.
 
 ## Build / Test / Verify (run from repo root)
 
-| Task | Command | Notes |
-|---|---|---|
-| Build all | `npm run build` | turbo, respects dep graph |
-| Typecheck all | `npm run typecheck` | turbo; **green baseline = 28/28, 0 errors** |
-| Test all | `npm run test` | vitest via turbo |
-| Lint / format | `npm run lint` · `npm run format` | eslint + prettier |
-| Coverage | `npm run test:coverage` | measurement scoped to an include-list in vitest.config.ts |
-| One package | `npx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` | |
-| One test file | `npx vitest run <path>` | e.g. `core/tests/utils.test.ts` |
-| WASM (AS) | `npm run build:wasm` | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
+| Task          | Command                                                 | Notes                                                                                          |
+| ------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Build all     | `npm run build`                                         | turbo, respects dep graph                                                                      |
+| Typecheck all | `npm run typecheck`                                     | turbo; **green baseline = 28/28, 0 errors**                                                    |
+| Test all      | `npm run test`                                          | vitest via turbo                                                                               |
+| Lint / format | `npm run lint` · `npm run format`                       | eslint + prettier                                                                              |
+| Coverage      | `npm run test:coverage`                                 | measurement scoped to an include-list in vitest.config.ts                                      |
+| One package   | `npx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                |
+| One test file | `npx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                |
+| WASM (AS)     | `npm run build:wasm`                                    | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
 
 **Before claiming "done":** run `npm run typecheck` (must stay 0 errors) and the
 affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
@@ -37,9 +37,10 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 There used to be a "two-layer" rule here (active vs. dormant). **It no longer
 applies.** On 2026-06-27 the dormant layer — unexported, unreachable, untested
 synced-mathjs code — was deleted (**455 files / ~58.6k LOC** across `functions/`
-+ `core/`, the bulk being the dead `functions/src/expression/` mirror). The
-`.ts→.ts` mathjs sync model that produced it is dead (upstream TS-split,
-2026-04-10).
+
+- `core/`, the bulk being the dead `functions/src/expression/` mirror). The
+  `.ts→.ts` mathjs sync model that produced it is dead (upstream TS-split,
+  2026-04-10).
 
 What remains in `functions/src/` is **all reachable from
 `functions/src/index.ts`** — one active graph:
@@ -74,23 +75,23 @@ input-position param types). Trust the **export surface in
 
 ## Where to find X (navigation hub)
 
-| You want… | Look in |
-|---|---|
-| Numeric types (Complex/Fraction/BigNumber), typed-function, factory | `core/src/` |
-| Dense/Sparse matrix, JS/WASM/GPU backends, BackendManager, decompositions | `matrix/src/` |
-| Rank-N Tensor (Float64Array) | `tensor/src/` |
-| Autodiff (forward DualTensor, reverse Tape) | `autograd/src/` |
-| **Live** math functions (arithmetic, trig, stats, signal, CAS, …) | `functions/src/typed/`, `functions/src/factories/` |
-| ComputePool / WebWorker ops | `parallel/src/` |
-| Expression parser/compiler/evaluator | `expression/src/` (wired via `functions/src/factories/evaluate.ts`) |
-| `.mtsw` notebook runtime (parser, graph, executor) | `workbook/src/` |
-| mathjs-compat shim (`create(all)`) | `compat/src/` |
-| AssemblyScript WASM source (the sole WASM backend — functions + matrix) | `assembly/src/` |
-| Forked typed-function / workerpool | `packages/typed-function/`, `packages/workerpool/` |
-| Thin re-export packages (parser, ast, units, linalg, arithmetic, …) | top-level dirs; they re-export, no impl |
-| Architecture / API / inventory docs | `docs/Architecture/`, `docs/api/`, `docs/inventory/` |
-| Roadmaps, gap analyses, WASM plans | `docs/roadmap/` (active); dated one-off plans archived in `docs/archive/plans/` |
-| Standalone tools (dep-graph, benchmarks, mathjs-port) | `tools/` |
+| You want…                                                                 | Look in                                                                         |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Numeric types (Complex/Fraction/BigNumber), typed-function, factory       | `core/src/`                                                                     |
+| Dense/Sparse matrix, JS/WASM/GPU backends, BackendManager, decompositions | `matrix/src/`                                                                   |
+| Rank-N Tensor (Float64Array)                                              | `tensor/src/`                                                                   |
+| Autodiff (forward DualTensor, reverse Tape)                               | `autograd/src/`                                                                 |
+| **Live** math functions (arithmetic, trig, stats, signal, CAS, …)         | `functions/src/typed/`, `functions/src/factories/`                              |
+| ComputePool / WebWorker ops                                               | `parallel/src/`                                                                 |
+| Expression parser/compiler/evaluator                                      | `expression/src/` (wired via `functions/src/factories/evaluate.ts`)             |
+| `.mtsw` notebook runtime (parser, graph, executor)                        | `workbook/src/`                                                                 |
+| mathjs-compat shim (`create(all)`)                                        | `compat/src/`                                                                   |
+| AssemblyScript WASM source (the sole WASM backend — functions + matrix)   | `assembly/src/`                                                                 |
+| Forked typed-function / workerpool                                        | `packages/typed-function/`, `packages/workerpool/`                              |
+| Thin re-export packages (parser, ast, units, linalg, arithmetic, …)       | top-level dirs; they re-export, no impl                                         |
+| Architecture / API / inventory docs                                       | `docs/Architecture/`, `docs/api/`, `docs/inventory/`                            |
+| Roadmaps, gap analyses, WASM plans                                        | `docs/roadmap/` (active); dated one-off plans archived in `docs/archive/plans/` |
+| Standalone tools (dep-graph, benchmarks, mathjs-port)                     | `tools/`                                                                        |
 
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo
 Structure**. Don't duplicate it here — reference it.
@@ -146,6 +147,18 @@ From the 2026-05-01 security release. Any change touching these must preserve th
   Cross-package: `tests/integration/`, `tests/wasm/`.
 - `assembly/tests/run.js` is a node runner (not vitest), needs
   `--experimental-wasm-simd`.
+- **Stale-`dist` gotcha:** a package's tests import the _built_ `dist/` of its
+  dependencies (workspace resolution), **not** their `src/`. So after editing a
+  dependency (e.g. `core`), a direct `npx vitest run` in a downstream package
+  (e.g. `autograd`, `functions`) runs against a **stale `dist`** and can report
+  false failures — e.g. a new `core` export shows as `undefined`. Fix: rebuild the
+  changed dependency first (`npx turbo build --filter=<pkg>` or its `tsup` build),
+  or run the suite via `npm run test` (turbo `test` depends on `["^build","build"]`,
+  so `dist/` is fresh). Don't chase a downstream test failure until the deps are built.
+- **Partial-`tsup` gotcha:** running `tsup src/index.ts --clean` by hand for a quick
+  rebuild wipes `dist/` but skips a package's _other_ build steps (e.g. copying
+  `mathts-as.wasm` into `functions/dist/wasm/`), leaving an incomplete `dist`. Use the
+  package's full `build` script (via turbo) when the wasm binary or `.d.ts` tree matters.
 
 ---
 
@@ -165,10 +178,10 @@ Add them via the `documentation` skill if multi-session memory becomes useful.
 
 ### Context File Maintenance
 
-| File | Update trigger | Who |
-|---|---|---|
-| `README.md` | Major project changes | Human |
-| `AGENTS.md` | New conventions/tools/agent feedback | Human + agent |
-| `CLAUDE.md` | Claude-specific invariants, structure changes | Human + agent |
-| `CHANGELOG.md` | Every release | Human + agent |
-| `docs/inventory/` | After large feature/activation waves (currently stale) | Agent |
+| File              | Update trigger                                         | Who           |
+| ----------------- | ------------------------------------------------------ | ------------- |
+| `README.md`       | Major project changes                                  | Human         |
+| `AGENTS.md`       | New conventions/tools/agent feedback                   | Human + agent |
+| `CLAUDE.md`       | Claude-specific invariants, structure changes          | Human + agent |
+| `CHANGELOG.md`    | Every release                                          | Human + agent |
+| `docs/inventory/` | After large feature/activation waves (currently stale) | Agent         |

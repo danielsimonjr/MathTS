@@ -153,9 +153,9 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
 - ✅ **[hygiene] `gap-tukey.test.ts` timeout edge** — gave the 3 nested-Simpson tests an explicit
   30s `testTimeout` (`SLOW_MS`) with a rationale comment. Compute-cost accommodation, not masking —
   the scipy-oracle assertions still verify correctness. Passes reliably (~10s under load).
-- ⬜ **[hygiene] stale-dist gotcha** — direct `vitest` resolves a package's built `dist`, not `src`;
-  a stale dist gives false failures (cost a 48-test false alarm this session). Document in AGENTS.md
-  testing section (rebuild or use `npm run test` via turbo, which depends on `^build`).
+- ✅ **[hygiene] stale-dist gotcha** — documented in AGENTS.md › Testing protocol (tests import deps'
+  built `dist/` not `src/`; rebuild the dep first or use `npm run test` via turbo) + the partial-`tsup`
+  gotcha (hand `--clean` skips the wasm copy). Also saved to memory `feedback-stale-dist-false-failures`.
 - ⬜ **[guardrail] lock in the hot-vs-cold rule** — add a `// PERF: keep local` comment on
   `functions`/`expression` `utils/is.ts` (cross-module guards defeat V8 inlining — the ~40% gap-tukey
   regression), plus a perf-regression test asserting the guard hot-path stays under budget.
