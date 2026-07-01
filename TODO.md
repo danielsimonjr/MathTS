@@ -133,10 +133,15 @@ one thing to maintain (see memory `project-all-libraries-build-on-core`).
   bundle inlines). More build complexity; low priority given the guards' triviality.
 - ✅ **tensor — non-task.** Real-valued `Float64Array`; delegates linalg to matrix; uses `Math.*`
   (the primitive). Reinvents nothing core provides; core dep is transitive-via-matrix.
-- ⬜ **remaining audit findings** (matrix, functions synced-mathjs mirror, workbook, compat, parallel):
-  mostly the same synced-util layer; apply the same rule — cold utils OK to consolidate, hot-path stays local.
-- ⬜ **regen dep-graph once at sweep end** — the `autograd → core` source edge is now real; run a single
-  `npm run docs:deps` (build:wasm first) when edges settle.
+- ✅ **audited the other libraries (matrix, parallel, workbook, compat) via the dep-graph reports —
+  NO further consolidation targets.** None carry a `utils/` synced-fork; none redefine a core numeric
+  type (no `Complex`/`Fraction`/`BigNumber`/`Dual` class outside core+assembly). They already build on
+  the standard packages: **compat** re-exports core/matrix/parallel (its purpose); **workbook** builds on
+  functions; **matrix** owns its domain (`Matrix`/`isMatrix`/`isDenseMatrix` — hot-path guards + its own
+  `MatrixConfig`, correctly local per the rule); **parallel** clean. functions' remaining name-collisions
+  outside `utils/` are public mathjs-API functions (`clone`/`typeOf`/`isInteger`/`format` via factories)
+  and imported hot-path guards — all legitimate, not duplication.
+- ✅ **regen dep-graph at sweep end** — `autograd → core` edge now real in the reports. (240a0dc)
 
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
