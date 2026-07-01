@@ -156,6 +156,29 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — `docs/reference/functions.md` curated tables document the gap-closure functions
+
+The rich curated domain sections at the top of the reference (with per-function
+signatures + descriptions) had never been updated with the ~89 gap-closure functions
+— they existed only in the generated index. Wrote them into the appropriate `##`
+sections' tables, source-verified (real signatures + return shapes, scipy/numpy parity
+noted only where the source claims it): **Statistics** (skewness/kurtosis/moment/cov/
+corrcoef/gmean/hmean/iqr/sem/zscore/rankdata + elementwise clamp/sigmoid/logsumexp/
+softmax/cum\* + time-series movingAverage/ewma/detrend/acf + linearRegression/kmeans/
+spectralClustering), **Probability Distributions** (the standalone `*CDF`/`*PDF`/
+`*Quantile` surface, cauchy/laplace/logistic families, studentized range, seedProbabilityRng),
+**Hypothesis Tests** (fTest/jarqueBera/kruskalWallis/wilcoxon/fisherExact/tukeyHSD),
+**Linear Algebra** (tril/triu/vander/toeplitz/circulant/companion/laplacianMatrix +
+logdet/generalizedEig/qz/singularValues/lowRankApprox/norm2/normFro/matrixExpm/Logm/Sqrtm),
+**Signal Processing** (firwin/butter/lfilter/lfilterZi/filtfilt + welchPSD/bartlettPSD/
+multiTaperPSD/goertzel/chirpZTransform), **Geometry** (haversine/slerp/quaternions/
+convexHull3D), **CAS** (symbolicIntegral/cas\*), **Numerical Methods** (nelderMead/
+gradientDescent/levenbergMarquardt + gradient/hessian/derivativeAt/gradientAt/
+valueAndDerivativeAt), **Special Functions** (carlson\*/elliptic incomplete/erfcScalar),
+**Graph Theory** (pageRank/betweennessCentrality/eigenvectorCentrality), and
+**Interpolation** (newtonInterp/chebyshevFit/legendreFit). Also corrected the stale
+coverage count (668→686 callable, 744→828 total).
+
 ### Changed (2026-07-01) — `docs/reference/functions.md` index reorganized by domain
 
 The generated export index dumped 416 of the 686 callable functions — including every

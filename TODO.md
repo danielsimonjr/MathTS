@@ -12,7 +12,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 >
 > **Bridge re-validation (2026-06-29):** All 10 integration bridges in `GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` re-checked vs current `main`. Of the 5 material gaps in the 2026-05-20 scorecard, **3 resolved** (B5 compat → 665 fns via `create(all)`; B7 workbook → `evaluate()`+sandbox; B3 FFT-fallback), **1 half-built** (B8 tensor/autograd: converters + native AD landed, no WASM/`functions` AD), **1 persists** (B2 matrix-factory acceleration). Every user-facing function gap closed (52 constants, type-conversion fns, `isInteger`, `parser()`, reviver/replacer); dormant 102 → 39 (all internal). Full Revision 3 + new gaps: [`docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` Part 5](docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md#part-5--revision-3-re-validation-2026-06-29). **New gaps — top 3:** `functions.md` drift (~40 undocumented, no generator) · `variance` (pop) ≠ `parallelStatVariance` (sample) silent divergence · B2 factory matrix ops still pure-JS on boxed `number[][]`.
 
-> **Domain coverage gap analysis (2026-06-30):** Fresh lens — *mathematical/scientific completeness within domains* + *cross-domain connector functions*, sourced from the now-current `functions.md` (744 exports) and vs the SciPy/SymPy bar. Distinct from the two reports above (which cover package bridges + mathjs parity). Thinnest domains: **statistics (~55%)** — no `skewness`/`kurtosis`/`cov`/`gmean`/rank-correlation — and **hypothesis tests (~55%)** — no `fTest`/`kruskalWallis`/`wilcoxon`/`fisherExact`. Highest-leverage bridge: **C4** — the special-fn primitives (`betainc`/`gammainc`/`erfcScalar`) already back the distribution objects but aren't surfaced as standalone `*CDF`/`*Quantile`, which would also unblock the missing tests. Recommended **Wave A** (small, pure, high-traffic): `skewness`/`kurtosis`/`moment`/`cov`/`gmean`/`iqr`/`zscore`/`logsumexp`/`softmax`/`cumprod`/`cumtrapz`. Full report + scorecard + C1–C12 bridge table: [`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`](docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md).
+> **Domain coverage gap analysis (2026-06-30):** Fresh lens — _mathematical/scientific completeness within domains_ + _cross-domain connector functions_, sourced from the now-current `functions.md` (744 exports) and vs the SciPy/SymPy bar. Distinct from the two reports above (which cover package bridges + mathjs parity). Thinnest domains: **statistics (~55%)** — no `skewness`/`kurtosis`/`cov`/`gmean`/rank-correlation — and **hypothesis tests (~55%)** — no `fTest`/`kruskalWallis`/`wilcoxon`/`fisherExact`. Highest-leverage bridge: **C4** — the special-fn primitives (`betainc`/`gammainc`/`erfcScalar`) already back the distribution objects but aren't surfaced as standalone `*CDF`/`*Quantile`, which would also unblock the missing tests. Recommended **Wave A** (small, pure, high-traffic): `skewness`/`kurtosis`/`moment`/`cov`/`gmean`/`iqr`/`zscore`/`logsumexp`/`softmax`/`cumprod`/`cumtrapz`. Full report + scorecard + C1–C12 bridge table: [`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`](docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md).
 >
 > **✅ CLOSED (2026-06-30) — no deferral.** Every wave plus all the remaining
 > highest-complexity items were implemented, oracle-verified, and released:
@@ -32,7 +32,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > (`cas-integration.ts`). Each function verified against NumPy/SciPy or by
 > self-consistency (d/dx ∫f = f), with ~18 oracle-pinned test files (`gap-*.test.ts`)
 > so CI needs no Python. **Two root-cause bugs surfaced by the new code and
-> fixed (Rule 2):** (1) `eigs` returned wrong eigenvalues for *every*
+> fixed (Rule 2):** (1) `eigs` returned wrong eigenvalues for _every_
 > non-symmetric matrix — now routes the factory through native `matrix` `eig`
 > (`functions/src/matrix/native-accel.ts#correctEigs`); (2) `core.Fraction(0.25)`
 > threw `BigInt(0.25)`, silently breaking CAS `simplify`/`derivative` for any
@@ -42,8 +42,8 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > Fraction fix); verified live by fresh install (`butter`/`tukeyHSD`/
 > `symbolicIntegral`/`nelderMead`/`Fraction(0.25)='1/4'`/`derivative('x^4/4')='x^3'`).
 > Per-wave status tracked in the report. Full regression: functions 3057 +
-> core 658 + compat 134 pass; tsc + eslint clean. Remaining as *breadth beyond
-> spec* (documented, not deferred): integration-by-parts / partial-fractions in
+> core 658 + compat 134 pass; tsc + eslint clean. Remaining as _breadth beyond
+> spec_ (documented, not deferred): integration-by-parts / partial-fractions in
 > `symbolicIntegral`, full real-spectrum triangularization of `qz` via a Francis
 > double-shift.
 
@@ -75,7 +75,12 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > `DOMAIN_SUPPLEMENT` for the 140 gap-closure/factory extras) instead of the coarse
 > typed-namespace grouping that dumped 416 fns in one "uncategorized" bucket — every
 > callable export is now categorized (empty "Other"; a new uncategorized export fails
-> `docs:functions:check`). **Open (genuine wall, not deferral):** adding a `docs:functions:check` step to
+> `docs:functions:check`). Then wrote the ~89 gap-closure functions into the curated
+> domain tables at the top of `docs/reference/functions.md` (per-function signatures +
+> descriptions, source-verified via 8 parallel doc agents) — they had existed only in
+> the generated index; corrected the stale coverage count (686 callable / 828 total).
+> **Standing rule (user, 2026-07-01):** always document new functions in the curated
+> tables, not just the generated index. **Open (genuine wall, not deferral):** adding a `docs:functions:check` step to
 > `.github/workflows/ci.yml` so drift fails CI is blocked by a workflow-edit security
 > guard — needs the maintainer to add the step (snippet in the 2026-07-01 CHANGELOG /
 > the doc commit message).
@@ -90,7 +95,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **Known limitation — `realSchur`/`qz` performance cliff (surfaced 2026-06-30).**
 > `realSchur` uses single-shift QR with only 1×1 deflation. For complex-conjugate or
 > equal-modulus spectra it cannot deflate the trailing 2×2 and burns its full 8000-iter
-> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns *correct* quasi-triangular
+> cap (~1.5s for a 4×4 cyclic permutation) — yet still returns _correct_ quasi-triangular
 > output (verified: 3 complex-spectrum pencils reconstruct to 0 error). So this is a
 > perf issue, not the silent-wrong-output the review predicted. A Francis double-shift
 > with 2×2 block deflation (+ Hessenberg pre-reduction) would fix both the speed and give
@@ -104,16 +109,16 @@ Audited independently against the live codebase on 2026-05-24 — every
 item below was verified actionable (vs. done, stale, or a documented
 non-decision).
 
-| #   | Item                                                     | Deps | Complexity  | Owner / next step                                                                |
-| --- | -------------------------------------------------------- | ---- | ----------- | -------------------------------------------------------------------------------- |
-| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0    | Low (admin) | ✅ Done 2026-05-25 — 6 packages published; GitHub Releases + tags pushed.        |
-| 2   | **Delete the npm token copy in Dropbox-synced folder**   | 0    | Trivial     | `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt` after confirming token is in `~/.npmrc` and `NPM_TOKEN` env var (it is). |
-| 3   | **Consolidate npm token storage to one source of truth** | 0    | Low         | Token is currently in `~/.npmrc` (literal), `Mathts/.npmrc` (literal, gitignored), and `NPM_TOKEN` env var. Decide one canonical home and remove the others — `NPM_TOKEN` is the cleanest. |
-| 4   | **Delete stale `.npmrc.bak-*` files**                    | 0    | Trivial     | Two backups left from the 2026-05-25 token rotation: `~/.npmrc.bak-20260525-141127` and `Mathts/.npmrc.bak-20260525-141201`. Both contain revoked tokens. |
-| 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | ✅ Done 2026-06-29 — 41 functions × 1420 seeded cases vs mpmath(dps=50)/scipy/numpy; **zero discrepancies** (all ≤~1e-13 rel.err). Report: `MATH_CORRECTNESS_AUDIT_2026-06-29.md`; reproducible harness: `tools/math-correctness-audit/`. |
-| 6   | **Address the audit B-3 through B-9 findings**           | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9). |
-| 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
-| 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0 | — | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected). |
+| #   | Item                                                                 | Deps | Complexity  | Owner / next step                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --- | -------------------------------------------------------------------- | ---- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Cut a release for the [Unreleased] CHANGELOG section**             | 0    | Low (admin) | ✅ Done 2026-05-25 — 6 packages published; GitHub Releases + tags pushed.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 2   | **Delete the npm token copy in Dropbox-synced folder**               | 0    | Trivial     | `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt` after confirming token is in `~/.npmrc` and `NPM_TOKEN` env var (it is).                                                                                                                                                                                                                                                                                                                                            |
+| 3   | **Consolidate npm token storage to one source of truth**             | 0    | Low         | Token is currently in `~/.npmrc` (literal), `Mathts/.npmrc` (literal, gitignored), and `NPM_TOKEN` env var. Decide one canonical home and remove the others — `NPM_TOKEN` is the cleanest.                                                                                                                                                                                                                                                                                  |
+| 4   | **Delete stale `.npmrc.bak-*` files**                                | 0    | Trivial     | Two backups left from the 2026-05-25 token rotation: `~/.npmrc.bak-20260525-141127` and `Mathts/.npmrc.bak-20260525-141201`. Both contain revoked tokens.                                                                                                                                                                                                                                                                                                                   |
+| 5   | **Mathematical-correctness audit (external-oracle pass)**            | 0    | Medium      | ✅ Done 2026-06-29 — 41 functions × 1420 seeded cases vs mpmath(dps=50)/scipy/numpy; **zero discrepancies** (all ≤~1e-13 rel.err). Report: `MATH_CORRECTNESS_AUDIT_2026-06-29.md`; reproducible harness: `tools/math-correctness-audit/`.                                                                                                                                                                                                                                   |
+| 6   | **Address the audit B-3 through B-9 findings**                       | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9).                                                                                                                                                                                                                                                          |
+| 7   | **Fix tensor test timeout regression**                               | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message _"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."_) Test now completes in ~4s. |
+| 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0    | —           | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected).                       |
 
 ### 🔭 Gap-closure backlog (from the 2026-06-29 re-analyses)
 
@@ -129,6 +134,7 @@ non-decision).
 > `ignore`; its 7 staged changesets remain parked).
 >
 > Scope notes on the harder three (delivered as the right-sized correct slice):
+>
 > - **GC7** — `multiply(2D, 2D)` (previously threw) now routes through native
 >   DenseMatrix + BackendManager (WASM/GPU). **Extended 2026-06-30:** `det`
 >   (~20× on 80×80) and `inv` (~9×) now route large numeric square matrices
@@ -147,7 +153,7 @@ non-decision).
 > - **GC15** — added the JAX-style `grad` / `valueAndGrad` / `derivative` / `jacobian`
 >   ergonomic AD bridge (plain numbers in/out, function written in AD-aware
 >   TapedTensor ops). **Extended 2026-06-30:** the larger follow-up — dual-number
->   overloading so `grad` flows through the *plain* `functions/` ops — is done:
+>   overloading so `grad` flows through the _plain_ `functions/` ops — is done:
 >   a scalar `Dual` type (core, registered for typed dispatch) + `Dual` signatures
 >   on the elementary functions (add/sub/mul/div/pow/sin/cos/tan/exp/log/sqrt/…),
 >   with `derivativeAt`/`valueAndDerivativeAt`/`gradientAt` entry points. So
@@ -165,24 +171,24 @@ Consolidated, deduplicated, and prioritized from the two refreshed reports —
 (the 10 integration bridges). Effort key: **S** ≤ 1 day · **M** ≈ 2–5 days · **L** ≈ 1–2 weeks.
 Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
 
-| ID    | Action                                                                              | Source        | Effort | Priority | Why now |
-| ----- | ----------------------------------------------------------------------------------- | ------------- | ------ | -------- | ------- |
-| GC1   | **Reconcile `variance`/`std`/`parallelStat*` normalization**                        | N2            | S      | **P0**   | Silent correctness footgun: `variance`=population (1.25), `parallelStatVariance`=sample (1.667) for the same input |
-| GC2   | **`functions.md` generator + CI drift-check**                                       | N1·R1·item 11 | S      | **P0**   | ~40 user-facing fns undocumented; recurring failure mode — cheap and self-perpetuating if left |
-| GC3   | **Distribution CDF/quantile external-oracle audit vs `scipy.stats`**                | G3a           | M      | **P0**   | Largest untested numeric surface; inline incomplete-beta/gamma is a shared-misunderstanding trap. Extends `tools/math-correctness-audit/` |
-| GC4   | **Add 6 canonical-name aliases** (`cumsum`,`ctranspose`,`createUnit`,`apply`,`index`,`help`) | G2     | S      | **P1**   | ~10 LOC → 100% mathjs canonical-name parity |
-| GC5   | **Wire `Unit` into arithmetic + comparison operators**                              | G1a·G1b       | M      | **P1**   | Flagship mathjs feature entirely absent from the operator layer (`smaller(5cm,2cm)` throws) |
-| GC6   | **Complex-argument oracle for `zeta`/`gamma`/`lgamma`**                              | G3b           | S      | **P1**   | `zeta` self-documents only ~6-digit complex accuracy, unverified |
-| GC7   | **Route factory matrix ops through native `DenseMatrix` + `BackendManager`**        | N3·B2·item 4  | L      | **P1**   | The one persisting severe bridge gap — `det`/`inv`/`eigs`/`qr`/`expm` get no WASM/GPU accel |
-| GC8   | **Wire tensor decompositions to the existing `*Wasm` async primitives**             | N6·R4         | M      | **P1**   | `svdWasm`/etc. already exist; tensor imports the sync JS path — mostly wiring |
-| GC9   | **`TapedTensor.pow(taped, taped)`** (variable-exponent AD)                           | G4a           | S      | **P2**   | Only genuinely-open infra item; ~30–40 LOC; adjoints specified |
-| GC10  | **`acsc`/`asec`/`acot` BigNumber path** (match `csc`/`sec`/`cot`)                    | G1e           | trivial| **P2**   | Closes an internal inconsistency at near-zero cost |
-| GC11  | **Decomposition-factor + CAS-sympy + units external-table oracles**                 | G3c·G3d·G3e   | M+     | **P2**   | Trust-hardening: factors/symbolic/unit-constants tested only self-referentially |
-| GC12  | **`compat`: make `config` drive behavior · widen `functions.d.ts` · add `chain`**   | N4·N5·R5      | M      | **P2**   | `config()` is inert; type defs frozen at ~22 of 665 fns; no fluent `chain` API |
-| GC13  | **Workbook `tensor`/`export` cell support (or parse-time reject) + B2 regression tests** | N8·N9·R6 | S      | **P2**   | Both cell types declared but throw; B2 stub-capture + SparseMatrix.map have no asserting test |
-| GC14  | **Transparent size-based parallel dispatch for FFT/`numeric` + consolidate threshold mechanisms** | N7·R7·item 7 | M | **P3** | FFT still parallel-only-named; `numeric` unaccelerated; `ThresholdDispatcher` orphaned vs `ComputePool.shouldParallelize` |
-| GC15  | **`functions/`↔`autograd` AD bridge (or document the boundary as intentional)**     | N10·R8·item 6 | L      | **P3**   | `grad` can't flow through any `functions/` op or `evaluate`; native AD is rich but walled off |
-| GC16  | **Broaden `statistics`/`round`/`floor`/`ceil`/`fix`/`sign`/`gcd`/`atan2` type signatures** | G1c·G1d | variable | **P3** | Parity ratchet; statistics breadth is partly a deliberate Float64Array trade-off |
+| ID   | Action                                                                                            | Source        | Effort   | Priority | Why now                                                                                                                                   |
+| ---- | ------------------------------------------------------------------------------------------------- | ------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| GC1  | **Reconcile `variance`/`std`/`parallelStat*` normalization**                                      | N2            | S        | **P0**   | Silent correctness footgun: `variance`=population (1.25), `parallelStatVariance`=sample (1.667) for the same input                        |
+| GC2  | **`functions.md` generator + CI drift-check**                                                     | N1·R1·item 11 | S        | **P0**   | ~40 user-facing fns undocumented; recurring failure mode — cheap and self-perpetuating if left                                            |
+| GC3  | **Distribution CDF/quantile external-oracle audit vs `scipy.stats`**                              | G3a           | M        | **P0**   | Largest untested numeric surface; inline incomplete-beta/gamma is a shared-misunderstanding trap. Extends `tools/math-correctness-audit/` |
+| GC4  | **Add 6 canonical-name aliases** (`cumsum`,`ctranspose`,`createUnit`,`apply`,`index`,`help`)      | G2            | S        | **P1**   | ~10 LOC → 100% mathjs canonical-name parity                                                                                               |
+| GC5  | **Wire `Unit` into arithmetic + comparison operators**                                            | G1a·G1b       | M        | **P1**   | Flagship mathjs feature entirely absent from the operator layer (`smaller(5cm,2cm)` throws)                                               |
+| GC6  | **Complex-argument oracle for `zeta`/`gamma`/`lgamma`**                                           | G3b           | S        | **P1**   | `zeta` self-documents only ~6-digit complex accuracy, unverified                                                                          |
+| GC7  | **Route factory matrix ops through native `DenseMatrix` + `BackendManager`**                      | N3·B2·item 4  | L        | **P1**   | The one persisting severe bridge gap — `det`/`inv`/`eigs`/`qr`/`expm` get no WASM/GPU accel                                               |
+| GC8  | **Wire tensor decompositions to the existing `*Wasm` async primitives**                           | N6·R4         | M        | **P1**   | `svdWasm`/etc. already exist; tensor imports the sync JS path — mostly wiring                                                             |
+| GC9  | **`TapedTensor.pow(taped, taped)`** (variable-exponent AD)                                        | G4a           | S        | **P2**   | Only genuinely-open infra item; ~30–40 LOC; adjoints specified                                                                            |
+| GC10 | **`acsc`/`asec`/`acot` BigNumber path** (match `csc`/`sec`/`cot`)                                 | G1e           | trivial  | **P2**   | Closes an internal inconsistency at near-zero cost                                                                                        |
+| GC11 | **Decomposition-factor + CAS-sympy + units external-table oracles**                               | G3c·G3d·G3e   | M+       | **P2**   | Trust-hardening: factors/symbolic/unit-constants tested only self-referentially                                                           |
+| GC12 | **`compat`: make `config` drive behavior · widen `functions.d.ts` · add `chain`**                 | N4·N5·R5      | M        | **P2**   | `config()` is inert; type defs frozen at ~22 of 665 fns; no fluent `chain` API                                                            |
+| GC13 | **Workbook `tensor`/`export` cell support (or parse-time reject) + B2 regression tests**          | N8·N9·R6      | S        | **P2**   | Both cell types declared but throw; B2 stub-capture + SparseMatrix.map have no asserting test                                             |
+| GC14 | **Transparent size-based parallel dispatch for FFT/`numeric` + consolidate threshold mechanisms** | N7·R7·item 7  | M        | **P3**   | FFT still parallel-only-named; `numeric` unaccelerated; `ThresholdDispatcher` orphaned vs `ComputePool.shouldParallelize`                 |
+| GC15 | **`functions/`↔`autograd` AD bridge (or document the boundary as intentional)**                   | N10·R8·item 6 | L        | **P3**   | `grad` can't flow through any `functions/` op or `evaluate`; native AD is rich but walled off                                             |
+| GC16 | **Broaden `statistics`/`round`/`floor`/`ceil`/`fix`/`sign`/`gcd`/`atan2` type signatures**        | G1c·G1d       | variable | **P3**   | Parity ratchet; statistics breadth is partly a deliberate Float64Array trade-off                                                          |
 
 **Recommended sequencing.** P0 first — GC1 (silent correctness) and GC2 (cheap, self-perpetuating doc gap) are both ~½-day; GC3 extends the existing oracle harness and closes the biggest untested numeric surface. Then P1 parity/accel (GC4 trivial; GC5/GC7 are the flagship feature + the surviving severe bridge gap; GC6/GC8 reuse machinery that already exists). P2/P3 are consistency, trust-hardening, and architectural — schedule after the correctness and parity gaps close.
 
@@ -191,24 +197,18 @@ Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
 Detail — Open Actions items 1–8:
 
 - [x] **Cut a release for the `[Unreleased]` CHANGELOG section.** ✅ Done 2026-05-25.
-      Six packages published to npm with matching GitHub Releases:
-      - `@danielsimonjr/mathts-matrix@0.1.3` — determinant parity fix,
-        Windows WASM-loader path fix, SHA-384 integrity verification across
-        all three load paths, build-script-driven manifest auto-regen.
-      - `@danielsimonjr/mathts-functions@0.2.1` — WASM loader artifact
-        filename + path resolution fix.
-      - `@danielsimonjr/mathts-functions@0.2.0` — parallel-execution
-        remediation (worker pool kernel loading, Float64Array chunking,
-        parallel ops across distribution / special / signal / matrix-decomp
-        layers, GPU primitives).
-      - `@danielsimonjr/mathts-parallel@0.2.0` — ComputePool kernels
-        (`applyKernel` / `applyKernel2` / `fftBatch`).
-      - `@danielsimonjr/mathts-workerpool@0.2.0` — kernel script loading
-        fix, batched-FFT kernel.
-      - `@danielsimonjr/mathts-wasm@0.1.3` and
-        `@danielsimonjr/mathts-expression@0.2.0` — version bumps from
-        prior workspace changes that hadn't been published yet; published
-        in this round to align git tags with npm.
+      Six packages published to npm with matching GitHub Releases: - `@danielsimonjr/mathts-matrix@0.1.3` — determinant parity fix,
+      Windows WASM-loader path fix, SHA-384 integrity verification across
+      all three load paths, build-script-driven manifest auto-regen. - `@danielsimonjr/mathts-functions@0.2.1` — WASM loader artifact
+      filename + path resolution fix. - `@danielsimonjr/mathts-functions@0.2.0` — parallel-execution
+      remediation (worker pool kernel loading, Float64Array chunking,
+      parallel ops across distribution / special / signal / matrix-decomp
+      layers, GPU primitives). - `@danielsimonjr/mathts-parallel@0.2.0` — ComputePool kernels
+      (`applyKernel` / `applyKernel2` / `fftBatch`). - `@danielsimonjr/mathts-workerpool@0.2.0` — kernel script loading
+      fix, batched-FFT kernel. - `@danielsimonjr/mathts-wasm@0.1.3` and
+      `@danielsimonjr/mathts-expression@0.2.0` — version bumps from
+      prior workspace changes that hadn't been published yet; published
+      in this round to align git tags with npm.
 
       Commits: `3d218f5` (H-1+H-2), `b507fb7` (0.2.0 release), `4e390e8`
       (S-1+B-6), `d795846` (B-1+B-2), `31a4893` (matrix 0.1.3 + functions
@@ -223,10 +223,7 @@ Detail — Open Actions items 1–8:
       redundant. Run `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt`.
 
 - [ ] **Consolidate npm token storage to one source of truth.**
-      Same token currently lives in three places:
-      - `~/.npmrc` (literal, user-scope)
-      - `Mathts/.npmrc` (literal, project-scope, gitignored)
-      - `NPM_TOKEN` env var (persistent, user-scope, set 2026-05-25)
+      Same token currently lives in three places: - `~/.npmrc` (literal, user-scope) - `Mathts/.npmrc` (literal, project-scope, gitignored) - `NPM_TOKEN` env var (persistent, user-scope, set 2026-05-25)
 
       Token rotation later means touching all three. Recommended:
       keep `NPM_TOKEN` env var as canonical, change `~/.npmrc` to
@@ -235,9 +232,7 @@ Detail — Open Actions items 1–8:
       gitignored but redundant — user-scope already covers it).
 
 - [ ] **Delete stale `.npmrc.bak-*` files.** Created 2026-05-25 when
-      rotating from the revoked token to the working one:
-      - `C:\Users\danie\.npmrc.bak-20260525-141127`
-      - `C:\Users\danie\Dropbox\Github\Mathts\.npmrc.bak-20260525-141201`
+      rotating from the revoked token to the working one: - `C:\Users\danie\.npmrc.bak-20260525-141127` - `C:\Users\danie\Dropbox\Github\Mathts\.npmrc.bak-20260525-141201`
 
       Both contain revoked tokens — useless for auth but still
       token-shaped material. Safe to delete.
@@ -247,7 +242,7 @@ Detail — Open Actions items 1–8:
       this as the largest gap: tests pass, but they only verify "what we
       computed" matches "what we expected" — neither side checked against a
       known-good oracle. **Result: no discrepancies.** 41 functions ×
-      1420 seeded random cases compared against an *independent* oracle
+      1420 seeded random cases compared against an _independent_ oracle
       (mpmath dps=50 / scipy.special / numpy, separate implementation
       lineage). Coverage spanned all the requested categories — special
       functions (gamma/digamma/erf*/beta/Bessel J,Y,I,K/Airy/zeta/elliptic
@@ -265,26 +260,20 @@ Detail — Open Actions items 1–8:
       (add one `reg(...)` line per future function). *Units were not
       separately audited — the units package re-exports core and has no
       numeric kernel of its own; probability distributions are covered via
-      `gammainc`/`gammaincp`/`erf` which back the CDFs.*
+      `gammainc`/`gammaincp`/`erf` which back the CDFs.\*
 
 - [ ] **Address the audit B-3 through B-9 findings.** Open after the
-      mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`:
-      - **B-3 (medium):** Cross-package WASM dist-hop — `matrix/dist/`
-        consumers (functions, expression, compat) see wrong relative
-        path. Needs a build-pipeline change (copy `lib/wasm/*.wasm`
-        into `matrix/dist/wasm/` during build).
-      - **B-4 (medium):** Three SVD `it.skip` cases at
-        `matrix/tests/decomposition/svd.test.ts:180,461,480` —
-        tall-matrix, 5x5 stability, 4x6 transpose handling.
-      - **B-5 (medium):** 35 commits of mathjs upstream drift
-        (including "6 CRITICAL, 6 HIGH" PR-review fixes); audit
-        which apply to MathTS-synced code.
-      - **B-7 (low):** `npm audit fix` for the `turbo` < 2.9.14
-        dev-dep advisories (CSRF + Yarn Berry LCE).
-      - **B-8 (low):** Resolve or document the `?matrix` FIXME at
-        `expression/src/node/AssignmentNode.ts:12`.
-      - **B-9 (informational):** Decide whether to delete
-        `core/src/types/unit/Unit.ts` (dormant, `@ts-nocheck`'d).
+      mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`: - **B-3 (medium):** Cross-package WASM dist-hop — `matrix/dist/`
+      consumers (functions, expression, compat) see wrong relative
+      path. Needs a build-pipeline change (copy `lib/wasm/*.wasm`
+      into `matrix/dist/wasm/` during build). - **B-4 (medium):** Three SVD `it.skip` cases at
+      `matrix/tests/decomposition/svd.test.ts:180,461,480` —
+      tall-matrix, 5x5 stability, 4x6 transpose handling. - **B-5 (medium):** 35 commits of mathjs upstream drift
+      (including "6 CRITICAL, 6 HIGH" PR-review fixes); audit
+      which apply to MathTS-synced code. - **B-7 (low):** `npm audit fix` for the `turbo` < 2.9.14
+      dev-dep advisories (CSRF + Yarn Berry LCE). - **B-8 (low):** Resolve or document the `?matrix` FIXME at
+      `expression/src/node/AssignmentNode.ts:12`. - **B-9 (informational):** Decide whether to delete
+      `core/src/types/unit/Unit.ts` (dormant, `@ts-nocheck`'d).
 
 - [ ] **Fix tensor test timeout regression.** Surfaced during the
       2026-05-25 release verification.
@@ -293,9 +282,10 @@ Detail — Open Actions items 1–8:
       asserts `elapsed < 10_000ms` but vitest's default test timeout is
       `5000ms`. On this machine the contraction consistently takes
       ~5.7s, so vitest kills the test at 5s before the assertion can
-      run. Two-line fix: `it('completes a 16-tensor exact DP in under
-      10 seconds', () => { ... }, { timeout: 15_000 });`. Pre-existing
-      bug, not introduced by any recent change.
+      run. Two-line fix: raise that test's per-test timeout above its
+      ~5.7s runtime by passing `{ timeout: 15_000 }` as the third
+      argument to `it(...)`. Pre-existing bug, not introduced by any
+      recent change.
 
 - [x] **Add a browser smoke test for the WebGPU paths.** ✅ LANDED
       via Wave-6 Slice 6.5 (`3aac312`). `@vitest/browser` +
@@ -808,7 +798,7 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 
 ### 2026-06-27 session — Rust removal · dormant purge · strict mode · lint cleanup
 
-- [x] **Rust → AssemblyScript migration complete**, then **all Rust scrubbed** from docs *and* code — zero `Rust` outside the 3 CHANGELOGs. AssemblyScript is the sole WASM backend.
+- [x] **Rust → AssemblyScript migration complete**, then **all Rust scrubbed** from docs _and_ code — zero `Rust` outside the 3 CHANGELOGs. AssemblyScript is the sole WASM backend.
 - [x] **Dormant code purged**: 455 synced-mathjs files (~58.6k LOC) from `functions/`+`core/`, plus 26 vestigial AS-source-as-`.ts` (~14k LOC) from `functions/src/wasm/`.
 - [x] **AS-vs-JS WASM benchmark suite** recreated (the old Rust-dependent suite was deleted with the migration).
 - [x] **Monorepo-wide `strict: true`** — `functions` (430 errors fixed honestly, incl. **2 real CSparse port bugs**) + `expression` flipped; all relaxed compiler flags (`noUnusedLocals`/`noUnusedParameters`/`noImplicitReturns`/`noFallthroughCasesInSwitch`) tightened in `functions`+`expression`.
@@ -1021,7 +1011,7 @@ below are limited to operations that genuinely clear that bar.
 > **Correction.** An earlier version of this section blamed a "typed-function
 > nested-dispatch bug" for breaking `polynomialRoot`'s cubic. **That diagnosis
 > was wrong.** typed-function was behaving correctly. Runtime instrumentation of
-> the *actual* failing call (the rawRoots step `add(b, C, divide(Delta0, C))`,
+> the _actual_ failing call (the rawRoots step `add(b, C, divide(Delta0, C))`,
 > where `C` is a complex cube root) showed `add` being called as
 > `add(number, Complex, Complex)` — and `add` had no matching signature. The
 > "value-dependent / nested-only" appearance was a red herring: `add(5184,5324,972)`
@@ -1038,7 +1028,7 @@ below are limited to operations that genuinely clear that bar.
 
 - [x] **`polynomialRoot` cubic branch now works** (real, complex, and repeated
       roots) — it was blocked solely by the `add`/`multiply` variadic gap above,
-      not by `cbrt` or typed-function. `cbrt(Ccubed, allRoots)` with a *Complex*
+      not by `cbrt` or typed-function. `cbrt(Ccubed, allRoots)` with a _Complex_
       `Ccubed` (the only case polynomialRoot's cubic uses) works fine.
 
 - [x] **`math.solve` (CAS) now delegates degree-≤3 to `polynomialRoot`** instead

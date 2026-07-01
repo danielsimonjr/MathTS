@@ -21,7 +21,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export; the factory version is also exported under
 a `factory_` prefix (`factory_add`, …).
 
-**Coverage**: 668 callable functions across the typed and factory layers (744
+**Coverage**: 686 callable functions across the typed and factory layers (828
 total exports, incl. 52 CODATA physical constants — see
 [Physical Constants](#physical-constants) — and 9 type-conversion functions). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -333,33 +333,41 @@ leftShift(1, 4); // 16
 
 ## Special Functions
 
-| Function                                    | Description                                  | Accel                  |
-| ------------------------------------------- | -------------------------------------------- | ---------------------- |
-| `erfc(x)`                                   | Complementary error function `1 - erf(x)`    | parallel               |
-| `erf(x)`                                    | Error function (factory layer)               | —                      |
-| `erfi(x)`                                   | Imaginary error function                     | parallel               |
-| `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`             | parallel               |
-| `betainc(x, a, b)`                          | Incomplete beta function                     | parallel               |
-| `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)` | parallel               |
-| `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)` | parallel               |
-| `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                       | parallel               |
-| `gamma(x)`                                  | Gamma function (factory layer)               | —                      |
-| `lgamma(x)`                                 | Log-gamma (factory layer)                    | —                      |
-| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                            | parallel + WASM (≥1 K) |
-| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                 | parallel + WASM (≥1 K) |
-| `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                    | parallel               |
-| `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind    | parallel + WASM (≥1 K) |
-| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                  | parallel               |
-| `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                            | parallel               |
-| `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                      | parallel               |
-| `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                 | parallel               |
-| `logIntegral(x)`                            | Logarithmic integral `li(x)`                 | parallel               |
-| `lambertW(x[, branch])`                     | Lambert W function                           | parallel               |
-| `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)            | parallel               |
-| `hermiteH(n, x)`                            | Hermite polynomial                           | parallel               |
-| `laguerreL(n, x)`                           | Laguerre polynomial                          | parallel               |
-| `legendreP(n, x)`                           | Legendre polynomial                          | parallel               |
-| `zeta(s)`                                   | Riemann zeta function (factory layer)        | —                      |
+| Function                                    | Description                                                                   | Accel                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------- |
+| `erfc(x)`                                   | Complementary error function `1 - erf(x)`                                     | parallel               |
+| `erf(x)`                                    | Error function (factory layer)                                                | —                      |
+| `erfi(x)`                                   | Imaginary error function                                                      | parallel               |
+| `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                              | parallel               |
+| `betainc(x, a, b)`                          | Incomplete beta function                                                      | parallel               |
+| `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)`                                  | parallel               |
+| `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)`                                  | parallel               |
+| `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                                                        | parallel               |
+| `gamma(x)`                                  | Gamma function (factory layer)                                                | —                      |
+| `lgamma(x)`                                 | Log-gamma (factory layer)                                                     | —                      |
+| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                                                             | parallel + WASM (≥1 K) |
+| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                  | parallel + WASM (≥1 K) |
+| `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                                                     | parallel               |
+| `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind                                     | parallel + WASM (≥1 K) |
+| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                                                   | parallel               |
+| `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                                                             | parallel               |
+| `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                                                       | parallel               |
+| `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                                                  | parallel               |
+| `logIntegral(x)`                            | Logarithmic integral `li(x)`                                                  | parallel               |
+| `lambertW(x[, branch])`                     | Lambert W function                                                            | parallel               |
+| `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)                                             | parallel               |
+| `hermiteH(n, x)`                            | Hermite polynomial                                                            | parallel               |
+| `laguerreL(n, x)`                           | Laguerre polynomial                                                           | parallel               |
+| `legendreP(n, x)`                           | Legendre polynomial                                                           | parallel               |
+| `zeta(s)`                                   | Riemann zeta function (factory layer)                                         | —                      |
+| `carlsonRC(x, y)`                           | Carlson degenerate symmetric elliptic integral R_C(x, y)                      | WASM (≥1 K)            |
+| `carlsonRF(x, y, z)`                        | Carlson symmetric elliptic integral of the first kind R_F                     | WASM (≥1 K)            |
+| `carlsonRD(x, y, z)`                        | Carlson symmetric elliptic integral of the second kind R_D                    | WASM (≥1 K)            |
+| `carlsonRJ(x, y, z, p)`                     | Carlson symmetric elliptic integral of the third kind R_J                     | WASM (≥1 K)            |
+| `ellipticF(phi, m)`                         | Incomplete elliptic integral of the first kind `F(φ, m)` (parameter `m = k²`) | WASM (≥1 K)            |
+| `ellipticEIncomplete(phi, m)`               | Incomplete elliptic integral of the second kind `E(φ, m)`                     | WASM (≥1 K)            |
+| `ellipticPi(n, phi, m)`                     | Incomplete elliptic integral of the third kind `Π(n, φ, m)`                   | WASM (≥1 K)            |
+| `erfcScalar(x)`                             | Scalar complementary error function `1 − erf(x)`                              | —                      |
 
 ### Details
 
@@ -532,6 +540,52 @@ returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 | `minSelect(arr, k)`   | `k` smallest elements            |
 | `maxSelect(arr, k)`   | `k` largest elements             |
 
+### Descriptive statistics
+
+| Function                                      | Description                                                                                                                                     |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skewness(x[, opts])`                         | Third standardized moment; population estimator by default (SciPy `bias=true`). `{ bias: false }` gives the sample-corrected G₁                 |
+| `kurtosis(x[, opts])`                         | Excess kurtosis by default (SciPy `fisher=true`, subtracts 3). `{ fisher: false }` → Pearson's; `{ bias: false }` applies the sample correction |
+| `moment(x, k[, central])`                     | k-th moment; `central` (default `true`) subtracts the mean first, else raw                                                                      |
+| `cov(x, y[, ddof])` / `cov(matrix[, , ddof])` | Sample covariance (scalar for two vectors) or covariance matrix (rows = observations, cols = variables); `ddof` defaults to 1                   |
+| `corrcoef(matrix)`                            | Pearson correlation-coefficient matrix (rows = observations, cols = variables); diagonal is 1                                                   |
+| `gmean(x)`                                    | Geometric mean `exp(mean(ln x))`; all entries must be `> 0`                                                                                     |
+| `hmean(x)`                                    | Harmonic mean `n / Σ(1/xᵢ)`; all entries must be `> 0`                                                                                          |
+| `iqr(x)`                                      | Interquartile range `Q3 − Q1` (via `quantileSeq`)                                                                                               |
+| `sem(x)`                                      | Standard error of the mean `sampleStd / √n` (sample std, `ddof=1`)                                                                              |
+| `zscore(x)`                                   | Per-element `(xᵢ − mean) / std` using population std (SciPy `zscore` default, `ddof=0`)                                                         |
+| `rankdata(x)`                                 | 1-based ranks with average tie handling (SciPy `rankdata` default `'average'`)                                                                  |
+
+### Elementwise & cumulative
+
+| Function           | Description                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `clamp(x, lo, hi)` | Clamp a number or each array element to `[lo, hi]`                                                                         |
+| `sigmoid(x)`       | Logistic sigmoid `1/(1+e^-x)` (numerically stable branch); scalar or array                                                 |
+| `logsumexp(x)`     | `log(Σ exp(xᵢ))`, max-shifted for stability                                                                                |
+| `softmax(x)`       | `exp(xᵢ − max) / Σ exp(x − max)`; returns a probability vector                                                             |
+| `cumprod(x)`       | Cumulative product (running ∏); same length as input                                                                       |
+| `cummax(x)`        | Cumulative (running) maximum                                                                                               |
+| `cummin(x)`        | Cumulative (running) minimum                                                                                               |
+| `cumtrapz(y[, x])` | Cumulative trapezoidal integral; `x` may be abscissae or scalar `dx` (default unit spacing), leading 0 (MATLAB convention) |
+
+### Time series
+
+| Function              | Description                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `movingAverage(x, w)` | Simple moving average over trailing window `w`; returns length `n − w + 1` ("valid")                          |
+| `ewma(x, alpha)`      | Exponentially-weighted moving average, `α ∈ (0,1]` (pandas `ewm(adjust=False)`); same length as input         |
+| `detrend(x[, type])`  | Remove trend: `'linear'` (default, least-squares line) or `'constant'` (mean); matches `scipy.signal.detrend` |
+| `acf(x, nlags)`       | Autocorrelation up to `nlags`, biased estimator (÷n, like statsmodels `acf`); `acf[0] = 1`                    |
+
+### Regression & clustering
+
+| Function                                   | Description                                                                                                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `linearRegression(x, y)`                   | Simple OLS fit; returns `{ slope, intercept, rValue, rSquared, pValue, stdErr }` (mirrors `scipy.stats.linregress`; needs ≥ 3 points)                       |
+| `kmeans(data, k[, opts])`                  | Lloyd's k-means on row-vectors, deterministic maximin seeding; returns `{ labels, centroids, inertia, iterations, converged }` (`opts.maxIter` default 100) |
+| `spectralClustering(adjacency, k[, opts])` | Normalized-Laplacian spectral clustering of a weighted graph; returns a label per node                                                                      |
+
 ### Details
 
 - Scalar and small-array overloads are synchronous; the `parallelStat*` family
@@ -611,6 +665,55 @@ Constructors returning objects with `pdf`, `cdf`, `ppf` (quantile), and
 | `random([min, max])`     | Uniform random number           |
 | `randomInt([min, max])`  | Uniform random integer          |
 | `pickRandom(array[, n])` | Random element(s) from an array |
+
+### Standalone CDF / PDF / quantile surface
+
+Free functions giving the SciPy-style standalone surface (`chi2.cdf(x, k)` → `chiSquaredCDF(x, k)`) and the quantile symmetry the density table lacked (`normalCDF` existed; `normalQuantile` did not). The CDF/quantile wrappers delegate to the `*Dist` objects and re-implement no distribution math — they surface the accurate incomplete-beta (`betainc`) / incomplete-gamma (`gammainc`) / `erfc` primitives that back those objects.
+
+| Function                          | Description                                                 | Accel    |
+| --------------------------------- | ----------------------------------------------------------- | -------- |
+| `normalQuantile(p[, mu, sigma])`  | Normal quantile (inverse CDF); defaults standard normal     | —        |
+| `studentTCDF(x, df)`              | Student-t CDF, `df` degrees of freedom                      | —        |
+| `studentTPDF(x, df)`              | Student-t PDF                                               | parallel |
+| `studentTQuantile(p, df)`         | Student-t quantile                                          | —        |
+| `chiSquaredCDF(x, df)`            | Chi-squared CDF                                             | —        |
+| `chiSquaredQuantile(p, df)`       | Chi-squared quantile                                        | —        |
+| `fCDF(x, d1, d2)`                 | F-distribution CDF, `d1`/`d2` degrees of freedom            | —        |
+| `fQuantile(p, d1, d2)`            | F-distribution quantile                                     | —        |
+| `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                 | —        |
+| `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                            | parallel |
+| `gammaQuantile(p, shape[, rate])` | Gamma quantile                                              | —        |
+| `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                         | —        |
+| `betaPDF(x, alpha, beta_)`        | Beta PDF                                                    | parallel |
+| `betaQuantile(p, a, b)`           | Beta quantile                                               | —        |
+| `noncentralChi2PDF(x, df, ncp)`   | Noncentral chi-squared PDF (Poisson-mixture, `ncp = λ ≥ 0`) | parallel |
+
+### Closed-form heavy-tail / location families
+
+Pure closed-form scalar PDF/CDF/quantile triples (location–scale parameterised).
+
+| Function                         | Description                                                 |
+| -------------------------------- | ----------------------------------------------------------- |
+| `cauchyPDF(x[, x0, gamma])`      | Cauchy (Lorentz) PDF — location `x0`, scale `gamma`         |
+| `cauchyCDF(x[, x0, gamma])`      | Cauchy CDF                                                  |
+| `cauchyQuantile(p[, x0, gamma])` | Cauchy quantile                                             |
+| `laplacePDF(x[, mu, b])`         | Laplace (double-exponential) PDF — location `mu`, scale `b` |
+| `laplaceCDF(x[, mu, b])`         | Laplace CDF                                                 |
+| `laplaceQuantile(p[, mu, b])`    | Laplace quantile                                            |
+| `logisticPDF(x[, mu, s])`        | Logistic PDF — location `mu`, scale `s`                     |
+| `logisticCDF(x[, mu, s])`        | Logistic CDF                                                |
+| `logisticQuantile(p[, mu, s])`   | Logistic quantile                                           |
+
+### Studentized range distribution
+
+Backs Tukey's HSD post-hoc test.
+
+| Function                             | Description                                                                                              |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `studentizedRangeCDF(q, k, df)`      | CDF of the studentized range (`k` groups, `df` residual df); matches `scipy.stats.studentized_range.cdf` |
+| `studentizedRangeQuantile(p, k, df)` | Quantile (inverse CDF) via bisection; supplies Tukey HSD critical values                                 |
+
+`seedProbabilityRng(seed)` resets the internal generator shared by `random`, `randomInt`, and `pickRandom` — pass a `string`/`number` for a reproducible sequence, or `null` to re-seed from the clock.
 
 ### Details
 
@@ -714,6 +817,33 @@ the standard `multiply` / `transpose` when full f64 precision is required.
 ### Sparse (CSC) routines
 
 `csChol`, `csLu`, `csSpsolve`, `csSqr`, `csCounts`, `csSymperm`, `csAmd`.
+
+### Structured matrix constructors
+
+| Function                             | Description                                                                                                                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tril(A[, k])`                       | Lower-triangular part of `A`, zeroing entries above the `k`-th diagonal (default `k = 0`)                                                                               |
+| `triu(A[, k])`                       | Upper-triangular part of `A`, zeroing entries below the `k`-th diagonal (default `k = 0`)                                                                               |
+| `vander(x[, n][, increasing])`       | Vandermonde matrix of `x`; column `j` is `xᵢ^(N-1-j)` (numpy `np.vander` convention, `N` defaults to `x.length`), or `xᵢ^j` when `increasing` is true                   |
+| `toeplitz(c[, r])`                   | Toeplitz matrix with first column `c` and first row `r` (defaults to `c`); constant along each diagonal                                                                 |
+| `circulant(c)`                       | Circulant matrix; each row is the previous one rotated right by one (connects to the FFT)                                                                               |
+| `companion(coeffs)`                  | Companion matrix of the polynomial `[a₀, …, aₙ]` (highest degree first, numpy `np.companion` convention); its eigenvalues are the polynomial's roots                    |
+| `laplacianMatrix(adjacency[, opts])` | Graph Laplacian of an adjacency matrix; combinatorial `L = D − A` by default, or the symmetric normalized `L_sym = I − D^(−1/2) A D^(−1/2)` with `{ normalized: true }` |
+
+### Decompositions & matrix functions (gap analysis)
+
+| Function               | Description                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logdet(A)`            | Natural log of the absolute determinant via LU (the `logabsdet` part of numpy `slogdet`), stable where `log(det(A))` overflows; returns `{ sign, value }` with `det = sign · exp(value)`                |
+| `generalizedEig(A, B)` | Generalized eigenvalues of the pencil `A x = λ B x` (`B` nonsingular) via the eigendecomposition of `B⁻¹A`; eigenvalues match `scipy.linalg.eig(A, B)`                                                  |
+| `qz(A, B)`             | Generalized (QZ) Schur decomposition of `(A, B)`; returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with `A = Q·AA·Zᵀ`, `B = Q·BB·Zᵀ` (matches `scipy.linalg.qz`; factors not unique) |
+| `singularValues(A)`    | Singular values in descending order (length `min(m, n)`, all non-negative)                                                                                                                              |
+| `lowRankApprox(A, k)`  | Best rank-`k` approximation in the Frobenius-norm sense via truncated SVD: `A_k = U[:, :k] · diag(S[:k]) · V[:, :k]ᵀ`                                                                                   |
+| `norm2(A)`             | Spectral norm (2-norm) of a matrix — the largest singular value                                                                                                                                         |
+| `normFro(A)`           | Frobenius norm of a matrix — `sqrt(sum(A_ij²))`                                                                                                                                                         |
+| `matrixExpm(A)`        | Matrix exponential via Padé-13 scaling-and-squaring (Higham 2005)                                                                                                                                       |
+| `matrixLogm(A)`        | Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive/complex eigenvalues                                                                 |
+| `matrixSqrtm(A)`       | Principal matrix square root via Newton iteration (eigendecomposition fallback); throws for negative/complex eigenvalues                                                                                |
 
 ### Details
 
@@ -908,39 +1038,44 @@ expand('(x + 1)^3'); // 'x^3 + 3*x^2 + 3*x + 1'
 
 Symbolic calculus, transforms, and equation solving.
 
-| Function                                   | Description                                |
-| ------------------------------------------ | ------------------------------------------ |
-| `integrate(expr, var[, a, b])`             | Symbolic integration (definite/indefinite) |
-| `limit(expr, var, point[, dir])`           | Symbolic limit                             |
-| `partialDerivative(expr, var)`             | Partial derivative                         |
-| `directionalDerivative(expr, vars, dir)`   | Directional derivative                     |
-| `gradientSymbolic(expr, vars)`             | Gradient vector                            |
-| `jacobian(exprs, vars)`                    | Jacobian matrix                            |
-| `laplacian(expr, vars)`                    | Laplacian operator                         |
-| `divergence(field, vars)`                  | Divergence of a vector field               |
-| `curl(field, vars)`                        | Curl of a 3D vector field                  |
-| `implicitDiff(eq, dep, indep)`             | Implicit differentiation                   |
-| `laplace(expr, t, s)`                      | Laplace transform                          |
-| `inverseLaplace(expr, s, t)`               | Inverse Laplace transform                  |
-| `inverseLaplaceTransform(...)`             | Inverse Laplace (numerical variant)        |
-| `fourierSeries(expr, var, n)`              | Fourier series coefficients                |
-| `zTransform(expr, n, z)`                   | Z-transform                                |
-| `taylor(expr, var, point, n)`              | Taylor series expansion                    |
-| `multivariateTaylor(expr, vars, point, n)` | Multivariate Taylor expansion              |
-| `series(expr, var, n)`                     | General series expansion                   |
-| `seriesCoefficient(expr, var, n)`          | nth series coefficient                     |
-| `solve(expr, var)`                         | Solve an equation                          |
-| `summation(expr, var, from, to)`           | Symbolic summation                         |
-| `symbolicProduct(expr, var, from, to)`     | Symbolic product                           |
-| `groebnerBasis(polys, vars)`               | Gröbner basis                              |
-| `minimalPolynomial(value)`                 | Minimal polynomial                         |
-| `toRadicals(expr)`                         | Express roots in radicals                  |
-| `odeGeneral(ode, y, x)`                    | Solve an ODE symbolically                  |
-| `piecewise(conditions)`                    | Piecewise function definition              |
-| `asymptotic(expr, var)`                    | Asymptotic expansion                       |
-| `assume(var, property)`                    | Register an assumption                     |
-| `getAssumptions([var])`                    | Read current assumptions                   |
-| `clearAssumptions()`                       | Clear all assumptions                      |
+| Function                                   | Description                                                                                                                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrate(expr, var[, a, b])`             | Symbolic integration (definite/indefinite)                                                                                                                                                                |
+| `limit(expr, var, point[, dir])`           | Symbolic limit                                                                                                                                                                                            |
+| `partialDerivative(expr, var)`             | Partial derivative                                                                                                                                                                                        |
+| `directionalDerivative(expr, vars, dir)`   | Directional derivative                                                                                                                                                                                    |
+| `gradientSymbolic(expr, vars)`             | Gradient vector                                                                                                                                                                                           |
+| `jacobian(exprs, vars)`                    | Jacobian matrix                                                                                                                                                                                           |
+| `laplacian(expr, vars)`                    | Laplacian operator                                                                                                                                                                                        |
+| `divergence(field, vars)`                  | Divergence of a vector field                                                                                                                                                                              |
+| `curl(field, vars)`                        | Curl of a 3D vector field                                                                                                                                                                                 |
+| `implicitDiff(eq, dep, indep)`             | Implicit differentiation                                                                                                                                                                                  |
+| `laplace(expr, t, s)`                      | Laplace transform                                                                                                                                                                                         |
+| `inverseLaplace(expr, s, t)`               | Inverse Laplace transform                                                                                                                                                                                 |
+| `inverseLaplaceTransform(...)`             | Inverse Laplace (numerical variant)                                                                                                                                                                       |
+| `fourierSeries(expr, var, n)`              | Fourier series coefficients                                                                                                                                                                               |
+| `zTransform(expr, n, z)`                   | Z-transform                                                                                                                                                                                               |
+| `taylor(expr, var, point, n)`              | Taylor series expansion                                                                                                                                                                                   |
+| `multivariateTaylor(expr, vars, point, n)` | Multivariate Taylor expansion                                                                                                                                                                             |
+| `series(expr, var, n)`                     | General series expansion                                                                                                                                                                                  |
+| `seriesCoefficient(expr, var, n)`          | nth series coefficient                                                                                                                                                                                    |
+| `solve(expr, var)`                         | Solve an equation                                                                                                                                                                                         |
+| `summation(expr, var, from, to)`           | Symbolic summation                                                                                                                                                                                        |
+| `symbolicProduct(expr, var, from, to)`     | Symbolic product                                                                                                                                                                                          |
+| `groebnerBasis(polys, vars)`               | Gröbner basis                                                                                                                                                                                             |
+| `minimalPolynomial(value)`                 | Minimal polynomial                                                                                                                                                                                        |
+| `toRadicals(expr)`                         | Express roots in radicals                                                                                                                                                                                 |
+| `odeGeneral(ode, y, x)`                    | Solve an ODE symbolically                                                                                                                                                                                 |
+| `piecewise(conditions)`                    | Piecewise function definition                                                                                                                                                                             |
+| `asymptotic(expr, var)`                    | Asymptotic expansion                                                                                                                                                                                      |
+| `assume(var, property)`                    | Register an assumption                                                                                                                                                                                    |
+| `getAssumptions([var])`                    | Read current assumptions                                                                                                                                                                                  |
+| `clearAssumptions()`                       | Clear all assumptions                                                                                                                                                                                     |
+| `symbolicIntegral(expr[, variable])`       | Recursive symbolic antiderivative (power rule, linearity, `1/x`, linear-substitution of `sin`/`cos`/`exp`/`ln`/`sinh`/`cosh`); returns an unevaluated `integral(expr, variable)` marker when out of scope |
+| `casSimplify(expr)`                        | Parallel-first symbolic simplification of an expression string or `MathNode` (array overload fans out to the worker pool)                                                                                 |
+| `casDerivative(expr, variable)`            | Symbolic derivative w.r.t. `variable` (array overload fans out to the worker pool)                                                                                                                        |
+| `casExpand(expr)`                          | Expand products / powers of an expression (array overload fans out to the worker pool)                                                                                                                    |
+| `casFactor(expr)`                          | Factor common terms out of an expression (array overload fans out to the worker pool)                                                                                                                     |
 
 ### Details
 
@@ -1028,27 +1163,30 @@ romberg(Math.sin, 0, Math.PI); // ~2.0
 
 ## Interpolation & Curve Fitting
 
-| Function                                 | Description                            | Accel |
-| ---------------------------------------- | -------------------------------------- | ----- |
-| `linearInterp(xs, ys, x)`                | Piecewise linear interpolation         | —     |
-| `lagrangeInterp(xs, ys, x)`              | Lagrange polynomial interpolation      | —     |
-| `cubicSpline(xs, ys)`                    | Natural cubic spline → evaluator       | —     |
-| `cspline(xs, ys)`                        | Cubic spline (numeric layer)           | —     |
-| `hermiteInterp(xs, ys, dys, x)`          | Hermite interpolation                  | —     |
-| `pchipInterp(xs, ys)` / `pchip(xs, ys)`  | Shape-preserving PCHIP spline          | —     |
-| `polyFit(xs, ys, degree)`                | Least-squares polynomial fit           | —     |
-| `interpolate(xs, ys, x[, method])`       | General interpolation dispatcher       | —     |
-| `griddata(xs, ys, values, xi, yi)`       | Scattered-data interpolation to a grid | WASM  |
-| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation    | WASM  |
-| `loess(xs, ys, x[, bandwidth])`          | LOESS local regression                 | WASM  |
-| `chebyshevApprox(f, a, b, n)`            | Chebyshev polynomial approximation     | —     |
-| `padeApproximant(coeffs, m, n)`          | Padé approximant                       | —     |
-| `bezierCurve(controlPoints, t)`          | Bézier curve evaluation                | WASM  |
-| `bspline(controlPoints, degree, t)`      | B-spline curve evaluation              | —     |
-| `curvefit(xs, ys, model, p0)`            | Nonlinear curve fitting                | —     |
-| `expfit(xs, ys)`                         | Exponential fit `a·exp(b·x)`           | —     |
-| `logfit(xs, ys)`                         | Logarithmic fit                        | —     |
-| `powerfit(xs, ys)`                       | Power-law fit                          | —     |
+| Function                                 | Description                                                                   | Accel |
+| ---------------------------------------- | ----------------------------------------------------------------------------- | ----- |
+| `linearInterp(xs, ys, x)`                | Piecewise linear interpolation                                                | —     |
+| `lagrangeInterp(xs, ys, x)`              | Lagrange polynomial interpolation                                             | —     |
+| `cubicSpline(xs, ys)`                    | Natural cubic spline → evaluator                                              | —     |
+| `cspline(xs, ys)`                        | Cubic spline (numeric layer)                                                  | —     |
+| `hermiteInterp(xs, ys, dys, x)`          | Hermite interpolation                                                         | —     |
+| `pchipInterp(xs, ys)` / `pchip(xs, ys)`  | Shape-preserving PCHIP spline                                                 | —     |
+| `polyFit(xs, ys, degree)`                | Least-squares polynomial fit                                                  | —     |
+| `interpolate(xs, ys, x[, method])`       | General interpolation dispatcher                                              | —     |
+| `griddata(xs, ys, values, xi, yi)`       | Scattered-data interpolation to a grid                                        | WASM  |
+| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation                                           | WASM  |
+| `loess(xs, ys, x[, bandwidth])`          | LOESS local regression                                                        | WASM  |
+| `chebyshevApprox(f, a, b, n)`            | Chebyshev polynomial approximation                                            | —     |
+| `padeApproximant(coeffs, m, n)`          | Padé approximant                                                              | —     |
+| `bezierCurve(controlPoints, t)`          | Bézier curve evaluation                                                       | WASM  |
+| `bspline(controlPoints, degree, t)`      | B-spline curve evaluation                                                     | —     |
+| `curvefit(xs, ys, model, p0)`            | Nonlinear curve fitting                                                       | —     |
+| `expfit(xs, ys)`                         | Exponential fit `a·exp(b·x)`                                                  | —     |
+| `logfit(xs, ys)`                         | Logarithmic fit                                                               | —     |
+| `powerfit(xs, ys)`                       | Power-law fit                                                                 | —     |
+| `newtonInterp(xs, ys, x)`                | Newton divided-difference polynomial interpolation; throws on duplicate nodes | WASM  |
+| `chebyshevFit(xs, ys, degree)`           | Least-squares fit in the Chebyshev-T basis → coefficient array                | WASM  |
+| `legendreFit(xs, ys, degree)`            | Least-squares fit in the Legendre-P basis → coefficient array                 | WASM  |
 
 ### Details
 
@@ -1118,6 +1256,24 @@ Root-finding, optimization, linear systems, and differential equations.
 | `rank(A)`                           | Numerical rank                           | WASM  |
 | `nullspace(A)`                      | Null-space basis                         | —     |
 | `residue(b, a)`                     | Partial-fraction residues                | —     |
+
+### Optimization
+
+| Function                                   | Description                                                                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                       |
+| `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }` |
+| `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                     |
+
+### Differentiation
+
+| Function                     | Description                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `gradient(y[, x])`           | Numeric gradient of sampled data (second-order central differences, one-sided at edges; matches `numpy.gradient`) |
+| `hessian(f, x[, h])`         | Numeric Hessian (second partials) of `f: ℝⁿ → ℝ` via central differences, symmetric by construction               |
+| `derivativeAt(f, x)`         | Exact scalar derivative of `f: ℝ → ℝ` at `x` via forward-mode autodiff (the `Dual` type; no finite differences)   |
+| `gradientAt(f, x)`           | Exact gradient of `f: ℝⁿ → ℝ` at `x` by `n` forward-mode passes                                                   |
+| `valueAndDerivativeAt(f, x)` | Value plus the exact forward-mode derivative of `f` at `x`; returns `{ value, deriv }`                            |
 
 ### Details
 
@@ -1203,6 +1359,26 @@ back to the sequential radix-2 implementation on the calling thread.
 | `freqz(b, a)`                                   | Digital filter frequency response (factory layer)    | —              |
 | `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)   | —              |
 
+### Digital filter design & application (vs `scipy.signal`)
+
+| Function                  | Description                                                                                                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `firwin(numtaps, cutoff)` | FIR lowpass tap design by the windowed-sinc method (Hamming window, unit DC gain); `cutoff` normalized to Nyquist (1 = Nyquist) — `scipy.signal.firwin(numtaps, cutoff)` with the default window |
+| `butter(N, Wn)`           | Butterworth IIR design, lowpass only; returns `{ b, a }` transfer-function coefficients. `N` = order, `Wn` = cutoff normalized to Nyquist (0 < Wn < 1) — `scipy.signal.butter(N, Wn)`            |
+| `lfilter(b, a, x)`        | Apply an IIR/FIR filter (numerator `b`, denominator `a`) to `x` via direct-form II transposed; `a[0]` normalizes — `scipy.signal.lfilter`                                                        |
+| `lfilterZi(b, a)`         | Steady-state initial conditions for `lfilter` so a constant input is unchanged at the boundary — `scipy.signal.lfilter_zi`                                                                       |
+| `filtfilt(b, a, x)`       | Zero-phase forward–backward filtering with odd-reflection padding (default padlen `3·max(len a, len b)`); no phase distortion — `scipy.signal.filtfilt`                                          |
+
+### Spectral estimation
+
+| Function                                       | Description                                                                                                                                                     | Accel |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `welchPSD(x[, opts])`                          | Welch overlapped-segment-averaging PSD; `opts = { frameLength, overlap, window }` (defaults 256, frameLength/2, `'hann'`) → `{ psd, frequencies, frameLength }` | WASM  |
+| `bartlettPSD(x[, opts])`                       | Bartlett non-overlapped segment-averaging PSD (Welch with overlap 0, rectangular window) → `{ psd, frequencies, frameLength }`                                  | WASM  |
+| `multiTaperPSD(x[, opts])`                     | Thomson multi-taper PSD; averages `K` Slepian-tapered periodograms to cut leakage; `opts = { nfft, K }` (default K=5) → `{ psd, frequencies }`                  | WASM  |
+| `goertzel(x, targetFreq, sampleRate)`          | Goertzel algorithm: power \|X[k]\|² at a single target frequency (Hz)                                                                                           | WASM  |
+| `chirpZTransform(x, m[, phiStart[, phiStep]])` | Chirp-Z (Bluestein) transform: `m` z-transform points along a chirp contour (`phiStart`/`phiStep` in turns; default `phiStep = -1/n`) → `{ re, im }`            | WASM  |
+
 ### Details
 
 - The `parallel`-marked transforms return a `Promise` and dispatch their FFT
@@ -1283,6 +1459,32 @@ Geometric operations on 2D/3D/nD coordinate arrays.
 | `nearestNeighbor(points, query)`                              | Nearest-neighbour search                  | WASM     |
 | `distanceMatrix(points)`                                      | All-pairs Euclidean distance matrix       | parallel |
 
+### Geodesy & interpolation
+
+| Function                                      | Description                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `haversine(lat1, lon1, lat2, lon2[, radius])` | Great-circle distance between two lat/lon points (degrees); `radius` defaults to mean Earth radius in km     |
+| `slerp(v0, v1, t)`                            | Spherical linear interpolation between two vectors for `t ∈ [0,1]`; throws on zero-length or antipodal input |
+
+### Quaternions
+
+Quaternions are `[w, x, y, z]` arrays (scalar-first).
+
+| Function                               | Description                                                    |
+| -------------------------------------- | -------------------------------------------------------------- |
+| `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                            |
+| `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                    |
+| `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude          |
+| `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for a rotation of `angle` radians about `axis` |
+| `quaternionRotate(q, v)`               | Rotate 3-vector `v` by unit quaternion `q`                     |
+| `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix for a unit quaternion                      |
+
+### 3D convex hull
+
+| Function               | Description                                                                                                                             | Accel |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `convexHull3D(points)` | 3D convex hull via QuickHull; returns CCW-oriented triangular faces as vertex-index triples; throws on fewer than 4 non-coplanar points | WASM  |
+
 ### Details
 
 - Points and vectors are plain coordinate arrays; most functions have explicit
@@ -1327,16 +1529,19 @@ convexHull([
 
 Algorithms over adjacency-matrix representations.
 
-| Function                           | Description                              |
-| ---------------------------------- | ---------------------------------------- |
-| `adjacencyMatrix(edges, n)`        | Build adjacency matrix from an edge list |
-| `shortestPath(adj, start, end)`    | Dijkstra shortest path (node sequence)   |
-| `graphDistance(adj, start, end)`   | Shortest-path length                     |
-| `minimumSpanningTree(adj)`         | MST (Prim) → edge list                   |
-| `connectedComponents(adj)`         | Connected components                     |
-| `stronglyConnectedComponents(adj)` | SCCs (Kosaraju)                          |
-| `topologicalSort(adj)`             | Topological order (DAGs)                 |
-| `isConnected(adj)`                 | Connectivity test                        |
+| Function                             | Description                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `adjacencyMatrix(edges, n)`          | Build adjacency matrix from an edge list                                      |
+| `shortestPath(adj, start, end)`      | Dijkstra shortest path (node sequence)                                        |
+| `graphDistance(adj, start, end)`     | Shortest-path length                                                          |
+| `minimumSpanningTree(adj)`           | MST (Prim) → edge list                                                        |
+| `connectedComponents(adj)`           | Connected components                                                          |
+| `stronglyConnectedComponents(adj)`   | SCCs (Kosaraju)                                                               |
+| `topologicalSort(adj)`               | Topological order (DAGs)                                                      |
+| `isConnected(adj)`                   | Connectivity test                                                             |
+| `pageRank(adj[, opts])`              | PageRank centrality (power iteration; `dampingFactor` default 0.85) — `async` |
+| `betweennessCentrality(adj[, opts])` | Brandes betweenness centrality — `async`                                      |
+| `eigenvectorCentrality(adj[, opts])` | Power-iteration eigenvector centrality — `async`                              |
 
 ### Details
 
@@ -1386,15 +1591,21 @@ minimumSpanningTree(adj); // MST edge list
 
 All return structured result objects.
 
-| Function                                   | Returns             | Description           |
-| ------------------------------------------ | ------------------- | --------------------- |
-| `studentTTest(sample1[, sample2])`         | `TTestResult`       | One/two-sample t-test |
-| `chiSquareTest(observed, expected)`        | `ChiSquareResult`   | Chi-square test       |
-| `anova(groups)`                            | `AnovaResult`       | One-way ANOVA         |
-| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`      | K-S test              |
-| `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult` | Mann–Whitney U test   |
-| `shapiroWilkTest(sample)`                  | `ShapiroWilkResult` | Normality test        |
-| `principalComponentAnalysis(data[, k])`    | `PCAResult`         | PCA                   |
+| Function                                   | Returns             | Description                                                                                           |
+| ------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `studentTTest(sample1[, sample2])`         | `TTestResult`       | One/two-sample t-test                                                                                 |
+| `chiSquareTest(observed, expected)`        | `ChiSquareResult`   | Chi-square test                                                                                       |
+| `anova(groups)`                            | `AnovaResult`       | One-way ANOVA                                                                                         |
+| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`      | K-S test                                                                                              |
+| `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult` | Mann–Whitney U test                                                                                   |
+| `shapiroWilkTest(sample)`                  | `ShapiroWilkResult` | Normality test                                                                                        |
+| `principalComponentAnalysis(data[, k])`    | `PCAResult`         | PCA                                                                                                   |
+| `fTest(x, y)`                              | `FTestResult`       | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                |
+| `jarqueBera(x)`                            | `JarqueBeraResult`  | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                           |
+| `kruskalWallis(...groups)`                 | `KruskalResult`     | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                           |
+| `wilcoxon(x[, y])`                         | `WilcoxonResult`    | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)` |
+| `fisherExact(table)`                       | `FisherExactResult` | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`              |
+| `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]` | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`          |
 
 ### Details
 
@@ -1827,7 +2038,7 @@ await terminatePool();
 
 **Statistics** (59): `acf`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `detrend`, `ewma`, `gmean`, `hmean`, `iqr`, `kmeans`, `kurtosis`, `linearRegression`, `logsumexp`, `mad`, `max`, `maxSelect`, `mean`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `prod`, `quantileSeq`, `quickSelect`, `rankdata`, `sem`, `skewness`, `softmax`, `spectralClustering`, `std`, `sum`, `variance`, `zscore`
 
-**Probability Distributions** (53): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `seedProbabilityRng`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `uniformDist`, `weibullDist`
+**Probability Distributions** (54): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `uniformDist`, `weibullDist`
 
 **Linear Algebra** (61): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `eigs`, `expm`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixPower`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
@@ -1857,7 +2068,7 @@ await terminatePool();
 
 **Complex Number Utilities** (3): `arg`, `conj`, `im`
 
-**Type Conversion** (9): `bignumber`, `boolean`, `complex`, `fraction`, `matrix`, `numeric`, `parseNumberWithConfig`, `sparse`, `string`
+**Type Conversion** (8): `bignumber`, `boolean`, `complex`, `fraction`, `matrix`, `numeric`, `parseNumberWithConfig`, `sparse`
 
 **Type Checking & Utilities** (21): `bin`, `chain`, `clone`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
