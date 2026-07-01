@@ -124,6 +124,11 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
 - **`functions/src/regression-extra.ts`**: `linearRegression` throws on `<3` points
   (`df=n−2≤0` → `Infinity`/`NaN` std error) and on a zero-variance predictor
   (`sxx=0` → `NaN` slope/`rValue`) — was a normal-looking result full of `NaN`.
+- **`functions/src/optimization-extra.ts`**: `levenbergMarquardt` narrows its
+  damped-solve `catch` to the expected singular-matrix error (bump λ) and re-throws
+  any other error instead of silently retrying it to `converged:false`. Defensive —
+  `A` is always square/numeric so only the singular case reaches the catch in
+  practice, but the intent is now explicit and matches `inv.ts`'s own guard.
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

@@ -55,7 +55,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > input, scipy/numpy parity), tests in `functions/tests/gap-degenerate-inputs.test.ts`.
 > Progress (✅ = committed): descriptive-stats ✅ · numeric-extra ✅ · hypothesis-extra ✅ ·
 > linalg-extra ✅ (`companion` a[0]=0 guard + realSchur quasi-tri postcondition) · geometry-extra ✅ ·
-> timeseries-extra ✅ · regression-extra ✅ · optimization-extra · clustering-extra
+> timeseries-extra ✅ · regression-extra ✅ · optimization-extra ✅ · clustering-extra
 > (`kmeans` `converged` field) · signal-filter-extra (`butter` Wn range) ·
 > cas-integration. Then code-simplifier pass + re-verify + patch release.
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses

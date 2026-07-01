@@ -185,9 +185,17 @@ export function levenbergMarquardt(
     try {
       const Ainv = _inv(A);
       delta = Ainv.map((row) => row.reduce((s, v, k) => s - v * Jtr[k], 0));
-    } catch {
-      lambda *= 10;
-      continue;
+    } catch (e) {
+      // A singular damped normal-equations matrix is the one expected failure —
+      // bumping λ adds to the diagonal and restores invertibility. Any OTHER error
+      // must not be silently retried as "bump λ"; re-throw it so a real bug surfaces
+      // instead of being reported as converged:false. (A is always square/numeric, so
+      // in practice only the singular case reaches here — matches inv.ts's own guard.)
+      if (e instanceof Error && /determinant is zero|singular|zero pivot/i.test(e.message)) {
+        lambda *= 10;
+        continue;
+      }
+      throw e;
     }
     const xNew = x.map((v, i) => v + delta[i]);
     const rNew = residual(xNew);
