@@ -156,6 +156,25 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — `docs/reference/functions.md` index reorganized by domain
+
+The generated export index dumped 416 of the 686 callable functions — including every
+gap-closure function (`skewness`, `tukeyHSD`, `kmeans`, `butter`, `qz`, `symbolicIntegral`,
+…) — into one alphabetical "Factory / uncategorized" bucket, because it grouped by the
+coarse typed-dispatch namespace (whose "Functions" category was itself a 121-name
+grab-bag of trig + special + signal + number theory). The generator now groups the
+index by **mathematical/scientific domain** — the same 26 domains the curated reference
+sections already use (Arithmetic, Special Functions, Statistics, Probability
+Distributions, Linear Algebra, CAS, Numerical Methods, Signal Processing, Geometry,
+Graph Theory, Hypothesis Tests, …), in the doc's own pedagogical order. Each domain is
+derived by parsing the doc's `##` section tables, with an explicit `DOMAIN_SUPPLEMENT`
+in the generator covering the 140 functions that weren't yet in any curated table.
+**Every callable export is now categorized** (the "Other exports" bucket is empty); a
+new export that matches no domain surfaces there and fails `docs:functions:check`, so it
+can't silently land uncategorized. `docs/api/functions.md` + the `functions.html` mirror
+inherit the same domain grouping; the `compat`/`core`/`matrix`/`parallel` docs (no
+curated domain sections) keep the flat export list.
+
 ### Changed (2026-07-01) — the whole `docs/api/` tree drift-guarded via the generator
 
 The hand-written `docs/api/*.md` reference tree had all frozen at 2026-05-22 while the

@@ -70,7 +70,12 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > emit + drift-check a generated Complete-export-index block into **all five** package
 > API docs (`functions` 828, `compat` 78, `core` 80, `matrix` 141, `parallel` 67) plus
 > the reference `.md`/`.html` — 7 generated blocks; `docs:functions:check` guards them
-> all. **Open (genuine wall, not deferral):** adding a `docs:functions:check` step to
+> all. Then reorganized the `docs/reference/functions.md` generated index **by
+> mathematical domain** (26 domains from the curated `##` sections + a
+> `DOMAIN_SUPPLEMENT` for the 140 gap-closure/factory extras) instead of the coarse
+> typed-namespace grouping that dumped 416 fns in one "uncategorized" bucket — every
+> callable export is now categorized (empty "Other"; a new uncategorized export fails
+> `docs:functions:check`). **Open (genuine wall, not deferral):** adding a `docs:functions:check` step to
 > `.github/workflows/ci.yml` so drift fails CI is blocked by a workflow-edit security
 > guard — needs the maintainer to add the step (snippet in the 2026-07-01 CHANGELOG /
 > the doc commit message).
