@@ -156,6 +156,24 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — drift-guard the WASM binary export counts (generated, not hand-maintained)
+
+`ARCHITECTURE.md` §6a hand-carried the AssemblyScript binary's export counts (318
+functions / 330 total / 11 globals / 1 memory / 30 sources + a per-category table),
+which nothing verified against the binary — the same drift risk as the earlier
+`functions.md` staleness. Extended `tools/create-dependency-graph` with a
+`probeWasmBinary()` that reads the built `.wasm` via `WebAssembly.Module.exports()`
+(a parse-only static read, no instantiation) — preferring `assembly/build/mathts.wasm`
+and falling back to the bundled copies, degrading gracefully with a "not built" note
+if absent — and emits a generated **WASM binary exports** section into `wasm-pairing.md`
+with the live counts + a deterministic per-export-name-prefix category table (Array 54,
+Matrix 50, Complex scalar 46, Complex array 33, FFT 2, Scalar & special 133 = 318;
+6 of the 7 original buckets reproduced exactly, the two judgment-split scalar rows
+merged into one deterministic bucket). ARCHITECTURE §6a now references that generated
+section instead of hand-coding the figures, so they can't silently drift. Regenerated
+by `npm run docs:deps` (run `npm run build:wasm` first so the binary exists to probe).
+Verified: probed counts match by three independent methods; tool typechecks clean.
+
 ### Changed (2026-07-01) — regenerated the dependency graph and reconciled the architecture docs
 
 Ran `npm run docs:deps` (regenerating `DEPENDENCY_GRAPH.md`, `unused-analysis.md`,

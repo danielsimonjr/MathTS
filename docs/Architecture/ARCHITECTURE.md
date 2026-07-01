@@ -179,22 +179,16 @@ dispatch is **AS → JS**.
 #### 6a. AssemblyScript WASM (`assembly/`)
 
 AssemblyScript compiles to a single WebAssembly binary (`mathts-as.wasm`,
-bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`). The built
-module exports **318 functions** (330 total exports, including 11 numeric
-globals such as `PI`/`E` plus the linear memory), compiled from **30
-AssemblyScript source files** under `assembly/src/`. (Verify with
-`WebAssembly.Module.exports()` on the built `.wasm`; rebuild via
-`npm run build:wasm`.)
-
-| Category                       | Function exports |
-| ------------------------------ | ---------------- |
-| Scalar `f64`                   | 79               |
-| Array                          | 54               |
-| Matrix                         | 50               |
-| Complex scalar                 | 46               |
-| Complex array                  | 33               |
-| FFT                            | 2                |
-| Special/poly/sort/signal/other | 54               |
+bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`), compiled from
+the AssemblyScript sources under `assembly/src/`. The exact export counts
+(functions, numeric globals, linear memory), the AssemblyScript source-file count,
+and the per-category function breakdown are **generated, not hand-maintained** —
+probed from the built `.wasm` via `WebAssembly.Module.exports()` by
+`npm run docs:deps` and emitted to
+[`wasm-pairing.md` › _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports)
+(rebuild the binary first with `npm run build:wasm`). As of the last regeneration
+the binary carried 318 function exports across 330 total exports; that figure lives
+in the generated report so it can no longer silently drift out of this doc.
 
 The binary is SHA-384 integrity-verified before instantiation and numerically
 verified to <1e-9 vs mpmath for the special-function kernels (see

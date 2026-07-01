@@ -90,6 +90,12 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > 158,032 LOC / 4,088 exports / 0 runtime cycles; dormant-mirror framing removed;
 > functions 828 exports; WASM 39/52/127 of 218; coverage 35.8% raw / 97.5% effective.
 > All figures verified vs the reports / package.json / fresh test re-runs.
+> **WASM binary counts drift-guarded (2026-07-01):** the AS binary export counts
+> (318 fn / 330 total / 30 sources + category table) that ARCHITECTURE.md §6a used to
+> hand-carry are now **generated** — `tools/create-dependency-graph` probes the built
+> `.wasm` via `WebAssembly.Module.exports()` and emits a "WASM binary exports" section
+> into `wasm-pairing.md`; §6a references it. Run `npm run build:wasm` before
+> `npm run docs:deps` so the binary exists to probe (graceful "not built" note otherwise).
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

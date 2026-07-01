@@ -936,5 +936,39 @@
       "parallel": 0,
       "jsOnly": 2
     }
+  },
+  "binary": {
+    "path": "assembly/build/mathts.wasm",
+    "total": 330,
+    "functions": 318,
+    "globals": 11,
+    "memory": 1,
+    "sourceFiles": 30,
+    "byCategory": [
+      {
+        "category": "Scalar & special (f64)",
+        "count": 133
+      },
+      {
+        "category": "Array",
+        "count": 54
+      },
+      {
+        "category": "Matrix",
+        "count": 50
+      },
+      {
+        "category": "Complex scalar",
+        "count": 46
+      },
+      {
+        "category": "Complex array",
+        "count": 33
+      },
+      {
+        "category": "FFT",
+        "count": 2
+      }
+    ]
   }
 }

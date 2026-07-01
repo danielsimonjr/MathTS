@@ -2263,6 +2263,16 @@ interface WasmPairingEntry {
   dispatch: string[];
   effectiveBackend: EffectiveBackend;
 }
+/** Static export-table probe of the built AssemblyScript `.wasm` binary. */
+interface WasmBinaryProbe {
+  path: string;
+  total: number;
+  functions: number;
+  globals: number;
+  memory: number;
+  sourceFiles: number;
+  byCategory: Array<{ category: string; count: number }>;
+}
 interface WasmPairing {
   generated: string;
   total: number;
@@ -2281,6 +2291,8 @@ interface WasmPairing {
   parallelOnly: WasmPairingEntry[];
   jsOnly: string[];
   byFile: Record<string, { wasm: number; parallel: number; jsOnly: number }>;
+  /** Static export-table probe of the built `.wasm` binary (null if not built). */
+  binary: WasmBinaryProbe | null;
 }
 
 /**
@@ -2390,6 +2402,77 @@ function analyzeWasmRuntime(rootDir: string): {
   return { bundledBackend, dispatchWasm };
 }
 
+/** Export-name-prefix category for a WASM binary function export (the AS naming
+ *  convention: `array_*`, `matrix_*`, `complex_*`/`complex_array_*`, `fft`/`rfft`). */
+function categorizeWasmExport(name: string): string {
+  if (/^array_/.test(name)) return 'Array';
+  if (/^matrix_/.test(name)) return 'Matrix';
+  if (/^complex/.test(name)) return /(_array|Array)/.test(name) ? 'Complex array' : 'Complex scalar';
+  if (/^(fft|ifft|rfft|irfft)$/.test(name)) return 'FFT';
+  return 'Scalar & special (f64)';
+}
+
+function countAssemblySourceFiles(rootDir: string): number {
+  const dir = join(rootDir, 'assembly', 'src');
+  if (!existsSync(dir)) return 0;
+  let n = 0;
+  const walk = (d: string): void => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) walk(join(d, e.name));
+      else if (e.name.endsWith('.ts')) n++;
+    }
+  };
+  walk(dir);
+  return n;
+}
+
+/**
+ * Probe the built AssemblyScript WASM binary's export table via
+ * `WebAssembly.Module.exports()` (a parse-only static read — no instantiation) so the
+ * binary export counts in ARCHITECTURE.md §6a stop being hand-maintained. Prefers the
+ * canonical build output (`assembly/build/mathts.wasm`), falling back to the bundled
+ * copies. Returns `null` if no binary is built (run `npm run build:wasm` first).
+ */
+function probeWasmBinary(rootDir: string): WasmBinaryProbe | null {
+  interface WasmModuleCtor {
+    new (bytes: Uint8Array): object;
+    exports(m: object): Array<{ name: string; kind: string }>;
+  }
+  const WAModule = (globalThis as unknown as { WebAssembly?: { Module: WasmModuleCtor } })
+    .WebAssembly?.Module;
+  if (!WAModule) return null;
+  const candidates = [
+    join(rootDir, 'assembly', 'build', 'mathts.wasm'),
+    join(rootDir, 'functions', 'dist', 'wasm', 'mathts-as.wasm'),
+    join(rootDir, 'matrix', 'dist', 'wasm', 'mathts-as.wasm'),
+  ];
+  const path = candidates.find((p) => existsSync(p));
+  if (!path) return null;
+  let ex: Array<{ name: string; kind: string }>;
+  try {
+    ex = WAModule.exports(new WAModule(readFileSync(path)));
+  } catch {
+    return null;
+  }
+  const fns = ex.filter((e) => e.kind === 'function');
+  const cats = new Map<string, number>();
+  for (const f of fns) cats.set(categorizeWasmExport(f.name), (cats.get(categorizeWasmExport(f.name)) ?? 0) + 1);
+  const ORDER = ['Scalar & special (f64)', 'Array', 'Matrix', 'Complex scalar', 'Complex array', 'FFT'];
+  const byCategory = [
+    ...ORDER.filter((c) => cats.has(c)),
+    ...[...cats.keys()].filter((c) => !ORDER.includes(c)).sort(),
+  ].map((category) => ({ category, count: cats.get(category) as number }));
+  return {
+    path: relative(rootDir, path).replace(/\\/g, '/'),
+    total: ex.length,
+    functions: fns.length,
+    globals: ex.filter((e) => e.kind === 'global').length,
+    memory: ex.filter((e) => e.kind === 'memory').length,
+    sourceFiles: countAssemblySourceFiles(rootDir),
+    byCategory,
+  };
+}
+
 function analyzeWasmPairing(rootDir: string): WasmPairing | null {
   const candidates = [join(rootDir, 'functions', 'src', 'typed'), join(rootDir, 'src', 'typed')];
   const typedDir = candidates.find((d) => existsSync(d));
@@ -2478,6 +2561,7 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
     parallelOnly,
     jsOnly,
     byFile,
+    binary: probeWasmBinary(rootDir),
   };
 }
 
@@ -2519,6 +2603,25 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback `;
   md += `functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken `;
   md += `or unstable — tracked follow-ups.\n`;
+
+  // Binary export table — probed from the built .wasm so ARCHITECTURE.md §6a no
+  // longer hand-maintains these counts.
+  md += `\n## WASM binary exports\n\n`;
+  if (!p.binary) {
+    md += `> WASM binary not built — run \`npm run build:wasm\` then \`npm run docs:deps\` to `;
+    md += `populate this section (probed via \`WebAssembly.Module.exports()\`).\n`;
+  } else {
+    const b = p.binary;
+    md += `Probed from \`${b.path}\` via \`WebAssembly.Module.exports()\` (a parse-only static `;
+    md += `read — no instantiation; rebuild with \`npm run build:wasm\`).\n\n`;
+    md += `**${b.total} total exports** = **${b.functions} functions** + **${b.globals} globals** `;
+    md += `(numeric constants such as \`PI\`/\`E\`) + **${b.memory} memory** (the shared linear `;
+    md += `memory), compiled from **${b.sourceFiles} AssemblyScript source files** under `;
+    md += `\`assembly/src/\`.\n\n`;
+    md += `| Category (by export-name prefix) | Function exports |\n| --- | --: |\n`;
+    for (const c of b.byCategory) md += `| ${c.category} | ${c.count} |\n`;
+    md += `| **Total** | **${b.functions}** |\n`;
+  }
   return md;
 }
 

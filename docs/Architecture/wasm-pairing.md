@@ -138,3 +138,19 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | unit          |    0 |        0 |       2 |
 
 > Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which runs the AssemblyScript binary for fft/eig/svd/decomposition. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups.
+
+## WASM binary exports
+
+Probed from `assembly/build/mathts.wasm` via `WebAssembly.Module.exports()` (a parse-only static read — no instantiation; rebuild with `npm run build:wasm`).
+
+**330 total exports** = **318 functions** + **11 globals** (numeric constants such as `PI`/`E`) + **1 memory** (the shared linear memory), compiled from **30 AssemblyScript source files** under `assembly/src/`.
+
+| Category (by export-name prefix) | Function exports |
+| -------------------------------- | ---------------: |
+| Scalar & special (f64)           |              133 |
+| Array                            |               54 |
+| Matrix                           |               50 |
+| Complex scalar                   |               46 |
+| Complex array                    |               33 |
+| FFT                              |                2 |
+| **Total**                        |          **318** |
