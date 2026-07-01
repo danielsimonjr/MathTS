@@ -150,9 +150,9 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
 - ✅ **[hygiene] dep-graph tool fights prettier** — `docs:deps` now chains `docs:deps:format`
   (`prettier --write` scoped to the tool's own outputs, not the coverage files it doesn't write),
   so regenerated reports are format-stable. Verified prettier-clean + idempotent.
-- ⬜ **[hygiene] `gap-tukey.test.ts` timeout edge** — correct but slow (nested Simpson); flakes at 5s
-  under load, passes at 30s. Give the 3 slow tests an explicit `testTimeout` (legitimately expensive,
-  not masking) — root-cause is compute cost, not a bug.
+- ✅ **[hygiene] `gap-tukey.test.ts` timeout edge** — gave the 3 nested-Simpson tests an explicit
+  30s `testTimeout` (`SLOW_MS`) with a rationale comment. Compute-cost accommodation, not masking —
+  the scipy-oracle assertions still verify correctness. Passes reliably (~10s under load).
 - ⬜ **[hygiene] stale-dist gotcha** — direct `vitest` resolves a package's built `dist`, not `src`;
   a stale dist gives false failures (cost a 48-test false alarm this session). Document in AGENTS.md
   testing section (rebuild or use `npm run test` via turbo, which depends on `^build`).
