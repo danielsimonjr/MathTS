@@ -156,6 +156,12 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — expression builds on core for number/object utilities
+
+Same consolidation as functions: `expression/src/utils/number.ts` and `object.ts` are now
+thin re-exports of `@danielsimonjr/mathts-core/internal`. All existing import sites keep
+working. Verified: expression **1980/1980 tests**, typecheck 0, build clean.
+
 ### Changed (2026-07-01) — functions builds on core for number/object utilities
 
 `functions/src/utils/number.ts` and `object.ts` are now thin re-exports of
