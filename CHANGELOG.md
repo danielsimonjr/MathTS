@@ -156,6 +156,22 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Added (2026-07-01) — core `/internal` subpath export for shared utilities (enables util consolidation)
+
+Enabling step for consolidating the duplicated synced-mathjs util layer (type guards,
+number formatting, object helpers) that `functions` and `expression` each carry a
+drifting fork of. Rather than grow core's main public API with ~40 low-level helpers,
+core now exposes them via a dedicated **`@danielsimonjr/mathts-core/internal`** subpath
+(second `tsup` entry `src/internal.ts` + `package.json` `exports["./internal"]`); the main
+`.` surface stays focused on the numeric types / typed-function / factory. Reconciled
+core's copies to the **superset** so downstream shims lose no behavior: adopted the
+array-supporting `deepExtend` (core's threw on arrays; functions' recurses — the drift a
+blind swap would have silently regressed), added `isPowZeroAtInfinity` and the
+`IndexDimension` interface, and exposed `hasOwnProperty`. Fixed two latent type faults the
+`export *` surfaced (root cause, not suppressed): `isComplex`/`isFraction` returned
+`{} | boolean` (→ `!!(…)`), and four `number.ts` casts (`as unknown as`,
+`NormalizedFormatOptions['notation']`). Verified: core 665/665, tsc 0, JS+DTS build clean.
+
 ### Changed (2026-07-01) — consolidate forward-mode AD rules onto core (autograd stops reinventing them)
 
 First step of the standing "all libraries build on core" principle: keep the

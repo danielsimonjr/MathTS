@@ -374,7 +374,7 @@ export function normalizeFormatOptions(options?: FormatOptions | number): Normal
     if (isNumber(options)) {
       precision = options;
     } else if (isBigNumber(options)) {
-      precision = (options as { toNumber(): number }).toNumber();
+      precision = (options as unknown as { toNumber(): number }).toNumber();
     } else if (isObject(options)) {
       if (options.precision !== undefined) {
         precision = _toNumberOrThrow(options.precision, () => {
@@ -389,7 +389,7 @@ export function normalizeFormatOptions(options?: FormatOptions | number): Normal
       }
 
       if (options.notation) {
-        notation = options.notation;
+        notation = options.notation as NormalizedFormatOptions['notation'];
       }
     } else {
       throw new Error('Unsupported type of options, number, BigNumber, or object expected');
@@ -821,6 +821,16 @@ export function copysign(x: number, y: number): number {
 }
 
 /**
+ * Check if x^y is 0 due to infinity
+ * @param x The base
+ * @param y The exponent
+ * @returns true if x^y is 0 due to infinity
+ */
+export function isPowZeroAtInfinity(x: number, y: number): boolean {
+  return (x * x < 1 && y === Infinity) || (x * x > 1 && y === -Infinity);
+}
+
+/**
  * Convert value to number or throw error
  * @param value   The value to convert
  * @param onError Callback to execute on error
@@ -830,7 +840,7 @@ function _toNumberOrThrow(value: unknown, onError: () => void): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as { toNumber(): number }).toNumber();
+    return (value as unknown as { toNumber(): number }).toNumber();
   } else {
     onError();
     return 0; // unreachable but TypeScript needs a return
@@ -847,7 +857,7 @@ function _toNumberOrDefault(value: unknown, defaultValue: number): number {
   if (isNumber(value)) {
     return value;
   } else if (isBigNumber(value)) {
-    return (value as { toNumber(): number }).toNumber();
+    return (value as unknown as { toNumber(): number }).toNumber();
   } else {
     return defaultValue;
   }

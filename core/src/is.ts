@@ -62,8 +62,16 @@ export interface Range {
   };
 }
 
+export interface IndexDimension {
+  _data?: unknown[];
+  _size: number[];
+  isRange?: boolean;
+  start?: number;
+  end?: number;
+}
+
 export interface Index {
-  _dimensions: unknown[];
+  _dimensions: (IndexDimension | string)[];
   _sourceSize?: (number | null)[];
   constructor: {
     prototype: { isIndex: boolean };
@@ -224,11 +232,11 @@ export function isBigInt(x: unknown): x is bigint {
 }
 
 export function isComplex(x: unknown): x is Complex {
-  return (x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true) || false;
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true);
 }
 
 export function isFraction(x: unknown): x is Fraction {
-  return (x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true) || false;
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true);
 }
 
 export function isUnit(x: unknown): x is Unit {

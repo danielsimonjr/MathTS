@@ -100,37 +100,64 @@ export function extend<T extends Record<string, unknown>, U extends Record<strin
  * @param {Object} b
  * @returns {Object}
  */
-export function deepExtend<T extends Record<string, unknown>>(
-  a: T,
-  b: Record<string, unknown>
-): T {
-  // TODO: add support for Arrays to deepExtend
+export function deepExtend<T>(a: T, b: unknown): T {
   if (Array.isArray(b)) {
-    throw new TypeError('Arrays are not supported by deepExtend');
+    if (!Array.isArray(a)) {
+      throw new TypeError('Cannot extend an object with an array');
+    }
+    for (let i = 0; i < b.length; i++) {
+      const bValue = b[i];
+      if (bValue && (bValue as object).constructor === Object) {
+        if ((a as unknown[])[i] === undefined) {
+          (a as unknown[])[i] = {};
+        }
+        if ((a as unknown[])[i] && ((a as unknown[])[i] as object).constructor === Object) {
+          deepExtend((a as unknown[])[i], bValue);
+        } else {
+          (a as unknown[])[i] = bValue;
+        }
+      } else if (Array.isArray(bValue)) {
+        if ((a as unknown[])[i] === undefined) {
+          (a as unknown[])[i] = [];
+        }
+        if (Array.isArray((a as unknown[])[i])) {
+          deepExtend((a as unknown[])[i], bValue);
+        } else {
+          (a as unknown[])[i] = clone(bValue);
+        }
+      } else {
+        (a as unknown[])[i] = bValue;
+      }
+    }
+    return a;
   }
 
-  const target = a as Record<string, unknown>;
-  const isPlainObject = (v: unknown): v is Record<string, unknown> =>
-    !!v && (v as { constructor?: unknown }).constructor === Object;
-
-  for (const prop in b) {
+  for (const prop in b as Record<string, unknown>) {
     // We check against prop not being in Object.prototype or Function.prototype
     // to prevent polluting for example Object.__proto__.
     if (hasOwnProperty(b, prop) && !(prop in Object.prototype) && !(prop in Function.prototype)) {
-      const bVal = b[prop];
-      if (isPlainObject(bVal)) {
-        if (target[prop] === undefined) {
-          target[prop] = {};
+      const bValue = (b as Record<string, unknown>)[prop];
+      const aValue = (a as Record<string, unknown>)[prop];
+      if (bValue && (bValue as object).constructor === Object) {
+        if (aValue === undefined) {
+          (a as Record<string, unknown>)[prop] = {};
         }
-        if (isPlainObject(target[prop])) {
-          deepExtend(target[prop] as Record<string, unknown>, bVal);
+        if (aValue && (aValue as object).constructor === Object) {
+          deepExtend(aValue, bValue);
         } else {
-          target[prop] = bVal;
+          (a as Record<string, unknown>)[prop] = bValue;
         }
-      } else if (Array.isArray(bVal)) {
-        throw new TypeError('Arrays are not supported by deepExtend');
+      } else if (Array.isArray(bValue)) {
+        if (aValue === undefined) {
+          (a as Record<string, unknown>)[prop] = [];
+        }
+        if (Array.isArray(aValue)) {
+          deepExtend(aValue, bValue);
+        } else {
+          (a as Record<string, unknown>)[prop] = clone(bValue);
+        }
       } else {
-        target[prop] = bVal;
+        (a as Record<string, unknown>)[prop] = bValue;
       }
     }
   }
@@ -252,7 +279,11 @@ export function canDefineProperty(): boolean {
  * @param {Function} valueResolver Function returning the property value. Called
  *                                without arguments.
  */
-export function lazy<T>(object: Record<string, unknown>, prop: string, valueResolver: () => T): void {
+export function lazy<T>(
+  object: Record<string, unknown>,
+  prop: string,
+  valueResolver: () => T
+): void {
   let _uninitialized = true;
   let _value: T;
 
