@@ -111,6 +111,11 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   across three complex-spectrum pencils (both companions and a cyclic permutation all
   returned correct quasi-triangular output), so the residual risk is defensive, plus
   a performance cliff on complex/equal-modulus spectra recorded in `TODO.md`.
+- **`functions/src/geometry-extra.ts`**: `slerp` throws on zero-length input
+  vectors and on antipodal directions (θ≈π, where `sin(omega)≈1.2e-16` made the
+  interpolation weights explode to ~1e15 — the path is genuinely undefined), while
+  keeping the near-parallel → lerp fallback; `quaternionNormalize` throws on a
+  zero-magnitude quaternion (was a `NaN` vector).
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 

@@ -17,6 +17,8 @@ import {
   studentizedRangeCDF,
   studentizedRangeQuantile,
   companion,
+  slerp,
+  quaternionNormalize,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -146,5 +148,22 @@ describe('linalg-extra — degenerate input guards', () => {
       [2, -1],
       [1, 0],
     ]);
+  });
+});
+
+describe('geometry-extra — degenerate input guards', () => {
+  it('slerp throws on zero-length input and on antipodal directions', () => {
+    expect(() => slerp([0, 0, 0], [1, 0, 0], 0.5)).toThrow(/non-zero|zero/i);
+    expect(() => slerp([1, 0, 0], [0, 0, 0], 0.5)).toThrow(/non-zero|zero/i);
+    expect(() => slerp([1, 0, 0], [-1, 0, 0], 0.5)).toThrow(/antipodal/i);
+    // happy path: orthogonal directions interpolate on the great circle
+    const r = slerp([1, 0, 0], [0, 1, 0], 0.5);
+    expect(r[0]).toBeCloseTo(Math.SQRT1_2, 10);
+    expect(r[1]).toBeCloseTo(Math.SQRT1_2, 10);
+  });
+
+  it('quaternionNormalize throws on a zero-magnitude quaternion', () => {
+    expect(() => quaternionNormalize([0, 0, 0, 0])).toThrow(/zero-magnitude|zero/i);
+    expect(quaternionNormalize([1, 1, 1, 1])[0]).toBeCloseTo(0.5, 10);
   });
 });

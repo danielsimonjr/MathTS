@@ -45,6 +45,7 @@ const norm = (a: readonly number[]): number => Math.sqrt(dot(a, a));
 export function slerp(v0: readonly number[], v1: readonly number[], t: number): number[] {
   const n0 = norm(v0);
   const n1 = norm(v1);
+  if (n0 === 0 || n1 === 0) throw new Error('slerp: input vectors must be non-zero');
   const u0 = v0.map((v) => v / n0);
   const u1 = v1.map((v) => v / n1);
   let cos = dot(u0, u1);
@@ -52,6 +53,10 @@ export function slerp(v0: readonly number[], v1: readonly number[], t: number): 
   const omega = Math.acos(cos);
   const mag = n0 + (n1 - n0) * t;
   if (omega < 1e-9) return u0.map((v, i) => (v + (u1[i] - v) * t) * mag); // ~parallel → lerp
+  // Antipodal directions (θ ≈ π): sin(omega) ≈ 0, so a/b below would explode — and the
+  // interpolation path is genuinely undefined (no unique great circle). Fail loudly.
+  if (Math.PI - omega < 1e-9)
+    throw new Error('slerp: antipodal directions have no unique interpolation path');
   const s = Math.sin(omega);
   const a = Math.sin((1 - t) * omega) / s;
   const b = Math.sin(t * omega) / s;
@@ -78,6 +83,7 @@ export function quaternionConjugate(q: Quat): number[] {
 /** Unit-normalize a quaternion. */
 export function quaternionNormalize(q: Quat): number[] {
   const m = norm(q as number[]);
+  if (m === 0) throw new Error('quaternionNormalize: zero-magnitude quaternion');
   return (q as number[]).map((v) => v / m);
 }
 
