@@ -84,6 +84,7 @@ modules:
             - default
             - create
           reExport: true
+      workspaceDependencies: []
       exports:
         - typed
         - create
@@ -170,6 +171,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - fftBitReverse
         - fftFrameInPlace
@@ -192,6 +194,7 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+      workspaceDependencies: []
       exports:
         - Transfer
         - DEFAULT_WORKER_CONFIG
@@ -247,6 +250,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - PI
         - E
@@ -383,6 +387,7 @@ modules:
             - math
             - DEFAULT_CONFIG
           reExport: true
+      workspaceDependencies: []
       exports:
         - Complex
         - isComplex
@@ -562,6 +567,7 @@ modules:
         - file: ../typed/mathts-typed.js
           imports:
             - mathTyped
+      workspaceDependencies: []
       exports:
         - DEFAULT_CONFIG
         - registry
@@ -596,6 +602,7 @@ modules:
             - math
             - DEFAULT_CONFIG
           reExport: true
+      workspaceDependencies: []
       exports:
         - FunctionRegistry
         - createFactory
@@ -654,6 +661,7 @@ modules:
           imports:
             - registerNativeTypes
           reExport: true
+      workspaceDependencies: []
       exports:
         - mathTyped
         - createMathTSTyped
@@ -751,6 +759,7 @@ modules:
           imports:
             - BigNumber
             - isBigNumber
+      workspaceDependencies: []
       exports:
         - typed
         - create
@@ -834,6 +843,7 @@ modules:
         - file: ../types/bignumber.js
           imports:
             - BigNumber
+      workspaceDependencies: []
       exports:
         - registerNativeTypes
       functions:
@@ -849,6 +859,7 @@ modules:
             - Scalar
             - MathTSValue
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - BIGNUMBER_ZERO
         - BIGNUMBER_ONE
@@ -885,6 +896,7 @@ modules:
             - Scalar
             - IComplex
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - I
         - COMPLEX_ZERO
@@ -906,6 +918,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isDual
         - Dual
@@ -923,6 +936,7 @@ modules:
             - Scalar
             - IFraction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - FRACTION_ZERO
         - FRACTION_ONE
@@ -948,6 +962,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
       interfaces:
         - MathTSValue
@@ -963,6 +978,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - DIMENSIONLESS
         - BASE_UNITS
@@ -988,6 +1004,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - SI_PREFIXES
         - SI_PREFIX_KEYS
@@ -1018,6 +1035,7 @@ modules:
             - BEST_PREFIXES
             - SI_PREFIXES
             - SI_PREFIX_KEYS
+      workspaceDependencies: []
       exports:
         - DIMENSIONLESS
         - dim
@@ -1040,6 +1058,7 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies: []
       exports:
         - DEFAULT_BACKEND_HINTS
         - backendRegistry
@@ -1079,6 +1098,7 @@ modules:
             - onConfigChange
             - MatrixConfig
             - OperationType
+      workspaceDependencies: []
       exports:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
@@ -1110,6 +1130,7 @@ modules:
           imports:
             - BufferPool
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - BatchExecutor
       classes:
@@ -1126,6 +1147,7 @@ modules:
         - file: ./GPUContext.js
           imports:
             - GPUContext
+      workspaceDependencies: []
       exports:
         - BufferPool
       classes:
@@ -1137,6 +1159,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - hasWebGPU
         - isBrowser
@@ -1167,6 +1190,7 @@ modules:
             - getGPUAdapter
             - detectGPUCapabilities
             - GPUCapabilities
+      workspaceDependencies: []
       exports:
         - getGlobalGPUContext
         - initializeGlobalGPU
@@ -1238,6 +1262,7 @@ modules:
             - TransferResult
             - SyncConfig
           reExport: true
+      workspaceDependencies: []
       exports:
         - hasWebGPU
         - isBrowser
@@ -1316,6 +1341,7 @@ modules:
         - file: ./GPUContext.js
           imports:
             - GPUContext
+      workspaceDependencies: []
       exports:
         - BUILTIN_SHADERS
         - ShaderManager
@@ -1339,6 +1365,7 @@ modules:
           imports:
             - BufferPool
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSyncManager
         - SyncManager
@@ -1366,6 +1393,7 @@ modules:
             - detectGPUCapabilities
             - getRecommendedWorkgroupSize
             - GPUCapabilities
+      workspaceDependencies: []
       exports:
         - getGlobalGPUBackend
         - initializeGlobalGPUBackend
@@ -1406,6 +1434,7 @@ modules:
             - hasWebGPU
             - detectGPUCapabilities
             - GPUCapabilities
+      workspaceDependencies: []
       exports:
         - gpuMatrixBackend
         - createGPUMatrixBackend
@@ -1497,6 +1526,7 @@ modules:
             - SyncManager
             - createSyncManager
           reExport: true
+      workspaceDependencies: []
       exports:
         - BackendRegistry
         - backendRegistry
@@ -1606,6 +1636,7 @@ modules:
             - MatrixBackend
             - BackendType
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - jsBackend
         - JSBackend
@@ -1625,6 +1656,13 @@ modules:
           imports:
             - BackendType
           typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
+            - ComputePool
+            - ComputePoolConfig
       exports:
         - parallelBackend
         - createParallelBackend
@@ -1642,6 +1680,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - detectWasmFeatures
         - isWasmAvailable
@@ -1667,6 +1706,7 @@ modules:
           imports:
             - wasmLoader
             - WasmModule
+      workspaceDependencies: []
       exports:
         - isPowerOf2
         - nextPowerOf2
@@ -1722,6 +1762,7 @@ modules:
             - nextPowerOf2
             - isWasmFFTAvailable
           reExport: true
+      workspaceDependencies: []
       exports:
         - detectWasmFeatures
         - isWasmAvailable
@@ -1782,6 +1823,7 @@ modules:
           imports:
             - detectWasmFeatures
             - WasmFeatures
+      workspaceDependencies: []
       exports:
         - wasmBackend
         - createWASMBackend
@@ -1799,6 +1841,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - wasmLoader
         - initWasm
@@ -1823,6 +1866,7 @@ modules:
           imports:
             - BackendType
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - DEFAULT_CONFIG
         - getConfig
@@ -1886,6 +1930,7 @@ modules:
           imports:
             - '*'
           reExport: true
+      workspaceDependencies: []
       exports: []
       reExported:
         - '* from ./types/index.js'
@@ -1901,6 +1946,20 @@ modules:
         - file: ./types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
+            - ParallelResult
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - SignatureFunction
       exports:
         - parallelMatrix
         - parallelIdentity
@@ -1996,6 +2055,15 @@ modules:
         - file: ./types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - SignatureFunction
       exports:
         - matrix
         - identity
@@ -2069,6 +2137,7 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies: []
       exports:
         - cholesky
       interfaces:
@@ -2080,6 +2149,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - eye
         - cloneMatrix
@@ -2124,6 +2194,7 @@ modules:
         - file: ../backends/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - eigWasm
         - eigvalsWasm
@@ -2141,6 +2212,7 @@ modules:
           imports:
             - isSymmetric
             - eye
+      workspaceDependencies: []
       exports:
         - eig
         - eigvals
@@ -2168,6 +2240,7 @@ modules:
             - matSub
             - matScale
             - norm1
+      workspaceDependencies: []
       exports:
         - matrixExpm
       interfaces:
@@ -2251,6 +2324,7 @@ modules:
             - SchurResult
             - SchurOptions
           reExport: true
+      workspaceDependencies: []
       exports:
         - eig
         - eigvals
@@ -2346,6 +2420,7 @@ modules:
             - matScale
             - normInf
             - norm1
+      workspaceDependencies: []
       exports:
         - matrixLogm
       interfaces:
@@ -2360,6 +2435,7 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies: []
       exports:
         - lu
       interfaces:
@@ -2377,6 +2453,7 @@ modules:
         - file: ./svd.js
           imports:
             - svd
+      workspaceDependencies: []
       exports:
         - pinv
       interfaces:
@@ -2391,6 +2468,7 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies: []
       exports:
         - qr
       interfaces:
@@ -2413,6 +2491,7 @@ modules:
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
+      workspaceDependencies: []
       exports:
         - matrixSchur
         - schurInternal
@@ -2441,6 +2520,7 @@ modules:
             - eye
             - matMul
             - transpose
+      workspaceDependencies: []
       exports:
         - matrixSqrtm
         - matrixSqrtNewtonInternal
@@ -2462,6 +2542,7 @@ modules:
         - file: ../backends/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - svdWasm
       functions:
@@ -2478,6 +2559,7 @@ modules:
             - householder
             - applyHouseholderLeft
             - applyHouseholderRight
+      workspaceDependencies: []
       exports:
         - svd
         - singularValues
@@ -2511,6 +2593,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - add
         - subtract
@@ -2534,6 +2617,7 @@ modules:
           imports:
             - DenseMatrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - sum
         - mean
@@ -2564,6 +2648,7 @@ modules:
         - file: ./dense/reduction.js
           imports:
             - '* as reduction'
+      workspaceDependencies: []
       exports:
         - isDenseMatrix
         - DenseMatrix
@@ -2591,6 +2676,7 @@ modules:
             - SparseMatrix
             - isSparseMatrix
           reExport: true
+      workspaceDependencies: []
       exports:
         - Matrix
         - isMatrix
@@ -2610,6 +2696,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isMatrix
       interfaces:
@@ -2632,6 +2719,7 @@ modules:
         - file: ./DenseMatrix.js
           imports:
             - DenseMatrix
+      workspaceDependencies: []
       exports:
         - isSparseMatrix
         - SparseMatrix
@@ -2651,6 +2739,7 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - contractNetwork
       interfaces:
@@ -2746,6 +2835,7 @@ modules:
           imports:
             - flip
           reExport: true
+      workspaceDependencies: []
       exports:
         - Tensor
         - Index
@@ -2799,6 +2889,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - idx
         - Index
@@ -2816,6 +2907,11 @@ modules:
         - file: ./named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
       exports:
         - Tensor
       classes:
@@ -2834,6 +2930,15 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - cholesky
       exports:
         - tensorCholesky
       interfaces:
@@ -2852,6 +2957,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - concatenate
       functions:
@@ -2864,6 +2970,16 @@ modules:
         - file: ../Tensor.js
           imports:
             - Tensor
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+            - eigWasm
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - EigResult
       exports:
         - tensorEig
         - tensorEigWasm
@@ -2884,6 +3000,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - flip
       functions:
@@ -2899,6 +3016,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - gather
       functions:
@@ -2914,6 +3032,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - tensorKron
       interfaces:
@@ -2931,6 +3050,15 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - lu
       exports:
         - tensorLU
       interfaces:
@@ -2949,6 +3077,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - pad
       interfaces:
@@ -2966,6 +3095,11 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
       exports:
         - tensorPinv
       interfaces:
@@ -2983,6 +3117,12 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - qr
       exports:
         - tensorQr
       interfaces:
@@ -3001,6 +3141,12 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - qr
       exports:
         - randomTensor
       interfaces:
@@ -3018,6 +3164,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - roll
       functions:
@@ -3033,6 +3180,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - scatter
       interfaces:
@@ -3050,6 +3198,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - slice
       interfaces:
@@ -3067,6 +3216,15 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - lu
       exports:
         - tensorSolve
       interfaces:
@@ -3085,6 +3243,7 @@ modules:
         - file: ../named-index.js
           imports:
             - Index
+      workspaceDependencies: []
       exports:
         - stack
       interfaces:
@@ -3099,6 +3258,16 @@ modules:
         - file: ../Tensor.js
           imports:
             - Tensor
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+            - svdWasm
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - SVDResult
       exports:
         - tensorSvd
         - tensorSvdWasm
@@ -3114,6 +3283,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
       exports:
         - DualTensor
       classes:
@@ -3126,6 +3300,11 @@ modules:
         - file: ./dual-tensor.js
           imports:
             - DualTensor
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
       exports:
         - forwardGrad
       functions:
@@ -3139,6 +3318,7 @@ modules:
           imports:
             - Tape
             - TapedTensor
+      workspaceDependencies: []
       exports:
         - valueAndGrad
         - grad
@@ -3178,6 +3358,7 @@ modules:
             - derivative
             - jacobian
           reExport: true
+      workspaceDependencies: []
       exports:
         - DualTensor
         - forwardGrad
@@ -3207,6 +3388,11 @@ modules:
           imports:
             - Tape
             - TapedTensor
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
       exports:
         - reverseGrad
       functions:
@@ -3216,6 +3402,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-tensor'
+          directory: tensor
+          imports:
+            - Tensor
+            - Index
+            - tensorSvd
+            - tensorEig
       exports:
         - Tape
         - TapedTensor
@@ -3241,6 +3435,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLup
       constants:
@@ -3260,6 +3455,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createQr
       constants:
@@ -3279,6 +3475,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSchur
       constants:
@@ -3306,6 +3503,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSlu
       constants:
@@ -3343,6 +3541,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDerivative
       constants:
@@ -3363,6 +3562,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLeafCount
       constants:
@@ -3379,6 +3579,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLyap
       constants:
@@ -3395,6 +3596,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createPolynomialRoot
       constants:
@@ -3426,6 +3628,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRationalize
       constants:
@@ -3456,6 +3659,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createResolve
       constants:
@@ -3480,6 +3684,7 @@ modules:
           imports:
             - MathNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUtil
       interfaces:
@@ -3510,6 +3715,7 @@ modules:
             - isConstantNode
             - isSymbolNode
           reExport: true
+      workspaceDependencies: []
       exports:
         - isConstantNode
         - isVariableNode
@@ -3566,6 +3772,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSimplify
       constants:
@@ -3609,6 +3816,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSimplifyConstant
       constants:
@@ -3644,6 +3852,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSimplifyCore
       constants:
@@ -3666,6 +3875,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLsolve
       constants:
@@ -3683,6 +3893,7 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+      workspaceDependencies: []
       exports:
         - createLsolveAll
       interfaces:
@@ -3714,6 +3925,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLusolve
       constants:
@@ -3736,6 +3948,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUsolve
       constants:
@@ -3753,6 +3966,7 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+      workspaceDependencies: []
       exports:
         - createUsolveAll
       interfaces:
@@ -3776,6 +3990,7 @@ modules:
         - file: ../../../utils/string.js
           imports:
             - format
+      workspaceDependencies: []
       exports:
         - createSolveValidation
       functions:
@@ -3804,6 +4019,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsAmd
       interfaces:
@@ -3828,6 +4044,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsChol
       interfaces:
@@ -3854,6 +4071,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsCounts
       interfaces:
@@ -3865,6 +4083,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csCumsum
       functions:
@@ -3883,6 +4102,7 @@ modules:
         - file: ./csUnflip.js
           imports:
             - csUnflip
+      workspaceDependencies: []
       exports:
         - csDfs
       functions:
@@ -3898,6 +4118,7 @@ modules:
         - file: ./csMarked.js
           imports:
             - csMarked
+      workspaceDependencies: []
       exports:
         - csEreach
       functions:
@@ -3907,6 +4128,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csEtree
       functions:
@@ -3916,6 +4138,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csFkeep
       functions:
@@ -3925,6 +4148,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csFlip
       functions:
@@ -3934,6 +4158,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csIpvec
       functions:
@@ -3943,6 +4168,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csLeaf
       functions:
@@ -3962,6 +4188,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsLu
       interfaces:
@@ -3978,6 +4205,7 @@ modules:
         - file: ./csFlip.js
           imports:
             - csFlip
+      workspaceDependencies: []
       exports:
         - csMark
       functions:
@@ -3987,6 +4215,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csMarked
       functions:
@@ -3996,6 +4225,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csPermute
       functions:
@@ -4008,6 +4238,7 @@ modules:
         - file: ./csTdfs.js
           imports:
             - csTdfs
+      workspaceDependencies: []
       exports:
         - csPost
       functions:
@@ -4026,6 +4257,7 @@ modules:
         - file: ./csDfs.js
           imports:
             - csDfs
+      workspaceDependencies: []
       exports:
         - csReach
       functions:
@@ -4045,6 +4277,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsSpsolve
       interfaces:
@@ -4078,6 +4311,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsSqr
       interfaces:
@@ -4100,6 +4334,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCsSymperm
       interfaces:
@@ -4111,6 +4346,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - csTdfs
       functions:
@@ -4123,6 +4359,7 @@ modules:
         - file: ./csFlip.js
           imports:
             - csFlip
+      workspaceDependencies: []
       exports:
         - csUnflip
       functions:
@@ -4139,6 +4376,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSylvester
       constants:
@@ -4162,6 +4400,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSymbolicEqual
       constants:
@@ -4185,6 +4424,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAbs
       constants:
@@ -4204,6 +4444,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAddScalar
       constants:
@@ -4232,6 +4473,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCbrt
       constants:
@@ -4274,6 +4516,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCeilNumber
         - createCeil
@@ -4295,6 +4538,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCube
       constants:
@@ -4316,6 +4560,7 @@ modules:
         - file: ../type/matrix/utils/matAlgo14xDs.js
           imports:
             - createMatAlgo14xDs
+      workspaceDependencies: []
       exports:
         - createDivide
       constants:
@@ -4332,6 +4577,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDivideScalar
       constants:
@@ -4370,6 +4616,7 @@ modules:
         - file: ../type/matrix/utils/matrixAlgorithmSuite.js
           imports:
             - createMatrixAlgorithmSuite
+      workspaceDependencies: []
       exports:
         - createDotDivide
       constants:
@@ -4402,6 +4649,7 @@ modules:
         - file: ../type/matrix/utils/matrixAlgorithmSuite.js
           imports:
             - createMatrixAlgorithmSuite
+      workspaceDependencies: []
       exports:
         - createDotMultiply
       constants:
@@ -4438,6 +4686,7 @@ modules:
         - file: ../type/matrix/utils/matrixAlgorithmSuite.js
           imports:
             - createMatrixAlgorithmSuite
+      workspaceDependencies: []
       exports:
         - createDotPow
       constants:
@@ -4457,6 +4706,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createExp
       constants:
@@ -4476,6 +4726,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - expm1Number
+      workspaceDependencies: []
       exports:
         - createExpm1
       constants:
@@ -4501,6 +4752,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFixNumber
         - createFix
@@ -4545,6 +4797,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFloorNumber
         - createFloor
@@ -4592,6 +4845,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createGcd
       constants:
@@ -4621,6 +4875,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createHypot
       constants:
@@ -4641,6 +4896,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createInvmod
       constants:
@@ -4676,6 +4932,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - lcmNumber
+      workspaceDependencies: []
       exports:
         - createLcm
       constants:
@@ -4702,6 +4959,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - logNumber
+      workspaceDependencies: []
       exports:
         - createLog
       constants:
@@ -4731,6 +4989,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLog10
       constants:
@@ -4757,6 +5016,7 @@ modules:
         - file: ../utils/number.js
           imports:
             - log1p
+      workspaceDependencies: []
       exports:
         - createLog1p
       constants:
@@ -4786,6 +5046,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLog2
       constants:
@@ -4831,6 +5092,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMod
       constants:
@@ -4850,6 +5112,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMultiplyScalar
       constants:
@@ -4869,6 +5132,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createNorm
       constants:
@@ -4907,6 +5171,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - nthRootNumber
+      workspaceDependencies: []
       exports:
         - createNthRoot
         - createNthRootNumber
@@ -4929,6 +5194,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createNthRoots
       constants:
@@ -4959,6 +5225,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createPow
       constants:
@@ -5001,6 +5268,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRound
       constants:
@@ -5023,6 +5291,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSign
       constants:
@@ -5043,6 +5312,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSqrt
       constants:
@@ -5062,6 +5332,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSquare
       constants:
@@ -5100,6 +5371,7 @@ modules:
         - file: ../type/matrix/utils/matrixAlgorithmSuite.js
           imports:
             - createMatrixAlgorithmSuite
+      workspaceDependencies: []
       exports:
         - createSubtract
       constants:
@@ -5119,6 +5391,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSubtractScalar
       constants:
@@ -5145,6 +5418,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUnaryMinus
       constants:
@@ -5174,6 +5448,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUnaryPlus
       constants:
@@ -5189,6 +5464,7 @@ modules:
         - file: ../../utils/is.js
           imports:
             - isNode
+      workspaceDependencies: []
       exports:
         - name
         - dependencies
@@ -5218,6 +5494,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - xgcdNumber
+      workspaceDependencies: []
       exports:
         - createXgcd
       constants:
@@ -5257,6 +5534,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBitAnd
       constants:
@@ -5282,6 +5560,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBitNot
       constants:
@@ -5320,6 +5599,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBitOr
       constants:
@@ -5358,6 +5638,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBitXor
       constants:
@@ -5412,6 +5693,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLeftShift
       constants:
@@ -5466,6 +5748,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRightArithShift
       constants:
@@ -5517,6 +5800,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRightLogShift
       constants:
@@ -5537,6 +5821,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUseMatrixForArrayScalar
       constants:
@@ -5547,6 +5832,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - gradient
         - hessian
@@ -5564,6 +5850,7 @@ modules:
         - file: ./factories/evaluate.js
           imports:
             - evaluate
+      workspaceDependencies: []
       exports:
         - symbolicIntegral
       functions:
@@ -5579,6 +5866,7 @@ modules:
         - file: ./linalg-extra.js
           imports:
             - laplacianMatrix
+      workspaceDependencies: []
       exports:
         - kmeans
         - spectralClustering
@@ -5600,6 +5888,7 @@ modules:
         - file: ./factories/index.js
           imports:
             - quantileSeq
+      workspaceDependencies: []
       exports:
         - rankdata
         - gmean
@@ -5637,6 +5926,7 @@ modules:
             - fDist
             - gammaDist
             - betaDist
+      workspaceDependencies: []
       exports:
         - normalQuantile
         - studentTCDF
@@ -5687,6 +5977,7 @@ modules:
         - file: ./typed/trigonometry.js
           imports:
             - toRadians
+      workspaceDependencies: []
       exports:
         - EARTH_RADIUS_KM
         - haversine
@@ -5713,6 +6004,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Dual
       exports:
         - derivativeAt
         - valueAndDerivativeAt
@@ -5729,6 +6025,12 @@ modules:
         - file: ./factories/evaluate.js
           imports:
             - evaluate
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createHelpClass
+            - embeddedDocs
       exports:
         - help
       functions:
@@ -5758,6 +6060,7 @@ modules:
         - file: ./typed/special.js
           imports:
             - lgamma
+      workspaceDependencies: []
       exports:
         - fTest
         - jarqueBera
@@ -5947,6 +6250,7 @@ modules:
             - quaternionRotate
             - quaternionToRotationMatrix
           reExport: true
+      workspaceDependencies: []
       exports:
         - to
         - toBest
@@ -6157,6 +6461,12 @@ modules:
         - file: ./typed/arithmetic.js
           imports:
             - multiply
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - lu
       exports:
         - generalizedEig
         - tril
@@ -6187,6 +6497,7 @@ modules:
         - file: ./typed/arithmetic.js
           imports:
             - sum
+      workspaceDependencies: []
       exports:
         - clamp
         - sigmoid
@@ -6217,6 +6528,7 @@ modules:
         - file: ./factories/index.js
           imports:
             - inv
+      workspaceDependencies: []
       exports:
         - nelderMead
         - gradientDescent
@@ -6239,6 +6551,7 @@ modules:
         - file: ./distribution-functions.js
           imports:
             - studentTCDF
+      workspaceDependencies: []
       exports:
         - linearRegression
       interfaces:
@@ -6256,6 +6569,11 @@ modules:
         - file: ./linalg-extra.js
           imports:
             - companion
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
       exports:
         - firwin
         - lfilter
@@ -6276,6 +6594,7 @@ modules:
         - file: ./typed/arithmetic.js
           imports:
             - mean
+      workspaceDependencies: []
       exports:
         - movingAverage
         - ewma
@@ -6291,6 +6610,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
       interfaces:
         - SparseMatrix
@@ -6315,6 +6635,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBellNumbers
       constants:
@@ -6335,6 +6656,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCatalan
       constants:
@@ -6355,6 +6677,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createComposition
       constants:
@@ -6378,6 +6701,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createStirlingS2
       constants:
@@ -6402,6 +6726,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createArg
       constants:
@@ -6428,6 +6753,7 @@ modules:
             - Fraction
             - Unit
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createConj
       constants:
@@ -6451,6 +6777,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIm
       constants:
@@ -6476,6 +6803,7 @@ modules:
             - BigNumber
             - Fraction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRe
       constants:
@@ -6486,6 +6814,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - DEFAULT_CONFIG
       interfaces:
@@ -6549,6 +6878,7 @@ modules:
         - file: ../../utils/number.js
           imports:
             - digits
+      workspaceDependencies: []
       exports:
         - createTyped
       interfaces:
@@ -6561,6 +6891,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - DimensionError
       classes:
@@ -6570,6 +6901,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - createIndexError
         - IndexError
@@ -6582,6 +6914,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - MathjsError
       classes:
@@ -6600,6 +6933,7 @@ modules:
             - isConstantNode
             - isParenthesisNode
             - rule2Node
+      workspaceDependencies: []
       exports:
         - properties
         - getPrecedence
@@ -6628,6 +6962,25 @@ modules:
         - file: ../typed/index.js
           imports:
             - '* as typedFns'
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createEvaluate
+            - compileExpression
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - Fraction
+            - I
+            - PHI
+            - SQRT2
+            - SQRT1_2
+            - LN2
+            - LN10
+            - LOG2E
+            - LOG10E
       exports:
         - parse
         - evaluate
@@ -7436,6 +7789,27 @@ modules:
             - createWeakMixingAngle
             - createEfimovFactor
             - createFermiCoupling
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createNode
+            - createAccessorNode
+            - createArrayNode
+            - createAssignmentNode
+            - createBlockNode
+            - createConditionalNode
+            - createConstantNode
+            - createFunctionAssignmentNode
+            - createFunctionNode
+            - createIndexNode
+            - createObjectNode
+            - createOperatorNode
+            - createParenthesisNode
+            - createRangeNode
+            - createRelationalNode
+            - createSymbolNode
+            - createParse
       exports:
         - apply
         - index
@@ -7947,6 +8321,12 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - backendManager
       exports:
         - createMatrixBridge
         - MathJSDenseMatrix
@@ -7972,6 +8352,14 @@ modules:
             - MathJSDenseMatrix
             - MathJSSparseMatrix
             - createMatrixBridge
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - Fraction
+            - BigNumber
       exports:
         - factoryScope
       constants:
@@ -7999,6 +8387,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDistance
       constants:
@@ -8026,6 +8415,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIntersect
       constants:
@@ -8065,6 +8455,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAnd
       constants:
@@ -8087,6 +8478,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createNot
       constants:
@@ -8121,6 +8513,7 @@ modules:
             - BigNumber
             - Fraction
             - Unit
+      workspaceDependencies: []
       exports:
         - createNullish
       constants:
@@ -8156,6 +8549,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createOr
       constants:
@@ -8191,6 +8585,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createXor
       constants:
@@ -8213,6 +8608,7 @@ modules:
         - file: ../utils/array.js
           imports:
             - validateIndex
+      workspaceDependencies: []
       exports:
         - createColumn
       constants:
@@ -8251,6 +8647,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createConcat
       constants:
@@ -8271,6 +8668,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCount
       constants:
@@ -8295,6 +8693,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCross
       constants:
@@ -8311,6 +8710,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCtranspose
       constants:
@@ -8341,6 +8741,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createDet
       constants:
@@ -8369,6 +8770,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDiag
       constants:
@@ -8392,6 +8794,7 @@ modules:
             - TypedFunction
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDiff
       constants:
@@ -8411,6 +8814,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDot
       constants:
@@ -8432,6 +8836,7 @@ modules:
         - file: ../../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createComplexEigs
       functions:
@@ -8450,6 +8855,7 @@ modules:
         - file: ../../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createRealSymmetric
       functions:
@@ -8484,6 +8890,7 @@ modules:
             - isBigNumber
             - isComplex
             - isFraction
+      workspaceDependencies: []
       exports:
         - createEigs
       constants:
@@ -8511,6 +8918,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createExpm
       interfaces:
@@ -8535,6 +8943,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFft
       constants:
@@ -8558,6 +8967,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFilter
       constants:
@@ -8577,6 +8987,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFlatten
       constants:
@@ -8599,6 +9010,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createForEach
       constants:
@@ -8621,6 +9033,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createGetMatrixDataType
       constants:
@@ -8646,6 +9059,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIdentity
       constants:
@@ -8667,6 +9081,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createIfft
       constants:
@@ -8697,6 +9112,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createInv
       constants:
@@ -8715,6 +9131,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createKron
       constants:
@@ -8741,6 +9158,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMap
       constants:
@@ -8767,6 +9185,7 @@ modules:
             - TypedFunction
             - Matrix
             - BigNumber
+      workspaceDependencies: []
       exports:
         - createMapSlices
       constants:
@@ -8779,6 +9198,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createMatrixFromColumns
       constants:
@@ -8795,6 +9215,7 @@ modules:
           imports:
             - TypedFunction
             - Matrix
+      workspaceDependencies: []
       exports:
         - createMatrixFromFunction
       constants:
@@ -8807,6 +9228,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createMatrixFromRows
       constants:
@@ -8816,6 +9238,17 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - lu
+            - eig
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
       exports:
         - NATIVE_MATRIX_THRESHOLD
         - isLargeNumericSquare
@@ -8843,6 +9276,7 @@ modules:
           imports:
             - createZerosAndOnes
             - Dependencies
+      workspaceDependencies: []
       exports:
         - createOnes
       constants:
@@ -8864,6 +9298,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createPartitionSelect
       constants:
@@ -8894,6 +9329,7 @@ modules:
         - file: ../utils/object.js
           imports:
             - clone
+      workspaceDependencies: []
       exports:
         - createPinv
       constants:
@@ -8918,6 +9354,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRange
       constants:
@@ -8937,6 +9374,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createReshape
       constants:
@@ -8976,6 +9414,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createResize
       constants:
@@ -8998,6 +9437,7 @@ modules:
             - BigNumber
             - Complex
             - Unit
+      workspaceDependencies: []
       exports:
         - createRotate
       constants:
@@ -9025,6 +9465,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRotationMatrix
       constants:
@@ -9046,6 +9487,7 @@ modules:
         - file: ../utils/array.js
           imports:
             - validateIndex
+      workspaceDependencies: []
       exports:
         - createRow
       constants:
@@ -9065,6 +9507,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSize
       constants:
@@ -9084,6 +9527,7 @@ modules:
           imports:
             - TypedFunction
             - Matrix
+      workspaceDependencies: []
       exports:
         - createSort
       constants:
@@ -9114,6 +9558,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - createSqrtm
       interfaces:
@@ -9138,6 +9583,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSqueeze
       constants:
@@ -9176,6 +9622,7 @@ modules:
           imports:
             - Index
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSubset
       constants:
@@ -9198,6 +9645,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTrace
       constants:
@@ -9223,6 +9671,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTranspose
       constants:
@@ -9245,6 +9694,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createZerosAndOnes
       interfaces:
@@ -9268,6 +9718,7 @@ modules:
           imports:
             - createZerosAndOnes
             - Dependencies
+      workspaceDependencies: []
       exports:
         - createZeros
       constants:
@@ -9297,6 +9748,7 @@ modules:
             - Unit
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSolveODE
       constants:
@@ -9318,6 +9770,7 @@ modules:
             - sign
             - toFixed
             - isPowZeroAtInfinity
+      workspaceDependencies: []
       exports:
         - absNumber
         - addNumber
@@ -9380,6 +9833,7 @@ modules:
         - file: ../../utils/number.js
           imports:
             - isInteger
+      workspaceDependencies: []
       exports:
         - bitAndNumber
         - bitNotNumber
@@ -9407,6 +9861,7 @@ modules:
         - file: ../../utils/product.js
           imports:
             - product
+      workspaceDependencies: []
       exports:
         - combinationsNumber
       functions:
@@ -9416,6 +9871,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - pi
         - tau
@@ -9467,6 +9923,7 @@ modules:
           imports:
             - '*'
           reExport: true
+      workspaceDependencies: []
       exports: []
       reExported:
         - '* from ./arithmetic.js'
@@ -9483,6 +9940,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - notNumber
         - orNumber
@@ -9504,6 +9962,7 @@ modules:
         - file: ../../utils/product.js
           imports:
             - product
+      workspaceDependencies: []
       exports:
         - gammaG
         - gammaP
@@ -9528,6 +9987,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - equalNumber
         - unequalNumber
@@ -9558,6 +10018,7 @@ modules:
             - sign
             - sinh
             - tanh
+      workspaceDependencies: []
       exports:
         - acosNumber
         - acoshNumber
@@ -9618,6 +10079,7 @@ modules:
         - file: ../../utils/number.js
           imports:
             - isInteger
+      workspaceDependencies: []
       exports:
         - isIntegerNumber
         - isNegativeNumber
@@ -9650,6 +10112,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBernoulli
       constants:
@@ -9669,6 +10132,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCombinations
       constants:
@@ -9691,6 +10155,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCombinationsWithRep
       constants:
@@ -9710,6 +10175,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFactorial
       constants:
@@ -9735,6 +10201,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createGamma
       constants:
@@ -9751,6 +10218,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createKldivergence
       constants:
@@ -9777,6 +10245,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLgamma
       constants:
@@ -9798,6 +10267,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMultinomial
       constants:
@@ -9820,6 +10290,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createPermutations
       constants:
@@ -9850,6 +10321,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createPickRandom
       constants:
@@ -9879,6 +10351,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRandom
         - createRandomNumber
@@ -9910,6 +10383,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createRandomInt
       constants:
@@ -9919,6 +10393,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - randomMatrix
       functions:
@@ -9931,6 +10406,7 @@ modules:
             - seedrandom
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - createRng
       functions:
@@ -9977,6 +10453,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCompare
         - createCompareNumber
@@ -10003,6 +10480,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCompareNatural
       constants:
@@ -10025,6 +10503,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCompareText
         - createCompareTextNumber
@@ -10043,6 +10522,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCompareUnits
       constants:
@@ -10059,6 +10539,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createDeepEqual
       constants:
@@ -10091,6 +10572,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createEqual
         - createEqualNumber
@@ -10126,6 +10608,7 @@ modules:
         - file: ../core/config.js
           imports:
             - ConfigOptions
+      workspaceDependencies: []
       exports:
         - createEqualScalar
         - createEqualScalarNumber
@@ -10144,6 +10627,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createEqualText
       constants:
@@ -10189,6 +10673,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLarger
         - createLargerNumber
@@ -10236,6 +10721,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createLargerEq
         - createLargerEqNumber
@@ -10283,6 +10769,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSmaller
         - createSmallerNumber
@@ -10330,6 +10817,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSmallerEq
         - createSmallerEqNumber
@@ -10368,6 +10856,7 @@ modules:
           imports:
             - AlgorithmFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUnequal
         - createUnequalNumber
@@ -10400,6 +10889,7 @@ modules:
           imports:
             - IndexInterface
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetCartesian
       constants:
@@ -10430,6 +10920,7 @@ modules:
           imports:
             - IndexInterface
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetDifference
       constants:
@@ -10451,6 +10942,7 @@ modules:
             - Matrix
             - MathNumericType
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetDistinct
       constants:
@@ -10481,6 +10973,7 @@ modules:
           imports:
             - IndexInterface
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetIntersect
       constants:
@@ -10502,6 +10995,7 @@ modules:
             - MathArray
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetIsSubset
       constants:
@@ -10523,6 +11017,7 @@ modules:
             - Matrix
             - MathNumericType
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetMultiplicity
       constants:
@@ -10544,6 +11039,7 @@ modules:
             - Matrix
             - MathNumericType
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetPowerset
       constants:
@@ -10564,6 +11060,7 @@ modules:
             - MathArray
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetSize
       constants:
@@ -10593,6 +11090,7 @@ modules:
           imports:
             - IndexInterface
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetSymDifference
       constants:
@@ -10622,6 +11120,7 @@ modules:
           imports:
             - IndexInterface
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSetUnion
       constants:
@@ -10643,6 +11142,7 @@ modules:
             - Matrix
             - Complex
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFreqz
       constants:
@@ -10660,6 +11160,7 @@ modules:
             - Matrix
             - Complex
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createZpk2tf
       constants:
@@ -10686,6 +11187,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createErf
       constants:
@@ -10710,6 +11212,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createZeta
       constants:
@@ -10730,6 +11233,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCorr
       constants:
@@ -10764,6 +11268,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCumSum
       constants:
@@ -10789,6 +11294,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMad
       constants:
@@ -10823,6 +11329,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMax
       constants:
@@ -10853,6 +11360,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMean
       constants:
@@ -10878,6 +11386,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMedian
       constants:
@@ -10912,6 +11421,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMin
       constants:
@@ -10931,6 +11441,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMode
       constants:
@@ -10960,6 +11471,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createProd
       constants:
@@ -10983,6 +11495,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createQuantileSeq
       constants:
@@ -11005,6 +11518,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createStd
       constants:
@@ -11036,6 +11550,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSum
       constants:
@@ -11048,6 +11563,7 @@ modules:
         - file: ../../utils/is.js
           imports:
             - typeOf
+      workspaceDependencies: []
       exports:
         - improveErrorMessage
       functions:
@@ -11076,6 +11592,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createVariance
       constants:
@@ -11097,6 +11614,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBin
       constants:
@@ -11116,6 +11634,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFormat
       constants:
@@ -11136,6 +11655,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createHex
       constants:
@@ -11156,6 +11676,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createOct
       constants:
@@ -11181,6 +11702,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createPrint
       constants:
@@ -11202,6 +11724,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAcos
       constants:
@@ -11233,6 +11756,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - acoshNumber
+      workspaceDependencies: []
       exports:
         - createAcosh
       constants:
@@ -11263,6 +11787,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - acotNumber
+      workspaceDependencies: []
       exports:
         - createAcot
       constants:
@@ -11297,6 +11822,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - acothNumber
+      workspaceDependencies: []
       exports:
         - createAcoth
       constants:
@@ -11331,6 +11857,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - acscNumber
+      workspaceDependencies: []
       exports:
         - createAcsc
       constants:
@@ -11361,6 +11888,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - acschNumber
+      workspaceDependencies: []
       exports:
         - createAcsch
       constants:
@@ -11395,6 +11923,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - asecNumber
+      workspaceDependencies: []
       exports:
         - createAsec
       constants:
@@ -11429,6 +11958,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - asechNumber
+      workspaceDependencies: []
       exports:
         - createAsech
       constants:
@@ -11449,6 +11979,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAsin
       constants:
@@ -11476,6 +12007,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - asinhNumber
+      workspaceDependencies: []
       exports:
         - createAsinh
       constants:
@@ -11492,6 +12024,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAtan
       constants:
@@ -11538,6 +12071,7 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAtan2
       constants:
@@ -11569,6 +12103,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - atanhNumber
+      workspaceDependencies: []
       exports:
         - createAtanh
       constants:
@@ -11588,6 +12123,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCos
       constants:
@@ -11607,6 +12143,7 @@ modules:
         - file: ../utils/number.js
           imports:
             - cosh
+      workspaceDependencies: []
       exports:
         - createCosh
       constants:
@@ -11637,6 +12174,7 @@ modules:
         - file: ./trigUnit.js
           imports:
             - createTrigUnit
+      workspaceDependencies: []
       exports:
         - createCot
       constants:
@@ -11664,6 +12202,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - cothNumber
+      workspaceDependencies: []
       exports:
         - createCoth
       constants:
@@ -11694,6 +12233,7 @@ modules:
         - file: ./trigUnit.js
           imports:
             - createTrigUnit
+      workspaceDependencies: []
       exports:
         - createCsc
       constants:
@@ -11721,6 +12261,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - cschNumber
+      workspaceDependencies: []
       exports:
         - createCsch
       constants:
@@ -11751,6 +12292,7 @@ modules:
         - file: ./trigUnit.js
           imports:
             - createTrigUnit
+      workspaceDependencies: []
       exports:
         - createSec
       constants:
@@ -11778,6 +12320,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - sechNumber
+      workspaceDependencies: []
       exports:
         - createSech
       constants:
@@ -11797,6 +12340,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSin
       constants:
@@ -11816,6 +12360,7 @@ modules:
         - file: ../plain/number/index.js
           imports:
             - sinhNumber
+      workspaceDependencies: []
       exports:
         - createSinh
       constants:
@@ -11835,6 +12380,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTan
       constants:
@@ -11854,6 +12400,7 @@ modules:
         - file: ../utils/number.js
           imports:
             - tanh
+      workspaceDependencies: []
       exports:
         - createTanh
       constants:
@@ -11870,6 +12417,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTrigUnit
       constants:
@@ -11886,6 +12434,7 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createBigNumberClass
       interfaces:
@@ -11917,6 +12466,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createChainClass
       interfaces:
@@ -11936,6 +12486,7 @@ modules:
         - file: ../../../types.js
           imports:
             - TypedFunction
+      workspaceDependencies: []
       exports:
         - createChain
       constants:
@@ -11959,6 +12510,7 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createComplexClass
       interfaces:
@@ -11984,6 +12536,7 @@ modules:
             - FibonacciHeapNode
             - MatrixValue
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFibonacciHeapClass
       constants:
@@ -12005,6 +12558,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIndex
       constants:
@@ -12035,6 +12589,7 @@ modules:
             - ImmutableDenseMatrixJSON
             - ImmutableDenseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createImmutableDenseMatrixClass
       constants:
@@ -12066,6 +12621,7 @@ modules:
             - RangeInterface
             - MatrixValue
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIndexClass
       constants:
@@ -12085,6 +12641,7 @@ modules:
             - MatrixValue
             - EqualScalarFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSpaClass
       constants:
@@ -12094,6 +12651,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
       interfaces:
         - BigNumberLike
@@ -12131,6 +12689,7 @@ modules:
         - file: ../../../utils/object.js
           imports:
             - deepStrictEqual
+      workspaceDependencies: []
       exports:
         - broadcast
       functions:
@@ -12155,6 +12714,7 @@ modules:
             - TypedFunction
             - DenseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo01xDSid
       constants:
@@ -12180,6 +12740,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo02xDS0
       constants:
@@ -12204,6 +12765,7 @@ modules:
             - TypedFunction
             - DenseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo03xDSf
       constants:
@@ -12229,6 +12791,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo04xSidSid
       constants:
@@ -12254,6 +12817,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo05xSfSf
       constants:
@@ -12282,6 +12846,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo06xS0S0
       constants:
@@ -12306,6 +12871,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo07xSSf
       constants:
@@ -12331,6 +12897,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo08xS0Sid
       constants:
@@ -12356,6 +12923,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo09xS0Sf
       constants:
@@ -12377,6 +12945,7 @@ modules:
             - TypedFunction
             - DenseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo10xSids
       constants:
@@ -12398,6 +12967,7 @@ modules:
             - TypedFunction
             - SparseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo11xS0s
       constants:
@@ -12419,6 +12989,7 @@ modules:
             - TypedFunction
             - DenseMatrixConstructorData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo12xSfs
       constants:
@@ -12443,6 +13014,7 @@ modules:
             - DenseMatrixConstructorData
             - MatrixValue
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo13xDD
       constants:
@@ -12467,6 +13039,7 @@ modules:
             - DenseMatrixConstructorData
             - MatrixValue
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatAlgo14xDs
       constants:
@@ -12499,6 +13072,7 @@ modules:
             - MatrixInterface
             - DenseMatrixData
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createMatrixAlgorithmSuite
       constants:
@@ -12511,6 +13085,7 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createResultSet
       interfaces:
@@ -12531,6 +13106,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createCreateUnit
       constants:
@@ -12547,6 +13123,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSplitUnit
       constants:
@@ -12570,6 +13147,7 @@ modules:
           imports:
             - MathCollection
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUnitFunction
       constants:
@@ -12589,6 +13167,7 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createSpeedOfLight
         - createGravitationConstant
@@ -12706,6 +13285,7 @@ modules:
           imports:
             - Complex
           typeOnly: true
+      workspaceDependencies: []
       exports: []
       interfaces:
         - BigNumberValue
@@ -12782,6 +13362,7 @@ modules:
             - UnitSystem
             - UnitSystemEntry
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createUnitClass
       constants:
@@ -12799,6 +13380,7 @@ modules:
             - resultantDispatch
             - discriminantDispatch
             - WASM_POLY_THRESHOLD
+      workspaceDependencies: []
       exports:
         - typedAlgebra
         - polyval
@@ -12884,6 +13466,26 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - Fraction
+            - BigNumber
+            - Unit
+            - Dual
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - backendManager
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
+            - ComputePool
       exports:
         - add
         - subtract
@@ -13005,6 +13607,16 @@ modules:
             - WASM_BITWISE_THRESHOLD
             - runBinaryBitwiseWasm
             - runUnaryBitwiseWasm
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - BigNumber
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - bitAnd
         - bitOr
@@ -13035,6 +13647,15 @@ modules:
         - file: ../factories/index.js
           imports:
             - polynomialRoot
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
       exports:
         - CAS_BATCH_THRESHOLD
         - integrate
@@ -13123,6 +13744,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - fibonacci
         - lucas
@@ -13172,6 +13798,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - BigNumber
       exports:
         - arg
         - conj
@@ -13192,6 +13825,11 @@ modules:
         - file: ./special.js
           imports:
             - erfcScalar
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - DIST_WORKER_THRESHOLD
         - normalDist
@@ -13238,6 +13876,11 @@ modules:
           imports:
             - mapArray
             - kernelSource
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - normalPDF
         - normalCDF
@@ -13282,6 +13925,7 @@ modules:
         - file: ./special.js
           imports:
             - erfcScalar
+      workspaceDependencies: []
       exports:
         - fuseUnaryChain
       functions:
@@ -13298,6 +13942,11 @@ modules:
           imports:
             - argsortF64Dispatch
             - WASM_SORT_THRESHOLD
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - angle2D
         - angle3D
@@ -13371,6 +14020,15 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - gpuMatrixBackend
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
       exports:
         - gpuMatmul
         - gpuAdd
@@ -13386,6 +14044,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - CENTRALITY_WORKER_THRESHOLD
         - adjacencyMatrix
@@ -13433,6 +14092,11 @@ modules:
           imports:
             - sortF64Dispatch
             - WASM_SORT_THRESHOLD
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - studentTTest
         - chiSquareTest
@@ -13682,6 +14346,7 @@ modules:
           imports:
             - typedUnit
           reExport: true
+      workspaceDependencies: []
       exports:
         - typedArithmetic
         - typedTrigonometry
@@ -13750,6 +14415,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - GAUSS_WORKER_THRESHOLD
         - ARRAY_WORKER_THRESHOLD
@@ -13793,6 +14463,7 @@ modules:
             - chebFitDispatch
             - legendreFitDispatch
             - WASM_POLY_FIT_THRESHOLD
+      workspaceDependencies: []
       exports:
         - WASM_INTERP_THRESHOLD
         - linearInterp
@@ -13819,6 +14490,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - BigNumber
       exports:
         - not
         - and
@@ -13838,6 +14516,34 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+            - svd
+            - cond
+            - norm2
+            - normFro
+            - lowRankApprox
+            - singularValues
+            - matrixPinv
+            - PinvOptions
+            - matrixExpm
+            - matrixLogm
+            - matrixSqrtm
+            - ExpmOptions
+            - LogmOptions
+            - SqrtmOptions
+            - DenseMatrix
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - pinv
         - cond
@@ -13890,6 +14596,7 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+      workspaceDependencies: []
       exports:
         - findRoot
         - linsolve
@@ -13969,6 +14676,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - kernelSource
         - mapArray
@@ -13983,6 +14695,11 @@ modules:
             - seedrandom
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - bernoulli
         - combinations
@@ -14017,6 +14734,14 @@ modules:
         - file: ../utils/number.js
           imports:
             - nearlyEqual
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - BigNumber
+            - Fraction
       exports:
         - equalScalar
         - unequal
@@ -14040,6 +14765,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
       exports:
         - setUnion
         - setIntersect
@@ -14081,6 +14811,15 @@ modules:
             - welchPSDDispatch
             - welchPSDJS
             - WASM_SIGNAL_THRESHOLD
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - parallelFFT
         - parallelIFFT
@@ -14237,6 +14976,12 @@ modules:
             - ellipticFIncompleteScalar
             - ellipticEIncompleteScalar
             - ellipticPiIncompleteScalar
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
       exports:
         - erfc
         - erfi
@@ -14328,6 +15073,15 @@ modules:
         - file: ../wasm/sort/wasm-bridge.js
           imports:
             - sortF64Dispatch
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - parallelStatSum
         - parallelStatMean
@@ -14395,6 +15149,12 @@ modules:
         - file: ../utils/print.js
           imports:
             - printTemplate
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - BigNumber
       exports:
         - bin
         - hex
@@ -14417,6 +15177,18 @@ modules:
         - file: ../wasm/elementwise/wasm-bridge.js
           imports:
             - elementwiseUnaryDispatch
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
+            - Complex
+            - BigNumber
+            - Dual
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - sin
         - cos
@@ -14464,6 +15236,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - registerNativeTypes
       exports:
         - initTypeBridge
       functions:
@@ -14473,6 +15250,12 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Unit
+            - mathTyped
       exports:
         - to
         - toBest
@@ -14497,6 +15280,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTo
       constants:
@@ -14513,6 +15297,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createToBest
       constants:
@@ -14547,6 +15332,7 @@ modules:
         - file: ./object.js
           imports:
             - deepStrictEqual
+      workspaceDependencies: []
       exports:
         - arraySize
         - validate
@@ -14618,6 +15404,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - promoteLogarithm
       functions:
@@ -14627,6 +15414,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitAndBigNumber
         - bitNotBigNumber
@@ -14651,6 +15439,7 @@ modules:
         - file: ../function.js
           imports:
             - memoize
+      workspaceDependencies: []
       exports:
         - createBigNumberE
         - createBigNumberPhi
@@ -14675,6 +15464,7 @@ modules:
             - isInteger
             - normalizeFormatOptions
             - FormatOptions
+      workspaceDependencies: []
       exports:
         - format
         - toEngineering
@@ -14690,6 +15480,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - nearlyEqual
       functions:
@@ -14709,6 +15500,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createClone
       constants:
@@ -14733,6 +15525,7 @@ modules:
         - file: ./switch.js
           imports:
             - _switch
+      workspaceDependencies: []
       exports:
         - containsCollections
         - deepForEach
@@ -14757,6 +15550,7 @@ modules:
           imports:
             - Complex
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - complexEquals
       functions:
@@ -14769,6 +15563,7 @@ modules:
         - file: ./object.js
           imports:
             - hasOwnProperty
+      workspaceDependencies: []
       exports:
         - getSafeProperty
         - setSafeProperty
@@ -14787,6 +15582,7 @@ modules:
         - file: ../error/MathjsError.js
           imports:
             - MathjsError
+      workspaceDependencies: []
       exports:
         - factory
         - sortFactories
@@ -14815,6 +15611,7 @@ modules:
         - file: ./lruQueue.js
           imports:
             - lruQueue
+      workspaceDependencies: []
       exports:
         - memoize
         - memoizeCompare
@@ -14836,6 +15633,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createHasNumericValue
       constants:
@@ -14845,6 +15643,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isArray
         - isNumber
@@ -14985,6 +15784,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsBounded
       constants:
@@ -15006,6 +15806,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsFinite
       constants:
@@ -15025,6 +15826,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsInteger
       constants:
@@ -15047,6 +15849,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsNaN
       constants:
@@ -15079,6 +15882,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsNegative
       constants:
@@ -15102,6 +15906,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsNumeric
       constants:
@@ -15134,6 +15939,7 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsPositive
       constants:
@@ -15153,6 +15959,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsPrime
       constants:
@@ -15172,6 +15979,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createIsZero
       constants:
@@ -15181,6 +15989,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - warnOnce
       constants:
@@ -15190,6 +15999,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lruQueue
       functions:
@@ -15208,6 +16018,7 @@ modules:
           imports:
             - isMap
             - isObject
+      workspaceDependencies: []
       exports:
         - createEmptyMap
         - createMap
@@ -15230,12 +16041,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
     functions/src/utils/noop.ts:
       description: noop module
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - noBignumber
         - noFraction
@@ -15258,6 +16071,7 @@ modules:
             - isBigNumber
             - isNumber
             - isObject
+      workspaceDependencies: []
       exports:
         - sign
         - log2
@@ -15333,6 +16147,7 @@ modules:
           imports:
             - noBignumber
             - noFraction
+      workspaceDependencies: []
       exports:
         - createNumeric
       constants:
@@ -15346,6 +16161,7 @@ modules:
           imports:
             - isBigNumber
             - isObject
+      workspaceDependencies: []
       exports:
         - clone
         - mapObject
@@ -15393,6 +16209,7 @@ modules:
         - file: ./is.js
           imports:
             - typeOf
+      workspaceDependencies: []
       exports:
         - optimizeCallback
       functions:
@@ -15409,6 +16226,7 @@ modules:
           imports:
             - BigNumber
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createParseNumberWithConfig
       constants:
@@ -15418,6 +16236,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - printTemplate
       constants:
@@ -15427,6 +16246,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - product
       functions:
@@ -15448,6 +16268,7 @@ modules:
         - file: ./bignumber/formatter.js
           imports:
             - format
+      workspaceDependencies: []
       exports:
         - endsWith
         - format
@@ -15465,6 +16286,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - _switch
       functions:
@@ -15484,6 +16306,7 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createTypeOf
       constants:
@@ -15505,6 +16328,7 @@ modules:
             - withAsI32
             - asReadReturnedI32
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_BITWISE_THRESHOLD
         - runBinaryBitwiseWasm
@@ -15525,6 +16349,7 @@ modules:
           imports:
             - wasmLoader
             - WasmModule
+      workspaceDependencies: []
       exports:
         - getWasm
         - isAsWasm
@@ -15561,6 +16386,7 @@ modules:
             - runChainPtr
             - PtrUnaryKernel
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_ELEMENTWISE_THRESHOLD
         - WASM_ELEMENTWISE_OPS
@@ -15577,6 +16403,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sha384OfBuffer
         - loadWasmManifest
@@ -15602,6 +16429,7 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_TRIDIAG_THRESHOLD
         - WASM_INTERP_THRESHOLD
@@ -15634,6 +16462,7 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_POLY_THRESHOLD
         - WASM_POLY_FIT_THRESHOLD
@@ -15662,6 +16491,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - resolvePackagedWasm
       functions:
@@ -15678,6 +16508,7 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_SIGNAL_THRESHOLD
         - applyWindowJS
@@ -15716,6 +16547,7 @@ modules:
             - asReadReturnedF64
             - asReadReturnedI32
             - RawWasm
+      workspaceDependencies: []
       exports:
         - WASM_SORT_THRESHOLD
         - sortF64JS
@@ -15738,6 +16570,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - _lgamma
         - besselHankel
@@ -15817,6 +16650,7 @@ modules:
             - airyBiScalar
             - ellipticKScalar
             - ellipticECompleteScalar
+      workspaceDependencies: []
       exports:
         - WASM_SPECIAL_THRESHOLD
         - besselJ0Dispatch
@@ -15930,6 +16764,7 @@ modules:
         - file: ./resolve.js
           imports:
             - resolvePackagedWasm
+      workspaceDependencies: []
       exports:
         - wasmLoader
         - initWasm
@@ -15961,6 +16796,7 @@ modules:
           imports:
             - MathNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - compile
       interfaces:
@@ -15977,6 +16813,7 @@ modules:
           imports:
             - compile
           reExport: true
+      workspaceDependencies: []
       exports:
         - compile
       reExported:
@@ -15987,6 +16824,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - eDocs
       constants:
@@ -15996,6 +16834,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - falseDocs
       constants:
@@ -16005,6 +16844,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - iDocs
       constants:
@@ -16014,6 +16854,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - InfinityDocs
       constants:
@@ -16023,6 +16864,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - LN10Docs
       constants:
@@ -16032,6 +16874,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - LN2Docs
       constants:
@@ -16041,6 +16884,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - LOG10EDocs
       constants:
@@ -16050,6 +16894,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - LOG2EDocs
       constants:
@@ -16059,6 +16904,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - NaNDocs
       constants:
@@ -16068,6 +16914,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - nullDocs
       constants:
@@ -16077,6 +16924,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - phiDocs
       constants:
@@ -16086,6 +16934,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - piDocs
       constants:
@@ -16095,6 +16944,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - SQRT12Docs
       constants:
@@ -16104,6 +16954,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - SQRT2Docs
       constants:
@@ -16113,6 +16964,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - tauDocs
       constants:
@@ -16122,6 +16974,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - trueDocs
       constants:
@@ -16131,6 +16984,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - versionDocs
       constants:
@@ -16140,6 +16994,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bigintDocs
       constants:
@@ -16149,6 +17004,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bignumberDocs
       constants:
@@ -16158,6 +17014,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - booleanDocs
       constants:
@@ -16167,6 +17024,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - complexDocs
       constants:
@@ -16176,6 +17034,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - createUnitDocs
       constants:
@@ -16185,6 +17044,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - fractionDocs
       constants:
@@ -16194,6 +17054,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - indexDocs
       constants:
@@ -16203,6 +17064,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrixDocs
       constants:
@@ -16212,6 +17074,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - numberDocs
       constants:
@@ -16221,6 +17084,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sparseDocs
       constants:
@@ -16230,6 +17094,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - splitUnitDocs
       constants:
@@ -16239,6 +17104,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - stringDocs
       constants:
@@ -16248,6 +17114,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - unitDocs
       constants:
@@ -16257,6 +17124,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - configDocs
       constants:
@@ -16266,6 +17134,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - importDocs
       constants:
@@ -16275,6 +17144,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - typedDocs
       constants:
@@ -17043,6 +17913,7 @@ modules:
         - file: ./function/numeric/solveODE.js
           imports:
             - solveODEDocs
+      workspaceDependencies: []
       exports:
         - embeddedDocs
       constants:
@@ -17052,6 +17923,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - derivativeDocs
       constants:
@@ -17061,6 +17933,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - leafCountDocs
       constants:
@@ -17070,6 +17943,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lsolveDocs
       constants:
@@ -17079,6 +17953,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lsolveAllDocs
       constants:
@@ -17088,6 +17963,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lupDocs
       constants:
@@ -17097,6 +17973,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lusolveDocs
       constants:
@@ -17106,6 +17983,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lyapDocs
       constants:
@@ -17115,6 +17993,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - polynomialRootDocs
       constants:
@@ -17124,6 +18003,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - qrDocs
       constants:
@@ -17133,6 +18013,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rationalizeDocs
       constants:
@@ -17142,6 +18023,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - resolveDocs
       constants:
@@ -17151,6 +18033,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - schurDocs
       constants:
@@ -17160,6 +18043,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - simplifyDocs
       constants:
@@ -17169,6 +18053,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - simplifyConstantDocs
       constants:
@@ -17178,6 +18063,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - simplifyCoreDocs
       constants:
@@ -17187,6 +18073,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sluDocs
       constants:
@@ -17196,6 +18083,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sylvesterDocs
       constants:
@@ -17205,6 +18093,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - symbolicEqualDocs
       constants:
@@ -17214,6 +18103,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - usolveDocs
       constants:
@@ -17223,6 +18113,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - usolveAllDocs
       constants:
@@ -17232,6 +18123,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - absDocs
       constants:
@@ -17241,6 +18133,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - addDocs
       constants:
@@ -17250,6 +18143,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cbrtDocs
       constants:
@@ -17259,6 +18153,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - ceilDocs
       constants:
@@ -17268,6 +18163,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cubeDocs
       constants:
@@ -17277,6 +18173,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - divideDocs
       constants:
@@ -17286,6 +18183,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - dotDivideDocs
       constants:
@@ -17295,6 +18193,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - dotMultiplyDocs
       constants:
@@ -17304,6 +18203,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - dotPowDocs
       constants:
@@ -17313,6 +18213,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - expDocs
       constants:
@@ -17322,6 +18223,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - expmDocs
       constants:
@@ -17331,6 +18233,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - expm1Docs
       constants:
@@ -17340,6 +18243,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - fixDocs
       constants:
@@ -17349,6 +18253,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - floorDocs
       constants:
@@ -17358,6 +18263,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - gcdDocs
       constants:
@@ -17367,6 +18273,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - hypotDocs
       constants:
@@ -17376,6 +18283,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - invmodDocs
       constants:
@@ -17385,6 +18293,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lcmDocs
       constants:
@@ -17394,6 +18303,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - logDocs
       constants:
@@ -17403,6 +18313,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - log10Docs
       constants:
@@ -17412,6 +18323,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - log1pDocs
       constants:
@@ -17421,6 +18333,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - log2Docs
       constants:
@@ -17430,6 +18343,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - modDocs
       constants:
@@ -17439,6 +18353,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - multiplyDocs
       constants:
@@ -17448,6 +18363,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - normDocs
       constants:
@@ -17457,6 +18373,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - nthRootDocs
       constants:
@@ -17466,6 +18383,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - nthRootsDocs
       constants:
@@ -17475,6 +18393,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - powDocs
       constants:
@@ -17484,6 +18403,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - roundDocs
       constants:
@@ -17493,6 +18413,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - signDocs
       constants:
@@ -17502,6 +18423,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sqrtDocs
       constants:
@@ -17511,6 +18433,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sqrtmDocs
       constants:
@@ -17520,6 +18443,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - squareDocs
       constants:
@@ -17529,6 +18453,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - subtractDocs
       constants:
@@ -17538,6 +18463,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - unaryMinusDocs
       constants:
@@ -17547,6 +18473,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - unaryPlusDocs
       constants:
@@ -17556,6 +18483,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - xgcdDocs
       constants:
@@ -17565,6 +18493,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitAndDocs
       constants:
@@ -17574,6 +18503,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitNotDocs
       constants:
@@ -17583,6 +18513,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitOrDocs
       constants:
@@ -17592,6 +18523,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitXorDocs
       constants:
@@ -17601,6 +18533,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - leftShiftDocs
       constants:
@@ -17610,6 +18543,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rightArithShiftDocs
       constants:
@@ -17619,6 +18553,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rightLogShiftDocs
       constants:
@@ -17628,6 +18563,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bellNumbersDocs
       constants:
@@ -17637,6 +18573,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - catalanDocs
       constants:
@@ -17646,6 +18583,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - compositionDocs
       constants:
@@ -17655,6 +18593,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - stirlingS2Docs
       constants:
@@ -17664,6 +18603,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - argDocs
       constants:
@@ -17673,6 +18613,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - conjDocs
       constants:
@@ -17682,6 +18623,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - imDocs
       constants:
@@ -17691,6 +18633,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - reDocs
       constants:
@@ -17700,6 +18643,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - compileDocs
       constants:
@@ -17709,6 +18653,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - evaluateDocs
       constants:
@@ -17718,6 +18663,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - helpDocs
       constants:
@@ -17727,6 +18673,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - parseDocs
       constants:
@@ -17736,6 +18683,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - parserDocs
       constants:
@@ -17745,6 +18693,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - distanceDocs
       constants:
@@ -17754,6 +18703,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - intersectDocs
       constants:
@@ -17763,6 +18713,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - andDocs
       constants:
@@ -17772,6 +18723,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - notDocs
       constants:
@@ -17781,6 +18733,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - nullishDocs
       constants:
@@ -17790,6 +18743,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - orDocs
       constants:
@@ -17799,6 +18753,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - xorDocs
       constants:
@@ -17808,6 +18763,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - columnDocs
       constants:
@@ -17817,6 +18773,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - concatDocs
       constants:
@@ -17826,6 +18783,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - countDocs
       constants:
@@ -17835,6 +18793,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - crossDocs
       constants:
@@ -17844,6 +18803,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - ctransposeDocs
       constants:
@@ -17853,6 +18813,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - detDocs
       constants:
@@ -17862,6 +18823,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - diagDocs
       constants:
@@ -17871,6 +18833,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - diffDocs
       constants:
@@ -17880,6 +18843,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - dotDocs
       constants:
@@ -17889,6 +18853,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - eigsDocs
       constants:
@@ -17898,6 +18863,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - fftDocs
       constants:
@@ -17907,6 +18873,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - filterDocs
       constants:
@@ -17916,6 +18883,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - flattenDocs
       constants:
@@ -17925,6 +18893,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - forEachDocs
       constants:
@@ -17934,6 +18903,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - getMatrixDataTypeDocs
       constants:
@@ -17943,6 +18913,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - identityDocs
       constants:
@@ -17952,6 +18923,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - ifftDocs
       constants:
@@ -17961,6 +18933,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - invDocs
       constants:
@@ -17970,6 +18943,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - kronDocs
       constants:
@@ -17979,6 +18953,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - mapDocs
       constants:
@@ -17988,6 +18963,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - mapSlicesDocs
       constants:
@@ -17997,6 +18973,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrixFromColumnsDocs
       constants:
@@ -18006,6 +18983,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrixFromFunctionDocs
       constants:
@@ -18015,6 +18993,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrixFromRowsDocs
       constants:
@@ -18024,6 +19003,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - onesDocs
       constants:
@@ -18033,6 +19013,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - partitionSelectDocs
       constants:
@@ -18042,6 +19023,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - pinvDocs
       constants:
@@ -18051,6 +19033,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rangeDocs
       constants:
@@ -18060,6 +19043,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - reshapeDocs
       constants:
@@ -18069,6 +19053,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - resizeDocs
       constants:
@@ -18078,6 +19063,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rotateDocs
       constants:
@@ -18087,6 +19073,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rotationMatrixDocs
       constants:
@@ -18096,6 +19083,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rowDocs
       constants:
@@ -18105,6 +19093,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sizeDocs
       constants:
@@ -18114,6 +19103,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sortDocs
       constants:
@@ -18123,6 +19113,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - squeezeDocs
       constants:
@@ -18132,6 +19123,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - subsetDocs
       constants:
@@ -18141,6 +19133,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - traceDocs
       constants:
@@ -18150,6 +19143,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - transposeDocs
       constants:
@@ -18159,6 +19153,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - zerosDocs
       constants:
@@ -18168,6 +19163,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - solveODEDocs
       constants:
@@ -18177,6 +19173,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bernoulliDocs
       constants:
@@ -18186,6 +19183,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - combinationsDocs
       constants:
@@ -18195,6 +19193,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - combinationsWithRepDocs
       constants:
@@ -18204,6 +19203,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - factorialDocs
       constants:
@@ -18213,6 +19213,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - gammaDocs
       constants:
@@ -18222,6 +19223,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - kldivergenceDocs
       constants:
@@ -18231,6 +19233,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lgammaDocs
       constants:
@@ -18240,6 +19243,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - multinomialDocs
       constants:
@@ -18249,6 +19253,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - permutationsDocs
       constants:
@@ -18258,6 +19263,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - pickRandomDocs
       constants:
@@ -18267,6 +19273,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - randomDocs
       constants:
@@ -18276,6 +19283,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - randomIntDocs
       constants:
@@ -18285,6 +19293,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - compareDocs
       constants:
@@ -18294,6 +19303,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - compareNaturalDocs
       constants:
@@ -18303,6 +19313,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - compareTextDocs
       constants:
@@ -18312,6 +19323,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - deepEqualDocs
       constants:
@@ -18321,6 +19333,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - equalDocs
       constants:
@@ -18330,6 +19343,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - equalTextDocs
       constants:
@@ -18339,6 +19353,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - largerDocs
       constants:
@@ -18348,6 +19363,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - largerEqDocs
       constants:
@@ -18357,6 +19373,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - smallerDocs
       constants:
@@ -18366,6 +19383,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - smallerEqDocs
       constants:
@@ -18375,6 +19393,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - unequalDocs
       constants:
@@ -18384,6 +19403,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setCartesianDocs
       constants:
@@ -18393,6 +19413,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setDifferenceDocs
       constants:
@@ -18402,6 +19423,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setDistinctDocs
       constants:
@@ -18411,6 +19433,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setIntersectDocs
       constants:
@@ -18420,6 +19443,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setIsSubsetDocs
       constants:
@@ -18429,6 +19453,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setMultiplicityDocs
       constants:
@@ -18438,6 +19463,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setPowersetDocs
       constants:
@@ -18447,6 +19473,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setSizeDocs
       constants:
@@ -18456,6 +19483,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setSymDifferenceDocs
       constants:
@@ -18465,6 +19493,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - setUnionDocs
       constants:
@@ -18474,6 +19503,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - freqzDocs
       constants:
@@ -18483,6 +19513,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - zpk2tfDocs
       constants:
@@ -18492,6 +19523,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - erfDocs
       constants:
@@ -18501,6 +19533,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - zetaDocs
       constants:
@@ -18510,6 +19543,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - corrDocs
       constants:
@@ -18519,6 +19553,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cumSumDocs
       constants:
@@ -18528,6 +19563,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - madDocs
       constants:
@@ -18537,6 +19573,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - maxDocs
       constants:
@@ -18546,6 +19583,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - meanDocs
       constants:
@@ -18555,6 +19593,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - medianDocs
       constants:
@@ -18564,6 +19603,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - minDocs
       constants:
@@ -18573,6 +19613,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - modeDocs
       constants:
@@ -18582,6 +19623,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - prodDocs
       constants:
@@ -18591,6 +19633,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - quantileSeqDocs
       constants:
@@ -18600,6 +19643,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - stdDocs
       constants:
@@ -18609,6 +19653,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sumDocs
       constants:
@@ -18618,6 +19663,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - varianceDocs
       constants:
@@ -18627,6 +19673,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acosDocs
       constants:
@@ -18636,6 +19683,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acoshDocs
       constants:
@@ -18645,6 +19693,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acotDocs
       constants:
@@ -18654,6 +19703,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acothDocs
       constants:
@@ -18663,6 +19713,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acscDocs
       constants:
@@ -18672,6 +19723,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - acschDocs
       constants:
@@ -18681,6 +19733,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - asecDocs
       constants:
@@ -18690,6 +19743,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - asechDocs
       constants:
@@ -18699,6 +19753,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - asinDocs
       constants:
@@ -18708,6 +19763,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - asinhDocs
       constants:
@@ -18717,6 +19773,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - atanDocs
       constants:
@@ -18726,6 +19783,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - atan2Docs
       constants:
@@ -18735,6 +19793,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - atanhDocs
       constants:
@@ -18744,6 +19803,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cosDocs
       constants:
@@ -18753,6 +19813,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - coshDocs
       constants:
@@ -18762,6 +19823,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cotDocs
       constants:
@@ -18771,6 +19833,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cothDocs
       constants:
@@ -18780,6 +19843,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cscDocs
       constants:
@@ -18789,6 +19853,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cschDocs
       constants:
@@ -18798,6 +19863,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - secDocs
       constants:
@@ -18807,6 +19873,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sechDocs
       constants:
@@ -18816,6 +19883,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sinDocs
       constants:
@@ -18825,6 +19893,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sinhDocs
       constants:
@@ -18834,6 +19903,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - tanDocs
       constants:
@@ -18843,6 +19913,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - tanhDocs
       constants:
@@ -18852,6 +19923,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - toDocs
       constants:
@@ -18861,6 +19933,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - toBestDocs
       constants:
@@ -18870,6 +19943,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - binDocs
       constants:
@@ -18879,6 +19953,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - cloneDocs
       constants:
@@ -18888,6 +19963,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - formatDocs
       constants:
@@ -18897,6 +19973,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - hasNumericValueDocs
       constants:
@@ -18906,6 +19983,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - hexDocs
       constants:
@@ -18915,6 +19993,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isBoundedDocs
       constants:
@@ -18924,6 +20003,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isFiniteDocs
       constants:
@@ -18933,6 +20013,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isIntegerDocs
       constants:
@@ -18942,6 +20023,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isNaNDocs
       constants:
@@ -18951,6 +20033,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isNegativeDocs
       constants:
@@ -18960,6 +20043,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isNumericDocs
       constants:
@@ -18969,6 +20053,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isPositiveDocs
       constants:
@@ -18978,6 +20063,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isPrimeDocs
       constants:
@@ -18987,6 +20073,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isZeroDocs
       constants:
@@ -18996,6 +20083,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - numericDocs
       constants:
@@ -19005,6 +20093,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - octDocs
       constants:
@@ -19014,6 +20103,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - printDocs
       constants:
@@ -19023,6 +20113,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - typeOfDocs
       constants:
@@ -19033,6 +20124,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - DimensionError
       classes:
@@ -19042,6 +20134,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - createIndexError
         - IndexError
@@ -19054,6 +20147,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - MathjsError
       classes:
@@ -19076,6 +20170,7 @@ modules:
           imports:
             - MathNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createEvaluate
         - compileExpression
@@ -19094,6 +20189,7 @@ modules:
             - createEvaluate
             - compileExpression
           reExport: true
+      workspaceDependencies: []
       exports:
         - createEvaluate
         - compileExpression
@@ -19111,6 +20207,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createParser
       constants:
@@ -19133,6 +20230,7 @@ modules:
         - file: ./utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createHelpClass
       constants:
@@ -19253,6 +20351,7 @@ modules:
           imports:
             - createSymbolNode
           reExport: true
+      workspaceDependencies: []
       exports:
         - createParser
         - embeddedDocs
@@ -19312,6 +20411,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - keywords
       constants:
@@ -19329,6 +20429,7 @@ modules:
             - isConstantNode
             - isParenthesisNode
             - rule2Node
+      workspaceDependencies: []
       exports:
         - properties
         - getPrecedence
@@ -19377,6 +20478,7 @@ modules:
           imports:
             - MathNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createParse
       constants:
@@ -19396,6 +20498,7 @@ modules:
           imports:
             - createEmptyMap
             - toObject
+      workspaceDependencies: []
       exports:
         - createParserClass
       constants:
@@ -19405,6 +20508,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
   expression/node:
     expression/src/node/AccessorNode.ts:
@@ -19437,6 +20541,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAccessorNode
       constants:
@@ -19461,6 +20566,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createArrayNode
       constants:
@@ -19501,6 +20607,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createAssignmentNode
       constants:
@@ -19525,6 +20632,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createBlockNode
       constants:
@@ -19552,6 +20660,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createConditionalNode
       constants:
@@ -19581,6 +20690,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createConstantNode
       constants:
@@ -19617,6 +20727,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFunctionAssignmentNode
       constants:
@@ -19662,6 +20773,7 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - createFunctionNode
       constants:
@@ -19691,6 +20803,7 @@ modules:
         - file: ../utils/string.js
           imports:
             - escape
+      workspaceDependencies: []
       exports:
         - createIndexNode
       constants:
@@ -19718,6 +20831,7 @@ modules:
         - file: ../utils/map.js
           imports:
             - createMap
+      workspaceDependencies: []
       exports:
         - createNode
       interfaces:
@@ -19746,6 +20860,7 @@ modules:
           imports:
             - escape
             - stringify
+      workspaceDependencies: []
       exports:
         - createObjectNode
       constants:
@@ -19791,6 +20906,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createOperatorNode
       constants:
@@ -19806,6 +20922,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createParenthesisNode
       constants:
@@ -19825,6 +20942,7 @@ modules:
         - file: ../operators.js
           imports:
             - getPrecedence
+      workspaceDependencies: []
       exports:
         - createRangeNode
       constants:
@@ -19853,6 +20971,7 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+      workspaceDependencies: []
       exports:
         - createRelationalNode
       constants:
@@ -19877,6 +20996,7 @@ modules:
         - file: ../utils/mathml.js
           imports:
             - toMathMLSymbol
+      workspaceDependencies: []
       exports:
         - createSymbolNode
       constants:
@@ -19892,6 +21012,7 @@ modules:
         - file: ../../utils/customs.js
           imports:
             - getSafeProperty
+      workspaceDependencies: []
       exports:
         - accessFactory
       functions:
@@ -19907,6 +21028,7 @@ modules:
         - file: ../../utils/customs.js
           imports:
             - setSafeProperty
+      workspaceDependencies: []
       exports:
         - assignFactory
       functions:
@@ -19920,6 +21042,7 @@ modules:
         - file: ../../error/IndexError.js
           imports:
             - IndexError
+      workspaceDependencies: []
       exports:
         - errorTransform
       functions:
@@ -19954,6 +21077,7 @@ modules:
         - file: ./object.js
           imports:
             - deepStrictEqual
+      workspaceDependencies: []
       exports:
         - arraySize
         - validate
@@ -20034,6 +21158,7 @@ modules:
             - isInteger
             - normalizeFormatOptions
             - FormatOptions
+      workspaceDependencies: []
       exports:
         - format
         - toEngineering
@@ -20064,6 +21189,7 @@ modules:
         - file: ./switch.js
           imports:
             - _switch
+      workspaceDependencies: []
       exports:
         - containsCollections
         - deepForEach
@@ -20084,6 +21210,7 @@ modules:
         - file: ./object.js
           imports:
             - hasOwnProperty
+      workspaceDependencies: []
       exports:
         - getSafeProperty
         - setSafeProperty
@@ -20102,6 +21229,7 @@ modules:
         - file: ../error/MathjsError.js
           imports:
             - MathjsError
+      workspaceDependencies: []
       exports:
         - factory
         - sortFactories
@@ -20127,6 +21255,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - isArray
         - isNumber
@@ -20264,6 +21393,7 @@ modules:
           imports:
             - MathNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - latexSymbols
         - latexOperators
@@ -20293,6 +21423,7 @@ modules:
           imports:
             - isMap
             - isObject
+      workspaceDependencies: []
       exports:
         - createEmptyMap
         - createMap
@@ -20315,6 +21446,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - escapeMathML
         - toMathMLSymbol
@@ -20345,6 +21477,7 @@ modules:
             - isBigNumber
             - isNumber
             - isObject
+      workspaceDependencies: []
       exports:
         - sign
         - log2
@@ -20412,6 +21545,7 @@ modules:
           imports:
             - isBigNumber
             - isObject
+      workspaceDependencies: []
       exports:
         - clone
         - mapObject
@@ -20453,6 +21587,7 @@ modules:
           imports:
             - ObjectWrappingMap
             - PartitionedMap
+      workspaceDependencies: []
       exports:
         - createSubScope
       functions:
@@ -20473,6 +21608,7 @@ modules:
         - file: ./bignumber/formatter.js
           imports:
             - format
+      workspaceDependencies: []
       exports:
         - endsWith
         - format
@@ -20490,6 +21626,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - _switch
       functions:
@@ -20500,6 +21637,39 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createParse
+            - createParserClass
+            - createParser
+            - createNode
+            - createAccessorNode
+            - createArrayNode
+            - createAssignmentNode
+            - createBlockNode
+            - createConditionalNode
+            - createConstantNode
+            - createFunctionAssignmentNode
+            - createFunctionNode
+            - createIndexNode
+            - createObjectNode
+            - createOperatorNode
+            - createParenthesisNode
+            - createRangeNode
+            - createRelationalNode
+            - createSymbolNode
+            - keywords
+            - properties
+            - getPrecedence
+            - getAssociativity
+            - isAssociativeWith
+            - getOperator
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - '*'
       exports:
         - createParse
         - createParserClass
@@ -20559,6 +21729,25 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Unit
+            - isUnit
+            - isUnitValue
+            - DimensionMismatchError
+            - UnitParseError
+            - DIMENSIONLESS
+            - dim
+            - BASE_UNITS
+            - DERIVED_UNITS
+            - ALL_UNITS
+            - UNIT_ALIASES
+            - getUnitDef
+            - SI_PREFIXES
+            - BEST_PREFIXES
+            - getPrefix
       exports:
         - Unit
         - isUnit
@@ -20597,6 +21786,34 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - isComplex
+            - I
+            - COMPLEX_ZERO
+            - COMPLEX_ONE
+            - COMPLEX_NEG_ONE
+            - Fraction
+            - isFraction
+            - FRACTION_ZERO
+            - FRACTION_ONE
+            - FRACTION_NEG_ONE
+            - FRACTION_HALF
+            - FRACTION_THIRD
+            - FRACTION_QUARTER
+            - BigNumber
+            - isBigNumber
+            - BIGNUMBER_ZERO
+            - BIGNUMBER_ONE
+            - BIGNUMBER_NEG_ONE
+            - BIGNUMBER_TEN
+            - BIGNUMBER_PI
+            - BIGNUMBER_E
+            - BIGNUMBER_LN2
+            - BIGNUMBER_LN10
       exports:
         - Complex
         - isComplex
@@ -20653,6 +21870,30 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createNode
+            - createAccessorNode
+            - createArrayNode
+            - createAssignmentNode
+            - createBlockNode
+            - createConditionalNode
+            - createConstantNode
+            - createFunctionAssignmentNode
+            - createFunctionNode
+            - createIndexNode
+            - createObjectNode
+            - createOperatorNode
+            - createParenthesisNode
+            - createRangeNode
+            - createRelationalNode
+            - createSymbolNode
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - '*'
       exports:
         - createNode
         - createAccessorNode
@@ -20694,6 +21935,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - compile
+            - createEvaluate
+            - compileExpression
       exports:
         - compile
         - createEvaluate
@@ -20708,6 +21956,32 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+            - eigvals
+            - powerIteration
+            - svd
+            - singularValues
+            - pinv
+            - lowRankApprox
+            - cond
+            - norm2
+            - normFro
+            - eigWasm
+            - eigvalsWasm
+            - spectralRadiusWasm
+            - svdWasm
+            - matrixPinv
+            - qr
+            - lu
+            - cholesky
+            - matrixExpm
+            - matrixLogm
+            - matrixSqrtm
+            - matrixSchur
       exports:
         - eig
         - eigvals
@@ -20760,6 +22034,56 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - add
+            - subtract
+            - multiply
+            - divide
+            - unaryMinus
+            - unaryPlus
+            - abs
+            - sign
+            - pow
+            - sqrt
+            - square
+            - cube
+            - cbrt
+            - nthRoot
+            - exp
+            - log
+            - log10
+            - log2
+            - log1p
+            - expm1
+            - round
+            - floor
+            - ceil
+            - fix
+            - mod
+            - gcd
+            - lcm
+            - xgcd
+            - norm
+            - sinh
+            - cosh
+            - tanh
+            - equal
+            - smaller
+            - larger
+            - smallerEq
+            - largerEq
+            - compare
+            - min
+            - max
+            - sum
+            - mean
+            - variance
+            - std
+            - dot
+            - typedArithmetic
       exports:
         - add
         - subtract
@@ -20860,6 +22184,30 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - sin
+            - cos
+            - tan
+            - csc
+            - sec
+            - cot
+            - asin
+            - acos
+            - atan
+            - atan2
+            - acsc
+            - asec
+            - acot
+            - asinh
+            - acosh
+            - atanh
+            - toRadians
+            - toDegrees
+            - hypot
+            - typedTrigonometry
       exports:
         - sin
         - cos
@@ -20908,6 +22256,33 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - parallelStatSum
+            - parallelStatMean
+            - parallelStatVariance
+            - parallelStatStd
+            - parallelStatMin
+            - parallelStatMax
+            - parallelStatMinMax
+            - parallelStatMedian
+            - parallelStatMode
+            - parallelStatProd
+            - parallelStatNorm
+            - parallelStatDistance
+            - parallelStatCorr
+            - parallelStatMAD
+            - parallelStatCumsum
+            - parallelStatQuantile
+            - parallelStatPercentile
+            - parallelStatHistogram
+            - quickSelect
+            - medianSelect
+            - minSelect
+            - maxSelect
+            - typedStatistics
       exports:
         - parallelStatSum
         - parallelStatMean
@@ -20962,6 +22337,44 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - parallelFFT
+            - parallelIFFT
+            - parallelFFTMagnitude
+            - parallelFFTPower
+            - parallelConv
+            - parallelXCorr
+            - parallelAutoCorr
+            - crossCorrelation
+            - autoCorrelation
+            - groupDelay
+            - unwrapPhase
+            - dct
+            - idct
+            - dst
+            - idst
+            - dwt
+            - fourier
+            - invFourier
+            - hilbertTransform
+            - periodogram
+            - lowpassFilter
+            - highpassFilter
+            - bandpassFilter
+            - resample
+            - medfilt
+            - windowFunction
+            - convolve
+            - correlate
+            - welchPSD
+            - bartlettPSD
+            - multiTaperPSD
+            - goertzel
+            - chirpZTransform
+            - typedSignal
       exports:
         - parallelFFT
         - parallelIFFT
@@ -21047,6 +22460,16 @@ modules:
             - leftShift
             - rightArithShift
             - rightLogShift
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-workerpool'
+          directory: packages/workerpool
+          imports:
+            - MathWorkerPool
+            - Transfer
+            - WorkerPoolConfig
+            - ParallelResult
+            - TaskOptions
+            - PoolStats
       exports:
         - Transfer
         - DEFAULT_THRESHOLD_BY_OP
@@ -21151,6 +22574,7 @@ modules:
             - calculateChunks
             - DEFAULT_THRESHOLDS
           reExport: true
+      workspaceDependencies: []
       exports:
         - ComputePool
         - computePool
@@ -21305,6 +22729,7 @@ modules:
           imports:
             - ParallelResult
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - parallelAdd
         - parallelSubtract
@@ -21402,6 +22827,7 @@ modules:
             - parallelCount
             - MapOptions
           reExport: true
+      workspaceDependencies: []
       exports:
         - parallelMatmul
         - parallelMatvec
@@ -21505,6 +22931,7 @@ modules:
           imports:
             - ParallelResult
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - parallelMap
         - parallelFilter
@@ -21538,6 +22965,7 @@ modules:
           imports:
             - ParallelResult
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - parallelMatmul
         - parallelMatvec
@@ -21565,6 +22993,7 @@ modules:
           imports:
             - ParallelResult
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - parallelSum
         - parallelMean
@@ -21601,6 +23030,7 @@ modules:
           imports:
             - calculateOptimalChunks
             - ChunkOptions
+      workspaceDependencies: []
       exports:
         - bitAnd
         - bitOr
@@ -21623,6 +23053,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - calculateOptimalChunks
         - chunkFloat64Array
@@ -21679,6 +23110,7 @@ modules:
             - ExecutionMode
             - DispatchResult
           reExport: true
+      workspaceDependencies: []
       exports:
         - calculateOptimalChunks
         - chunkFloat64Array
@@ -21732,6 +23164,7 @@ modules:
             - computePool
             - ComputePool
             - DEFAULT_THRESHOLD_BY_OP
+      workspaceDependencies: []
       exports:
         - DEFAULT_THRESHOLDS
         - thresholdDispatcher
@@ -21757,6 +23190,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - SCHEMA_VERSION
         - VERSION
@@ -21778,6 +23212,7 @@ modules:
           imports:
             - buildDependencyGraph
             - detectCycles
+      workspaceDependencies: []
       exports:
         - describeData
       interfaces:
@@ -21803,6 +23238,7 @@ modules:
           imports:
             - buildDependencyGraph
             - detectCycles
+      workspaceDependencies: []
       exports:
         - addCell
         - editCell
@@ -21844,6 +23280,11 @@ modules:
           imports:
             - parseYamlHardened
             - assertNoPollution
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - evaluate
       exports:
         - createExecutor
         - WorkbookExecutor
@@ -21856,6 +23297,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - formatResult
       functions:
@@ -21870,6 +23312,7 @@ modules:
             - renameSync
             - unlinkSync
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - writeFileAtomic
       functions:
@@ -21885,6 +23328,7 @@ modules:
             - DependencyGraph
             - DependencyNode
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - buildDependencyGraph
         - topologicalSort
@@ -21951,6 +23395,7 @@ modules:
           imports:
             - handleRequest
           reExport: true
+      workspaceDependencies: []
       exports:
         - parseWorkbook
         - serializeWorkbook
@@ -22012,6 +23457,11 @@ modules:
         - file: ./parser
           imports:
             - SUPPORTED_CELL_TYPES
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - '* as mathFunctions'
       exports:
         - listFunctions
         - capabilitiesInfo
@@ -22043,6 +23493,7 @@ modules:
             - RuntimeConfig
             - WorkbookMetadata
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - detectCellType
         - CELL_TYPE_KEYS
@@ -22084,6 +23535,7 @@ modules:
           imports:
             - CellPosition
           typeOnly: true
+      workspaceDependencies: []
       exports:
         - JSON_RPC_CODES
         - handleRequest
@@ -22128,6 +23580,7 @@ modules:
         - file: ./edit
           imports:
             - '* as edit'
+      workspaceDependencies: []
       exports:
         - Session
       classes:
@@ -22139,6 +23592,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports: []
       interfaces:
         - WorkbookMetadata
@@ -22159,6 +23613,7 @@ modules:
             - parse
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - parseYamlHardened
         - findPollutionKeys
@@ -22173,6 +23628,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrix_lu_decompose
         - matrix_qr_decompose
@@ -22191,6 +23647,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - array_abs_ptr
         - array_sin_ptr
@@ -22637,6 +24094,7 @@ modules:
             - complex_array_add_inplace
             - complex_array_copy
           reExport: true
+      workspaceDependencies: []
       exports:
         - Complex
         - complex
@@ -23294,6 +24752,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - poly_mul_f64
         - poly_div_mod_f64
@@ -23315,6 +24774,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - apply_window_f64
         - welch_psd_f64
@@ -23332,6 +24792,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - sort_f64
         - argsort_f64
@@ -23345,6 +24806,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - lgamma_f64
         - bessel_j0_f64
@@ -23392,6 +24854,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - tridiag_solve_f64
         - divided_difference_f64
@@ -23404,6 +24867,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - residue
         - padeApproximant
@@ -23415,6 +24879,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - array_sum
         - array_product
@@ -23494,6 +24959,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - bitAnd_i32_array
         - bitOr_i32_array
@@ -23518,6 +24984,7 @@ modules:
         - file: ../types/complex
           imports:
             - Complex
+      workspaceDependencies: []
       exports:
         - complex_array_zeros
         - complex_array_ones
@@ -23595,6 +25062,7 @@ modules:
           imports:
             - Complex
             - complexFromPolar
+      workspaceDependencies: []
       exports:
         - complex_add
         - complex_sub
@@ -23690,6 +25158,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - expfit
         - logfit
@@ -23703,6 +25172,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrix_eig_symmetric
         - matrix_spectral_radius
@@ -23716,6 +25186,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - fft
         - rfft
@@ -23729,6 +25200,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - rowReduce
         - characteristicPolynomial
@@ -23740,6 +25212,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrix_zeros
         - matrix_ones
@@ -23829,6 +25302,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - eulerPhi
         - divisorSigma
@@ -23858,6 +25332,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - quadprog
         - linprog
@@ -23871,6 +25346,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - polyadd
         - polynomialQuotient
@@ -23892,6 +25368,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - PI
         - E
@@ -24004,6 +25481,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - resample
         - medfilt
@@ -24017,6 +25495,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - chebyshevT
         - hermiteH
@@ -24042,6 +25521,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - matrix_svd
         - matrix_singular_values
@@ -24053,6 +25533,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - tensorTranspose
       functions:
@@ -24063,6 +25544,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - COMPLEX_ZERO
         - COMPLEX_ONE
@@ -24091,6 +25573,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies: []
       exports:
         - createChain
       interfaces:
@@ -24113,6 +25596,35 @@ modules:
           imports:
             - '*'
           reExport: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - '* as mathFunctions'
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - Fraction
+            - BigNumber
+            - I
+            - COMPLEX_ZERO
+            - COMPLEX_ONE
+            - FRACTION_ZERO
+            - FRACTION_ONE
+            - BIGNUMBER_ZERO
+            - BIGNUMBER_ONE
+            - BIGNUMBER_PI
+            - BIGNUMBER_E
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - SparseMatrix
+        - package: '@danielsimonjr/mathts-parallel'
+          directory: parallel
+          imports:
+            - computePool
       exports:
         - Complex
         - Fraction
@@ -24160,6 +25672,51 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+            - Fraction
+            - BigNumber
+            - I
+            - COMPLEX_ZERO
+            - isComplex
+            - isFraction
+            - isBigNumber
+            - isNumber
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - add
+            - subtract
+            - multiply
+            - divide
+            - pow
+            - sqrt
+            - abs
+            - exp
+            - log
+            - sin
+            - cos
+            - tan
+            - sum
+            - mean
+            - min
+            - max
+            - gcd
+            - lcm
+            - round
+            - floor
+            - ceil
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - SparseMatrix
+            - add
+            - subtract
+            - multiply
       exports:
         - add
         - subtract

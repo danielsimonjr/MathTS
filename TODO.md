@@ -103,6 +103,13 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > emits `package-export-surfaces.json`; `docs:functions:check` fails if any shipped export
 > lacks a source origin (first run clean: 828/828). Run `npm run docs:deps` alongside
 > `npm run docs:functions` to keep both in sync.
+> **Dep-graph cross-package edges fixed (2026-07-01):** the tool computed each file's
+> `workspaceDependencies` (imports of other monorepo packages) for the package-level table
+> but dropped the field from the per-file JSON + per-module `.md` sections, so file-level
+> edges (`tensor → matrix`, `autograd → tensor`, …) were invisible (0/846). Fixed at source
+> (serialize the field + render a Workspace block); now 64/846 files show them.
+> Investigation finding: tensor reuses matrix decompositions, autograd builds on tensor —
+> not reinventing; the open item is B8 (element-wise/AD not on the WASM/functions layer).
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

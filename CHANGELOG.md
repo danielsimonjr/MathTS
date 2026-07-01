@@ -156,6 +156,24 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Fixed (2026-07-01) — dep-graph dropped cross-package (workspace) edges from its per-file output
+
+Investigating whether `tensor`/`autograd` reuse primitives or reinvent them surfaced a
+bug: `create-dependency-graph` **computed** each file's `workspaceDependencies` (imports
+of other monorepo packages) and used them for the package-level `## Package
+Dependencies` table, but **dropped the field** from both the per-file
+`dependency-graph.json` serialization and the per-module `DEPENDENCY_GRAPH.md` sections.
+So file-level cross-package edges (`tensor → matrix`, `autograd → tensor`,
+`functions → matrix`, …) were invisible to any consumer of those views — **0 of 846
+files** showed a workspace dep. Root cause, fixed at source: the `fileData` JSON object
+omitted `workspaceDependencies`, and the per-module markdown renderer emitted
+External/Node/Internal blocks but no Workspace block. Both now include it — **64 of 846
+files** (every cross-package importer) now show their edges; the diff is purely additive.
+The compact LLM summary intentionally carries no dep edges (by design, not a drop) and is
+unchanged. (`tensor` reuses `matrix`'s decompositions and `autograd` builds on `tensor` —
+no wheel-reinvention there; they just don't route element-wise math through the
+`functions`/parallel layer, which is the tracked B8 gap, not a bug.)
+
 ### Changed (2026-07-01) — cross-validate the functions doc surface against the dep-graph (two independent tools, one truth)
 
 The functions docs (runtime `Object.keys(functions/dist/index.js)`) and the dependency

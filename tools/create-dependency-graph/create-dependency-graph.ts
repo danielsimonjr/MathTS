@@ -1505,6 +1505,11 @@ function generateJSON(
           ...(d.reExport ? { reExport: true } : {}),
           ...(d.typeOnly ? { typeOnly: true } : {}),
         })),
+        // Cross-package workspace imports (e.g. `@danielsimonjr/mathts-matrix`). Computed
+        // and used for the package-level dependency table, but previously dropped from
+        // the per-file JSON, so file-level cross-package edges (tensor→matrix,
+        // autograd→tensor, …) were invisible to consumers of dependency-graph.json.
+        workspaceDependencies: file.workspaceDependencies,
         exports: file.exports.named,
         reExported: file.exports.reExported.length > 0 ? file.exports.reExported : undefined,
         classes: file.exports.classes.length > 0 ? file.exports.classes : undefined,
@@ -1713,6 +1718,19 @@ function generateMarkdown(
         lines.push('| Package | Import |');
         lines.push('|---------|--------|');
         for (const dep of file.externalDependencies) {
+          lines.push(`| \`${dep.package}\` | \`${dep.imports.join(', ')}\` |`);
+        }
+        lines.push('');
+      }
+
+      // Workspace (cross-package) dependencies — imports from other monorepo packages
+      // (e.g. tensor → matrix, autograd → tensor). Rendered so the per-file sections
+      // reflect cross-package edges, not just the package-level table.
+      if (file.workspaceDependencies.length > 0) {
+        lines.push('**Workspace Dependencies:**');
+        lines.push('| Package | Import |');
+        lines.push('|---------|--------|');
+        for (const dep of file.workspaceDependencies) {
           lines.push(`| \`${dep.package}\` | \`${dep.imports.join(', ')}\` |`);
         }
         lines.push('');

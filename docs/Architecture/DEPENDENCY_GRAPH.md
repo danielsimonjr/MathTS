@@ -756,6 +756,11 @@ graph LR
 
 ### `matrix/src/backends/ParallelBackend.ts` - Parallel Matrix Backend
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, ComputePoolConfig` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -878,6 +883,13 @@ graph LR
 
 ### `matrix/src/parallel-matrix.ts` - Parallel-First Matrix Operations
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ParallelResult` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -891,6 +903,12 @@ graph LR
 ---
 
 ### `matrix/src/typed-operations.ts` - Typed Matrix Operations
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1267,6 +1285,11 @@ graph LR
 
 ### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1285,6 +1308,12 @@ graph LR
 ## Tensor/operations Dependencies
 
 ### `tensor/src/operations/cholesky.ts` - tensorCholesky — Cholesky decomposition for symmetric positive-definite
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
+| `@danielsimonjr/mathts-matrix` | `cholesky` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1314,6 +1343,12 @@ graph LR
 ---
 
 ### `tensor/src/operations/eig.ts` - tensorEig — eigenvalue / eigenvector decomposition for rank-N tensors.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `eig, eigWasm` |
+| `@danielsimonjr/mathts-matrix` | `EigResult` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1372,6 +1407,12 @@ graph LR
 
 ### `tensor/src/operations/lu.ts` - tensorLU — LU decomposition with partial pivoting for rank-N tensors.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
+| `@danielsimonjr/mathts-matrix` | `lu` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1402,6 +1443,11 @@ graph LR
 
 ### `tensor/src/operations/pinv.ts` - tensorPinv — Moore-Penrose pseudoinverse for rank-N tensors.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `svd` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1417,6 +1463,11 @@ graph LR
 
 ### `tensor/src/operations/qr.ts` - tensorQr — QR decomposition for rank-N tensors.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, qr` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1431,6 +1482,11 @@ graph LR
 ---
 
 ### `tensor/src/operations/random.ts` - randomTensor — construct a Tensor filled with pseudo-random values.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, qr` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1491,6 +1547,12 @@ graph LR
 
 ### `tensor/src/operations/solve.ts` - tensorSolve — named-index linear solver for rank-N tensors.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
+| `@danielsimonjr/mathts-matrix` | `lu` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1521,6 +1583,12 @@ graph LR
 
 ### `tensor/src/operations/svd.ts` - tensorSvd — truncated SVD for rank-N tensors.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `svd, svdWasm` |
+| `@danielsimonjr/mathts-matrix` | `SVDResult` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1539,6 +1607,11 @@ graph LR
 
 ### `autograd/src/dual-tensor.ts` - DualTensor — a Tensor + per-element tangent component for forward-mode AD.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-tensor` | `Tensor` |
+
 **Exports:**
 
 - Classes: `DualTensor`
@@ -1546,6 +1619,11 @@ graph LR
 ---
 
 ### `autograd/src/forward-grad.ts` - Forward-mode AD via dual numbers. Returns the value and the full Jacobian
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-tensor` | `Tensor` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1591,6 +1669,11 @@ graph LR
 
 ### `autograd/src/reverse-grad.ts` - Reverse-mode AD via tape. Returns the value and the vector-Jacobian product
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-tensor` | `Tensor` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1603,6 +1686,11 @@ graph LR
 ---
 
 ### `autograd/src/tape.ts` - Tape — records the sequence of ops during a forward pass so we can
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-tensor` | `Tensor, Index, tensorSvd, tensorEig` |
 
 **Exports:**
 
@@ -3202,6 +3290,11 @@ graph LR
 
 ### `functions/src/grad-forward.ts` - Forward-mode automatic differentiation over the plain functions surface.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Dual` |
+
 **Exports:**
 
 - Types: `DualFn`
@@ -3210,6 +3303,11 @@ graph LR
 ---
 
 ### `functions/src/help.ts` - GC4 — `help(search)` mathjs-canonical export.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createHelpClass, embeddedDocs` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -3274,6 +3372,11 @@ graph LR
 
 ### `functions/src/linalg-extra.ts` - Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -3329,6 +3432,11 @@ graph LR
 ---
 
 ### `functions/src/signal-filter-extra.ts` - Digital filter design + application (Wave D / remaining). FIR window design
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Complex` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -3587,6 +3695,12 @@ graph LR
 
 ### `functions/src/factories/evaluate.ts` - Expression evaluator wired to the activated factory scope.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpression` |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, I, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -3602,6 +3716,11 @@ graph LR
 ---
 
 ### `functions/src/factories/index.ts` - Activated mathjs leaf factory functions.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, createParse` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -3860,6 +3979,11 @@ graph LR
 
 ### `functions/src/factories/matrix-bridge.ts` - Matrix Compatibility Bridge
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+
 **Exports:**
 
 - Classes: `MathJSDenseMatrix`, `MathJSSparseMatrix`
@@ -3868,6 +3992,11 @@ graph LR
 ---
 
 ### `functions/src/factories/scope.ts` - Shared factory scope for activating synced mathjs factory functions.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4489,6 +4618,12 @@ graph LR
 ---
 
 ### `functions/src/matrix/native-accel.ts` - Native-accelerated fast paths for matrix factory functions.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, eig` |
+| `@danielsimonjr/mathts-core` | `Complex` |
 
 **Exports:**
 
@@ -6989,6 +7124,13 @@ graph LR
 
 ### `functions/src/typed/arithmetic.ts` - Typed Arithmetic Functions (Parallel-First)
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, Unit, Dual` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7004,6 +7146,12 @@ graph LR
 
 ### `functions/src/typed/bitwise.ts` - Typed Bitwise Functions (Parallel-First)
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7016,6 +7164,12 @@ graph LR
 ---
 
 ### `functions/src/typed/cas.ts` - Symbolic CAS (Computer Algebra System) Functions
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `Complex` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7032,6 +7186,11 @@ graph LR
 
 ### `functions/src/typed/combinatorics.ts` - Extended Combinatorics Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
 **Exports:**
 
 - Constants: `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `prime`, `nextPrime`, `primePi`, `primeFactors`, `divisors`, `eulerPhi`, `divisorSigma`, `carmichaelLambda`, `moebiusMu`, `jacobiSymbol`, `chineseRemainder`, `lucasL`, `partitions`, `harmonicNumber`, `integerDigits`
@@ -7040,6 +7199,11 @@ graph LR
 
 ### `functions/src/typed/complex.ts` - Typed Complex Helper Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber` |
+
 **Exports:**
 
 - Constants: `arg`, `conj`, `im`, `re`, `typedComplex`
@@ -7047,6 +7211,11 @@ graph LR
 ---
 
 ### `functions/src/typed/dist-objects.ts` - Distribution Objects
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7062,6 +7231,11 @@ graph LR
 ---
 
 ### `functions/src/typed/distributions.ts` - Typed Probability Distribution Functions
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7091,6 +7265,11 @@ graph LR
 
 ### `functions/src/typed/geometry.ts` - Typed Geometry Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7106,6 +7285,12 @@ graph LR
 ---
 
 ### `functions/src/typed/gpu.ts` - WebGPU-Accelerated Matrix Operations
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `gpuMatrixBackend` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
 
 **Exports:**
 
@@ -7124,6 +7309,11 @@ graph LR
 ---
 
 ### `functions/src/typed/hypothesis.ts` - Statistical Hypothesis Tests
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7203,6 +7393,11 @@ graph LR
 
 ### `functions/src/typed/integration.ts` - Numerical Integration Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Exports:**
 
 - Interfaces: `GaussQuadOptions`, `RombergOptions`
@@ -7228,6 +7423,11 @@ graph LR
 
 ### `functions/src/typed/logical.ts` - Typed Logical Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber` |
+
 **Exports:**
 
 - Constants: `not`, `and`, `or`, `xor`, `nullish`, `typedLogical`
@@ -7235,6 +7435,13 @@ graph LR
 ---
 
 ### `functions/src/typed/matrix-ops.ts` - Typed Matrix Operations
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `eig, svd, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix` |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 
@@ -7260,6 +7467,11 @@ graph LR
 
 ### `functions/src/typed/parallel-map.ts` - Shared parallel array-evaluation helpers for the typed math surfaces.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Exports:**
 
 - Functions: `kernelSource`, `mapArray`
@@ -7272,6 +7484,11 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `seedrandom` | `seedrandom` |
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
 
 **Exports:**
 
@@ -7287,6 +7504,11 @@ graph LR
 |---------|--------|
 | `javascript-natural-sort` | `naturalSort` |
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7300,6 +7522,11 @@ graph LR
 
 ### `functions/src/typed/set.ts` - Typed Set Functions
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
 **Exports:**
 
 - Constants: `setUnion`, `setIntersect`, `setDifference`, `setSymDifference`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setDistinct`, `setSize`, `setCartesian`, `typedSet`
@@ -7307,6 +7534,12 @@ graph LR
 ---
 
 ### `functions/src/typed/signal.ts` - Typed Signal Processing Functions (Parallel-First)
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7322,6 +7555,11 @@ graph LR
 ---
 
 ### `functions/src/typed/special.ts` - Typed Special Functions
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7341,6 +7579,12 @@ graph LR
 
 ### `functions/src/typed/statistics.ts` - Typed Statistics Functions (Parallel-First)
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7355,6 +7599,11 @@ graph LR
 ---
 
 ### `functions/src/typed/string.ts` - Typed String Formatting Functions
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, BigNumber` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7371,6 +7620,12 @@ graph LR
 
 ### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions (Parallel-First)
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Dual` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -7384,6 +7639,11 @@ graph LR
 
 ### `functions/src/typed/typed-bridge.ts` - Initialize the type bridge for mathjs factory compatibility.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `registerNativeTypes` |
+
 **Exports:**
 
 - Functions: `initTypeBridge`
@@ -7391,6 +7651,11 @@ graph LR
 ---
 
 ### `functions/src/typed/unit.ts` - Typed Unit Functions
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Unit, mathTyped` |
 
 **Exports:**
 
@@ -11167,6 +11432,12 @@ graph LR
 
 ### `parser/src/index.ts` - Standalone expression parser for MathTS. This package re-exports the parser
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createParse, createParserClass, createParser, createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, keywords, properties, getPrecedence, getAssociativity, isAssociativeWith, getOperator` |
+| `@danielsimonjr/mathts-expression` | `*` |
+
 **Exports:**
 
 - Re-exports: `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`, `type * from @danielsimonjr/mathts-expression`
@@ -11178,6 +11449,11 @@ graph LR
 ## Units Dependencies
 
 ### `units/src/index.ts` - Standalone units & dimensional analysis for MathTS. Re-exports the unit system
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Unit, isUnit, isUnitValue, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim, BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef, SI_PREFIXES, BEST_PREFIXES, getPrefix` |
 
 **Exports:**
 
@@ -11191,6 +11467,11 @@ graph LR
 
 ### `numbers/src/index.ts` - Standalone numeric types for MathTS. Re-exports `Complex`, `Fraction`, and
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE, Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER, BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` |
+
 **Exports:**
 
 - Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`
@@ -11202,6 +11483,12 @@ graph LR
 ## Ast Dependencies
 
 ### `ast/src/index.ts` - Standalone AST node constructors for MathTS expressions. Re-exports the
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode` |
+| `@danielsimonjr/mathts-expression` | `*` |
 
 **Exports:**
 
@@ -11215,6 +11502,11 @@ graph LR
 
 ### `evaluator/src/index.ts` - Standalone compiler + evaluator for MathTS expressions. Re-exports the
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `compile, createEvaluate, compileExpression` |
+
 **Exports:**
 
 - Re-exports: `compile`, `createEvaluate`, `compileExpression`
@@ -11226,6 +11518,11 @@ graph LR
 ## Linalg Dependencies
 
 ### `linalg/src/index.ts` - Standalone linear-algebra decompositions for MathTS. Re-exports the matrix
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `eig, eigvals, powerIteration, svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, eigWasm, eigvalsWasm, spectralRadiusWasm, svdWasm, matrixPinv, qr, lu, cholesky, matrixExpm, matrixLogm, matrixSqrtm, matrixSchur` |
 
 **Exports:**
 
@@ -11239,6 +11536,11 @@ graph LR
 
 ### `arithmetic/src/index.ts` - Standalone arithmetic functions for MathTS. Re-exports the `arithmetic` typed-function domain
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, unaryMinus, unaryPlus, abs, sign, pow, sqrt, square, cube, cbrt, nthRoot, exp, log, log10, log2, log1p, expm1, round, floor, ceil, fix, mod, gcd, lcm, xgcd, norm, sinh, cosh, tanh, equal, smaller, larger, smallerEq, largerEq, compare, min, max, sum, mean, variance, std, dot, typedArithmetic` |
+
 **Exports:**
 
 - Re-exports: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
@@ -11250,6 +11552,11 @@ graph LR
 ## Trigonometry Dependencies
 
 ### `trigonometry/src/index.ts` - Standalone trigonometric functions for MathTS. Re-exports the `trigonometry` typed-function domain
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `sin, cos, tan, csc, sec, cot, asin, acos, atan, atan2, acsc, asec, acot, asinh, acosh, atanh, toRadians, toDegrees, hypot, typedTrigonometry` |
 
 **Exports:**
 
@@ -11263,6 +11570,11 @@ graph LR
 
 ### `statistics/src/index.ts` - Standalone statistics functions for MathTS. Re-exports the `statistics` typed-function domain
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `parallelStatSum, parallelStatMean, parallelStatVariance, parallelStatStd, parallelStatMin, parallelStatMax, parallelStatMinMax, parallelStatMedian, parallelStatMode, parallelStatProd, parallelStatNorm, parallelStatDistance, parallelStatCorr, parallelStatMAD, parallelStatCumsum, parallelStatQuantile, parallelStatPercentile, parallelStatHistogram, quickSelect, medianSelect, minSelect, maxSelect, typedStatistics` |
+
 **Exports:**
 
 - Re-exports: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`
@@ -11275,6 +11587,11 @@ graph LR
 
 ### `signal/src/index.ts` - Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `parallelFFT, parallelIFFT, parallelFFTMagnitude, parallelFFTPower, parallelConv, parallelXCorr, parallelAutoCorr, crossCorrelation, autoCorrelation, groupDelay, unwrapPhase, dct, idct, dst, idst, dwt, fourier, invFourier, hilbertTransform, periodogram, lowpassFilter, highpassFilter, bandpassFilter, resample, medfilt, windowFunction, convolve, correlate, welchPSD, bartlettPSD, multiTaperPSD, goertzel, chirpZTransform, typedSignal` |
+
 **Exports:**
 
 - Re-exports: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fourier`, `invFourier`, `hilbertTransform`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample`, `medfilt`, `windowFunction`, `convolve`, `correlate`, `welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`, `typedSignal`
@@ -11286,6 +11603,11 @@ graph LR
 ## Parallel Dependencies
 
 ### `parallel/src/ComputePool.ts` - MathTS Compute Pool
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -11506,6 +11828,11 @@ graph LR
 
 ### `workbook/src/executor.ts` - Workbook executor
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `evaluate` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -11575,6 +11902,11 @@ graph LR
 ---
 
 ### `workbook/src/introspect.ts` - Engine introspection shared by the CLI (`capabilities`, `functions`) and the
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `* as mathFunctions` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -11963,6 +12295,14 @@ graph LR
 
 ### `compat/src/index.ts` - mathjs Compatibility Layer
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `* as mathFunctions` |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, COMPLEX_ONE, FRACTION_ZERO, FRACTION_ONE, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, SparseMatrix` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -11980,6 +12320,13 @@ graph LR
 ---
 
 ### `compat/src/shims.ts` - mathjs Compatibility Shims
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber` |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, SparseMatrix, add, subtract, multiply` |
 
 **Exports:**
 
