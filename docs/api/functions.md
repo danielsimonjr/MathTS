@@ -1,6 +1,10 @@
 # @danielsimonjr/mathts-functions API Reference
 
-Mathematical functions with automatic type dispatch. 158 exports across 11 modules.
+Mathematical functions with automatic type dispatch. The domain tables below are a
+**curated highlight** of commonly-used functions with signatures and examples; for the
+**complete, always-current list of every export**, see the generated
+[Complete export index](#complete-export-index) at the end of this document (kept in
+sync by `npm run docs:functions`).
 
 ## Installation
 
@@ -428,3 +432,59 @@ round(2.567, 2); // 2.57
 floor(2.9); // 2
 ceil(2.1); // 3
 ```
+
+## Complete export index
+
+<!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->
+
+> **Generated** — do not edit by hand. Run `npm run docs:functions` after
+> adding or removing a public export. Complete index of every public name in
+> `@danielsimonjr/mathts-functions` (828 exports).
+
+### Functions by category
+
+**Algebra** (36): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `normalForm`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polyval`, `powerExpand`, `reduce`, `resultant`, `substitute`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
+
+**Arithmetic** (53): `abs`, `add`, `cbrt`, `ceil`, `compare`, `cosh`, `cube`, `divide`, `dot`, `equal`, `exp`, `expm1`, `fix`, `floor`, `gcd`, `getComputePool`, `initializePool`, `larger`, `largerEq`, `lcm`, `log`, `log10`, `log1p`, `log2`, `matmul`, `matvec`, `max`, `mean`, `min`, `mod`, `multiply`, `norm`, `nthRoot`, `outer`, `pow`, `round`, `shouldParallelize`, `sign`, `sinh`, `smaller`, `smallerEq`, `sqrt`, `square`, `std`, `subtract`, `sum`, `tanh`, `terminatePool`, `transpose`, `unaryMinus`, `unaryPlus`, `variance`, `xgcd`
+
+**Bitwise** (7): `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `rightArithShift`, `rightLogShift`
+
+**Complex** (4): `arg`, `conj`, `im`, `re`
+
+**Distributions** (14): `bernoulliPMF`, `betaPDF`, `binomialPMF`, `entropy`, `exponentialCDF`, `exponentialPDF`, `gammaPDF`, `geometricPMF`, `jsDivergence`, `noncentralChi2PDF`, `normalCDF`, `normalPDF`, `poissonPMF`, `studentTPDF`
+
+**Functions** (121): `acos`, `acosh`, `acot`, `acsc`, `airyAi`, `airyBi`, `asec`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `carmichaelLambda`, `chebyshevT`, `chineseRemainder`, `chirpZTransform`, `convolve`, `corr`, `correlate`, `cos`, `cosIntegral`, `cot`, `crossCorrelation`, `csc`, `cumsum`, `dct`, `digamma`, `distance`, `divisors`, `divisorSigma`, `doubleFactorial`, `dst`, `dwt`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erfc`, `erfi`, `eulerPhi`, `expIntegralEi`, `fallingFactorial`, `fft`, `fft2d`, `fibonacci`, `fourier`, `fresnelC`, `fresnelS`, `gammainc`, `gammaincp`, `goertzel`, `groupDelay`, `harmonicNumber`, `hermiteH`, `highpassFilter`, `hilbertTransform`, `hypot`, `idct`, `idst`, `ifft`, `integerDigits`, `invFourier`, `jacobiSymbol`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `lowpassFilter`, `lucas`, `lucasL`, `mad`, `maxSelect`, `medfilt`, `median`, `medianSelect`, `minSelect`, `mode`, `moebiusMu`, `multiTaperPSD`, `nextPrime`, `partitions`, `periodogram`, `prime`, `primeFactors`, `primePi`, `prod`, `quickSelect`, `resample`, `risingFactorial`, `sec`, `sin`, `sinIntegral`, `spectrogram`, `subfactorial`, `tan`, `to`, `toBest`, `toDegrees`, `toRadians`, `unwrapPhase`, `welchPSD`, `windowFunction`
+
+**Logical** (5): `and`, `not`, `nullish`, `or`, `xor`
+
+**Probability** (8): `bernoulli`, `combinations`, `combinationsWithRep`, `multinomial`, `permutations`, `pickRandom`, `random`, `randomInt`
+
+**Relational** (7): `compareNatural`, `compareText`, `compareUnits`, `deepEqual`, `equalScalar`, `equalText`, `unequal`
+
+**Set** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
+
+**String** (5): `bin`, `format`, `hex`, `oct`, `print`
+
+**Factory / uncategorized** (416): `acf`, `acoth`, `acsch`, `addScalar`, `adjacencyMatrix`, `angle2D`, `angle3D`, `anova`, `apply`, `area`, `asech`, `assume`, `asymptotic`, `bellNumbers`, `betaCDF`, `betaDist`, `betaQuantile`, `betweennessCentrality`, `bezierCurve`, `bigint`, `bignumber`, `binomialDist`, `boolean`, `bspline`, `butter`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `catalan`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `centroid`, `chain`, `characteristicPolynomial`, `chebyshevApprox`, `chebyshevDistance`, `chebyshevFit`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `chiSquareTest`, `cholesky`, `circulant`, `clamp`, `clearAssumptions`, `clone`, `column`, `companion`, `compileExpr`, `complex`, `composition`, `concat`, `cond`, `connectedComponents`, `convexHull`, `convexHull3D`, `coordinateTransform`, `corrcoef`, `coth`, `count`, `cov`, `createUnit`, `cross`, `cross3D`, `csAmd`, `csch`, `csChol`, `csCounts`, `csLu`, `cspline`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `cubicSpline`, `cummax`, `cummin`, `cumprod`, `cumtrapz`, `curl`, `curvefit`, `delaunayTriangulation`, `derivative`, `derivativeAt`, `det`, `detrend`, `diag`, `diff`, `directionalDerivative`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `divergence`, `divideScalar`, `dot3D`, `dotDivide`, `dotMultiply`, `dotPow`, `eigenvectorCentrality`, `eigs`, `erf`, `erfcScalar`, `evaluate`, `eventDetection`, `ewma`, `expfit`, `expm`, `exponentialDist`, `factorial`, `fCDF`, `fDist`, `filter`, `filtfilt`, `findRoot`, `firwin`, `fisherExact`, `flatten`, `forEach`, `fourierSeries`, `fQuantile`, `fraction`, `freqz`, `fTest`, `fuseUnaryChain`, `gamma`, `gammaCDF`, `gammaDist`, `gammaQuantile`, `gaussQuad`, `generalizedEig`, `getAssumptions`, `getMatrixDataType`, `globalMinimize`, `gmean`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `gradient`, `gradientAt`, `gradientDescent`, `gradientSymbolic`, `graphDistance`, `griddata`, `groebnerBasis`, `hasNumericValue`, `haversine`, `help`, `hermiteInterp`, `hessenbergForm`, `hessian`, `hmean`, `identity`, `implicitDiff`, `index`, `indexFn`, `initializeSignal`, `initializeStatistics`, `integrate`, `interpolate`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `inv`, `inverseLaplace`, `inverseLaplaceTransform`, `invmod`, `iqr`, `isBounded`, `isConnected`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `jacobian`, `jarqueBera`, `jordanForm`, `kdTree`, `kdTreeNearest`, `kldivergence`, `kmeans`, `kolmogorovSmirnovTest`, `kron`, `kruskalWallis`, `kurtosis`, `lagrangeInterp`, `laplace`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `laplacian`, `laplacianMatrix`, `leafCount`, `leastSquares`, `legendreFit`, `levenbergMarquardt`, `lfilter`, `lfilterZi`, `limit`, `linearInterp`, `linearRegression`, `linprog`, `linsolve`, `loess`, `logdet`, `logfit`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `logsumexp`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `manhattanDistance`, `mannWhitneyTest`, `map`, `mapSlices`, `matrix`, `matrixExpm`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `matrixLog`, `matrixLogm`, `matrixPower`, `matrixRank`, `matrixSqrtm`, `maximize`, `minimalPolynomial`, `minimize`, `minimumSpanningTree`, `minkowskiDistance`, `moment`, `movingAverage`, `multiplyScalar`, `multivariateTaylor`, `nearestNeighbor`, `nelderMead`, `newtonInterp`, `nintegrate`, `norm2`, `normalDist`, `normalQuantile`, `normFro`, `nthRoots`, `nullspace`, `number`, `numeric`, `odeAdaptiveStep`, `odeGeneral`, `ones`, `padeApproximant`, `pageRank`, `parallelAutoCorr`, `parallelConv`, `parallelFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelIFFT`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `parallelXCorr`, `parse`, `parseNumberWithConfig`, `parser`, `partialDerivative`, `partitionSelect`, `pchip`, `pchipInterp`, `piecewise`, `pinv`, `pointInPolygon`, `poissonDist`, `polarDecomposition`, `polyFit`, `polygonArea`, `polygonPerimeter`, `polynomialRoot`, `powerfit`, `principalComponentAnalysis`, `projectVector`, `qr`, `quadprog`, `quantileSeq`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `qz`, `range`, `rank`, `rankdata`, `rationalize`, `rbfInterpolate`, `reflectVector`, `replacer`, `reshape`, `residue`, `resize`, `resolve`, `reviver`, `romberg`, `rotate`, `rotateVector2D`, `rotateVector3D`, `rotationMatrix`, `row`, `rowReduce`, `schur`, `sech`, `seedProbabilityRng`, `sem`, `series`, `seriesCoefficient`, `shapiroWilkTest`, `shortestPath`, `sigmoid`, `simplify`, `simplifyConstant`, `simplifyCore`, `simpson`, `simpsonF64`, `simpsons`, `singularValues`, `size`, `skewness`, `slerp`, `slu`, `softmax`, `solve`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `sort`, `sparse`, `spectralClustering`, `splitUnit`, `sqrtm`, `squeeze`, `stiffODESolver`, `stirlingS2`, `string`, `stronglyConnectedComponents`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTQuantile`, `studentTTest`, `subset`, `subtractScalar`, `summation`, `sylvester`, `symbolicEqual`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `tDist`, `terminateSignal`, `terminateStatistics`, `toeplitz`, `topologicalSort`, `toRadicals`, `trace`, `trapz`, `trapzF64`, `triangleArea`, `tril`, `triu`, `tukeyHSD`, `typeOf`, `uniformDist`, `unit`, `usolve`, `usolveAll`, `validateClosureSource`, `valueAndDerivativeAt`, `vander`, `voronoiDiagram`, `weibullDist`, `wilcoxon`, `zeros`, `zeta`, `zpk2tf`, `zscore`, `zTransform`
+
+### Constants & values (61)
+
+`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+
+### Classes & types (1)
+
+`Chain`
+
+### Factory-shadowed (`factory_*`, 64)
+
+These duplicate a typed export under a `factory_` prefix.
+
+`factory_abs`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atan2`, `factory_atanh`, `factory_cbrt`, `factory_ceil`, `factory_compare`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_createUnit`, `factory_csc`, `factory_ctranspose`, `factory_cube`, `factory_cumsum`, `factory_divide`, `factory_dot`, `factory_equal`, `factory_exp`, `factory_expm1`, `factory_fix`, `factory_floor`, `factory_gcd`, `factory_hypot`, `factory_larger`, `factory_largerEq`, `factory_lcm`, `factory_log`, `factory_log10`, `factory_log1p`, `factory_log2`, `factory_max`, `factory_mean`, `factory_min`, `factory_mod`, `factory_norm`, `factory_nthRoot`, `factory_pow`, `factory_round`, `factory_sec`, `factory_sign`, `factory_sin`, `factory_sinh`, `factory_smaller`, `factory_smallerEq`, `factory_sqrt`, `factory_square`, `factory_std`, `factory_subtract`, `factory_sum`, `factory_tan`, `factory_tanh`, `factory_transpose`, `factory_unaryMinus`, `factory_unaryPlus`, `factory_variance`, `factory_xgcd`
+
+### Namespace aggregates (16)
+
+Per-category objects bundling the functions above.
+
+`typedAlgebra`, `typedArithmetic`, `typedBitwise`, `typedComplex`, `typedDistributions`, `typedFunctions`, `typedLogical`, `typedProbability`, `typedRelational`, `typedSet`, `typedSignal`, `typedSpecial`, `typedStatistics`, `typedString`, `typedTrigonometry`, `typedUnit`
+
+<!-- END GENERATED EXPORT INDEX -->

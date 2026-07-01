@@ -156,6 +156,21 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — `docs/api/functions.md` drift-guarded via the generator
+
+The hand-written `docs/api/functions.md` had frozen at "158 exports across 11 modules"
+(2026-05-22) while the real surface grew to 828 — it was missing the ~89 gap-closure
+functions and everything from five releases. `tools/generate-functions-reference.mjs`
+now emits and drift-checks a third file: it appends a generated **Complete export
+index** (every export grouped by module, with live counts) below the curated highlight
+tables, exactly as it already does for `docs/reference/functions.md`. `npm run
+docs:functions` regenerates all three (`docs/reference/functions.md` + `.html` +
+`docs/api/functions.md`); `npm run docs:functions:check` now fails if any of the three
+drifts, listing the undocumented exports. The curated per-domain tables + examples are
+kept as prose above the generated block. (Recommended follow-up, blocked here by a
+workflow-edit guard: add a `docs:functions:check` step to `.github/workflows/ci.yml`
+so drift fails CI, not just the local command.)
+
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
 - Removed `@ts-nocheck` from the mathjs-derived Unit factory and resolved every

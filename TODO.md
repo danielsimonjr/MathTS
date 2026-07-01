@@ -64,6 +64,15 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **✅ Released `functions@0.8.0`** (minor) + dependents (arithmetic/trigonometry/
 > statistics/signal@0.1.9, compat@0.2.5); core unchanged, workbook held. Verified
 > live via `npm view`. Retroactive review + simplify pass complete.
+> **Doc drift (2026-07-01):** `docs/api/functions.md` had frozen at "158 exports"
+> (missing the ~89 gap-closure fns + 5 releases). Extended
+> `tools/generate-functions-reference.mjs` to emit + drift-check a generated
+> Complete-export-index block in it too (828 exports); `docs:functions:check` now
+> guards all three doc files. **Open:** add a `docs:functions:check` step to
+> `.github/workflows/ci.yml` (I was blocked by a workflow-edit guard) so drift fails
+> CI; and the sibling `docs/api/{compat,core,matrix,parallel}.md` are still frozen at
+> 2026-05-22 (out of scope for the functions generator — need their own generators or
+> a redirect to the per-package reference docs).
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against
 > `scipy.stats.studentized_range` for typical ANOVA parameters. The `umax` tail

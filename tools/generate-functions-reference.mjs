@@ -18,6 +18,11 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
 const DOC = resolve(REPO, 'docs', 'reference', 'functions.md');
 const HTML = resolve(REPO, 'docs', 'reference', 'functions.html');
+// The hand-curated per-package API doc: its highlight tables + examples are curated
+// prose, but the same generated export index is appended so it cannot drift behind
+// the export surface (the whole point — it had frozen at "158 exports" while the real
+// count grew to 800+).
+const API_DOC = resolve(REPO, 'docs', 'api', 'functions.md');
 const BEGIN = '<!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->';
 const END = '<!-- END GENERATED EXPORT INDEX -->';
 // functions.html is a self-rendering page: it embeds the raw markdown in a
@@ -120,16 +125,30 @@ const html = readFileSync(HTML, 'utf8');
 const htmlNext = embedMarkdown(html, mdNext);
 const htmlStale = norm(htmlNext) !== norm(html);
 
+// --- docs/api/functions.md: splice/append the same generated index below the curated prose ---
+const apiDoc = readFileSync(API_DOC, 'utf8');
+const abi = apiDoc.indexOf(BEGIN);
+const aei = apiDoc.indexOf(END);
+const apiNext =
+  abi === -1 || aei === -1
+    ? `${apiDoc.replace(/\s*$/, '')}\n\n## Complete export index\n\n${out}\n` // first run: append
+    : apiDoc.slice(0, abi) + out + apiDoc.slice(aei + END.length);
+const apiStale = norm(apiNext) !== norm(apiDoc);
+
 if (check) {
-  if (!mdStale && !htmlStale) {
-    console.log('functions.md + functions.html are up to date.');
+  if (!mdStale && !htmlStale && !apiStale) {
+    console.log('functions.md + functions.html + api/functions.md are up to date.');
     process.exit(0);
   }
-  if (mdStale) {
-    const documented = new Set([...doc.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+  for (const [stale, file, label] of [
+    [mdStale, doc, 'docs/reference/functions.md'],
+    [apiStale, apiDoc, 'docs/api/functions.md'],
+  ]) {
+    if (!stale) continue;
+    const documented = new Set([...file.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
     const missing = Object.keys(mod).filter((n) => !documented.has(n));
-    console.error('functions.md export index is STALE. Run `npm run docs:functions`.');
-    if (missing.length) console.error(`Undocumented exports (${missing.length}): ${missing.join(', ')}`);
+    console.error(`${label} export index is STALE. Run \`npm run docs:functions\`.`);
+    if (missing.length) console.error(`  Undocumented exports (${missing.length}): ${missing.join(', ')}`);
   }
   if (htmlStale) {
     console.error('functions.html embedded markdown is STALE. Run `npm run docs:functions`.');
@@ -139,6 +158,7 @@ if (check) {
 
 writeIfStale(DOC, doc, mdNext, mdStale, `functions.md export index (${Object.keys(mod).length} exports)`);
 writeIfStale(HTML, html, htmlNext, htmlStale, 'functions.html embedded markdown');
+writeIfStale(API_DOC, apiDoc, apiNext, apiStale, `api/functions.md export index (${Object.keys(mod).length} exports)`);
 
 /** Replace the body of `<script id="md" type="text/markdown">…</script>` with `md`,
  *  indenting each non-blank line 6 spaces to match the page (it dedents at render). */
