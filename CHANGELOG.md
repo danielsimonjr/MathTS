@@ -156,6 +156,16 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — functions builds on core for number/object utilities
+
+`functions/src/utils/number.ts` and `object.ts` are now thin re-exports of
+`@danielsimonjr/mathts-core/internal` instead of drifting forks — the implementations
+live once in core. All existing `../utils/number.js`/`object.js` import sites (44 + 28)
+keep working unchanged. Verified behaviorally by the full suite (functions **3087 passed /
+41 skipped**, typecheck 0, build clean); the earlier core reconciliation (array-supporting
+`deepExtend`, `isPowZeroAtInfinity`) means the swap loses nothing. `is.ts` (a mixed barrel
+of guards + duck-type interfaces) follows separately.
+
 ### Added (2026-07-01) — core `/internal` subpath export for shared utilities (enables util consolidation)
 
 Enabling step for consolidating the duplicated synced-mathjs util layer (type guards,
