@@ -18,6 +18,10 @@ export interface KMeansResult {
   labels: number[];
   centroids: number[][];
   inertia: number;
+  /** Number of Lloyd iterations actually run. */
+  iterations: number;
+  /** True if the assignment stabilized before `maxIter` (false = hit the cap). */
+  converged: boolean;
 }
 
 /**
@@ -32,6 +36,8 @@ export function kmeans(
 ): KMeansResult {
   const { maxIter = 100 } = opts;
   const n = data.length;
+  if (n === 0) throw new Error('kmeans: data is empty');
+  if (!Number.isInteger(k) || k < 1) throw new Error('kmeans: k must be a positive integer');
   const d = data[0].length;
   if (k > n) throw new Error('kmeans: k exceeds number of points');
   // maximin seeding: first centroid = point nearest the mean, then farthest-from-chosen
@@ -53,7 +59,10 @@ export function kmeans(
     centroids.push(data[best].slice());
   }
   const labels = new Array<number>(n).fill(0);
+  let iterations = 0;
+  let converged = false;
   for (let iter = 0; iter < maxIter; iter++) {
+    iterations = iter + 1;
     let changed = false;
     for (let i = 0; i < n; i++) {
       let best = 0;
@@ -76,10 +85,13 @@ export function kmeans(
       for (let j = 0; j < d; j++)
         centroids[c][j] = members.reduce((s, p) => s + p[j], 0) / members.length;
     }
-    if (!changed) break;
+    if (!changed) {
+      converged = true;
+      break;
+    }
   }
   const inertia = data.reduce((s, p, i) => s + dist2(p, centroids[labels[i]]), 0);
-  return { labels, centroids, inertia };
+  return { labels, centroids, inertia, iterations, converged };
 }
 
 /**

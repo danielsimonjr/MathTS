@@ -23,6 +23,7 @@ import {
   ewma,
   detrend,
   linearRegression,
+  kmeans,
 } from '@danielsimonjr/mathts-functions';
 
 /**
@@ -201,5 +202,42 @@ describe('regression-extra — degenerate input guards', () => {
     expect(r.slope).toBeCloseTo(2, 10);
     expect(r.intercept).toBeCloseTo(0, 10);
     expect(r.rValue).toBeCloseTo(1, 10);
+  });
+});
+
+describe('clustering-extra — validation & convergence signal', () => {
+  it('kmeans validates empty data and non-positive / non-integer k', () => {
+    expect(() => kmeans([], 2)).toThrow(/empty/i);
+    expect(() =>
+      kmeans(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        0
+      )
+    ).toThrow(/positive integer|k must/i);
+    expect(() =>
+      kmeans(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        1.5
+      )
+    ).toThrow(/positive integer|k must/i);
+  });
+
+  it('kmeans reports convergence and iteration count', () => {
+    const blobs = [
+      [0, 0],
+      [0.1, 0],
+      [10, 10],
+      [10.1, 10],
+    ];
+    const r = kmeans(blobs, 2);
+    expect(r.converged).toBe(true); // was undefined — no signal
+    expect(r.iterations).toBeGreaterThanOrEqual(1);
+    expect(r.iterations).toBeLessThanOrEqual(100);
   });
 });

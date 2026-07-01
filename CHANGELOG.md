@@ -129,6 +129,11 @@ covered by `functions/tests/gap-degenerate-inputs.test.ts`.
   any other error instead of silently retrying it to `converged:false`. Defensive —
   `A` is always square/numeric so only the singular case reaches the catch in
   practice, but the intent is now explicit and matches `inv.ts`'s own guard.
+- **`functions/src/clustering-extra.ts`**: `KMeansResult` gains `converged` and
+  `iterations` (mirroring `OptimizeResult`) so a caller can tell a settled partition
+  from one that hit `maxIter` still moving; `kmeans` validates empty `data` (was a
+  cryptic `TypeError` on `data[0]`) and rejects non-integer / `<1` `k` (was a silent
+  single-cluster result).
 
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
