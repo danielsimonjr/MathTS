@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-signal",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Standalone signal-processing functions for MathTS, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "^0.7.0",
+    "@danielsimonjr/mathts-functions": "^0.8.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {

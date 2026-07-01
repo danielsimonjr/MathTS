@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-functions
 
+## 0.8.0
+
+### Minor Changes
+
+- Degenerate-input hardening for the 2026-06-30 domain gap-closure functions (retroactive code-review + silent-failure pass).
+
+  A 7-reviewer pass over the ~89 new functions found one recurring root cause: they silently returned `NaN`/`Infinity`/garbage on structurally invalid or statistically degenerate input. Policy fix: throw a clear `Error` matching the scipy/numpy semantics the docstrings claim. Covered by `functions/tests/gap-degenerate-inputs.test.ts`.
+
+  - **descriptive-stats**: `gmean`/`hmean` throw on non-positive entries; `zscore`/`skewness`/`kurtosis` throw on constant (zero-variance) input; `skewness`/`kurtosis` return `NaN` (SciPy parity) for a bias-correction requested below its `n` domain; `cov` throws when observations ≤ `ddof`. Empty input stays graceful (`NaN`/`[]`).
+  - **numeric-extra**: `logsumexp`/`softmax` use a spread-free O(n) max (was `RangeError` on ~1e5+ vectors); `cumtrapz` throws on an abscissa shorter than `y`.
+  - **hypothesis-extra**: `fTest`/`jarqueBera`/`kruskalWallis`/`wilcoxon`/`tukeyHSD` guard degenerate samples; `studentizedRangeQuantile` validates `p∈(0,1)` and brackets adaptively; `studentizedRangeCDF` validates `k≥2`/`df>0` and self-extends its `umax` tail bound.
+  - **linalg-extra**: `companion` throws on a zero leading coefficient; `realSchur` throws if QR ever fails to reach (quasi-)triangular form.
+  - **geometry-extra**: `slerp` throws on zero-length / antipodal inputs; `quaternionNormalize` throws on zero magnitude.
+  - **timeseries-extra**: `acf` guards zero-variance / out-of-range `nlags`; `ewma` guards empty input; `detrend('linear')` returns zeros for `<2` points.
+  - **regression-extra**: `linearRegression` throws on `<3` points or a zero-variance predictor.
+  - **optimization-extra**: `levenbergMarquardt` re-throws non-singular solver errors instead of swallowing them.
+  - **clustering-extra**: `KMeansResult` gains `converged`/`iterations`; `kmeans` validates empty `data` and non-integer/`<1` `k`.
+  - **signal-filter-extra**: `butter` validates `N≥1`/`0<Wn<1`; `firwin` validates `numtaps≥2` and rejects zero-sum designs; `lfilterZi` reports a clear pole-at-`z=1` error.
+  - **cas-integration**: `symbolicIntegral` returns its `integral(...)` marker (not a thrown "Undefined symbol") for symbolic constant coefficients.
+
 ## 0.7.0
 
 ### Minor Changes
