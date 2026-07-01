@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-06-29
+Updated: 2026-06-30
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
@@ -13,6 +13,39 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > **Bridge re-validation (2026-06-29):** All 10 integration bridges in `GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` re-checked vs current `main`. Of the 5 material gaps in the 2026-05-20 scorecard, **3 resolved** (B5 compat → 665 fns via `create(all)`; B7 workbook → `evaluate()`+sandbox; B3 FFT-fallback), **1 half-built** (B8 tensor/autograd: converters + native AD landed, no WASM/`functions` AD), **1 persists** (B2 matrix-factory acceleration). Every user-facing function gap closed (52 constants, type-conversion fns, `isInteger`, `parser()`, reviver/replacer); dormant 102 → 39 (all internal). Full Revision 3 + new gaps: [`docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` Part 5](docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md#part-5--revision-3-re-validation-2026-06-29). **New gaps — top 3:** `functions.md` drift (~40 undocumented, no generator) · `variance` (pop) ≠ `parallelStatVariance` (sample) silent divergence · B2 factory matrix ops still pure-JS on boxed `number[][]`.
 
 > **Domain coverage gap analysis (2026-06-30):** Fresh lens — *mathematical/scientific completeness within domains* + *cross-domain connector functions*, sourced from the now-current `functions.md` (744 exports) and vs the SciPy/SymPy bar. Distinct from the two reports above (which cover package bridges + mathjs parity). Thinnest domains: **statistics (~55%)** — no `skewness`/`kurtosis`/`cov`/`gmean`/rank-correlation — and **hypothesis tests (~55%)** — no `fTest`/`kruskalWallis`/`wilcoxon`/`fisherExact`. Highest-leverage bridge: **C4** — the special-fn primitives (`betainc`/`gammainc`/`erfcScalar`) already back the distribution objects but aren't surfaced as standalone `*CDF`/`*Quantile`, which would also unblock the missing tests. Recommended **Wave A** (small, pure, high-traffic): `skewness`/`kurtosis`/`moment`/`cov`/`gmean`/`iqr`/`zscore`/`logsumexp`/`softmax`/`cumprod`/`cumtrapz`. Full report + scorecard + C1–C12 bridge table: [`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`](docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md).
+>
+> **✅ CLOSED (2026-06-30) — no deferral.** Every wave plus all the remaining
+> highest-complexity items were implemented, oracle-verified, and released:
+> **~89 new functions** (744 → 828 exports) across descriptive stats
+> (`descriptive-stats.ts`), elementwise/cumulative (`numeric-extra.ts`),
+> standalone distribution CDF/quantile surface (`distribution-functions.ts`,
+> bridge **C4**), hypothesis tests + Tukey HSD (`hypothesis-extra.ts`),
+> structured matrices + `logdet`/`laplacianMatrix`/`generalizedEig`/`qz`
+> (`linalg-extra.ts`), numeric `hessian`/`gradient` (`calculus-extra.ts`),
+> geodesy + quaternions (`geometry-extra.ts`), time series
+> (`timeseries-extra.ts`), OLS `linearRegression` (`regression-extra.ts`),
+> optimizers `nelderMead`/`gradientDescent`/`levenbergMarquardt`
+> (`optimization-extra.ts`), `kmeans`/`spectralClustering`
+> (`clustering-extra.ts`), digital filter design
+> `firwin`/`butter`/`lfilter`/`lfilterZi`/`filtfilt` (`signal-filter-extra.ts`,
+> machine-precision vs scipy.signal), and `symbolicIntegral`
+> (`cas-integration.ts`). Each function verified against NumPy/SciPy or by
+> self-consistency (d/dx ∫f = f), with ~18 oracle-pinned test files (`gap-*.test.ts`)
+> so CI needs no Python. **Two root-cause bugs surfaced by the new code and
+> fixed (Rule 2):** (1) `eigs` returned wrong eigenvalues for *every*
+> non-symmetric matrix — now routes the factory through native `matrix` `eig`
+> (`functions/src/matrix/native-accel.ts#correctEigs`); (2) `core.Fraction(0.25)`
+> threw `BigInt(0.25)`, silently breaking CAS `simplify`/`derivative` for any
+> fractional coefficient — constructor now decomposes non-integers to an exact
+> ratio. **Released to npm across two rounds:** `functions@0.6.0` (Waves A–D +
+> eigs fix) then `functions@0.7.0` + `core@0.3.1` (remaining high-complexity +
+> Fraction fix); verified live by fresh install (`butter`/`tukeyHSD`/
+> `symbolicIntegral`/`nelderMead`/`Fraction(0.25)='1/4'`/`derivative('x^4/4')='x^3'`).
+> Per-wave status tracked in the report. Full regression: functions 3057 +
+> core 658 + compat 134 pass; tsc + eslint clean. Remaining as *breadth beyond
+> spec* (documented, not deferred): integration-by-parts / partial-fractions in
+> `symbolicIntegral`, full real-spectrum triangularization of `qz` via a Francis
+> double-shift.
 
 ## 🎯 Open Actions
 

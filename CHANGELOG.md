@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-30) — domain gap-closure: ~89 new functions (`functions@0.6.0` → `0.7.0`, `core@0.3.1`)
+
+Closed the 2026-06-30 domain-coverage gap analysis (`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`)
+**with no deferral** — every wave plus all remaining highest-complexity items,
+oracle-verified and released. Exports grew 744 → 828. Each function is verified
+against NumPy/SciPy or by self-consistency (d/dx ∫f = f); ~18 oracle-pinned
+`functions/tests/gap-*.test.ts` files pin the reference values so CI needs no Python.
+
+- **Descriptive statistics** (`functions/src/descriptive-stats.ts`):
+  `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`,
+  `cov`, `corrcoef`, `rankdata` — composed from existing `mean`/`std`/`sum`/`quantileSeq`.
+- **Elementwise / cumulative / log-domain** (`functions/src/numeric-extra.ts`):
+  `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`.
+- **Standalone distribution CDF/quantile surface** (`functions/src/distribution-functions.ts`,
+  bridge C4): `normalQuantile`, `studentTCDF/Quantile`, `chiSquaredCDF/Quantile`,
+  `fCDF/Quantile`, `gammaCDF/Quantile`, `betaCDF/Quantile`, and
+  `cauchy`/`laplace`/`logistic` PDF/CDF/Quantile — surfacing the incomplete
+  beta/gamma primitives that already backed the distribution objects.
+- **Hypothesis tests + Tukey HSD** (`functions/src/hypothesis-extra.ts`):
+  `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`,
+  `studentizedRangeCDF`/`studentizedRangeQuantile` (nested numerical integration),
+  `tukeyHSD` — vs `scipy.stats`.
+- **Structured matrices + decompositions** (`functions/src/linalg-extra.ts`):
+  `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`,
+  `laplacianMatrix`, `generalizedEig`, `qz` (generalized Schur of a pencil).
+- **Calculus** (`functions/src/calculus-extra.ts`): numeric `hessian` (central
+  difference), `gradient` (numpy 2nd-order non-uniform formula).
+- **Geometry** (`functions/src/geometry-extra.ts`): `haversine`, `slerp`, and a
+  quaternion algebra (`quaternionMultiply`/`Conjugate`/`Normalize`/`FromAxisAngle`/`Rotate`/`ToRotationMatrix`).
+- **Time series** (`functions/src/timeseries-extra.ts`): `movingAverage`, `ewma`, `detrend`, `acf`.
+- **Regression** (`functions/src/regression-extra.ts`): OLS `linearRegression`.
+- **Optimization** (`functions/src/optimization-extra.ts`): `nelderMead`,
+  `gradientDescent`, `levenbergMarquardt`.
+- **Clustering** (`functions/src/clustering-extra.ts`): `kmeans` (deterministic
+  maximin seed), `spectralClustering` (reuses `laplacianMatrix` + `eigs`).
+- **Digital filter design** (`functions/src/signal-filter-extra.ts`, vs
+  `scipy.signal`): `firwin`, `butter` (full zpk→bilinear→tf pipeline), `lfilter`,
+  `lfilterZi`, `filtfilt` (scipy's `lfilter_zi` steady-state edge handling) — both
+  to machine precision.
+- **Symbolic CAS** (`functions/src/cas-integration.ts`): `symbolicIntegral`
+  (indefinite integration over polynomials, power rule, linearity, `1/x→ln`, and
+  linear-substitution for `sin`/`cos`/`exp`/`ln`/`sinh`/`cosh`; returns an
+  unevaluated `integral(...)` marker rather than a wrong answer when out of scope).
+
+### Fixed (2026-06-30) — two root-cause bugs surfaced by the new functions
+
+- **`eigs` returned wrong eigenvalues for every non-symmetric matrix** (even
+  triangular ones — `[[2,1,0],[0,3,1],[0,0,4]]` gave `[1.27, 3, 4.73]`). Surfaced
+  by `companion`'s eigenvalue cross-check. The factory `eigs` now routes numeric
+  square matrices through the correct native `matrix` `eig`
+  (`functions/src/matrix/native-accel.ts#correctEigs`), preserving real
+  eigenvalues as numbers and complex ones as `Complex`.
+- **`core` `new Fraction(0.25)` threw `"0.25 cannot be converted to a BigInt"`**,
+  which had *silently* broken the CAS `simplify` and symbolic `derivative` for any
+  fractional coefficient (`derivative('x^4/4','x')`). The constructor now
+  decomposes a non-integer number into an exact integer ratio (`0.25` → `1/4`);
+  `derivative('x^4/4','x')` now returns `'x ^ 3'`.
+
+Released to npm across two rounds — `functions@0.6.0` (Waves A–D + eigs fix), then
+`functions@0.7.0` + `core@0.3.1` (remaining high-complexity items + Fraction fix);
+verified live by fresh install. Per-package detail in `functions/CHANGELOG.md` and
+`core/CHANGELOG.md`. Full regression: functions 3057 + core 658 + compat 134 pass.
+
 ### Changed (2026-06-28) — `functions/src/type/unit/Unit.ts` fully typed (`@ts-nocheck` removed)
 
 - Removed `@ts-nocheck` from the mathjs-derived Unit factory and resolved every
