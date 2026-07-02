@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-01",
+  "generated": "2026-07-02",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -307,6 +307,7 @@
       "matrix_min",
       "matrix_mul_elementwise",
       "matrix_multiply",
+      "matrix_multiply_simd_ptr",
       "matrix_neg",
       "matrix_norm_frobenius",
       "matrix_ones",

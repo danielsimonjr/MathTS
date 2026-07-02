@@ -191,10 +191,16 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   tensor's tensorEigWasm/tensorSvdWasm). lu/qr/cholesky had no wired WASM variant (dead kernels).
   WASM-dispatch tests skipped w/ reason; matrix 747 pass / 20 skip. **WASM's whole value is now the SIMD
   matmul kernel.**
-- ⬜ **[follow-up, maintenance] delete the dead WASM decomposition kernels + disabled branches** —
-  AS `matrix_eig_symmetric`/`matrix_eig_general`/`matrix_svd`/`matrix_spectral_radius` +
-  `algebra/decomposition.ts` (lu/qr/cholesky/inverse/determinant, never wired) + the flag-gated WASM
-  branches in eig-wasm.ts/svd-wasm.ts + the skipped dispatch tests. A SIMD revival would be new code.
+- ✅ **[partial] deleted the dead WASM eig/svd DISPATCH code** — eig-wasm.ts/svd-wasm.ts rewritten to
+  clean JS delegation (no flag-gated branches); 3 obsolete dispatch test files deleted. matrix 746/7skip.
+- ⬜ **[follow-up] delete the dead AS eig/svd kernel files** — `ops/eig.ts`
+  (matrix_eig_symmetric/general/spectral_radius) + `ops/svd.ts` (matrix_svd/singular_values) are now
+  unused-by-source (eig-wasm/svd-wasm no longer call them). Delete + remove their `assembly/src/index.ts`
+  exports + rebuild WASM. (Needs updating any test that asserts those exports load.)
+- ⚠️ **[correction] lu/qr/cholesky AS kernels are NOT dead** — `WASMBackend` has lu/qr/cholesky/inverse/
+  determinant METHODS that call them via runtime `module.X` (dep-graph import edges don't capture these).
+  Before touching `algebra/decomposition.ts`, audit whether those WASMBackend methods are reachable from
+  the public API (the public `operations/{lu,qr,cholesky}.ts` are pure JS) — and benchmark if they win.
 - ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
   (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
 - ⬜ **[follow-up, maintenance] delete now-dead WASM element-wise AS kernels + `WASMBackend` bodies** —

@@ -1,23 +1,17 @@
 /**
- * WASM-accelerated Singular Value Decomposition.
+ * `svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`).
  *
- * Routes through the AssemblyScript binary's one-sided Jacobi SVD
- * (`matrix_svd` export, `assembly/src/ops/svd.ts`) for any real `m x n`
- * matrix, and falls back to the synchronous JavaScript Golub-Reinsch
- * {@link svd} when the WASM module is unavailable. (Phase 7b: repointed onto
- * the AssemblyScript binary; singular values are bit-identical to the JS
- * reference per the 7a parity validation.)
- *
- * Unlike the synchronous {@link svd} (which returns the *full* `m x m` /
- * `n x n` factors), `svdWasm` always returns the **thin / economy** form —
- * `U` is `m x k`, `V` is `n x k`, `k = min(m, n)` — on both the WASM and the
- * fallback path, so callers get a stable result shape.
+ * The WASM SVD path was RETIRED and REMOVED (2026-07-01): the AssemblyScript one-sided
+ * Jacobi kernel was scalar + async and measured 0.4–0.7× of the pure-JS Golub-Reinsch
+ * {@link svd}, worsening with size — see `tools/benchmarks/decomp-audit`. It now delegates
+ * to the JS `svd`, truncated to the **thin / economy** form (`U` is `m×k`, `V` is `n×k`,
+ * `k = min(m, n)`) so the result shape is unchanged. The `async` signature is retained so
+ * existing callers (which `await`) are unaffected.
  *
  * @packageDocumentation
  */
 
 import { svd, type SVDResult, type SVDOptions } from './svd.js';
-import { wasmLoader } from '../backends/WasmLoader.js';
 
 /** Count singular values above the rank tolerance. */
 function estimateRank(s: number[], rankTolerance: number): number {
@@ -40,8 +34,8 @@ function toThin(full: SVDResult, k: number, rankTolerance: number): SVDResult {
 }
 
 /**
- * WASM-accelerated thin SVD. Always safe to call — falls back to the
- * synchronous JS SVD when the AssemblyScript WASM module is not available.
+ * Thin SVD. Delegates to the JS {@link svd} and truncates to the economy form
+ * (WASM path retired — see file header).
  *
  * @param matrix - Input matrix (m x n) as a row-major 2D array
  * @param options - SVD options; `rankTolerance` controls the rank estimate
@@ -53,63 +47,7 @@ export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise
   if (m === 0 || n === 0) {
     return { U: [], S: [], V: [], rank: 0 };
   }
-
   const k = Math.min(m, n);
   const rankTolerance = options?.rankTolerance ?? 1e-10;
-
-  // WASM svd RETIRED (2026-07-01): the AS one-sided Jacobi kernel is scalar + async and
-  // measured 0.4–0.7× of the JS path, worsening with size — see tools/benchmarks/decomp-audit.
-  // Skip the WASM path (module stays null → JS fallback below). Eligibility kept behind the
-  // flag for a future SIMD-optimized kernel. WASM's proven win is compute-dense SIMD matmul.
-  const WASM_SVD_ENABLED = false;
-  let module = WASM_SVD_ENABLED ? wasmLoader.getModule() : null;
-  if (WASM_SVD_ENABLED && !module) {
-    try {
-      module = await wasmLoader.load();
-    } catch {
-      module = null;
-    }
-  }
-
-  if (!module || typeof module.matrix_svd !== 'function') {
-    // AS WASM unavailable — synchronous JS SVD, truncated to the thin form.
-    return toThin(svd(matrix, options), k, rankTolerance);
-  }
-
-  const flat = new Float64Array(m * n);
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) flat[i * n + j] = matrix[i][j];
-  }
-
-  const aAlloc = wasmLoader.allocateFloat64Array(flat);
-  try {
-    // matrix_svd returns a managed Float64Array header packing
-    // [ U(m*k) | S(k) | V(n*k) ] (U row-major m×k, V row-major n×k).
-    const packedPtr = module.matrix_svd(aAlloc.ptr, m, n);
-    const packed = wasmLoader.readReturnedFloat64Array(packedPtr);
-    if (packed.length < m * k + k + n * k) {
-      return toThin(svd(matrix, options), k, rankTolerance);
-    }
-
-    const uFlat = packed.subarray(0, m * k);
-    const sFlat = packed.subarray(m * k, m * k + k);
-    const vFlat = packed.subarray(m * k + k, m * k + k + n * k);
-
-    const U: number[][] = [];
-    for (let i = 0; i < m; i++) {
-      U.push(Array.from(uFlat.subarray(i * k, i * k + k)));
-    }
-    const V: number[][] = [];
-    for (let i = 0; i < n; i++) {
-      V.push(Array.from(vFlat.subarray(i * k, i * k + k)));
-    }
-    const S = Array.from(sFlat);
-
-    return { U, S, V, rank: estimateRank(S, rankTolerance) };
-  } catch {
-    // Any marshalling / instantiation failure — fall back to JS.
-    return toThin(svd(matrix, options), k, rankTolerance);
-  } finally {
-    wasmLoader.free(aAlloc.ptr);
-  }
+  return toThin(svd(matrix, options), k, rankTolerance);
 }

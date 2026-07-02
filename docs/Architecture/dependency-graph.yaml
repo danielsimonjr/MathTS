@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-01'
+  lastUpdated: '2026-07-02'
   totalFiles: 847
   totalModules: 70
-  totalExports: 4101
+  totalExports: 4103
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -2201,21 +2201,17 @@ modules:
         - applyHouseholderLeft
         - applyHouseholderRight
     matrix/src/operations/eig-wasm.ts:
-      description: WASM-accelerated Eigendecomposition
+      description: '`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./eig.js
           imports:
             - eig
+            - eigvals
+            - powerIteration
             - EigResult
             - EigOptions
-        - file: ./common.js
-          imports:
-            - isSymmetric
-        - file: ../backends/WasmLoader.js
-          imports:
-            - wasmLoader
       workspaceDependencies: []
       exports:
         - eigWasm
@@ -2552,7 +2548,7 @@ modules:
         - matrixSqrtm
         - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
-      description: WASM-accelerated Singular Value Decomposition.
+      description: '`svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`).'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -2561,9 +2557,6 @@ modules:
             - svd
             - SVDResult
             - SVDOptions
-        - file: ../backends/WasmLoader.js
-          imports:
-            - wasmLoader
       workspaceDependencies: []
       exports:
         - svdWasm
@@ -2934,6 +2927,7 @@ modules:
           directory: matrix
           imports:
             - DenseMatrix
+            - backendManager
       exports:
         - Tensor
       classes:
@@ -23901,6 +23895,7 @@ modules:
             - matrix_add_scalar
             - matrix_neg
             - matrix_multiply
+            - matrix_multiply_simd_ptr
             - matrix_vector_multiply
             - vector_matrix_multiply
             - matrix_outer
@@ -24295,6 +24290,7 @@ modules:
         - matrix_add_scalar
         - matrix_neg
         - matrix_multiply
+        - matrix_multiply_simd_ptr
         - matrix_vector_multiply
         - vector_matrix_multiply
         - matrix_outer
@@ -24621,6 +24617,7 @@ modules:
         - matrix_add_scalar
         - matrix_neg
         - matrix_multiply
+        - matrix_multiply_simd_ptr
         - matrix_vector_multiply
         - vector_matrix_multiply
         - matrix_outer
@@ -25322,6 +25319,7 @@ modules:
         - matrix_add_scalar
         - matrix_neg
         - matrix_multiply
+        - matrix_multiply_simd_ptr
         - matrix_vector_multiply
         - vector_matrix_multiply
         - matrix_outer
@@ -25364,6 +25362,7 @@ modules:
         - matrix_add_scalar
         - matrix_neg
         - matrix_multiply
+        - matrix_multiply_simd_ptr
         - matrix_vector_multiply
         - vector_matrix_multiply
         - matrix_outer
@@ -26936,15 +26935,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 847
   totalModules: 70
-  totalLinesOfCode: 155569
-  totalExports: 4101
+  totalLinesOfCode: 155394
+  totalExports: 4103
   totalClasses: 50
   totalInterfaces: 351
-  totalFunctions: 1404
+  totalFunctions: 1405
   totalTypeGuards: 130
   totalEnums: 0
   totalConstants: 1394
-  totalReExports: 1286
+  totalReExports: 1287
   totalTypeOnlyImports: 431
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2

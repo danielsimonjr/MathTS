@@ -156,6 +156,23 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Removed (2026-07-01) — delete the dead WASM eig/svd dispatch code + its tests
+
+Follow-through on the eig/svd retirement: replaced the flag-gated dead WASM branches in
+`eig-wasm.ts`/`svd-wasm.ts` with clean JS delegation — `eigWasm`/`eigvalsWasm`/
+`spectralRadiusWasm` now delegate to `eig`/`eigvals`/`powerIteration`, `svdWasm` to `svd`
+(thin form), dropping the `wasmLoader`/alloc/flatten machinery and the `WASM_*_ENABLED`
+flags. Deleted the three obsolete test files that asserted the (now-removed) WASM-decomposition
+dispatch: `eig-wasm-mock.test.ts`, `svd-wasm-mock.test.ts`, `heavy-ops-as.test.ts`. Verified:
+matrix 746 pass / 7 skip, tensor 389/389, autograd 258/258, typecheck 0.
+
+Correction found while doing this (dep-graph import edges miss runtime `module.X` calls): the
+`lu`/`qr`/`cholesky`/`inverse`/`determinant` AS kernels are **not** dead — `WASMBackend` has
+methods that call them. So only the eig/svd/spectral AS kernels are now unused-by-source.
+Follow-up (TODO): delete the dead AS `ops/eig.ts`/`ops/svd.ts` kernels + their `index.ts` exports
+(needs a WASM rebuild), and audit whether `WASMBackend`'s lu/qr/cholesky methods are reachable
+before touching `algebra/decomposition.ts`.
+
 ### Changed (2026-07-01) — retire WASM eig/svd (0.2–0.7× pessimization); WASM = SIMD matmul only
 
 Decomposition audit (`tools/benchmarks/decomp-audit.mjs`, eig/svd JS vs WASM) closed the loop

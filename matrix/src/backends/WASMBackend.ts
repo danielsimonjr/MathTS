@@ -106,9 +106,8 @@ interface AsModule {
   array_norm: (aHdr: number) => number;
   array_dot: (aHdr: number, bHdr: number) => number;
 
-  // Dense decompositions — see assembly/src/algebra/decomposition.ts.
-  // Optional because older AS artifacts don't expose them; the methods
-  // below probe at call time and fall back to JS when absent.
+  // Dense decompositions — see assembly/src/algebra/decomposition.ts. Used by this backend's
+  // lu/qr/cholesky/inverse/determinant methods (probed at call time; JS fallback when absent).
   matrix_lu_decompose?: (
     aHdr: number,
     n: number,
