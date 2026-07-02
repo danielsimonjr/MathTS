@@ -201,6 +201,10 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   determinant METHODS that call them via runtime `module.X` (dep-graph import edges don't capture these).
   Before touching `algebra/decomposition.ts`, audit whether those WASMBackend methods are reachable from
   the public API (the public `operations/{lu,qr,cholesky}.ts` are pure JS) — and benchmark if they win.
+- ✅ **[pre-commit workflow] WB→DGT before every commit** — `.husky/pre-commit` runs `precommit:refresh`
+  (`build:wasm && docs:deps`) + stages `docs/Architecture/` + `lint-staged`. Also restored staged-file
+  linting (no committed hook existed before — `.husky/` was never tracked). `build:wasm` is the slow
+  step; hook documents how to gate it on `assembly/src/` changes if needed.
 - ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
   (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
 - ⬜ **[follow-up, maintenance] delete now-dead WASM element-wise AS kernels + `WASMBackend` bodies** —

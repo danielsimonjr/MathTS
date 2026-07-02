@@ -1,0 +1,16 @@
+# Keep the WASM binary and the generated dependency-graph reports current on every commit,
+# then lint the staged files. Husky runs this via `sh -e`, so any failure aborts the commit.
+# Bypass with `git commit --no-verify` only when explicitly authorized.
+#
+# WB then DGT: the dep-graph tool probes the built `.wasm` for its wasm-pairing report, so the
+# binary must be rebuilt first. `docs:deps` also prettier-formats its output (docs:deps:format),
+# so the regenerated reports are commit-clean; we stage them into this commit.
+#
+# NOTE: `build:wasm` (asc debug+release+manifest) is the slow step (~10-30s). If that cost
+# becomes a problem for frequent commits, gate it on `git diff --cached --name-only` touching
+# `assembly/src/` (see precommit:refresh) — the reports only change meaningfully when source does.
+
+npm run precommit:refresh
+git add docs/Architecture
+
+npx lint-staged
