@@ -259,6 +259,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   `functions.html` regenerated; `docs:functions:check` green. **Open follow-up (needs benchmark data, not a doc
   fix):** the surfaced `DEFAULT_THRESHOLD_BY_OP` inconsistency — sqrt/square/norm/dot/min/max default to the 50k
   global (active) while abs/negate/sum/mean are explicit `'never'`; retune via `tools/benchmark/parallel/run.ts`.
+- 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
+  452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
+  workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
+  First sprint (no gate blocks): WS-1 P1 oracle-coverage audit · WS-3 P1 export triage · WS-0 bench harness.
+  **Decision gates awaiting maintainer:** G1 fast-check dep · G2 wasm kernel fix-vs-retire · G3 unit-dispatch
+  spec · G4 notebook host · G5 plotting approach.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

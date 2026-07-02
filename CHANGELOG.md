@@ -28,6 +28,19 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Docs (2026-07-02) — scientific-library completeness roadmap (subagent-driven plan)
+
+Turned the DGT-report analysis into a program roadmap for making MathTS a
+trustworthy/discoverable/teachable library:
+[`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
+Nine workstreams (WS-0…WS-8) decomposed into tasks and atomic-commit actions with
+per-task verification gates, marked shovel-ready vs decision-gated, and structured
+for `subagent-driven-development`. Grounded in the reports (parallel-pairing
+96/17/105, wasm-pairing 39/218 + broken kernels, 452 unused exports, 97.5%
+effective coverage, WebGPU f32). Five decision gates (G1–G5) surfaced for the
+maintainer rather than guessed (new dependency, WASM fix-vs-retire, unit-dispatch
+design, notebook host, plotting approach).
+
 ### Docs (2026-07-02) — sync design docs + `functions.md` to the parallel-pairing data
 
 Used the new generated `parallel-pairing.md` to correct **live drift** in the
