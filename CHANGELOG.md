@@ -28,6 +28,19 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Docs (2026-07-02) — WS-1 P1: oracle-coverage matrix
+
+`docs/roadmap/ORACLE_COVERAGE_MATRIX.md` — a read-only audit classifying all 395
+public typed functions by _how_ they are verified: **ORACLE** (external pin to
+SciPy/NumPy/mpmath/DLMF, or independent closed form) vs **SELF-REF** (round-trip,
+decomposition reconstruction, or `Math.*`-tautological) vs **UNTESTED**. Result:
+**318 ORACLE / 75 SELF-REF / 2 UNTESTED**. This is the WS-1 Phase-2 work-list.
+Findings (spot-verified): the 7 core `hypothesis.ts` tests and 10 linalg
+decompositions are self-referential (reconstruction, not pinned factors);
+`gammaQuantile`/`betaQuantile` are UNTESTED. Line coverage was already 97.5%
+effective — this measures _numerical correctness_ grounding, which line coverage
+cannot.
+
 ### Tooling (2026-07-02) — WS-0: machine-readable parallel benchmark report
 
 First execution commit of the scientific-library roadmap (WS-0). The parallel

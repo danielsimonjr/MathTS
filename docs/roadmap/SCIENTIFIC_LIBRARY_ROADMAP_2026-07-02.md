@@ -75,7 +75,7 @@ correctness_.
 
 **Phase 1 (🟡 audit, 1 read-only subagent):**
 
-- [ ] Produce `docs/roadmap/ORACLE_COVERAGE_MATRIX.md` — per domain (arithmetic, special, linalg, stats, signal, CAS, distributions), list which functions have external-oracle pins vs self-referential-only tests. Output is the parallelizable work-list.
+- [x] Produce `docs/roadmap/ORACLE_COVERAGE_MATRIX.md` — per domain, list which functions have external-oracle pins vs self-referential-only tests. **DONE** — 395 fns classified: **318 ORACLE / 75 SELF-REF / 2 UNTESTED**. Findings: special+distributions strongest (SciPy/DLMF-pinned); arithmetic/trig/typed-stats have zero external pins (closed-form or `Math.*`-tautological); the 7 core `hypothesis.ts` tests and 10 linalg decompositions are self-referential (reconstruction, not pinned factors); `gammaQuantile`/`betaQuantile` UNTESTED. P2 priority: `qr`, `lu`, `gammaQuantile`, `betaQuantile`, `matrixSchur`, the hypothesis block.
 
 **Phase 2 (🟢 per-domain, parallel subagents — one per domain):** each is an atomic commit:
 
