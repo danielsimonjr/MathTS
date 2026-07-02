@@ -41,8 +41,8 @@ which uses 40+ duck-typed type checks.
 matrix.multiply(other)   // DenseMatrix or SparseMatrix
   1. BackendManager.selectBackend(size) called with rows * cols
   2. Checks registered backends in preference order:
-       size < 1,000         -> JSBackend    (always available)
-       1,000 <= size < 100K -> WASMBackend  (if available)
+       size < 256           -> JSBackend    (always available)
+       256 <= size < 100K   -> WASMBackend  (if available)
        size >= 100,000      -> GPUBackend   (if available)
   3. executeWithFallback(op, backend):
        - Tries selected backend
@@ -55,12 +55,12 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
   5. Returns result as DenseMatrix
 ```
 
-| Backend           | Threshold      | Key Ops                                      |
-| ----------------- | -------------- | -------------------------------------------- |
-| `JSBackend`       | Default        | All ops, pure TypeScript, Float64Array       |
-| `WASMBackend`     | >1K elements   | SIMD multiply, LU/QR/Cholesky, eigenvalues   |
-| `GPUBackend`      | >100K elements | WebGPU matmul, transpose, scale, elementwise |
-| `ParallelBackend` | Configurable   | WebWorker-backed elementwise + matmul        |
+| Backend           | Threshold      | Key Ops                                         |
+| ----------------- | -------------- | ----------------------------------------------- |
+| `JSBackend`       | Default        | All ops, pure TypeScript, Float64Array          |
+| `WASMBackend`     | ≥256 elements  | SIMD matmul, LU/QR/Cholesky/inverse/determinant |
+| `GPUBackend`      | >100K elements | WebGPU matmul, transpose, scale, elementwise    |
+| `ParallelBackend` | Configurable   | WebWorker-backed elementwise + matmul           |
 
 ---
 
@@ -318,8 +318,8 @@ typed-function (@danielsimonjr/mathts-core)
     |         |
     |         +---> WASMBackend (threshold check)
     |         |         |
-    |         |         +---> [>1K elements] WasmLoader --> assembly (AS, mathts-as.wasm)
-    |         |         +---> [<1K or fallback] JSBackend
+    |         |         +---> [≥256 elements] WasmLoader --> assembly (AS, mathts-as.wasm)
+    |         |         +---> [<256 or fallback] JSBackend
     |         |
     |         +---> [>100K elements] ComputePool (@danielsimonjr/mathts-parallel)
     |

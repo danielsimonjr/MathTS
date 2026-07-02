@@ -137,7 +137,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | trigonometry  |    8 |        4 |       7 |
 | unit          |    0 |        0 |       2 |
 
-> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), which runs the AssemblyScript binary for fft/eig/svd/decomposition. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups.
+> Notes: the `matrix` package backend runs the AssemblyScript binary separately from the typed-API dispatch counted here. After the 2026-07 WASM audit that backend is scoped to **SIMD matmul (≥256 elems)** + the **LU/QR/Cholesky/inverse/determinant** decompositions; element-wise/transpose/reductions and eig/svd run on JS (measured 0.2–6× slower on WASM — memory-bound or scalar; the eig/svd AS kernels were deleted). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the wasm-effective set here. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken or unstable — tracked follow-ups.
 
 ## WASM binary exports
 

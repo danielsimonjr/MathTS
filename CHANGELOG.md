@@ -156,6 +156,20 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Docs (2026-07-02) — reconcile architecture docs to the post-WASM-audit state
+
+Ran WB (`build:wasm`) + DGT (`docs:deps`) and synced the curated architecture docs to the reports.
+Fixed stale WASM claims left by the audit across `docs/Architecture/{WASM_ACCELERATION,ARCHITECTURE,
+OVERVIEW,API,DATAFLOW,TEST_COVERAGE}.md`, plus `CLAUDE.md`, `README.md`, and `linalg/README.md`:
+the matrix WASMBackend is now described as **SIMD matmul (≥256 elems) + LU/QR/Cholesky/inverse/
+determinant** (was "elementwise + all matrix ops + svd/eig/fft"); the matmul threshold is **≥256**
+(was >1000); element-wise/transpose/reductions/eig/svd are noted as running on JS; FFT is attributed
+to `functions/src/wasm/signal/` (not the matrix backend); the AS export count is corrected to **314
+functions / 326 total from 28 source files** (was 318/330 from 30 — the eig.ts/svd.ts deletion); and
+`TEST_COVERAGE.md`'s entries for the deleted `assembly/src/ops/{eig,svd}.ts` were removed. Also fixed
+the generated wasm-pairing note in the dep-graph tool. Available-ops lists that mention SVD/eig were
+left intact — those operations still exist (on JS). No code change.
+
 ### Changed (2026-07-02) — drop the matmul WASM threshold 500→256 (SIMD wins from 16²)
 
 `tools/benchmarks/matmul-threshold.mjs` measured the SIMD-WASM matmul vs JS at small sizes: WASM wins

@@ -141,7 +141,7 @@ Three computation backends with automatic selection via BackendManager:
 | Backend     | Implementation         | Threshold          |
 | ----------- | ---------------------- | ------------------ |
 | JSBackend   | Pure TypeScript        | Always (default)   |
-| WASMBackend | AssemblyScript + SIMD  | > 1,000 elements   |
+| WASMBackend | AssemblyScript + SIMD  | ≥ 256 elements     |
 | GPUBackend  | WebGPU compute shaders | > 100,000 elements |
 
 BackendManager selects based on data size, backend availability, and
@@ -187,7 +187,7 @@ probed from the built `.wasm` via `WebAssembly.Module.exports()` by
 `npm run docs:deps` and emitted to
 [`wasm-pairing.md` › _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports)
 (rebuild the binary first with `npm run build:wasm`). As of the last regeneration
-the binary carried 318 function exports across 330 total exports; that figure lives
+the binary carried 314 function exports across 326 total exports; that figure lives
 in the generated report so it can no longer silently drift out of this doc.
 
 The binary is SHA-384 integrity-verified before instantiation and numerically
@@ -204,10 +204,11 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   handle so they need not do pointer arithmetic.
 - **`matrix/src/backends/WASMBackend.ts`**: The sole WASM matrix backend. It
   decides JS vs. WASM per operation by element-count threshold (e.g. matrix
-  multiply switches to WASM above 1,000 elements) and falls back to `JSBackend`
-  transparently on WASM failure. It also hosts the AS kernels for the heavy
-  linear-algebra ops (multiply/gemm, transpose, inverse, determinant, LU/QR/
-  Cholesky/SVD, symmetric + non-symmetric eig, FFT/IFFT).
+  multiply switches to WASM at ≥256 elements) and falls back to `JSBackend`
+  transparently on WASM failure. It hosts the AS kernels only where SIMD wins:
+  SIMD multiply/gemm plus the dense inverse, determinant, and LU/QR/Cholesky
+  decompositions. Element-wise ops, transpose, reductions, and `eig`/`svd` were
+  measured slower on WASM and run on JS; FFT/IFFT is not a matrix-backend op.
 - **`functions/src/wasm/`**: The `functions` package's own AS bridges
   (`bridges/`, `elementwise/`, `special/`, `poly/`, `sort/`, `signal/`,
   `interpolation/`, `bitwise/`, …) plus `functions/src/wasm/WasmLoader.ts`,
@@ -223,7 +224,7 @@ For matrix operations via `BackendManager`:
 
 ```
 JS fallback (always)
-  --> WASM acceleration (>1K elements, 2-10x faster)
+  --> WASM acceleration (≥256 elements, 2-10x faster)
         --> Parallel/multi-core (>100K elements, additional 2-4x)
 ```
 

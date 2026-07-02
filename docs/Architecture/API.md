@@ -261,7 +261,7 @@ SVD, LU, QR, Cholesky, eigendecomposition (symmetric matrices)
 | Backend           | Methods | Threshold      | Notes                                                  |
 | ----------------- | ------- | -------------- | ------------------------------------------------------ |
 | `JSBackend`       | 28      | Default        | Always available, pure TypeScript                      |
-| `WASMBackend`     | 63      | >1K elements   | AssemblyScript + SIMD; LU, QR, Cholesky, eigenvalues   |
+| `WASMBackend`     | 63      | ≥256 elements  | AssemblyScript + SIMD; matmul, LU, QR, Cholesky        |
 | `GPUBackend`      | 40      | >100K elements | WebGPU compute shaders; matmul, transpose, scale       |
 | `ParallelBackend` | 35      | Configurable   | WebWorker-backed elementwise and matmul                |
 | `BackendManager`  | 51      | Adaptive       | Auto-selects and falls back; adaptive threshold tuning |
@@ -406,9 +406,9 @@ Forked worker pool management. Used internally by `@danielsimonjr/mathts-paralle
 
 ### AssemblyScript WASM (`assembly/`) — Sole WASM backend
 
-The built `mathts-as.wasm` binary exports **318 functions** (330 total exports,
+The built `mathts-as.wasm` binary exports **314 functions** (326 total exports,
 including 11 numeric globals such as `PI`/`E` plus the linear memory), compiled
-from 30 AssemblyScript source files under `assembly/src/`. The same binary is
+from 28 AssemblyScript source files under `assembly/src/`. The same binary is
 bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. AssemblyScript
 is the only WASM toolchain. Counts verified via `WebAssembly.Module.exports()` on
 the built `.wasm`.

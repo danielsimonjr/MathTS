@@ -170,19 +170,19 @@ Override defaults via `ComputePoolConfig.thresholdByOp` (see
 
 ### Packages
 
-| Package                                | Role                                                            |
-| -------------------------------------- | --------------------------------------------------------------- |
-| `@danielsimonjr/mathts-typed-function` | Symbol-based typed dispatch (forked, survives minification)     |
-| `@danielsimonjr/mathts-workerpool`     | Worker pool management (forked, SharedArrayBuffer support)      |
-| `@danielsimonjr/mathts-core`           | Complex, Fraction, BigNumber types; mathTyped; FunctionRegistry |
-| `@danielsimonjr/mathts-matrix`         | DenseMatrix, SparseMatrix; JS/WASM/GPU backends; SVD/eig/FFT    |
-| `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction     |
-| `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor  |
-| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`            |
-| `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch      |
-| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes) |
-| `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                    |
-| `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                   |
+| Package                                | Role                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-typed-function` | Symbol-based typed dispatch (forked, survives minification)              |
+| `@danielsimonjr/mathts-workerpool`     | Worker pool management (forked, SharedArrayBuffer support)               |
+| `@danielsimonjr/mathts-core`           | Complex, Fraction, BigNumber types; mathTyped; FunctionRegistry          |
+| `@danielsimonjr/mathts-matrix`         | DenseMatrix, SparseMatrix; JS/WASM/GPU backends; SVD/eig/QR/LU/Cholesky  |
+| `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction              |
+| `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor           |
+| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`                     |
+| `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch               |
+| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes)          |
+| `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                             |
+| `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                            |
 | `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the sole WASM backend (functions + matrix) |
 
 ### Dependency graph
@@ -220,9 +220,9 @@ The stack is **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript i
 **sole WASM backend** for the whole repo. Both `functions` and `matrix` load
 `mathts-as.wasm` and dispatch is **AS→JS**.
 
-| Backend       | Class | Source          | Binary           | Use                                                                              |
-| ------------- | ----- | --------------- | ---------------- | -------------------------------------------------------------------------------- |
-| `WASMBackend` | AS    | `assembly/src/` | `mathts-as.wasm` | Element-wise + all matrix ops (multiply/transpose, FFT, eig, SVD, decompositions) |
+| Backend       | Class | Source          | Binary           | Use                                                                                                     |
+| ------------- | ----- | --------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `WASMBackend` | AS    | `assembly/src/` | `mathts-as.wasm` | SIMD matmul (≥256 elems) + LU/QR/Cholesky/inverse/determinant; element-wise/transpose/eig/svd run on JS |
 
 SHA-384 integrity verification of the AS binary is enforced before instantiation.
 A few `functions` kernels deliberately stay on the JS fallback where their AS
@@ -289,12 +289,12 @@ Live metrics — file / export / module counts, per-file test coverage, and the
 WASM↔function pairing — are kept in **generated** reports rather than duplicated
 here (so they can't drift). Regenerate with `npm run docs:deps`:
 
-| Report | Contents |
-| --- | --- |
-| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md) | Package & architecture metrics |
-| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md) | Per-file test coverage |
-| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Dependency graph |
-| [`docs/Architecture/wasm-pairing.md`](./docs/Architecture/wasm-pairing.md) | WASM accelerator ↔ function pairing |
+| Report                                                                             | Contents                            |
+| ---------------------------------------------------------------------------------- | ----------------------------------- |
+| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                 | Package & architecture metrics      |
+| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)       | Per-file test coverage              |
+| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Dependency graph                    |
+| [`docs/Architecture/wasm-pairing.md`](./docs/Architecture/wasm-pairing.md)         | WASM accelerator ↔ function pairing |
 
 ### Known open items
 

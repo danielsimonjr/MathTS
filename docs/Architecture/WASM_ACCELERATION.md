@@ -14,8 +14,10 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 - **AssemblyScript is the sole WASM backend** for the whole repo. The
   `functions` package bundles `dist/wasm/mathts-as.wasm` (~292 `f64` kernels),
   resolves it package-relative, and its dispatch is **AS → JS**. The `matrix`
-  package loads the same AssemblyScript binary for its heavy ops
-  (fft/eig/svd/decomposition). The AS binary is numerically verified to <1e-9
+  package loads the same AssemblyScript binary for the ops where SIMD actually
+  wins: the f64x2 matrix **multiply** kernel plus the dense **LU/QR/Cholesky/
+  inverse/determinant** decompositions. Element-wise ops, transpose, reductions,
+  and `eig`/`svd` were measured slower on WASM and run on JS. The AS binary is numerically verified to <1e-9
   against mpmath for the special functions, and SHA-384 integrity-verified before
   instantiation.
 - **Threshold:** the `functions` special bridges engage WASM only for arrays of
@@ -82,8 +84,11 @@ whole JS-only families anymore — they also carry WASM and/or parallel paths, a
 - **Matrix linear algebra** is WASM-accelerated via the **`matrix` package**
   backend (`matrix/src/backends/WASMBackend.ts`, bundling
   `matrix/dist/wasm/mathts-as.wasm`), not via `functions/src/typed/matrix-ops.ts`.
-  Operations: multiply/gemm, transpose, inverse, determinant, decompositions
-  (LU/QR/Cholesky/SVD), FFT/IFFT — above the matrix backend threshold.
+  Operations: SIMD `multiply`/gemm (engages at ≥256 elements) and the dense
+  `inverse`/`determinant` + `LU`/`QR`/`Cholesky` decompositions. Element-wise
+  ops, `transpose`, reductions (sum/norm/dot), and `eig`/`svd` were benchmarked
+  slower on WASM and run on JS; FFT/IFFT is not a matrix-backend op (its WASM
+  path lives in `functions/src/wasm/signal/`).
 - **Internal kernels** (`functions/src/wasm/{poly,signal,sort,interpolation,
 bitwise}/`) accelerate algebra/numeric/interpolation code paths
   (`poly_mul`, `welch_psd`, `sort_f64`, `tridiag_solve`, divided differences,

@@ -73,7 +73,7 @@ active/dormant split. Highlights:
 - **Activated mathjs factory layer**: the mathjs-derived factory functions are wired into the live graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`) — first-class active code, not dormant.
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: **318 AssemblyScript function exports** — the sole WASM backend
+- **WASM**: **314 AssemblyScript function exports** — the sole WASM backend
 
 ### Beyond the mathjs API surface
 
@@ -106,10 +106,10 @@ MathTS has three computation backends selected automatically based on operation 
 | Backend             | Source                             | Status                | Description                                      |
 | ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------ |
 | JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                         |
-| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 318 function exports (330 total), SIMD-optimized |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 314 function exports (326 total), SIMD-optimized |
 | WebGPU              | `matrix/src/backends/gpu/`         | >100K elements        | WebGPU compute shaders                           |
 
-The AssemblyScript backend compiles `assembly/src/` (30 source files) to a
+The AssemblyScript backend compiles `assembly/src/` (28 source files) to a
 single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and
 `functions/dist/wasm/`. There is no backend-selection step — AssemblyScript is
 the sole WASM toolchain.
@@ -159,7 +159,7 @@ math.add(1, 2);
 | Workbook   | Active      | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                                                                                            |
 | Expression | Active      | Parser (16 node types), compiler, and evaluator fully functional; sandbox-hardened (2026-05-01 security release)                                                                                                                                                                                                               |
 | Compat     | Active      | 54 shims wired to real implementations, 87 test cases                                                                                                                                                                                                                                                                          |
-| Assembly   | **Primary** | Sole WASM backend — 318 function exports (330 total) in `mathts-as.wasm`; powers both `matrix` heavy ops and `functions` kernels (AS → JS dispatch)                                                                                                                                                                            |
+| Assembly   | **Primary** | Sole WASM backend — 314 function exports (326 total) in `mathts-as.wasm`; powers `matrix` heavy ops (SIMD matmul + LU/QR/Cholesky/inverse/determinant) and `functions` kernels (AS → JS dispatch)                                                                                                                              |
 
 ## Integration Status
 
