@@ -54,7 +54,7 @@ harness, WS-1/WS-2 findings silently rot. This unblocks WS-2's retune.
 
 **Atomic commits (sequential):**
 
-- [ ] `bench(parallel): stable-hardware harness emitting JSON per op` — deterministic warmup/iteration counts, machine-tagged output; no threshold change yet.
+- [x] `bench(parallel): stable-hardware harness emitting JSON per op` — deterministic warmup/iteration counts, machine-tagged output; no threshold change yet. **DONE** — `--json[=path]` writes a `buildBenchReport` artifact with per-op `recommendedThreshold` (number or `'never'`); pure transform unit-tested in `tests/benchmark/parallel-report.test.ts`.
 - [ ] `bench(accuracy): ULP/relative-error harness vs pinned oracle values` — reuse the `gap-*.test.ts` oracle fixtures as the reference set.
 - [ ] `docs(bench): generated benchmarks.md report + docs:bench script` — the perf/accuracy analog of `parallel-pairing.md`.
 - [ ] `chore(ci): document the benchmarks:check step for the maintainer` — snippet only; do **not** edit `.github/workflows/` (surface to maintainer).

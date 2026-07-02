@@ -28,6 +28,19 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tooling (2026-07-02) — WS-0: machine-readable parallel benchmark report
+
+First execution commit of the scientific-library roadmap (WS-0). The parallel
+benchmark runner (`tools/benchmark/parallel/run.ts`) now accepts `--json[=path]`
+and emits a `buildBenchReport` artifact: per-op `recommendedThreshold` (element
+count, or `'never'` when parallel never reaches a persistent break-even) plus a
+machine tag (CPUs / node / arch / platform). This is the input the WS-2
+`DEFAULT_THRESHOLD_BY_OP` retune consumes programmatically instead of eyeballing
+the printed tables. `buildBenchReport` is a pure, deterministic transform
+(`tools/benchmark/parallel/report.ts`), unit-tested in
+`tests/benchmark/parallel-report.test.ts` (5 cases). The generated
+`results.json` is gitignored (machine-specific).
+
 ### Docs (2026-07-02) — scientific-library completeness roadmap (subagent-driven plan)
 
 Turned the DGT-report analysis into a program roadmap for making MathTS a

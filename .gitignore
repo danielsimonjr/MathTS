@@ -74,8 +74,9 @@ temp/
 *.mtsw.outputs.yaml
 .mtsw-cache/
 
-# Benchmark results (generated)
+# Benchmark results (generated, machine-specific)
 benchmark-results/
+tools/benchmark/parallel/results.json
 
 # Documentation build
 docs/_site/

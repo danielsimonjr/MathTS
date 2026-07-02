@@ -10,6 +10,8 @@
  *
  *   npm run bench:parallel                 # full suite
  *   npx tsx tools/benchmark/parallel/run.ts add sin matmul   # subset by name
+ *   npx tsx tools/benchmark/parallel/run.ts --json            # also write results.json
+ *   npx tsx tools/benchmark/parallel/run.ts matmul --json=out.json  # subset + custom path
  *
  * Build the functions package first so the benchmark imports the built dist/:
  *
@@ -20,14 +22,27 @@
  * trusting any threshold recommendation.
  */
 
-import { cpus } from 'node:os';
+import { writeFileSync } from 'node:fs';
+import { arch, cpus, platform } from 'node:os';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 import { ALL_BENCHES } from './operations.bench.js';
 import { runCase, printOperationTable, printSummary, type OperationResult } from './harness.js';
+import { buildBenchReport } from './report.js';
+
+const DEFAULT_JSON_PATH = 'tools/benchmark/parallel/results.json';
 
 async function main(): Promise<void> {
-  const filter = process.argv.slice(2).map((s) => s.toLowerCase());
+  // Split `--json` / `--json=<path>` (machine-readable artifact for the WS-2
+  // threshold retune) from the positional operation-name filter.
+  const argv = process.argv.slice(2);
+  const jsonArg = argv.find((a) => a === '--json' || a.startsWith('--json='));
+  const jsonPath = jsonArg
+    ? jsonArg.includes('=')
+      ? jsonArg.slice(jsonArg.indexOf('=') + 1)
+      : DEFAULT_JSON_PATH
+    : null;
+  const filter = argv.filter((a) => a !== jsonArg).map((s) => s.toLowerCase());
   const benches =
     filter.length === 0
       ? ALL_BENCHES
@@ -79,6 +94,21 @@ async function main(): Promise<void> {
     printOperationTable(result);
   }
   printSummary(results);
+
+  if (jsonPath) {
+    const report = buildBenchReport(results, {
+      generated: new Date().toISOString(),
+      machine: {
+        logicalCpus: cpus().length,
+        node: process.version,
+        arch: arch(),
+        platform: platform(),
+      },
+    });
+    writeFileSync(jsonPath, JSON.stringify(report, null, 2));
+    console.log(`\nWrote machine-readable report: ${jsonPath}`);
+    console.log('  (per-op `recommendedThreshold` feeds the WS-2 DEFAULT_THRESHOLD_BY_OP retune)');
+  }
 }
 
 main().catch((err) => {
