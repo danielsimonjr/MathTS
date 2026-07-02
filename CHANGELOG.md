@@ -28,6 +28,18 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin `studentTTest` + `anova`
+
+`functions/tests/gap-hypothesis-oracle.test.ts` — external-oracle pins for two of
+the core `hypothesis.ts` tests the audit flagged SELF-REF. Statistics are exact
+hand-derived closed forms (one-sample `t = 3√2`; Welch two-sample `t = −3/√(2/3)`;
+one-way `F = 27`), independently arithmetic-verified. The ANOVA p-value is pinned
+to an **exact closed form** — for numerator df=2 the F survival is
+`(1 + 2x/d₂)^(−d₂/2)`, giving `p = 0.001` at `F=27, d₂=6` — and the t-test
+p-values to published Student-t two-tailed critical-value brackets (df=4). Both
+functions were already correct (3/3 GREEN). Hypothesis domain: 8→10 ORACLE,
+7→5 SELF-REF; matrix total 322 ORACLE / 73 SELF-REF / 0 UNTESTED.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin the two UNTESTED quantiles
 
 `functions/tests/gap-quantile-oracle.test.ts` — external-oracle pins for
