@@ -156,6 +156,17 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — Tensor.matMul dogfoods matrix's SIMD-WASM matmul (3.6–6.8× faster)
+
+`Tensor.matMul` was a naive JS triple loop — the clearest dogfooding gap. It now delegates to
+matrix's `backendManager.multiply` (backend-selected: SIMD-WASM once `wasmBackend.initialize()`
+has run, matrix's cache-friendly JS ikj otherwise — both faster than the old naive ijk).
+`DenseMatrix` wraps the tensor's `Float64Array` without copying (matmul reads only). Measured
+end-to-end with WASM initialized: **3.6× (128²) → 6.8× (256²/512²)** vs the old loop, correctness
+exact. Verified: tensor 389/389, autograd 258/258. This is the dogfooding win the "build on core"
+sweep was aiming at — one implementation, exercised through matrix, with large-input WASM inherited
+for free.
+
 ### Added (2026-07-01) — SIMD matmul kernel: matrix's WASM matmul now beats JS 1.8–4.7×
 
 The earlier B8 spike found matrix's WASM matmul was _slower_ than a JS loop — because the AS

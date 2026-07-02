@@ -178,9 +178,9 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   scalar kernel lost to JS (0.41–0.73×); the SIMD kernel wins 1.81× (64²) → 4.68× (512²) vs JS ikj
   (init WASM first). matrix WASM+backend suites 209/209. `tools/benchmarks/matmul-wasm.mjs` fixed to
   actually init WASM (it was silently measuring the JS fallback).
-- ⬜ **[NEXT] dogfood `Tensor.matMul` → matrix's (now-fast) matmul** — delegate the naive JS triple
-  loop to `matrix` so tensor inherits the SIMD-WASM speedup for large inputs + drops its own matmul
-  (maintenance). Sync API: WASM when initialized, JS-ikj fallback otherwise.
+- ✅ **dogfooded `Tensor.matMul` → matrix `backendManager.multiply`** — dropped the naive JS triple loop;
+  tensor now inherits the SIMD-WASM matmul (WASM when initialized, matrix's JS-ikj otherwise). End-to-end:
+  **3.6× (128²) → 6.8× (256²/512²)** vs the old loop, correctness exact; tensor 389/389, autograd 258/258.
 - ⬜ **[element-wise still stands]** the AS _element-wise_ kernels remain scalar and don't beat JS
   (single-op 0.85–0.95×); the SIMD win is matmul-class (compute-dense) only. Element-wise stays JS.
 - ⬜ **[matmul threshold check]** now that WASM matmul is fast, verify matrix's `wasmThreshold` (1000

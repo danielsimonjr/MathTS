@@ -10,7 +10,7 @@
  * "generic template for future rank-N support".
  */
 
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 import { Index } from './named-index.js';
 
 export type NestedArray = number | NestedArray[];
@@ -643,15 +643,15 @@ export class Tensor {
     const [m, k] = this.shape;
     const [k2, n] = other.shape;
     if (k !== k2) throw new Error(`Tensor.matMul: inner dimension mismatch ${k} != ${k2}`);
-    const out = new Float64Array(m * n);
-    for (let i = 0; i < m; i++) {
-      for (let j = 0; j < n; j++) {
-        let sum = 0;
-        for (let q = 0; q < k; q++) sum += this.data[i * k + q] * other.data[q * n + j];
-        out[i * n + j] = sum;
-      }
-    }
-    return new Tensor([m, n], out);
+    // Dogfood matrix's backend-selected matmul instead of a local triple loop: WASM
+    // (SIMD f64x2, ~4.7x at 512²) once `wasmBackend.initialize()` has run, else matrix's
+    // cache-friendly JS ikj — both faster than the old naive ijk. DenseMatrix wraps our
+    // Float64Array without copying (matmul reads only). See tools/benchmarks/matmul-wasm.mjs.
+    const c = backendManager.multiply(
+      new DenseMatrix(m, k, this.data),
+      new DenseMatrix(k, n, other.data)
+    );
+    return new Tensor([m, n], c.toFloat64Array());
   }
 
   static einsum(spec: EinsumSpec, ...operands: Tensor[]): Tensor {
