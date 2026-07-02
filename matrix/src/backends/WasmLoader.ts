@@ -496,25 +496,10 @@ export interface WasmModule {
   matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
   matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
 
-  // Heavy decompositions / spectral kernels exported by the AssemblyScript
-  // binary (assembly/src/ops/{svd,eig}.ts). These RETURN a managed
-  // Float64Array *header* pointer (decode via `readReturnedFloat64Array`).
-  // Optional because the WASM binary may be absent (JS fallback).
-  //
-  //  - matrix_svd(a, m, n)                -> packed [ U(m*k) | S(k) | V(n*k) ], k=min(m,n)
-  //  - matrix_singular_values(a, m, n)    -> S (k), descending
-  //  - matrix_eig_symmetric(a, n)         -> packed [ eigenvalues(n) | eigenvectors(n*n) ]
-  //                                          (eigenvectors as columns: V[i*n+j])
-  //  - matrix_eig_general(a, n)           -> packed [ re(n) | im(n) | eigenvectors(n*n) ]
-  //                                          (non-symmetric; eigenvectors as columns,
-  //                                          real eigenvectors unit-normalised,
-  //                                          complex-eigenvalue columns zero-filled)
-  //  - matrix_spectral_radius(a, n)       -> f64 (max |eigenvalue|)
-  matrix_svd?: (aHdr: number, m: number, n: number) => number;
-  matrix_singular_values?: (aHdr: number, m: number, n: number) => number;
-  matrix_eig_symmetric?: (aHdr: number, n: number) => number;
-  matrix_eig_general?: (aHdr: number, n: number) => number;
-  matrix_spectral_radius?: (aHdr: number, n: number) => number;
+  // NOTE: the WASM SVD / eig kernels (matrix_svd, matrix_singular_values,
+  // matrix_eig_symmetric, matrix_eig_general, matrix_spectral_radius) were REMOVED
+  // (2026-07-01) — scalar + async, 0.2–0.7× the JS path (tools/benchmarks/decomp-audit).
+  // matrix's eig/svd run in JS; eig-wasm.ts/svd-wasm.ts delegate to it. See CHANGELOG.
 
   // Memory management — AssemblyScript managed runtime.
   __new: (size: number, id: number) => number;
@@ -873,7 +858,7 @@ export class WasmLoader {
 
   /**
    * Decode a managed Float64Array RETURNED by an AssemblyScript export
-   * (e.g. `matrix_svd`, `matrix_eig_symmetric`) into a fresh JS copy.
+   * (e.g. the `matrix_lu_decompose` / `matrix_qr_decompose` outputs) into a fresh JS copy.
    *
    * AS exports that return a `Float64Array` hand back the typed-array
    * *header* pointer. The header is a 12-byte block laid out as

@@ -2,10 +2,10 @@
  * Non-symmetric eigensolver correctness tests.
  *
  * Regression guard for the bug where the JS non-symmetric path returned
- * all-zero eigenvalues for companion-style matrices. The JS `eig` now uses the
- * JAMA orthes/hqr2 algorithm — identical to the AssemblyScript
- * `matrix_eig_general` kernel — so eigenvalues match the true spectrum and the
- * WASM kernel to machine precision.
+ * all-zero eigenvalues for companion-style matrices. The JS `eig` uses the
+ * JAMA orthes/hqr2 algorithm, so eigenvalues match the true spectrum to machine
+ * precision. (A WASM `matrix_eig_general` kernel once mirrored it; removed
+ * 2026-07-01 as a scalar pessimization — eig runs in JS.)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -128,9 +128,7 @@ function makeRng(seed: number): () => number {
 
 function randomMatrix(n: number, seed: number): number[][] {
   const rng = makeRng(seed);
-  return Array.from({ length: n }, () =>
-    Array.from({ length: n }, () => rng() * 2 - 1)
-  );
+  return Array.from({ length: n }, () => Array.from({ length: n }, () => rng() * 2 - 1));
 }
 
 describe('Non-symmetric eigensolver (JAMA orthes/hqr2)', () => {

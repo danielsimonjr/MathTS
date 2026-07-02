@@ -39,9 +39,9 @@ export interface EigOptions {
 // accumulated transform) followed by `hqr2` (Francis double-shift implicit QR to
 // the real Schur form, then back-substitution + back-transform to recover
 // eigenvectors). This is the canonical EISPACK `orthes`/`hqr2` algorithm and is
-// numerically robust for general real matrices. It mirrors `matrix_eig_general`
-// in `assembly/src/ops/eig.ts` exactly, so the JS fallback and the WASM kernel
-// agree to machine precision.
+// numerically robust for general real matrices. (A WASM `matrix_eig_general` kernel
+// once mirrored this; it was removed 2026-07-01 as a scalar pessimization — eig runs
+// in JS. See CHANGELOG / tools/benchmarks/decomp-audit.)
 //
 // Replaces the previous ad-hoc `doubleShiftQR` + inverse-iteration path, which
 // failed to converge on companion-style matrices (returned all-zero eigenvalues).
@@ -461,7 +461,9 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
               const vi = (d[i] - p) * 2.0 * q;
               if (vr === 0.0 && vi === 0.0) {
                 vr =
-                  eps * norm * (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z));
+                  eps *
+                  norm *
+                  (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z));
               }
               const cd = cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi);
               H[i * nn + (nIdx - 1)] = cd.r;
@@ -472,12 +474,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
                 H[(i + 1) * nn + nIdx] =
                   (-sa - w * H[i * nn + nIdx] - q * H[i * nn + (nIdx - 1)]) / x;
               } else {
-                const cd2 = cdiv(
-                  -r - y * H[i * nn + (nIdx - 1)],
-                  -s - y * H[i * nn + nIdx],
-                  z,
-                  q
-                );
+                const cd2 = cdiv(-r - y * H[i * nn + (nIdx - 1)], -s - y * H[i * nn + nIdx], z, q);
                 H[(i + 1) * nn + (nIdx - 1)] = cd2.r;
                 H[(i + 1) * nn + nIdx] = cd2.i;
               }

@@ -861,11 +861,11 @@
   },
   "binary": {
     "path": "assembly/build/mathts.wasm",
-    "total": 331,
-    "functions": 319,
+    "total": 326,
+    "functions": 314,
     "globals": 11,
     "memory": 1,
-    "sourceFiles": 30,
+    "sourceFiles": 28,
     "byCategory": [
       {
         "category": "Scalar & special (f64)",
@@ -877,7 +877,7 @@
       },
       {
         "category": "Matrix",
-        "count": 51
+        "count": 46
       },
       {
         "category": "Complex scalar",

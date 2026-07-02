@@ -156,6 +156,24 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Removed (2026-07-01) — delete the dead AS eig/svd kernels (WASM = SIMD matmul + decompositions)
+
+Completed the WASM eig/svd retirement by deleting the now-unused AssemblyScript kernels:
+`assembly/src/ops/eig.ts` (`matrix_eig_symmetric`/`matrix_eig_general`/`matrix_spectral_radius`)
+and `assembly/src/ops/svd.ts` (`matrix_svd`/`matrix_singular_values`), their `assembly/src/index.ts`
+exports, the `WasmModule` type decls in `matrix/src/backends/WasmLoader.ts`, the AS-level
+`assembly/tests/svd.test.mjs` (+ its entry in the assembly `test` script), and the svd/eig cases in
+`tools/benchmark/wasm/matrix.bench.ts`. The `eigWasm`/`svdWasm`/`spectralRadiusWasm` wrappers already
+delegate to JS, so nothing at runtime used these; the matrix decomposition tests were retargeted from
+"proves execution on the AS kernel" to plain correctness (they pass via JS delegation).
+
+**Kept:** the AS `matrix_lu_decompose`/`matrix_qr_decompose`/`matrix_cholesky`/`matrix_inverse`/
+`matrix_determinant` kernels — WASMBackend's lu/qr/cholesky/inverse/determinant methods call them at
+runtime (verified live by `assembly/tests/diff-decomposition.test.mjs`, 30/30 pass). Verified end to
+end: WASM rebuild clean, assembly suite ALL PASS, matrix 743 pass / 7 skip, tensor 389/389, autograd
+258/258, typecheck 28/28, eslint clean. **WASM's surface is now SIMD matmul + the LU/QR/Cholesky
+decompositions** — the scalar eig/svd/element-wise pessimizations are fully gone.
+
 ### Added (2026-07-01) — pre-commit workflow: keep WASM binary + dep-graph reports current
 
 New `.husky/pre-commit` hook (+ `precommit:refresh` npm script = `build:wasm && docs:deps`) keeps the

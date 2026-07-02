@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { svdWasm } from '../src/operations/svd-wasm.js';
 import { svd } from '../src/operations/svd.js';
-import { wasmLoader } from '../src/backends/WasmLoader.js';
 
 /**
- * Tests `svdWasm` — the WASM-accelerated thin SVD wired to the AssemblyScript
- * `matrix_svd` export (Phase 7b). Reconstruction checks pass on either path
- * (AS WASM or the JS fallback), so the suite is environment-robust.
+ * Tests `svdWasm` — the thin (economy) SVD. It delegates to the JS Golub-Reinsch `svd`,
+ * truncated to the thin form (`U` m×k, `V` n×k, k=min(m,n)); the WASM `matrix_svd` kernel
+ * was removed 2026-07-01 as a scalar pessimization (see CHANGELOG / decomp-audit). The
+ * reconstruction checks verify the shared implementation.
  */
 function reconstruct(
   U: number[][],
@@ -111,14 +111,5 @@ describe('svdWasm', () => {
   it('handles an empty matrix', async () => {
     const r = await svdWasm([]);
     expect(r).toEqual({ U: [], S: [], V: [], rank: 0 });
-  });
-
-  it('reports which backend served the decomposition', async () => {
-    await svdWasm([
-      [1, 0],
-      [0, 1],
-    ]);
-    // Informational: whether the AssemblyScript build is loaded, else JS fallback.
-    console.log(`svdWasm backend: ${wasmLoader.isLoaded() ? 'AssemblyScript WASM' : 'JS fallback'}`);
   });
 });

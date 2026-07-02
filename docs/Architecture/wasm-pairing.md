@@ -143,14 +143,14 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 Probed from `assembly/build/mathts.wasm` via `WebAssembly.Module.exports()` (a parse-only static read — no instantiation; rebuild with `npm run build:wasm`).
 
-**331 total exports** = **319 functions** + **11 globals** (numeric constants such as `PI`/`E`) + **1 memory** (the shared linear memory), compiled from **30 AssemblyScript source files** under `assembly/src/`.
+**326 total exports** = **314 functions** + **11 globals** (numeric constants such as `PI`/`E`) + **1 memory** (the shared linear memory), compiled from **28 AssemblyScript source files** under `assembly/src/`.
 
 | Category (by export-name prefix) | Function exports |
 | -------------------------------- | ---------------: |
 | Scalar & special (f64)           |              133 |
 | Array                            |               54 |
-| Matrix                           |               51 |
+| Matrix                           |               46 |
 | Complex scalar                   |               46 |
 | Complex array                    |               33 |
 | FFT                              |                2 |
-| **Total**                        |          **319** |
+| **Total**                        |          **314** |

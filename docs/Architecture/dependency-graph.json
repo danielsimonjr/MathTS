@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-02",
-    "totalFiles": 847,
+    "totalFiles": 845,
     "totalModules": 70,
-    "totalExports": 4103
+    "totalExports": 4093
   },
   "entryPoints": [
     {
@@ -25839,16 +25839,6 @@
             "reExport": true
           },
           {
-            "file": "./ops/svd",
-            "imports": ["matrix_svd", "matrix_singular_values"],
-            "reExport": true
-          },
-          {
-            "file": "./ops/eig",
-            "imports": ["matrix_eig_symmetric", "matrix_spectral_radius", "matrix_eig_general"],
-            "reExport": true
-          },
-          {
             "file": "./ops/fft",
             "imports": ["fft", "rfft", "powerSpectrum"],
             "reExport": true
@@ -26261,11 +26251,6 @@
           "matrix_axpy",
           "matrix_gemm",
           "matrix_gemv",
-          "matrix_svd",
-          "matrix_singular_values",
-          "matrix_eig_symmetric",
-          "matrix_spectral_radius",
-          "matrix_eig_general",
           "fft",
           "rfft",
           "powerSpectrum",
@@ -26589,11 +26574,6 @@
           "matrix_axpy",
           "matrix_gemm",
           "matrix_gemv",
-          "matrix_svd",
-          "matrix_singular_values",
-          "matrix_eig_symmetric",
-          "matrix_spectral_radius",
-          "matrix_eig_general",
           "fft",
           "rfft",
           "powerSpectrum",
@@ -27213,15 +27193,6 @@
         "exports": ["expfit", "logfit", "powerfit"],
         "functions": ["expfit", "logfit", "powerfit"]
       },
-      "assembly/src/ops/eig.ts": {
-        "description": "Eigenvalue decomposition for real **symmetric** matrices via the classic",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["matrix_eig_symmetric", "matrix_spectral_radius", "matrix_eig_general"],
-        "functions": ["matrix_eig_symmetric", "matrix_spectral_radius", "matrix_eig_general"]
-      },
       "assembly/src/ops/fft.ts": {
         "description": "Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved",
         "externalDependencies": [],
@@ -27556,15 +27527,6 @@
           "cosIntegral",
           "logIntegral"
         ]
-      },
-      "assembly/src/ops/svd.ts": {
-        "description": "Singular Value Decomposition via the one-sided Jacobi algorithm.",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["matrix_svd", "matrix_singular_values"],
-        "functions": ["matrix_svd", "matrix_singular_values"]
       },
       "assembly/src/ops/tensor.ts": {
         "description": "Rank-N tensor operations — AssemblyScript fallback.",
@@ -29012,7 +28974,6 @@
           "assembly/src/ops/complex-array.ts",
           "assembly/src/ops/complex-ops.ts",
           "assembly/src/ops/curvefit.ts",
-          "assembly/src/ops/eig.ts",
           "assembly/src/ops/fft.ts",
           "assembly/src/ops/linalg.ts",
           "assembly/src/ops/matrix.ts",
@@ -29022,7 +28983,6 @@
           "assembly/src/ops/scalar.ts",
           "assembly/src/ops/signal.ts",
           "assembly/src/ops/special.ts",
-          "assembly/src/ops/svd.ts",
           "assembly/src/ops/tensor.ts"
         ]
       },
@@ -29037,17 +28997,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 847,
+    "totalTypeScriptFiles": 845,
     "totalModules": 70,
-    "totalLinesOfCode": 155394,
-    "totalExports": 4103,
+    "totalLinesOfCode": 154515,
+    "totalExports": 4093,
     "totalClasses": 50,
     "totalInterfaces": 351,
-    "totalFunctions": 1405,
+    "totalFunctions": 1400,
     "totalTypeGuards": 130,
     "totalEnums": 0,
     "totalConstants": 1394,
-    "totalReExports": 1287,
+    "totalReExports": 1282,
     "totalTypeOnlyImports": 431,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,

@@ -209,17 +209,11 @@ export {
   matrix_gemv,
 } from './ops/matrix';
 
-// =============================================================================
-// Singular Value Decomposition
-// =============================================================================
-
-export { matrix_svd, matrix_singular_values } from './ops/svd';
-
-// =============================================================================
-// Symmetric Eigendecomposition (Jacobi) + spectral radius
-// =============================================================================
-
-export { matrix_eig_symmetric, matrix_spectral_radius, matrix_eig_general } from './ops/eig';
+// NOTE: the WASM SVD (`matrix_svd`/`matrix_singular_values`) and eig
+// (`matrix_eig_symmetric`/`matrix_eig_general`/`matrix_spectral_radius`) kernels were
+// REMOVED (2026-07-01). They were scalar + async and measured 0.2–0.7× of the JS path,
+// worse at scale (tools/benchmarks/decomp-audit); matrix's eig/svd now run in JS. See
+// CHANGELOG. The compute-dense WASM win is SIMD matmul (matrix_multiply_simd_ptr).
 
 // =============================================================================
 // FFT (radix-2 Cooley-Tukey): fft/ifft, rfft, powerSpectrum (interleaved)

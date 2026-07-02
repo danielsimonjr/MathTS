@@ -193,16 +193,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   matmul kernel.**
 - ✅ **[partial] deleted the dead WASM eig/svd DISPATCH code** — eig-wasm.ts/svd-wasm.ts rewritten to
   clean JS delegation (no flag-gated branches); 3 obsolete dispatch test files deleted. matrix 746/7skip.
-- ⬜ **[follow-up] delete the dead AS eig/svd kernel files** — `ops/eig.ts`
-  (matrix_eig_symmetric/general/spectral_radius) + `ops/svd.ts` (matrix_svd/singular_values) are now
-  unused by the matrix RUNTIME (eig-wasm/svd-wasm delegate to JS). But the deletion has a wider blast
-  radius than the import graph shows (grep found the consumers): remove their `assembly/src/index.ts`
-  exports + the `WasmLoader.ts` `WasmModule` type decls; update/delete the AS-level tests that exercise
-  the kernels directly on the binary (`assembly/tests/svd.test.mjs` + eig equivalent, run via
-  `test:wasm`, NOT the matrix vitest suite) + `tools/benchmark/wasm/matrix.bench.ts`; the matrix
-  decomposition tests (`svd-wasm.test.ts`, `eig-general-wasm.test.ts`, `eig-nonsymmetric.test.ts`)
-  already pass via JS-delegation so they only need a correctness re-check. Then rebuild WASM (the hook
-  does this) and run BOTH `npm test` (vitest) and `npm run test:wasm` (asc runner). A focused pass.
+- ✅ **[done] deleted the dead AS eig/svd kernels** — removed `ops/eig.ts` + `ops/svd.ts` +
+  `index.ts` exports + `WasmLoader` type decls + `assembly/tests/svd.test.mjs` (+ its test-script entry)
+  - the svd/eig benchmark cases; retargeted the matrix decomposition tests to correctness-only. Verified:
+    WASM rebuild clean, assembly ALL PASS, matrix 743/7skip, tensor 389, autograd 258, typecheck 28/28,
+    eslint clean. Kept lu/qr/cholesky/inverse/determinant kernels (WASMBackend uses them; diff-decomposition
+    30/30). WASM surface is now SIMD matmul + LU/QR/Cholesky decompositions.
 - ⚠️ **[correction] lu/qr/cholesky AS kernels are NOT dead** — `WASMBackend` has lu/qr/cholesky/inverse/
   determinant METHODS that call them via runtime `module.X` (dep-graph import edges don't capture these).
   Before touching `algebra/decomposition.ts`, audit whether those WASMBackend methods are reachable from
