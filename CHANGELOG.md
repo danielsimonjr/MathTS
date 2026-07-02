@@ -156,16 +156,19 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
-### Added (2026-07-01) — pre-commit workflow: rebuild WASM + regenerate dep-graph before every commit
+### Added (2026-07-01) — pre-commit workflow: keep WASM binary + dep-graph reports current
 
-New `.husky/pre-commit` hook (+ `precommit:refresh` npm script = `build:wasm && docs:deps`) keeps
-the two generated-but-committed artifacts current on every commit: the AS `.wasm` binary is rebuilt
-first (the dep-graph tool probes it for its wasm-pairing report), then `docs:deps` regenerates +
-prettier-formats the `docs/Architecture/` reports, which the hook stages into the commit. Finally
-`lint-staged` runs (eslint --fix + prettier) — which also **restores** the staged-file linting that
-had silently stopped running (there was no committed `.husky/pre-commit`; the whole hook logic lived
-only on one machine). `build:wasm` is the slow step (~10-30s); the hook comments how to gate it on
-`assembly/src/` changes if that cost bites. Bypass with `--no-verify` only when authorized.
+New `.husky/pre-commit` hook (+ `precommit:refresh` npm script = `build:wasm && docs:deps`) keeps the
+two generated-but-committed artifacts current, then runs `lint-staged` (eslint --fix + prettier) —
+which also **restores** the staged-file linting that had silently stopped (there was no committed
+`.husky/pre-commit`; the hook logic lived only on one machine, and `.husky/` was never tracked).
+
+Both refresh steps are **gated on what the commit touches** — running `build:wasm` (asc, ~1-2 min) on
+every commit proved too slow and is pure waste on a doc/test-only commit (the binary and reports are
+pure functions of source): `build:wasm` runs only when `assembly/` changed; `docs:deps` (regenerate +
+prettier-format the `docs/Architecture/` reports, then stage them) runs only when any package `src/`
+(or `assembly/`) changed. A commit touching only docs/tests/config skips both. `precommit:refresh`
+remains available to force a full refresh manually. Bypass with `--no-verify` only when authorized.
 
 ### Removed (2026-07-01) — delete the dead WASM eig/svd dispatch code + its tests
 

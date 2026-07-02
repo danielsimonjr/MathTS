@@ -1,16 +1,27 @@
-# Keep the WASM binary and the generated dependency-graph reports current on every commit,
-# then lint the staged files. Husky runs this via `sh -e`, so any failure aborts the commit.
-# Bypass with `git commit --no-verify` only when explicitly authorized.
+# Keep the two generated-but-committed artifacts current before every commit, then lint staged
+# files. Husky runs this via `sh -e`, so any failure aborts the commit. Bypass with
+# `git commit --no-verify` only when explicitly authorized.
 #
-# WB then DGT: the dep-graph tool probes the built `.wasm` for its wasm-pairing report, so the
-# binary must be rebuilt first. `docs:deps` also prettier-formats its output (docs:deps:format),
-# so the regenerated reports are commit-clean; we stage them into this commit.
-#
-# NOTE: `build:wasm` (asc debug+release+manifest) is the slow step (~10-30s). If that cost
-# becomes a problem for frequent commits, gate it on `git diff --cached --name-only` touching
-# `assembly/src/` (see precommit:refresh) — the reports only change meaningfully when source does.
+# Both refresh steps are GATED on what the commit actually touches — running `build:wasm` (asc
+# debug+release+manifest, ~1-2 min) on every commit is too slow and pure waste on a doc/test-only
+# commit (the binary and reports are pure functions of source, so they don't change). So:
+#   - WB (build:wasm): only when `assembly/` source changed — the only input to the .wasm binary
+#     and its wasm-pairing report.
+#   - DGT (docs:deps): only when any package `src/` (or `assembly/`) changed — imports/exports are
+#     what drive the dependency graph. Regenerated reports are staged into the commit.
+# A commit touching only docs/tests/config skips both and just runs lint-staged.
 
-npm run precommit:refresh
-git add docs/Architecture
+staged=$(git diff --cached --name-only)
+
+if printf '%s\n' "$staged" | grep -q '^assembly/'; then
+  echo "pre-commit: assembly/ changed → rebuilding WASM (build:wasm)"
+  npm run build:wasm
+fi
+
+if printf '%s\n' "$staged" | grep -qE '(^|/)src/|^assembly/'; then
+  echo "pre-commit: source changed → regenerating dependency-graph reports (docs:deps)"
+  npm run docs:deps
+  git add docs/Architecture
+fi
 
 npx lint-staged
