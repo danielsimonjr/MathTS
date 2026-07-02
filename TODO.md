@@ -214,8 +214,10 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   (`build:wasm && docs:deps`) + stages `docs/Architecture/` + `lint-staged`. Also restored staged-file
   linting (no committed hook existed before — `.husky/` was never tracked). `build:wasm` is the slow
   step; hook documents how to gate it on `assembly/src/` changes if needed.
-- ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
-  (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
+- ❌ **[SUPERSEDED — do NOT retire] functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path.** This item
+  rested on the "0.85–0.95× loses" claim, which was refuted (indirect-call benchmark artifact; unproven
+  vs the real `computePool` fallback — see the resolved item above + `tools/benchmarks/README.md`). The
+  transcendental path stays. Only line-item left is the optional definitive benchmark above.
 - ✅ **[done — WASMBackend bodies] removed the dead WASM branches** in the 11 gated element-wise/
   transpose/reduction methods (add/subtract/multiply-elementwise/divide/scale/abs/negate/transpose/
   sum/norm/dot) → pure `jsBackend` delegation; trimmed `AsModule` to just `matrix_multiply_simd_ptr`
