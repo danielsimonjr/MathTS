@@ -51,8 +51,7 @@ function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
   }
 
   // Zero out below-subdiagonal entries (numerical cleanup)
-  for (let i = 0; i < n; i++)
-    for (let j = 0; j < i - 1; j++) H[i][j] = 0;
+  for (let i = 0; i < n; i++) for (let j = 0; j < i - 1; j++) H[i][j] = 0;
 
   return { H, Q };
 }
@@ -69,7 +68,14 @@ function givensParams(a: number, b: number): { c: number; s: number } {
   return { c, s: c * t };
 }
 
-function applyGivensLeft(A: number[][], c: number, s: number, i: number, k: number, startCol: number): void {
+function applyGivensLeft(
+  A: number[][],
+  c: number,
+  s: number,
+  i: number,
+  k: number,
+  startCol: number
+): void {
   const n = A[0].length;
   for (let j = startCol; j < n; j++) {
     const temp = c * A[i][j] - s * A[k][j];
@@ -78,7 +84,14 @@ function applyGivensLeft(A: number[][], c: number, s: number, i: number, k: numb
   }
 }
 
-function applyGivensRight(A: number[][], c: number, s: number, i: number, k: number, startRow: number): void {
+function applyGivensRight(
+  A: number[][],
+  c: number,
+  s: number,
+  i: number,
+  k: number,
+  startRow: number
+): void {
   const m = A.length;
   for (let j = startRow; j < m; j++) {
     const temp = c * A[j][i] - s * A[j][k];
@@ -184,6 +197,58 @@ function qrStepDouble(H: number[][], Q: number[][], start: number, end: number):
 }
 
 /**
+ * Standardize a trailing 2×2 diagonal block at rows/cols (p, p+1).
+ *
+ * The real Schur form keeps a 2×2 diagonal block ONLY for a complex-conjugate
+ * eigenvalue pair; a 2×2 block with **real** eigenvalues must be triangularized
+ * so its diagonal shows those eigenvalues. Applies the similarity Givens rotation
+ * whose first column is the eigenvector of one real eigenvalue — this zeros the
+ * sub-diagonal entry `H[p+1][p]` and puts the eigenvalues on the diagonal, while
+ * accumulating the rotation into Q so `Q·T·Qᵀ = A` is preserved. No-op for a
+ * complex-conjugate pair (negative discriminant) or an already-triangular block.
+ *
+ * Without this step a real 2×2 block is silently accepted unreduced, so the
+ * diagonal (and hence the eigenvalues read from T) is wrong even though the
+ * reconstruction `Q·T·Qᵀ = A` still holds — the reason the reconstruction-only
+ * tests missed it.
+ */
+function standardize2x2Block(H: number[][], Q: number[][], p: number): void {
+  const q = p + 1;
+  const a = H[p][p];
+  const b = H[p][q];
+  const c = H[q][p];
+  const d = H[q][q];
+  if (c === 0) return; // already upper triangular
+  const half = (a - d) / 2;
+  const disc = half * half + b * c;
+  if (disc < 0) return; // complex-conjugate pair: valid real-Schur 2×2 block
+  const z = Math.sqrt(disc);
+  const lambda = (a + d) / 2 + (half >= 0 ? z : -z);
+  // Eigenvector of `lambda` from the larger row of (M − λI), for stability.
+  const r0 = Math.hypot(a - lambda, b);
+  const r1 = Math.hypot(c, d - lambda);
+  let u0: number;
+  let u1: number;
+  if (r0 >= r1) {
+    u0 = b;
+    u1 = lambda - a;
+  } else {
+    u0 = lambda - d;
+    u1 = c;
+  }
+  const norm = Math.hypot(u0, u1);
+  if (norm === 0) return;
+  // The existing helpers apply the similarity G^T·H·G with G = [[cs, sn], [-sn, cs]]
+  // (G's first column is [cs, -sn]); set that equal to the eigenvector direction.
+  const cs = u0 / norm;
+  const sn = -u1 / norm;
+  applyGivensLeft(H, cs, sn, p, q, 0);
+  applyGivensRight(H, cs, sn, p, q, 0);
+  applyGivensRight(Q, cs, sn, p, q, 0);
+  H[q][p] = 0; // enforce an exact zero against round-off
+}
+
+/**
  * Compute the real Schur decomposition of a square real matrix from a 2-D
  * array. Returns H (quasi-upper-triangular) and Q (orthogonal accumulator).
  */
@@ -218,6 +283,9 @@ function schurRaw(
     if (start === end) {
       end--;
     } else if (start === end - 1) {
+      // Trailing 2×2 block: triangularize it if its eigenvalues are real
+      // (a complex-conjugate pair is left as a valid real-Schur 2×2 block).
+      standardize2x2Block(H, Q, start);
       end -= 2;
     } else {
       if (end - start >= 2) {

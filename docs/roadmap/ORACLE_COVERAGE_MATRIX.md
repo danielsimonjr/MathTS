@@ -472,6 +472,16 @@ distribution CDF/quantiles). Ordered by value:
    systematically-biased factorization passes today. Pin the classic Householder `R`
    (`[[12,−51,4]…]` → R=[[14,21,−14],[0,175,−70],[0,0,35]]), the exact `L`/`U`, Schur `T`
    diagonal (against a known spectrum), and a known analytical `inv`.
+
+   > **🐞 `matrixSchur` — two bugs surfaced by the WS-1 P2 eigenvalue oracle**
+   > (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`). **(1) FIXED**: real
+   > 2×2 diagonal blocks were accepted unreduced (as if complex pairs), so eigenvalues
+   > read off `T` were wrong — fixed with `standardize2x2Block`. **(2) OPEN**: the Francis
+   > double-shift **stalls** when eigenvalues are symmetric about the shift centre (e.g.
+   > the tridiagonal Toeplitz `{4−√2,4,4+√2}`), returning the matrix unchanged — needs an
+   > exceptional-shift mechanism. Reconstruction-only tests were blind to both. So
+   > `matrixSchur` stays **SELF-REF** in the counts until the stall is fixed. Tracked in
+   > TODO.md.
 2. ~~**`gammaQuantile` and `betaQuantile` — UNTESTED.**~~ ✅ **DONE (WS-1 P2)** —
    `functions/tests/gap-quantile-oracle.test.ts` pins both to chi-square-table + exact
    closed-form oracles (uniform, exponential, `Beta(a,1)=p^(1/a)`, symmetric-median);

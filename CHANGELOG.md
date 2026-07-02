@@ -28,6 +28,25 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Fixed (2026-07-02) — WS-1 P2: `matrixSchur` real 2×2 blocks (eigenvalue bug)
+
+The WS-1 P2 eigenvalue oracle (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`)
+surfaced that `matrixSchur` accepted a trailing **real** 2×2 diagonal block
+*unreduced* — treating it as a complex-conjugate pair — so the eigenvalues read
+off `T` were wrong: `matrixSchur([[2,1],[1,2]])` returned the input (diagonal
+`[2,2]`) instead of `diag{1,3}`. Fixed with `standardize2x2Block` in
+`matrix/src/operations/schur.ts`: a real 2×2 block is now triangularized via a
+similarity Givens rotation (eigenvector-aligned), putting the eigenvalues on the
+diagonal while preserving `Q·T·Qᵀ = A`; complex pairs are left as valid real-Schur
+blocks. `schur`/`logm`/`sqrtm` suites stay green (51 tests). The reconstruction-only
+tests were blind to this (`Q=I, T=A` reconstructs trivially).
+
+**Known-remaining (tracked, not silently left):** the Francis double-shift also
+**stalls** when a block's eigenvalues are symmetric about the shift centre (e.g.
+the tridiagonal Toeplitz `{4−√2,4,4+√2}` returns unchanged) — needs an
+exceptional-shift mechanism. Repro is a skipped case in the oracle test; details
+in TODO.md.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin `principalComponentAnalysis`
 
 Extended `functions/tests/gap-hypothesis-oracle.test.ts` with a known-covariance

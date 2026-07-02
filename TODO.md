@@ -259,6 +259,16 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   `functions.html` regenerated; `docs:functions:check` green. **Open follow-up (needs benchmark data, not a doc
   fix):** the surfaced `DEFAULT_THRESHOLD_BY_OP` inconsistency — sqrt/square/norm/dot/min/max default to the 50k
   global (active) while abs/negate/sum/mean are explicit `'never'`; retune via `tools/benchmark/parallel/run.ts`.
+- 🐞 **[HIGH-PRIORITY BUG — found by WS-1 P2 oracle tests] `matrixSchur` is broken two ways.**
+  (1) ✅ **FIXED**: real 2×2 diagonal blocks were never triangularized (accepted as if complex pairs),
+  so `matrixSchur([[2,1],[1,2]])` returned the input with diagonal `[2,2]` instead of eigenvalues `{1,3}`
+  — fixed via `standardize2x2Block` in `matrix/src/operations/schur.ts`. (2) ⬜ **STILL BROKEN**: the
+  Francis double-shift **stalls** on matrices whose eigenvalues are symmetric about the shift centre —
+  `matrixSchur([[4,1,0],[1,4,1],[0,1,4]])` returns the input UNCHANGED (diagonal `[4,4,4]`, not
+  `{4−√2, 4, 4+√2}`); the degenerate implicit shift gives a `[0,0,1]` bulge → no progress. Needs an
+  **exceptional-shift** mechanism (LAPACK-style, every ~10 stalled iters). Affects consumers `matrixLogm`
+  /`matrixSqrtm`/`eig` on such inputs. **The reconstruction-only tests are blind** (`Q=I,T=A ⇒ Q·T·Qᵀ=A`),
+  which is exactly why it went undetected. Repro + skipped oracle: `matrix/tests/operations/schur-eigenvalue-oracle.test.ts`.
 - 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
   452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
   workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
