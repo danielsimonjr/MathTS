@@ -17,18 +17,31 @@ don't ship an assumed win.
 | **Single op** (`exp`), 256 – 1 048 576 elements                  | **WASM loses, 0.85–0.95×**                          | AssemblyScript's scalar `exp` is not faster than V8's native libm `Math.exp`, and the WASM path pays a `Float64Array` copy-in + copy-out. |
 | **3-op fused chain** (`sinh(exp(sin x))`, data resident in WASM) | **modest win, 1.1–1.3×** at ~16k; ~tie at 1k / 262k | Op-fusion amortizes the one copy over K ops and avoids intermediate JS allocations.                                                       |
 
-**Conclusion — element-wise WASM is _not_ the propagation win it looked like:**
+**Framing.** The consolidation goal is **dogfooding** (internal consumers exercise the
+standard packages) and **reducing maintenance complexity** (one implementation, not N forks)
+— _not_ making element-wise faster. WASM is a **large-input** backend that the standard
+packages already own via their size-thresholded `BackendManager`: consumers get WASM at
+scale and JS for small inputs, for free, without reimplementing anything. This benchmark
+exists only to answer one narrow sub-question — _should element-wise transcendentals be a
+WASM code path at all?_ — so we don't add a code path that doesn't earn its keep.
 
-- **Do not** route single element-wise ops through WASM — it regresses. (This also means
-  `functions`' `WASM_ELEMENTWISE_THRESHOLD = 1024` single-op path is a mild pessimization
-  worth revisiting — see TODO; the _chain_ dispatch is fine.)
-- Chain-fusion wins only modestly, only for K ≥ 2 at mid sizes, and needs a lazy/deferred
-  execution model to exploit. Crucially it **does not fit `autograd`**: each op must also
-  compute the tangent (derivative), which the primal-only WASM kernels don't — the fusion
-  breaks.
-- The real WASM wins remain the O(n²⁺) ops (SVD / eig / matmul / FFT) where compute
-  dominates the copy — already accelerated in `matrix`.
+**Conclusion:**
 
-So the `DUAL_UNARY_RULES` `primal` functions correctly stay JS `Math.*`; there is no faster
-scalar-transcendental path to propagate. See `project-all-libraries-build-on-core` (memory)
-and CHANGELOG for the reasoning.
+- **Element-wise transcendentals are the one op-class where even large-input WASM does not
+  help** (0.85–0.95× single-op; scalar AS math ≤ V8 libm, plus the copy). So they correctly
+  stay JS — and `DUAL_UNARY_RULES`' `primal` functions stay `Math.*`. Chain-fusion wins only
+  modestly and doesn't fit `autograd` (each op must also compute the tangent, which the
+  primal-only kernels don't — the fusion breaks).
+- **Where large-input WASM _does_ win — the O(n²⁺) ops (SVD / eig / matmul / FFT) — the
+  dogfooding is already in place:** `tensor` routes its decompositions through `matrix`, whose
+  `BackendManager` engages WASM above threshold. So `tensor` inherits large-input WASM for the
+  ops that benefit, with zero duplicated kernels.
+- **Maintenance/dogfooding is achieved by the consolidation, not by a WASM code path:**
+  `autograd` builds on `core`'s shared `DUAL_UNARY_RULES`, `functions`/`expression` build on
+  `core/internal` for number/object utils, `tensor` builds on `matrix`. One implementation
+  each; large-input WASM handled by the standard packages.
+- **Follow-up:** `functions`' `WASM_ELEMENTWISE_THRESHOLD = 1024` _single-op_ path looks like a
+  mild pessimization (single-op WASM never wins); verify against its actual dispatch incl. the
+  parallel/worker path before changing. The _chain_ dispatch is fine.
+
+See `project-all-libraries-build-on-core` (memory) and CHANGELOG for the full reasoning.

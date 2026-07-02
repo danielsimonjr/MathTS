@@ -161,14 +161,14 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   in functions + expression) that fails if is.ts is turned into a core re-export shim. Chose
   structural over timing (a micro-benchmark wouldn't reliably reflect hot-loop inlining); verified
   the guard catches a shim.
-- ✅/❌ **[B8 — spiked + MEASURED, do NOT implement as element-wise WASM]** Benchmarked before
-  building (`tools/benchmarks/elementwise-wasm-{single,chain}.mjs`). Result: **single-op** element-wise
-  WASM **loses** to V8's `Math.*` loop (0.85–0.95× — AS scalar math isn't faster + copy overhead);
-  **3-op fused chain** wins only **modestly** (1.1–1.3× at ~16k, tie at 1k/262k). Routing autograd/tensor
-  single ops through WASM would REGRESS; chain-fusion needs a lazy/deferred model AND doesn't fit
-  autograd (each op must also compute the tangent — primal-only kernels break fusion). So the
-  `DUAL_UNARY_RULES` primal correctly stays JS `Math.*`; real WASM wins remain the O(n²⁺) matrix ops
-  (already accelerated). Full write-up in `tools/benchmarks/README.md`.
+- ✅ **[B8 — reframed: the goal is dogfooding + maintenance, not element-wise WASM perf]** WASM is a
+  large-input backend the standard packages already own (matrix's `BackendManager`); consumers get it
+  for free at scale. Dogfooding is **already achieved**: `tensor` routes decompositions through `matrix`
+  (inherits large-input WASM for the O(n²⁺) ops that actually benefit), `autograd` builds on `core`'s
+  `DUAL_UNARY_RULES`, `functions`/`expression` on `core/internal`. The benchmark
+  (`tools/benchmarks/`) only settled one sub-question — element-wise transcendentals are the one op-class
+  where even large-input WASM doesn't help (0.85–0.95×), so they correctly stay JS (dogfooded via the
+  shared rule table, no WASM code path). Full framing in `tools/benchmarks/README.md`.
 - ⬜ **[follow-up from B8] investigate `functions` `WASM_ELEMENTWISE_THRESHOLD = 1024` single-op path** —
   the single-op benchmark suggests routing single element-wise ops to WASM above 1024 is a mild
   pessimization (~0.9×). Verify against functions' ACTUAL dispatch (incl. the parallel/worker path,
