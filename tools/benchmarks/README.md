@@ -40,11 +40,13 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
   and overstates the AS win. `elementwise-wasm-single.mjs` (B8), whose JS baseline calls
   `Math.exp` **directly** (inlined), shows a **tie-to-mild-loss** (0.68–1.38× across sizes). Neither
   is the real comparison: the production JS fallback is `computePool.<op>` (ComputePool, sync for
-  these ops), **not** a bare loop. So "single-op WASM loses" was an over-generalization — the honest
-  status is _unproven either way_, so the path **stays** (retiring on unproven evidence risks a
-  regression). Contrast the matrix element-wise **arithmetic** (add/multiply/transpose): memory-bound,
-  cleanly measured 4–6× loss (`backend-audit.mjs`) — correctly retired. Transcendentals are a
-  different (compute-bound) regime.
+  these ops), **not** a bare loop. So "single-op WASM loses" was an over-generalization.
+  **RESOLVED (`tools/benchmark/wasm/transcendental-dispatch.bench.ts`): the WASM path is a net WIN vs
+  the real `computePool` fallback** — sin 1.36–1.93×, log 1.02–1.33×, exp 1.01–1.23×, never losing at
+  any size (computePool wraps the JS loop in Promise + dispatch overhead, which WASM beats). So the
+  path correctly **stays**. Contrast the matrix element-wise **arithmetic** (add/multiply/transpose):
+  memory-bound, cleanly measured 4–6× loss (`backend-audit.mjs`) — correctly retired. Transcendentals
+  are a different (compute-bound) regime.
 - **WASM's actual winning surface (after the 2026-07-01 retirements): SIMD matmul + the
   LU/QR/Cholesky decompositions.** The scalar element-wise-arithmetic, eig, and svd WASM paths were
   retired/removed (they lost). `tensor.matMul` dogfoods the SIMD matmul via `matrix`; `tensor`'s
@@ -52,9 +54,9 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
 - **Maintenance/dogfooding is achieved by the consolidation, not by a WASM code path:**
   `autograd` builds on `core`'s shared `DUAL_UNARY_RULES`, `functions`/`expression` build on
   `core/internal` for number/object utils, `tensor` builds on `matrix`. One implementation each.
-- **Follow-up to settle the transcendental question definitively:** benchmark
-  `elementwiseUnaryDispatch(op, xs)` vs `computePool.<op>(xs)` (the _actual_ production alternative),
-  not vs a bare or indirect `Math.*` loop. Until then, leave the threshold/dispatch as-is.
+- **Settled:** `tools/benchmark/wasm/transcendental-dispatch.bench.ts` did the definitive comparison —
+  `elementwiseUnaryDispatch` vs the actual `computePool.<op>` fallback (not a bare `Math.*` loop). WASM
+  wins at every size; the path stays, threshold unchanged.
 
 ## `matmul-wasm.mjs` — should `Tensor.matMul` dogfood matrix's accelerated matmul?
 

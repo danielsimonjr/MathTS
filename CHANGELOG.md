@@ -156,6 +156,16 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Docs (2026-07-02) — settle the element-wise transcendental WASM question (definitively KEEP)
+
+Ran the comparison that neither prior benchmark did: `tools/benchmark/wasm/transcendental-dispatch.bench.ts`
+pits `elementwiseUnaryDispatch` (the `array_<op>_ptr` WASM path) against the **actual production fallback**,
+`computePool.<op>` (ComputePool, sync for these ops) — not a bare/indirect `Math.*` loop. WASM **wins at
+every size, never loses**: sin 1.36–1.93×, log 1.02–1.33×, exp 1.01–1.23× (computePool wraps the JS loop in
+Promise + dispatch overhead, which WASM beats). This confirms keeping the transcendental WASM path was
+correct (earlier "retire it — 0.85–0.95× loses" rested on a WASM-vs-bare-loop framing that isn't the real
+alternative). No code change; threshold unchanged. Updated `tools/benchmarks/README.md` + TODO.
+
 ### Docs (2026-07-02) — reconcile architecture docs to the post-WASM-audit state
 
 Ran WB (`build:wasm`) + DGT (`docs:deps`) and synced the curated architecture docs to the reports.

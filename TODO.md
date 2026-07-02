@@ -177,9 +177,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   comparison — the production fallback is `computePool.<op>`, not a bare loop. So "single-op WASM loses"
   was an over-generalization; premise **unproven**, path **stays** (retiring on unproven evidence risks a
   regression). Distinct from matrix element-wise arithmetic (memory-bound, cleanly 4–6× loss → retired).
-- ⬜ **[to settle definitively, if perf here matters]** benchmark `elementwiseUnaryDispatch(op,xs)` vs
-  `computePool.<op>(xs)` (the actual production alternative) — then raise/keep the 1024 threshold or
-  retire, per data. Low priority (the current path is at worst perf-neutral).
+- ✅ **[settled → KEEP confirmed]** `tools/benchmark/wasm/transcendental-dispatch.bench.ts` benchmarks
+  `elementwiseUnaryDispatch` vs the REAL fallback `computePool.<op>` (not a bare `Math.*` loop). WASM
+  **wins at every size, never loses**: sin 1.36–1.93×, log 1.02–1.33×, exp 1.01–1.23×. computePool wraps
+  the JS loop in Promise + dispatch overhead, so the production comparison favors WASM. The transcendental
+  path earns its keep; the "retire it" premise (based on WASM-vs-bare-loop) is definitively refuted. No
+  code change; threshold (1024) left as-is.
 - ✅ **[was BLOCKER] AS matmul kernel optimized — matrix's WASM matmul now beats JS 1.8–4.7×.** Added
   `matrix_multiply_simd_ptr` (f64x2 SIMD, ikj, ptr-ABI) and wired `WASMBackend.multiply` to it. The old
   scalar kernel lost to JS (0.41–0.73×); the SIMD kernel wins 1.81× (64²) → 4.68× (512²) vs JS ikj
