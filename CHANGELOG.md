@@ -28,6 +28,19 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Docs (2026-07-02) — WS-3 P1: export triage (452 "unused" exports)
+
+`docs/roadmap/EXPORT_TRIAGE.md` — a read-only classification of the 452
+exports `unused-analysis.md` flags. **Key correction:** that figure is largely a
+DGT **false positive** — the dependency-graph tool does not count `export … from`
+re-exports as imports, so most flagged symbols are live public API or
+barrel-unreachable internals, not dead. Buckets: ~24 PROMOTE / ~122 KEEP / ~277
+INTERNALIZE / ~30 DELETE?. A spot-check of the "safe deletions" shortlist already
+found a false positive (`complexFromPolar` is live), so WS-3 Phase 2b must
+re-verify each candidate per-commit. Top PROMOTE: matrix `config.ts` (17
+tested-but-unexported backend-config setters), workbook `importWorkbook` + RPC
+types, expression `EvaluateOptions`.
+
 ### Docs (2026-07-02) — WS-1 P1: oracle-coverage matrix
 
 `docs/roadmap/ORACLE_COVERAGE_MATRIX.md` — a read-only audit classifying all 395

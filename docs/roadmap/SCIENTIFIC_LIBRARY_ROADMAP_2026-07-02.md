@@ -125,7 +125,7 @@ AS kernels "broken or unstable".
 
 **Phase 1 (🟡 audit, 1 read-only subagent):**
 
-- [ ] `docs/roadmap/EXPORT_TRIAGE.md` — classify each of the 452 into: **PROMOTE** (useful, undocumented → add to curated `functions.md` tables), **INTERNALIZE** (`@internal` / move behind `/internal` subpath), **DELETE** (dead). This is the work-list; no code yet.
+- [x] `docs/roadmap/EXPORT_TRIAGE.md` — classify the 452 into PROMOTE / INTERNALIZE / DELETE. **DONE** — ~24 PROMOTE / ~122 KEEP / ~277 INTERNALIZE / ~30 DELETE?. **Key correction: the "452 unused" figure is largely a DGT false positive** — the tool doesn't count `export … from` re-exports as imports, so most flagged exports are live public API (KEEP) or barrel-unreachable internals (INTERNALIZE), not dead. Only ~30 are deletion candidates, and a spot-check already found one false positive (`complexFromPolar` is live) → Phase 2b must re-verify each DELETE item in its own commit. Top PROMOTE: matrix `config.ts` (17 backend-config setters, tested but not barrel-exported), workbook `importWorkbook`/RPC types, expression `EvaluateOptions`.
 
 **Phase 2 (🟢 per-bucket, parallel by package):** atomic commits:
 
