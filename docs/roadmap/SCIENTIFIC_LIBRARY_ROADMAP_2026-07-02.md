@@ -107,7 +107,7 @@ AS kernels "broken or unstable".
 
 **Tasks / atomic commits:**
 
-- [ ] `perf(parallel): set every OpName threshold explicitly (no implicit global fallback)` — resolves the sqrt-vs-abs inconsistency; values from WS-0 harness on real hardware; update `BackendManager.test.ts` + regenerate `parallel-pairing.md`.
+- [~] `perf(parallel): set every OpName threshold explicitly (no implicit global fallback)` — **started**: added `sqrt`/`square`/`norm`/`dot`(+`min`/`max`) bench cases, measured them (all `recommendedThreshold=never`), and set the 4 that are `OpName`s to explicit `'never'` — resolves the sqrt-vs-abs inconsistency. Remaining: `min`/`max` need adding to `OpName`; `distance`/`minMax`/`prod`/`std`/`histogram` still default to global (want bench cases); a **target-hardware** run (values here are from a dev box).
 - [ ] `refactor(parallel): delete worker paths that provably never win` — remove dead `'never'` dispatch branches whose benchmark shows no crossover at any feasible size; keep only genuinely-tunable ones. (Mirrors the WASM-branch cleanup already done in matrix.)
 - [ ] `fix(wasm): stabilize the poly-fit AS kernel + deterministic test` **or** `chore(wasm): retire the poly-fit kernel, document the JS path` — one atomic commit per kernel (poly-fit, Airy, argsort/rank). ⚠️ **Decision gate G2**: fix vs retire per kernel.
 - [ ] `docs: regenerate wasm-pairing + reconcile ARCHITECTURE §6a` after each kernel decision.

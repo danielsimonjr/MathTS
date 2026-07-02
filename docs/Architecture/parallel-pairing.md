@@ -8,8 +8,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      96 |
-| Parallel — disabled (all ops `'never'`)    |      17 |
+| Parallel — effective (op threshold active) |      92 |
+| Parallel — disabled (all ops `'never'`)    |      21 |
 | Non-parallel (no worker-pool path)         |     105 |
 | **Total**                                  | **218** |
 
@@ -52,7 +52,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `csc`                   | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
 | `cube`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `digamma`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `dot`                   | `dot`                         | 50000 (global)                        | arithmetic    |
 | `ellipticE`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `ellipticK`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `erfc`                  | `applyKernel`                 | 50000 (global kernel)                 | special       |
@@ -80,7 +79,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `logIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `max`                   | `max`                         | 50000 (global)                        | arithmetic    |
 | `min`                   | `min`                         | 50000 (global)                        | arithmetic    |
-| `norm`                  | `norm`                        | 50000 (global)                        | arithmetic    |
 | `normalCDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
 | `normalPDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
 | `parallelAutoCorr`      | `applyKernel`                 | 50000 (global kernel)                 | signal        |
@@ -98,7 +96,7 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelStatMin`       | `min`                         | 50000 (global)                        | statistics    |
 | `parallelStatMinMax`    | `minMax`                      | 50000 (global)                        | statistics    |
 | `parallelStatMode`      | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatNorm`      | `applyKernel`, `norm`         | 50000 (global kernel), 50000 (global) | statistics    |
+| `parallelStatNorm`      | `applyKernel`, `norm`         | 50000 (global kernel), never          | statistics    |
 | `parallelStatProd`      | `applyKernel`, `prod`         | 50000 (global kernel), 50000 (global) | statistics    |
 | `parallelStatQuantile`  | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
 | `parallelStatStd`       | `applyKernel`, `std`          | 50000 (global kernel), 50000 (global) | statistics    |
@@ -112,8 +110,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `sign`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `sinh`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `sinIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `sqrt`                  | `sqrt`                        | 50000 (global)                        | arithmetic    |
-| `square`                | `square`                      | 50000 (global)                        | arithmetic    |
 | `tanh`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 
 ## Disabled parallel paths (wired but always inline JS)
@@ -126,13 +122,17 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | `add`              | `add`               | arithmetic   |
 | `cos`              | `cos`               | trigonometry |
 | `divide`           | `divide`            | arithmetic   |
+| `dot`              | `dot`               | arithmetic   |
 | `exp`              | `exp`               | arithmetic   |
 | `log`              | `log`               | arithmetic   |
 | `mean`             | `mean`              | arithmetic   |
 | `multiply`         | `multiply`, `scale` | arithmetic   |
+| `norm`             | `norm`              | arithmetic   |
 | `parallelStatMean` | `mean`              | statistics   |
 | `parallelStatSum`  | `sum`               | statistics   |
 | `sin`              | `sin`               | trigonometry |
+| `sqrt`             | `sqrt`              | arithmetic   |
+| `square`           | `square`            | arithmetic   |
 | `std`              | `variance`          | arithmetic   |
 | `subtract`         | `subtract`          | arithmetic   |
 | `sum`              | `sum`               | arithmetic   |
@@ -144,7 +144,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 
 | Module        | Effective | Disabled | Non-parallel |
 | ------------- | --------: | -------: | -----------: |
-| arithmetic    |        20 |       12 |           13 |
+| arithmetic    |        16 |       16 |           13 |
 | bitwise       |         7 |        0 |            0 |
 | combinatorics |         0 |        0 |           21 |
 | complex       |         0 |        0 |            4 |
@@ -182,7 +182,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `distance`                 | 50000 (global)        |    ✓    |           1 |
 | `distanceMatrix`           | never                 |    —    |           0 |
 | `divide`                   | never                 |    —    |           1 |
-| `dot`                      | 50000 (global)        |    ✓    |           1 |
+| `dot`                      | never                 |    —    |           1 |
 | `erfc`                     | 100000                |    ✓    |           0 |
 | `exp`                      | never                 |    —    |           1 |
 | `fft2d`                    | never                 |    —    |           0 |
@@ -200,7 +200,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `minMax`                   | 50000 (global)        |    ✓    |           1 |
 | `multiply`                 | never                 |    —    |           1 |
 | `negate`                   | never                 |    —    |           1 |
-| `norm`                     | 50000 (global)        |    ✓    |           2 |
+| `norm`                     | never                 |    —    |           2 |
 | `normalCDF`                | never                 |    —    |           0 |
 | `parallelConv`             | never                 |    —    |           0 |
 | `parallelFFT`              | never                 |    —    |           0 |
@@ -215,8 +215,8 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `sign`                     | never                 |    —    |           0 |
 | `sin`                      | never                 |    —    |           1 |
 | `spectrogram`              | 65536                 |    ✓    |           0 |
-| `sqrt`                     | 50000 (global)        |    ✓    |           1 |
-| `square`                   | 50000 (global)        |    ✓    |           1 |
+| `sqrt`                     | never                 |    —    |           1 |
+| `square`                   | never                 |    —    |           1 |
 | `std`                      | 50000 (global)        |    ✓    |           1 |
 | `subtract`                 | never                 |    —    |           1 |
 | `sum`                      | never                 |    —    |           2 |

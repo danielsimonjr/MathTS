@@ -182,6 +182,13 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   cos: 'never',
   tan: 'never',
   sign: 'never',
+  // Added 2026-07-02 (WS-2): these element-wise ops were absent from the map and
+  // silently defaulted to the 50 000 global threshold — an inconsistency with their
+  // siblings above (surfaced by parallel-pairing.md). Benchmarked (tools/benchmark/
+  // parallel/run.ts sqrt square) — memory-bound, speedup 0.12–0.65×, no persistent
+  // break-even → 'never', matching the class.
+  sqrt: 'never',
+  square: 'never',
   // tensor contraction: parallelize when contracted-axis volume >= 8K
   tensordot: 8_192,
 
@@ -191,6 +198,13 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   variance: 'never',
   parallelStatProd: 'never',
   normalCDF: 'never',
+  // Added 2026-07-02 (WS-2): reductions that were absent from the map and defaulted
+  // to the global threshold; benchmarked memory-bound (0.09–1.19×, occasional noise
+  // spikes but no persistent win) → 'never'. (`min`/`max` are also memory-bound in
+  // the same benchmark but are not `OpName`s — they'd need adding to the union to be
+  // tunable here; tracked as a follow-up.)
+  norm: 'never',
+  dot: 'never',
 
   // signal: overhead dominates or break-even never reached
   parallelFFT: 'never',

@@ -196,11 +196,11 @@ describe('ComputePool', () => {
 
     // --- fallback: op not in per-op map uses global thresholdElements -------
 
-    it("op not in map ('dot') falls through to global thresholdElements", () => {
-      // 'dot' is not in DEFAULT_THRESHOLD_BY_OP → falls back to the pool's
+    it("op not in map ('matvec') falls through to global thresholdElements", () => {
+      // 'matvec' is not in DEFAULT_THRESHOLD_BY_OP → falls back to the pool's
       // thresholdElements (1000 in this test's pool).
-      expect(pool.shouldParallelize(999, 'dot')).toBe(false);
-      expect(pool.shouldParallelize(1000, 'dot')).toBe(true);
+      expect(pool.shouldParallelize(999, 'matvec')).toBe(false);
+      expect(pool.shouldParallelize(1000, 'matvec')).toBe(true);
     });
 
     it('no op argument uses global thresholdElements (backward compat)', () => {
@@ -258,8 +258,8 @@ describe('ComputePool', () => {
       await pool.initialize();
 
       expect(pool.shouldParallelize(1_000_000, 'add')).toBe(false);
-      // 'dot' is not overridden → falls back to 100
-      expect(pool.shouldParallelize(101, 'dot')).toBe(true);
+      // 'matvec' is not overridden → falls back to 100
+      expect(pool.shouldParallelize(101, 'matvec')).toBe(true);
 
       await pool.terminate();
     });

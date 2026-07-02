@@ -27,6 +27,12 @@ import {
   sin,
   exp,
   sign,
+  sqrt,
+  square,
+  norm,
+  dot,
+  min,
+  max,
   matmul,
   normalCDF,
   erfc,
@@ -173,6 +179,57 @@ const besselJBench: BenchCase = {
 // ---------------------------------------------------------------------------
 // Reductions — size = element count
 // ---------------------------------------------------------------------------
+
+// Element-wise ops that were absent from DEFAULT_THRESHOLD_BY_OP and so defaulted
+// to the global fallback (WS-2 inconsistency surfaced by parallel-pairing.md).
+const sqrtBench: BenchCase = {
+  operation: 'sqrt',
+  category: 'element-wise',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => sqrt(randPositive(size)),
+};
+
+const squareBench: BenchCase = {
+  operation: 'square',
+  category: 'element-wise',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => square(randFloat64(size)),
+};
+
+// Reductions absent from the per-op map (same WS-2 inconsistency).
+const normBench: BenchCase = {
+  operation: 'norm',
+  category: 'reduction',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => norm(randFloat64(size)),
+};
+
+const dotBench: BenchCase = {
+  operation: 'dot',
+  category: 'reduction',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => dot(randFloat64(size), randFloat64(size)),
+};
+
+const minBench: BenchCase = {
+  operation: 'min',
+  category: 'reduction',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => min(randFloat64(size)),
+};
+
+const maxBench: BenchCase = {
+  operation: 'max',
+  category: 'reduction',
+  sizeUnit: 'elements',
+  sizes: ELEMENTWISE_SIZES,
+  run: async (size) => max(randFloat64(size)),
+};
 
 const sumBench: BenchCase = {
   operation: 'sum',
@@ -408,6 +465,8 @@ export const ALL_BENCHES: BenchCase[] = [
   sinBench,
   expBench,
   signBench,
+  sqrtBench,
+  squareBench,
   // special / distribution
   normalCDFBench,
   erfcBench,
@@ -417,6 +476,10 @@ export const ALL_BENCHES: BenchCase[] = [
   meanBench,
   varianceBench,
   parallelStatProdBench,
+  normBench,
+  dotBench,
+  minBench,
+  maxBench,
   // linear algebra
   matmulBench,
   matrixPowerBench,

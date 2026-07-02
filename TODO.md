@@ -256,9 +256,15 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   distribution PDFs (studentTPDF/gammaPDF/betaPDF/noncentralChi2PDF, verified no worker dispatch in source)
   dropped from `parallel` → `—`; legend expanded + points to the generated report as source of truth.
   ARCHITECTURE.md §5 + DATAFLOW.md §3 reconciled to the report (effective set + thresholds + disabled note).
-  `functions.html` regenerated; `docs:functions:check` green. **Open follow-up (needs benchmark data, not a doc
-  fix):** the surfaced `DEFAULT_THRESHOLD_BY_OP` inconsistency — sqrt/square/norm/dot/min/max default to the 50k
-  global (active) while abs/negate/sum/mean are explicit `'never'`; retune via `tools/benchmark/parallel/run.ts`.
+  `functions.html` regenerated; `docs:functions:check` green.
+- ✅ **[done — WS-2 threshold consistency, benchmark-driven]** the surfaced `DEFAULT_THRESHOLD_BY_OP`
+  inconsistency is resolved: added `sqrt`/`square`/`norm`/`dot` bench cases to `operations.bench.ts`
+  (+`min`/`max`), measured them (`run.ts sqrt square norm dot min max` → all `recommendedThreshold=never`,
+  speedup 0.08–1.19× with no persistent break-even — memory-bound, matching `add`/`abs`/`sum`/`mean`), and set
+  `sqrt`/`square`/`norm`/`dot` to explicit `'never'` in `ComputePool.ts`. Parallel 417✓, functions
+  arithmetic/parallel 241✓. **Follow-ups:** `min`/`max` are also memory-bound but are **not `OpName`s** —
+  add them to the union to make them tunable; the remaining unmeasured global-default ops (`distance`,
+  `minMax`, `prod`, `std`, `histogram`) still want bench cases + a **target-hardware** run (this was a dev box).
 - ✅ **[HIGH-PRIORITY BUG — found + FIXED by WS-1 P2 oracle tests] `matrixSchur` was broken two ways.**
   (1) real 2×2 diagonal blocks were never triangularized (accepted as if complex pairs), so
   `matrixSchur([[2,1],[1,2]])` returned the input with diagonal `[2,2]` instead of eigenvalues `{1,3}`

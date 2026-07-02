@@ -2,8 +2,8 @@
   "generated": "2026-07-02",
   "total": 218,
   "parallelizedCount": 113,
-  "effectiveCount": 96,
-  "disabledCount": 17,
+  "effectiveCount": 92,
+  "disabledCount": 21,
   "nonParallelCount": 105,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
@@ -271,8 +271,8 @@
       "name": "dot",
       "file": "arithmetic.ts",
       "ops": ["dot"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "ellipticE",
@@ -495,8 +495,8 @@
       "name": "norm",
       "file": "arithmetic.ts",
       "ops": ["norm"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "normalCDF",
@@ -628,7 +628,7 @@
       "name": "parallelStatNorm",
       "file": "statistics.ts",
       "ops": ["applyKernel", "norm"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "thresholds": ["50000 (global kernel)", "never"],
       "effectiveness": "effective"
     },
     {
@@ -740,15 +740,15 @@
       "name": "sqrt",
       "file": "arithmetic.ts",
       "ops": ["sqrt"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "square",
       "file": "arithmetic.ts",
       "ops": ["square"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "std",
@@ -1080,8 +1080,8 @@
     },
     {
       "op": "dot",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["dot"]
     },
     {
@@ -1188,8 +1188,8 @@
     },
     {
       "op": "norm",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["norm", "parallelStatNorm"]
     },
     {
@@ -1278,14 +1278,14 @@
     },
     {
       "op": "sqrt",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["sqrt"]
     },
     {
       "op": "square",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["square"]
     },
     {
@@ -1327,8 +1327,8 @@
   ],
   "byFile": {
     "arithmetic.ts": {
-      "effective": 20,
-      "disabled": 12,
+      "effective": 16,
+      "disabled": 16,
       "none": 13
     },
     "bitwise.ts": {

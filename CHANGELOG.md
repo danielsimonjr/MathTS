@@ -28,6 +28,24 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Changed (2026-07-02) — WS-2: resolve the `DEFAULT_THRESHOLD_BY_OP` inconsistency
+
+The parallel-pairing report surfaced that `sqrt`/`square`/`norm`/`dot` (and
+`min`/`max`) were **absent** from `DEFAULT_THRESHOLD_BY_OP` and so silently
+defaulted to the 50 000 global threshold — i.e. parallelized ≥50k elements —
+while their memory-bound siblings (`add`/`abs`/`sum`/`mean`) were explicit
+`'never'`. Added bench cases for these ops to `tools/benchmark/parallel/operations.bench.ts`
+and measured them (`run.ts sqrt square norm dot min max`): every one is
+memory-bound (speedup 0.08–1.19×, no persistent break-even ⇒
+`recommendedThreshold=never`). Set `sqrt`/`square`/`norm`/`dot` to explicit
+`'never'` in `parallel/src/ComputePool.ts`, removing the inconsistency (these
+now run inline JS at all sizes — a pessimization removed, no correctness change).
+Parallel suite 417 pass (one fall-through test repointed from the now-mapped
+`'dot'` to the still-unmapped `'matvec'`); functions arithmetic/parallel 241 pass.
+`min`/`max` are memory-bound too but are not `OpName`s (not tunable via the map) —
+tracked as a follow-up, along with a target-hardware run for the remaining
+unmeasured defaults.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin `lu` + `qr`
 
 `matrix/tests/operations/lu-qr-oracle.test.ts` — external pins for the two
