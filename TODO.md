@@ -163,16 +163,23 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   the guard catches a shim.
 - ✅ **[B8 — reframed: the goal is dogfooding + maintenance, not element-wise WASM perf]** WASM is a
   large-input backend the standard packages already own (matrix's `BackendManager`); consumers get it
-  for free at scale. Dogfooding is **already achieved**: `tensor` routes decompositions through `matrix`
-  (inherits large-input WASM for the O(n²⁺) ops that actually benefit), `autograd` builds on `core`'s
-  `DUAL_UNARY_RULES`, `functions`/`expression` on `core/internal`. The benchmark
-  (`tools/benchmarks/`) only settled one sub-question — element-wise transcendentals are the one op-class
-  where even large-input WASM doesn't help (0.85–0.95×), so they correctly stay JS (dogfooded via the
-  shared rule table, no WASM code path). Full framing in `tools/benchmarks/README.md`.
-- ⬜ **[follow-up from B8] investigate `functions` `WASM_ELEMENTWISE_THRESHOLD = 1024` single-op path** —
-  the single-op benchmark suggests routing single element-wise ops to WASM above 1024 is a mild
-  pessimization (~0.9×). Verify against functions' ACTUAL dispatch (incl. the parallel/worker path,
-  which this single-thread bench didn't test) before changing; the _chain_ dispatch is justified.
+  for free at scale. Dogfooding is **already achieved**: `tensor.matMul` routes through `matrix` (inherits
+  the SIMD-WASM matmul — the one O(n²⁺) op that clearly benefits; `tensor`'s eig/svd run in JS since the
+  scalar WASM eig/svd kernels were retired), `autograd` builds on `core`'s `DUAL_UNARY_RULES`,
+  `functions`/`expression` on `core/internal`. Post-audit WASM winning surface: **SIMD matmul + LU/QR/
+  Cholesky**. Element-wise arithmetic (add/multiply) WASM was retired (memory-bound, 4–6× loss); the
+  element-wise **transcendental** dispatch (`functions` `array_<op>_ptr`) stays — its benchmarks conflict
+  and the loss was unproven (see the corrected `tools/benchmarks/README.md`). Full framing there.
+- ✅ **[investigated → NOT retired; docs corrected]** `functions` `WASM_ELEMENTWISE_THRESHOLD` single-op
+  path. Reconciled the conflicting benchmarks: `bench:elementwise` shows AS winning at scale but its JS
+  baseline uses a **non-inlinable indirect call** (`f(x)` via a lookup) that under-times JS ~2.4× and
+  overstates the win; B8 (direct `Math.exp`, inlined) shows tie-to-mild-loss. Neither is the real
+  comparison — the production fallback is `computePool.<op>`, not a bare loop. So "single-op WASM loses"
+  was an over-generalization; premise **unproven**, path **stays** (retiring on unproven evidence risks a
+  regression). Distinct from matrix element-wise arithmetic (memory-bound, cleanly 4–6× loss → retired).
+- ⬜ **[to settle definitively, if perf here matters]** benchmark `elementwiseUnaryDispatch(op,xs)` vs
+  `computePool.<op>(xs)` (the actual production alternative) — then raise/keep the 1024 threshold or
+  retire, per data. Low priority (the current path is at worst perf-neutral).
 - ✅ **[was BLOCKER] AS matmul kernel optimized — matrix's WASM matmul now beats JS 1.8–4.7×.** Added
   `matrix_multiply_simd_ptr` (f64x2 SIMD, ikj, ptr-ABI) and wired `WASMBackend.multiply` to it. The old
   scalar kernel lost to JS (0.41–0.73×); the SIMD kernel wins 1.81× (64²) → 4.68× (512²) vs JS ikj

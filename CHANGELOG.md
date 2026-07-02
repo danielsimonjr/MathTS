@@ -156,6 +156,20 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Docs (2026-07-02) — correct the element-wise-WASM benchmark claims (transcendental path kept)
+
+Investigated the TODO to "retire functions' single-op element-wise WASM path" and found the premise
+unproven — did **not** retire. The two benchmarks of the same `array_<op>_ptr` kernel disagree because
+`bench:elementwise`'s JS baseline calls the op through a **non-inlinable indirect lookup** (`f(x)`),
+under-timing JS ~2.4× and overstating the AS win, while B8's direct-`Math.exp` baseline shows
+tie-to-mild-loss; and neither matches the real production fallback (`computePool.<op>`, not a bare
+loop). Corrected the over-generalized "single-op element-wise WASM loses 0.85–0.95×" claim in
+`tools/benchmarks/README.md` + TODO, and fixed a now-false doc claim that "tensor inherits large-input
+WASM decompositions" (the WASM eig/svd were removed; only SIMD matmul + LU/QR/Cholesky remain). No
+code change; recorded a definitive `elementwiseUnaryDispatch` vs `computePool` benchmark as the way to
+settle it if perf there matters. (The matrix element-wise **arithmetic** retirement stands — that was
+memory-bound with a cleanly measured 4–6× loss.)
+
 ### Removed (2026-07-01) — delete the dead AS eig/svd kernels (WASM = SIMD matmul + decompositions)
 
 Completed the WASM eig/svd retirement by deleting the now-unused AssemblyScript kernels:

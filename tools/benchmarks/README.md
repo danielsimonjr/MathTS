@@ -27,22 +27,29 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
 
 **Conclusion:**
 
-- **Element-wise transcendentals are the one op-class where even large-input WASM does not
-  help** (0.85–0.95× single-op; scalar AS math ≤ V8 libm, plus the copy). So they correctly
-  stay JS — and `DUAL_UNARY_RULES`' `primal` functions stay `Math.*`. Chain-fusion wins only
-  modestly and doesn't fit `autograd` (each op must also compute the tangent, which the
-  primal-only kernels don't — the fusion breaks).
-- **Where large-input WASM _does_ win — the O(n²⁺) ops (SVD / eig / matmul / FFT) — the
-  dogfooding is already in place:** `tensor` routes its decompositions through `matrix`, whose
-  `BackendManager` engages WASM above threshold. So `tensor` inherits large-input WASM for the
-  ops that benefit, with zero duplicated kernels.
+- **Element-wise transcendentals (`functions`' `array_<op>_ptr` path) — inconclusive, NOT
+  retired.** ⚠️ Two benchmarks of the _same_ kernel disagree, and the reason is instructive:
+  `bench:elementwise` (`tools/benchmark/wasm/elementwise.bench.ts`) reports AS winning 1.4–2.5× at
+  scale, but its JS baseline calls the op through an **indirect function-pointer lookup**
+  (`const f = MATH_REF[op]; out[i] = f(x)`) that V8 **can't inline** — so it under-times JS by ~2.4×
+  and overstates the AS win. `elementwise-wasm-single.mjs` (B8), whose JS baseline calls
+  `Math.exp` **directly** (inlined), shows a **tie-to-mild-loss** (0.68–1.38× across sizes). Neither
+  is the real comparison: the production JS fallback is `computePool.<op>` (ComputePool, sync for
+  these ops), **not** a bare loop. So "single-op WASM loses" was an over-generalization — the honest
+  status is _unproven either way_, so the path **stays** (retiring on unproven evidence risks a
+  regression). Contrast the matrix element-wise **arithmetic** (add/multiply/transpose): memory-bound,
+  cleanly measured 4–6× loss (`backend-audit.mjs`) — correctly retired. Transcendentals are a
+  different (compute-bound) regime.
+- **WASM's actual winning surface (after the 2026-07-01 retirements): SIMD matmul + the
+  LU/QR/Cholesky decompositions.** The scalar element-wise-arithmetic, eig, and svd WASM paths were
+  retired/removed (they lost). `tensor.matMul` dogfoods the SIMD matmul via `matrix`; `tensor`'s
+  eig/svd run in **JS** (the WASM eig/svd kernels were deleted — they were 0.2–0.7× JS).
 - **Maintenance/dogfooding is achieved by the consolidation, not by a WASM code path:**
   `autograd` builds on `core`'s shared `DUAL_UNARY_RULES`, `functions`/`expression` build on
-  `core/internal` for number/object utils, `tensor` builds on `matrix`. One implementation
-  each; large-input WASM handled by the standard packages.
-- **Follow-up:** `functions`' `WASM_ELEMENTWISE_THRESHOLD = 1024` _single-op_ path looks like a
-  mild pessimization (single-op WASM never wins); verify against its actual dispatch incl. the
-  parallel/worker path before changing. The _chain_ dispatch is fine.
+  `core/internal` for number/object utils, `tensor` builds on `matrix`. One implementation each.
+- **Follow-up to settle the transcendental question definitively:** benchmark
+  `elementwiseUnaryDispatch(op, xs)` vs `computePool.<op>(xs)` (the _actual_ production alternative),
+  not vs a bare or indirect `Math.*` loop. Until then, leave the threshold/dispatch as-is.
 
 ## `matmul-wasm.mjs` — should `Tensor.matMul` dogfood matrix's accelerated matmul?
 
