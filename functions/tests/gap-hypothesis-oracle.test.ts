@@ -6,6 +6,7 @@ import {
   chiSquareTest,
   mannWhitneyTest,
   principalComponentAnalysis,
+  kolmogorovSmirnovTest,
 } from '../src/typed/hypothesis.js';
 
 /**
@@ -119,5 +120,21 @@ describe('principalComponentAnalysis — external oracle (known covariance spect
     expect(Math.abs(r.components[0][1])).toBeCloseTo(0, 5);
     expect(Math.abs(r.components[1][1])).toBeCloseTo(1, 5);
     expect(Math.abs(r.components[1][0])).toBeCloseTo(0, 5);
+  });
+});
+
+describe('kolmogorovSmirnovTest — external oracle (exact D statistic vs uniform CDF)', () => {
+  // One-sample KS D = maxᵢ( |（i+1)/n − F(xᵢ)|, |F(xᵢ) − i/n| ). With the uniform
+  // CDF F(x)=x the statistic is an exact rational, hand-derived and independently
+  // verified. (The empirical/asymptotic p-value is separate; the D statistic is the
+  // deterministic quantity the audit's SELF-REF concern was about.)
+  it('sample [0.1,0.5,0.9] vs uniform: D = 7/30', async () => {
+    const r = await kolmogorovSmirnovTest([0.1, 0.5, 0.9], (x) => x);
+    expectClose(r.statistic, 7 / 30, 1e-9);
+  });
+
+  it('sample [0.2,0.4,0.6,0.8] vs uniform: D = 0.2', async () => {
+    const r = await kolmogorovSmirnovTest([0.2, 0.4, 0.6, 0.8], (x) => x);
+    expectClose(r.statistic, 0.2, 1e-9);
   });
 });

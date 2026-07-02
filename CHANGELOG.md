@@ -91,6 +91,15 @@ the tridiagonal Toeplitz `{4−√2,4,4+√2}` returns unchanged) — needs an
 exceptional-shift mechanism. Repro is a skipped case in the oracle test; details
 in TODO.md.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin `kolmogorovSmirnovTest`
+
+Added exact `D`-statistic pins to `functions/tests/gap-hypothesis-oracle.test.ts`:
+against the uniform CDF `F(x)=x`, `[0.1,0.5,0.9] → D=7/30` and
+`[0.2,0.4,0.6,0.8] → D=0.2` (one-sample KS `D = maxᵢ(|（i+1)/n−F(xᵢ)|,|F(xᵢ)−i/n|)`,
+hand-derived + independently verified). Already correct (8/8 GREEN). Hypothesis
+domain 13→14 ORACLE, 2→1 SELF-REF (only `shapiroWilkTest`'s Royston `W` remains —
+needs a scipy reference); matrix total 329 ORACLE / 66 SELF-REF / 0 UNTESTED.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin `principalComponentAnalysis`
 
 Extended `functions/tests/gap-hypothesis-oracle.test.ts` with a known-covariance
