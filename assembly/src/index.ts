@@ -173,6 +173,7 @@ export {
 
   // Matrix multiplication
   matrix_multiply,
+  matrix_multiply_simd_ptr,
   matrix_vector_multiply,
   vector_matrix_multiply,
   matrix_outer,

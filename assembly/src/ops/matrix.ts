@@ -237,6 +237,49 @@ export function matrix_multiply(
 }
 
 /**
+ * SIMD matrix multiplication over raw linear memory (pointer ABI): C = A * B.
+ * A is (aRows x aCols) at aPtr, B is (aCols x bCols) at bPtr, C is (aRows x bCols) at cPtr;
+ * all row-major f64. ikj order (cache-friendly: streams B and C rows) with an f64x2 inner
+ * loop (2 columns per instruction). Caller owns the buffers; nothing is allocated here.
+ */
+export function matrix_multiply_simd_ptr(
+  aPtr: usize,
+  aRows: i32,
+  aCols: i32,
+  bPtr: usize,
+  bCols: i32,
+  cPtr: usize
+): void {
+  // Zero C.
+  const clen = aRows * bCols;
+  for (let t = 0; t < clen; t++) {
+    store<f64>(cPtr + ((<usize>t) << 3), 0.0);
+  }
+
+  const jSimd = bCols & ~1; // largest even column count
+  for (let i = 0; i < aRows; i++) {
+    const cRow = cPtr + ((<usize>(i * bCols)) << 3);
+    const aRow = aPtr + ((<usize>(i * aCols)) << 3);
+    for (let k = 0; k < aCols; k++) {
+      const aik = load<f64>(aRow + ((<usize>k) << 3));
+      const av = f64x2.splat(aik);
+      const bRow = bPtr + ((<usize>(k * bCols)) << 3);
+      let j = 0;
+      for (; j < jSimd; j += 2) {
+        const off = (<usize>j) << 3;
+        const cv = v128.load(cRow + off);
+        const bv = v128.load(bRow + off);
+        v128.store(cRow + off, f64x2.add(cv, f64x2.mul(av, bv)));
+      }
+      if (j < bCols) {
+        const off = (<usize>j) << 3;
+        store<f64>(cRow + off, load<f64>(cRow + off) + aik * load<f64>(bRow + off));
+      }
+    }
+  }
+}
+
+/**
  * Matrix-vector multiplication: y = A * x
  * A is (rows x cols), x is (cols), y is (rows)
  */

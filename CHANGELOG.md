@@ -156,6 +156,21 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Added (2026-07-01) — SIMD matmul kernel: matrix's WASM matmul now beats JS 1.8–4.7×
+
+The earlier B8 spike found matrix's WASM matmul was _slower_ than a JS loop — because the AS
+kernel, while ikj (cache-friendly), was **scalar**. Added `matrix_multiply_simd_ptr`
+(`assembly/src/ops/matrix.ts`): an `f64x2` SIMD, ikj, pointer-ABI kernel (raw data pointers, no
+AS-managed-array header indirection). Wired `matrix`'s `WASMBackend.multiply` to it (via the
+allocation's `bufferPtr`). Measured (`tools/benchmarks/matmul-wasm.mjs`, WASM initialized):
+**1.81× (64²) → 4.68× (512²) vs a cache-friendly JS ikj loop**, correctness exact vs JS. The win
+compounds SIMD (2×) with AS's tight codegen (`unchecked`, direct linear memory) vs V8's JIT
+(bounds checks). Verified: matrix WASM+backend suites 209/209.
+
+This is the prerequisite that _unblocks_ the dogfooding: with matrix's matmul genuinely fast for
+large inputs, `Tensor.matMul` (a naive JS triple loop) can now delegate to it and inherit the
+speedup (next commit) — WASM engages once `wasmBackend.initialize()` has run, JS ikj otherwise.
+
 ### Changed (2026-07-01) — expression builds on core for number/object utilities
 
 Same consolidation as functions: `expression/src/utils/number.ts` and `object.ts` are now
