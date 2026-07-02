@@ -10,21 +10,27 @@ import { MathJSDenseMatrix } from '../src/factories/matrix-bridge.js';
  * tests** — a live bug-risk, since the *distinct* `matrix/src/operations/`
  * Schur had two real eigenvalue bugs found the same session.
  *
- * Writing these oracles surfaced **three real bugs** in the shipped bridge
- * (`functions/src/factories/matrix-bridge.ts`), all fixed alongside this file:
+ * Writing these oracles surfaced real bugs, all fixed alongside this file:
  *
- *  1. `MathJSDenseMatrix` lacked the static `_swapRows` the dense `lup`
- *     partial-pivoting step calls — any LU needing a pivot swap threw.
+ *  1. `MathJSDenseMatrix` (the factory-scope `DenseMatrix`, in `matrix-bridge.ts`)
+ *     lacked the static `_swapRows` the dense `lup` partial-pivoting step calls —
+ *     any LU needing a pivot swap threw.
  *  2. `MathJSDenseMatrix.get` accepted only the mathjs array form `get([i,j])`,
  *     not the `@danielsimonjr/mathts-core` scalar form `get(i,j)` its
  *     `Matrix~>Array` typed-function conversion uses — so e.g. `multiply(R,Q)`
  *     inside `schur` (no direct `Matrix,Matrix` signature ⇒ Array-conversion
  *     fallback) crashed.
+ *  3. The factory `schur` itself was routed to the maintained, oracle-pinned
+ *     real-Schur primitive `matrixSchur` in `@danielsimonjr/mathts-matrix`,
+ *     replacing a broken in-package unshifted-QR fallback (its convergence check
+ *     crashed in the L2 matrix norm's `eigs(...).values.toArray()`).
  *
  * Every reference value is implementation-independent
  * (see [[feedback-oracle-tests-implementation-independent]]): exact hand-derived
- * `L`/`U`/`p` for `lup`, and convention-free invariants (`QᵀQ=I`, `R` upper-Δ,
- * `|R₀₀|=‖col₀‖`, `∏|diag R|=|det A|`) for `qr`, whose factors are sign-ambiguous.
+ * `L`/`U`/`p` for `lup`, convention-free invariants (`QᵀQ=I`, `R` upper-Δ,
+ * `|R₀₀|=‖col₀‖`, `∏|diag R|=|det A|`) for `qr` whose factors are sign-ambiguous,
+ * and known-spectrum `diag(T)` eigenvalues for `schur`. `slu` remains blocked
+ * (see the `describe.skip` note below).
  */
 
 /** Relative closeness (absolute for values ≤ 1). */
@@ -159,26 +165,6 @@ describe('qr — external oracle (convention-free invariants)', () => {
   });
 });
 
-/**
- * KNOWN-BROKEN — tracked as the next HIGH task in TODO.md (DGT diagnostic sweep).
- *
- * These oracles are correct and ready; the factory functions are broken through
- * deeper factory-layer interop, so the blocks are skipped (surfaced loudly, not
- * silently green):
- *
- *  - **schur** (unshifted-QR iteration) calls `norm(subtract(A, A0))` each sweep;
- *    the L2 matrix-norm path does `eigs(squaredX).values.toArray()`, and because
- *    the factory `subtract`/`multiply` on bridge matrices don't round-trip as
- *    bridge `Matrix`es, `squaredX` isn't a `Matrix` so `.values` isn't matricized
- *    (no `.toArray`). Cleanest root-cause fix: route the factory `schur` to the
- *    already-oracle-pinned `matrix/src/operations` Schur (the `native-accel`
- *    pattern used for `eigs`/`det`/`inv`), rather than repair the QR+norm+eigs
- *    chain. The two symmetric cases below are exactly the matrices that broke the
- *    matrix-layer Schur this session — so this oracle guards the same bug class.
- *  - **slu** (sparse LU via the CSparse port) throws inside `csAmd` (`add(a, at)`
- *    — "Too few arguments … index 2") for order 1 and inside `csSpsolve`
- *    (`divideScalar(x[j], undefined)`) for order 0.
- */
 describe('schur — external oracle (known spectrum via diag T)', () => {
   // The two symmetric cases are exactly the matrices that broke the matrix-layer
   // Schur this session — this oracle guards the same eigenvalue bug class. The
@@ -242,6 +228,14 @@ describe('schur — external oracle (known spectrum via diag T)', () => {
   });
 });
 
+/**
+ * KNOWN-BROKEN — tracked as a HIGH task in TODO.md (DGT diagnostic sweep). This
+ * oracle is correct and ready; `slu` (sparse LU via the CSparse port) throws
+ * inside the port itself — `csAmd` (`add(a, at)` — "Too few arguments … index 2")
+ * for order 1, and `csSpsolve` (`divideScalar(x[j], undefined)`) for order 0 —
+ * so the block is skipped (surfaced loudly, not silently green) until the port
+ * is repaired.
+ */
 describe.skip('slu — external oracle (|∏diag U| = |det A|) — BLOCKED (see TODO)', () => {
   it('order 1 [[4,3],[6,3]] (det −6): |∏diag U| = 6', () => {
     const A = sparse([
