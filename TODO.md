@@ -216,9 +216,18 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   step; hook documents how to gate it on `assembly/src/` changes if needed.
 - ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
   (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
-- ⬜ **[follow-up, maintenance] delete now-dead WASM element-wise AS kernels + `WASMBackend` bodies** —
-  they're no longer reachable (opKind gate). Removing them + shrinking the AS surface is the maintenance
-  win; do after the decomposition audit so the kernel cleanup is one pass.
+- ✅ **[done — WASMBackend bodies] removed the dead WASM branches** in the 11 gated element-wise/
+  transpose/reduction methods (add/subtract/multiply-elementwise/divide/scale/abs/negate/transpose/
+  sum/norm/dot) → pure `jsBackend` delegation; trimmed `AsModule` to just `matrix_multiply_simd_ptr`
+  (+ decompositions); repointed the init sentinel to it. matrix 743/7skip, tensor 389, autograd 258,
+  typecheck 0, eslint clean. ~150 lines of dead code gone.
+- ⚠️ **[decided NOT to delete the AS element-wise kernels]** — unlike the self-contained eig/svd files,
+  `matrix_add`/`sub`/`mul_elementwise`/`scale`/`neg`/`transpose` + `array_abs` live in the general-purpose
+  AS matrix/array library (`ops/matrix.ts` — which also holds the crown-jewel `matrix_multiply_simd_ptr`
+  — and `ops/array.ts`), are documented in `assembly/README.md`, and `matrix_transpose` is referenced in
+  the AS bindings. They have no live JS consumer now, but surgically deleting ~7 functions from the
+  matmul-holding file for a marginal binary saving is high-risk / low-value + removes a coherent AS API.
+  Kept as the general AS library.
 - ⬜ **[matmul threshold check]** SIMD matmul wins even at 64² (8.9×), so matrix's `wasmThreshold`
   (1000 elems ≈ 32²) could likely drop — but the JS-ikj fallback is fine, so low priority.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came

@@ -156,6 +156,23 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-02) — remove the dead WASM branches from WASMBackend's element-wise methods
+
+The element-wise / transpose / reduction ops were retired from WASM earlier (memory-bound, 4–6× slower
+than JS — `backend-audit.mjs`) via `shouldUseWasm`'s `opKind` gate, which left 11 method bodies with an
+unreachable WASM branch after the `jsBackend` fallback. Simplified all 11 (add/subtract/
+multiplyElementwise/divideElementwise/scale/abs/negate/transpose/sum/norm/dot) to pure `jsBackend`
+delegation, trimmed `AsModule` to the one kernel this backend still calls (`matrix_multiply_simd_ptr`
++ the LU/QR/Cholesky decomposition decls), and repointed the init sentinel to it. ~150 lines of dead
+code removed; behavior identical (matrix 743 pass / 7 skip, tensor 389/389, autograd 258/258, typecheck
+0, eslint clean).
+
+Deliberately did **not** delete the AS element-wise *kernels* themselves: unlike the self-contained
+eig/svd files, `matrix_add`/`sub`/`mul_elementwise`/`scale`/`neg`/`transpose` + `array_abs` live in the
+general-purpose AS matrix/array library (`ops/matrix.ts`, which also holds the SIMD matmul kernel, and
+`ops/array.ts`), are documented, and are referenced by the AS bindings. Surgically deleting them from
+the matmul-holding file is high-risk / low-value and removes a coherent (if currently-unused) AS API.
+
 ### Docs (2026-07-02) — correct the element-wise-WASM benchmark claims (transcendental path kept)
 
 Investigated the TODO to "retire functions' single-op element-wise WASM path" and found the premise
