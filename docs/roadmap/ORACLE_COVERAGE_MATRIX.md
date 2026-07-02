@@ -41,14 +41,14 @@
 | Arithmetic | 49 | 39 (0 ext / 39 cf) | 10 | 0 |
 | Trigonometry | 19 | 3 (0 ext / 3 cf) | 16 | 0 |
 | Statistics (typed) | 24 | 20 (0 ext / 20 cf) | 4 | 0 |
-| Hypothesis tests | 15 | 10 (8 ext / 2 cf) | 5 | 0 |
+| Hypothesis tests | 15 | 12 (8 ext / 4 cf) | 3 | 0 |
 | Linear algebra / decompositions | 43 | 33 (ext+cf) | 10 | 0 |
 | Signal | 55 | 38 (ext+cf) | 17 | 0 |
 | CAS / calculus | 44 | 37 (ext+cf) | 7 | 0 |
 | Geometry | 40 | 38 (ext+cf) | 2 | 0 |
 | Bitwise | 7 | 7 (cf, exact-integer) | 0 | 0 |
 | Optimization / regression / numeric utils | 15 | 13 (ext+cf) | 2 | 0 |
-| **Total** | **395** | **322** | **73** | **0** |
+| **Total** | **395** | **324** | **71** | **0** |
 
 **Headline findings**
 
@@ -258,15 +258,14 @@ functions are purely self-referential (directional `p<0.05` + seq-vs-parallel co
 | studentizedRangeCDF / Quantile | ORACLE(ext) | gap-tukey | CDF(3.5,4,20)≈0.9050415494, Q(0.95,4,20)≈3.9582935609 vs scipy |
 | tukeyHSD | ORACLE(ext) | gap-tukey | pairwise p 0.00131624/0.31437432/0.00011624 vs scipy.stats.tukey_hsd |
 
-**hypothesis: 15 fns — 10 ORACLE, 5 SELF-REF, 0 UNTESTED.** WS-1 P2 pinned
-`studentTTest` + `anova` (`functions/tests/gap-hypothesis-oracle.test.ts`) to
-exact hand-derived statistics + a closed-form ANOVA p-value (`F(2,6)` survival =
-`(1+2x/6)⁻³` = 0.001 at F=27) and published Student-t critical-value brackets;
-both already correct. Remaining SELF-REF (5): `chiSquareTest`,
-`kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`,
-`principalComponentAnalysis` — the permutation tests return stochastic empirical
-p-values, so pin the deterministic `.statistic` (and PCA eigenvalues of a
-known-spectrum matrix).
+**hypothesis: 15 fns — 12 ORACLE, 3 SELF-REF, 0 UNTESTED.** WS-1 P2 pinned
+`studentTTest` + `anova` + `chiSquareTest` + `mannWhitneyTest`
+(`functions/tests/gap-hypothesis-oracle.test.ts`) to exact hand-derived statistics
++ closed-form p-values where they exist (ANOVA `F(2,6)`=`(1+2x/6)⁻³`=0.001 at F=27;
+χ²₂ survival `exp(−x/2)`) and published-critical-value brackets (Student-t df=4,
+Φ(1.96) for Mann-Whitney U=0); all already correct. Remaining SELF-REF (3):
+`kolmogorovSmirnovTest`, `shapiroWilkTest`, `principalComponentAnalysis` — pin the
+deterministic KS `D`, and PCA eigenvalues of a known-spectrum covariance matrix.
 
 ---
 
@@ -477,13 +476,13 @@ distribution CDF/quantiles). Ordered by value:
    closed-form oracles (uniform, exponential, `Beta(a,1)=p^(1/a)`, symmetric-median);
    both were already correct (7/7 GREEN, no source change). Remaining: promote the
    factory `gammaDist.quantile` / `betaDist.quantile` self-ref inversions to external pins.
-3. **The core `hypothesis.ts` statistics/p-values.** ✅ `studentTTest` + `anova` **DONE
-   (WS-1 P2)** — `functions/tests/gap-hypothesis-oracle.test.ts` pins exact statistics +
-   a closed-form ANOVA p-value + Student-t brackets (3/3 GREEN, already correct).
-   Remaining (5): `chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest`,
-   `shapiroWilkTest`, `principalComponentAnalysis` — pin the deterministic `.statistic`
-   (the permutation tests' `pValueEmpirical` is stochastic) and PCA eigenvalues of a
-   known-spectrum matrix (`numpy.linalg.eig`).
+3. **The core `hypothesis.ts` statistics/p-values.** ✅ `studentTTest` + `anova` +
+   `chiSquareTest` + `mannWhitneyTest` **DONE (WS-1 P2)** —
+   `functions/tests/gap-hypothesis-oracle.test.ts` pins exact statistics + closed-form
+   p-values (ANOVA, χ²₂) + critical-value brackets (5/5 GREEN, all already correct).
+   Remaining (3): `kolmogorovSmirnovTest` (pin deterministic `D`), `shapiroWilkTest`
+   (Royston `W` — needs a scipy reference), `principalComponentAnalysis` (eigenvalues of
+   a known-spectrum covariance matrix, `numpy.linalg.eig`).
 
 ### Tier 2 — high value
 

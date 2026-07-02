@@ -28,6 +28,18 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin `chiSquareTest` + `mannWhitneyTest`
+
+Extended `functions/tests/gap-hypothesis-oracle.test.ts` to two more core
+hypothesis tests the audit flagged SELF-REF. `chiSquareTest` goodness-of-fit
+`[10,20,30]` vs `[20,20,20]`: exact `χ²=10`, and the p-value is pinned to the
+**exact χ²₂ survival** `exp(−x/2) = exp(−5)` (no stats package). `mannWhitneyTest`
+`[1,2,3]` vs `[4,5,6]` (fully separated): exact `U=0`, with the default
+normal-approximation p-value bracketed via `Φ(1.96)=0.975`. Both statistics
+independently arithmetic-verified; both functions already correct (5/5 GREEN).
+Hypothesis domain: 10→12 ORACLE, 5→3 SELF-REF; matrix total 324 ORACLE /
+71 SELF-REF / 0 UNTESTED.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin `studentTTest` + `anova`
 
 `functions/tests/gap-hypothesis-oracle.test.ts` — external-oracle pins for two of

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { studentTTest, anova } from '../src/typed/hypothesis.js';
+import { studentTTest, anova, chiSquareTest, mannWhitneyTest } from '../src/typed/hypothesis.js';
 
 /**
  * External-oracle pins for the core `hypothesis.ts` tests the WS-1 audit flagged
@@ -15,9 +15,12 @@ import { studentTTest, anova } from '../src/typed/hypothesis.js';
  *    published Student-t two-tailed critical values (df=4: t₀.₀₅=2.776, t₀.₀₂=3.747,
  *    t₀.₀₁=4.604).
  *
- * Covers `studentTTest` and `anova`; the permutation tests (KS/MW/W/chi²) return
- * stochastic empirical p-values and need a statistic-only or seeded approach —
- * tracked as remaining WS-1 P2 work.
+ * Covers `studentTTest`, `anova`, `chiSquareTest`, and `mannWhitneyTest`. For the
+ * latter two, the *statistic* is deterministic and exactly hand-derivable, so it is
+ * pinned directly; the χ² goodness-of-fit p-value is the exact χ²₂ survival
+ * `exp(−x/2)`, and the Mann-Whitney p-value (a deterministic normal approximation
+ * at the default settings) is bracketed by the Φ(1.96)=0.975 fact. `kolmogorovSmirnovTest`
+ * / `shapiroWilkTest` / `principalComponentAnalysis` remain — tracked WS-1 P2 work.
  */
 
 /** Relative closeness (absolute for values ≤ 1). */
@@ -64,5 +67,28 @@ describe('anova — external oracle (exact F and closed-form p-value)', () => {
     // For numerator df=2 the F survival is exactly (1 + 2x/d₂)^(−d₂/2);
     // at x=27, d₂=6: (1+9)^(−3) = 10⁻³ = 0.001.
     expectClose(r.pValue, 0.001, 1e-6);
+  });
+});
+
+describe('chiSquareTest — external oracle (exact statistic + closed-form χ²₂ p)', () => {
+  it('goodness-of-fit [10,20,30] vs [20,20,20]: χ²=10, p=exp(−5)', async () => {
+    // Σ(O−E)²/E = 100/20 + 0 + 100/20 = 10.  df = k−1 = 2.
+    const r = await chiSquareTest([10, 20, 30], [20, 20, 20]);
+    expectClose(r.statistic, 10, 1e-9);
+    // χ²₂ survival is exactly exp(−x/2) ⇒ p(10) = exp(−5). No stats package needed.
+    expectClose(r.pValue, Math.exp(-5), 1e-6);
+  });
+});
+
+describe('mannWhitneyTest — external oracle (exact U statistic)', () => {
+  it('[1,2,3] vs [4,5,6] fully separated: U = 0', async () => {
+    // Ranks 1,2,3 vs 4,5,6 ⇒ R₁=6, U₁ = 6 − n₁(n₁+1)/2 = 0, U = min(U₁, n₁n₂−U₁) = 0.
+    const r = await mannWhitneyTest([1, 2, 3], [4, 5, 6]);
+    expectClose(r.uStatistic, 0, 1e-9);
+    // Default p is the deterministic normal approximation 2·Φ((U−μ)/σ) with
+    // μ=4.5, σ=√5.25 ⇒ z≈−1.964; since Φ(1.96)=0.975, the two-tailed p sits just
+    // under 0.05.  Bracket it (externally grounded, robust to the approximation).
+    expect(r.pValue).toBeGreaterThan(0.04);
+    expect(r.pValue).toBeLessThan(0.055);
   });
 });
