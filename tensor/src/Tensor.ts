@@ -1,13 +1,14 @@
 /**
  * Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
- * compute primitive behind @danielsimonjr/mathts-tensor. Construction +
- * elementwise here; einsum / matMul / transpose / reshape in the same
- * file, added by the next task.
+ * compute primitive behind @danielsimonjr/mathts-tensor. Construction,
+ * elementwise, einsum, matMul, transpose, reshape live here.
  *
- * Naive O(n) algorithms — a correctness baseline. Mirrors the storage
- * pattern of DenseMatrix (Float64Array, row-major) but generalised to
- * arbitrary rank, filling the `Matrix<T>` base class's documented
- * "generic template for future rank-N support".
+ * Element-wise and data-movement ops are straightforward O(n) loops (a
+ * correctness baseline). Heavy ops delegate to the standard packages rather
+ * than reinventing them: `matMul` uses matrix's backend-selected multiply
+ * (SIMD-WASM for large inputs), and the decompositions (in `operations/`)
+ * route through matrix's `svd`/`eig`/`lu`/`qr`/`cholesky`. Storage mirrors
+ * DenseMatrix (Float64Array, row-major), generalised to arbitrary rank.
  */
 
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
