@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.13
+
+### Patch Changes
+
+- Scope the WASM backend to where SIMD actually wins. Matmul (SIMD `f64x2` kernel) and the dense LU/QR/Cholesky/inverse/determinant decompositions stay on WASM; element-wise ops, transpose, reductions, `eig`, and `svd` now run on JS — they were measured 0.2–6× slower on WASM (memory-bound or scalar). Removed the dead WASM branches from `WASMBackend`, repointed `eigWasm`/`svdWasm`/`spectralRadiusWasm` to the JS implementations, and dropped the matmul WASM threshold 500→256 (the SIMD kernel wins from 16²). Results are unchanged; small matmuls are faster and the backend carries less dead code.
+
 ## 0.1.12
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.3
+
+### Patch Changes
+
+- `Tensor.matMul` now delegates to matrix's SIMD-WASM matmul (via `backendManager.multiply`) instead of a naive JS triple loop — 3.6–6.8× faster at 128²–512², results identical.
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.1.13
+
 ## 0.2.2
 
 ### Patch Changes

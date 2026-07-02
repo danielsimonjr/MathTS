@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-wasm
 
+## 0.2.0
+
+### Minor Changes
+
+- Remove the scalar eig/svd AssemblyScript kernels (`matrix_eig_symmetric`, `matrix_eig_general`, `matrix_spectral_radius`, `matrix_svd`, `matrix_singular_values`) — they were 0.2–0.7× the JS path and worsened with size, and are no longer used (matrix's eig/svd run on JS). The SIMD matmul kernel and the LU/QR/Cholesky/inverse/determinant decompositions — the measured WASM wins — are kept. Binary drops from 30 to 28 source files (318→314 exports).
+
 ## 0.1.5
 
 ### Patch Changes (Special-function accuracy fixes)
@@ -15,7 +21,7 @@ All 140 special-function cases and 30 decomposition checks now pass to <1e-9.
   unstable when n > x, so those cases now use Miller's backward recurrence
   (previously forward was used whenever n <= 20, giving up to ~1e-3 error,
   e.g. J5(1)).
-- **Miller backward recurrence off-by-one fixed**: it returned J_{n+1} instead
+- **Miller backward recurrence off-by-one fixed**: it returned J\_{n+1} instead
   of J_n (latent — previously only reachable for n > 20).
 - **Airy Ai/Bi negative-argument asymptotic fixed**: the P/Q series were
   non-alternating and the sin/cos pairing was wrong (DLMF 9.7.9/9.7.10),
