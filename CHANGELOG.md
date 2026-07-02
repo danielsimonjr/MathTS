@@ -28,6 +28,17 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin `principalComponentAnalysis`
+
+Extended `functions/tests/gap-hypothesis-oracle.test.ts` with a known-covariance
+PCA oracle. Data with two orthogonal mean-zero columns (sample variances 16/3 and
+4/3, zero covariance) has covariance `diag(16/3, 4/3)`, so the explained-variance
+ratios are exactly `[0.8, 0.2]` (eigenvalues / trace, convention-free) and the
+principal components are axis-aligned (compared by magnitude — eigenvectors are
+sign-ambiguous). PCA already correct (6/6 GREEN). Hypothesis domain: 12→13 ORACLE,
+3→2 SELF-REF; matrix total 325 ORACLE / 70 SELF-REF / 0 UNTESTED. Remaining
+hypothesis SELF-REF: `kolmogorovSmirnovTest`, `shapiroWilkTest`.
+
 ### Tests (2026-07-02) — WS-1 P2: oracle-pin `chiSquareTest` + `mannWhitneyTest`
 
 Extended `functions/tests/gap-hypothesis-oracle.test.ts` to two more core

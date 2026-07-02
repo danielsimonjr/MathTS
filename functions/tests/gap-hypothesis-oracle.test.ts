@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
-import { studentTTest, anova, chiSquareTest, mannWhitneyTest } from '../src/typed/hypothesis.js';
+import {
+  studentTTest,
+  anova,
+  chiSquareTest,
+  mannWhitneyTest,
+  principalComponentAnalysis,
+} from '../src/typed/hypothesis.js';
 
 /**
  * External-oracle pins for the core `hypothesis.ts` tests the WS-1 audit flagged
@@ -90,5 +96,28 @@ describe('mannWhitneyTest — external oracle (exact U statistic)', () => {
     // under 0.05.  Bracket it (externally grounded, robust to the approximation).
     expect(r.pValue).toBeGreaterThan(0.04);
     expect(r.pValue).toBeLessThan(0.055);
+  });
+});
+
+describe('principalComponentAnalysis — external oracle (known covariance spectrum)', () => {
+  it('diagonal covariance eigenvalues (16/3, 4/3) ⇒ explained [0.8, 0.2], axis-aligned PCs', () => {
+    // Two orthogonal, mean-zero columns: col1=[2,−2,2,−2] (sample var 16/3),
+    // col2=[1,1,−1,−1] (sample var 4/3), sample covariance 0. So the covariance
+    // matrix is diag(16/3, 4/3); trace 20/3; explained ratios 0.8 and 0.2.
+    const data = [
+      [2, 1],
+      [-2, 1],
+      [2, -1],
+      [-2, -1],
+    ];
+    const r = principalComponentAnalysis(data);
+    expectClose(r.explained[0], 0.8, 1e-6);
+    expectClose(r.explained[1], 0.2, 1e-6);
+    // First PC aligns with the high-variance axis (col 1); second with col 2.
+    // Eigenvectors are sign-ambiguous, so compare magnitudes.
+    expect(Math.abs(r.components[0][0])).toBeCloseTo(1, 5);
+    expect(Math.abs(r.components[0][1])).toBeCloseTo(0, 5);
+    expect(Math.abs(r.components[1][1])).toBeCloseTo(1, 5);
+    expect(Math.abs(r.components[1][0])).toBeCloseTo(0, 5);
   });
 });
