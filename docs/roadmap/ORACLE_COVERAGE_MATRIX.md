@@ -42,13 +42,13 @@
 | Trigonometry | 19 | 3 (0 ext / 3 cf) | 16 | 0 |
 | Statistics (typed) | 24 | 20 (0 ext / 20 cf) | 4 | 0 |
 | Hypothesis tests | 15 | 13 (8 ext / 5 cf) | 2 | 0 |
-| Linear algebra / decompositions | 43 | 34 (ext+cf) | 9 | 0 |
+| Linear algebra / decompositions | 43 | 36 (ext+cf) | 7 | 0 |
 | Signal | 55 | 38 (ext+cf) | 17 | 0 |
 | CAS / calculus | 44 | 37 (ext+cf) | 7 | 0 |
 | Geometry | 40 | 38 (ext+cf) | 2 | 0 |
 | Bitwise | 7 | 7 (cf, exact-integer) | 0 | 0 |
 | Optimization / regression / numeric utils | 15 | 13 (ext+cf) | 2 | 0 |
-| **Total** | **395** | **326** | **69** | **0** |
+| **Total** | **395** | **328** | **67** | **0** |
 
 **Headline findings**
 
@@ -287,8 +287,8 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | **pinv** (svd.ts) | **SELF-REF** | svd | Moore-Penrose identities only |
 | matrixPinv (pinv.ts) | ORACLE(cf) | pinv | analytical inverse (1/18)[[11,−4,1]…] |
 | **lowRankApprox** | **SELF-REF** | svd, typed-matrix-ops | reconstruction + monotone error |
-| **qr** | **SELF-REF** | qr, wasm/accuracy, wasm/decompositions-as | A=Q·R + QᵀQ=I only; no pinned R |
-| **lu** | **SELF-REF** | lu, wasm/accuracy, wasm/decompositions-as | P·A=L·U + structure; exact U in comment, not asserted |
+| `qr` | ORACLE(cf) | lu-qr-oracle | `|R₀₀|=‖col₀‖=14`, `∏|diag R|=|det A|=85750`, QᵀQ=I (WS-1 P2) |
+| `lu` | ORACLE(cf) | lu-qr-oracle | exact hand-computed L/U/P (no-pivot 3×3 + pivoting 2×2) (WS-1 P2) |
 | cholesky (matrix + functions) | ORACLE(cf) | cholesky, matrix-ops | L=[[2,0],[1,√2]] |
 | matrixExpm / matrixLogm / matrixSqrtm | ORACLE(cf+ext) | expm, logm, sqrtm | closed forms + SciPy rotation ref (1/√2)[[1,−1],[1,1]] |
 | `matrixSchur` | ORACLE(cf) | schur-eigenvalue-oracle | T diagonal = known spectra (sym 2×2/3×3/4×4, non-sym, complex-pair-kept); **fixed 2 bugs** |
@@ -304,11 +304,10 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | logdet | ORACLE(ext) | gap-wave-c | numpy.linalg.slogdet 4.204692619390966 |
 | **qz** | **SELF-REF** | gap-qz | cites scipy but "factors not unique" → reconstruction only |
 
-**linalg: 43 fns — 34 ORACLE, 9 SELF-REF, 0 UNTESTED.** `matrixSchur` is now
-eigenvalue-pinned (WS-1 P2) — and the pin surfaced + fixed two real bugs (see
-Tier-1 #1). The remaining 9 SELF-REF (`qr`, `lu`, `hessenbergForm`,
-`polarDecomposition`, `qz`, WASM `inv`, `svdWasm`, svd-`pinv`, `lowRankApprox`) are
-the top decomposition oracle-pin candidates.
+**linalg: 43 fns — 36 ORACLE, 7 SELF-REF, 0 UNTESTED.** `matrixSchur` (eigenvalues,
+2 bugs fixed), `lu`, and `qr` are now oracle-pinned (WS-1 P2). The remaining 7
+SELF-REF (`hessenbergForm`, `polarDecomposition`, `qz`, WASM `inv`, `svdWasm`,
+svd-`pinv`, `lowRankApprox`) are the top decomposition oracle-pin candidates.
 
 ---
 
@@ -468,12 +467,11 @@ distribution CDF/quantiles). Ordered by value:
 
 ### Tier 1 — highest value
 
-1. **Decomposition factor/value pins.** `qr`, `lu`, `hessenbergForm`,
-   `polarDecomposition`, `qz`, WASMBackend `inv`, `svdWasm`, svd-`pinv`, `lowRankApprox`
-   are verified **only by reconstruction/orthogonality** — a systematically-biased
-   factorization passes today. Pin the classic Householder `R`
-   (`[[12,−51,4]…]` → R=[[14,21,−14],[0,175,−70],[0,0,35]]), the exact `L`/`U`, and a
-   known analytical `inv`. (`matrixSchur` is now done — see below.)
+1. **Decomposition factor/value pins.** ✅ `matrixSchur`, `lu`, `qr` **DONE (WS-1 P2)**.
+   Remaining: `hessenbergForm`, `polarDecomposition`, `qz`, WASMBackend `inv`, `svdWasm`,
+   svd-`pinv`, `lowRankApprox` are verified **only by reconstruction/orthogonality** — a
+   systematically-biased factorization passes today. Pin the exact factors / a known
+   analytical `inv` / pinned singular values.
 
    > **🐞 `matrixSchur` — two bugs surfaced AND FIXED by the WS-1 P2 eigenvalue oracle**
    > (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`). **(1)** real 2×2 diagonal

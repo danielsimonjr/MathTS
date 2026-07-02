@@ -28,6 +28,17 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin `lu` + `qr`
+
+`matrix/tests/operations/lu-qr-oracle.test.ts` — external pins for the two
+decompositions the audit flagged SELF-REF (reconstruction/orthogonality only).
+`lu`: exact hand-computed `L`/`U`/`P` for a no-pivot 3×3 (`P=[0,1,2]`, `U` diagonal
+`[4,1.5,2.5]`, multipliers `0.5`/`0.25`/`1⁄6`, det 15) and a pivoting 2×2
+(`P=[1,0]`). `qr`: convention-free invariants on the classic Householder matrix —
+`|R₀₀| = ‖col₀‖ = 14`, `∏|diag R| = |det A| = 85750`, `QᵀQ = I`, `A = QR`. Both
+already correct (3/3 GREEN). Linalg domain: 34→36 ORACLE; matrix total 328 ORACLE
+/ 67 SELF-REF / 0 UNTESTED.
+
 ### Fixed (2026-07-02) — WS-1 P2: `matrixSchur` Francis double-shift stall
 
 Second `matrixSchur` bug from the eigenvalue oracle: the Francis double-shift
