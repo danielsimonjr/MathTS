@@ -297,6 +297,36 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   **Now in progress:** WS-1 P2 (above) + WS-2 threshold retune (sqrt/square/norm/dot done).
   **Decision gates awaiting maintainer:** G1 fast-check dep · G2 wasm kernel fix-vs-retire · G3 unit-dispatch
   spec · G4 notebook host · G5 plotting approach.
+
+### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
+
+Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,
+parallel-pairing, wasm-pairing). Scale: 845 files / 154,494 LOC / 4,093 exports / **0 runtime cycles**.
+Genuine issues found (verified, not report artifacts):
+
+- 🐞 **[HIGH — untested shipped decompositions, bug-risk] the factory-layer decompositions have ZERO direct
+  tests.** `functions/src/algebra/decomposition/{lup,qr,schur,slu}.ts` are **shipped** (wired via
+  `factories/index.ts` → `createLup`/`createQr`/`createSchur`/`createSlu`) but no test imports them (verified).
+  These are a **distinct** implementation from the `matrix/src/operations/` ones I just oracle-pinned — and the
+  matrix-layer Schur had **2 real eigenvalue bugs** found this session, so the untested factory `schur`/`qr` are
+  a live bug-risk. Add oracle-pinned tests (same implementation-independent technique — see
+  [[feedback-oracle-tests-implementation-independent]]); check `createSchur` for the same real-2×2 / stall bugs.
+- ⬜ **[MED — activated algebra/CAS layer flagged no-direct-test] audit real vs transitive coverage.**
+  TEST_COVERAGE lists `functions/src/algebra/` files with no direct-import test: `simplify`(+`util`/`wildcards`),
+  `rationalize`, `derivative`, `polynomialRoot`, `lyap`, `resolve`, `leafCount`, plus `expression/src/error/MathjsError.ts`.
+  Several are likely covered transitively (CAS/simplify tests exist) — audit which are genuinely untested and pin those.
+- ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
+  MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
+  (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
+  `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
+  union first). Same class as the sqrt/square/norm/dot fix already landed.
+- ⬜ **[LOW — structural smell] 2 type-only import cycles in matrix.** `DenseMatrix.ts ↔ dense/arithmetic.ts` and
+  `DenseMatrix.ts ↔ dense/reduction.ts`. Safe (type-only, erased at runtime; 0 runtime cycles) but a smell — could
+  extract the shared type interface to break them. Low priority.
+- ℹ️ **[known, tracked elsewhere]** unused-analysis still 452 (mostly re-export false positives → DGT fix is task #8;
+  ~30 real DELETE candidates → WS-3 Phase-2b, per `EXPORT_TRIAGE.md`); wasm `js-fallback` broken kernels (poly-fit/
+  Airy/argsort-rank) → gate **G2**. Not re-filed here.
+
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
