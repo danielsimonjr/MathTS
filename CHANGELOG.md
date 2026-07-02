@@ -28,6 +28,30 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Docs (2026-07-02) — sync design docs + `functions.md` to the parallel-pairing data
+
+Used the new generated `parallel-pairing.md` to correct **live drift** in the
+user-facing docs — several functions were labeled `parallel` that the report
+shows never actually dispatch to workers.
+
+- **`docs/reference/functions.md`**: introduced a **`parallel†`** Accel label for
+  worker-pool paths that are threshold-disabled (`'never'` → always inline JS) and
+  relabeled the affected element-wise / reduction functions (`add`, `subtract`,
+  `multiply`, `divide`, `unaryMinus`, `abs`, `exp`, `log`, `sin`/`cos`/`tan`,
+  `parallelStatSum`, `parallelStatMean`). Corrected four distribution PDFs
+  (`studentTPDF`, `gammaPDF`, `betaPDF`, `noncentralChi2PDF`) from `parallel` to
+  `—`: their `Float64Array` branch returns a `Promise` but computes inline (no
+  worker dispatch — verified in source). Expanded the Accel legend and added a
+  pointer to the generated report as the authoritative effective-vs-disabled map.
+- **`docs/Architecture/ARCHITECTURE.md`** §5: replaced the stale "40+ parallel
+  functions: elementwise (add, subtract, multiply…)" line with the report's
+  effective set + thresholds + the disabled-`'never'` note, referencing
+  `parallel-pairing.md` (the parallel analog of §6a's `wasm-pairing.md`).
+- **`docs/Architecture/DATAFLOW.md`** §3: noted that the parallel-flow example is
+  the general mechanism, and per-op thresholds decide whether an op actually
+  reaches the chunking step; pointed to `parallel-pairing.md`.
+- Regenerated the `functions.html` mirror; `docs:functions:check` green.
+
 ### Added (2026-06-30) — domain gap-closure: ~89 new functions (`functions@0.6.0` → `0.7.0`, `core@0.3.1`)
 
 Closed the 2026-06-30 domain-coverage gap analysis (`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`)

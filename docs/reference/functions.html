@@ -563,7 +563,16 @@
       Function tables in hardware-accelerated categories carry an **Accel** column:
 
       - **`parallel`** — the function's `Float64Array` (or large-matrix) path is
-        dispatched across worker threads by the compute pool.
+        dispatched across worker threads by the compute pool **above a per-op element
+        threshold** (`DEFAULT_THRESHOLD_BY_OP`; the default global fallback is 50,000
+        elements).
+      - **`parallel†`** — a worker-pool path exists but its op threshold is currently
+        `'never'`, so it **always runs inline JS** today: the 2026-05 parallel
+        benchmark found worker overhead dominates at every tested size for these
+        memory-bound element-wise / reduction ops (`add`, `subtract`, `multiply`,
+        `divide`, `abs`, `exp`, `log`, `sin`/`cos`/`tan`, `parallelStatSum`/`Mean`, …).
+        The path is kept wired so a future threshold retune switches it on without code
+        churn.
       - **`WASM`** — the function has a WebAssembly fast path for large inputs.
       - **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
         large inputs (32-bit float precision).
@@ -571,6 +580,16 @@
       Each acceleration falls back automatically to a pure-TypeScript implementation
       when the input is small, the worker pool is not initialized, or the WASM /
       WebGPU device is unavailable.
+
+      > The authoritative, always-current map of which functions are effectively
+      > parallelized (vs threshold-disabled) and each op's threshold is the generated
+      > report [`docs/Architecture/parallel-pairing.md`](../Architecture/parallel-pairing.md)
+      > (`npm run docs:deps`; data in `parallel-pairing.json`). As of the last
+      > regeneration: **96 effectively parallelized, 17 threshold-disabled (`parallel†`),
+      > 105 non-parallel** of 218 typed functions. Matrix/linear-algebra ops (`matmul`,
+      > `matvec`, decompositions) parallelize through the `matrix` package backend
+      > rather than a direct compute-pool call, so their acceleration is documented in
+      > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
 
       Every category below is documented in three parts: **Details** — supported
       types, return semantics, and numerical caveats; **Background & History** — the
@@ -582,41 +601,41 @@
 
       ## Arithmetic
 
-      | Function         | Description                     | Types                                           | Accel    |
-      | ---------------- | ------------------------------- | ----------------------------------------------- | -------- |
-      | `add(a, b)`      | Addition                        | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `subtract(a, b)` | Subtraction                     | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `divide(a, b)`   | Division                        | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `unaryMinus(x)`  | Negation `-x`                   | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `unaryPlus(x)`   | Identity `+x`                   | number, bigint, Complex, Fraction               | —        |
-      | `abs(x)`         | Absolute value                  | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `sign(x)`        | Sign of x: -1, 0, or 1          | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `pow(x, y)`      | Power `x^y`                     | number, bigint, Complex, Fraction               | —        |
-      | `sqrt(x)`        | Square root                     | number, Complex, BigNumber, Float64Array        | parallel |
-      | `square(x)`      | `x²`                            | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `cube(x)`        | `x³`                            | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `cbrt(x)`        | Cube root                       | number, Complex, BigNumber, Float64Array        | parallel |
-      | `nthRoot(x, n)`  | nth root                        | number, Complex                                 | —        |
-      | `exp(x)`         | `e^x`                           | number, Complex, BigNumber, Float64Array        | parallel |
-      | `expm1(x)`       | `e^x - 1` (stable near 0)       | number, Complex, Float64Array                   | parallel |
-      | `log(x[, base])` | Natural log (or log base)       | number, Complex, BigNumber, Float64Array        | parallel |
-      | `log2(x)`        | Base-2 logarithm                | number, Complex, BigNumber, Float64Array        | parallel |
-      | `log10(x)`       | Base-10 logarithm               | number, Complex, BigNumber, Float64Array        | parallel |
-      | `log1p(x)`       | `ln(1 + x)` (stable near 0)     | number, Complex, Float64Array                   | parallel |
-      | `round(x[, n])`  | Round to n digits               | number, bigint, Complex, Fraction, Float64Array | parallel |
-      | `floor(x)`       | Round down                      | number, Complex, Fraction, Float64Array         | parallel |
-      | `ceil(x)`        | Round up                        | number, Complex, Fraction, Float64Array         | parallel |
-      | `fix(x)`         | Round toward zero               | number, Complex, Fraction, Float64Array         | parallel |
-      | `mod(a, b)`      | Modulo `a % b`                  | number, bigint                                  | —        |
-      | `gcd(a, b)`      | Greatest common divisor         | number, bigint                                  | —        |
-      | `lcm(a, b)`      | Least common multiple           | number, bigint                                  | —        |
-      | `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`     | number                                          | —        |
-      | `norm(x[, p])`   | p-norm                          | number, Float64Array, DenseMatrix               | parallel |
-      | `dot(a, b)`      | Vector dot product              | Float64Array, array                             | parallel |
-      | `outer(a, b)`    | Vector outer product            | Float64Array, array                             | parallel |
-      | `matmul(A, B)`   | Matrix multiplication           | Float64Array, DenseMatrix                       | parallel |
-      | `matvec(A, x)`   | Matrix–vector product           | Float64Array, DenseMatrix                       | parallel |
+      | Function         | Description                     | Types                                           | Accel     |
+      | ---------------- | ------------------------------- | ----------------------------------------------- | --------- |
+      | `add(a, b)`      | Addition                        | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `subtract(a, b)` | Subtraction                     | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `divide(a, b)`   | Division                        | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `unaryMinus(x)`  | Negation `-x`                   | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `unaryPlus(x)`   | Identity `+x`                   | number, bigint, Complex, Fraction               | —         |
+      | `abs(x)`         | Absolute value                  | number, bigint, Complex, Fraction, Float64Array | parallel† |
+      | `sign(x)`        | Sign of x: -1, 0, or 1          | number, bigint, Complex, Fraction, Float64Array | parallel  |
+      | `pow(x, y)`      | Power `x^y`                     | number, bigint, Complex, Fraction               | —         |
+      | `sqrt(x)`        | Square root                     | number, Complex, BigNumber, Float64Array        | parallel  |
+      | `square(x)`      | `x²`                            | number, bigint, Complex, Fraction, Float64Array | parallel  |
+      | `cube(x)`        | `x³`                            | number, bigint, Complex, Fraction, Float64Array | parallel  |
+      | `cbrt(x)`        | Cube root                       | number, Complex, BigNumber, Float64Array        | parallel  |
+      | `nthRoot(x, n)`  | nth root                        | number, Complex                                 | —         |
+      | `exp(x)`         | `e^x`                           | number, Complex, BigNumber, Float64Array        | parallel† |
+      | `expm1(x)`       | `e^x - 1` (stable near 0)       | number, Complex, Float64Array                   | parallel  |
+      | `log(x[, base])` | Natural log (or log base)       | number, Complex, BigNumber, Float64Array        | parallel† |
+      | `log2(x)`        | Base-2 logarithm                | number, Complex, BigNumber, Float64Array        | parallel  |
+      | `log10(x)`       | Base-10 logarithm               | number, Complex, BigNumber, Float64Array        | parallel  |
+      | `log1p(x)`       | `ln(1 + x)` (stable near 0)     | number, Complex, Float64Array                   | parallel  |
+      | `round(x[, n])`  | Round to n digits               | number, bigint, Complex, Fraction, Float64Array | parallel  |
+      | `floor(x)`       | Round down                      | number, Complex, Fraction, Float64Array         | parallel  |
+      | `ceil(x)`        | Round up                        | number, Complex, Fraction, Float64Array         | parallel  |
+      | `fix(x)`         | Round toward zero               | number, Complex, Fraction, Float64Array         | parallel  |
+      | `mod(a, b)`      | Modulo `a % b`                  | number, bigint                                  | —         |
+      | `gcd(a, b)`      | Greatest common divisor         | number, bigint                                  | —         |
+      | `lcm(a, b)`      | Least common multiple           | number, bigint                                  | —         |
+      | `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`     | number                                          | —         |
+      | `norm(x[, p])`   | p-norm                          | number, Float64Array, DenseMatrix               | parallel  |
+      | `dot(a, b)`      | Vector dot product              | Float64Array, array                             | parallel  |
+      | `outer(a, b)`    | Vector outer product            | Float64Array, array                             | parallel  |
+      | `matmul(A, B)`   | Matrix multiplication           | Float64Array, DenseMatrix                       | parallel  |
+      | `matvec(A, x)`   | Matrix–vector product           | Float64Array, DenseMatrix                       | parallel  |
 
       The factory layer additionally provides scalar variants used internally and by
       the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -730,20 +749,20 @@
 
       Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-      | Function                         | Description                                      | Accel    |
-      | -------------------------------- | ------------------------------------------------ | -------- |
-      | `sin(x)` `cos(x)` `tan(x)`       | Sine, cosine, tangent                            | parallel |
-      | `csc(x)` `sec(x)` `cot(x)`       | Cosecant, secant, cotangent                      | parallel |
-      | `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel |
-      | `atan2(y, x)`                    | Two-argument arctangent                          | —        |
-      | `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —        |
-      | `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel |
-      | `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent         | parallel |
-      | `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —        |
-      | `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —        |
-      | `toRadians(deg)`                 | Convert degrees to radians                       | —        |
-      | `toDegrees(rad)`                 | Convert radians to degrees                       | —        |
-      | `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —        |
+      | Function                         | Description                                      | Accel     |
+      | -------------------------------- | ------------------------------------------------ | --------- |
+      | `sin(x)` `cos(x)` `tan(x)`       | Sine, cosine, tangent                            | parallel† |
+      | `csc(x)` `sec(x)` `cot(x)`       | Cosecant, secant, cotangent                      | parallel  |
+      | `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel  |
+      | `atan2(y, x)`                    | Two-argument arctangent                          | —         |
+      | `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —         |
+      | `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel  |
+      | `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent         | parallel  |
+      | `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —         |
+      | `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —         |
+      | `toRadians(deg)`                 | Convert degrees to radians                       | —         |
+      | `toDegrees(rad)`                 | Convert radians to degrees                       | —         |
+      | `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —         |
 
       ### Details
 
@@ -1037,24 +1056,24 @@
       For `Float64Array` data, the `parallelStat*` family runs in worker threads and
       returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 
-      | Function                                  | Description                                  | Accel    |
-      | ----------------------------------------- | -------------------------------------------- | -------- |
-      | `parallelStatSum(a)`                      | Sum of all elements                          | parallel |
-      | `parallelStatMean(a)`                     | Arithmetic mean                              | parallel |
-      | `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`) | parallel |
-      | `parallelStatStd(a[, type])`              | Standard deviation                           | parallel |
-      | `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                    | parallel |
-      | `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                   | parallel |
-      | `parallelStatMedian(a)`                   | Median                                       | parallel |
-      | `parallelStatMode(a)`                     | Mode                                         | —        |
-      | `parallelStatProd(a)`                     | Product                                      | parallel |
-      | `parallelStatNorm(a[, p])`                | p-norm                                       | parallel |
-      | `parallelStatDistance(a, b)`              | Euclidean distance                           | parallel |
-      | `parallelStatCorr(a, b)`                  | Pearson correlation                          | parallel |
-      | `parallelStatMAD(a)`                      | Median absolute deviation                    | parallel |
-      | `parallelStatCumsum(a)`                   | Cumulative sum                               | —        |
-      | `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                          | —        |
-      | `parallelStatHistogram(a, bins)`          | Histogram bin counts                         | parallel |
+      | Function                                  | Description                                  | Accel     |
+      | ----------------------------------------- | -------------------------------------------- | --------- |
+      | `parallelStatSum(a)`                      | Sum of all elements                          | parallel† |
+      | `parallelStatMean(a)`                     | Arithmetic mean                              | parallel† |
+      | `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`) | parallel  |
+      | `parallelStatStd(a[, type])`              | Standard deviation                           | parallel  |
+      | `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                    | parallel  |
+      | `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                   | parallel  |
+      | `parallelStatMedian(a)`                   | Median                                       | parallel  |
+      | `parallelStatMode(a)`                     | Mode                                         | —         |
+      | `parallelStatProd(a)`                     | Product                                      | parallel  |
+      | `parallelStatNorm(a[, p])`                | p-norm                                       | parallel  |
+      | `parallelStatDistance(a, b)`              | Euclidean distance                           | parallel  |
+      | `parallelStatCorr(a, b)`                  | Pearson correlation                          | parallel  |
+      | `parallelStatMAD(a)`                      | Median absolute deviation                    | parallel  |
+      | `parallelStatCumsum(a)`                   | Cumulative sum                               | —         |
+      | `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                          | —         |
+      | `parallelStatHistogram(a, bins)`          | Histogram bin counts                         | parallel  |
 
       ### Selection (O(n), no full sort)
 
@@ -1195,23 +1214,23 @@
 
       Free functions giving the SciPy-style standalone surface (`chi2.cdf(x, k)` → `chiSquaredCDF(x, k)`) and the quantile symmetry the density table lacked (`normalCDF` existed; `normalQuantile` did not). The CDF/quantile wrappers delegate to the `*Dist` objects and re-implement no distribution math — they surface the accurate incomplete-beta (`betainc`) / incomplete-gamma (`gammainc`) / `erfc` primitives that back those objects.
 
-      | Function                          | Description                                                 | Accel    |
-      | --------------------------------- | ----------------------------------------------------------- | -------- |
-      | `normalQuantile(p[, mu, sigma])`  | Normal quantile (inverse CDF); defaults standard normal     | —        |
-      | `studentTCDF(x, df)`              | Student-t CDF, `df` degrees of freedom                      | —        |
-      | `studentTPDF(x, df)`              | Student-t PDF                                               | parallel |
-      | `studentTQuantile(p, df)`         | Student-t quantile                                          | —        |
-      | `chiSquaredCDF(x, df)`            | Chi-squared CDF                                             | —        |
-      | `chiSquaredQuantile(p, df)`       | Chi-squared quantile                                        | —        |
-      | `fCDF(x, d1, d2)`                 | F-distribution CDF, `d1`/`d2` degrees of freedom            | —        |
-      | `fQuantile(p, d1, d2)`            | F-distribution quantile                                     | —        |
-      | `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                 | —        |
-      | `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                            | parallel |
-      | `gammaQuantile(p, shape[, rate])` | Gamma quantile                                              | —        |
-      | `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                         | —        |
-      | `betaPDF(x, alpha, beta_)`        | Beta PDF                                                    | parallel |
-      | `betaQuantile(p, a, b)`           | Beta quantile                                               | —        |
-      | `noncentralChi2PDF(x, df, ncp)`   | Noncentral chi-squared PDF (Poisson-mixture, `ncp = λ ≥ 0`) | parallel |
+      | Function                          | Description                                                 | Accel |
+      | --------------------------------- | ----------------------------------------------------------- | ----- |
+      | `normalQuantile(p[, mu, sigma])`  | Normal quantile (inverse CDF); defaults standard normal     | —     |
+      | `studentTCDF(x, df)`              | Student-t CDF, `df` degrees of freedom                      | —     |
+      | `studentTPDF(x, df)`              | Student-t PDF                                               | —     |
+      | `studentTQuantile(p, df)`         | Student-t quantile                                          | —     |
+      | `chiSquaredCDF(x, df)`            | Chi-squared CDF                                             | —     |
+      | `chiSquaredQuantile(p, df)`       | Chi-squared quantile                                        | —     |
+      | `fCDF(x, d1, d2)`                 | F-distribution CDF, `d1`/`d2` degrees of freedom            | —     |
+      | `fQuantile(p, d1, d2)`            | F-distribution quantile                                     | —     |
+      | `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                 | —     |
+      | `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                            | —     |
+      | `gammaQuantile(p, shape[, rate])` | Gamma quantile                                              | —     |
+      | `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                         | —     |
+      | `betaPDF(x, alpha, beta_)`        | Beta PDF                                                    | —     |
+      | `betaQuantile(p, a, b)`           | Beta quantile                                               | —     |
+      | `noncentralChi2PDF(x, df, ncp)`   | Noncentral chi-squared PDF (Poisson-mixture, `ncp = λ ≥ 0`) | —     |
 
       ### Closed-form heavy-tail / location families
 

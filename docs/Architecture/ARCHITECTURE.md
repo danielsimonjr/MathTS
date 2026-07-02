@@ -156,9 +156,6 @@ ComputePool manages Web Workers for parallel operations.
 Chunk strategies determine optimal data partitioning. ThresholdDispatcher
 decides whether to parallelize based on data size (7 threshold categories).
 
-40+ parallel functions: elementwise (add, subtract, multiply, etc.),
-matrix (matmul, matvec, transpose, outer, dot), reduce, and map operations.
-
 Results wrapped in `ParallelResult<T>` with result data, duration, chunk count, and parallelization flag.
 
 `ComputePool` exposes an `OpName` union type covering all recognised kernel
@@ -169,6 +166,24 @@ stored in `ComputePoolConfig` lets callers override the global
 `DEFAULT_THRESHOLD_BY_OP` were measured on a CI container (2026-05-23) and
 sourced from `tools/benchmark/parallel/run.ts`. `OpThreshold` accepts a number
 or the string aliases `'never'` / `'always'`.
+
+**Which public functions are effectively parallelized** — and each op's
+threshold — is a **generated artifact**, not a hand-maintained list: per public
+`mathTyped` function, `npm run docs:deps` scans its worker-pool routing and pairs
+it against `DEFAULT_THRESHOLD_BY_OP` (parsed straight from
+`parallel/src/ComputePool.ts`), emitting
+[`parallel-pairing.md` / `parallel-pairing.json`](./parallel-pairing.md) — the
+parallel analog of §6a's `wasm-pairing.md`. As of the last regeneration: **96
+effectively parallelized, 17 threshold-disabled, 105 non-parallel** of 218 typed
+functions. The **effective** set is the compute-bound ops — `matmul` (4,096),
+`tensordot` (8,192), `matrixPower` / `characteristicPolynomial` (9,216), the
+hypothesis tests (4,096), `erfc` (100,000), `besselJ` (1,000,000), `spectrogram`
+(65,536), `sampleChunk` (100,000) — plus every generic per-element kernel above
+the 50,000 global threshold. The **threshold-disabled** ops (`'never'`) are the
+memory-bound element-wise arithmetic / transcendentals (`add`, `multiply`, `exp`,
+`sin`, …) and small reductions (`sum`, `mean`, `variance`), where the 2026-05
+benchmark found worker overhead dominates at every tested size; their pool wiring
+is kept so a future retune can switch them on without code churn.
 
 ### 6. WASM Layer
 

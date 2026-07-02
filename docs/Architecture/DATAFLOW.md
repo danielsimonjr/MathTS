@@ -88,6 +88,14 @@ Statistics and signal functions (`@danielsimonjr/mathts-functions`) follow the s
 array overloads call `@danielsimonjr/mathts-parallel` internally and return `Promise<ParallelResult<T>>`.
 Variadic overloads (2–4 scalars) are synchronous.
 
+The flow above is the general mechanism; **whether a given op actually reaches
+step 2** depends on its per-op threshold in `DEFAULT_THRESHOLD_BY_OP`. Memory-bound
+element-wise ops (`add`, `multiply`, `exp`, `sin`, …) and small reductions are set
+to `'never'`, so step 1 always takes the synchronous branch for them today. The
+generated [`parallel-pairing.md`](./parallel-pairing.md) is the authoritative,
+always-current map of which functions are effectively parallelized vs
+threshold-disabled, and each op's threshold.
+
 ---
 
 ## 3b. WASM Bridge Interception Flow

@@ -250,6 +250,15 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
     `sqrt`/`square`/`norm`/`dot`/`min`/`max` are absent from `DEFAULT_THRESHOLD_BY_OP` so default to the 50k
     global threshold (active), while their element-wise siblings `abs`/`negate`/`sum`/`mean` are explicit
     `'never'` — an inconsistency the report now makes visible for a future threshold retune.
+- ✅ **[done — doc sync to parallel-pairing data]** used the new `parallel-pairing.md` to fix live drift:
+  `functions.md` now has a **`parallel†`** Accel label for threshold-disabled (`'never'`) worker paths
+  (add/subtract/multiply/divide/unaryMinus/abs/exp/log/sin/cos/tan/parallelStatSum/Mean); the 4 async-but-inline
+  distribution PDFs (studentTPDF/gammaPDF/betaPDF/noncentralChi2PDF, verified no worker dispatch in source)
+  dropped from `parallel` → `—`; legend expanded + points to the generated report as source of truth.
+  ARCHITECTURE.md §5 + DATAFLOW.md §3 reconciled to the report (effective set + thresholds + disabled note).
+  `functions.html` regenerated; `docs:functions:check` green. **Open follow-up (needs benchmark data, not a doc
+  fix):** the surfaced `DEFAULT_THRESHOLD_BY_OP` inconsistency — sqrt/square/norm/dot/min/max default to the 50k
+  global (active) while abs/negate/sum/mean are explicit `'never'`; retune via `tools/benchmark/parallel/run.ts`.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
