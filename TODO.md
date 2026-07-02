@@ -173,6 +173,13 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   the single-op benchmark suggests routing single element-wise ops to WASM above 1024 is a mild
   pessimization (~0.9×). Verify against functions' ACTUAL dispatch (incl. the parallel/worker path,
   which this single-thread bench didn't test) before changing; the _chain_ dispatch is justified.
+- ⬜ **[BLOCKER for dogfooding-as-perf-win] the AS WASM kernels don't beat tight JS loops.** Measured
+  (`tools/benchmarks/matmul-wasm.mjs`): matrix's WASM matmul is **0.41–0.73× the naive JS loop** even at
+  512² (WASM IS selected — the AS matmul is a naive scalar kernel, no SIMD/cache-blocking; V8 JITs the
+  loop better + DenseMatrix/copy overhead). So `Tensor.matMul` (a JS triple loop, the clearest dogfooding
+  gap) must **not** be wired to matrix yet — it would regress 0.4–0.7×. **Real large-input work =
+  optimize the AS kernels (SIMD + cache-blocked matmul), THEN dogfood tensor onto them.** Sequence:
+  fast kernels first, dogfood second. (Same story blocks element-wise: kernels aren't faster than JS.)
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

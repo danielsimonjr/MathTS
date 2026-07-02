@@ -44,4 +44,30 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
   mild pessimization (single-op WASM never wins); verify against its actual dispatch incl. the
   parallel/worker path before changing. The _chain_ dispatch is fine.
 
+## `matmul-wasm.mjs` — should `Tensor.matMul` dogfood matrix's accelerated matmul?
+
+`Tensor.matMul` (tensor/src/Tensor.ts) is a naive JS triple loop — the clearest dogfooding gap
+(it should delegate to matrix's `backendManager.multiply`, which selects `WASMBackend` above
+1000 elements). Measured before wiring it.
+
+**Finding (2026-07-01, Node 24):** WASM **is** selected (`WASMBackend` for all large sizes,
+binary present), yet matrix's matmul is **slower than the tight JS loop at every size**:
+
+| size | JS     | matrix (WASM) | speedup |
+| ---- | ------ | ------------- | ------- |
+| 64²  | 1.3 ms | 3.2 ms        | 0.41×   |
+| 128² | 9.9 ms | 21 ms         | 0.47×   |
+| 256² | 109 ms | 159 ms        | 0.69×   |
+| 512² | 996 ms | 1374 ms       | 0.73×   |
+
+**Conclusion — the dogfooding target is right, but it's blocked upstream:** the AssemblyScript
+matmul is a **naive scalar kernel** (no SIMD, no cache-blocking); V8's JIT of the same loop wins,
+and the `DenseMatrix` + WASM copy overhead adds to it. So wiring `Tensor.matMul → matrix` today
+would **regress** 0.4–0.7×. **This is the honest crux of the whole thread:** across three
+measurements (element-wise single/chain, matmul) the standard packages' current WASM kernels do
+**not** beat tight JS loops — there is no speedup to inherit yet. The real large-input work is
+**optimizing the AS kernels (SIMD + cache-blocking)**; _then_ dogfooding `Tensor.matMul` (and the
+decompositions) propagates a genuine win. Sequence: fast kernels first, dogfood second. Until
+then, tensor's local loop is (correctly) the faster path.
+
 See `project-all-libraries-build-on-core` (memory) and CHANGELOG for the full reasoning.
