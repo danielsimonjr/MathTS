@@ -12,6 +12,11 @@ don't ship an assumed win.
 
 **Finding (2026-07-01, Node 24, this machine):**
 
+> ⚠️ **Superseded — read the Conclusion below.** The "single op loses 0.85–0.95×" row was an
+> over-generalization: a re-run + the maintained `bench:elementwise` disagree, and the loss was
+> never established against the _real_ production alternative (`computePool.<op>`, not a bare loop).
+> The transcendental WASM path was **kept**. Table retained as the original snapshot.
+
 | Path                                                             | Result                                              | Why                                                                                                                                       |
 | ---------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Single op** (`exp`), 256 – 1 048 576 elements                  | **WASM loses, 0.85–0.95×**                          | AssemblyScript's scalar `exp` is not faster than V8's native libm `Math.exp`, and the WASM path pays a `Float64Array` copy-in + copy-out. |
@@ -56,6 +61,11 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
 `Tensor.matMul` (tensor/src/Tensor.ts) is a naive JS triple loop — the clearest dogfooding gap
 (it should delegate to matrix's `backendManager.multiply`, which selects `WASMBackend` above
 1000 elements). Measured before wiring it.
+
+> ⚠️ **Superseded — this measured the OLD scalar kernel and drove the fix.** Adding
+> `matrix_multiply_simd_ptr` (f64x2 SIMD) reversed the verdict: WASM matmul now wins **9–12×**
+> (see `backend-audit.mjs` below), and `Tensor.matMul` **was** dogfooded onto it (3.6–6.8×). The
+> snapshot below is the pre-SIMD "blocked upstream" state, kept for the history.
 
 **Finding (2026-07-01, Node 24):** WASM **is** selected (`WASMBackend` for all large sizes,
 binary present), yet matrix's matmul is **slower than the tight JS loop at every size**:
