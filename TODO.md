@@ -238,6 +238,18 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   copy overhead, 12² (144) marginal. So the `BackendManager` `multiply.wasm` gate (was 500) forced
   16²–22² matmuls onto JS needlessly — dropped to 256 (the reproducible solid-win boundary). matrix
   743/7skip, tensor 389, autograd 258.
+- ✅ **[done — parallel-optimization pairing report]** added `parallel-pairing.md`/`.json` to the
+  dep-graph tool (`analyzeParallelPairing`/`generateParallelPairingMarkdown`), the worker-pool analog of
+  `wasm-pairing`. Per public `mathTyped` fn it detects worker-pool routing (named `computePool.<op>` or a
+  generic `applyKernel`/`mapArray`/`parallel*`/`shouldParallelize` kernel) and pairs each op against the
+  **canonical `DEFAULT_THRESHOLD_BY_OP` + `thresholdElements`, parsed straight from
+  `parallel/src/ComputePool.ts`** (not hand-copied). Classifies **effective** (op threshold active) vs
+  **disabled** (all ops `'never'` → wired but always inline JS, the parallel analog of a WASM js-fallback).
+  First run: **96/113 effectively parallelized, 17 disabled, 105 non-parallel of 218**. Wired into `main()`
+  - `docs:deps:format` (prettier-stable); tool typecheck 0. **Surfaced (not fixed — needs benchmark data):**
+    `sqrt`/`square`/`norm`/`dot`/`min`/`max` are absent from `DEFAULT_THRESHOLD_BY_OP` so default to the 50k
+    global threshold (active), while their element-wise siblings `abs`/`negate`/`sum`/`mean` are explicit
+    `'never'` — an inconsistency the report now makes visible for a future threshold retune.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

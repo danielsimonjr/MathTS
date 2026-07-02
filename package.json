@@ -51,7 +51,7 @@
     "bench:matrix": "npx tsx tools/benchmark/wasm/matrix.bench.ts",
     "precommit:refresh": "npm run build:wasm && npm run docs:deps",
     "docs:deps": "npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=. && npm run docs:deps:format",
-    "docs:deps:format": "prettier --write docs/Architecture/DEPENDENCY_GRAPH.md docs/Architecture/unused-analysis.md docs/Architecture/wasm-pairing.md docs/Architecture/dependency-graph.json docs/Architecture/dependency-graph.yaml docs/Architecture/dependency-summary.compact.json docs/Architecture/package-export-surfaces.json docs/Architecture/wasm-pairing.json",
+    "docs:deps:format": "prettier --write docs/Architecture/DEPENDENCY_GRAPH.md docs/Architecture/unused-analysis.md docs/Architecture/wasm-pairing.md docs/Architecture/dependency-graph.json docs/Architecture/dependency-graph.yaml docs/Architecture/dependency-summary.compact.json docs/Architecture/package-export-surfaces.json docs/Architecture/wasm-pairing.json docs/Architecture/parallel-pairing.md docs/Architecture/parallel-pairing.json",
     "docs:functions": "node tools/generate-functions-reference.mjs",
     "docs:functions:check": "node tools/generate-functions-reference.mjs --check",
     "typecheck": "turbo run typecheck",

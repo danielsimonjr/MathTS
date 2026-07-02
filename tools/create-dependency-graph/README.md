@@ -25,6 +25,12 @@ npx tsx tools/create-dependency-graph.ts
 - `docs/Architecture/wasm-pairing.md` / `wasm-pairing.json` - WASM accelerator ↔
   function pairing: which public `mathTyped` functions route to a WASM bridge
   (`*Dispatch`) vs run pure-JS (generated only when `functions/src/typed/` is in scope)
+- `docs/Architecture/parallel-pairing.md` / `parallel-pairing.json` - worker-pool
+  (parallel) ↔ function pairing: which public `mathTyped` functions dispatch to
+  `computePool` (named op or generic kernel) and whether that op's threshold is
+  active or `'never'` (wired but always inline JS). Thresholds are parsed from
+  `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP` + `thresholdElements`);
+  generated only when `functions/src/typed/` is in scope
 
 **Features:**
 

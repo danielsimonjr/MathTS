@@ -2659,6 +2659,329 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
 }
 
 /**
+ * Parallel (worker-pool) ↔ function pairing analysis.
+ *
+ * The parallel analog of {@link analyzeWasmPairing}. Scans the `functions`
+ * package's public typed API (`functions/src/typed/*.ts`) and determines, per
+ * `mathTyped` export, whether it dispatches to the worker pool — via a
+ * `computePool.<op>()` call (a named op with a tunable threshold) or a generic
+ * kernel path (`applyKernel` / `mapArray` / a bare `parallel*` helper / a
+ * `shouldParallelize` gate). Crucially, unlike WASM routing, a function can be
+ * *wired* to the pool yet still always run inline JS because its op's threshold
+ * in `DEFAULT_THRESHOLD_BY_OP` is `'never'` — the parallel equivalent of a
+ * WASM js-fallback. This report pairs each function against the canonical
+ * thresholds parsed straight from `parallel/src/ComputePool.ts`, so the
+ * "which functions are effectively parallelized" map is a generated artifact.
+ */
+type ParallelEffectiveness = 'effective' | 'disabled';
+interface ParallelPairingEntry {
+  name: string;
+  file: string;
+  /** computePool op names + the `applyKernel` pseudo-op when a generic path exists. */
+  ops: string[];
+  /** Resolved threshold display, parallel to `ops` (e.g. `'4096'`, `'never'`, `'50000 (global)'`). */
+  thresholds: string[];
+  effectiveness: ParallelEffectiveness;
+}
+/** One row of the canonical threshold table (parsed from ComputePool.ts). */
+interface ParallelOpRow {
+  op: string;
+  threshold: string; // 'never' | 'always' | numeric string | 'N (global)'
+  active: boolean; // threshold !== 'never'
+  functions: string[]; // typed functions dispatching through this op
+}
+/** Canonical per-op thresholds, parsed from `parallel/src/ComputePool.ts`. */
+interface ParallelThresholds {
+  byOp: Map<string, string>; // op -> 'never' | 'always' | numeric string
+  global: number; // thresholdElements fallback for ops absent from the map
+}
+interface ParallelPairing {
+  generated: string;
+  total: number; // all mathTyped functions scanned
+  parallelizedCount: number; // route to computePool / generic kernel
+  effectiveCount: number; // parallelized AND at least one op active
+  disabledCount: number; // parallelized but every op is 'never'
+  nonParallelCount: number; // no worker-pool reference
+  globalThreshold: number; // thresholdElements fallback
+  /** Whether ComputePool.ts thresholds were parsed (false ⇒ table degraded). */
+  thresholdsResolved: boolean;
+  /** Detection is per-`mathTyped`-block direct references; parallelism reached
+   * only through helper functions outside the block is not traced (under-reports). */
+  parallelized: ParallelPairingEntry[];
+  nonParallel: string[];
+  byOp: ParallelOpRow[];
+  byFile: Record<string, { effective: number; disabled: number; none: number }>;
+}
+
+/**
+ * Parse the canonical per-op parallelization thresholds directly from
+ * `parallel/src/ComputePool.ts` — the `DEFAULT_THRESHOLD_BY_OP` object literal
+ * plus the `thresholdElements` global fallback — so the pairing table is
+ * generated rather than a hand-copied snapshot. Line comments are stripped
+ * before parsing so values in trailing `//` comments (e.g. `// (4,096 …)`)
+ * can't leak in. Returns `null` if the source can't be located.
+ */
+function readParallelThresholds(rootDir: string): ParallelThresholds | null {
+  const candidates = [
+    join(rootDir, 'parallel', 'src', 'ComputePool.ts'),
+    join(rootDir, 'src', 'ComputePool.ts'),
+  ];
+  const path = candidates.find((p) => existsSync(p));
+  if (!path) return null;
+  const src = readFileSync(path, 'utf-8');
+
+  // Brace-match the DEFAULT_THRESHOLD_BY_OP object literal.
+  const anchor = src.indexOf('DEFAULT_THRESHOLD_BY_OP');
+  if (anchor < 0) return null;
+  const eq = src.indexOf('=', anchor);
+  const braceStart = src.indexOf('{', eq);
+  if (eq < 0 || braceStart < 0) return null;
+  let depth = 0;
+  let end = braceStart;
+  for (let i = braceStart; i < src.length; i++) {
+    const c = src[i];
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+  // Strip line comments so commented example numbers don't get parsed as values.
+  const body = src
+    .slice(braceStart, end + 1)
+    .split('\n')
+    .map((line) => {
+      const idx = line.indexOf('//');
+      return idx >= 0 ? line.slice(0, idx) : line;
+    })
+    .join('\n');
+
+  const byOp = new Map<string, string>();
+  const re = /(\w+)\s*:\s*(?:'(never|always)'|([\d_]+))/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(body)) !== null) {
+    const op = m[1];
+    const value = m[2] ?? m[3].replace(/_/g, '');
+    byOp.set(op, value);
+  }
+
+  const gm = src.match(/thresholdElements:\s*(\d+)/);
+  const global = gm ? parseInt(gm[1], 10) : 50_000;
+  return { byOp, global };
+}
+
+function analyzeParallelPairing(rootDir: string): ParallelPairing | null {
+  const candidates = [join(rootDir, 'functions', 'src', 'typed'), join(rootDir, 'src', 'typed')];
+  const typedDir = candidates.find((d) => existsSync(d));
+  if (!typedDir) return null;
+
+  const thresholds = readParallelThresholds(rootDir);
+  const byOpMap = thresholds?.byOp ?? new Map<string, string>();
+  const globalThreshold = thresholds?.global ?? 50_000;
+
+  // Resolve an op to its threshold display. Ops absent from the map fall back to
+  // the global `thresholdElements` at runtime (so they are active). The generic
+  // `applyKernel` pseudo-op is gated by the same global threshold.
+  const resolve = (op: string): string => {
+    if (op === 'applyKernel') return `${globalThreshold} (global kernel)`;
+    const v = byOpMap.get(op);
+    return v ?? `${globalThreshold} (global)`;
+  };
+  const isActive = (op: string): boolean => resolve(op) !== 'never';
+
+  // computePool methods that are infrastructure, not dispatchable ops. `applyKernel`
+  // is handled separately (it is the generic-kernel parallel path).
+  const INFRA = new Set([
+    'shouldParallelize',
+    'terminate',
+    'getStats',
+    'isReady',
+    'configure',
+    'warmup',
+    'dispose',
+    'getConfig',
+    'setConfig',
+    'execute',
+    'on',
+  ]);
+
+  const parallelized: ParallelPairingEntry[] = [];
+  const nonParallel: string[] = [];
+  const byFile: Record<string, { effective: number; disabled: number; none: number }> = {};
+  const opUsers = new Map<string, Set<string>>();
+
+  for (const fname of readdirSync(typedDir)) {
+    if (!fname.endsWith('.ts')) continue;
+    const src = readFileSync(join(typedDir, fname), 'utf-8');
+    const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src)) !== null) {
+      const name = m[1];
+      // Brace-match the mathTyped({...}) object literal starting at its `{`.
+      let depth = 0;
+      const start = m.index + m[0].length - 1;
+      let end = start;
+      for (let i = start; i < src.length; i++) {
+        const c = src[i];
+        if (c === '{') depth++;
+        else if (c === '}') {
+          depth--;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+      const block = src.slice(start, end + 1);
+
+      // Named computePool ops (excluding infra) + generic-kernel detection.
+      const ops = new Set<string>();
+      let generic = false;
+      for (const cm of block.matchAll(/computePool\.(\w+)\s*\(/g)) {
+        const method = cm[1];
+        if (method === 'applyKernel') generic = true;
+        else if (!INFRA.has(method)) ops.add(method);
+      }
+      // Generic worker-pool paths that don't map to a single named op: the
+      // `mapArray` helper (wraps computePool.applyKernel), a `shouldParallelize`
+      // gate, or a bare `parallel*` signal/reduction helper.
+      if (/\bmapArray\s*\(/.test(block)) generic = true;
+      if (/\bcomputePool\.shouldParallelize\s*\(/.test(block)) generic = true;
+      if (/\bparallel[A-Z]\w+\s*\(/.test(block)) generic = true;
+      if (generic) ops.add('applyKernel');
+
+      if (!byFile[fname]) byFile[fname] = { effective: 0, disabled: 0, none: 0 };
+      if (ops.size === 0) {
+        nonParallel.push(name);
+        byFile[fname].none++;
+        continue;
+      }
+      const opList = [...ops].sort();
+      const effective = opList.some((op) => isActive(op));
+      for (const op of opList) {
+        if (!opUsers.has(op)) opUsers.set(op, new Set());
+        opUsers.get(op)!.add(name);
+      }
+      parallelized.push({
+        name,
+        file: fname,
+        ops: opList,
+        thresholds: opList.map((op) => resolve(op)),
+        effectiveness: effective ? 'effective' : 'disabled',
+      });
+      if (effective) byFile[fname].effective++;
+      else byFile[fname].disabled++;
+    }
+  }
+
+  parallelized.sort((a, b) => a.name.localeCompare(b.name));
+  nonParallel.sort();
+
+  // Canonical threshold table: every op in DEFAULT_THRESHOLD_BY_OP (source of
+  // truth) plus any extra op detected in the typed API (resolves to global).
+  const allOps = new Set<string>([...byOpMap.keys(), ...opUsers.keys()]);
+  const byOp: ParallelOpRow[] = [...allOps].sort().map((op) => ({
+    op,
+    threshold: resolve(op),
+    active: isActive(op),
+    functions: [...(opUsers.get(op) ?? [])].sort(),
+  }));
+
+  const effectiveCount = parallelized.filter((e) => e.effectiveness === 'effective').length;
+  const disabledCount = parallelized.filter((e) => e.effectiveness === 'disabled').length;
+  return {
+    generated: new Date().toISOString().split('T')[0],
+    total: parallelized.length + nonParallel.length,
+    parallelizedCount: parallelized.length,
+    effectiveCount,
+    disabledCount,
+    nonParallelCount: nonParallel.length,
+    globalThreshold,
+    thresholdsResolved: thresholds !== null,
+    parallelized,
+    nonParallel,
+    byOp,
+    byFile,
+  };
+}
+
+function generateParallelPairingMarkdown(p: ParallelPairing): string {
+  let md = '# Parallel (Worker-Pool) ↔ Function Pairing\n\n';
+  md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `Per public \`mathTyped\` function in \`functions/src/typed/\`, its worker-pool `;
+  md += `routing: a **named op** (\`computePool.<op>()\`, which consults a tunable threshold) `;
+  md += `or a **generic kernel** path (\`applyKernel\`/\`mapArray\`/\`shouldParallelize\`/a bare `;
+  md += `\`parallel*\` helper — gated by the global \`thresholdElements\`). A function counts as `;
+  md += `**effective** when at least one of its ops has a threshold ≠ \`'never'\`, and **disabled** `;
+  md += `when every op it touches is \`'never'\` (wired to the pool but always runs inline JS — `;
+  md += `the parallel analog of a WASM js-fallback).\n\n`;
+  md += `> Detection is per-\`mathTyped\`-block direct references; parallelism reached only via `;
+  md += `helper functions outside the block is not traced, so this can under-report. Thresholds are `;
+  md += `parsed from \`parallel/src/ComputePool.ts\` (\`DEFAULT_THRESHOLD_BY_OP\` + \`thresholdElements\`).`;
+  if (!p.thresholdsResolved) {
+    md += ` **⚠ ComputePool.ts could not be parsed — thresholds degraded to the ${p.globalThreshold} global default.**`;
+  }
+  md += `\n\n`;
+  md += `| Routing | Count |\n| --- | --: |\n`;
+  md += `| Parallel — effective (op threshold active) | ${p.effectiveCount} |\n`;
+  md += `| Parallel — disabled (all ops \`'never'\`) | ${p.disabledCount} |\n`;
+  md += `| Non-parallel (no worker-pool path) | ${p.nonParallelCount} |\n`;
+  md += `| **Total** | **${p.total}** |\n\n`;
+  md += `Global fallback threshold (\`thresholdElements\`, for ops absent from the per-op map): `;
+  md += `**${p.globalThreshold}** elements.\n\n`;
+
+  md += `## Effectively parallelized functions\n\n`;
+  md += `| Function | Ops | Thresholds (elements) | Module |\n| --- | --- | --- | --- |\n`;
+  for (const e of p.parallelized.filter((x) => x.effectiveness === 'effective')) {
+    md += `| \`${e.name}\` | \`${e.ops.join('`, `')}\` | ${e.thresholds.join(', ')} | ${e.file.replace(/\.ts$/, '')} |\n`;
+  }
+
+  md += `\n## Disabled parallel paths (wired but always inline JS)\n\n`;
+  md += `These route to the worker pool but every op resolves to \`'never'\` — overhead dominated `;
+  md += `at all benchmarked sizes, so they always run inline JS today. Kept wired so a future `;
+  md += `threshold retune (\`tools/benchmark/parallel/run.ts\`) can switch them on without code churn.\n\n`;
+  md += `| Function | Ops (all \`'never'\`) | Module |\n| --- | --- | --- |\n`;
+  for (const e of p.parallelized.filter((x) => x.effectiveness === 'disabled')) {
+    md += `| \`${e.name}\` | \`${e.ops.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+  }
+
+  md += `\n## Per-module counts\n\n| Module | Effective | Disabled | Non-parallel |\n| --- | --: | --: | --: |\n`;
+  for (const f of Object.keys(p.byFile).sort()) {
+    md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].effective} | ${p.byFile[f].disabled} | ${p.byFile[f].none} |\n`;
+  }
+
+  // Canonical threshold table — the parallel analog of the WASM binary export
+  // table. Parsed from ComputePool.ts so ARCHITECTURE docs stop hand-maintaining it.
+  md += `\n## Canonical op thresholds\n\n`;
+  md += `Parsed from \`parallel/src/ComputePool.ts\` (\`DEFAULT_THRESHOLD_BY_OP\`). \`# functions\` `;
+  md += `counts public typed functions dispatching through each op (0 ⇒ the op is exposed by the `;
+  md += `pool but not reached from the scanned typed API — e.g. used only by the matrix package or `;
+  md += `internal helpers). \`applyKernel\` is the synthetic generic-kernel path.\n\n`;
+  md += `| Op | Threshold (elements) | Active? | # functions |\n| --- | --- | :-: | --: |\n`;
+  for (const r of p.byOp) {
+    md += `| \`${r.op}\` | ${r.threshold} | ${r.active ? '✓' : '—'} | ${r.functions.length} |\n`;
+  }
+
+  md += `\n## Non-parallel functions (no worker-pool path)\n\n`;
+  md += `Pure-JS or WASM-only typed functions — see \`wasm-pairing.md\` for their WASM routing.\n\n`;
+  md += p.nonParallel.length
+    ? p.nonParallel.map((n) => `\`${n}\``).join(', ') + '\n'
+    : '_(none)_\n';
+
+  md += `\n> Notes: element-wise arithmetic/transcendental ops (\`add\`/\`sin\`/\`exp\`/…) and the `;
+  md += `signal/reduction ops are \`'never'\` — the 2026-05 parallel benchmark found worker `;
+  md += `overhead dominates at every tested size for memory-bound element-wise work. The active `;
+  md += `set is the compute-bound ops (tensordot, matmul, matrixPower, characteristicPolynomial, `;
+  md += `the hypothesis tests, and the special functions erfc/besselJ/spectrogram/sampleChunk) `;
+  md += `plus any generic \`applyKernel\` path above the ${p.globalThreshold}-element global `;
+  md += `threshold. Re-tune via \`tools/benchmark/parallel/run.ts\`.\n`;
+  return md;
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
@@ -2988,6 +3311,26 @@ async function main(): Promise<void> {
     console.log(
       `Written: ${join(OUTPUT_DIR, 'wasm-pairing.md')} ` +
         `(${wasmPairing.acceleratedCount}/${wasmPairing.total} WASM-accelerated)`
+    );
+  }
+
+  // Parallel (worker-pool) <-> function pairing (generated artifact; the parallel
+  // analog of wasm-pairing — pairs each typed function against the canonical
+  // DEFAULT_THRESHOLD_BY_OP thresholds parsed from parallel/src/ComputePool.ts).
+  const parallelPairing = analyzeParallelPairing(ROOT_DIR);
+  if (parallelPairing) {
+    writeFileSync(
+      join(OUTPUT_DIR, 'parallel-pairing.json'),
+      JSON.stringify(parallelPairing, null, 2)
+    );
+    writeFileSync(
+      join(OUTPUT_DIR, 'parallel-pairing.md'),
+      generateParallelPairingMarkdown(parallelPairing)
+    );
+    console.log(
+      `Written: ${join(OUTPUT_DIR, 'parallel-pairing.md')} ` +
+        `(${parallelPairing.effectiveCount}/${parallelPairing.parallelizedCount} effectively parallelized, ` +
+        `${parallelPairing.disabledCount} disabled)`
     );
   }
 

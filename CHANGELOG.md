@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tooling (2026-07-02) — parallel-optimization pairing report (dep-graph tool)
+
+Added a **worker-pool (parallel) ↔ function pairing** report to the dependency-graph
+tool (`tools/create-dependency-graph`), the parallel analog of the existing WASM
+pairing report. `npm run docs:deps` now also emits
+`docs/Architecture/parallel-pairing.md` + `parallel-pairing.json`.
+
+- Per public `mathTyped` function in `functions/src/typed/`, detects worker-pool
+  routing — a named `computePool.<op>()` (tunable threshold) or a generic-kernel
+  path (`applyKernel`/`mapArray`/a bare `parallel*` helper/a `shouldParallelize`
+  gate) — and classifies it **effective** (at least one op's threshold ≠ `'never'`)
+  vs **disabled** (every op is `'never'`: wired to the pool but always runs inline
+  JS — the parallel analog of a WASM js-fallback).
+- The canonical op-threshold table is **parsed directly from
+  `parallel/src/ComputePool.ts`** (`DEFAULT_THRESHOLD_BY_OP` + the `thresholdElements`
+  global fallback), so the thresholds are a generated artifact, never hand-copied —
+  mirroring how the WASM report probes the `.wasm` export table.
+- First run: 96/113 effectively parallelized, 17 disabled, 105 non-parallel (of 218
+  typed functions). Added the new outputs to `docs:deps:format` so they stay
+  prettier-stable, and to the `docs/README.md` + tool README report indexes.
+
 ### Added (2026-06-30) — domain gap-closure: ~89 new functions (`functions@0.6.0` → `0.7.0`, `core@0.3.1`)
 
 Closed the 2026-06-30 domain-coverage gap analysis (`docs/roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md`)

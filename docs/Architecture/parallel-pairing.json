@@ -1,0 +1,1410 @@
+{
+  "generated": "2026-07-02",
+  "total": 218,
+  "parallelizedCount": 113,
+  "effectiveCount": 96,
+  "disabledCount": 17,
+  "nonParallelCount": 105,
+  "globalThreshold": 50000,
+  "thresholdsResolved": true,
+  "parallelized": [
+    {
+      "name": "abs",
+      "file": "arithmetic.ts",
+      "ops": ["abs"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "acos",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "acosh",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "add",
+      "file": "arithmetic.ts",
+      "ops": ["add"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "airyAi",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "airyBi",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "asin",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "asinh",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "atan",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "atanh",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "bernoulliPMF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselI",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselJ",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselJ0",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselJ1",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselK",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselY",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselY0",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "besselY1",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "beta",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "betainc",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "binomialPMF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "bitAnd",
+      "file": "bitwise.ts",
+      "ops": ["bitAnd"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "bitNot",
+      "file": "bitwise.ts",
+      "ops": ["bitNot"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "bitOr",
+      "file": "bitwise.ts",
+      "ops": ["bitOr"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "bitXor",
+      "file": "bitwise.ts",
+      "ops": ["bitXor"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cbrt",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "ceil",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "chebyshevT",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cos",
+      "file": "trigonometry.ts",
+      "ops": ["cos"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "cosh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cosIntegral",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cot",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "csc",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cube",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "digamma",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "divide",
+      "file": "arithmetic.ts",
+      "ops": ["divide"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "dot",
+      "file": "arithmetic.ts",
+      "ops": ["dot"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "ellipticE",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "ellipticK",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "erfc",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "erfi",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "exp",
+      "file": "arithmetic.ts",
+      "ops": ["exp"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "expIntegralEi",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "expm1",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "exponentialCDF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "exponentialPDF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "fix",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "floor",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "fresnelC",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "fresnelS",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "gammainc",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "gammaincp",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "geometricPMF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "hermiteH",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "laguerreL",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "lambertW",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "leftShift",
+      "file": "bitwise.ts",
+      "ops": ["leftShift"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "legendreP",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "lgamma",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "log",
+      "file": "arithmetic.ts",
+      "ops": ["log"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "log10",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "log1p",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "log2",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "logIntegral",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "max",
+      "file": "arithmetic.ts",
+      "ops": ["max"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "mean",
+      "file": "arithmetic.ts",
+      "ops": ["mean"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "min",
+      "file": "arithmetic.ts",
+      "ops": ["min"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "multiply",
+      "file": "arithmetic.ts",
+      "ops": ["multiply", "scale"],
+      "thresholds": ["never", "never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "norm",
+      "file": "arithmetic.ts",
+      "ops": ["norm"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "normalCDF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "normalPDF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelAutoCorr",
+      "file": "signal.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelConv",
+      "file": "signal.ts",
+      "ops": ["applyKernel", "fftBatch"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelFFT",
+      "file": "signal.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelFFTMagnitude",
+      "file": "signal.ts",
+      "ops": ["applyKernel", "applyKernel2"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelFFTPower",
+      "file": "signal.ts",
+      "ops": ["applyKernel", "applyKernel2"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelIFFT",
+      "file": "signal.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatCorr",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "variance"],
+      "thresholds": ["50000 (global kernel)", "never"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatDistance",
+      "file": "statistics.ts",
+      "ops": ["distance"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatHistogram",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "histogram"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMAD",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "mean"],
+      "thresholds": ["50000 (global kernel)", "never"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMax",
+      "file": "statistics.ts",
+      "ops": ["max"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMean",
+      "file": "statistics.ts",
+      "ops": ["mean"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "parallelStatMedian",
+      "file": "statistics.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMin",
+      "file": "statistics.ts",
+      "ops": ["min"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMinMax",
+      "file": "statistics.ts",
+      "ops": ["minMax"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatMode",
+      "file": "statistics.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatNorm",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "norm"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatProd",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "prod"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatQuantile",
+      "file": "statistics.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatStd",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "std"],
+      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelStatSum",
+      "file": "statistics.ts",
+      "ops": ["sum"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "parallelStatVariance",
+      "file": "statistics.ts",
+      "ops": ["applyKernel", "variance"],
+      "thresholds": ["50000 (global kernel)", "never"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "parallelXCorr",
+      "file": "signal.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "poissonPMF",
+      "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "rightArithShift",
+      "file": "bitwise.ts",
+      "ops": ["rightArithShift"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "rightLogShift",
+      "file": "bitwise.ts",
+      "ops": ["rightLogShift"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "round",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sec",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sign",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sin",
+      "file": "trigonometry.ts",
+      "ops": ["sin"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "sinh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sinIntegral",
+      "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sqrt",
+      "file": "arithmetic.ts",
+      "ops": ["sqrt"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "square",
+      "file": "arithmetic.ts",
+      "ops": ["square"],
+      "thresholds": ["50000 (global)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "std",
+      "file": "arithmetic.ts",
+      "ops": ["variance"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "subtract",
+      "file": "arithmetic.ts",
+      "ops": ["subtract"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "sum",
+      "file": "arithmetic.ts",
+      "ops": ["sum"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "tan",
+      "file": "trigonometry.ts",
+      "ops": ["tan"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "tanh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "unaryMinus",
+      "file": "arithmetic.ts",
+      "ops": ["negate"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    },
+    {
+      "name": "variance",
+      "file": "arithmetic.ts",
+      "ops": ["variance"],
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
+    }
+  ],
+  "nonParallel": [
+    "acot",
+    "acsc",
+    "and",
+    "arg",
+    "asec",
+    "atan2",
+    "bernoulli",
+    "betaPDF",
+    "bin",
+    "carlsonRC",
+    "carlsonRD",
+    "carlsonRF",
+    "carlsonRJ",
+    "carmichaelLambda",
+    "chineseRemainder",
+    "combinations",
+    "combinationsWithRep",
+    "compare",
+    "compareNatural",
+    "compareText",
+    "compareUnits",
+    "cond",
+    "conj",
+    "deepEqual",
+    "divisorSigma",
+    "divisors",
+    "doubleFactorial",
+    "ellipticEIncomplete",
+    "ellipticF",
+    "ellipticPi",
+    "entropy",
+    "equal",
+    "equalScalar",
+    "equalText",
+    "eulerPhi",
+    "fallingFactorial",
+    "fibonacci",
+    "format",
+    "gammaPDF",
+    "gcd",
+    "harmonicNumber",
+    "hex",
+    "hypot",
+    "im",
+    "integerDigits",
+    "jacobiSymbol",
+    "jsDivergence",
+    "larger",
+    "largerEq",
+    "lcm",
+    "lowRankApprox",
+    "lucas",
+    "lucasL",
+    "matrixExpm",
+    "matrixLogm",
+    "matrixSqrtm",
+    "mod",
+    "moebiusMu",
+    "multinomial",
+    "nextPrime",
+    "noncentralChi2PDF",
+    "norm2",
+    "normFro",
+    "not",
+    "nthRoot",
+    "nullish",
+    "oct",
+    "or",
+    "parallelStatCumsum",
+    "partitions",
+    "permutations",
+    "pickRandom",
+    "pinv",
+    "pow",
+    "prime",
+    "primeFactors",
+    "primePi",
+    "print",
+    "random",
+    "randomInt",
+    "re",
+    "risingFactorial",
+    "setCartesian",
+    "setDifference",
+    "setDistinct",
+    "setIntersect",
+    "setIsSubset",
+    "setMultiplicity",
+    "setPowerset",
+    "setSize",
+    "setSymDifference",
+    "setUnion",
+    "singularValues",
+    "smaller",
+    "smallerEq",
+    "studentTPDF",
+    "subfactorial",
+    "to",
+    "toBest",
+    "toDegrees",
+    "toRadians",
+    "unaryPlus",
+    "unequal",
+    "xgcd",
+    "xor"
+  ],
+  "byOp": [
+    {
+      "op": "abs",
+      "threshold": "never",
+      "active": false,
+      "functions": ["abs"]
+    },
+    {
+      "op": "add",
+      "threshold": "never",
+      "active": false,
+      "functions": ["add"]
+    },
+    {
+      "op": "applyKernel",
+      "threshold": "50000 (global kernel)",
+      "active": true,
+      "functions": [
+        "acos",
+        "acosh",
+        "airyAi",
+        "airyBi",
+        "asin",
+        "asinh",
+        "atan",
+        "atanh",
+        "bernoulliPMF",
+        "besselI",
+        "besselJ",
+        "besselJ0",
+        "besselJ1",
+        "besselK",
+        "besselY",
+        "besselY0",
+        "besselY1",
+        "beta",
+        "betainc",
+        "binomialPMF",
+        "cbrt",
+        "ceil",
+        "chebyshevT",
+        "cosIntegral",
+        "cosh",
+        "cot",
+        "csc",
+        "cube",
+        "digamma",
+        "ellipticE",
+        "ellipticK",
+        "erfc",
+        "erfi",
+        "expIntegralEi",
+        "expm1",
+        "exponentialCDF",
+        "exponentialPDF",
+        "fix",
+        "floor",
+        "fresnelC",
+        "fresnelS",
+        "gammainc",
+        "gammaincp",
+        "geometricPMF",
+        "hermiteH",
+        "laguerreL",
+        "lambertW",
+        "legendreP",
+        "lgamma",
+        "log10",
+        "log1p",
+        "log2",
+        "logIntegral",
+        "normalCDF",
+        "normalPDF",
+        "parallelAutoCorr",
+        "parallelConv",
+        "parallelFFT",
+        "parallelFFTMagnitude",
+        "parallelFFTPower",
+        "parallelIFFT",
+        "parallelStatCorr",
+        "parallelStatHistogram",
+        "parallelStatMAD",
+        "parallelStatMedian",
+        "parallelStatMode",
+        "parallelStatNorm",
+        "parallelStatProd",
+        "parallelStatQuantile",
+        "parallelStatStd",
+        "parallelStatVariance",
+        "parallelXCorr",
+        "poissonPMF",
+        "round",
+        "sec",
+        "sign",
+        "sinIntegral",
+        "sinh",
+        "tanh"
+      ]
+    },
+    {
+      "op": "applyKernel2",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelFFTMagnitude", "parallelFFTPower"]
+    },
+    {
+      "op": "besselJ",
+      "threshold": "1000000",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "bitAnd",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["bitAnd"]
+    },
+    {
+      "op": "bitNot",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["bitNot"]
+    },
+    {
+      "op": "bitOr",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["bitOr"]
+    },
+    {
+      "op": "bitXor",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["bitXor"]
+    },
+    {
+      "op": "characteristicPolynomial",
+      "threshold": "9216",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "chiSquareTest",
+      "threshold": "4096",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "cos",
+      "threshold": "never",
+      "active": false,
+      "functions": ["cos"]
+    },
+    {
+      "op": "distance",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelStatDistance"]
+    },
+    {
+      "op": "distanceMatrix",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "divide",
+      "threshold": "never",
+      "active": false,
+      "functions": ["divide"]
+    },
+    {
+      "op": "dot",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["dot"]
+    },
+    {
+      "op": "erfc",
+      "threshold": "100000",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "exp",
+      "threshold": "never",
+      "active": false,
+      "functions": ["exp"]
+    },
+    {
+      "op": "fft2d",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "fftBatch",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelConv"]
+    },
+    {
+      "op": "histogram",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelStatHistogram"]
+    },
+    {
+      "op": "kolmogorovSmirnovTest",
+      "threshold": "4096",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "leftShift",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["leftShift"]
+    },
+    {
+      "op": "log",
+      "threshold": "never",
+      "active": false,
+      "functions": ["log"]
+    },
+    {
+      "op": "mannWhitneyTest",
+      "threshold": "4096",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "matmul",
+      "threshold": "4096",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "matrixPower",
+      "threshold": "9216",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "max",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["max", "parallelStatMax"]
+    },
+    {
+      "op": "mean",
+      "threshold": "never",
+      "active": false,
+      "functions": ["mean", "parallelStatMAD", "parallelStatMean"]
+    },
+    {
+      "op": "min",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["min", "parallelStatMin"]
+    },
+    {
+      "op": "minMax",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelStatMinMax"]
+    },
+    {
+      "op": "multiply",
+      "threshold": "never",
+      "active": false,
+      "functions": ["multiply"]
+    },
+    {
+      "op": "negate",
+      "threshold": "never",
+      "active": false,
+      "functions": ["unaryMinus"]
+    },
+    {
+      "op": "norm",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["norm", "parallelStatNorm"]
+    },
+    {
+      "op": "normalCDF",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "parallelConv",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "parallelFFT",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "parallelStatProd",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "pow",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "prod",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelStatProd"]
+    },
+    {
+      "op": "rightArithShift",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["rightArithShift"]
+    },
+    {
+      "op": "rightLogShift",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["rightLogShift"]
+    },
+    {
+      "op": "sampleChunk",
+      "threshold": "100000",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "scale",
+      "threshold": "never",
+      "active": false,
+      "functions": ["multiply"]
+    },
+    {
+      "op": "shapiroWilkTest",
+      "threshold": "4096",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "sign",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "sin",
+      "threshold": "never",
+      "active": false,
+      "functions": ["sin"]
+    },
+    {
+      "op": "spectrogram",
+      "threshold": "65536",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "sqrt",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["sqrt"]
+    },
+    {
+      "op": "square",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["square"]
+    },
+    {
+      "op": "std",
+      "threshold": "50000 (global)",
+      "active": true,
+      "functions": ["parallelStatStd"]
+    },
+    {
+      "op": "subtract",
+      "threshold": "never",
+      "active": false,
+      "functions": ["subtract"]
+    },
+    {
+      "op": "sum",
+      "threshold": "never",
+      "active": false,
+      "functions": ["parallelStatSum", "sum"]
+    },
+    {
+      "op": "tan",
+      "threshold": "never",
+      "active": false,
+      "functions": ["tan"]
+    },
+    {
+      "op": "tensordot",
+      "threshold": "8192",
+      "active": true,
+      "functions": []
+    },
+    {
+      "op": "variance",
+      "threshold": "never",
+      "active": false,
+      "functions": ["parallelStatCorr", "parallelStatVariance", "std", "variance"]
+    }
+  ],
+  "byFile": {
+    "arithmetic.ts": {
+      "effective": 20,
+      "disabled": 12,
+      "none": 13
+    },
+    "bitwise.ts": {
+      "effective": 7,
+      "disabled": 0,
+      "none": 0
+    },
+    "combinatorics.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 21
+    },
+    "complex.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 4
+    },
+    "distributions.ts": {
+      "effective": 8,
+      "disabled": 0,
+      "none": 6
+    },
+    "logical.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 5
+    },
+    "matrix-ops.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 9
+    },
+    "probability.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 8
+    },
+    "relational.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 7
+    },
+    "set.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 10
+    },
+    "signal.ts": {
+      "effective": 7,
+      "disabled": 0,
+      "none": 0
+    },
+    "special.ts": {
+      "effective": 31,
+      "disabled": 0,
+      "none": 7
+    },
+    "statistics.ts": {
+      "effective": 14,
+      "disabled": 2,
+      "none": 1
+    },
+    "string.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 5
+    },
+    "trigonometry.ts": {
+      "effective": 9,
+      "disabled": 3,
+      "none": 7
+    },
+    "unit.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 2
+    }
+  }
+}
