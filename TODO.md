@@ -156,9 +156,11 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
 - ✅ **[hygiene] stale-dist gotcha** — documented in AGENTS.md › Testing protocol (tests import deps'
   built `dist/` not `src/`; rebuild the dep first or use `npm run test` via turbo) + the partial-`tsup`
   gotcha (hand `--clean` skips the wasm copy). Also saved to memory `feedback-stale-dist-false-failures`.
-- ⬜ **[guardrail] lock in the hot-vs-cold rule** — add a `// PERF: keep local` comment on
-  `functions`/`expression` `utils/is.ts` (cross-module guards defeat V8 inlining — the ~40% gap-tukey
-  regression), plus a perf-regression test asserting the guard hot-path stays under budget.
+- ✅ **[guardrail] lock in the hot-vs-cold rule** — `// PERF: keep local` banner on both
+  `utils/is.ts` files + a deterministic structural guardrail test (`tests/is-guards-local.test.ts`
+  in functions + expression) that fails if is.ts is turned into a core re-export shim. Chose
+  structural over timing (a micro-benchmark wouldn't reliably reflect hot-loop inlining); verified
+  the guard catches a shim.
 - ⬜ **[B8 — the perf prize] size-thresholded batch elementary functions wired through the standard
   layer.** Put a batch elementary-fn path in the standard layer (WASM/SIMD if the assembly kernels
   support it, else a tight JS batch), dispatch by size (small → inlined `Math.*`, large → batch), and

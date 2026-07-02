@@ -1,3 +1,11 @@
+// PERF: keep these type guards DEFINED LOCALLY — do NOT consolidate them into a
+// re-export shim from `@danielsimonjr/mathts-core`. They are called in hot numerical
+// loops (e.g. the studentized-range / Tukey Simpson integration), where V8 inlines
+// local guards but will NOT inline them across a module boundary. A cross-module
+// re-export measured ~40% slower on that path (tipped gap-tukey past its timeout).
+// Cold utilities (number/object) live in core/internal; hot-path guards stay here.
+// Enforced by `tests/is-guards-local.test.ts`.
+//
 // type checks for all known types
 //
 // note that:
