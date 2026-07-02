@@ -17,7 +17,11 @@ import {
 } from '../../src/backends/BackendManager.js';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 import { resetConfig, setConfig, configureAdaptiveTuning } from '../../src/config.js';
-import { backendRegistry, type MatrixBackend, type BackendType } from '../../src/backends/Backend.js';
+import {
+  backendRegistry,
+  type MatrixBackend,
+  type BackendType,
+} from '../../src/backends/Backend.js';
 
 /**
  * A backend whose every operation throws — used to drive the
@@ -51,7 +55,9 @@ describe('DEFAULT_EXTENDED_HINTS', () => {
   it('extends the base hints with operation thresholds', () => {
     expect(DEFAULT_EXTENDED_HINTS.autoSIMD).toBe(true);
     expect(DEFAULT_EXTENDED_HINTS.fallbackOnError).toBe(true);
-    expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(500);
+    // matmul WASM threshold dropped 500→256 (SIMD kernel wins from ~256 elems — decomp-audit/
+    // matmul-threshold benchmarks).
+    expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(256);
   });
 });
 
@@ -406,7 +412,10 @@ describe('BackendManager — adaptive tuning & stats', () => {
     const m = adjusted.get('multiply');
     expect(m).toBeDefined();
     // WASM faster → wasm threshold lowered below the default 500.
-    if (m) expect(m.wasm).toBeLessThanOrEqual(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply!.wasm!);
+    if (m)
+      expect(m.wasm).toBeLessThanOrEqual(
+        DEFAULT_EXTENDED_HINTS.operationThresholds.multiply!.wasm!
+      );
   });
 
   it('raises the WASM threshold when JS outperforms WASM', () => {

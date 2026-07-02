@@ -156,6 +156,16 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-02) — drop the matmul WASM threshold 500→256 (SIMD wins from 16²)
+
+`tools/benchmarks/matmul-threshold.mjs` measured the SIMD-WASM matmul vs JS at small sizes: WASM wins
+from ~256 elements (16², 1.32×) and grows (2.27× at 24², 4.8× at 48², 8× at 128²); it only loses at 8²
+(64 elems, copy/alloc overhead) and is marginal at 12² (144). So `BackendManager`'s `multiply.wasm`
+gate of 500 was forcing 16²–22² matmuls onto JS where WASM would win 1.3–2.2×. Dropped it to **256**
+(the reproducible solid-win boundary; below it the win is marginal/noisy and 8² loses). Correctness is
+backend-agnostic — matrix 743 pass / 7 skip, tensor 389/389, autograd 258/258. (WASMBackend's own
+`minElements: 100` gate was already near the crossover; the manager gate was the binding one.)
+
 ### Changed (2026-07-02) — remove the dead WASM branches from WASMBackend's element-wise methods
 
 The element-wise / transpose / reduction ops were retired from WASM earlier (memory-bound, 4–6× slower

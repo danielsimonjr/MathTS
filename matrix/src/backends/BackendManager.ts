@@ -41,8 +41,13 @@ export interface ExtendedBackendHints extends BackendHints {
 export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> = {
   ...DEFAULT_BACKEND_HINTS,
   operationThresholds: {
-    multiply: { wasm: 500, gpu: 50000 },
+    // matmul: the SIMD-WASM kernel wins from ~256 elems (16²), solidly 1.3–2.2× (measured,
+    // tools/benchmarks/matmul-threshold.mjs); below that copy/alloc overhead dominates (8²
+    // loses, 12² marginal). Dropped 500→256 to stop forcing 16²–22² matmuls onto JS.
+    multiply: { wasm: 256, gpu: 50000 },
     decomposition: { wasm: 100, gpu: 10000 },
+    // transpose WASM is retired (memory-bound, lost 4–6×) — WASMBackend.transpose always uses
+    // JS regardless of this gate; kept high so the manager doesn't even select the WASM backend.
     transpose: { wasm: 2000, gpu: 200000 },
   },
   autoSIMD: true,

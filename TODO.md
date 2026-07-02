@@ -228,8 +228,11 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   the AS bindings. They have no live JS consumer now, but surgically deleting ~7 functions from the
   matmul-holding file for a marginal binary saving is high-risk / low-value + removes a coherent AS API.
   Kept as the general AS library.
-- ⬜ **[matmul threshold check]** SIMD matmul wins even at 64² (8.9×), so matrix's `wasmThreshold`
-  (1000 elems ≈ 32²) could likely drop — but the JS-ikj fallback is fine, so low priority.
+- ✅ **[done — matmul threshold dropped 500→256]** `tools/benchmarks/matmul-threshold.mjs`: SIMD-WASM
+  matmul wins from ~256 elems (16², 1.3×) solidly (2.2× at 24², up to 8× at 128²); 8² (64) loses to
+  copy overhead, 12² (144) marginal. So the `BackendManager` `multiply.wasm` gate (was 500) forced
+  16²–22² matmuls onto JS needlessly — dropped to 256 (the reproducible solid-win boundary). matrix
+  743/7skip, tensor 389, autograd 258.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

@@ -141,3 +141,26 @@ WASM-dispatch tests are `describe.skip`/`it.skip` with the reason; matrix suite 
 **Net: the WASM backend's entire remaining value is the one SIMD matmul kernel.** Follow-up: delete
 the dead AS decomposition kernels (`matrix_eig_*`, `matrix_svd`, `algebra/decomposition.ts` lu/qr/
 cholesky) + the disabled WASM branches — a from-scratch SIMD version would be new code anyway.
+_(Follow-up done 2026-07-01: the AS eig/svd kernels were deleted; lu/qr/cholesky kept — WASMBackend
+uses them. See CHANGELOG.)_
+
+## `matmul-threshold.mjs` — where does the SIMD-WASM matmul start beating JS?
+
+Forces the WASM backend (`minElements: 0`) and compares `WASMBackend.multiply` to `jsBackend.multiply`
+across small square sizes, to tune the `BackendManager` `multiply.wasm` gate. **Init WASM first.**
+
+**Finding (2026-07-02, Node 24):** JS/WASM ratio (>1 → WASM faster):
+
+| size | elems | JS/WASM | verdict       |
+| ---- | ----- | ------- | ------------- |
+| 8²   | 64    | 0.56×   | JS wins       |
+| 12²  | 144   | 1.25×   | ~marginal     |
+| 16²  | 256   | 1.32×   | **WASM wins** |
+| 24²  | 576   | 2.27×   | WASM wins     |
+| 48²  | 2304  | 4.80×   | WASM wins     |
+| 128² | 16384 | 7.98×   | WASM wins     |
+
+**Conclusion (implemented):** WASM matmul wins solidly from **256 elements (16²)**; below that the
+JS↔WASM copy + alloc overhead dominates the tiny compute (8² loses, 12² marginal/noisy). Dropped the
+`BackendManager` `multiply.wasm` threshold 500→256 so 16²–22² matmuls take the winning WASM path
+(they were needlessly on JS). Correctness is backend-agnostic; matrix 743 pass / 7 skip.
