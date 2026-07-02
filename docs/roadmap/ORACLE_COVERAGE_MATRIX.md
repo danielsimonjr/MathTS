@@ -37,7 +37,7 @@
 | Domain | Fns | ORACLE (ext / cf) | SELF-REF | UNTESTED |
 |---|---:|---|---:|---:|
 | Special functions | 38 | 38 (mixed ext+cf) | 0 | 0 |
-| Distributions | 46 | 44 (ext-heavy) | 0 | **2** |
+| Distributions | 46 | 46 (ext-heavy) | 0 | 0 |
 | Arithmetic | 49 | 39 (0 ext / 39 cf) | 10 | 0 |
 | Trigonometry | 19 | 3 (0 ext / 3 cf) | 16 | 0 |
 | Statistics (typed) | 24 | 20 (0 ext / 20 cf) | 4 | 0 |
@@ -48,13 +48,14 @@
 | Geometry | 40 | 38 (ext+cf) | 2 | 0 |
 | Bitwise | 7 | 7 (cf, exact-integer) | 0 | 0 |
 | Optimization / regression / numeric utils | 15 | 13 (ext+cf) | 2 | 0 |
-| **Total** | **395** | **318** | **75** | **2** |
+| **Total** | **395** | **320** | **75** | **0** |
 
 **Headline findings**
 
-- **Special functions (38/38)** and **Distributions (44/46)** are the *best* covered — the
-  `gap-wave-*` files pin them to SciPy/mpmath/DLMF constants. Only `gammaQuantile` and
-  `betaQuantile` are outright UNTESTED.
+- **Special functions (38/38)** and **Distributions (46/46)** are the *best* covered — the
+  `gap-wave-*` files pin them to SciPy/mpmath/DLMF constants. `gammaQuantile` and
+  `betaQuantile` were the only outright UNTESTED functions; **both were pinned in WS-1 P2**
+  (`functions/tests/gap-quantile-oracle.test.ts`) — the matrix now has **0 UNTESTED**.
 - **Arithmetic, Trigonometry, typed Statistics** carry **zero external pins** — they rest
   on closed-form identities (fine for elementary algebra) or, for trig, on the JS `Math.*`
   primitive the implementation itself calls (tautological on the `number` path).
@@ -146,14 +147,14 @@ Tests: `distributions.test.ts`, `typed-distributions-wasm.test.ts`, `dist-object
 | chiSquaredCDF / chiSquaredQuantile | ORACLE(ext) | gap-wave-b | 0.9281022275035349 / 7.814727903251179 |
 | fCDF / fQuantile | ORACLE(ext) | gap-wave-b | 0.9344424379061559 / 3.3258345304130104 |
 | gammaCDF | ORACLE(ext) | gap-wave-b | 0.32332358381693654 |
-| **gammaQuantile** | **UNTESTED** | — | not referenced in any test |
+| gammaQuantile | ORACLE(ext+cf) | gap-quantile-oracle | chi²-table + exponential closed form (WS-1 P2) |
 | betaCDF | ORACLE(ext) | gap-wave-b | 0.5248 |
-| **betaQuantile** | **UNTESTED** | — | not referenced in any test |
+| betaQuantile | ORACLE(cf) | gap-quantile-oracle | uniform / Beta(a,1)=p^(1/a) / Beta(1,b) / symmetric closed forms (WS-1 P2) |
 | cauchyPDF/CDF/Quantile | ORACLE(ext) | gap-wave-d2 | 0.15915494309189535 / 0.75 / 1.0 (scipy.stats) |
 | laplacePDF/CDF/Quantile | ORACLE(ext) | gap-wave-d2 | 0.18393972058572117 / 0.8160602794142788 / −0.6931471805599453 |
 | logisticPDF/CDF/Quantile | ORACLE(ext) | gap-wave-d2 | 0.19661193324148185 / 0.7310585786300049 / 2.1972245773362196 |
 
-**distributions: 46 fns (excl. constant) — 44 ORACLE, 0 pure SELF-REF at the free-function level, 2 UNTESTED** (`gammaQuantile`, `betaQuantile`). Several *factory* `.quantile`/`.cdf` methods are self-ref (see priority list).
+**distributions: 46 fns (excl. constant) — 46 ORACLE, 0 pure SELF-REF at the free-function level, 0 UNTESTED.** `gammaQuantile`/`betaQuantile` were pinned in WS-1 P2 (`functions/tests/gap-quantile-oracle.test.ts`) against chi-square-table + exact closed-form oracles. Several *factory* `.quantile`/`.cdf` methods are still self-ref (see priority list).
 
 ---
 
@@ -463,8 +464,11 @@ distribution CDF/quantiles). Ordered by value:
    systematically-biased factorization passes today. Pin the classic Householder `R`
    (`[[12,−51,4]…]` → R=[[14,21,−14],[0,175,−70],[0,0,35]]), the exact `L`/`U`, Schur `T`
    diagonal (against a known spectrum), and a known analytical `inv`.
-2. **`gammaQuantile` and `betaQuantile` — UNTESTED.** Add scipy `.ppf` pins; also promote
-   `gammaDist.quantile` / `betaDist.quantile` from self-ref inversion to external pins.
+2. ~~**`gammaQuantile` and `betaQuantile` — UNTESTED.**~~ ✅ **DONE (WS-1 P2)** —
+   `functions/tests/gap-quantile-oracle.test.ts` pins both to chi-square-table + exact
+   closed-form oracles (uniform, exponential, `Beta(a,1)=p^(1/a)`, symmetric-median);
+   both were already correct (7/7 GREEN, no source change). Remaining: promote the
+   factory `gammaDist.quantile` / `betaDist.quantile` self-ref inversions to external pins.
 3. **The 7 core `hypothesis.ts` statistics/p-values.** `studentTTest`, `chiSquareTest`,
    `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`,
    `principalComponentAnalysis` — pin the returned statistic *and* p-value to
@@ -487,6 +491,6 @@ distribution CDF/quantiles). Ordered by value:
 
 ### Top-5 single functions to pin first
 
-`qr` · `lu` · `gammaQuantile` · `betaQuantile` · `matrixSchur` — then the 7-function
+`qr` · `lu` · ~~`gammaQuantile`~~ ✅ · ~~`betaQuantile`~~ ✅ · `matrixSchur` — then the 7-function
 `hypothesis.ts` block and `poissonDist.cdf`.
 <!-- prettier-ignore-end -->

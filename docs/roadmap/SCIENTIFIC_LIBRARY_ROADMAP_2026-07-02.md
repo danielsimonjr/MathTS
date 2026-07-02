@@ -81,7 +81,7 @@ correctness_.
 
 - [ ] `test(special): oracle-pin <fns> vs mpmath/SciPy reference values`
 - [ ] `test(linalg): reference-pin decompositions (A≈QR, LUP·A, chol·cholᵀ) vs numpy`
-- [ ] `test(distributions): pin CDF/quantile vs scipy.stats (inverse round-trip)`
+- [~] `test(distributions): pin CDF/quantile vs scipy.stats` — **started**: the two UNTESTED quantiles (`gammaQuantile`, `betaQuantile`) are now oracle-pinned (`functions/tests/gap-quantile-oracle.test.ts`, chi-square-table + closed-form; 7/7 GREEN, both already correct). Remaining: factory `.cdf`/`.quantile` self-ref promotions, `poissonDist.cdf`.
 - [ ] `test(stats|signal|cas): oracle pins per remaining domain`
       Each: RED (assert against pinned constants) → the value is either correct (GREEN, no src change) or a **real bug** surfaced (fix at root in the same effort, RFL Rule 2).
 

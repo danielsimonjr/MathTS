@@ -28,6 +28,18 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Tests (2026-07-02) — WS-1 P2: oracle-pin the two UNTESTED quantiles
+
+`functions/tests/gap-quantile-oracle.test.ts` — external-oracle pins for
+`gammaQuantile` and `betaQuantile`, the only functions the WS-1 P1 audit found
+outright UNTESTED. The oracle is independent of the implementation: exact closed
+forms (uniform `Beta(1,1)`, exponential `shape=1`, `Beta(a,1)=p^(1/a)`,
+`Beta(1,b)`, symmetric-Beta median) plus standard chi-square 0.95/0.99 critical
+values (via the Gamma≡chi² relationship `chi²_k = Gamma(k/2, rate=0.5)`). Both
+functions were **already correct** — 7/7 GREEN, no source change — so this closes
+a verification gap rather than fixing a bug. Oracle-coverage matrix updated to 0
+UNTESTED.
+
 ### Docs (2026-07-02) — WS-3 P1: export triage (452 "unused" exports)
 
 `docs/roadmap/EXPORT_TRIAGE.md` — a read-only classification of the 452
