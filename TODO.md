@@ -185,8 +185,16 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   WASM wins 9–12× (beats Parallel 3–4× — SIMD is the compute-dense lever); element-wise/transpose
   WASM were 4–6× _slower_ than JS → retired. `WASMBackend.shouldUseWasm` now gates on `opKind` and
   only WASMs `'matmul'`; element-wise falls to JS (re-measured ≈ JS). matrix 209/209.
-- ⬜ **[follow-up] audit WASM decompositions vs JS** — svd/eig/lu/qr/cholesky; the scalar ones likely
-  lose like scalar matmul did. SIMD-optimize the compute-dense winners or disable WASM selection per op.
+- ✅ **[decomposition audit done → WASM eig/svd retired]** `tools/benchmarks/decomp-audit.mjs`: WASM
+  eig/svd were **0.2–0.7× JS, worse at scale** (scalar async Jacobi/Francis) — retired behind
+  `WASM_{EIG,SVD,SPECTRAL}_ENABLED=false` in eig-wasm.ts/svd-wasm.ts (delegate to JS; un-pessimizes
+  tensor's tensorEigWasm/tensorSvdWasm). lu/qr/cholesky had no wired WASM variant (dead kernels).
+  WASM-dispatch tests skipped w/ reason; matrix 747 pass / 20 skip. **WASM's whole value is now the SIMD
+  matmul kernel.**
+- ⬜ **[follow-up, maintenance] delete the dead WASM decomposition kernels + disabled branches** —
+  AS `matrix_eig_symmetric`/`matrix_eig_general`/`matrix_svd`/`matrix_spectral_radius` +
+  `algebra/decomposition.ts` (lu/qr/cholesky/inverse/determinant, never wired) + the flag-gated WASM
+  branches in eig-wasm.ts/svd-wasm.ts + the skipped dispatch tests. A SIMD revival would be new code.
 - ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
   (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
 - ⬜ **[follow-up, maintenance] delete now-dead WASM element-wise AS kernels + `WASMBackend` bodies** —

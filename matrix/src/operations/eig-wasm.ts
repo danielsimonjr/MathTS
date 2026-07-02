@@ -74,10 +74,14 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
     }
   }
 
-  // For small matrices or when WASM is not loaded, use JS fallback.
-  // Load the shared (AS-default) loader on first use; failures drop to JS.
-  let module = wasmLoader.getModule();
-  if (!module) {
+  // WASM eig RETIRED (2026-07-01): the AS Jacobi / Francis kernels are scalar + async and
+  // measured 0.2–0.7× of the JS path, worsening with size (~5× slower at 128²) — see
+  // tools/benchmarks/decomp-audit. So we skip the WASM path (module stays null → JS fallback
+  // below). The eligibility logic is kept behind the flag for when the kernels are
+  // SIMD-optimized (as matmul was). WASM's proven win is compute-dense SIMD matmul only.
+  const WASM_EIG_ENABLED = false;
+  let module = WASM_EIG_ENABLED ? wasmLoader.getModule() : null;
+  if (WASM_EIG_ENABLED && !module) {
     try {
       module = await wasmLoader.load();
     } catch {
@@ -90,7 +94,10 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
   //   symmetric     -> matrix_eig_symmetric (Jacobi)
   //   non-symmetric -> matrix_eig_general   (Hessenberg + Francis double-shift QR)
   const useSymWasm =
-    !!module && n >= WASM_EIG_THRESHOLD && symmetric && typeof module.matrix_eig_symmetric === 'function';
+    !!module &&
+    n >= WASM_EIG_THRESHOLD &&
+    symmetric &&
+    typeof module.matrix_eig_symmetric === 'function';
   const useGenWasm =
     !!module &&
     n >= WASM_EIG_THRESHOLD &&
@@ -222,8 +229,11 @@ export async function spectralRadiusWasm(
 ): Promise<number> {
   const n = matrix.length;
 
-  let module = wasmLoader.getModule();
-  if (!module) {
+  // WASM power-iteration retired alongside eig/svd (scalar + async, loses to JS — see
+  // tools/benchmarks/decomp-audit). Skip WASM; the JS fallback below runs.
+  const WASM_SPECTRAL_ENABLED = false;
+  let module = WASM_SPECTRAL_ENABLED ? wasmLoader.getModule() : null;
+  if (WASM_SPECTRAL_ENABLED && !module) {
     try {
       module = await wasmLoader.load();
     } catch {

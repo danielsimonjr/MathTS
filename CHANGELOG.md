@@ -156,6 +156,24 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — retire WASM eig/svd (0.2–0.7× pessimization); WASM = SIMD matmul only
+
+Decomposition audit (`tools/benchmarks/decomp-audit.mjs`, eig/svd JS vs WASM) closed the loop
+on scoping WASM. matrix's `eigWasm`/`svdWasm` (async; **tensor dogfoods them** via
+`tensorEigWasm`/`tensorSvdWasm`) were **0.2–0.7× the JS path, worsening with size** (~5× slower at
+128²): the AS Jacobi/Francis/one-sided-Jacobi kernels are scalar + async, and (unlike matmul)
+iterative algorithms that don't vectorize into a quick SIMD win. `lu`/`qr`/`cholesky` have no wired
+WASM variant at all — those AS kernels are dead-built. So the WASM decomposition path was pure
+pessimization that tensor inherited.
+
+Retired it: `eig-wasm.ts`/`svd-wasm.ts` gate the WASM path behind `WASM_EIG_ENABLED` /
+`WASM_SVD_ENABLED` / `WASM_SPECTRAL_ENABLED = false`, so `eigWasm`/`svdWasm`/`spectralRadiusWasm`
+delegate to JS (re-measured ≈ JS; un-pessimizes tensor). The WASM-dispatch tests are
+`describe.skip`/`it.skip` with the reason (deliberate feature retirement, not masking). matrix suite
+747 pass / 20 skip; tensor 389/389. **Net: the WASM backend's entire remaining value is the one SIMD
+matmul kernel** — element-wise and decompositions all lose. Follow-up: delete the dead AS
+decomposition kernels + disabled branches (a SIMD revival would be new code).
+
 ### Changed (2026-07-01) — retire element-wise WASM (4–6× pessimization); scope WASM to matmul
 
 Backend audit (`tools/benchmarks/backend-audit.mjs`, JS vs WASM vs Parallel per op) settled the

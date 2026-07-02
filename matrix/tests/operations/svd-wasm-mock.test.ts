@@ -76,7 +76,12 @@ function reconstruct(U: number[][], S: number[], V: number[][], m: number, n: nu
   return out;
 }
 
-describe('svdWasm — WASM-dispatch branch (mocked AS module)', () => {
+// RETIRED (2026-07-01): the WASM svd dispatch is disabled behind `WASM_SVD_ENABLED = false`
+// in svd-wasm.ts — the scalar AS one-sided-Jacobi kernel measured 0.4–0.7× of JS, worse at
+// scale (tools/benchmarks/decomp-audit). svdWasm now always uses the JS path, so this branch
+// is unreachable. Skipped (not deleted) — unskip if the kernel is SIMD-optimized and re-enabled.
+// svdWasm correctness is covered by the JS svd tests.
+describe.skip('svdWasm — WASM-dispatch branch (mocked AS module)', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

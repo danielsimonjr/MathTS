@@ -99,3 +99,28 @@ Answers "which backend for which op." **Init WASM first** or you measure the JS 
   ones likely lose like scalar matmul did, so SIMD-optimize or disable per op; retire functions'
   `WASM_ELEMENTWISE_THRESHOLD` single-op path (same reason); remove the now-dead WASM element-wise
   AS kernels + `WASMBackend` bodies.
+
+## `decomp-audit.mjs` — JS vs WASM for eig / svd (the decompositions with a wired WASM variant)
+
+matrix exposes `eig`/`svd` (JS) **and** `eigWasm`/`svdWasm` (async WASM); **tensor dogfoods
+`eigWasm`/`svdWasm`** (its `tensorEigWasm`/`tensorSvdWasm`). `lu`/`qr`/`cholesky` have JS-only public
+paths — their AS kernels are built but wired to nothing (dead).
+
+**Finding (2026-07-01, Node 24):** correct, but **WASM loses and degrades with size**:
+
+| size | eig JS→WASM | svd JS→WASM |
+| ---- | ----------- | ----------- |
+| 16²  | 0.67×       | 1.20×       |
+| 64²  | **0.22×**   | 0.57×       |
+| 128² | **0.21×**   | 0.44×       |
+
+**Conclusion (implemented):** the AS eig/svd kernels (Jacobi / Francis / one-sided-Jacobi) are
+**scalar + async** — 0.2–0.7× JS, worst at scale (~5× slower at 128²). Unlike matmul, these are
+iterative algorithms that don't vectorize into a quick SIMD win, and the scalar code has no salvage
+value. **Retired:** `eig-wasm.ts`/`svd-wasm.ts` gate the WASM path behind `WASM_EIG_ENABLED` /
+`WASM_SVD_ENABLED` / `WASM_SPECTRAL_ENABLED` = `false`, so `eigWasm`/`svdWasm`/`spectralRadiusWasm`
+delegate to JS (this also un-pessimizes tensor's `tensorEigWasm`/`tensorSvdWasm`). The
+WASM-dispatch tests are `describe.skip`/`it.skip` with the reason; matrix suite 747 pass / 20 skip.
+**Net: the WASM backend's entire remaining value is the one SIMD matmul kernel.** Follow-up: delete
+the dead AS decomposition kernels (`matrix_eig_*`, `matrix_svd`, `algebra/decomposition.ts` lu/qr/
+cholesky) + the disabled WASM branches — a from-scratch SIMD version would be new code anyway.

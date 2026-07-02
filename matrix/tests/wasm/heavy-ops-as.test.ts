@@ -57,7 +57,10 @@ describe('heavy ops execute on the AssemblyScript binary (Phase 7b)', () => {
     expect(typeof mod!.matrix_eig_symmetric).toBe('function');
   });
 
-  it.runIf(asAvailable)('svdWasm invokes matrix_svd and matches the JS SVD', async () => {
+  // RETIRED (2026-07-01): WASM svd disabled (WASM_SVD_ENABLED=false in svd-wasm.ts) — scalar
+  // AS kernel measured 0.4–0.7× of JS (tools/benchmarks/decomp-audit). svdWasm now uses JS, so
+  // the on-wasm dispatch this asserts no longer fires. Unskip if the kernel is SIMD-optimized.
+  it.skip('svdWasm invokes matrix_svd and matches the JS SVD', async () => {
     // `readReturnedFloat64Array` is invoked only on the WASM dispatch path
     // (to decode the packed header the AS export returns); spying it proves
     // svdWasm ran on-wasm rather than via the JS fallback.
@@ -90,57 +93,56 @@ describe('heavy ops execute on the AssemblyScript binary (Phase 7b)', () => {
     }
   });
 
-  it.runIf(asAvailable)(
-    'eigWasm invokes matrix_eig_symmetric and matches the JS eig (A·v ≈ λ·v)',
-    async () => {
-      // On-wasm proof: the decode hook only fires on the WASM dispatch path.
-      const spy = vi.spyOn(wasmLoader, 'readReturnedFloat64Array');
+  // RETIRED (2026-07-01): WASM eig disabled (WASM_EIG_ENABLED=false in eig-wasm.ts) — scalar
+  // AS Jacobi/Francis kernels measured 0.2–0.7× of JS, worse at scale (decomp-audit). eigWasm
+  // now uses JS, so the on-wasm dispatch this asserts no longer fires. Unskip if SIMD-optimized.
+  it.skip('eigWasm invokes matrix_eig_symmetric and matches the JS eig (A·v ≈ λ·v)', async () => {
+    // On-wasm proof: the decode hook only fires on the WASM dispatch path.
+    const spy = vi.spyOn(wasmLoader, 'readReturnedFloat64Array');
 
-      const A = symmetric(8);
-      const n = A.length;
-      const { values, vectors } = await eigWasm(A);
-      expect(spy).toHaveBeenCalled();
-      expect(values).toHaveLength(n);
+    const A = symmetric(8);
+    const n = A.length;
+    const { values, vectors } = await eigWasm(A);
+    expect(spy).toHaveBeenCalled();
+    expect(values).toHaveLength(n);
 
-      // Sum of eigenvalues == trace.
-      const trace = A.reduce((s, row, i) => s + row[i], 0);
-      const sum = values.reduce((s, v) => s + v.re, 0);
-      expect(sum).toBeCloseTo(trace, 6);
+    // Sum of eigenvalues == trace.
+    const trace = A.reduce((s, row, i) => s + row[i], 0);
+    const sum = values.reduce((s, v) => s + v.re, 0);
+    expect(sum).toBeCloseTo(trace, 6);
 
-      // Eigenvalue sets agree with the JS reference (sorted ascending).
-      const jsVals = eig(A)
-        .values.map((v) => v.re)
-        .sort((a, b) => a - b);
-      const wasmVals = values.map((v) => v.re).sort((a, b) => a - b);
-      for (let i = 0; i < n; i++) expect(wasmVals[i]).toBeCloseTo(jsVals[i], 6);
+    // Eigenvalue sets agree with the JS reference (sorted ascending).
+    const jsVals = eig(A)
+      .values.map((v) => v.re)
+      .sort((a, b) => a - b);
+    const wasmVals = values.map((v) => v.re).sort((a, b) => a - b);
+    for (let i = 0; i < n; i++) expect(wasmVals[i]).toBeCloseTo(jsVals[i], 6);
 
-      // Each (value, vector) pair satisfies A·v ≈ λ·v.
-      for (let k = 0; k < n; k++) {
-        const v = vectors[k];
-        const lambda = values[k].re;
-        for (let i = 0; i < n; i++) {
-          let av = 0;
-          for (let j = 0; j < n; j++) av += A[i][j] * v[j];
-          const scale = Math.max(1, Math.abs(av), Math.abs(lambda * v[i]));
-          expect(Math.abs(av - lambda * v[i]) / scale).toBeLessThan(1e-6);
-        }
+    // Each (value, vector) pair satisfies A·v ≈ λ·v.
+    for (let k = 0; k < n; k++) {
+      const v = vectors[k];
+      const lambda = values[k].re;
+      for (let i = 0; i < n; i++) {
+        let av = 0;
+        for (let j = 0; j < n; j++) av += A[i][j] * v[j];
+        const scale = Math.max(1, Math.abs(av), Math.abs(lambda * v[i]));
+        expect(Math.abs(av - lambda * v[i]) / scale).toBeLessThan(1e-6);
       }
     }
-  );
+  });
 
-  it.runIf(asAvailable)(
-    'spectralRadiusWasm invokes matrix_spectral_radius and matches the JS eig',
-    async () => {
-      // On-wasm proof: allocateFloat64Array runs only on the WASM dispatch
-      // path (the JS power-iteration fallback never allocates WASM memory).
-      const spy = vi.spyOn(wasmLoader, 'allocateFloat64Array');
+  // RETIRED (2026-07-01): WASM power-iteration disabled alongside eig/svd (decomp-audit).
+  // spectralRadiusWasm now uses JS; the on-wasm dispatch this asserts no longer fires.
+  it.skip('spectralRadiusWasm invokes matrix_spectral_radius and matches the JS eig', async () => {
+    // On-wasm proof: allocateFloat64Array runs only on the WASM dispatch
+    // path (the JS power-iteration fallback never allocates WASM memory).
+    const spy = vi.spyOn(wasmLoader, 'allocateFloat64Array');
 
-      const A = symmetric(8);
-      const radius = await spectralRadiusWasm(A);
-      expect(spy).toHaveBeenCalled();
+    const A = symmetric(8);
+    const radius = await spectralRadiusWasm(A);
+    expect(spy).toHaveBeenCalled();
 
-      const expected = Math.max(...eig(A).values.map((v) => Math.abs(v.re)));
-      expect(radius).toBeCloseTo(expected, 6);
-    }
-  );
+    const expected = Math.max(...eig(A).values.map((v) => Math.abs(v.re)));
+    expect(radius).toBeCloseTo(expected, 6);
+  });
 });

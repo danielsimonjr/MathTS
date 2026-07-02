@@ -90,7 +90,12 @@ function installFakeModule(opts: { throwInCall?: boolean; shortResult?: boolean 
   return { fakeModule, allocateFloat64Array };
 }
 
-describe('eigWasm — WASM-dispatch branch (mocked AS module)', () => {
+// RETIRED (2026-07-01): the WASM eig dispatch is disabled behind `WASM_EIG_ENABLED = false`
+// in eig-wasm.ts — the scalar AS Jacobi/Francis kernels measured 0.2–0.7× of JS, worse at
+// scale (tools/benchmarks/decomp-audit). eigWasm now always uses the JS path, so this branch
+// is unreachable. Skipped (not deleted) — unskip if the kernel is SIMD-optimized and re-enabled.
+// eigWasm correctness is covered by the JS eig tests.
+describe.skip('eigWasm — WASM-dispatch branch (mocked AS module)', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

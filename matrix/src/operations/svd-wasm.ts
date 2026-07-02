@@ -57,10 +57,13 @@ export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise
   const k = Math.min(m, n);
   const rankTolerance = options?.rankTolerance ?? 1e-10;
 
-  // Use the shared (AS-default) loader. Load on first use; any failure
-  // (e.g. binary missing in this environment) drops to the JS fallback.
-  let module = wasmLoader.getModule();
-  if (!module) {
+  // WASM svd RETIRED (2026-07-01): the AS one-sided Jacobi kernel is scalar + async and
+  // measured 0.4–0.7× of the JS path, worsening with size — see tools/benchmarks/decomp-audit.
+  // Skip the WASM path (module stays null → JS fallback below). Eligibility kept behind the
+  // flag for a future SIMD-optimized kernel. WASM's proven win is compute-dense SIMD matmul.
+  const WASM_SVD_ENABLED = false;
+  let module = WASM_SVD_ENABLED ? wasmLoader.getModule() : null;
+  if (WASM_SVD_ENABLED && !module) {
     try {
       module = await wasmLoader.load();
     } catch {
