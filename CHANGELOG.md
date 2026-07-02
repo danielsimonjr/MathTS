@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-02) — factory decompositions: two `MathJSDenseMatrix` bridge bugs
+
+The DGT diagnostic sweep flagged the factory-layer decompositions
+(`functions/src/algebra/decomposition/{lup,qr,schur,slu}.ts`) as **shipped but with
+zero direct tests**. A new implementation-independent oracle suite
+(`functions/tests/gap-factory-decomposition-oracle.test.ts`) surfaced **three real
+bugs** in the factory-scope matrix bridge (`functions/src/factories/matrix-bridge.ts`):
+
+- **`MathJSDenseMatrix` was missing the static `_swapRows`** the dense `lup`
+  partial-pivoting step calls (`DenseMatrix._swapRows(j, pi, data)`) — so **any LU
+  decomposition that needed a pivot swap threw** `_swapRows is not a function`
+  (the no-pivot path happened to work). Added the static (mirrors the existing
+  `MathJSSparseMatrix._swapRows`).
+- **`MathJSDenseMatrix.get` accepted only the mathjs array form `get([i,j])`**, not
+  the `@danielsimonjr/mathts-core` scalar form `get(i,j)` used by core's
+  `Matrix~>Array` typed-function conversion. Any code path that converted a bridge
+  matrix to an array crashed with "Cannot read properties of undefined" — e.g.
+  `multiply(R, Q)` inside the `schur` factory (two DenseMatrix operands with no
+  direct `Matrix,Matrix` signature fall back to Array conversion). `get` now accepts
+  both conventions.
+
+`lup` (exact L/U/p + `∏diag(U)=±det`) and `qr` (convention-free invariants: `QᵀQ=I`,
+`R` upper-triangular, `|R₀₀|=‖col₀‖`, `∏|diag R|=|det A|`) are now oracle-pinned and
+pass. `schur` and `slu` remain broken through deeper factory-layer interop
+(documented with precise root causes in `TODO.md`; their oracles are checked in as
+`describe.skip`); the recommended fix is to route `schur` to the already-oracle-pinned
+`matrix/src/operations` Schur. No regressions: `functions` 3110 pass / 44 skip;
+typecheck clean.
+
 ### Tooling (2026-07-02) — parallel-optimization pairing report (dep-graph tool)
 
 Added a **worker-pool (parallel) ↔ function pairing** report to the dependency-graph

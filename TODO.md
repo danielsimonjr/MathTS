@@ -304,13 +304,31 @@ Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, u
 parallel-pairing, wasm-pairing). Scale: 845 files / 154,494 LOC / 4,093 exports / **0 runtime cycles**.
 Genuine issues found (verified, not report artifacts):
 
-- 🐞 **[HIGH — untested shipped decompositions, bug-risk] the factory-layer decompositions have ZERO direct
-  tests.** `functions/src/algebra/decomposition/{lup,qr,schur,slu}.ts` are **shipped** (wired via
-  `factories/index.ts` → `createLup`/`createQr`/`createSchur`/`createSlu`) but no test imports them (verified).
-  These are a **distinct** implementation from the `matrix/src/operations/` ones I just oracle-pinned — and the
-  matrix-layer Schur had **2 real eigenvalue bugs** found this session, so the untested factory `schur`/`qr` are
-  a live bug-risk. Add oracle-pinned tests (same implementation-independent technique — see
-  [[feedback-oracle-tests-implementation-independent]]); check `createSchur` for the same real-2×2 / stall bugs.
+- 🐞 **[HIGH — untested shipped decompositions] PARTIALLY CLOSED (2026-07-02). The prediction was right: the
+  oracle tests found THREE real bugs.** `functions/src/algebra/decomposition/{lup,qr,schur,slu}.ts` were
+  **shipped** (wired via `factories/index.ts` → `createLup`/`createQr`/`createSchur`/`createSlu`) with **zero**
+  direct tests. New oracle suite `functions/tests/gap-factory-decomposition-oracle.test.ts` (implementation-
+  independent — see [[feedback-oracle-tests-implementation-independent]]).
+  - ✅ **`lup`** — real bug: `MathJSDenseMatrix` (the factory-scope `DenseMatrix`, in `matrix-bridge.ts`) was
+    **missing the static `_swapRows`** the partial-pivoting step calls → any LU needing a pivot swap threw
+    `_swapRows is not a function`. Added the static (mirrors `MathJSSparseMatrix._swapRows`). Pinned: exact
+    hand-derived L/U/p for a no-pivot + a pivot case + `∏diag(U)=±det`.
+  - ✅ **`get` dual-convention** — real general bridge bug: `MathJSDenseMatrix.get` accepted only mathjs'
+    `get([i,j])` array form, not core's `get(i,j)` scalar form used by core's `Matrix~>Array` typed-function
+    conversion → `multiply(R,Q)` inside `schur` (no `Matrix,Matrix` signature ⇒ Array-conversion fallback)
+    crashed with "reading 'undefined'". Fixed `get` to accept both; direct regression pin added. Affects **any**
+    Matrix→Array conversion, not just schur.
+  - ✅ **`qr`** — already correct; pinned convention-free (QᵀQ=I, R upper-Δ, |R₀₀|=‖col₀‖, ∏|diag R|=|det A|).
+  - ⬜ **`schur` — STILL BROKEN (next task).** Its unshifted-QR loop calls `norm(subtract(A,A0))` each sweep;
+    the L2 matrix-norm path does `eigs(squaredX).values.toArray()`, but the factory `subtract`/`multiply` on
+    bridge matrices don't round-trip as bridge `Matrix`es, so `squaredX` isn't a `Matrix` ⇒ `.values` isn't
+    matricized (no `.toArray`). **Cleanest root-cause fix: route the factory `schur` to the already-oracle-pinned
+    `matrix/src/operations` Schur** (the `native-accel` pattern used for `eigs`/`det`/`inv`), not repair the
+    QR+norm+eigs chain. Oracle ready as `describe.skip` (incl. the two symmetric cases that broke the matrix-layer
+    Schur). Also investigate whether the general `norm(matrix, 2)` L2 path is broken for bridge matrices.
+  - ⬜ **`slu` — STILL BROKEN (next task).** Sparse LU via the CSparse port throws inside `csAmd` (`add(a, at)` —
+    "Too few arguments … index 2") for order 1 and inside `csSpsolve` (`divideScalar(x[j], undefined)`) for
+    order 0. Independent of the dense-bridge bugs. Oracle ready as `describe.skip`.
 - ⬜ **[MED — activated algebra/CAS layer flagged no-direct-test] audit real vs transitive coverage.**
   TEST_COVERAGE lists `functions/src/algebra/` files with no direct-import test: `simplify`(+`util`/`wildcards`),
   `rationalize`, `derivative`, `polynomialRoot`, `lyap`, `resolve`, `leafCount`, plus `expression/src/error/MathjsError.ts`.

@@ -123,9 +123,7 @@ export class MathJSDenseMatrix {
     callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => number
   ): MathJSDenseMatrix {
     if (this._size.length === 1) {
-      const flat = (this._data as unknown as number[]).map((val, i) =>
-        callback(val, [i], this)
-      );
+      const flat = (this._data as unknown as number[]).map((val, i) => callback(val, [i], this));
       const m = new MathJSDenseMatrix(flat as unknown as number[][]);
       m._size = [...this._size];
       return m;
@@ -149,12 +147,22 @@ export class MathJSDenseMatrix {
 
   /**
    * Get element at [row, col].
+   *
+   * Accepts BOTH index conventions in the monorepo: the mathjs factory form
+   * `get([row, col])` (single array arg) and the `@danielsimonjr/mathts-core`
+   * form `get(row, col)` (two scalar args) used by core's `Matrix~>Array`
+   * typed-function conversion. Supporting only the array form silently broke
+   * that conversion — e.g. `multiply(R, Q)` inside the `schur` factory, where
+   * the two DenseMatrix operands have no direct `Matrix,Matrix` signature and
+   * fall back to Array conversion (core calls `matrix.get(i, j)`).
    */
-  get(index: number[]): number {
+  get(indexOrRow: number[] | number, col?: number): number {
+    const row = Array.isArray(indexOrRow) ? indexOrRow[0] : indexOrRow;
     if (this._size.length === 1) {
-      return this._data[index[0]] as unknown as number;
+      return this._data[row] as unknown as number;
     }
-    return this._data[index[0]][index[1]];
+    const j = Array.isArray(indexOrRow) ? indexOrRow[1] : (col as number);
+    return this._data[row][j];
   }
 
   /**
@@ -313,6 +321,19 @@ export class MathJSDenseMatrix {
   /** Create from native DenseMatrix. */
   static fromNative(dm: DenseMatrix): MathJSDenseMatrix {
     return new MathJSDenseMatrix(dm.toArray());
+  }
+
+  /**
+   * Swap rows i and j (by reference) in a raw 2-D data array. Required by the
+   * dense `lup` factory's partial-pivoting step (`DenseMatrix._swapRows(j, pi,
+   * data)`); its absence made any LU decomposition that needed a pivot swap
+   * throw `_swapRows is not a function`. Mirrors mathjs's static of the same
+   * name and the sibling `MathJSSparseMatrix._swapRows`.
+   */
+  static _swapRows(i: number, j: number, data: unknown[][]): void {
+    const vi = data[i];
+    data[i] = data[j];
+    data[j] = vi;
   }
 
   /**
