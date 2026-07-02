@@ -161,11 +161,18 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   in functions + expression) that fails if is.ts is turned into a core re-export shim. Chose
   structural over timing (a micro-benchmark wouldn't reliably reflect hot-loop inlining); verified
   the guard catches a shim.
-- ⬜ **[B8 — the perf prize] size-thresholded batch elementary functions wired through the standard
-  layer.** Put a batch elementary-fn path in the standard layer (WASM/SIMD if the assembly kernels
-  support it, else a tight JS batch), dispatch by size (small → inlined `Math.*`, large → batch), and
-  route core `Dual` / autograd `DualTensor` / tensor element-wise through it so the speedup propagates.
-  Prove + benchmark on one function (`exp`) beating the `Math.*` loop above ~N elements, then generalize.
+- ✅/❌ **[B8 — spiked + MEASURED, do NOT implement as element-wise WASM]** Benchmarked before
+  building (`tools/benchmarks/elementwise-wasm-{single,chain}.mjs`). Result: **single-op** element-wise
+  WASM **loses** to V8's `Math.*` loop (0.85–0.95× — AS scalar math isn't faster + copy overhead);
+  **3-op fused chain** wins only **modestly** (1.1–1.3× at ~16k, tie at 1k/262k). Routing autograd/tensor
+  single ops through WASM would REGRESS; chain-fusion needs a lazy/deferred model AND doesn't fit
+  autograd (each op must also compute the tangent — primal-only kernels break fusion). So the
+  `DUAL_UNARY_RULES` primal correctly stays JS `Math.*`; real WASM wins remain the O(n²⁺) matrix ops
+  (already accelerated). Full write-up in `tools/benchmarks/README.md`.
+- ⬜ **[follow-up from B8] investigate `functions` `WASM_ELEMENTWISE_THRESHOLD = 1024` single-op path** —
+  the single-op benchmark suggests routing single element-wise ops to WASM above 1024 is a mild
+  pessimization (~0.9×). Verify against functions' ACTUAL dispatch (incl. the parallel/worker path,
+  which this single-thread bench didn't test) before changing; the _chain_ dispatch is justified.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
