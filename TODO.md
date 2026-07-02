@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-01
+Updated: 2026-07-02
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
@@ -275,10 +275,26 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   (`Q=I,T=A ⇒ Q·T·Qᵀ=A`). Verified: 6-case eigenvalue oracle (`schur-eigenvalue-oracle.test.ts`, incl.
   4×4 symmetric + complex-pair-kept) + full matrix suite 749✓/7skip; `matrixLogm`/`matrixSqrtm`/`expm`
   green. `matrixSchur` is now ORACLE in the coverage matrix.
+- 🔄 **[WS-1 P2 — external-oracle pins, in progress] 318→329 ORACLE / 66 SELF-REF / 0 UNTESTED** (of 395;
+  baseline at the P1 audit was 318/75/2). Each pin uses an implementation-independent oracle (closed form,
+  standard table value, or a known spectrum) — never a round-trip against MathTS's own CDF. Done so far:
+  - **Distributions:** `gammaQuantile`, `betaQuantile` (were UNTESTED) → chi-square-table + closed forms.
+  - **Hypothesis (14/15):** `studentTTest`, `anova` (closed-form F(2,6) p=0.001), `chiSquareTest` (χ²₂
+    `exp(−x/2)`), `mannWhitneyTest` (U), `principalComponentAnalysis` (known covariance spectrum),
+    `kolmogorovSmirnovTest` (exact `D`). All in `functions/tests/gap-hypothesis-oracle.test.ts`.
+  - **Linalg (36/43):** `matrixSchur` (eigenvalues — **2 bugs found+fixed**), `lu`, `qr` (convention-free
+    invariants). `schur-eigenvalue-oracle.test.ts` + `lu-qr-oracle.test.ts`.
+  - Every pinned function was **already correct** (verification gap, not correctness gap) except `matrixSchur`.
+  - **Remaining:** `shapiroWilkTest` (Royston `W` — needs a scipy reference); 6 decompositions
+    (`hessenbergForm`, `polarDecomposition`, `qz`, `svdWasm`, svd-`pinv`, `lowRankApprox`, WASM `inv`);
+    the 75→66 SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal spectra, factory dist `.cdf`/`.quantile`).
+    ⬜ **G1** (add `fast-check`) unlocks WS-1 P3 property-based invariant tests.
 - 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
   452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
   workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
-  First sprint (no gate blocks): WS-1 P1 oracle-coverage audit · WS-3 P1 export triage · WS-0 bench harness.
+  ✅ **First sprint done** (WS-0 bench harness · WS-1 P1 oracle-coverage audit · WS-3 P1 export triage —
+  the last found the 452 "unused" figure is mostly a DGT re-export false positive, only ~30 truly dead).
+  **Now in progress:** WS-1 P2 (above) + WS-2 threshold retune (sqrt/square/norm/dot done).
   **Decision gates awaiting maintainer:** G1 fast-check dep · G2 wasm kernel fix-vs-retire · G3 unit-dispatch
   spec · G4 notebook host · G5 plotting approach.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
