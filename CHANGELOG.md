@@ -28,6 +28,21 @@ pairing report. `npm run docs:deps` now also emits
   typed functions). Added the new outputs to `docs:deps:format` so they stay
   prettier-stable, and to the `docs/README.md` + tool README report indexes.
 
+### Fixed (2026-07-02) — WS-1 P2: `matrixSchur` Francis double-shift stall
+
+Second `matrixSchur` bug from the eigenvalue oracle: the Francis double-shift
+**stalled** when a block's eigenvalues are symmetric about the shift centre (the
+degenerate implicit shift gives a `[0,0,1]` bulge), so e.g. the tridiagonal
+Toeplitz `[[4,1,0],[1,4,1],[0,1,4]]` returned **unchanged** — eigenvalues `[4,4,4]`
+instead of `{4−√2,4,4+√2}`. Fixed with an EISPACK-style **exceptional shift**:
+`schurRaw` now tracks sweeps since the last deflation and, every 10 stalled
+sweeps, applies a single implicit QR sweep (`qrStepSingleShift`) with a perturbed
+shift (`exceptionalShift`) to break the symmetry. Verified by an expanded 6-case
+eigenvalue oracle (symmetric 2×2/3×3/4×4, non-symmetric real, and a complex-pair
+case confirming 2×2 blocks are still *kept*) plus the full matrix suite
+(749 passed / 7 pre-existing skips) and `logm`/`sqrtm`/`expm`. With both bugs
+fixed, `matrixSchur` is now oracle-verified (coverage matrix: linalg 33→34 ORACLE).
+
 ### Fixed (2026-07-02) — WS-1 P2: `matrixSchur` real 2×2 blocks (eigenvalue bug)
 
 The WS-1 P2 eigenvalue oracle (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`)

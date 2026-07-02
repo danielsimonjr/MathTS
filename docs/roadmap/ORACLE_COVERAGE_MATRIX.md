@@ -42,13 +42,13 @@
 | Trigonometry | 19 | 3 (0 ext / 3 cf) | 16 | 0 |
 | Statistics (typed) | 24 | 20 (0 ext / 20 cf) | 4 | 0 |
 | Hypothesis tests | 15 | 13 (8 ext / 5 cf) | 2 | 0 |
-| Linear algebra / decompositions | 43 | 33 (ext+cf) | 10 | 0 |
+| Linear algebra / decompositions | 43 | 34 (ext+cf) | 9 | 0 |
 | Signal | 55 | 38 (ext+cf) | 17 | 0 |
 | CAS / calculus | 44 | 37 (ext+cf) | 7 | 0 |
 | Geometry | 40 | 38 (ext+cf) | 2 | 0 |
 | Bitwise | 7 | 7 (cf, exact-integer) | 0 | 0 |
 | Optimization / regression / numeric utils | 15 | 13 (ext+cf) | 2 | 0 |
-| **Total** | **395** | **325** | **70** | **0** |
+| **Total** | **395** | **326** | **69** | **0** |
 
 **Headline findings**
 
@@ -291,7 +291,7 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | **lu** | **SELF-REF** | lu, wasm/accuracy, wasm/decompositions-as | P·A=L·U + structure; exact U in comment, not asserted |
 | cholesky (matrix + functions) | ORACLE(cf) | cholesky, matrix-ops | L=[[2,0],[1,√2]] |
 | matrixExpm / matrixLogm / matrixSqrtm | ORACLE(cf+ext) | expm, logm, sqrtm | closed forms + SciPy rotation ref (1/√2)[[1,−1],[1,1]] |
-| **matrixSchur** | **SELF-REF** | schur | Q·T·Qᵀ≈A + structure; T eigenvalues never checked |
+| `matrixSchur` | ORACLE(cf) | schur-eigenvalue-oracle | T diagonal = known spectra (sym 2×2/3×3/4×4, non-sym, complex-pair-kept); **fixed 2 bugs** |
 | det (determinantWasm) | ORACLE(cf) | wasm/accuracy, wasm/decompositions-as | hand cofactor values 5,24,15,1 |
 | **inv** (inverse, WASMBackend) | **SELF-REF** | wasm/accuracy, wasm/decompositions-as | A·inv=I only; no pinned entries |
 | characteristicPolynomial / rowReduce / matrixRank | ORACLE(cf) | matrix-ops | closed-form coeffs / RREF / ranks |
@@ -304,9 +304,11 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | logdet | ORACLE(ext) | gap-wave-c | numpy.linalg.slogdet 4.204692619390966 |
 | **qz** | **SELF-REF** | gap-qz | cites scipy but "factors not unique" → reconstruction only |
 
-**linalg: 43 fns — 33 ORACLE, 10 SELF-REF, 0 UNTESTED.** The 10 SELF-REF
-(`qr`, `lu`, `matrixSchur`, `hessenbergForm`, `polarDecomposition`, `qz`, WASM `inv`,
-`svdWasm`, svd-`pinv`, `lowRankApprox`) are the top decomposition oracle-pin candidates.
+**linalg: 43 fns — 34 ORACLE, 9 SELF-REF, 0 UNTESTED.** `matrixSchur` is now
+eigenvalue-pinned (WS-1 P2) — and the pin surfaced + fixed two real bugs (see
+Tier-1 #1). The remaining 9 SELF-REF (`qr`, `lu`, `hessenbergForm`,
+`polarDecomposition`, `qz`, WASM `inv`, `svdWasm`, svd-`pinv`, `lowRankApprox`) are
+the top decomposition oracle-pin candidates.
 
 ---
 
@@ -466,22 +468,22 @@ distribution CDF/quantiles). Ordered by value:
 
 ### Tier 1 — highest value
 
-1. **Decomposition factor/value pins (10 functions).** `qr`, `lu`, `matrixSchur`,
-   `hessenbergForm`, `polarDecomposition`, `qz`, WASMBackend `inv`, `svdWasm`, svd-`pinv`,
-   `lowRankApprox` are verified **only by reconstruction/orthogonality** — a
-   systematically-biased factorization passes today. Pin the classic Householder `R`
-   (`[[12,−51,4]…]` → R=[[14,21,−14],[0,175,−70],[0,0,35]]), the exact `L`/`U`, Schur `T`
-   diagonal (against a known spectrum), and a known analytical `inv`.
+1. **Decomposition factor/value pins.** `qr`, `lu`, `hessenbergForm`,
+   `polarDecomposition`, `qz`, WASMBackend `inv`, `svdWasm`, svd-`pinv`, `lowRankApprox`
+   are verified **only by reconstruction/orthogonality** — a systematically-biased
+   factorization passes today. Pin the classic Householder `R`
+   (`[[12,−51,4]…]` → R=[[14,21,−14],[0,175,−70],[0,0,35]]), the exact `L`/`U`, and a
+   known analytical `inv`. (`matrixSchur` is now done — see below.)
 
-   > **🐞 `matrixSchur` — two bugs surfaced by the WS-1 P2 eigenvalue oracle**
-   > (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`). **(1) FIXED**: real
-   > 2×2 diagonal blocks were accepted unreduced (as if complex pairs), so eigenvalues
-   > read off `T` were wrong — fixed with `standardize2x2Block`. **(2) OPEN**: the Francis
-   > double-shift **stalls** when eigenvalues are symmetric about the shift centre (e.g.
-   > the tridiagonal Toeplitz `{4−√2,4,4+√2}`), returning the matrix unchanged — needs an
-   > exceptional-shift mechanism. Reconstruction-only tests were blind to both. So
-   > `matrixSchur` stays **SELF-REF** in the counts until the stall is fixed. Tracked in
-   > TODO.md.
+   > **🐞 `matrixSchur` — two bugs surfaced AND FIXED by the WS-1 P2 eigenvalue oracle**
+   > (`matrix/tests/operations/schur-eigenvalue-oracle.test.ts`). **(1)** real 2×2 diagonal
+   > blocks were accepted unreduced (as if complex pairs), so eigenvalues read off `T` were
+   > wrong — fixed with `standardize2x2Block`. **(2)** the Francis double-shift **stalled**
+   > when eigenvalues are symmetric about the shift centre (e.g. tridiagonal Toeplitz
+   > `{4−√2,4,4+√2}` returned unchanged) — fixed with an **exceptional shift**
+   > (`qrStepSingleShift` + `exceptionalShift`, every 10 stalled sweeps). Reconstruction-only
+   > tests were blind to both. Verified by a 6-case eigenvalue oracle + full matrix suite
+   > (749✓/7skip). `matrixSchur` is now **ORACLE**.
 2. ~~**`gammaQuantile` and `betaQuantile` — UNTESTED.**~~ ✅ **DONE (WS-1 P2)** —
    `functions/tests/gap-quantile-oracle.test.ts` pins both to chi-square-table + exact
    closed-form oracles (uniform, exponential, `Beta(a,1)=p^(1/a)`, symmetric-median);
@@ -511,6 +513,6 @@ distribution CDF/quantiles). Ordered by value:
 
 ### Top-5 single functions to pin first
 
-`qr` · `lu` · ~~`gammaQuantile`~~ ✅ · ~~`betaQuantile`~~ ✅ · `matrixSchur` — then the 7-function
+`qr` · `lu` · ~~`gammaQuantile`~~ ✅ · ~~`betaQuantile`~~ ✅ · ~~`matrixSchur`~~ ✅ — then the 7-function
 `hypothesis.ts` block and `poissonDist.cdf`.
 <!-- prettier-ignore-end -->

@@ -44,14 +44,12 @@ describe('matrixSchur — external eigenvalue oracle (T diagonal = known spectru
     expectCloseArray(sortedDiag(T), [1, 3], 1e-8);
   });
 
-  // KNOWN BUG (discovered by this oracle, WS-1 P2) — un-skip when fixed.
-  // matrixSchur's Francis double-shift STALLS on this symmetric tridiagonal: its
-  // eigenvalues {4−√2, 4, 4+√2} are symmetric about the shift centre, so the
-  // implicit shift produces a degenerate bulge (leading column [0,0,1]) and the
-  // iteration returns the matrix UNCHANGED — diagonal [4,4,4], not the spectrum.
-  // The reconstruction-only tests miss it (Q=I, T=A ⇒ Q·T·Qᵀ=A holds). Fixing it
-  // needs an exceptional-shift mechanism. Tracked in TODO.md + the roadmap.
-  it.skip('symmetric tridiagonal Toeplitz (a=4, b=1, n=3) has eigenvalues 4−√2, 4, 4+√2', () => {
+  // Regression for the Francis double-shift STALL fixed via the exceptional shift:
+  // this symmetric tridiagonal's eigenvalues {4−√2, 4, 4+√2} are symmetric about
+  // the shift centre, which previously produced a degenerate bulge and returned
+  // the matrix unchanged (diagonal [4,4,4]). The reconstruction-only tests were
+  // blind to it (Q=I, T=A ⇒ Q·T·Qᵀ=A held).
+  it('symmetric tridiagonal Toeplitz (a=4, b=1, n=3) has eigenvalues 4−√2, 4, 4+√2', () => {
     const { T } = matrixSchur(
       DenseMatrix.fromArray([
         [4, 1, 0],
@@ -71,5 +69,46 @@ describe('matrixSchur — external eigenvalue oracle (T diagonal = known spectru
       ])
     );
     expectCloseArray(sortedDiag(T), [1, 2], 1e-6);
+  });
+
+  it('non-symmetric [[4,1],[2,3]] has real eigenvalues {2, 5}', () => {
+    // λ² − 7λ + 10 = (λ−2)(λ−5). Exercises real-2×2 standardization off the symmetric case.
+    const { T } = matrixSchur(
+      DenseMatrix.fromArray([
+        [4, 1],
+        [2, 3],
+      ])
+    );
+    expectCloseArray(sortedDiag(T), [2, 5], 1e-6);
+  });
+
+  it('4×4 symmetric tridiagonal Toeplitz (a=2, b=1) matches 2 + 2·cos(kπ/5)', () => {
+    // Closed-form spectrum of the tridiagonal Toeplitz matrix (independent of the impl).
+    const expected = [1, 2, 3, 4]
+      .map((k) => 2 + 2 * Math.cos((k * Math.PI) / 5))
+      .sort((a, b) => a - b);
+    const { T } = matrixSchur(
+      DenseMatrix.fromArray([
+        [2, 1, 0, 0],
+        [1, 2, 1, 0],
+        [0, 1, 2, 1],
+        [0, 0, 1, 2],
+      ])
+    );
+    expectCloseArray(sortedDiag(T), expected, 1e-6);
+  });
+
+  it('complex-conjugate pair [[0,−1],[1,0]] is KEPT as a 2×2 block (not triangularized)', () => {
+    // Eigenvalues ±i: a real 2×2 Schur block must remain; standardize2x2Block must
+    // leave it (negative discriminant). Real parts are 0 ⇒ zero trace.
+    const { T } = matrixSchur(
+      DenseMatrix.fromArray([
+        [0, -1],
+        [1, 0],
+      ])
+    );
+    const t = T.toArray();
+    expect(Math.abs(t[0][0] + t[1][1])).toBeLessThan(1e-9); // trace = sum of real parts = 0
+    expect(Math.abs(t[1][0])).toBeGreaterThan(0.5); // sub-diagonal preserved ⇒ still a 2×2 block
   });
 });

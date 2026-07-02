@@ -197,6 +197,47 @@ function qrStepDouble(H: number[][], Q: number[][], start: number, end: number):
 }
 
 /**
+ * An implicit single-shift QR sweep across the active block `[start, end]` with
+ * an explicit shift `μ` (the bulge chase mirrors {@link qrStepSingle}, which only
+ * covers a 2×2 block). Used for the exceptional shift below; a valid shifted QR
+ * step, so it preserves `H = QᵀAQ`.
+ */
+function qrStepSingleShift(
+  H: number[][],
+  Q: number[][],
+  start: number,
+  end: number,
+  shift: number
+): void {
+  let x = H[start][start] - shift;
+  let y = H[start + 1][start];
+  for (let k = start; k < end; k++) {
+    const { c: gc, s: gs } = givensParams(x, y);
+    applyGivensLeft(H, gc, gs, k, k + 1, Math.max(0, k - 1));
+    applyGivensRight(H, gc, gs, k, k + 1, 0);
+    applyGivensRight(Q, gc, gs, k, k + 1, 0);
+    if (k < end - 1) {
+      x = H[k + 1][k];
+      y = H[k + 2][k];
+    }
+  }
+}
+
+/**
+ * Ad-hoc "exceptional" shift used to break a stall. When the trailing block's
+ * eigenvalues are symmetric about the shift centre the normal double-shift
+ * produces a degenerate bulge (leading column ≈ 0) and never deflates; offsetting
+ * `H[end][end]` by a fraction of the local sub-diagonal magnitude perturbs the
+ * shift away from that symmetry (EISPACK/`hqr`-style). Applied via a single
+ * implicit sweep, which restarts convergence.
+ */
+function exceptionalShift(H: number[][], start: number, end: number): number {
+  const sub1 = Math.abs(H[end][end - 1]);
+  const sub2 = end - 1 > start ? Math.abs(H[end - 1][end - 2]) : 0;
+  return H[end][end] + 0.75 * (sub1 + sub2);
+}
+
+/**
  * Standardize a trailing 2×2 diagonal block at rows/cols (p, p+1).
  *
  * The real Schur form keeps a 2×2 diagonal block ONLY for a complex-conjugate
@@ -267,8 +308,15 @@ function schurRaw(
 
   let end = n - 1;
   let iter = 0;
+  // QR sweeps since the last deflation. A stalled double-shift (degenerate bulge
+  // on eigenvalues symmetric about the shift centre) makes no progress; after a
+  // few stalled sweeps we inject an exceptional shift to break it.
+  let iterSinceDeflation = 0;
+  const EXCEPTIONAL_EVERY = 10;
 
   while (end > 0 && iter < maxIterations) {
+    const endBefore = end;
+
     // Deflation: zero out negligible subdiagonal entries
     let start = end;
     while (start > 0) {
@@ -287,13 +335,16 @@ function schurRaw(
       // (a complex-conjugate pair is left as a valid real-Schur 2×2 block).
       standardize2x2Block(H, Q, start);
       end -= 2;
+    } else if (iterSinceDeflation > 0 && iterSinceDeflation % EXCEPTIONAL_EVERY === 0) {
+      // Stalled: perturb the shift to restart convergence.
+      qrStepSingleShift(H, Q, start, end, exceptionalShift(H, start, end));
+    } else if (end - start >= 2) {
+      qrStepDouble(H, Q, start, end);
     } else {
-      if (end - start >= 2) {
-        qrStepDouble(H, Q, start, end);
-      } else {
-        qrStepSingle(H, Q, start, end);
-      }
+      qrStepSingle(H, Q, start, end);
     }
+
+    iterSinceDeflation = end < endBefore ? 0 : iterSinceDeflation + 1;
     iter++;
   }
 
