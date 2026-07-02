@@ -319,13 +319,18 @@ Genuine issues found (verified, not report artifacts):
     crashed with "reading 'undefined'". Fixed `get` to accept both; direct regression pin added. Affects **any**
     Matrix→Array conversion, not just schur.
   - ✅ **`qr`** — already correct; pinned convention-free (QᵀQ=I, R upper-Δ, |R₀₀|=‖col₀‖, ∏|diag R|=|det A|).
-  - ⬜ **`schur` — STILL BROKEN (next task).** Its unshifted-QR loop calls `norm(subtract(A,A0))` each sweep;
-    the L2 matrix-norm path does `eigs(squaredX).values.toArray()`, but the factory `subtract`/`multiply` on
-    bridge matrices don't round-trip as bridge `Matrix`es, so `squaredX` isn't a `Matrix` ⇒ `.values` isn't
-    matricized (no `.toArray`). **Cleanest root-cause fix: route the factory `schur` to the already-oracle-pinned
-    `matrix/src/operations` Schur** (the `native-accel` pattern used for `eigs`/`det`/`inv`), not repair the
-    QR+norm+eigs chain. Oracle ready as `describe.skip` (incl. the two symmetric cases that broke the matrix-layer
-    Schur). Also investigate whether the general `norm(matrix, 2)` L2 path is broken for bridge matrices.
+  - ✅ **`schur`** — FIXED (2026-07-02) by **routing to the oracle-pinned `matrix/src/operations` `matrixSchur`**
+    (Francis QR + real-2×2 standardization + exceptional shift — the `native-accel` pattern used for
+    `eigs`/`det`/`inv`), replacing the broken in-package unshifted-QR fallback (whose `norm(subtract(A,A0))`
+    convergence check crashed in the L2 norm's `eigs(...).values.toArray()` because the factory
+    `subtract`/`multiply` don't round-trip bridge matrices as `Matrix`es). `schur` deps trimmed 7→2 (`typed`,
+    `matrix`); non-real inputs now throw a clear `TypeError` (real Schur is real-only). 5 eigenvalue oracles pass
+    (incl. the two symmetric cases that broke the matrix-layer Schur + a Matrix-input case). **Note:** the general
+    `norm(matrix, 2)` L2 path is still suspect for bridge matrices (surfaced, not investigated) — separate item.
+  - ⬜ **[open] investigate `norm(matrix, 2)` for bridge matrices.** The schur fix side-stepped it, but the L2
+    matrix-norm's reliance on `eigs(squaredX).values.toArray()` (with `squaredX = multiply(ctranspose(x), x)`)
+    may still be broken when the factory `subtract`/`multiply` return non-`Matrix` results. Confirm whether the
+    user-facing `norm` is affected or only the internal factory path.
   - ⬜ **`slu` — STILL BROKEN (next task).** Sparse LU via the CSparse port throws inside `csAmd` (`add(a, at)` —
     "Too few arguments … index 2") for order 1 and inside `csSpsolve` (`divideScalar(x[j], undefined)`) for
     order 0. Independent of the dense-bridge bugs. Oracle ready as `describe.skip`.

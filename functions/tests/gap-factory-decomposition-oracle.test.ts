@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { schur, lup, qr, slu, sparse } from '../src/factories/index.js';
+import { schur, lup, qr, slu, sparse, matrix } from '../src/factories/index.js';
 import { MathJSDenseMatrix } from '../src/factories/matrix-bridge.js';
 
 /**
@@ -179,15 +179,28 @@ describe('qr — external oracle (convention-free invariants)', () => {
  *    — "Too few arguments … index 2") for order 1 and inside `csSpsolve`
  *    (`divideScalar(x[j], undefined)`) for order 0.
  */
-describe.skip('schur — external oracle (known spectrum via diag T) — BLOCKED (see TODO)', () => {
+describe('schur — external oracle (known spectrum via diag T)', () => {
+  // The two symmetric cases are exactly the matrices that broke the matrix-layer
+  // Schur this session — this oracle guards the same eigenvalue bug class. The
+  // factory `schur` now routes to that (fixed, oracle-pinned) matrix-layer Schur.
   it('symmetric [[2,1],[1,2]] ⇒ eigenvalues {1, 3}', () => {
     const r = schur([
       [2, 1],
       [1, 2],
     ]) as { T: number[][] };
     const ev = sortedAsc(diag(r.T));
-    expectClose(ev[0], 1, 1e-4);
-    expectClose(ev[1], 3, 1e-4);
+    expectClose(ev[0], 1, 1e-6);
+    expectClose(ev[1], 3, 1e-6);
+  });
+
+  it('docstring [[1,0],[-4,3]] ⇒ eigenvalues {1, 3}', () => {
+    const r = schur([
+      [1, 0],
+      [-4, 3],
+    ]) as { T: number[][] };
+    const ev = sortedAsc(diag(r.T));
+    expectClose(ev[0], 1, 1e-6);
+    expectClose(ev[1], 3, 1e-6);
   });
 
   it('tridiagonal [[4,1,0],[1,4,1],[0,1,4]] ⇒ eigenvalues {4−√2, 4, 4+√2}', () => {
@@ -197,9 +210,35 @@ describe.skip('schur — external oracle (known spectrum via diag T) — BLOCKED
       [0, 1, 4],
     ]) as { T: number[][] };
     const ev = sortedAsc(diag(r.T));
-    expectClose(ev[0], 4 - Math.SQRT2, 1e-4);
-    expectClose(ev[1], 4, 1e-4);
-    expectClose(ev[2], 4 + Math.SQRT2, 1e-4);
+    expectClose(ev[0], 4 - Math.SQRT2, 1e-6);
+    expectClose(ev[1], 4, 1e-6);
+    expectClose(ev[2], 4 + Math.SQRT2, 1e-6);
+  });
+
+  it('non-symmetric [[0,2],[2,3]] ⇒ eigenvalues {−1, 4}', () => {
+    // λ = (3 ± √(9+16))/2 = (3 ± 5)/2 ⇒ {4, −1}.
+    const r = schur([
+      [0, 2],
+      [2, 3],
+    ]) as { T: number[][] };
+    const ev = sortedAsc(diag(r.T));
+    expectClose(ev[0], -1, 1e-6);
+    expectClose(ev[1], 4, 1e-6);
+  });
+
+  it('Matrix input returns U,T whose diagonal carries the spectrum {2, 5}', () => {
+    // [[4,1],[2,3]] has eigenvalues (7 ± √(9+8))/2 = {5, 2}; check the Matrix
+    // signature (U/T returned as matrices, not bare arrays).
+    const r = schur(
+      matrix([
+        [4, 1],
+        [2, 3],
+      ]) as never
+    ) as { T: { valueOf(): unknown } };
+    const T = r.T.valueOf() as number[][];
+    const ev = sortedAsc(diag(T));
+    expectClose(ev[0], 2, 1e-6);
+    expectClose(ev[1], 5, 1e-6);
   });
 });
 

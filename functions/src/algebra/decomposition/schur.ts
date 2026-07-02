@@ -1,9 +1,6 @@
 import { factory } from '../../utils/factory.js';
-import { wasmLoader } from '../../wasm/WasmLoader.js';
+import { matrixSchur, DenseMatrix as NativeDenseMatrix } from '@danielsimonjr/mathts-matrix';
 import type { TypedFunction } from '../../core/function/typed.js';
-
-// Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_SCHUR_THRESHOLD = 16; // 4x4 matrix
 
 /**
  * Check if a 2D array contains only plain numbers
@@ -20,19 +17,6 @@ function isPlainNumberMatrix(matrix: unknown[][]): boolean {
   return true;
 }
 
-/**
- * Flatten a 2D array to a Float64Array in row-major order
- */
-function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
-  const result = new Float64Array(rows * cols);
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j];
-    }
-  }
-  return result;
-}
-
 // Type definitions
 type NestedArray<T = unknown> = T | NestedArray<T>[];
 type MatrixData = NestedArray;
@@ -40,27 +24,15 @@ type MatrixData = NestedArray;
 interface Matrix {
   type: string;
   storage(): string;
-  datatype(): string | undefined;
   size(): number[];
-  clone(): Matrix;
   toArray(): MatrixData;
   valueOf(): MatrixData;
+  toString(): string;
   _data?: MatrixData;
-  _size?: number[];
-  _datatype?: string;
 }
 
 interface MatrixConstructor {
   (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
-}
-
-interface IdentityFunction {
-  (size: number | number[]): Matrix;
-}
-
-interface QRResult {
-  Q: Matrix;
-  R: Matrix;
 }
 
 interface SchurResult {
@@ -77,25 +49,29 @@ interface SchurArrayResult {
 interface Dependencies {
   typed: TypedFunction;
   matrix: MatrixConstructor;
-  identity: IdentityFunction;
-  multiply: TypedFunction;
-  qr: (a: Matrix) => QRResult;
-  norm: (x: unknown) => number;
-  subtract: TypedFunction;
 }
 
 const name = 'schur';
-const dependencies = ['typed', 'matrix', 'identity', 'multiply', 'qr', 'norm', 'subtract'];
+const dependencies = ['typed', 'matrix'];
 
 export const createSchur = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, identity, multiply, qr, norm, subtract }: Dependencies) => {
+  ({ typed, matrix }: Dependencies) => {
     /**
      *
      * Performs a real Schur decomposition of the real matrix A = UTU' where U is orthogonal
      * and T is upper quasi-triangular.
      * https://en.wikipedia.org/wiki/Schur_decomposition
+     *
+     * Delegates to the maintained, oracle-pinned real-Schur primitive
+     * `matrixSchur` in `@danielsimonjr/mathts-matrix` (Francis QR with double
+     * shifts + real-2×2 standardization). This is the `native-accel` pattern
+     * already used for `eigs`/`det`/`inv`. The previous in-package
+     * unshifted-QR-iteration fallback was broken — its convergence check
+     * `norm(subtract(A, A0))` routed through the L2 matrix norm's
+     * `eigs(...).values.toArray()`, which crashed because the factory
+     * `subtract`/`multiply` don't round-trip bridge matrices as `Matrix`es.
      *
      * Syntax:
      *
@@ -104,18 +80,18 @@ export const createSchur = /* #__PURE__ */ factory(
      * Examples:
      *
      *     const A = [[1, 0], [-4, 3]]
-     *     math.schur(A) // returns {T: [[3, 4], [0, 1]], R: [[0, 1], [-1, 0]]}
+     *     math.schur(A) // returns {U, T} with A = U·T·U' and eigenvalues on diag(T)
      *
      * See also:
      *
      *     sylvester, lyap, qr
      *
-     * @param {Array | Matrix} A  Matrix A
+     * @param {Array | Matrix} A  Real square matrix A
      * @return {{U: Array | Matrix, T: Array | Matrix}} Object containing both matrix U and T of the Schur Decomposition A=UTU'
      */
     return typed(name, {
       Array: function (X: unknown[][]): SchurArrayResult {
-        const r = _schur(matrix(X));
+        const r = _schur(X);
         return {
           U: r.U.valueOf() as unknown[][],
           T: r.T.valueOf() as unknown[][],
@@ -123,102 +99,30 @@ export const createSchur = /* #__PURE__ */ factory(
       },
 
       Matrix: function (X: Matrix): SchurResult {
-        return _schur(X);
+        return _schur(X.valueOf() as unknown[][]);
       },
     });
 
-    function _schur(X: Matrix): SchurResult {
-      const n = X.size()[0];
-
-      // WASM fast path for square plain number matrices
-      const wasm = wasmLoader.getModule();
-      const data = X._data as unknown[][];
-      if (
-        wasm &&
-        X.storage() === 'dense' &&
-        n * n >= WASM_SCHUR_THRESHOLD &&
-        data &&
-        isPlainNumberMatrix(data)
-      ) {
-        try {
-          const flat = flattenToFloat64(data as number[][], n, n);
-          const aAlloc = wasmLoader.allocateFloat64Array(flat);
-          const qAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
-          const tAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
-          const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
-
-          try {
-            const result = wasm.schur(
-              aAlloc.ptr,
-              n,
-              100, // maxIter
-              1e-4, // tol
-              qAlloc.ptr,
-              tAlloc.ptr,
-              workAlloc.ptr
-            );
-
-            if (result !== 0) {
-              // Extract U (Q) from qPtr
-              const Udata: number[][] = [];
-              for (let i = 0; i < n; i++) {
-                Udata[i] = [];
-                for (let j = 0; j < n; j++) {
-                  Udata[i][j] = qAlloc.array[i * n + j];
-                }
-              }
-
-              // Extract T from tPtr
-              const Tdata: number[][] = [];
-              for (let i = 0; i < n; i++) {
-                Tdata[i] = [];
-                for (let j = 0; j < n; j++) {
-                  Tdata[i][j] = tAlloc.array[i * n + j];
-                }
-              }
-
-              const U = matrix(Udata);
-              const T = matrix(Tdata);
-
-              return {
-                U,
-                T,
-                toString: function () {
-                  return 'U: ' + this.U.toString() + '\nT: ' + this.T.toString();
-                },
-              };
-            }
-            // Fall through to JS implementation if WASM failed
-          } finally {
-            wasmLoader.free(aAlloc.ptr);
-            wasmLoader.free(qAlloc.ptr);
-            wasmLoader.free(tAlloc.ptr);
-            wasmLoader.free(workAlloc.ptr);
-          }
-        } catch {
-          // Fall back to JS implementation on WASM error
-        }
+    /**
+     * Compute the real Schur decomposition of a real square matrix given as a
+     * plain 2-D array. Returns U and T wrapped in the factory `matrix` type.
+     */
+    function _schur(data: unknown[][]): SchurResult {
+      if (!isPlainNumberMatrix(data)) {
+        throw new TypeError('schur: only real (number) matrices are supported');
+      }
+      const n = data.length;
+      if (n === 0 || (data[0]?.length ?? 0) !== n) {
+        throw new Error('schur: matrix must be square (real Schur decomposition)');
       }
 
-      // JavaScript fallback
-      let A: Matrix = X;
-      let U: Matrix = identity(n);
-      let k = 0;
-      let A0: Matrix;
-      do {
-        A0 = A;
-        const QR = qr(A);
-        const Q = QR.Q;
-        const R = QR.R;
-        A = multiply(R, Q) as Matrix;
-        U = multiply(U, Q) as Matrix;
-        if (k++ > 100) {
-          break;
-        }
-      } while (norm(subtract(A, A0)) > 1e-4);
+      const { Q, T } = matrixSchur(NativeDenseMatrix.fromArray(data as number[][]));
+      const U = matrix(Q.toArray() as unknown[][]);
+      const Tmatrix = matrix(T.toArray() as unknown[][]);
+
       return {
         U,
-        T: A,
+        T: Tmatrix,
         toString: function () {
           return 'U: ' + this.U.toString() + '\nT: ' + this.T.toString();
         },

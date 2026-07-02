@@ -178,7 +178,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 391            | 10              |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 391            | 10              |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -226,9 +226,9 @@ graph LR
     P4 --> P3
     P5 --> P4
     P5 --> P2
+    P6 --> P3
     P6 --> P7
     P6 --> P2
-    P6 --> P3
     P6 --> P18
     P8 --> P7
     P9 --> P2
@@ -1750,11 +1750,15 @@ graph LR
 
 ### `functions/src/algebra/decomposition/schur.ts` - Check if a 2D array contains only plain numbers
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `matrixSchur, DenseMatrix` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `../../utils/factory.js` | `factory` | Import |
-| `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -12346,7 +12350,7 @@ graph LR
 | `functions/src/core/config`                            | 0 files      | 52 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `functions/src/utils/number`                           | 1 file       | 48 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 46 files   |
+| `functions/src/wasm/WasmLoader`                        | 2 files      | 45 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `functions/src/types`                                  | 0 files      | 30 files   |
@@ -13073,7 +13077,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 845    |
 | Total Modules           | 70     |
-| Total Lines of Code     | 154515 |
+| Total Lines of Code     | 154419 |
 | Total Exports           | 4093   |
 | Total Re-exports        | 1282   |
 | Total Classes           | 50     |

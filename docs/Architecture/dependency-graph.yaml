@@ -3489,14 +3489,16 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
-        - file: ../../wasm/WasmLoader.js
-          imports:
-            - wasmLoader
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - matrixSchur
+            - DenseMatrix
       exports:
         - createSchur
       constants:
@@ -26886,7 +26888,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 845
   totalModules: 70
-  totalLinesOfCode: 154515
+  totalLinesOfCode: 154419
   totalExports: 4093
   totalClasses: 50
   totalInterfaces: 351

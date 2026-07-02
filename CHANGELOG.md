@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-02) — factory `schur`: routed to the oracle-pinned matrix-layer Schur
+
+The factory `schur` (`functions/src/algebra/decomposition/schur.ts`) was broken:
+its in-package unshifted-QR fallback checked convergence with
+`norm(subtract(A, A0))`, whose L2 matrix-norm path does
+`eigs(squaredX).values.toArray()` — and that crashed because the factory
+`subtract`/`multiply` don't round-trip bridge matrices as `Matrix`es (so
+`squaredX` wasn't a `Matrix` and its eigenvalues weren't matricized).
+
+Fixed by **delegating to the maintained, oracle-pinned real-Schur primitive
+`matrixSchur` in `@danielsimonjr/mathts-matrix`** (Francis QR with double shifts,
+real-2×2 standardization, exceptional shift) — the same `native-accel` pattern
+already used for `eigs`/`det`/`inv`. The factory now returns the same `{U, T}`
+contract with `A = U·T·U'` and the spectrum on `diag(T)`; its dependency list
+shrank from 7 injected functions to 2 (`typed`, `matrix`); and non-real
+(Complex/BigNumber) inputs throw a clear `TypeError` (real Schur is real-only).
+Oracle-pinned by 5 known-spectrum cases (incl. the two symmetric matrices that
+broke the matrix-layer Schur earlier this session, plus a Matrix-input case) in
+`functions/tests/gap-factory-decomposition-oracle.test.ts`. No regressions:
+`functions` 3115 pass / 42 skip; typecheck + eslint clean. (`slu` — the sparse
+CSparse-port decomposition — remains broken; tracked in `TODO.md`.)
+
 ### Fixed (2026-07-02) — factory decompositions: two `MathJSDenseMatrix` bridge bugs
 
 The DGT diagnostic sweep flagged the factory-layer decompositions
