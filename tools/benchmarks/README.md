@@ -71,3 +71,31 @@ decompositions) propagates a genuine win. Sequence: fast kernels first, dogfood 
 then, tensor's local loop is (correctly) the faster path.
 
 See `project-all-libraries-build-on-core` (memory) and CHANGELOG for the full reasoning.
+
+## `backend-audit.mjs` — JS vs WASM(SIMD) vs Parallel, per matrix op
+
+Answers "which backend for which op." **Init WASM first** or you measure the JS fallback.
+
+**Finding (2026-07-01, Node 24):** speedup vs the winning backend; "slower" = WASM loses.
+
+| op                    | 128²             | 256²        | 512²        | winner          | verdict         |
+| --------------------- | ---------------- | ----------- | ----------- | --------------- | --------------- |
+| `multiply` (matmul)   | WASM 8.9×        | WASM 9.7×   | WASM 12×    | **WASM (SIMD)** | **keep WASM**   |
+| `multiplyElementwise` | WASM 4.4× slower | 4.8× slower | 6.2× slower | Par ~1.5× / JS  | **retire WASM** |
+| `add`                 | 5× slower        | 4.4× slower | 4.2× slower | Par / JS        | **retire WASM** |
+| `transpose`           | 5.9× slower      | 5.7× slower | 5.1× slower | Par / JS        | **retire WASM** |
+
+**Conclusions (implemented):**
+
+- **SIMD, not cores, is the compute-dense lever.** WASM matmul beats _Parallel_ by 3–4× at
+  every size — SIMD-WASM is the right primary accelerator; a JS worker pool can't match it for
+  matmul (each worker is scalar). Parallelism is a narrow complement (async + transfer overhead;
+  only ~1.5× on memory-bound element-wise via bandwidth-scaling).
+- **Element-wise / transpose WASM retired.** They were 4–6× _slower_ than JS (memory-bound +
+  DenseMatrix/managed-array alloc overhead) — a pure pessimization. `WASMBackend.shouldUseWasm`
+  now gates WASM to `opKind: 'matmul'` only; element-wise/transpose fall to their existing JS
+  path (verified ≈ JS, no longer 4–6× slower). matrix WASM+backend suites 209/209.
+- **Follow-ups:** benchmark the WASM _decompositions_ (svd/eig/lu/qr/cholesky) vs JS — the scalar
+  ones likely lose like scalar matmul did, so SIMD-optimize or disable per op; retire functions'
+  `WASM_ELEMENTWISE_THRESHOLD` single-op path (same reason); remove the now-dead WASM element-wise
+  AS kernels + `WASMBackend` bodies.

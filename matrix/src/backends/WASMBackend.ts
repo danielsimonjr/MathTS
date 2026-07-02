@@ -447,7 +447,18 @@ export class WASMBackend implements MatrixBackend {
     return instance.exports as unknown as AsModule;
   }
 
-  private shouldUseWasm(elementCount: number): boolean {
+  /**
+   * WASM is only worth its copy/alloc overhead for compute-dense ops. The 2026-07-01
+   * backend audit (`tools/benchmarks/backend-audit`) measured element-wise / transpose
+   * ops 4–6× SLOWER on WASM than JS (memory-bound; the SIMD matmul kernel is the only
+   * clear win, 9–12×). So WASM is reserved for `opKind: 'matmul'`; everything else stays
+   * on JS via each method's existing `jsBackend` fallback.
+   */
+  private shouldUseWasm(
+    elementCount: number,
+    opKind: 'matmul' | 'elementwise' = 'elementwise'
+  ): boolean {
+    if (opKind !== 'matmul') return false;
     return this.wasmModule !== null && elementCount >= this.config.minElements;
   }
 
@@ -593,7 +604,8 @@ export class WASMBackend implements MatrixBackend {
 
   multiply(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols + b.rows * b.cols;
-    if (!this.shouldUseWasm(elementCount)) return jsBackend.multiply(a, b);
+    // matmul is the one op where the SIMD kernel wins (9–12×); opt into WASM explicitly.
+    if (!this.shouldUseWasm(elementCount, 'matmul')) return jsBackend.multiply(a, b);
 
     const mod = this.wasmModule!;
     const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());

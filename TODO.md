@@ -181,10 +181,19 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
 - ✅ **dogfooded `Tensor.matMul` → matrix `backendManager.multiply`** — dropped the naive JS triple loop;
   tensor now inherits the SIMD-WASM matmul (WASM when initialized, matrix's JS-ikj otherwise). End-to-end:
   **3.6× (128²) → 6.8× (256²/512²)** vs the old loop, correctness exact; tensor 389/389, autograd 258/258.
-- ⬜ **[element-wise still stands]** the AS _element-wise_ kernels remain scalar and don't beat JS
-  (single-op 0.85–0.95×); the SIMD win is matmul-class (compute-dense) only. Element-wise stays JS.
-- ⬜ **[matmul threshold check]** now that WASM matmul is fast, verify matrix's `wasmThreshold` (1000
-  elements ≈ 18² / 32×32) is right — SIMD wins even at 64², so the threshold could likely drop.
+- ✅ **[backend audit done → WASM scoped to matmul]** `tools/benchmarks/backend-audit.mjs`: matmul
+  WASM wins 9–12× (beats Parallel 3–4× — SIMD is the compute-dense lever); element-wise/transpose
+  WASM were 4–6× _slower_ than JS → retired. `WASMBackend.shouldUseWasm` now gates on `opKind` and
+  only WASMs `'matmul'`; element-wise falls to JS (re-measured ≈ JS). matrix 209/209.
+- ⬜ **[follow-up] audit WASM decompositions vs JS** — svd/eig/lu/qr/cholesky; the scalar ones likely
+  lose like scalar matmul did. SIMD-optimize the compute-dense winners or disable WASM selection per op.
+- ⬜ **[follow-up] retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op path** — same reason
+  (single-op element-wise WASM 0.85–0.95×). The _chain_ dispatch is fine.
+- ⬜ **[follow-up, maintenance] delete now-dead WASM element-wise AS kernels + `WASMBackend` bodies** —
+  they're no longer reachable (opKind gate). Removing them + shrinking the AS surface is the maintenance
+  win; do after the decomposition audit so the kernel cleanup is one pass.
+- ⬜ **[matmul threshold check]** SIMD matmul wins even at 64² (8.9×), so matrix's `wasmThreshold`
+  (1000 elems ≈ 32²) could likely drop — but the JS-ikj fallback is fine, so low priority.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

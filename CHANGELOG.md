@@ -156,6 +156,21 @@ dead `kruskalWallis` `N<2` branch removed) and step 8 (full re-verify): function
 is still far tighter than any tolerance) so the nested-Simpson solve doesn't exceed
 the default 5 s test timeout under full-suite parallel load.
 
+### Changed (2026-07-01) — retire element-wise WASM (4–6× pessimization); scope WASM to matmul
+
+Backend audit (`tools/benchmarks/backend-audit.mjs`, JS vs WASM vs Parallel per op) settled the
+"keep or drop WASM" question with data: **matmul WASM wins 9–12×** (and beats the worker Parallel
+backend by 3–4× — SIMD, not cores, is the compute-dense lever), while **element-wise / transpose
+WASM were 4–6× _slower_ than JS** (memory-bound + DenseMatrix/managed-array alloc overhead) — a
+pure pessimization that matrix's `BackendManager` was selecting for large inputs. Scoped WASM to
+where it wins: `WASMBackend.shouldUseWasm` now gates on `opKind` and only returns true for
+`'matmul'`; element-wise/transpose fall to their existing JS path (re-measured ≈ JS, no longer
+4–6× slower). matmul's SIMD win is untouched. Verified: matrix WASM + backend suites 209/209.
+
+Follow-ups recorded (TODO): audit the WASM decompositions (svd/eig/lu/qr/cholesky) vs JS — scalar
+ones likely lose like scalar matmul did; retire functions' `WASM_ELEMENTWISE_THRESHOLD` single-op
+path; delete the now-dead WASM element-wise AS kernels + backend bodies (maintenance).
+
 ### Changed (2026-07-01) — Tensor.matMul dogfoods matrix's SIMD-WASM matmul (3.6–6.8× faster)
 
 `Tensor.matMul` was a naive JS triple loop — the clearest dogfooding gap. It now delegates to
