@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-03) — Unit operators: dimensional analysis now works (GC5 / G3)
+
+Arithmetic and comparison on units — a flagship feature for engineering/science —
+was entirely broken through the public API: `unit('5 cm') + unit('2 cm')`,
+`smaller(5 cm, 2 cm)`, `abs(unit('-5 cm'))`, etc. all threw. Root cause: the typed
+operators were wired to the **core** `Unit`'s method names (`a.add` / `a.sub` /
+`a.dimensionsEqual`), but the public `unit()` returns the **mathjs-derived** `Unit`
+(`functions/src/type/unit/Unit.ts`), which keeps that logic at the operator level
+(`equalBase` / normalized `value` / `clone` / `multiply` / `divide`). Two `Unit`
+classes are both registered as the `'Unit'` typed-function type (`to()`/`toBest()`
+return the core one), so the operators now support **both** flavors.
+
+Now working: `add` / `subtract` (same-dimension, converting across prefixes),
+`multiply` / `divide` (scalar scaling **and** compound/derived dimensions —
+`3 m × 4 m = 12 m²`, `10 m / 2 s = 5 m/s`), `abs`, and `smaller` / `larger` /
+`smallerEq` / `largerEq` / `equal` / `unequal` / `compare` (by physical quantity —
+`equal(5 cm, 50 mm) = true`); mismatched dimensions throw. Pinned in
+`functions/tests/gap-unit-operators.test.ts` (13 cases). functions 3170 pass /
+41 skip; typecheck + eslint clean. (Follow-up in TODO: unify the two `Unit`
+classes so the dual-flavor branching can go away.)
+
 ### Added (2026-07-03) — property-based invariant tests (WS-1 P3; `fast-check`, gate G1)
 
 Added `fast-check` (dev-dependency) and a first suite of property-based invariant

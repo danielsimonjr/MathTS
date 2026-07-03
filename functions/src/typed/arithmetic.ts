@@ -94,6 +94,81 @@ const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
 const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
 
 // =============================================================================
+// Unit operator helpers
+// =============================================================================
+
+/**
+ * Two `Unit` implementations are both registered as the `'Unit'` typed-function
+ * type: the mathjs-derived one (`functions/src/type/unit/Unit.ts`) that `unit()`
+ * returns — which keeps add/subtract/comparison at the OPERATOR level and exposes
+ * `equalBase` / normalized `value` / `clone` / `multiply` / `divide` / `abs`; and
+ * the core `Unit` (`@danielsimonjr/mathts-core`) that `to()`/`toBest()` return —
+ * which exposes `add` / `sub` / `mul` / `div` / `dimensionsEqual` methods. The
+ * operators below support BOTH: use the core method when present, else fall back
+ * to the mathjs operator-level logic. (Unifying the two is a separate,
+ * larger "own the synced-mathjs layer" cleanup — see TODO.)
+ */
+interface UnitLike {
+  value?: unknown;
+  equalBase?(other: unknown): boolean;
+  dimensionsEqual?(other: unknown): boolean;
+  clone?(): UnitLike;
+  add?(other: unknown): unknown;
+  sub?(other: unknown): unknown;
+  mul?(other: unknown): unknown;
+  div?(other: unknown): unknown;
+  multiply?(other: unknown): unknown;
+  divide?(other: unknown): unknown;
+  abs?(): unknown;
+}
+
+const asUnit = (u: unknown): UnitLike => u as UnitLike;
+const hasFn = (o: UnitLike, name: keyof UnitLike): boolean => typeof o[name] === 'function';
+
+/** Same-dimension test, whichever Unit flavor. */
+function unitSameDimension(a: unknown, b: unknown): boolean {
+  const ua = asUnit(a);
+  return hasFn(ua, 'equalBase') ? ua.equalBase!(b) : ua.dimensionsEqual!(b);
+}
+
+/** Comparison sign of two dimensionally-compatible units (throws if incompatible). */
+function unitCmp(a: Unit, b: Unit): i32 {
+  if (!unitSameDimension(a, b)) {
+    throw new Error('Cannot compare units with different dimensions');
+  }
+  const va = asUnit(a).value as number;
+  const vb = asUnit(b).value as number;
+  return va > vb ? 1 : va < vb ? -1 : 0;
+}
+
+/**
+ * Add/subtract for the mathjs Unit (core Unit uses its own `add`/`sub`): result
+ * carries the first operand's unit representation + the combined normalized value.
+ */
+function unitAddSubMathjs(a: unknown, b: unknown, op: ScalarOp): unknown {
+  const ua = asUnit(a);
+  const ub = asUnit(b);
+  if (!ua.equalBase!(b)) {
+    throw new Error('Cannot add/subtract units with different dimensions');
+  }
+  if (ua.value == null || ub.value == null) {
+    throw new Error('Cannot add/subtract a valueless unit');
+  }
+  const res = ua.clone!();
+  res.value = op(ua.value, ub.value);
+  return res;
+}
+
+const unitAdd = (a: unknown, b: unknown): unknown =>
+  hasFn(asUnit(a), 'add') ? asUnit(a).add!(b) : unitAddSubMathjs(a, b, addOp);
+const unitSub = (a: unknown, b: unknown): unknown =>
+  hasFn(asUnit(a), 'sub') ? asUnit(a).sub!(b) : unitAddSubMathjs(a, b, (x, y) => subtract(x, y));
+const unitMul = (a: unknown, b: unknown): unknown =>
+  hasFn(asUnit(a), 'mul') ? asUnit(a).mul!(b) : asUnit(a).multiply!(b);
+const unitDiv = (a: unknown, b: unknown): unknown =>
+  hasFn(asUnit(a), 'div') ? asUnit(a).div!(b) : asUnit(a).divide!(b);
+
+// =============================================================================
 // Addition (Parallel-First)
 // =============================================================================
 
@@ -123,7 +198,7 @@ export const add = mathTyped('add', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.add(b),
 
   // Unit arithmetic (mathjs parity): same-dimension units add (e.g. 5 cm + 3 mm).
-  'Unit, Unit': (a: Unit, b: Unit): Unit => a.add(b),
+  'Unit, Unit': (a: Unit, b: Unit): Unit => unitAdd(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.add(b),
@@ -196,7 +271,7 @@ export const subtract = mathTyped('subtract', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.subtract(b),
 
   // Unit subtraction (same dimension): 5 cm − 3 mm.
-  'Unit, Unit': (a: Unit, b: Unit): Unit => a.sub(b),
+  'Unit, Unit': (a: Unit, b: Unit): Unit => unitSub(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.sub(b),
@@ -238,8 +313,8 @@ export const multiply = mathTyped('multiply', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.multiply(b),
 
   // Unit multiplication / scaling (mathjs parity).
-  'Unit, Unit': (a: Unit, b: Unit): Unit => a.mul(b),
-  'Unit, number': (a: Unit, b: f64): Unit => a.mul(b),
+  'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
+  'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
   'number, Unit': (a: f64, b: Unit): Unit => b.mul(a),
 
   // Dual numbers (forward-mode AD).
@@ -341,8 +416,8 @@ export const divide = mathTyped('divide', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.divide(b),
 
   // Unit division / scaling (mathjs parity). Unit ÷ Unit may be dimensionless.
-  'Unit, Unit': (a: Unit, b: Unit): Unit => a.div(b),
-  'Unit, number': (a: Unit, b: f64): Unit => a.div(b),
+  'Unit, Unit': (a: Unit, b: Unit): Unit => unitDiv(a, b) as Unit,
+  'Unit, number': (a: Unit, b: f64): Unit => unitDiv(a, b) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.div(b),
@@ -408,6 +483,7 @@ export const abs = mathTyped('abs', {
   Fraction: (a: Fraction): Fraction => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
   Dual: (a: Dual): Dual => a.abs(),
+  Unit: (a: Unit): Unit => asUnit(a).abs!() as unknown as Unit,
 
   // Parallel array abs
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -1056,20 +1132,14 @@ export const tanh = mathTyped('tanh', {
 // Unit comparison (mathjs parity): order by base-unit value once dimensions
 // match. Ordering across incompatible dimensions is an error; equality across
 // them is simply false.
-function unitCmp(a: Unit, b: Unit): i32 {
-  if (!a.dimensionsEqual(b)) {
-    throw new Error('Cannot compare units with different dimensions');
-  }
-  return a.value > b.value ? 1 : a.value < b.value ? -1 : 0;
-}
-
 export const equal = mathTyped('equal', {
   'number, number': (a: f64, b: f64): boolean => a === b,
   'bigint, bigint': (a: i64, b: i64): boolean => a === b,
   'Complex, Complex': (a: Complex, b: Complex): boolean => a.equals(b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.equals(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.equals(b),
-  'Unit, Unit': (a: Unit, b: Unit): boolean => a.dimensionsEqual(b) && a.value === b.value,
+  'Unit, Unit': (a: Unit, b: Unit): boolean =>
+    unitSameDimension(a, b) && asUnit(a).value === asUnit(b).value,
 });
 
 /**
