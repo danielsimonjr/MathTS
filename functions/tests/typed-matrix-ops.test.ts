@@ -104,13 +104,17 @@ describe('pinv (typed/)', () => {
     expect(Ap.cols).toBe(2);
   });
 
-  it('throws TypeError for non-DenseMatrix input', () => {
-    expect(() =>
-      (pinv as (...args: unknown[]) => unknown)([
-        [1, 2],
-        [3, 4],
-      ])
-    ).toThrow(TypeError);
+  it('accepts a 2-D Array (returns the pseudoinverse, Array-in/Array-out)', () => {
+    // Array input is now supported (was previously rejected — see gap-linalg-decomposition-oracle).
+    const r = (pinv as (...args: unknown[]) => unknown)([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(Array.isArray(r)).toBe(true);
+  });
+
+  it('throws for a genuinely unsupported input type (number)', () => {
+    expect(() => (pinv as (...args: unknown[]) => unknown)(5)).toThrow();
   });
 });
 
@@ -257,7 +261,9 @@ describe('lowRankApprox (typed/)', () => {
   });
 
   it('throws TypeError for non-array first argument', () => {
-    expect(() => (lowRankApprox as (...args: unknown[]) => unknown)('matrix', 1)).toThrow(TypeError);
+    expect(() => (lowRankApprox as (...args: unknown[]) => unknown)('matrix', 1)).toThrow(
+      TypeError
+    );
   });
 });
 

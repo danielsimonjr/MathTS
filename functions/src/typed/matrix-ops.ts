@@ -1125,6 +1125,11 @@ export const pinv = mathTyped('pinv', {
   DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => matrixPinv(A),
   'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) =>
     matrixPinv(A, opts),
+  // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
+  // "expected DenseMatrix, actual Array" — the common call form was unsupported.
+  Array: (A: number[][]) => matrixPinv(DenseMatrix.fromArray(A)).toArray(),
+  'Array, Object': (A: number[][], opts: PinvOptions) =>
+    matrixPinv(DenseMatrix.fromArray(A), opts).toArray(),
 });
 
 /**

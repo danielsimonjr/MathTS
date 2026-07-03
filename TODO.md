@@ -300,9 +300,24 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
     Royston AS-R94, so it won't match scipy digit-for-digit). Oracle is the exact implementation-independent
     invariances: scale+location invariance (`W(a·x+b)=W(x)`), reflection invariance (`W(−x)=W(x)`), range `(0,1]`,
     and near-normal-vs-heavy-outlier discrimination. In `gap-hypothesis-oracle.test.ts` (3 cases).
-  - **Remaining:** 6 decompositions (`hessenbergForm`, `polarDecomposition`, `qz`, `svdWasm`, svd-`pinv`,
-    `lowRankApprox`, WASM `inv`); the SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal spectra, factory
-    dist `.cdf`/`.quantile`).
+  - ✅ **Decompositions oracle-pinned 2026-07-03** (`gap-linalg-decomposition-oracle.test.ts`):
+    `pinv` (the four **Penrose conditions** — the unique-defining oracle), `polarDecomposition` (UᵀU=I, P symmetric,
+    U·P=A), `hessenbergForm` (QᵀQ=I, H Hessenberg, trace-preserving similarity), `lowRankApprox` (rank-1 minor
+    vanishes). **Fixed a real bug:** `pinv([[…]])` (Array input) threw "expected DenseMatrix" — added Array-in/
+    Array-out signatures.
+  - 🐞 **[HIGH — new, root-caused] SVD `handleZero` bug: exactly-rank-deficient matrices give wrong σ + V.**
+    `svd([[1,2],[2,4]])` returns σ₁ = **√5** (should be **5**) and a wrong `V`, and doesn't even reconstruct
+    (`U·S·Vᵀ ≠ A`). Root cause: in `matrix/src/operations/svd.ts` `handleZero`, when a diagonal `d[i]` is exactly
+    0 and has **no active superdiagonal to its right** (trailing or isolated zero — e.g. `d[end]=0`), the chase
+    loop `for k=zeroIdx; k<n-1` is empty, so `e[i-1]` is never folded into `d[i-1]` (should become `hypot(d,e)`).
+    Corrupts `lowRankApprox` / `pinv` / `norm2` / `cond` for **exactly-singular** inputs (float data with tiny-but-
+    nonzero singular values is unaffected — the bug needs an exact 0). **Partial fix attempted** (fold `e[i-1]` via a
+    right Givens when `e[zeroIdx]===0`): corrects σ for all cases + fully fixes 2×2, but the **multiple-zero** case
+    (rank ≤ n−2, e.g. rank-1 3×3) still yields wrong singular _vectors_ (regressed a `pinv` test) — the full
+    Golub-Reinsch zero-row deflation is needed. Reverted pending a focused fix; oracle ready as `it.skip` in the test
+    file. Do NOT rush this (foundational primitive).
+  - **Remaining:** `qz`, `svdWasm`, WASM `inv`; the SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal
+    spectra, factory dist `.cdf`/`.quantile`).
     ✅ **G1** (add `fast-check`) DONE 2026-07-03 — `fast-check@4.8.0` added as a root dev-dep; **WS-1 P3 started**:
     `functions/tests/property-invariants.test.ts` asserts exact mathematical invariants over thousands of random
     inputs — `abs` non-negativity/evenness, `add`/`multiply` commutativity (numbers + element-wise vectors), vector

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-03) — `pinv` accepts Array input + decompositions oracle-pinned
+
+- **`pinv([[…]])` (Array input) threw** "expected DenseMatrix" — only the
+  DenseMatrix form was wired. Added Array-in/Array-out signatures (mathjs
+  convention), so the common call form works.
+- Oracle-pinned `pinv` / `polarDecomposition` / `hessenbergForm` / `lowRankApprox`
+  with implementation-independent invariants (`functions/tests/gap-linalg-
+  decomposition-oracle.test.ts`): `pinv` against the **four Penrose conditions**
+  (the unique-defining property), polar (`UᵀU=I`, `P` symmetric, `U·P=A`),
+  Hessenberg (`QᵀQ=I`, `H` upper-Hessenberg, trace-preserving similarity),
+  low-rank (rank-1 minor vanishes).
+
+Surfaced (documented HIGH in TODO, **not** fixed here): a real SVD bug —
+`svd([[1,2],[2,4]])` returns σ₁ = √5 instead of 5 (and a wrong `V`) for
+**exactly-rank-deficient** matrices, because `matrix/src/operations/svd.ts`
+`handleZero` never folds the superdiagonal into the diagonal for a trailing/
+isolated zero singular value. A partial fix (correct for 2×2 + all singular
+values) regressed the rank-≤n−2 vector case, so it was reverted pending the full
+Golub-Reinsch zero-row deflation. (Full-rank inputs and float data with
+tiny-but-nonzero singular values are unaffected.)
+
 ### Fixed (2026-07-03) — Unit operators: dimensional analysis now works (GC5 / G3)
 
 Arithmetic and comparison on units — a flagship feature for engineering/science —
