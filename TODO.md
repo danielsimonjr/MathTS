@@ -448,11 +448,19 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   public `unit()` returns the **mathjs `Unit`** (`functions/src/type/unit/Unit.ts`, `equalBase`/`clone`/`value`/
   `multiply`), so every public Unit op threw. Fixed the operators (`functions/src/typed/arithmetic.ts`) to support
   **both** flavors (`to()`/`toBest()` still return core Units). Pinned in `gap-unit-operators.test.ts` (13 cases).
-  ⬜ **Residual (this is the synced-layer fork):** there are TWO `Unit` classes both registered as `'Unit'` —
-  mathjs (`functions/src/type/unit/Unit.ts`, public via `unit()`) and core (`@danielsimonjr/mathts-core`, via
-  `to()`/`toBest()`; and a third dormant `@ts-nocheck` one at `core/src/types/unit/Unit.ts`, B-9). **Unify on one**
-  (make `to`/`toBest` return the mathjs Unit, retire the dormant core one) so the operators don't need dual-flavor
-  branching. Larger cleanup — schedule deliberately.
+  🔧 **Residual — Unit MERGE (in progress 2026-07-03):** there are TWO live `Unit` classes both registered as
+  `'Unit'` — mathjs (`functions/src/type/unit/Unit.ts`, 3737 lines, feature-complete: parser/prefixes/unit-systems/
+  createUnit/toSI/simplify/angle+bit dims/physical-constants; public via `unit()`) and core
+  (`@danielsimonjr/mathts-core/types/unit.ts`, 743 lines, canonical-value subset; via `to()`/`toBest()`). (No third
+  dormant Unit — that file doesn't exist; earlier note was stale.) **Maintainer chose the full merge** into one
+  class. **Staged plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
+  **Architecture recommendation (REVERSES the "core as base" preference — needs maintainer confirm before Phase 3):**
+  relocate the feature-complete **mathjs Unit into `core`** as the single class + port core's nicer canonical `toBest`
+  (`0.1 mm` not `100 µm`), rather than reimplement ~3000 lines of mathjs features onto the core class (reinvention +
+  capability-loss risk). Both already SI-normalize `.value`, so storage is compatible. **Progress:** ✅ Phase 0.1
+  characterization net (`functions/tests/unit-characterization.test.ts`, 8 oracles pinning the thin-covered mathjs
+  features so the merge can't silently drop them). Next: Phase 0.2 (core canonical net) → Phase 1 (dep audit + move
+  to core). The operator dual-flavor branching stays until Phase 3.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
