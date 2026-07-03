@@ -125,14 +125,10 @@ describe('lowRankApprox — best rank-k approximation', () => {
     close(R[0][0] * R[1][1] - R[0][1] * R[1][0], 0, 1e-8);
   });
 
-  // KNOWN-BROKEN — blocked on the SVD `handleZero` bug (tracked HIGH in TODO). For
-  // an EXACTLY-rank-deficient matrix, the bidiagonal QR leaves a trailing/isolated
-  // zero singular value with its superdiagonal unfolded, so `svd([[1,2],[2,4]])`
-  // returns σ₁ = √5 (should be 5) and a wrong V — corrupting `lowRankApprox` /
-  // `pinv` / `norm2` for exactly-singular inputs. (Full-rank inputs are fine, hence
-  // the passing tests above.) Root cause + partial fix documented in TODO.
-  it.skip('rank-k of an exactly-rank-k matrix reproduces it (BLOCKED: SVD handleZero bug)', async () => {
-    // [[1,2],[2,4]] = [1,2]ᵀ·[1,2] is exactly rank 1.
+  it('rank-k of an exactly-rank-k matrix reproduces it (rank-1 outer product)', async () => {
+    // [[1,2],[2,4]] = [1,2]ᵀ·[1,2] is exactly rank 1. This exercises the SVD's
+    // rank-deficient path — previously it returned σ₁ = √5 (should be 5) and a wrong
+    // V; the one-sided Jacobi fallback (matrix/src/operations/svd.ts) now makes it exact.
     const A: Mat = [
       [1, 2],
       [2, 4],

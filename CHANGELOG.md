@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-03) — SVD correct for rank-deficient matrices (one-sided Jacobi fallback)
+
+`svd([[1,2],[2,4]])` returned σ₁ = **√5** (should be **5**) with a wrong `V` and no
+reconstruction (`U·S·Vᵀ ≠ A`) for **exactly-rank-deficient** matrices — corrupting
+`pinv` / `lowRankApprox` / `norm2` / `cond` on singular inputs. Root cause: the
+bidiagonal Golub-Reinsch `handleZero` never folds the superdiagonal into the diagonal
+for a trailing/isolated exact-zero singular value.
+
+Fix keeps the fast Golub-Reinsch path for the (overwhelmingly common) full-rank case
+and, when a zero singular value is detected, recomputes with a robust **one-sided
+Jacobi SVD** — correct for rank-deficient inputs, with null-space basis completion so
+`U`/`V` stay orthonormal. Now `svd([[1,2],[2,4]]) → S=[5,0]` with exact reconstruction
+and orthonormal factors across 2×2 / 3×3 / wide / tall / zero, symmetric and
+non-symmetric. Un-skipped the 5×5 SVD reconstruction test and the `lowRankApprox`
+exact-rank-1 oracle. matrix 753 pass / 6 skip; functions 3180 pass; typecheck + eslint
+clean. (Remaining SVD skips need the separate full-matrices `U`/`V` option; thin
+reconstruction is already exact.)
+
 ### Fixed (2026-07-03) — `pinv` accepts Array input + decompositions oracle-pinned
 
 - **`pinv([[…]])` (Array input) threw** "expected DenseMatrix" — only the
@@ -19,14 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Hessenberg (`QᵀQ=I`, `H` upper-Hessenberg, trace-preserving similarity),
   low-rank (rank-1 minor vanishes).
 
-Surfaced (documented HIGH in TODO, **not** fixed here): a real SVD bug —
-`svd([[1,2],[2,4]])` returns σ₁ = √5 instead of 5 (and a wrong `V`) for
-**exactly-rank-deficient** matrices, because `matrix/src/operations/svd.ts`
-`handleZero` never folds the superdiagonal into the diagonal for a trailing/
-isolated zero singular value. A partial fix (correct for 2×2 + all singular
-values) regressed the rank-≤n−2 vector case, so it was reverted pending the full
-Golub-Reinsch zero-row deflation. (Full-rank inputs and float data with
-tiny-but-nonzero singular values are unaffected.)
+This work surfaced the rank-deficient SVD bug now fixed in the entry above.
 
 ### Fixed (2026-07-03) — Unit operators: dimensional analysis now works (GC5 / G3)
 

@@ -250,6 +250,104 @@ function handleZero(
 }
 
 /**
+ * One-sided Jacobi SVD of a tall/square matrix (m >= n). Numerically robust and
+ * correct for **rank-deficient** inputs — used as a fallback when the bidiagonal
+ * Golub-Reinsch path above hits an exact zero singular value (its `handleZero`
+ * bulge-chasing is unreliable there). Rotates the columns of a working copy `W`
+ * to mutual orthogonality; the column norms are the singular values and the
+ * normalized columns are the left singular vectors. `V` accumulates the
+ * rotations. Returns the pre-sort `{ d, U, V }` so the shared tail (positive-σ /
+ * sort / transpose) applies unchanged.
+ */
+function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] } {
+  const m = A.length;
+  const n = A[0].length;
+  const W = A.map((row) => row.slice()); // m×n; columns converge to σ·u
+  const V = eye(n);
+  const EPS = 1e-15;
+  const MAX_SWEEPS = 60;
+
+  for (let sweep = 0; sweep < MAX_SWEEPS; sweep++) {
+    let rotated = false;
+    for (let p = 0; p < n - 1; p++) {
+      for (let q = p + 1; q < n; q++) {
+        let alpha = 0;
+        let beta = 0;
+        let gamma = 0;
+        for (let i = 0; i < m; i++) {
+          alpha += W[i][p] * W[i][p];
+          gamma += W[i][q] * W[i][q];
+          beta += W[i][p] * W[i][q];
+        }
+        if (Math.abs(beta) <= EPS * Math.sqrt(alpha * gamma) || (alpha === 0 && gamma === 0)) {
+          continue;
+        }
+        rotated = true;
+        // Jacobi rotation (c, s) diagonalizing [[alpha, beta], [beta, gamma]].
+        const zeta = (gamma - alpha) / (2 * beta);
+        const sign = zeta >= 0 ? 1 : -1;
+        const t = sign / (Math.abs(zeta) + Math.sqrt(1 + zeta * zeta));
+        const c = 1 / Math.sqrt(1 + t * t);
+        const s = c * t;
+        for (let i = 0; i < m; i++) {
+          const wip = W[i][p];
+          const wiq = W[i][q];
+          W[i][p] = c * wip - s * wiq;
+          W[i][q] = s * wip + c * wiq;
+        }
+        for (let i = 0; i < n; i++) {
+          const vip = V[i][p];
+          const viq = V[i][q];
+          V[i][p] = c * vip - s * viq;
+          V[i][q] = s * vip + c * viq;
+        }
+      }
+    }
+    if (!rotated) break;
+  }
+
+  const d = new Array(n).fill(0);
+  const U = Array.from({ length: m }, () => new Array(n).fill(0));
+  for (let j = 0; j < n; j++) {
+    let norm = 0;
+    for (let i = 0; i < m; i++) norm += W[i][j] * W[i][j];
+    norm = Math.sqrt(norm);
+    d[j] = norm;
+    if (norm > 1e-300) {
+      for (let i = 0; i < m; i++) U[i][j] = W[i][j] / norm;
+    }
+    // else σ = 0 — the U column is filled with a null-space basis vector below so
+    // the returned U stays orthonormal (a bare zero column would break that).
+  }
+
+  // Complete any σ = 0 columns to an orthonormal basis (Gram-Schmidt against the
+  // already-filled columns, seeded from standard basis vectors). Processed in
+  // ascending j so each new column is orthogonal to all previously filled ones.
+  for (let j = 0; j < n; j++) {
+    if (d[j] > 1e-300) continue;
+    const col = new Array(m).fill(0);
+    for (let seed = 0; seed < m; seed++) {
+      col.fill(0);
+      col[seed] = 1;
+      for (let c = 0; c < n; c++) {
+        if (c === j) continue;
+        let dot = 0;
+        for (let i = 0; i < m; i++) dot += col[i] * U[i][c];
+        for (let i = 0; i < m; i++) col[i] -= dot * U[i][c];
+      }
+      let nrm = 0;
+      for (let i = 0; i < m; i++) nrm += col[i] * col[i];
+      nrm = Math.sqrt(nrm);
+      if (nrm > 1e-8) {
+        for (let i = 0; i < m; i++) U[i][j] = col[i] / nrm;
+        break;
+      }
+    }
+  }
+  return { d, U, V };
+}
+
+/**
  * Compute SVD of a matrix
  *
  * @param matrix - Input matrix (m x n)
@@ -356,23 +454,41 @@ export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {})
     svdStep(d, e, U, V, start, end);
   }
 
+  // Rank-deficiency fallback. The bidiagonal QR's exact-zero deflation
+  // (`handleZero`) is unreliable — for a matrix with an exactly-zero singular
+  // value it can leave the superdiagonal unfolded, yielding a wrong σ and V (it
+  // returns σ₁ = √5 instead of 5 for [[1,2],[2,4]]). When we detect a zero
+  // singular value, recompute the whole decomposition with the robust one-sided
+  // Jacobi SVD, which is correct for rank-deficient inputs. Full-rank matrices
+  // (the overwhelmingly common case) never trigger this and keep the fast path.
+  let dFinal = d;
+  let uFinal = U;
+  let vFinal = V;
+  const maxAbsD = d.reduce((mx, x) => Math.max(mx, Math.abs(x)), 0);
+  if (maxAbsD > 0 && d.some((x) => Math.abs(x) <= rankTolerance * maxAbsD)) {
+    const jac = jacobiSVD(A);
+    dFinal = jac.d;
+    uFinal = jac.U;
+    vFinal = jac.V;
+  }
+
   // Ensure positive singular values
-  for (let i = 0; i < d.length; i++) {
-    if (d[i] < 0) {
-      d[i] = -d[i];
-      for (let j = 0; j < V.length; j++) {
-        V[j][i] = -V[j][i];
+  for (let i = 0; i < dFinal.length; i++) {
+    if (dFinal[i] < 0) {
+      dFinal[i] = -dFinal[i];
+      for (let j = 0; j < vFinal.length; j++) {
+        vFinal[j][i] = -vFinal[j][i];
       }
     }
   }
 
   // Sort singular values in descending order
-  const indices = Array.from({ length: d.length }, (_, i) => i);
-  indices.sort((a, b) => d[b] - d[a]);
+  const indices = Array.from({ length: dFinal.length }, (_, i) => i);
+  indices.sort((a, b) => dFinal[b] - dFinal[a]);
 
-  const sortedS = indices.map((i) => d[i]);
-  const sortedU = U.map((row) => indices.map((i) => row[i]));
-  const sortedV = V.map((row) => indices.map((i) => row[i]));
+  const sortedS = indices.map((i) => dFinal[i]);
+  const sortedU = uFinal.map((row) => indices.map((i) => row[i]));
+  const sortedV = vFinal.map((row) => indices.map((i) => row[i]));
 
   // Compute rank
   const maxS = sortedS[0] || 0;

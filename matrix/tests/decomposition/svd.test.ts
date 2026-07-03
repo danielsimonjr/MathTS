@@ -457,7 +457,7 @@ describe('Singular Value Decomposition', () => {
   // These require refactoring the Golub-Reinsch implementation.
   // See: https://github.com/danielsimonjr/mathts/issues (future issue)
   describe('Larger matrices', () => {
-    it.skip('should handle 5x5 matrix (numerical stability issue in QR iteration)', () => {
+    it('should handle 5x5 matrix (square: thin U = full U)', () => {
       const A = [
         [5, 2, 1, 0, 0],
         [2, 5, 2, 1, 0],
@@ -476,7 +476,10 @@ describe('Singular Value Decomposition', () => {
       expect(matDiff(A, USV)).toBeLessThan(1e-4 * aNorm);
     });
 
-    it.skip('should handle 4x6 matrix (dimension mismatch in transpose handling)', () => {
+    // Thin SVD now reconstructs this (rank-3) matrix exactly; the full-form check
+    // below (`diag(S,4,6)` with `Uᴹˣᴹ`, `Vᴺˣᴺ`) needs the unimplemented full-matrices
+    // option — U/V are returned in thin form. Separate feature from the SVD fix.
+    it.skip('should handle 4x6 matrix (needs full-matrices U/V, not thin)', () => {
       const A = [
         [1, 2, 3, 4, 5, 6],
         [7, 8, 9, 10, 11, 12],
