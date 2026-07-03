@@ -262,6 +262,16 @@ export const multiply = mathTyped('multiply', {
     return backendManager.multiply(A, B).toArray();
   },
 
+  // Matrix × matrix on boxed matrices returns a boxed matrix (mathjs parity) —
+  // NOT a bare array. The `Array, Array` path above returns an array, and
+  // reaching it via the Matrix~>Array conversion would strip the matrix type
+  // (breaking callers like `sylvester` that call `.toArray()` on the product).
+  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
+    const A = DenseMatrix.fromArray((a as { toArray(): number[][] }).toArray());
+    const B = DenseMatrix.fromArray((b as { toArray(): number[][] }).toArray());
+    return new MathJSDenseMatrix(backendManager.multiply(A, B).toArray());
+  },
+
   'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
   'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
 

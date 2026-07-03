@@ -20,6 +20,34 @@ void backendManager.initialize().catch(() => {
   /* JS backend remains available */
 });
 
+/** The subset of the mathjs `Index` API the bridge matrices consume. */
+interface MatrixIndexLike {
+  isScalar(): boolean;
+  size(): number[];
+  dimension(dim: number): unknown;
+}
+
+/**
+ * Resolve a mathjs `Index` object to the list of selected indices per dimension.
+ * Each dimension selector is a scalar number → `[n]`, or a Range /
+ * ImmutableDenseMatrix (has `.toArray()`) → its index list.
+ */
+function matrixIndexSelectors(index: MatrixIndexLike): number[][] {
+  const nDims = index.size().length;
+  const out: number[][] = [];
+  for (let d = 0; d < nDims; d++) {
+    const sel = index.dimension(d);
+    if (typeof sel === 'number') {
+      out.push([sel]);
+    } else if (sel && typeof (sel as { toArray?: () => number[] }).toArray === 'function') {
+      out.push((sel as { toArray(): number[] }).toArray());
+    } else {
+      out.push([Number(sel)]);
+    }
+  }
+  return out;
+}
+
 /**
  * mathjs-compatible dense matrix adapter.
  *
@@ -178,13 +206,70 @@ export class MathJSDenseMatrix {
   }
 
   /**
-   * Basic subset access (simplified for common patterns).
+   * Subset access. Accepts either a plain coordinate `number[]` (internal
+   * callers) or a mathjs `Index` object (what the factory `subset(value, index)`
+   * passes — `value.subset(index)`). Index support was missing, so scalar
+   * extraction like `subset(M, index(k, k))` — used throughout `sylvester` /
+   * `lyap` — passed the whole Index object to `get`, reading `_data[Index]` =
+   * undefined.
    */
-  subset(index: number[], replacement?: number, defaultValue?: number): number | MathJSDenseMatrix {
-    if (replacement === undefined) {
-      return this.get(index);
+  subset(
+    index: number[] | MatrixIndexLike,
+    replacement?: unknown,
+    defaultValue?: number
+  ): number | MathJSDenseMatrix {
+    if (Array.isArray(index)) {
+      return replacement === undefined
+        ? this.get(index)
+        : this.set(index, replacement as number, defaultValue);
     }
-    return this.set(index, replacement, defaultValue);
+    const dims = matrixIndexSelectors(index);
+    return replacement === undefined
+      ? this._getSubset(index, dims)
+      : this._setSubset(index, dims, replacement);
+  }
+
+  /** Read a scalar (Index.isScalar) or a sub-matrix from selected indices. */
+  private _getSubset(index: MatrixIndexLike, dims: number[][]): number | MathJSDenseMatrix {
+    if (index.isScalar()) {
+      return dims.length === 1
+        ? (this._data[dims[0][0]] as unknown as number)
+        : this._data[dims[0][0]][dims[1][0]];
+    }
+    if (dims.length === 1) {
+      const picked = dims[0].map((i) => (this._data as unknown as number[])[i]);
+      const m = new MathJSDenseMatrix(picked as unknown as number[][]);
+      m._size = [dims[0].length];
+      return m;
+    }
+    const [rowSel, colSel] = dims;
+    return new MathJSDenseMatrix(rowSel.map((i) => colSel.map((j) => this._data[i][j])));
+  }
+
+  /** Write a scalar or a sub-matrix at the selected indices; returns this. */
+  private _setSubset(
+    index: MatrixIndexLike,
+    dims: number[][],
+    replacement: unknown
+  ): MathJSDenseMatrix {
+    if (index.isScalar()) {
+      if (dims.length === 1)
+        (this._data as unknown as number[])[dims[0][0]] = replacement as number;
+      else this._data[dims[0][0]][dims[1][0]] = replacement as number;
+      return this;
+    }
+    const rep = (replacement as { toArray?: () => unknown }).toArray
+      ? (replacement as { toArray(): unknown[] }).toArray()
+      : (replacement as unknown[]);
+    const [rowSel, colSel] = dims.length === 2 ? dims : [dims[0], [0]];
+    for (let ri = 0; ri < rowSel.length; ri++) {
+      for (let ci = 0; ci < colSel.length; ci++) {
+        const row = rep[ri];
+        const v = Array.isArray(row) ? row[ci] : row;
+        this._data[rowSel[ri]][colSel[ci]] = v as number;
+      }
+    }
+    return this;
   }
 
   /**

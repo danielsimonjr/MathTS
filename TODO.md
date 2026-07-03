@@ -355,12 +355,17 @@ Genuine issues found (verified, not report artifacts):
     `algebra.test.ts` / `cas.test.ts` / `forward-mode-ad.test.ts`).
   - ✅ **`leafCount`** — was **smoke-only** (`typeof leafCount === 'function'`); now pinned with deterministic
     oracles in `functions/tests/gap-algebra-cas-oracle.test.ts` (5 cases).
-  - 🐞 **[HIGH — new] `sylvester` + `lyap` BROKEN.** Both were smoke-only. `sylvester(A,B,C)` throws in
-    `subset(G, index(k,k))` → `MathJSDenseMatrix.get` ("reading undefined" — out-of-range row); `lyap` (which is
-    `sylvester(A, Aᵀ, −Q)`) fails through it. It's **now reached** because the factory `schur` `sylvester` depends
-    on was fixed earlier this session (previously it threw at `schur`). Likely a broken `Index`/`subset` interaction
-    on the bridge matrices, or a real indexing bug. Oracle ready: `lyap(diag(−1,−2), I)` ⇒ `diag(0.5, 0.25)` (closed
-    form of `AP+PA'+Q=0`). Same class as the slu/schur factory-layer bugs.
+  - ✅ **`sylvester` + `lyap`** — FIXED 2026-07-02. Both were smoke-only and broken. **Two root causes**, both in
+    the matrix bridge (`matrix-bridge.ts`):
+    (1) `MathJSDenseMatrix.subset` only understood a plain coordinate `number[]`, so the factory
+    `subset(value, Index)` (which calls `value.subset(indexObject)`) passed the whole `Index` object to `get`
+    (`_data[Index]` = undefined) — `sylvester` uses `subset(G, index(k,k))` / `subset(D, index(all,[k]))`
+    everywhere. Added mathjs `Index` support (scalar element + range/array sub-matrix get **and** set).
+    (2) `multiply(DenseMatrix, DenseMatrix)` returned a bare **array** (via the `Matrix~>Array` conversion → the
+    `Array,Array` matmul), so `sylvester`'s `X = multiply(U, …)` had no `.toArray()`. Added a
+    `'DenseMatrix, DenseMatrix'` matmul signature that returns a boxed matrix (mathjs parity). Oracle-pinned:
+    `lyap(diag(−1,−2), I) ⇒ diag(0.5, 0.25)` + `sylvester` defining-equation + `subset`/`index` regression pins in
+    `functions/tests/gap-sylvester-lyap-oracle.test.ts`.
   - 🐞 **[HIGH — new] `rationalize` BROKEN.** Smoke-only. `rationalize('(x+1)^2')` (1-arg, the basic form) throws
     "Unexpected type … (expected: boolean or Object, actual: undefined, index 1)" — there is **no `string`
     signature** (only `Node` / `Node,boolean` / `Node,Object` / `Node,Object,boolean`), yet its own docstring shows

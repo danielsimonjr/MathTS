@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-02) — factory `sylvester` / `lyap`: `Index` subset + matrix-product boxing
+
+`sylvester` (and `lyap`, which delegates to it) were shipped broken (smoke-tested
+only). Two root causes in the matrix bridge:
+
+- **`MathJSDenseMatrix.subset` didn't understand mathjs `Index` objects.** The
+  factory `subset(value, index)` calls `value.subset(indexObject)`, but the
+  bridge's `subset` only handled a plain coordinate `number[]` — it passed the
+  whole `Index` to `get`, reading `_data[Index]` = undefined. `sylvester` uses
+  `subset(G, index(k,k))` / `subset(D, index(all,[k]))` throughout. The bridge
+  now resolves `Index` objects (scalar-element and range/array sub-matrix, for
+  both get and set).
+- **`multiply(DenseMatrix, DenseMatrix)` returned a bare array**, not a matrix
+  (it reached the `Array, Array` matmul via the `Matrix~>Array` conversion), so
+  `sylvester`'s `X = multiply(U, …)` had no `.toArray()`. Added a
+  `'DenseMatrix, DenseMatrix'` matmul signature that returns a boxed matrix
+  (mathjs parity).
+
+Oracle-pinned: `lyap(diag(−1,−2), I) = diag(0.5, 0.25)` (closed form of
+`A·P + P·Aᵀ + Q = 0`), the `sylvester` defining equation, and `subset`/`index`
+regression pins in `functions/tests/gap-sylvester-lyap-oracle.test.ts`. No
+regressions: functions 3135 pass / 41 skip; typecheck + eslint clean.
+
 ### Tests (2026-07-02) — algebra/CAS coverage audit + `leafCount` oracle
 
 Audited the activated `functions/src/algebra/` layer the DGT flagged as having no
