@@ -392,9 +392,12 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
   `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
   union first). Same class as the sqrt/square/norm/dot fix already landed.
-- ⬜ **[LOW — structural smell] 2 type-only import cycles in matrix.** `DenseMatrix.ts ↔ dense/arithmetic.ts` and
-  `DenseMatrix.ts ↔ dense/reduction.ts`. Safe (type-only, erased at runtime; 0 runtime cycles) but a smell — could
-  extract the shared type interface to break them. Low priority.
+- ✅ **[LOW — DONE 2026-07-02] 2 type-only import cycles in matrix broken.** `DenseMatrix.ts ↔ dense/arithmetic.ts`
+  and `DenseMatrix.ts ↔ dense/reduction.ts`: the helpers only need a read view of the matrix (`rows`/`cols`/`get`/
+  `length`/`isSquare`), so their param type was changed from `DenseMatrix` to the `Matrix<number>` base interface
+  they already imported (for the `b` operand). `Matrix.ts` doesn't import the helpers, so the cycle is gone;
+  `DenseMatrix` satisfies `Matrix<number>` structurally (no `implements` needed). matrix 752✓/7skip, typecheck +
+  eslint clean.
 - ✅ **[task #8 — DONE 2026-07-02] DGT re-export false positives cut 452 → 371.** Two fixes in
   `tools/create-dependency-graph`: (1) the parser **never matched `export type { X } from './b'`** (the named-
   re-export regex only matches `export {`, not `export type {`), so every re-exported type/interface looked

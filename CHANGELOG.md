@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-02) — matrix: broke two type-only `DenseMatrix` import cycles
+
+`dense/arithmetic.ts` and `dense/reduction.ts` did `import type { DenseMatrix }`
+while `DenseMatrix` imports them at runtime to delegate its methods — two
+(type-only, runtime-erased) import cycles. The helpers only need a structural
+read view (`rows`/`cols`/`get`/`length`/`isSquare`), so their parameter type was
+changed from `DenseMatrix` to the `Matrix<number>` base interface they already
+imported for the other operand. `Matrix.ts` doesn't import the helpers, so the
+cycles are gone; `DenseMatrix` satisfies `Matrix<number>` structurally. No runtime
+change. matrix 752 pass / 7 skip; typecheck + eslint clean.
+
 ### Fixed (2026-07-02) — WS-2: `min`/`max`/`norm` respected their parallel thresholds
 
 `min`, `max`, and `norm` on a `Float64Array` dispatched to the worker pool

@@ -1,4 +1,3 @@
-import type { DenseMatrix } from '../DenseMatrix.js';
 import type { Matrix } from '../Matrix.js';
 
 /**
@@ -18,7 +17,7 @@ function flat(m: Matrix<number>): Float64Array {
   return out;
 }
 
-export function add(a: DenseMatrix, b: Matrix<number>): Float64Array {
+export function add(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
   const result = new Float64Array(ad.length);
@@ -26,7 +25,7 @@ export function add(a: DenseMatrix, b: Matrix<number>): Float64Array {
   return result;
 }
 
-export function subtract(a: DenseMatrix, b: Matrix<number>): Float64Array {
+export function subtract(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
   const result = new Float64Array(ad.length);
@@ -34,7 +33,7 @@ export function subtract(a: DenseMatrix, b: Matrix<number>): Float64Array {
   return result;
 }
 
-export function multiplyElementwise(a: DenseMatrix, b: Matrix<number>): Float64Array {
+export function multiplyElementwise(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
   const result = new Float64Array(ad.length);
@@ -42,7 +41,7 @@ export function multiplyElementwise(a: DenseMatrix, b: Matrix<number>): Float64A
   return result;
 }
 
-export function multiply(a: DenseMatrix, b: Matrix<number>): Float64Array {
+export function multiply(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const n = a.rows;
   const p = a.cols;
   const m = b.cols;
@@ -64,14 +63,14 @@ export function multiply(a: DenseMatrix, b: Matrix<number>): Float64Array {
   return result;
 }
 
-export function scale(a: DenseMatrix, scalar: number): Float64Array {
+export function scale(a: Matrix<number>, scalar: number): Float64Array {
   const ad = flat(a);
   const result = new Float64Array(ad.length);
   for (let i = 0; i < ad.length; i++) result[i] = ad[i] * scalar;
   return result;
 }
 
-export function transpose(a: DenseMatrix): Float64Array {
+export function transpose(a: Matrix<number>): Float64Array {
   const ad = flat(a);
   const rows = a.rows;
   const cols = a.cols;

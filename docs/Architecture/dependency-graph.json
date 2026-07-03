@@ -2867,11 +2867,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../DenseMatrix.js",
-            "imports": ["DenseMatrix"],
-            "typeOnly": true
-          },
-          {
             "file": "../Matrix.js",
             "imports": ["Matrix"],
             "typeOnly": true
@@ -2887,8 +2882,8 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../DenseMatrix.js",
-            "imports": ["DenseMatrix"],
+            "file": "../Matrix.js",
+            "imports": ["Matrix"],
             "typeOnly": true
           }
         ],
@@ -28859,21 +28854,10 @@
   "dependencyGraph": {
     "circularDependencies": {
       "runtime": [],
-      "typeOnly": [
-        [
-          "matrix/src/types/DenseMatrix.ts",
-          "matrix/src/types/dense/arithmetic.ts",
-          "matrix/src/types/DenseMatrix.ts"
-        ],
-        [
-          "matrix/src/types/DenseMatrix.ts",
-          "matrix/src/types/dense/reduction.ts",
-          "matrix/src/types/DenseMatrix.ts"
-        ]
-      ],
-      "total": 2,
+      "typeOnly": [],
+      "total": 0,
       "runtimeCount": 0,
-      "typeOnlyCount": 2
+      "typeOnlyCount": 0
     },
     "layers": [
       {
@@ -30020,9 +30004,9 @@
     "totalEnums": 0,
     "totalConstants": 1397,
     "totalReExports": 1461,
-    "totalTypeOnlyImports": 486,
+    "totalTypeOnlyImports": 485,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 2,
+    "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 371
   }

@@ -1,6 +1,6 @@
-import type { DenseMatrix } from '../DenseMatrix.js';
+import type { Matrix } from '../Matrix.js';
 
-export function sum(a: DenseMatrix): number {
+export function sum(a: Matrix<number>): number {
   let total = 0;
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
@@ -10,11 +10,11 @@ export function sum(a: DenseMatrix): number {
   return total;
 }
 
-export function mean(a: DenseMatrix): number {
+export function mean(a: Matrix<number>): number {
   return sum(a) / a.length;
 }
 
-export function min(a: DenseMatrix): number {
+export function min(a: Matrix<number>): number {
   let minVal = Infinity;
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
@@ -25,7 +25,7 @@ export function min(a: DenseMatrix): number {
   return minVal;
 }
 
-export function max(a: DenseMatrix): number {
+export function max(a: Matrix<number>): number {
   let maxVal = -Infinity;
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
@@ -36,7 +36,7 @@ export function max(a: DenseMatrix): number {
   return maxVal;
 }
 
-export function norm(a: DenseMatrix): number {
+export function norm(a: Matrix<number>): number {
   let sumSquared = 0;
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
@@ -47,7 +47,7 @@ export function norm(a: DenseMatrix): number {
   return Math.sqrt(sumSquared);
 }
 
-export function trace(a: DenseMatrix): number {
+export function trace(a: Matrix<number>): number {
   if (!a.isSquare) {
     throw new Error('Trace is only defined for square matrices');
   }

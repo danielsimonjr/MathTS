@@ -1172,7 +1172,6 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../DenseMatrix.js` | `DenseMatrix` | Import (type-only) |
 | `../Matrix.js` | `Matrix` | Import (type-only) |
 
 **Exports:**
@@ -1186,7 +1185,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../DenseMatrix.js` | `DenseMatrix` | Import (type-only) |
+| `../Matrix.js` | `Matrix` | Import (type-only) |
 
 **Exports:**
 
@@ -12520,9 +12519,9 @@ graph LR
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
 | `expression/src/index`                                 | 27 files     | 0 files    |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
-| `matrix/src/types/DenseMatrix`                         | 3 files      | 20 files   |
 | `expression/src/utils/is`                              | 0 files      | 23 files   |
 | `expression/src/utils/factory`                         | 2 files      | 20 files   |
+| `matrix/src/types/DenseMatrix`                         | 3 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
@@ -12548,19 +12547,7 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**2 circular dependencies detected:**
-
-- **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 2 (safe, no runtime impact)
-
-### Type-Only Circular Dependencies
-
-These cycles only involve type imports and are safe (erased at runtime):
-
-- matrix/src/types/DenseMatrix.ts -> matrix/src/types/dense/arithmetic.ts -> matrix/src/types/DenseMatrix.ts
-- matrix/src/types/DenseMatrix.ts -> matrix/src/types/dense/reduction.ts -> matrix/src/types/DenseMatrix.ts
-
----
+## **No circular dependencies detected.**
 
 <a id="visual-dependency-graph"></a>
 
@@ -13250,9 +13237,9 @@ graph TD
 | Total Functions         | 1405   |
 | Total Type Guards       | 130    |
 | Total Enums             | 0      |
-| Type-only Imports       | 486    |
+| Type-only Imports       | 485    |
 | Runtime Circular Deps   | 0      |
-| Type-only Circular Deps | 2      |
+| Type-only Circular Deps | 0      |
 
 ---
 
