@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-03",
-    "totalFiles": 845,
+    "totalFiles": 850,
     "totalModules": 70,
-    "totalExports": 4093
+    "totalExports": 4281
   },
   "entryPoints": [
     {
@@ -130,6 +130,12 @@
             "file": "typed-function",
             "imports": ["default", "create"],
             "reExport": true
+          },
+          {
+            "file": "typed-function",
+            "imports": ["TypedFunction"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -169,9 +175,10 @@
           "createRobustTypeDef",
           "NoMatchingSignatureError",
           "TypeConversionError",
-          "default"
+          "default",
+          "TypedFunction"
         ],
-        "reExported": ["default", "create"],
+        "reExported": ["default", "create", "TypedFunction"],
         "classes": ["NoMatchingSignatureError", "TypeConversionError"],
         "interfaces": ["TypeDef", "ExtendedTypeDef", "ConversionDef"],
         "functions": [
@@ -427,6 +434,61 @@
             "file": "./factory/index.js",
             "imports": ["FunctionRegistry", "createFactory", "registry", "math", "DEFAULT_CONFIG"],
             "reExport": true
+          },
+          {
+            "file": "./types/interfaces.js",
+            "imports": [
+              "MathTSValue",
+              "Scalar",
+              "BackendType",
+              "NumericType",
+              "MatrixBackend",
+              "IMatrix",
+              "IComplex",
+              "IFraction",
+              "IBigNumber",
+              "MatrixDimensions"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./types/dual-rules.js",
+            "imports": ["DualUnaryRule", "DualUnaryRuleName"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./types/bignumber.js",
+            "imports": ["BigNumberConfig", "RoundingMode"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./types/unit.js",
+            "imports": ["Dimensions", "UnitDef"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./typed/index.js",
+            "imports": [
+              "TypedFunction",
+              "TypedInstance",
+              "TypeDef",
+              "ConversionDef",
+              "SignatureFunction",
+              "ReferTo",
+              "ReferToSelf"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./factory/index.js",
+            "imports": ["MathTSConfig", "FactoryFunction", "FactoryDependencies", "FactoryImport"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -511,7 +573,34 @@
           "registry",
           "math",
           "DEFAULT_CONFIG",
-          "VERSION"
+          "VERSION",
+          "MathTSValue",
+          "Scalar",
+          "BackendType",
+          "NumericType",
+          "MatrixBackend",
+          "IMatrix",
+          "IComplex",
+          "IFraction",
+          "IBigNumber",
+          "MatrixDimensions",
+          "DualUnaryRule",
+          "DualUnaryRuleName",
+          "BigNumberConfig",
+          "RoundingMode",
+          "Dimensions",
+          "UnitDef",
+          "TypedFunction",
+          "TypedInstance",
+          "TypeDef",
+          "ConversionDef",
+          "SignatureFunction",
+          "ReferTo",
+          "ReferToSelf",
+          "MathTSConfig",
+          "FactoryFunction",
+          "FactoryDependencies",
+          "FactoryImport"
         ],
         "reExported": [
           "Complex",
@@ -592,7 +681,34 @@
           "createFactory",
           "registry",
           "math",
-          "DEFAULT_CONFIG"
+          "DEFAULT_CONFIG",
+          "MathTSValue",
+          "Scalar",
+          "BackendType",
+          "NumericType",
+          "MatrixBackend",
+          "IMatrix",
+          "IComplex",
+          "IFraction",
+          "IBigNumber",
+          "MatrixDimensions",
+          "DualUnaryRule",
+          "DualUnaryRuleName",
+          "BigNumberConfig",
+          "RoundingMode",
+          "Dimensions",
+          "UnitDef",
+          "TypedFunction",
+          "TypedInstance",
+          "TypeDef",
+          "ConversionDef",
+          "SignatureFunction",
+          "ReferTo",
+          "ReferToSelf",
+          "MathTSConfig",
+          "FactoryFunction",
+          "FactoryDependencies",
+          "FactoryImport"
         ],
         "constants": ["VERSION"]
       }
@@ -649,6 +765,12 @@
               "DEFAULT_CONFIG"
             ],
             "reExport": true
+          },
+          {
+            "file": "./factory.js",
+            "imports": ["MathTSConfig", "FactoryFunction", "FactoryDependencies", "FactoryImport"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -658,7 +780,11 @@
           "createTypedFunction",
           "registry",
           "math",
-          "DEFAULT_CONFIG"
+          "DEFAULT_CONFIG",
+          "MathTSConfig",
+          "FactoryFunction",
+          "FactoryDependencies",
+          "FactoryImport"
         ],
         "reExported": [
           "FunctionRegistry",
@@ -666,7 +792,11 @@
           "createTypedFunction",
           "registry",
           "math",
-          "DEFAULT_CONFIG"
+          "DEFAULT_CONFIG",
+          "MathTSConfig",
+          "FactoryFunction",
+          "FactoryDependencies",
+          "FactoryImport"
         ]
       }
     },
@@ -717,6 +847,20 @@
             "file": "./type-bridge.js",
             "imports": ["registerNativeTypes"],
             "reExport": true
+          },
+          {
+            "file": "./mathts-typed.js",
+            "imports": [
+              "TypedFunction",
+              "TypedInstance",
+              "TypeDef",
+              "ConversionDef",
+              "SignatureFunction",
+              "ReferTo",
+              "ReferToSelf"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -752,7 +896,14 @@
           "isUnit",
           "initTypedWasm",
           "isTypedWasmAvailable",
-          "registerNativeTypes"
+          "registerNativeTypes",
+          "TypedFunction",
+          "TypedInstance",
+          "TypeDef",
+          "ConversionDef",
+          "SignatureFunction",
+          "ReferTo",
+          "ReferToSelf"
         ],
         "reExported": [
           "mathTyped",
@@ -786,7 +937,14 @@
           "isUnit",
           "initTypedWasm",
           "isTypedWasmAvailable",
-          "registerNativeTypes"
+          "registerNativeTypes",
+          "TypedFunction",
+          "TypedInstance",
+          "TypeDef",
+          "ConversionDef",
+          "SignatureFunction",
+          "ReferTo",
+          "ReferToSelf"
         ]
       },
       "core/src/typed/mathts-typed.ts": {
@@ -1600,6 +1758,24 @@
               "createSyncManager"
             ],
             "reExport": true
+          },
+          {
+            "file": "./Backend.js",
+            "imports": ["MatrixBackend", "BackendType", "BackendHints"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./wasm/index.js",
+            "imports": ["WasmFeatures"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./gpu/index.js",
+            "imports": ["GPUCapabilities", "GPUContextOptions", "SyncStrategy", "SyncConfig"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -1650,7 +1826,15 @@
           "BUILTIN_SHADERS",
           "BatchExecutor",
           "SyncManager",
-          "createSyncManager"
+          "createSyncManager",
+          "MatrixBackend",
+          "BackendType",
+          "BackendHints",
+          "WasmFeatures",
+          "GPUCapabilities",
+          "GPUContextOptions",
+          "SyncStrategy",
+          "SyncConfig"
         ],
         "reExported": [
           "BackendRegistry",
@@ -1699,7 +1883,15 @@
           "BUILTIN_SHADERS",
           "BatchExecutor",
           "SyncManager",
-          "createSyncManager"
+          "createSyncManager",
+          "MatrixBackend",
+          "BackendType",
+          "BackendHints",
+          "WasmFeatures",
+          "GPUCapabilities",
+          "GPUContextOptions",
+          "SyncStrategy",
+          "SyncConfig"
         ]
       },
       "matrix/src/backends/JSBackend.ts": {
@@ -1846,6 +2038,18 @@
               "isWasmFFTAvailable"
             ],
             "reExport": true
+          },
+          {
+            "file": "./detect.js",
+            "imports": ["WasmFeatures"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./fft-wasm.js",
+            "imports": ["FFTResult", "FFTBackend", "FFTConfig"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -1870,7 +2074,11 @@
           "fft",
           "ifft",
           "rfft",
-          "convolve"
+          "convolve",
+          "WasmFeatures",
+          "FFTResult",
+          "FFTBackend",
+          "FFTConfig"
         ],
         "reExported": [
           "detectWasmFeatures",
@@ -1889,7 +2097,11 @@
           "phaseSpectrum",
           "isPowerOf2",
           "nextPowerOf2",
-          "isWasmFFTAvailable"
+          "isWasmFFTAvailable",
+          "WasmFeatures",
+          "FFTResult",
+          "FFTBackend",
+          "FFTConfig"
         ]
       },
       "matrix/src/backends/WASMBackend.ts": {
@@ -2726,6 +2938,18 @@
             "file": "./SparseMatrix.js",
             "imports": ["SparseMatrix", "isSparseMatrix"],
             "reExport": true
+          },
+          {
+            "file": "./Matrix.js",
+            "imports": [
+              "MatrixDimensions",
+              "MatrixIndex",
+              "SliceSpec",
+              "MatrixEntry",
+              "MatrixType"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -2735,7 +2959,12 @@
           "DenseMatrix",
           "isDenseMatrix",
           "SparseMatrix",
-          "isSparseMatrix"
+          "isSparseMatrix",
+          "MatrixDimensions",
+          "MatrixIndex",
+          "SliceSpec",
+          "MatrixEntry",
+          "MatrixType"
         ],
         "reExported": [
           "Matrix",
@@ -2743,7 +2972,12 @@
           "DenseMatrix",
           "isDenseMatrix",
           "SparseMatrix",
-          "isSparseMatrix"
+          "isSparseMatrix",
+          "MatrixDimensions",
+          "MatrixIndex",
+          "SliceSpec",
+          "MatrixEntry",
+          "MatrixType"
         ]
       },
       "matrix/src/types/Matrix.ts": {
@@ -2900,6 +3134,102 @@
             "file": "./operations/flip",
             "imports": ["flip"],
             "reExport": true
+          },
+          {
+            "file": "./Tensor",
+            "imports": ["NestedArray", "EinsumSpec"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./named-index",
+            "imports": ["IndexOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/svd",
+            "imports": ["TensorSvdOpts", "TensorSvdResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/random",
+            "imports": ["RandomTensorOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./contraction-sequence",
+            "imports": ["ContractNetworkOpts", "ContractNetworkResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/qr",
+            "imports": ["TensorQrOpts", "TensorQrResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/lu",
+            "imports": ["TensorLUOpts", "TensorLUResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/cholesky",
+            "imports": ["TensorCholeskyOpts", "TensorCholeskyResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/eig",
+            "imports": ["TensorEigOpts", "TensorEigResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/pinv",
+            "imports": ["TensorPinvOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/solve",
+            "imports": ["TensorSolveOpts", "TensorSolveResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/kron",
+            "imports": ["TensorKronOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/slice",
+            "imports": ["SliceRange"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/stack",
+            "imports": ["StackOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/scatter",
+            "imports": ["ScatterOpts"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/pad",
+            "imports": ["PadOptions"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -2926,7 +3256,31 @@
           "scatter",
           "pad",
           "roll",
-          "flip"
+          "flip",
+          "NestedArray",
+          "EinsumSpec",
+          "IndexOpts",
+          "TensorSvdOpts",
+          "TensorSvdResult",
+          "RandomTensorOpts",
+          "ContractNetworkOpts",
+          "ContractNetworkResult",
+          "TensorQrOpts",
+          "TensorQrResult",
+          "TensorLUOpts",
+          "TensorLUResult",
+          "TensorCholeskyOpts",
+          "TensorCholeskyResult",
+          "TensorEigOpts",
+          "TensorEigResult",
+          "TensorPinvOpts",
+          "TensorSolveOpts",
+          "TensorSolveResult",
+          "TensorKronOpts",
+          "SliceRange",
+          "StackOpts",
+          "ScatterOpts",
+          "PadOptions"
         ],
         "reExported": [
           "Tensor",
@@ -2951,7 +3305,31 @@
           "scatter",
           "pad",
           "roll",
-          "flip"
+          "flip",
+          "NestedArray",
+          "EinsumSpec",
+          "IndexOpts",
+          "TensorSvdOpts",
+          "TensorSvdResult",
+          "RandomTensorOpts",
+          "ContractNetworkOpts",
+          "ContractNetworkResult",
+          "TensorQrOpts",
+          "TensorQrResult",
+          "TensorLUOpts",
+          "TensorLUResult",
+          "TensorCholeskyOpts",
+          "TensorCholeskyResult",
+          "TensorEigOpts",
+          "TensorEigResult",
+          "TensorPinvOpts",
+          "TensorSolveOpts",
+          "TensorSolveResult",
+          "TensorKronOpts",
+          "SliceRange",
+          "StackOpts",
+          "ScatterOpts",
+          "PadOptions"
         ]
       },
       "tensor/src/named-index.ts": {
@@ -3457,6 +3835,12 @@
             "file": "./grad.js",
             "imports": ["grad", "valueAndGrad", "derivative", "jacobian"],
             "reExport": true
+          },
+          {
+            "file": "./grad.js",
+            "imports": ["ScalarFn", "NumericInput"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -3469,7 +3853,9 @@
           "grad",
           "valueAndGrad",
           "derivative",
-          "jacobian"
+          "jacobian",
+          "ScalarFn",
+          "NumericInput"
         ],
         "reExported": [
           "DualTensor",
@@ -3480,7 +3866,9 @@
           "grad",
           "valueAndGrad",
           "derivative",
-          "jacobian"
+          "jacobian",
+          "ScalarFn",
+          "NumericInput"
         ]
       },
       "autograd/src/reverse-grad.ts": {
@@ -6740,6 +7128,43 @@
               "quaternionToRotationMatrix"
             ],
             "reExport": true
+          },
+          {
+            "file": "./grad-forward.js",
+            "imports": ["DualFn"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./hypothesis-extra.js",
+            "imports": [
+              "FTestResult",
+              "JarqueBeraResult",
+              "KruskalResult",
+              "WilcoxonResult",
+              "FisherExactResult",
+              "TukeyComparison"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./regression-extra.js",
+            "imports": ["LinregressResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./optimization-extra.js",
+            "imports": ["OptimizeResult", "LMResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./clustering-extra.js",
+            "imports": ["KMeansResult"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -6839,7 +7264,18 @@
           "quaternionNormalize",
           "quaternionFromAxisAngle",
           "quaternionRotate",
-          "quaternionToRotationMatrix"
+          "quaternionToRotationMatrix",
+          "DualFn",
+          "FTestResult",
+          "JarqueBeraResult",
+          "KruskalResult",
+          "WilcoxonResult",
+          "FisherExactResult",
+          "TukeyComparison",
+          "LinregressResult",
+          "OptimizeResult",
+          "LMResult",
+          "KMeansResult"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -6940,7 +7376,18 @@
           "quaternionNormalize",
           "quaternionFromAxisAngle",
           "quaternionRotate",
-          "quaternionToRotationMatrix"
+          "quaternionToRotationMatrix",
+          "DualFn",
+          "FTestResult",
+          "JarqueBeraResult",
+          "KruskalResult",
+          "WilcoxonResult",
+          "FisherExactResult",
+          "TukeyComparison",
+          "LinregressResult",
+          "OptimizeResult",
+          "LMResult",
+          "KMeansResult"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -7101,9 +7548,61 @@
         "description": "Type definitions re-exported for internal use",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./core/config.js",
+            "imports": ["MathJsConfig", "ConfigOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./core/create.js",
+            "imports": ["MathJsInstance"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "../types/index.js",
+            "imports": [
+              "Matrix",
+              "MathCollection",
+              "MathNumericType",
+              "MathScalarType",
+              "MathArray"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": [],
+        "exports": [
+          "TypedFunction",
+          "MathJsConfig",
+          "ConfigOptions",
+          "MathJsInstance",
+          "Matrix",
+          "MathCollection",
+          "MathNumericType",
+          "MathScalarType",
+          "MathArray"
+        ],
+        "reExported": [
+          "TypedFunction",
+          "MathJsConfig",
+          "ConfigOptions",
+          "MathJsInstance",
+          "Matrix",
+          "MathCollection",
+          "MathNumericType",
+          "MathScalarType",
+          "MathArray"
+        ],
         "interfaces": ["SparseMatrix", "Unit", "MatrixConstructor"]
       }
     },
@@ -7334,6 +7833,177 @@
         "interfaces": ["ConfigOptions"],
         "constants": ["DEFAULT_CONFIG"]
       },
+      "functions/src/core/create.ts": {
+        "description": "Type for the mathjs instance",
+        "externalDependencies": [
+          {
+            "package": "typed-function",
+            "imports": ["typedFunction"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../error/ArgumentsError.js",
+            "imports": ["ArgumentsError"]
+          },
+          {
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
+          },
+          {
+            "file": "../error/IndexError.js",
+            "imports": ["IndexError"]
+          },
+          {
+            "file": "../utils/factory.js",
+            "imports": ["factory", "isFactory"]
+          },
+          {
+            "file": "../utils/factory.js",
+            "imports": ["FactoryFunction", "LegacyFactory"],
+            "typeOnly": true
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": [
+              "isAccessorNode",
+              "isArray",
+              "isArrayNode",
+              "isAssignmentNode",
+              "isBigInt",
+              "isBigNumber",
+              "isBlockNode",
+              "isBoolean",
+              "isChain",
+              "isCollection",
+              "isComplex",
+              "isConditionalNode",
+              "isConstantNode",
+              "isDate",
+              "isDenseMatrix",
+              "isFraction",
+              "isFunction",
+              "isFunctionAssignmentNode",
+              "isFunctionNode",
+              "isHelp",
+              "isIndex",
+              "isIndexNode",
+              "isMap",
+              "isMatrix",
+              "isNode",
+              "isNull",
+              "isNumber",
+              "isObject",
+              "isObjectNode",
+              "isOperatorNode",
+              "isParenthesisNode",
+              "isPartitionedMap",
+              "isRange",
+              "isRangeNode",
+              "isRegExp",
+              "isRelationalNode",
+              "isResultSet",
+              "isSparseMatrix",
+              "isString",
+              "isSymbolNode",
+              "isUndefined",
+              "isUnit"
+            ]
+          },
+          {
+            "file": "../utils/object.js",
+            "imports": ["deepFlatten", "isLegacyFactory"]
+          },
+          {
+            "file": "../utils/map.js",
+            "imports": ["isObjectWrappingMap"]
+          },
+          {
+            "file": "./../utils/emitter.js",
+            "imports": ["* as emitter"]
+          },
+          {
+            "file": "./config.js",
+            "imports": ["DEFAULT_CONFIG"]
+          },
+          {
+            "file": "./config.js",
+            "imports": ["ConfigOptions", "MathJsConfig"],
+            "typeOnly": true
+          },
+          {
+            "file": "./function/config.js",
+            "imports": ["configFactory"]
+          },
+          {
+            "file": "./function/import.js",
+            "imports": ["importFactory"]
+          },
+          {
+            "file": "./function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["create"],
+        "interfaces": ["MathJsInstance", "ImportOptions"],
+        "functions": ["create"]
+      },
+      "functions/src/core/function/config.ts": {
+        "description": "Type for partial config options",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/object.js",
+            "imports": ["clone", "deepExtend"]
+          },
+          {
+            "file": "../config.js",
+            "imports": ["DEFAULT_CONFIG", "MathJsConfig"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["MATRIX_OPTIONS", "NUMBER_OPTIONS", "configFactory"],
+        "interfaces": ["ConfigFunction"],
+        "functions": ["configFactory"],
+        "constants": ["MATRIX_OPTIONS", "NUMBER_OPTIONS"]
+      },
+      "functions/src/core/function/import.ts": {
+        "description": "Options for the import function",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isBigNumber", "isComplex", "isFraction", "isMatrix", "isObject", "isUnit"]
+          },
+          {
+            "file": "../../utils/factory.js",
+            "imports": ["isFactory", "stripOptionalNotation", "FactoryFunction", "FactoryMeta"]
+          },
+          {
+            "file": "../../utils/object.js",
+            "imports": ["hasOwnProperty", "lazy"]
+          },
+          {
+            "file": "../../error/ArgumentsError.js",
+            "imports": ["ArgumentsError"]
+          },
+          {
+            "file": "./typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["path", "importFactory"],
+        "interfaces": ["ImportOptions"],
+        "functions": ["importFactory"],
+        "constants": ["path"]
+      },
       "functions/src/core/function/typed.ts": {
         "description": "Create a typed-function which checks the types of the arguments and",
         "externalDependencies": [
@@ -7406,6 +8076,16 @@
       }
     },
     "functions/error": {
+      "functions/src/error/ArgumentsError.ts": {
+        "description": "Custom error type for wrong number of arguments",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["createArgumentsError", "ArgumentsError"],
+        "classes": ["ArgumentsError"],
+        "functions": ["createArgumentsError"]
+      },
       "functions/src/error/DimensionError.ts": {
         "description": "Create a range error with the message:",
         "externalDependencies": [],
@@ -17219,6 +17899,21 @@
           "isPlainObject"
         ]
       },
+      "functions/src/utils/emitter.ts": {
+        "description": "Extend given object with emitter functions `on`, `off`, `once`, `emit`",
+        "externalDependencies": [
+          {
+            "package": "tiny-emitter",
+            "imports": ["Emitter"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["mixin"],
+        "interfaces": ["EmitterMixin"],
+        "functions": ["mixin"]
+      },
       "functions/src/utils/factory.ts": {
         "description": "Type for a factory function that creates instances",
         "externalDependencies": [],
@@ -17720,9 +18415,68 @@
         "description": "Type definitions for Math.js AST nodes",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/index.js",
+            "imports": [
+              "MathNode",
+              "AccessorNode",
+              "ArrayNode",
+              "AssignmentNode",
+              "BlockNode",
+              "ConditionalNode",
+              "ConstantNode",
+              "FunctionAssignmentNode",
+              "FunctionNode",
+              "IndexNode",
+              "ObjectNode",
+              "OperatorNode",
+              "ParenthesisNode",
+              "RangeNode",
+              "RelationalNode",
+              "SymbolNode"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": []
+        "exports": [
+          "MathNode",
+          "AccessorNode",
+          "ArrayNode",
+          "AssignmentNode",
+          "BlockNode",
+          "ConditionalNode",
+          "ConstantNode",
+          "FunctionAssignmentNode",
+          "FunctionNode",
+          "IndexNode",
+          "ObjectNode",
+          "OperatorNode",
+          "ParenthesisNode",
+          "RangeNode",
+          "RelationalNode",
+          "SymbolNode"
+        ],
+        "reExported": [
+          "MathNode",
+          "AccessorNode",
+          "ArrayNode",
+          "AssignmentNode",
+          "BlockNode",
+          "ConditionalNode",
+          "ConstantNode",
+          "FunctionAssignmentNode",
+          "FunctionNode",
+          "IndexNode",
+          "ObjectNode",
+          "OperatorNode",
+          "ParenthesisNode",
+          "RangeNode",
+          "RelationalNode",
+          "SymbolNode"
+        ]
       },
       "functions/src/utils/noop.ts": {
         "description": "noop module",
@@ -17769,6 +18523,17 @@
               "toPrecision"
             ],
             "reExport": true
+          },
+          {
+            "file": "@danielsimonjr/mathts-core/internal",
+            "imports": [
+              "FormatOptions",
+              "NormalizedFormatOptions",
+              "NumberTypeConfig",
+              "SplitValue"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -17798,7 +18563,11 @@
           "toEngineering",
           "toExponential",
           "toFixed",
-          "toPrecision"
+          "toPrecision",
+          "FormatOptions",
+          "NormalizedFormatOptions",
+          "NumberTypeConfig",
+          "SplitValue"
         ],
         "reExported": [
           "acosh",
@@ -17826,7 +18595,11 @@
           "toEngineering",
           "toExponential",
           "toFixed",
-          "toPrecision"
+          "toPrecision",
+          "FormatOptions",
+          "NormalizedFormatOptions",
+          "NumberTypeConfig",
+          "SplitValue"
         ]
       },
       "functions/src/utils/numeric.ts": {
@@ -18527,7 +19300,7 @@
         "functions": ["compile"]
       },
       "expression/src/compiler/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 3 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -18535,11 +19308,17 @@
             "file": "./compile.js",
             "imports": ["compile"],
             "reExport": true
+          },
+          {
+            "file": "./compile.js",
+            "imports": ["CompiledExpression", "Scope"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["compile"],
-        "reExported": ["compile"]
+        "exports": ["compile", "CompiledExpression", "Scope"],
+        "reExported": ["compile", "CompiledExpression", "Scope"]
       }
     },
     "expression/embeddedDocs": {
@@ -23326,6 +24105,17 @@
               "toPrecision"
             ],
             "reExport": true
+          },
+          {
+            "file": "@danielsimonjr/mathts-core/internal",
+            "imports": [
+              "FormatOptions",
+              "NormalizedFormatOptions",
+              "NumberTypeConfig",
+              "SplitValue"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -23354,7 +24144,11 @@
           "toEngineering",
           "toExponential",
           "toFixed",
-          "toPrecision"
+          "toPrecision",
+          "FormatOptions",
+          "NormalizedFormatOptions",
+          "NumberTypeConfig",
+          "SplitValue"
         ],
         "reExported": [
           "acosh",
@@ -23381,7 +24175,11 @@
           "toEngineering",
           "toExponential",
           "toFixed",
-          "toPrecision"
+          "toPrecision",
+          "FormatOptions",
+          "NormalizedFormatOptions",
+          "NumberTypeConfig",
+          "SplitValue"
         ]
       },
       "expression/src/utils/object.ts": {
@@ -23621,6 +24419,11 @@
               "BEST_PREFIXES",
               "getPrefix"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Dimensions", "UnitDef"]
           }
         ],
         "exports": [
@@ -23638,7 +24441,9 @@
           "getUnitDef",
           "SI_PREFIXES",
           "BEST_PREFIXES",
-          "getPrefix"
+          "getPrefix",
+          "Dimensions",
+          "UnitDef"
         ],
         "reExported": [
           "Unit",
@@ -23655,7 +24460,9 @@
           "getUnitDef",
           "SI_PREFIXES",
           "BEST_PREFIXES",
-          "getPrefix"
+          "getPrefix",
+          "Dimensions",
+          "UnitDef"
         ]
       }
     },
@@ -23695,6 +24502,11 @@
               "BIGNUMBER_LN2",
               "BIGNUMBER_LN10"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["IComplex", "IFraction", "IBigNumber", "BigNumberConfig", "RoundingMode"]
           }
         ],
         "exports": [
@@ -23721,7 +24533,12 @@
           "BIGNUMBER_PI",
           "BIGNUMBER_E",
           "BIGNUMBER_LN2",
-          "BIGNUMBER_LN10"
+          "BIGNUMBER_LN10",
+          "IComplex",
+          "IFraction",
+          "IBigNumber",
+          "BigNumberConfig",
+          "RoundingMode"
         ],
         "reExported": [
           "Complex",
@@ -23747,7 +24564,12 @@
           "BIGNUMBER_PI",
           "BIGNUMBER_E",
           "BIGNUMBER_LN2",
-          "BIGNUMBER_LN10"
+          "BIGNUMBER_LN10",
+          "IComplex",
+          "IFraction",
+          "IBigNumber",
+          "BigNumberConfig",
+          "RoundingMode"
         ]
       }
     },
@@ -23836,10 +24658,27 @@
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
             "imports": ["compile", "createEvaluate", "compileExpression"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["CompiledExpression", "Scope"]
           }
         ],
-        "exports": ["compile", "createEvaluate", "compileExpression"],
-        "reExported": ["compile", "createEvaluate", "compileExpression"]
+        "exports": [
+          "compile",
+          "createEvaluate",
+          "compileExpression",
+          "CompiledExpression",
+          "Scope"
+        ],
+        "reExported": [
+          "compile",
+          "createEvaluate",
+          "compileExpression",
+          "CompiledExpression",
+          "Scope"
+        ]
       }
     },
     "linalg": {
@@ -23876,6 +24715,26 @@
               "matrixSqrtm",
               "matrixSchur"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": [
+              "EigResult",
+              "EigOptions",
+              "SVDResult",
+              "SVDOptions",
+              "PinvOptions",
+              "QRResult",
+              "QROptions",
+              "LUResult",
+              "CholeskyResult",
+              "ExpmOptions",
+              "LogmOptions",
+              "SqrtmOptions",
+              "SchurResult",
+              "SchurOptions"
+            ]
           }
         ],
         "exports": [
@@ -23900,7 +24759,21 @@
           "matrixExpm",
           "matrixLogm",
           "matrixSqrtm",
-          "matrixSchur"
+          "matrixSchur",
+          "EigResult",
+          "EigOptions",
+          "SVDResult",
+          "SVDOptions",
+          "PinvOptions",
+          "QRResult",
+          "QROptions",
+          "LUResult",
+          "CholeskyResult",
+          "ExpmOptions",
+          "LogmOptions",
+          "SqrtmOptions",
+          "SchurResult",
+          "SchurOptions"
         ],
         "reExported": [
           "eig",
@@ -23924,7 +24797,21 @@
           "matrixExpm",
           "matrixLogm",
           "matrixSqrtm",
-          "matrixSchur"
+          "matrixSchur",
+          "EigResult",
+          "EigOptions",
+          "SVDResult",
+          "SVDOptions",
+          "PinvOptions",
+          "QRResult",
+          "QROptions",
+          "LUResult",
+          "CholeskyResult",
+          "ExpmOptions",
+          "LogmOptions",
+          "SqrtmOptions",
+          "SchurResult",
+          "SchurOptions"
         ]
       }
     },
@@ -24519,6 +25406,38 @@
               "DEFAULT_THRESHOLDS"
             ],
             "reExport": true
+          },
+          {
+            "file": "./ComputePool.js",
+            "imports": ["ComputePoolConfig", "ParallelResult", "OpName", "OpThreshold"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./operations/index.js",
+            "imports": ["MatmulOptions", "ElementwiseOptions", "ReduceOptions", "MapOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ops/bitwise.js",
+            "imports": ["BitwiseBinaryOp"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./strategies/index.js",
+            "imports": [
+              "ChunkOptions",
+              "ChunkResult",
+              "ChunkInfo",
+              "ThresholdConfig",
+              "OperationCategory",
+              "ExecutionMode",
+              "DispatchResult"
+            ],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24589,7 +25508,23 @@
           "shouldParallelize",
           "dispatch",
           "calculateChunks",
-          "DEFAULT_THRESHOLDS"
+          "DEFAULT_THRESHOLDS",
+          "ComputePoolConfig",
+          "ParallelResult",
+          "OpName",
+          "OpThreshold",
+          "MatmulOptions",
+          "ElementwiseOptions",
+          "ReduceOptions",
+          "MapOptions",
+          "BitwiseBinaryOp",
+          "ChunkOptions",
+          "ChunkResult",
+          "ChunkInfo",
+          "ThresholdConfig",
+          "OperationCategory",
+          "ExecutionMode",
+          "DispatchResult"
         ],
         "reExported": [
           "ComputePool",
@@ -24658,7 +25593,23 @@
           "shouldParallelize",
           "dispatch",
           "calculateChunks",
-          "DEFAULT_THRESHOLDS"
+          "DEFAULT_THRESHOLDS",
+          "ComputePoolConfig",
+          "ParallelResult",
+          "OpName",
+          "OpThreshold",
+          "MatmulOptions",
+          "ElementwiseOptions",
+          "ReduceOptions",
+          "MapOptions",
+          "BitwiseBinaryOp",
+          "ChunkOptions",
+          "ChunkResult",
+          "ChunkInfo",
+          "ThresholdConfig",
+          "OperationCategory",
+          "ExecutionMode",
+          "DispatchResult"
         ],
         "interfaces": ["PoolOptions", "ExecOptions", "PoolStats"]
       }
@@ -25376,6 +26327,29 @@
             "file": "./rpc",
             "imports": ["handleRequest"],
             "reExport": true
+          },
+          {
+            "file": "./types",
+            "imports": [
+              "Workbook",
+              "Cell",
+              "CellType",
+              "ExecutionMode",
+              "WorkbookMetadata",
+              "RuntimeConfig",
+              "ParseResult",
+              "WorkbookEvent",
+              "CellResult",
+              "RunResult"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./edit",
+            "imports": ["CellPosition", "RemoveResult"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -25402,7 +26376,19 @@
           "SCHEMA_VERSION",
           "VERSION",
           "Session",
-          "handleRequest"
+          "handleRequest",
+          "Workbook",
+          "Cell",
+          "CellType",
+          "ExecutionMode",
+          "WorkbookMetadata",
+          "RuntimeConfig",
+          "ParseResult",
+          "WorkbookEvent",
+          "CellResult",
+          "RunResult",
+          "CellPosition",
+          "RemoveResult"
         ],
         "reExported": [
           "parseWorkbook",
@@ -25427,7 +26413,19 @@
           "SCHEMA_VERSION",
           "VERSION",
           "Session",
-          "handleRequest"
+          "handleRequest",
+          "Workbook",
+          "Cell",
+          "CellType",
+          "ExecutionMode",
+          "WorkbookMetadata",
+          "RuntimeConfig",
+          "ParseResult",
+          "WorkbookEvent",
+          "CellResult",
+          "RunResult",
+          "CellPosition",
+          "RemoveResult"
         ]
       },
       "workbook/src/introspect.ts": {
@@ -28169,11 +29167,18 @@
       },
       {
         "name": "Functions/core",
-        "files": ["functions/src/core/config.ts", "functions/src/core/function/typed.ts"]
+        "files": [
+          "functions/src/core/config.ts",
+          "functions/src/core/create.ts",
+          "functions/src/core/function/config.ts",
+          "functions/src/core/function/import.ts",
+          "functions/src/core/function/typed.ts"
+        ]
       },
       {
         "name": "Functions/error",
         "files": [
+          "functions/src/error/ArgumentsError.ts",
           "functions/src/error/DimensionError.ts",
           "functions/src/error/IndexError.ts",
           "functions/src/error/MathjsError.ts"
@@ -28486,6 +29491,7 @@
           "functions/src/utils/collection.ts",
           "functions/src/utils/complex.ts",
           "functions/src/utils/customs.ts",
+          "functions/src/utils/emitter.ts",
           "functions/src/utils/factory.ts",
           "functions/src/utils/function.ts",
           "functions/src/utils/hasNumericValue.ts",
@@ -29003,21 +30009,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 845,
+    "totalTypeScriptFiles": 850,
     "totalModules": 70,
-    "totalLinesOfCode": 154711,
-    "totalExports": 4093,
-    "totalClasses": 50,
-    "totalInterfaces": 351,
-    "totalFunctions": 1400,
+    "totalLinesOfCode": 155860,
+    "totalExports": 4281,
+    "totalClasses": 51,
+    "totalInterfaces": 356,
+    "totalFunctions": 1405,
     "totalTypeGuards": 130,
     "totalEnums": 0,
-    "totalConstants": 1394,
-    "totalReExports": 1282,
-    "totalTypeOnlyImports": 431,
+    "totalConstants": 1397,
+    "totalReExports": 1461,
+    "totalTypeOnlyImports": 486,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 452
+    "unusedExportsCount": 371
   }
 }

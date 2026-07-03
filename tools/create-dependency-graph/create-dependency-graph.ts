@@ -912,6 +912,36 @@ function parseFile(filePath: string): ParsedFile {
     result.exports.reExported.push(...exports);
   }
 
+  // Re-exports: export type { foo } from (named type-only re-exports). The plain
+  // named regex above only matches `export {` (not `export type {`), so without
+  // this every re-exported type/interface looked unused — the bulk of the
+  // unused-analysis false positives.
+  const reExportTypeNamedRegex = /export\s+type\s*{\s*([^}]+)\s*}\s*from\s+['"]([^'"]+)['"]/g;
+  while ((match = reExportTypeNamedRegex.exec(code)) !== null) {
+    const exports = match[1]
+      .split(',')
+      .map((s) => cleanExportName(s.split(' as ')[0]))
+      .filter(Boolean);
+    const reSource = match[2];
+    const reWs = workspaceMap.get(reSource);
+    if (reWs) {
+      result.workspaceDependencies.push({
+        package: reWs.name,
+        directory: reWs.directory,
+        imports: exports,
+      });
+    } else {
+      result.internalDependencies.push({
+        file: reSource,
+        imports: exports,
+        reExport: true,
+        typeOnly: true,
+      });
+    }
+    result.exports.named.push(...exports);
+    result.exports.reExported.push(...exports);
+  }
+
   // Re-exports: export type * from (type-only re-exports)
   const reExportTypeAllRegex = /export\s+type\s+\*\s+from\s+['"]([^'"]+)['"]/g;
   while ((match = reExportTypeAllRegex.exec(code)) !== null) {
@@ -1359,6 +1389,36 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
     }
   }
 
+  // Public-API surface: any export surfaced through a package `src/index.ts` —
+  // directly, or re-exported into one via `export … from` (transitively) — is the
+  // package's external surface, consumed by downstream packages / end users, not
+  // internal files. Flagging it as "unused" is a false positive (the bulk of the
+  // list). Collect it and exclude it below.
+  const byPath = new Map(files.map((f) => [f.path, f] as const));
+  const publicWildcardFiles = new Set<string>(); // ALL exports public (reached by `export *`)
+  const publicNamed = new Set<string>(); // `${path}::${name}` for named public exports
+
+  const markPublic = (file: ParsedFile, seen: Set<string>): void => {
+    if (seen.has(file.path)) return;
+    seen.add(file.path);
+    publicWildcardFiles.add(file.path); // the file's own exports are public
+    for (const dep of file.internalDependencies) {
+      if (!dep.reExport) continue;
+      const target = byPath.get(resolvePath(file.path, dep.file));
+      if (!target) continue;
+      if (dep.imports.includes('*')) {
+        markPublic(target, seen); // export * → every export of the source is public
+      } else {
+        for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
+      }
+    }
+  };
+  for (const file of files) {
+    if (file.path === 'src/index.ts' || file.path.endsWith('/src/index.ts')) {
+      markPublic(file, new Set());
+    }
+  }
+
   // Find unused files (excluding entry point and index files which are re-export hubs)
   const unusedFiles: string[] = [];
   for (const file of files) {
@@ -1372,6 +1432,9 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
   // Find unused exports
   const unusedExports: UnusedExport[] = [];
   for (const file of files) {
+    // Package public-API hub: all its exports are the external surface.
+    if (publicWildcardFiles.has(file.path)) continue;
+
     const usedSymbols = importedSymbols.get(file.path);
     const isWildcardImported = usedSymbols?.has('*');
 
@@ -1379,34 +1442,38 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
     // or if it's wildcard imported (all exports considered used)
     if (!usedSymbols || isWildcardImported) continue;
 
+    // A named export that is re-exported into a package index is public API.
+    const isPublic = (name: string): boolean =>
+      usedSymbols.has(name) || publicNamed.has(`${file.path}::${name}`);
+
     // Check each export
     for (const fn of file.exports.functions) {
-      if (!usedSymbols.has(fn)) {
+      if (!isPublic(fn)) {
         unusedExports.push({ file: file.path, name: fn, type: 'function' });
       }
     }
     for (const cls of file.exports.classes) {
-      if (!usedSymbols.has(cls)) {
+      if (!isPublic(cls)) {
         unusedExports.push({ file: file.path, name: cls, type: 'class' });
       }
     }
     for (const iface of file.exports.interfaces) {
-      if (!usedSymbols.has(iface)) {
+      if (!isPublic(iface)) {
         unusedExports.push({ file: file.path, name: iface, type: 'interface' });
       }
     }
     for (const type of file.exports.types) {
-      if (!usedSymbols.has(type) && !file.exports.interfaces.includes(type)) {
+      if (!isPublic(type) && !file.exports.interfaces.includes(type)) {
         unusedExports.push({ file: file.path, name: type, type: 'type' });
       }
     }
     for (const en of file.exports.enums) {
-      if (!usedSymbols.has(en)) {
+      if (!isPublic(en)) {
         unusedExports.push({ file: file.path, name: en, type: 'enum' });
       }
     }
     for (const constant of file.exports.constants) {
-      if (!usedSymbols.has(constant)) {
+      if (!isPublic(constant)) {
         unusedExports.push({ file: file.path, name: constant, type: 'constant' });
       }
     }

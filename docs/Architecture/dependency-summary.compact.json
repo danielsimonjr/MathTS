@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-03", "f": 845, "e": 4093, "re": 1282 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-03", "f": 850, "e": 4281, "re": 1461 },
   "s": {
-    "loc": 154711,
-    "cls": 50,
-    "int": 351,
-    "fn": 1400,
+    "loc": 155860,
+    "cls": 51,
+    "int": 356,
+    "fn": 1405,
     "tg": 130,
     "en": 0,
-    "co": 1394,
-    "toi": 431
+    "co": 1397,
+    "toi": 486
   },
   "c": { "rt": 0, "to": 2, "rtp": [] },
   "mod": {
@@ -106,7 +106,11 @@
         "math",
         "createFactory",
         "createTypedFunction",
-        "FunctionRegistry"
+        "FunctionRegistry",
+        "MathTSConfig",
+        "FactoryFunction",
+        "FactoryDependencies",
+        "FactoryImport"
       ],
       "cls": ["FunctionRegistry"],
       "int": ["MathTSConfig", "FactoryFunction", "FactoryDependencies"]
@@ -397,7 +401,9 @@
         "jacobian",
         "Tape",
         "TapedTensor",
-        "reverseGrad"
+        "reverseGrad",
+        "ScalarFn",
+        "NumericInput"
       ],
       "cls": ["DualTensor", "Tape", "TapedTensor"]
     },
@@ -516,14 +522,30 @@
     },
     "functions/complex": { "f": 4, "exp": ["createArg", "createConj", "createIm", "createRe"] },
     "functions/core": {
-      "f": 2,
-      "exp": ["DEFAULT_CONFIG", "createTyped"],
-      "int": ["ConfigOptions", "TypedFunction"]
+      "f": 5,
+      "exp": [
+        "DEFAULT_CONFIG",
+        "create",
+        "MATRIX_OPTIONS",
+        "NUMBER_OPTIONS",
+        "configFactory",
+        "path",
+        "importFactory",
+        "createTyped"
+      ],
+      "int": ["ConfigOptions", "MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
     },
     "functions/error": {
-      "f": 3,
-      "exp": ["DimensionError", "createIndexError", "IndexError", "MathjsError"],
-      "cls": ["DimensionError", "IndexError", "MathjsError"]
+      "f": 4,
+      "exp": [
+        "createArgumentsError",
+        "ArgumentsError",
+        "DimensionError",
+        "createIndexError",
+        "IndexError",
+        "MathjsError"
+      ],
+      "cls": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"]
     },
     "functions/expression": {
       "f": 1,
@@ -805,7 +827,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 38,
+      "f": 39,
       "exp": [
         "arraySize",
         "validate",
@@ -831,6 +853,7 @@
       "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
         "IdentifiedValue",
+        "EmitterMixin",
         "FactoryFunction",
         "LegacyFactory",
         "FactoryMeta",
@@ -838,8 +861,7 @@
         "MemoizedFunction",
         "BigNumber",
         "Complex",
-        "Fraction",
-        "Unit"
+        "Fraction"
       ]
     },
     "functions/wasm": {
@@ -869,7 +891,11 @@
       "cls": ["WasmLoader"],
       "int": ["RawWasm", "WasmManifest", "WasmModule", "LoadingMetrics"]
     },
-    "expression/compiler": { "f": 2, "exp": ["compile"], "int": ["Scope", "CompiledExpression"] },
+    "expression/compiler": {
+      "f": 2,
+      "exp": ["compile", "CompiledExpression", "Scope"],
+      "int": ["Scope", "CompiledExpression"]
+    },
     "expression/embeddedDocs": {
       "f": 254,
       "exp": [
@@ -1037,7 +1063,9 @@
         "getUnitDef",
         "SI_PREFIXES",
         "BEST_PREFIXES",
-        "getPrefix"
+        "getPrefix",
+        "Dimensions",
+        "UnitDef"
       ]
     },
     "numbers": {
@@ -1086,7 +1114,10 @@
         "createSymbolNode"
       ]
     },
-    "evaluator": { "f": 1, "exp": ["compile", "createEvaluate", "compileExpression"] },
+    "evaluator": {
+      "f": 1,
+      "exp": ["compile", "createEvaluate", "compileExpression", "CompiledExpression", "Scope"]
+    },
     "linalg": {
       "f": 1,
       "exp": [
@@ -1432,20 +1463,20 @@
     }
   },
   "hp": [
-    { "p": "utils/factory.ts", "i": 2, "o": 262 },
+    { "p": "utils/factory.ts", "i": 2, "o": 264 },
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 253, "o": 1 },
     { "p": "factories/index.ts", "i": 245, "o": 8 },
-    { "p": "function/typed.ts", "i": 3, "o": 199 },
-    { "p": "utils/is.ts", "i": 0, "o": 64 },
+    { "p": "function/typed.ts", "i": 3, "o": 202 },
+    { "p": "utils/is.ts", "i": 0, "o": 66 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
+    { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
-    { "p": "core/config.ts", "i": 0, "o": 52 },
+    { "p": "utils/number.ts", "i": 2, "o": 48 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/number.ts", "i": 1, "o": 48 },
     { "p": "wasm/WasmLoader.ts", "i": 2, "o": 45 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "utils/matrixAlgorithmSuite.ts", "i": 6, "o": 27 },
-    { "p": "src/types.ts", "i": 0, "o": 30 }
+    { "p": "src/index.ts", "i": 36, "o": 0 },
+    { "p": "src/types.ts", "i": 4, "o": 30 }
   ]
 }

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tooling (2026-07-02) — dependency-graph: fewer unused-export false positives (452 → 371)
+
+Two fixes in `tools/create-dependency-graph`:
+
+- The parser **never matched `export type { X } from './b'`** — the named
+  re-export regex only matches `export {`, not `export type {` — so every
+  re-exported type/interface looked unused (the bulk of the false positives).
+  Added a dedicated handler.
+- `detectUnused` now treats a package's **public-API surface** as used: exports
+  of a `src/index.ts`, plus everything re-exported into one via
+  `export * from` / `export { … } from` (transitively), are the external surface
+  consumed by downstream packages / end users, not internal dead code.
+
+`unused-analysis.md` drops from **452 → 371**; the remainder is per-symbol triage
+(genuine deletion candidates + public-API type contracts not reached by an index
+re-export).
+
 ### Added (2026-07-02) — matrix support for the public typed `norm`
 
 The public `norm` (typed) had no matrix path: `norm(matrix, 2)` returned `null`

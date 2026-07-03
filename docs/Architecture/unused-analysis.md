@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 452
+- **Potentially unused exports**: 371
 
 ## Potentially Unused Files
 
@@ -19,73 +19,12 @@ These exports are not imported by any other file in the codebase:
 
 - `fftBitReverse` (function)
 
-### `packages/workerpool/src/index.ts`
-
-- `canUseWasm` (function)
-- `canUseSharedMemory` (function)
-- `transferFloat64` (function)
-- `transferArrayBuffer` (function)
-- `transferTypedArray` (function)
-- `createSharedFloat64Array` (function)
-- `createSharedBuffer` (function)
-- `isSharedBuffer` (function)
-- `getCapabilities` (function)
-- `initWorkerWasm` (function)
-- `isWorkerWasmAvailable` (function)
-- `getWasmFeatures` (function)
-- `initializePool` (function)
-- `terminatePool` (function)
-- `getPoolStats` (function)
-- `WorkerpoolCapabilities` (interface)
-- `WasmFeatureStatus` (interface)
-- `PoolMetrics` (interface)
-- `EnhancedPoolStats` (interface)
-- `DEFAULT_WORKER_CONFIG` (constant)
-- `mathWorkerPool` (constant)
-
-### `core/src/factory/factory.ts`
-
-- `MathTSConfig` (interface)
-- `FactoryFunction` (interface)
-- `FactoryDependencies` (interface)
-- `FactoryImport` (type)
-
-### `core/src/index.ts`
-
-- `VERSION` (constant)
-
 ### `core/src/typed/mathts-typed.ts`
 
 - `MathTSTyped` (interface)
-- `TypeDef` (interface)
-- `ConversionDef` (interface)
 - `MathTSTypeDef` (interface)
 - `SignatureImpl` (type)
 - `SignatureRecord` (type)
-
-### `core/src/types/bignumber.ts`
-
-- `BigNumberConfig` (interface)
-- `RoundingMode` (type)
-
-### `core/src/types/dual-rules.ts`
-
-- `DualUnaryRuleName` (type)
-
-### `core/src/types/interfaces.ts`
-
-- `MatrixBackend` (interface)
-- `IMatrix` (interface)
-- `IBigNumber` (interface)
-- `MatrixDimensions` (interface)
-- `BackendType` (type)
-- `NumericType` (type)
-
-### `matrix/src/backends/wasm/fft-wasm.ts`
-
-- `FFTResult` (interface)
-- `FFTConfig` (interface)
-- `FFTBackend` (type)
 
 ### `matrix/src/backends/WasmLoader.ts`
 
@@ -135,89 +74,6 @@ These exports are not imported by any other file in the codebase:
 - `max` (function)
 - `norm` (function)
 - `trace` (function)
-
-### `matrix/src/types/Matrix.ts`
-
-- `MatrixDimensions` (interface)
-- `MatrixIndex` (interface)
-- `MatrixType` (type)
-
-### `tensor/src/contraction-sequence.ts`
-
-- `ContractNetworkOpts` (interface)
-- `ContractNetworkResult` (interface)
-
-### `tensor/src/named-index.ts`
-
-- `IndexOpts` (interface)
-
-### `tensor/src/operations/cholesky.ts`
-
-- `TensorCholeskyOpts` (interface)
-- `TensorCholeskyResult` (interface)
-
-### `tensor/src/operations/eig.ts`
-
-- `TensorEigOpts` (interface)
-- `TensorEigResult` (interface)
-
-### `tensor/src/operations/kron.ts`
-
-- `TensorKronOpts` (interface)
-
-### `tensor/src/operations/lu.ts`
-
-- `TensorLUResult` (interface)
-- `TensorLUOpts` (interface)
-
-### `tensor/src/operations/pad.ts`
-
-- `PadOptions` (interface)
-
-### `tensor/src/operations/pinv.ts`
-
-- `TensorPinvOpts` (interface)
-
-### `tensor/src/operations/qr.ts`
-
-- `TensorQrOpts` (interface)
-- `TensorQrResult` (interface)
-
-### `tensor/src/operations/random.ts`
-
-- `RandomTensorOpts` (interface)
-
-### `tensor/src/operations/scatter.ts`
-
-- `ScatterOpts` (interface)
-
-### `tensor/src/operations/slice.ts`
-
-- `SliceRange` (interface)
-
-### `tensor/src/operations/solve.ts`
-
-- `TensorSolveOpts` (interface)
-- `TensorSolveResult` (interface)
-
-### `tensor/src/operations/stack.ts`
-
-- `StackOpts` (interface)
-
-### `tensor/src/operations/svd.ts`
-
-- `TensorSvdOpts` (interface)
-- `TensorSvdResult` (interface)
-
-### `tensor/src/Tensor.ts`
-
-- `EinsumSpec` (interface)
-- `NestedArray` (type)
-
-### `autograd/src/grad.ts`
-
-- `ScalarFn` (type)
-- `NumericInput` (type)
 
 ### `functions/src/algebra/simplify/util.ts`
 
@@ -287,9 +143,26 @@ These exports are not imported by any other file in the codebase:
 - `name` (constant)
 - `dependencies` (constant)
 
-### `functions/src/clustering-extra.ts`
+### `functions/src/core/create.ts`
 
-- `KMeansResult` (interface)
+- `create` (function)
+- `ImportOptions` (interface)
+- `FactoriesInput` (type)
+
+### `functions/src/core/function/config.ts`
+
+- `ConfigFunction` (interface)
+- `MatrixOption` (type)
+- `NumberOption` (type)
+- `ConfigOptions` (type)
+- `EmitFunction` (type)
+- `MATRIX_OPTIONS` (constant)
+- `NUMBER_OPTIONS` (constant)
+
+### `functions/src/core/function/import.ts`
+
+- `ImportOptions` (interface)
+- `path` (constant)
 
 ### `functions/src/core/function/typed.ts`
 
@@ -298,6 +171,10 @@ These exports are not imported by any other file in the codebase:
 - `TypeConversion` (type)
 - `TypeDefinition` (type)
 - `createTyped` (constant)
+
+### `functions/src/error/ArgumentsError.ts`
+
+- `createArgumentsError` (function)
 
 ### `functions/src/error/IndexError.ts`
 
@@ -309,19 +186,6 @@ These exports are not imported by any other file in the codebase:
 - `getAssociativity` (function)
 - `isAssociativeWith` (function)
 - `properties` (constant)
-
-### `functions/src/grad-forward.ts`
-
-- `DualFn` (type)
-
-### `functions/src/hypothesis-extra.ts`
-
-- `FTestResult` (interface)
-- `JarqueBeraResult` (interface)
-- `KruskalResult` (interface)
-- `WilcoxonResult` (interface)
-- `FisherExactResult` (interface)
-- `TukeyComparison` (interface)
 
 ### `functions/src/matrix/expm.ts`
 
@@ -345,18 +209,9 @@ These exports are not imported by any other file in the codebase:
 - `Matrix` (interface)
 - `Config` (interface)
 
-### `functions/src/optimization-extra.ts`
-
-- `OptimizeResult` (interface)
-- `LMResult` (interface)
-
 ### `functions/src/probability/random.ts`
 
 - `createRandomNumber` (constant)
-
-### `functions/src/regression-extra.ts`
-
-- `LinregressResult` (interface)
 
 ### `functions/src/relational/compare.ts`
 
@@ -497,17 +352,17 @@ These exports are not imported by any other file in the codebase:
 - `toExponential` (function)
 - `toFixed` (function)
 
+### `functions/src/utils/emitter.ts`
+
+- `mixin` (function)
+- `EmitterMixin` (interface)
+
 ### `functions/src/utils/factory.ts`
 
 - `sortFactories` (function)
 - `create` (function)
-- `isFactory` (function)
 - `assertDependencies` (function)
 - `isOptionalDependency` (function)
-- `stripOptionalNotation` (function)
-- `FactoryFunction` (interface)
-- `LegacyFactory` (interface)
-- `FactoryMeta` (interface)
 - `DependencyName` (type)
 - `CreateFunction` (type)
 
@@ -519,7 +374,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `functions/src/utils/is.ts`
 
-- `isPartitionedMap` (function)
 - `BigNumber` (interface)
 - `Fraction` (interface)
 - `Unit` (interface)
@@ -551,7 +405,6 @@ These exports are not imported by any other file in the codebase:
 
 - `toObject` (function)
 - `assign` (function)
-- `isObjectWrappingMap` (function)
 - `ObjectWrappingMap` (class)
 - `PartitionedMap` (class)
 
@@ -773,19 +626,6 @@ These exports are not imported by any other file in the codebase:
 ### `parallel/src/ComputePool.ts`
 
 - `tensordotChunkKernel` (function)
-- `ComputePoolConfig` (interface)
-- `OpName` (type)
-- `OpThreshold` (type)
-
-### `parallel/src/index.ts`
-
-- `PoolOptions` (interface)
-- `ExecOptions` (interface)
-- `PoolStats` (interface)
-
-### `parallel/src/ops/bitwise.ts`
-
-- `BitwiseBinaryOp` (type)
 
 ### `parallel/src/strategies/chunk.ts`
 
@@ -794,10 +634,6 @@ These exports are not imported by any other file in the codebase:
 ### `workbook/src/doc.ts`
 
 - `DescribeDoc` (interface)
-
-### `workbook/src/edit.ts`
-
-- `RemoveResult` (interface)
 
 ### `workbook/src/parser.ts`
 
@@ -813,10 +649,6 @@ These exports are not imported by any other file in the codebase:
 ### `workbook/src/session.ts`
 
 - `WorkbookEventLite` (interface)
-
-### `workbook/src/types.ts`
-
-- `ExecutionMode` (type)
 
 ### `assembly/src/types/complex.ts`
 

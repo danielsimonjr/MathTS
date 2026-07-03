@@ -386,9 +386,14 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
 - ⬜ **[LOW — structural smell] 2 type-only import cycles in matrix.** `DenseMatrix.ts ↔ dense/arithmetic.ts` and
   `DenseMatrix.ts ↔ dense/reduction.ts`. Safe (type-only, erased at runtime; 0 runtime cycles) but a smell — could
   extract the shared type interface to break them. Low priority.
-- ℹ️ **[known, tracked elsewhere]** unused-analysis still 452 (mostly re-export false positives → DGT fix is task #8;
-  ~30 real DELETE candidates → WS-3 Phase-2b, per `EXPORT_TRIAGE.md`); wasm `js-fallback` broken kernels (poly-fit/
-  Airy/argsort-rank) → gate **G2**. Not re-filed here.
+- ✅ **[task #8 — DONE 2026-07-02] DGT re-export false positives cut 452 → 371.** Two fixes in
+  `tools/create-dependency-graph`: (1) the parser **never matched `export type { X } from './b'`** (the named-
+  re-export regex only matches `export {`, not `export type {`), so every re-exported type/interface looked
+  unused — added a `reExportTypeNamedRegex` handler (−56); (2) `detectUnused` now treats a package's **public-API
+  surface** (exports of `src/index.ts`, plus everything re-exported into one via `export */export {…} from`,
+  transitively) as used, not dead (−25). Remaining **371** are per-symbol triage (WS-3 Phase-2b, `EXPORT_TRIAGE.md`,
+  ~30 real DELETE candidates + legit public-API type contracts not reached by an index re-export). wasm
+  `js-fallback` broken kernels (poly-fit/Airy/argsort-rank) → gate **G2**. Not re-filed here.
 
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
