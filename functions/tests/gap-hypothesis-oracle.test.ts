@@ -7,6 +7,7 @@ import {
   mannWhitneyTest,
   principalComponentAnalysis,
   kolmogorovSmirnovTest,
+  shapiroWilkTest,
 } from '../src/typed/hypothesis.js';
 
 /**
@@ -136,5 +137,35 @@ describe('kolmogorovSmirnovTest — external oracle (exact D statistic vs unifor
   it('sample [0.2,0.4,0.6,0.8] vs uniform: D = 0.2', async () => {
     const r = await kolmogorovSmirnovTest([0.2, 0.4, 0.6, 0.8], (x) => x);
     expectClose(r.statistic, 0.2, 1e-9);
+  });
+});
+
+describe('shapiroWilkTest — invariance + discrimination oracle', () => {
+  // The W statistic uses an approximation (Blom order-statistic coefficients) so
+  // it does not match SciPy's Royston AS-R94 to many digits — but it obeys exact,
+  // implementation-independent invariances (W subtracts the mean and divides by S²,
+  // so location cancels and scale cancels between the b² numerator and the S²
+  // denominator; the antisymmetric coefficients make it reflection-invariant).
+  const W = async (x: number[]): Promise<number> =>
+    ((await shapiroWilkTest(x)) as { statistic: number }).statistic;
+
+  it('scale + location invariant: W(x) = W(a·x + b) for a > 0', async () => {
+    const x = [2, 3, 5, 7, 11, 13, 17];
+    expectClose(await W(x), await W(x.map((v) => 3 * v + 10)), 1e-9);
+  });
+
+  it('reflection invariant: W(x) = W(−x)', async () => {
+    const x = [2, 3, 5, 7, 11, 13, 17];
+    expectClose(await W(x), await W(x.map((v) => -v)), 1e-9);
+  });
+
+  it('range (0, 1] and discriminates near-normal from a heavy outlier', async () => {
+    const linear = await W([1, 2, 3, 4, 5, 6, 7]); // ~evenly spaced ⇒ near-normal
+    const outlier = await W([1, 2, 3, 4, 5, 6, 100]); // one extreme value
+    expect(linear).toBeGreaterThan(0);
+    expect(linear).toBeLessThanOrEqual(1);
+    expect(linear).toBeGreaterThan(0.95); // near-linear ⇒ W close to 1
+    expect(outlier).toBeLessThan(0.6); // heavy departure ⇒ low W
+    expect(linear).toBeGreaterThan(outlier);
   });
 });

@@ -285,9 +285,13 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   - **Linalg (36/43):** `matrixSchur` (eigenvalues — **2 bugs found+fixed**), `lu`, `qr` (convention-free
     invariants). `schur-eigenvalue-oracle.test.ts` + `lu-qr-oracle.test.ts`.
   - Every pinned function was **already correct** (verification gap, not correctness gap) except `matrixSchur`.
-  - **Remaining:** `shapiroWilkTest` (Royston `W` — needs a scipy reference); 6 decompositions
-    (`hessenbergForm`, `polarDecomposition`, `qz`, `svdWasm`, svd-`pinv`, `lowRankApprox`, WASM `inv`);
-    the 75→66 SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal spectra, factory dist `.cdf`/`.quantile`).
+  - ✅ **`shapiroWilkTest`** — pinned 2026-07-02 without a scipy reference (its `W` uses Blom coefficients, not
+    Royston AS-R94, so it won't match scipy digit-for-digit). Oracle is the exact implementation-independent
+    invariances: scale+location invariance (`W(a·x+b)=W(x)`), reflection invariance (`W(−x)=W(x)`), range `(0,1]`,
+    and near-normal-vs-heavy-outlier discrimination. In `gap-hypothesis-oracle.test.ts` (3 cases).
+  - **Remaining:** 6 decompositions (`hessenbergForm`, `polarDecomposition`, `qz`, `svdWasm`, svd-`pinv`,
+    `lowRankApprox`, WASM `inv`); the SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal spectra, factory
+    dist `.cdf`/`.quantile`).
     ⬜ **G1** (add `fast-check`) unlocks WS-1 P3 property-based invariant tests.
 - 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
   452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
