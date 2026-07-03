@@ -366,11 +366,21 @@ Genuine issues found (verified, not report artifacts):
     `'DenseMatrix, DenseMatrix'` matmul signature that returns a boxed matrix (mathjs parity). Oracle-pinned:
     `lyap(diag(−1,−2), I) ⇒ diag(0.5, 0.25)` + `sylvester` defining-equation + `subset`/`index` regression pins in
     `functions/tests/gap-sylvester-lyap-oracle.test.ts`.
-  - 🐞 **[HIGH — new] `rationalize` BROKEN.** Smoke-only. `rationalize('(x+1)^2')` (1-arg, the basic form) throws
-    "Unexpected type … (expected: boolean or Object, actual: undefined, index 1)" — there is **no `string`
-    signature** (only `Node` / `Node,boolean` / `Node,Object` / `Node,Object,boolean`), yet its own docstring shows
-    `rationalize('sin(x)+y')`. The 2-arg `rationalize(expr, scope)` form throws inside `resolve` ("actual: any,
-    index 1"). Add `string` signatures (parse first) + fix the `resolve` scope typing.
+  - 🐞 **[HIGH — new, still open] `rationalize` BROKEN — two distinct typed-dispatch bugs (deeper than
+    sylvester/lyap; needs dedicated tracing).** Diagnosed 2026-07-02:
+    1. **1-arg string** — `rationalize('x+x+x')` throws "expected boolean or Object, actual undefined, index 1".
+       A global `string→Node` conversion exists (`simplify('x^1')` works via it) but does **not** reach
+       `rationalize`'s `Node:` signature — the string arg is instead pushed toward the 2-arg `Node,boolean|Object`
+       sigs. Likely needs explicit `string` signatures on `rationalize` (parse first), like other CAS fns.
+    2. **Object scope → resolve** — `rationalize(node, {y:1})` (and every internal `simplify(expr, rules, {}, opts)`
+       call rationalize makes) throws in `resolve` ("expected Object/null/undefined/Map, actual: **any**, index 1").
+       Reproduces standalone: `simplify(node, [], {}, opts)` throws the same, but `simplify(node, [], new Map(), opts)`
+       works. The `Object→Map` conversion is `removeConversion`-ed for simplify's dispatch (simplify.ts:346), so a
+       plain `{}` scope reaches `resolve` un-mapped and typed-function classifies it as "any". **A naive
+       `_simplify` scope-normalization (convert `{}`→Map before `resolve(expr,scope)` at simplify.ts:740) did NOT
+       fix it** (reverted) — the failing `resolve` is triggered on a different path (likely during typed-conversion
+       /`referTo` inside the dispatch, before `_simplify`'s body). Needs tracing of the actual `resolve` call site
+       - the simplify Object/Map conversion setup (lines ~315–350). Oracle ready in the pattern of the others.
   - ℹ️ `resolve` (13 test-file refs) — mostly `Promise.resolve` false matches; the CAS `resolve` is exercised via
     `rationalize`/`simplify` but has the scope-typing bug above.
 - ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
