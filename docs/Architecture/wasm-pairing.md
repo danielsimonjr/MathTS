@@ -1,6 +1,6 @@
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-07-02 (by tools/create-dependency-graph)
+**Generated**: 2026-07-03 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 

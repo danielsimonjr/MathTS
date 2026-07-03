@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-02) — element-wise Array/Matrix support for typed `add` / `multiply`
+
+The typed `add` had no 2-argument Array/Matrix signature, so `add([1,2],[3,4])`,
+`add(denseMatrix, denseMatrix)`, and `add(sparseMatrix, sparseMatrix)` all threw
+"Too few arguments … index 2" (the `'any,any,...any'` variadic doesn't match a
+2-arg call in this typed-function fork); only scalar `add` worked.
+
+- **`add`** now does **element-wise** addition over plain (nested / N-D) arrays
+  with scalar broadcast (`'Array, Array'`, `'Array, number'`, `'number, Array'`)
+  and over matrices (`'DenseMatrix, DenseMatrix'`, `'SparseMatrix, SparseMatrix'`,
+  matrix⊕scalar). Sparse⊕sparse stays sparse (CSC) so the CSparse algebra
+  factories (`csAmd`'s `C = A + Aᵀ`, etc.) get CSC output. Leaves fold through the
+  binary `add`, so Complex / Fraction / BigNumber elements work too.
+- **`multiply`** gains scalar × collection **element-wise scaling**
+  (`'Array, number'`, `'number, Array'`, matrix⊕scalar). Matrix × matrix stays
+  matrix multiplication (the existing `'Array, Array'` matmul, reached for Matrix
+  operands via the `Matrix~>Array` conversion) — element-wise product of two
+  matrices is `dotMultiply`, unchanged.
+
+Tests: `functions/tests/typed-arithmetic-elementwise.test.ts`. No regressions
+(functions 3126 pass / 41 skip; typecheck + eslint clean).
+
+### Fixed (2026-07-02) — factory `slu` (sparse LU) + `MathJSSparseMatrix` CSC aliasing
+
+The factory `slu` (sparse LU via the CSparse port) threw for every input. Two
+independent root causes, both fixed — completing the four-decomposition sweep
+(`lup`/`qr`/`schur`/`slu` all now oracle-pinned):
+
+- **order 1** was blocked by `csAmd`'s `add(A, Aᵀ)` (fixed by the element-wise
+  `add` above).
+- **both orders** then failed in `csLu`→`csSpsolve` with `divideScalar(x,
+  undefined)`: the CSparse port constructs the `L`/`U` `SparseMatrix` wrapping the
+  CSC arrays it keeps **mutating and reading back through the wrapper mid-build**,
+  but `MathJSSparseMatrix`'s constructor **deep-copied** those arrays
+  (`[...values]`), freezing an empty snapshot so `L._ptr[J]` / `L._values[p0]`
+  read `undefined`. The constructor now stores CSC arrays **by reference**
+  (mathjs `SparseMatrix` semantics the port depends on); dense-array construction
+  still allocates fresh via `_fromDenseArray`, and `clone()` still copies.
+
+Oracle: `slu` order 0 + order 1 pinned by `|∏diag U| = |det A|` in
+`functions/tests/gap-factory-decomposition-oracle.test.ts` (now 13 pass, 0 skip).
+
 ### Fixed (2026-07-02) — factory `schur`: routed to the oracle-pinned matrix-layer Schur
 
 The factory `schur` (`functions/src/algebra/decomposition/schur.ts`) was broken:

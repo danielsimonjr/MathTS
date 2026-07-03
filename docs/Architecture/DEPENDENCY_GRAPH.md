@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-02
+**Version**: 0.1.0 | **Last Updated**: 2026-07-03
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -7153,6 +7153,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
 
 **Exports:**
@@ -13077,7 +13078,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 845    |
 | Total Modules           | 70     |
-| Total Lines of Code     | 154419 |
+| Total Lines of Code     | 154515 |
 | Total Exports           | 4093   |
 | Total Re-exports        | 1282   |
 | Total Classes           | 50     |
@@ -13091,5 +13092,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-02
+_Last Updated_: 2026-07-03
 _Version_: 0.1.0

@@ -331,27 +331,23 @@ Genuine issues found (verified, not report artifacts):
     matrix-norm's reliance on `eigs(squaredX).values.toArray()` (with `squaredX = multiply(ctranspose(x), x)`)
     may still be broken when the factory `subtract`/`multiply` return non-`Matrix` results. Confirm whether the
     user-facing `norm` is affected or only the internal factory path.
-  - ⬜ **`slu` — STILL BROKEN; root-caused 2026-07-02 (two independent deep issues, oracle ready as
-    `describe.skip`).**
-    - **order 1** fails at `csAmd` → `_createTargetMatrix` → `add(a, transpose(a))` (C = A + A'). Root cause is
-      **broader than slu**: the typed `add` (`functions/src/typed/arithmetic.ts`) has **no 2-argument
-      Array/Matrix signature** — only scalar types + `Float64Array` (parallel) + an `'any, any, ...any'`
-      variadic that (in this typed-function fork) does **not** match a 2-arg call. Verified: `add([1,2],[3,4])`,
-      `add(denseM, denseM)`, and `add(sparseM, sparseM)` **all** throw `Too few arguments … index 2`; only
-      scalar `add(num, num)` works. `transpose(sparse)` is fine. So basic element-wise Array/Matrix `add` is a
-      real gap (contrast: `multiply` has an `'Array, Array'` matmul signature). **Fix is a core-arithmetic
-      decision** (add element-wise `'Array,Array'`/`'DenseMatrix,DenseMatrix'`/`'SparseMatrix,SparseMatrix'`
-      signatures to `add` — sparse⊕sparse is a CSC merge) — surface to maintainer; broad blast radius, own item.
-    - **order 0** fails independently inside `csLu` → `csSpsolve` at `x[j] = divideScalar(x[j], gvalues[p1-1])`
-      with the divisor `undefined` — the U column being solved has a **missing diagonal entry** (a CSparse-port
-      algorithm bug in `csLu`/`csSpsolve`/`csReach`, not the `add` gap).
-      Both are substantial and independent; neither is a quick fix, so `slu` needs a dedicated effort (or a
-      decision to route sparse LU elsewhere).
-  - ⬜ **[MED — broader than slu] typed `add` rejects 2-arg Array/Matrix operands.** Surfaced by the slu
-    diagnosis above: `add([1,2],[3,4])` throws `Too few arguments … index 2` (same for dense/sparse matrices).
-    Either intentional parallel-first design (users must use `Float64Array`) — in which case the error message
-    is wrong and should be a clear "unsupported type" — or a real gap needing element-wise Array/Matrix `add`
-    signatures. Decide + fix the message or the dispatch.
+  - ✅ **`slu`** — FIXED (2026-07-02). Two independent root causes, both fixed:
+    - **order 1** (`csAmd`'s `add(A, Aᵀ)`) was blocked by the typed `add` lacking 2-arg Array/Matrix
+      signatures — fixed by the element-wise add/multiply work below.
+    - **order 0/1** then both failed in `csLu`→`csSpsolve` (`divideScalar(x, undefined)`): the CSparse port
+      wraps `L`/`U` around arrays it keeps **mutating and reading back through the wrapper mid-build**, but
+      `MathJSSparseMatrix`'s constructor **deep-copied** the CSC arrays (`[...values]`), freezing an empty
+      snapshot so `L._ptr[J]`/`L._values[p0]` read `undefined`. Fixed by storing the CSC arrays **by
+      reference** (mathjs SparseMatrix semantics; dense-array construction still allocates fresh via
+      `_fromDenseArray`). Oracle-pinned (order 0 + order 1, `|∏diag U| = |det A|`). **All four factory
+      decompositions (lup/qr/schur/slu) now pass.**
+  - ✅ **[was MED — broader than slu] typed `add`/`multiply` now support 2-arg Array/Matrix operands.**
+    Added element-wise `add` (`'Array,Array'` + nested/N-D + scalar broadcast; `'DenseMatrix,DenseMatrix'`,
+    `'SparseMatrix,SparseMatrix'` — sparse⊕sparse stays CSC — + matrix⊕scalar) and `multiply` scalar-scaling
+    (`'Array,number'`/`'number,Array'` + matrix⊕scalar; matrix×matrix stays matmul via the existing
+    `'Array,Array'` path — element-wise product is `dotMultiply`). `add([1,2],[3,4])` etc. now work; leaves fold
+    through the binary op so Complex/Fraction/BigNumber elements work too. Tests:
+    `functions/tests/typed-arithmetic-elementwise.test.ts` (9). No regressions (functions 3126 pass / 41 skip).
 - ⬜ **[MED — activated algebra/CAS layer flagged no-direct-test] audit real vs transitive coverage.**
   TEST_COVERAGE lists `functions/src/algebra/` files with no direct-import test: `simplify`(+`util`/`wildcards`),
   `rationalize`, `derivative`, `polynomialRoot`, `lyap`, `resolve`, `leafCount`, plus `expression/src/error/MathjsError.ts`.

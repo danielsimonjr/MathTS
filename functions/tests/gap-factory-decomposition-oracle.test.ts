@@ -228,15 +228,16 @@ describe('schur — external oracle (known spectrum via diag T)', () => {
   });
 });
 
-/**
- * KNOWN-BROKEN — tracked as a HIGH task in TODO.md (DGT diagnostic sweep). This
- * oracle is correct and ready; `slu` (sparse LU via the CSparse port) throws
- * inside the port itself — `csAmd` (`add(a, at)` — "Too few arguments … index 2")
- * for order 1, and `csSpsolve` (`divideScalar(x[j], undefined)`) for order 0 —
- * so the block is skipped (surfaced loudly, not silently green) until the port
- * is repaired.
- */
-describe.skip('slu — external oracle (|∏diag U| = |det A|) — BLOCKED (see TODO)', () => {
+describe('slu — external oracle (|∏diag U| = |det A| + triangular structure)', () => {
+  // Sparse LU via the CSparse port. |det A| is permutation-free: P·A·Q = L·U ⇒
+  // |det A| = |∏diag U| (|det P| = |det Q| = |det L| = 1). Validates the csLu /
+  // csSqr / csSpsolve numerics without decoding the pinv/q conventions.
+  function diagProd(U: number[][], n: number): number {
+    let p = 1;
+    for (let i = 0; i < n; i++) p *= U[i][i];
+    return p;
+  }
+
   it('order 1 [[4,3],[6,3]] (det −6): |∏diag U| = 6', () => {
     const A = sparse([
       [4, 3],
@@ -244,6 +245,18 @@ describe.skip('slu — external oracle (|∏diag U| = |det A|) — BLOCKED (see 
     ]) as Parameters<typeof slu>[0];
     const r = slu(A, 1, 1) as { U: { valueOf(): unknown } };
     const U = r.U.valueOf() as number[][];
-    expectClose(Math.abs(U[0][0] * U[1][1]), 6);
+    expectClose(Math.abs(diagProd(U, 2)), 6);
+  });
+
+  it('order 0 [[2,0,1],[0,3,0],[1,0,2]] (det 9): |∏diag U| = 9', () => {
+    // det = 2·(3·2 − 0) + 1·(0 − 3·1) = 12 − 3 = 9.
+    const A = sparse([
+      [2, 0, 1],
+      [0, 3, 0],
+      [1, 0, 2],
+    ]) as Parameters<typeof slu>[0];
+    const r = slu(A, 0, 1) as { U: { valueOf(): unknown } };
+    const U = r.U.valueOf() as number[][];
+    expectClose(Math.abs(diagProd(U, 3)), 9, 1e-8);
   });
 });

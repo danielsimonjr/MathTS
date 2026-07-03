@@ -459,10 +459,17 @@ export class MathJSSparseMatrix {
     const ptr = data.ptr ?? data._ptr;
     const size = data.size ?? data._size;
 
-    this._values = values != null ? [...values] : null;
-    this._index = index ? [...index] : [];
-    this._ptr = ptr ? [...ptr] : [0];
-    this._size = size ? [...size] : [0, 0];
+    // Store the CSC arrays BY REFERENCE (mathjs SparseMatrix semantics), not a
+    // defensive copy. The CSparse algebra ports (csLu / csSqr / …) construct an
+    // L/U SparseMatrix wrapping arrays they keep mutating and reading back
+    // through the wrapper mid-build (csSpsolve reads `L._values`/`L._ptr`); a
+    // copy freezes an empty snapshot, so those reads return `undefined`
+    // (`divideScalar(x, undefined)`). Callers building a dense matrix go through
+    // `_fromDenseArray` above, which allocates fresh arrays.
+    this._values = values != null ? (values as unknown[]) : null;
+    this._index = index ?? [];
+    this._ptr = ptr ?? [0];
+    this._size = size ?? [0, 0];
     this._datatype = data.datatype ?? data._datatype;
   }
 

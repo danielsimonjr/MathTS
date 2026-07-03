@@ -2,7 +2,7 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-02",
+    "lastUpdated": "2026-07-03",
     "totalFiles": 845,
     "totalModules": 70,
     "totalExports": 4093
@@ -14951,6 +14951,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../factories/matrix-bridge.js",
+            "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
+          },
+          {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch"]
           }
@@ -29001,7 +29005,7 @@
   "statistics": {
     "totalTypeScriptFiles": 845,
     "totalModules": 70,
-    "totalLinesOfCode": 154419,
+    "totalLinesOfCode": 154515,
     "totalExports": 4093,
     "totalClasses": 50,
     "totalInterfaces": 351,

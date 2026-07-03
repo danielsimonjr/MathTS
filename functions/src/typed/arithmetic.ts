@@ -14,6 +14,7 @@
 
 import { mathTyped, Complex, Fraction, BigNumber, Unit, Dual } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
@@ -30,6 +31,67 @@ type i32 = number;
 
 /** 64-bit signed integer */
 type i64 = bigint;
+
+// =============================================================================
+// Element-wise Array / Matrix helpers
+// =============================================================================
+
+/** A scalar binary operation applied at the leaves of an element-wise walk. */
+type ScalarOp = (x: unknown, y: unknown) => unknown;
+
+/**
+ * Recursively apply `op` element-wise over two nested-array operands. When one
+ * operand is a scalar (non-array) it broadcasts against the other. Same-length
+ * arrays are required at every level; a mismatch throws (mathjs parity).
+ */
+function elementwise(op: ScalarOp, a: unknown, b: unknown): unknown {
+  const aArr = Array.isArray(a);
+  const bArr = Array.isArray(b);
+  if (aArr && bArr) {
+    if (a.length !== b.length) {
+      throw new RangeError(
+        `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
+      );
+    }
+    return a.map((x, i) => elementwise(op, x, b[i]));
+  }
+  if (aArr) return a.map((x) => elementwise(op, x, b));
+  if (bArr) return b.map((y) => elementwise(op, a, y));
+  return op(a, b);
+}
+
+/** True if `m` is a matrix in sparse storage. */
+function isSparseStorage(m: unknown): boolean {
+  const s = (m as { storage?: () => string }).storage;
+  return typeof s === 'function' && s.call(m) === 'sparse';
+}
+
+/** A matrix operand → its dense nested array; a scalar passes through unchanged. */
+function toNested(m: unknown): unknown {
+  const t = (m as { toArray?: () => unknown }).toArray;
+  return typeof t === 'function' ? t.call(m) : m;
+}
+
+/**
+ * Element-wise `op` over Matrix (and Matrix⊕scalar) operands, returning a bridge
+ * matrix that preserves storage: sparse if either operand is sparse (CSC fields
+ * intact, which the CSparse algebra factories rely on), otherwise dense.
+ */
+function elementwiseMatrix(
+  op: ScalarOp,
+  a: unknown,
+  b: unknown
+): MathJSDenseMatrix | MathJSSparseMatrix {
+  const data = elementwise(op, toNested(a), toNested(b)) as unknown[][];
+  return isSparseStorage(a) || isSparseStorage(b)
+    ? new MathJSSparseMatrix(data)
+    : new MathJSDenseMatrix(data as number[][]);
+}
+
+// Leaf operations for the element-wise walks above — deferred closures so they
+// resolve the binary `add` / `multiply` at call time (after both are defined).
+const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
+const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
 
 // =============================================================================
 // Addition (Parallel-First)
@@ -83,6 +145,22 @@ export const add = mathTyped('add', {
     const result = await computePool.add(a, b);
     return result.result;
   },
+
+  // Element-wise addition over plain (possibly nested / N-D) arrays, with scalar
+  // broadcast. Leaves fold through the binary `add`, so number / Complex /
+  // Fraction / BigNumber elements all work.
+  'Array, Array': (a: unknown[], b: unknown[]): unknown => elementwise(addOp, a, b),
+  'Array, number': (a: unknown[], b: f64): unknown => elementwise(addOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(addOp, a, b),
+
+  // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
+  // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
+  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
+  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(addOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(addOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
 
   // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
   // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
@@ -209,6 +287,17 @@ export const multiply = mathTyped('multiply', {
     const result = await computePool.scale(a, scalar);
     return result.result;
   },
+
+  // Scalar × collection = element-wise scaling (mathjs parity). Matrix × matrix
+  // stays matrix multiplication — the `Array, Array` matmul above (reached for
+  // Matrix operands via the Matrix~>Array conversion); element-wise product of
+  // two collections is `dotMultiply`.
+  'Array, number': (a: unknown[], b: f64): unknown => elementwise(mulOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(mulOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(mulOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(mulOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(mulOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(mulOp, a, b),
 
   // Variadic multiplication over ANY types (mathjs parity); folds pairwise
   // through the binary `multiply`. See the variadic-add note above re: types and
