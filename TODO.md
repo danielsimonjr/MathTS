@@ -366,23 +366,15 @@ Genuine issues found (verified, not report artifacts):
     `'DenseMatrix, DenseMatrix'` matmul signature that returns a boxed matrix (mathjs parity). Oracle-pinned:
     `lyap(diag(−1,−2), I) ⇒ diag(0.5, 0.25)` + `sylvester` defining-equation + `subset`/`index` regression pins in
     `functions/tests/gap-sylvester-lyap-oracle.test.ts`.
-  - 🐞 **[HIGH — new, still open] `rationalize` BROKEN — two distinct typed-dispatch bugs (deeper than
-    sylvester/lyap; needs dedicated tracing).** Diagnosed 2026-07-02:
-    1. **1-arg string** — `rationalize('x+x+x')` throws "expected boolean or Object, actual undefined, index 1".
-       A global `string→Node` conversion exists (`simplify('x^1')` works via it) but does **not** reach
-       `rationalize`'s `Node:` signature — the string arg is instead pushed toward the 2-arg `Node,boolean|Object`
-       sigs. Likely needs explicit `string` signatures on `rationalize` (parse first), like other CAS fns.
-    2. **Object scope → resolve** — `rationalize(node, {y:1})` (and every internal `simplify(expr, rules, {}, opts)`
-       call rationalize makes) throws in `resolve` ("expected Object/null/undefined/Map, actual: **any**, index 1").
-       Reproduces standalone: `simplify(node, [], {}, opts)` throws the same, but `simplify(node, [], new Map(), opts)`
-       works. The `Object→Map` conversion is `removeConversion`-ed for simplify's dispatch (simplify.ts:346), so a
-       plain `{}` scope reaches `resolve` un-mapped and typed-function classifies it as "any". **A naive
-       `_simplify` scope-normalization (convert `{}`→Map before `resolve(expr,scope)` at simplify.ts:740) did NOT
-       fix it** (reverted) — the failing `resolve` is triggered on a different path (likely during typed-conversion
-       /`referTo` inside the dispatch, before `_simplify`'s body). Needs tracing of the actual `resolve` call site
-       - the simplify Object/Map conversion setup (lines ~315–350). Oracle ready in the pattern of the others.
-  - ℹ️ `resolve` (13 test-file refs) — mostly `Promise.resolve` false matches; the CAS `resolve` is exercised via
-    `rationalize`/`simplify` but has the scope-typing bug above.
+  - ✅ **`rationalize`** — FIXED 2026-07-02 (one root cause resolved all failures; the "1-arg string" error was a
+    red herring). **Root cause:** simplify's `Object→Map` conversion (and callers passing `{}`) produce an
+    **`ObjectWrappingMap`**, but core's `mathTyped` **registers no duck-typing `Map` type** (`core/src/typed/
+mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|…` signature falls back to
+    typed-function's **strict `instanceof Map`** and classifies the wrapper as "any". Fixed by coercing the scope
+    to a **native Map** in `_simplify` (via `forEach`, works for the wrapper and plain objects). `rationalize('(x+1)^2')
+= x^2+2x+1`, `rationalize('x+x+x+y',{y:1}) = 3x+1` (docstring) now work; pinned in `gap-algebra-cas-oracle.test.ts`.
+    **Follow-up (deeper root):** register a duck-typing `Map` type in core's `MATHTS_TYPES` so `ObjectWrappingMap` is
+    recognized everywhere (removes the per-call-site coercion) — core-wide change, own item.
 - ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
   MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
   (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and

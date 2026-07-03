@@ -332,8 +332,11 @@ export const createSimplify = /* #__PURE__ */ factory(
     const simplify = typed('simplify', {
       Node: _simplify,
       'Node, Map': (expr: MathNode, scope: Map<string, unknown>) => _simplify(expr, false, scope),
-      'Node, Map, Object': (expr: MathNode, scope: Map<string, unknown>, options: SimplifyOptions) =>
-        _simplify(expr, false, scope, options),
+      'Node, Map, Object': (
+        expr: MathNode,
+        scope: Map<string, unknown>,
+        options: SimplifyOptions
+      ) => _simplify(expr, false, scope, options),
       'Node, Array': _simplify,
       'Node, Array, Map': _simplify,
       'Node, Array, Map, Object': _simplify,
@@ -636,7 +639,9 @@ export const createSimplify = /* #__PURE__ */ factory(
         // Gen. the LHS placeholder used in this NC-context specific expansion rules
         if (nonCommutative) leftExpandsym = _getExpandPlaceholderSymbol();
 
-        const makeNode = createMakeNodeFunction(newRule.l! as unknown as Parameters<typeof createMakeNodeFunction>[0]);
+        const makeNode = createMakeNodeFunction(
+          newRule.l! as unknown as Parameters<typeof createMakeNodeFunction>[0]
+        );
         const expandsym = _getExpandPlaceholderSymbol();
         const expandedL = makeNode([newRule.l!, expandsym]);
         // Push the expandsym into the deepest possible branch.
@@ -733,6 +738,27 @@ export const createSimplify = /* #__PURE__ */ factory(
       options: SimplifyOptions = {}
     ): MathNode {
       const debug = options.consoleDebug;
+      // Coerce the scope to a NATIVE Map before `resolve`. simplify's Object→Map
+      // conversion (and callers like `rationalize`, which pass `{}`) yield an
+      // `ObjectWrappingMap`, but core's typed universe never registers a
+      // duck-typing `Map` type — so `resolve`'s `Map` signature falls back to
+      // typed-function's strict `instanceof Map` and rejects the wrapper as
+      // "any". A native Map passes. (Converting via `createMap` doesn't help — it
+      // returns the wrapper unchanged when the input is already Map-like.)
+      if (scope != null && !(scope instanceof Map)) {
+        const native = new Map<string, unknown>();
+        const sm = scope as {
+          forEach?: (cb: (value: unknown, key: unknown) => void) => void;
+        };
+        if (typeof sm.forEach === 'function') {
+          sm.forEach((value, key) => native.set(key as string, value));
+        } else {
+          for (const [key, value] of Object.entries(scope as Record<string, unknown>)) {
+            native.set(key, value);
+          }
+        }
+        scope = native;
+      }
       const builtRules: ParsedRule[] = _buildRules(
         (rules as SimplifyRule[]) || simplify.rules,
         options.context
@@ -1113,7 +1139,11 @@ export const createSimplify = /* #__PURE__ */ factory(
           // except in any order if operator is commutative
           let childMatches: MatchResult[][] = [];
           for (let i = 0; i < (rule as NodeLike).args.length; i++) {
-            const childMatch = _ruleMatch((rule as NodeLike).args[i], (node as NodeLike).args[i], context);
+            const childMatch = _ruleMatch(
+              (rule as NodeLike).args[i],
+              (node as NodeLike).args[i],
+              context
+            );
             if (childMatch.length === 0) {
               // Child did not match, so stop searching immediately
               break;
@@ -1139,11 +1169,19 @@ export const createSimplify = /* #__PURE__ */ factory(
               );
             }
             /* Exactly two arguments, try them reversed */
-            const leftMatch = _ruleMatch((rule as NodeLike).args[0], (node as NodeLike).args[1], context);
+            const leftMatch = _ruleMatch(
+              (rule as NodeLike).args[0],
+              (node as NodeLike).args[1],
+              context
+            );
             if (leftMatch.length === 0) {
               return [];
             }
-            const rightMatch = _ruleMatch((rule as NodeLike).args[1], (node as NodeLike).args[0], context);
+            const rightMatch = _ruleMatch(
+              (rule as NodeLike).args[1],
+              (node as NodeLike).args[0],
+              context
+            );
             if (rightMatch.length === 0) {
               return [];
             }

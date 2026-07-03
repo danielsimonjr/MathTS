@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { leafCount } from '../src/factories/index.js';
+import { leafCount, rationalize } from '../src/factories/index.js';
 
 /**
  * Coverage audit of the activated algebra/CAS layer the 2026-07-02 DGT sweep
@@ -10,13 +10,13 @@ import { leafCount } from '../src/factories/index.js';
  *    assertions in algebra.test.ts / cas.test.ts / forward-mode-ad.test.ts).
  *  - `leafCount` — was smoke-only (`typeof leafCount === 'function'`); pinned
  *    here with deterministic oracles.
- *  - `sylvester` / `lyap` / `rationalize` — smoke-only AND **broken** (surfaced
- *    by this audit; tracked as HIGH items in TODO.md, not pinned here):
- *      · `sylvester(A,B,C)` throws in `subset(G, index(k,k))` → `MathJSDenseMatrix.get`
- *        (out-of-range row); `lyap` fails through it. Now *reached* because the
- *        factory `schur` it depends on was fixed earlier this session.
- *      · `rationalize(expr)` has no `string` signature (its own docstring shows
- *        `rationalize('sin(x)+y')`) and the 2-arg form throws inside `resolve`.
+ *  - `sylvester` / `lyap` — were smoke-only AND broken; fixed + pinned in
+ *    `gap-sylvester-lyap-oracle.test.ts`.
+ *  - `rationalize` — was smoke-only AND broken (every call threw). Root cause was
+ *    in `simplify`: an `ObjectWrappingMap` scope reached `resolve`, whose typed
+ *    `Map` test only accepts native Maps (core registers no duck-typing `Map`
+ *    type), so the scope was classified as "any". Fixed by coercing the scope to
+ *    a native Map in `_simplify`; pinned below.
  *
  * `leafCount(expr)` counts leaf nodes of the parse tree (symbols + constants;
  * operators and function-application nodes are not leaves, but a function's name
@@ -45,5 +45,23 @@ describe('leafCount — deterministic oracle', () => {
 
   it('[a,b;c,d][0,1] = 6 (4 matrix-entry symbols + 2 index constants)', () => {
     expect(lc('[a,b;c,d][0,1]')).toBe(6);
+  });
+});
+
+const rat = rationalize as (expr: string, scope?: unknown) => { toString(): string };
+
+describe('rationalize — canonical polynomial oracle', () => {
+  // The rationalized form of a polynomial is its unique expanded form (an
+  // implementation-independent value); only the print spacing is formatting.
+  it('(x+1)^2 expands to x^2 + 2x + 1', () => {
+    expect(rat('(x+1)^2').toString()).toBe('x ^ 2 + 2 * x + 1');
+  });
+
+  it('x+x+x collects to 3*x', () => {
+    expect(rat('x+x+x').toString()).toBe('3 * x');
+  });
+
+  it('string input with a scope: rationalize("x+x+x+y", {y:1}) = 3*x + 1 (docstring)', () => {
+    expect(rat('x+x+x+y', { y: 1 }).toString()).toBe('3 * x + 1');
   });
 });

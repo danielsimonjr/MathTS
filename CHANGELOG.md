@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-02) — factory `rationalize` (and `simplify` with an object scope)
+
+`rationalize(...)` threw on every call (shipped smoke-tested only). Root cause was
+in `simplify`: its `Object→Map` scope conversion (and callers like `rationalize`
+that pass `{}`) produce an `ObjectWrappingMap`, but core's `mathTyped` registers
+no duck-typing `Map` type — so `resolve`'s `Map` signature falls back to
+typed-function's strict `instanceof Map` and classifies the wrapper as "any"
+(`simplify(node, [], {}, opts)` reproduced it standalone; a native `Map` worked).
+Fixed by coercing the scope to a native `Map` in `_simplify` (via `forEach`, so it
+handles both the wrapper and plain objects). `rationalize('(x+1)^2') → x^2+2x+1`,
+`rationalize('x+x+x+y', {y:1}) → 3x+1` (docstring), and string input all work now.
+Pinned in `functions/tests/gap-algebra-cas-oracle.test.ts`. No regressions:
+functions 3138 pass / 41 skip; typecheck + eslint clean. (Deeper follow-up in
+TODO: register a duck-typing `Map` type in core's `MATHTS_TYPES`.)
+
 ### Fixed (2026-07-02) — factory `sylvester` / `lyap`: `Index` subset + matrix-product boxing
 
 `sylvester` (and `lyap`, which delegates to it) were shipped broken (smoke-tested
