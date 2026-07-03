@@ -267,9 +267,15 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   dispatched to the worker pool **unconditionally** (no `shouldParallelize` gate), so `norm`'s existing `'never'`
   config was silently ignored and every `min`/`max`/`norm` call paid worker-dispatch overhead regardless of size.
   Added `shouldParallelize` gates + sequential fallbacks; they now respect the threshold (sequential for these
-  memory-bound reductions). ⬜ **Still open:** the remaining unmeasured global-default ops (`distance`, `histogram`,
-  `parallelStat{Min,Max,Distance}`, bitwise family) want bench cases + a **target-hardware** run (this was a dev
-  box), and the `variance`/`distance` ComputePool methods have the same unconditional-dispatch pattern to audit.
+  memory-bound reductions). ✅ **Extended 2026-07-03 (DGT sweep):** the same unconditional-dispatch pattern was
+  systemic across **all** the reductions (`sum`/`mean`/`variance`/`std`/`prod`/`dot`/`norm`/`distance`/`minMax` —
+  ~20 `functions/` call sites, none gated). Fixed at the **root** by gating **inside the ComputePool methods**
+  (inline sequential fallback wrapped in the `ParallelResult` envelope), so every call site honors the threshold
+  without per-site edits. Added `minMax`/`std`/`prod` to `OpName` and set `distance`/`prod`/`minMax`/`std` →
+  `'never'` (all memory-bound, matching the class). parallel 417✓, functions 3148✓. ⬜ **Still open:** the
+  `histogram` + bitwise family thresholds want bench cases + a **target-hardware** run (this was a dev box);
+  `distanceMatrix` (O(n²), compute-heavy — unlike the O(n) `distance`) may genuinely benefit from parallelism and
+  should be benched rather than assumed `'never'`.
 - ✅ **[HIGH-PRIORITY BUG — found + FIXED by WS-1 P2 oracle tests] `matrixSchur` was broken two ways.**
   (1) real 2×2 diagonal blocks were never triangularized (accepted as if complex pairs), so
   `matrixSchur([[2,1],[1,2]])` returned the input with diagonal `[2,2]` instead of eigenvalues `{1,3}`

@@ -2,8 +2,8 @@
   "generated": "2026-07-03",
   "total": 218,
   "parallelizedCount": 113,
-  "effectiveCount": 91,
-  "disabledCount": 22,
+  "effectiveCount": 89,
+  "disabledCount": 24,
   "nonParallelCount": 105,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
@@ -565,8 +565,8 @@
       "name": "parallelStatDistance",
       "file": "statistics.ts",
       "ops": ["distance"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "parallelStatHistogram",
@@ -614,8 +614,8 @@
       "name": "parallelStatMinMax",
       "file": "statistics.ts",
       "ops": ["minMax"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "parallelStatMode",
@@ -635,7 +635,7 @@
       "name": "parallelStatProd",
       "file": "statistics.ts",
       "ops": ["applyKernel", "prod"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "thresholds": ["50000 (global kernel)", "never"],
       "effectiveness": "effective"
     },
     {
@@ -649,7 +649,7 @@
       "name": "parallelStatStd",
       "file": "statistics.ts",
       "ops": ["applyKernel", "std"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "thresholds": ["50000 (global kernel)", "never"],
       "effectiveness": "effective"
     },
     {
@@ -1065,8 +1065,8 @@
     },
     {
       "op": "distance",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["parallelStatDistance"]
     },
     {
@@ -1173,8 +1173,8 @@
     },
     {
       "op": "minMax",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["parallelStatMinMax"]
     },
     {
@@ -1227,8 +1227,8 @@
     },
     {
       "op": "prod",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["parallelStatProd"]
     },
     {
@@ -1293,8 +1293,8 @@
     },
     {
       "op": "std",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["parallelStatStd"]
     },
     {
@@ -1390,8 +1390,8 @@
       "none": 7
     },
     "statistics.ts": {
-      "effective": 12,
-      "disabled": 4,
+      "effective": 10,
+      "disabled": 6,
       "none": 1
     },
     "string.ts": {

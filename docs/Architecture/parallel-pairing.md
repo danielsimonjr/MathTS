@@ -8,8 +8,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      91 |
-| Parallel — disabled (all ops `'never'`)    |      22 |
+| Parallel — effective (op threshold active) |      89 |
+| Parallel — disabled (all ops `'never'`)    |      24 |
 | Non-parallel (no worker-pool path)         |     105 |
 | **Total**                                  | **218** |
 
@@ -89,16 +89,14 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelFFTPower`      | `applyKernel`, `applyKernel2` | 50000 (global kernel), 50000 (global) | signal        |
 | `parallelIFFT`          | `applyKernel`                 | 50000 (global kernel)                 | signal        |
 | `parallelStatCorr`      | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
-| `parallelStatDistance`  | `distance`                    | 50000 (global)                        | statistics    |
 | `parallelStatHistogram` | `applyKernel`, `histogram`    | 50000 (global kernel), 50000 (global) | statistics    |
 | `parallelStatMAD`       | `applyKernel`, `mean`         | 50000 (global kernel), never          | statistics    |
 | `parallelStatMedian`    | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatMinMax`    | `minMax`                      | 50000 (global)                        | statistics    |
 | `parallelStatMode`      | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
 | `parallelStatNorm`      | `applyKernel`, `norm`         | 50000 (global kernel), never          | statistics    |
-| `parallelStatProd`      | `applyKernel`, `prod`         | 50000 (global kernel), 50000 (global) | statistics    |
+| `parallelStatProd`      | `applyKernel`, `prod`         | 50000 (global kernel), never          | statistics    |
 | `parallelStatQuantile`  | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatStd`       | `applyKernel`, `std`          | 50000 (global kernel), 50000 (global) | statistics    |
+| `parallelStatStd`       | `applyKernel`, `std`          | 50000 (global kernel), never          | statistics    |
 | `parallelStatVariance`  | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
 | `parallelXCorr`         | `applyKernel`                 | 50000 (global kernel)                 | signal        |
 | `poissonPMF`            | `applyKernel`                 | 50000 (global kernel)                 | distributions |
@@ -115,30 +113,32 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 
 These route to the worker pool but every op resolves to `'never'` — overhead dominated at all benchmarked sizes, so they always run inline JS today. Kept wired so a future threshold retune (`tools/benchmark/parallel/run.ts`) can switch them on without code churn.
 
-| Function           | Ops (all `'never'`) | Module       |
-| ------------------ | ------------------- | ------------ |
-| `abs`              | `abs`               | arithmetic   |
-| `add`              | `add`               | arithmetic   |
-| `cos`              | `cos`               | trigonometry |
-| `divide`           | `divide`            | arithmetic   |
-| `dot`              | `dot`               | arithmetic   |
-| `exp`              | `exp`               | arithmetic   |
-| `log`              | `log`               | arithmetic   |
-| `mean`             | `mean`              | arithmetic   |
-| `multiply`         | `multiply`, `scale` | arithmetic   |
-| `parallelStatMax`  | `max`               | statistics   |
-| `parallelStatMean` | `mean`              | statistics   |
-| `parallelStatMin`  | `min`               | statistics   |
-| `parallelStatSum`  | `sum`               | statistics   |
-| `sin`              | `sin`               | trigonometry |
-| `sqrt`             | `sqrt`              | arithmetic   |
-| `square`           | `square`            | arithmetic   |
-| `std`              | `variance`          | arithmetic   |
-| `subtract`         | `subtract`          | arithmetic   |
-| `sum`              | `sum`               | arithmetic   |
-| `tan`              | `tan`               | trigonometry |
-| `unaryMinus`       | `negate`            | arithmetic   |
-| `variance`         | `variance`          | arithmetic   |
+| Function               | Ops (all `'never'`) | Module       |
+| ---------------------- | ------------------- | ------------ |
+| `abs`                  | `abs`               | arithmetic   |
+| `add`                  | `add`               | arithmetic   |
+| `cos`                  | `cos`               | trigonometry |
+| `divide`               | `divide`            | arithmetic   |
+| `dot`                  | `dot`               | arithmetic   |
+| `exp`                  | `exp`               | arithmetic   |
+| `log`                  | `log`               | arithmetic   |
+| `mean`                 | `mean`              | arithmetic   |
+| `multiply`             | `multiply`, `scale` | arithmetic   |
+| `parallelStatDistance` | `distance`          | statistics   |
+| `parallelStatMax`      | `max`               | statistics   |
+| `parallelStatMean`     | `mean`              | statistics   |
+| `parallelStatMin`      | `min`               | statistics   |
+| `parallelStatMinMax`   | `minMax`            | statistics   |
+| `parallelStatSum`      | `sum`               | statistics   |
+| `sin`                  | `sin`               | trigonometry |
+| `sqrt`                 | `sqrt`              | arithmetic   |
+| `square`               | `square`            | arithmetic   |
+| `std`                  | `variance`          | arithmetic   |
+| `subtract`             | `subtract`          | arithmetic   |
+| `sum`                  | `sum`               | arithmetic   |
+| `tan`                  | `tan`               | trigonometry |
+| `unaryMinus`           | `negate`            | arithmetic   |
+| `variance`             | `variance`          | arithmetic   |
 
 ## Per-module counts
 
@@ -156,7 +156,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | set           |         0 |        0 |           10 |
 | signal        |         7 |        0 |            0 |
 | special       |        31 |        0 |            7 |
-| statistics    |        12 |        4 |            1 |
+| statistics    |        10 |        6 |            1 |
 | string        |         0 |        0 |            5 |
 | trigonometry  |         9 |        3 |            7 |
 | unit          |         0 |        0 |            2 |
@@ -179,7 +179,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `characteristicPolynomial` | 9216                  |    ✓    |           0 |
 | `chiSquareTest`            | 4096                  |    ✓    |           0 |
 | `cos`                      | never                 |    —    |           1 |
-| `distance`                 | 50000 (global)        |    ✓    |           1 |
+| `distance`                 | never                 |    —    |           1 |
 | `distanceMatrix`           | never                 |    —    |           0 |
 | `divide`                   | never                 |    —    |           1 |
 | `dot`                      | never                 |    —    |           1 |
@@ -197,7 +197,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `max`                      | never                 |    —    |           2 |
 | `mean`                     | never                 |    —    |           3 |
 | `min`                      | never                 |    —    |           2 |
-| `minMax`                   | 50000 (global)        |    ✓    |           1 |
+| `minMax`                   | never                 |    —    |           1 |
 | `multiply`                 | never                 |    —    |           1 |
 | `negate`                   | never                 |    —    |           1 |
 | `norm`                     | never                 |    —    |           2 |
@@ -206,7 +206,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `parallelFFT`              | never                 |    —    |           0 |
 | `parallelStatProd`         | never                 |    —    |           0 |
 | `pow`                      | never                 |    —    |           0 |
-| `prod`                     | 50000 (global)        |    ✓    |           1 |
+| `prod`                     | never                 |    —    |           1 |
 | `rightArithShift`          | 50000 (global)        |    ✓    |           1 |
 | `rightLogShift`            | 50000 (global)        |    ✓    |           1 |
 | `sampleChunk`              | 100000                |    ✓    |           0 |
@@ -217,7 +217,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `spectrogram`              | 65536                 |    ✓    |           0 |
 | `sqrt`                     | never                 |    —    |           1 |
 | `square`                   | never                 |    —    |           1 |
-| `std`                      | 50000 (global)        |    ✓    |           1 |
+| `std`                      | never                 |    —    |           1 |
 | `subtract`                 | never                 |    —    |           1 |
 | `sum`                      | never                 |    —    |           2 |
 | `tan`                      | never                 |    —    |           1 |

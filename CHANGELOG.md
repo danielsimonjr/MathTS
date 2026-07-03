@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-03) — parallel: reductions honor their thresholds (systemic dispatch fix)
+
+A DGT sweep confirmed the `min`/`max`/`norm` unconditional-dispatch bug was
+**systemic**: `sum`, `mean`, `variance`, `std`, `prod`, `dot`, `norm`, `distance`,
+and `minMax` all dispatched to the worker pool at every `functions/` call site
+(~20 sites) with **no `shouldParallelize` gate**, so their thresholds — several
+of which were `'never'` or should be — were silently ignored, paying a worker
+round-trip on every call regardless of size.
+
+Fixed at the root by gating **inside the ComputePool reduction methods**: each now
+checks its threshold and computes inline (sequential) below it, wrapped in the
+`ParallelResult` envelope. So every call site honors the threshold without
+per-site edits. Added `minMax` / `std` / `prod` to the `OpName` union and set
+`distance` / `prod` / `minMax` / `std` to `'never'` (memory-bound reductions,
+matching `sum`/`mean`/`norm`/`dot`). Results unchanged (mismatched-length `dot`
+/`distance` still throw). parallel 417 pass; functions 3148 pass / 41 skip;
+typecheck + eslint clean. (`histogram` + bitwise thresholds and `distanceMatrix`,
+which is O(n²) and may genuinely parallelize, still want a target-hardware bench.)
+
 ### Changed (2026-07-02) — matrix: broke two type-only `DenseMatrix` import cycles
 
 `dense/arithmetic.ts` and `dense/reduction.ts` did `import type { DenseMatrix }`

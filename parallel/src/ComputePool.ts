@@ -65,10 +65,13 @@ export type OpName =
   | 'mean'
   | 'min'
   | 'max'
+  | 'minMax'
   | 'variance'
+  | 'std'
   | 'norm'
   | 'histogram'
   | 'dot'
+  | 'prod'
   | 'distance'
   | 'parallelStatProd'
   // linear algebra
@@ -212,6 +215,16 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   // call; they now respect this threshold (sequential) with a `shouldParallelize` gate.
   min: 'never',
   max: 'never',
+  // Added 2026-07-03 (WS-2, DGT sweep): the remaining memory-bound reductions that
+  // defaulted to the 50 000 global threshold and dispatched unconditionally at every
+  // `functions/` call site. Same class as sum/mean/min/max/norm/dot → 'never'. Now
+  // gated INSIDE the ComputePool reduction methods (inline sequential fallback), so
+  // ALL call sites honor the threshold without per-site edits. `std` derives from
+  // `variance`; `min`/`max` derive from `minMax`.
+  minMax: 'never',
+  std: 'never',
+  prod: 'never',
+  distance: 'never',
 
   // signal: overhead dominates or break-even never reached
   parallelFFT: 'never',
@@ -507,6 +520,18 @@ export class ComputePool {
   }
 
   /**
+   * Wrap a sequentially-computed reduction result in the `ParallelResult`
+   * envelope. Used by the reduction methods below so that ops whose threshold
+   * says "don't parallelize at this size" (notably the memory-bound reductions
+   * pinned to `'never'`) compute inline instead of paying a worker round-trip —
+   * previously every reduction dispatched to the pool unconditionally, ignoring
+   * its threshold.
+   */
+  private seqResult<T>(result: T): ParallelResult<T> {
+    return { result, duration: 0, chunks: 1, parallelized: false };
+  }
+
+  /**
    * Execute a method in the worker pool
    */
   async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
@@ -524,24 +549,37 @@ export class ComputePool {
    * Parallel sum of array elements
    */
   async sum(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.workerPool.sum(data);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(data.length, 'sum')) {
+      let s = 0;
+      for (let i = 0; i < data.length; i++) s += data[i];
+      return this.seqResult(s);
+    }
+    return toParallelResult(await this.workerPool.sum(data));
   }
 
   /**
    * Parallel product of array elements
    */
   async prod(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.workerPool.prod(data);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(data.length, 'prod')) {
+      let p = 1;
+      for (let i = 0; i < data.length; i++) p *= data[i];
+      return this.seqResult(p);
+    }
+    return toParallelResult(await this.workerPool.prod(data));
   }
 
   /**
    * Parallel dot product
    */
   async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.workerPool.dot(a, b);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(a.length, 'dot')) {
+      if (a.length !== b.length) throw new Error('dot: vectors must have the same length');
+      let s = 0;
+      for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+      return this.seqResult(s);
+    }
+    return toParallelResult(await this.workerPool.dot(a, b));
   }
 
   /**
@@ -634,8 +672,29 @@ export class ComputePool {
   async minMax(
     data: Float64Array
   ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
-    const result = await this.workerPool.minMax(data);
-    return toParallelResult(result);
+    // 'minMax' backs both `min` and `max` (they slice this result); gate on the
+    // stricter of the two so it honors either op's threshold.
+    if (
+      !this.shouldParallelize(data.length, 'minMax') &&
+      !this.shouldParallelize(data.length, 'min')
+    ) {
+      let min = Infinity;
+      let max = -Infinity;
+      let minIdx = -1;
+      let maxIdx = -1;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] < min) {
+          min = data[i];
+          minIdx = i;
+        }
+        if (data[i] > max) {
+          max = data[i];
+          maxIdx = i;
+        }
+      }
+      return this.seqResult({ min, max, minIdx, maxIdx });
+    }
+    return toParallelResult(await this.workerPool.minMax(data));
   }
 
   /**
@@ -644,24 +703,42 @@ export class ComputePool {
   async variance(
     data: Float64Array
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
-    const result = await this.workerPool.variance(data);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(data.length, 'variance')) {
+      const n = data.length;
+      let mean = 0;
+      for (let i = 0; i < n; i++) mean += data[i];
+      mean = n > 0 ? mean / n : 0;
+      let acc = 0;
+      for (let i = 0; i < n; i++) acc += (data[i] - mean) ** 2;
+      const variance = n > 0 ? acc / n : 0; // population variance (matches the worker)
+      return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
+    }
+    return toParallelResult(await this.workerPool.variance(data));
   }
 
   /**
    * Compute norm (Euclidean length) in parallel
    */
   async norm(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.workerPool.norm(data);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(data.length, 'norm')) {
+      let s = 0;
+      for (let i = 0; i < data.length; i++) s += data[i] * data[i];
+      return this.seqResult(Math.sqrt(s));
+    }
+    return toParallelResult(await this.workerPool.norm(data));
   }
 
   /**
    * Compute Euclidean distance in parallel
    */
   async distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.workerPool.distance(a, b);
-    return toParallelResult(result);
+    if (!this.shouldParallelize(a.length, 'distance')) {
+      if (a.length !== b.length) throw new Error('distance: vectors must have the same length');
+      let s = 0;
+      for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2;
+      return this.seqResult(Math.sqrt(s));
+    }
+    return toParallelResult(await this.workerPool.distance(a, b));
   }
 
   /**
