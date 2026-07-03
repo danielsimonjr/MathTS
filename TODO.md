@@ -303,7 +303,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   - **Remaining:** 6 decompositions (`hessenbergForm`, `polarDecomposition`, `qz`, `svdWasm`, svd-`pinv`,
     `lowRankApprox`, WASM `inv`); the SELF-REF tail (arithmetic/trig `Math.*`-tautological, signal spectra, factory
     dist `.cdf`/`.quantile`).
-    ⬜ **G1** (add `fast-check`) unlocks WS-1 P3 property-based invariant tests.
+    ✅ **G1** (add `fast-check`) DONE 2026-07-03 — `fast-check@4.8.0` added as a root dev-dep; **WS-1 P3 started**:
+    `functions/tests/property-invariants.test.ts` asserts exact mathematical invariants over thousands of random
+    inputs — `abs` non-negativity/evenness, `add`/`multiply` commutativity (numbers + element-wise vectors), vector
+    `norm` non-negativity/absolute-homogeneity/triangle-inequality, matrix-Frobenius homogeneity, `qr` orthonormality
+    (`QᵀQ=I` over random n×n), and `shapiroWilkTest` scale+location+reflection invariance (non-degenerate samples).
+    10 properties, stable across repeated seeds. Extend to more functions incrementally.
 - 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
   452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
   workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).

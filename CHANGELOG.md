@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-03) — property-based invariant tests (WS-1 P3; `fast-check`, gate G1)
+
+Added `fast-check` (dev-dependency) and a first suite of property-based invariant
+tests, `functions/tests/property-invariants.test.ts`. Where the oracle tests pin a
+single hand-derived value, these assert an exact mathematical *property* over
+thousands of randomly-generated inputs: `abs` non-negativity/evenness, `add` /
+`multiply` commutativity (numbers and element-wise vectors), vector `norm`
+non-negativity / absolute-homogeneity / triangle-inequality, matrix-Frobenius
+homogeneity, `qr` orthonormality (`QᵀQ = I` over random n×n matrices), and
+`shapiroWilkTest` scale+location+reflection invariance (non-degenerate samples).
+10 properties, stable across repeated seeds.
+
 ### Fixed (2026-07-03) — parallel: reductions honor their thresholds (systemic dispatch fix)
 
 A DGT sweep confirmed the `min`/`max`/`norm` unconditional-dispatch bug was
