@@ -13,7 +13,7 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Unit, Dual } from '@danielsimonjr/mathts-core';
-import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
@@ -882,20 +882,88 @@ export const xgcd = mathTyped('xgcd', {
 /**
  * Vector/array norm (Euclidean norm by default) with parallel support
  */
+/** Is `arr` a 2-D (matrix) array rather than a flat vector? */
+function is2DArray(arr: unknown[]): boolean {
+  return Array.isArray(arr[0]);
+}
+
+/** Vector p-norm (`p` defaults to 2). */
+function vectorNorm(arr: f64[], p: f64 = 2): f64 {
+  if (p === Infinity) return Math.max(...arr.map((x) => Math.abs(x)));
+  if (p === -Infinity) return Math.min(...arr.map((x) => Math.abs(x)));
+  if (p === 0) return arr.filter((x) => x !== 0).length;
+  if (p === 2) return Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0));
+  return Math.pow(
+    arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0),
+    1 / p
+  );
+}
+
+/**
+ * Matrix norm of a 2-D array. Supports Frobenius (`'fro'`/`'frobenius'`, the
+ * default), the max-column-sum 1-norm, the max-row-sum ∞-norm, and the spectral
+ * 2-norm (largest singular value). Previously the typed `norm` had no matrix
+ * path, so `norm(matrix, 2)` returned `null` and `norm(matrix, 'fro')` threw.
+ */
+function matrixNorm(data: f64[][], p: f64 | string = 'fro'): f64 {
+  const rows = data.length;
+  const cols = rows > 0 ? data[0].length : 0;
+  if (p === 'fro' || p === 'frobenius') {
+    let s = 0;
+    for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) s += data[i][j] * data[i][j];
+    return Math.sqrt(s);
+  }
+  if (p === 1) {
+    let max = 0;
+    for (let j = 0; j < cols; j++) {
+      let s = 0;
+      for (let i = 0; i < rows; i++) s += Math.abs(data[i][j]);
+      if (s > max) max = s;
+    }
+    return max;
+  }
+  if (p === Infinity) {
+    let max = 0;
+    for (let i = 0; i < rows; i++) {
+      let s = 0;
+      for (let j = 0; j < cols; j++) s += Math.abs(data[i][j]);
+      if (s > max) max = s;
+    }
+    return max;
+  }
+  if (p === 2) {
+    // spectral norm = largest singular value
+    const sv = singularValues(data);
+    return sv.length > 0 ? Math.max(...sv) : 0;
+  }
+  throw new Error(`Unsupported matrix norm p=${String(p)} (use 'fro', 1, 2, or Infinity)`);
+}
+
+const matrixLike = (m: { toArray(): unknown }): f64[][] => m.toArray() as f64[][];
+
 export const norm = mathTyped('norm', {
   number: (a: f64): f64 => Math.abs(a),
   Complex: (a: Complex): f64 => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
-  Array: (arr: f64[]): f64 => Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0)),
-  'Array, number': (arr: f64[], p: f64): f64 => {
-    if (p === Infinity) return Math.max(...arr.map(Math.abs));
-    if (p === -Infinity) return Math.min(...arr.map(Math.abs));
-    if (p === 0) return arr.filter((x) => x !== 0).length;
-    return Math.pow(
-      arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0),
-      1 / p
-    );
-  },
+
+  // Array: a flat vector uses the vector 2-norm; a 2-D array is a matrix (Frobenius).
+  Array: (arr: unknown[]): f64 =>
+    is2DArray(arr) ? matrixNorm(arr as f64[][]) : vectorNorm(arr as f64[]),
+  'Array, number': (arr: unknown[], p: f64): f64 =>
+    is2DArray(arr) ? matrixNorm(arr as f64[][], p) : vectorNorm(arr as f64[], p),
+  'Array, string': (arr: unknown[], p: string): f64 => matrixNorm(arr as f64[][], p),
+
+  // Matrix norms (mathjs parity): Frobenius / 1 / 2 / ∞.
+  DenseMatrix: (m: unknown): f64 => matrixNorm(matrixLike(m as { toArray(): unknown })),
+  'DenseMatrix, number': (m: unknown, p: f64): f64 =>
+    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
+  'DenseMatrix, string': (m: unknown, p: string): f64 =>
+    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
+  SparseMatrix: (m: unknown): f64 => matrixNorm(matrixLike(m as { toArray(): unknown })),
+  'SparseMatrix, number': (m: unknown, p: f64): f64 =>
+    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
+  'SparseMatrix, string': (m: unknown, p: string): f64 =>
+    matrixNorm(matrixLike(m as { toArray(): unknown }), p),
 
   // Parallel Float64Array norm
   Float64Array: async (a: Float64Array): Promise<f64> => {

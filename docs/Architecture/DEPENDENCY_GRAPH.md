@@ -7147,7 +7147,7 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, Unit, Dual` |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager, singularValues` |
 | `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
 
 **Internal Dependencies:**
@@ -13078,7 +13078,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 845    |
 | Total Modules           | 70     |
-| Total Lines of Code     | 154631 |
+| Total Lines of Code     | 154711 |
 | Total Exports           | 4093   |
 | Total Re-exports        | 1282   |
 | Total Classes           | 50     |

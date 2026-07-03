@@ -13508,6 +13508,7 @@ modules:
           imports:
             - DenseMatrix
             - backendManager
+            - singularValues
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
@@ -26892,7 +26893,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 845
   totalModules: 70
-  totalLinesOfCode: 154631
+  totalLinesOfCode: 154711
   totalExports: 4093
   totalClasses: 50
   totalInterfaces: 351

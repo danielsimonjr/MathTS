@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-02) — matrix support for the public typed `norm`
+
+The public `norm` (typed) had no matrix path: `norm(matrix, 2)` returned `null`
+and `norm(matrix, 'fro')` threw, because a 2-D operand fell through to the flat
+vector code. Added matrix norms — Frobenius (`'fro'`/`'frobenius'`, the default),
+1 (max column sum), ∞ (max row sum), and 2 (spectral = largest singular value,
+via the matrix package's `singularValues`) — for `DenseMatrix` / `SparseMatrix` /
+2-D `Array` operands; the 1-D vector path is unchanged. (The internal factory
+`norm` already computed matrix norms correctly; this closes the gap in the
+user-facing typed one.) Pinned in `functions/tests/gap-matrix-norm-oracle.test.ts`.
+No regressions: functions 3145 pass / 41 skip; typecheck + eslint clean.
+
 ### Fixed (2026-07-02) — factory `rationalize` (and `simplify` with an object scope)
 
 `rationalize(...)` threw on every call (shipped smoke-tested only). Root cause was

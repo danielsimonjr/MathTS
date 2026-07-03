@@ -327,10 +327,13 @@ Genuine issues found (verified, not report artifacts):
     `matrix`); non-real inputs now throw a clear `TypeError` (real Schur is real-only). 5 eigenvalue oracles pass
     (incl. the two symmetric cases that broke the matrix-layer Schur + a Matrix-input case). **Note:** the general
     `norm(matrix, 2)` L2 path is still suspect for bridge matrices (surfaced, not investigated) — separate item.
-  - ⬜ **[open] investigate `norm(matrix, 2)` for bridge matrices.** The schur fix side-stepped it, but the L2
-    matrix-norm's reliance on `eigs(squaredX).values.toArray()` (with `squaredX = multiply(ctranspose(x), x)`)
-    may still be broken when the factory `subtract`/`multiply` return non-`Matrix` results. Confirm whether the
-    user-facing `norm` is affected or only the internal factory path.
+  - ✅ **`norm(matrix, …)`** — INVESTIGATED + FIXED (2026-07-02). The _factory_ `norm` (arithmetic/norm.ts, the
+    `eigs`-based L2 path) works correctly now (`norm(diag(3,4),2)=4`, `fro=5`, `1=4`, `∞=4`). But the **public
+    typed `norm`** (typed/arithmetic.ts) had **no matrix path** — `norm(matrix,2)` returned `null`,
+    `norm(matrix,'fro')` threw (a 2-D operand fell through to the flat-vector code). Added matrix norms to the
+    typed `norm`: Frobenius (`'fro'`/default), 1 (max col sum), ∞ (max row sum), 2 (spectral, via the matrix
+    package's `singularValues`), for `DenseMatrix`/`SparseMatrix`/2-D `Array`; vector path preserved. Pinned in
+    `functions/tests/gap-matrix-norm-oracle.test.ts`.
   - ✅ **`slu`** — FIXED (2026-07-02). Two independent root causes, both fixed:
     - **order 1** (`csAmd`'s `add(A, Aᵀ)`) was blocked by the typed `add` lacking 2-arg Array/Matrix
       signatures — fixed by the element-wise add/multiply work below.
