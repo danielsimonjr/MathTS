@@ -63,6 +63,8 @@ export type OpName =
   // reductions
   | 'sum'
   | 'mean'
+  | 'min'
+  | 'max'
   | 'variance'
   | 'norm'
   | 'histogram'
@@ -200,11 +202,16 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   normalCDF: 'never',
   // Added 2026-07-02 (WS-2): reductions that were absent from the map and defaulted
   // to the global threshold; benchmarked memory-bound (0.09–1.19×, occasional noise
-  // spikes but no persistent win) → 'never'. (`min`/`max` are also memory-bound in
-  // the same benchmark but are not `OpName`s — they'd need adding to the union to be
-  // tunable here; tracked as a follow-up.)
+  // spikes but no persistent win) → 'never'.
   norm: 'never',
   dot: 'never',
+  // Added 2026-07-02 (WS-2): `min`/`max` are now `OpName`s (added to the union) so
+  // they're tunable. Same memory-bound reduction profile as sum/mean/norm above →
+  // 'never'. Their `functions/` call sites previously dispatched to the worker pool
+  // unconditionally (no `shouldParallelize` gate), paying dispatch overhead on every
+  // call; they now respect this threshold (sequential) with a `shouldParallelize` gate.
+  min: 'never',
+  max: 'never',
 
   // signal: overhead dominates or break-even never reached
   parallelFFT: 'never',

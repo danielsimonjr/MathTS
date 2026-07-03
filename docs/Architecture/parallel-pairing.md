@@ -8,8 +8,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      92 |
-| Parallel — disabled (all ops `'never'`)    |      21 |
+| Parallel — effective (op threshold active) |      91 |
+| Parallel — disabled (all ops `'never'`)    |      22 |
 | Non-parallel (no worker-pool path)         |     105 |
 | **Total**                                  | **218** |
 
@@ -77,8 +77,9 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `log1p`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `log2`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `logIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `max`                   | `max`                         | 50000 (global)                        | arithmetic    |
-| `min`                   | `min`                         | 50000 (global)                        | arithmetic    |
+| `max`                   | `applyKernel`, `max`          | 50000 (global kernel), never          | arithmetic    |
+| `min`                   | `applyKernel`, `min`          | 50000 (global kernel), never          | arithmetic    |
+| `norm`                  | `applyKernel`, `norm`         | 50000 (global kernel), never          | arithmetic    |
 | `normalCDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
 | `normalPDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
 | `parallelAutoCorr`      | `applyKernel`                 | 50000 (global kernel)                 | signal        |
@@ -91,9 +92,7 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelStatDistance`  | `distance`                    | 50000 (global)                        | statistics    |
 | `parallelStatHistogram` | `applyKernel`, `histogram`    | 50000 (global kernel), 50000 (global) | statistics    |
 | `parallelStatMAD`       | `applyKernel`, `mean`         | 50000 (global kernel), never          | statistics    |
-| `parallelStatMax`       | `max`                         | 50000 (global)                        | statistics    |
 | `parallelStatMedian`    | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatMin`       | `min`                         | 50000 (global)                        | statistics    |
 | `parallelStatMinMax`    | `minMax`                      | 50000 (global)                        | statistics    |
 | `parallelStatMode`      | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
 | `parallelStatNorm`      | `applyKernel`, `norm`         | 50000 (global kernel), never          | statistics    |
@@ -127,8 +126,9 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | `log`              | `log`               | arithmetic   |
 | `mean`             | `mean`              | arithmetic   |
 | `multiply`         | `multiply`, `scale` | arithmetic   |
-| `norm`             | `norm`              | arithmetic   |
+| `parallelStatMax`  | `max`               | statistics   |
 | `parallelStatMean` | `mean`              | statistics   |
+| `parallelStatMin`  | `min`               | statistics   |
 | `parallelStatSum`  | `sum`               | statistics   |
 | `sin`              | `sin`               | trigonometry |
 | `sqrt`             | `sqrt`              | arithmetic   |
@@ -144,7 +144,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 
 | Module        | Effective | Disabled | Non-parallel |
 | ------------- | --------: | -------: | -----------: |
-| arithmetic    |        16 |       16 |           13 |
+| arithmetic    |        17 |       15 |           13 |
 | bitwise       |         7 |        0 |            0 |
 | combinatorics |         0 |        0 |           21 |
 | complex       |         0 |        0 |            4 |
@@ -156,7 +156,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | set           |         0 |        0 |           10 |
 | signal        |         7 |        0 |            0 |
 | special       |        31 |        0 |            7 |
-| statistics    |        14 |        2 |            1 |
+| statistics    |        12 |        4 |            1 |
 | string        |         0 |        0 |            5 |
 | trigonometry  |         9 |        3 |            7 |
 | unit          |         0 |        0 |            2 |
@@ -169,7 +169,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | -------------------------- | --------------------- | :-----: | ----------: |
 | `abs`                      | never                 |    —    |           1 |
 | `add`                      | never                 |    —    |           1 |
-| `applyKernel`              | 50000 (global kernel) |    ✓    |          79 |
+| `applyKernel`              | 50000 (global kernel) |    ✓    |          82 |
 | `applyKernel2`             | 50000 (global)        |    ✓    |           2 |
 | `besselJ`                  | 1000000               |    ✓    |           0 |
 | `bitAnd`                   | 50000 (global)        |    ✓    |           1 |
@@ -194,9 +194,9 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `mannWhitneyTest`          | 4096                  |    ✓    |           0 |
 | `matmul`                   | 4096                  |    ✓    |           0 |
 | `matrixPower`              | 9216                  |    ✓    |           0 |
-| `max`                      | 50000 (global)        |    ✓    |           2 |
+| `max`                      | never                 |    —    |           2 |
 | `mean`                     | never                 |    —    |           3 |
-| `min`                      | 50000 (global)        |    ✓    |           2 |
+| `min`                      | never                 |    —    |           2 |
 | `minMax`                   | 50000 (global)        |    ✓    |           1 |
 | `multiply`                 | never                 |    —    |           1 |
 | `negate`                   | never                 |    —    |           1 |

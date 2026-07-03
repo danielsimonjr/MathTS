@@ -262,9 +262,14 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   (+`min`/`max`), measured them (`run.ts sqrt square norm dot min max` → all `recommendedThreshold=never`,
   speedup 0.08–1.19× with no persistent break-even — memory-bound, matching `add`/`abs`/`sum`/`mean`), and set
   `sqrt`/`square`/`norm`/`dot` to explicit `'never'` in `ComputePool.ts`. Parallel 417✓, functions
-  arithmetic/parallel 241✓. **Follow-ups:** `min`/`max` are also memory-bound but are **not `OpName`s** —
-  add them to the union to make them tunable; the remaining unmeasured global-default ops (`distance`,
-  `minMax`, `prod`, `std`, `histogram`) still want bench cases + a **target-hardware** run (this was a dev box).
+  arithmetic/parallel 241✓. **Follow-ups:** ✅ **`min`/`max` added to `OpName` + set `'never'` (2026-07-02)** —
+  and while doing so found a real enforcement bug: the `functions/` `min`/`max`/`norm` Float64Array call sites
+  dispatched to the worker pool **unconditionally** (no `shouldParallelize` gate), so `norm`'s existing `'never'`
+  config was silently ignored and every `min`/`max`/`norm` call paid worker-dispatch overhead regardless of size.
+  Added `shouldParallelize` gates + sequential fallbacks; they now respect the threshold (sequential for these
+  memory-bound reductions). ⬜ **Still open:** the remaining unmeasured global-default ops (`distance`, `histogram`,
+  `parallelStat{Min,Max,Distance}`, bitwise family) want bench cases + a **target-hardware** run (this was a dev
+  box), and the `variance`/`distance` ComputePool methods have the same unconditional-dispatch pattern to audit.
 - ✅ **[HIGH-PRIORITY BUG — found + FIXED by WS-1 P2 oracle tests] `matrixSchur` was broken two ways.**
   (1) real 2×2 diagonal blocks were never triangularized (accepted as if complex pairs), so
   `matrixSchur([[2,1],[1,2]])` returned the input with diagonal `[2,2]` instead of eigenvalues `{1,3}`

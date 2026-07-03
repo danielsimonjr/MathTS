@@ -965,10 +965,16 @@ export const norm = mathTyped('norm', {
   'SparseMatrix, string': (m: unknown, p: string): f64 =>
     matrixNorm(matrixLike(m as { toArray(): unknown }), p),
 
-  // Parallel Float64Array norm
+  // Float64Array norm (Euclidean) — gated on the (memory-bound ⇒ 'never') threshold.
+  // Previously dispatched to the worker pool unconditionally, ignoring the 'never'
+  // config; now sequential unless the threshold says otherwise.
   Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.norm(a);
-    return result.result;
+    if (computePool.shouldParallelize(a.length, 'norm')) {
+      return (await computePool.norm(a)).result;
+    }
+    let s = 0;
+    for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+    return Math.sqrt(s);
   },
 });
 
@@ -1137,10 +1143,15 @@ export const min = mathTyped('min', {
   'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.min(a, b, ...rest),
 
-  // Parallel Float64Array min
+  // Float64Array min — gated on the (memory-bound ⇒ 'never') threshold, so it stays
+  // sequential instead of paying worker-dispatch overhead on every call.
   Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.min(a);
-    return result.result;
+    if (computePool.shouldParallelize(a.length, 'min')) {
+      return (await computePool.min(a)).result;
+    }
+    let m = Infinity;
+    for (let i = 0; i < a.length; i++) if (a[i] < m) m = a[i];
+    return m;
   },
 });
 
@@ -1156,10 +1167,14 @@ export const max = mathTyped('max', {
   'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.max(a, b, ...rest),
 
-  // Parallel Float64Array max
+  // Float64Array max — gated on the (memory-bound ⇒ 'never') threshold; sequential.
   Float64Array: async (a: Float64Array): Promise<f64> => {
-    const result = await computePool.max(a);
-    return result.result;
+    if (computePool.shouldParallelize(a.length, 'max')) {
+      return (await computePool.max(a)).result;
+    }
+    let m = -Infinity;
+    for (let i = 0; i < a.length; i++) if (a[i] > m) m = a[i];
+    return m;
   },
 });
 

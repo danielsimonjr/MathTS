@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-02) — WS-2: `min`/`max`/`norm` respected their parallel thresholds
+
+`min`, `max`, and `norm` on a `Float64Array` dispatched to the worker pool
+**unconditionally** — the call sites never checked `shouldParallelize`. So
+`norm`'s existing `'never'` threshold was silently ignored, and every `min` /
+`max` / `norm` call paid worker-dispatch overhead regardless of size. Also,
+`min`/`max` weren't `OpName`s, so they couldn't be tuned at all.
+
+- Added `min` / `max` to the `OpName` union and set both to `'never'` in
+  `DEFAULT_THRESHOLD_BY_OP` (same memory-bound reduction profile as
+  `sum`/`mean`/`norm`/`dot`).
+- Gated the `min` / `max` / `norm` `Float64Array` paths on `shouldParallelize`
+  with a sequential fallback, so they honor the threshold (now sequential) instead
+  of always dispatching.
+
+No behavior change to results; removes needless worker round-trips on these
+reductions. functions 3148 pass / 41 skip; parallel 417 pass; typecheck + eslint
+clean. (Open: `distance`/`variance` ComputePool methods have the same
+unconditional-dispatch pattern; `distance`/`histogram`/bitwise thresholds still
+want a target-hardware bench run.)
+
 ### Tooling (2026-07-02) — dependency-graph: fewer unused-export false positives (452 → 371)
 
 Two fixes in `tools/create-dependency-graph`:
