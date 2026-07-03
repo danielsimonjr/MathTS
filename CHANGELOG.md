@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tests (2026-07-02) — algebra/CAS coverage audit + `leafCount` oracle
+
+Audited the activated `functions/src/algebra/` layer the DGT flagged as having no
+*direct* test. `simplify` / `derivative` / `polynomialRoot` are genuinely covered
+(the flag only checks direct imports). `leafCount` was smoke-only (`typeof … ===
+'function'`) and is now pinned with deterministic oracles
+(`functions/tests/gap-algebra-cas-oracle.test.ts`, 5 cases). The audit also
+surfaced two more smoke-only-**and-broken** activated functions, documented in
+`TODO.md` as HIGH follow-ups: `sylvester` (throws in `subset(G, index(k,k))` →
+`get`; `lyap` fails through it — now reached because the factory `schur` was
+fixed earlier) and `rationalize` (no `string` signature despite its docstring;
+2-arg form throws in `resolve`).
+
 ### Added (2026-07-02) — element-wise Array/Matrix support for typed `add` / `multiply`
 
 The typed `add` had no 2-argument Array/Matrix signature, so `add([1,2],[3,4])`,

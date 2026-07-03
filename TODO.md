@@ -348,10 +348,26 @@ Genuine issues found (verified, not report artifacts):
     `'Array,Array'` path — element-wise product is `dotMultiply`). `add([1,2],[3,4])` etc. now work; leaves fold
     through the binary op so Complex/Fraction/BigNumber elements work too. Tests:
     `functions/tests/typed-arithmetic-elementwise.test.ts` (9). No regressions (functions 3126 pass / 41 skip).
-- ⬜ **[MED — activated algebra/CAS layer flagged no-direct-test] audit real vs transitive coverage.**
-  TEST_COVERAGE lists `functions/src/algebra/` files with no direct-import test: `simplify`(+`util`/`wildcards`),
-  `rationalize`, `derivative`, `polynomialRoot`, `lyap`, `resolve`, `leafCount`, plus `expression/src/error/MathjsError.ts`.
-  Several are likely covered transitively (CAS/simplify tests exist) — audit which are genuinely untested and pin those.
+- ✅/🐞 **[MED — activated algebra/CAS coverage audit DONE 2026-07-02] and it found more broken functions.**
+  The DGT "no direct-import test" flag is a false positive for the _covered_ ones (it only checks direct imports).
+  Audit result:
+  - ✅ **`simplify` / `derivative` / `polynomialRoot`** — genuinely covered (real assertions in
+    `algebra.test.ts` / `cas.test.ts` / `forward-mode-ad.test.ts`).
+  - ✅ **`leafCount`** — was **smoke-only** (`typeof leafCount === 'function'`); now pinned with deterministic
+    oracles in `functions/tests/gap-algebra-cas-oracle.test.ts` (5 cases).
+  - 🐞 **[HIGH — new] `sylvester` + `lyap` BROKEN.** Both were smoke-only. `sylvester(A,B,C)` throws in
+    `subset(G, index(k,k))` → `MathJSDenseMatrix.get` ("reading undefined" — out-of-range row); `lyap` (which is
+    `sylvester(A, Aᵀ, −Q)`) fails through it. It's **now reached** because the factory `schur` `sylvester` depends
+    on was fixed earlier this session (previously it threw at `schur`). Likely a broken `Index`/`subset` interaction
+    on the bridge matrices, or a real indexing bug. Oracle ready: `lyap(diag(−1,−2), I)` ⇒ `diag(0.5, 0.25)` (closed
+    form of `AP+PA'+Q=0`). Same class as the slu/schur factory-layer bugs.
+  - 🐞 **[HIGH — new] `rationalize` BROKEN.** Smoke-only. `rationalize('(x+1)^2')` (1-arg, the basic form) throws
+    "Unexpected type … (expected: boolean or Object, actual: undefined, index 1)" — there is **no `string`
+    signature** (only `Node` / `Node,boolean` / `Node,Object` / `Node,Object,boolean`), yet its own docstring shows
+    `rationalize('sin(x)+y')`. The 2-arg `rationalize(expr, scope)` form throws inside `resolve` ("actual: any,
+    index 1"). Add `string` signatures (parse first) + fix the `resolve` scope typing.
+  - ℹ️ `resolve` (13 test-file refs) — mostly `Promise.resolve` false matches; the CAS `resolve` is exercised via
+    `rationalize`/`simplify` but has the scope-typing bug above.
 - ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
   MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
   (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
