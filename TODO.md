@@ -454,13 +454,20 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   (`@danielsimonjr/mathts-core/types/unit.ts`, 743 lines, canonical-value subset; via `to()`/`toBest()`). (No third
   dormant Unit — that file doesn't exist; earlier note was stale.) **Maintainer chose the full merge** into one
   class. **Staged plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
-  **Architecture recommendation (REVERSES the "core as base" preference — needs maintainer confirm before Phase 3):**
-  relocate the feature-complete **mathjs Unit into `core`** as the single class + port core's nicer canonical `toBest`
-  (`0.1 mm` not `100 µm`), rather than reimplement ~3000 lines of mathjs features onto the core class (reinvention +
-  capability-loss risk). Both already SI-normalize `.value`, so storage is compatible. **Progress:** ✅ Phase 0.1
-  characterization net (`functions/tests/unit-characterization.test.ts`, 8 oracles pinning the thin-covered mathjs
-  features so the merge can't silently drop them). Next: Phase 0.2 (core canonical net) → Phase 1 (dep audit + move
-  to core). The operator dual-flavor branching stays until Phase 3.
+  **Architecture (CONFIRMED by maintainer 2026-07-03): relocate the feature-complete mathjs Unit into `core` as the
+  single class, DEEPLY INTEGRATED** (satisfied by core's own `Complex`/`BigNumber`/`Fraction` + config + format + new
+  core scalar arithmetic, absorbing core's `unit-definitions`/`unit-prefixes`), + port core's nicer canonical `toBest`
+  (`0.1 mm` not `100 µm`). Both already SI-normalize `.value`. **Progress:**
+  ✅ **Phase 0** — characterization safety net: mathjs features (`functions/tests/unit-characterization.test.ts`, 8
+  oracles) + core canonical semantics (existing `core/tests/types/unit.test.ts`, 96 asserts, serves as the net).
+  ✅ **Phase 1.1 dep audit** — the 19 injected `UnitDependencies` mapped to core: core HAS Complex/BigNumber/Fraction,
+  `config`(`DEFAULT_CONFIG`), `format`, number-only `isNumeric`; **the load-bearing GAP is polymorphic scalar
+  arithmetic** (`addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/`pow`/`abs`/`fix`/`round`/`equal` over
+  `number|BigNumber|Complex|Fraction`) → new `core/src/arithmetic/scalar.ts`. **Next (resumable): Phase 1.1-impl** —
+  build `core/src/arithmetic/scalar.ts` (TDD) → **1.2** move `Unit.ts`+supporting files to core & rewire onto it →
+  **2** reconcile toBest/JSON → **3** rewire functions (`unit()`/`to`/`toBest`/operators; drop dual-branching) →
+  **4** retire core Unit to an alias → **5** migrate ~130 tests + regression + changeset. Operator dual-flavor
+  branching stays until Phase 3. Full step list: the plan doc.
 - ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
   from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
   (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.

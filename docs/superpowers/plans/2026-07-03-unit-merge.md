@@ -19,7 +19,24 @@
 
 ## Decision Record
 
-- **Base = mathjs Unit (relocated to core), not core Unit.** Rationale: superset of capability; avoids reimplementing parser/systems/createUnit; both already SI-normalize `.value`. (User's stated preference was "core base + port features"; cataloging showed that direction is ~3,000 lines of reinvention with capability-loss risk. Surface this reversal to the maintainer before Phase 3 — it is reversible until then.)
+- **CONFIRMED by maintainer (2026-07-03): relocate the mathjs Unit into `core` as the single class, and DEEPLY INTEGRATE it** — the relocated Unit must be satisfied by core's OWN primitives (core `Complex`/`BigNumber`/`Fraction`, core `config`, core `format`, and new core scalar arithmetic), not by dragging functions-package utils into core. It becomes a first-class core citizen, absorbing core's existing `unit-definitions.ts`/`unit-prefixes.ts` where they overlap.
+- **Base = mathjs Unit (relocated to core), not core Unit.** Rationale: superset of capability; avoids reimplementing parser/systems/createUnit; both already SI-normalize `.value`.
+
+### Phase 1.1 dependency audit (COMPLETE) — the 19 injected `UnitDependencies` → core
+
+| Dep                                                          | Core status                             | Deep-integration action                                                                                                                     |
+| ------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Complex`, `BigNumber`, `Fraction`                           | ✅ core exports                         | import from core                                                                                                                            |
+| `config`                                                     | ✅ `DEFAULT_CONFIG` (core/src/index)    | wire core config surface                                                                                                                    |
+| `format`                                                     | ✅ `core/src/number.ts#format`          | verify option shape; reuse                                                                                                                  |
+| `isNumeric`                                                  | ⚠️ number-only (`core/src/utils.ts:10`) | extend to `number\|BigNumber\|Complex\|Fraction`                                                                                            |
+| `number`                                                     | ⚠️ needs a converter                    | add/reuse core `number()`                                                                                                                   |
+| `addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar` | ❌ GAP                                  | **NEW `core/src/arithmetic/scalar.ts`** — polymorphic over the 4 numeric types (the numeric classes have `.add`/`.mul` methods to build on) |
+| `pow`/`abs`/`fix`/`round`/`equal`                            | ❌ GAP (polymorphic)                    | add to `scalar.ts`                                                                                                                          |
+| `?on`                                                        | n/a (optional event hook)               | pass `undefined` (config-change listener unused in core)                                                                                    |
+
+So Phase 1.1's implementation half = **build `core/src/arithmetic/scalar.ts`** (TDD, polymorphic scalar ops) + a polymorphic `isNumeric`. That module is the load-bearing piece of deep integration; everything else in Phase 1.2 is the mechanical move + rewire onto it.
+
 - **`dimensions` = array-9 (mathjs), keep angle+bit.** Superset; core's struct-7 is representable. Core tests that read `.dimensions.temperature` (struct) get a compatibility accessor OR are rewritten (Phase 5).
 - **`toBest` = port core's `|log10|`-minimizing scan** over the mathjs prefix tables so results match the nicer core behavior.
 - **JSON:** accept BOTH `{mathts,…}` and `{mathjs,…}` on `fromJSON`; emit one canonical envelope (choose `{mathts,…}`, alias kept).
@@ -40,13 +57,9 @@ Capture CURRENT behavior of BOTH Units before any change — especially the thin
 - [ ] Run; confirm GREEN (documents present behavior).
 - [ ] Commit `test(functions): characterize mathjs Unit features pre-merge`.
 
-### Task 0.2: Characterize core Unit's canonical semantics
+### Task 0.2: Characterize core Unit's canonical semantics — ✅ SATISFIED BY EXISTING COVERAGE
 
-**Files:**
-
-- Create: `core/tests/types/unit-characterization.test.ts`
-- [ ] Pin the behaviors the merge must preserve: `toBest` results (`0.1 mm`, `1 kg`, `1 MPa`), canonical `.value`, `add/sub/mul/div/pow`, `to`, `equals`/`dimensionsEqual`, JSON `{mathts,…}` round-trip.
-- [ ] Run GREEN; commit `test(core): characterize core Unit canonical semantics pre-merge`.
+The existing `core/tests/types/unit.test.ts` (96 asserts) already pins canonical `.value`, `toBest` results (`0.1 mm`/`1 kg`/`1 MPa`), `add/sub/mul/div/pow`, `to`, `equals`/`dimensionsEqual`, and JSON `{mathts,…}` round-trip. No new file needed — that suite IS the core characterization net and must stay green through Phase 5 (with Phase 5.1 reconciling shape-specific assertions).
 
 ---
 
