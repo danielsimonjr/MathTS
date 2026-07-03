@@ -4,6 +4,21 @@ import fc from 'fast-check';
 import { abs, add, multiply, norm } from '../src/typed/arithmetic.js';
 import { qr } from '../src/factories/index.js';
 import { shapiroWilkTest } from '../src/typed/hypothesis.js';
+import {
+  sin,
+  cos,
+  sinh,
+  cosh,
+  exp,
+  log,
+  sqrt,
+  cbrt,
+  hypot,
+  sign,
+  gcd,
+  lcm,
+  sort,
+} from '../src/index.js';
 
 /**
  * WS-1 P3 — property-based invariant tests (unlocked by `fast-check`, gate G1).
@@ -28,6 +43,20 @@ const A = add as (x: unknown, y: unknown) => unknown;
 const M = multiply as (x: unknown, y: unknown) => unknown;
 const N = norm as (x: unknown, p?: unknown) => number;
 const ABS = abs as (x: number) => number;
+const num = (f: unknown) => f as (x: number) => number;
+const SIN = num(sin);
+const COS = num(cos);
+const SINH = num(sinh);
+const COSH = num(cosh);
+const EXP = num(exp);
+const LOG = num(log);
+const SQRT = num(sqrt);
+const CBRT = num(cbrt);
+const SIGN = num(sign);
+const HYP = hypot as (a: number, b: number) => number;
+const GCD = gcd as (a: number, b: number) => number;
+const LCM = lcm as (a: number, b: number) => number;
+const SORT = sort as (x: number[]) => number[];
 
 describe('abs — properties', () => {
   it('non-negative and even: abs(x) ≥ 0 and abs(−x) = abs(x)', () => {
@@ -160,6 +189,118 @@ describe('shapiroWilkTest — invariance over random samples', () => {
         }
       ),
       { numRuns: 50 }
+    );
+  });
+});
+
+describe('trigonometry — exact identities', () => {
+  it('Pythagorean: sin²(x) + cos²(x) = 1', () => {
+    fc.assert(
+      fc.property(dbl(-1e3, 1e3), (x) => close(SIN(x) * SIN(x) + COS(x) * COS(x), 1, 1e-9))
+    );
+  });
+
+  it('parity: sin(−x) = −sin(x) and cos(−x) = cos(x)', () => {
+    fc.assert(
+      fc.property(dbl(-1e3, 1e3), (x) => close(SIN(-x), -SIN(x)) && close(COS(-x), COS(x)))
+    );
+  });
+});
+
+describe('hyperbolic — exact identities', () => {
+  it('cosh(x) + sinh(x) = exp(x)', () => {
+    // The `cosh² − sinh² = 1` form suffers catastrophic cancellation for large x
+    // (both terms ~e^{2x}/4, so their difference loses the leading 1). This
+    // equivalent identity is cancellation-free (both summands positive).
+    fc.assert(fc.property(dbl(-100, 100), (x) => close(COSH(x) + SINH(x), EXP(x), 1e-9)));
+  });
+});
+
+describe('exp / log — inverse relationship', () => {
+  it('log(exp(x)) = x on a non-overflowing range', () => {
+    fc.assert(fc.property(dbl(-100, 100), (x) => close(LOG(EXP(x)), x, 1e-9)));
+  });
+
+  it('exp(log(x)) = x for x > 0', () => {
+    fc.assert(fc.property(dbl(1e-6, 1e6), (x) => close(EXP(LOG(x)), x, 1e-9)));
+  });
+});
+
+describe('roots — inverse relationship', () => {
+  it('sqrt(x)² = x for x ≥ 0', () => {
+    fc.assert(fc.property(dbl(0, 1e8), (x) => close(SQRT(x) * SQRT(x), x, 1e-8)));
+  });
+
+  it('cbrt(x)³ = x (all sign)', () => {
+    fc.assert(
+      fc.property(dbl(-1e6, 1e6), (x) => {
+        const c = CBRT(x);
+        return close(c * c * c, x, 1e-7);
+      })
+    );
+  });
+
+  it('hypot(a, b)² = a² + b²', () => {
+    fc.assert(
+      fc.property(dbl(-1e4, 1e4), dbl(-1e4, 1e4), (a, b) =>
+        close(HYP(a, b) * HYP(a, b), a * a + b * b, 1e-7)
+      )
+    );
+  });
+});
+
+describe('sign — defining property', () => {
+  it('sign(x)·|x| = x and sign(x) ∈ {−1, 0, 1}', () => {
+    fc.assert(
+      fc.property(dbl(-1e9, 1e9), (x) => {
+        const s = SIGN(x);
+        return (s === -1 || s === 0 || s === 1) && close(s * ABS(x), x);
+      })
+    );
+  });
+});
+
+describe('gcd / lcm — number-theory identity', () => {
+  it('gcd(a,b)·lcm(a,b) = a·b for positive integers', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 1e4 }), fc.integer({ min: 1, max: 1e4 }), (a, b) => {
+        // bound keeps a·b ≤ 1e8, well within exact-integer range
+        return GCD(a, b) * LCM(a, b) === a * b;
+      })
+    );
+  });
+
+  it('gcd divides both operands', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 1e6 }), fc.integer({ min: 1, max: 1e6 }), (a, b) => {
+        const g = GCD(a, b);
+        return a % g === 0 && b % g === 0;
+      })
+    );
+  });
+});
+
+describe('sort — order + permutation invariants', () => {
+  // Integer samples: the public `sort` orders via `compareNatural`, which is
+  // *tolerance-aware* (values within `config.epsilon` compare equal — so e.g. a
+  // denormal like 1e-320 and 0 are "equal" and their mutual order is unspecified).
+  // Well-separated integers make the tolerant order coincide with the strict order,
+  // so the invariant is meaningful. (This is documented mathjs behavior, not a bug.)
+  const ints = fc.array(fc.integer({ min: -1e6, max: 1e6 }), { maxLength: 40 });
+
+  it('output is non-decreasing, idempotent, and preserves the multiset', () => {
+    fc.assert(
+      fc.property(ints, (x) => {
+        const s = SORT(x.slice());
+        // non-decreasing
+        for (let i = 1; i < s.length; i++) if (s[i] < s[i - 1]) return false;
+        // idempotent
+        const s2 = SORT(s.slice());
+        if (s2.some((v, i) => v !== s[i])) return false;
+        // permutation: same length and same exact sum (integers ⇒ no round-off)
+        if (s.length !== x.length) return false;
+        return s.reduce((a, b) => a + b, 0) === x.reduce((a, b) => a + b, 0);
+      })
     );
   });
 });

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tests (2026-07-03) — extended property-based invariants (WS-1 P3)
+
+Grew `functions/tests/property-invariants.test.ts` from 10 to 22 `fast-check`
+properties: trig Pythagorean identity + parity, a cancellation-free hyperbolic
+identity (`cosh+sinh=exp`), `exp`/`log` and `sqrt`/`cbrt`/`hypot` inverse
+relationships, the `sign` defining property, the `gcd·lcm=a·b` number-theory
+identity, and `sort` order/idempotence/multiset invariants — each asserted over
+thousands of random inputs. (Surfaced, and documented in-test: the public `sort`
+uses a tolerance-aware comparator, so near-equal floats compare equal and their
+mutual order is unspecified — intended mathjs behavior, not a defect.)
+
 ### Fixed (2026-07-03) — SVD correct for rank-deficient matrices (one-sided Jacobi fallback)
 
 `svd([[1,2],[2,4]])` returned σ₁ = **√5** (should be **5**) with a wrong `V` and no

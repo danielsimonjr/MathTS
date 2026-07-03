@@ -324,7 +324,13 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
     inputs — `abs` non-negativity/evenness, `add`/`multiply` commutativity (numbers + element-wise vectors), vector
     `norm` non-negativity/absolute-homogeneity/triangle-inequality, matrix-Frobenius homogeneity, `qr` orthonormality
     (`QᵀQ=I` over random n×n), and `shapiroWilkTest` scale+location+reflection invariance (non-degenerate samples).
-    10 properties, stable across repeated seeds. Extend to more functions incrementally.
+    **Extended 2026-07-03 → 22 properties**: added trig Pythagorean identity (`sin²+cos²=1`) + parity,
+    cancellation-free hyperbolic identity (`cosh+sinh=exp`), `exp`/`log` and `sqrt`/`cbrt`/`hypot` inverse
+    relationships, `sign` defining property, the `gcd·lcm=a·b` number-theory identity (+ gcd divides both), and
+    `sort` order/idempotence/multiset-permutation invariants. Stable across repeated seeds. **Finding (documented in
+    the test, not a bug):** the public `sort` uses the _tolerance-aware_ `compareNatural`, so near-equal floats
+    (e.g. a denormal `1e-320` vs `0`) compare **equal** and their mutual order is unspecified — the invariant is
+    pinned on well-separated integers. Extend to more functions incrementally.
 - 📋 **[program roadmap] scientific-library completeness** — the DGT-report analysis (parallel/wasm pairing,
   452 unused exports, oracle-coverage, GPU f32) turned into a subagent-driven, atomic-commit plan across 9
   workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
