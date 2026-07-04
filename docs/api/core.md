@@ -309,11 +309,11 @@ See [typed-function documentation](https://github.com/josdejong/typed-function) 
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (81 exports).
+> `@danielsimonjr/mathts-core` (92 exports).
 
-### Functions (32)
+### Functions (43)
 
-`create`, `createFactory`, `createMathTSTyped`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `registerNativeTypes`, `typed`, `UnitParseError`
+`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `number`, `pow`, `registerNativeTypes`, `round`, `subtractScalar`, `typed`, `UnitParseError`
 
 ### Constants & values (42)
 

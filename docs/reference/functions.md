@@ -568,6 +568,7 @@ returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 | `moment(x, k[, central])`                     | k-th moment; `central` (default `true`) subtracts the mean first, else raw                                                                      |
 | `cov(x, y[, ddof])` / `cov(matrix[, , ddof])` | Sample covariance (scalar for two vectors) or covariance matrix (rows = observations, cols = variables); `ddof` defaults to 1                   |
 | `corrcoef(matrix)`                            | Pearson correlation-coefficient matrix (rows = observations, cols = variables); diagonal is 1                                                   |
+| `spearman(x, y)`                              | Spearman rank correlation ρ (Pearson of the ranks); captures any monotonic relationship — a monotonic non-linear pair gives ρ = 1               |
 | `gmean(x)`                                    | Geometric mean `exp(mean(ln x))`; all entries must be `> 0`                                                                                     |
 | `hmean(x)`                                    | Harmonic mean `n / Σ(1/xᵢ)`; all entries must be `> 0`                                                                                          |
 | `iqr(x)`                                      | Interquartile range `Q3 − Q1` (via `quantileSeq`)                                                                                               |
@@ -2039,7 +2040,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (828 exports).
+> `@danielsimonjr/mathts-functions` (829 exports).
 
 ### Functions by category
 
@@ -2094,6 +2095,8 @@ await terminatePool();
 **Expression Evaluation** (5): `compileExpr`, `evaluate`, `parser`, `replacer`, `reviver`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
+
+**Other exports (uncategorized)** (1): `spearman`
 
 ### Constants & values (61)
 
