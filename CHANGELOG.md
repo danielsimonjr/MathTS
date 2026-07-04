@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — DGT: `bin`/entry files are reachability roots (5th fix)
+
+`workbook/src/cli.ts` (the `mtsw` bin entry) was unreachable from `src/index.ts`, so the
+whole CLI subtree was excluded from the graph and everything it consumes false-flagged
+(e.g. `importWorkbook` — a documented parser API the CLI imports). `bin` targets and
+`exports` subpath files now seed the reachability walk (entry points 22 → 25:
+`core/src/internal.ts`, `workbook/src/cli.ts`, `workerpool/src/worker.ts`), and such
+roots are exempt from the unused-files check (nothing imports a worker script by design —
+it's loaded via `new URL(...)`). Final today: **481 → 243 flagged / 31 true deletion
+candidates / 0 unused files** across five root-cause classifier fixes.
+
 ### Changed (2026-07-04) — DGT unused-analysis: test-only consumers now always count (4th fix)
 
 Test files were fed into the unused-analysis **only under `--include-tests`**, but

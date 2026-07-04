@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4395, "re": 1501 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 862, "e": 4415, "re": 1501 },
   "s": {
-    "loc": 157761,
+    "loc": 160542,
     "cls": 51,
-    "int": 372,
-    "fn": 1473,
+    "int": 377,
+    "fn": 1493,
     "tg": 156,
     "en": 0,
     "co": 1408,
-    "toi": 491
+    "toi": 494
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -40,7 +40,7 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 2,
+      "f": 3,
       "exp": [
         "fftBitReverse",
         "fftFrameInPlace",
@@ -1352,41 +1352,41 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 14,
+      "f": 18,
       "exp": [
+        "runCommand",
+        "validateCommand",
+        "describeCommand",
+        "capabilitiesCommand",
+        "templatesCommand",
+        "functionsCommand",
+        "metaCommand",
+        "exportCommand",
+        "runServer",
+        "serveCommand",
+        "graphCommand",
+        "stripCommand",
+        "newCommand",
+        "importCommand",
+        "cellCommand",
+        "dispatch",
         "SCHEMA_VERSION",
         "VERSION",
         "COMMAND_NAMES",
-        "describeData",
-        "addCell",
-        "editCell",
-        "removeCell",
-        "moveCell",
-        "renameCell",
-        "setMetadata",
-        "createExecutor",
-        "WorkbookExecutor",
-        "formatResult",
-        "writeFileAtomic",
-        "buildDependencyGraph",
-        "topologicalSort",
-        "getDependents",
-        "getAncestors",
-        "toMermaid",
-        "detectCycles"
+        "describeData"
       ],
       "cls": ["WorkbookExecutor", "Session"],
       "int": [
+        "CommandResult",
         "DescribeDoc",
         "CellPosition",
         "RemoveResult",
+        "RenderCell",
+        "RenderDoc",
+        "ToHtmlOptions",
         "JsonRpcRequest",
         "JsonRpcResponse",
-        "JsonRpcEvent",
-        "HandleResult",
-        "WorkbookEventLite",
-        "WorkbookMetadata",
-        "RuntimeConfig"
+        "JsonRpcEvent"
       ]
     },
     "assembly/algebra": {

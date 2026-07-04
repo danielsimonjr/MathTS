@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-04",
-    "totalFiles": 857,
+    "totalFiles": 862,
     "totalModules": 72,
-    "totalExports": 4395
+    "totalExports": 4415
   },
   "entryPoints": [
     {
@@ -293,6 +293,24 @@
           "getPoolStats"
         ],
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
+      },
+      "packages/workerpool/src/worker.ts": {
+        "description": "Worker functions for parallel MathTS computations.",
+        "externalDependencies": [
+          {
+            "package": "workerpool",
+            "imports": ["worker"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./fft-core.js",
+            "imports": ["fftFrameInPlace"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
       }
     },
     "core/arithmetic": {
@@ -26629,6 +26647,152 @@
       }
     },
     "workbook": {
+      "workbook/src/cli.ts": {
+        "description": "MathTS Workbook CLI",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": ["readFileSync", "writeFileSync", "lstatSync", "realpathSync"]
+          },
+          {
+            "module": "url",
+            "imports": ["pathToFileURL"]
+          },
+          {
+            "module": "path",
+            "imports": ["basename"]
+          },
+          {
+            "module": "readline",
+            "imports": ["createInterface"]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./fs-atomic",
+            "imports": ["writeFileAtomic"]
+          },
+          {
+            "file": "./session",
+            "imports": ["Session"]
+          },
+          {
+            "file": "./rpc",
+            "imports": ["handleRequest", "JsonRpcRequest"]
+          },
+          {
+            "file": "./parser",
+            "imports": ["parseWorkbook", "serializeWorkbook", "stripOutputs", "importWorkbook"]
+          },
+          {
+            "file": "./executor",
+            "imports": ["createExecutor"]
+          },
+          {
+            "file": "./graph",
+            "imports": ["buildDependencyGraph", "detectCycles", "toMermaid"]
+          },
+          {
+            "file": "./formatter",
+            "imports": ["formatResult"]
+          },
+          {
+            "file": "./contract",
+            "imports": ["SCHEMA_VERSION", "VERSION"]
+          },
+          {
+            "file": "./doc",
+            "imports": ["describeData"]
+          },
+          {
+            "file": "./introspect",
+            "imports": ["capabilitiesInfo", "listFunctions"]
+          },
+          {
+            "file": "./edit",
+            "imports": [
+              "addCell",
+              "editCell",
+              "removeCell",
+              "moveCell",
+              "renameCell",
+              "setMetadata"
+            ]
+          },
+          {
+            "file": "./edit",
+            "imports": ["CellPosition"],
+            "typeOnly": true
+          },
+          {
+            "file": "./types",
+            "imports": ["CellResult", "Workbook", "ParseResult", "CellType"],
+            "typeOnly": true
+          },
+          {
+            "file": "./html",
+            "imports": ["toHTML"]
+          },
+          {
+            "file": "./svg",
+            "imports": ["renderChart"]
+          },
+          {
+            "file": "./html",
+            "imports": ["RenderDoc", "RenderCell"],
+            "typeOnly": true
+          },
+          {
+            "file": "./yaml-safe",
+            "imports": ["parseYamlHardened"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": ["* as mathFunctions"]
+          }
+        ],
+        "exports": [
+          "runCommand",
+          "validateCommand",
+          "describeCommand",
+          "capabilitiesCommand",
+          "templatesCommand",
+          "functionsCommand",
+          "metaCommand",
+          "exportCommand",
+          "runServer",
+          "serveCommand",
+          "graphCommand",
+          "stripCommand",
+          "newCommand",
+          "importCommand",
+          "cellCommand",
+          "dispatch"
+        ],
+        "interfaces": ["CommandResult"],
+        "functions": [
+          "runCommand",
+          "validateCommand",
+          "describeCommand",
+          "capabilitiesCommand",
+          "templatesCommand",
+          "functionsCommand",
+          "metaCommand",
+          "exportCommand",
+          "runServer",
+          "serveCommand",
+          "graphCommand",
+          "stripCommand",
+          "newCommand",
+          "importCommand",
+          "cellCommand",
+          "dispatch"
+        ]
+      },
       "workbook/src/contract.ts": {
         "description": "Machine-contract constants shared by the CLI and the public API.",
         "externalDependencies": [],
@@ -26770,6 +26934,27 @@
           "toMermaid",
           "detectCycles"
         ]
+      },
+      "workbook/src/html.ts": {
+        "description": "Assemble a generic document structure into one self-contained HTML5 file —",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./markdown.js",
+            "imports": ["markdownToHtml"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["mathMLDocument", "mathMLError"]
+          }
+        ],
+        "exports": ["toCSS", "toHTML"],
+        "interfaces": ["RenderCell", "RenderDoc", "ToHtmlOptions"],
+        "functions": ["toCSS", "toHTML"]
       },
       "workbook/src/index.ts": {
         "description": "Scientific workbook runtime",
@@ -26954,6 +27139,15 @@
         "exports": ["listFunctions", "capabilitiesInfo"],
         "functions": ["listFunctions", "capabilitiesInfo"]
       },
+      "workbook/src/markdown.ts": {
+        "description": "Minimal, dependency-free Markdown → HTML for rendered documents. A small",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["markdownToHtml"],
+        "functions": ["markdownToHtml"]
+      },
       "workbook/src/parser.ts": {
         "description": "Workbook YAML parser",
         "externalDependencies": [
@@ -27079,6 +27273,16 @@
         "exports": ["Session"],
         "classes": ["Session"],
         "interfaces": ["WorkbookEventLite"]
+      },
+      "workbook/src/svg.ts": {
+        "description": "Render numeric data series to a self-contained inline SVG chart — a",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["renderChart"],
+        "interfaces": ["ChartSpec"],
+        "functions": ["renderChart"]
       },
       "workbook/src/types.ts": {
         "description": "Workbook type definitions",
@@ -29373,7 +29577,11 @@
       },
       {
         "name": "Packages/workerpool",
-        "files": ["packages/workerpool/src/fft-core.ts", "packages/workerpool/src/index.ts"]
+        "files": [
+          "packages/workerpool/src/fft-core.ts",
+          "packages/workerpool/src/index.ts",
+          "packages/workerpool/src/worker.ts"
+        ]
       },
       {
         "name": "Core/arithmetic",
@@ -30452,6 +30660,7 @@
       {
         "name": "Workbook",
         "files": [
+          "workbook/src/cli.ts",
           "workbook/src/contract.ts",
           "workbook/src/doc.ts",
           "workbook/src/edit.ts",
@@ -30459,11 +30668,14 @@
           "workbook/src/formatter.ts",
           "workbook/src/fs-atomic.ts",
           "workbook/src/graph.ts",
+          "workbook/src/html.ts",
           "workbook/src/index.ts",
           "workbook/src/introspect.ts",
+          "workbook/src/markdown.ts",
           "workbook/src/parser.ts",
           "workbook/src/rpc.ts",
           "workbook/src/session.ts",
+          "workbook/src/svg.ts",
           "workbook/src/types.ts",
           "workbook/src/yaml-safe.ts"
         ]
@@ -30516,18 +30728,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 857,
+    "totalTypeScriptFiles": 862,
     "totalModules": 72,
-    "totalLinesOfCode": 157761,
-    "totalExports": 4395,
+    "totalLinesOfCode": 160542,
+    "totalExports": 4415,
     "totalClasses": 51,
-    "totalInterfaces": 372,
-    "totalFunctions": 1473,
+    "totalInterfaces": 377,
+    "totalFunctions": 1493,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1408,
     "totalReExports": 1501,
-    "totalTypeOnlyImports": 491,
+    "totalTypeOnlyImports": 494,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

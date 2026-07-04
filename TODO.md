@@ -477,8 +477,17 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
     (2) subpath workspace imports (`@…/mathts-core/internal`) were exact-match-missed → misclassified as
     EXTERNAL deps, usage never registered; (3) `import * as X` was recorded as a named symbol `X` instead of
     wildcard → whole namespace-imported modules false-flagged (e.g. `dense/arithmetic.ts`). Report now SPLIT:
-    "Unreferenced anywhere (73, the actionable list)" vs "Referenced in-module (286, type contracts/helpers)".
-    **NEXT:** triage the 73 (delete or justify), one package per commit.
+    "Unreferenced anywhere" vs "Referenced in-module (type contracts/helpers)".
+    Then two MORE classifier defects found by spot-checking the candidates (RFL second-method): (4) test files
+    only fed the unused-analysis under `--include-tests`, which docs:deps never passes — every test-only-consumed
+    export false-flagged (e.g. matrix `initWasm`); now unconditional. (5) `bin`/entry files (workbook `cli.ts`,
+    workerpool `worker.ts`) weren't reachability roots — the whole CLI subtree was excluded and its imports
+    (e.g. the documented `importWorkbook`) false-flagged; now seeded (entry points 22→25) + exempt from the
+    unused-files check. **FINAL: 481 → 243 flagged / 31 true deletion candidates / 0 unused files.**
+    **NEXT:** triage the 31 (mathjs number-only factory remnants like `createNthRootNumber`/`createBigNumberClass`,
+    orphan utils `initial`/`toObject`/`noIndex`/`endsWith`, `SI_PREFIX_KEYS`, `matrixSqrtNewtonInternal`,
+    matrix/config.ts setters [decide: wire into index as public API or delete], assembly complex helpers
+    [verify asc-side usage first]) — delete or justify, one package per commit.
 
 - ✅/⬜ **[GC5 / G3 — Unit operators FIXED 2026-07-03; underlying two-Unit-types fork remains]** Dimensional
   analysis now works across `add`/`subtract`/`multiply`/`divide`/`abs` and `smaller`/`larger`/`smallerEq`/

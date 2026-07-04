@@ -6,8 +6,8 @@
 
 - **Potentially unused files**: 0
 - **Potentially unused exports**: 243
-  - **Unreferenced anywhere (deletion candidates)**: 32
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 211
+  - **Unreferenced anywhere (deletion candidates)**: 31
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 212
 
 ## Potentially Unused Files
 
@@ -96,10 +96,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `expression/src/utils/mathml.ts`
 
 - `operatorPrecedence` (function)
-
-### `workbook/src/parser.ts`
-
-- `importWorkbook` (function)
 
 ### `assembly/src/types/complex.ts`
 
@@ -499,9 +495,12 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `DescribeDoc` (interface) — 1 in-file ref
 
+### `workbook/src/html.ts`
+
+- `ToHtmlOptions` (interface) — 1 in-file ref
+
 ### `workbook/src/rpc.ts`
 
-- `JsonRpcRequest` (interface) — 1 in-file ref
 - `JsonRpcResponse` (interface) — 1 in-file ref
 - `JsonRpcEvent` (interface) — 3 in-file refs
 - `HandleResult` (interface) — 3 in-file refs
@@ -509,3 +508,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `workbook/src/session.ts`
 
 - `WorkbookEventLite` (interface) — 2 in-file refs
+
+### `workbook/src/svg.ts`
+
+- `ChartSpec` (interface) — 1 in-file ref

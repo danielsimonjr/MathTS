@@ -225,18 +225,28 @@ let workspaceMap: Map<string, WorkspacePackage> = new Map();
 function exportsSubpathEntries(
   rootDir: string,
   pkgDir: string,
-  pkg: { exports?: Record<string, unknown> }
+  pkg: { exports?: Record<string, unknown>; bin?: Record<string, string> | string }
 ): string[] {
   const entries: string[] = [];
+  const addIfExists = (srcPath: string): void => {
+    if (existsSync(join(rootDir, srcPath))) {
+      entries.push(srcPath.replace(/\\/g, '/'));
+    }
+  };
   if (pkg.exports && typeof pkg.exports === 'object') {
     for (const key of Object.keys(pkg.exports)) {
       if (key === '.' || !key.startsWith('./')) continue;
       const name = key.slice(2); // "./internal" → "internal"
-      const srcPath = join(pkgDir, 'src', `${name}.ts`);
-      if (existsSync(join(rootDir, srcPath))) {
-        entries.push(srcPath.replace(/\\/g, '/'));
-      }
+      addIfExists(join(pkgDir, 'src', `${name}.ts`));
     }
+  }
+  // `bin` entries (e.g. workbook's mtsw CLI → "./dist/cli.js" → src/cli.ts) are build
+  // roots too: nothing imports them, so without seeding them the whole CLI subtree is
+  // excluded from the graph and everything it consumes gets false-flagged as unused.
+  const binValues = typeof pkg.bin === 'string' ? [pkg.bin] : pkg.bin ? Object.values(pkg.bin) : [];
+  for (const bin of binValues) {
+    const m = /(?:\.\/)?dist\/(.+)\.[cm]?js$/.exec(bin);
+    if (m) addIfExists(join(pkgDir, 'src', `${m[1]}.ts`));
   }
   return entries;
 }
@@ -1509,6 +1519,9 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
   for (const file of files) {
     if (file.path === 'src/index.ts') continue; // Entry point is always "used"
     if (file.name === 'index' && file.exports.reExported.length > 0) continue; // Re-export hubs
+    // `exports` subpath / `bin` entry files are roots — nothing imports them by
+    // design (e.g. workerpool's worker.ts, loaded at runtime via `new URL(...)`).
+    if (extraEntryPaths.has(file.path)) continue;
     if (!importedFiles.has(file.path)) {
       unusedFiles.push(file.path);
     }
@@ -3210,13 +3223,17 @@ async function main(): Promise<void> {
   let activeParsedFiles = parsedFiles;
 
   if (isMonorepo) {
-    // Find entry points: each package's src/index.ts
+    // Find entry points: each package's src/index.ts PLUS its `exports` subpath and
+    // `bin` entry files (e.g. core/src/internal.ts, workbook/src/cli.ts) — build
+    // roots that nothing imports but that are just as alive as the index.
     const entryPoints: string[] = [];
     for (const [, ws] of workspaceMap) {
-      const entryPath = `${ws.srcDir}/index.ts`.replace(/\\/g, '/');
-      const found = parsedFiles.find((f) => f.path === entryPath);
-      if (found) {
-        entryPoints.push(found.path);
+      const candidates = [`${ws.srcDir}/index.ts`.replace(/\\/g, '/'), ...ws.extraEntries];
+      for (const entryPath of candidates) {
+        const found = parsedFiles.find((f) => f.path === entryPath);
+        if (found) {
+          entryPoints.push(found.path);
+        }
       }
     }
 
