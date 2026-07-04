@@ -21,7 +21,21 @@ import {
   isBigNumber,
   isMatrix,
 } from '../src/index.js';
+import { typeOf } from '../src/is.js';
 import { isComplexLike, isMatrixArray } from '../src/utils.js';
+
+describe('typeOf — canonical names for core numeric types (bundler-mangling proof)', () => {
+  it('returns the merge/dispatch names, not the (possibly mangled) constructor name', () => {
+    // The Unit keys its value-type converters on exactly these strings; a bundler
+    // may rename the class (e.g. `Fraction` → `_Fraction`), so typeOf must not lean
+    // on `constructor.name` for core's own types.
+    expect(typeOf(new Complex(1, 2))).toBe('Complex');
+    expect(typeOf(new Fraction(1, 2))).toBe('Fraction');
+    expect(typeOf(BigNumber.fromNumber(1))).toBe('BigNumber');
+    expect(typeOf(5)).toBe('number');
+    expect(typeOf('x')).toBe('string');
+  });
+});
 
 describe('canonical isComplex (instanceof)', () => {
   it('accepts a real Complex instance', () => {

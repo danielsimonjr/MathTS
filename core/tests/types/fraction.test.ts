@@ -34,6 +34,17 @@ describe('Fraction', () => {
       expect(f.denominator).toBe(4n);
     });
 
+    it('should accept a Fraction argument (clone it) instead of throwing on BigInt', () => {
+      // `new Fraction(frac)` must clone, not `BigInt(frac)` → lossy float → throw.
+      // The Unit value-type converters rely on this for non-integer Fraction values
+      // (e.g. degF's 5/9 conversion factor).
+      const src = new Fraction(-160, 9);
+      const clone = new Fraction(src);
+      expect(clone.numerator).toBe(-160n);
+      expect(clone.denominator).toBe(9n);
+      expect(clone.equals(src)).toBe(true);
+    });
+
     it('should default denominator to 1', () => {
       const f = new Fraction(5n);
       expect(f.numerator).toBe(5n);

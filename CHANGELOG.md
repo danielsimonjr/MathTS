@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — merged Unit: `°C`/`°F` parsing + `degF` conversions (Phase 4 prep)
+
+Capability preservation + two root-cause bug fixes for the merged Unit, all surfaced by a
+`degF`/`°F` conversion test:
+
+- **`°C`/`°F`/`°` notation.** `Unit.parse` now normalizes degree-symbol notations to their
+  ASCII spellings (`°C`→`degC`, `°F`→`degF`, `°`→`deg`) before tokenizing, so the merged Unit
+  accepts everything the old core Unit did (the mathjs parser natively rejects `°`).
+- **`Fraction` constructor accepts a `Fraction`.** `new Fraction(frac)` used to fall through to
+  `BigInt(frac)` — a lossy float coercion that *threw* for non-integer values (e.g. `degF`'s
+  `5/9` factor). It now clones, matching mathjs parity.
+- **`typeOf` canonical names.** `typeOf` returned `constructor.name` for `Complex`/`Fraction`,
+  which a bundler mangles to `_Complex`/`_Fraction` — silently breaking the Unit's value-type
+  converter dispatch in the built bundle. It now returns canonical `'Complex'`/`'Fraction'`
+  (as it already special-cased `BigNumber`).
+
+Together these make `degF`/`°F` conversions work in the core-wired Unit (`32 °F → 0 degC`,
+`100 °C → 373.15 K`). core 734 pass; functions unit suites green.
+
 ### Changed (2026-07-04) — functions now uses the core-relocated Unit (Phase 3 switch)
 
 The functions package no longer carries its own copy of the ~3.7k-line mathjs `Unit`

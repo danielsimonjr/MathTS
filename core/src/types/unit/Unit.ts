@@ -27,6 +27,16 @@ import type {
   UnitSystemEntry,
 } from './unit-types.js';
 
+/**
+ * Normalize degree-symbol unit notations to their ASCII spellings before parsing,
+ * so the merged Unit accepts the inputs the old core Unit did (`°C`, `°F`, and a
+ * bare `°` for angle). The mathjs parser treats `°` as an invalid character, so
+ * this must run before tokenizing. Order matters: `°C`/`°F` before the bare `°`.
+ */
+function normalizeDegreeSymbols(s: string): string {
+  return s.replace(/°C/g, 'degC').replace(/°F/g, 'degF').replace(/°/g, 'deg');
+}
+
 const name = 'Unit';
 const dependencies = [
   '?on',
@@ -290,13 +300,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
      */
     Unit.parse = function (str: string, options?: ParseOptions): UnitInstance {
       options = options || {};
-      text = str;
-      index = -1;
-      c = '';
 
-      if (typeof text !== 'string') {
+      if (typeof str !== 'string') {
         throw new TypeError('Invalid argument in Unit.parse, string expected');
       }
+
+      text = normalizeDegreeSymbols(str);
+      index = -1;
+      c = '';
 
       const unit = new Unit();
       unit.units = [];

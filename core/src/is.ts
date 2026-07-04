@@ -449,6 +449,12 @@ export function typeOf(x: unknown): string {
   if (t === 'object') {
     if (x === null) return 'null';
     if (isBigNumber(x)) return 'BigNumber'; // Special: weird mashup with Decimal
+    // Canonical names for core's own numeric types — a bundler may mangle the class
+    // name (e.g. `Fraction` → `_Fraction`), so `constructor.name` is unreliable for
+    // these. The Unit's value-type dispatch (`valueType`/`_getNumberConverter`) keys
+    // on exactly these strings, so returning the mangled name silently breaks it.
+    if (isComplex(x)) return 'Complex';
+    if (isFraction(x)) return 'Fraction';
     const ctor = (x as { constructor?: { name?: string } }).constructor;
     if (ctor && ctor.name) return ctor.name;
 

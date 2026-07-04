@@ -36,10 +36,19 @@ export class Fraction implements IFraction {
   readonly numerator: bigint;
   readonly denominator: bigint;
 
-  constructor(numerator: bigint | number | string, denominator: bigint | number | string = 1n) {
+  constructor(
+    numerator: bigint | number | string | Fraction,
+    denominator: bigint | number | string | Fraction = 1n
+  ) {
     // Decompose each argument into an exact integer ratio so that non-integer
     // numbers work too: `new Fraction(0.25)` → 1/4 (previously `BigInt(0.25)` threw).
-    const toRatio = (x: bigint | number | string): [bigint, bigint] => {
+    // A Fraction argument is accepted directly (mathjs parity: `new Fraction(frac)`
+    // clones it) — without this, `BigInt(frac)` collapses it to a lossy float and
+    // throws for non-integer values.
+    const toRatio = (x: bigint | number | string | Fraction): [bigint, bigint] => {
+      if (isFraction(x)) {
+        return [x.numerator, x.denominator];
+      }
       if (typeof x === 'number' && !Number.isInteger(x)) {
         const f = Fraction.fromNumber(x);
         return [f.numerator, f.denominator];

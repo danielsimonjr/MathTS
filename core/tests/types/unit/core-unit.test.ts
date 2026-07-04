@@ -35,6 +35,15 @@ describe('core Unit — conversion', () => {
     expect(Unit.parse('90 deg').to('rad').toString()).toBe('1.5707963267948966 rad');
     expect(Unit.parse('1 byte').to('bit').toString()).toBe('8 bit');
   });
+
+  it('accepts °C / °F degree-symbol notation (preserved from the old core Unit)', () => {
+    // The mathjs parser natively rejects '°'; we normalize °C→degC, °F→degF, °→deg
+    // so the merged Unit loses no capability the old core Unit had.
+    expect(new Unit(20, '°C').to('K').toString()).toBe('293.15 K');
+    expect(new Unit(32, '°F').to('degC').toString()).toBe('0 degC');
+    expect(Unit.parse('100 °C').to('K').toString()).toBe('373.15 K');
+    expect(Unit.parse('90 °').to('rad').toString()).toBe('1.5707963267948966 rad');
+  });
 });
 
 describe('core Unit — simplify / toSI / arithmetic', () => {
