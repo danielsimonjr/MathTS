@@ -4,20 +4,28 @@ Generated: 2026-01-13
 Updated: 2026-07-03
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
-> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 1.2)
+> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 3: switch functions to core's Unit)
 >
 > **In-flight migration:** merge the two `Unit` classes into one — relocate the feature-complete mathjs `Unit`
-> (`functions/src/type/unit/Unit.ts`) into `core`, **deeply integrated** on core's own primitives. Direction is
-> maintainer-confirmed. **DONE:** Phase 0 (characterization) + Phase 1.1 dep audit (`950a8fd`) + **Phase 1.1-impl —
-> the load-bearing gap is closed:** `core/src/arithmetic/scalar.ts` now provides polymorphic
-> `addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/`pow`/`abs`/`fix`/`round`/`equal` over
-> `number|bigint|Complex|Fraction|BigNumber` + polymorphic `isNumeric` + `number()`, exported from `core` (52
-> oracle tests; core 717 pass). **Start here — Phase 1.2:** move `Unit.ts`+`physicalConstants.ts`+`unit-types.ts`+
-> `function/*` from `functions/src/type/unit/` → `core/src/types/unit/`, rewire the 19 injected deps onto core
-> (the new `scalar.ts` ops, core `Complex`/`BigNumber`/`Fraction`/`config`/`format`), absorb core's existing
-> `unit-definitions.ts`/`unit-prefixes.ts`, export `createUnitClass`/`Unit` from `core/src/index.ts`.
-> **Full task-by-task plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
-> Details + resume notes: memory `project-unit-merge-in-progress.md` and the Unit-merge entry lower in this file.
+> into `core`, **deeply integrated** on core's own primitives (maintainer-confirmed). **Strangler-fig pattern:**
+> core's Unit is built + validated in parallel; functions stays GREEN until it switches over.
+>
+> **DONE:** Phase 0 + Phase 1.1 dep audit (`950a8fd`) · **1.1-impl** `core/src/arithmetic/scalar.ts` (`25b80ed`) ·
+> **1.2 inc1** shared `memoize`/`endsWith`/`warnOnce` (`1cd2400`) · **inc2** `unit-types.ts` → core via `/internal`
+> (`451773e`) · **inc3a** `BigNumber.div`/`.times` aliases (`5611a77`) · **inc3b** the whole `Unit.ts` (~3.7k lines)
+> relocated to `core/src/types/unit/` + `dependencies.ts` (19 deps wired from core primitives, Unit-aware
+> `subtractScalar`) + `index.ts` (ready-wired `Unit`), proven by 6 parity oracles (`f1b76e7`). **core has a working,
+> feature-complete Unit today; functions is untouched + GREEN.**
+>
+> **START HERE — Phase 3 (switch functions over, the delicate part):** (a) relocate `physicalConstants.ts` +
+> `function/{unit,createUnit,splitUnit}.ts` into core (needs a core `deepMap` — currently MISSING — for
+> `function/unit.ts`); (b) export `createUnitClass`/`unitDependencies`/`Unit` from core (`/internal` or public);
+> (c) rewire `functions/src/factories/index.ts` (line ~1064-1069) to import the Unit from core, delete the functions
+> `type/unit/` copies; (d) DROP the dual-flavor operator branching in `functions/src/typed/arithmetic.ts` (`UnitLike`/
+> `unitAdd`/etc. — one Unit type now). Keep functions GREEN at each step. Then **Phase 4** retire `core/src/types/unit.ts`
+> (old core Unit) to an alias; **Phase 5** migrate ~130 tests + full regression + changeset (core minor already pending).
+> **Full plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
+> Resume notes: memory `project-unit-merge-in-progress.md`. Last clean commit `f1b76e7`.
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 >

@@ -84,9 +84,21 @@ The existing `core/tests/types/unit.test.ts` (96 asserts) already pins canonical
 
 **Files:** move `functions/src/type/unit/{Unit.ts,unit-types.ts,physicalConstants.ts,function/*}` → `core/src/types/unit/…`; fix import depths + `.js` extensions; absorb into core's `unit-definitions.ts`/`unit-prefixes.ts` where duplicated.
 
-- [ ] Move + rewire imports; `cd core && npx tsc --noEmit` GREEN.
-- [ ] Export the unified `createUnitClass`/`Unit` from `core/src/index.ts`.
-- [ ] Commit.
+> **Strangler-fig progress (2026-07-03):** relocating via COPY-then-validate so functions stays GREEN throughout.
+>
+> - ✅ inc1 `1cd2400` — core `shared.ts` gains `memoize`/`endsWith`/`warnOnce`.
+> - ✅ inc2 `451773e` — `unit-types.ts` moved to `core/src/types/unit/`, re-exported via `/internal`; functions imports from there.
+> - ✅ inc3a `5611a77` — `BigNumber.div`/`.times` aliases (the Unit calls these on BigNumber values).
+> - ✅ inc3b `f1b76e7` — **`Unit.ts` (~3.7k) relocated to `core/src/types/unit/`**; `dependencies.ts` wires the 19
+>   injected deps from core primitives (scalar ops + ctor adapters + Unit-aware `subtractScalar` + number/boxed
+>   `format`); `index.ts` exports factory + ready-wired `Unit`. 6 parity oracles GREEN (`core-unit.test.ts`).
+>   `createPi` replaced by core `BIGNUMBER_PI`. functions UNTOUCHED.
+> - ⏳ REMAINING for Phase 1.2/3: relocate `physicalConstants.ts` + `function/{unit,createUnit,splitUnit}.ts`
+>   (needs a core `deepMap` for `function/unit.ts`); export from `core/src/index.ts`; then Phase 3 switches functions over.
+
+- [x] Move + rewire imports; `cd core && npx tsc --noEmit` GREEN. _(Unit.ts done; physicalConstants + function/_ remain.)\*
+- [ ] Export the unified `createUnitClass`/`Unit` from `core/src/index.ts`. _(currently only in `types/unit/index.ts`, not the public barrel — awaits Phase 4 retire-old-Unit.)_
+- [ ] Commit. _(inc1–3b committed.)_
 
 ---
 
