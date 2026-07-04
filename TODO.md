@@ -470,6 +470,15 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
     (3) util modules. Safe removal needs per-symbol import-PATH verification (name-grep is unreliable — every
     package duplicates `is.ts`), not a sweep. Next candidates: expression/functions `is.ts` unused subsets (but
     verify each isn't the intentional-local API first), and the util modules (`number.ts`/`object.ts`/`array.ts`).
+  - ✅ **[WS-3 P2 continued — DGT fixed at root 2026-07-04] 481 → 359 flagged, only 73 TRUE deletion candidates.**
+    Three classifier defects fixed in the DGT itself (better than deleting per bad data): (1) package.json
+    `exports` subpath entries (core `./internal` → `src/internal.ts`) now seed the public-API walk — ~39 false
+    positives, caught RIGHT BEFORE deleting `number.ts` functions that 5 files import via `core/internal`;
+    (2) subpath workspace imports (`@…/mathts-core/internal`) were exact-match-missed → misclassified as
+    EXTERNAL deps, usage never registered; (3) `import * as X` was recorded as a named symbol `X` instead of
+    wildcard → whole namespace-imported modules false-flagged (e.g. `dense/arithmetic.ts`). Report now SPLIT:
+    "Unreferenced anywhere (73, the actionable list)" vs "Referenced in-module (286, type contracts/helpers)".
+    **NEXT:** triage the 73 (delete or justify), one package per commit.
 
 - ✅/⬜ **[GC5 / G3 — Unit operators FIXED 2026-07-03; underlying two-Unit-types fork remains]** Dimensional
   analysis now works across `add`/`subtract`/`multiply`/`divide`/`abs` and `smaller`/`larger`/`smallerEq`/

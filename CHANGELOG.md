@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — DGT unused-analysis: 3 root-cause fixes make the report legible (WS-3 P2)
+
+Three classifier defects in `tools/create-dependency-graph` inflated the unused-export
+count and hid the real signal; all fixed at root:
+
+1. **`exports` subpath entries are now public roots.** Core's `./internal` entry
+   (`core/src/internal.ts`, `export * from './number.js'` + `object.js`) is a published
+   API surface, but only `src/index.ts` seeded the public-API walk — so every symbol
+   reachable only via `core/internal` was false-flagged (~39 items). Caught just before
+   deleting "unused" `number.ts` functions that five files import via the subpath.
+2. **Subpath workspace imports now resolve.** `@danielsimonjr/mathts-core/internal` was
+   exact-match-missed by the workspace map and misclassified as an EXTERNAL dependency —
+   its imported symbols never registered as usage at all (and the dependency graph
+   miscounted the edge). A prefix-matching resolver fixes classification, reachability,
+   and usage marking in one place.
+3. **Namespace imports (`import * as X`) now mark all exports used.** The detector
+   stripped the alias and recorded it as a named symbol, so every namespace-imported
+   module (e.g. `matrix/src/types/dense/arithmetic.ts`) had its whole surface
+   false-flagged.
+
+The report now also **splits** flagged exports by an in-file reference count:
+"Unreferenced anywhere (deletion candidates)" vs "Referenced in-module (type contracts /
+helpers backing live exports)". Result: **481 → 359 flagged, of which only 73 are true
+deletion candidates** — the actionable dead-code list, no longer buried in 400 lines of
+API-completeness noise.
+
 ### Fixed (2026-07-04) — `qz` spun 8000 no-op QR iterations on complex spectra (the gap-qz flake)
 
 Root cause of the intermittent `gap-qz` full-suite failure: `realSchur`'s shifted-QR loop

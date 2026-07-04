@@ -1,7 +1,7 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 856, "e": 4386, "re": 1489 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4395, "re": 1501 },
   "s": {
-    "loc": 157734,
+    "loc": 157761,
     "cls": 51,
     "int": 372,
     "fn": 1473,
@@ -91,7 +91,7 @@
       ]
     },
     "core": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "DEFAULT_CONFIG",
         "PI",
@@ -1501,8 +1501,8 @@
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
-    { "p": "utils/number.ts", "i": 2, "o": 48 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
+    { "p": "utils/number.ts", "i": 0, "o": 48 },
     { "p": "wasm/WasmLoader.ts", "i": 2, "o": 44 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
     { "p": "src/index.ts", "i": 36, "o": 0 },

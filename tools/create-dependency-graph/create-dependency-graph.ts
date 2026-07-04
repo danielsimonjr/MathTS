@@ -90,6 +90,11 @@ interface UnusedExport {
   file: string;
   name: string;
   type: 'function' | 'class' | 'interface' | 'type' | 'constant' | 'enum' | 'other';
+  // How many times the symbol is referenced WITHIN its own file beyond its export
+  // definition. > 0 means it's a type contract / helper backing live exports in the
+  // same module (not deletable in isolation); 0 means unreferenced anywhere — the
+  // true deletion candidates. This split is what makes the report legible.
+  inFileRefs: number;
 }
 
 interface UnusedAnalysis {
@@ -112,12 +117,20 @@ interface WorkspacePackage {
   name: string; // npm name, e.g., "@danielsimonjr/mathts-core"
   directory: string; // relative dir, e.g., "core"
   srcDir: string; // relative src dir, e.g., "core/src"
+  // Source files of package.json `exports` subpath entries other than "." —
+  // e.g. core's `"./internal"` → "core/src/internal.ts". These are PUBLIC roots
+  // exactly like src/index.ts; without them every symbol reachable only through
+  // a subpath entry is false-flagged as unused.
+  extraEntries: string[];
 }
 
 interface WorkspaceDependency {
   package: string; // workspace package name
   directory: string; // workspace package directory
   imports: string[]; // imported symbols
+  // Set when the import specifier targeted an `exports` subpath entry rather than
+  // the package root — e.g. `@danielsimonjr/mathts-core/internal` → "internal".
+  subpath?: string;
 }
 
 // CLI options interface
@@ -204,6 +217,30 @@ let workspaceMap: Map<string, WorkspacePackage> = new Map();
  * Returns a Map keyed by npm package name.
  * Returns empty map if no workspaces field (backward compat with single packages).
  */
+/**
+ * Source files of a package's `exports` subpath entries other than "." —
+ * `"./internal": { import: "./dist/internal.js" }` maps to `src/internal.ts`.
+ * Returned paths are repo-relative (e.g. "core/src/internal.ts").
+ */
+function exportsSubpathEntries(
+  rootDir: string,
+  pkgDir: string,
+  pkg: { exports?: Record<string, unknown> }
+): string[] {
+  const entries: string[] = [];
+  if (pkg.exports && typeof pkg.exports === 'object') {
+    for (const key of Object.keys(pkg.exports)) {
+      if (key === '.' || !key.startsWith('./')) continue;
+      const name = key.slice(2); // "./internal" → "internal"
+      const srcPath = join(pkgDir, 'src', `${name}.ts`);
+      if (existsSync(join(rootDir, srcPath))) {
+        entries.push(srcPath.replace(/\\/g, '/'));
+      }
+    }
+  }
+  return entries;
+}
+
 function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
   const workspaces = new Map<string, WorkspacePackage>();
 
@@ -232,6 +269,7 @@ function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
                   name: pkg.name,
                   directory: pkgDir.replace(/\\/g, '/'),
                   srcDir: srcDir.replace(/\\/g, '/'),
+                  extraEntries: exportsSubpathEntries(rootDir, pkgDir, pkg),
                 });
               }
             } catch {
@@ -251,6 +289,7 @@ function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
                 name: pkg.name,
                 directory: pattern.replace(/\\/g, '/'),
                 srcDir: srcDir.replace(/\\/g, '/'),
+                extraEntries: exportsSubpathEntries(rootDir, pattern, pkg),
               });
             }
           } catch {
@@ -772,8 +811,8 @@ function parseFile(filePath: string): ParsedFile {
 
     const typeOnly = isTypeOnlyImport || !hasRuntimeImport;
 
-    // Check if source is a workspace package import
-    const wsPackage = workspaceMap.get(source);
+    // Check if source is a workspace package import (root or `exports` subpath)
+    const wsResolved = resolveWorkspaceSource(source);
 
     if (source.startsWith('.')) {
       result.internalDependencies.push({
@@ -781,11 +820,12 @@ function parseFile(filePath: string): ParsedFile {
         imports: imports,
         typeOnly: typeOnly,
       });
-    } else if (wsPackage) {
+    } else if (wsResolved) {
       result.workspaceDependencies.push({
-        package: wsPackage.name,
-        directory: wsPackage.directory,
+        package: wsResolved.ws.name,
+        directory: wsResolved.ws.directory,
         imports: imports,
+        ...(wsResolved.subpath ? { subpath: wsResolved.subpath } : {}),
       });
     } else if (source.startsWith('node:') || nodeBuiltins.includes(source.split('/')[0])) {
       result.nodeDependencies.push({
@@ -869,12 +909,13 @@ function parseFile(filePath: string): ParsedFile {
   const reExportAllRegex = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g;
   while ((match = reExportAllRegex.exec(code)) !== null) {
     const reSource = match[1];
-    const reWs = workspaceMap.get(reSource);
+    const reWs = resolveWorkspaceSource(reSource);
     if (reWs) {
       result.workspaceDependencies.push({
-        package: reWs.name,
-        directory: reWs.directory,
+        package: reWs.ws.name,
+        directory: reWs.ws.directory,
         imports: ['*'],
+        ...(reWs.subpath ? { subpath: reWs.subpath } : {}),
       });
     } else {
       result.internalDependencies.push({
@@ -894,12 +935,13 @@ function parseFile(filePath: string): ParsedFile {
       .map((s) => cleanExportName(s.split(' as ')[0]))
       .filter(Boolean);
     const reSource = match[2];
-    const reWs = workspaceMap.get(reSource);
+    const reWs = resolveWorkspaceSource(reSource);
     if (reWs) {
       result.workspaceDependencies.push({
-        package: reWs.name,
-        directory: reWs.directory,
+        package: reWs.ws.name,
+        directory: reWs.ws.directory,
         imports: exports,
+        ...(reWs.subpath ? { subpath: reWs.subpath } : {}),
       });
     } else {
       result.internalDependencies.push({
@@ -923,12 +965,13 @@ function parseFile(filePath: string): ParsedFile {
       .map((s) => cleanExportName(s.split(' as ')[0]))
       .filter(Boolean);
     const reSource = match[2];
-    const reWs = workspaceMap.get(reSource);
+    const reWs = resolveWorkspaceSource(reSource);
     if (reWs) {
       result.workspaceDependencies.push({
-        package: reWs.name,
-        directory: reWs.directory,
+        package: reWs.ws.name,
+        directory: reWs.ws.directory,
         imports: exports,
+        ...(reWs.subpath ? { subpath: reWs.subpath } : {}),
       });
     } else {
       result.internalDependencies.push({
@@ -946,12 +989,13 @@ function parseFile(filePath: string): ParsedFile {
   const reExportTypeAllRegex = /export\s+type\s+\*\s+from\s+['"]([^'"]+)['"]/g;
   while ((match = reExportTypeAllRegex.exec(code)) !== null) {
     const reSource = match[1];
-    const reWs = workspaceMap.get(reSource);
+    const reWs = resolveWorkspaceSource(reSource);
     if (reWs) {
       result.workspaceDependencies.push({
-        package: reWs.name,
-        directory: reWs.directory,
+        package: reWs.ws.name,
+        directory: reWs.ws.directory,
         imports: ['*'],
+        ...(reWs.subpath ? { subpath: reWs.subpath } : {}),
       });
     } else {
       result.internalDependencies.push({
@@ -1221,7 +1265,9 @@ function findReachableFiles(entryPoints: string[], allFiles: ParsedFile[]): Set<
     // `@danielsimonjr/mathts-workerpool` from `parallel/`) get
     // false-flagged as unused/dormant.
     for (const ws of file.workspaceDependencies) {
-      const target = workspaceEntryPath(ws.package);
+      // Subpath imports (`pkg/internal`) reach the subpath entry file, not index.
+      const sub = ws.subpath ? workspaceEntryPath(ws.package, ws.subpath) : undefined;
+      const target = sub && fileMap.has(sub) ? sub : workspaceEntryPath(ws.package);
       if (target && fileMap.has(target) && !reachable.has(target)) {
         queue.push(target);
       }
@@ -1236,10 +1282,32 @@ function findReachableFiles(entryPoints: string[], allFiles: ParsedFile[]): Set<
  * (`<srcDir>/index.ts`). Returns undefined if the package isn't a
  * known workspace member.
  */
-function workspaceEntryPath(packageName: string): string | undefined {
+function workspaceEntryPath(packageName: string, subpath?: string): string | undefined {
   const ws = workspaceMap.get(packageName);
   if (!ws) return undefined;
-  return `${ws.srcDir}/index.ts`;
+  return `${ws.srcDir}/${subpath ?? 'index'}.ts`;
+}
+
+/**
+ * Resolve an import specifier to a workspace package, including `exports`
+ * subpath entries (`@scope/pkg/internal` → pkg + subpath "internal"). A bare
+ * `workspaceMap.get(source)` misses subpath imports entirely, so they were
+ * misclassified as EXTERNAL dependencies and their imported symbols never
+ * registered as usage — the root cause of the number.ts/object.ts
+ * unused-analysis false positives.
+ */
+function resolveWorkspaceSource(
+  source: string
+): { ws: WorkspacePackage; subpath?: string } | undefined {
+  const exact = workspaceMap.get(source);
+  if (exact) return { ws: exact };
+  if (source.startsWith('.')) return undefined;
+  for (const [name, ws] of workspaceMap) {
+    if (source.startsWith(name + '/')) {
+      return { ws, subpath: source.slice(name.length + 1) };
+    }
+  }
+  return undefined;
 }
 
 interface CircularDependencyResult {
@@ -1359,11 +1427,14 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
         }
         const symbols = importedSymbols.get(resolved)!;
         for (const imp of dep.imports) {
-          if (imp === '*') {
-            // Wildcard import - mark all exports as used
+          if (imp === '*' || imp.startsWith('* as ')) {
+            // Wildcard OR namespace import (`import * as X`) — every export of the
+            // source is reachable (X.foo), so mark all as used. Stripping the alias
+            // and recording it as a named symbol false-flagged every namespace-
+            // imported module's exports as unused (e.g. dense/arithmetic.ts).
             symbols.add('*');
           } else {
-            symbols.add(imp.replace(/^\* as /, ''));
+            symbols.add(imp);
           }
         }
       }
@@ -1374,16 +1445,18 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
     // import). Without this, every workspace-only consumer looks like
     // dead code to the unused-export detector.
     for (const ws of file.workspaceDependencies) {
-      const target = workspaceEntryPath(ws.package);
+      // Subpath imports (`pkg/internal`) mark usage on the subpath entry file.
+      const sub = ws.subpath ? workspaceEntryPath(ws.package, ws.subpath) : undefined;
+      const target = sub && filePaths.has(sub) ? sub : workspaceEntryPath(ws.package);
       if (!target || !filePaths.has(target)) continue;
       importedFiles.add(target);
       if (!importedSymbols.has(target)) importedSymbols.set(target, new Set());
       const symbols = importedSymbols.get(target)!;
       for (const imp of ws.imports) {
-        if (imp === '*') {
-          symbols.add('*');
+        if (imp === '*' || imp.startsWith('* as ')) {
+          symbols.add('*'); // namespace import — all exports reachable via the alias
         } else {
-          symbols.add(imp.replace(/^\* as /, ''));
+          symbols.add(imp);
         }
       }
     }
@@ -1413,8 +1486,20 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
       }
     }
   };
+  // Public roots: every package src/index.ts PLUS every package.json `exports`
+  // subpath entry (e.g. core's `./internal` → core/src/internal.ts). A subpath
+  // entry is exactly as public as the index — without seeding it, everything it
+  // re-exports (`export * from './number.js'`) is false-flagged as unused.
+  const extraEntryPaths = new Set<string>();
+  for (const ws of workspaceMap.values()) {
+    for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
+  }
   for (const file of files) {
-    if (file.path === 'src/index.ts' || file.path.endsWith('/src/index.ts')) {
+    if (
+      file.path === 'src/index.ts' ||
+      file.path.endsWith('/src/index.ts') ||
+      extraEntryPaths.has(file.path)
+    ) {
       markPublic(file, new Set());
     }
   }
@@ -1446,36 +1531,51 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
     const isPublic = (name: string): boolean =>
       usedSymbols.has(name) || publicNamed.has(`${file.path}::${name}`);
 
+    // In-file reference count: occurrences of the symbol in its own file beyond
+    // the export definition. Splits "type contract / helper backing live exports"
+    // (refs > 0) from "unreferenced anywhere" (refs = 0, the deletion candidates).
+    let fileContent: string | undefined;
+    const inFileRefs = (name: string): number => {
+      if (fileContent === undefined) {
+        try {
+          fileContent = readFileSync(join(ROOT_DIR, file.path), 'utf-8');
+        } catch {
+          fileContent = '';
+        }
+      }
+      const all = (fileContent.match(new RegExp(`\\b${name}\\b`, 'g')) || []).length;
+      const defs = (
+        fileContent.match(
+          new RegExp(
+            `export\\s+(?:async\\s+)?(?:function|const|let|var|class|interface|type|enum)\\s+${name}\\b`,
+            'g'
+          )
+        ) || []
+      ).length;
+      return Math.max(0, all - defs);
+    };
+    const push = (name: string, type: UnusedExport['type']): void => {
+      unusedExports.push({ file: file.path, name, type, inFileRefs: inFileRefs(name) });
+    };
+
     // Check each export
     for (const fn of file.exports.functions) {
-      if (!isPublic(fn)) {
-        unusedExports.push({ file: file.path, name: fn, type: 'function' });
-      }
+      if (!isPublic(fn)) push(fn, 'function');
     }
     for (const cls of file.exports.classes) {
-      if (!isPublic(cls)) {
-        unusedExports.push({ file: file.path, name: cls, type: 'class' });
-      }
+      if (!isPublic(cls)) push(cls, 'class');
     }
     for (const iface of file.exports.interfaces) {
-      if (!isPublic(iface)) {
-        unusedExports.push({ file: file.path, name: iface, type: 'interface' });
-      }
+      if (!isPublic(iface)) push(iface, 'interface');
     }
     for (const type of file.exports.types) {
-      if (!isPublic(type) && !file.exports.interfaces.includes(type)) {
-        unusedExports.push({ file: file.path, name: type, type: 'type' });
-      }
+      if (!isPublic(type) && !file.exports.interfaces.includes(type)) push(type, 'type');
     }
     for (const en of file.exports.enums) {
-      if (!isPublic(en)) {
-        unusedExports.push({ file: file.path, name: en, type: 'enum' });
-      }
+      if (!isPublic(en)) push(en, 'enum');
     }
     for (const constant of file.exports.constants) {
-      if (!isPublic(constant)) {
-        unusedExports.push({ file: file.path, name: constant, type: 'constant' });
-      }
+      if (!isPublic(constant)) push(constant, 'constant');
     }
   }
 
@@ -3341,9 +3441,13 @@ async function main(): Promise<void> {
   const unusedReportPath = join(OUTPUT_DIR, 'unused-analysis.md');
   let unusedReport = '# Unused Files and Exports Analysis\n\n';
   unusedReport += `**Generated**: ${new Date().toISOString().split('T')[0]}\n\n`;
+  const deadExports = unusedAnalysis.unusedExports.filter((e) => e.inFileRefs === 0);
+  const contractExports = unusedAnalysis.unusedExports.filter((e) => e.inFileRefs > 0);
   unusedReport += `## Summary\n\n`;
   unusedReport += `- **Potentially unused files**: ${unusedAnalysis.unusedFiles.length}\n`;
-  unusedReport += `- **Potentially unused exports**: ${unusedAnalysis.unusedExports.length}\n\n`;
+  unusedReport += `- **Potentially unused exports**: ${unusedAnalysis.unusedExports.length}\n`;
+  unusedReport += `  - **Unreferenced anywhere (deletion candidates)**: ${deadExports.length}\n`;
+  unusedReport += `  - **Referenced in-module (type contracts / helpers backing live exports)**: ${contractExports.length}\n\n`;
 
   unusedReport += `## Potentially Unused Files\n\n`;
   unusedReport += `These files are not imported by any other file in the codebase:\n\n`;
@@ -3351,20 +3455,37 @@ async function main(): Promise<void> {
     unusedReport += `- \`${file}\`\n`;
   }
 
-  unusedReport += `\n## Potentially Unused Exports\n\n`;
-  unusedReport += `These exports are not imported by any other file in the codebase:\n\n`;
-  const byFileForReport = new Map<string, UnusedExport[]>();
-  for (const exp of unusedAnalysis.unusedExports) {
-    if (!byFileForReport.has(exp.file)) byFileForReport.set(exp.file, []);
-    byFileForReport.get(exp.file)!.push(exp);
-  }
-  for (const [file, exports] of byFileForReport) {
-    unusedReport += `### \`${file}\`\n\n`;
+  const renderByFile = (exports: UnusedExport[], note?: (e: UnusedExport) => string): string => {
+    let out = '';
+    const byFile = new Map<string, UnusedExport[]>();
     for (const exp of exports) {
-      unusedReport += `- \`${exp.name}\` (${exp.type})\n`;
+      if (!byFile.has(exp.file)) byFile.set(exp.file, []);
+      byFile.get(exp.file)!.push(exp);
     }
-    unusedReport += '\n';
-  }
+    for (const [file, exps] of byFile) {
+      out += `### \`${file}\`\n\n`;
+      for (const exp of exps) {
+        out += `- \`${exp.name}\` (${exp.type})${note ? note(exp) : ''}\n`;
+      }
+      out += '\n';
+    }
+    return out;
+  };
+
+  unusedReport += `\n## Unreferenced Anywhere (deletion candidates)\n\n`;
+  unusedReport += `Not imported by any other file AND not referenced within their own module — `;
+  unusedReport += `the true dead-code candidates. Verify each isn't consumed by a mechanism the\n`;
+  unusedReport += `parser can't see (dynamic access, docs examples, published-API contract) before deleting.\n\n`;
+  unusedReport += renderByFile(deadExports);
+
+  unusedReport += `\n## Referenced In-Module (type contracts / helpers backing live exports)\n\n`;
+  unusedReport += `Not imported cross-file, but referenced within their own module — they type or\n`;
+  unusedReport += `support exports that ARE used, so they cannot be deleted in isolation. Mostly\n`;
+  unusedReport += `interfaces typing live guards and per-package API completeness, not rot.\n\n`;
+  unusedReport += renderByFile(
+    contractExports,
+    (e) => ` — ${e.inFileRefs} in-file ref${e.inFileRefs === 1 ? '' : 's'}`
+  );
 
   writeFileSync(unusedReportPath, unusedReport);
   console.log(`\nWritten: ${unusedReportPath}`);

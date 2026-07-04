@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-04",
-    "totalFiles": 856,
+    "totalFiles": 857,
     "totalModules": 72,
-    "totalExports": 4386
+    "totalExports": 4395
   },
   "entryPoints": [
     {
@@ -861,6 +861,76 @@
           "FactoryImport"
         ],
         "constants": ["VERSION"]
+      },
+      "core/src/internal.ts": {
+        "description": "Internal shared utilities, exposed via the `@danielsimonjr/mathts-core/internal`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./is.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./number.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./object.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./shared.js",
+            "imports": ["hasOwnProperty", "endsWith", "warnOnce", "memoize"],
+            "reExport": true
+          },
+          {
+            "file": "./types/unit/index.js",
+            "imports": ["createUnitClass", "unitDependencies", "Unit"],
+            "reExport": true
+          },
+          {
+            "file": "./shared.js",
+            "imports": ["MemoizedFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./types/unit/unit-types.js",
+            "imports": ["*"],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "hasOwnProperty",
+          "endsWith",
+          "warnOnce",
+          "memoize",
+          "createUnitClass",
+          "unitDependencies",
+          "CoreUnit",
+          "Unit",
+          "MemoizedFunction"
+        ],
+        "reExported": [
+          "* from ./is.js",
+          "* from ./number.js",
+          "* from ./object.js",
+          "hasOwnProperty",
+          "endsWith",
+          "warnOnce",
+          "memoize",
+          "createUnitClass",
+          "unitDependencies",
+          "Unit",
+          "MemoizedFunction",
+          "type * from ./types/unit/unit-types.js"
+        ]
       },
       "core/src/is.ts": {
         "description": "Structural view used by the duck-typing guards below: math.js types are",
@@ -8801,12 +8871,7 @@
       },
       "functions/src/factories/index.ts": {
         "description": "Activated mathjs leaf factory functions.",
-        "externalDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core/internal",
-            "imports": ["createUnitClass"]
-          }
-        ],
+        "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -9863,6 +9928,12 @@
               "createSymbolNode",
               "createParse"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["createUnitClass"],
+            "subpath": "internal"
           }
         ],
         "exports": [
@@ -18918,9 +18989,11 @@
         "description": "Number formatting, parsing, and Math polyfills.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "acosh",
               "asinh",
@@ -18949,21 +19022,20 @@
               "toFixed",
               "toPrecision"
             ],
-            "reExport": true
+            "subpath": "internal"
           },
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "FormatOptions",
               "NormalizedFormatOptions",
               "NumberTypeConfig",
               "SplitValue"
             ],
-            "reExport": true,
-            "typeOnly": true
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "acosh",
           "asinh",
@@ -19055,9 +19127,11 @@
         "description": "Object cloning, extension, deep-equality, and traversal helpers.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "canDefineProperty",
               "clone",
@@ -19075,10 +19149,9 @@
               "set",
               "traverse"
             ],
-            "reExport": true
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "canDefineProperty",
           "clone",
@@ -24501,9 +24574,11 @@
         "description": "Number formatting, parsing, and Math polyfills.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "acosh",
               "asinh",
@@ -24531,21 +24606,20 @@
               "toFixed",
               "toPrecision"
             ],
-            "reExport": true
+            "subpath": "internal"
           },
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "FormatOptions",
               "NormalizedFormatOptions",
               "NumberTypeConfig",
               "SplitValue"
             ],
-            "reExport": true,
-            "typeOnly": true
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "acosh",
           "asinh",
@@ -24613,9 +24687,11 @@
         "description": "Object cloning, extension, deep-equality, and traversal helpers.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "@danielsimonjr/mathts-core/internal",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "canDefineProperty",
               "clone",
@@ -24633,10 +24709,9 @@
               "set",
               "traverse"
             ],
-            "reExport": true
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "canDefineProperty",
           "clone",
@@ -29311,6 +29386,7 @@
           "core/src/constants.ts",
           "core/src/factory.ts",
           "core/src/index.ts",
+          "core/src/internal.ts",
           "core/src/is.ts",
           "core/src/number.ts",
           "core/src/object.ts",
@@ -30440,21 +30516,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 856,
+    "totalTypeScriptFiles": 857,
     "totalModules": 72,
-    "totalLinesOfCode": 157734,
-    "totalExports": 4386,
+    "totalLinesOfCode": 157761,
+    "totalExports": 4395,
     "totalClasses": 51,
     "totalInterfaces": 372,
     "totalFunctions": 1473,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1408,
-    "totalReExports": 1489,
+    "totalReExports": 1501,
     "totalTypeOnlyImports": 491,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 439
+    "unusedExportsCount": 359
   }
 }
