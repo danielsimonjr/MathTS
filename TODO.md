@@ -1,8 +1,19 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-02
+Updated: 2026-07-03
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
+
+> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 1.1-impl)
+>
+> **In-flight migration:** merge the two `Unit` classes into one — relocate the feature-complete mathjs `Unit`
+> (`functions/src/type/unit/Unit.ts`) into `core`, **deeply integrated** on core's own primitives. Direction is
+> maintainer-confirmed. **Phase 0 (characterization) + Phase 1.1 (dep audit) are DONE and committed** (`950a8fd`,
+> nothing half-built). **Start here:** build `core/src/arithmetic/scalar.ts` — the polymorphic scalar arithmetic
+> (`addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/`pow`/`abs`/`fix`/`round`/`equal` over
+> `number|BigNumber|Complex|Fraction`) + polymorphic `isNumeric`, the one load-bearing gap the audit found.
+> **Full task-by-task plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
+> Details + resume notes: memory `project-unit-merge-in-progress.md` and the Unit-merge entry lower in this file.
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 >
