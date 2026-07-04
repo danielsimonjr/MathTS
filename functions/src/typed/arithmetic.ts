@@ -525,6 +525,38 @@ export const pow = mathTyped('pow', {
   // Dual numbers (forward-mode AD): constant or variable exponent.
   'Dual, number': (a: Dual, b: f64): Dual => a.powConst(b),
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.pow(b),
+
+  // Matrix power A^n for a square 2-D array and non-negative integer n, via binary
+  // exponentiation on the native DenseMatrix backend (accelerated matmul, B2). Element-
+  // wise power is `dotPow`; negative/fractional matrix powers need eigendecomposition —
+  // use the async `matrixPower(A, p)`.
+  'Array, number': (a: unknown[], b: f64): number[][] => {
+    if (!Array.isArray(a[0])) {
+      throw new TypeError(
+        'pow(Array, number): expected a square 2-D matrix; use dotPow for element-wise power'
+      );
+    }
+    const m = a as number[][];
+    const n = m.length;
+    if (m.some((row) => row.length !== n)) {
+      throw new RangeError(`pow: matrix must be square (got ${n}×${m[0]?.length ?? 0})`);
+    }
+    if (!Number.isInteger(b) || b < 0) {
+      throw new Error(
+        'pow: only non-negative integer exponents are supported for matrices here; ' +
+          'use matrixPower(A, p) for negative or fractional powers'
+      );
+    }
+    let result = DenseMatrix.identity(n);
+    let base = DenseMatrix.fromArray(m);
+    let e = b;
+    while (e > 0) {
+      if (e % 2 === 1) result = backendManager.multiply(result, base);
+      e = Math.floor(e / 2);
+      if (e > 0) base = backendManager.multiply(base, base);
+    }
+    return result.toArray();
+  },
 });
 
 /**

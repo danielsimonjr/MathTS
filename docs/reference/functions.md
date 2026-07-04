@@ -76,41 +76,41 @@ code. A browsable HTML edition of this page is available at
 
 ## Arithmetic
 
-| Function         | Description                     | Types                                           | Accel     |
-| ---------------- | ------------------------------- | ----------------------------------------------- | --------- |
-| `add(a, b)`      | Addition                        | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `subtract(a, b)` | Subtraction                     | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `divide(a, b)`   | Division                        | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `unaryMinus(x)`  | Negation `-x`                   | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `unaryPlus(x)`   | Identity `+x`                   | number, bigint, Complex, Fraction               | —         |
-| `abs(x)`         | Absolute value                  | number, bigint, Complex, Fraction, Float64Array | parallel† |
-| `sign(x)`        | Sign of x: -1, 0, or 1          | number, bigint, Complex, Fraction, Float64Array | parallel  |
-| `pow(x, y)`      | Power `x^y`                     | number, bigint, Complex, Fraction               | —         |
-| `sqrt(x)`        | Square root                     | number, Complex, BigNumber, Float64Array        | parallel  |
-| `square(x)`      | `x²`                            | number, bigint, Complex, Fraction, Float64Array | parallel  |
-| `cube(x)`        | `x³`                            | number, bigint, Complex, Fraction, Float64Array | parallel  |
-| `cbrt(x)`        | Cube root                       | number, Complex, BigNumber, Float64Array        | parallel  |
-| `nthRoot(x, n)`  | nth root                        | number, Complex                                 | —         |
-| `exp(x)`         | `e^x`                           | number, Complex, BigNumber, Float64Array        | parallel† |
-| `expm1(x)`       | `e^x - 1` (stable near 0)       | number, Complex, Float64Array                   | parallel  |
-| `log(x[, base])` | Natural log (or log base)       | number, Complex, BigNumber, Float64Array        | parallel† |
-| `log2(x)`        | Base-2 logarithm                | number, Complex, BigNumber, Float64Array        | parallel  |
-| `log10(x)`       | Base-10 logarithm               | number, Complex, BigNumber, Float64Array        | parallel  |
-| `log1p(x)`       | `ln(1 + x)` (stable near 0)     | number, Complex, Float64Array                   | parallel  |
-| `round(x[, n])`  | Round to n digits               | number, bigint, Complex, Fraction, Float64Array | parallel  |
-| `floor(x)`       | Round down                      | number, Complex, Fraction, Float64Array         | parallel  |
-| `ceil(x)`        | Round up                        | number, Complex, Fraction, Float64Array         | parallel  |
-| `fix(x)`         | Round toward zero               | number, Complex, Fraction, Float64Array         | parallel  |
-| `mod(a, b)`      | Modulo `a % b`                  | number, bigint                                  | —         |
-| `gcd(a, b)`      | Greatest common divisor         | number, bigint                                  | —         |
-| `lcm(a, b)`      | Least common multiple           | number, bigint                                  | —         |
-| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`     | number                                          | —         |
-| `norm(x[, p])`   | p-norm                          | number, Float64Array, DenseMatrix               | parallel  |
-| `dot(a, b)`      | Vector dot product              | Float64Array, array                             | parallel  |
-| `outer(a, b)`    | Vector outer product            | Float64Array, array                             | parallel  |
-| `matmul(A, B)`   | Matrix multiplication           | Float64Array, DenseMatrix                       | parallel  |
-| `matvec(A, x)`   | Matrix–vector product           | Float64Array, DenseMatrix                       | parallel  |
+| Function         | Description                                                                                                                          | Types                                             | Accel     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | --------- |
+| `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —         |
+| `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel† |
+| `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | parallel  |
+| `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —         |
+| `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel  |
+| `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel  |
+| `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel  |
+| `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel  |
+| `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —         |
+| `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | parallel† |
+| `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | parallel  |
+| `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel† |
+| `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | parallel  |
+| `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | parallel  |
+| `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | parallel  |
+| `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | parallel  |
+| `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | parallel  |
+| `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | parallel  |
+| `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | parallel  |
+| `mod(a, b)`      | Modulo `a % b`                                                                                                                       | number, bigint                                    | —         |
+| `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —         |
+| `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —         |
+| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —         |
+| `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | parallel  |
+| `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | parallel  |
+| `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | parallel  |
+| `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | parallel  |
+| `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | parallel  |
 
 The factory layer additionally provides scalar variants used internally and by
 the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,

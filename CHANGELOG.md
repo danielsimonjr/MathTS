@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-04) — `pow(A, n)` square-matrix power (B2 parity)
+
+`pow` now handles a square 2-D matrix with a non-negative integer exponent (mathjs parity)
+via binary exponentiation on the native `DenseMatrix` backend (accelerated matmul) —
+previously `pow([[…]], n)` threw `Unexpected type of argument`. Element-wise power stays
+`dotPow`; negative/fractional matrix powers throw a clear error pointing to the async
+`matrixPower(A, p)`. Pinned by `gap-pow-matrix-oracle.test.ts`.
+
 ### Fixed (2026-07-04) — the canonical `expm` (matrix exponential) was completely broken (B2)
 
 `expm(A)` threw on **every** input. The public `expm` was the factory-Padé version, created
