@@ -29,8 +29,10 @@ import { MathJSDenseMatrix } from '../src/factories/matrix-bridge.js';
  * (see [[feedback-oracle-tests-implementation-independent]]): exact hand-derived
  * `L`/`U`/`p` for `lup`, convention-free invariants (`QᵀQ=I`, `R` upper-Δ,
  * `|R₀₀|=‖col₀‖`, `∏|diag R|=|det A|`) for `qr` whose factors are sign-ambiguous,
- * and known-spectrum `diag(T)` eigenvalues for `schur`. `slu` remains blocked
- * (see the `describe.skip` note below).
+ * and known-spectrum `diag(T)` eigenvalues for `schur`. `slu` is pinned via the
+ * permutation-free determinant identity `|∏diag U| = |det A|` plus triangular
+ * structure (its `describe` below — formerly skipped, active since the csChol/csSqr
+ * CSparse-port typo fixes).
  */
 
 /** Relative closeness (absolute for values ≤ 1). */
