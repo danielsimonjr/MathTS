@@ -34,8 +34,8 @@ describe('GC5: Unit arithmetic operators', () => {
 
   it('divide: unit/unit (dimensionless), unit/scalar', () => {
     expect((divide(u(5, 'cm'), 2) as Unit).value).toBeCloseTo(0.025, 12);
-    // 10 m / 2 m = 5 (dimensionless)
-    expect((divide(u(10, 'm'), u(2, 'm')) as Unit).value).toBeCloseTo(5, 12);
+    // 10 m / 2 m = 5 (fully cancelled → a plain dimensionless number, mathjs parity)
+    expect(divide(u(10, 'm'), u(2, 'm')) as number).toBeCloseTo(5, 12);
   });
 });
 

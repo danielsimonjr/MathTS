@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 463
+- **Potentially unused exports**: 482
 
 ## Potentially Unused Files
 
@@ -24,12 +24,24 @@ These exports are not imported by any other file in the codebase:
 - `ConfigOptions` (interface)
 - `MathJsConfig` (type)
 
+### `core/src/factory.ts`
+
+- `sortFactories` (function)
+- `create` (function)
+- `isFactory` (function)
+- `assertDependencies` (function)
+- `isOptionalDependency` (function)
+- `stripOptionalNotation` (function)
+- `FactoryFunction` (interface)
+- `LegacyFactory` (interface)
+- `FactoryMeta` (interface)
+- `DependencyName` (type)
+- `CreateFunction` (type)
+
 ### `core/src/is.ts`
 
 - `isBigInt` (function)
-- `isComplex` (function)
 - `isFraction` (function)
-- `isUnit` (function)
 - `isString` (function)
 - `isMatrix` (function)
 - `isCollection` (function)
@@ -66,9 +78,7 @@ These exports are not imported by any other file in the codebase:
 - `isRelationalNode` (function)
 - `isSymbolNode` (function)
 - `isChain` (function)
-- `typeOf` (function)
 - `BigNumber` (interface)
-- `Complex` (interface)
 - `Fraction` (interface)
 - `Unit` (interface)
 - `Matrix` (interface)
@@ -103,7 +113,6 @@ These exports are not imported by any other file in the codebase:
 
 - `isInteger` (function)
 - `safeNumberType` (function)
-- `format` (function)
 - `normalizeFormatOptions` (function)
 - `splitNumber` (function)
 - `toEngineering` (function)
@@ -116,7 +125,6 @@ These exports are not imported by any other file in the codebase:
 - `isPowZeroAtInfinity` (function)
 - `SplitValue` (interface)
 - `NumberTypeConfig` (interface)
-- `FormatOptions` (interface)
 - `NormalizedFormatOptions` (interface)
 - `sign` (constant)
 - `log2` (constant)
@@ -131,12 +139,35 @@ These exports are not imported by any other file in the codebase:
 - `sinh` (constant)
 - `tanh` (constant)
 
+### `core/src/object.ts`
+
+- `mapObject` (function)
+- `extend` (function)
+- `deepExtend` (function)
+- `deepStrictEqual` (function)
+- `deepFlatten` (function)
+- `canDefineProperty` (function)
+- `lazy` (function)
+- `traverse` (function)
+- `isLegacyFactory` (function)
+- `get` (function)
+- `set` (function)
+- `pick` (function)
+
+### `core/src/shared.ts`
+
+- `MemoizedFunction` (interface)
+
 ### `core/src/typed/mathts-typed.ts`
 
 - `MathTSTyped` (interface)
 - `MathTSTypeDef` (interface)
 - `SignatureImpl` (type)
 - `SignatureRecord` (type)
+
+### `core/src/types/unit-prefixes.ts`
+
+- `SI_PREFIX_KEYS` (constant)
 
 ### `matrix/src/backends/WasmLoader.ts`
 

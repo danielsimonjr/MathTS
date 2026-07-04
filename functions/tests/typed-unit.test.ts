@@ -15,7 +15,7 @@ describe('typed to(value, target)', () => {
     const ft = to(m, 'ft');
     expect(ft).toBeInstanceOf(Unit);
     expect(ft.value).toBeCloseTo(1, 12); // canonical metres unchanged
-    expect(ft.notation).toBe('ft');
+    expect(ft.formatUnits()).toBe('ft');
   });
 
   it('converts km → m', () => {
@@ -49,19 +49,19 @@ describe('typed to(value, target)', () => {
     const u = to(5, 'm');
     expect(u).toBeInstanceOf(Unit);
     expect(u.value).toBe(5);
-    expect(u.notation).toBe('m');
+    expect(u.formatUnits()).toBe('m');
   });
 
   it('constructs with SI prefix: to(2, "km") yields canonical 2000 m', () => {
     const u = to(2, 'km');
     expect(u.value).toBe(2000);
-    expect(u.notation).toBe('km');
+    expect(u.formatUnits()).toBe('km');
   });
 
-  it('constructs temperature: to(20, "°C") yields canonical 293.15 K', () => {
+  it('constructs temperature: to(20, "°C") converts to 293.15 K', () => {
     const u = to(20, '°C');
-    expect(u.value).toBeCloseTo(293.15, 12);
-    expect(u.dimensions.temperature).toBe(1);
+    expect(u.equalBase(new Unit(0, 'K'))).toBe(true);
+    expect(parseFloat(u.to('K').toString().split(' ')[0])).toBeCloseTo(293.15, 9);
   });
 
   it('dispatch error on bad argument types (string, number)', () => {
@@ -80,12 +80,12 @@ describe('typed to(value, target)', () => {
 describe('typed toBest(value)', () => {
   it('0.0001 m → mm', () => {
     const u = toBest(new Unit(0.0001, 'm'));
-    expect(u.notation).toBe('mm');
+    expect(u.formatUnits()).toBe('mm');
   });
 
   it('1000 g → kg', () => {
     const u = toBest(new Unit(1000, 'g'));
-    expect(u.notation).toBe('kg');
+    expect(u.formatUnits()).toBe('kg');
   });
 
   it('preserves canonical magnitude (round-trip via .to)', () => {
@@ -97,7 +97,7 @@ describe('typed toBest(value)', () => {
   it('1000000 Pa → MPa', () => {
     const u = toBest(new Unit(1e6, 'Pa'));
     // Best should pick a prefix that minimises |log10(displayed)|. MPa → 1.
-    expect(u.notation).toBe('MPa');
+    expect(u.formatUnits()).toBe('MPa');
   });
 
   it('refuses non-Unit arguments via typed-function dispatch', () => {

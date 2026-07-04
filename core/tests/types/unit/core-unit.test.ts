@@ -11,6 +11,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { Unit } from '../../../src/types/unit/index';
+import { DimensionMismatchError, UnitParseError } from '../../../src/types/unit/errors';
 
 describe('core Unit — parsing & value', () => {
   it('parses compound / prefixed unit strings', () => {
@@ -86,5 +87,16 @@ describe('core Unit — JSON envelope compatibility', () => {
 
   it('fromJSON accepts the old core {mathts, value, notation} envelope (no capability loss)', () => {
     expect(FromJSON({ mathts: 'Unit', value: 5, notation: 'cm' }).toString()).toBe('5 cm');
+  });
+});
+
+describe('core Unit — typed errors (preserved from the old core Unit)', () => {
+  it('throws UnitParseError for an unknown or invalid unit', () => {
+    expect(() => new Unit(1, 'xyzzy')).toThrow(UnitParseError);
+    expect(() => new Unit(1, '$')).toThrow(UnitParseError);
+  });
+
+  it('throws DimensionMismatchError converting between incompatible dimensions', () => {
+    expect(() => new Unit(1, 'm').to('s')).toThrow(DimensionMismatchError);
   });
 });

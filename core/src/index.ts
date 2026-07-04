@@ -92,7 +92,7 @@ export {
   DIMENSIONLESS,
   dim,
 } from './types/unit.js';
-export type { Dimensions, UnitDef } from './types/unit.js';
+export type { Dimensions, UnitDef, UnitInstance } from './types/unit.js';
 export {
   BASE_UNITS,
   DERIVED_UNITS,

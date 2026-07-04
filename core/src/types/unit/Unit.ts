@@ -26,6 +26,7 @@ import type {
   UnitSystem,
   UnitSystemEntry,
 } from './unit-types.js';
+import { DimensionMismatchError, UnitParseError } from './errors.js';
 
 /**
  * Normalize degree-symbol unit notations to their ASCII spellings before parsing,
@@ -387,7 +388,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
           const oldC = c;
           uStr = parseUnit();
           if (uStr === null) {
-            throw new SyntaxError(
+            throw new UnitParseError(
               'Unexpected "' + oldC + '" in "' + text + '" at index ' + index.toString()
             );
           }
@@ -400,7 +401,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const res = _findUnit(uStr) as { unit: UnitDef; prefix: PrefixDef } | null;
         if (res === null) {
           // Unit not found.
-          throw new SyntaxError('Unit "' + uStr + '" not found.');
+          throw new UnitParseError('Unit "' + uStr + '" not found.');
         }
 
         let power = powerMultiplierCurrent * powerMultiplierStackProduct;
@@ -411,7 +412,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
           const p = parseNumber();
           if (p === null) {
             // No valid number found for the power!
-            throw new SyntaxError(
+            throw new UnitParseError(
               'In "' + str + '", "^" must be followed by a floating-point number'
             );
           }
@@ -435,7 +436,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
         skipWhitespace();
         while (c === ')') {
           if (powerMultiplierStack.length === 0) {
-            throw new SyntaxError('Unmatched ")" in "' + text + '" at index ' + index.toString());
+            throw new UnitParseError(
+              'Unmatched ")" in "' + text + '" at index ' + index.toString()
+            );
           }
           powerMultiplierStackProduct /= powerMultiplierStack.pop()!;
           next();
@@ -472,22 +475,22 @@ export const createUnitClass = /* #__PURE__ */ factory(
       // Has the string been entirely consumed?
       skipWhitespace();
       if (c) {
-        throw new SyntaxError('Could not parse: "' + str + '"');
+        throw new UnitParseError('Could not parse: "' + str + '"');
       }
 
       // Is there a trailing slash?
       if (expectingUnit) {
-        throw new SyntaxError('Trailing characters: "' + str + '"');
+        throw new UnitParseError('Trailing characters: "' + str + '"');
       }
 
       // Is the parentheses stack empty?
       if (powerMultiplierStack.length !== 0) {
-        throw new SyntaxError('Unmatched "(" in "' + text + '"');
+        throw new UnitParseError('Unmatched "(" in "' + text + '"');
       }
 
       // Are there any units at all?
       if (unit.units.length === 0 && !options.allowNoUnits) {
-        throw new SyntaxError('"' + str + '" contains no units');
+        throw new UnitParseError('"' + str + '" contains no units');
       }
 
       unit.value = value !== undefined ? unit._normalize(value) : null;
@@ -1073,7 +1076,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
 
       if (!this.equalBase(other)) {
-        throw new Error(`Units do not match ('${other.toString()}' != '${this.toString()}')`);
+        throw new DimensionMismatchError(
+          `Units do not match ('${other.toString()}' != '${this.toString()}')`
+        );
       }
       if (other.value !== null) {
         throw new Error('Cannot convert to a unit with a value');
@@ -2832,14 +2837,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
         name: 'eV',
         base: BASE_UNITS.ENERGY,
         prefixes: PREFIXES.SHORT,
-        value: 1.602176565e-19,
+        value: 1.602176634e-19,
         offset: 0,
       },
       electronvolt: {
         name: 'electronvolt',
         base: BASE_UNITS.ENERGY,
         prefixes: PREFIXES.LONG,
-        value: 1.602176565e-19,
+        value: 1.602176634e-19,
         offset: 0,
       },
 

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-04",
-    "totalFiles": 848,
-    "totalModules": 71,
-    "totalExports": 4367
+    "totalFiles": 857,
+    "totalModules": 72,
+    "totalExports": 4407
   },
   "entryPoints": [
     {
@@ -371,6 +371,41 @@
         "exports": ["PI", "E", "TAU", "PHI", "SQRT2", "SQRT1_2", "LN2", "LN10", "LOG2E", "LOG10E"],
         "constants": ["PI", "E", "TAU", "PHI", "SQRT2", "SQRT1_2", "LN2", "LN10", "LOG2E", "LOG10E"]
       },
+      "core/src/factory.ts": {
+        "description": "Type for a factory function that creates instances",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./object.js",
+            "imports": ["pickShallow"]
+          },
+          {
+            "file": "./error/MathjsError.js",
+            "imports": ["MathjsError"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "factory",
+          "sortFactories",
+          "create",
+          "isFactory",
+          "assertDependencies",
+          "isOptionalDependency",
+          "stripOptionalNotation"
+        ],
+        "interfaces": ["FactoryFunction", "LegacyFactory", "FactoryMeta"],
+        "functions": [
+          "factory",
+          "sortFactories",
+          "create",
+          "isFactory",
+          "assertDependencies",
+          "isOptionalDependency",
+          "stripOptionalNotation"
+        ]
+      },
       "core/src/index.ts": {
         "description": "Core types and utilities for MathTS",
         "externalDependencies": [],
@@ -555,7 +590,7 @@
           },
           {
             "file": "./types/unit.js",
-            "imports": ["Dimensions", "UnitDef"],
+            "imports": ["Dimensions", "UnitDef", "UnitInstance"],
             "reExport": true,
             "typeOnly": true
           },
@@ -691,6 +726,7 @@
           "NumericScalar",
           "Dimensions",
           "UnitDef",
+          "UnitInstance",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -811,6 +847,7 @@
           "NumericScalar",
           "Dimensions",
           "UnitDef",
+          "UnitInstance",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -1033,6 +1070,77 @@
           "sinh",
           "tanh"
         ]
+      },
+      "core/src/object.ts": {
+        "description": "Clone an object",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./is.js",
+            "imports": ["isBigNumber", "isObject"]
+          },
+          {
+            "file": "./shared.js",
+            "imports": ["hasOwnProperty"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "hasOwnProperty",
+          "clone",
+          "mapObject",
+          "extend",
+          "deepExtend",
+          "deepStrictEqual",
+          "deepFlatten",
+          "canDefineProperty",
+          "lazy",
+          "traverse",
+          "isLegacyFactory",
+          "get",
+          "set",
+          "pick",
+          "pickShallow"
+        ],
+        "functions": [
+          "clone",
+          "mapObject",
+          "extend",
+          "deepExtend",
+          "deepStrictEqual",
+          "deepFlatten",
+          "canDefineProperty",
+          "lazy",
+          "traverse",
+          "isLegacyFactory",
+          "get",
+          "set",
+          "pick",
+          "pickShallow"
+        ]
+      },
+      "core/src/shared.ts": {
+        "description": "Shared utility functions used across core utility modules.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["warnOnce", "hasOwnProperty", "endsWith", "memoize"],
+        "interfaces": ["MemoizedFunction"],
+        "functions": ["hasOwnProperty", "endsWith", "memoize"],
+        "constants": ["warnOnce"]
+      }
+    },
+    "core/error": {
+      "core/src/error/MathjsError.ts": {
+        "description": "Custom error type for Mathjs errors",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["MathjsError"],
+        "classes": ["MathjsError"]
       }
     },
     "core/factory": {
@@ -1530,6 +1638,219 @@
           "MatrixDimensions"
         ]
       },
+      "core/src/types/unit/dependencies.ts": {
+        "description": "The dependency object injected into the relocated mathjs `Unit` factory",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../arithmetic/scalar.js",
+            "imports": [
+              "addScalar",
+              "subtractScalar",
+              "multiplyScalar",
+              "divideScalar",
+              "pow",
+              "abs",
+              "fix",
+              "round",
+              "equal",
+              "isNumeric",
+              "number"
+            ]
+          },
+          {
+            "file": "../../config.js",
+            "imports": ["DEFAULT_CONFIG"]
+          },
+          {
+            "file": "../../is.js",
+            "imports": ["isUnit"]
+          },
+          {
+            "file": "../../number.js",
+            "imports": ["format", "FormatOptions"]
+          },
+          {
+            "file": "../bignumber.js",
+            "imports": ["BigNumber"]
+          },
+          {
+            "file": "../complex.js",
+            "imports": ["Complex", "I"]
+          },
+          {
+            "file": "../fraction.js",
+            "imports": ["Fraction"]
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": [
+              "BigNumberConstructor",
+              "ComplexConstructor",
+              "FractionConstructor",
+              "Numeric",
+              "ScalarBinaryOp",
+              "ScalarUnaryOp",
+              "SubtractScalar",
+              "UnitConfig",
+              "UnitDependencies",
+              "UnitInstance"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["unitDependencies"],
+        "constants": ["unitDependencies"]
+      },
+      "core/src/types/unit/errors.ts": {
+        "description": "Typed error classes for the Unit. Kept in their own module (with no Unit",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["UnitParseError", "DimensionMismatchError"],
+        "classes": ["UnitParseError", "DimensionMismatchError"]
+      },
+      "core/src/types/unit/index.ts": {
+        "description": "The relocated, feature-complete `Unit` — the mathjs-derived unit system now",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Unit.js",
+            "imports": ["createUnitClass"]
+          },
+          {
+            "file": "./dependencies.js",
+            "imports": ["unitDependencies"]
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": ["UnitConstructor"],
+            "typeOnly": true
+          },
+          {
+            "file": "./Unit.js",
+            "imports": ["createUnitClass"],
+            "reExport": true
+          },
+          {
+            "file": "./dependencies.js",
+            "imports": ["unitDependencies"],
+            "reExport": true
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": ["*"],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createUnitClass", "unitDependencies", "Unit"],
+        "reExported": ["createUnitClass", "unitDependencies", "type * from ./unit-types.js"],
+        "constants": ["Unit"]
+      },
+      "core/src/types/unit/unit-types.ts": {
+        "description": "Shared TypeScript interfaces for the Unit factory (`Unit.ts`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../is.js",
+            "imports": ["Complex"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "BigNumberValue",
+          "FractionValue",
+          "PrefixDef",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitJSON",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "SubtractScalar",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor"
+        ]
+      },
+      "core/src/types/unit/Unit.ts": {
+        "description": "Normalize degree-symbol unit notations to their ASCII spellings before parsing,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../is.js",
+            "imports": ["isComplex", "isUnit", "typeOf"]
+          },
+          {
+            "file": "../../factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "../../object.js",
+            "imports": ["clone"]
+          },
+          {
+            "file": "../../shared.js",
+            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce"]
+          },
+          {
+            "file": "../bignumber.js",
+            "imports": ["BIGNUMBER_PI"]
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": [
+              "BaseUnitDef",
+              "BigNumberValue",
+              "ConverterFn",
+              "CreateUnitDefObject",
+              "CreateUnitOptions",
+              "FractionValue",
+              "Numeric",
+              "ParseOptions",
+              "PrefixDef",
+              "PrefixTable",
+              "TypeConverters",
+              "UnitComponent",
+              "UnitConfig",
+              "UnitConstructor",
+              "UnitDef",
+              "UnitDependencies",
+              "UnitFormatOptions",
+              "UnitInstance",
+              "UnitJSON",
+              "UnitSystem",
+              "UnitSystemEntry"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./errors.js",
+            "imports": ["DimensionMismatchError", "UnitParseError"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createUnitClass"],
+        "constants": ["createUnitClass"]
+      },
       "core/src/types/unit-definitions.ts": {
         "description": "Unit definitions for the Unit type.",
         "externalDependencies": [],
@@ -1560,38 +1881,70 @@
         "constants": ["SI_PREFIXES", "SI_PREFIX_KEYS", "BEST_PREFIXES"]
       },
       "core/src/types/unit.ts": {
-        "description": "Unit type — dimensional analysis, composition, conversion, and pretty-print.",
+        "description": "The core `Unit` — now the single, feature-complete implementation under",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./unit-definitions.js",
-            "imports": [
-              "ALL_UNITS",
-              "DIMENSIONLESS",
-              "Dimensions",
-              "UNIT_ALIASES",
-              "UnitDef",
-              "dim",
-              "getUnitDef"
-            ]
+            "file": "./unit/index.js",
+            "imports": ["Unit", "createUnitClass", "unitDependencies"],
+            "reExport": true
           },
           {
-            "file": "./unit-prefixes.js",
-            "imports": ["BEST_PREFIXES", "SI_PREFIXES", "SI_PREFIX_KEYS"]
+            "file": "./unit/errors.js",
+            "imports": ["DimensionMismatchError", "UnitParseError"],
+            "reExport": true
+          },
+          {
+            "file": "../is.js",
+            "imports": ["isUnit"],
+            "reExport": true
+          },
+          {
+            "file": "./unit-definitions.js",
+            "imports": ["DIMENSIONLESS", "dim"],
+            "reExport": true
+          },
+          {
+            "file": "./unit/index.js",
+            "imports": ["UnitInstance"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./unit-definitions.js",
+            "imports": ["Dimensions", "UnitDef"],
+            "reExport": true,
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
         "exports": [
-          "DIMENSIONLESS",
-          "dim",
-          "isUnit",
+          "Unit",
+          "createUnitClass",
+          "unitDependencies",
           "DimensionMismatchError",
           "UnitParseError",
-          "Unit"
+          "isUnit",
+          "DIMENSIONLESS",
+          "dim",
+          "UnitInstance",
+          "Dimensions",
+          "UnitDef"
         ],
-        "classes": ["DimensionMismatchError", "UnitParseError", "Unit"],
-        "functions": ["isUnit"]
+        "reExported": [
+          "Unit",
+          "createUnitClass",
+          "unitDependencies",
+          "DimensionMismatchError",
+          "UnitParseError",
+          "isUnit",
+          "DIMENSIONLESS",
+          "dim",
+          "UnitInstance",
+          "Dimensions",
+          "UnitDef"
+        ]
       }
     },
     "matrix/backends": {
@@ -15859,7 +16212,12 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber", "Unit", "Dual"]
+            "imports": ["mathTyped", "Complex", "Fraction", "BigNumber", "Dual"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
           },
           {
             "package": "@danielsimonjr/mathts-matrix",
@@ -17783,7 +18141,12 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Unit", "mathTyped"]
+            "imports": ["mathTyped"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Unit", "UnitInstance"]
           }
         ],
         "exports": ["to", "toBest", "typedUnit"],
@@ -29041,10 +29404,17 @@
         "files": [
           "core/src/config.ts",
           "core/src/constants.ts",
+          "core/src/factory.ts",
           "core/src/index.ts",
           "core/src/is.ts",
-          "core/src/number.ts"
+          "core/src/number.ts",
+          "core/src/object.ts",
+          "core/src/shared.ts"
         ]
+      },
+      {
+        "name": "Core/error",
+        "files": ["core/src/error/MathjsError.ts"]
       },
       {
         "name": "Core/factory",
@@ -29067,6 +29437,11 @@
           "core/src/types/dual.ts",
           "core/src/types/fraction.ts",
           "core/src/types/interfaces.ts",
+          "core/src/types/unit/dependencies.ts",
+          "core/src/types/unit/errors.ts",
+          "core/src/types/unit/index.ts",
+          "core/src/types/unit/unit-types.ts",
+          "core/src/types/unit/Unit.ts",
           "core/src/types/unit-definitions.ts",
           "core/src/types/unit-prefixes.ts",
           "core/src/types/unit.ts"
@@ -30161,21 +30536,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 848,
-    "totalModules": 71,
-    "totalLinesOfCode": 153725,
-    "totalExports": 4367,
+    "totalTypeScriptFiles": 857,
+    "totalModules": 72,
+    "totalLinesOfCode": 158087,
+    "totalExports": 4407,
     "totalClasses": 51,
-    "totalInterfaces": 368,
-    "totalFunctions": 1471,
-    "totalTypeGuards": 175,
+    "totalInterfaces": 393,
+    "totalFunctions": 1494,
+    "totalTypeGuards": 177,
     "totalEnums": 0,
-    "totalConstants": 1405,
-    "totalReExports": 1473,
-    "totalTypeOnlyImports": 484,
+    "totalConstants": 1409,
+    "totalReExports": 1488,
+    "totalTypeOnlyImports": 491,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 463
+    "unusedExportsCount": 482
   }
 }

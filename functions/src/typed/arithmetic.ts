@@ -12,7 +12,9 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber, Unit, Dual } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+// The Unit is now the single merged class; use its instance type in type position.
+import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 
@@ -98,37 +100,26 @@ const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
 // =============================================================================
 
 /**
- * Two `Unit` implementations are both registered as the `'Unit'` typed-function
- * type: the mathjs-derived one (`functions/src/type/unit/Unit.ts`) that `unit()`
- * returns — which keeps add/subtract/comparison at the OPERATOR level and exposes
- * `equalBase` / normalized `value` / `clone` / `multiply` / `divide` / `abs`; and
- * the core `Unit` (`@danielsimonjr/mathts-core`) that `to()`/`toBest()` return —
- * which exposes `add` / `sub` / `mul` / `div` / `dimensionsEqual` methods. The
- * operators below support BOTH: use the core method when present, else fall back
- * to the mathjs operator-level logic. (Unifying the two is a separate,
- * larger "own the synced-mathjs layer" cleanup — see TODO.)
+ * The Unit is now the single, core-relocated mathjs `Unit`
+ * (`@danielsimonjr/mathts-core`) — the merge collapsed the former core/mathjs
+ * duality, so `unit()`, `to()` and `toBest()` all return the SAME class. It keeps
+ * add/subtract/comparison at the OPERATOR level and exposes `equalBase` /
+ * normalized `value` / `clone` / `multiply` / `divide` / `abs`.
  */
 interface UnitLike {
   value?: unknown;
-  equalBase?(other: unknown): boolean;
-  dimensionsEqual?(other: unknown): boolean;
-  clone?(): UnitLike;
-  add?(other: unknown): unknown;
-  sub?(other: unknown): unknown;
-  mul?(other: unknown): unknown;
-  div?(other: unknown): unknown;
-  multiply?(other: unknown): unknown;
-  divide?(other: unknown): unknown;
-  abs?(): unknown;
+  equalBase(other: unknown): boolean;
+  clone(): UnitLike;
+  multiply(other: unknown): unknown;
+  divide(other: unknown): unknown;
+  abs(): unknown;
 }
 
 const asUnit = (u: unknown): UnitLike => u as UnitLike;
-const hasFn = (o: UnitLike, name: keyof UnitLike): boolean => typeof o[name] === 'function';
 
-/** Same-dimension test, whichever Unit flavor. */
+/** Same-dimension test. */
 function unitSameDimension(a: unknown, b: unknown): boolean {
-  const ua = asUnit(a);
-  return hasFn(ua, 'equalBase') ? ua.equalBase!(b) : ua.dimensionsEqual!(b);
+  return asUnit(a).equalBase(b);
 }
 
 /** Comparison sign of two dimensionally-compatible units (throws if incompatible). */
@@ -142,31 +133,27 @@ function unitCmp(a: Unit, b: Unit): i32 {
 }
 
 /**
- * Add/subtract for the mathjs Unit (core Unit uses its own `add`/`sub`): result
- * carries the first operand's unit representation + the combined normalized value.
+ * Add/subtract: result carries the first operand's unit representation + the
+ * combined normalized value.
  */
-function unitAddSubMathjs(a: unknown, b: unknown, op: ScalarOp): unknown {
+function unitAddSub(a: unknown, b: unknown, op: ScalarOp): unknown {
   const ua = asUnit(a);
   const ub = asUnit(b);
-  if (!ua.equalBase!(b)) {
+  if (!ua.equalBase(b)) {
     throw new Error('Cannot add/subtract units with different dimensions');
   }
   if (ua.value == null || ub.value == null) {
     throw new Error('Cannot add/subtract a valueless unit');
   }
-  const res = ua.clone!();
+  const res = ua.clone();
   res.value = op(ua.value, ub.value);
   return res;
 }
 
-const unitAdd = (a: unknown, b: unknown): unknown =>
-  hasFn(asUnit(a), 'add') ? asUnit(a).add!(b) : unitAddSubMathjs(a, b, addOp);
-const unitSub = (a: unknown, b: unknown): unknown =>
-  hasFn(asUnit(a), 'sub') ? asUnit(a).sub!(b) : unitAddSubMathjs(a, b, (x, y) => subtract(x, y));
-const unitMul = (a: unknown, b: unknown): unknown =>
-  hasFn(asUnit(a), 'mul') ? asUnit(a).mul!(b) : asUnit(a).multiply!(b);
-const unitDiv = (a: unknown, b: unknown): unknown =>
-  hasFn(asUnit(a), 'div') ? asUnit(a).div!(b) : asUnit(a).divide!(b);
+const unitAdd = (a: unknown, b: unknown): unknown => unitAddSub(a, b, addOp);
+const unitSub = (a: unknown, b: unknown): unknown => unitAddSub(a, b, (x, y) => subtract(x, y));
+const unitMul = (a: unknown, b: unknown): unknown => asUnit(a).multiply(b);
+const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
 
 // =============================================================================
 // Addition (Parallel-First)
@@ -315,7 +302,7 @@ export const multiply = mathTyped('multiply', {
   // Unit multiplication / scaling (mathjs parity).
   'Unit, Unit': (a: Unit, b: Unit): Unit => unitMul(a, b) as Unit,
   'Unit, number': (a: Unit, b: f64): Unit => unitMul(a, b) as Unit,
-  'number, Unit': (a: f64, b: Unit): Unit => b.mul(a),
+  'number, Unit': (a: f64, b: Unit): Unit => unitMul(b, a) as Unit,
 
   // Dual numbers (forward-mode AD).
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.mul(b),
@@ -483,7 +470,7 @@ export const abs = mathTyped('abs', {
   Fraction: (a: Fraction): Fraction => a.abs(),
   BigNumber: (a: BigNumber): BigNumber => a.abs(),
   Dual: (a: Dual): Dual => a.abs(),
-  Unit: (a: Unit): Unit => asUnit(a).abs!() as unknown as Unit,
+  Unit: (a: Unit): Unit => asUnit(a).abs() as unknown as Unit,
 
   // Parallel array abs
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {

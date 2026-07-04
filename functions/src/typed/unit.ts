@@ -16,7 +16,10 @@
  * @packageDocumentation
  */
 
-import { Unit, mathTyped } from '@danielsimonjr/mathts-core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+// The single, merged Unit. `Unit` (the value) constructs it; `UnitInstance` is the
+// instance type used in signatures.
+import { Unit, type UnitInstance } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // to(value, target)
@@ -43,8 +46,8 @@ import { Unit, mathTyped } from '@danielsimonjr/mathts-core';
  *   dimension vectors (e.g. metres to seconds).
  */
 export const to = mathTyped('to', {
-  'Unit, string': (value: Unit, target: string): Unit => value.to(target),
-  'number, string': (value: number, target: string): Unit => new Unit(value, target),
+  'Unit, string': (value: UnitInstance, target: string): UnitInstance => value.to(target),
+  'number, string': (value: number, target: string): UnitInstance => new Unit(value, target),
 });
 
 // =============================================================================
@@ -65,7 +68,7 @@ export const to = mathTyped('to', {
  * ```
  */
 export const toBest = mathTyped('toBest', {
-  Unit: (value: Unit): Unit => value.toBest(),
+  Unit: (value: UnitInstance): UnitInstance => value.toBest(),
 });
 
 // =============================================================================

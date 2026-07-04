@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — **BREAKING**: one `Unit` — old core Unit retired onto the merged implementation
+
+The Unit merge is complete: `core/src/types/unit.ts`'s former standalone `Unit` class
+(the 743-line canonical-value subset) is **retired**; `@danielsimonjr/mathts-core`'s `Unit`
+is now the single, feature-complete merged implementation, and `functions` `unit()`/`to()`/
+`toBest()`/operators all return that one class. Net −841 LOC.
+
+Migration notes for callers of the former core `Unit`:
+
+- **Arithmetic is at the operator level**, not Unit methods: use `add`/`subtract`/`multiply`/
+  `divide` from `@danielsimonjr/mathts-functions` instead of `unit.add(…)`/`.sub`/`.mul`/`.div`.
+  (`u1 / u2` of the same dimension now returns a plain dimensionless **number**, mathjs parity.)
+- `unit.equalBase(other)` replaces `unit.dimensionsEqual(other)`.
+- Dimensions are a 9-element exponent array (incl. angle + bit), not a `{length, mass, …}` struct.
+- `unit.formatUnits()` / `unit.toString()` replace the former `.notation` property.
+- Temperature offsets apply on **conversion** (mathjs behavior): `new Unit(20,'degC').value === 20`;
+  `.to('K')` yields `293.15 K`. `°C`/`°F`/`°` notation is accepted (normalized to `degC`/`degF`/`deg`).
+- `DimensionMismatchError` / `UnitParseError` are still thrown and exported (now from
+  `core/src/types/unit/errors.ts`); `Unit`, `isUnitValue`, `DIMENSIONLESS`, `dim`, `Dimensions`,
+  `UnitDef` keep their import paths. New: `UnitInstance` (the instance type) is exported for type
+  position, since `Unit` is now a value (an instantiated constructor), not a class name.
+
+Also: `eV` corrected to the exact 2019-SI value `1.602176634e-19` J (was `1.602176565e-19`); a
+latent `MathjsError` `captureStackTrace` parameter type was tightened to a constructor type.
+Verified end-to-end: full monorepo build 22/22, test 44/44 (functions 3200, expression 1982,
+compat 134, workbook 274, autograd 258, …), typecheck 28/28, eslint clean — zero regressions.
+
 ### Changed (2026-07-04) — merged Unit `toBest` returns clean prefixes (`0.1 mm`, not `100.0000…1 µm`)
 
 `Unit.toBest()` now defaults its best-prefix offset to `0` → pure `|log10(displayed)|`

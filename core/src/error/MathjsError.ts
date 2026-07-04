@@ -17,7 +17,10 @@ export class MathjsError extends Error {
     // captureStackTrace static is non-standard (V8 only), so reach it through
     // a narrow structural cast rather than assuming it on ErrorConstructor.
     const errorCtor = Error as unknown as {
-      captureStackTrace?(targetObject: object, constructorOpt?: (...args: never[]) => unknown): void;
+      captureStackTrace?(
+        targetObject: object,
+        constructorOpt?: abstract new (...args: never[]) => unknown
+      ): void;
     };
     if (errorCtor.captureStackTrace) {
       errorCtor.captureStackTrace(this, MathjsError);

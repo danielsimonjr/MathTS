@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 848, "e": 4367, "re": 1473 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4407, "re": 1488 },
   "s": {
-    "loc": 153725,
+    "loc": 158087,
     "cls": 51,
-    "int": 368,
-    "fn": 1471,
-    "tg": 175,
+    "int": 393,
+    "fn": 1494,
+    "tg": 177,
     "en": 0,
-    "co": 1405,
-    "toi": 484
+    "co": 1409,
+    "toi": 491
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -91,7 +91,7 @@
       ]
     },
     "core": {
-      "f": 5,
+      "f": 8,
       "exp": [
         "DEFAULT_CONFIG",
         "PI",
@@ -104,29 +104,30 @@
         "LN10",
         "LOG2E",
         "LOG10E",
+        "factory",
+        "sortFactories",
+        "create",
+        "isFactory",
+        "assertDependencies",
+        "isOptionalDependency",
+        "stripOptionalNotation",
         "Complex",
-        "isComplex",
-        "I",
-        "COMPLEX_ZERO",
-        "COMPLEX_ONE",
-        "COMPLEX_NEG_ONE",
-        "Dual",
-        "isDual",
-        "DUAL_UNARY_RULES"
+        "isComplex"
       ],
       "int": [
         "ConfigOptions",
+        "FactoryFunction",
+        "LegacyFactory",
+        "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
         "Matrix",
-        "DenseMatrix",
-        "SparseMatrix",
-        "Range",
-        "IndexDimension"
+        "DenseMatrix"
       ]
     },
+    "core/error": { "f": 1, "exp": ["MathjsError"], "cls": ["MathjsError"] },
     "core/factory": {
       "f": 2,
       "exp": [
@@ -172,7 +173,7 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 9,
+      "f": 14,
       "exp": [
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",
@@ -200,9 +201,8 @@
         "Complex",
         "Dual",
         "Fraction",
-        "DimensionMismatchError",
         "UnitParseError",
-        "Unit"
+        "DimensionMismatchError"
       ],
       "int": [
         "BigNumberConfig",
