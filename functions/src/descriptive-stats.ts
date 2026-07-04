@@ -56,6 +56,38 @@ export function rankdata(x: Vec): number[] {
   return ranks;
 }
 
+/**
+ * Spearman rank correlation coefficient ρ — the Pearson correlation of the
+ * rank-transformed inputs (ties broken by average ranks via {@link rankdata}).
+ * Unlike Pearson, it measures any MONOTONIC relationship, so a monotonic
+ * non-linear pair (e.g. `y = x²` on positives) gives ρ = 1. Result is in [−1, 1].
+ *
+ * @throws if the inputs differ in length or a rank vector is constant.
+ */
+export function spearman(x: Vec, y: Vec): number {
+  const rx = rankdata(x);
+  const ry = rankdata(y);
+  const n = rx.length;
+  if (n !== ry.length) throw new Error('spearman: inputs must have equal length');
+  if (n === 0) return NaN;
+  const mx = mean(rx);
+  const my = mean(ry);
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = rx[i] - mx;
+    const dy = ry[i] - my;
+    sxy += dx * dy;
+    sxx += dx * dx;
+    syy += dy * dy;
+  }
+  if (sxx === 0 || syy === 0) {
+    throw new Error('spearman: a rank vector is constant; correlation undefined');
+  }
+  return sxy / Math.sqrt(sxx * syy);
+}
+
 /** Geometric mean: `exp(mean(ln x))` (stable form). All entries must be > 0. */
 export function gmean(x: Vec): number {
   const a = arr(x);

@@ -2606,6 +2606,7 @@
       "sortF64JS",
       "sortFactories",
       "sparse",
+      "spearman",
       "spectralClustering",
       "spectrogram",
       "speedOfLight",

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-04'
   totalFiles: 857
   totalModules: 72
-  totalExports: 4407
+  totalExports: 4409
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -6921,6 +6921,7 @@ modules:
       workspaceDependencies: []
       exports:
         - rankdata
+        - spearman
         - gmean
         - hmean
         - moment
@@ -6933,6 +6934,7 @@ modules:
         - corrcoef
       functions:
         - rankdata
+        - spearman
         - gmean
         - hmean
         - moment
@@ -7170,6 +7172,7 @@ modules:
             - cov
             - corrcoef
             - rankdata
+            - spearman
           reExport: true
         - file: ./numeric-extra.js
           imports:
@@ -7336,6 +7339,7 @@ modules:
         - cov
         - corrcoef
         - rankdata
+        - spearman
         - clamp
         - sigmoid
         - logsumexp
@@ -7447,6 +7451,7 @@ modules:
         - cov
         - corrcoef
         - rankdata
+        - spearman
         - clamp
         - sigmoid
         - logsumexp
@@ -28349,15 +28354,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 857
   totalModules: 72
-  totalLinesOfCode: 158096
-  totalExports: 4407
+  totalLinesOfCode: 158129
+  totalExports: 4409
   totalClasses: 51
   totalInterfaces: 393
-  totalFunctions: 1494
+  totalFunctions: 1495
   totalTypeGuards: 177
   totalEnums: 0
   totalConstants: 1409
-  totalReExports: 1488
+  totalReExports: 1489
   totalTypeOnlyImports: 491
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

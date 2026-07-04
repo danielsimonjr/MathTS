@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4407, "re": 1488 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4409, "re": 1489 },
   "s": {
-    "loc": 158096,
+    "loc": 158129,
     "cls": 51,
     "int": 393,
-    "fn": 1494,
+    "fn": 1495,
     "tg": 177,
     "en": 0,
     "co": 1409,
@@ -517,6 +517,7 @@
         "kmeans",
         "spectralClustering",
         "rankdata",
+        "spearman",
         "gmean",
         "hmean",
         "moment",
@@ -529,8 +530,7 @@
         "corrcoef",
         "normalQuantile",
         "studentTCDF",
-        "studentTQuantile",
-        "chiSquaredCDF"
+        "studentTQuantile"
       ],
       "int": [
         "KMeansResult",

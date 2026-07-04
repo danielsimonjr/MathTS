@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-04) — `spearman` rank correlation (closes the statistics-depth gap)
+
+New `spearman(x, y)` — Spearman's ρ (Pearson correlation of the rank-transformed inputs,
+average-rank ties). Captures any monotonic relationship (a monotonic non-linear pair → ρ=1,
+where Pearson < 1). The rest of the descriptive-stats depth (`skewness`/`kurtosis`/`cov`/
+`gmean`/`iqr`/`zscore`/`kruskalWallis`/`wilcoxon`/`fTest`) already shipped in the Wave-A work,
+so this was the one remaining gap. Oracle-tested (ρ=1 monotonic, −1 reversed, 0.8 no-tie case).
+
 ### Fixed (2026-07-04) — `kolmogorovSmirnovTest` rejects a non-function CDF with a clear error
 
 Passing a second array (mistaking it for a two-sample KS test) crashed with an opaque

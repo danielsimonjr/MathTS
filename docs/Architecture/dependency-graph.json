@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-04",
     "totalFiles": 857,
     "totalModules": 72,
-    "totalExports": 4407
+    "totalExports": 4409
   },
   "entryPoints": [
     {
@@ -7416,6 +7416,7 @@
         "workspaceDependencies": [],
         "exports": [
           "rankdata",
+          "spearman",
           "gmean",
           "hmean",
           "moment",
@@ -7429,6 +7430,7 @@
         ],
         "functions": [
           "rankdata",
+          "spearman",
           "gmean",
           "hmean",
           "moment",
@@ -7675,7 +7677,8 @@
               "zscore",
               "cov",
               "corrcoef",
-              "rankdata"
+              "rankdata",
+              "spearman"
             ],
             "reExport": true
           },
@@ -7862,6 +7865,7 @@
           "cov",
           "corrcoef",
           "rankdata",
+          "spearman",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -7974,6 +7978,7 @@
           "cov",
           "corrcoef",
           "rankdata",
+          "spearman",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -30538,15 +30543,15 @@
   "statistics": {
     "totalTypeScriptFiles": 857,
     "totalModules": 72,
-    "totalLinesOfCode": 158096,
-    "totalExports": 4407,
+    "totalLinesOfCode": 158129,
+    "totalExports": 4409,
     "totalClasses": 51,
     "totalInterfaces": 393,
-    "totalFunctions": 1494,
+    "totalFunctions": 1495,
     "totalTypeGuards": 177,
     "totalEnums": 0,
     "totalConstants": 1409,
-    "totalReExports": 1488,
+    "totalReExports": 1489,
     "totalTypeOnlyImports": 491,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
