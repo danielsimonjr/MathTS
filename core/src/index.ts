@@ -67,6 +67,22 @@ export {
 } from './types/bignumber.js';
 export type { BigNumberConfig, RoundingMode } from './types/bignumber.js';
 
+// Polymorphic scalar arithmetic (over number | bigint | Complex | Fraction | BigNumber)
+export {
+  addScalar,
+  subtractScalar,
+  multiplyScalar,
+  divideScalar,
+  pow,
+  abs,
+  fix,
+  round,
+  equal,
+  isNumeric,
+  number,
+} from './arithmetic/scalar.js';
+export type { NumericScalar } from './arithmetic/scalar.js';
+
 // Units (dimensional analysis)
 export {
   Unit,

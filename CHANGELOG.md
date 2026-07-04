@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-03) — core polymorphic scalar arithmetic (Unit-merge Phase 1.1)
+
+New `core/src/arithmetic/scalar.ts`: `addScalar`/`subtractScalar`/`multiplyScalar`/
+`divideScalar`/`pow`/`abs`/`fix`/`round`/`equal` over any mix of `number | bigint |
+Complex | Fraction | BigNumber`, plus polymorphic `isNumeric` and a `number()`
+converter — all built solely on core's own numeric primitives (no typed-function
+dispatch). This is the load-bearing dependency for **relocating the feature-complete
+`Unit` class into `core`** (the merge that collapses MathTS's two coexisting `Unit`
+implementations into one; see `docs/superpowers/plans/2026-07-03-unit-merge.md`).
+
+Dispatch promotes both operands to the richest common domain (Complex ≻ BigNumber ≻
+Fraction) then invokes one same-type method, so commutative and non-commutative ops
+share a path with operand order preserved, and same-type operands stay exact. Three
+correctness guards baked in from review: non-integer exponents on an exact base fall
+back to double `Math.pow` (`BigNumber.pow(0.5)` no longer silently returns 1, nor does
+`Fraction.pow(0.5)` throw); `round` forces `'halfCeil'` on BigNumber so negative
+half-integers round consistently with `Math.round`/`Fraction.round`; `isNumeric` matches
+mathjs semantics (true for boolean, false for Complex). 52 oracle-pinned tests; core 717
+pass; typecheck + eslint clean. Purely additive — nothing consumes it yet (the Unit is
+rewired in Phase 1.2).
+
 ### Tests (2026-07-03) — extended property-based invariants (WS-1 P3)
 
 Grew `functions/tests/property-invariants.test.ts` from 10 to 22 `fast-check`

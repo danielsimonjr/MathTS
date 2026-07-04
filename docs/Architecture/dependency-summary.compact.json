@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-03", "f": 850, "e": 4281, "re": 1461 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 854, "e": 4376, "re": 1473 },
   "s": {
-    "loc": 156149,
+    "loc": 157775,
     "cls": 51,
-    "int": 356,
-    "fn": 1405,
-    "tg": 130,
+    "int": 391,
+    "fn": 1474,
+    "tg": 175,
     "en": 0,
-    "co": 1397,
-    "toi": 485
+    "co": 1411,
+    "toi": 486
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -74,9 +74,26 @@
         "TaskOptions"
       ]
     },
-    "core": {
-      "f": 2,
+    "core/arithmetic": {
+      "f": 1,
       "exp": [
+        "addScalar",
+        "subtractScalar",
+        "multiplyScalar",
+        "divideScalar",
+        "pow",
+        "abs",
+        "fix",
+        "round",
+        "equal",
+        "isNumeric",
+        "number"
+      ]
+    },
+    "core": {
+      "f": 5,
+      "exp": [
+        "DEFAULT_CONFIG",
         "PI",
         "E",
         "TAU",
@@ -96,6 +113,18 @@
         "Dual",
         "isDual",
         "DUAL_UNARY_RULES"
+      ],
+      "int": [
+        "ConfigOptions",
+        "BigNumber",
+        "Complex",
+        "Fraction",
+        "Unit",
+        "Matrix",
+        "DenseMatrix",
+        "SparseMatrix",
+        "Range",
+        "IndexDimension"
       ]
     },
     "core/factory": {

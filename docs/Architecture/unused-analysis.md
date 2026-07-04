@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-03
+**Generated**: 2026-07-04
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 371
+- **Potentially unused exports**: 474
 
 ## Potentially Unused Files
 
@@ -18,6 +18,118 @@ These exports are not imported by any other file in the codebase:
 ### `packages/workerpool/src/fft-core.ts`
 
 - `fftBitReverse` (function)
+
+### `core/src/config.ts`
+
+- `ConfigOptions` (interface)
+- `MathJsConfig` (type)
+
+### `core/src/is.ts`
+
+- `isBigInt` (function)
+- `isComplex` (function)
+- `isFraction` (function)
+- `isUnit` (function)
+- `isString` (function)
+- `isMatrix` (function)
+- `isCollection` (function)
+- `isDenseMatrix` (function)
+- `isSparseMatrix` (function)
+- `isRange` (function)
+- `isIndex` (function)
+- `isBoolean` (function)
+- `isResultSet` (function)
+- `isHelp` (function)
+- `isFunction` (function)
+- `isDate` (function)
+- `isRegExp` (function)
+- `isMap` (function)
+- `isPartitionedMap` (function)
+- `isObjectWrappingMap` (function)
+- `isNull` (function)
+- `isUndefined` (function)
+- `isAccessorNode` (function)
+- `isArrayNode` (function)
+- `isAssignmentNode` (function)
+- `isBlockNode` (function)
+- `isConditionalNode` (function)
+- `isConstantNode` (function)
+- `rule2Node` (function)
+- `isFunctionAssignmentNode` (function)
+- `isFunctionNode` (function)
+- `isIndexNode` (function)
+- `isNode` (function)
+- `isObjectNode` (function)
+- `isOperatorNode` (function)
+- `isParenthesisNode` (function)
+- `isRangeNode` (function)
+- `isRelationalNode` (function)
+- `isSymbolNode` (function)
+- `isChain` (function)
+- `typeOf` (function)
+- `BigNumber` (interface)
+- `Complex` (interface)
+- `Fraction` (interface)
+- `Unit` (interface)
+- `Matrix` (interface)
+- `DenseMatrix` (interface)
+- `SparseMatrix` (interface)
+- `Range` (interface)
+- `IndexDimension` (interface)
+- `Index` (interface)
+- `ResultSet` (interface)
+- `Help` (interface)
+- `Chain` (interface)
+- `Node` (interface)
+- `AccessorNode` (interface)
+- `ArrayNode` (interface)
+- `AssignmentNode` (interface)
+- `BlockNode` (interface)
+- `ConditionalNode` (interface)
+- `ConstantNode` (interface)
+- `FunctionAssignmentNode` (interface)
+- `FunctionNode` (interface)
+- `IndexNode` (interface)
+- `ObjectNode` (interface)
+- `OperatorNode` (interface)
+- `ParenthesisNode` (interface)
+- `RangeNode` (interface)
+- `RelationalNode` (interface)
+- `SymbolNode` (interface)
+- `PartitionedMap` (interface)
+- `isArray` (constant)
+
+### `core/src/number.ts`
+
+- `isInteger` (function)
+- `safeNumberType` (function)
+- `format` (function)
+- `normalizeFormatOptions` (function)
+- `splitNumber` (function)
+- `toEngineering` (function)
+- `toFixed` (function)
+- `toExponential` (function)
+- `toPrecision` (function)
+- `roundDigits` (function)
+- `digits` (function)
+- `copysign` (function)
+- `isPowZeroAtInfinity` (function)
+- `SplitValue` (interface)
+- `NumberTypeConfig` (interface)
+- `FormatOptions` (interface)
+- `NormalizedFormatOptions` (interface)
+- `sign` (constant)
+- `log2` (constant)
+- `log10` (constant)
+- `log1p` (constant)
+- `cbrt` (constant)
+- `expm1` (constant)
+- `acosh` (constant)
+- `asinh` (constant)
+- `atanh` (constant)
+- `cosh` (constant)
+- `sinh` (constant)
+- `tanh` (constant)
 
 ### `core/src/typed/mathts-typed.ts`
 

@@ -37,6 +37,13 @@
 
 So Phase 1.1's implementation half = **build `core/src/arithmetic/scalar.ts`** (TDD, polymorphic scalar ops) + a polymorphic `isNumeric`. That module is the load-bearing piece of deep integration; everything else in Phase 1.2 is the mechanical move + rewire onto it.
 
+> **✅ Phase 1.1-impl DONE (2026-07-03).** `core/src/arithmetic/scalar.ts` built + exported from `core/src/index.ts`:
+> `addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/`pow`/`abs`/`fix`/`round`/`equal` over
+> `number|bigint|Complex|Fraction|BigNumber`, plus polymorphic `isNumeric` (mathjs semantics: boolean ✓, Complex ✗)
+> and `number()`. Promote-to-richest-common-domain dispatch; 52 oracle-pinned tests (`core/tests/arithmetic/scalar.test.ts`);
+> 3 review-surfaced correctness guards fixed at root (non-integer `pow` on exact base → double fallback; `round`
+> `'halfCeil'` on BigNumber; `isNumeric` boolean). core 717 pass, typecheck + eslint clean.
+
 - **`dimensions` = array-9 (mathjs), keep angle+bit.** Superset; core's struct-7 is representable. Core tests that read `.dimensions.temperature` (struct) get a compatibility accessor OR are rewritten (Phase 5).
 - **`toBest` = port core's `|log10|`-minimizing scan** over the mathjs prefix tables so results match the nicer core behavior.
 - **JSON:** accept BOTH `{mathts,…}` and `{mathjs,…}` on `fromJSON`; emit one canonical envelope (choose `{mathts,…}`, alias kept).

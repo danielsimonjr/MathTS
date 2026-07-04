@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-03",
-    "totalFiles": 850,
-    "totalModules": 70,
-    "totalExports": 4281
+    "lastUpdated": "2026-07-04",
+    "totalFiles": 854,
+    "totalModules": 71,
+    "totalExports": 4376
   },
   "entryPoints": [
     {
@@ -295,7 +295,73 @@
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       }
     },
+    "core/arithmetic": {
+      "core/src/arithmetic/scalar.ts": {
+        "description": "Polymorphic scalar arithmetic over core's numeric primitives.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../config.js",
+            "imports": ["DEFAULT_CONFIG"]
+          },
+          {
+            "file": "../number.js",
+            "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "../types/bignumber.js",
+            "imports": ["BigNumber"]
+          },
+          {
+            "file": "../types/complex.js",
+            "imports": ["Complex"]
+          },
+          {
+            "file": "../types/fraction.js",
+            "imports": ["Fraction"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "addScalar",
+          "subtractScalar",
+          "multiplyScalar",
+          "divideScalar",
+          "pow",
+          "abs",
+          "fix",
+          "round",
+          "equal",
+          "isNumeric",
+          "number"
+        ],
+        "functions": [
+          "addScalar",
+          "subtractScalar",
+          "multiplyScalar",
+          "divideScalar",
+          "pow",
+          "abs",
+          "fix",
+          "round",
+          "equal",
+          "isNumeric",
+          "number"
+        ]
+      }
+    },
     "core": {
+      "core/src/config.ts": {
+        "description": "Configuration interface for math.js",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["DEFAULT_CONFIG"],
+        "interfaces": ["ConfigOptions"],
+        "constants": ["DEFAULT_CONFIG"]
+      },
       "core/src/constants.ts": {
         "description": "Named mathematical constants (plain `number`).",
         "externalDependencies": [],
@@ -375,6 +441,23 @@
               "BIGNUMBER_E",
               "BIGNUMBER_LN2",
               "BIGNUMBER_LN10"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./arithmetic/scalar.js",
+            "imports": [
+              "addScalar",
+              "subtractScalar",
+              "multiplyScalar",
+              "divideScalar",
+              "pow",
+              "abs",
+              "fix",
+              "round",
+              "equal",
+              "isNumeric",
+              "number"
             ],
             "reExport": true
           },
@@ -465,6 +548,12 @@
             "typeOnly": true
           },
           {
+            "file": "./arithmetic/scalar.js",
+            "imports": ["NumericScalar"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./types/unit.js",
             "imports": ["Dimensions", "UnitDef"],
             "reExport": true,
@@ -530,6 +619,17 @@
           "BIGNUMBER_E",
           "BIGNUMBER_LN2",
           "BIGNUMBER_LN10",
+          "addScalar",
+          "subtractScalar",
+          "multiplyScalar",
+          "divideScalar",
+          "pow",
+          "abs",
+          "fix",
+          "round",
+          "equal",
+          "isNumeric",
+          "number",
           "Unit",
           "isUnitValue",
           "DimensionMismatchError",
@@ -588,6 +688,7 @@
           "DualUnaryRuleName",
           "BigNumberConfig",
           "RoundingMode",
+          "NumericScalar",
           "Dimensions",
           "UnitDef",
           "TypedFunction",
@@ -640,6 +741,17 @@
           "BIGNUMBER_E",
           "BIGNUMBER_LN2",
           "BIGNUMBER_LN10",
+          "addScalar",
+          "subtractScalar",
+          "multiplyScalar",
+          "divideScalar",
+          "pow",
+          "abs",
+          "fix",
+          "round",
+          "equal",
+          "isNumeric",
+          "number",
           "Unit",
           "isUnit",
           "DimensionMismatchError",
@@ -696,6 +808,7 @@
           "DualUnaryRuleName",
           "BigNumberConfig",
           "RoundingMode",
+          "NumericScalar",
           "Dimensions",
           "UnitDef",
           "TypedFunction",
@@ -711,6 +824,215 @@
           "FactoryImport"
         ],
         "constants": ["VERSION"]
+      },
+      "core/src/is.ts": {
+        "description": "Structural view used by the duck-typing guards below: math.js types are",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "isArray",
+          "isNumber",
+          "isBigNumber",
+          "isBigInt",
+          "isComplex",
+          "isFraction",
+          "isUnit",
+          "isString",
+          "isMatrix",
+          "isCollection",
+          "isDenseMatrix",
+          "isSparseMatrix",
+          "isRange",
+          "isIndex",
+          "isBoolean",
+          "isResultSet",
+          "isHelp",
+          "isFunction",
+          "isDate",
+          "isRegExp",
+          "isObject",
+          "isMap",
+          "isPartitionedMap",
+          "isObjectWrappingMap",
+          "isNull",
+          "isUndefined",
+          "isAccessorNode",
+          "isArrayNode",
+          "isAssignmentNode",
+          "isBlockNode",
+          "isConditionalNode",
+          "isConstantNode",
+          "rule2Node",
+          "isFunctionAssignmentNode",
+          "isFunctionNode",
+          "isIndexNode",
+          "isNode",
+          "isObjectNode",
+          "isOperatorNode",
+          "isParenthesisNode",
+          "isRangeNode",
+          "isRelationalNode",
+          "isSymbolNode",
+          "isChain",
+          "typeOf"
+        ],
+        "interfaces": [
+          "BigNumber",
+          "Complex",
+          "Fraction",
+          "Unit",
+          "Matrix",
+          "DenseMatrix",
+          "SparseMatrix",
+          "Range",
+          "IndexDimension",
+          "Index",
+          "ResultSet",
+          "Help",
+          "Chain",
+          "Node",
+          "AccessorNode",
+          "ArrayNode",
+          "AssignmentNode",
+          "BlockNode",
+          "ConditionalNode",
+          "ConstantNode",
+          "FunctionAssignmentNode",
+          "FunctionNode",
+          "IndexNode",
+          "ObjectNode",
+          "OperatorNode",
+          "ParenthesisNode",
+          "RangeNode",
+          "RelationalNode",
+          "SymbolNode",
+          "PartitionedMap"
+        ],
+        "functions": [
+          "isNumber",
+          "isBigNumber",
+          "isBigInt",
+          "isComplex",
+          "isFraction",
+          "isUnit",
+          "isString",
+          "isMatrix",
+          "isCollection",
+          "isDenseMatrix",
+          "isSparseMatrix",
+          "isRange",
+          "isIndex",
+          "isBoolean",
+          "isResultSet",
+          "isHelp",
+          "isFunction",
+          "isDate",
+          "isRegExp",
+          "isObject",
+          "isMap",
+          "isPartitionedMap",
+          "isObjectWrappingMap",
+          "isNull",
+          "isUndefined",
+          "isAccessorNode",
+          "isArrayNode",
+          "isAssignmentNode",
+          "isBlockNode",
+          "isConditionalNode",
+          "isConstantNode",
+          "rule2Node",
+          "isFunctionAssignmentNode",
+          "isFunctionNode",
+          "isIndexNode",
+          "isNode",
+          "isObjectNode",
+          "isOperatorNode",
+          "isParenthesisNode",
+          "isRangeNode",
+          "isRelationalNode",
+          "isSymbolNode",
+          "isChain",
+          "typeOf"
+        ],
+        "constants": ["isArray"]
+      },
+      "core/src/number.ts": {
+        "description": "Split value representation with sign, coefficients, and exponent",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./is.js",
+            "imports": ["isBigNumber", "isNumber", "isObject"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "sign",
+          "log2",
+          "log10",
+          "log1p",
+          "cbrt",
+          "expm1",
+          "acosh",
+          "asinh",
+          "atanh",
+          "cosh",
+          "sinh",
+          "tanh",
+          "isInteger",
+          "safeNumberType",
+          "format",
+          "normalizeFormatOptions",
+          "splitNumber",
+          "toEngineering",
+          "toFixed",
+          "toExponential",
+          "toPrecision",
+          "roundDigits",
+          "digits",
+          "nearlyEqual",
+          "copysign",
+          "isPowZeroAtInfinity"
+        ],
+        "interfaces": [
+          "SplitValue",
+          "NumberTypeConfig",
+          "FormatOptions",
+          "NormalizedFormatOptions"
+        ],
+        "functions": [
+          "isInteger",
+          "safeNumberType",
+          "format",
+          "normalizeFormatOptions",
+          "splitNumber",
+          "toEngineering",
+          "toFixed",
+          "toExponential",
+          "toPrecision",
+          "roundDigits",
+          "digits",
+          "nearlyEqual",
+          "copysign",
+          "isPowZeroAtInfinity"
+        ],
+        "constants": [
+          "sign",
+          "log2",
+          "log10",
+          "log1p",
+          "cbrt",
+          "expm1",
+          "acosh",
+          "asinh",
+          "atanh",
+          "cosh",
+          "sinh",
+          "tanh"
+        ]
       }
     },
     "core/factory": {
@@ -28869,8 +29191,18 @@
         "files": ["packages/workerpool/src/fft-core.ts", "packages/workerpool/src/index.ts"]
       },
       {
+        "name": "Core/arithmetic",
+        "files": ["core/src/arithmetic/scalar.ts"]
+      },
+      {
         "name": "Core",
-        "files": ["core/src/constants.ts", "core/src/index.ts"]
+        "files": [
+          "core/src/config.ts",
+          "core/src/constants.ts",
+          "core/src/index.ts",
+          "core/src/is.ts",
+          "core/src/number.ts"
+        ]
       },
       {
         "name": "Core/factory",
@@ -29993,21 +30325,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 850,
-    "totalModules": 70,
-    "totalLinesOfCode": 156149,
-    "totalExports": 4281,
+    "totalTypeScriptFiles": 854,
+    "totalModules": 71,
+    "totalLinesOfCode": 157775,
+    "totalExports": 4376,
     "totalClasses": 51,
-    "totalInterfaces": 356,
-    "totalFunctions": 1405,
-    "totalTypeGuards": 130,
+    "totalInterfaces": 391,
+    "totalFunctions": 1474,
+    "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1397,
-    "totalReExports": 1461,
-    "totalTypeOnlyImports": 485,
+    "totalConstants": 1411,
+    "totalReExports": 1473,
+    "totalTypeOnlyImports": 486,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 371
+    "unusedExportsCount": 474
   }
 }
