@@ -4,28 +4,32 @@ Generated: 2026-01-13
 Updated: 2026-07-03
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
-> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 3: switch functions to core's Unit)
+> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 4: retire the old core Unit — BREAKING)
 >
 > **In-flight migration:** merge the two `Unit` classes into one — relocate the feature-complete mathjs `Unit`
-> into `core`, **deeply integrated** on core's own primitives (maintainer-confirmed). **Strangler-fig pattern:**
-> core's Unit is built + validated in parallel; functions stays GREEN until it switches over.
+> into `core`, **deeply integrated** on core's own primitives (maintainer-confirmed). **Strangler-fig pattern.**
 >
-> **DONE:** Phase 0 + Phase 1.1 dep audit (`950a8fd`) · **1.1-impl** `core/src/arithmetic/scalar.ts` (`25b80ed`) ·
-> **1.2 inc1** shared `memoize`/`endsWith`/`warnOnce` (`1cd2400`) · **inc2** `unit-types.ts` → core via `/internal`
-> (`451773e`) · **inc3a** `BigNumber.div`/`.times` aliases (`5611a77`) · **inc3b** the whole `Unit.ts` (~3.7k lines)
-> relocated to `core/src/types/unit/` + `dependencies.ts` (19 deps wired from core primitives, Unit-aware
-> `subtractScalar`) + `index.ts` (ready-wired `Unit`), proven by 6 parity oracles (`f1b76e7`). **core has a working,
-> feature-complete Unit today; functions is untouched + GREEN.**
+> **DONE (all pushed, L==R, dep-graph verified — NO circular deps):** Phase 0 + 1.1 audit (`950a8fd`) · **1.1-impl**
+> `scalar.ts` (`25b80ed`) · **1.2** shared utils (`1cd2400`) + `unit-types.ts`→core (`451773e`) + `BigNumber.div`/`.times`
+> (`5611a77`) + **`Unit.ts` relocated + wired + 6 parity oracles** (`f1b76e7`) · **Phase 3 — functions switched over**
+> (`ce7ff3f`): `factories/index.ts` imports `createUnitClass` from core `/internal` + instantiates with the same scope;
+> `functions/src/type/unit/Unit.ts` DELETED (the ~3.7k-line duplicate is gone). Enabling fixes: `memoize({limit})` LRU,
+> local `./unit-types.js` import, `factory.isOptionalDependency` return type. **Verified: functions 3197 + compat/
+> expression/integration 2201 + core 731 pass; 0 regressions.**
 >
-> **START HERE — Phase 3 (switch functions over, the delicate part):** (a) relocate `physicalConstants.ts` +
-> `function/{unit,createUnit,splitUnit}.ts` into core (needs a core `deepMap` — currently MISSING — for
-> `function/unit.ts`); (b) export `createUnitClass`/`unitDependencies`/`Unit` from core (`/internal` or public);
-> (c) rewire `functions/src/factories/index.ts` (line ~1064-1069) to import the Unit from core, delete the functions
-> `type/unit/` copies; (d) DROP the dual-flavor operator branching in `functions/src/typed/arithmetic.ts` (`UnitLike`/
-> `unitAdd`/etc. — one Unit type now). Keep functions GREEN at each step. Then **Phase 4** retire `core/src/types/unit.ts`
-> (old core Unit) to an alias; **Phase 5** migrate ~130 tests + full regression + changeset (core minor already pending).
+> **START HERE — Phase 4 (retire the OLD core Unit — a BREAKING core API change; direction already maintainer-confirmed):**
+> The old core `Unit` (`core/src/types/unit.ts`, 743-line subset: `.add`/`.sub`/`.dimensionsEqual`, struct-7 dims,
+> `{mathts}` JSON, nicer `toBest`) is still core's PUBLIC `Unit` and is what `functions/src/typed/unit.ts` `to(number,string)`
+> constructs — the last thing keeping the dual-flavor branching alive. Steps: (1) **Phase 2 first** — port the old core
+> Unit's two nicer behaviors onto the new Unit (canonical `toBest` `|log10|`-min scan → `0.1 mm` not `100 µm`; accept BOTH
+> `{mathts}`+`{mathjs}` on `fromJSON`); (2) make `core/src/types/unit.ts` re-export the NEW Unit (keep `DimensionMismatchError`/
+> `UnitParseError`/`isUnitValue`/`DIMENSIONLESS`/`dim`/`Dimensions`/`UnitDef` names stable); (3) point `functions/src/typed/unit.ts`
+> `to()`'s number case at the new Unit; (4) **DROP the dual-flavor** in `functions/src/typed/arithmetic.ts` (`UnitLike`/`unitAdd`/
+> `unitSub`/`unitMul`/`unitDiv`/`unitSameDimension`/`unitAddSubMathjs` → mathjs-flavor only, since one Unit now); (5) **Phase 5**
+> migrate `core/tests/types/unit.test.ts` (96 asserts) to new semantics + full monorepo regression + finalize changeset
+> (core minor already pending; add functions minor + units patch).
 > **Full plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
-> Resume notes: memory `project-unit-merge-in-progress.md`. Last clean commit `f1b76e7`.
+> Resume notes: memory `project-unit-merge-in-progress.md`. Last clean commit `ce7ff3f`.
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 >
