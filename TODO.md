@@ -301,9 +301,16 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   (`Q=I,T=A ⇒ Q·T·Qᵀ=A`). Verified: 6-case eigenvalue oracle (`schur-eigenvalue-oracle.test.ts`, incl.
   4×4 symmetric + complex-pair-kept) + full matrix suite 749✓/7skip; `matrixLogm`/`matrixSqrtm`/`expm`
   green. `matrixSchur` is now ORACLE in the coverage matrix.
-- 🔄 **[WS-1 P2 — external-oracle pins, in progress] 318→329 ORACLE / 66 SELF-REF / 0 UNTESTED** (of 395;
-  baseline at the P1 audit was 318/75/2). Each pin uses an implementation-independent oracle (closed form,
-  standard table value, or a known spectrum) — never a round-trip against MathTS's own CDF. Done so far:
+- 🔄 **[WS-1 P2 — external-oracle pins, ~40 more converted 2026-07-04] ~329→~369 ORACLE / ~26 SELF-REF / 0 UNTESTED.**
+  This session's batch (5 new `gap-*-oracles` suites): 5 distribution objects, 21 elementary trig/hyperbolic/
+  arithmetic, 6 hypothesis tests + PCA, 5 decompositions (polar/hessenberg/qz/lowRankApprox/pinv), signal/CAS
+  (autoCorrelation/correlate/hilbertTransform/kmeans/multivariateTaylor/series). Surfaced + fixed 1 bug
+  (`kolmogorovSmirnovTest` non-fn-CDF guard, functions@0.10.0); documented `series` numerical-degradation limit.
+  Also **GC4 verified already-done** (cumsum/ctranspose/createUnit/apply/index/help all exist + work) and
+  **statistics-depth gap closed** — added `spearman` (functions@0.10.0), the only missing one (skewness/kurtosis/
+  cov/gmean/iqr/zscore/kruskalWallis/wilcoxon/fTest already shipped). **Remaining SELF-REF (~26):** inherently
+  round-trip/random (FFT `ifft`/`spectrogram`/`resample`, `shapiroWilkTest` Royston-W, geometry `kdTree`/
+  `voronoiDiagram`, lifecycle smoke) — need seeded-determinism or scipy pins. Baseline history below:
   - **Distributions:** `gammaQuantile`, `betaQuantile` (were UNTESTED) → chi-square-table + closed forms.
   - **Hypothesis (14/15):** `studentTTest`, `anova` (closed-form F(2,6) p=0.001), `chiSquareTest` (χ²₂
     `exp(−x/2)`), `mannWhitneyTest` (U), `principalComponentAnalysis` (known covariance spectrum),
