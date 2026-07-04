@@ -13,6 +13,17 @@ Passing a second array (mistaking it for a two-sample KS test) crashed with an o
 `cdf is not a function`; it now throws `TypeError: … must be a CDF function (this is a
 one-sample test)`. Found while adding the WS-1 P2 hypothesis-test oracles.
 
+### Tests (2026-07-04) — oracle pins for decompositions + signal/CAS/clustering (WS-1 P2)
+
+`gap-decomposition-oracles.test.ts` pins matrix decomposition FACTORS (not just
+reconstruction): `polarDecomposition` (A=2R → U=R, P=2I), `hessenbergForm` (Householder
+invariants |H[1][0]|=√65, H[2][0]=0, trace preserved), `qz` (gen-eigenvalues 2,3),
+`lowRankApprox` (exact rank-1 truncation), `pinv` (diag(2,4)→diag(½,¼)).
+`gap-signal-cas-oracles.test.ts` pins `autoCorrelation`/`correlate` (=[3,8,14,8,3], lag-0=Σx²),
+`hilbertTransform` (90° shift), `kmeans` (exact cluster-mean centroids), `multivariateTaylor`
+(exact for polynomials), and `series` leading behavior (documenting that its finite-difference
+higher-order coefficients are only approximate).
+
 ### Tests (2026-07-04) — closed-form oracle pins for hypothesis tests + elementary functions (WS-1 P2)
 
 Two new oracle suites converting SELF-REF functions to ORACLE(cf):

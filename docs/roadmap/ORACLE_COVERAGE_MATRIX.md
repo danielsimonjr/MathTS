@@ -50,6 +50,19 @@
 | Optimization / regression / numeric utils | 15 | 13 (ext+cf) | 2 | 0 |
 | **Total** | **395** | **329** | **66** | **0** |
 
+> **WS-1 P2 conversion batch (2026-07-04).** ~40 of the 66 SELF-REF functions were pinned to
+> external/closed-form oracles this session, across new suites `gap-distribution-oracles`,
+> `gap-elementary-oracles`, `gap-hypothesis-oracles`, `gap-decomposition-oracles`,
+> `gap-signal-cas-oracles`: the 5 distribution objects; 21 elementary trig/inverse/hyperbolic
+> + `log1p`/`expm1`/`unaryPlus`; 6 hypothesis tests + PCA; 5 decompositions (`polarDecomposition`,
+> `hessenbergForm`, `qz`, `lowRankApprox`, `pinv`); and `autoCorrelation`/`correlate`/
+> `hilbertTransform`/`kmeans`/`multivariateTaylor`/`series`. One real bug surfaced + fixed
+> (`kolmogorovSmirnovTest` non-function CDF guard) and one limitation documented (numerical
+> `series` degrades beyond low order). Remaining SELF-REF (~26) are the inherently
+> round-trip/random ones (FFT `ifft`/`spectrogram`/`resample`, `shapiroWilkTest` Royston-W,
+> geometry `kdTree`/`voronoiDiagram`, lifecycle smoke) — candidates for seeded-determinism or
+> scipy pins.
+
 **Headline findings**
 
 - **Special functions (38/38)** and **Distributions (46/46)** are the *best* covered — the
@@ -285,9 +298,9 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | svd | ORACLE(cf) | svd | σ pinned for diag (3,2,1) and √(3²+4²)=5 |
 | **svdWasm** | **SELF-REF** | svd-wasm | reconstruction + "agrees with JS svd" (MathTS-vs-MathTS) |
 | singularValues / norm2 / normFro / cond | ORACLE(cf) | svd, typed-matrix-ops | pinned σ / Frobenius / cond(I)=1 |
-| **pinv** (svd.ts) | **SELF-REF** | svd | Moore-Penrose identities only |
+| **pinv** (svd.ts) | ORACLE(cf) | gap-decomposition-oracles | pinv(diag(2,4))=diag(½,¼) |
 | matrixPinv (pinv.ts) | ORACLE(cf) | pinv | analytical inverse (1/18)[[11,−4,1]…] |
-| **lowRankApprox** | **SELF-REF** | svd, typed-matrix-ops | reconstruction + monotone error |
+| **lowRankApprox** | ORACLE(cf) | gap-decomposition-oracles | rank-1 of diag(3,1) = [[3,0],[0,0]] |
 | `qr` | ORACLE(cf) | lu-qr-oracle | `|R₀₀|=‖col₀‖=14`, `∏|diag R|=|det A|=85750`, QᵀQ=I (WS-1 P2) |
 | `lu` | ORACLE(cf) | lu-qr-oracle | exact hand-computed L/U/P (no-pivot 3×3 + pivoting 2×2) (WS-1 P2) |
 | cholesky (matrix + functions) | ORACLE(cf) | cholesky, matrix-ops | L=[[2,0],[1,√2]] |
@@ -297,8 +310,8 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | **inv** (inverse, WASMBackend) | **SELF-REF** | wasm/accuracy, wasm/decompositions-as | A·inv=I only; no pinned entries |
 | characteristicPolynomial / rowReduce / matrixRank | ORACLE(cf) | matrix-ops | closed-form coeffs / RREF / ranks |
 | matrixPower / matrixLog (eig-based) / jordanForm | ORACLE(cf) | matrix-ops | closed forms + pinned Jordan eigenvalues |
-| **hessenbergForm** | **SELF-REF** | matrix-ops | A=Q·H·Qᵀ only |
-| **polarDecomposition** | **SELF-REF** | matrix-ops | A=U·P only; no pinned factors |
+| **hessenbergForm** | ORACLE(cf) | gap-decomposition-oracles | Householder: |H[1][0]|=√65, H[2][0]=0, trace preserved |
+| **polarDecomposition** | ORACLE(cf) | gap-decomposition-oracles | A=2·R → U=R, P=2I (pinned factors) |
 | generalizedEig | ORACLE(ext) | gap-wave-d2, gap-qz | eigenvalues vs scipy.linalg.eig(A,B): [2,5],[1,2,3] |
 | tril / triu / vander / toeplitz / circulant / companion | ORACLE(ext) | gap-wave-c | exact numpy/scipy arrays |
 | laplacianMatrix | ORACLE(ext) | gap-wave-c2 | exact D−A + normalized Laplacian |
