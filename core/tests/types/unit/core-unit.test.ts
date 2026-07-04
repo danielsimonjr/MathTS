@@ -1,0 +1,49 @@
+/**
+ * Smoke + parity oracles for the relocated `Unit` (Unit-merge Phase 1.2).
+ *
+ * These pin the SAME expected strings/numbers as the functions-package
+ * characterization net (`functions/tests/unit-characterization.test.ts`), proving
+ * the core-wired Unit — instantiated from `unitDependencies` (core scalar ops,
+ * numeric types, format, config) — behaves identically to the still-in-functions
+ * original. If a dependency adapter is subtly wrong (e.g. a broken BigNumber ctor
+ * or a mis-ordered subtract), one of these exact oracles breaks.
+ */
+import { describe, it, expect } from 'vitest';
+
+import { Unit } from '../../../src/types/unit/index';
+
+describe('core Unit — parsing & value', () => {
+  it('parses compound / prefixed unit strings', () => {
+    expect(Unit.parse('5 km/h').toString()).toBe('5 km / h');
+    expect(Unit.parse('4e2 cm/s^2').toString()).toContain('cm');
+  });
+
+  it('reports numeric value in a requested unit', () => {
+    expect(new Unit(2, 'km').toNumeric('m')).toBe(2000);
+  });
+});
+
+describe('core Unit — conversion', () => {
+  it('converts across units (imperial + temperature + compound)', () => {
+    expect(new Unit(1, 'm').to('ft').toString()).toBe('3.280839895013123 ft');
+    expect(new Unit(2, 'inch').to('cm').toString()).toBe('5.08 cm');
+    expect(Unit.parse('20 degC').to('K').toString()).toBe('293.15 K');
+    expect(Unit.parse('36 km/h').to('m/s').toString()).toBe('10 m / s');
+  });
+
+  it('handles angle + information dimensions', () => {
+    expect(Unit.parse('90 deg').to('rad').toString()).toBe('1.5707963267948966 rad');
+    expect(Unit.parse('1 byte').to('bit').toString()).toBe('8 bit');
+  });
+});
+
+describe('core Unit — simplify / toSI / arithmetic', () => {
+  it('toSI expands to base SI units', () => {
+    expect(Unit.parse('1 N').toSI().toString()).toBe('1 (kg m) / s^2');
+  });
+
+  it('splitUnit distributes a magnitude across parts (exercises Unit-aware subtractScalar)', () => {
+    const parts = new Unit(1.5, 'm').splitUnit(['m', 'cm']);
+    expect(parts.map((p) => p.toString())).toEqual(['1 m', '50 cm']);
+  });
+});

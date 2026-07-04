@@ -14,6 +14,20 @@ matching the Decimal.js / mathjs calling convention already followed by `Complex
 `Fraction`. Both accept BigNumber/number/string operands. Needed by the mathjs-derived
 `Unit` (which calls `.div`/`.times` on BigNumber unit values) as it merges into core.
 
+### Internal (2026-07-03) — feature-complete Unit now lives (and works) in core (Phase 1.2)
+
+The mathjs-derived `Unit` class body (`Unit.ts`, ~3.7k lines) is relocated into
+`core/src/types/unit/`, its util imports rewired onto core (`is`/`factory`/`object` +
+the new `shared` helpers; `createBigNumberPi` replaced by core's `BIGNUMBER_PI`). A new
+`dependencies.ts` assembles the factory's 19 injected deps ENTIRELY from core primitives —
+the `scalar.ts` ops, core `Complex`/`BigNumber`/`Fraction` (with small adapters for the
+private BigNumber ctor and the `Complex.I` static), a number+boxed `format` wrapper, and
+`DEFAULT_CONFIG` — with a Unit-aware `subtractScalar` for `splitUnit`. `index.ts` exports
+the factory plus a ready-wired `Unit`. Proven by 6 parity oracles pinning the SAME
+strings/numbers as the functions characterization net (`5 km/h`, `1 m → 3.280839895013123 ft`,
+`20 degC → 293.15 K`, `1 N → toSI`, `splitUnit → ['1 m','50 cm']`). Not yet on core's public
+API — functions still uses its own copy (switched over in Phase 3). core 730 pass; tsc + eslint clean.
+
 ### Internal (2026-07-03) — core groundwork for the Unit relocation (Phase 1.2 prep)
 
 Two non-user-facing steps toward relocating the feature-complete mathjs `Unit` into core:
