@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Internal (2026-07-03) — core shared utils for the Unit relocation (Phase 1.2 prep)
+
+`core/src/shared.ts` gains three small dependency-free helpers the relocated mathjs
+`Unit` needs — `endsWith`, `warnOnce`, and a lean unbounded `memoize` (hasher option;
+`delete fn.cache` reset, which `createUnit`/`deleteUnit` rely on to invalidate the
+unit-name lookup). Ported into core's zero-import graph base rather than dragging the
+functions-package util plumbing (incl. `lruQueue`) across the dependency boundary. Not
+part of core's public API; internal scaffolding only. 12 tests; core 723 pass.
+
 ### Added (2026-07-03) — core polymorphic scalar arithmetic (Unit-merge Phase 1.1)
 
 New `core/src/arithmetic/scalar.ts`: `addScalar`/`subtractScalar`/`multiplyScalar`/
