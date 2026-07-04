@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 853, "e": 4376, "re": 1473 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 848, "e": 4367, "re": 1473 },
   "s": {
-    "loc": 157534,
+    "loc": 153540,
     "cls": 51,
-    "int": 370,
-    "fn": 1474,
+    "int": 368,
+    "fn": 1471,
     "tg": 175,
     "en": 0,
-    "co": 1411,
+    "co": 1405,
     "toi": 484
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -781,7 +781,7 @@
       ]
     },
     "functions/type": {
-      "f": 32,
+      "f": 31,
       "exp": [
         "createBigNumberClass",
         "createChainClass",
@@ -856,7 +856,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 39,
+      "f": 35,
       "exp": [
         "arraySize",
         "validate",
@@ -886,11 +886,11 @@
         "FactoryFunction",
         "LegacyFactory",
         "FactoryMeta",
-        "MemoizeCache",
-        "MemoizedFunction",
         "BigNumber",
         "Complex",
-        "Fraction"
+        "Fraction",
+        "Unit",
+        "Matrix"
       ]
     },
     "functions/wasm": {
@@ -1492,11 +1492,11 @@
     }
   },
   "hp": [
-    { "p": "utils/factory.ts", "i": 2, "o": 264 },
+    { "p": "utils/factory.ts", "i": 2, "o": 263 },
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 253, "o": 1 },
-    { "p": "factories/index.ts", "i": 245, "o": 8 },
+    { "p": "factories/index.ts", "i": 244, "o": 8 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "utils/is.ts", "i": 0, "o": 65 },
+    { "p": "utils/is.ts", "i": 0, "o": 64 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },

@@ -167,9 +167,13 @@ export type ScalarUnaryOp = (x: Numeric) => Numeric;
 
 /**
  * The dependency object injected into the Unit factory by the factory system.
- * `on` is optional (`?on` in the dependency list).
+ * `on` is optional (`?on` in the dependency list). The index signature reflects that
+ * this is a factory *scope* (a string-keyed dependency record that may also carry
+ * deps beyond the ones the Unit itself reads), and lets it satisfy the `factory`
+ * helper's `Record<string, unknown>` constraint.
  */
 export interface UnitDependencies {
+  [key: string]: unknown;
   on?: (event: string, callback: (curr: UnitConfig, prev: UnitConfig) => void) => void;
   config: UnitConfig;
   addScalar: ScalarBinaryOp;

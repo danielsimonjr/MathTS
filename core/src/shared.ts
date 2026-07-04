@@ -45,28 +45,41 @@ export interface MemoizedFunction {
 }
 
 /**
- * Memoize a pure function, caching results in an unbounded `Map` keyed by a string
- * hash of the arguments (default `JSON.stringify`; override via `hasher`). The cache
- * is exposed as `fn.cache` and can be reset with `delete fn.cache` — the next call
- * lazily recreates it. (The relocated `Unit` relies on that reset when `createUnit`/
- * `deleteUnit` invalidate the unit-name lookup cache.)
+ * Memoize a pure function, caching results in a `Map` keyed by a string hash of the
+ * arguments (default `JSON.stringify`; override via `hasher`). Pass `limit` to bound
+ * the cache to N most-recently-used entries (LRU eviction via `Map` insertion order —
+ * on a hit the key is moved to the most-recent end; on overflow the oldest key is
+ * dropped); omit for an unbounded cache. The cache is exposed as `fn.cache` and can be
+ * reset with `delete fn.cache` — the next call lazily recreates it. (The relocated
+ * `Unit` relies on that reset when `createUnit`/`deleteUnit` invalidate the unit-name
+ * lookup cache, and passes `limit: 100` to bound the parse cache.)
  */
 export function memoize(
   fn: (...args: unknown[]) => unknown,
-  { hasher }: { hasher?: (args: unknown[]) => string } = {}
+  { hasher, limit }: { hasher?: (args: unknown[]) => string; limit?: number } = {}
 ): MemoizedFunction {
   const hash = hasher ?? ((args: unknown[]): string => JSON.stringify(args));
+  const maxSize = limit == null ? Number.POSITIVE_INFINITY : limit;
 
   const memoized: MemoizedFunction = function (...args: unknown[]): unknown {
     if (!(memoized.cache instanceof Map)) {
       memoized.cache = new Map<string, unknown>();
     }
+    const cache = memoized.cache;
     const key = hash(args);
-    if (memoized.cache.has(key)) {
-      return memoized.cache.get(key);
+    if (cache.has(key)) {
+      const value = cache.get(key);
+      // touch: move to the most-recently-used end
+      cache.delete(key);
+      cache.set(key, value);
+      return value;
     }
     const value = fn.apply(fn, args);
-    memoized.cache.set(key, value);
+    cache.set(key, value);
+    if (cache.size > maxSize) {
+      // evict the least-recently-used (first) entry
+      cache.delete(cache.keys().next().value as string);
+    }
     return value;
   };
 

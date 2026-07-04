@@ -131,10 +131,10 @@ The codebase is organized into the following modules:
 - **functions/statistics**: 14 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
-- **functions/type**: 32 files
+- **functions/type**: 31 files
 - **functions/typed**: 30 files
 - **functions/unit**: 2 files
-- **functions/utils**: 39 files
+- **functions/utils**: 35 files
 - **functions/wasm**: 12 files
 - **expression/compiler**: 2 files
 - **expression/embeddedDocs**: 254 files
@@ -180,7 +180,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 395            | 5               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -3920,6 +3920,11 @@ graph LR
 
 ### `functions/src/factories/index.ts` - Activated mathjs leaf factory functions.
 
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core/internal` | `createUnitClass` |
+
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
@@ -4120,7 +4125,6 @@ graph LR
 | `../type/chain/function/chain.js` | `createChain` | Import |
 | `../type/unit/function/createUnit.js` | `createCreateUnit` | Import |
 | `../type/unit/function/unit.js` | `createUnitFunction` | Import |
-| `../type/unit/Unit.js` | `createUnitClass` | Import |
 | `../type/matrix/FibonacciHeap.js` | `createFibonacciHeapClass` | Import |
 | `../type/matrix/ImmutableDenseMatrix.js` | `createImmutableDenseMatrixClass` | Import |
 | `../matrix/column.js` | `createColumn` | Import |
@@ -7273,30 +7277,6 @@ graph LR
 
 ---
 
-### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-core/internal` | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
-| `../../utils/factory.js` | `factory` | Import |
-| `../../utils/function.js` | `memoize` | Import |
-| `../../utils/string.js` | `endsWith` | Import |
-| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
-| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
-| `../../utils/log.js` | `warnOnce` | Import |
-
-**Exports:**
-
-- Constants: `createUnitClass`
-
----
-
 <a id="functions-typed-dependencies"></a>
 
 ## Functions/typed Dependencies
@@ -7930,19 +7910,6 @@ graph LR
 
 ---
 
-### `functions/src/utils/bignumber/constants.ts` - Calculate BigNumber e
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../function.js` | `memoize` | Import |
-
-**Exports:**
-
-- Constants: `createBigNumberE`, `createBigNumberPhi`, `createBigNumberPi`, `createBigNumberTau`
-
----
-
 ### `functions/src/utils/bignumber/formatter.ts` - Structural contract for the BigNumber values handled by this formatter.
 
 **Internal Dependencies:**
@@ -8048,20 +8015,6 @@ graph LR
 - Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
 - Types: `DependencyName`, `CreateFunction`
 - Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
-
----
-
-### `functions/src/utils/function.ts` - Memoize a given function by caching the computed result.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./lruQueue.js` | `lruQueue` | Import |
-
-**Exports:**
-
-- Interfaces: `MemoizeCache`, `MemoizedFunction`
-- Functions: `memoize`, `memoizeCompare`
 
 ---
 
@@ -8231,22 +8184,6 @@ graph LR
 **Exports:**
 
 - Constants: `createIsZero`
-
----
-
-### `functions/src/utils/log.ts` - Log a console.warn message only once
-
-**Exports:**
-
-- Constants: `warnOnce`
-
----
-
-### `functions/src/utils/lruQueue.ts` - (c) 2018, Mariusz Nowak
-
-**Exports:**
-
-- Functions: `lruQueue`
 
 ---
 
@@ -12551,11 +12488,11 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
-| `functions/src/utils/factory`                          | 2 files      | 264 files  |
+| `functions/src/utils/factory`                          | 2 files      | 263 files  |
 | `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
-| `functions/src/factories/index`                        | 244 files    | 8 files    |
+| `functions/src/factories/index`                        | 243 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
-| `functions/src/utils/is`                               | 0 files      | 65 files   |
+| `functions/src/utils/is`                               | 0 files      | 64 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
@@ -12565,7 +12502,7 @@ graph LR
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `functions/src/types`                                  | 4 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
-| `functions/src/utils/object`                           | 1 file       | 31 files   |
+| `functions/src/utils/object`                           | 1 file       | 30 files   |
 | `functions/src/type/bignumber/BigNumber`               | 1 file       | 27 files   |
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
 | `expression/src/index`                                 | 27 files     | 0 files    |
@@ -12577,8 +12514,8 @@ graph LR
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `functions/src/index`                                  | 20 files     | 0 files    |
-| `functions/src/utils/string`                           | 3 files      | 17 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
+| `functions/src/utils/string`                           | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/complex/Complex`                   | 3 files      | 15 files   |
@@ -12959,7 +12896,7 @@ graph TD
         N238[MatrixIndex]
         N239[Spa]
         N240[types]
-        N241[...22 more]
+        N241[...21 more]
     end
 
     subgraph Functions/typed
@@ -12985,14 +12922,14 @@ graph TD
         N255[array]
         N256[bigint]
         N257[bitwise]
-        N258[constants]
-        N259[formatter]
-        N260[nearlyEqual]
-        N261[clone]
-        N262[collection]
-        N263[complex]
-        N264[customs]
-        N265[...29 more]
+        N258[formatter]
+        N259[nearlyEqual]
+        N260[clone]
+        N261[collection]
+        N262[complex]
+        N263[customs]
+        N264[emitter]
+        N265[...25 more]
     end
 
     subgraph Functions/wasm
@@ -13285,14 +13222,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 853    |
+| Total TypeScript Files  | 848    |
 | Total Modules           | 71     |
-| Total Lines of Code     | 157534 |
-| Total Exports           | 4376   |
+| Total Lines of Code     | 153540 |
+| Total Exports           | 4367   |
 | Total Re-exports        | 1473   |
 | Total Classes           | 51     |
-| Total Interfaces        | 370    |
-| Total Functions         | 1474   |
+| Total Interfaces        | 368    |
+| Total Functions         | 1471   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
 | Type-only Imports       | 484    |

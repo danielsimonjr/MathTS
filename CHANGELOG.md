@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — functions now uses the core-relocated Unit (Phase 3 switch)
+
+The functions package no longer carries its own copy of the ~3.7k-line mathjs `Unit`
+class: `functions/src/factories/index.ts` now imports `createUnitClass` from
+`@danielsimonjr/mathts-core/internal` and instantiates it with the SAME factory scope as
+before, so `unit()` / `to()` / `createUnit` / `splitUnit` / physical constants behave
+identically (same source, same injected deps, same single core numeric classes — no type
+mixing). `functions/src/type/unit/Unit.ts` is deleted; the one Unit source now lives in
+core. Verified with the full suites: functions 3197 pass, compat + expression + integration
+2201 pass, core 731 pass — zero regressions. Two enabling fixes: the relocated Unit's
+bounded parse cache needs `memoize({ limit })`, so core's `shared.memoize` gains LRU
+eviction (was unbounded); and the core Unit's type import was pointed at the local
+`./unit-types.js` (it had been left resolving through the package's own `/internal` subpath).
+
+### Fixed (2026-07-04) — `factory` `isOptionalDependency` return type
+
+`core/src/factory.ts#isOptionalDependency` returned `dependency && dependency[0] === '?'`,
+whose type is `string | boolean` (the empty-string branch yields `''`), not the declared
+`boolean`. Runtime behavior was already correct (callers used it in boolean context), but the
+imprecise type broke the rollup-dts declaration build once the function became reachable from a
+new entry point. Simplified to `dependency[0] === '?'` (`[0]` is `undefined` for `''`, so the
+guard was unnecessary). Type-only; no behavior change.
+
 ### Added (2026-07-03) — `BigNumber.div` / `BigNumber.times` aliases
 
 `BigNumber` gains `.div` and `.times` short-name aliases for `divide`/`multiply`,

@@ -272,7 +272,9 @@ export function assertDependencies(
  * @returns true if the dependency is optional
  */
 export function isOptionalDependency(dependency: DependencyName): boolean {
-  return dependency && dependency[0] === '?';
+  // `dependency[0]` is `undefined` for an empty string, so no truthiness guard is
+  // needed — and the guard made the return type `string | boolean` (`'' | boolean`).
+  return dependency[0] === '?';
 }
 
 /**

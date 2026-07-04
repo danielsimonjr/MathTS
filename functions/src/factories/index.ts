@@ -143,8 +143,12 @@ import { createParseNumberWithConfig } from '../utils/parseNumber.js';
 
 // arithmetic (non-conflicting)
 export const addScalar = createAddScalar(factoryScope as Parameters<typeof createAddScalar>[0]);
-export const multiplyScalar = createMultiplyScalar(factoryScope as Parameters<typeof createMultiplyScalar>[0]);
-export const subtractScalar = createSubtractScalar(factoryScope as Parameters<typeof createSubtractScalar>[0]);
+export const multiplyScalar = createMultiplyScalar(
+  factoryScope as Parameters<typeof createMultiplyScalar>[0]
+);
+export const subtractScalar = createSubtractScalar(
+  factoryScope as Parameters<typeof createSubtractScalar>[0]
+);
 
 // bitwise (synced factory — superseded by typed/bitwise; kept internal for factoryScope wiring)
 const bitNot = createBitNot(factoryScope as Parameters<typeof createBitNot>[0]);
@@ -162,14 +166,18 @@ const not = createNot(factoryScope as Parameters<typeof createNot>[0]);
 export const filter = createFilter(factoryScope as Parameters<typeof createFilter>[0]);
 export const flatten = createFlatten(factoryScope as Parameters<typeof createFlatten>[0]);
 export const forEach = createForEach(factoryScope as Parameters<typeof createForEach>[0]);
-export const getMatrixDataType = createGetMatrixDataType(factoryScope as Parameters<typeof createGetMatrixDataType>[0]);
+export const getMatrixDataType = createGetMatrixDataType(
+  factoryScope as Parameters<typeof createGetMatrixDataType>[0]
+);
 export const map = createMap(factoryScope as Parameters<typeof createMap>[0]);
 export const size = createSize(factoryScope as Parameters<typeof createSize>[0]);
 export const squeeze = createSqueeze(factoryScope as Parameters<typeof createSqueeze>[0]);
 
 // probability (synced factories — superseded by typed/probability; kept internal for factoryScope wiring)
 const combinations = createCombinations(factoryScope as Parameters<typeof createCombinations>[0]);
-const combinationsWithRep = createCombinationsWithRep(factoryScope as Parameters<typeof createCombinationsWithRep>[0]);
+const combinationsWithRep = createCombinationsWithRep(
+  factoryScope as Parameters<typeof createCombinationsWithRep>[0]
+);
 // lgamma superseded by typed/special.ts (WASM-backed); kept internal for factoryScope wiring
 const lgamma = createLgamma(factoryScope as Parameters<typeof createLgamma>[0]);
 const pickRandom = createPickRandom(factoryScope as Parameters<typeof createPickRandom>[0]);
@@ -220,7 +228,9 @@ export const factory_log2 = createLog2(factoryScope as Parameters<typeof createL
 export const factory_sign = createSign(factoryScope as Parameters<typeof createSign>[0]);
 export const factory_sqrt = createSqrt(factoryScope as Parameters<typeof createSqrt>[0]);
 export const factory_square = createSquare(factoryScope as Parameters<typeof createSquare>[0]);
-export const factory_unaryMinus = createUnaryMinus(factoryScope as Parameters<typeof createUnaryMinus>[0]);
+export const factory_unaryMinus = createUnaryMinus(
+  factoryScope as Parameters<typeof createUnaryMinus>[0]
+);
 export const factory_acos = createAcos(factoryScope as Parameters<typeof createAcos>[0]);
 export const factory_acosh = createAcosh(factoryScope as Parameters<typeof createAcosh>[0]);
 export const factory_acot = createAcot(factoryScope as Parameters<typeof createAcot>[0]);
@@ -313,11 +323,15 @@ factoryScope.sech = sech;
 // ---------------------------------------------------------------------------
 
 // Prerequisite: parseNumberWithConfig (needed by prod)
-export const parseNumberWithConfig = createParseNumberWithConfig(factoryScope as Parameters<typeof createParseNumberWithConfig>[0]);
+export const parseNumberWithConfig = createParseNumberWithConfig(
+  factoryScope as Parameters<typeof createParseNumberWithConfig>[0]
+);
 factoryScope.parseNumberWithConfig = parseNumberWithConfig;
 
 // arithmetic
-export const divideScalar = createDivideScalar(factoryScope as Parameters<typeof createDivideScalar>[0]);
+export const divideScalar = createDivideScalar(
+  factoryScope as Parameters<typeof createDivideScalar>[0]
+);
 
 // probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
 createRandomInt(factoryScope as Parameters<typeof createRandomInt>[0]);
@@ -332,12 +346,16 @@ createHex(factoryScope as Parameters<typeof createHex>[0]);
 createOct(factoryScope as Parameters<typeof createOct>[0]);
 
 // utils
-export const hasNumericValue = createHasNumericValue(factoryScope as Parameters<typeof createHasNumericValue>[0]);
+export const hasNumericValue = createHasNumericValue(
+  factoryScope as Parameters<typeof createHasNumericValue>[0]
+);
 export const isFinite = createIsFinite(factoryScope as Parameters<typeof createIsFinite>[0]);
 export const isZero = createIsZero(factoryScope as Parameters<typeof createIsZero>[0]);
 
 // Tier 2 conflicting names — use factory_ prefix
-export const factory_unaryPlus = createUnaryPlus(factoryScope as Parameters<typeof createUnaryPlus>[0]);
+export const factory_unaryPlus = createUnaryPlus(
+  factoryScope as Parameters<typeof createUnaryPlus>[0]
+);
 export const factory_dot = createDot(factoryScope as Parameters<typeof createDot>[0]);
 
 // ---------------------------------------------------------------------------
@@ -379,10 +397,14 @@ import { acceleratedDet, acceleratedInv, correctEigs } from '../matrix/native-ac
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
-export const factory_transpose = createTranspose(factoryScope as Parameters<typeof createTranspose>[0]);
+export const factory_transpose = createTranspose(
+  factoryScope as Parameters<typeof createTranspose>[0]
+);
 factoryScope.transpose = factory_transpose;
 
-export const factory_ctranspose = createCtranspose(factoryScope as Parameters<typeof createCtranspose>[0]);
+export const factory_ctranspose = createCtranspose(
+  factoryScope as Parameters<typeof createCtranspose>[0]
+);
 factoryScope.ctranspose = factory_ctranspose;
 
 export const identity = createIdentity(factoryScope as Parameters<typeof createIdentity>[0]);
@@ -400,13 +422,19 @@ factoryScope.diag = diag;
 export const kron = createKron(factoryScope as Parameters<typeof createKron>[0]);
 factoryScope.kron = kron;
 
-export const matrixFromFunction = createMatrixFromFunction(factoryScope as Parameters<typeof createMatrixFromFunction>[0]);
+export const matrixFromFunction = createMatrixFromFunction(
+  factoryScope as Parameters<typeof createMatrixFromFunction>[0]
+);
 factoryScope.matrixFromFunction = matrixFromFunction;
 
-export const matrixFromColumns = createMatrixFromColumns(factoryScope as Parameters<typeof createMatrixFromColumns>[0]);
+export const matrixFromColumns = createMatrixFromColumns(
+  factoryScope as Parameters<typeof createMatrixFromColumns>[0]
+);
 factoryScope.matrixFromColumns = matrixFromColumns;
 
-export const matrixFromRows = createMatrixFromRows(factoryScope as Parameters<typeof createMatrixFromRows>[0]);
+export const matrixFromRows = createMatrixFromRows(
+  factoryScope as Parameters<typeof createMatrixFromRows>[0]
+);
 factoryScope.matrixFromRows = matrixFromRows;
 
 export const count = createCount(factoryScope as Parameters<typeof createCount>[0]);
@@ -432,7 +460,10 @@ factoryScope.det = factoryDet;
 // to the factory for small / non-numeric / non-square inputs. Internal factory
 // consumers (e.g. inv) keep using `factoryScope.det` unchanged.
 export const det = ((m: unknown) =>
-  acceleratedDet(m, factoryDet as unknown as (x: unknown) => unknown)) as unknown as typeof factoryDet;
+  acceleratedDet(
+    m,
+    factoryDet as unknown as (x: unknown) => unknown
+  )) as unknown as typeof factoryDet;
 
 // reshape needs isInteger — provide a simple stub
 factoryScope.isInteger = (x: unknown) => typeof x === 'number' && Number.isInteger(x);
@@ -517,7 +548,10 @@ factoryScope.inv = factoryInv;
 // (factory path is pure-JS over boxed number[][], ~144ms for 80×80). Singular
 // and all other inputs delegate to the factory unchanged.
 export const inv = ((m: unknown) =>
-  acceleratedInv(m, factoryInv as unknown as (x: unknown) => unknown)) as unknown as typeof factoryInv;
+  acceleratedInv(
+    m,
+    factoryInv as unknown as (x: unknown) => unknown
+  )) as unknown as typeof factoryInv;
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);
@@ -644,13 +678,17 @@ factoryScope.deepEqual = deepEqual;
 export const factory_larger = createLarger(factoryScope as Parameters<typeof createLarger>[0]);
 factoryScope.larger = factory_larger;
 
-export const factory_largerEq = createLargerEq(factoryScope as Parameters<typeof createLargerEq>[0]);
+export const factory_largerEq = createLargerEq(
+  factoryScope as Parameters<typeof createLargerEq>[0]
+);
 factoryScope.largerEq = factory_largerEq;
 
 export const factory_smaller = createSmaller(factoryScope as Parameters<typeof createSmaller>[0]);
 factoryScope.smaller = factory_smaller;
 
-export const factory_smallerEq = createSmallerEq(factoryScope as Parameters<typeof createSmallerEq>[0]);
+export const factory_smallerEq = createSmallerEq(
+  factoryScope as Parameters<typeof createSmallerEq>[0]
+);
 factoryScope.smallerEq = factory_smallerEq;
 
 // unequal (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
@@ -661,7 +699,9 @@ factoryScope.unequal = unequal;
 export const dotDivide = createDotDivide(factoryScope as Parameters<typeof createDotDivide>[0]);
 factoryScope.dotDivide = dotDivide;
 
-export const dotMultiply = createDotMultiply(factoryScope as Parameters<typeof createDotMultiply>[0]);
+export const dotMultiply = createDotMultiply(
+  factoryScope as Parameters<typeof createDotMultiply>[0]
+);
 factoryScope.dotMultiply = dotMultiply;
 
 export const factory_gcd = createGcd(factoryScope as Parameters<typeof createGcd>[0]);
@@ -701,10 +741,14 @@ factoryScope.bitXor = bitXor;
 const leftShift = createLeftShift(factoryScope as Parameters<typeof createLeftShift>[0]);
 factoryScope.leftShift = leftShift;
 
-const rightArithShift = createRightArithShift(factoryScope as Parameters<typeof createRightArithShift>[0]);
+const rightArithShift = createRightArithShift(
+  factoryScope as Parameters<typeof createRightArithShift>[0]
+);
 factoryScope.rightArithShift = rightArithShift;
 
-const rightLogShift = createRightLogShift(factoryScope as Parameters<typeof createRightLogShift>[0]);
+const rightLogShift = createRightLogShift(
+  factoryScope as Parameters<typeof createRightLogShift>[0]
+);
 factoryScope.rightLogShift = rightLogShift;
 
 // logical (synced factories — superseded by typed/logical; kept internal for factoryScope wiring)
@@ -768,7 +812,9 @@ import { createDistance } from '../geometry/distance.js';
 // --- Activate tier 6 ---
 
 // relational (synced factories — superseded by typed/relational; kept internal for factoryScope wiring)
-const compareNatural = createCompareNatural(factoryScope as Parameters<typeof createCompareNatural>[0]);
+const compareNatural = createCompareNatural(
+  factoryScope as Parameters<typeof createCompareNatural>[0]
+);
 factoryScope.compareNatural = compareNatural;
 
 const equalText = createEqualText(factoryScope as Parameters<typeof createEqualText>[0]);
@@ -792,11 +838,15 @@ const nullish = createNullish(factoryScope as Parameters<typeof createNullish>[0
 factoryScope.nullish = nullish;
 
 // combinatorics
-export const composition = createComposition(factoryScope as Parameters<typeof createComposition>[0]);
+export const composition = createComposition(
+  factoryScope as Parameters<typeof createComposition>[0]
+);
 factoryScope.composition = composition;
 
 // matrix
-export const partitionSelect = createPartitionSelect(factoryScope as Parameters<typeof createPartitionSelect>[0]);
+export const partitionSelect = createPartitionSelect(
+  factoryScope as Parameters<typeof createPartitionSelect>[0]
+);
 factoryScope.partitionSelect = partitionSelect;
 
 // pinv: the typed/ layer owns the public `pinv` export (Slice 5.2).
@@ -857,7 +907,9 @@ export const stirlingS2 = createStirlingS2(factoryScope as Parameters<typeof cre
 factoryScope.stirlingS2 = stirlingS2;
 
 // probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
-const permutations_factory = createPermutations(factoryScope as Parameters<typeof createPermutations>[0]);
+const permutations_factory = createPermutations(
+  factoryScope as Parameters<typeof createPermutations>[0]
+);
 factoryScope.permutations = permutations_factory;
 
 // ---------------------------------------------------------------------------
@@ -866,7 +918,9 @@ factoryScope.permutations = permutations_factory;
 
 import { createBellNumbers } from '../combinatorics/bellNumbers.js';
 
-export const bellNumbers = createBellNumbers(factoryScope as Parameters<typeof createBellNumbers>[0]);
+export const bellNumbers = createBellNumbers(
+  factoryScope as Parameters<typeof createBellNumbers>[0]
+);
 factoryScope.bellNumbers = bellNumbers;
 
 // ---------------------------------------------------------------------------
@@ -1026,7 +1080,9 @@ import { createSplitUnit } from '../type/unit/function/splitUnit.js';
 import { createFft } from '../matrix/fft.js';
 import { createChainClass } from '../type/chain/Chain.js';
 
-export const nodeOperations = createNodeOperations(factoryScope as Parameters<typeof createNodeOperations>[0]);
+export const nodeOperations = createNodeOperations(
+  factoryScope as Parameters<typeof createNodeOperations>[0]
+);
 factoryScope.nodeOperations = nodeOperations;
 
 export const leafCount = createLeafCount(factoryScope as Parameters<typeof createLeafCount>[0]);
@@ -1035,10 +1091,14 @@ factoryScope.leafCount = leafCount;
 export const resolve = createResolve(factoryScope as Parameters<typeof createResolve>[0]);
 factoryScope.resolve = resolve;
 
-export const simplifyConstant = createSimplifyConstant(factoryScope as Parameters<typeof createSimplifyConstant>[0]);
+export const simplifyConstant = createSimplifyConstant(
+  factoryScope as Parameters<typeof createSimplifyConstant>[0]
+);
 factoryScope.simplifyConstant = simplifyConstant;
 
-export const simplifyUtil = createSimplifyUtil(factoryScope as Parameters<typeof createSimplifyUtil>[0]);
+export const simplifyUtil = createSimplifyUtil(
+  factoryScope as Parameters<typeof createSimplifyUtil>[0]
+);
 factoryScope.simplifyUtil = simplifyUtil;
 
 export const splitUnit = createSplitUnit(factoryScope as Parameters<typeof createSplitUnit>[0]);
@@ -1061,7 +1121,7 @@ import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
 import { createCreateUnit } from '../type/unit/function/createUnit.js';
 import { createUnitFunction } from '../type/unit/function/unit.js';
-import { createUnitClass } from '../type/unit/Unit.js';
+import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
 
@@ -1069,13 +1129,19 @@ import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMa
 const _Unit = createUnitClass(factoryScope as Parameters<typeof createUnitClass>[0]);
 factoryScope.Unit = _Unit;
 
-const _FibonacciHeap = createFibonacciHeapClass(factoryScope as Parameters<typeof createFibonacciHeapClass>[0]);
+const _FibonacciHeap = createFibonacciHeapClass(
+  factoryScope as Parameters<typeof createFibonacciHeapClass>[0]
+);
 factoryScope.FibonacciHeap = _FibonacciHeap;
 
-const _ImmutableDenseMatrix = createImmutableDenseMatrixClass(factoryScope as Parameters<typeof createImmutableDenseMatrixClass>[0]);
+const _ImmutableDenseMatrix = createImmutableDenseMatrixClass(
+  factoryScope as Parameters<typeof createImmutableDenseMatrixClass>[0]
+);
 factoryScope.ImmutableDenseMatrix = _ImmutableDenseMatrix;
 
-export const factory_subtract = createSubtract(factoryScope as Parameters<typeof createSubtract>[0]);
+export const factory_subtract = createSubtract(
+  factoryScope as Parameters<typeof createSubtract>[0]
+);
 factoryScope.subtract = factory_subtract;
 
 export const factory_divide = createDivide(factoryScope as Parameters<typeof createDivide>[0]);
@@ -1094,7 +1160,9 @@ factoryScope.Index = _Index;
 export const chain = createChain(factoryScope as Parameters<typeof createChain>[0]);
 factoryScope.chain = chain;
 
-export const factory_createUnit = createCreateUnit(factoryScope as Parameters<typeof createCreateUnit>[0]);
+export const factory_createUnit = createCreateUnit(
+  factoryScope as Parameters<typeof createCreateUnit>[0]
+);
 factoryScope.createUnit = factory_createUnit;
 
 export const unit = createUnitFunction(factoryScope as Parameters<typeof createUnitFunction>[0]);
@@ -1179,17 +1247,25 @@ factoryScope.mean = factory_mean;
 export const median = createMedian(factoryScope as Parameters<typeof createMedian>[0]);
 factoryScope.median = median;
 
-export const factory_variance = createVariance(factoryScope as Parameters<typeof createVariance>[0]);
+export const factory_variance = createVariance(
+  factoryScope as Parameters<typeof createVariance>[0]
+);
 factoryScope.variance = factory_variance;
 
-export const quantileSeq = createQuantileSeq(factoryScope as Parameters<typeof createQuantileSeq>[0]);
+export const quantileSeq = createQuantileSeq(
+  factoryScope as Parameters<typeof createQuantileSeq>[0]
+);
 factoryScope.quantileSeq = quantileSeq;
 
-export const kldivergence = createKldivergence(factoryScope as Parameters<typeof createKldivergence>[0]);
+export const kldivergence = createKldivergence(
+  factoryScope as Parameters<typeof createKldivergence>[0]
+);
 factoryScope.kldivergence = kldivergence;
 
 // probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
-const multinomial_factory = createMultinomial(factoryScope as Parameters<typeof createMultinomial>[0]);
+const multinomial_factory = createMultinomial(
+  factoryScope as Parameters<typeof createMultinomial>[0]
+);
 factoryScope.multinomial = multinomial_factory;
 
 export const freqz = createFreqz(factoryScope as Parameters<typeof createFreqz>[0]);
@@ -1200,7 +1276,9 @@ const setCartesian = createSetCartesian(factoryScope as Parameters<typeof create
 factoryScope.setCartesian = setCartesian;
 
 // setDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
-const setDifference = createSetDifference(factoryScope as Parameters<typeof createSetDifference>[0]);
+const setDifference = createSetDifference(
+  factoryScope as Parameters<typeof createSetDifference>[0]
+);
 factoryScope.setDifference = setDifference;
 
 // setDistinct (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
@@ -1216,17 +1294,23 @@ const setIsSubset = createSetIsSubset(factoryScope as Parameters<typeof createSe
 factoryScope.setIsSubset = setIsSubset;
 
 // setMultiplicity (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
-const setMultiplicity = createSetMultiplicity(factoryScope as Parameters<typeof createSetMultiplicity>[0]);
+const setMultiplicity = createSetMultiplicity(
+  factoryScope as Parameters<typeof createSetMultiplicity>[0]
+);
 factoryScope.setMultiplicity = setMultiplicity;
 
 // setPowerset (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setPowerset = createSetPowerset(factoryScope as Parameters<typeof createSetPowerset>[0]);
 factoryScope.setPowerset = setPowerset;
 
-export const simplifyCore = createSimplifyCore(factoryScope as Parameters<typeof createSimplifyCore>[0]);
+export const simplifyCore = createSimplifyCore(
+  factoryScope as Parameters<typeof createSimplifyCore>[0]
+);
 factoryScope.simplifyCore = simplifyCore;
 
-export const polynomialRoot = createPolynomialRoot(factoryScope as Parameters<typeof createPolynomialRoot>[0]);
+export const polynomialRoot = createPolynomialRoot(
+  factoryScope as Parameters<typeof createPolynomialRoot>[0]
+);
 factoryScope.polynomialRoot = polynomialRoot;
 
 export const solveODE = createSolveODE(factoryScope as Parameters<typeof createSolveODE>[0]);
@@ -1257,7 +1341,11 @@ factoryScope.eigs = factoryEigs;
 // orthes/hqr2 solver, which is correct for symmetric/non-symmetric/complex spectra;
 // non-numeric inputs delegate to the factory. Internal consumers keep factoryScope.
 export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean }) =>
-  correctEigs(m, opts, factoryEigs as unknown as (x: unknown, o?: unknown) => unknown)) as unknown as typeof factoryEigs;
+  correctEigs(
+    m,
+    opts,
+    factoryEigs as unknown as (x: unknown, o?: unknown) => unknown
+  )) as unknown as typeof factoryEigs;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;
@@ -1272,7 +1360,9 @@ export const factory_std = createStd(factoryScope as Parameters<typeof createStd
 factoryScope.std = factory_std;
 
 // setSymDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
-const setSymDifference = createSetSymDifference(factoryScope as Parameters<typeof createSetSymDifference>[0]);
+const setSymDifference = createSetSymDifference(
+  factoryScope as Parameters<typeof createSetSymDifference>[0]
+);
 factoryScope.setSymDifference = setSymDifference;
 
 export const simplify = createSimplify(factoryScope as Parameters<typeof createSimplify>[0]);
@@ -1294,14 +1384,18 @@ factoryScope.derivative = derivative;
 export const factory_norm = createNorm(factoryScope as Parameters<typeof createNorm>[0]);
 factoryScope.norm = factory_norm;
 
-export const rationalize = createRationalize(factoryScope as Parameters<typeof createRationalize>[0]);
+export const rationalize = createRationalize(
+  factoryScope as Parameters<typeof createRationalize>[0]
+);
 factoryScope.rationalize = rationalize;
 
 // setUnion (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setUnion = createSetUnion(factoryScope as Parameters<typeof createSetUnion>[0]);
 factoryScope.setUnion = setUnion;
 
-export const symbolicEqual = createSymbolicEqual(factoryScope as Parameters<typeof createSymbolicEqual>[0]);
+export const symbolicEqual = createSymbolicEqual(
+  factoryScope as Parameters<typeof createSymbolicEqual>[0]
+);
 factoryScope.symbolicEqual = symbolicEqual;
 
 // ---------------------------------------------------------------------------
@@ -1311,7 +1405,9 @@ factoryScope.symbolicEqual = symbolicEqual;
 import { createRotationMatrix } from '../matrix/rotationMatrix.js';
 import { createSchur } from '../algebra/decomposition/schur.js';
 
-export const rotationMatrix = createRotationMatrix(factoryScope as Parameters<typeof createRotationMatrix>[0]);
+export const rotationMatrix = createRotationMatrix(
+  factoryScope as Parameters<typeof createRotationMatrix>[0]
+);
 factoryScope.rotationMatrix = rotationMatrix;
 
 export const schur = createSchur(factoryScope as Parameters<typeof createSchur>[0]);
@@ -1402,58 +1498,132 @@ import {
   createFermiCoupling,
 } from '../type/unit/physicalConstants.js';
 
-export const speedOfLight = createSpeedOfLight(factoryScope as Parameters<typeof createSpeedOfLight>[0]);
-export const gravitationConstant = createGravitationConstant(factoryScope as Parameters<typeof createGravitationConstant>[0]);
-export const planckConstant = createPlanckConstant(factoryScope as Parameters<typeof createPlanckConstant>[0]);
-export const reducedPlanckConstant = createReducedPlanckConstant(factoryScope as Parameters<typeof createReducedPlanckConstant>[0]);
-export const magneticConstant = createMagneticConstant(factoryScope as Parameters<typeof createMagneticConstant>[0]);
-export const electricConstant = createElectricConstant(factoryScope as Parameters<typeof createElectricConstant>[0]);
-export const vacuumImpedance = createVacuumImpedance(factoryScope as Parameters<typeof createVacuumImpedance>[0]);
+export const speedOfLight = createSpeedOfLight(
+  factoryScope as Parameters<typeof createSpeedOfLight>[0]
+);
+export const gravitationConstant = createGravitationConstant(
+  factoryScope as Parameters<typeof createGravitationConstant>[0]
+);
+export const planckConstant = createPlanckConstant(
+  factoryScope as Parameters<typeof createPlanckConstant>[0]
+);
+export const reducedPlanckConstant = createReducedPlanckConstant(
+  factoryScope as Parameters<typeof createReducedPlanckConstant>[0]
+);
+export const magneticConstant = createMagneticConstant(
+  factoryScope as Parameters<typeof createMagneticConstant>[0]
+);
+export const electricConstant = createElectricConstant(
+  factoryScope as Parameters<typeof createElectricConstant>[0]
+);
+export const vacuumImpedance = createVacuumImpedance(
+  factoryScope as Parameters<typeof createVacuumImpedance>[0]
+);
 export const coulomb = createCoulomb(factoryScope as Parameters<typeof createCoulomb>[0]);
-export const coulombConstant = createCoulombConstant(factoryScope as Parameters<typeof createCoulombConstant>[0]);
-export const elementaryCharge = createElementaryCharge(factoryScope as Parameters<typeof createElementaryCharge>[0]);
-export const bohrMagneton = createBohrMagneton(factoryScope as Parameters<typeof createBohrMagneton>[0]);
-export const conductanceQuantum = createConductanceQuantum(factoryScope as Parameters<typeof createConductanceQuantum>[0]);
-export const inverseConductanceQuantum = createInverseConductanceQuantum(factoryScope as Parameters<typeof createInverseConductanceQuantum>[0]);
-export const magneticFluxQuantum = createMagneticFluxQuantum(factoryScope as Parameters<typeof createMagneticFluxQuantum>[0]);
-export const nuclearMagneton = createNuclearMagneton(factoryScope as Parameters<typeof createNuclearMagneton>[0]);
+export const coulombConstant = createCoulombConstant(
+  factoryScope as Parameters<typeof createCoulombConstant>[0]
+);
+export const elementaryCharge = createElementaryCharge(
+  factoryScope as Parameters<typeof createElementaryCharge>[0]
+);
+export const bohrMagneton = createBohrMagneton(
+  factoryScope as Parameters<typeof createBohrMagneton>[0]
+);
+export const conductanceQuantum = createConductanceQuantum(
+  factoryScope as Parameters<typeof createConductanceQuantum>[0]
+);
+export const inverseConductanceQuantum = createInverseConductanceQuantum(
+  factoryScope as Parameters<typeof createInverseConductanceQuantum>[0]
+);
+export const magneticFluxQuantum = createMagneticFluxQuantum(
+  factoryScope as Parameters<typeof createMagneticFluxQuantum>[0]
+);
+export const nuclearMagneton = createNuclearMagneton(
+  factoryScope as Parameters<typeof createNuclearMagneton>[0]
+);
 export const klitzing = createKlitzing(factoryScope as Parameters<typeof createKlitzing>[0]);
 export const josephson = createJosephson(factoryScope as Parameters<typeof createJosephson>[0]);
 export const faraday = createFaraday(factoryScope as Parameters<typeof createFaraday>[0]);
-export const fineStructure = createFineStructure(factoryScope as Parameters<typeof createFineStructure>[0]);
+export const fineStructure = createFineStructure(
+  factoryScope as Parameters<typeof createFineStructure>[0]
+);
 export const boltzmann = createBoltzmann(factoryScope as Parameters<typeof createBoltzmann>[0]);
-export const gasConstant = createGasConstant(factoryScope as Parameters<typeof createGasConstant>[0]);
-export const molarVolume = createMolarVolume(factoryScope as Parameters<typeof createMolarVolume>[0]);
+export const gasConstant = createGasConstant(
+  factoryScope as Parameters<typeof createGasConstant>[0]
+);
+export const molarVolume = createMolarVolume(
+  factoryScope as Parameters<typeof createMolarVolume>[0]
+);
 export const molarMass = createMolarMass(factoryScope as Parameters<typeof createMolarMass>[0]);
-export const molarMassC12 = createMolarMassC12(factoryScope as Parameters<typeof createMolarMassC12>[0]);
-export const molarPlanckConstant = createMolarPlanckConstant(factoryScope as Parameters<typeof createMolarPlanckConstant>[0]);
+export const molarMassC12 = createMolarMassC12(
+  factoryScope as Parameters<typeof createMolarMassC12>[0]
+);
+export const molarPlanckConstant = createMolarPlanckConstant(
+  factoryScope as Parameters<typeof createMolarPlanckConstant>[0]
+);
 export const avogadro = createAvogadro(factoryScope as Parameters<typeof createAvogadro>[0]);
 export const loschmidt = createLoschmidt(factoryScope as Parameters<typeof createLoschmidt>[0]);
-export const sackurTetrode = createSackurTetrode(factoryScope as Parameters<typeof createSackurTetrode>[0]);
-export const stefanBoltzmann = createStefanBoltzmann(factoryScope as Parameters<typeof createStefanBoltzmann>[0]);
-export const firstRadiation = createFirstRadiation(factoryScope as Parameters<typeof createFirstRadiation>[0]);
-export const secondRadiation = createSecondRadiation(factoryScope as Parameters<typeof createSecondRadiation>[0]);
-export const wienDisplacement = createWienDisplacement(factoryScope as Parameters<typeof createWienDisplacement>[0]);
-export const electronMass = createElectronMass(factoryScope as Parameters<typeof createElectronMass>[0]);
+export const sackurTetrode = createSackurTetrode(
+  factoryScope as Parameters<typeof createSackurTetrode>[0]
+);
+export const stefanBoltzmann = createStefanBoltzmann(
+  factoryScope as Parameters<typeof createStefanBoltzmann>[0]
+);
+export const firstRadiation = createFirstRadiation(
+  factoryScope as Parameters<typeof createFirstRadiation>[0]
+);
+export const secondRadiation = createSecondRadiation(
+  factoryScope as Parameters<typeof createSecondRadiation>[0]
+);
+export const wienDisplacement = createWienDisplacement(
+  factoryScope as Parameters<typeof createWienDisplacement>[0]
+);
+export const electronMass = createElectronMass(
+  factoryScope as Parameters<typeof createElectronMass>[0]
+);
 export const protonMass = createProtonMass(factoryScope as Parameters<typeof createProtonMass>[0]);
-export const neutronMass = createNeutronMass(factoryScope as Parameters<typeof createNeutronMass>[0]);
-export const deuteronMass = createDeuteronMass(factoryScope as Parameters<typeof createDeuteronMass>[0]);
+export const neutronMass = createNeutronMass(
+  factoryScope as Parameters<typeof createNeutronMass>[0]
+);
+export const deuteronMass = createDeuteronMass(
+  factoryScope as Parameters<typeof createDeuteronMass>[0]
+);
 export const atomicMass = createAtomicMass(factoryScope as Parameters<typeof createAtomicMass>[0]);
 export const bohrRadius = createBohrRadius(factoryScope as Parameters<typeof createBohrRadius>[0]);
-export const classicalElectronRadius = createClassicalElectronRadius(factoryScope as Parameters<typeof createClassicalElectronRadius>[0]);
+export const classicalElectronRadius = createClassicalElectronRadius(
+  factoryScope as Parameters<typeof createClassicalElectronRadius>[0]
+);
 export const gravity = createGravity(factoryScope as Parameters<typeof createGravity>[0]);
-export const planckLength = createPlanckLength(factoryScope as Parameters<typeof createPlanckLength>[0]);
+export const planckLength = createPlanckLength(
+  factoryScope as Parameters<typeof createPlanckLength>[0]
+);
 export const planckMass = createPlanckMass(factoryScope as Parameters<typeof createPlanckMass>[0]);
 export const planckTime = createPlanckTime(factoryScope as Parameters<typeof createPlanckTime>[0]);
-export const planckCharge = createPlanckCharge(factoryScope as Parameters<typeof createPlanckCharge>[0]);
-export const planckTemperature = createPlanckTemperature(factoryScope as Parameters<typeof createPlanckTemperature>[0]);
-export const hartreeEnergy = createHartreeEnergy(factoryScope as Parameters<typeof createHartreeEnergy>[0]);
-export const quantumOfCirculation = createQuantumOfCirculation(factoryScope as Parameters<typeof createQuantumOfCirculation>[0]);
+export const planckCharge = createPlanckCharge(
+  factoryScope as Parameters<typeof createPlanckCharge>[0]
+);
+export const planckTemperature = createPlanckTemperature(
+  factoryScope as Parameters<typeof createPlanckTemperature>[0]
+);
+export const hartreeEnergy = createHartreeEnergy(
+  factoryScope as Parameters<typeof createHartreeEnergy>[0]
+);
+export const quantumOfCirculation = createQuantumOfCirculation(
+  factoryScope as Parameters<typeof createQuantumOfCirculation>[0]
+);
 export const rydberg = createRydberg(factoryScope as Parameters<typeof createRydberg>[0]);
-export const thomsonCrossSection = createThomsonCrossSection(factoryScope as Parameters<typeof createThomsonCrossSection>[0]);
-export const weakMixingAngle = createWeakMixingAngle(factoryScope as Parameters<typeof createWeakMixingAngle>[0]);
-export const efimovFactor = createEfimovFactor(factoryScope as Parameters<typeof createEfimovFactor>[0]);
-export const fermiCoupling = createFermiCoupling(factoryScope as Parameters<typeof createFermiCoupling>[0]);
+export const thomsonCrossSection = createThomsonCrossSection(
+  factoryScope as Parameters<typeof createThomsonCrossSection>[0]
+);
+export const weakMixingAngle = createWeakMixingAngle(
+  factoryScope as Parameters<typeof createWeakMixingAngle>[0]
+);
+export const efimovFactor = createEfimovFactor(
+  factoryScope as Parameters<typeof createEfimovFactor>[0]
+);
+export const fermiCoupling = createFermiCoupling(
+  factoryScope as Parameters<typeof createFermiCoupling>[0]
+);
 
 // ---------------------------------------------------------------------------
 // Type-conversion functions (EXPANSION_PLAN W9)

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-04",
-    "totalFiles": 853,
+    "totalFiles": 848,
     "totalModules": 71,
-    "totalExports": 4376
+    "totalExports": 4367
   },
   "entryPoints": [
     {
@@ -8507,7 +8507,12 @@
       },
       "functions/src/factories/index.ts": {
         "description": "Activated mathjs leaf factory functions.",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core/internal",
+            "imports": ["createUnitClass"]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -9277,10 +9282,6 @@
           {
             "file": "../type/unit/function/unit.js",
             "imports": ["createUnitFunction"]
-          },
-          {
-            "file": "../type/unit/Unit.js",
-            "imports": ["createUnitClass"]
           },
           {
             "file": "../type/matrix/FibonacciHeap.js",
@@ -15741,71 +15742,6 @@
           "createPlanckCharge",
           "createPlanckTemperature"
         ]
-      },
-      "functions/src/type/unit/Unit.ts": {
-        "description": "A unit can be constructed in the following ways:",
-        "externalDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core/internal",
-            "imports": [
-              "BaseUnitDef",
-              "BigNumberValue",
-              "ConverterFn",
-              "CreateUnitDefObject",
-              "CreateUnitOptions",
-              "FractionValue",
-              "Numeric",
-              "ParseOptions",
-              "PrefixDef",
-              "PrefixTable",
-              "TypeConverters",
-              "UnitComponent",
-              "UnitConfig",
-              "UnitConstructor",
-              "UnitDef",
-              "UnitDependencies",
-              "UnitFormatOptions",
-              "UnitInstance",
-              "UnitJSON",
-              "UnitSystem",
-              "UnitSystemEntry"
-            ]
-          }
-        ],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../../utils/is.js",
-            "imports": ["isComplex", "isUnit", "typeOf"]
-          },
-          {
-            "file": "../../utils/factory.js",
-            "imports": ["factory"]
-          },
-          {
-            "file": "../../utils/function.js",
-            "imports": ["memoize"]
-          },
-          {
-            "file": "../../utils/string.js",
-            "imports": ["endsWith"]
-          },
-          {
-            "file": "../../utils/object.js",
-            "imports": ["clone", "hasOwnProperty"]
-          },
-          {
-            "file": "../../utils/bignumber/constants.js",
-            "imports": ["createBigNumberPi"]
-          },
-          {
-            "file": "../../utils/log.js",
-            "imports": ["warnOnce"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["createUnitClass"],
-        "constants": ["createUnitClass"]
       }
     },
     "functions/typed": {
@@ -18040,30 +17976,6 @@
           "rightArithShiftBigNumber"
         ]
       },
-      "functions/src/utils/bignumber/constants.ts": {
-        "description": "Calculate BigNumber e",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../function.js",
-            "imports": ["memoize"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": [
-          "createBigNumberE",
-          "createBigNumberPhi",
-          "createBigNumberPi",
-          "createBigNumberTau"
-        ],
-        "constants": [
-          "createBigNumberE",
-          "createBigNumberPhi",
-          "createBigNumberPi",
-          "createBigNumberTau"
-        ]
-      },
       "functions/src/utils/bignumber/formatter.ts": {
         "description": "Structural contract for the BigNumber values handled by this formatter.",
         "externalDependencies": [],
@@ -18228,21 +18140,6 @@
           "isOptionalDependency",
           "stripOptionalNotation"
         ]
-      },
-      "functions/src/utils/function.ts": {
-        "description": "Memoize a given function by caching the computed result.",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./lruQueue.js",
-            "imports": ["lruQueue"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["memoize", "memoizeCompare"],
-        "interfaces": ["MemoizeCache", "MemoizedFunction"],
-        "functions": ["memoize", "memoizeCompare"]
       },
       "functions/src/utils/hasNumericValue.ts": {
         "description": "Test whether a value is an numeric value.",
@@ -18645,24 +18542,6 @@
         "workspaceDependencies": [],
         "exports": ["createIsZero"],
         "constants": ["createIsZero"]
-      },
-      "functions/src/utils/log.ts": {
-        "description": "Log a console.warn message only once",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["warnOnce"],
-        "constants": ["warnOnce"]
-      },
-      "functions/src/utils/lruQueue.ts": {
-        "description": "(c) 2018, Mariusz Nowak",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["lruQueue"],
-        "functions": ["lruQueue"]
       },
       "functions/src/utils/map.ts": {
         "description": "A map facade on a bare object.",
@@ -29713,8 +29592,7 @@
           "functions/src/type/unit/function/createUnit.ts",
           "functions/src/type/unit/function/splitUnit.ts",
           "functions/src/type/unit/function/unit.ts",
-          "functions/src/type/unit/physicalConstants.ts",
-          "functions/src/type/unit/Unit.ts"
+          "functions/src/type/unit/physicalConstants.ts"
         ]
       },
       {
@@ -29762,7 +29640,6 @@
           "functions/src/utils/array.ts",
           "functions/src/utils/bigint.ts",
           "functions/src/utils/bignumber/bitwise.ts",
-          "functions/src/utils/bignumber/constants.ts",
           "functions/src/utils/bignumber/formatter.ts",
           "functions/src/utils/bignumber/nearlyEqual.ts",
           "functions/src/utils/clone.ts",
@@ -29771,7 +29648,6 @@
           "functions/src/utils/customs.ts",
           "functions/src/utils/emitter.ts",
           "functions/src/utils/factory.ts",
-          "functions/src/utils/function.ts",
           "functions/src/utils/hasNumericValue.ts",
           "functions/src/utils/is.ts",
           "functions/src/utils/isBounded.ts",
@@ -29783,8 +29659,6 @@
           "functions/src/utils/isPositive.ts",
           "functions/src/utils/isPrime.ts",
           "functions/src/utils/isZero.ts",
-          "functions/src/utils/log.ts",
-          "functions/src/utils/lruQueue.ts",
           "functions/src/utils/map.ts",
           "functions/src/utils/node.ts",
           "functions/src/utils/noop.ts",
@@ -30287,21 +30161,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 853,
+    "totalTypeScriptFiles": 848,
     "totalModules": 71,
-    "totalLinesOfCode": 157534,
-    "totalExports": 4376,
+    "totalLinesOfCode": 153540,
+    "totalExports": 4367,
     "totalClasses": 51,
-    "totalInterfaces": 370,
-    "totalFunctions": 1474,
+    "totalInterfaces": 368,
+    "totalFunctions": 1471,
     "totalTypeGuards": 175,
     "totalEnums": 0,
-    "totalConstants": 1411,
+    "totalConstants": 1405,
     "totalReExports": 1473,
     "totalTypeOnlyImports": 484,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 468
+    "unusedExportsCount": 463
   }
 }

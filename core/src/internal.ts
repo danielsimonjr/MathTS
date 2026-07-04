@@ -18,3 +18,9 @@ export type { MemoizedFunction } from './shared.js';
 // Unit factory type contract (relocated here as the Unit merges into core; consumed
 // by the mathjs-derived Unit while it still lives in the functions package).
 export type * from './types/unit/unit-types.js';
+
+// The relocated, feature-complete Unit — the factory, its core-wired dependency
+// bundle, and a ready-instantiated class — for the functions package to adopt as it
+// retires its own copy (Unit-merge Phase 3). `CoreUnit` is the value export; the
+// `Unit` *type* continues to come from `is.js`.
+export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/unit/index.js';

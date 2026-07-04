@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 468
+- **Potentially unused exports**: 463
 
 ## Potentially Unused Files
 
@@ -442,12 +442,6 @@ These exports are not imported by any other file in the codebase:
 
 - `bitwise` (function)
 
-### `functions/src/utils/bignumber/constants.ts`
-
-- `createBigNumberE` (constant)
-- `createBigNumberPhi` (constant)
-- `createBigNumberTau` (constant)
-
 ### `functions/src/utils/bignumber/formatter.ts`
 
 - `toEngineering` (function)
@@ -467,12 +461,6 @@ These exports are not imported by any other file in the codebase:
 - `isOptionalDependency` (function)
 - `DependencyName` (type)
 - `CreateFunction` (type)
-
-### `functions/src/utils/function.ts`
-
-- `memoizeCompare` (function)
-- `MemoizeCache` (interface)
-- `MemoizedFunction` (interface)
 
 ### `functions/src/utils/is.ts`
 
@@ -518,6 +506,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `functions/src/utils/string.ts`
 
+- `endsWith` (function)
 - `stringify` (function)
 - `escape` (function)
 - `GeneralFormatOptions` (type)
