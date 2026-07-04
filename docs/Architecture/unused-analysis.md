@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 359
-  - **Unreferenced anywhere (deletion candidates)**: 73
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 286
+- **Potentially unused exports**: 243
+  - **Unreferenced anywhere (deletion candidates)**: 32
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 211
 
 ## Potentially Unused Files
 
@@ -21,28 +21,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `core/src/types/unit-prefixes.ts`
 
 - `SI_PREFIX_KEYS` (constant)
-
-### `matrix/src/backends/WasmLoader.ts`
-
-- `initWasm` (function)
-
-### `matrix/src/config.ts`
-
-- `resetConfig` (function)
-- `setBackendPreference` (function)
-- `setBackendThreshold` (function)
-- `setBackendEnabled` (function)
-- `getRecommendedBackend` (function)
-- `forceBackend` (function)
-- `enableProfiling` (function)
-- `disableProfiling` (function)
-- `enableAdaptiveTuning` (function)
-- `disableAdaptiveTuning` (function)
-- `configureAdaptiveTuning` (function)
-
-### `matrix/src/operations/sqrtm.ts`
-
-- `matrixSqrtNewtonInternal` (function)
 
 ### `functions/src/arithmetic/nthRoot.ts`
 
@@ -103,82 +81,21 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 - `endsWith` (function)
 - `escape` (function)
 
-### `functions/src/wasm/bitwise/wasm-bridge.ts`
-
-- `resetBitwiseWasm` (function)
-
-### `functions/src/wasm/bridges/common.ts`
-
-- `resetScratch` (function)
-
-### `functions/src/wasm/interpolation/wasm-bridge.ts`
-
-- `resetTridiagWasm` (function)
-
-### `functions/src/wasm/poly/wasm-bridge.ts`
-
-- `resetPolyWasm` (function)
-
-### `functions/src/wasm/sort/wasm-bridge.ts`
-
-- `rankF64Dispatch` (function)
-
 ### `functions/src/wasm/special/wasm-bridge.ts`
 
 - `resetCarlsonWasm` (function)
-- `resetBesselWasm` (function)
-- `resetAiryWasm` (function)
-- `resetEllipticWasm` (function)
-- `resetLgammaWasm` (function)
 
 ### `functions/src/wasm/WasmLoader.ts`
 
 - `initWasm` (function)
 
-### `expression/src/error/IndexError.ts`
-
-- `createIndexError` (function)
-
 ### `expression/src/utils/array.ts`
 
-- `validateIndexSourceSize` (function)
-- `isEmptyIndex` (function)
-- `filterRegExp` (function)
-- `identify` (function)
-- `generalize` (function)
-- `initial` (function)
 - `ArrayOrScalar` (type)
-
-### `expression/src/utils/collection.ts`
-
-- `containsCollections` (function)
-- `scatter` (function)
-
-### `expression/src/utils/is.ts`
-
-- `isBigInt` (function)
-- `isBoolean` (function)
-- `isDate` (function)
-- `isRegExp` (function)
-- `isPartitionedMap` (function)
-- `isNull` (function)
-- `isUndefined` (function)
-
-### `expression/src/utils/map.ts`
-
-- `isObjectWrappingMap` (function)
 
 ### `expression/src/utils/mathml.ts`
 
 - `operatorPrecedence` (function)
-
-### `expression/src/utils/string.ts`
-
-- `endsWith` (function)
-
-### `parallel/src/strategies/chunk.ts`
-
-- `memorySizeBytes` (function)
 
 ### `workbook/src/parser.ts`
 
@@ -199,24 +116,17 @@ Not imported cross-file, but referenced within their own module — they type or
 support exports that ARE used, so they cannot be deleted in isolation. Mostly
 interfaces typing live guards and per-package API completeness, not rot.
 
-### `packages/workerpool/src/fft-core.ts`
-
-- `fftBitReverse` (function) — 1 in-file ref
-
 ### `core/src/config.ts`
 
-- `ConfigOptions` (interface) — 2 in-file refs
 - `MathJsConfig` (type) — 1 in-file ref
 
 ### `core/src/factory.ts`
 
-- `sortFactories` (function) — 1 in-file ref
 - `create` (function) — 7 in-file refs
 - `isFactory` (function) — 10 in-file refs
 - `assertDependencies` (function) — 1 in-file ref
 - `isOptionalDependency` (function) — 1 in-file ref
 - `stripOptionalNotation` (function) — 1 in-file ref
-- `FactoryFunction` (interface) — 12 in-file refs
 - `LegacyFactory` (interface) — 9 in-file refs
 - `FactoryMeta` (interface) — 3 in-file refs
 - `DependencyName` (type) — 4 in-file refs
@@ -231,18 +141,15 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `matrix/src/backends/WasmLoader.ts`
 
-- `WasmLoader` (class) — 9 in-file refs
 - `Allocation` (interface) — 10 in-file refs
 - `LoadingMetrics` (interface) — 2 in-file refs
 
 ### `matrix/src/config.ts`
 
-- `setConfig` (function) — 10 in-file refs
 - `BackendConfig` (interface) — 3 in-file refs
 - `AdaptiveTuningConfig` (interface) — 2 in-file refs
 - `ProfilingConfig` (interface) — 1 in-file ref
 - `BackendPreference` (type) — 2 in-file refs
-- `DEFAULT_CONFIG` (constant) — 2 in-file refs
 
 ### `functions/src/algebra/simplify/util.ts`
 
@@ -521,46 +428,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `stringify` (function) — 2 in-file refs
 - `GeneralFormatOptions` (type) — 1 in-file ref
 
-### `functions/src/wasm/elementwise/wasm-bridge.ts`
-
-- `WASM_ELEMENTWISE_THRESHOLD` (constant) — 2 in-file refs
-- `WASM_ELEMENTWISE_OPS` (constant) — 1 in-file ref
-
 ### `functions/src/wasm/integrity.ts`
 
-- `sha384OfBuffer` (function) — 1 in-file ref
 - `WasmManifest` (interface) — 4 in-file refs
-
-### `functions/src/wasm/interpolation/wasm-bridge.ts`
-
-- `tridiagSolveJS` (function) — 1 in-file ref
-- `WASM_TRIDIAG_THRESHOLD` (constant) — 1 in-file ref
-
-### `functions/src/wasm/signal/wasm-bridge.ts`
-
-- `applyWindowJS` (function) — 2 in-file refs
-- `goertzelJS` (function) — 1 in-file ref
-- `bartlettPSDJS` (function) — 1 in-file ref
-- `chirpZTransformJS` (function) — 1 in-file ref
-
-### `functions/src/wasm/sort/wasm-bridge.ts`
-
-- `sortF64JS` (function) — 1 in-file ref
-- `argsortF64JS` (function) — 2 in-file refs
-- `rankF64JS` (function) — 1 in-file ref
-
-### `functions/src/wasm/special/wasm-bridge.ts`
-
-- `besselJ0JS` (function) — 1 in-file ref
-- `besselJ1JS` (function) — 1 in-file ref
-- `besselJnJS` (function) — 1 in-file ref
-- `besselY0JS` (function) — 1 in-file ref
-- `besselY1JS` (function) — 1 in-file ref
-- `besselYnJS` (function) — 1 in-file ref
-- `airyAiJS` (function) — 1 in-file ref
-- `airyBiJS` (function) — 1 in-file ref
-- `ellipticKJS` (function) — 1 in-file ref
-- `ellipticEJS` (function) — 1 in-file ref
 
 ### `functions/src/wasm/WasmLoader.ts`
 
@@ -577,67 +447,18 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `expression/src/utils/array.ts`
 
-- `validate` (function) — 7 in-file refs
-- `validateIndex` (function) — 1 in-file ref
-- `resize` (function) — 5 in-file refs
-- `reshape` (function) — 2 in-file refs
-- `processSizesWildcard` (function) — 1 in-file ref
-- `squeeze` (function) — 3 in-file refs
-- `unsqueeze` (function) — 3 in-file refs
-- `flatten` (function) — 2 in-file refs
-- `filter` (function) — 3 in-file refs
-- `getArrayDataType` (function) — 1 in-file ref
-- `last` (function) — 6 in-file refs
-- `concat` (function) — 4 in-file refs
-- `broadcastSizes` (function) — 2 in-file refs
-- `checkBroadcastingRules` (function) — 2 in-file refs
-- `broadcastTo` (function) — 1 in-file ref
-- `broadcastArrays` (function) — 1 in-file ref
-- `stretch` (function) — 1 in-file ref
-- `get` (function) — 2 in-file refs
-- `clone` (function) — 1 in-file ref
 - `IdentifiedValue` (interface) — 3 in-file refs
 - `NestedArray` (type) — 80 in-file refs
 
-### `expression/src/utils/bignumber/formatter.ts`
-
-- `toEngineering` (function) — 1 in-file ref
-- `toExponential` (function) — 5 in-file refs
-- `toFixed` (function) — 5 in-file refs
-
-### `expression/src/utils/collection.ts`
-
-- `deepForEach` (function) — 1 in-file ref
-- `reduce` (function) — 5 in-file refs
-
 ### `expression/src/utils/factory.ts`
 
-- `sortFactories` (function) — 1 in-file ref
-- `create` (function) — 7 in-file refs
-- `isFactory` (function) — 10 in-file refs
-- `assertDependencies` (function) — 1 in-file ref
-- `isOptionalDependency` (function) — 1 in-file ref
-- `stripOptionalNotation` (function) — 1 in-file ref
 - `FactoryFunction` (interface) — 13 in-file refs
-- `LegacyFactory` (interface) — 10 in-file refs
 - `FactoryMeta` (interface) — 3 in-file refs
 - `DependencyName` (type) — 4 in-file refs
 - `CreateFunction` (type) — 1 in-file ref
 
 ### `expression/src/utils/is.ts`
 
-- `isFraction` (function) — 2 in-file refs
-- `isDenseMatrix` (function) — 3 in-file refs
-- `isSparseMatrix` (function) — 3 in-file refs
-- `isRange` (function) — 4 in-file refs
-- `isIndex` (function) — 3 in-file refs
-- `isResultSet` (function) — 3 in-file refs
-- `isAssignmentNode` (function) — 3 in-file refs
-- `isBlockNode` (function) — 3 in-file refs
-- `isConditionalNode` (function) — 3 in-file refs
-- `isRangeNode` (function) — 3 in-file refs
-- `isRelationalNode` (function) — 3 in-file refs
-- `isChain` (function) — 3 in-file refs
 - `BigNumber` (interface) — 2 in-file refs
 - `Complex` (interface) — 1 in-file ref
 - `Fraction` (interface) — 1 in-file ref
@@ -666,21 +487,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `expression/src/utils/latex.ts`
-
-- `latexSymbols` (constant) — 3 in-file refs
-
-### `expression/src/utils/map.ts`
-
-- `assign` (function) — 1 in-file ref
-
 ### `expression/src/utils/mathml.ts`
 
 - `numberToMathML` (function) — 1 in-file ref
-
-### `expression/src/utils/string.ts`
-
-- `compareText` (function) — 2 in-file refs
 
 ### `parallel/src/ComputePool.ts`
 

@@ -3247,27 +3247,26 @@ async function main(): Promise<void> {
     `Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`
   );
 
-  // Parse test files up-front when --include-tests is set so they can
-  // also be fed into the unused-analysis (test-only imports of helpers
-  // like `resetPolyWasm` would otherwise false-flag those helpers).
-  let parsedTestFiles: ParsedFile[] = [];
-  let testFilePaths: string[] = [];
-  if (cliOptions.includeTests) {
-    if (isMonorepo) {
-      for (const [, ws] of workspaceMap) {
-        const testDir = join(ROOT_DIR, ws.directory, 'tests');
-        const srcDir = join(ROOT_DIR, ws.srcDir);
-        testFilePaths.push(...getAllTestFiles(testDir));
-        testFilePaths.push(...getAllTestFiles(srcDir));
-      }
-      const rootTestDir = join(ROOT_DIR, 'tests');
-      testFilePaths.push(...getAllTestFiles(rootTestDir));
-    } else {
-      const testDir = join(ROOT_DIR, 'tests');
-      testFilePaths = [...getAllTestFiles(testDir), ...getAllTestFiles(SRC_DIR)];
+  // Parse test files up-front UNCONDITIONALLY so the unused-analysis always sees
+  // test-only consumers (a test importing `initWasm` or `resetPolyWasm` is a
+  // legitimate consumer). This used to be gated on --include-tests — but docs:deps
+  // runs without that flag, so every test-only-consumed export was false-flagged.
+  // The flag now gates only the test-coverage REPORT generation below.
+  const testFilePaths: string[] = [];
+  if (isMonorepo) {
+    for (const [, ws] of workspaceMap) {
+      const testDir = join(ROOT_DIR, ws.directory, 'tests');
+      const srcDir = join(ROOT_DIR, ws.srcDir);
+      testFilePaths.push(...getAllTestFiles(testDir));
+      testFilePaths.push(...getAllTestFiles(srcDir));
     }
-    parsedTestFiles = testFilePaths.map(parseFile);
+    const rootTestDir = join(ROOT_DIR, 'tests');
+    testFilePaths.push(...getAllTestFiles(rootTestDir));
+  } else {
+    const testDir = join(ROOT_DIR, 'tests');
+    testFilePaths.push(...getAllTestFiles(testDir), ...getAllTestFiles(SRC_DIR));
   }
+  const parsedTestFiles: ParsedFile[] = testFilePaths.map(parseFile);
 
   // Detect unused files and exports
   const unusedAnalysis = detectUnused(activeParsedFiles, parsedTestFiles);

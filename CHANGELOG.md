@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — DGT unused-analysis: test-only consumers now always count (4th fix)
+
+Test files were fed into the unused-analysis **only under `--include-tests`**, but
+`docs:deps` runs without that flag — so every export consumed only by tests (e.g. matrix's
+`initWasm`, exercised by `WasmLoader.test.ts`) was false-flagged. Test files are now parsed
+unconditionally for the unused-analysis; the flag gates only the test-coverage report.
+Result: **359 → 243 flagged, 73 → 32 true deletion candidates.** Combined with the three
+fixes below and the core `is.ts` cleanup, today's full progression is **481 → 243 flagged /
+32 actionable** — the dead-code signal is finally legible.
+
 ### Changed (2026-07-04) — DGT unused-analysis: 3 root-cause fixes make the report legible (WS-3 P2)
 
 Three classifier defects in `tools/create-dependency-graph` inflated the unused-export
