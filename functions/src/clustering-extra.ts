@@ -105,6 +105,14 @@ export function spectralClustering(
   k: number,
   opts: { maxIter?: number } = {}
 ): number[] {
+  // `adjacency` is a square n×n affinity/adjacency matrix (NOT a point cloud). A
+  // non-square input otherwise reaches the eigensolver and loops forever, so fail fast.
+  const n0 = adjacency.length;
+  if (n0 === 0 || adjacency.some((row) => row.length !== n0)) {
+    throw new Error(
+      `spectralClustering: adjacency must be a square n×n matrix (got ${n0}×${adjacency[0]?.length ?? 0})`
+    );
+  }
   const L = laplacianMatrix(adjacency, { normalized: true });
   const { eigenvectors } = _eigs(L); // ascending by eigenvalue
   const n = adjacency.length;

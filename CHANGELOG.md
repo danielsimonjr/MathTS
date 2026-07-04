@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — `spectralClustering` infinite loop + `voronoiDiagram` bounds guard
+
+Two input-validation fixes found while adding WS-1 P2 signal/geometry oracles:
+`spectralClustering` **looped forever** on a non-square adjacency matrix (e.g. a point
+cloud passed by mistake) — it now throws a clear error; `voronoiDiagram` now rejects a
+missing/malformed `bounds` argument instead of crashing with `Cannot read properties of
+undefined`.
+
+### Tests (2026-07-04) — signal/geometry oracle pins (WS-1 P2)
+
+`gap-signal-geometry-oracles.test.ts`: known DFTs (`fft[1,1,1,1]=[4,0,0,0]`,
+`fft[1,−1,1,−1]=[0,0,4,0]`, `ifft[4,0,0,0]=[1,1,1,1]` — hand-written spectra, not
+round-trips), `resample` decimation, `kdTree` median root, `voronoiDiagram` region count,
+and `spectralClustering` component separation.
+
 ### Added (2026-07-04) — `spearman` rank correlation (closes the statistics-depth gap)
 
 New `spearman(x, y)` — Spearman's ρ (Pearson correlation of the rank-transformed inputs,

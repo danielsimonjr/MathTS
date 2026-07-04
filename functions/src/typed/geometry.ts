@@ -752,6 +752,11 @@ export function voronoiDiagram(
   points: number[][],
   bounds: [f64, f64, f64, f64]
 ): { vertices: number[][]; regions: number[][] } {
+  if (!Array.isArray(bounds) || bounds.length !== 4) {
+    throw new TypeError(
+      'voronoiDiagram: bounds must be a [xMin, yMin, xMax, yMax] tuple (the clipping box)'
+    );
+  }
   const n: i32 = points.length;
 
   // WASM-accelerated path
@@ -1083,16 +1088,18 @@ export function convexHull3D(points: number[][]): HullFace3D[] {
 function convexHull3DJS(points: number[][]): HullFace3D[] {
   const n: i32 = points.length;
 
-  function orient3d(
-    a: number[], b: number[], c: number[], p: number[]
-  ): f64 {
-    const bax = b[0] - a[0]; const bay = b[1] - a[1]; const baz = b[2] - a[2];
-    const cax = c[0] - a[0]; const cay = c[1] - a[1]; const caz = c[2] - a[2];
-    const pax = p[0] - a[0]; const pay = p[1] - a[1]; const paz = p[2] - a[2];
+  function orient3d(a: number[], b: number[], c: number[], p: number[]): f64 {
+    const bax = b[0] - a[0];
+    const bay = b[1] - a[1];
+    const baz = b[2] - a[2];
+    const cax = c[0] - a[0];
+    const cay = c[1] - a[1];
+    const caz = c[2] - a[2];
+    const pax = p[0] - a[0];
+    const pay = p[1] - a[1];
+    const paz = p[2] - a[2];
     return (
-      bax * (cay * paz - caz * pay) -
-      bay * (cax * paz - caz * pax) +
-      baz * (cax * pay - cay * pax)
+      bax * (cay * paz - caz * pay) - bay * (cax * paz - caz * pax) + baz * (cax * pay - cay * pax)
     );
   }
 
@@ -1131,7 +1138,10 @@ function convexHull3DJS(points: number[][]): HullFace3D[] {
     const cy = az * vx - ax * vz;
     const cz = ax * vy - ay * vx;
     const d = cx * cx + cy * cy + cz * cz;
-    if (d > bestD) { bestD = d; i2 = i; }
+    if (d > bestD) {
+      bestD = d;
+      i2 = i;
+    }
   }
   if (i2 < 0 || bestD < 1e-24) {
     throw new Error('convexHull3D: degenerate input (all points collinear)');
@@ -1142,7 +1152,10 @@ function convexHull3DJS(points: number[][]): HullFace3D[] {
   for (let i = 0; i < n; i++) {
     if (i === i0 || i === i1 || i === i2) continue;
     const d = Math.abs(faceDist([i0, i1, i2] as HullFace3D, i));
-    if (d > bestD) { bestD = d; i3 = i; }
+    if (d > bestD) {
+      bestD = d;
+      i3 = i;
+    }
   }
   if (i3 < 0 || bestD < 1e-12) {
     throw new Error('convexHull3D: degenerate input (all points co-planar)');
@@ -1178,7 +1191,11 @@ function convexHull3DJS(points: number[][]): HullFace3D[] {
     const horizon: [i32, i32][] = [];
     for (const fi of visible) {
       const fv = hull[fi];
-      const edges: [i32, i32][] = [[fv[0], fv[1]], [fv[1], fv[2]], [fv[2], fv[0]]];
+      const edges: [i32, i32][] = [
+        [fv[0], fv[1]],
+        [fv[1], fv[2]],
+        [fv[2], fv[0]],
+      ];
       for (const [ea, eb] of edges) {
         let shared = false;
         for (const fj of visible) {
