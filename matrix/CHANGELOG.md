@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.14
+
+### Patch Changes
+
+- c041b4e: Fix SVD for exactly-rank-deficient matrices. `svd([[1,2],[2,4]])` returned σ₁ = √5 instead of 5 with a wrong `V` (no reconstruction) — corrupting `pinv` / `lowRankApprox` / `norm2` / `cond` on singular inputs. The bidiagonal Golub-Reinsch `handleZero` never folded the superdiagonal into the diagonal for a trailing/isolated exact-zero singular value. Now, when a zero singular value is detected, the decomposition is recomputed with a robust one-sided Jacobi SVD (with null-space basis completion so `U`/`V` stay orthonormal); the fast Golub-Reinsch path is unchanged for the full-rank common case. Exact reconstruction + orthonormal factors across 2×2 / 3×3 / wide / tall / zero, symmetric and non-symmetric.
+- Updated dependencies [5611a77]
+- Updated dependencies [25b80ed]
+- Updated dependencies [d27e0a5]
+- Updated dependencies [82bb0b1]
+  - @danielsimonjr/mathts-core@0.4.0
+
 ## 0.1.13
 
 ### Patch Changes

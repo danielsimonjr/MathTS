@@ -1,5 +1,32 @@
 # @danielsimonjr/mathts-core
 
+## 0.4.0
+
+### Minor Changes
+
+- 5611a77: Add `BigNumber.prototype.div` and `.times` — short-name aliases for `divide`/`multiply`, matching the Decimal.js / mathjs calling convention already followed by `Complex` and `Fraction` (`.div`/`.mul`/`.sub`). Both accept the same operand types as their long forms (BigNumber, number, string). Needed by the mathjs-derived `Unit` (which calls `.div`/`.times` on BigNumber unit values) as it merges into core, and useful for general Decimal.js API parity.
+- 25b80ed: Add polymorphic scalar arithmetic (`core/src/arithmetic/scalar.ts`): `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal` over any mix of `number | bigint | Complex | Fraction | BigNumber`, plus a polymorphic `isNumeric` and a `number()` converter — all built solely on core's own numeric primitives. Dispatch promotes both operands to the richest common domain (Complex ≻ BigNumber ≻ Fraction) and invokes one same-type method, so operand order is preserved for non-commutative ops and same-type operands stay exact. Non-integer exponents on an exact base fall back to double `Math.pow` (so `pow(BigNumber, 0.5)` is correct, not silently `1`); `round` uses `'halfCeil'` on BigNumber for cross-type consistency with `Math.round`/`Fraction.round`; `isNumeric` follows mathjs semantics (boolean is numeric, Complex is not). This is the foundational dependency for the in-progress relocation of the feature-complete `Unit` class into core.
+- 82bb0b1: **BREAKING (Unit merge complete): one `Unit`.** The former standalone core `Unit` class (the canonical-value subset in `core/src/types/unit.ts`) is retired; `@danielsimonjr/mathts-core`'s `Unit` is now the single, feature-complete merged implementation, and `functions` `unit()`/`to()`/`toBest()`/arithmetic+comparison operators all return that one class (the `to`/`toBest` operator dual-flavor branching is gone).
+
+  Caller migration:
+
+  - Unit arithmetic is at the operator level — use `add`/`subtract`/`multiply`/`divide` from `@danielsimonjr/mathts-functions`, not `unit.add(…)`/`.sub`/`.mul`/`.div`. `u1 / u2` of the same dimension returns a plain dimensionless number (mathjs parity).
+  - `unit.equalBase(other)` replaces `unit.dimensionsEqual(other)`; dimensions are a 9-element exponent array, not a struct; `unit.formatUnits()`/`unit.toString()` replace `.notation`.
+  - Temperature offsets apply on conversion (`new Unit(20,'degC').value === 20`; `.to('K')` → `293.15 K`); `°C`/`°F`/`°` are accepted.
+  - `DimensionMismatchError`/`UnitParseError` are still thrown and exported; `Unit`/`isUnitValue`/`DIMENSIONLESS`/`dim`/`Dimensions`/`UnitDef` keep their import paths. New `UnitInstance` type export for type position.
+
+  Also corrects `eV` to the exact 2019-SI value `1.602176634e-19` J.
+
+### Patch Changes
+
+- d27e0a5: Fix temperature-unit conversions and preserve degree-symbol notation in the merged `Unit`:
+
+  - `Unit.parse` normalizes `°C`→`degC`, `°F`→`degF`, `°`→`deg` before tokenizing (the mathjs parser rejects `°`), so the merged Unit accepts the same inputs the previous core Unit did.
+  - `new Fraction(fraction)` now clones its argument instead of falling through to `BigInt(fraction)`, which threw for non-integer values (e.g. `degF`'s `5/9` factor).
+  - `typeOf(value)` returns canonical `'Complex'`/`'Fraction'` for those types instead of `constructor.name` (which a bundler mangles to `_Complex`/`_Fraction`), fixing the Unit's value-type converter dispatch in the built bundle.
+
+  Net effect: `degF`/`°F` conversions (`32 °F → 0 degC`) now work.
+
 ## 0.3.1
 
 ### Patch Changes

@@ -1,5 +1,36 @@
 # @danielsimonjr/mathts-functions
 
+## 0.9.0
+
+### Minor Changes
+
+- 82bb0b1: **BREAKING (Unit merge complete): one `Unit`.** The former standalone core `Unit` class (the canonical-value subset in `core/src/types/unit.ts`) is retired; `@danielsimonjr/mathts-core`'s `Unit` is now the single, feature-complete merged implementation, and `functions` `unit()`/`to()`/`toBest()`/arithmetic+comparison operators all return that one class (the `to`/`toBest` operator dual-flavor branching is gone).
+
+  Caller migration:
+
+  - Unit arithmetic is at the operator level — use `add`/`subtract`/`multiply`/`divide` from `@danielsimonjr/mathts-functions`, not `unit.add(…)`/`.sub`/`.mul`/`.div`. `u1 / u2` of the same dimension returns a plain dimensionless number (mathjs parity).
+  - `unit.equalBase(other)` replaces `unit.dimensionsEqual(other)`; dimensions are a 9-element exponent array, not a struct; `unit.formatUnits()`/`unit.toString()` replace `.notation`.
+  - Temperature offsets apply on conversion (`new Unit(20,'degC').value === 20`; `.to('K')` → `293.15 K`); `°C`/`°F`/`°` are accepted.
+  - `DimensionMismatchError`/`UnitParseError` are still thrown and exported; `Unit`/`isUnitValue`/`DIMENSIONLESS`/`dim`/`Dimensions`/`UnitDef` keep their import paths. New `UnitInstance` type export for type position.
+
+  Also corrects `eV` to the exact 2019-SI value `1.602176634e-19` J.
+
+### Patch Changes
+
+- c041b4e: Fix Unit arithmetic/comparison and `pinv` Array input.
+
+  - **Unit operators**: dimensional analysis now works through the public API — `add`/`subtract`/`multiply`/`divide`/`abs` and `smaller`/`larger`/`smallerEq`/`largerEq`/`equal`/`unequal`/`compare` on `unit(...)` values (`5 cm + 3 mm = 5.3 cm`, `3 m × 4 m = 12 m²`, `10 m / 2 s = 5 m/s`, `equal(5 cm, 50 mm) = true`); mismatched dimensions throw. The typed operators had been wired to a different `Unit`'s interface, so every `unit()` arithmetic/comparison threw. Both Unit flavors (`unit()` and `to()`/`toBest()`) are supported.
+  - **`pinv([[…]])`** (Array input) threw "expected DenseMatrix"; added Array-in/Array-out signatures.
+
+- Updated dependencies [5611a77]
+- Updated dependencies [25b80ed]
+- Updated dependencies [d27e0a5]
+- Updated dependencies [c041b4e]
+- Updated dependencies [82bb0b1]
+  - @danielsimonjr/mathts-core@0.4.0
+  - @danielsimonjr/mathts-matrix@0.1.14
+  - @danielsimonjr/mathts-expression@0.4.3
+
 ## 0.8.0
 
 ### Minor Changes

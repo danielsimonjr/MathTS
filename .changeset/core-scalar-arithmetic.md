@@ -1,5 +1,0 @@
----
-'@danielsimonjr/mathts-core': minor
----
-
-Add polymorphic scalar arithmetic (`core/src/arithmetic/scalar.ts`): `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal` over any mix of `number | bigint | Complex | Fraction | BigNumber`, plus a polymorphic `isNumeric` and a `number()` converter — all built solely on core's own numeric primitives. Dispatch promotes both operands to the richest common domain (Complex ≻ BigNumber ≻ Fraction) and invokes one same-type method, so operand order is preserved for non-commutative ops and same-type operands stay exact. Non-integer exponents on an exact base fall back to double `Math.pow` (so `pow(BigNumber, 0.5)` is correct, not silently `1`); `round` uses `'halfCeil'` on BigNumber for cross-type consistency with `Math.round`/`Fraction.round`; `isNumeric` follows mathjs semantics (boolean is numeric, Complex is not). This is the foundational dependency for the in-progress relocation of the feature-complete `Unit` class into core.
