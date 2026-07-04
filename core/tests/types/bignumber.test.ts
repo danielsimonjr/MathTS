@@ -175,6 +175,21 @@ describe('BigNumber', () => {
       expect(base.pow(0).toString()).toBe('1');
     });
 
+    it('should expose div/times aliases (mathjs / Decimal.js calling convention)', () => {
+      // The relocated Unit calls `.div`/`.times` on BigNumber values, including with
+      // string operands (e.g. new BigNumber(String(n)).div(String(d)).times(String(s))).
+      BigNumber.config({ precision: 10 });
+      const a = BigNumber.fromNumber(100);
+      const b = BigNumber.fromNumber(7);
+      // aliases are exactly their long forms (implementation-independent)
+      expect(a.div(b).toString()).toBe(a.divide(b).toString());
+      expect(a.times(b).toString()).toBe(a.multiply(b).toString());
+      // exact cases + string operand acceptance
+      expect(BigNumber.fromNumber(50).div(BigNumber.fromNumber(5)).toString()).toBe('10');
+      expect(BigNumber.fromNumber(6).times('7').toString()).toBe('42');
+      expect(BigNumber.fromNumber(10).div('2').toString()).toBe('5');
+    });
+
     it('should compute square root', () => {
       BigNumber.config({ precision: 10 });
       const n = BigNumber.fromNumber(4);

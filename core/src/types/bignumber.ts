@@ -606,6 +606,13 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
+   * Alias for multiply — Decimal.js calling convention (used by the Unit).
+   */
+  times(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.multiply(other);
+  }
+
+  /**
    * Division
    */
   divide(other: Scalar | BigNumber | number | string): BigNumber {
@@ -634,6 +641,13 @@ export class BigNumber implements MathTSValue {
     const exponent = this._exponent - b._exponent - precision - 10;
 
     return this.normalize(sign, quotient, exponent).roundToPrecision(precision);
+  }
+
+  /**
+   * Alias for divide — Decimal.js calling convention (used by the Unit).
+   */
+  div(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.divide(other);
   }
 
   /**

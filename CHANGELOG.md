@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-03) — `BigNumber.div` / `BigNumber.times` aliases
+
+`BigNumber` gains `.div` and `.times` short-name aliases for `divide`/`multiply`,
+matching the Decimal.js / mathjs calling convention already followed by `Complex` and
+`Fraction`. Both accept BigNumber/number/string operands. Needed by the mathjs-derived
+`Unit` (which calls `.div`/`.times` on BigNumber unit values) as it merges into core.
+
 ### Internal (2026-07-03) — core groundwork for the Unit relocation (Phase 1.2 prep)
 
 Two non-user-facing steps toward relocating the feature-complete mathjs `Unit` into core:
