@@ -6,9 +6,9 @@
  * describe the runtime shapes precisely so `Unit.ts` can be fully type-checked
  * under strict mode without suppression directives or escape-hatch typing.
  *
- * @module @danielsimonjr/mathts-functions/type/unit/unit-types
+ * @module @danielsimonjr/mathts-core/types/unit/unit-types
  */
-import type { Complex } from '../../utils/is.js';
+import type { Complex } from '../../is.js';
 
 /** A complex number value (re/im pair), as produced by the `Complex` type. */
 export type ComplexValue = Complex;

@@ -27,7 +27,7 @@ import type {
   UnitJSON,
   UnitSystem,
   UnitSystemEntry,
-} from './unit-types.js';
+} from '@danielsimonjr/mathts-core/internal';
 
 const name = 'Unit';
 const dependencies = [

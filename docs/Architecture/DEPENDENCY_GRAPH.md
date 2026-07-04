@@ -131,7 +131,7 @@ The codebase is organized into the following modules:
 - **functions/statistics**: 14 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
-- **functions/type**: 33 files
+- **functions/type**: 32 files
 - **functions/typed**: 30 files
 - **functions/unit**: 2 files
 - **functions/utils**: 39 files
@@ -176,11 +176,11 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 2              | 3               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 20             | 10              |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 20             | 11              |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 396            | 5               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 395            | 5               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -7273,21 +7273,12 @@ graph LR
 
 ---
 
-### `functions/src/type/unit/unit-types.ts` - Shared TypeScript interfaces for the Unit factory (`Unit.ts`).
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/is.js` | `Complex` | Import (type-only) |
-
-**Exports:**
-
-- Interfaces: `BigNumberValue`, `FractionValue`, `PrefixDef`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitJSON`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `SubtractScalar`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`
-- Types: `ComplexValue`, `Numeric`, `PrefixTable`, `UnitSystem`, `ConverterFn`, `ScalarBinaryOp`, `ScalarUnaryOp`
-
----
-
 ### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core/internal` | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7299,7 +7290,6 @@ graph LR
 | `../../utils/object.js` | `clone, hasOwnProperty` | Import |
 | `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
 | `../../utils/log.js` | `warnOnce` | Import |
-| `./unit-types.js` | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` | Import (type-only) |
 
 **Exports:**
 
@@ -12565,7 +12555,7 @@ graph LR
 | `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
 | `functions/src/factories/index`                        | 244 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
-| `functions/src/utils/is`                               | 0 files      | 66 files   |
+| `functions/src/utils/is`                               | 0 files      | 65 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
@@ -12969,7 +12959,7 @@ graph TD
         N238[MatrixIndex]
         N239[Spa]
         N240[types]
-        N241[...23 more]
+        N241[...22 more]
     end
 
     subgraph Functions/typed
@@ -13295,17 +13285,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 854    |
+| Total TypeScript Files  | 853    |
 | Total Modules           | 71     |
-| Total Lines of Code     | 157776 |
+| Total Lines of Code     | 157520 |
 | Total Exports           | 4376   |
 | Total Re-exports        | 1473   |
 | Total Classes           | 51     |
-| Total Interfaces        | 391    |
+| Total Interfaces        | 370    |
 | Total Functions         | 1474   |
 | Total Type Guards       | 175    |
 | Total Enums             | 0      |
-| Type-only Imports       | 486    |
+| Type-only Imports       | 484    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

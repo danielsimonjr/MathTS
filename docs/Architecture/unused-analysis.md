@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 474
+- **Potentially unused exports**: 468
 
 ## Potentially Unused Files
 
@@ -420,16 +420,6 @@ These exports are not imported by any other file in the codebase:
 
 - `UnitInstance` (interface)
 
-### `functions/src/type/unit/unit-types.ts`
-
-- `ComplexConstructor` (interface)
-- `BigNumberConstructor` (interface)
-- `FractionConstructor` (interface)
-- `SubtractScalar` (interface)
-- `ComplexValue` (type)
-- `ScalarBinaryOp` (type)
-- `ScalarUnaryOp` (type)
-
 ### `functions/src/utils/array.ts`
 
 - `validate` (function)
@@ -487,6 +477,7 @@ These exports are not imported by any other file in the codebase:
 ### `functions/src/utils/is.ts`
 
 - `BigNumber` (interface)
+- `Complex` (interface)
 - `Fraction` (interface)
 - `Unit` (interface)
 - `DenseMatrix` (interface)

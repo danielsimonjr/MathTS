@@ -12,4 +12,9 @@
 export * from './is.js';
 export * from './number.js';
 export * from './object.js';
-export { hasOwnProperty } from './shared.js';
+export { hasOwnProperty, endsWith, warnOnce, memoize } from './shared.js';
+export type { MemoizedFunction } from './shared.js';
+
+// Unit factory type contract (relocated here as the Unit merges into core; consumed
+// by the mathjs-derived Unit while it still lives in the functions package).
+export type * from './types/unit/unit-types.js';

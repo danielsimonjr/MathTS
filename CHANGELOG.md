@@ -7,14 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Internal (2026-07-03) — core shared utils for the Unit relocation (Phase 1.2 prep)
+### Internal (2026-07-03) — core groundwork for the Unit relocation (Phase 1.2 prep)
 
-`core/src/shared.ts` gains three small dependency-free helpers the relocated mathjs
-`Unit` needs — `endsWith`, `warnOnce`, and a lean unbounded `memoize` (hasher option;
-`delete fn.cache` reset, which `createUnit`/`deleteUnit` rely on to invalidate the
-unit-name lookup). Ported into core's zero-import graph base rather than dragging the
-functions-package util plumbing (incl. `lruQueue`) across the dependency boundary. Not
-part of core's public API; internal scaffolding only. 12 tests; core 723 pass.
+Two non-user-facing steps toward relocating the feature-complete mathjs `Unit` into core:
+
+- **Shared utils.** `core/src/shared.ts` gains three small dependency-free helpers the
+  relocated `Unit` needs — `endsWith`, `warnOnce`, and a lean unbounded `memoize` (hasher
+  option; `delete fn.cache` reset, which `createUnit`/`deleteUnit` rely on to invalidate
+  the unit-name lookup). Ported into core's zero-import graph base rather than dragging the
+  functions-package util plumbing (incl. `lruQueue`) across the dependency boundary.
+- **Type contract.** The Unit factory's TypeScript interface set (`unit-types.ts` —
+  `UnitInstance`/`UnitConstructor`/`UnitDependencies`/`Numeric`/… ) is relocated to
+  `core/src/types/unit/unit-types.ts` and re-exported from the `@danielsimonjr/mathts-core/internal`
+  subpath; the mathjs-derived `Unit` (still in `functions` for now) imports it from there.
+
+Internal scaffolding only — no public API or behavior change. core 723 pass; functions unit
+suites 48 pass; typecheck clean across both.
 
 ### Added (2026-07-03) — core polymorphic scalar arithmetic (Unit-merge Phase 1.1)
 

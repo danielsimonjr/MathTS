@@ -2,7 +2,7 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-04'
-  totalFiles: 854
+  totalFiles: 853
   totalModules: 71
   totalExports: 4376
 entryPoints:
@@ -14252,42 +14252,32 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
-    functions/src/type/unit/unit-types.ts:
-      description: Shared TypeScript interfaces for the Unit factory (`Unit.ts`).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/is.js
-          imports:
-            - Complex
-          typeOnly: true
-      workspaceDependencies: []
-      exports: []
-      interfaces:
-        - BigNumberValue
-        - FractionValue
-        - PrefixDef
-        - BaseUnitDef
-        - UnitDef
-        - UnitComponent
-        - UnitSystemEntry
-        - UnitJSON
-        - TypeConverters
-        - ParseOptions
-        - UnitFormatOptions
-        - CreateUnitOptions
-        - CreateUnitDefObject
-        - UnitConfig
-        - ComplexConstructor
-        - BigNumberConstructor
-        - FractionConstructor
-        - SubtractScalar
-        - UnitDependencies
-        - UnitInstance
-        - UnitConstructor
     functions/src/type/unit/Unit.ts:
       description: 'A unit can be constructed in the following ways:'
-      externalDependencies: []
+      externalDependencies:
+        - package: '@danielsimonjr/mathts-core/internal'
+          imports:
+            - BaseUnitDef
+            - BigNumberValue
+            - ConverterFn
+            - CreateUnitDefObject
+            - CreateUnitOptions
+            - FractionValue
+            - Numeric
+            - ParseOptions
+            - PrefixDef
+            - PrefixTable
+            - TypeConverters
+            - UnitComponent
+            - UnitConfig
+            - UnitConstructor
+            - UnitDef
+            - UnitDependencies
+            - UnitFormatOptions
+            - UnitInstance
+            - UnitJSON
+            - UnitSystem
+            - UnitSystemEntry
       nodeDependencies: []
       internalDependencies:
         - file: ../../utils/is.js
@@ -14314,30 +14304,6 @@ modules:
         - file: ../../utils/log.js
           imports:
             - warnOnce
-        - file: ./unit-types.js
-          imports:
-            - BaseUnitDef
-            - BigNumberValue
-            - ConverterFn
-            - CreateUnitDefObject
-            - CreateUnitOptions
-            - FractionValue
-            - Numeric
-            - ParseOptions
-            - PrefixDef
-            - PrefixTable
-            - TypeConverters
-            - UnitComponent
-            - UnitConfig
-            - UnitConstructor
-            - UnitDef
-            - UnitDependencies
-            - UnitFormatOptions
-            - UnitInstance
-            - UnitJSON
-            - UnitSystem
-            - UnitSystemEntry
-          typeOnly: true
       workspaceDependencies: []
       exports:
         - createUnitClass
@@ -27631,7 +27597,6 @@ dependencyGraph:
         - functions/src/type/unit/function/splitUnit.ts
         - functions/src/type/unit/function/unit.ts
         - functions/src/type/unit/physicalConstants.ts
-        - functions/src/type/unit/unit-types.ts
         - functions/src/type/unit/Unit.ts
     - name: Functions/typed
       files:
@@ -28148,19 +28113,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 854
+  totalTypeScriptFiles: 853
   totalModules: 71
-  totalLinesOfCode: 157776
+  totalLinesOfCode: 157520
   totalExports: 4376
   totalClasses: 51
-  totalInterfaces: 391
+  totalInterfaces: 370
   totalFunctions: 1474
   totalTypeGuards: 175
   totalEnums: 0
   totalConstants: 1411
   totalReExports: 1473
-  totalTypeOnlyImports: 486
+  totalTypeOnlyImports: 484
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 474
+  unusedExportsCount: 468
