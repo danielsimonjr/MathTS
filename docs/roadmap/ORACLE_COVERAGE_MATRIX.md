@@ -243,13 +243,13 @@ functions are purely self-referential (directional `p<0.05` + seq-vs-parallel co
 
 | Function | Verification | Test file | Notes |
 |---|---|---|---|
-| studentTTest | SELF-REF | hypothesis | only `p>0.5`/`<0.001` + df=4; **no t-stat / p pinned** |
-| chiSquareTest | SELF-REF (+cf stat) | hypothesis, typed-hypothesis-* | statistic=10/0 closed form; p only directional |
-| anova | SELF-REF (+cf df) | hypothesis | df exact; F & p only directional |
-| kolmogorovSmirnovTest | SELF-REF | hypothesis, typed-hypothesis-* | D∈[0,1], directional p; **no D/p pin** |
-| mannWhitneyTest | SELF-REF | hypothesis, typed-hypothesis-* | U≥0, directional p; **no U/p pin** |
+| studentTTest | ORACLE(cf) | gap-hypothesis-oracles | one-sample t of {1..5} = 3√2, df=4 |
+| chiSquareTest | ORACLE(cf) | gap-hypothesis-oracles | χ²=20, df=3 for {10,20,30,40} vs uniform |
+| anova | ORACLE(cf) | gap-hypothesis-oracles | F=27, df=(2,6) for {1,2,3},{4,5,6},{7,8,9} |
+| kolmogorovSmirnovTest | ORACLE(cf) | gap-hypothesis-oracles | D=7/30 vs Uniform, D=½ for {0} vs normal; + non-fn-CDF guard |
+| mannWhitneyTest | ORACLE(cf) | gap-hypothesis-oracles | U=0 when {1,2,3} entirely below {4,5,6} |
 | shapiroWilkTest | SELF-REF | hypothesis, typed-hypothesis-* | W∈(0,1], W=1 for constant; **approximate Blom/Royston algo** |
-| principalComponentAnalysis | SELF-REF | hypothesis | unit-vector + explained-sums-to-1; **no eigenvalue/loading pin** |
+| principalComponentAnalysis | ORACLE(cf) | gap-hypothesis-oracles | collinear (1,1)…(3,3): first PC=(1,1)/√2, 100% variance |
 | fTest | ORACLE(ext) | gap-wave-b | statistic≈1.4086482275, p≈0.6625574737 (scipy) |
 | jarqueBera | ORACLE(ext) | gap-wave-b | full stat/p/skew/kurt vs scipy.stats.jarque_bera |
 | kruskalWallis | ORACLE(ext) | gap-wave-b2 | H≈1.037279735, p≈0.595329724 vs scipy.stats.kruskal |

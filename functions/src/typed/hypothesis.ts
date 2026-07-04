@@ -735,6 +735,13 @@ export async function kolmogorovSmirnovTest(
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult> {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
+  if (cdfFn !== undefined && cdfFn !== null && typeof cdfFn !== 'function') {
+    // One-sample test against a CDF *function* — guard the common mistake of
+    // passing a second sample array (this is not a two-sample KS test).
+    throw new TypeError(
+      'kolmogorovSmirnovTest: cdfFn must be a CDF function (this is a one-sample test)'
+    );
+  }
 
   const n = sample.length;
   // Sort — WASM-accelerated above WASM_SORT_THRESHOLD (16 K elements).

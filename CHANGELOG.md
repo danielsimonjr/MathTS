@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — `kolmogorovSmirnovTest` rejects a non-function CDF with a clear error
+
+Passing a second array (mistaking it for a two-sample KS test) crashed with an opaque
+`cdf is not a function`; it now throws `TypeError: … must be a CDF function (this is a
+one-sample test)`. Found while adding the WS-1 P2 hypothesis-test oracles.
+
+### Tests (2026-07-04) — closed-form oracle pins for hypothesis tests + elementary functions (WS-1 P2)
+
+Two new oracle suites converting SELF-REF functions to ORACLE(cf):
+
+- `gap-hypothesis-oracles.test.ts` — `studentTTest` (one-sample t of {1..5} = 3√2),
+  `chiSquareTest` (χ²=20), `anova` (F=27, df=(2,6)), `mannWhitneyTest` (U=0),
+  `kolmogorovSmirnovTest` (D=7/30 vs Uniform, ½ vs normal), `principalComponentAnalysis`
+  (collinear data → first PC=(1,1)/√2, 100% variance) — statistics pinned to hand-derived
+  exact values, not directional p-value sanity.
+- `gap-elementary-oracles.test.ts` — 21 exact special-angle / closed-form pins for
+  `sin`/`cos`/`tan`/`csc`/`sec`/`cot` + inverses, the hyperbolic ln2-family
+  (`sinh(ln2)=¾`, `cosh(ln2)=5/4`, `tanh(ln2)=⅗` and their exact inverses `=ln2`),
+  `log1p(e−1)=1`, `expm1(ln2)=1`, `unaryPlus`. These were previously checked only against
+  the `Math.*` primitive the impl itself calls.
+
 ### Tests (2026-07-04) — external/closed-form oracle pins for the 5 distribution objects (WS-1 P2)
 
 `betaDist`/`gammaDist`/`poissonDist`/`logNormalDist`/`weibullDist` were classified
