@@ -4,7 +4,7 @@ Generated: 2026-01-13
 Updated: 2026-07-03
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
-> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 4: retire the old core Unit — BREAKING)
+> ## ▶ RESUME NEXT SESSION — Unit merge (Phase 4 RETIREMENT — BREAKING; capability-prep DONE)
 >
 > **In-flight migration:** merge the two `Unit` classes into one — relocate the feature-complete mathjs `Unit`
 > into `core`, **deeply integrated** on core's own primitives (maintainer-confirmed). **Strangler-fig pattern.**
@@ -17,16 +17,25 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > local `./unit-types.js` import, `factory.isOptionalDependency` return type. **Verified: functions 3197 + compat/
 > expression/integration 2201 + core 731 pass; 0 regressions.**
 >
-> **START HERE — Phase 4 (retire the OLD core Unit — a BREAKING core API change; direction already maintainer-confirmed):**
+> **✅ Phase 2 (capability preservation) DONE — the merged Unit now has EVERY old-core nicety, so the retirement loses nothing:**
+> `°C`/`°F`/`°` parsing + 2 root-cause bug fixes for `degF` (`Fraction` ctor accepts a `Fraction`; `typeOf` canonical names,
+> bundler-mangling-proof) (`d27e0a5`) · dual `{mathts}`+`{mathjs}` JSON envelopes on `fromJSON` (`6423c33`) · clean
+> `|log10|`-min `toBest` via `offset:0` default — `0.1 mm`/`1 kg`, no float noise, ZERO format-parity risk (`1e695cc`).
+>
+> **START HERE — Phase 4 the RETIREMENT (BREAKING; maintainer chose "full push, preserve niceties"). This is LARGE — scoped:**
 > The old core `Unit` (`core/src/types/unit.ts`, 743-line subset: `.add`/`.sub`/`.dimensionsEqual`, struct-7 dims,
-> `{mathts}` JSON, nicer `toBest`) is still core's PUBLIC `Unit` and is what `functions/src/typed/unit.ts` `to(number,string)`
-> constructs — the last thing keeping the dual-flavor branching alive. Steps: (1) **Phase 2 first** — port the old core
-> Unit's two nicer behaviors onto the new Unit (canonical `toBest` `|log10|`-min scan → `0.1 mm` not `100 µm`; accept BOTH
-> `{mathts}`+`{mathjs}` on `fromJSON`); (2) make `core/src/types/unit.ts` re-export the NEW Unit (keep `DimensionMismatchError`/
-> `UnitParseError`/`isUnitValue`/`DIMENSIONLESS`/`dim`/`Dimensions`/`UnitDef` names stable); (3) point `functions/src/typed/unit.ts`
-> `to()`'s number case at the new Unit; (4) **DROP the dual-flavor** in `functions/src/typed/arithmetic.ts` (`UnitLike`/`unitAdd`/
-> `unitSub`/`unitMul`/`unitDiv`/`unitSameDimension`/`unitAddSubMathjs` → mathjs-flavor only, since one Unit now); (5) **Phase 5**
-> migrate `core/tests/types/unit.test.ts` (96 asserts) to new semantics + full monorepo regression + finalize changeset
+> `DimensionMismatchError`/`UnitParseError`) is still core's PUBLIC `Unit`, and `functions/src/typed/unit.ts` `to(number,string)`
+> constructs it — the last thing keeping dual-flavor alive. **6d + 6e must land TOGETHER** (dropping dual-flavor alone leaves
+> `to()` output mixed). **The two real blockers found while probing (2026-07-04):** (a) **error-class contract** —
+> `DimensionMismatchError` is imported by SOURCE files (`functions/src/algebra/simplifyConstant.ts`, `type/matrix/MatrixIndex.ts`,
+> `utils/array.ts`, `typed/unit.ts`) + tests, but the merged Unit throws generic `Error('Units do not match')`; must make the
+> merged Unit throw `DimensionMismatchError`/`UnitParseError` (relocate those classes to a shared spot both Units import) OR
+> migrate every catch site; (b) **~55 old-core-API assertions** in `core/tests/types/unit.test.ts` (423 lines) + the 3
+> `functions/tests/typed-unit.test.ts` `to(number,…)` cases (`.notation`→`toString`, `instanceof` old→merged, `.dimensions.temperature`
+> struct→array-9). Steps: (1) reconcile error classes; (2) `core/src/types/unit.ts` re-exports the merged Unit + keeps
+> `isUnitValue`/`DIMENSIONLESS`/`dim`/`Dimensions`/`UnitDef` stable; (3) point `to()`/`toBest` at the merged Unit + **DROP dual-flavor**
+> in `functions/src/typed/arithmetic.ts` (`UnitLike`/`unitAdd`/`unitSub`/`unitMul`/`unitDiv`/`unitSameDimension`/`unitAddSubMathjs`
+> → mathjs-flavor only; also `.abs!()`→`.abs()` at the abs op); (4) **migrate** the ~55+3 assertions; (5) full monorepo regression + finalize changeset
 > (core minor already pending; add functions minor + units patch).
 > **Full plan:** [`docs/superpowers/plans/2026-07-03-unit-merge.md`](docs/superpowers/plans/2026-07-03-unit-merge.md).
 > Resume notes: memory `project-unit-merge-in-progress.md`. Last clean commit `ce7ff3f`.
