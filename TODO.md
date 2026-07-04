@@ -461,6 +461,15 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   transitively) as used, not dead (−25). Remaining **371** are per-symbol triage (WS-3 Phase-2b, `EXPORT_TRIAGE.md`,
   ~30 real DELETE candidates + legit public-API type contracts not reached by an index re-export). wasm
   `js-fallback` broken kernels (poly-fit/Airy/argsort-rank) → gate **G2**. Not re-filed here.
+  - 🔄 **[WS-3 P2 — noise removal STARTED 2026-07-04]** DGT unused count **481 → 439**: deleted core `is.ts`'s
+    dead mathjs-remnant cluster (18 AST-node guards + `rule2Node` + `isResultSet`/`isHelp`/`isChain`/
+    `isPartitionedMap`/`isObjectWrappingMap` + interfaces, ~200 LOC) — core has no AST nodes, imported by
+    nothing (functions/expression keep their own copies). **Key finding:** the remaining ~439 is NOT deletable
+    dead code — it's dominated by (1) intentionally-duplicated per-package type guards (`is.ts` kept LOCAL for
+    V8 inlining, see [[project-all-libraries-build-on-core]]), (2) ~201 type/interface CONTRACTS (public API),
+    (3) util modules. Safe removal needs per-symbol import-PATH verification (name-grep is unreliable — every
+    package duplicates `is.ts`), not a sweep. Next candidates: expression/functions `is.ts` unused subsets (but
+    verify each isn't the intentional-local API first), and the util modules (`number.ts`/`object.ts`/`array.ts`).
 
 - ✅/⬜ **[GC5 / G3 — Unit operators FIXED 2026-07-03; underlying two-Unit-types fork remains]** Dimensional
   analysis now works across `add`/`subtract`/`multiply`/`divide`/`abs` and `smaller`/`larger`/`smallerEq`/

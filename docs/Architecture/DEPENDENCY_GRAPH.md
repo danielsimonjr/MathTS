@@ -406,8 +406,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isNull`, `isUndefined`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -13349,13 +13349,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 856    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 157918 |
-| Total Exports           | 4408   |
+| Total Lines of Code     | 157716 |
+| Total Exports           | 4386   |
 | Total Re-exports        | 1489   |
 | Total Classes           | 51     |
-| Total Interfaces        | 392    |
-| Total Functions         | 1495   |
-| Total Type Guards       | 177    |
+| Total Interfaces        | 372    |
+| Total Functions         | 1473   |
+| Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 491    |
 | Runtime Circular Deps   | 0      |

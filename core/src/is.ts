@@ -78,101 +78,6 @@ export interface Index {
   };
 }
 
-export interface ResultSet {
-  entries: unknown[];
-  constructor: {
-    prototype: { isResultSet: boolean };
-  };
-}
-
-export interface Help {
-  constructor: {
-    prototype: { isHelp: boolean };
-  };
-}
-
-export interface Chain {
-  constructor: {
-    prototype: { isChain: boolean };
-  };
-}
-
-// AST Node types
-export interface Node {
-  isNode: boolean;
-  constructor: {
-    prototype: { isNode: boolean };
-  };
-}
-
-export interface AccessorNode extends Node {
-  isAccessorNode: boolean;
-}
-
-export interface ArrayNode extends Node {
-  isArrayNode: boolean;
-}
-
-export interface AssignmentNode extends Node {
-  isAssignmentNode: boolean;
-}
-
-export interface BlockNode extends Node {
-  isBlockNode: boolean;
-}
-
-export interface ConditionalNode extends Node {
-  isConditionalNode: boolean;
-}
-
-export interface ConstantNode extends Node {
-  isConstantNode: boolean;
-}
-
-export interface FunctionAssignmentNode extends Node {
-  isFunctionAssignmentNode: boolean;
-}
-
-export interface FunctionNode extends Node {
-  isFunctionNode: boolean;
-}
-
-export interface IndexNode extends Node {
-  isIndexNode: boolean;
-}
-
-export interface ObjectNode extends Node {
-  isObjectNode: boolean;
-}
-
-export interface OperatorNode extends Node {
-  isOperatorNode: boolean;
-  op: string;
-  args: Node[];
-}
-
-export interface ParenthesisNode extends Node {
-  isParenthesisNode: boolean;
-}
-
-export interface RangeNode extends Node {
-  isRangeNode: boolean;
-}
-
-export interface RelationalNode extends Node {
-  isRelationalNode: boolean;
-}
-
-export interface SymbolNode extends Node {
-  isSymbolNode: boolean;
-}
-
-// Map types
-export interface PartitionedMap {
-  a: Map<unknown, unknown>;
-  b: Map<unknown, unknown>;
-}
-
 // Type guard functions
 
 /**
@@ -282,14 +187,6 @@ export function isBoolean(x: unknown): x is boolean {
   return typeof x === 'boolean';
 }
 
-export function isResultSet(x: unknown): x is ResultSet {
-  return hasPrototypeFlag(x, 'isResultSet');
-}
-
-export function isHelp(x: unknown): x is Help {
-  return hasPrototypeFlag(x, 'isHelp');
-}
-
 export function isFunction(x: unknown): x is (...args: unknown[]) => unknown {
   return typeof x === 'function';
 }
@@ -336,111 +233,12 @@ export function isMap(object: unknown): object is Map<unknown, unknown> {
   );
 }
 
-export function isPartitionedMap(object: unknown): object is PartitionedMap {
-  const pm = object as { a?: unknown; b?: unknown };
-  return isMap(object) && isMap(pm.a) && isMap(pm.b);
-}
-
-export function isObjectWrappingMap(object: unknown): boolean {
-  if (!isMap(object)) return false;
-  const wrapper = object as { wrappedObject?: unknown; [Symbol.toStringTag]?: string };
-  return wrapper[Symbol.toStringTag] === 'ObjectWrappingMap' && isObject(wrapper.wrappedObject);
-}
-
 export function isNull(x: unknown): x is null {
   return x === null;
 }
 
 export function isUndefined(x: unknown): x is undefined {
   return x === undefined;
-}
-
-export function isAccessorNode(x: unknown): x is AccessorNode {
-  return hasOwnAndPrototypeFlag(x, 'isAccessorNode', 'isNode');
-}
-
-export function isArrayNode(x: unknown): x is ArrayNode {
-  return hasOwnAndPrototypeFlag(x, 'isArrayNode', 'isNode');
-}
-
-export function isAssignmentNode(x: unknown): x is AssignmentNode {
-  return hasOwnAndPrototypeFlag(x, 'isAssignmentNode', 'isNode');
-}
-
-export function isBlockNode(x: unknown): x is BlockNode {
-  return hasOwnAndPrototypeFlag(x, 'isBlockNode', 'isNode');
-}
-
-export function isConditionalNode(x: unknown): x is ConditionalNode {
-  return hasOwnAndPrototypeFlag(x, 'isConditionalNode', 'isNode');
-}
-
-export function isConstantNode(x: unknown): x is ConstantNode {
-  return hasOwnAndPrototypeFlag(x, 'isConstantNode', 'isNode');
-}
-
-/* Very specialized: returns true for those nodes which in the numerator of
-   a fraction means that the division in that fraction has precedence over implicit
-   multiplication, e.g. -2/3 x parses as (-2/3) x and 3/4 x parses as (3/4) x but
-   6!/8 x parses as 6! / (8x). It is located here because it is shared between
-   parse.js and OperatorNode.js (for parsing and printing, respectively).
-
-   This should *not* be exported from mathjs, unlike most of the tests here.
-   Its name does not start with 'is' to prevent utils/snapshot.js from thinking
-   it should be exported.
-*/
-export function rule2Node(node: Node): boolean {
-  return (
-    isConstantNode(node) ||
-    (isOperatorNode(node) &&
-      node.args.length === 1 &&
-      isConstantNode(node.args[0]) &&
-      '-+~'.includes(node.op))
-  );
-}
-
-export function isFunctionAssignmentNode(x: unknown): x is FunctionAssignmentNode {
-  return hasOwnAndPrototypeFlag(x, 'isFunctionAssignmentNode', 'isNode');
-}
-
-export function isFunctionNode(x: unknown): x is FunctionNode {
-  return hasOwnAndPrototypeFlag(x, 'isFunctionNode', 'isNode');
-}
-
-export function isIndexNode(x: unknown): x is IndexNode {
-  return hasOwnAndPrototypeFlag(x, 'isIndexNode', 'isNode');
-}
-
-export function isNode(x: unknown): x is Node {
-  return hasOwnAndPrototypeFlag(x, 'isNode', 'isNode');
-}
-
-export function isObjectNode(x: unknown): x is ObjectNode {
-  return hasOwnAndPrototypeFlag(x, 'isObjectNode', 'isNode');
-}
-
-export function isOperatorNode(x: unknown): x is OperatorNode {
-  return hasOwnAndPrototypeFlag(x, 'isOperatorNode', 'isNode');
-}
-
-export function isParenthesisNode(x: unknown): x is ParenthesisNode {
-  return hasOwnAndPrototypeFlag(x, 'isParenthesisNode', 'isNode');
-}
-
-export function isRangeNode(x: unknown): x is RangeNode {
-  return hasOwnAndPrototypeFlag(x, 'isRangeNode', 'isNode');
-}
-
-export function isRelationalNode(x: unknown): x is RelationalNode {
-  return hasOwnAndPrototypeFlag(x, 'isRelationalNode', 'isNode');
-}
-
-export function isSymbolNode(x: unknown): x is SymbolNode {
-  return hasOwnAndPrototypeFlag(x, 'isSymbolNode', 'isNode');
-}
-
-export function isChain(x: unknown): x is Chain {
-  return hasPrototypeFlag(x, 'isChain');
 }
 
 export function typeOf(x: unknown): string {

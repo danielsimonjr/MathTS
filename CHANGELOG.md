@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed (2026-07-04) — dead mathjs-remnant type guards from core `is.ts` (noise removal)
+
+Deleted ~200 LOC of unreferenced AST-node and exotic-type guards + their interfaces from
+`core/src/is.ts` — `isNode`/`isSymbolNode`/`isConstantNode`/`isOperatorNode`/… (all 18 AST-node
+guards), `rule2Node`, `isResultSet`, `isHelp`, `isChain`, `isPartitionedMap`,
+`isObjectWrappingMap`, and their interface declarations. Core has **no AST nodes** (those live
+in the `expression` package, which keeps its own guards; the `functions` package likewise has
+its own copy) — these were `.ts→.ts`-sync remnants from mathjs, imported by nothing and
+referenced only inside `is.ts` itself. None were in core's public index, so there is no API
+change. Verified: build 22/22, typecheck 28/28, tests 44/44. Cuts the DGT unused-export count
+481 → 439 (part of the WS-3 "remove the noise so the DGT signal is legible" pass).
+
 ### Added (2026-07-04) — `pow(A, n)` square-matrix power (B2 parity)
 
 `pow` now handles a square 2-D matrix with a non-negative integer exponent (mathjs parity)

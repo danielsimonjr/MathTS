@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-04'
   totalFiles: 856
   totalModules: 72
-  totalExports: 4408
+  totalExports: 4386
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -826,35 +826,13 @@ modules:
         - isRange
         - isIndex
         - isBoolean
-        - isResultSet
-        - isHelp
         - isFunction
         - isDate
         - isRegExp
         - isObject
         - isMap
-        - isPartitionedMap
-        - isObjectWrappingMap
         - isNull
         - isUndefined
-        - isAccessorNode
-        - isArrayNode
-        - isAssignmentNode
-        - isBlockNode
-        - isConditionalNode
-        - isConstantNode
-        - rule2Node
-        - isFunctionAssignmentNode
-        - isFunctionNode
-        - isIndexNode
-        - isNode
-        - isObjectNode
-        - isOperatorNode
-        - isParenthesisNode
-        - isRangeNode
-        - isRelationalNode
-        - isSymbolNode
-        - isChain
         - typeOf
       interfaces:
         - BigNumber
@@ -867,26 +845,6 @@ modules:
         - Range
         - IndexDimension
         - Index
-        - ResultSet
-        - Help
-        - Chain
-        - Node
-        - AccessorNode
-        - ArrayNode
-        - AssignmentNode
-        - BlockNode
-        - ConditionalNode
-        - ConstantNode
-        - FunctionAssignmentNode
-        - FunctionNode
-        - IndexNode
-        - ObjectNode
-        - OperatorNode
-        - ParenthesisNode
-        - RangeNode
-        - RelationalNode
-        - SymbolNode
-        - PartitionedMap
       functions:
         - isNumber
         - isBigNumber
@@ -902,35 +860,13 @@ modules:
         - isRange
         - isIndex
         - isBoolean
-        - isResultSet
-        - isHelp
         - isFunction
         - isDate
         - isRegExp
         - isObject
         - isMap
-        - isPartitionedMap
-        - isObjectWrappingMap
         - isNull
         - isUndefined
-        - isAccessorNode
-        - isArrayNode
-        - isAssignmentNode
-        - isBlockNode
-        - isConditionalNode
-        - isConstantNode
-        - rule2Node
-        - isFunctionAssignmentNode
-        - isFunctionNode
-        - isIndexNode
-        - isNode
-        - isObjectNode
-        - isOperatorNode
-        - isParenthesisNode
-        - isRangeNode
-        - isRelationalNode
-        - isSymbolNode
-        - isChain
         - typeOf
       constants:
         - isArray
@@ -28323,12 +28259,12 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 856
   totalModules: 72
-  totalLinesOfCode: 157918
-  totalExports: 4408
+  totalLinesOfCode: 157716
+  totalExports: 4386
   totalClasses: 51
-  totalInterfaces: 392
-  totalFunctions: 1495
-  totalTypeGuards: 177
+  totalInterfaces: 372
+  totalFunctions: 1473
+  totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1408
   totalReExports: 1489
@@ -28336,4 +28272,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 481
+  unusedExportsCount: 439
