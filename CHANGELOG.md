@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tests (2026-07-04) — external/closed-form oracle pins for the 5 distribution objects (WS-1 P2)
+
+`betaDist`/`gammaDist`/`poissonDist`/`logNormalDist`/`weibullDist` were classified
+SELF-REF in the oracle-coverage matrix (cdf/quantile/mean tested only against the impl's
+own output). New `functions/tests/gap-distribution-oracles.test.ts` pins pdf/cdf/mean/
+variance/quantile to independently-derived closed forms (e.g. `betaDist(2,3)` cdf(½)=11/16,
+`poissonDist(3)` cdf(2)=8.5·e⁻³, `weibullDist(2,1)` mean=Γ(3/2)=√π/2) — 22 assertions, all
+matching the implementation to machine precision, so a systematically-biased distribution
+would now be caught. Moves these 5 from SELF-REF to ORACLE(cf).
+
 ### Changed (2026-07-04) — **BREAKING**: one `Unit` — old core Unit retired onto the merged implementation
 
 The Unit merge is complete: `core/src/types/unit.ts`'s former standalone `Unit` class

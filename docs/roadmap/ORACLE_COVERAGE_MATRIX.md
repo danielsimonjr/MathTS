@@ -129,13 +129,13 @@ Tests: `distributions.test.ts`, `typed-distributions-wasm.test.ts`, `dist-object
 |---|---|---|---|
 | normalDist | ORACLE(ext) | dist-objects | pdf/cdf/quantile all pinned (Φ(1.96)=0.975, q(0.975)=1.96) |
 | uniformDist | ORACLE(cf) | dist-objects | pdf/cdf/quantile all closed form |
-| betaDist | ORACLE(ext) cdf / **SELF-REF quantile** | dist-objects, gap-wave-b | `.cdf` via `betaCDF`; **`.quantile` inverts cdf only** |
-| gammaDist | ORACLE(ext) cdf / **SELF-REF quantile** | dist-objects, gap-wave-b | `.cdf` via `gammaCDF`; **`.quantile` self-ref** |
+| betaDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean/var + quantile(11/16)→0.5 pinned (B(2,3)=1/12; cdf=11/16) |
+| gammaDist | ORACLE(cf) | gap-distribution-oracles, gap-wave-b | pdf/cdf/mean/var pinned (P(2,1)=1−2e⁻¹) |
 | chiSquaredDist / fDist / tDist | ORACLE(ext) | dist-objects, gap-wave-b | cdf+quantile via scipy-pinned standalone wrappers |
 | binomialDist / exponentialDist | ORACLE(cf) mean/pdf / SELF-REF cdf | dist-objects | moments pinned; cdf/quantile self-ref |
-| poissonDist | ORACLE(cf) mean/var / **SELF-REF cdf+quantile** | dist-objects, cov-dist | no standalone Poisson CDF; only monotonicity + integer quantile |
-| logNormalDist | ORACLE(cf) mean/pdf / **SELF-REF cdf+quantile** | dist-objects, cov-dist | CDF Φ((ln x−μ)/σ) never pinned |
-| weibullDist | ORACLE(cf) pdf / **SELF-REF quantile, loose mean** | dist-objects, cov-dist | mean only `>0`, not λ·Γ(1+1/k) |
+| poissonDist | ORACLE(cf) | gap-distribution-oracles | pmf/cdf/mean/var pinned (cdf(2)=8.5·e⁻³) |
+| logNormalDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean/var pinned (cdf(1)=½ since median e^μ=1) |
+| weibullDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean=Γ(3/2)/var + quantile pinned (Rayleigh k=2) |
 | DIST_WORKER_THRESHOLD | n/a (constant) | cov-dist | `toBe(100000)` |
 
 ### Standalone free functions (`distribution-functions.ts`)
