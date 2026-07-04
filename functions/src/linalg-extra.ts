@@ -34,24 +34,42 @@ function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
   let A = M.map((r) => r.slice());
   let U = identityArr(n);
   let m = n;
+  // Absolute fallback scale for deflation tolerances: the relative form
+  // `1e-14·(|diag|+|diag|)` collapses to 0 for blocks with zero diagonal (e.g. pure
+  // imaginary spectra, whose converged 2×2 blocks look like rotations), which would
+  // block deflation forever even when the subdiagonal entry is exactly 0.
+  const normM = Math.max(...M.map((r) => r.reduce((s, v) => s + Math.abs(v), 0)), 1e-300);
   for (let iter = 0; iter < 8000 && m > 1; iter++) {
-    if (Math.abs(A[m - 1][m - 2]) < 1e-14 * (Math.abs(A[m - 2][m - 2]) + Math.abs(A[m - 1][m - 1]))) {
+    if (
+      Math.abs(A[m - 1][m - 2]) <
+      1e-14 * (Math.abs(A[m - 2][m - 2]) + Math.abs(A[m - 1][m - 1]) || normM)
+    ) {
       A[m - 1][m - 2] = 0;
       m--;
       continue;
     }
-    // Wilkinson shift from the trailing 2×2 block (eigenvalue nearest A[m-1][m-1])
+    // Trailing 2×2 block quantities (shared by the deflation checks and the shift)
     const a = A[m - 2][m - 2];
     const b = A[m - 2][m - 1];
     const c = A[m - 1][m - 2];
     const d = A[m - 1][m - 1];
     const delta = (a - d) / 2;
     const disc = delta * delta + b * c;
+    if (disc < 0) {
+      // Complex-conjugate pair: a real single shift can never drive A[m-1][m-2] to 0
+      // (the pair stays a 2×2 block in the real Schur form), so deflation must happen
+      // BY THE BLOCK — without these two checks the loop spins all 8000 iterations
+      // after convergence (m never decreases), ~1s per call and a vitest-timeout flake.
+      if (m === 2) break; // the whole remaining block IS the 2×2 — quasi-triangular reached
+      if (Math.abs(A[m - 2][m - 3]) < 1e-14 * (Math.abs(A[m - 3][m - 3]) + Math.abs(a) || normM)) {
+        A[m - 2][m - 3] = 0;
+        m -= 2;
+        continue;
+      }
+    }
+    // Wilkinson shift from the trailing 2×2 block (eigenvalue nearest A[m-1][m-1])
     const denom = Math.abs(delta) + Math.sqrt(Math.abs(disc));
-    const s =
-      disc >= 0 && denom > 1e-300
-        ? d - ((Math.sign(delta) || 1) * (b * c)) / denom
-        : d; // complex 2×2, or a degenerate block → Rayleigh shift (avoids 0/0 → NaN)
+    const s = disc >= 0 && denom > 1e-300 ? d - ((Math.sign(delta) || 1) * (b * c)) / denom : d; // complex 2×2, or a degenerate block → Rayleigh shift (avoids 0/0 → NaN)
     const As = A.map((r, i) => r.map((v, j) => v - (i === j ? s : 0)));
     const { Q, R } = _qr(As);
     A = _multiply(R, Q).map((r, i) => r.map((v, j) => v + (i === j ? s : 0))); // R·Q + sI

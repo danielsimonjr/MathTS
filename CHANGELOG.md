@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — `qz` spun 8000 no-op QR iterations on complex spectra (the gap-qz flake)
+
+Root cause of the intermittent `gap-qz` full-suite failure: `realSchur`'s shifted-QR loop
+could only deflate one **real** eigenvalue at a time (checking just the last subdiagonal
+entry), but for a complex-conjugate pair that entry never vanishes — the pair converges as
+a 2×2 block. So on any pencil with complex eigenvalues the block counter never decreased
+and the loop always ran its full 8000-iteration cap **after** converging: ~1.1s for the
+4×4 two-pair companion, ~350ms of literal no-ops for a 2×2 rotation (QR of a rotation
+returns the rotation). Under turbo's parallel package tests that ~1s stretched past
+vitest's 5s default timeout → the "flaky" failure (deterministic math, load-dependent
+wall-clock). Fix: deflate a converged trailing 2×2 complex block (`m -= 2`), stop when the
+remaining top block is itself a complex pair (the real Schur form cannot reduce it over ℝ),
+and give the deflation tolerances an absolute fallback scale so zero-diagonal blocks (pure
+imaginary spectra) can deflate at all. 4×4 two-pair: 1100ms → 21ms; 2×2 rotation: 354ms →
+1ms. New pin: pure-rotation case (trace 0, det 1) in `gap-qz.test.ts`. Functions suite
+144/144 / 3275 passed.
+
 ### Removed (2026-07-04) — dead mathjs-remnant type guards from core `is.ts` (noise removal)
 
 Deleted ~200 LOC of unreferenced AST-node and exotic-type guards + their interfaces from

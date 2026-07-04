@@ -100,4 +100,23 @@ describe('qz — generalized Schur decomposition', () => {
       .sort((a, b) => a - b);
     [1, 2, 3].forEach((r, i) => expect(ev[i]).toBeCloseTo(r, 6));
   });
+
+  it('pure rotation (eigenvalues ±i): returns the 2×2 as its own quasi-triangular block', () => {
+    // The classic single-shift-QR pathological case: no real shift can triangularize a
+    // complex pair over ℝ. Before the 2×2-block deflation fix, realSchur spun all 8000
+    // iterations on this (~350ms of no-op QR steps — QR of a rotation returns the
+    // rotation); the whole gap-qz file then breached vitest's 5s timeout under parallel
+    // full-suite load. Now it exits immediately: the block IS the real Schur form.
+    const R = [
+      [0, -1],
+      [1, 0],
+    ];
+    const I2 = eye(2);
+    const { AA, BB, Q, Z } = qz(R, I2);
+    expect(maxAbsDiff(mm(mm(Q, AA), T(Z)), R)).toBeLessThan(1e-9);
+    expect(maxAbsDiff(BB, I2)).toBeLessThan(1e-9);
+    // eigenvalues of AA's 2×2 block are ±i: trace 0, determinant 1
+    expect(AA[0][0] + AA[1][1]).toBeCloseTo(0, 9);
+    expect(AA[0][0] * AA[1][1] - AA[0][1] * AA[1][0]).toBeCloseTo(1, 9);
+  });
 });
