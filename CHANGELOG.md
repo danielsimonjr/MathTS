@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — the canonical `expm` (matrix exponential) was completely broken (B2)
+
+`expm(A)` threw on **every** input. The public `expm` was the factory-Padé version, created
+inside the window where `factoryScope.multiply` is temporarily rebound to `multiplyScalar`
+(for `det`'s scalar-element LU) and before it is restored to the full matrix `multiply` ~700
+lines later — so it captured a scalar-only multiply (`Unexpected type of argument in function
+multiplyScalar` on any matrix) and, lacking an `Array` signature, threw `A.size is not a
+function` on a raw `number[][]`. `sqrtm` was unaffected only because it happens to be
+instantiated *after* the `multiply` restore. The canonical `expm` now routes to the native,
+backend-accelerated `matrixExpm` (the implementation already tested under that name), and the
+dead 272-LOC factory `expm.ts` was removed. Found while auditing B2 (factory matrix-op
+acceleration); pinned by `gap-expm-canonical-oracle.test.ts` (expm(0)=I, expm(diag(2,3))=
+diag(e²,e³), expm(nilpotent)=I+N).
+
 ### Fixed (2026-07-04) — `spectralClustering` infinite loop + `voronoiDiagram` bounds guard
 
 Two input-validation fixes found while adding WS-1 P2 signal/geometry oracles:

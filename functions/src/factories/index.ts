@@ -643,7 +643,7 @@ import { createOr } from '../logical/or.js';
 import { createXor } from '../logical/xor.js';
 
 // matrix
-import { createExpm } from '../matrix/expm.js';
+import { matrixExpm } from '../typed/matrix-ops.js';
 
 // relational
 import { createCompare } from '../relational/compare.js';
@@ -759,7 +759,12 @@ const xor = createXor(factoryScope as Parameters<typeof createXor>[0]);
 factoryScope.xor = xor;
 
 // matrix
-export const expm = createExpm(factoryScope as Parameters<typeof createExpm>[0]);
+// The canonical `expm` routes to the native `matrixExpm` (DenseMatrix/Array dispatch,
+// backend-accelerated). The former factory-Padé `createExpm` was instantiated inside
+// the window where `factoryScope.multiply` is temporarily bound to `multiplyScalar`
+// (for `det`), so it captured a scalar-only multiply and threw on every matrix input
+// (`multiplyScalar` rejects a Matrix) — and it had no `Array` signature. See B2.
+export const expm = matrixExpm;
 factoryScope.expm = expm;
 
 // trigonometry

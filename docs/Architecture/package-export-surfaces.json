@@ -1519,7 +1519,6 @@
       "createEqualText",
       "createErf",
       "createExp",
-      "createExpm",
       "createExpm1",
       "createFactorial",
       "createFaraday",

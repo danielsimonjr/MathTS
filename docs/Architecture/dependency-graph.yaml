@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-04'
-  totalFiles: 857
+  totalFiles: 856
   totalModules: 72
-  totalExports: 4409
+  totalExports: 4408
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8749,9 +8749,9 @@ modules:
         - file: ../logical/xor.js
           imports:
             - createXor
-        - file: ../matrix/expm.js
+        - file: ../typed/matrix-ops.js
           imports:
-            - createExpm
+            - matrixExpm
         - file: ../relational/compare.js
           imports:
             - createCompare
@@ -10211,36 +10211,6 @@ modules:
         - createEigs
       constants:
         - createEigs
-    functions/src/matrix/expm.ts:
-      description: Compute the matrix exponential, expm(A) = e^A. The matrix must be square.
-      externalDependencies:
-        - package: bignumber.js
-          imports:
-            - BigNumber
-        - package: complex.js
-          imports:
-            - Complex
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isSparseMatrix
-        - file: ../utils/string.js
-          imports:
-            - format
-        - file: ../utils/factory.js
-          imports:
-            - factory
-        - file: ../wasm/WasmLoader.js
-          imports:
-            - wasmLoader
-      workspaceDependencies: []
-      exports:
-        - createExpm
-      interfaces:
-        - Matrix
-      constants:
-        - createExpm
     functions/src/matrix/fft.ts:
       description: Check if n is a power of 2
       externalDependencies: []
@@ -27657,7 +27627,6 @@ dependencyGraph:
         - functions/src/matrix/eigs/complexEigs.ts
         - functions/src/matrix/eigs/realSymmetric.ts
         - functions/src/matrix/eigs.ts
-        - functions/src/matrix/expm.ts
         - functions/src/matrix/fft.ts
         - functions/src/matrix/filter.ts
         - functions/src/matrix/flatten.ts
@@ -28352,19 +28321,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 857
+  totalTypeScriptFiles: 856
   totalModules: 72
-  totalLinesOfCode: 158142
-  totalExports: 4409
+  totalLinesOfCode: 157886
+  totalExports: 4408
   totalClasses: 51
-  totalInterfaces: 393
+  totalInterfaces: 392
   totalFunctions: 1495
   totalTypeGuards: 177
   totalEnums: 0
-  totalConstants: 1409
+  totalConstants: 1408
   totalReExports: 1489
   totalTypeOnlyImports: 491
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 482
+  unusedExportsCount: 481

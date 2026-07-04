@@ -122,7 +122,7 @@ The codebase is organized into the following modules:
 - **functions/factories**: 4 files
 - **functions/geometry**: 2 files
 - **functions/logical**: 5 files
-- **functions/matrix**: 46 files
+- **functions/matrix**: 45 files
 - **functions/numeric**: 1 file
 - **functions/plain**: 10 files
 - **functions/probability**: 14 files
@@ -182,7 +182,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 389            | 9               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -4212,7 +4212,7 @@ graph LR
 | `../bitwise/rightLogShift.js` | `createRightLogShift` | Import |
 | `../logical/or.js` | `createOr` | Import |
 | `../logical/xor.js` | `createXor` | Import |
-| `../matrix/expm.js` | `createExpm` | Import |
+| `../typed/matrix-ops.js` | `matrixExpm` | Import |
 | `../relational/compare.js` | `createCompare` | Import |
 | `../relational/compareText.js` | `createCompareText` | Import |
 | `../relational/deepEqual.js` | `createDeepEqual` | Import |
@@ -4712,29 +4712,6 @@ graph LR
 **Exports:**
 
 - Constants: `createEigs`
-
----
-
-### `functions/src/matrix/expm.ts` - Compute the matrix exponential, expm(A) = e^A. The matrix must be square.
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `bignumber.js` | `BigNumber` |
-| `complex.js` | `Complex` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../utils/is.js` | `isSparseMatrix` | Import |
-| `../utils/string.js` | `format` | Import |
-| `../utils/factory.js` | `factory` | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
-
-**Exports:**
-
-- Interfaces: `Matrix`
-- Constants: `createExpm`
 
 ---
 
@@ -12627,17 +12604,17 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
-| `functions/src/utils/factory`                          | 2 files      | 263 files  |
+| `functions/src/utils/factory`                          | 2 files      | 262 files  |
 | `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
 | `functions/src/factories/index`                        | 243 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
-| `functions/src/utils/is`                               | 0 files      | 64 files   |
+| `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `functions/src/utils/number`                           | 1 file       | 48 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 45 files   |
+| `functions/src/wasm/WasmLoader`                        | 2 files      | 44 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `functions/src/types`                                  | 4 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -12654,11 +12631,11 @@ graph LR
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `functions/src/index`                                  | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `functions/src/utils/string`                           | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/complex/Complex`                   | 3 files      | 15 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `functions/src/utils/string`                           | 3 files      | 15 files   |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
@@ -12926,7 +12903,7 @@ graph TD
         N159[diff]
         N160[dot]
         N161[complexEigs]
-        N162[...36 more]
+        N162[...35 more]
     end
 
     subgraph Functions/numeric
@@ -13370,13 +13347,13 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 857    |
+| Total TypeScript Files  | 856    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 158142 |
-| Total Exports           | 4409   |
+| Total Lines of Code     | 157886 |
+| Total Exports           | 4408   |
 | Total Re-exports        | 1489   |
 | Total Classes           | 51     |
-| Total Interfaces        | 393    |
+| Total Interfaces        | 392    |
 | Total Functions         | 1495   |
 | Total Type Guards       | 177    |
 | Total Enums             | 0      |

@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 857, "e": 4409, "re": 1489 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 856, "e": 4408, "re": 1489 },
   "s": {
-    "loc": 158142,
+    "loc": 157886,
     "cls": 51,
-    "int": 393,
+    "int": 392,
     "fn": 1495,
     "tg": 177,
     "en": 0,
-    "co": 1409,
+    "co": 1408,
     "toi": 491
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -612,7 +612,7 @@
       "exp": ["createAnd", "createNot", "createNullish", "createOr", "createXor"]
     },
     "functions/matrix": {
-      "f": 46,
+      "f": 45,
       "exp": [
         "createColumn",
         "createConcat",
@@ -626,14 +626,14 @@
         "createComplexEigs",
         "createRealSymmetric",
         "createEigs",
-        "createExpm",
         "createFft",
         "createFilter",
         "createFlatten",
         "createForEach",
         "createGetMatrixDataType",
         "createIdentity",
-        "createIfft"
+        "createIfft",
+        "createInv"
       ],
       "int": [
         "Matrix",
@@ -1492,18 +1492,18 @@
     }
   },
   "hp": [
-    { "p": "utils/factory.ts", "i": 2, "o": 263 },
+    { "p": "utils/factory.ts", "i": 2, "o": 262 },
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 253, "o": 1 },
     { "p": "factories/index.ts", "i": 244, "o": 8 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "utils/is.ts", "i": 0, "o": 64 },
+    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
     { "p": "utils/number.ts", "i": 2, "o": 48 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 45 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 44 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
     { "p": "src/index.ts", "i": 36, "o": 0 },
     { "p": "src/types.ts", "i": 4, "o": 30 }
