@@ -1379,6 +1379,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
       unitList: Array<string | UnitInstance> = [],
       options: UnitFormatOptions = {}
     ): UnitInstance {
+      // Default the best-prefix offset to 0 → pure |log10(displayed)|-minimization,
+      // giving clean results (0.1 mm, 1 kg; no float noise), preserving the old core
+      // Unit's toBest behavior. `format()` keeps the mathjs 1.2 engineering offset, so
+      // only the EXPLICIT toBest picks this cleaner prefix. Caller can still override.
+      options = { offset: 0, ...options };
       if (unitList && !Array.isArray(unitList)) {
         throw new Error('Invalid unit type. Expected string or Unit.');
       }

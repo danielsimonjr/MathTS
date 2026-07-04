@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — merged Unit `toBest` returns clean prefixes (`0.1 mm`, not `100.0000…1 µm`)
+
+`Unit.toBest()` now defaults its best-prefix offset to `0` → pure `|log10(displayed)|`
+minimization, preserving the old core Unit's clean behavior: `0.0001 m → 0.1 mm`,
+`1000 g → 1 kg`, with no floating-point display noise. Only the EXPLICIT `toBest()` uses
+this; `format()`'s incidental auto-prefixing keeps the mathjs `1.2` engineering offset, so
+general unit formatting is unchanged (callers may still pass an explicit `offset`).
+
 ### Added (2026-07-04) — merged Unit `fromJSON` accepts both envelopes
 
 `Unit.fromJSON` now rehydrates BOTH the mathjs envelope (`{ mathjs, value, unit, … }`) and the

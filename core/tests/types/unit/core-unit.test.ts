@@ -51,6 +51,13 @@ describe('core Unit — simplify / toSI / arithmetic', () => {
     expect(Unit.parse('1 N').toSI().toString()).toBe('1 (kg m) / s^2');
   });
 
+  it('toBest picks the clean |log10|-minimizing prefix (0.1 mm, 1 kg — not 100.0000…1 µm)', () => {
+    // Preserves the old core Unit's toBest behavior: minimize |log10(displayed)| with
+    // no engineering offset, so results are clean (mantissa near 1, no float noise).
+    expect(new Unit(0.0001, 'm').toBest().toString()).toBe('0.1 mm');
+    expect(new Unit(1000, 'g').toBest().toString()).toBe('1 kg');
+  });
+
   it('splitUnit distributes a magnitude across parts (exercises Unit-aware subtractScalar)', () => {
     const parts = new Unit(1.5, 'm').splitUnit(['m', 'cm']);
     expect(parts.map((p) => p.toString())).toEqual(['1 m', '50 cm']);
