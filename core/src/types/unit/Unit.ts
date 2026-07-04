@@ -1181,7 +1181,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * @return {Unit}
      */
     Unit.fromJSON = function (json: UnitJSON): UnitInstance {
-      const unit = new Unit(json.value, json.unit ?? undefined);
+      // Accept BOTH envelopes: the mathjs `{ mathjs, value, unit, fixPrefix, skipSimp }`
+      // and the old core `{ mathts, value, notation }` — so units serialized by either
+      // predecessor rehydrate without loss.
+      const legacy = json as { notation?: string };
+      const unitStr = json.unit ?? legacy.notation ?? undefined;
+      const unit = new Unit(json.value, unitStr);
       unit.fixPrefix = json.fixPrefix ?? fixPrefixDefault;
       unit.skipAutomaticSimplification = json.skipSimp ?? skipAutomaticSimplificationDefault;
       return unit;

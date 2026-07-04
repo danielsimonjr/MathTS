@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-04) — merged Unit `fromJSON` accepts both envelopes
+
+`Unit.fromJSON` now rehydrates BOTH the mathjs envelope (`{ mathjs, value, unit, … }`) and the
+old core envelope (`{ mathts, value, notation }`), so units serialized by either predecessor
+round-trip without loss as the two Units merge into one.
+
 ### Fixed (2026-07-04) — merged Unit: `°C`/`°F` parsing + `degF` conversions (Phase 4 prep)
 
 Capability preservation + two root-cause bug fixes for the merged Unit, all surfaced by a

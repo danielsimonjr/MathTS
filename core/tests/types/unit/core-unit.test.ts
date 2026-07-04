@@ -56,3 +56,28 @@ describe('core Unit — simplify / toSI / arithmetic', () => {
     expect(parts.map((p) => p.toString())).toEqual(['1 m', '50 cm']);
   });
 });
+
+describe('core Unit — JSON envelope compatibility', () => {
+  const FromJSON = Unit.fromJSON as (json: unknown) => { toString(): string };
+
+  it('toJSON round-trips through fromJSON', () => {
+    const u = new Unit(2, 'km');
+    expect(FromJSON(u.toJSON()).toString()).toBe(new Unit(2, 'km').toString());
+  });
+
+  it('fromJSON accepts the mathjs envelope', () => {
+    expect(
+      FromJSON({
+        mathjs: 'Unit',
+        value: 5,
+        unit: 'cm',
+        fixPrefix: false,
+        skipSimp: true,
+      }).toString()
+    ).toBe('5 cm');
+  });
+
+  it('fromJSON accepts the old core {mathts, value, notation} envelope (no capability loss)', () => {
+    expect(FromJSON({ mathts: 'Unit', value: 5, notation: 'cm' }).toString()).toBe('5 cm');
+  });
+});
