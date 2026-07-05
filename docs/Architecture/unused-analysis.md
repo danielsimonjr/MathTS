@@ -5,8 +5,8 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 9
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 7
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 7
 - **Potentially unused exports**: 231
   - **Unreferenced anywhere (deletion candidates)**: 0
@@ -19,13 +19,7 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-### `core` (1)
-
-- `core/src/types/index.ts`
-
-### `packages/workerpool` (1)
-
-- `packages/workerpool/src/workerpool-browser-shim.ts`
+_None._
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 

@@ -390,6 +390,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   superseded by the active `compiler`/`evaluator`/`Help.ts`; unwireable — name-collide with evaluator's
   `createEvaluate`). Test pruned to its live `createParser` block. Expression dormant files: 0.
 
+- ✅ **[Both orphaned files resolved 2026-07-05, no deference]** `core/src/types/index.ts` deleted
+  (redundant unreachable barrel; constituents exported directly by index). `workerpool-browser-shim.ts`
+  proven live (aliased by `vitest.config.browser.ts`) — taught DGT to seed config-referenced
+  `new URL(...)` roots + exclude them from unused-files. DGT: 0 orphaned / 0 unused files / 0 dead
+  exports / 0 cycles.
+
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
 Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,

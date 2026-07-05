@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 993, "e": 4570, "re": 1532 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 994, "e": 4576, "re": 1532 },
   "s": {
-    "loc": 165293,
-    "cls": 53,
-    "int": 378,
-    "fn": 1497,
+    "loc": 165423,
+    "cls": 55,
+    "int": 381,
+    "fn": 1501,
     "tg": 156,
     "en": 0,
     "co": 1527,
@@ -40,7 +40,7 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "fftBitReverse",
         "fftFrameInPlace",
@@ -63,7 +63,7 @@
         "terminatePool",
         "getPoolStats"
       ],
-      "cls": ["MathWorkerPool"],
+      "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
         "WorkerpoolCapabilities",
         "WasmFeatureStatus",
@@ -71,7 +71,10 @@
         "ParallelResult",
         "PoolMetrics",
         "EnhancedPoolStats",
-        "TaskOptions"
+        "TaskOptions",
+        "PoolOptions",
+        "ExecOptions",
+        "PoolStats"
       ]
     },
     "core/arithmetic": {

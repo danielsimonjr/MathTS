@@ -3240,11 +3240,14 @@
       "isWorkerWasmAvailable",
       "mathWorkerPool",
       "MathWorkerPool",
+      "pool",
+      "Pool",
       "terminatePool",
       "Transfer",
       "transferArrayBuffer",
       "transferFloat64",
-      "transferTypedArray"
+      "transferTypedArray",
+      "worker"
     ],
     "parallel": [
       "bitAnd",

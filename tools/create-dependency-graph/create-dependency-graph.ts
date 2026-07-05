@@ -288,6 +288,45 @@ function exportsSubpathEntries(
 }
 
 /**
+ * Source files pulled into a bundle by a root-level build/test config through a
+ * path the module graph never surfaces — specifically a `new URL('./…/src/x.ts',
+ * import.meta.url)` reference, the idiom for a bundler ALIAS or entry target
+ * (e.g. `vitest.config.browser.ts` aliasing `workerpool` to a browser shim).
+ *
+ * Deliberately narrow: it matches ONLY `new URL(...)` source references, NOT
+ * arbitrary quoted strings. A config's coverage `include` / test `include` lists
+ * name dozens of `src/*.ts` files that are measured or matched, not bundle
+ * roots — seeding those would falsely mark their whole import closure reachable
+ * and hide genuine dormancy.
+ */
+function configReferencedEntries(rootDir: string): string[] {
+  const out = new Set<string>();
+  let names: string[];
+  try {
+    names = readdirSync(rootDir);
+  } catch {
+    return [];
+  }
+  const isConfig = (n: string): boolean =>
+    /\.config(\.[\w-]+)?\.(m?[jt]s)$/.test(n) || /^(vite|vitest|rollup|webpack|tsup)\./.test(n);
+  for (const name of names) {
+    if (!isConfig(name)) continue;
+    let code: string;
+    try {
+      code = readFileSync(join(rootDir, name), 'utf-8');
+    } catch {
+      continue;
+    }
+    // `new URL('<path ending in src/….ts>', …)` only. Normalize a leading `./`
+    // away to match parsedFiles' repo-relative paths.
+    for (const m of code.matchAll(/new\s+URL\(\s*['"`]([^'"`]*?src\/[\w./-]+\.ts)['"`]/g)) {
+      out.add(m[1].replace(/^\.\//, ''));
+    }
+  }
+  return [...out];
+}
+
+/**
  * Seed the entry files of a secondary tsconfig (`tsc -p <cfg>`): its explicit
  * `files`, plus non-glob `include` paths that point at a concrete `.ts`. Glob
  * includes (`src/bindings/**`) are expanded to every `.ts` under the base dir,
@@ -1626,6 +1665,10 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
   for (const ws of workspaceMap.values()) {
     for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
   }
+  // Config-referenced roots (bundler alias / entry targets, e.g. the browser
+  // shim aliased in by vitest.config.browser.ts) are entry points too — nothing
+  // imports them by design, so they must not be flagged as "unused files".
+  for (const entry of configReferencedEntries(ROOT_DIR)) extraEntryPaths.add(entry);
   for (const file of files) {
     if (
       file.path === 'src/index.ts' ||
@@ -3357,6 +3400,18 @@ async function main(): Promise<void> {
         if (found) {
           entryPoints.push(found.path);
         }
+      }
+    }
+
+    // Config-referenced source files are roots too. Build/test config at the repo
+    // root (vitest/vite/tsup/rollup/webpack) can pull a source file into a bundle
+    // via a path reference the module graph never shows — most commonly a bundler
+    // ALIAS target (e.g. `vitest.config.browser.ts` aliasing `workerpool` to a
+    // browser shim through `new URL('./…/src/shim.ts', import.meta.url)`). Seed
+    // any `src/*.ts` path mentioned by a root-level config file.
+    for (const cfgEntry of configReferencedEntries(ROOT_DIR)) {
+      if (parsedFiles.some((f) => f.path === cfgEntry) && !entryPoints.includes(cfgEntry)) {
+        entryPoints.push(cfgEntry);
       }
     }
 

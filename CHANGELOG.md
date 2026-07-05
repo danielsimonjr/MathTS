@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed/Tooling (2026-07-05) — both remaining orphaned files resolved (0 orphaned, 0 unused files)
+
+Resolved the two dormant files previously left as "report-only", at root cause:
+- **`core/src/types/index.ts`** — a redundant, unreachable type barrel (its constituents
+  are exported directly by `core/src/index.ts`; nothing imported the barrel). **Deleted.**
+  Published bundle unchanged (it was tree-shaken out).
+- **`packages/workerpool/src/workerpool-browser-shim.ts`** — NOT dead: it is aliased in for
+  the `workerpool` package by `vitest.config.browser.ts` (browser WebGPU smoke test). The
+  DGT simply couldn't see a bundler-alias reference. Taught the tool to seed
+  **config-referenced roots**: `new URL('./…/src/x.ts', import.meta.url)` targets in
+  root-level build/test config are now reachability roots (and excluded from the
+  unused-files metric). The shim is correctly reachable — no longer dormant/orphaned/unused.
+
+DGT after: **0 orphaned, 0 unused files, 0 dead exports, 0 cycles**; the 7 remaining dormant
+are all legitimately test-only (documented-kept signal kernels, the security-invariant
+`WorkerPool`, `ParallelMatrix`, and a vestigial core guard cluster). Gates: build 22/22,
+typecheck 28/28, test 44/44, eslint clean.
+
 ### Removed (2026-07-05) — expression package fully integrated: 3 superseded factory duplicates deleted
 
 Answering "is the expression package fully integrated?": it wasn't — three files remained in a

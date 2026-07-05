@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-05",
-    "totalFiles": 993,
+    "totalFiles": 994,
     "totalModules": 73,
-    "totalExports": 4570
+    "totalExports": 4576
   },
   "entryPoints": [
     {
@@ -311,6 +311,17 @@
         ],
         "workspaceDependencies": [],
         "exports": []
+      },
+      "packages/workerpool/src/workerpool-browser-shim.ts": {
+        "description": "Browser shim for the Node-oriented `workerpool` npm package.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["pool", "worker", "canUseWasm", "canUseSharedMemory", "Pool", "Transfer"],
+        "classes": ["Pool", "Transfer"],
+        "interfaces": ["PoolOptions", "ExecOptions", "PoolStats"],
+        "functions": ["pool", "worker", "canUseWasm", "canUseSharedMemory"]
       }
     },
     "core/arithmetic": {
@@ -31739,7 +31750,8 @@
         "files": [
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
-          "packages/workerpool/src/worker.ts"
+          "packages/workerpool/src/worker.ts",
+          "packages/workerpool/src/workerpool-browser-shim.ts"
         ]
       },
       {
@@ -33025,13 +33037,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 993,
+    "totalTypeScriptFiles": 994,
     "totalModules": 73,
-    "totalLinesOfCode": 165293,
-    "totalExports": 4570,
-    "totalClasses": 53,
-    "totalInterfaces": 378,
-    "totalFunctions": 1497,
+    "totalLinesOfCode": 165423,
+    "totalExports": 4576,
+    "totalClasses": 55,
+    "totalInterfaces": 381,
+    "totalFunctions": 1501,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1527,
