@@ -8570,7 +8570,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `resolvePackagedWasm`
+- Functions: `resolvePackagedWasm`, `defaultWasmLocation`
 
 ---
 
@@ -8632,7 +8632,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest` | Import |
-| `./resolve.js` | `resolvePackagedWasm` | Import |
+| `./resolve.js` | `resolvePackagedWasm, defaultWasmLocation` | Import |
 
 **Exports:**
 
@@ -13437,12 +13437,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 862    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 160038 |
-| Total Exports           | 4388   |
+| Total Lines of Code     | 160067 |
+| Total Exports           | 4389   |
 | Total Re-exports        | 1501   |
 | Total Classes           | 51     |
 | Total Interfaces        | 373    |
-| Total Functions         | 1476   |
+| Total Functions         | 1477   |
 | Total Type Guards       | 155    |
 | Total Enums             | 0      |
 | Type-only Imports       | 494    |

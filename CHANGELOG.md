@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — B-3: wasm loaders' dead `lib/wasm` fallback replaced with an accurate package-relative one
+
+All three wasm loaders (matrix `WasmLoader` + `WASMBackend`, functions `WasmLoader`)
+carried a legacy fallback fabricating `../../../lib/wasm/<file>` relative to the loader —
+correct only for the pre-bundling source layout. From a bundled `dist/` it resolved
+OUTSIDE the repo (the `…\Github\lib\wasm\…` ENOENT caught live in the 07-04 flake-hunt
+log), and `<repo-root>/lib/wasm` no longer exists in ANY layout (asc outputs to
+`assembly/build/`; package builds copy to `dist/wasm/`, and both published tarballs ship
+it — verified via `npm pack --dry-run`). New `defaultWasmLocation()` (in both `resolve.ts`
+copies, TDD'd with package-fixture tests) walks to the package root and names the real
+canonical `dist/wasm/<file>` location; the browser branch — which previously had ONLY the
+broken URL and never tried the packaged location — now returns the bundle-relative
+`./wasm/<file>` URL. Happy path unchanged; missing-binary warnings are now actionable and
+browser consumers can actually resolve the artifact. Gates: build 22/22, test 44/44
+(matrix 760, functions wasm suites green).
+
 ### Fixed (2026-07-04) — `shapiroWilkTest` W was ~2% off and its p-value used the wrong test's transform
 
 Root-caused while pinning the WS-1 P2 tail to scipy: the implementation used plain Blom

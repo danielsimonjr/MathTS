@@ -673,16 +673,10 @@ export class WasmLoader {
    * (`mathts-as.wasm`); the legacy second toolchain was removed in the
    * WASM-backend migration (complete 2026-06-26).
    *
-   * The path is resolved relative to this source file's location so it is
-   * CWD-independent.  This file lives at:
-   *   <repo-root>/matrix/src/backends/WasmLoader.ts
-   * so the repo root is three directories up, and the artifact is at
-   *   <repo-root>/lib/wasm/mathts-as.wasm
-   *
-   * Both branches use `new URL(relative, import.meta.url)` to resolve a
-   * file: URL. In Node we convert via `fileURLToPath` (which correctly
-   * strips the leading slash on Windows so the drive letter is not
-   * doubled); in the browser we keep the full `.href` for fetch().
+   * Resolution is package-relative and CWD-independent: the packaged artifact
+   * (`dist/wasm/`) is preferred via `resolvePackagedWasm`; when absent, the
+   * canonical expected location is returned so the missing-binary warning is
+   * actionable (see `defaultWasmLocation` in wasm/resolve.ts — B-3).
    */
   private async getDefaultWasmPath(): Promise<string> {
     const wasmFile = 'mathts-as.wasm';
@@ -693,14 +687,13 @@ export class WasmLoader {
       const { resolvePackagedWasm } = await import('./wasm/resolve.js');
       const found = await resolvePackagedWasm(import.meta.url, wasmFile);
       if (found) return found;
-      // Legacy monorepo fallback: <repo-root>/lib/wasm/<file>.
-      // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
-      // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
-      // the platform-correct conversion (and decodes %-escapes).
-      const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url));
+      // No packaged copy found anywhere up-tree: return the canonical expected
+      // location so the missing-binary warning is actionable (run the build).
+      const { defaultWasmLocation } = await import('./wasm/resolve.js');
+      return defaultWasmLocation(import.meta.url, wasmFile);
     }
-    return new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url).href;
+    const { defaultWasmLocation } = await import('./wasm/resolve.js');
+    return defaultWasmLocation(import.meta.url, wasmFile, { browser: true });
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {

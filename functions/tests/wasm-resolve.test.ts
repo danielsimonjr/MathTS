@@ -6,9 +6,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
-import { resolvePackagedWasm, defaultWasmLocation } from '../src/backends/wasm/resolve.js';
+import { resolvePackagedWasm, defaultWasmLocation } from '../src/wasm/resolve.js';
 
-describe('packaged wasm resolution (M2)', () => {
+describe('packaged wasm resolution (functions copy)', () => {
   it('resolves the co-located AS wasm to an existing file', async () => {
     const p = await resolvePackagedWasm(import.meta.url, 'mathts-as.wasm');
     expect(p, 'run `npm run build` in matrix/ first').toBeTruthy();

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-05'
   totalFiles: 862
   totalModules: 72
-  totalExports: 4388
+  totalExports: 4389
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -17712,8 +17712,10 @@ modules:
       workspaceDependencies: []
       exports:
         - resolvePackagedWasm
+        - defaultWasmLocation
       functions:
         - resolvePackagedWasm
+        - defaultWasmLocation
     functions/src/wasm/signal/wasm-bridge.ts:
       description: WASM dispatch bridge for spectral signal kernels — Slice 5.6.
       externalDependencies: []
@@ -17980,6 +17982,7 @@ modules:
         - file: ./resolve.js
           imports:
             - resolvePackagedWasm
+            - defaultWasmLocation
       workspaceDependencies: []
       exports:
         - wasmLoader
@@ -28441,11 +28444,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 862
   totalModules: 72
-  totalLinesOfCode: 160038
-  totalExports: 4388
+  totalLinesOfCode: 160067
+  totalExports: 4389
   totalClasses: 51
   totalInterfaces: 373
-  totalFunctions: 1476
+  totalFunctions: 1477
   totalTypeGuards: 155
   totalEnums: 0
   totalConstants: 1398

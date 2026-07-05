@@ -2,7 +2,7 @@
  * WASM Matrix Backend (AssemblyScript)
  *
  * Implements MatrixBackend using the AssemblyScript-compiled WebAssembly
- * module (`lib/wasm/mathts-as.wasm`, ~42 KB). Falls back to JSBackend when
+ * module (`dist/wasm/mathts-as.wasm`, ~65 KB). Falls back to JSBackend when
  * the WASM module is unavailable or for small matrices.
  *
  * ABI:
@@ -275,7 +275,7 @@ function releaseAsInt32Array(module: AsModule, alloc: AsInt32Allocation): void {
 export interface WASMBackendConfig {
   /** Minimum elements to use WASM (default: 100) */
   minElements?: number;
-  /** Path to WASM file (defaults to the AS artifact, `lib/wasm/mathts-as.wasm`) */
+  /** Path to WASM file (defaults to the packaged AS artifact, `dist/wasm/mathts-as.wasm`) */
   wasmPath?: string;
   /** Enable SIMD code paths if the AS module exposes them (currently a no-op
    * — AS export surface does not include `simd*` ops; kept for API stability). */
@@ -357,25 +357,21 @@ export class WASMBackend implements MatrixBackend {
   }
 
   /**
-   * Resolve the path to the AssemblyScript artifact (`lib/wasm/mathts-as.wasm`).
-   *
-   * On Windows, `URL.pathname` returns "/C:/foo/bar.wasm" which fs.readFile
-   * interprets as drive-relative ("C:\C:\foo\..."). `fileURLToPath` does the
-   * platform-correct conversion.
+   * Resolve the path to the AssemblyScript artifact (`dist/wasm/mathts-as.wasm`).
    */
   private async resolveAsWasmPath(): Promise<string> {
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    const { resolvePackagedWasm, defaultWasmLocation } = await import('./wasm/resolve.js');
     if (isNode) {
       // Preferred: package-relative artifact (dist/wasm/), robust across
       // monorepo-source and published layouts.
-      const { resolvePackagedWasm } = await import('./wasm/resolve.js');
       const found = await resolvePackagedWasm(import.meta.url, 'mathts-as.wasm');
       if (found) return found;
-      // Legacy monorepo fallback (pre-packaging layout).
-      const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url));
+      // No packaged copy anywhere up-tree: return the canonical expected
+      // location so the missing-binary warning is actionable (run the build).
+      return defaultWasmLocation(import.meta.url, 'mathts-as.wasm');
     }
-    return new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url).href;
+    return defaultWasmLocation(import.meta.url, 'mathts-as.wasm', { browser: true });
   }
 
   /**

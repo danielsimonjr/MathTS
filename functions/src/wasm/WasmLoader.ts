@@ -16,7 +16,7 @@
  */
 
 import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js';
-import { resolvePackagedWasm } from './resolve.js';
+import { resolvePackagedWasm, defaultWasmLocation } from './resolve.js';
 
 export interface WasmModule {
   // Matrix operations
@@ -961,10 +961,11 @@ export class WasmLoader {
       // monorepo-relative path if the packaged copy isn't present.
       const packaged = await resolvePackagedWasm(import.meta.url, wasmFile);
       if (packaged) return packaged;
-      const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url));
+      // No packaged copy found anywhere up-tree: return the canonical expected
+      // location so the missing-binary warning is actionable (run the build).
+      return defaultWasmLocation(import.meta.url, wasmFile);
     }
-    return new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url).href;
+    return defaultWasmLocation(import.meta.url, wasmFile, { browser: true });
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
