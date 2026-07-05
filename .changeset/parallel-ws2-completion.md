@@ -1,5 +1,0 @@
----
-'@danielsimonjr/mathts-parallel': patch
----
-
-WS-2 threshold-retune completion: the five `OpName`s absent from `DEFAULT_THRESHOLD_BY_OP` (`histogram`, `transpose`, `matvec`, `outer`, `integrateChunk`) silently rode the untested 50 000 global threshold — and the first four `ComputePool` methods dispatched to the worker pool **unconditionally** (no `shouldParallelize` gate), paying worker copy overhead on every call. Benchmarked (`tools/benchmarks/ws2-missing-ops.mjs`, medians of 9 interleaved reps): histogram 0.23–0.56×, transpose 0.01–0.28×, matvec 0.00–0.05×, outer 0.01–0.50× at every size up to 4.2M elements — memory-bound/copy-dominated, no break-even. All five are now `'never'`, and the four methods gate with an inline sequential fallback (numerically identical, dimension validation preserved) — a significant speedup for every caller. `integrateFanOut` remains caller-opt-in via `workerCount`; its entry documents that cheap integrands lose ~50–100× (expensive ms-scale integrands are the one case the fan-out pays). Every `OpName` now has an explicit, benchmark-sourced threshold.

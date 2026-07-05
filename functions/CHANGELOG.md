@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-functions
 
+## 0.11.2
+
+### Patch Changes
+
+- 22427a8: Dead-code sweep: remove all 31 verified-unreferenced exports flagged by the fixed dependency-graph unused-analysis (plus 4 cascade orphans), ~630 LOC. None were public API — every symbol was verified unimported by source, tests, docs, and factory name-string dispatch before deletion. Highlights: the mathjs number-only-bundle factory remnants (`createNthRootNumber`, `createCompareTextNumber`, `createEqualScalarNumber`, `createBigNumberClass`, `createComplexClass`, `createArgumentsError`, `createIndexError`), the dead `functions/src/expression/operators.ts` precedence/associativity chain (the live copy is the `expression` package's own), orphan utils (`initial`, `toObject`, `noIndex`/`noSubset`, `endsWith`/`escape`, `operatorPrecedence`), unused JSON/type contracts, `SI_PREFIX_KEYS`, and AssemblyScript complex-constant helpers. The unused-analysis deletion-candidate count is now **0**.
+- Updated dependencies [22427a8]
+- Updated dependencies [6cd4dfd]
+  - @danielsimonjr/mathts-core@0.4.1
+  - @danielsimonjr/mathts-expression@0.4.4
+  - @danielsimonjr/mathts-parallel@0.3.1
+
 ## 0.11.1
 
 ### Patch Changes
