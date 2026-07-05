@@ -38,7 +38,13 @@ export interface SVDOptions {
   maxIterations?: number;
   /** Convergence tolerance */
   tolerance?: number;
-  /** Whether to compute full U and V matrices */
+  /**
+   * Complete the thin factor to a square orthonormal basis (U → m×m for tall
+   * inputs, V → n×n for wide ones), numpy `full_matrices=True` style, so the
+   * rectangular-Σ reconstruction `A = U·Σ·Vᵀ` holds. Default `false` = thin
+   * factors (the library's long-standing behavior; the option was previously
+   * accepted but ignored — B-4).
+   */
   fullMatrices?: boolean;
   /** Threshold for rank determination */
   rankTolerance?: number;
@@ -354,11 +360,42 @@ function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] }
  * @param options - Computation options
  * @returns SVD decomposition
  */
+
+/**
+ * Extend `m×k` orthonormal columns to a full `m×m` orthonormal basis (B-4).
+ * Candidates are the standard basis vectors, orthogonalized by modified
+ * Gram-Schmidt with one re-orthogonalization pass; a candidate is accepted when
+ * its residual norm is non-negligible (> 0.1 — for orthonormal starting columns
+ * at least m−k of the eᵢ always qualify, since the projector's diagonal cannot
+ * be all-ones on more than k coordinates).
+ */
+function completeOrthonormalBasis(cols: number[][], m: number): number[][] {
+  const k = cols[0]?.length ?? 0;
+  const basis: number[][] = Array.from({ length: k }, (_, j) => cols.map((row) => row[j]));
+  for (let cand = 0; cand < m && basis.length < m; cand++) {
+    const v = Array.from({ length: m }, (_, i) => (i === cand ? 1 : 0));
+    for (let pass = 0; pass < 2; pass++) {
+      for (const b of basis) {
+        let dot = 0;
+        for (let i = 0; i < m; i++) dot += v[i] * b[i];
+        for (let i = 0; i < m; i++) v[i] -= dot * b[i];
+      }
+    }
+    let norm = 0;
+    for (let i = 0; i < m; i++) norm += v[i] * v[i];
+    norm = Math.sqrt(norm);
+    if (norm > 0.1) {
+      basis.push(v.map((x) => x / norm));
+    }
+  }
+  return Array.from({ length: m }, (_, i) => basis.map((b) => b[i]));
+}
+
 export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {}): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
-    fullMatrices: _fullMatrices = true,
+    fullMatrices = false,
     rankTolerance = 1e-10,
   } = options;
 
@@ -499,18 +536,27 @@ export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {})
     }
   }
 
-  // Handle transposition
+  // Handle transposition. The thin factor is always the larger-dimension side
+  // (internally m ≥ n, so sortedU is m×n thin and sortedV is n×n square);
+  // fullMatrices completes it to a square orthonormal basis — the extra columns
+  // multiply zero rows of the rectangular Σ, so A = U·Σ·Vᵀ holds exactly.
   if (transposed) {
     return {
       U: sortedV,
       S: sortedS,
-      V: sortedU,
+      V:
+        fullMatrices && sortedU.length > (sortedU[0]?.length ?? 0)
+          ? completeOrthonormalBasis(sortedU, sortedU.length)
+          : sortedU,
       rank,
     };
   }
 
   return {
-    U: sortedU,
+    U:
+      fullMatrices && sortedU.length > (sortedU[0]?.length ?? 0)
+        ? completeOrthonormalBasis(sortedU, sortedU.length)
+        : sortedU,
     S: sortedS,
     V: sortedV,
     rank,

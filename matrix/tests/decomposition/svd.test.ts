@@ -173,17 +173,26 @@ describe('Singular Value Decomposition', () => {
       expect(matDiff(A, USV)).toBeLessThan(1e-10);
     });
 
-    // Known limitation: SVD returns reduced matrices (U: m x min(m,n) instead of m x m).
-    // The sorting code only keeps columns corresponding to singular values.
-    // Full matrix reconstruction requires fullMatrices option implementation.
-    it.skip("should satisfy A = U*S*V' for tall matrix (requires full matrix support)", () => {
+    // fullMatrices: true (B-4, 2026-07-05) completes the thin factor to a square
+    // orthonormal basis, so the rectangular-Σ reconstruction A = U·Σ·Vᵀ holds.
+    it("should satisfy A = U*S*V' for tall matrix (fullMatrices: true)", () => {
       const A = [
         [1, 2],
         [3, 4],
         [5, 6],
       ];
 
-      const { U, S, V } = svd(A);
+      const { U, S, V } = svd(A, { fullMatrices: true });
+      expect(U.length).toBe(3);
+      expect(U[0].length).toBe(3); // completed to m×m
+      // completed U is orthonormal: UᵀU = I
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          let dot = 0;
+          for (let k = 0; k < 3; k++) dot += U[k][i] * U[k][j];
+          expect(dot).toBeCloseTo(i === j ? 1 : 0, 9);
+        }
+      }
       const m = A.length;
       const n = A[0].length;
 
@@ -476,10 +485,8 @@ describe('Singular Value Decomposition', () => {
       expect(matDiff(A, USV)).toBeLessThan(1e-4 * aNorm);
     });
 
-    // Thin SVD now reconstructs this (rank-3) matrix exactly; the full-form check
-    // below (`diag(S,4,6)` with `Uᴹˣᴹ`, `Vᴺˣᴺ`) needs the unimplemented full-matrices
-    // option — U/V are returned in thin form. Separate feature from the SVD fix.
-    it.skip('should handle 4x6 matrix (needs full-matrices U/V, not thin)', () => {
+    // fullMatrices: true (B-4, 2026-07-05): the wide case completes V to n×n.
+    it('should handle 4x6 matrix (fullMatrices: true completes V)', () => {
       const A = [
         [1, 2, 3, 4, 5, 6],
         [7, 8, 9, 10, 11, 12],
@@ -487,7 +494,16 @@ describe('Singular Value Decomposition', () => {
         [19, 20, 21, 22, 23, 25],
       ];
 
-      const { U, S, V } = svd(A);
+      const { U, S, V } = svd(A, { fullMatrices: true });
+      expect(V.length).toBe(6);
+      expect(V[0].length).toBe(6); // completed to n×n
+      for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 6; j++) {
+          let dot = 0;
+          for (let k = 0; k < 6; k++) dot += V[k][i] * V[k][j];
+          expect(dot).toBeCloseTo(i === j ? 1 : 0, 9);
+        }
+      }
 
       // Verify reconstruction - use relative tolerance
       const Sigma = diag(S, 4, 6);

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-05) — B-4: SVD `fullMatrices` option implemented (was accepted but ignored)
+
+`svd`'s `SVDOptions.fullMatrices` was destructured with a claimed default of `true` and
+then discarded — factors were always thin. Now `fullMatrices: true` completes the thin
+factor to a square orthonormal basis (U → m×m tall / V → n×n wide; modified Gram-Schmidt
+with a re-orthogonalization pass), so `A = U·Σ·Vᵀ` holds with the rectangular Σ. The
+default is honestly `false` (thin — the actual long-standing behavior; no caller's output
+shapes change). The two `it.skip` tests blocked on this are unskipped with UᵀU=I / VᵀV=I
+orthonormality pins — the SVD suite has **zero skips** left. Gates: matrix 42/42 (762),
+build 22/22, test 44/44.
+
 ### Changed (2026-07-05) — WS-2 addendum: bitwise family benchmarked + set to `'never'`
 
 The seven bitwise ops gated via a **nameless** `shouldParallelize(len)` → the untested
