@@ -7,11 +7,23 @@
  * - docs/Architecture/DEPENDENCY_GRAPH.md (human-readable)
  * - docs/Architecture/dependency-graph.json (machine-readable)
  * - docs/Architecture/dependency-graph.yaml (compact, ~40% smaller than JSON)
+ * - docs/Architecture/unused-analysis.md (unused exports + DORMANT FILES)
  *
  * Usage: npx tsx tools/create-dependency-graph.ts
  *
  * This tool is generic and does not depend on any codebase-specific functions.
  * It dynamically discovers the project structure from the filesystem.
+ *
+ * Reachability model. A file is "reachable" if a path of imports leads to it
+ * from a seeded ROOT. Roots are each package's `src/index.ts` plus every build
+ * entry the tool can discover: `exports` subpath targets, `bin` targets, extra
+ * `tsup src/*.ts` entries and secondary `tsc -p <cfg>` includes parsed from the
+ * package scripts. Edges are followed through four import forms — `import … from`,
+ * bare side-effect `import '…'`, inline `import('…')` type expressions, and
+ * npm-scoped workspace imports. Files reachable from none of these are DORMANT,
+ * split in unused-analysis.md into "orphaned" (reachable from no root and no
+ * test — delete/wire candidates) and "test-only" (exercised by a test, ships
+ * nothing). `.d.ts` ambient declarations are excluded from the dormant count.
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
@@ -225,12 +237,17 @@ let workspaceMap: Map<string, WorkspacePackage> = new Map();
 function exportsSubpathEntries(
   rootDir: string,
   pkgDir: string,
-  pkg: { exports?: Record<string, unknown>; bin?: Record<string, string> | string }
+  pkg: {
+    exports?: Record<string, unknown>;
+    bin?: Record<string, string> | string;
+    scripts?: Record<string, string>;
+  }
 ): string[] {
   const entries: string[] = [];
   const addIfExists = (srcPath: string): void => {
-    if (existsSync(join(rootDir, srcPath))) {
-      entries.push(srcPath.replace(/\\/g, '/'));
+    const norm = srcPath.replace(/\\/g, '/');
+    if (existsSync(join(rootDir, srcPath)) && !entries.includes(norm)) {
+      entries.push(norm);
     }
   };
   if (pkg.exports && typeof pkg.exports === 'object') {
@@ -248,7 +265,64 @@ function exportsSubpathEntries(
     const m = /(?:\.\/)?dist\/(.+)\.[cm]?js$/.exec(bin);
     if (m) addIfExists(join(pkgDir, 'src', `${m[1]}.ts`));
   }
+  // Bundler entry points declared in the `build`/`dev` scripts — e.g.
+  // `tsup src/index.ts src/worker.ts` or `... src/cli.ts`. Each additional
+  // `src/*.ts` argument is a BUILD ROOT emitting its own bundle (worker scripts
+  // loaded at runtime via `new URL('./worker.js', import.meta.url)`, multi-entry
+  // CLIs). Nothing imports them, so they were false-dormant.
+  const allScripts = Object.values(pkg.scripts ?? {});
+  for (const script of allScripts) {
+    if (!script) continue;
+    // Direct tsup/build entry args: `... src/foo.ts src/bar.ts ...`
+    for (const m of script.matchAll(/(?:^|\s)(src\/[\w./-]+\.ts)\b/g)) {
+      addIfExists(join(pkgDir, m[1]));
+    }
+    // Secondary `tsc -p <tsconfig>` builds (e.g. AssemblyScript JS bindings via
+    // `tsc -p tsconfig.bindings.json`): seed that tsconfig's `files`/`include`
+    // roots — they are compiled separately and shipped, but nothing imports them.
+    for (const m of script.matchAll(/tsc\s+-p\s+([\w./-]+\.json)/g)) {
+      seedTsconfigEntries(rootDir, pkgDir, m[1], addIfExists);
+    }
+  }
   return entries;
+}
+
+/**
+ * Seed the entry files of a secondary tsconfig (`tsc -p <cfg>`): its explicit
+ * `files`, plus non-glob `include` paths that point at a concrete `.ts`. Glob
+ * includes (`src/bindings/**`) are expanded to every `.ts` under the base dir,
+ * so a whole separately-compiled subtree is treated as reachable rather than
+ * false-dormant.
+ */
+function seedTsconfigEntries(
+  rootDir: string,
+  pkgDir: string,
+  cfgRel: string,
+  add: (srcPath: string) => void
+): void {
+  const cfgPath = join(rootDir, pkgDir, cfgRel);
+  if (!existsSync(cfgPath)) return;
+  let cfg: { files?: string[]; include?: string[] };
+  try {
+    cfg = JSON.parse(readFileSync(cfgPath, 'utf-8'));
+  } catch {
+    return;
+  }
+  const cfgDir = dirname(join(pkgDir, cfgRel));
+  const seedPath = (p: string): void => {
+    if (p.includes('*')) {
+      const base = join(rootDir, cfgDir, p.replace(/\/?\*.*$/, ''));
+      if (existsSync(base)) {
+        for (const f of getAllSourceTsFiles(base)) {
+          add(relative(rootDir, f).replace(/\\/g, '/'));
+        }
+      }
+    } else if (p.endsWith('.ts')) {
+      add(join(cfgDir, p));
+    }
+  };
+  for (const f of cfg.files ?? []) seedPath(f);
+  for (const inc of cfg.include ?? []) seedPath(inc);
 }
 
 function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
@@ -351,6 +425,26 @@ function getAllTsFiles(dir: string, files: string[] = []): string[] {
 /**
  * Recursively get all test files (.test.ts, .spec.ts) in a directory
  */
+/** Recursively collect non-test, non-declaration `.ts` source files under `dir`. */
+function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
+  if (!existsSync(dir)) return files;
+  for (const entry of readdirSync(dir)) {
+    if (entry === 'node_modules') continue;
+    const fullPath = join(dir, entry);
+    if (statSync(fullPath).isDirectory()) {
+      getAllSourceTsFiles(fullPath, files);
+    } else if (
+      entry.endsWith('.ts') &&
+      !entry.endsWith('.test.ts') &&
+      !entry.endsWith('.spec.ts') &&
+      !entry.endsWith('.d.ts')
+    ) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
 function getAllTestFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) {
     return files;
@@ -847,6 +941,34 @@ function parseFile(filePath: string): ParsedFile {
         package: source,
         imports: imports,
       });
+    }
+  }
+
+  // Bare side-effect imports: `import './register-backends.js';` (no bindings,
+  // no `from`). These are real runtime edges — the module runs for its effects
+  // (backend registration, polyfills) — but the binding-oriented importRegex
+  // above never matches them, so without this pass such modules were
+  // false-flagged as dormant. Relative specifiers only (a bare `import 'pkg'`
+  // is an external side-effect and irrelevant to reachability here).
+  const sideEffectImportRegex = /(?:^|\n)\s*import\s+['"](\.[^'"]+)['"]\s*;?/g;
+  while ((match = sideEffectImportRegex.exec(code)) !== null) {
+    const source = match[1];
+    if (!result.internalDependencies.some((d) => d.file === source)) {
+      result.internalDependencies.push({ file: source, imports: [], typeOnly: false });
+    }
+  }
+
+  // Inline import-type expressions: `import('./type/local/Decimal.ts').Decimal`
+  // and `typeof import('../foo.js')`. These are type-position dynamic-import
+  // references — a real dependency edge (the module supplies the referenced
+  // type), but they use neither `from` nor a bare statement, so both regexes
+  // above miss them and the referenced module was false-flagged dormant. Record
+  // as a type-only edge (it carries no runtime import).
+  const inlineImportRegex = /\bimport\s*\(\s*['"](\.[^'"]+)['"]\s*\)/g;
+  while ((match = inlineImportRegex.exec(code)) !== null) {
+    const source = match[1];
+    if (!result.internalDependencies.some((d) => d.file === source)) {
+      result.internalDependencies.push({ file: source, imports: [], typeOnly: true });
     }
   }
 
@@ -3460,11 +3582,73 @@ async function main(): Promise<void> {
   unusedReport += `**Generated**: ${new Date().toISOString().split('T')[0]}\n\n`;
   const deadExports = unusedAnalysis.unusedExports.filter((e) => e.inFileRefs === 0);
   const contractExports = unusedAnalysis.unusedExports.filter((e) => e.inFileRefs > 0);
+  // Dormant files: on disk under a package `src/`, runtime code (not `.d.ts`
+  // ambient declarations), NOT reachable from any seeded root (index, `exports`
+  // subpaths, `bin`, or build-script entries). The file-granularity analog of
+  // the unused-export list. Split into:
+  //   - test-only: reachable from a test file (exercised but ships nothing —
+  //     e.g. functions/src/signal/fft.ts, kept for its direct test)
+  //   - orphaned: reachable from nothing at all — the true delete/wire candidates.
+  const testReachable = dormantSet
+    ? findReachableFiles(
+        parsedTestFiles.map((f) => f.path),
+        [...parsedFiles, ...parsedTestFiles]
+      )
+    : new Set<string>();
+  const dormantAll = dormantSet
+    ? [...dormantSet].filter((f) => /(^|\/)src\//.test(f) && !f.endsWith('.d.ts')).sort()
+    : [];
+  const orphaned = dormantAll.filter((f) => !testReachable.has(f));
+  const testOnly = dormantAll.filter((f) => testReachable.has(f));
+
+  const groupByPkg = (files: string[]): Map<string, string[]> => {
+    const m = new Map<string, string[]>();
+    for (const f of files) {
+      let pkg = '(root)';
+      for (const [, ws] of workspaceMap) {
+        if (f.startsWith(ws.directory + '/')) {
+          pkg = ws.directory;
+          break;
+        }
+      }
+      if (!m.has(pkg)) m.set(pkg, []);
+      m.get(pkg)!.push(f);
+    }
+    return m;
+  };
+
   unusedReport += `## Summary\n\n`;
   unusedReport += `- **Potentially unused files**: ${unusedAnalysis.unusedFiles.length}\n`;
+  unusedReport += `- **Dormant files** (runtime code on disk, unreachable from any entry/build root): ${dormantAll.length}\n`;
+  unusedReport += `  - **Orphaned (reachable from nothing — delete/wire candidates)**: ${orphaned.length}\n`;
+  unusedReport += `  - **Test-only (exercised by a test, ships nothing)**: ${testOnly.length}\n`;
   unusedReport += `- **Potentially unused exports**: ${unusedAnalysis.unusedExports.length}\n`;
   unusedReport += `  - **Unreferenced anywhere (deletion candidates)**: ${deadExports.length}\n`;
   unusedReport += `  - **Referenced in-module (type contracts / helpers backing live exports)**: ${contractExports.length}\n\n`;
+
+  const renderDormant = (files: string[]): string => {
+    if (files.length === 0) return `_None._\n\n`;
+    let out = '';
+    for (const [pkg, fs] of [...groupByPkg(files)].sort()) {
+      out += `### \`${pkg}\` (${fs.length})\n\n`;
+      for (const f of fs) out += `- \`${f}\`\n`;
+      out += '\n';
+    }
+    return out;
+  };
+
+  unusedReport += `## Dormant Files — Orphaned (delete/wire candidates)\n\n`;
+  unusedReport += `Runtime source files reachable from NO root and NO test. Each is either dead code\n`;
+  unusedReport += `to delete, or a root the tool cannot see (a new build/worker entry, a\n`;
+  unusedReport += `\`new URL()\`-loaded script, or a side-effect-only module) — in which case wire it\n`;
+  unusedReport += `or seed it. Verify before deleting.\n\n`;
+  unusedReport += renderDormant(orphaned);
+
+  unusedReport += `## Dormant Files — Test-only (ships nothing, but exercised)\n\n`;
+  unusedReport += `Not reachable from any package entry point, but imported by a test — deliberately\n`;
+  unusedReport += `kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives\n`;
+  unusedReport += `directly. Not dead; not shipped. No action needed.\n\n`;
+  unusedReport += renderDormant(testOnly);
 
   unusedReport += `## Potentially Unused Files\n\n`;
   unusedReport += `These files are not imported by any other file in the codebase:\n\n`;

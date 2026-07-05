@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-05'
-  totalFiles: 986
-  totalModules: 72
-  totalExports: 4546
+  totalFiles: 993
+  totalModules: 73
+  totalExports: 4570
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1921,6 +1921,8 @@ modules:
             - onConfigChange
             - MatrixConfig
             - OperationType
+        - file: ./register-backends.js
+          imports: []
       workspaceDependencies: []
       exports:
         - DEFAULT_EXTENDED_HINTS
@@ -2275,6 +2277,8 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./register-backends.js
+          imports: []
         - file: ./Backend.js
           imports:
             - BackendRegistry
@@ -2534,6 +2538,22 @@ modules:
         - createParallelBackend
       constants:
         - parallelBackend
+    matrix/src/backends/register-backends.ts:
+      description: Default backend registrations.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - backendRegistry
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./WASMBackend.js
+          imports:
+            - wasmBackend
+      workspaceDependencies: []
+      exports: []
     matrix/src/backends/wasm/detect.ts:
       description: WASM Feature Detection
       externalDependencies: []
@@ -2682,6 +2702,34 @@ modules:
         - FFTResult
         - FFTBackend
         - FFTConfig
+    matrix/src/backends/wasm/integrity.ts:
+      description: WASM integrity verification - SHA-384 manifest check.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+      interfaces:
+        - WasmManifest
+      functions:
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+    matrix/src/backends/wasm/resolve.ts:
+      description: Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - resolvePackagedWasm
+        - defaultWasmLocation
+      functions:
+        - resolvePackagedWasm
+        - defaultWasmLocation
     matrix/src/backends/WASMBackend.ts:
       description: WASM Matrix Backend (AssemblyScript)
       externalDependencies: []
@@ -2702,6 +2750,12 @@ modules:
           imports:
             - detectWasmFeatures
             - WasmFeatures
+        - file: ./wasm/resolve.js
+          imports: []
+          typeOnly: true
+        - file: ./wasm/integrity.js
+          imports: []
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - wasmBackend
@@ -2719,7 +2773,13 @@ modules:
       description: WASM Loader - Loads and manages WebAssembly modules
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./wasm/integrity.js
+          imports: []
+          typeOnly: true
+        - file: ./wasm/resolve.js
+          imports: []
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - wasmLoader
@@ -7707,6 +7767,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./type/local/Decimal.ts
+          imports: []
+          typeOnly: true
         - file: ./core/function/typed.js
           imports:
             - TypedFunction
@@ -13808,6 +13871,39 @@ modules:
         - PolarInput
         - AbsArgInput
         - ComplexConstructor
+    functions/src/type/local/Decimal.ts:
+      description: Local Decimal implementation for arbitrary precision arithmetic.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - ROUND_UP
+        - ROUND_DOWN
+        - ROUND_CEIL
+        - ROUND_FLOOR
+        - ROUND_HALF_UP
+        - ROUND_HALF_DOWN
+        - ROUND_HALF_EVEN
+        - ROUND_HALF_CEIL
+        - ROUND_HALF_FLOOR
+        - EUCLID
+        - Decimal
+      classes:
+        - Decimal
+      interfaces:
+        - DecimalConfig
+      constants:
+        - ROUND_UP
+        - ROUND_DOWN
+        - ROUND_CEIL
+        - ROUND_FLOOR
+        - ROUND_HALF_UP
+        - ROUND_HALF_DOWN
+        - ROUND_HALF_EVEN
+        - ROUND_HALF_CEIL
+        - ROUND_HALF_FLOOR
+        - EUCLID
     functions/src/type/matrix/FibonacciHeap.ts:
       description: Comparison function type for heap operations.
       externalDependencies: []
@@ -26100,6 +26196,13 @@ modules:
         - PoolOptions
         - ExecOptions
         - PoolStats
+    parallel/src/matrix.worker.ts:
+      description: Matrix Worker for parallel computation
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports: []
   parallel/operations:
     parallel/src/operations/elementwise.ts:
       description: Parallel Element-wise Operations
@@ -27248,6 +27351,55 @@ modules:
         - matrix_cholesky
         - matrix_inverse
         - matrix_determinant
+  assembly/bindings:
+    assembly/src/bindings/index.ts:
+      description: MathTS WASM Bindings
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./wasm-loader.js
+          imports:
+            - MathTSWasm
+            - loadWasm
+            - loadWasmSync
+          reExport: true
+        - file: ./wasm-loader.js
+          imports:
+            - MathTSWasmExports
+            - MathTSWasmInstance
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - MathTSWasm
+        - loadWasm
+        - loadWasmSync
+        - MathTSWasmExports
+        - MathTSWasmInstance
+      reExported:
+        - MathTSWasm
+        - loadWasm
+        - loadWasmSync
+        - MathTSWasmExports
+        - MathTSWasmInstance
+    assembly/src/bindings/wasm-loader.ts:
+      description: WASM Module Loader
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - loadWasm
+        - loadWasmSync
+        - MathTSWasm
+      classes:
+        - MathTSWasm
+      interfaces:
+        - MathTSWasmExports
+        - MathTSWasmInstance
+      functions:
+        - loadWasm
+        - loadWasmSync
   assembly:
     assembly/src/elementwise.ts:
       description: Unary elementwise transcendental array kernels — POINTER-ABI AssemblyScript.
@@ -29468,9 +29620,12 @@ dependencyGraph:
         - matrix/src/backends/index.ts
         - matrix/src/backends/JSBackend.ts
         - matrix/src/backends/ParallelBackend.ts
+        - matrix/src/backends/register-backends.ts
         - matrix/src/backends/wasm/detect.ts
         - matrix/src/backends/wasm/fft-wasm.ts
         - matrix/src/backends/wasm/index.ts
+        - matrix/src/backends/wasm/integrity.ts
+        - matrix/src/backends/wasm/resolve.ts
         - matrix/src/backends/WASMBackend.ts
         - matrix/src/backends/WasmLoader.ts
     - name: Matrix
@@ -29867,6 +30022,7 @@ dependencyGraph:
         - functions/src/type/chain/Chain.ts
         - functions/src/type/chain/function/chain.ts
         - functions/src/type/complex/Complex.ts
+        - functions/src/type/local/Decimal.ts
         - functions/src/type/matrix/FibonacciHeap.ts
         - functions/src/type/matrix/function/index.ts
         - functions/src/type/matrix/ImmutableDenseMatrix.ts
@@ -30459,6 +30615,7 @@ dependencyGraph:
       files:
         - parallel/src/ComputePool.ts
         - parallel/src/index.ts
+        - parallel/src/matrix.worker.ts
     - name: Parallel/operations
       files:
         - parallel/src/operations/elementwise.ts
@@ -30497,6 +30654,10 @@ dependencyGraph:
     - name: Assembly/algebra
       files:
         - assembly/src/algebra/decomposition.ts
+    - name: Assembly/bindings
+      files:
+        - assembly/src/bindings/index.ts
+        - assembly/src/bindings/wasm-loader.ts
     - name: Assembly
       files:
         - assembly/src/elementwise.ts
@@ -30533,19 +30694,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 986
-  totalModules: 72
-  totalLinesOfCode: 163347
-  totalExports: 4546
-  totalClasses: 51
-  totalInterfaces: 374
-  totalFunctions: 1490
+  totalTypeScriptFiles: 993
+  totalModules: 73
+  totalLinesOfCode: 165293
+  totalExports: 4570
+  totalClasses: 53
+  totalInterfaces: 378
+  totalFunctions: 1497
   totalTypeGuards: 156
   totalEnums: 0
-  totalConstants: 1517
-  totalReExports: 1527
-  totalTypeOnlyImports: 494
+  totalConstants: 1527
+  totalReExports: 1532
+  totalTypeOnlyImports: 500
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 218
+  unusedExportsCount: 231

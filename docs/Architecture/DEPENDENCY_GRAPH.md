@@ -78,14 +78,15 @@ This document provides a comprehensive dependency graph of all files, components
 68. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
 69. [Workbook Dependencies](#workbook-dependencies)
 70. [Assembly/algebra Dependencies](#assembly-algebra-dependencies)
-71. [Assembly Dependencies](#assembly-dependencies)
-72. [Assembly/ops Dependencies](#assembly-ops-dependencies)
-73. [Assembly/types Dependencies](#assembly-types-dependencies)
-74. [Compat Dependencies](#compat-dependencies)
-75. [Dependency Matrix](#dependency-matrix)
-76. [Circular Dependency Analysis](#circular-dependency-analysis)
-77. [Visual Dependency Graph](#visual-dependency-graph)
-78. [Summary Statistics](#summary-statistics)
+71. [Assembly/bindings Dependencies](#assembly-bindings-dependencies)
+72. [Assembly Dependencies](#assembly-dependencies)
+73. [Assembly/ops Dependencies](#assembly-ops-dependencies)
+74. [Assembly/types Dependencies](#assembly-types-dependencies)
+75. [Compat Dependencies](#compat-dependencies)
+76. [Dependency Matrix](#dependency-matrix)
+77. [Circular Dependency Analysis](#circular-dependency-analysis)
+78. [Visual Dependency Graph](#visual-dependency-graph)
+79. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -103,7 +104,7 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core/typed**: 3 files
 - **core/types**: 14 files
-- **matrix/backends**: 19 files
+- **matrix/backends**: 22 files
 - **matrix**: 4 files
 - **matrix/operations**: 14 files
 - **matrix/types**: 6 files
@@ -133,7 +134,7 @@ The codebase is organized into the following modules:
 - **functions/statistics**: 14 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
-- **functions/type**: 31 files
+- **functions/type**: 32 files
 - **functions/typed**: 31 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
@@ -157,12 +158,13 @@ The codebase is organized into the following modules:
 - **trigonometry**: 1 file
 - **statistics**: 1 file
 - **signal**: 1 file
-- **parallel**: 2 files
+- **parallel**: 3 files
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
 - **workbook**: 18 files
 - **assembly/algebra**: 1 file
+- **assembly/bindings**: 2 files
 - **assembly**: 7 files
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
@@ -179,11 +181,11 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 3              | 2               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 30             | 5               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 425            | 4               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 391            | 4               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 425            | 3               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -194,9 +196,9 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-trigonometry` (`trigonometry/`)              | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
-| `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 11             | 4               |
+| `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 12             | 2               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
-| `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 25             | 3               |
+| `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 1               |
 
 ### Package Dependency Diagram
@@ -825,6 +827,7 @@ graph LR
 | `./Backend.js` | `backendRegistry, DEFAULT_BACKEND_HINTS` | Import |
 | `./JSBackend.js` | `jsBackend` | Import |
 | `../config.js` | `getConfig, onConfigChange, MatrixConfig, OperationType` | Import |
+| `./register-backends.js` | `` | Import |
 
 **Exports:**
 
@@ -982,18 +985,19 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./Backend.js` | `BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS` | Re-export |
-| `./JSBackend.js` | `JSBackend, jsBackend` | Re-export |
-| `./ParallelBackend.js` | `ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig` | Re-export |
-| `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
-| `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
-| `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
-| `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
-| `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
-| `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
-| `./Backend.js` | `MatrixBackend, BackendType, BackendHints` | Re-export (type-only) |
-| `./wasm/index.js` | `WasmFeatures` | Re-export (type-only) |
-| `./gpu/index.js` | `GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig` | Re-export (type-only) |
+| `./register-backends.js` | ``| Import |
+|`./Backend.js`|`BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS`| Re-export |
+|`./JSBackend.js`|`JSBackend, jsBackend`| Re-export |
+|`./ParallelBackend.js`|`ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig`| Re-export |
+|`./WASMBackend.js`|`WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig`| Re-export |
+|`./GPUMatrixBackend.js`|`GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig`| Re-export |
+|`./GPUBackend.js`|`GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus`| Re-export |
+|`./BackendManager.js`|`BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType`| Re-export |
+|`./wasm/index.js`|`detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures`| Re-export |
+|`./gpu/index.js`|`hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager`| Re-export |
+|`./Backend.js`|`MatrixBackend, BackendType, BackendHints`| Re-export (type-only) |
+|`./wasm/index.js`|`WasmFeatures`| Re-export (type-only) |
+|`./gpu/index.js`|`GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig` | Re-export (type-only) |
 
 **Exports:**
 
@@ -1038,6 +1042,17 @@ graph LR
 
 ---
 
+### `matrix/src/backends/register-backends.ts` - Default backend registrations.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `backendRegistry` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./WASMBackend.js` | `wasmBackend` | Import |
+
+---
+
 ### `matrix/src/backends/wasm/detect.ts` - WASM Feature Detection
 
 **Exports:**
@@ -1078,6 +1093,23 @@ graph LR
 
 ---
 
+### `matrix/src/backends/wasm/integrity.ts` - WASM integrity verification - SHA-384 manifest check.
+
+**Exports:**
+
+- Interfaces: `WasmManifest`
+- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
+
+---
+
+### `matrix/src/backends/wasm/resolve.ts` - Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+
+**Exports:**
+
+- Functions: `resolvePackagedWasm`, `defaultWasmLocation`
+
+---
+
 ### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend (AssemblyScript)
 
 **Internal Dependencies:**
@@ -1087,6 +1119,8 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 | `./JSBackend.js` | `jsBackend` | Import |
 | `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
+| `./wasm/resolve.js` | ``| Import (type-only) |
+| `./wasm/integrity.js` |`` | Import (type-only) |
 
 **Exports:**
 
@@ -1098,6 +1132,12 @@ graph LR
 ---
 
 ### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./wasm/integrity.js` | ``| Import (type-only) |
+| `./wasm/resolve.js` |`` | Import (type-only) |
 
 **Exports:**
 
@@ -3756,10 +3796,11 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./core/function/typed.js` | `TypedFunction` | Re-export (type-only) |
-| `./core/config.js` | `MathJsConfig, ConfigOptions` | Re-export (type-only) |
-| `./core/create.js` | `MathJsInstance` | Re-export (type-only) |
-| `../types/index.js` | `Matrix, MathCollection, MathNumericType, MathScalarType, MathArray` | Re-export (type-only) |
+| `./type/local/Decimal.ts` | ``| Import (type-only) |
+|`./core/function/typed.js`|`TypedFunction`| Re-export (type-only) |
+|`./core/config.js`|`MathJsConfig, ConfigOptions`| Re-export (type-only) |
+|`./core/create.js`|`MathJsInstance`| Re-export (type-only) |
+|`../types/index.js`|`Matrix, MathCollection, MathNumericType, MathScalarType, MathArray` | Re-export (type-only) |
 
 **Exports:**
 
@@ -6995,6 +7036,17 @@ graph LR
 **Exports:**
 
 - Interfaces: `ComplexJSON`, `PolarCoordinates`, `ComplexFormatOptions`, `Complex`, `PolarInput`, `AbsArgInput`, `ComplexConstructor`
+
+---
+
+### `functions/src/type/local/Decimal.ts` - Local Decimal implementation for arbitrary precision arithmetic.
+
+**Exports:**
+
+- Classes: `Decimal`
+- Interfaces: `DecimalConfig`
+- Constants: `ROUND_UP`, `ROUND_DOWN`, `ROUND_CEIL`, `ROUND_FLOOR`, `ROUND_HALF_UP`, `ROUND_HALF_DOWN`, `ROUND_HALF_EVEN`, `ROUND_HALF_CEIL`, `ROUND_HALF_FLOOR`, `EUCLID`
+- Default: `Decimal`
 
 ---
 
@@ -13236,6 +13288,10 @@ graph LR
 
 ---
 
+### `parallel/src/matrix.worker.ts` - Matrix Worker for parallel computation
+
+---
+
 <a id="parallel-operations-dependencies"></a>
 
 ## Parallel/operations Dependencies
@@ -13693,6 +13749,35 @@ graph LR
 
 ---
 
+<a id="assembly-bindings-dependencies"></a>
+
+## Assembly/bindings Dependencies
+
+### `assembly/src/bindings/index.ts` - MathTS WASM Bindings
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./wasm-loader.js` | `MathTSWasm, loadWasm, loadWasmSync` | Re-export |
+| `./wasm-loader.js` | `MathTSWasmExports, MathTSWasmInstance` | Re-export (type-only) |
+
+**Exports:**
+
+- Re-exports: `MathTSWasm`, `loadWasm`, `loadWasmSync`, `MathTSWasmExports`, `MathTSWasmInstance`
+
+---
+
+### `assembly/src/bindings/wasm-loader.ts` - WASM Module Loader
+
+**Exports:**
+
+- Classes: `MathTSWasm`
+- Interfaces: `MathTSWasmExports`, `MathTSWasmInstance`
+- Functions: `loadWasm`, `loadWasmSync`
+- Default: `MathTSWasm`
+
+---
+
 <a id="assembly-dependencies"></a>
 
 ## Assembly Dependencies
@@ -14014,7 +14099,7 @@ graph LR
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 44 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `expression/src/utils/is`                              | 0 files      | 40 files   |
-| `functions/src/types`                                  | 4 files      | 30 files   |
+| `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
@@ -14121,7 +14206,7 @@ graph TD
         N38[ShaderManager]
         N39[Sync]
         N40[GPUBackend]
-        N41[...9 more]
+        N41[...12 more]
     end
 
     subgraph Matrix
@@ -14413,13 +14498,13 @@ graph TD
         N240[Chain]
         N241[chain]
         N242[Complex]
-        N243[FibonacciHeap]
-        N244[index]
-        N245[ImmutableDenseMatrix]
-        N246[MatrixIndex]
-        N247[Spa]
-        N248[types]
-        N249[...21 more]
+        N243[Decimal]
+        N244[FibonacciHeap]
+        N245[index]
+        N246[ImmutableDenseMatrix]
+        N247[MatrixIndex]
+        N248[Spa]
+        N249[...22 more]
     end
 
     subgraph Functions/typed
@@ -14598,76 +14683,82 @@ graph TD
     subgraph Parallel
         N354[ComputePool]
         N355[index]
+        N356[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N356[elementwise]
-        N357[index]
-        N358[map]
-        N359[matmul]
-        N360[reduce]
+        N357[elementwise]
+        N358[index]
+        N359[map]
+        N360[matmul]
+        N361[reduce]
     end
 
     subgraph Parallel/ops
-        N361[bitwise]
+        N362[bitwise]
     end
 
     subgraph Parallel/strategies
-        N362[chunk]
-        N363[index]
-        N364[threshold]
+        N363[chunk]
+        N364[index]
+        N365[threshold]
     end
 
     subgraph Workbook
-        N365[cli]
-        N366[contract]
-        N367[doc]
-        N368[edit]
-        N369[executor]
-        N370[formatter]
-        N371[fs-atomic]
-        N372[graph]
-        N373[html]
-        N374[index]
-        N375[...8 more]
+        N366[cli]
+        N367[contract]
+        N368[doc]
+        N369[edit]
+        N370[executor]
+        N371[formatter]
+        N372[fs-atomic]
+        N373[graph]
+        N374[html]
+        N375[index]
+        N376[...8 more]
     end
 
     subgraph Assembly/algebra
-        N376[decomposition]
+        N377[decomposition]
+    end
+
+    subgraph Assembly/bindings
+        N378[index]
+        N379[wasm-loader]
     end
 
     subgraph Assembly
-        N377[elementwise]
-        N378[index]
-        N379[poly]
-        N380[signal]
-        N381[sort]
-        N382[special]
-        N383[tridiag]
+        N380[elementwise]
+        N381[index]
+        N382[poly]
+        N383[signal]
+        N384[sort]
+        N385[special]
+        N386[tridiag]
     end
 
     subgraph Assembly/ops
-        N384[approx]
-        N385[array]
-        N386[bitwise]
-        N387[complex-array]
-        N388[complex-ops]
-        N389[curvefit]
-        N390[fft]
-        N391[linalg]
-        N392[matrix]
-        N393[number-theory]
-        N394[...6 more]
+        N387[approx]
+        N388[array]
+        N389[bitwise]
+        N390[complex-array]
+        N391[complex-ops]
+        N392[curvefit]
+        N393[fft]
+        N394[linalg]
+        N395[matrix]
+        N396[number-theory]
+        N397[...6 more]
     end
 
     subgraph Assembly/types
-        N395[complex]
+        N398[complex]
     end
 
     subgraph Compat
-        N396[chain]
-        N397[index]
-        N398[shims]
+        N399[chain]
+        N400[index]
+        N401[shims]
     end
 
     N2 --> N1
@@ -14755,17 +14846,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 986    |
-| Total Modules           | 72     |
-| Total Lines of Code     | 163347 |
-| Total Exports           | 4546   |
-| Total Re-exports        | 1527   |
-| Total Classes           | 51     |
-| Total Interfaces        | 374    |
-| Total Functions         | 1490   |
+| Total TypeScript Files  | 993    |
+| Total Modules           | 73     |
+| Total Lines of Code     | 165293 |
+| Total Exports           | 4570   |
+| Total Re-exports        | 1532   |
+| Total Classes           | 53     |
+| Total Interfaces        | 378    |
+| Total Functions         | 1497   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 494    |
+| Type-only Imports       | 500    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

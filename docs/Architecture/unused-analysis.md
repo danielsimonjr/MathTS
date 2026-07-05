@@ -5,9 +5,55 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 218
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 12
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
+  - **Test-only (exercised by a test, ships nothing)**: 10
+- **Potentially unused exports**: 231
   - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 218
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 231
+
+## Dormant Files — Orphaned (delete/wire candidates)
+
+Runtime source files reachable from NO root and NO test. Each is either dead code
+to delete, or a root the tool cannot see (a new build/worker entry, a
+`new URL()`-loaded script, or a side-effect-only module) — in which case wire it
+or seed it. Verify before deleting.
+
+### `core` (1)
+
+- `core/src/types/index.ts`
+
+### `packages/workerpool` (1)
+
+- `packages/workerpool/src/workerpool-browser-shim.ts`
+
+## Dormant Files — Test-only (ships nothing, but exercised)
+
+Not reachable from any package entry point, but imported by a test — deliberately
+kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
+directly. Not dead; not shipped. No action needed.
+
+### `core` (3)
+
+- `core/src/types.ts`
+- `core/src/types/matrix/Range.ts`
+- `core/src/utils.ts`
+
+### `expression` (3)
+
+- `expression/src/function/compile.ts`
+- `expression/src/function/evaluate.ts`
+- `expression/src/function/help.ts`
+
+### `functions` (2)
+
+- `functions/src/signal/conv.ts`
+- `functions/src/signal/fft.ts`
+
+### `parallel` (2)
+
+- `parallel/src/ParallelMatrix.ts`
+- `parallel/src/WorkerPool.ts`
 
 ## Potentially Unused Files
 
@@ -46,6 +92,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `MathTSTypeDef` (interface) — 1 in-file ref
 - `SignatureImpl` (type) — 7 in-file refs
 - `SignatureRecord` (type) — 3 in-file refs
+
+### `matrix/src/backends/wasm/integrity.ts`
+
+- `WasmManifest` (interface) — 4 in-file refs
 
 ### `matrix/src/backends/WasmLoader.ts`
 
@@ -226,6 +276,21 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `PolarInput` (interface) — 3 in-file refs
 - `AbsArgInput` (interface) — 2 in-file refs
 - `ComplexConstructor` (interface) — 1 in-file ref
+
+### `functions/src/type/local/Decimal.ts`
+
+- `Decimal` (class) — 161 in-file refs
+- `DecimalConfig` (interface) — 3 in-file refs
+- `ROUND_UP` (constant) — 3 in-file refs
+- `ROUND_DOWN` (constant) — 3 in-file refs
+- `ROUND_CEIL` (constant) — 4 in-file refs
+- `ROUND_FLOOR` (constant) — 4 in-file refs
+- `ROUND_HALF_UP` (constant) — 5 in-file refs
+- `ROUND_HALF_DOWN` (constant) — 3 in-file refs
+- `ROUND_HALF_EVEN` (constant) — 3 in-file refs
+- `ROUND_HALF_CEIL` (constant) — 3 in-file refs
+- `ROUND_HALF_FLOOR` (constant) — 3 in-file refs
+- `EUCLID` (constant) — 2 in-file refs
 
 ### `functions/src/type/matrix/MatrixIndex.ts`
 

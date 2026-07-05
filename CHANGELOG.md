@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added/Changed (2026-07-05) — DGT (dependency-graph tool) now reports DORMANT FILES + 4 reachability fixes; 8 dead files deleted
+
+The dependency-graph tool (`npm run docs:deps`) gained a **Dormant Files** section in
+`unused-analysis.md` — source files on disk reachable from no entry/build root — split
+into **orphaned** (reachable from nothing, delete/wire candidates) vs **test-only**
+(exercised by a test, ships nothing), with `.d.ts` excluded. Getting that list truthful
+required fixing four reachability blind spots, each of which had been silently
+false-flagging live code as dormant:
+
+- **bare side-effect imports** (`import './register-backends.js';`) — the binding-oriented
+  regex never matched them; backend-registration modules looked dead.
+- **build-script entry points** (`tsup src/index.ts src/worker.ts`) — extra `src/*.ts`
+  bundler entries (worker scripts loaded via `new URL(...)`) are roots nothing imports.
+- **secondary `tsc -p <cfg>` builds** (AssemblyScript JS bindings via
+  `tsc -p tsconfig.bindings.json`) — the tool now seeds that tsconfig's `include` roots.
+- **inline `import('…')` type expressions** (`import('./type/local/Decimal.ts').Decimal`)
+  — a real type-position edge that neither the `import…from` nor bare-import regex saw;
+  this alone re-classified a large chain of type barrels from dormant to reachable
+  (orphaned 11 → 2).
+
+With the tool now accurate, the genuinely-dead remainder was removed: **8 files** —
+`expression/src/error/ArgumentsError.ts`; `functions/src/utils/{function,log,lruQueue,
+bignumber/constants}.ts` (a closed import subgraph reachable from nothing);
+`matrix/src/types.ts`; `parallel/src/workers/compute.worker.ts` (a superseded worker
+never built); `assembly/src/env/abort.ts` (a custom AS abort handler never wired via
+asconfig). All were unreachable and unexported, so the published bundles are unchanged.
+Two orphans were deliberately KEPT and are report-only: `core/src/types/index.ts` (a
+type barrel exercised by `core/tests/utils.test.ts`) and
+`packages/workerpool/src/workerpool-browser-shim.ts` (a documented browser fallback).
+Gates: build 22/22, wasm build, typecheck 28/28, test 44/44, eslint clean, cycles 0/0.
+
 ### Added (2026-07-05) — 92 embeddedDocs entries wired; `help()` now covers the MathTS extensions
 
 The second half of the dormant expression pocket: 92 doc files (CAS/algebra, geometry,

@@ -22,6 +22,10 @@ npx tsx tools/create-dependency-graph.ts
 
 - `docs/Architecture/DEPENDENCY_GRAPH.md` - Markdown documentation
 - `docs/Architecture/dependency-graph.json` - JSON data structure
+- `docs/Architecture/unused-analysis.md` - unused exports **and dormant files**: source
+  files reachable from no entry/build root, split into _orphaned_ (reachable from nothing
+  — delete/wire candidates) and _test-only_ (imported by a test, ships nothing); `.d.ts`
+  ambient declarations excluded
 - `docs/Architecture/wasm-pairing.md` / `wasm-pairing.json` - WASM accelerator ↔
   function pairing: which public `mathTyped` functions route to a WASM bridge
   (`*Dispatch`) vs run pure-JS (generated only when `functions/src/typed/` is in scope)
@@ -35,9 +39,14 @@ npx tsx tools/create-dependency-graph.ts
 **Features:**
 
 - Scans all TypeScript files in `src/`
-- Parses imports and exports
+- Parses imports and exports — including bare side-effect `import '…'`, inline
+  `import('…')` type expressions, and npm-scoped workspace imports
+- Seeds reachability from every build root it can discover: `src/index.ts`, `exports`
+  subpaths, `bin` targets, extra `tsup src/*.ts` entries, and secondary `tsc -p <cfg>`
+  includes parsed from the package scripts
 - Categorizes files into logical modules
 - Detects circular dependencies
+- Reports dormant files (orphaned vs test-only) and unused exports
 - Generates statistics (file count, export count, etc.)
 - Produces both human-readable Markdown and machine-readable JSON
 - Fully typed TypeScript for type safety

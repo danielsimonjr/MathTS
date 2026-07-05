@@ -377,6 +377,14 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   wired into the index (`help('polyFit')` etc. now work); 1 doc for a nonexistent fn deleted. Dormancy
   157 → 34 files; cycles 0/0.
 
+- ✅ **[DGT upgraded + dead-code purge 2026-07-05]** The dependency-graph tool now emits a
+  **Dormant Files** report (orphaned vs test-only, `.d.ts` excluded) and follows 4 previously-blind
+  edge forms: bare side-effect imports, `tsup`/`tsc -p` build entries, and inline `import('…')` type
+  expressions. Accurate list → deleted 8 confirmed-dead files (closed `constants→function→lruQueue`
+  subgraph, `matrix/types.ts`, superseded `compute.worker.ts`, unwired AS `env/abort.ts`, expression
+  `ArgumentsError.ts`). Orphaned 11 → 2 (both kept: test-reachable `core/types/index.ts`, deliberate
+  `workerpool-browser-shim.ts`). All gates green.
+
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
 Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,

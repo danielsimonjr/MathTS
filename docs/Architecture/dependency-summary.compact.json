@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 986, "e": 4546, "re": 1527 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 993, "e": 4570, "re": 1532 },
   "s": {
-    "loc": 163347,
-    "cls": 51,
-    "int": 374,
-    "fn": 1490,
+    "loc": 165293,
+    "cls": 53,
+    "int": 378,
+    "fn": 1497,
     "tg": 156,
     "en": 0,
-    "co": 1517,
-    "toi": 494
+    "co": 1527,
+    "toi": 500
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -218,7 +218,7 @@
       ]
     },
     "matrix/backends": {
-      "f": 19,
+      "f": 22,
       "exp": [
         "DEFAULT_BACKEND_HINTS",
         "backendRegistry",
@@ -771,29 +771,30 @@
       ]
     },
     "functions/type": {
-      "f": 31,
+      "f": 32,
       "exp": [
         "createChainClass",
         "createChain",
+        "ROUND_UP",
+        "ROUND_DOWN",
+        "ROUND_CEIL",
+        "ROUND_FLOOR",
+        "ROUND_HALF_UP",
+        "ROUND_HALF_DOWN",
+        "ROUND_HALF_EVEN",
+        "ROUND_HALF_CEIL",
+        "ROUND_HALF_FLOOR",
+        "EUCLID",
+        "Decimal",
         "createFibonacciHeapClass",
         "createIndex",
         "createImmutableDenseMatrixClass",
         "createIndexClass",
         "createSpaClass",
         "broadcast",
-        "createMatAlgo01xDSid",
-        "createMatAlgo02xDS0",
-        "createMatAlgo03xDSf",
-        "createMatAlgo04xSidSid",
-        "createMatAlgo05xSfSf",
-        "createMatAlgo06xS0S0",
-        "createMatAlgo07xSSf",
-        "createMatAlgo08xS0Sid",
-        "createMatAlgo09xS0Sf",
-        "createMatAlgo10xSids",
-        "createMatAlgo11xS0s",
-        "createMatAlgo12xSfs"
+        "createMatAlgo01xDSid"
       ],
+      "cls": ["Decimal"],
       "int": [
         "BigNumberJSON",
         "BigNumberClass",
@@ -1277,7 +1278,7 @@
       ]
     },
     "parallel": {
-      "f": 2,
+      "f": 3,
       "exp": [
         "Transfer",
         "DEFAULT_THRESHOLD_BY_OP",
@@ -1402,6 +1403,12 @@
         "matrix_inverse",
         "matrix_determinant"
       ]
+    },
+    "assembly/bindings": {
+      "f": 2,
+      "exp": ["MathTSWasm", "loadWasm", "loadWasmSync", "MathTSWasmExports", "MathTSWasmInstance"],
+      "cls": ["MathTSWasm"],
+      "int": ["MathTSWasmExports", "MathTSWasmInstance"]
     },
     "assembly": {
       "f": 7,
