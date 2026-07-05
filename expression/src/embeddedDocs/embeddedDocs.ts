@@ -252,6 +252,100 @@ import { printDocs } from './function/utils/print.js';
 import { typeOfDocs } from './function/utils/typeOf.js';
 import { solveODEDocs } from './function/numeric/solveODE.js';
 
+// MathTS-native extension docs (wired 2026-07-05 — formerly dormant)
+import { apartDocs } from './function/algebra/apart.js';
+import { cancelDocs } from './function/algebra/cancel.js';
+import { coefficientListDocs } from './function/algebra/coefficientList.js';
+import { collectDocs } from './function/algebra/collect.js';
+import { combineDocs } from './function/algebra/combine.js';
+import { complexExpandDocs } from './function/algebra/complexExpand.js';
+import { degreeDocs } from './function/algebra/degree.js';
+import { differencesDocs } from './function/algebra/differences.js';
+import { discriminantDocs } from './function/algebra/discriminant.js';
+import { elementDocs } from './function/algebra/element.js';
+import { eliminateDocs } from './function/algebra/eliminate.js';
+import { expToTrigDocs } from './function/algebra/expToTrig.js';
+import { expandDocs } from './function/algebra/expand.js';
+import { factorDocs } from './function/algebra/factor.js';
+import { fullSimplifyDocs } from './function/algebra/fullSimplify.js';
+import { functionExpandDocs } from './function/algebra/functionExpand.js';
+import { normalFormDocs } from './function/algebra/normalForm.js';
+import { partialDerivativeDocs } from './function/algebra/partialDerivative.js';
+import { polyaddDocs } from './function/algebra/polyadd.js';
+import { polyderDocs } from './function/algebra/polyder.js';
+import { polymulDocs } from './function/algebra/polymul.js';
+import { polynomialGCDDocs } from './function/algebra/polynomialGCD.js';
+import { polynomialLCMDocs } from './function/algebra/polynomialLCM.js';
+import { polynomialQuotientDocs } from './function/algebra/polynomialQuotient.js';
+import { polynomialRemainderDocs } from './function/algebra/polynomialRemainder.js';
+import { polyvalDocs } from './function/algebra/polyval.js';
+import { powerExpandDocs } from './function/algebra/powerExpand.js';
+import { reduceDocs } from './function/algebra/reduce.js';
+import { resultantDocs } from './function/algebra/resultant.js';
+import { substituteDocs } from './function/algebra/substitute.js';
+import { tangentLineDocs } from './function/algebra/tangentLine.js';
+import { togetherDocs } from './function/algebra/together.js';
+import { trigExpandDocs } from './function/algebra/trigExpand.js';
+import { trigReduceDocs } from './function/algebra/trigReduce.js';
+import { trigToExpDocs } from './function/algebra/trigToExp.js';
+import { variablesDocs } from './function/algebra/variables.js';
+import { doubleFactorialDocs } from './function/combinatorics/doubleFactorial.js';
+import { fallingFactorialDocs } from './function/combinatorics/fallingFactorial.js';
+import { fibonacciDocs } from './function/combinatorics/fibonacci.js';
+import { lucasDocs } from './function/combinatorics/lucas.js';
+import { risingFactorialDocs } from './function/combinatorics/risingFactorial.js';
+import { subfactorialDocs } from './function/combinatorics/subfactorial.js';
+import { angle2DDocs } from './function/geometry/angle2D.js';
+import { angle3DDocs } from './function/geometry/angle3D.js';
+import { convexHullDocs } from './function/geometry/convexHull.js';
+import { cross3DDocs } from './function/geometry/cross3D.js';
+import { distance2DDocs } from './function/geometry/distance2D.js';
+import { distance3DDocs } from './function/geometry/distance3D.js';
+import { distanceNDDocs } from './function/geometry/distanceND.js';
+import { distancePointToLine2DDocs } from './function/geometry/distancePointToLine2D.js';
+import { dot3DDocs } from './function/geometry/dot3D.js';
+import { intersectLines2DDocs } from './function/geometry/intersectLines2D.js';
+import { intersectSegments2DDocs } from './function/geometry/intersectSegments2D.js';
+import { pointInPolygonDocs } from './function/geometry/pointInPolygon.js';
+import { polygonAreaDocs } from './function/geometry/polygonArea.js';
+import { projectVectorDocs } from './function/geometry/projectVector.js';
+import { reflectVectorDocs } from './function/geometry/reflectVector.js';
+import { rotateVector2DDocs } from './function/geometry/rotateVector2D.js';
+import { rotateVector3DDocs } from './function/geometry/rotateVector3D.js';
+import { triangleAreaDocs } from './function/geometry/triangleArea.js';
+import { cubicSplineDocs } from './function/numeric/cubicSpline.js';
+import { gaussQuadDocs } from './function/numeric/gaussQuad.js';
+import { hermiteInterpDocs } from './function/numeric/hermiteInterp.js';
+import { lagrangeInterpDocs } from './function/numeric/lagrangeInterp.js';
+import { linearInterpDocs } from './function/numeric/linearInterp.js';
+import { pchipInterpDocs } from './function/numeric/pchipInterp.js';
+import { polyFitDocs } from './function/numeric/polyFit.js';
+import { rombergDocs } from './function/numeric/romberg.js';
+import { simpsonDocs } from './function/numeric/simpson.js';
+import { trapzDocs } from './function/numeric/trapz.js';
+import { bernoulliPMFDocs } from './function/probability/bernoulliPMF.js';
+import { binomialPMFDocs } from './function/probability/binomialPMF.js';
+import { entropyDocs } from './function/probability/entropy.js';
+import { exponentialCDFDocs } from './function/probability/exponentialCDF.js';
+import { exponentialPDFDocs } from './function/probability/exponentialPDF.js';
+import { geometricPMFDocs } from './function/probability/geometricPMF.js';
+import { jsDivergenceDocs } from './function/probability/jsDivergence.js';
+import { normalCDFDocs } from './function/probability/normalCDF.js';
+import { normalPDFDocs } from './function/probability/normalPDF.js';
+import { poissonPMFDocs } from './function/probability/poissonPMF.js';
+import { autoCorrelationDocs } from './function/signal/autoCorrelation.js';
+import { crossCorrelationDocs } from './function/signal/crossCorrelation.js';
+import { groupDelayDocs } from './function/signal/groupDelay.js';
+import { unwrapPhaseDocs } from './function/signal/unwrapPhase.js';
+import { besselJ0Docs } from './function/special/besselJ0.js';
+import { besselJ1Docs } from './function/special/besselJ1.js';
+import { besselY0Docs } from './function/special/besselY0.js';
+import { besselY1Docs } from './function/special/besselY1.js';
+import { betaDocs } from './function/special/beta.js';
+import { digammaDocs } from './function/special/digamma.js';
+import { erfcDocs } from './function/special/erfc.js';
+import { gammaincDocs } from './function/special/gammainc.js';
+
 export const embeddedDocs = {
   // construction functions
   bignumber: bignumberDocs,
@@ -655,4 +749,97 @@ export const embeddedDocs = {
   print: printDocs,
   typeOf: typeOfDocs,
   numeric: numericDocs,
+  // MathTS-native extension docs (wired 2026-07-05)
+  apart: apartDocs,
+  cancel: cancelDocs,
+  coefficientList: coefficientListDocs,
+  collect: collectDocs,
+  combine: combineDocs,
+  complexExpand: complexExpandDocs,
+  degree: degreeDocs,
+  differences: differencesDocs,
+  discriminant: discriminantDocs,
+  element: elementDocs,
+  eliminate: eliminateDocs,
+  expToTrig: expToTrigDocs,
+  expand: expandDocs,
+  factor: factorDocs,
+  fullSimplify: fullSimplifyDocs,
+  functionExpand: functionExpandDocs,
+  normalForm: normalFormDocs,
+  partialDerivative: partialDerivativeDocs,
+  polyadd: polyaddDocs,
+  polyder: polyderDocs,
+  polymul: polymulDocs,
+  polynomialGCD: polynomialGCDDocs,
+  polynomialLCM: polynomialLCMDocs,
+  polynomialQuotient: polynomialQuotientDocs,
+  polynomialRemainder: polynomialRemainderDocs,
+  polyval: polyvalDocs,
+  powerExpand: powerExpandDocs,
+  reduce: reduceDocs,
+  resultant: resultantDocs,
+  substitute: substituteDocs,
+  tangentLine: tangentLineDocs,
+  together: togetherDocs,
+  trigExpand: trigExpandDocs,
+  trigReduce: trigReduceDocs,
+  trigToExp: trigToExpDocs,
+  variables: variablesDocs,
+  doubleFactorial: doubleFactorialDocs,
+  fallingFactorial: fallingFactorialDocs,
+  fibonacci: fibonacciDocs,
+  lucas: lucasDocs,
+  risingFactorial: risingFactorialDocs,
+  subfactorial: subfactorialDocs,
+  angle2D: angle2DDocs,
+  angle3D: angle3DDocs,
+  convexHull: convexHullDocs,
+  cross3D: cross3DDocs,
+  distance2D: distance2DDocs,
+  distance3D: distance3DDocs,
+  distanceND: distanceNDDocs,
+  distancePointToLine2D: distancePointToLine2DDocs,
+  dot3D: dot3DDocs,
+  intersectLines2D: intersectLines2DDocs,
+  intersectSegments2D: intersectSegments2DDocs,
+  pointInPolygon: pointInPolygonDocs,
+  polygonArea: polygonAreaDocs,
+  projectVector: projectVectorDocs,
+  reflectVector: reflectVectorDocs,
+  rotateVector2D: rotateVector2DDocs,
+  rotateVector3D: rotateVector3DDocs,
+  triangleArea: triangleAreaDocs,
+  cubicSpline: cubicSplineDocs,
+  gaussQuad: gaussQuadDocs,
+  hermiteInterp: hermiteInterpDocs,
+  lagrangeInterp: lagrangeInterpDocs,
+  linearInterp: linearInterpDocs,
+  pchipInterp: pchipInterpDocs,
+  polyFit: polyFitDocs,
+  romberg: rombergDocs,
+  simpson: simpsonDocs,
+  trapz: trapzDocs,
+  bernoulliPMF: bernoulliPMFDocs,
+  binomialPMF: binomialPMFDocs,
+  entropy: entropyDocs,
+  exponentialCDF: exponentialCDFDocs,
+  exponentialPDF: exponentialPDFDocs,
+  geometricPMF: geometricPMFDocs,
+  jsDivergence: jsDivergenceDocs,
+  normalCDF: normalCDFDocs,
+  normalPDF: normalPDFDocs,
+  poissonPMF: poissonPMFDocs,
+  autoCorrelation: autoCorrelationDocs,
+  crossCorrelation: crossCorrelationDocs,
+  groupDelay: groupDelayDocs,
+  unwrapPhase: unwrapPhaseDocs,
+  besselJ0: besselJ0Docs,
+  besselJ1: besselJ1Docs,
+  besselY0: besselY0Docs,
+  besselY1: besselY1Docs,
+  beta: betaDocs,
+  digamma: digammaDocs,
+  erfc: erfcDocs,
+  gammainc: gammaincDocs,
 };

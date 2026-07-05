@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-05",
-    "totalFiles": 894,
+    "totalFiles": 986,
     "totalModules": 72,
-    "totalExports": 4454
+    "totalExports": 4546
   },
   "entryPoints": [
     {
@@ -20164,7 +20164,7 @@
         "constants": ["typedDocs"]
       },
       "expression/src/embeddedDocs/embeddedDocs.ts": {
-        "description": "embeddedDocs module",
+        "description": "MathTS-native extension docs (wired 2026-07-05 — formerly dormant)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -21179,11 +21179,442 @@
           {
             "file": "./function/numeric/solveODE.js",
             "imports": ["solveODEDocs"]
+          },
+          {
+            "file": "./function/algebra/apart.js",
+            "imports": ["apartDocs"]
+          },
+          {
+            "file": "./function/algebra/cancel.js",
+            "imports": ["cancelDocs"]
+          },
+          {
+            "file": "./function/algebra/coefficientList.js",
+            "imports": ["coefficientListDocs"]
+          },
+          {
+            "file": "./function/algebra/collect.js",
+            "imports": ["collectDocs"]
+          },
+          {
+            "file": "./function/algebra/combine.js",
+            "imports": ["combineDocs"]
+          },
+          {
+            "file": "./function/algebra/complexExpand.js",
+            "imports": ["complexExpandDocs"]
+          },
+          {
+            "file": "./function/algebra/degree.js",
+            "imports": ["degreeDocs"]
+          },
+          {
+            "file": "./function/algebra/differences.js",
+            "imports": ["differencesDocs"]
+          },
+          {
+            "file": "./function/algebra/discriminant.js",
+            "imports": ["discriminantDocs"]
+          },
+          {
+            "file": "./function/algebra/element.js",
+            "imports": ["elementDocs"]
+          },
+          {
+            "file": "./function/algebra/eliminate.js",
+            "imports": ["eliminateDocs"]
+          },
+          {
+            "file": "./function/algebra/expToTrig.js",
+            "imports": ["expToTrigDocs"]
+          },
+          {
+            "file": "./function/algebra/expand.js",
+            "imports": ["expandDocs"]
+          },
+          {
+            "file": "./function/algebra/factor.js",
+            "imports": ["factorDocs"]
+          },
+          {
+            "file": "./function/algebra/fullSimplify.js",
+            "imports": ["fullSimplifyDocs"]
+          },
+          {
+            "file": "./function/algebra/functionExpand.js",
+            "imports": ["functionExpandDocs"]
+          },
+          {
+            "file": "./function/algebra/normalForm.js",
+            "imports": ["normalFormDocs"]
+          },
+          {
+            "file": "./function/algebra/partialDerivative.js",
+            "imports": ["partialDerivativeDocs"]
+          },
+          {
+            "file": "./function/algebra/polyadd.js",
+            "imports": ["polyaddDocs"]
+          },
+          {
+            "file": "./function/algebra/polyder.js",
+            "imports": ["polyderDocs"]
+          },
+          {
+            "file": "./function/algebra/polymul.js",
+            "imports": ["polymulDocs"]
+          },
+          {
+            "file": "./function/algebra/polynomialGCD.js",
+            "imports": ["polynomialGCDDocs"]
+          },
+          {
+            "file": "./function/algebra/polynomialLCM.js",
+            "imports": ["polynomialLCMDocs"]
+          },
+          {
+            "file": "./function/algebra/polynomialQuotient.js",
+            "imports": ["polynomialQuotientDocs"]
+          },
+          {
+            "file": "./function/algebra/polynomialRemainder.js",
+            "imports": ["polynomialRemainderDocs"]
+          },
+          {
+            "file": "./function/algebra/polyval.js",
+            "imports": ["polyvalDocs"]
+          },
+          {
+            "file": "./function/algebra/powerExpand.js",
+            "imports": ["powerExpandDocs"]
+          },
+          {
+            "file": "./function/algebra/reduce.js",
+            "imports": ["reduceDocs"]
+          },
+          {
+            "file": "./function/algebra/resultant.js",
+            "imports": ["resultantDocs"]
+          },
+          {
+            "file": "./function/algebra/substitute.js",
+            "imports": ["substituteDocs"]
+          },
+          {
+            "file": "./function/algebra/tangentLine.js",
+            "imports": ["tangentLineDocs"]
+          },
+          {
+            "file": "./function/algebra/together.js",
+            "imports": ["togetherDocs"]
+          },
+          {
+            "file": "./function/algebra/trigExpand.js",
+            "imports": ["trigExpandDocs"]
+          },
+          {
+            "file": "./function/algebra/trigReduce.js",
+            "imports": ["trigReduceDocs"]
+          },
+          {
+            "file": "./function/algebra/trigToExp.js",
+            "imports": ["trigToExpDocs"]
+          },
+          {
+            "file": "./function/algebra/variables.js",
+            "imports": ["variablesDocs"]
+          },
+          {
+            "file": "./function/combinatorics/doubleFactorial.js",
+            "imports": ["doubleFactorialDocs"]
+          },
+          {
+            "file": "./function/combinatorics/fallingFactorial.js",
+            "imports": ["fallingFactorialDocs"]
+          },
+          {
+            "file": "./function/combinatorics/fibonacci.js",
+            "imports": ["fibonacciDocs"]
+          },
+          {
+            "file": "./function/combinatorics/lucas.js",
+            "imports": ["lucasDocs"]
+          },
+          {
+            "file": "./function/combinatorics/risingFactorial.js",
+            "imports": ["risingFactorialDocs"]
+          },
+          {
+            "file": "./function/combinatorics/subfactorial.js",
+            "imports": ["subfactorialDocs"]
+          },
+          {
+            "file": "./function/geometry/angle2D.js",
+            "imports": ["angle2DDocs"]
+          },
+          {
+            "file": "./function/geometry/angle3D.js",
+            "imports": ["angle3DDocs"]
+          },
+          {
+            "file": "./function/geometry/convexHull.js",
+            "imports": ["convexHullDocs"]
+          },
+          {
+            "file": "./function/geometry/cross3D.js",
+            "imports": ["cross3DDocs"]
+          },
+          {
+            "file": "./function/geometry/distance2D.js",
+            "imports": ["distance2DDocs"]
+          },
+          {
+            "file": "./function/geometry/distance3D.js",
+            "imports": ["distance3DDocs"]
+          },
+          {
+            "file": "./function/geometry/distanceND.js",
+            "imports": ["distanceNDDocs"]
+          },
+          {
+            "file": "./function/geometry/distancePointToLine2D.js",
+            "imports": ["distancePointToLine2DDocs"]
+          },
+          {
+            "file": "./function/geometry/dot3D.js",
+            "imports": ["dot3DDocs"]
+          },
+          {
+            "file": "./function/geometry/intersectLines2D.js",
+            "imports": ["intersectLines2DDocs"]
+          },
+          {
+            "file": "./function/geometry/intersectSegments2D.js",
+            "imports": ["intersectSegments2DDocs"]
+          },
+          {
+            "file": "./function/geometry/pointInPolygon.js",
+            "imports": ["pointInPolygonDocs"]
+          },
+          {
+            "file": "./function/geometry/polygonArea.js",
+            "imports": ["polygonAreaDocs"]
+          },
+          {
+            "file": "./function/geometry/projectVector.js",
+            "imports": ["projectVectorDocs"]
+          },
+          {
+            "file": "./function/geometry/reflectVector.js",
+            "imports": ["reflectVectorDocs"]
+          },
+          {
+            "file": "./function/geometry/rotateVector2D.js",
+            "imports": ["rotateVector2DDocs"]
+          },
+          {
+            "file": "./function/geometry/rotateVector3D.js",
+            "imports": ["rotateVector3DDocs"]
+          },
+          {
+            "file": "./function/geometry/triangleArea.js",
+            "imports": ["triangleAreaDocs"]
+          },
+          {
+            "file": "./function/numeric/cubicSpline.js",
+            "imports": ["cubicSplineDocs"]
+          },
+          {
+            "file": "./function/numeric/gaussQuad.js",
+            "imports": ["gaussQuadDocs"]
+          },
+          {
+            "file": "./function/numeric/hermiteInterp.js",
+            "imports": ["hermiteInterpDocs"]
+          },
+          {
+            "file": "./function/numeric/lagrangeInterp.js",
+            "imports": ["lagrangeInterpDocs"]
+          },
+          {
+            "file": "./function/numeric/linearInterp.js",
+            "imports": ["linearInterpDocs"]
+          },
+          {
+            "file": "./function/numeric/pchipInterp.js",
+            "imports": ["pchipInterpDocs"]
+          },
+          {
+            "file": "./function/numeric/polyFit.js",
+            "imports": ["polyFitDocs"]
+          },
+          {
+            "file": "./function/numeric/romberg.js",
+            "imports": ["rombergDocs"]
+          },
+          {
+            "file": "./function/numeric/simpson.js",
+            "imports": ["simpsonDocs"]
+          },
+          {
+            "file": "./function/numeric/trapz.js",
+            "imports": ["trapzDocs"]
+          },
+          {
+            "file": "./function/probability/bernoulliPMF.js",
+            "imports": ["bernoulliPMFDocs"]
+          },
+          {
+            "file": "./function/probability/binomialPMF.js",
+            "imports": ["binomialPMFDocs"]
+          },
+          {
+            "file": "./function/probability/entropy.js",
+            "imports": ["entropyDocs"]
+          },
+          {
+            "file": "./function/probability/exponentialCDF.js",
+            "imports": ["exponentialCDFDocs"]
+          },
+          {
+            "file": "./function/probability/exponentialPDF.js",
+            "imports": ["exponentialPDFDocs"]
+          },
+          {
+            "file": "./function/probability/geometricPMF.js",
+            "imports": ["geometricPMFDocs"]
+          },
+          {
+            "file": "./function/probability/jsDivergence.js",
+            "imports": ["jsDivergenceDocs"]
+          },
+          {
+            "file": "./function/probability/normalCDF.js",
+            "imports": ["normalCDFDocs"]
+          },
+          {
+            "file": "./function/probability/normalPDF.js",
+            "imports": ["normalPDFDocs"]
+          },
+          {
+            "file": "./function/probability/poissonPMF.js",
+            "imports": ["poissonPMFDocs"]
+          },
+          {
+            "file": "./function/signal/autoCorrelation.js",
+            "imports": ["autoCorrelationDocs"]
+          },
+          {
+            "file": "./function/signal/crossCorrelation.js",
+            "imports": ["crossCorrelationDocs"]
+          },
+          {
+            "file": "./function/signal/groupDelay.js",
+            "imports": ["groupDelayDocs"]
+          },
+          {
+            "file": "./function/signal/unwrapPhase.js",
+            "imports": ["unwrapPhaseDocs"]
+          },
+          {
+            "file": "./function/special/besselJ0.js",
+            "imports": ["besselJ0Docs"]
+          },
+          {
+            "file": "./function/special/besselJ1.js",
+            "imports": ["besselJ1Docs"]
+          },
+          {
+            "file": "./function/special/besselY0.js",
+            "imports": ["besselY0Docs"]
+          },
+          {
+            "file": "./function/special/besselY1.js",
+            "imports": ["besselY1Docs"]
+          },
+          {
+            "file": "./function/special/beta.js",
+            "imports": ["betaDocs"]
+          },
+          {
+            "file": "./function/special/digamma.js",
+            "imports": ["digammaDocs"]
+          },
+          {
+            "file": "./function/special/erfc.js",
+            "imports": ["erfcDocs"]
+          },
+          {
+            "file": "./function/special/gammainc.js",
+            "imports": ["gammaincDocs"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["embeddedDocs"],
         "constants": ["embeddedDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/apart.ts": {
+        "description": "apart module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["apartDocs"],
+        "constants": ["apartDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/cancel.ts": {
+        "description": "cancel module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["cancelDocs"],
+        "constants": ["cancelDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/coefficientList.ts": {
+        "description": "coefficientList module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["coefficientListDocs"],
+        "constants": ["coefficientListDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/collect.ts": {
+        "description": "collect module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["collectDocs"],
+        "constants": ["collectDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/combine.ts": {
+        "description": "combine module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["combineDocs"],
+        "constants": ["combineDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/complexExpand.ts": {
+        "description": "complexExpand module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["complexExpandDocs"],
+        "constants": ["complexExpandDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/degree.ts": {
+        "description": "degree module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["degreeDocs"],
+        "constants": ["degreeDocs"]
       },
       "expression/src/embeddedDocs/function/algebra/derivative.ts": {
         "description": "derivative module",
@@ -21193,6 +21624,87 @@
         "workspaceDependencies": [],
         "exports": ["derivativeDocs"],
         "constants": ["derivativeDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/differences.ts": {
+        "description": "differences module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["differencesDocs"],
+        "constants": ["differencesDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/discriminant.ts": {
+        "description": "discriminant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["discriminantDocs"],
+        "constants": ["discriminantDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/element.ts": {
+        "description": "element module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["elementDocs"],
+        "constants": ["elementDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/eliminate.ts": {
+        "description": "eliminate module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["eliminateDocs"],
+        "constants": ["eliminateDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/expand.ts": {
+        "description": "expand module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["expandDocs"],
+        "constants": ["expandDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/expToTrig.ts": {
+        "description": "expToTrig module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["expToTrigDocs"],
+        "constants": ["expToTrigDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/factor.ts": {
+        "description": "factor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["factorDocs"],
+        "constants": ["factorDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/fullSimplify.ts": {
+        "description": "fullSimplify module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fullSimplifyDocs"],
+        "constants": ["fullSimplifyDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/functionExpand.ts": {
+        "description": "functionExpand module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["functionExpandDocs"],
+        "constants": ["functionExpandDocs"]
       },
       "expression/src/embeddedDocs/function/algebra/leafCount.ts": {
         "description": "leafCount module",
@@ -21248,6 +21760,87 @@
         "exports": ["lyapDocs"],
         "constants": ["lyapDocs"]
       },
+      "expression/src/embeddedDocs/function/algebra/normalForm.ts": {
+        "description": "normalForm module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["normalFormDocs"],
+        "constants": ["normalFormDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/partialDerivative.ts": {
+        "description": "partialDerivative module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["partialDerivativeDocs"],
+        "constants": ["partialDerivativeDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polyadd.ts": {
+        "description": "polyadd module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polyaddDocs"],
+        "constants": ["polyaddDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polyder.ts": {
+        "description": "polyder module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polyderDocs"],
+        "constants": ["polyderDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polymul.ts": {
+        "description": "polymul module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polymulDocs"],
+        "constants": ["polymulDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polynomialGCD.ts": {
+        "description": "polynomialGCD module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polynomialGCDDocs"],
+        "constants": ["polynomialGCDDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polynomialLCM.ts": {
+        "description": "polynomialLCM module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polynomialLCMDocs"],
+        "constants": ["polynomialLCMDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polynomialQuotient.ts": {
+        "description": "polynomialQuotient module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polynomialQuotientDocs"],
+        "constants": ["polynomialQuotientDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polynomialRemainder.ts": {
+        "description": "polynomialRemainder module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polynomialRemainderDocs"],
+        "constants": ["polynomialRemainderDocs"]
+      },
       "expression/src/embeddedDocs/function/algebra/polynomialRoot.ts": {
         "description": "polynomialRoot module",
         "externalDependencies": [],
@@ -21256,6 +21849,24 @@
         "workspaceDependencies": [],
         "exports": ["polynomialRootDocs"],
         "constants": ["polynomialRootDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/polyval.ts": {
+        "description": "polyval module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polyvalDocs"],
+        "constants": ["polyvalDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/powerExpand.ts": {
+        "description": "powerExpand module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["powerExpandDocs"],
+        "constants": ["powerExpandDocs"]
       },
       "expression/src/embeddedDocs/function/algebra/qr.ts": {
         "description": "qr module",
@@ -21275,6 +21886,15 @@
         "exports": ["rationalizeDocs"],
         "constants": ["rationalizeDocs"]
       },
+      "expression/src/embeddedDocs/function/algebra/reduce.ts": {
+        "description": "reduce module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["reduceDocs"],
+        "constants": ["reduceDocs"]
+      },
       "expression/src/embeddedDocs/function/algebra/resolve.ts": {
         "description": "resolve module",
         "externalDependencies": [],
@@ -21283,6 +21903,15 @@
         "workspaceDependencies": [],
         "exports": ["resolveDocs"],
         "constants": ["resolveDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/resultant.ts": {
+        "description": "resultant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["resultantDocs"],
+        "constants": ["resultantDocs"]
       },
       "expression/src/embeddedDocs/function/algebra/schur.ts": {
         "description": "schur module",
@@ -21329,6 +21958,15 @@
         "exports": ["sluDocs"],
         "constants": ["sluDocs"]
       },
+      "expression/src/embeddedDocs/function/algebra/substitute.ts": {
+        "description": "substitute module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["substituteDocs"],
+        "constants": ["substituteDocs"]
+      },
       "expression/src/embeddedDocs/function/algebra/sylvester.ts": {
         "description": "sylvester module",
         "externalDependencies": [],
@@ -21347,6 +21985,51 @@
         "exports": ["symbolicEqualDocs"],
         "constants": ["symbolicEqualDocs"]
       },
+      "expression/src/embeddedDocs/function/algebra/tangentLine.ts": {
+        "description": "tangentLine module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["tangentLineDocs"],
+        "constants": ["tangentLineDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/together.ts": {
+        "description": "together module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["togetherDocs"],
+        "constants": ["togetherDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/trigExpand.ts": {
+        "description": "trigExpand module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["trigExpandDocs"],
+        "constants": ["trigExpandDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/trigReduce.ts": {
+        "description": "trigReduce module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["trigReduceDocs"],
+        "constants": ["trigReduceDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/trigToExp.ts": {
+        "description": "trigToExp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["trigToExpDocs"],
+        "constants": ["trigToExpDocs"]
+      },
       "expression/src/embeddedDocs/function/algebra/usolve.ts": {
         "description": "usolve module",
         "externalDependencies": [],
@@ -21364,6 +22047,15 @@
         "workspaceDependencies": [],
         "exports": ["usolveAllDocs"],
         "constants": ["usolveAllDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/variables.ts": {
+        "description": "variables module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["variablesDocs"],
+        "constants": ["variablesDocs"]
       },
       "expression/src/embeddedDocs/function/arithmetic/abs.ts": {
         "description": "abs module",
@@ -21788,6 +22480,51 @@
         "exports": ["compositionDocs"],
         "constants": ["compositionDocs"]
       },
+      "expression/src/embeddedDocs/function/combinatorics/doubleFactorial.ts": {
+        "description": "doubleFactorial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["doubleFactorialDocs"],
+        "constants": ["doubleFactorialDocs"]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/fallingFactorial.ts": {
+        "description": "fallingFactorial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fallingFactorialDocs"],
+        "constants": ["fallingFactorialDocs"]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/fibonacci.ts": {
+        "description": "fibonacci module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fibonacciDocs"],
+        "constants": ["fibonacciDocs"]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/lucas.ts": {
+        "description": "lucas module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["lucasDocs"],
+        "constants": ["lucasDocs"]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/risingFactorial.ts": {
+        "description": "risingFactorial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["risingFactorialDocs"],
+        "constants": ["risingFactorialDocs"]
+      },
       "expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts": {
         "description": "stirlingS2 module",
         "externalDependencies": [],
@@ -21796,6 +22533,15 @@
         "workspaceDependencies": [],
         "exports": ["stirlingS2Docs"],
         "constants": ["stirlingS2Docs"]
+      },
+      "expression/src/embeddedDocs/function/combinatorics/subfactorial.ts": {
+        "description": "subfactorial module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["subfactorialDocs"],
+        "constants": ["subfactorialDocs"]
       },
       "expression/src/embeddedDocs/function/complex/arg.ts": {
         "description": "arg module",
@@ -21878,6 +22624,42 @@
         "exports": ["parserDocs"],
         "constants": ["parserDocs"]
       },
+      "expression/src/embeddedDocs/function/geometry/angle2D.ts": {
+        "description": "angle2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["angle2DDocs"],
+        "constants": ["angle2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/angle3D.ts": {
+        "description": "angle3D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["angle3DDocs"],
+        "constants": ["angle3DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/convexHull.ts": {
+        "description": "convexHull module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["convexHullDocs"],
+        "constants": ["convexHullDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/cross3D.ts": {
+        "description": "cross3D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["cross3DDocs"],
+        "constants": ["cross3DDocs"]
+      },
       "expression/src/embeddedDocs/function/geometry/distance.ts": {
         "description": "distance module",
         "externalDependencies": [],
@@ -21887,6 +22669,51 @@
         "exports": ["distanceDocs"],
         "constants": ["distanceDocs"]
       },
+      "expression/src/embeddedDocs/function/geometry/distance2D.ts": {
+        "description": "distance2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["distance2DDocs"],
+        "constants": ["distance2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/distance3D.ts": {
+        "description": "distance3D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["distance3DDocs"],
+        "constants": ["distance3DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/distanceND.ts": {
+        "description": "distanceND module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["distanceNDDocs"],
+        "constants": ["distanceNDDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/distancePointToLine2D.ts": {
+        "description": "distancePointToLine2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["distancePointToLine2DDocs"],
+        "constants": ["distancePointToLine2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/dot3D.ts": {
+        "description": "dot3D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["dot3DDocs"],
+        "constants": ["dot3DDocs"]
+      },
       "expression/src/embeddedDocs/function/geometry/intersect.ts": {
         "description": "intersect module",
         "externalDependencies": [],
@@ -21895,6 +22722,87 @@
         "workspaceDependencies": [],
         "exports": ["intersectDocs"],
         "constants": ["intersectDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/intersectLines2D.ts": {
+        "description": "intersectLines2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["intersectLines2DDocs"],
+        "constants": ["intersectLines2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/intersectSegments2D.ts": {
+        "description": "intersectSegments2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["intersectSegments2DDocs"],
+        "constants": ["intersectSegments2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/pointInPolygon.ts": {
+        "description": "pointInPolygon module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["pointInPolygonDocs"],
+        "constants": ["pointInPolygonDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/polygonArea.ts": {
+        "description": "polygonArea module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polygonAreaDocs"],
+        "constants": ["polygonAreaDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/projectVector.ts": {
+        "description": "projectVector module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["projectVectorDocs"],
+        "constants": ["projectVectorDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/reflectVector.ts": {
+        "description": "reflectVector module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["reflectVectorDocs"],
+        "constants": ["reflectVectorDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/rotateVector2D.ts": {
+        "description": "rotateVector2D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rotateVector2DDocs"],
+        "constants": ["rotateVector2DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/rotateVector3D.ts": {
+        "description": "rotateVector3D module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rotateVector3DDocs"],
+        "constants": ["rotateVector3DDocs"]
+      },
+      "expression/src/embeddedDocs/function/geometry/triangleArea.ts": {
+        "description": "triangleArea module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["triangleAreaDocs"],
+        "constants": ["triangleAreaDocs"]
       },
       "expression/src/embeddedDocs/function/logical/and.ts": {
         "description": "and module",
@@ -22301,6 +23209,87 @@
         "exports": ["zerosDocs"],
         "constants": ["zerosDocs"]
       },
+      "expression/src/embeddedDocs/function/numeric/cubicSpline.ts": {
+        "description": "cubicSpline module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["cubicSplineDocs"],
+        "constants": ["cubicSplineDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/gaussQuad.ts": {
+        "description": "gaussQuad module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gaussQuadDocs"],
+        "constants": ["gaussQuadDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/hermiteInterp.ts": {
+        "description": "hermiteInterp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hermiteInterpDocs"],
+        "constants": ["hermiteInterpDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/lagrangeInterp.ts": {
+        "description": "lagrangeInterp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["lagrangeInterpDocs"],
+        "constants": ["lagrangeInterpDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/linearInterp.ts": {
+        "description": "linearInterp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["linearInterpDocs"],
+        "constants": ["linearInterpDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/pchipInterp.ts": {
+        "description": "pchipInterp module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["pchipInterpDocs"],
+        "constants": ["pchipInterpDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/polyFit.ts": {
+        "description": "polyFit module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["polyFitDocs"],
+        "constants": ["polyFitDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/romberg.ts": {
+        "description": "romberg module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rombergDocs"],
+        "constants": ["rombergDocs"]
+      },
+      "expression/src/embeddedDocs/function/numeric/simpson.ts": {
+        "description": "simpson module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["simpsonDocs"],
+        "constants": ["simpsonDocs"]
+      },
       "expression/src/embeddedDocs/function/numeric/solveODE.ts": {
         "description": "solveODE module",
         "externalDependencies": [],
@@ -22310,6 +23299,15 @@
         "exports": ["solveODEDocs"],
         "constants": ["solveODEDocs"]
       },
+      "expression/src/embeddedDocs/function/numeric/trapz.ts": {
+        "description": "trapz module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["trapzDocs"],
+        "constants": ["trapzDocs"]
+      },
       "expression/src/embeddedDocs/function/probability/bernoulli.ts": {
         "description": "bernoulli module",
         "externalDependencies": [],
@@ -22318,6 +23316,24 @@
         "workspaceDependencies": [],
         "exports": ["bernoulliDocs"],
         "constants": ["bernoulliDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/bernoulliPMF.ts": {
+        "description": "bernoulliPMF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["bernoulliPMFDocs"],
+        "constants": ["bernoulliPMFDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/binomialPMF.ts": {
+        "description": "binomialPMF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["binomialPMFDocs"],
+        "constants": ["binomialPMFDocs"]
       },
       "expression/src/embeddedDocs/function/probability/combinations.ts": {
         "description": "combinations module",
@@ -22337,6 +23353,33 @@
         "exports": ["combinationsWithRepDocs"],
         "constants": ["combinationsWithRepDocs"]
       },
+      "expression/src/embeddedDocs/function/probability/entropy.ts": {
+        "description": "entropy module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["entropyDocs"],
+        "constants": ["entropyDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/exponentialCDF.ts": {
+        "description": "exponentialCDF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["exponentialCDFDocs"],
+        "constants": ["exponentialCDFDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/exponentialPDF.ts": {
+        "description": "exponentialPDF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["exponentialPDFDocs"],
+        "constants": ["exponentialPDFDocs"]
+      },
       "expression/src/embeddedDocs/function/probability/factorial.ts": {
         "description": "factorial module",
         "externalDependencies": [],
@@ -22354,6 +23397,24 @@
         "workspaceDependencies": [],
         "exports": ["gammaDocs"],
         "constants": ["gammaDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/geometricPMF.ts": {
+        "description": "geometricPMF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["geometricPMFDocs"],
+        "constants": ["geometricPMFDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/jsDivergence.ts": {
+        "description": "jsDivergence module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["jsDivergenceDocs"],
+        "constants": ["jsDivergenceDocs"]
       },
       "expression/src/embeddedDocs/function/probability/kldivergence.ts": {
         "description": "kldivergence module",
@@ -22382,6 +23443,24 @@
         "exports": ["multinomialDocs"],
         "constants": ["multinomialDocs"]
       },
+      "expression/src/embeddedDocs/function/probability/normalCDF.ts": {
+        "description": "normalCDF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["normalCDFDocs"],
+        "constants": ["normalCDFDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/normalPDF.ts": {
+        "description": "normalPDF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["normalPDFDocs"],
+        "constants": ["normalPDFDocs"]
+      },
       "expression/src/embeddedDocs/function/probability/permutations.ts": {
         "description": "permutations module",
         "externalDependencies": [],
@@ -22399,6 +23478,15 @@
         "workspaceDependencies": [],
         "exports": ["pickRandomDocs"],
         "constants": ["pickRandomDocs"]
+      },
+      "expression/src/embeddedDocs/function/probability/poissonPMF.ts": {
+        "description": "poissonPMF module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["poissonPMFDocs"],
+        "constants": ["poissonPMFDocs"]
       },
       "expression/src/embeddedDocs/function/probability/random.ts": {
         "description": "random module",
@@ -22607,6 +23695,24 @@
         "exports": ["setUnionDocs"],
         "constants": ["setUnionDocs"]
       },
+      "expression/src/embeddedDocs/function/signal/autoCorrelation.ts": {
+        "description": "autoCorrelation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["autoCorrelationDocs"],
+        "constants": ["autoCorrelationDocs"]
+      },
+      "expression/src/embeddedDocs/function/signal/crossCorrelation.ts": {
+        "description": "crossCorrelation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["crossCorrelationDocs"],
+        "constants": ["crossCorrelationDocs"]
+      },
       "expression/src/embeddedDocs/function/signal/freqz.ts": {
         "description": "freqz module",
         "externalDependencies": [],
@@ -22615,6 +23721,24 @@
         "workspaceDependencies": [],
         "exports": ["freqzDocs"],
         "constants": ["freqzDocs"]
+      },
+      "expression/src/embeddedDocs/function/signal/groupDelay.ts": {
+        "description": "groupDelay module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["groupDelayDocs"],
+        "constants": ["groupDelayDocs"]
+      },
+      "expression/src/embeddedDocs/function/signal/unwrapPhase.ts": {
+        "description": "unwrapPhase module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["unwrapPhaseDocs"],
+        "constants": ["unwrapPhaseDocs"]
       },
       "expression/src/embeddedDocs/function/signal/zpk2tf.ts": {
         "description": "zpk2tf module",
@@ -22625,6 +23749,60 @@
         "exports": ["zpk2tfDocs"],
         "constants": ["zpk2tfDocs"]
       },
+      "expression/src/embeddedDocs/function/special/besselJ0.ts": {
+        "description": "besselJ0 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["besselJ0Docs"],
+        "constants": ["besselJ0Docs"]
+      },
+      "expression/src/embeddedDocs/function/special/besselJ1.ts": {
+        "description": "besselJ1 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["besselJ1Docs"],
+        "constants": ["besselJ1Docs"]
+      },
+      "expression/src/embeddedDocs/function/special/besselY0.ts": {
+        "description": "besselY0 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["besselY0Docs"],
+        "constants": ["besselY0Docs"]
+      },
+      "expression/src/embeddedDocs/function/special/besselY1.ts": {
+        "description": "besselY1 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["besselY1Docs"],
+        "constants": ["besselY1Docs"]
+      },
+      "expression/src/embeddedDocs/function/special/beta.ts": {
+        "description": "beta module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["betaDocs"],
+        "constants": ["betaDocs"]
+      },
+      "expression/src/embeddedDocs/function/special/digamma.ts": {
+        "description": "digamma module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["digammaDocs"],
+        "constants": ["digammaDocs"]
+      },
       "expression/src/embeddedDocs/function/special/erf.ts": {
         "description": "erf module",
         "externalDependencies": [],
@@ -22633,6 +23811,24 @@
         "workspaceDependencies": [],
         "exports": ["erfDocs"],
         "constants": ["erfDocs"]
+      },
+      "expression/src/embeddedDocs/function/special/erfc.ts": {
+        "description": "erfc module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["erfcDocs"],
+        "constants": ["erfcDocs"]
+      },
+      "expression/src/embeddedDocs/function/special/gammainc.ts": {
+        "description": "gammainc module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gammaincDocs"],
+        "constants": ["gammaincDocs"]
       },
       "expression/src/embeddedDocs/function/special/zeta.ts": {
         "description": "zeta module",
@@ -31097,26 +32293,62 @@
           "expression/src/embeddedDocs/core/import.ts",
           "expression/src/embeddedDocs/core/typed.ts",
           "expression/src/embeddedDocs/embeddedDocs.ts",
+          "expression/src/embeddedDocs/function/algebra/apart.ts",
+          "expression/src/embeddedDocs/function/algebra/cancel.ts",
+          "expression/src/embeddedDocs/function/algebra/coefficientList.ts",
+          "expression/src/embeddedDocs/function/algebra/collect.ts",
+          "expression/src/embeddedDocs/function/algebra/combine.ts",
+          "expression/src/embeddedDocs/function/algebra/complexExpand.ts",
+          "expression/src/embeddedDocs/function/algebra/degree.ts",
           "expression/src/embeddedDocs/function/algebra/derivative.ts",
+          "expression/src/embeddedDocs/function/algebra/differences.ts",
+          "expression/src/embeddedDocs/function/algebra/discriminant.ts",
+          "expression/src/embeddedDocs/function/algebra/element.ts",
+          "expression/src/embeddedDocs/function/algebra/eliminate.ts",
+          "expression/src/embeddedDocs/function/algebra/expand.ts",
+          "expression/src/embeddedDocs/function/algebra/expToTrig.ts",
+          "expression/src/embeddedDocs/function/algebra/factor.ts",
+          "expression/src/embeddedDocs/function/algebra/fullSimplify.ts",
+          "expression/src/embeddedDocs/function/algebra/functionExpand.ts",
           "expression/src/embeddedDocs/function/algebra/leafCount.ts",
           "expression/src/embeddedDocs/function/algebra/lsolve.ts",
           "expression/src/embeddedDocs/function/algebra/lsolveAll.ts",
           "expression/src/embeddedDocs/function/algebra/lup.ts",
           "expression/src/embeddedDocs/function/algebra/lusolve.ts",
           "expression/src/embeddedDocs/function/algebra/lyap.ts",
+          "expression/src/embeddedDocs/function/algebra/normalForm.ts",
+          "expression/src/embeddedDocs/function/algebra/partialDerivative.ts",
+          "expression/src/embeddedDocs/function/algebra/polyadd.ts",
+          "expression/src/embeddedDocs/function/algebra/polyder.ts",
+          "expression/src/embeddedDocs/function/algebra/polymul.ts",
+          "expression/src/embeddedDocs/function/algebra/polynomialGCD.ts",
+          "expression/src/embeddedDocs/function/algebra/polynomialLCM.ts",
+          "expression/src/embeddedDocs/function/algebra/polynomialQuotient.ts",
+          "expression/src/embeddedDocs/function/algebra/polynomialRemainder.ts",
           "expression/src/embeddedDocs/function/algebra/polynomialRoot.ts",
+          "expression/src/embeddedDocs/function/algebra/polyval.ts",
+          "expression/src/embeddedDocs/function/algebra/powerExpand.ts",
           "expression/src/embeddedDocs/function/algebra/qr.ts",
           "expression/src/embeddedDocs/function/algebra/rationalize.ts",
+          "expression/src/embeddedDocs/function/algebra/reduce.ts",
           "expression/src/embeddedDocs/function/algebra/resolve.ts",
+          "expression/src/embeddedDocs/function/algebra/resultant.ts",
           "expression/src/embeddedDocs/function/algebra/schur.ts",
           "expression/src/embeddedDocs/function/algebra/simplify.ts",
           "expression/src/embeddedDocs/function/algebra/simplifyConstant.ts",
           "expression/src/embeddedDocs/function/algebra/simplifyCore.ts",
           "expression/src/embeddedDocs/function/algebra/slu.ts",
+          "expression/src/embeddedDocs/function/algebra/substitute.ts",
           "expression/src/embeddedDocs/function/algebra/sylvester.ts",
           "expression/src/embeddedDocs/function/algebra/symbolicEqual.ts",
+          "expression/src/embeddedDocs/function/algebra/tangentLine.ts",
+          "expression/src/embeddedDocs/function/algebra/together.ts",
+          "expression/src/embeddedDocs/function/algebra/trigExpand.ts",
+          "expression/src/embeddedDocs/function/algebra/trigReduce.ts",
+          "expression/src/embeddedDocs/function/algebra/trigToExp.ts",
           "expression/src/embeddedDocs/function/algebra/usolve.ts",
           "expression/src/embeddedDocs/function/algebra/usolveAll.ts",
+          "expression/src/embeddedDocs/function/algebra/variables.ts",
           "expression/src/embeddedDocs/function/arithmetic/abs.ts",
           "expression/src/embeddedDocs/function/arithmetic/add.ts",
           "expression/src/embeddedDocs/function/arithmetic/cbrt.ts",
@@ -31164,7 +32396,13 @@
           "expression/src/embeddedDocs/function/combinatorics/bellNumbers.ts",
           "expression/src/embeddedDocs/function/combinatorics/catalan.ts",
           "expression/src/embeddedDocs/function/combinatorics/composition.ts",
+          "expression/src/embeddedDocs/function/combinatorics/doubleFactorial.ts",
+          "expression/src/embeddedDocs/function/combinatorics/fallingFactorial.ts",
+          "expression/src/embeddedDocs/function/combinatorics/fibonacci.ts",
+          "expression/src/embeddedDocs/function/combinatorics/lucas.ts",
+          "expression/src/embeddedDocs/function/combinatorics/risingFactorial.ts",
           "expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts",
+          "expression/src/embeddedDocs/function/combinatorics/subfactorial.ts",
           "expression/src/embeddedDocs/function/complex/arg.ts",
           "expression/src/embeddedDocs/function/complex/conj.ts",
           "expression/src/embeddedDocs/function/complex/im.ts",
@@ -31174,8 +32412,26 @@
           "expression/src/embeddedDocs/function/expression/help.ts",
           "expression/src/embeddedDocs/function/expression/parse.ts",
           "expression/src/embeddedDocs/function/expression/parser.ts",
+          "expression/src/embeddedDocs/function/geometry/angle2D.ts",
+          "expression/src/embeddedDocs/function/geometry/angle3D.ts",
+          "expression/src/embeddedDocs/function/geometry/convexHull.ts",
+          "expression/src/embeddedDocs/function/geometry/cross3D.ts",
           "expression/src/embeddedDocs/function/geometry/distance.ts",
+          "expression/src/embeddedDocs/function/geometry/distance2D.ts",
+          "expression/src/embeddedDocs/function/geometry/distance3D.ts",
+          "expression/src/embeddedDocs/function/geometry/distanceND.ts",
+          "expression/src/embeddedDocs/function/geometry/distancePointToLine2D.ts",
+          "expression/src/embeddedDocs/function/geometry/dot3D.ts",
           "expression/src/embeddedDocs/function/geometry/intersect.ts",
+          "expression/src/embeddedDocs/function/geometry/intersectLines2D.ts",
+          "expression/src/embeddedDocs/function/geometry/intersectSegments2D.ts",
+          "expression/src/embeddedDocs/function/geometry/pointInPolygon.ts",
+          "expression/src/embeddedDocs/function/geometry/polygonArea.ts",
+          "expression/src/embeddedDocs/function/geometry/projectVector.ts",
+          "expression/src/embeddedDocs/function/geometry/reflectVector.ts",
+          "expression/src/embeddedDocs/function/geometry/rotateVector2D.ts",
+          "expression/src/embeddedDocs/function/geometry/rotateVector3D.ts",
+          "expression/src/embeddedDocs/function/geometry/triangleArea.ts",
           "expression/src/embeddedDocs/function/logical/and.ts",
           "expression/src/embeddedDocs/function/logical/not.ts",
           "expression/src/embeddedDocs/function/logical/nullish.ts",
@@ -31221,17 +32477,37 @@
           "expression/src/embeddedDocs/function/matrix/trace.ts",
           "expression/src/embeddedDocs/function/matrix/transpose.ts",
           "expression/src/embeddedDocs/function/matrix/zeros.ts",
+          "expression/src/embeddedDocs/function/numeric/cubicSpline.ts",
+          "expression/src/embeddedDocs/function/numeric/gaussQuad.ts",
+          "expression/src/embeddedDocs/function/numeric/hermiteInterp.ts",
+          "expression/src/embeddedDocs/function/numeric/lagrangeInterp.ts",
+          "expression/src/embeddedDocs/function/numeric/linearInterp.ts",
+          "expression/src/embeddedDocs/function/numeric/pchipInterp.ts",
+          "expression/src/embeddedDocs/function/numeric/polyFit.ts",
+          "expression/src/embeddedDocs/function/numeric/romberg.ts",
+          "expression/src/embeddedDocs/function/numeric/simpson.ts",
           "expression/src/embeddedDocs/function/numeric/solveODE.ts",
+          "expression/src/embeddedDocs/function/numeric/trapz.ts",
           "expression/src/embeddedDocs/function/probability/bernoulli.ts",
+          "expression/src/embeddedDocs/function/probability/bernoulliPMF.ts",
+          "expression/src/embeddedDocs/function/probability/binomialPMF.ts",
           "expression/src/embeddedDocs/function/probability/combinations.ts",
           "expression/src/embeddedDocs/function/probability/combinationsWithRep.ts",
+          "expression/src/embeddedDocs/function/probability/entropy.ts",
+          "expression/src/embeddedDocs/function/probability/exponentialCDF.ts",
+          "expression/src/embeddedDocs/function/probability/exponentialPDF.ts",
           "expression/src/embeddedDocs/function/probability/factorial.ts",
           "expression/src/embeddedDocs/function/probability/gamma.ts",
+          "expression/src/embeddedDocs/function/probability/geometricPMF.ts",
+          "expression/src/embeddedDocs/function/probability/jsDivergence.ts",
           "expression/src/embeddedDocs/function/probability/kldivergence.ts",
           "expression/src/embeddedDocs/function/probability/lgamma.ts",
           "expression/src/embeddedDocs/function/probability/multinomial.ts",
+          "expression/src/embeddedDocs/function/probability/normalCDF.ts",
+          "expression/src/embeddedDocs/function/probability/normalPDF.ts",
           "expression/src/embeddedDocs/function/probability/permutations.ts",
           "expression/src/embeddedDocs/function/probability/pickRandom.ts",
+          "expression/src/embeddedDocs/function/probability/poissonPMF.ts",
           "expression/src/embeddedDocs/function/probability/random.ts",
           "expression/src/embeddedDocs/function/probability/randomInt.ts",
           "expression/src/embeddedDocs/function/relational/compare.ts",
@@ -31255,9 +32531,21 @@
           "expression/src/embeddedDocs/function/set/setSize.ts",
           "expression/src/embeddedDocs/function/set/setSymDifference.ts",
           "expression/src/embeddedDocs/function/set/setUnion.ts",
+          "expression/src/embeddedDocs/function/signal/autoCorrelation.ts",
+          "expression/src/embeddedDocs/function/signal/crossCorrelation.ts",
           "expression/src/embeddedDocs/function/signal/freqz.ts",
+          "expression/src/embeddedDocs/function/signal/groupDelay.ts",
+          "expression/src/embeddedDocs/function/signal/unwrapPhase.ts",
           "expression/src/embeddedDocs/function/signal/zpk2tf.ts",
+          "expression/src/embeddedDocs/function/special/besselJ0.ts",
+          "expression/src/embeddedDocs/function/special/besselJ1.ts",
+          "expression/src/embeddedDocs/function/special/besselY0.ts",
+          "expression/src/embeddedDocs/function/special/besselY1.ts",
+          "expression/src/embeddedDocs/function/special/beta.ts",
+          "expression/src/embeddedDocs/function/special/digamma.ts",
           "expression/src/embeddedDocs/function/special/erf.ts",
+          "expression/src/embeddedDocs/function/special/erfc.ts",
+          "expression/src/embeddedDocs/function/special/gammainc.ts",
           "expression/src/embeddedDocs/function/special/zeta.ts",
           "expression/src/embeddedDocs/function/statistics/corr.ts",
           "expression/src/embeddedDocs/function/statistics/cumsum.ts",
@@ -31563,16 +32851,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 894,
+    "totalTypeScriptFiles": 986,
     "totalModules": 72,
-    "totalLinesOfCode": 162296,
-    "totalExports": 4454,
+    "totalLinesOfCode": 163347,
+    "totalExports": 4546,
     "totalClasses": 51,
     "totalInterfaces": 374,
     "totalFunctions": 1490,
     "totalTypeGuards": 156,
     "totalEnums": 0,
-    "totalConstants": 1425,
+    "totalConstants": 1517,
     "totalReExports": 1527,
     "totalTypeOnlyImports": 494,
     "runtimeCircularDeps": 0,

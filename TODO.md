@@ -370,6 +370,13 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   the 2026-07-04 Unit merge — ONE Unit class, all operators verified live: add/multiply/divide/equal across
   units correct) · G4 notebook host (**HOLD** per maintainer) · G5 plotting approach (**HOLD** per maintainer).
 
+- ✅ **[Expression dormant pocket WIRED 2026-07-05]** Both halves integrated: (1) the 25 expression-language
+  **transforms** — language is now one-based/lazy/mathjs-exact (verified identical to mathjs 15), transforms
+  take their base fns as injected deps (no parallel impl layer), installed on mathWithTransform + evaluate's
+  scope; standalone compiler gained rawArgs + `end`; bridge callbacks arity-adapted. (2) **92 embeddedDocs**
+  wired into the index (`help('polyFit')` etc. now work); 1 doc for a nonexistent fn deleted. Dormancy
+  157 → 34 files; cycles 0/0.
+
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
 Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,

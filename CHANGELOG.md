@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-05) — 92 embeddedDocs entries wired; `help()` now covers the MathTS extensions
+
+The second half of the dormant expression pocket: 92 doc files (CAS/algebra, geometry,
+numeric, probability, signal, special — `polyFit`, `gaussQuad`, `besselJ0`, `entropy`, …)
+existed but were never imported by the docs index, so `help()` couldn't see them. All 92
+wired; the one doc for a nonexistent function (`distribution`, a removed mathjs factory)
+deleted rather than wired. New completeness test pins that every documented function
+exists in the surface. **Repo dormancy: 157 → 34 files** (986 reachable, +123 activated
+by the two wiring commits); cycles 0/0. Gates: build 22/22, test 44/44.
+
 ### Added/Fixed (2026-07-05) — expression-language transforms wired: the language is now one-based, lazy, mathjs-exact
 
 The dormant `expression/src/transform` pocket (25 transforms) is live. The expression

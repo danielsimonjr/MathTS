@@ -139,7 +139,7 @@ The codebase is organized into the following modules:
 - **functions/utils**: 35 files
 - **functions/wasm**: 12 files
 - **expression/compiler**: 2 files
-- **expression/embeddedDocs**: 254 files
+- **expression/embeddedDocs**: 346 files
 - **expression/error**: 3 files
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
@@ -183,7 +183,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 333            | 97              |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 425            | 4               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -8958,7 +8958,7 @@ graph LR
 
 ---
 
-### `expression/src/embeddedDocs/embeddedDocs.ts` - embeddedDocs module
+### `expression/src/embeddedDocs/embeddedDocs.ts` - MathTS-native extension docs (wired 2026-07-05 — formerly dormant)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -9216,10 +9216,158 @@ graph LR
 | `./function/utils/print.js` | `printDocs` | Import |
 | `./function/utils/typeOf.js` | `typeOfDocs` | Import |
 | `./function/numeric/solveODE.js` | `solveODEDocs` | Import |
+| `./function/algebra/apart.js` | `apartDocs` | Import |
+| `./function/algebra/cancel.js` | `cancelDocs` | Import |
+| `./function/algebra/coefficientList.js` | `coefficientListDocs` | Import |
+| `./function/algebra/collect.js` | `collectDocs` | Import |
+| `./function/algebra/combine.js` | `combineDocs` | Import |
+| `./function/algebra/complexExpand.js` | `complexExpandDocs` | Import |
+| `./function/algebra/degree.js` | `degreeDocs` | Import |
+| `./function/algebra/differences.js` | `differencesDocs` | Import |
+| `./function/algebra/discriminant.js` | `discriminantDocs` | Import |
+| `./function/algebra/element.js` | `elementDocs` | Import |
+| `./function/algebra/eliminate.js` | `eliminateDocs` | Import |
+| `./function/algebra/expToTrig.js` | `expToTrigDocs` | Import |
+| `./function/algebra/expand.js` | `expandDocs` | Import |
+| `./function/algebra/factor.js` | `factorDocs` | Import |
+| `./function/algebra/fullSimplify.js` | `fullSimplifyDocs` | Import |
+| `./function/algebra/functionExpand.js` | `functionExpandDocs` | Import |
+| `./function/algebra/normalForm.js` | `normalFormDocs` | Import |
+| `./function/algebra/partialDerivative.js` | `partialDerivativeDocs` | Import |
+| `./function/algebra/polyadd.js` | `polyaddDocs` | Import |
+| `./function/algebra/polyder.js` | `polyderDocs` | Import |
+| `./function/algebra/polymul.js` | `polymulDocs` | Import |
+| `./function/algebra/polynomialGCD.js` | `polynomialGCDDocs` | Import |
+| `./function/algebra/polynomialLCM.js` | `polynomialLCMDocs` | Import |
+| `./function/algebra/polynomialQuotient.js` | `polynomialQuotientDocs` | Import |
+| `./function/algebra/polynomialRemainder.js` | `polynomialRemainderDocs` | Import |
+| `./function/algebra/polyval.js` | `polyvalDocs` | Import |
+| `./function/algebra/powerExpand.js` | `powerExpandDocs` | Import |
+| `./function/algebra/reduce.js` | `reduceDocs` | Import |
+| `./function/algebra/resultant.js` | `resultantDocs` | Import |
+| `./function/algebra/substitute.js` | `substituteDocs` | Import |
+| `./function/algebra/tangentLine.js` | `tangentLineDocs` | Import |
+| `./function/algebra/together.js` | `togetherDocs` | Import |
+| `./function/algebra/trigExpand.js` | `trigExpandDocs` | Import |
+| `./function/algebra/trigReduce.js` | `trigReduceDocs` | Import |
+| `./function/algebra/trigToExp.js` | `trigToExpDocs` | Import |
+| `./function/algebra/variables.js` | `variablesDocs` | Import |
+| `./function/combinatorics/doubleFactorial.js` | `doubleFactorialDocs` | Import |
+| `./function/combinatorics/fallingFactorial.js` | `fallingFactorialDocs` | Import |
+| `./function/combinatorics/fibonacci.js` | `fibonacciDocs` | Import |
+| `./function/combinatorics/lucas.js` | `lucasDocs` | Import |
+| `./function/combinatorics/risingFactorial.js` | `risingFactorialDocs` | Import |
+| `./function/combinatorics/subfactorial.js` | `subfactorialDocs` | Import |
+| `./function/geometry/angle2D.js` | `angle2DDocs` | Import |
+| `./function/geometry/angle3D.js` | `angle3DDocs` | Import |
+| `./function/geometry/convexHull.js` | `convexHullDocs` | Import |
+| `./function/geometry/cross3D.js` | `cross3DDocs` | Import |
+| `./function/geometry/distance2D.js` | `distance2DDocs` | Import |
+| `./function/geometry/distance3D.js` | `distance3DDocs` | Import |
+| `./function/geometry/distanceND.js` | `distanceNDDocs` | Import |
+| `./function/geometry/distancePointToLine2D.js` | `distancePointToLine2DDocs` | Import |
+| `./function/geometry/dot3D.js` | `dot3DDocs` | Import |
+| `./function/geometry/intersectLines2D.js` | `intersectLines2DDocs` | Import |
+| `./function/geometry/intersectSegments2D.js` | `intersectSegments2DDocs` | Import |
+| `./function/geometry/pointInPolygon.js` | `pointInPolygonDocs` | Import |
+| `./function/geometry/polygonArea.js` | `polygonAreaDocs` | Import |
+| `./function/geometry/projectVector.js` | `projectVectorDocs` | Import |
+| `./function/geometry/reflectVector.js` | `reflectVectorDocs` | Import |
+| `./function/geometry/rotateVector2D.js` | `rotateVector2DDocs` | Import |
+| `./function/geometry/rotateVector3D.js` | `rotateVector3DDocs` | Import |
+| `./function/geometry/triangleArea.js` | `triangleAreaDocs` | Import |
+| `./function/numeric/cubicSpline.js` | `cubicSplineDocs` | Import |
+| `./function/numeric/gaussQuad.js` | `gaussQuadDocs` | Import |
+| `./function/numeric/hermiteInterp.js` | `hermiteInterpDocs` | Import |
+| `./function/numeric/lagrangeInterp.js` | `lagrangeInterpDocs` | Import |
+| `./function/numeric/linearInterp.js` | `linearInterpDocs` | Import |
+| `./function/numeric/pchipInterp.js` | `pchipInterpDocs` | Import |
+| `./function/numeric/polyFit.js` | `polyFitDocs` | Import |
+| `./function/numeric/romberg.js` | `rombergDocs` | Import |
+| `./function/numeric/simpson.js` | `simpsonDocs` | Import |
+| `./function/numeric/trapz.js` | `trapzDocs` | Import |
+| `./function/probability/bernoulliPMF.js` | `bernoulliPMFDocs` | Import |
+| `./function/probability/binomialPMF.js` | `binomialPMFDocs` | Import |
+| `./function/probability/entropy.js` | `entropyDocs` | Import |
+| `./function/probability/exponentialCDF.js` | `exponentialCDFDocs` | Import |
+| `./function/probability/exponentialPDF.js` | `exponentialPDFDocs` | Import |
+| `./function/probability/geometricPMF.js` | `geometricPMFDocs` | Import |
+| `./function/probability/jsDivergence.js` | `jsDivergenceDocs` | Import |
+| `./function/probability/normalCDF.js` | `normalCDFDocs` | Import |
+| `./function/probability/normalPDF.js` | `normalPDFDocs` | Import |
+| `./function/probability/poissonPMF.js` | `poissonPMFDocs` | Import |
+| `./function/signal/autoCorrelation.js` | `autoCorrelationDocs` | Import |
+| `./function/signal/crossCorrelation.js` | `crossCorrelationDocs` | Import |
+| `./function/signal/groupDelay.js` | `groupDelayDocs` | Import |
+| `./function/signal/unwrapPhase.js` | `unwrapPhaseDocs` | Import |
+| `./function/special/besselJ0.js` | `besselJ0Docs` | Import |
+| `./function/special/besselJ1.js` | `besselJ1Docs` | Import |
+| `./function/special/besselY0.js` | `besselY0Docs` | Import |
+| `./function/special/besselY1.js` | `besselY1Docs` | Import |
+| `./function/special/beta.js` | `betaDocs` | Import |
+| `./function/special/digamma.js` | `digammaDocs` | Import |
+| `./function/special/erfc.js` | `erfcDocs` | Import |
+| `./function/special/gammainc.js` | `gammaincDocs` | Import |
 
 **Exports:**
 
 - Constants: `embeddedDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/apart.ts` - apart module
+
+**Exports:**
+
+- Constants: `apartDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/cancel.ts` - cancel module
+
+**Exports:**
+
+- Constants: `cancelDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/coefficientList.ts` - coefficientList module
+
+**Exports:**
+
+- Constants: `coefficientListDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/collect.ts` - collect module
+
+**Exports:**
+
+- Constants: `collectDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/combine.ts` - combine module
+
+**Exports:**
+
+- Constants: `combineDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/complexExpand.ts` - complexExpand module
+
+**Exports:**
+
+- Constants: `complexExpandDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/degree.ts` - degree module
+
+**Exports:**
+
+- Constants: `degreeDocs`
 
 ---
 
@@ -9228,6 +9376,78 @@ graph LR
 **Exports:**
 
 - Constants: `derivativeDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/differences.ts` - differences module
+
+**Exports:**
+
+- Constants: `differencesDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/discriminant.ts` - discriminant module
+
+**Exports:**
+
+- Constants: `discriminantDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/element.ts` - element module
+
+**Exports:**
+
+- Constants: `elementDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/eliminate.ts` - eliminate module
+
+**Exports:**
+
+- Constants: `eliminateDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/expand.ts` - expand module
+
+**Exports:**
+
+- Constants: `expandDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/expToTrig.ts` - expToTrig module
+
+**Exports:**
+
+- Constants: `expToTrigDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/factor.ts` - factor module
+
+**Exports:**
+
+- Constants: `factorDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/fullSimplify.ts` - fullSimplify module
+
+**Exports:**
+
+- Constants: `fullSimplifyDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/functionExpand.ts` - functionExpand module
+
+**Exports:**
+
+- Constants: `functionExpandDocs`
 
 ---
 
@@ -9279,11 +9499,99 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/algebra/normalForm.ts` - normalForm module
+
+**Exports:**
+
+- Constants: `normalFormDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/partialDerivative.ts` - partialDerivative module
+
+**Exports:**
+
+- Constants: `partialDerivativeDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polyadd.ts` - polyadd module
+
+**Exports:**
+
+- Constants: `polyaddDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polyder.ts` - polyder module
+
+**Exports:**
+
+- Constants: `polyderDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polymul.ts` - polymul module
+
+**Exports:**
+
+- Constants: `polymulDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polynomialGCD.ts` - polynomialGCD module
+
+**Exports:**
+
+- Constants: `polynomialGCDDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polynomialLCM.ts` - polynomialLCM module
+
+**Exports:**
+
+- Constants: `polynomialLCMDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polynomialQuotient.ts` - polynomialQuotient module
+
+**Exports:**
+
+- Constants: `polynomialQuotientDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polynomialRemainder.ts` - polynomialRemainder module
+
+**Exports:**
+
+- Constants: `polynomialRemainderDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/algebra/polynomialRoot.ts` - polynomialRoot module
 
 **Exports:**
 
 - Constants: `polynomialRootDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/polyval.ts` - polyval module
+
+**Exports:**
+
+- Constants: `polyvalDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/powerExpand.ts` - powerExpand module
+
+**Exports:**
+
+- Constants: `powerExpandDocs`
 
 ---
 
@@ -9303,11 +9611,27 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/algebra/reduce.ts` - reduce module
+
+**Exports:**
+
+- Constants: `reduceDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/algebra/resolve.ts` - resolve module
 
 **Exports:**
 
 - Constants: `resolveDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/resultant.ts` - resultant module
+
+**Exports:**
+
+- Constants: `resultantDocs`
 
 ---
 
@@ -9351,6 +9675,14 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/algebra/substitute.ts` - substitute module
+
+**Exports:**
+
+- Constants: `substituteDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/algebra/sylvester.ts` - sylvester module
 
 **Exports:**
@@ -9367,6 +9699,46 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/algebra/tangentLine.ts` - tangentLine module
+
+**Exports:**
+
+- Constants: `tangentLineDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/together.ts` - together module
+
+**Exports:**
+
+- Constants: `togetherDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/trigExpand.ts` - trigExpand module
+
+**Exports:**
+
+- Constants: `trigExpandDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/trigReduce.ts` - trigReduce module
+
+**Exports:**
+
+- Constants: `trigReduceDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/trigToExp.ts` - trigToExp module
+
+**Exports:**
+
+- Constants: `trigToExpDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/algebra/usolve.ts` - usolve module
 
 **Exports:**
@@ -9380,6 +9752,14 @@ graph LR
 **Exports:**
 
 - Constants: `usolveAllDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/variables.ts` - variables module
+
+**Exports:**
+
+- Constants: `variablesDocs`
 
 ---
 
@@ -9759,11 +10139,59 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/combinatorics/doubleFactorial.ts` - doubleFactorial module
+
+**Exports:**
+
+- Constants: `doubleFactorialDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/combinatorics/fallingFactorial.ts` - fallingFactorial module
+
+**Exports:**
+
+- Constants: `fallingFactorialDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/combinatorics/fibonacci.ts` - fibonacci module
+
+**Exports:**
+
+- Constants: `fibonacciDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/combinatorics/lucas.ts` - lucas module
+
+**Exports:**
+
+- Constants: `lucasDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/combinatorics/risingFactorial.ts` - risingFactorial module
+
+**Exports:**
+
+- Constants: `risingFactorialDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts` - stirlingS2 module
 
 **Exports:**
 
 - Constants: `stirlingS2Docs`
+
+---
+
+### `expression/src/embeddedDocs/function/combinatorics/subfactorial.ts` - subfactorial module
+
+**Exports:**
+
+- Constants: `subfactorialDocs`
 
 ---
 
@@ -9839,6 +10267,38 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/geometry/angle2D.ts` - angle2D module
+
+**Exports:**
+
+- Constants: `angle2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/angle3D.ts` - angle3D module
+
+**Exports:**
+
+- Constants: `angle3DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/convexHull.ts` - convexHull module
+
+**Exports:**
+
+- Constants: `convexHullDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/cross3D.ts` - cross3D module
+
+**Exports:**
+
+- Constants: `cross3DDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/geometry/distance.ts` - distance module
 
 **Exports:**
@@ -9847,11 +10307,123 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/geometry/distance2D.ts` - distance2D module
+
+**Exports:**
+
+- Constants: `distance2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/distance3D.ts` - distance3D module
+
+**Exports:**
+
+- Constants: `distance3DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/distanceND.ts` - distanceND module
+
+**Exports:**
+
+- Constants: `distanceNDDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/distancePointToLine2D.ts` - distancePointToLine2D module
+
+**Exports:**
+
+- Constants: `distancePointToLine2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/dot3D.ts` - dot3D module
+
+**Exports:**
+
+- Constants: `dot3DDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/geometry/intersect.ts` - intersect module
 
 **Exports:**
 
 - Constants: `intersectDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/intersectLines2D.ts` - intersectLines2D module
+
+**Exports:**
+
+- Constants: `intersectLines2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/intersectSegments2D.ts` - intersectSegments2D module
+
+**Exports:**
+
+- Constants: `intersectSegments2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/pointInPolygon.ts` - pointInPolygon module
+
+**Exports:**
+
+- Constants: `pointInPolygonDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/polygonArea.ts` - polygonArea module
+
+**Exports:**
+
+- Constants: `polygonAreaDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/projectVector.ts` - projectVector module
+
+**Exports:**
+
+- Constants: `projectVectorDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/reflectVector.ts` - reflectVector module
+
+**Exports:**
+
+- Constants: `reflectVectorDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/rotateVector2D.ts` - rotateVector2D module
+
+**Exports:**
+
+- Constants: `rotateVector2DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/rotateVector3D.ts` - rotateVector3D module
+
+**Exports:**
+
+- Constants: `rotateVector3DDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/geometry/triangleArea.ts` - triangleArea module
+
+**Exports:**
+
+- Constants: `triangleAreaDocs`
 
 ---
 
@@ -10215,6 +10787,78 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/numeric/cubicSpline.ts` - cubicSpline module
+
+**Exports:**
+
+- Constants: `cubicSplineDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/gaussQuad.ts` - gaussQuad module
+
+**Exports:**
+
+- Constants: `gaussQuadDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/hermiteInterp.ts` - hermiteInterp module
+
+**Exports:**
+
+- Constants: `hermiteInterpDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/lagrangeInterp.ts` - lagrangeInterp module
+
+**Exports:**
+
+- Constants: `lagrangeInterpDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/linearInterp.ts` - linearInterp module
+
+**Exports:**
+
+- Constants: `linearInterpDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/pchipInterp.ts` - pchipInterp module
+
+**Exports:**
+
+- Constants: `pchipInterpDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/polyFit.ts` - polyFit module
+
+**Exports:**
+
+- Constants: `polyFitDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/romberg.ts` - romberg module
+
+**Exports:**
+
+- Constants: `rombergDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/numeric/simpson.ts` - simpson module
+
+**Exports:**
+
+- Constants: `simpsonDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/numeric/solveODE.ts` - solveODE module
 
 **Exports:**
@@ -10223,11 +10867,35 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/numeric/trapz.ts` - trapz module
+
+**Exports:**
+
+- Constants: `trapzDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/probability/bernoulli.ts` - bernoulli module
 
 **Exports:**
 
 - Constants: `bernoulliDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/bernoulliPMF.ts` - bernoulliPMF module
+
+**Exports:**
+
+- Constants: `bernoulliPMFDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/binomialPMF.ts` - binomialPMF module
+
+**Exports:**
+
+- Constants: `binomialPMFDocs`
 
 ---
 
@@ -10247,6 +10915,30 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/probability/entropy.ts` - entropy module
+
+**Exports:**
+
+- Constants: `entropyDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/exponentialCDF.ts` - exponentialCDF module
+
+**Exports:**
+
+- Constants: `exponentialCDFDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/exponentialPDF.ts` - exponentialPDF module
+
+**Exports:**
+
+- Constants: `exponentialPDFDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/probability/factorial.ts` - factorial module
 
 **Exports:**
@@ -10260,6 +10952,22 @@ graph LR
 **Exports:**
 
 - Constants: `gammaDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/geometricPMF.ts` - geometricPMF module
+
+**Exports:**
+
+- Constants: `geometricPMFDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/jsDivergence.ts` - jsDivergence module
+
+**Exports:**
+
+- Constants: `jsDivergenceDocs`
 
 ---
 
@@ -10287,6 +10995,22 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/probability/normalCDF.ts` - normalCDF module
+
+**Exports:**
+
+- Constants: `normalCDFDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/normalPDF.ts` - normalPDF module
+
+**Exports:**
+
+- Constants: `normalPDFDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/probability/permutations.ts` - permutations module
 
 **Exports:**
@@ -10300,6 +11024,14 @@ graph LR
 **Exports:**
 
 - Constants: `pickRandomDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/probability/poissonPMF.ts` - poissonPMF module
+
+**Exports:**
+
+- Constants: `poissonPMFDocs`
 
 ---
 
@@ -10487,11 +11219,43 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/signal/autoCorrelation.ts` - autoCorrelation module
+
+**Exports:**
+
+- Constants: `autoCorrelationDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/signal/crossCorrelation.ts` - crossCorrelation module
+
+**Exports:**
+
+- Constants: `crossCorrelationDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/signal/freqz.ts` - freqz module
 
 **Exports:**
 
 - Constants: `freqzDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/signal/groupDelay.ts` - groupDelay module
+
+**Exports:**
+
+- Constants: `groupDelayDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/signal/unwrapPhase.ts` - unwrapPhase module
+
+**Exports:**
+
+- Constants: `unwrapPhaseDocs`
 
 ---
 
@@ -10503,11 +11267,75 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/function/special/besselJ0.ts` - besselJ0 module
+
+**Exports:**
+
+- Constants: `besselJ0Docs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/besselJ1.ts` - besselJ1 module
+
+**Exports:**
+
+- Constants: `besselJ1Docs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/besselY0.ts` - besselY0 module
+
+**Exports:**
+
+- Constants: `besselY0Docs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/besselY1.ts` - besselY1 module
+
+**Exports:**
+
+- Constants: `besselY1Docs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/beta.ts` - beta module
+
+**Exports:**
+
+- Constants: `betaDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/digamma.ts` - digamma module
+
+**Exports:**
+
+- Constants: `digammaDocs`
+
+---
+
 ### `expression/src/embeddedDocs/function/special/erf.ts` - erf module
 
 **Exports:**
 
 - Constants: `erfDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/erfc.ts` - erfc module
+
+**Exports:**
+
+- Constants: `erfcDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/special/gammainc.ts` - gammainc module
+
+**Exports:**
+
+- Constants: `gammaincDocs`
 
 ---
 
@@ -13172,8 +14000,8 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
+| `expression/src/embeddedDocs/embeddedDocs`             | 345 files    | 1 file     |
 | `functions/src/utils/factory`                          | 2 files      | 260 files  |
-| `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
 | `functions/src/factories/index`                        | 243 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
@@ -13657,7 +14485,7 @@ graph TD
         N294[LOG2E]
         N295[NaN]
         N296[null]
-        N297[...244 more]
+        N297[...336 more]
     end
 
     subgraph Expression/error
@@ -13927,10 +14755,10 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 894    |
+| Total TypeScript Files  | 986    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 162296 |
-| Total Exports           | 4454   |
+| Total Lines of Code     | 163347 |
+| Total Exports           | 4546   |
 | Total Re-exports        | 1527   |
 | Total Classes           | 51     |
 | Total Interfaces        | 374    |
