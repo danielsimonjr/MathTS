@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — B-5 upstream audit: groebnerBasis + eliminate were fakes; Unit gains astronomical units
+
+Audited all 61 upstream mathjs drift commits since the dead sync (verdicts:
+`docs/roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md`). The upstream CRITICAL/HIGH CAS fixes
+(`3c355ade9`) don't apply as patches — MathTS's implementations are independent rewrites —
+but behavioral probes of the same bug classes found two of ours were **fakes**:
+
+- **`groebnerBasis` never ran Buchberger** (returned inputs "normalized") and its
+  evaluation-based parser couldn't distinguish `x` from `x²` (both are 1 at the unit
+  point) — ⟨x²+y²−1, x−y⟩ came back containing `x+y−1`, which doesn't even vanish on the
+  system's solutions. Rewritten: exact AST-parsed polynomials + real Buchberger with
+  honest caps (new `typed/polynomial-ideal.ts`); 12 ideal-membership oracle pins.
+- **`eliminate` returned decorative strings** (`"(A) - (B) [x eliminated]"`) and echoed
+  garbage. Rewritten as the real elimination ideal on the same machinery; garbage throws.
+- `laplacian` now validates its variables (was silent 0 / unhelpful crash).
+- **Ported** the upstream Unit additions+fix (`ece1aab0f` + `5f360326b`): astronomical /
+  nautical / typography units with upward-only `ly`/`pc` prefixes (`Mpc` works, `mly`
+  throws) and no lowercase `au` (Bohr-radius collision). 17 IAU/NIST pins.
+- Audited **clean**: discriminant, piecewise, toRadicals, fullSimplify, complexExpand,
+  reduce, rowReduce (different designs without the upstream bug classes).
+
+Gates: build 22/22, test 44/44 (functions 147 files/3302+, core 485), typecheck 28/28.
+
 ### Added (2026-07-05) — B-4: SVD `fullMatrices` option implemented (was accepted but ignored)
 
 `svd`'s `SVDOptions.fullMatrices` was destructured with a claimed default of `true` and

@@ -496,15 +496,28 @@ describe('element', () => {
 });
 
 describe('eliminate', () => {
-  it('should eliminate variable from system', () => {
+  // B-5: these previously pinned the FAKE implementation (decorative
+  // "[x eliminated]" strings). eliminate now computes the real elimination
+  // ideal; the pins assert the mathematics instead of the old formatting.
+  it('should eliminate variable from system (y = 1 survives)', () => {
+    // x = 2 − y ⇒ 2(2−y) + 3y = 5 ⇒ y = 1.
     const result = eliminate(['2*x + 3*y = 5', 'x + y = 2'], 'x');
-    expect(result.length).toBe(1);
-    expect(result[0]).toContain('x eliminated');
+    expect(result.length).toBeGreaterThan(0);
+    for (const eq of result) expect(eq).not.toContain('x');
+    // some surviving relation pins y to 1
+    const hasY1 = result.some((eq) => {
+      const lhs = eq.split('=')[0].replaceAll('y', '(1)').replace(/\^/g, '**');
+      return Math.abs(Function('"use strict";return ' + lhs)()) < 1e-9;
+    });
+    expect(hasY1).toBe(true);
   });
 
-  it('should preserve equations without the variable', () => {
+  it('should preserve variable-free relations (z pinned to 3)', () => {
     const result = eliminate(['x + y = 1', 'z = 3', 'x - y = 0'], 'x');
-    expect(result).toContain('z = 3');
+    const zEq = result.find((eq) => eq.includes('z'));
+    expect(zEq).toBeDefined();
+    const lhs = zEq!.split('=')[0].replaceAll('z', '(3)').replaceAll('y', '(0.5)');
+    expect(Math.abs(Function('"use strict";return ' + lhs)())).toBeLessThan(1e-9);
   });
 });
 

@@ -21,6 +21,11 @@
  */
 
 import { parse, evaluate } from '../factories/evaluate.js';
+import {
+  polyFromExpression,
+  buchberger,
+  polyToString as idealPolyToString,
+} from './polynomial-ideal.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
@@ -417,6 +422,19 @@ export function jacobian(exprs: string[], vars: string[], scope: Record<string, 
  * laplacian('x^2 + y^2 + z^2', ['x', 'y', 'z'], { x: 1, y: 2, z: 3 }) // => 6
  */
 export function laplacian(expr: string, vars: string[], scope: Record<string, f64>): f64 {
+  // B-5 (upstream parity): validate the variables array — a silent 0 for an
+  // empty/malformed list, or a crash on scope lookup, hides caller bugs.
+  if (!Array.isArray(vars) || vars.length === 0) {
+    throw new Error('laplacian: variables must be a non-empty array of variable names');
+  }
+  for (const v of vars) {
+    if (typeof v !== 'string' || v.length === 0) {
+      throw new Error('laplacian: variables must be non-empty strings');
+    }
+    if (!(v in scope)) {
+      throw new Error(`laplacian: variables must have a value in scope (missing '${v}')`);
+    }
+  }
   let sum: f64 = 0;
   for (const v of vars) {
     const x0 = scope[v];
@@ -1322,136 +1340,14 @@ export function asymptotic(
  * groebnerBasis(['x^2 + y - 1', 'x + y^2 - 1'], ['x', 'y'])
  */
 export function groebnerBasis(polys: string[], vars: string[]): string[] {
-  // Internal monomial representation
-  type Monomial = { coeff: f64; powers: number[] };
-  type Poly = Monomial[];
-
-  // Parse a polynomial by evaluating at specific points to extract coefficients
-  // This is a simplified approach - works for polynomials with integer coefficients
-  // and small degree
-  function parsePoly(expr: string): Poly {
-    const result: Poly = [];
-    const maxDeg = 4;
-    const nVars = vars.length;
-
-    // Enumerate all monomials up to degree maxDeg
-    function enumerate(remaining: number, current: number[]): number[][] {
-      if (current.length === nVars) {
-        return remaining >= 0 ? [current] : [];
-      }
-      const results: number[][] = [];
-      for (let d = 0; d <= remaining; d++) {
-        results.push(...enumerate(remaining - d, [...current, d]));
-      }
-      return results;
-    }
-
-    const allMonomials = enumerate(maxDeg, []);
-
-    // Build a linear system to find coefficients
-    // Evaluate polynomial at enough points
-    const nMonomials = allMonomials.length;
-    const points: f64[][] = [];
-    const values: f64[] = [];
-
-    // Generate distinct evaluation points
-    for (let i = 0; i < nMonomials && i < 50; i++) {
-      const point: f64[] = [];
-      let idx = i;
-      for (let j = 0; j < nVars; j++) {
-        point.push((idx % 5) - 2); // -2, -1, 0, 1, 2
-        idx = Math.floor(idx / 5);
-      }
-      const scope: Record<string, f64> = {};
-      for (let j = 0; j < nVars; j++) scope[vars[j]] = point[j];
-      try {
-        values.push(evalWith(expr, scope));
-        points.push(point);
-      } catch {
-        // Skip invalid evaluation points
-      }
-    }
-
-    // Solve via least squares (simplified: just compute coefficients directly
-    // for common cases)
-    // For now, extract by probing specific monomials
-    for (const powers of allMonomials) {
-      // Use inclusion-exclusion to extract coefficient
-      // This is a simplified Vandermonde-like approach
-      const scope0: Record<string, f64> = {};
-      for (let j = 0; j < nVars; j++) scope0[vars[j]] = 0;
-
-      // For constant term
-      if (powers.every((p) => p === 0)) {
-        try {
-          result.push({ coeff: evalWith(expr, scope0), powers: [...powers] });
-        } catch {
-          result.push({ coeff: 0, powers: [...powers] });
-        }
-        continue;
-      }
-
-      // Extract coefficient via finite differences
-      let coeff: f64 = 0;
-      try {
-        // Use multi-dimensional finite difference
-        const totalDeg = powers.reduce((s, p) => s + p, 0);
-        if (totalDeg <= maxDeg) {
-          // Evaluate at unit point for this monomial
-          const unitScope: Record<string, f64> = {};
-          for (let j = 0; j < nVars; j++) unitScope[vars[j]] = powers[j] > 0 ? 1 : 0;
-          const fUnit = evalWith(expr, unitScope);
-
-          // Subtract contributions from lower-degree terms already found
-          let lowerContrib = 0;
-          for (const m of result) {
-            let mVal = m.coeff;
-            for (let j = 0; j < nVars; j++) {
-              mVal *= Math.pow(unitScope[vars[j]], m.powers[j]);
-            }
-            lowerContrib += mVal;
-          }
-          coeff = fUnit - lowerContrib;
-
-          // Divide by the multinomial coefficient
-          for (let j = 0; j < nVars; j++) {
-            if (powers[j] > 1) coeff /= factorial(powers[j]);
-          }
-        }
-      } catch {
-        coeff = 0;
-      }
-
-      if (Math.abs(coeff) > 1e-10) {
-        result.push({
-          coeff: Math.abs(coeff - Math.round(coeff)) < 1e-8 ? Math.round(coeff) : coeff,
-          powers: [...powers],
-        });
-      }
-    }
-
-    return result.filter((m) => Math.abs(m.coeff) > 1e-10);
-  }
-
-  // Convert polynomial back to string
-  function polyToString(p: Poly): string {
-    if (p.length === 0) return '0';
-    const terms = p.map((m) => {
-      let term = formatCoeff(m.coeff);
-      for (let j = 0; j < vars.length; j++) {
-        if (m.powers[j] === 1) term += `*${vars[j]}`;
-        else if (m.powers[j] > 1) term += `*${vars[j]}^${m.powers[j]}`;
-      }
-      return term;
-    });
-    return terms.join(' + ').replace(/\+ -/g, '- ');
-  }
-
-  // For this simplified implementation, return the original polynomials parsed
-  // and normalized. A full Buchberger's algorithm would compute S-polynomials
-  // and reduce, but that requires complete polynomial arithmetic.
-  const parsed = polys.map((p) => parsePoly(p));
-  return parsed.map((p) => polyToString(p));
+  // B-5: real Buchberger over an EXACT AST-parsed representation. The former
+  // implementation returned the inputs "normalized" (no S-polynomials at all)
+  // through an evaluation-based coefficient extractor that could not tell x
+  // from x² — ⟨x²+y²−1, x−y⟩ came back containing x+y−1, which does not even
+  // vanish on the system's solutions. See typed/polynomial-ideal.ts.
+  const parsed = polys.map((s) => polyFromExpression(s, vars));
+  const basis = buchberger(parsed);
+  return basis.map((b) => idealPolyToString(b, vars));
 }
 
 /**

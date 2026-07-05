@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 210
+- **Potentially unused exports**: 218
   - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 210
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 218
 
 ## Potentially Unused Files
 
@@ -257,6 +257,17 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/type/unit/physicalConstants.ts`
 
 - `UnitInstance` (interface) — 2 in-file refs
+
+### `functions/src/typed/polynomial-ideal.ts`
+
+- `normalize` (function) — 8 in-file refs
+- `polyAdd` (function) — 2 in-file refs
+- `polyNeg` (function) — 2 in-file refs
+- `polySub` (function) — 3 in-file refs
+- `polyMul` (function) — 5 in-file refs
+- `polyReduce` (function) — 3 in-file refs
+- `Term` (interface) — 2 in-file refs
+- `Poly` (type) — 37 in-file refs
 
 ### `functions/src/utils/array.ts`
 

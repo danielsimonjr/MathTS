@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-05",
-    "totalFiles": 862,
+    "totalFiles": 863,
     "totalModules": 72,
-    "totalExports": 4389
+    "totalExports": 4398
   },
   "entryPoints": [
     {
@@ -16066,6 +16066,10 @@
               "discriminantDispatch",
               "WASM_POLY_THRESHOLD"
             ]
+          },
+          {
+            "file": "./polynomial-ideal.js",
+            "imports": ["polyFromExpression", "buchberger", "polyToString"]
           }
         ],
         "workspaceDependencies": [],
@@ -16350,6 +16354,10 @@
           {
             "file": "../factories/evaluate.js",
             "imports": ["parse", "evaluate"]
+          },
+          {
+            "file": "./polynomial-ideal.js",
+            "imports": ["polyFromExpression", "buchberger", "polyToString"]
           },
           {
             "file": "../factories/index.js",
@@ -17478,6 +17486,41 @@
         ],
         "exports": ["kernelSource", "mapArray"],
         "functions": ["kernelSource", "mapArray"]
+      },
+      "functions/src/typed/polynomial-ideal.ts": {
+        "description": "Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/evaluate.js",
+            "imports": ["parse"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "normalize",
+          "polyAdd",
+          "polyNeg",
+          "polySub",
+          "polyMul",
+          "polyFromExpression",
+          "polyReduce",
+          "buchberger",
+          "polyToString"
+        ],
+        "interfaces": ["Term"],
+        "functions": [
+          "normalize",
+          "polyAdd",
+          "polyNeg",
+          "polySub",
+          "polyMul",
+          "polyFromExpression",
+          "polyReduce",
+          "buchberger",
+          "polyToString"
+        ]
       },
       "functions/src/typed/probability.ts": {
         "description": "Typed Probability & Combinatorics Functions",
@@ -29503,10 +29546,18 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [],
+      "runtime": [
+        [
+          "functions/src/factories/evaluate.ts",
+          "functions/src/typed/index.ts",
+          "functions/src/typed/algebra.ts",
+          "functions/src/typed/polynomial-ideal.ts",
+          "functions/src/factories/evaluate.ts"
+        ]
+      ],
       "typeOnly": [],
-      "total": 0,
-      "runtimeCount": 0,
+      "total": 1,
+      "runtimeCount": 1,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -30120,6 +30171,7 @@
           "functions/src/typed/matrix-ops.ts",
           "functions/src/typed/numeric.ts",
           "functions/src/typed/parallel-map.ts",
+          "functions/src/typed/polynomial-ideal.ts",
           "functions/src/typed/probability.ts",
           "functions/src/typed/relational.ts",
           "functions/src/typed/set.ts",
@@ -30667,21 +30719,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 862,
+    "totalTypeScriptFiles": 863,
     "totalModules": 72,
-    "totalLinesOfCode": 160133,
-    "totalExports": 4389,
+    "totalLinesOfCode": 160447,
+    "totalExports": 4398,
     "totalClasses": 51,
-    "totalInterfaces": 373,
-    "totalFunctions": 1477,
+    "totalInterfaces": 374,
+    "totalFunctions": 1486,
     "totalTypeGuards": 155,
     "totalEnums": 0,
     "totalConstants": 1398,
     "totalReExports": 1501,
     "totalTypeOnlyImports": 494,
-    "runtimeCircularDeps": 0,
+    "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 210
+    "unusedExportsCount": 218
   }
 }

@@ -134,7 +134,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 31 files
-- **functions/typed**: 30 files
+- **functions/typed**: 31 files
 - **functions/unit**: 2 files
 - **functions/utils**: 35 files
 - **functions/wasm**: 12 files
@@ -182,7 +182,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 4               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 389            | 9               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 302            | 127             |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -7410,6 +7410,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
+| `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString` | Import |
 
 **Exports:**
 
@@ -7473,6 +7474,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../factories/evaluate.js` | `parse, evaluate` | Import |
+| `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString` | Import |
 | `../factories/index.js` | `polynomialRoot` | Import |
 
 **Exports:**
@@ -7773,6 +7775,21 @@ graph LR
 **Exports:**
 
 - Functions: `kernelSource`, `mapArray`
+
+---
+
+### `functions/src/typed/polynomial-ideal.ts` - Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../factories/evaluate.js` | `parse` | Import |
+
+**Exports:**
+
+- Interfaces: `Term`
+- Types: `Poly`
+- Functions: `normalize`, `polyAdd`, `polyNeg`, `polySub`, `polyMul`, `polyFromExpression`, `polyReduce`, `buchberger`, `polyToString`
 
 ---
 
@@ -12737,7 +12754,18 @@ graph LR
 
 ## Circular Dependency Analysis
 
-## **No circular dependencies detected.**
+**1 circular dependencies detected:**
+
+- **Runtime cycles**: 1 (require attention)
+- **Type-only cycles**: 0 (safe, no runtime impact)
+
+### Runtime Circular Dependencies
+
+These cycles involve runtime imports and may cause issues:
+
+- functions/src/factories/evaluate.ts -> functions/src/typed/index.ts -> functions/src/typed/algebra.ts -> functions/src/typed/polynomial-ideal.ts -> functions/src/factories/evaluate.ts
+
+---
 
 <a id="visual-dependency-graph"></a>
 
@@ -13123,7 +13151,7 @@ graph TD
         N257[distributions]
         N258[fused]
         N259[geometry]
-        N260[...20 more]
+        N260[...21 more]
     end
 
     subgraph Functions/unit
@@ -13435,18 +13463,18 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 862    |
+| Total TypeScript Files  | 863    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 160133 |
-| Total Exports           | 4389   |
+| Total Lines of Code     | 160447 |
+| Total Exports           | 4398   |
 | Total Re-exports        | 1501   |
 | Total Classes           | 51     |
-| Total Interfaces        | 373    |
-| Total Functions         | 1477   |
+| Total Interfaces        | 374    |
+| Total Functions         | 1486   |
 | Total Type Guards       | 155    |
 | Total Enums             | 0      |
 | Type-only Imports       | 494    |
-| Runtime Circular Deps   | 0      |
+| Runtime Circular Deps   | 1      |
 | Type-only Circular Deps | 0      |
 
 ---

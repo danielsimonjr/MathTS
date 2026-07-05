@@ -1820,6 +1820,26 @@ export const createUnitClass = /* #__PURE__ */ factory(
     PREFIXES.BINARY_SHORT = Object.assign({}, PREFIXES.BINARY_SHORT_SI, PREFIXES.BINARY_SHORT_IEC);
     PREFIXES.BINARY_LONG = Object.assign({}, PREFIXES.BINARY_LONG_SI, PREFIXES.BINARY_LONG_IEC);
 
+    // Upward-only short prefix set for cosmological-scale units like
+    // light-year (`ly`) and parsec (`pc`). Cosmologists only multiply these
+    // units up (kpc, Mpc, Gpc; Mly, Gly), never down — `mly` (milli-lightyear)
+    // etc. are not used in physics literature and lead to silent
+    // misinterpretations (e.g. `mly` parsing as 1e-3 ly instead of
+    // mega-lightyear). Ported from upstream mathjs ece1aab0f + 5f360326b (B-5).
+    PREFIXES.SHORT_UP_ONLY = {
+      '': { name: '', value: 1, scientific: true },
+      k: { name: 'k', value: 1e3, scientific: true },
+      M: { name: 'M', value: 1e6, scientific: true },
+      G: { name: 'G', value: 1e9, scientific: true },
+      T: { name: 'T', value: 1e12, scientific: true },
+      P: { name: 'P', value: 1e15, scientific: true },
+      E: { name: 'E', value: 1e18, scientific: true },
+      Z: { name: 'Z', value: 1e21, scientific: true },
+      Y: { name: 'Y', value: 1e24, scientific: true },
+      R: { name: 'R', value: 1e27, scientific: true },
+      Q: { name: 'Q', value: 1e30, scientific: true },
+    };
+
     /* Internally, each unit is represented by a value and a dimension array. The elements of the dimensions array have the following meaning:
      * Index  Dimension
      * -----  ---------
@@ -2010,6 +2030,81 @@ export const createUnitClass = /* #__PURE__ */ factory(
         base: BASE_UNITS.LENGTH,
         prefixes: PREFIXES.NONE,
         value: 1e-10,
+        offset: 0,
+      },
+
+      // Astronomical / nautical / typography length units (ported from
+      // upstream mathjs ece1aab0f + 5f360326b — B-5). `ly` and `pc` are
+      // first-class UNITS with SHORT_UP_ONLY prefixes so kpc/Mpc/Mly/Gly
+      // resolve through the prefix system while sub-multiples throw.
+      astronomicalUnit: {
+        name: 'astronomicalUnit',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 1.495978707e11, // IAU 2012 exact definition
+        offset: 0,
+      },
+      lightyear: {
+        name: 'lightyear',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 9.4607304725808e15, // Julian year × c (exact)
+        offset: 0,
+      },
+      ly: {
+        name: 'ly',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.SHORT_UP_ONLY,
+        value: 9.4607304725808e15,
+        offset: 0,
+      },
+      parsec: {
+        name: 'parsec',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.LONG, // kiloparsec, megaparsec, gigaparsec
+        value: 3.08567758149137e16, // IAU 2015 exact definition
+        offset: 0,
+      },
+      pc: {
+        name: 'pc',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.SHORT_UP_ONLY,
+        value: 3.08567758149137e16,
+        offset: 0,
+      },
+      nauticalMile: {
+        name: 'nauticalMile',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 1852, // exact
+        offset: 0,
+      },
+      fathom: {
+        name: 'fathom',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 1.8288, // 6 ft exactly
+        offset: 0,
+      },
+      furlong: {
+        name: 'furlong',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 201.168, // 1/8 mile exactly
+        offset: 0,
+      },
+      point: {
+        name: 'point',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 0.0254 / 72, // 1/72 inch (PostScript), exact
+        offset: 0,
+      },
+      pica: {
+        name: 'pica',
+        base: BASE_UNITS.LENGTH,
+        prefixes: PREFIXES.NONE,
+        value: 0.0254 / 6, // 1/6 inch (12 points), exact
         offset: 0,
       },
 
@@ -3105,6 +3200,19 @@ export const createUnitClass = /* #__PURE__ */ factory(
     // note that ALIASES is only used at creation to create more entries in UNITS by copying the aliased units
     const ALIASES: Record<string, string> = {
       meters: 'meter',
+      // Astronomical / nautical / typography aliases (B-5 port). Lowercase
+      // 'au' is deliberately ABSENT: it collides with the atomic unit of
+      // length (Bohr radius, ~5.29e-11 m), 21 orders of magnitude smaller.
+      AU: 'astronomicalUnit',
+      astronomicalUnits: 'astronomicalUnit',
+      lightyears: 'lightyear',
+      parsecs: 'parsec',
+      nmi: 'nauticalMile',
+      nauticalMiles: 'nauticalMile',
+      fathoms: 'fathom',
+      furlongs: 'furlong',
+      points: 'point',
+      picas: 'pica',
       inches: 'inch',
       feet: 'foot',
       yards: 'yard',

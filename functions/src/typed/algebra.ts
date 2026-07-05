@@ -17,6 +17,11 @@ import {
   discriminantDispatch,
   WASM_POLY_THRESHOLD,
 } from '../wasm/poly/wasm-bridge.js';
+import {
+  polyFromExpression,
+  buchberger,
+  polyToString as idealPolyToString,
+} from './polynomial-ideal.js';
 
 // =============================================================================
 // Type Aliases
@@ -967,31 +972,49 @@ export function element<T>(arr: T[], index: number): T {
 }
 
 /**
- * Eliminate a variable from a system of linear equations.
+ * Eliminate a variable from a system of polynomial equations (`"lhs = rhs"`
+ * strings) by computing the ELIMINATION IDEAL: a lex Gröbner basis with the
+ * eliminated variable ordered first, keeping the basis elements free of it.
+ * Returns the surviving relations as `"<poly> = 0"` strings.
  *
- * @param system - Array of equation strings
+ * B-5: the former implementation returned decorative strings
+ * (`"(A) - (B) [x eliminated]"`) — not equations — and echoed non-equation
+ * input unchanged. It now performs real elimination and throws on input it
+ * cannot parse as polynomial equations.
+ *
+ * @param system - Array of equation strings (`"lhs = rhs"` — the `=` is required)
  * @param variable - Variable to eliminate
- * @returns Reduced system of equations
+ * @returns The eliminated system as `"<poly> = 0"` strings
  */
 export function eliminate(system: string[], variable: string): string[] {
-  const withVar: string[] = [];
-  const withoutVar: string[] = [];
-
+  // Discover the variable set from the equations themselves (AST symbols).
+  const symbols = new Set<string>();
+  const polysSrc: string[] = [];
   for (const eq of system) {
-    if (eq.includes(variable)) {
-      withVar.push(eq);
-    } else {
-      withoutVar.push(eq);
+    const parts = eq.split('=');
+    if (parts.length !== 2) {
+      throw new Error(`eliminate: '${eq}' is not an equation (expected exactly one '=')`);
     }
+    const polySrc = `(${parts[0]}) - (${parts[1]})`;
+    polysSrc.push(polySrc);
+    for (const m of polySrc.matchAll(/[A-Za-z_][A-Za-z0-9_]*/g)) symbols.add(m[0]);
   }
-
-  if (withVar.length < 2) return [...withoutVar, ...withVar];
-
-  const result = [...withoutVar];
-  for (let i = 1; i < withVar.length; i++) {
-    result.push('(' + withVar[i] + ') - (' + withVar[0] + ') [' + variable + ' eliminated]');
+  if (!symbols.has(variable)) {
+    // Nothing to eliminate — the system is already free of the variable.
+    return polysSrc.map((s) => `${s} = 0`);
   }
-  return result;
+  // Lex order with the eliminated variable FIRST (most significant), so the
+  // basis elements whose leading terms avoid it form the elimination ideal.
+  const vars = [variable, ...[...symbols].filter((s) => s !== variable).sort()];
+  const parsed = polysSrc.map((s) => polyFromExpression(s, vars));
+  const basis = buchberger(parsed);
+  const survived = basis.filter((b) => b.every((t) => t.powers[0] === 0));
+  if (survived.length === 0) {
+    throw new Error(
+      `eliminate: no relations survive eliminating '${variable}' (system may be underdetermined)`
+    );
+  }
+  return survived.map((b) => `${idealPolyToString(b, vars)} = 0`);
 }
 
 /**

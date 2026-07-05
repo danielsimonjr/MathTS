@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 862, "e": 4389, "re": 1501 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 863, "e": 4398, "re": 1501 },
   "s": {
-    "loc": 160133,
+    "loc": 160447,
     "cls": 51,
-    "int": 373,
-    "fn": 1477,
+    "int": 374,
+    "fn": 1486,
     "tg": 155,
     "en": 0,
     "co": 1398,
     "toi": 494
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": { "rt": 1, "to": 0, "rtp": ["evaluate→index→algebra→polynomial-ideal→evaluate"] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -808,7 +808,7 @@
       ]
     },
     "functions/typed": {
-      "f": 30,
+      "f": 31,
       "exp": [
         "typedAlgebra",
         "polyval",
