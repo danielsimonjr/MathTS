@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-expression
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [cb4bebf]
+- Updated dependencies [a5b5af6]
+  - @danielsimonjr/mathts-core@0.6.0
+
 ## 0.5.2
 
 ### Patch Changes
