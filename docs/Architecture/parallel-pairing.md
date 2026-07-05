@@ -8,8 +8,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      89 |
-| Parallel — disabled (all ops `'never'`)    |      24 |
+| Parallel — effective (op threshold active) |      82 |
+| Parallel — disabled (all ops `'never'`)    |      31 |
 | Non-parallel (no worker-pool path)         |     105 |
 | **Total**                                  | **218** |
 
@@ -39,10 +39,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `beta`                  | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `betainc`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `binomialPMF`           | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `bitAnd`                | `bitAnd`                      | 50000 (global)                        | bitwise       |
-| `bitNot`                | `bitNot`                      | 50000 (global)                        | bitwise       |
-| `bitOr`                 | `bitOr`                       | 50000 (global)                        | bitwise       |
-| `bitXor`                | `bitXor`                      | 50000 (global)                        | bitwise       |
 | `cbrt`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `ceil`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `chebyshevT`            | `applyKernel`                 | 50000 (global kernel)                 | special       |
@@ -70,7 +66,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `hermiteH`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `laguerreL`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `lambertW`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `leftShift`             | `leftShift`                   | 50000 (global)                        | bitwise       |
 | `legendreP`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `lgamma`                | `applyKernel`                 | 50000 (global kernel)                 | special       |
 | `log10`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
@@ -100,8 +95,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelStatVariance`  | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
 | `parallelXCorr`         | `applyKernel`                 | 50000 (global kernel)                 | signal        |
 | `poissonPMF`            | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `rightArithShift`       | `rightArithShift`             | 50000 (global)                        | bitwise       |
-| `rightLogShift`         | `rightLogShift`               | 50000 (global)                        | bitwise       |
 | `round`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
 | `sec`                   | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
 | `sign`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
@@ -117,10 +110,15 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | ---------------------- | ------------------- | ------------ |
 | `abs`                  | `abs`               | arithmetic   |
 | `add`                  | `add`               | arithmetic   |
+| `bitAnd`               | `bitAnd`            | bitwise      |
+| `bitNot`               | `bitNot`            | bitwise      |
+| `bitOr`                | `bitOr`             | bitwise      |
+| `bitXor`               | `bitXor`            | bitwise      |
 | `cos`                  | `cos`               | trigonometry |
 | `divide`               | `divide`            | arithmetic   |
 | `dot`                  | `dot`               | arithmetic   |
 | `exp`                  | `exp`               | arithmetic   |
+| `leftShift`            | `leftShift`         | bitwise      |
 | `log`                  | `log`               | arithmetic   |
 | `mean`                 | `mean`              | arithmetic   |
 | `multiply`             | `multiply`, `scale` | arithmetic   |
@@ -130,6 +128,8 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | `parallelStatMin`      | `min`               | statistics   |
 | `parallelStatMinMax`   | `minMax`            | statistics   |
 | `parallelStatSum`      | `sum`               | statistics   |
+| `rightArithShift`      | `rightArithShift`   | bitwise      |
+| `rightLogShift`        | `rightLogShift`     | bitwise      |
 | `sin`                  | `sin`               | trigonometry |
 | `sqrt`                 | `sqrt`              | arithmetic   |
 | `square`               | `square`            | arithmetic   |
@@ -145,7 +145,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | Module        | Effective | Disabled | Non-parallel |
 | ------------- | --------: | -------: | -----------: |
 | arithmetic    |        17 |       15 |           13 |
-| bitwise       |         7 |        0 |            0 |
+| bitwise       |         0 |        7 |            0 |
 | combinatorics |         0 |        0 |           21 |
 | complex       |         0 |        0 |            4 |
 | distributions |         8 |        0 |            6 |
@@ -172,10 +172,10 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `applyKernel`              | 50000 (global kernel) |    ✓    |          82 |
 | `applyKernel2`             | 50000 (global)        |    ✓    |           2 |
 | `besselJ`                  | 1000000               |    ✓    |           0 |
-| `bitAnd`                   | 50000 (global)        |    ✓    |           1 |
-| `bitNot`                   | 50000 (global)        |    ✓    |           1 |
-| `bitOr`                    | 50000 (global)        |    ✓    |           1 |
-| `bitXor`                   | 50000 (global)        |    ✓    |           1 |
+| `bitAnd`                   | never                 |    —    |           1 |
+| `bitNot`                   | never                 |    —    |           1 |
+| `bitOr`                    | never                 |    —    |           1 |
+| `bitXor`                   | never                 |    —    |           1 |
 | `characteristicPolynomial` | 9216                  |    ✓    |           0 |
 | `chiSquareTest`            | 4096                  |    ✓    |           0 |
 | `cos`                      | never                 |    —    |           1 |
@@ -190,7 +190,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `histogram`                | never                 |    —    |           1 |
 | `integrateChunk`           | never                 |    —    |           0 |
 | `kolmogorovSmirnovTest`    | 4096                  |    ✓    |           0 |
-| `leftShift`                | 50000 (global)        |    ✓    |           1 |
+| `leftShift`                | never                 |    —    |           1 |
 | `log`                      | never                 |    —    |           1 |
 | `mannWhitneyTest`          | 4096                  |    ✓    |           0 |
 | `matmul`                   | 4096                  |    ✓    |           0 |
@@ -210,8 +210,8 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `parallelStatProd`         | never                 |    —    |           0 |
 | `pow`                      | never                 |    —    |           0 |
 | `prod`                     | never                 |    —    |           1 |
-| `rightArithShift`          | 50000 (global)        |    ✓    |           1 |
-| `rightLogShift`            | 50000 (global)        |    ✓    |           1 |
+| `rightArithShift`          | never                 |    —    |           1 |
+| `rightLogShift`            | never                 |    —    |           1 |
 | `sampleChunk`              | 100000                |    ✓    |           0 |
 | `scale`                    | never                 |    —    |           1 |
 | `shapiroWilkTest`          | 4096                  |    ✓    |           0 |

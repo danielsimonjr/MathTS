@@ -2,8 +2,8 @@
   "generated": "2026-07-05",
   "total": 218,
   "parallelizedCount": 113,
-  "effectiveCount": 89,
-  "disabledCount": 24,
+  "effectiveCount": 82,
+  "disabledCount": 31,
   "nonParallelCount": 105,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
@@ -166,29 +166,29 @@
       "name": "bitAnd",
       "file": "bitwise.ts",
       "ops": ["bitAnd"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "bitNot",
       "file": "bitwise.ts",
       "ops": ["bitNot"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "bitOr",
       "file": "bitwise.ts",
       "ops": ["bitOr"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "bitXor",
       "file": "bitwise.ts",
       "ops": ["bitXor"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "cbrt",
@@ -411,8 +411,8 @@
       "name": "leftShift",
       "file": "bitwise.ts",
       "ops": ["leftShift"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "legendreP",
@@ -684,15 +684,15 @@
       "name": "rightArithShift",
       "file": "bitwise.ts",
       "ops": ["rightArithShift"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "rightLogShift",
       "file": "bitwise.ts",
       "ops": ["rightLogShift"],
-      "thresholds": ["50000 (global)"],
-      "effectiveness": "effective"
+      "thresholds": ["never"],
+      "effectiveness": "disabled"
     },
     {
       "name": "round",
@@ -1023,26 +1023,26 @@
     },
     {
       "op": "bitAnd",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["bitAnd"]
     },
     {
       "op": "bitNot",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["bitNot"]
     },
     {
       "op": "bitOr",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["bitOr"]
     },
     {
       "op": "bitXor",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["bitXor"]
     },
     {
@@ -1131,8 +1131,8 @@
     },
     {
       "op": "leftShift",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["leftShift"]
     },
     {
@@ -1251,14 +1251,14 @@
     },
     {
       "op": "rightArithShift",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["rightArithShift"]
     },
     {
       "op": "rightLogShift",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["rightLogShift"]
     },
     {
@@ -1359,8 +1359,8 @@
       "none": 13
     },
     "bitwise.ts": {
-      "effective": 7,
-      "disabled": 0,
+      "effective": 0,
+      "disabled": 7,
       "none": 0
     },
     "combinatorics.ts": {

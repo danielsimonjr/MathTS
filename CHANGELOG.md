@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-05) — WS-2 addendum: bitwise family benchmarked + set to `'never'`
+
+The seven bitwise ops gated via a **nameless** `shouldParallelize(len)` → the untested
+global 50k threshold, so ≥50k-element calls dispatched to workers unmeasured. Benchmarked
+(`ws2-bitwise-ops.mjs`): worker path loses 7–25× at every size up to 4M elements
+(bitAnd 0.07–0.15×, bitNot 0.06–0.09×, leftShift 0.04–0.07×). All seven added to `OpName`
+and set `'never'`; the methods now pass their op names so the entries govern. Existing
+worker-kernel oracle tests kept exercising the worker path via an explicit `thresholdByOp:
+{}` override. The **whole OpName surface (57/57) now carries explicit benchmark-sourced
+thresholds** — the WS-2 workstream is closed with no unmeasured ops left. Gates: parallel
+426/426, build 22/22, test 44/44.
+
 ### Fixed (2026-07-05) — B-3: wasm loaders' dead `lib/wasm` fallback replaced with an accurate package-relative one
 
 All three wasm loaders (matrix `WasmLoader` + `WASMBackend`, functions `WasmLoader`)

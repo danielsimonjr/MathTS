@@ -459,7 +459,7 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
 bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested global 50k. They DO have inline
   fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
-  element-wise = the most memory-bound class there is). REMAINING: add them to `OpName`, bench, set explicitly.
+  element-wise = the most memory-bound class there is). ✅ **DONE 2026-07-05:** all 7 added to `OpName`, benched (0.04–0.15×, worker loses 7–25× at every size), set `'never'`, call sites pass op names; worker-kernel tests preserved via per-op-map override. WS-2 fully closed — 57/57 OpNames explicit.
 - ✅ **[LOW — DONE 2026-07-02] 2 type-only import cycles in matrix broken.** `DenseMatrix.ts ↔ dense/arithmetic.ts`
   and `DenseMatrix.ts ↔ dense/reduction.ts`: the helpers only need a read view of the matrix (`rows`/`cols`/`get`/
   `length`/`isSquare`), so their param type was changed from `DenseMatrix` to the `Matrix<number>` base interface

@@ -934,11 +934,14 @@ describe('ComputePool', () => {
 
       beforeAll(async () => {
         // Force parallel path: low threshold + small chunk so a 100-element
-        // input produces multiple chunks (>1).
+        // input produces multiple chunks (>1). The bitwise ops are 'never' in
+        // DEFAULT_THRESHOLD_BY_OP (WS-2 addendum) — clear the per-op map so the
+        // global threshold governs and the WORKER KERNELS stay exercised.
         pool = new ComputePool({
           maxWorkers: 3,
           thresholdElements: 10,
           chunkSize: 7,
+          thresholdByOp: {},
         });
         await pool.initialize();
       }, 60_000);

@@ -52,6 +52,14 @@ export type OpName =
   | 'negate'
   | 'sqrt'
   | 'square'
+  // bitwise (Int32Array element-wise)
+  | 'bitAnd'
+  | 'bitOr'
+  | 'bitXor'
+  | 'bitNot'
+  | 'leftShift'
+  | 'rightArithShift'
+  | 'rightLogShift'
   | 'exp'
   | 'log'
   | 'sin'
@@ -244,6 +252,20 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   // no shouldParallelize call consults it. Expensive (ms-scale) integrands are the
   // one case where the fan-out pays off.
   integrateChunk: 'never',
+  // Added 2026-07-05 (WS-2 addendum): the bitwise family gated via a NAMELESS
+  // shouldParallelize(len) -> the untested global 50k. Benchmarked
+  // (tools/benchmarks/ws2-bitwise-ops.mjs, medians of 9 interleaved reps):
+  // bitAnd 0.07-0.15x, bitNot 0.06-0.09x, leftShift 0.04-0.07x at every size up
+  // to 4M elements - Int32Array element-wise is maximally memory-bound; the
+  // worker path loses 7-25x. All seven -> 'never'; the methods now pass their
+  // op name so these entries actually govern.
+  bitAnd: 'never',
+  bitOr: 'never',
+  bitXor: 'never',
+  bitNot: 'never',
+  leftShift: 'never',
+  rightArithShift: 'never',
+  rightLogShift: 'never',
 
   // signal: overhead dominates or break-even never reached
   parallelFFT: 'never',
@@ -1408,7 +1430,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'bitAnd')) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitAnd'));
     }
     const start = performance.now();
@@ -1428,7 +1450,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'bitOr')) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitOr'));
     }
     const start = performance.now();
@@ -1448,7 +1470,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'bitXor')) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitXor'));
     }
     const start = performance.now();
@@ -1465,7 +1487,7 @@ export class ComputePool {
    * Unary bitwise NOT on an `Int32Array`.
    */
   async bitNot(a: Int32Array): Promise<ParallelResult<Int32Array>> {
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'bitNot')) {
       return toParallelResult(await this.workerPool.bitwiseNot(a));
     }
     const start = performance.now();
@@ -1486,7 +1508,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'leftShift')) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'leftShift')
@@ -1513,7 +1535,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'rightArithShift')) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'rightArithShift')
@@ -1539,7 +1561,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length, 'rightLogShift')) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'rightLogShift')
