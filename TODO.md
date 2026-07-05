@@ -364,8 +364,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   unconditionally) now gate with inline sequential fallbacks (a speedup for every caller). All 50/50 OpNames
   have explicit benchmark-sourced thresholds. Caveat: benched on the dev box (medians of 9 interleaved reps);
   the 0.00–0.5× margins are far too wide for noise to flip the verdicts.
-  **Decision gates awaiting maintainer:** G1 fast-check dep · G2 wasm kernel fix-vs-retire · G3 unit-dispatch
-  spec · G4 notebook host · G5 plotting approach.
+  **Decision gates:** G1 fast-check dep · ~~G2~~ ✅ **CLOSED 2026-07-04** (investigated fix-vs-retire and found
+  it was ALREADY FIXED: the "parked" kernels — Airy, poly-fits, argsort/rank — were repointed to AS in Phase 6
+  [Airy truncation-cap → AS↔JS ≈4e-16; poly fits attempt AS ≥1024 pts with validated-JS rank-deficiency
+  fallback]; runtime probe: 39/39 wasm-routed execute wasm, 0 fallbacks. Only STALE COMMENTS survived — fixed
+  the special-bridge header + the wasm-pairing generator note) · G3 unit-dispatch spec · G4 notebook host
+  (**HOLD** per maintainer) · G5 plotting approach (**HOLD** per maintainer).
 
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 

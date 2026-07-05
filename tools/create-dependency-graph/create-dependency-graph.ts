@@ -2814,8 +2814,9 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `element-wise/transpose/reductions and eig/svd run on JS (measured 0.2–6× slower on WASM — `;
   md += `memory-bound or scalar; the eig/svd AS kernels were deleted). The elementwise transcendentals `;
   md += `(abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the `;
-  md += `wasm-effective set here. The js-fallback functions (poly fits, Airy, argsort/rank) are on JS `;
-  md += `because their AS kernels are broken or unstable — tracked follow-ups.\n`;
+  md += `wasm-effective set here. The formerly-parked kernels (poly fits, Airy, argsort/rank) were `;
+  md += `fixed and repointed to AS in Phase 6 (Airy truncation-cap: AS vs JS ≈4e-16; poly fits attempt the AS kernel ≥1024 points with a validated-JS rank-deficiency fallback) — G2 closed 2026-07-04.
+`;
 
   // Binary export table — probed from the built .wasm so ARCHITECTURE.md §6a no
   // longer hand-maintains these counts.

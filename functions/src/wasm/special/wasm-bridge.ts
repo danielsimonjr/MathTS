@@ -17,8 +17,9 @@
  *
  * AS parity (Slice 4.9): `assembly/src/special.ts` implements the Bessel/Y and
  *   lgamma/elliptic kernels with the same algorithms, validated ≤1e-12 vs the JS
- *   reference. (Airy is the exception — see `airyAiDispatch`/`airyBiDispatch`,
- *   which stay on JS pending a Phase 6 AS asymptotic fix.) The legacy
+ *   reference. (Airy was the last holdout — its AS asymptotic series needed the
+ *   Phase 6 truncation cap, after which AS vs JS agree to ≈4e-16; see the note
+ *   above `airyAiDispatch`, which now routes to AS like its siblings.) The legacy
  *   native-pointer path was removed from this bridge in the Phase 5 AS cutover.
  *
  * Any thrown error is swallowed and the JS fallback runs — the WASM tier

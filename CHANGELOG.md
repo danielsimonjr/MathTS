@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Docs (2026-07-04) — G2 closed: the "parked" WASM kernels were already fixed
+
+Investigated the G2 fix-vs-retire decision for the js-fallback kernels (poly-fit, Airy,
+argsort/rank) and found the work was **already done in Phase 6**: Airy's AS asymptotic
+series got its truncation cap (AS↔JS agree to ≈4e-16) and was repointed; poly fits attempt
+the AS kernel ≥1024 points with a validated-JS rank-deficiency fallback; argsort/rank were
+repointed to AS. The wasm-pairing runtime probe confirms 39/39 wasm-routed functions execute
+WASM with 0 fallbacks. What survived was stale documentation — the special-bridge header
+still said Airy "stays on JS pending a Phase 6 fix" (contradicted 200 lines later by the fix
+itself) and the wasm-pairing **generator** still emitted "kernels are broken or unstable".
+Both corrected at source.
+
 ### Changed (2026-07-04) — WS-2 threshold retune COMPLETE: last 5 ops benchmarked + gated
 
 The five `OpName`s absent from `DEFAULT_THRESHOLD_BY_OP` (`histogram`/`transpose`/`matvec`/
