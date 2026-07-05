@@ -1072,20 +1072,57 @@ export async function shapiroWilkTest(
     return baseResult;
   }
 
-  // Compute approximate Shapiro-Wilk coefficients using Blom's expected normal order statistics
+  // Shapiro-Wilk coefficients per Royston (1995), algorithm AS R94: Blom expected
+  // normal order statistics m_i, with polynomial-corrected tail weights a_n (and
+  // a_{n-1} for n > 5) and φ-renormalized interior. The former plain-Blom
+  // normalization (a = m/‖m‖, no tail correction) biased W low — 0.9014 vs
+  // scipy's 0.9166 on an 8-point sample, a 1.7% error in a published statistic.
   const aArr: f64[] = new Array(n).fill(0);
-  for (let idx = 0; idx < Math.floor(n / 2); idx++) {
-    const p = (idx + 1 - 0.375) / (n + 0.25);
-    const mi = _approxProbit(p);
-    aArr[idx] = mi;
-    aArr[n - 1 - idx] = -mi;
+  if (n === 3) {
+    // Exact for n = 3: a = (−1/√2, 0, 1/√2).
+    aArr[0] = -Math.SQRT1_2;
+    aArr[2] = Math.SQRT1_2;
+  } else {
+    const mArr: f64[] = new Array(n);
+    let mm = 0;
+    for (let i = 0; i < n; i++) {
+      const mi = _approxProbit((i + 1 - 0.375) / (n + 0.25));
+      mArr[i] = mi;
+      mm += mi * mi;
+    }
+    const u = 1 / Math.sqrt(n);
+    const rmm = Math.sqrt(mm);
+    const an =
+      -2.706056 * u ** 5 +
+      4.434685 * u ** 4 -
+      2.07119 * u ** 3 -
+      0.147981 * u * u +
+      0.221157 * u +
+      mArr[n - 1] / rmm;
+    if (n > 5) {
+      const an1 =
+        -3.582633 * u ** 5 +
+        5.682633 * u ** 4 -
+        1.752461 * u ** 3 -
+        0.293762 * u * u +
+        0.042981 * u +
+        mArr[n - 2] / rmm;
+      const phi =
+        (mm - 2 * mArr[n - 1] ** 2 - 2 * mArr[n - 2] ** 2) / (1 - 2 * an * an - 2 * an1 * an1);
+      const rphi = Math.sqrt(phi);
+      for (let i = 2; i < n - 2; i++) aArr[i] = mArr[i] / rphi;
+      aArr[n - 1] = an;
+      aArr[0] = -an;
+      aArr[n - 2] = an1;
+      aArr[1] = -an1;
+    } else {
+      const phi = (mm - 2 * mArr[n - 1] ** 2) / (1 - 2 * an * an);
+      const rphi = Math.sqrt(phi);
+      for (let i = 1; i < n - 1; i++) aArr[i] = mArr[i] / rphi;
+      aArr[n - 1] = an;
+      aArr[0] = -an;
+    }
   }
-
-  // Normalize coefficients
-  let sumA2 = 0;
-  for (const ai of aArr) sumA2 += ai * ai;
-  const normCoeff = Math.sqrt(sumA2);
-  for (let idx = 0; idx < n; idx++) aArr[idx] /= normCoeff;
 
   const aF64 = new Float64Array(aArr);
 
@@ -1103,12 +1140,29 @@ export async function shapiroWilkTest(
 
   const W = (b * b) / ss;
 
-  // Approximate p-value using normal transformation of W (Royston's approximation)
-  const lnN = Math.log(n);
-  const mu1 = -1.2725 + 1.0521 * lnN;
-  const sigma1 = 1.0308 - 0.26758 * lnN;
-  const zStat = (Math.log(1 - W) - mu1) / sigma1;
-  const pValue = 1 - _normalCDF(zStat);
+  // p-value per Royston (1995) AS R94, branched on n. (The former constants
+  // −1.2725 + 1.0521·ln n were the Shapiro-FRANCIA normalization, not the
+  // Shapiro-Wilk one — wrong test's transform.)
+  let pValue: f64;
+  if (n === 3) {
+    // Exact small-sample distribution: p = (6/π)(asin(√W) − asin(√¾)).
+    pValue = (6 / Math.PI) * (Math.asin(Math.sqrt(W)) - Math.asin(Math.sqrt(0.75)));
+  } else if (n <= 11) {
+    const g = -2.273 + 0.459 * n;
+    const arg = g - Math.log(1 - W);
+    if (arg <= 0) {
+      pValue = 0; // extreme non-normality — transform out of domain
+    } else {
+      const mu1 = 0.544 - 0.39978 * n + 0.025054 * n * n - 0.0006714 * n ** 3;
+      const sigma1 = Math.exp(1.3822 - 0.77857 * n + 0.062767 * n * n - 0.0020322 * n ** 3);
+      pValue = 1 - _normalCDF((-Math.log(arg) - mu1) / sigma1);
+    }
+  } else {
+    const lnN = Math.log(n);
+    const mu1 = -1.5861 - 0.31082 * lnN - 0.083751 * lnN * lnN + 0.0038915 * lnN ** 3;
+    const sigma1 = Math.exp(-0.4803 - 0.082676 * lnN + 0.0030302 * lnN * lnN);
+    pValue = 1 - _normalCDF((Math.log(1 - W) - mu1) / sigma1);
+  }
 
   const baseResult: ShapiroWilkResult = { statistic: W, pValue: Math.max(0, Math.min(1, pValue)) };
 

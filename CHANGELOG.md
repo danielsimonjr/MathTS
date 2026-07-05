@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-04) — `shapiroWilkTest` W was ~2% off and its p-value used the wrong test's transform
+
+Root-caused while pinning the WS-1 P2 tail to scipy: the implementation used plain Blom
+scores **without Royston's (1995, AS R94) tail-weight corrections** (a_n, a_{n-1}
+polynomials + φ renormalization) — W was 0.9014 vs scipy's 0.9166 on an 8-point sample, a
+1.7% bias in a published statistic — and the p-value normalization constants
+(−1.2725 + 1.0521·ln n) were the Shapiro-**Francia** transform, not Shapiro-Wilk. Now
+implements full Royston AS R94 (exact n=3 arcsine branch, n≤11 and n≥12 transforms):
+W agrees with `scipy.stats.shapiro` to **~2e-10** and p to **~6e-8** on pinned samples.
+
+### Fixed (2026-07-04) — the "flaky under load" full-suite failure was a property-test domain bug
+
+Reproduced with captured logs (3 forced full-suite runs): the intermittent functions#test
+failure is the fast-check property `cosh(x)+sinh(x)=exp(x)`, whose comment claimed the
+identity is cancellation-free but whose domain (−100, 100) includes large-negative x where
+the summands are ±e^{|x|}/2 and the sum loses ~e^{2|x|}·ε relative precision
+(counterexample −18.09: two ~3.6e7 terms summing to ~1.4e-8). fast-check draws a fresh
+random seed per run — **the intermittency was the seed, not machine load**. Fixed at root:
+the sum identity now runs on x ≥ 0 (genuinely cancellation-free) and the negative axis is
+grounded by the *exact* parity identities cosh(−x)=cosh(x), sinh(−x)=−sinh(x) — full-line
+coverage, zero cancellation. (A second captured failure — expression ENOENT on functions'
+dist — was self-inflicted: a concurrent `--clean` rebuild during the hunt; the documented
+stale-dist trap, not a flake.)
+
+### Tests (2026-07-04) — WS-1 P2 COMPLETE: scipy + closed-form pins for the entire remaining tail
+
+`gap-scipy-and-tail-oracles.test.ts` (scipy 1.17.1 references): `shapiroWilkTest` (W+p, two
+samples), `generalizedEig` (pencil eigenvalues to 9 digits), `exponentialDist`/`binomialDist`
+cdf+quantile closed forms, `parallelIFFT` (hand-written spectrum), `parallelStatHistogram`
+(exact bins), `spectrogram` (pure tone → analytic peak bin 8).
+`matrix/tests/wasm/gap-wasm-inv-svd-oracles.test.ts`: WASM `inverse` exact entries
+(inv(diag(2,4))=diag(½,¼), inv([[4,7],[2,6]])=(1/10)[[6,−7],[−2,4]]) and `svdWasm`
+closed-form singular values (σ(diag(3,2,1))=(3,2,1), σ([[3,0],[4,5]])=(3√5,√5)).
+Pool/statistics lifecycle functions reclassified **N/A** in the oracle matrix (no numeric
+output to pin). **Remaining actionable SELF-REF: 0.** Decision gates G1 (fast-check — done
+2026-07-03) and G3 (unit dispatch — resolved by the Unit merge) closed after verification.
+
 ### Docs (2026-07-04) — G2 closed: the "parked" WASM kernels were already fixed
 
 Investigated the G2 fix-vs-retire decision for the js-fallback kernels (poly-fit, Airy,

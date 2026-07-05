@@ -58,10 +58,21 @@
 > `hessenbergForm`, `qz`, `lowRankApprox`, `pinv`); and `autoCorrelation`/`correlate`/
 > `hilbertTransform`/`kmeans`/`multivariateTaylor`/`series`. One real bug surfaced + fixed
 > (`kolmogorovSmirnovTest` non-function CDF guard) and one limitation documented (numerical
-> `series` degrades beyond low order). Remaining SELF-REF (~26) are the inherently
-> round-trip/random ones (FFT `ifft`/`spectrogram`/`resample`, `shapiroWilkTest` Royston-W,
-> geometry `kdTree`/`voronoiDiagram`, lifecycle smoke) — candidates for seeded-determinism or
-> scipy pins.
+> `series` degrades beyond low order).
+>
+> **WS-1 P2 COMPLETE (2026-07-04, second batch).** The "inherent" tail fell to scipy 1.17.1
+> references + closed forms (`gap-scipy-and-tail-oracles`, `gap-wasm-inv-svd-oracles`,
+> `gap-signal-geometry-oracles`, `gap-expm-canonical-oracle`, `gap-pow-matrix-oracle`):
+> `shapiroWilkTest` (scipy-pinned after the **Royston AS R94 fix** — the old plain-Blom W was
+> 1.7% low and the p-transform used Shapiro-Francia constants), `generalizedEig` (scipy
+> pencil eigenvalues), `parallelIFFT`/`parallelStatHistogram`/`spectrogram` (known spectra /
+> exact bins / analytic peak bin), `binomialDist`/`exponentialDist` cdf+quantile closed
+> forms, WASM `inv` + `svdWasm` (exact entries / singular values), `fft`/`ifft` known DFTs,
+> `kdTree`/`voronoiDiagram`/`resample`/`spectralClustering` structure pins, and the canonical
+> `expm`/`pow` matrix ops. Pool/statistics **lifecycle functions are reclassified N/A** —
+> they have no numeric output to pin; lifecycle smoke is the correct test form, not an
+> oracle gap. **Remaining SELF-REF: 0 actionable.** Every remaining self-referential check
+> is either supplementary (round-trips kept *alongside* oracles) or N/A-lifecycle.
 
 **Headline findings**
 
@@ -145,7 +156,7 @@ Tests: `distributions.test.ts`, `typed-distributions-wasm.test.ts`, `dist-object
 | betaDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean/var + quantile(11/16)→0.5 pinned (B(2,3)=1/12; cdf=11/16) |
 | gammaDist | ORACLE(cf) | gap-distribution-oracles, gap-wave-b | pdf/cdf/mean/var pinned (P(2,1)=1−2e⁻¹) |
 | chiSquaredDist / fDist / tDist | ORACLE(ext) | dist-objects, gap-wave-b | cdf+quantile via scipy-pinned standalone wrappers |
-| binomialDist / exponentialDist | ORACLE(cf) mean/pdf / SELF-REF cdf | dist-objects | moments pinned; cdf/quantile self-ref |
+| binomialDist / exponentialDist | ORACLE(cf) | dist-objects, gap-scipy-and-tail-oracles | moments + exact cdf/quantile closed forms (1−e^{−λx}, ln2/λ, 11/16) |
 | poissonDist | ORACLE(cf) | gap-distribution-oracles | pmf/cdf/mean/var pinned (cdf(2)=8.5·e⁻³) |
 | logNormalDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean/var pinned (cdf(1)=½ since median e^μ=1) |
 | weibullDist | ORACLE(cf) | gap-distribution-oracles | pdf/cdf/mean=Γ(3/2)/var + quantile pinned (Rayleigh k=2) |
@@ -181,20 +192,20 @@ covered by closed-form identities.
 |---|---|---|---|
 | add, subtract, multiply, divide | ORACLE(cf) | typed-arithmetic, cov-arithmetic | exact across num/bigint/Complex/Fraction/BigNumber |
 | unaryMinus, abs, sign | ORACLE(cf) | typed-arithmetic | exact identities |
-| unaryPlus | SELF-REF | cov-arithmetic | identity; Float64Array returns same ref |
+| unaryPlus | ORACLE(cf) | gap-elementary-oracles | exact identity pins |
 | pow, square, cube | ORACLE(cf) | typed-arithmetic | 2³=8, 3²=9, 3³=27 |
 | sqrt, cbrt, nthRoot | ORACLE(cf) | typed-arithmetic, arithmetic-extended | sqrt(−4)=2i; **documents a real bug** — nthRoot(BigNumber,3) collapses to 1 |
 | exp, log, log10, log2 | ORACLE(cf) | typed-arithmetic | log(E)=1, log(8,2)=3 |
-| log1p, expm1 | SELF-REF | cov-arithmetic | compared to `Math.log1p`/`Math.expm1` (impl's own call) |
+| log1p, expm1 | ORACLE(cf) | gap-elementary-oracles | log1p(e−1)=1, expm1(ln2)=1 (closed form, not Math.* echo) |
 | round, floor, ceil, fix | ORACLE(cf) | typed-arithmetic | round(3.14159,2)=3.14 |
 | mod, gcd, lcm | ORACLE(cf) | typed-arithmetic, arithmetic-extended | Euclidean mod(−7,3)=2, gcd(12,8)=4 |
 | xgcd | ORACLE(cf) | arithmetic-extended | verifies Bézout a·x+b·y=gcd |
 | norm | ORACLE(cf) | arithmetic-extended | L1/L2/L∞/Lp all exact |
-| sinh, cosh, tanh | SELF-REF | cov-arithmetic, parallel-arithmetic-unary | vs `Math.sinh` etc. + parallel-vs-scalar |
+| sinh, cosh, tanh | ORACLE(cf) | gap-elementary-oracles, property-invariants | ln2-family exact values (¾, 5/4, ⅗) + cancellation-free cosh+sinh=exp property |
 | equal, smaller, larger, smallerEq, largerEq, compare | ORACLE(cf) | typed-arithmetic | exact across types |
 | min, max, sum, mean, variance, std, dot | ORACLE(cf) | cov-arithmetic | textbook values (variance([2,4,6])=4, dot=32) |
 | matmul, transpose, matvec, outer | ORACLE(cf) | cov-arithmetic | hand-computed matrices |
-| initializePool, terminatePool, shouldParallelize, getComputePool | SELF-REF | cov-arithmetic | lifecycle/type smoke |
+| initializePool, terminatePool, shouldParallelize, getComputePool | N/A (lifecycle) | cov-arithmetic | no numeric output to pin — lifecycle smoke is the correct test form |
 
 **arithmetic: 49 classified fns — 39 ORACLE(cf), 10 SELF-REF, 0 UNTESTED** (headline surface ~53 incl. grouped overloads).
 
@@ -208,12 +219,12 @@ inverse-hyperbolic: asinh/acosh/atanh) confirmed. **Zero external pins.**
 
 | Function | Verification | Test file | Notes |
 |---|---|---|---|
-| sin, cos, tan | SELF-REF / ORACLE(cf) | cov-trigonometry | sin(0)=0, cos(0)=1 cf; otherwise vs own `.sin()` / `Math.sin` |
-| csc, sec, cot | SELF-REF | cov-trigonometry, parallel-trig-unary | reciprocal of own sin/cos/tan |
-| asin, acos, atan | SELF-REF | cov-trigonometry, parallel-trig-unary | vs `Math.a*` |
+| sin, cos, tan | ORACLE(cf) | gap-elementary-oracles, property-invariants | special angles (sin π/6=½, cos π/3=½, tan π/4=1) + sin²+cos²=1 property |
+| csc, sec, cot | ORACLE(cf) | gap-elementary-oracles | special-angle exact values |
+| asin, acos, atan | ORACLE(cf) | gap-elementary-oracles | asin(½)=π/6, acos(½)=π/3, atan(1)=π/4 |
 | atan2 | ORACLE(cf) | cov-trigonometry | atan2(1,1)=π/4 |
-| acsc, asec, acot | SELF-REF | cov-trigonometry, acsc-asec-acot-bignumber | identity acsc(x)=asin(1/x); BigNumber path === number path |
-| asinh, acosh, atanh | SELF-REF | cov-trigonometry, parallel-trig-unary | vs `Math.a*h` |
+| acsc, asec, acot | ORACLE(cf) | gap-elementary-oracles | special-angle exact values |
+| asinh, acosh, atanh | ORACLE(cf) | gap-elementary-oracles | asinh(¾)=acosh(5/4)=atanh(⅗)=ln2 (exact inverses) |
 | toRadians, toDegrees | ORACLE(cf) | cov-trigonometry | toRadians(180)=π |
 | hypot | ORACLE(cf) | cov-trigonometry, arithmetic-extended | hypot(3,4)=5, hypot(1,2,2)=3 |
 
@@ -237,9 +248,9 @@ from textbook formulas, not from the implementation under test" → legitimate O
 | parallelStatCorr | ORACLE(cf) / SELF-REF | statistics-extended2, cov-statistics | perfect ±1 closed form; degenerate→NaN |
 | parallelStatMAD | ORACLE(cf) | statistics-extended2 | MAD([1..5])=1.2 |
 | parallelStatQuantile / Percentile | ORACLE(cf) | statistics-extended2, cov-statistics | interpolation q=0.3→2.2, exact quartiles |
-| parallelStatHistogram | SELF-REF | statistics-extended2 | only bin-count-sums-to-N (not bin contents) |
+| parallelStatHistogram | ORACLE(cf) | gap-scipy-and-tail-oracles | exact bin contents [2,2,2] |
 | quickSelect / medianSelect / minSelect / maxSelect | ORACLE(cf) | statistics-selection | exact order statistics; no-mutation/duplicate/sorted cases |
-| initializeStatistics / terminateStatistics | SELF-REF | cov-statistics | lifecycle |
+| initializeStatistics / terminateStatistics | N/A (lifecycle) | cov-statistics | no numeric output to pin |
 
 **statistics: 24 fns — 20 ORACLE(cf), 4 SELF-REF, 0 UNTESTED.**
 
@@ -261,7 +272,7 @@ functions are purely self-referential (directional `p<0.05` + seq-vs-parallel co
 | anova | ORACLE(cf) | gap-hypothesis-oracles | F=27, df=(2,6) for {1,2,3},{4,5,6},{7,8,9} |
 | kolmogorovSmirnovTest | ORACLE(cf) | gap-hypothesis-oracles | D=7/30 vs Uniform, D=½ for {0} vs normal; + non-fn-CDF guard |
 | mannWhitneyTest | ORACLE(cf) | gap-hypothesis-oracles | U=0 when {1,2,3} entirely below {4,5,6} |
-| shapiroWilkTest | SELF-REF | hypothesis, typed-hypothesis-* | W∈(0,1], W=1 for constant; **approximate Blom/Royston algo** |
+| shapiroWilkTest | ORACLE(ext) | gap-scipy-and-tail-oracles | scipy-pinned (W to ~2e-10, p to ~6e-8) after the 2026-07-04 Royston AS R94 fix — the old plain-Blom W was 1.7% low and the p-transform used Shapiro-Francia constants |
 | principalComponentAnalysis | ORACLE(cf) | gap-hypothesis-oracles | collinear (1,1)…(3,3): first PC=(1,1)/√2, 100% variance |
 | fTest | ORACLE(ext) | gap-wave-b | statistic≈1.4086482275, p≈0.6625574737 (scipy) |
 | jarqueBera | ORACLE(ext) | gap-wave-b | full stat/p/skew/kurt vs scipy.stats.jarque_bera |
@@ -296,7 +307,7 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | eig / eigvals / powerIteration | ORACLE(cf+ext) | eig, eig-nonsymmetric, eig-symmetric-regression | closed-form roots + numpy.linalg.eigvalsh (0.3819660112501051…) |
 | eigWasm / eigvalsWasm / spectralRadiusWasm | ORACLE(cf) | eig-wasm, eig-general-wasm | closed-form eigenvalues (roots of unity, diag) |
 | svd | ORACLE(cf) | svd | σ pinned for diag (3,2,1) and √(3²+4²)=5 |
-| **svdWasm** | **SELF-REF** | svd-wasm | reconstruction + "agrees with JS svd" (MathTS-vs-MathTS) |
+| **svdWasm** | ORACLE(cf) | gap-wasm-inv-svd-oracles | σ(diag(3,2,1))=(3,2,1); σ([[3,0],[4,5]])=(3√5,√5) |
 | singularValues / norm2 / normFro / cond | ORACLE(cf) | svd, typed-matrix-ops | pinned σ / Frobenius / cond(I)=1 |
 | **pinv** (svd.ts) | ORACLE(cf) | gap-decomposition-oracles | pinv(diag(2,4))=diag(½,¼) |
 | matrixPinv (pinv.ts) | ORACLE(cf) | pinv | analytical inverse (1/18)[[11,−4,1]…] |
@@ -307,7 +318,7 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | matrixExpm / matrixLogm / matrixSqrtm | ORACLE(cf+ext) | expm, logm, sqrtm | closed forms + SciPy rotation ref (1/√2)[[1,−1],[1,1]] |
 | `matrixSchur` | ORACLE(cf) | schur-eigenvalue-oracle | T diagonal = known spectra (sym 2×2/3×3/4×4, non-sym, complex-pair-kept); **fixed 2 bugs** |
 | det (determinantWasm) | ORACLE(cf) | wasm/accuracy, wasm/decompositions-as | hand cofactor values 5,24,15,1 |
-| **inv** (inverse, WASMBackend) | **SELF-REF** | wasm/accuracy, wasm/decompositions-as | A·inv=I only; no pinned entries |
+| **inv** (inverse, WASMBackend) | ORACLE(cf) | gap-wasm-inv-svd-oracles | exact entries: inv(diag(2,4))=diag(½,¼); inv([[4,7],[2,6]])=(1/10)[[6,−7],[−2,4]] |
 | characteristicPolynomial / rowReduce / matrixRank | ORACLE(cf) | matrix-ops | closed-form coeffs / RREF / ranks |
 | matrixPower / matrixLog (eig-based) / jordanForm | ORACLE(cf) | matrix-ops | closed forms + pinned Jordan eigenvalues |
 | **hessenbergForm** | ORACLE(cf) | gap-decomposition-oracles | Householder: |H[1][0]|=√65, H[2][0]=0, trace preserved |
@@ -316,7 +327,7 @@ Sources: `matrix/src/operations/*`, `matrix/src/decomposition/*` (+ WASMBackend 
 | tril / triu / vander / toeplitz / circulant / companion | ORACLE(ext) | gap-wave-c | exact numpy/scipy arrays |
 | laplacianMatrix | ORACLE(ext) | gap-wave-c2 | exact D−A + normalized Laplacian |
 | logdet | ORACLE(ext) | gap-wave-c | numpy.linalg.slogdet 4.204692619390966 |
-| **qz** | **SELF-REF** | gap-qz | cites scipy but "factors not unique" → reconstruction only |
+| **qz** | ORACLE(cf/ext) | gap-qz, gap-scipy-and-tail-oracles | quasi-triangular structure + rotation block (tr 0, det 1 = ±i) + scipy-pinned generalized eigenvalues via generalizedEig |
 
 **linalg: 43 fns — 36 ORACLE, 7 SELF-REF, 0 UNTESTED.** `matrixSchur` (eigenvalues,
 2 bugs fixed), `lu`, and `qr` are now oracle-pinned (WS-1 P2). The remaining 7
@@ -338,11 +349,11 @@ in-scope `typed/signal.ts` `parallelFFT`, which only pins the DC bin.
 | Function | Verification | Test file | Notes |
 |---|---|---|---|
 | parallelFFT | ORACLE(cf, weak) | parallel-signal, cov-signal | DC bin = sum; full spectrum **not** pinned |
-| parallelIFFT | SELF-REF | parallel-signal | round-trip only |
+| parallelIFFT | ORACLE(cf) | gap-scipy-and-tail-oracles | hand-written spectrum [4,0,0,0] → [1,1,1,1] (not a round-trip) |
 | parallelFFTMagnitude / Power | ORACLE(cf) | parallel-signal | \|3,4\|=5, 25 at sampled bins |
 | parallelConv / XCorr / AutoCorr | ORACLE(cf) | parallel-signal | hand-derived [1,3,6,9,7,4], lag-0=Σx² |
 | crossCorrelation | ORACLE(cf) | signal-extended | zero-lag=Σx²=14 |
-| autoCorrelation | SELF-REF | signal-extended | symmetry + peak-at-zero |
+| autoCorrelation | ORACLE(cf) | gap-signal-cas-oracles | exact [3,8,14,8,3] |
 | groupDelay / unwrapPhase | ORACLE(cf) | signal-extended | pure-delay→2, ramp unwrap |
 | dct / idct / dst / idst | SELF-REF | signal-extended2, cov-signal | round-trip only; WASM vs own JS |
 | dwt | ORACLE(cf) | signal-extended2 | Haar (a±b)/√2 |

@@ -208,11 +208,21 @@ describe('trigonometry — exact identities', () => {
 });
 
 describe('hyperbolic — exact identities', () => {
-  it('cosh(x) + sinh(x) = exp(x)', () => {
-    // The `cosh² − sinh² = 1` form suffers catastrophic cancellation for large x
-    // (both terms ~e^{2x}/4, so their difference loses the leading 1). This
-    // equivalent identity is cancellation-free (both summands positive).
-    fc.assert(fc.property(dbl(-100, 100), (x) => close(COSH(x) + SINH(x), EXP(x), 1e-9)));
+  it('cosh(x) + sinh(x) = exp(x) for x ≥ 0 (the genuinely cancellation-free half)', () => {
+    // The `cosh² − sinh² = 1` form suffers catastrophic cancellation for large x.
+    // The sum identity is cancellation-free ONLY for x ≥ 0 (both summands
+    // positive); for x < 0 the terms are ±e^{|x|}/2 and their sum loses
+    // ~e^{2|x|}·ε of relative precision — the old (−100, 100) domain failed
+    // intermittently whenever fast-check's seed landed a large-negative x
+    // (counterexample −18.09: two ~3.6e7 terms summing to ~1.4e-8). This was
+    // the "flaky under load" full-suite failure — per-run random seeds, not load.
+    fc.assert(fc.property(dbl(0, 100), (x) => close(COSH(x) + SINH(x), EXP(x), 1e-9)));
+  });
+
+  it('parity grounds the negative axis exactly: cosh(−x) = cosh(x), sinh(−x) = −sinh(x)', () => {
+    // Combined with the x ≥ 0 sum identity above, these exact (no-tolerance-needed)
+    // symmetries pin the hyperbolics on the whole line without any cancellation.
+    fc.assert(fc.property(dbl(0, 100), (x) => COSH(-x) === COSH(x) && SINH(-x) === -SINH(x)));
   });
 });
 

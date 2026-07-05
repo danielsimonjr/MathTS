@@ -301,7 +301,7 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   (`Q=I,T=A ⇒ Q·T·Qᵀ=A`). Verified: 6-case eigenvalue oracle (`schur-eigenvalue-oracle.test.ts`, incl.
   4×4 symmetric + complex-pair-kept) + full matrix suite 749✓/7skip; `matrixLogm`/`matrixSqrtm`/`expm`
   green. `matrixSchur` is now ORACLE in the coverage matrix.
-- 🔄 **[WS-1 P2 — external-oracle pins, ~40 more converted 2026-07-04] ~329→~369 ORACLE / ~26 SELF-REF / 0 UNTESTED.**
+- ✅ **[WS-1 P2 COMPLETE 2026-07-04] 0 actionable SELF-REF remain.** Final batch: scipy 1.17.1 pins (`gap-scipy-and-tail-oracles`) for shapiroWilkTest (after the **Royston AS R94 fix** — old W was 1.7% low, p used Shapiro-Francia constants), generalizedEig pencil eigenvalues; closed forms for exponential/binomial cdf+quantile, parallelIFFT, parallelStatHistogram, spectrogram peak-bin; WASM inv + svdWasm exact entries (`matrix/tests/wasm/gap-wasm-inv-svd-oracles`); lifecycle fns reclassified N/A (no numeric output). Earlier batches (same day):
   This session's batch (5 new `gap-*-oracles` suites): 5 distribution objects, 21 elementary trig/hyperbolic/
   arithmetic, 6 hypothesis tests + PCA, 5 decompositions (polar/hessenberg/qz/lowRankApprox/pinv), signal/CAS
   (autoCorrelation/correlate/hilbertTransform/kmeans/multivariateTaylor/series). Surfaced + fixed 1 bug
@@ -364,12 +364,14 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   unconditionally) now gate with inline sequential fallbacks (a speedup for every caller). All 50/50 OpNames
   have explicit benchmark-sourced thresholds. Caveat: benched on the dev box (medians of 9 interleaved reps);
   the 0.00–0.5× margins are far too wide for noise to flip the verdicts.
-  **Decision gates:** G1 fast-check dep · ~~G2~~ ✅ **CLOSED 2026-07-04** (investigated fix-vs-retire and found
+  **Decision gates:** ~~G1~~ ✅ CLOSED (fast-check@4.8.0 added 2026-07-03, 23 property invariants live —
+  the gates line was stale) · ~~G2~~ ✅ **CLOSED 2026-07-04** (investigated fix-vs-retire and found
   it was ALREADY FIXED: the "parked" kernels — Airy, poly-fits, argsort/rank — were repointed to AS in Phase 6
   [Airy truncation-cap → AS↔JS ≈4e-16; poly fits attempt AS ≥1024 pts with validated-JS rank-deficiency
   fallback]; runtime probe: 39/39 wasm-routed execute wasm, 0 fallbacks. Only STALE COMMENTS survived — fixed
-  the special-bridge header + the wasm-pairing generator note) · G3 unit-dispatch spec · G4 notebook host
-  (**HOLD** per maintainer) · G5 plotting approach (**HOLD** per maintainer).
+  the special-bridge header + the wasm-pairing generator note) · ~~G3~~ ✅ CLOSED (unit dispatch resolved by
+  the 2026-07-04 Unit merge — ONE Unit class, all operators verified live: add/multiply/divide/equal across
+  units correct) · G4 notebook host (**HOLD** per maintainer) · G5 plotting approach (**HOLD** per maintainer).
 
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
@@ -498,11 +500,13 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
     `ConfigChangeEvent`, `unwrapParen`/`OperatorNodeLike`, functions' `rule2Node`) — ~630 LOC. The matrix
     items (config.ts setters, `matrixSqrtNewtonInternal`, `initWasm`) turned out TEST-CONSUMED (dropped
     off after DGT fix #4 — kept). **Deletion candidates now 0.** Gates green incl. `build:wasm` + AS tests.
-  - ⚠️ **[flaky-under-load watch]** A functions#test task failed once during a full parallel `npm run test`
-    (44-task turbo) and passed standalone + on re-run — the failing TEST NAME was not captured (grep
-    filtered it). Distinct from the FIXED qz flake. Next time it happens: re-run with
-    `npm run test 2>&1 | tee /tmp/fulltest.log` and pull the `×` lines; suspect another slow test near
-    vitest's 5s default under contention.
+  - ✅ **[flaky-under-load RESOLVED 2026-07-04]** Reproduced with 3 forced full-suite runs + captured logs:
+    the failure is the fast-check property `cosh(x)+sinh(x)=exp(x)` — its (−100,100) domain includes
+    large-negative x where the identity suffers catastrophic cancellation (counterexample −18.09); fast-check's
+    per-run random seed made it intermittent — **NOT load-related** ("under load" was a red herring; more runs
+    = more seeds). Fixed at root: sum identity on x ≥ 0 + exact parity pins for the negative axis. (A second
+    captured failure — expression ENOENT on functions dist — was self-inflicted: concurrent `--clean` rebuild
+    during the hunt, the documented stale-dist trap.)
 
 - ✅/⬜ **[GC5 / G3 — Unit operators FIXED 2026-07-03; underlying two-Unit-types fork remains]** Dimensional
   analysis now works across `add`/`subtract`/`multiply`/`divide`/`abs` and `smaller`/`larger`/`smallerEq`/
