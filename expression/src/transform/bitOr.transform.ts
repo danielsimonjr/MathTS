@@ -1,10 +1,5 @@
-import { createBitOr } from '../../function/bitwise/bitOr.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
-
-interface TypedFunction<T = unknown> {
-  (...args: unknown[]): T;
-}
 
 interface Node {
   compile(): CompiledExpression;
@@ -20,26 +15,20 @@ interface TransformFunction {
 }
 
 interface Dependencies {
-  typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  equalScalar: (...args: unknown[]) => unknown;
-  DenseMatrix: new (...args: unknown[]) => unknown;
-  concat: (...args: unknown[]) => unknown;
+  bitOr: (...args: unknown[]) => unknown;
 }
 
 const name = 'bitOr';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
+const dependencies = ['bitOr'];
 
 export const createBitOrTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, DenseMatrix, concat }: Dependencies) => {
-    const bitOr = createBitOr({ typed, matrix, equalScalar, DenseMatrix, concat });
-
-    function bitOrTransform(args: Node[], math: unknown, scope: unknown): unknown {
+  ({ bitOr }: Dependencies) => {
+    function bitOrTransform(args: Node[], _math: unknown, scope: unknown): unknown {
       const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1)) {
-        if (isNaN(condition1)) {
+        if (isNaN(condition1 as number)) {
           return NaN;
         }
         if (condition1 === -1) {

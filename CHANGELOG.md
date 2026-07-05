@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added/Fixed (2026-07-05) — expression-language transforms wired: the language is now one-based, lazy, mathjs-exact
+
+The dormant `expression/src/transform` pocket (25 transforms) is live. The expression
+language previously CONTRADICTED its own documented design ("implicit start of range = 1
+(one-based)", embeddedDocs: "Indexes are one-based"): `A[1]` returned the SECOND element,
+`1:3` excluded 3, `row(M,1)` was zero-based, `max(M,dim)` rejected dim args, and
+`true or undefinedVar` threw instead of short-circuiting. All fixed and verified
+**identical to real mathjs 15 output** (including the subtle map-callback contract: the
+index argument is a one-based ARRAY, so `f(x,i) = x+i` broadcasts — pinned).
+
+Design: each transform factory takes its base function as an injected dependency (the
+24 nonexistent `expression/src/function/**` imports the dormant files carried are gone —
+no parallel implementation layer); transforms are instantiated once against factoryScope
+and installed on the `mathWithTransform` compile namespace (the "proxy for now" stub) +
+overlaid on evaluate's mathScope. Supporting fixes: `rawArgs` + IndexNode `end` support in
+the standalone compiler, arity-appropriate callback invocation in the MathJSDenseMatrix
+bridge (typed 2-arg lambdas threw "Too many arguments"), and an ES6-class fix in
+index.transform (`Index.apply` → spread constructor). The programmatic API is unchanged.
+Gates: build 22/22, full test 44/44 (expression 90 files/2256, functions 147+, workbook
+green — nothing pinned the old inconsistent semantics).
+
 ### Fixed (2026-07-05) — runtime import cycle introduced by polynomial-ideal.ts (caught by DGT)
 
 The pre-G5 DGT run found 1 runtime cycle (previously 0): `factories/evaluate → typed/index

@@ -1,5 +1,4 @@
 import { factory } from '../utils/factory.js';
-import { createRow } from '../../function/matrix/row.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { isNumber } from '../utils/is.js';
 
@@ -8,14 +7,12 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  row: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  Index: new (...args: unknown[]) => unknown;
-  matrix: (...args: unknown[]) => unknown;
-  range: (...args: unknown[]) => unknown;
 }
 
 const name = 'row';
-const dependencies = ['typed', 'Index', 'matrix', 'range'];
+const dependencies = ['typed', 'row'];
 
 /**
  * Attach a transform function to matrix.column
@@ -27,9 +24,7 @@ const dependencies = ['typed', 'Index', 'matrix', 'range'];
 export const createRowTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, Index, matrix, range }: Dependencies) => {
-    const row = createRow({ typed, Index, matrix, range });
-
+  ({ typed, row }: Dependencies) => {
     // @see: comment of row itself
     return typed('row', {
       '...any': function (args: unknown[]): unknown {

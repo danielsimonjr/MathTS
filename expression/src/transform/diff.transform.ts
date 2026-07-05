@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createDiff } from '../../function/matrix/diff.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,22 +7,17 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  diff: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  subtract: (...args: unknown[]) => unknown;
-  number: (...args: unknown[]) => unknown;
-  bignumber: (...args: unknown[]) => unknown;
 }
 
 const name = 'diff';
-const dependencies = ['typed', 'matrix', 'subtract', 'number', 'bignumber'];
+const dependencies = ['typed', 'diff'];
 
 export const createDiffTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, subtract, number, bignumber }: Dependencies) => {
-    const diff = createDiff({ typed, matrix, subtract, number, bignumber });
-
+  ({ typed, diff }: Dependencies) => {
     /**
      * Attach a transform function to math.diff
      * Adds a property transform containing the transform function.

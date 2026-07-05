@@ -34,7 +34,9 @@ export const createIndexTransform = /* #__PURE__ */ factory(
           arg.start--;
           arg.end -= arg.step > 0 ? 0 : 2;
         } else if (arg && (arg as { isSet?: boolean }).isSet === true) {
-          arg = (arg as { map(cb: (v: number) => number): unknown }).map(function (v: number): number {
+          arg = (arg as { map(cb: (v: number) => number): unknown }).map(function (
+            v: number
+          ): number {
             return v - 1;
           });
         } else if (isArray(arg) || isMatrix(arg)) {
@@ -48,7 +50,7 @@ export const createIndexTransform = /* #__PURE__ */ factory(
         } else if (isNumber(arg) || isBigInt(arg)) {
           arg--;
         } else if (isBigNumber(arg)) {
-          arg = (arg as { toNumber(): number }).toNumber() - 1;
+          arg = (arg as unknown as { toNumber(): number }).toNumber() - 1;
         } else if (typeof arg === 'string') {
           // leave as is
         } else {
@@ -60,9 +62,9 @@ export const createIndexTransform = /* #__PURE__ */ factory(
         transformedArgs[i] = arg;
       }
 
-      const res = new Index();
-      Index.apply(res, transformedArgs);
-      return res;
+      // ES6 classes cannot be Function.apply'd into an instance (the old
+      // mathjs-JS idiom) — spread into the constructor instead.
+      return new Index(...transformedArgs);
     };
   },
   { isTransformFunction: true }

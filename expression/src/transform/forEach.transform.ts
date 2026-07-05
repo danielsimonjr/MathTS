@@ -1,4 +1,3 @@
-import { createForEach } from '../../function/matrix/forEach.js';
 import { createTransformCallback } from './utils/transformCallback.js';
 import { factory } from '../utils/factory.js';
 import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
@@ -22,29 +21,29 @@ interface TransformFunction {
 }
 
 interface Dependencies {
+  forEach: (...args: unknown[]) => unknown;
   typed: TypedFunction;
 }
 
 const name = 'forEach';
-const dependencies = ['typed'];
+const dependencies = ['typed', 'forEach'];
 
 export const createForEachTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed }: Dependencies) => {
+  ({ typed, forEach }: Dependencies) => {
     /**
      * Attach a transform function to math.forEach
      * Adds a property transform containing the transform function.
      *
      * This transform creates a one-based index instead of a zero-based index
      */
-    const forEach = createForEach({ typed });
     const transformCallback = createTransformCallback({ typed });
     function forEachTransform(args: Node[], math: unknown, scope: unknown): unknown {
       if (args.length === 0) {
         return forEach();
       }
-      let x = args[0];
+      let x: unknown = args[0];
 
       if (args.length === 1) {
         return forEach(x);
@@ -54,7 +53,7 @@ export const createForEachTransform = /* #__PURE__ */ factory(
       let callback: unknown = args[N];
 
       if (x) {
-        x = _compileAndEvaluate(x, scope);
+        x = _compileAndEvaluate(x as Node, scope);
       }
 
       if (callback) {
@@ -63,7 +62,11 @@ export const createForEachTransform = /* #__PURE__ */ factory(
           callback = _compileAndEvaluate(callback as unknown as Node, scope);
         } else {
           // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(callback, math, scope);
+          callback = compileInlineExpression(
+            callback as Parameters<typeof compileInlineExpression>[0],
+            math as Record<string, unknown>,
+            scope as Map<string, unknown>
+          );
         }
       }
 

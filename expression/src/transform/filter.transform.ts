@@ -1,4 +1,3 @@
-import { createFilter } from '../../function/matrix/filter.js';
 import { factory } from '../utils/factory.js';
 import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
 import { compileInlineExpression } from './utils/compileInlineExpression.js';
@@ -22,16 +21,17 @@ interface TransformFunction {
 }
 
 interface Dependencies {
+  filter: (...args: unknown[]) => unknown;
   typed: TypedFunction;
 }
 
 const name = 'filter';
-const dependencies = ['typed'];
+const dependencies = ['typed', 'filter'];
 
 export const createFilterTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed }: Dependencies) => {
+  ({ typed, filter }: Dependencies) => {
     /**
      * Attach a transform function to math.filter
      * Adds a property transform containing the transform function.
@@ -40,13 +40,12 @@ export const createFilterTransform = /* #__PURE__ */ factory(
      * so you can do something like 'filter([3, -2, 5], x > 0)'.
      */
     function filterTransform(args: Node[], math: unknown, scope: unknown): unknown {
-      const filter = createFilter({ typed });
       const transformCallback = createTransformCallback({ typed });
 
       if (args.length === 0) {
         return filter();
       }
-      let x = args[0];
+      let x: unknown = args[0];
 
       if (args.length === 1) {
         return filter(x);
@@ -56,7 +55,7 @@ export const createFilterTransform = /* #__PURE__ */ factory(
       let callback: unknown = args[N];
 
       if (x) {
-        x = _compileAndEvaluate(x, scope);
+        x = _compileAndEvaluate(x as Node, scope);
       }
 
       if (callback) {
@@ -65,7 +64,11 @@ export const createFilterTransform = /* #__PURE__ */ factory(
           callback = _compileAndEvaluate(callback as unknown as Node, scope);
         } else {
           // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(callback, math, scope);
+          callback = compileInlineExpression(
+            callback as Parameters<typeof compileInlineExpression>[0],
+            math as Record<string, unknown>,
+            scope as Map<string, unknown>
+          );
         }
       }
 

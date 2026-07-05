@@ -1,4 +1,3 @@
-import { createPrint } from '../../function/string/print.js';
 import { factory } from '../utils/factory.js';
 import { printTemplate } from '../utils/print.js';
 
@@ -7,30 +6,27 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  print: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  zeros: (...args: unknown[]) => unknown;
-  add: (...args: unknown[]) => unknown;
 }
 
 const name = 'print';
-const dependencies = ['typed', 'matrix', 'zeros', 'add'];
+const dependencies = ['typed', 'print'];
 
 export const createPrintTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, zeros, add }: Dependencies) => {
-    const print = createPrint({ typed, matrix, zeros, add });
+  ({ typed, print }: Dependencies) => {
     return typed(name, {
       'string, Object | Array': function (template: string, values: unknown): string {
-        return print(_convertTemplateToZeroBasedIndex(template), values);
+        return print(_convertTemplateToZeroBasedIndex(template), values) as string;
       },
       'string, Object | Array, number | Object': function (
         template: string,
         values: unknown,
         options: unknown
       ): string {
-        return print(_convertTemplateToZeroBasedIndex(template), values, options);
+        return print(_convertTemplateToZeroBasedIndex(template), values, options) as string;
       },
     });
 

@@ -1,16 +1,14 @@
 import { isBigNumber, isCollection, isNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createCumSum } from '../../function/statistics/cumsum.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
 }
 
 interface Dependencies {
+  cumsum: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  add: (...args: unknown[]) => unknown;
-  unaryPlus: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -21,14 +19,12 @@ interface Dependencies {
  * from one-based to zero based
  */
 const name = 'cumsum';
-const dependencies = ['typed', 'add', 'unaryPlus'];
+const dependencies = ['typed', 'cumsum'];
 
 export const createCumSumTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, unaryPlus }: Dependencies) => {
-    const cumsum = createCumSum({ typed, add, unaryPlus });
-
+  ({ typed, cumsum }: Dependencies) => {
     return typed(name, {
       '...any': function (args: unknown[]): unknown {
         // change last argument dim from one-based to zero-based
@@ -37,7 +33,7 @@ export const createCumSumTransform = /* #__PURE__ */ factory(
           if (isNumber(dim)) {
             args[1] = dim - 1;
           } else if (isBigNumber(dim)) {
-            args[1] = (dim as { minus(n: number): unknown }).minus(1);
+            args[1] = (dim as unknown as { minus(n: number): unknown }).minus(1);
           }
         }
 

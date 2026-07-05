@@ -145,8 +145,8 @@ The codebase is organized into the following modules:
 - **expression/function**: 1 file
 - **expression**: 7 files
 - **expression/node**: 18 files
-- **expression/transform**: 1 file
-- **expression/utils**: 14 files
+- **expression/transform**: 31 files
+- **expression/utils**: 15 files
 - **parser**: 1 file
 - **units**: 1 file
 - **numbers**: 1 file
@@ -183,7 +183,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 390            | 9               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 302            | 127             |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 333            | 97              |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -4089,6 +4089,7 @@ graph LR
 |---------|--------|
 | `@danielsimonjr/mathts-expression` | `createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, createParse` |
 | `@danielsimonjr/mathts-core` | `createUnitClass` |
+| `@danielsimonjr/mathts-expression` | `createAndTransform, createBitAndTransform, createBitOrTransform, createColumnTransform, createConcatTransform, createCumSumTransform, createDiffTransform, createFilterTransform, createForEachTransform, createIndexTransform, createMapTransform, createMapSlicesTransform, createMaxTransform, createMeanTransform, createMinTransform, createNullishTransform, createOrTransform, createPrintTransform, createQuantileSeqTransform, createRangeTransform, createRowTransform, createStdTransform, createSubsetTransform, createSumTransform, createVarianceTransform` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4349,6 +4350,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
 
 **Exports:**
@@ -11093,6 +11095,7 @@ graph LR
 | `./Help.js` | `*` | Re-export |
 | `./compiler/index.js` | `*` | Re-export |
 | `./evaluator/index.js` | `*` | Re-export |
+| `./transform/index.js` | `*` | Re-export |
 | `./function/parser.js` | `createParser` | Re-export |
 | `./embeddedDocs/embeddedDocs.js` | `embeddedDocs` | Re-export |
 | `./utils/mathml.js` | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol` | Re-export |
@@ -11115,7 +11118,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
 
 ---
 
@@ -11505,6 +11508,422 @@ graph LR
 
 ## Expression/transform Dependencies
 
+### `expression/src/transform/and.transform.ts` - and.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Constants: `createAndTransform`
+
+---
+
+### `expression/src/transform/bitAnd.transform.ts` - bitAnd.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Constants: `createBitAndTransform`
+
+---
+
+### `expression/src/transform/bitOr.transform.ts` - bitOr.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Constants: `createBitOrTransform`
+
+---
+
+### `expression/src/transform/column.transform.ts` - Attach a transform function to matrix.column
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isNumber` | Import |
+
+**Exports:**
+
+- Constants: `createColumnTransform`
+
+---
+
+### `expression/src/transform/concat.transform.ts` - Attach a transform function to math.range
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/is.js` | `isBigNumber, isNumber` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../utils/factory.js` | `factory` | Import |
+
+**Exports:**
+
+- Constants: `createConcatTransform`
+
+---
+
+### `expression/src/transform/cumsum.transform.ts` - Attach a transform function to math.sum
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/is.js` | `isBigNumber, isCollection, isNumber` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+
+**Exports:**
+
+- Constants: `createCumSumTransform`
+
+---
+
+### `expression/src/transform/diff.transform.ts` - Attach a transform function to math.diff
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createDiffTransform`
+
+---
+
+### `expression/src/transform/filter.transform.ts` - Attach a transform function to math.filter
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+
+**Exports:**
+
+- Constants: `createFilterTransform`
+
+---
+
+### `expression/src/transform/forEach.transform.ts` - Attach a transform function to math.forEach
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+
+**Exports:**
+
+- Constants: `createForEachTransform`
+
+---
+
+### `expression/src/transform/index.transform.ts` - Attach a transform function to math.index
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/is.js` | `isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange` | Import |
+| `../utils/factory.js` | `factory` | Import |
+
+**Exports:**
+
+- Constants: `createIndexTransform`
+
+---
+
+### `expression/src/transform/index.ts` - Expression-language transforms (wired 2026-07-05 — formerly a dormant pocket).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./and.transform.js` | `createAndTransform` | Re-export |
+| `./bitAnd.transform.js` | `createBitAndTransform` | Re-export |
+| `./bitOr.transform.js` | `createBitOrTransform` | Re-export |
+| `./column.transform.js` | `createColumnTransform` | Re-export |
+| `./concat.transform.js` | `createConcatTransform` | Re-export |
+| `./cumsum.transform.js` | `createCumSumTransform` | Re-export |
+| `./diff.transform.js` | `createDiffTransform` | Re-export |
+| `./filter.transform.js` | `createFilterTransform` | Re-export |
+| `./forEach.transform.js` | `createForEachTransform` | Re-export |
+| `./index.transform.js` | `createIndexTransform` | Re-export |
+| `./map.transform.js` | `createMapTransform` | Re-export |
+| `./mapSlices.transform.js` | `createMapSlicesTransform` | Re-export |
+| `./max.transform.js` | `createMaxTransform` | Re-export |
+| `./mean.transform.js` | `createMeanTransform` | Re-export |
+| `./min.transform.js` | `createMinTransform` | Re-export |
+| `./nullish.transform.js` | `createNullishTransform` | Re-export |
+| `./or.transform.js` | `createOrTransform` | Re-export |
+| `./print.transform.js` | `createPrintTransform` | Re-export |
+| `./quantileSeq.transform.js` | `createQuantileSeqTransform` | Re-export |
+| `./range.transform.js` | `createRangeTransform` | Re-export |
+| `./row.transform.js` | `createRowTransform` | Re-export |
+| `./std.transform.js` | `createStdTransform` | Re-export |
+| `./subset.transform.js` | `createSubsetTransform` | Re-export |
+| `./sum.transform.js` | `createSumTransform` | Re-export |
+| `./variance.transform.js` | `createVarianceTransform` | Re-export |
+
+**Exports:**
+
+- Re-exports: `createAndTransform`, `createBitAndTransform`, `createBitOrTransform`, `createColumnTransform`, `createConcatTransform`, `createCumSumTransform`, `createDiffTransform`, `createFilterTransform`, `createForEachTransform`, `createIndexTransform`, `createMapTransform`, `createMapSlicesTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createNullishTransform`, `createOrTransform`, `createPrintTransform`, `createQuantileSeqTransform`, `createRangeTransform`, `createRowTransform`, `createStdTransform`, `createSubsetTransform`, `createSumTransform`, `createVarianceTransform`
+
+---
+
+### `expression/src/transform/map.transform.ts` - Attach a transform function to math.map
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+
+**Exports:**
+
+- Constants: `createMapTransform`
+
+---
+
+### `expression/src/transform/mapSlices.transform.ts` - Attach a transform function to math.mapSlices
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isBigNumber, isNumber` | Import |
+
+**Exports:**
+
+- Constants: `createMapSlicesTransform`
+
+---
+
+### `expression/src/transform/max.transform.ts` - Attach a transform function to math.max
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createMaxTransform`
+
+---
+
+### `expression/src/transform/mean.transform.ts` - Attach a transform function to math.mean
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createMeanTransform`
+
+---
+
+### `expression/src/transform/min.transform.ts` - Attach a transform function to math.min
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createMinTransform`
+
+---
+
+### `expression/src/transform/nullish.transform.ts` - nullish.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Constants: `createNullishTransform`
+
+---
+
+### `expression/src/transform/or.transform.ts` - or.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Constants: `createOrTransform`
+
+---
+
+### `expression/src/transform/print.transform.ts` - print.transform module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/print.js` | `printTemplate` | Import |
+
+**Exports:**
+
+- Constants: `createPrintTransform`
+
+---
+
+### `expression/src/transform/quantileSeq.transform.ts` - Attach a transform function to math.quantileSeq
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createQuantileSeqTransform`
+
+---
+
+### `expression/src/transform/range.transform.ts` - Attach a transform function to math.range
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+
+**Exports:**
+
+- Constants: `createRangeTransform`
+
+---
+
+### `expression/src/transform/row.transform.ts` - Attach a transform function to matrix.column
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../utils/is.js` | `isNumber` | Import |
+
+**Exports:**
+
+- Constants: `createRowTransform`
+
+---
+
+### `expression/src/transform/std.transform.ts` - Attach a transform function to math.std
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createStdTransform`
+
+---
+
+### `expression/src/transform/subset.transform.ts` - Attach a transform function to math.subset
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+
+**Exports:**
+
+- Constants: `createSubsetTransform`
+
+---
+
+### `expression/src/transform/sum.transform.ts` - Attach a transform function to math.sum
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createSumTransform`
+
+---
+
+### `expression/src/transform/utils/compileInlineExpression.ts` - Compile an inline expression like "x > 0"
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isSymbolNode` | Import |
+| `../../utils/map.js` | `PartitionedMap` | Import |
+
+**Exports:**
+
+- Functions: `compileInlineExpression`
+
+---
+
+### `expression/src/transform/utils/dimToZeroBase.ts` - Change last argument dim from one-based to zero-based.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isNumber, isBigNumber` | Import |
+
+**Exports:**
+
+- Functions: `dimToZeroBase`, `isNumberOrBigNumber`
+
+---
+
 ### `expression/src/transform/utils/errorTransform.ts` - Transform zero-based indices to one-based indices in errors
 
 **Internal Dependencies:**
@@ -11515,6 +11934,49 @@ graph LR
 **Exports:**
 
 - Functions: `errorTransform`
+
+---
+
+### `expression/src/transform/utils/lastDimToZeroBase.ts` - Change last argument dim from one-based to zero-based.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isCollection` | Import |
+| `./dimToZeroBase.js` | `dimToZeroBase, isNumberOrBigNumber` | Import |
+
+**Exports:**
+
+- Functions: `lastDimToZeroBase`
+
+---
+
+### `expression/src/transform/utils/transformCallback.ts` - Transforms the given callback function based on its type and number of arrays.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/factory.js` | `factory` | Import |
+| `../../types.js` | `TypedFunction` | Import |
+
+**Exports:**
+
+- Constants: `createTransformCallback`
+
+---
+
+### `expression/src/transform/variance.transform.ts` - Attach a transform function to math.var
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+
+**Exports:**
+
+- Constants: `createVarianceTransform`
 
 ---
 
@@ -11676,6 +12138,14 @@ graph LR
 **Exports:**
 
 - Re-exports: `canDefineProperty`, `clone`, `deepExtend`, `deepFlatten`, `deepStrictEqual`, `extend`, `get`, `hasOwnProperty`, `isLegacyFactory`, `lazy`, `mapObject`, `pick`, `pickShallow`, `set`, `traverse`
+
+---
+
+### `expression/src/utils/print.ts` - print module
+
+**Exports:**
+
+- Constants: `printTemplate`
 
 ---
 
@@ -12711,18 +13181,19 @@ graph LR
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
+| `expression/src/utils/factory`                         | 2 files      | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 44 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
+| `expression/src/utils/is`                              | 0 files      | 40 files   |
 | `functions/src/types`                                  | 4 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
+| `expression/src/index`                                 | 28 files     | 0 files    |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
-| `expression/src/index`                                 | 27 files     | 0 files    |
+| `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
-| `expression/src/utils/is`                              | 0 files      | 23 files   |
-| `expression/src/utils/factory`                         | 2 files      | 20 files   |
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
@@ -12734,14 +13205,13 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
+| `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
 | `workbook/src/cli`                                     | 15 files     | 0 files    |
 | `functions/src/bitwise/rightLogShift`                  | 13 files     | 1 file     |
 | `functions/src/type/matrix/utils/matAlgo02xDS0`        | 3 files      | 11 files   |
-| `functions/src/type/matrix/utils/matAlgo14xDs`         | 3 files      | 11 files   |
-| `core/src/index`                                       | 13 files     | 0 files    |
 
 ---
 
@@ -13230,136 +13700,146 @@ graph TD
     end
 
     subgraph Expression/transform
-        N322[errorTransform]
+        N322[and.transform]
+        N323[bitAnd.transform]
+        N324[bitOr.transform]
+        N325[column.transform]
+        N326[concat.transform]
+        N327[cumsum.transform]
+        N328[diff.transform]
+        N329[filter.transform]
+        N330[forEach.transform]
+        N331[index.transform]
+        N332[...21 more]
     end
 
     subgraph Expression/utils
-        N323[array]
-        N324[formatter]
-        N325[collection]
-        N326[customs]
-        N327[factory]
-        N328[is]
-        N329[latex]
-        N330[map]
-        N331[mathml]
-        N332[number]
-        N333[...4 more]
+        N333[array]
+        N334[formatter]
+        N335[collection]
+        N336[customs]
+        N337[factory]
+        N338[is]
+        N339[latex]
+        N340[map]
+        N341[mathml]
+        N342[number]
+        N343[...5 more]
     end
 
     subgraph Parser
-        N334[index]
+        N344[index]
     end
 
     subgraph Units
-        N335[index]
-    end
-
-    subgraph Numbers
-        N336[index]
-    end
-
-    subgraph Ast
-        N337[index]
-    end
-
-    subgraph Evaluator
-        N338[index]
-    end
-
-    subgraph Linalg
-        N339[index]
-    end
-
-    subgraph Arithmetic
-        N340[index]
-    end
-
-    subgraph Trigonometry
-        N341[index]
-    end
-
-    subgraph Statistics
-        N342[index]
-    end
-
-    subgraph Signal
-        N343[index]
-    end
-
-    subgraph Parallel
-        N344[ComputePool]
         N345[index]
     end
 
-    subgraph Parallel/operations
-        N346[elementwise]
+    subgraph Numbers
+        N346[index]
+    end
+
+    subgraph Ast
         N347[index]
-        N348[map]
-        N349[matmul]
-        N350[reduce]
+    end
+
+    subgraph Evaluator
+        N348[index]
+    end
+
+    subgraph Linalg
+        N349[index]
+    end
+
+    subgraph Arithmetic
+        N350[index]
+    end
+
+    subgraph Trigonometry
+        N351[index]
+    end
+
+    subgraph Statistics
+        N352[index]
+    end
+
+    subgraph Signal
+        N353[index]
+    end
+
+    subgraph Parallel
+        N354[ComputePool]
+        N355[index]
+    end
+
+    subgraph Parallel/operations
+        N356[elementwise]
+        N357[index]
+        N358[map]
+        N359[matmul]
+        N360[reduce]
     end
 
     subgraph Parallel/ops
-        N351[bitwise]
+        N361[bitwise]
     end
 
     subgraph Parallel/strategies
-        N352[chunk]
-        N353[index]
-        N354[threshold]
+        N362[chunk]
+        N363[index]
+        N364[threshold]
     end
 
     subgraph Workbook
-        N355[cli]
-        N356[contract]
-        N357[doc]
-        N358[edit]
-        N359[executor]
-        N360[formatter]
-        N361[fs-atomic]
-        N362[graph]
-        N363[html]
-        N364[index]
-        N365[...8 more]
+        N365[cli]
+        N366[contract]
+        N367[doc]
+        N368[edit]
+        N369[executor]
+        N370[formatter]
+        N371[fs-atomic]
+        N372[graph]
+        N373[html]
+        N374[index]
+        N375[...8 more]
     end
 
     subgraph Assembly/algebra
-        N366[decomposition]
+        N376[decomposition]
     end
 
     subgraph Assembly
-        N367[elementwise]
-        N368[index]
-        N369[poly]
-        N370[signal]
-        N371[sort]
-        N372[special]
-        N373[tridiag]
+        N377[elementwise]
+        N378[index]
+        N379[poly]
+        N380[signal]
+        N381[sort]
+        N382[special]
+        N383[tridiag]
     end
 
     subgraph Assembly/ops
-        N374[approx]
-        N375[array]
-        N376[bitwise]
-        N377[complex-array]
-        N378[complex-ops]
-        N379[curvefit]
-        N380[fft]
-        N381[linalg]
-        N382[matrix]
-        N383[number-theory]
-        N384[...6 more]
+        N384[approx]
+        N385[array]
+        N386[bitwise]
+        N387[complex-array]
+        N388[complex-ops]
+        N389[curvefit]
+        N390[fft]
+        N391[linalg]
+        N392[matrix]
+        N393[number-theory]
+        N394[...6 more]
     end
 
     subgraph Assembly/types
-        N385[complex]
+        N395[complex]
     end
 
     subgraph Compat
-        N386[chain]
-        N387[index]
-        N388[shims]
+        N396[chain]
+        N397[index]
+        N398[shims]
     end
 
     N2 --> N1
@@ -13447,15 +13927,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 863    |
+| Total TypeScript Files  | 894    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 160524 |
-| Total Exports           | 4398   |
-| Total Re-exports        | 1501   |
+| Total Lines of Code     | 162296 |
+| Total Exports           | 4454   |
+| Total Re-exports        | 1527   |
 | Total Classes           | 51     |
 | Total Interfaces        | 374    |
-| Total Functions         | 1486   |
-| Total Type Guards       | 155    |
+| Total Functions         | 1490   |
+| Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 494    |
 | Runtime Circular Deps   | 0      |

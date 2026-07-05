@@ -1,7 +1,6 @@
 import { isBigNumber, isNumber } from '../utils/is.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { factory } from '../utils/factory.js';
-import { createConcat } from '../../function/matrix/concat.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
@@ -9,20 +8,17 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  concat: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  isInteger: (x: unknown) => boolean;
 }
 
 const name = 'concat';
-const dependencies = ['typed', 'matrix', 'isInteger'];
+const dependencies = ['typed', 'concat'];
 
 export const createConcatTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, isInteger }: Dependencies) => {
-    const concat = createConcat({ typed, matrix, isInteger });
-
+  ({ typed, concat }: Dependencies) => {
     /**
      * Attach a transform function to math.range
      * Adds a property transform containing the transform function.
@@ -38,7 +34,7 @@ export const createConcatTransform = /* #__PURE__ */ factory(
         if (isNumber(last)) {
           args[lastIndex] = last - 1;
         } else if (isBigNumber(last)) {
-          args[lastIndex] = (last as { minus(n: number): unknown }).minus(1);
+          args[lastIndex] = (last as unknown as { minus(n: number): unknown }).minus(1);
         }
 
         try {

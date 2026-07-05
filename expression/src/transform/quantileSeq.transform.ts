@@ -1,5 +1,4 @@
 import { factory } from '../utils/factory.js';
-import { createQuantileSeq } from '../../function/statistics/quantileSeq.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -7,37 +6,12 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  quantileSeq: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  bignumber: (...args: unknown[]) => unknown;
-  add: (...args: unknown[]) => unknown;
-  subtract: (...args: unknown[]) => unknown;
-  divide: (...args: unknown[]) => unknown;
-  multiply: (...args: unknown[]) => unknown;
-  partitionSelect: (...args: unknown[]) => unknown;
-  compare: (...args: unknown[]) => unknown;
-  isInteger: (x: unknown) => boolean;
-  smaller: (...args: unknown[]) => unknown;
-  smallerEq: (...args: unknown[]) => unknown;
-  larger: (...args: unknown[]) => unknown;
-  mapSlices: (...args: unknown[]) => unknown;
 }
 
 const name = 'quantileSeq';
-const dependencies = [
-  'typed',
-  'bignumber',
-  'add',
-  'subtract',
-  'divide',
-  'multiply',
-  'partitionSelect',
-  'compare',
-  'isInteger',
-  'smaller',
-  'smallerEq',
-  'larger',
-  'mapSlices',
-];
+const dependencies = ['typed', 'quantileSeq'];
 
 /**
  * Attach a transform function to math.quantileSeq
@@ -49,37 +23,7 @@ const dependencies = [
 export const createQuantileSeqTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    bignumber,
-    add,
-    subtract,
-    divide,
-    multiply,
-    partitionSelect,
-    compare,
-    isInteger,
-    smaller,
-    smallerEq,
-    larger,
-    mapSlices,
-  }: Dependencies) => {
-    const quantileSeq = createQuantileSeq({
-      typed,
-      bignumber,
-      add,
-      subtract,
-      divide,
-      multiply,
-      partitionSelect,
-      compare,
-      isInteger,
-      smaller,
-      smallerEq,
-      larger,
-      mapSlices,
-    });
-
+  ({ typed, quantileSeq }: Dependencies) => {
     return typed('quantileSeq', {
       'Array | Matrix, number | BigNumber': quantileSeq,
       'Array | Matrix, number | BigNumber, number': (arr: unknown, prob: unknown, dim: number) =>

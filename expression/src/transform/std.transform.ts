@@ -1,5 +1,4 @@
 import { factory } from '../utils/factory.js';
-import { createStd } from '../../function/statistics/std.js';
 import { errorTransform } from './utils/errorTransform.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
@@ -8,14 +7,12 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  std: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  map: TypedFunction;
-  sqrt: TypedFunction;
-  variance: TypedFunction;
 }
 
 const name = 'std';
-const dependencies = ['typed', 'map', 'sqrt', 'variance'];
+const dependencies = ['typed', 'std'];
 
 /**
  * Attach a transform function to math.std
@@ -27,9 +24,7 @@ const dependencies = ['typed', 'map', 'sqrt', 'variance'];
 export const createStdTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, map, sqrt, variance }: Dependencies) => {
-    const std = createStd({ typed, map, sqrt, variance });
-
+  ({ typed, std }: Dependencies) => {
     return typed('std', {
       '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);

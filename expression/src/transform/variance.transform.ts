@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createVariance } from '../../function/statistics/variance.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,17 +7,12 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  variance: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  add: TypedFunction;
-  subtract: TypedFunction;
-  multiply: TypedFunction;
-  divide: TypedFunction;
-  mapSlices: TypedFunction;
-  isNaN: (x: unknown) => boolean;
 }
 
 const name = 'variance';
-const dependencies = ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlices', 'isNaN'];
+const dependencies = ['typed', 'variance'];
 
 /**
  * Attach a transform function to math.var
@@ -30,17 +24,7 @@ const dependencies = ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlic
 export const createVarianceTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, subtract, multiply, divide, mapSlices, isNaN: mathIsNaN }: Dependencies) => {
-    const variance = createVariance({
-      typed,
-      add,
-      subtract,
-      multiply,
-      divide,
-      mapSlices,
-      isNaN: mathIsNaN,
-    });
-
+  ({ typed, variance }: Dependencies) => {
     return typed(name, {
       '...any': function (args: unknown[]): unknown {
         args = lastDimToZeroBase(args);

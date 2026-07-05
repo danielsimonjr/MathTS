@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
-import { createMap } from '../../function/matrix/map.js';
 import { compileInlineExpression } from './utils/compileInlineExpression.js';
 import { createTransformCallback } from './utils/transformCallback.js';
 
@@ -22,23 +21,23 @@ interface TransformFunction {
 }
 
 interface Dependencies {
+  map: (...args: unknown[]) => unknown;
   typed: TypedFunction;
 }
 
 const name = 'map';
-const dependencies = ['typed'];
+const dependencies = ['typed', 'map'];
 
 export const createMapTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed }: Dependencies) => {
+  ({ typed, map }: Dependencies) => {
     /**
      * Attach a transform function to math.map
      * Adds a property transform containing the transform function.
      *
      * This transform creates a one-based index instead of a zero-based index
      */
-    const map = createMap({ typed });
     const transformCallback = createTransformCallback({ typed });
 
     function mapTransform(args: Node[], math: unknown, scope: unknown): unknown {
@@ -50,9 +49,9 @@ export const createMapTransform = /* #__PURE__ */ factory(
         return map(args[0]);
       }
       const N = args.length - 1;
-      let X = args.slice(0, N);
+      let X: unknown[] = args.slice(0, N);
       let callback: unknown = args[N];
-      X = X.map((arg) => _compileAndEvaluate(arg, scope));
+      X = X.map((arg) => _compileAndEvaluate(arg as Node, scope));
 
       if (callback) {
         if (isSymbolNode(callback) || isFunctionAssignmentNode(callback)) {
@@ -60,7 +59,11 @@ export const createMapTransform = /* #__PURE__ */ factory(
           callback = _compileAndEvaluate(callback as unknown as Node, scope);
         } else {
           // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(callback, math, scope);
+          callback = compileInlineExpression(
+            callback as Parameters<typeof compileInlineExpression>[0],
+            math as Record<string, unknown>,
+            scope as Map<string, unknown>
+          );
         }
       }
       return map(...X, transformCallback(callback, N));

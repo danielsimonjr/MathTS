@@ -105,11 +105,7 @@ export function compile(node: MathNode, mathScope: Record<string, unknown>): Com
  * Internal type for compiled node evaluation functions.
  * Matches the mathjs _compile signature: (scope, args, context) => value
  */
-type EvalFunction = (
-  scope: Scope,
-  args: Record<string, unknown>,
-  context: unknown
-) => unknown;
+type EvalFunction = (scope: Scope, args: Record<string, unknown>, context: unknown) => unknown;
 
 /**
  * Compile a single AST node into an evaluation function.
@@ -232,13 +228,28 @@ function compileOperatorNode(
     throw new Error(`Function "${fnName}" missing in provided namespace "math"`);
   }
 
-  const fn = math[fnName] as MathFunction;
+  const fn = math[fnName] as MathFunction & { rawArgs?: boolean };
+
+  // rawArgs (expression-language transforms, e.g. lazy `and`/`or`/`??`): the
+  // function receives the UNevaluated argument nodes plus the namespace and
+  // scope, so it can short-circuit without evaluating the other side.
+  if (fn.rawArgs === true) {
+    const rawNodes = opNode.args;
+    return function evalOperatorNodeRaw(scope: Scope) {
+      return fn(rawNodes, math, scope);
+    };
+  }
+
   const evalArgs: EvalFunction[] = opNode.args.map((arg) => compileNode(arg, math, argNames));
 
   // Optimize for common arity
   if (evalArgs.length === 1) {
     const evalArg0 = evalArgs[0];
-    return function evalOperatorNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
+    return function evalOperatorNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
       return fn(evalArg0(scope, args, context));
     };
   }
@@ -246,7 +257,11 @@ function compileOperatorNode(
   if (evalArgs.length === 2) {
     const evalArg0 = evalArgs[0];
     const evalArg1 = evalArgs[1];
-    return function evalOperatorNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
+    return function evalOperatorNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
       return fn(evalArg0(scope, args, context), evalArg1(scope, args, context));
     };
   }
@@ -272,12 +287,36 @@ function compileFunctionNode(
       index?: MathNode & ObjectPropertyIndex;
     };
   };
-  const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) => compileNode(arg, math, argNames));
-
   // Get the function name from the fn property (which is a SymbolNode)
   const fnNode = fnNodeOuter.fn;
   if (fnNode && fnNode.isSymbolNode) {
     const name: string = fnNode.name as string;
+
+    // rawArgs (expression-language transforms, e.g. map/filter/forEach with
+    // 1-based callback indices): statically detectable from the namespace,
+    // mirroring mathjs FunctionNode._compile. The function receives the raw
+    // argument NODES plus the namespace and scope.
+    const staticFn = Object.prototype.hasOwnProperty.call(math, name)
+      ? (math[name] as MathFunction & { rawArgs?: boolean })
+      : undefined;
+    if (typeof staticFn === 'function' && staticFn.rawArgs === true) {
+      const rawNodes = fnNodeOuter.args;
+      return function evalFunctionNodeRaw(scope: Scope) {
+        // the name can be shadowed in scope by a non-rawArgs function
+        const shadow = scope.has(name) ? scope.get(name) : undefined;
+        if (typeof shadow === 'function' && (shadow as { rawArgs?: boolean }).rawArgs !== true) {
+          const values = rawNodes.map((rn) =>
+            compileNode(rn, math, argNames)(scope, {}, undefined)
+          );
+          return (shadow as MathFunction)(...values);
+        }
+        return staticFn(rawNodes, math, scope);
+      };
+    }
+
+    const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) =>
+      compileNode(arg, math, argNames)
+    );
 
     const resolveFn = (scope: Scope): MathFunction => {
       if (scope.has(name)) {
@@ -346,9 +385,16 @@ function compileFunctionNode(
     fnNode.index.isObjectProperty &&
     fnNode.index.isObjectProperty()
   ) {
+    const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) =>
+      compileNode(arg, math, argNames)
+    );
     const evalObject = compileNode(fnNode.object as MathNode, math, argNames);
     const methodName: string = fnNode.index.getObjectProperty!();
-    return function evalFunctionNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
+    return function evalFunctionNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
       const obj = evalObject(scope, args, context);
       const fn = getSafeMethod(obj, methodName);
       if (typeof fn !== 'function') {
@@ -360,6 +406,7 @@ function compileFunctionNode(
   }
 
   // General fallback (computed accessor, etc.)
+  const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) => compileNode(arg, math, argNames));
   const evalFn = compileNode(fnNode, math, argNames);
   return function evalFunctionNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const fn = evalFn(scope, args, context);
@@ -456,7 +503,8 @@ function compileBlockNode(
   math: Record<string, unknown>,
   argNames: Record<string, boolean>
 ): EvalFunction {
-  const blocks = (node as MathNode & { blocks: Array<{ node: MathNode; visible: boolean }> }).blocks;
+  const blocks = (node as MathNode & { blocks: Array<{ node: MathNode; visible: boolean }> })
+    .blocks;
   const evalBlocks = blocks.map((block) => ({
     evaluate: compileNode(block.node, math, argNames),
     visible: block.visible,
@@ -653,7 +701,9 @@ function compileAccessorNode(
   return function evalAccessorNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const object = evalObject(scope, args, context);
     if (accNode.optionalChaining && object == null) return undefined;
-    const index = evalIndex(scope, args, context);
+    // The indexed OBJECT is the context for the index evaluation — the
+    // IndexNode's `end` symbol resolves against its size (mathjs parity).
+    const index = evalIndex(scope, args, object);
     // Use math.subset if available for matrix indexing
     if (math.subset) {
       return (math.subset as MathFunction)(object, index);
@@ -673,12 +723,44 @@ function compileIndexNode(
   argNames: Record<string, boolean>
 ): EvalFunction {
   const dimensionNodes = (node as MathNode & { dimensions: MathNode[] }).dimensions;
-  const evalDimensions: EvalFunction[] = dimensionNodes.map((dim) =>
-    compileNode(dim, math, argNames)
+  // `end` support (mathjs parity): inside dimension i of `A[...]`, the symbol
+  // `end` resolves to the size of A along that dimension (1-based last index).
+  // Compile each dimension with `end` registered as an argument name; at eval
+  // time, supply args.end from the context's size when the dimension uses it.
+  const usesEnd = dimensionNodes.map(
+    (dim) =>
+      (dim as MathNode & { filter?: (cb: (n: unknown) => boolean) => unknown[] }).filter?.(
+        (n) =>
+          (n as { isSymbolNode?: boolean; name?: string }).isSymbolNode === true &&
+          (n as { name?: string }).name === 'end'
+      )?.length ?? 0
   );
+  const evalDimensions: EvalFunction[] = dimensionNodes.map((dim, i) => {
+    if (usesEnd[i]) {
+      const childArgNames: Record<string, boolean> = Object.create(argNames);
+      childArgNames.end = true;
+      return compileNode(dim, math, childArgNames);
+    }
+    return compileNode(dim, math, argNames);
+  });
+  const anyEnd = usesEnd.some((n) => n > 0);
 
   return function evalIndexNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
-    const dimensions = evalDimensions.map((e) => e(scope, args, context));
+    const dimensions = evalDimensions.map((e, i) => {
+      if (usesEnd[i]) {
+        const sizeFn = math.size as ((x: unknown) => unknown) | undefined;
+        if (!sizeFn || context === undefined || context === null) {
+          throw new Error('Cannot resolve "end": no indexing context');
+        }
+        const s = sizeFn(context) as { valueOf(): unknown };
+        const sizes = (Array.isArray(s) ? s : (s.valueOf() as number[])) as number[];
+        const childArgs: Record<string, unknown> = Object.create(args);
+        childArgs.end = sizes[i];
+        return e(scope, childArgs, context);
+      }
+      return e(scope, args, context);
+    });
+    void anyEnd;
     // Use math.index if available
     if (math.index) {
       return (math.index as MathFunction)(...dimensions);

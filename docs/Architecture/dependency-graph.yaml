@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-05'
-  totalFiles: 863
+  totalFiles: 894
   totalModules: 72
-  totalExports: 4398
+  totalExports: 4454
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9117,6 +9117,34 @@ modules:
           imports:
             - createUnitClass
           subpath: internal
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - createAndTransform
+            - createBitAndTransform
+            - createBitOrTransform
+            - createColumnTransform
+            - createConcatTransform
+            - createCumSumTransform
+            - createDiffTransform
+            - createFilterTransform
+            - createForEachTransform
+            - createIndexTransform
+            - createMapTransform
+            - createMapSlicesTransform
+            - createMaxTransform
+            - createMeanTransform
+            - createMinTransform
+            - createNullishTransform
+            - createOrTransform
+            - createPrintTransform
+            - createQuantileSeqTransform
+            - createRangeTransform
+            - createRowTransform
+            - createStdTransform
+            - createSubsetTransform
+            - createSumTransform
+            - createVarianceTransform
       exports:
         - apply
         - index
@@ -9629,6 +9657,10 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mathTyped
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -21536,6 +21568,10 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./transform/index.js
+          imports:
+            - '*'
+          reExport: true
         - file: ./function/parser.js
           imports:
             - createParser
@@ -21648,6 +21684,7 @@ modules:
         - '* from ./Help.js'
         - '* from ./compiler/index.js'
         - '* from ./evaluator/index.js'
+        - '* from ./transform/index.js'
         - createParser
         - embeddedDocs
         - mathMLDocument
@@ -22298,6 +22335,640 @@ modules:
       functions:
         - assignFactory
   expression/transform:
+    expression/src/transform/and.transform.ts:
+      description: and.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - createAndTransform
+      constants:
+        - createAndTransform
+    expression/src/transform/bitAnd.transform.ts:
+      description: bitAnd.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - createBitAndTransform
+      constants:
+        - createBitAndTransform
+    expression/src/transform/bitOr.transform.ts:
+      description: bitOr.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - createBitOrTransform
+      constants:
+        - createBitOrTransform
+    expression/src/transform/column.transform.ts:
+      description: Attach a transform function to matrix.column
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isNumber
+      workspaceDependencies: []
+      exports:
+        - createColumnTransform
+      constants:
+        - createColumnTransform
+    expression/src/transform/concat.transform.ts:
+      description: Attach a transform function to math.range
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isNumber
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ../utils/factory.js
+          imports:
+            - factory
+      workspaceDependencies: []
+      exports:
+        - createConcatTransform
+      constants:
+        - createConcatTransform
+    expression/src/transform/cumsum.transform.ts:
+      description: Attach a transform function to math.sum
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isCollection
+            - isNumber
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+      workspaceDependencies: []
+      exports:
+        - createCumSumTransform
+      constants:
+        - createCumSumTransform
+    expression/src/transform/diff.transform.ts:
+      description: Attach a transform function to math.diff
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createDiffTransform
+      constants:
+        - createDiffTransform
+    expression/src/transform/filter.transform.ts:
+      description: Attach a transform function to math.filter
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isFunctionAssignmentNode
+            - isSymbolNode
+        - file: ./utils/compileInlineExpression.js
+          imports:
+            - compileInlineExpression
+        - file: ./utils/transformCallback.js
+          imports:
+            - createTransformCallback
+      workspaceDependencies: []
+      exports:
+        - createFilterTransform
+      constants:
+        - createFilterTransform
+    expression/src/transform/forEach.transform.ts:
+      description: Attach a transform function to math.forEach
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./utils/transformCallback.js
+          imports:
+            - createTransformCallback
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isFunctionAssignmentNode
+            - isSymbolNode
+        - file: ./utils/compileInlineExpression.js
+          imports:
+            - compileInlineExpression
+      workspaceDependencies: []
+      exports:
+        - createForEachTransform
+      constants:
+        - createForEachTransform
+    expression/src/transform/index.transform.ts:
+      description: Attach a transform function to math.index
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/is.js
+          imports:
+            - isArray
+            - isBigInt
+            - isBigNumber
+            - isMatrix
+            - isNumber
+            - isRange
+        - file: ../utils/factory.js
+          imports:
+            - factory
+      workspaceDependencies: []
+      exports:
+        - createIndexTransform
+      constants:
+        - createIndexTransform
+    expression/src/transform/index.ts:
+      description: Expression-language transforms (wired 2026-07-05 — formerly a dormant pocket).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./and.transform.js
+          imports:
+            - createAndTransform
+          reExport: true
+        - file: ./bitAnd.transform.js
+          imports:
+            - createBitAndTransform
+          reExport: true
+        - file: ./bitOr.transform.js
+          imports:
+            - createBitOrTransform
+          reExport: true
+        - file: ./column.transform.js
+          imports:
+            - createColumnTransform
+          reExport: true
+        - file: ./concat.transform.js
+          imports:
+            - createConcatTransform
+          reExport: true
+        - file: ./cumsum.transform.js
+          imports:
+            - createCumSumTransform
+          reExport: true
+        - file: ./diff.transform.js
+          imports:
+            - createDiffTransform
+          reExport: true
+        - file: ./filter.transform.js
+          imports:
+            - createFilterTransform
+          reExport: true
+        - file: ./forEach.transform.js
+          imports:
+            - createForEachTransform
+          reExport: true
+        - file: ./index.transform.js
+          imports:
+            - createIndexTransform
+          reExport: true
+        - file: ./map.transform.js
+          imports:
+            - createMapTransform
+          reExport: true
+        - file: ./mapSlices.transform.js
+          imports:
+            - createMapSlicesTransform
+          reExport: true
+        - file: ./max.transform.js
+          imports:
+            - createMaxTransform
+          reExport: true
+        - file: ./mean.transform.js
+          imports:
+            - createMeanTransform
+          reExport: true
+        - file: ./min.transform.js
+          imports:
+            - createMinTransform
+          reExport: true
+        - file: ./nullish.transform.js
+          imports:
+            - createNullishTransform
+          reExport: true
+        - file: ./or.transform.js
+          imports:
+            - createOrTransform
+          reExport: true
+        - file: ./print.transform.js
+          imports:
+            - createPrintTransform
+          reExport: true
+        - file: ./quantileSeq.transform.js
+          imports:
+            - createQuantileSeqTransform
+          reExport: true
+        - file: ./range.transform.js
+          imports:
+            - createRangeTransform
+          reExport: true
+        - file: ./row.transform.js
+          imports:
+            - createRowTransform
+          reExport: true
+        - file: ./std.transform.js
+          imports:
+            - createStdTransform
+          reExport: true
+        - file: ./subset.transform.js
+          imports:
+            - createSubsetTransform
+          reExport: true
+        - file: ./sum.transform.js
+          imports:
+            - createSumTransform
+          reExport: true
+        - file: ./variance.transform.js
+          imports:
+            - createVarianceTransform
+          reExport: true
+      workspaceDependencies: []
+      exports:
+        - createAndTransform
+        - createBitAndTransform
+        - createBitOrTransform
+        - createColumnTransform
+        - createConcatTransform
+        - createCumSumTransform
+        - createDiffTransform
+        - createFilterTransform
+        - createForEachTransform
+        - createIndexTransform
+        - createMapTransform
+        - createMapSlicesTransform
+        - createMaxTransform
+        - createMeanTransform
+        - createMinTransform
+        - createNullishTransform
+        - createOrTransform
+        - createPrintTransform
+        - createQuantileSeqTransform
+        - createRangeTransform
+        - createRowTransform
+        - createStdTransform
+        - createSubsetTransform
+        - createSumTransform
+        - createVarianceTransform
+      reExported:
+        - createAndTransform
+        - createBitAndTransform
+        - createBitOrTransform
+        - createColumnTransform
+        - createConcatTransform
+        - createCumSumTransform
+        - createDiffTransform
+        - createFilterTransform
+        - createForEachTransform
+        - createIndexTransform
+        - createMapTransform
+        - createMapSlicesTransform
+        - createMaxTransform
+        - createMeanTransform
+        - createMinTransform
+        - createNullishTransform
+        - createOrTransform
+        - createPrintTransform
+        - createQuantileSeqTransform
+        - createRangeTransform
+        - createRowTransform
+        - createStdTransform
+        - createSubsetTransform
+        - createSumTransform
+        - createVarianceTransform
+    expression/src/transform/map.transform.ts:
+      description: Attach a transform function to math.map
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isFunctionAssignmentNode
+            - isSymbolNode
+        - file: ./utils/compileInlineExpression.js
+          imports:
+            - compileInlineExpression
+        - file: ./utils/transformCallback.js
+          imports:
+            - createTransformCallback
+      workspaceDependencies: []
+      exports:
+        - createMapTransform
+      constants:
+        - createMapTransform
+    expression/src/transform/mapSlices.transform.ts:
+      description: Attach a transform function to math.mapSlices
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isNumber
+      workspaceDependencies: []
+      exports:
+        - createMapSlicesTransform
+      constants:
+        - createMapSlicesTransform
+    expression/src/transform/max.transform.ts:
+      description: Attach a transform function to math.max
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createMaxTransform
+      constants:
+        - createMaxTransform
+    expression/src/transform/mean.transform.ts:
+      description: Attach a transform function to math.mean
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createMeanTransform
+      constants:
+        - createMeanTransform
+    expression/src/transform/min.transform.ts:
+      description: Attach a transform function to math.min
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createMinTransform
+      constants:
+        - createMinTransform
+    expression/src/transform/nullish.transform.ts:
+      description: nullish.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - createNullishTransform
+      constants:
+        - createNullishTransform
+    expression/src/transform/or.transform.ts:
+      description: or.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - createOrTransform
+      constants:
+        - createOrTransform
+    expression/src/transform/print.transform.ts:
+      description: print.transform module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ../utils/print.js
+          imports:
+            - printTemplate
+      workspaceDependencies: []
+      exports:
+        - createPrintTransform
+      constants:
+        - createPrintTransform
+    expression/src/transform/quantileSeq.transform.ts:
+      description: Attach a transform function to math.quantileSeq
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createQuantileSeqTransform
+      constants:
+        - createQuantileSeqTransform
+    expression/src/transform/range.transform.ts:
+      description: Attach a transform function to math.range
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+      workspaceDependencies: []
+      exports:
+        - createRangeTransform
+      constants:
+        - createRangeTransform
+    expression/src/transform/row.transform.ts:
+      description: Attach a transform function to matrix.column
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ../utils/is.js
+          imports:
+            - isNumber
+      workspaceDependencies: []
+      exports:
+        - createRowTransform
+      constants:
+        - createRowTransform
+    expression/src/transform/std.transform.ts:
+      description: Attach a transform function to math.std
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createStdTransform
+      constants:
+        - createStdTransform
+    expression/src/transform/subset.transform.ts:
+      description: Attach a transform function to math.subset
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+      workspaceDependencies: []
+      exports:
+        - createSubsetTransform
+      constants:
+        - createSubsetTransform
+    expression/src/transform/sum.transform.ts:
+      description: Attach a transform function to math.sum
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createSumTransform
+      constants:
+        - createSumTransform
+    expression/src/transform/utils/compileInlineExpression.ts:
+      description: Compile an inline expression like "x > 0"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isSymbolNode
+        - file: ../../utils/map.js
+          imports:
+            - PartitionedMap
+      workspaceDependencies: []
+      exports:
+        - compileInlineExpression
+      functions:
+        - compileInlineExpression
+    expression/src/transform/utils/dimToZeroBase.ts:
+      description: Change last argument dim from one-based to zero-based.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isNumber
+            - isBigNumber
+      workspaceDependencies: []
+      exports:
+        - dimToZeroBase
+        - isNumberOrBigNumber
+      functions:
+        - dimToZeroBase
+        - isNumberOrBigNumber
     expression/src/transform/utils/errorTransform.ts:
       description: Transform zero-based indices to one-based indices in errors
       externalDependencies: []
@@ -22311,6 +22982,58 @@ modules:
         - errorTransform
       functions:
         - errorTransform
+    expression/src/transform/utils/lastDimToZeroBase.ts:
+      description: Change last argument dim from one-based to zero-based.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isCollection
+        - file: ./dimToZeroBase.js
+          imports:
+            - dimToZeroBase
+            - isNumberOrBigNumber
+      workspaceDependencies: []
+      exports:
+        - lastDimToZeroBase
+      functions:
+        - lastDimToZeroBase
+    expression/src/transform/utils/transformCallback.ts:
+      description: Transforms the given callback function based on its type and number of arrays.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/factory.js
+          imports:
+            - factory
+        - file: ../../types.js
+          imports:
+            - TypedFunction
+      workspaceDependencies: []
+      exports:
+        - createTransformCallback
+      constants:
+        - createTransformCallback
+    expression/src/transform/variance.transform.ts:
+      description: Attach a transform function to math.var
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/errorTransform.js
+          imports:
+            - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
+      workspaceDependencies: []
+      exports:
+        - createVarianceTransform
+      constants:
+        - createVarianceTransform
   expression/utils:
     expression/src/utils/array.ts:
       description: Calculate the size of a multi dimensional array.
@@ -22889,6 +23612,16 @@ modules:
         - pickShallow
         - set
         - traverse
+    expression/src/utils/print.ts:
+      description: print module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - printTemplate
+      constants:
+        - printTemplate
     expression/src/utils/scope.ts:
       description: Create a new scope which can access the parent scope,
       externalDependencies: []
@@ -28356,7 +29089,37 @@ dependencyGraph:
         - expression/src/node/utils/assign.ts
     - name: Expression/transform
       files:
+        - expression/src/transform/and.transform.ts
+        - expression/src/transform/bitAnd.transform.ts
+        - expression/src/transform/bitOr.transform.ts
+        - expression/src/transform/column.transform.ts
+        - expression/src/transform/concat.transform.ts
+        - expression/src/transform/cumsum.transform.ts
+        - expression/src/transform/diff.transform.ts
+        - expression/src/transform/filter.transform.ts
+        - expression/src/transform/forEach.transform.ts
+        - expression/src/transform/index.transform.ts
+        - expression/src/transform/index.ts
+        - expression/src/transform/map.transform.ts
+        - expression/src/transform/mapSlices.transform.ts
+        - expression/src/transform/max.transform.ts
+        - expression/src/transform/mean.transform.ts
+        - expression/src/transform/min.transform.ts
+        - expression/src/transform/nullish.transform.ts
+        - expression/src/transform/or.transform.ts
+        - expression/src/transform/print.transform.ts
+        - expression/src/transform/quantileSeq.transform.ts
+        - expression/src/transform/range.transform.ts
+        - expression/src/transform/row.transform.ts
+        - expression/src/transform/std.transform.ts
+        - expression/src/transform/subset.transform.ts
+        - expression/src/transform/sum.transform.ts
+        - expression/src/transform/utils/compileInlineExpression.ts
+        - expression/src/transform/utils/dimToZeroBase.ts
         - expression/src/transform/utils/errorTransform.ts
+        - expression/src/transform/utils/lastDimToZeroBase.ts
+        - expression/src/transform/utils/transformCallback.ts
+        - expression/src/transform/variance.transform.ts
     - name: Expression/utils
       files:
         - expression/src/utils/array.ts
@@ -28370,6 +29133,7 @@ dependencyGraph:
         - expression/src/utils/mathml.ts
         - expression/src/utils/number.ts
         - expression/src/utils/object.ts
+        - expression/src/utils/print.ts
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
         - expression/src/utils/switch.ts
@@ -28481,17 +29245,17 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 863
+  totalTypeScriptFiles: 894
   totalModules: 72
-  totalLinesOfCode: 160524
-  totalExports: 4398
+  totalLinesOfCode: 162296
+  totalExports: 4454
   totalClasses: 51
   totalInterfaces: 374
-  totalFunctions: 1486
-  totalTypeGuards: 155
+  totalFunctions: 1490
+  totalTypeGuards: 156
   totalEnums: 0
-  totalConstants: 1398
-  totalReExports: 1501
+  totalConstants: 1425
+  totalReExports: 1527
   totalTypeOnlyImports: 494
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

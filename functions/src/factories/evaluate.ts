@@ -63,6 +63,48 @@ const mathScope: Record<string, unknown> = {
 };
 
 // ---------------------------------------------------------------------------
+// Step 1b: Expression-language transforms (wired 2026-07-05)
+// ---------------------------------------------------------------------------
+// Overlay the expression-language transforms (built once in factories/index.ts
+// against factoryScope and registered on `mathWithTransform`): 1-based
+// indices/dimensions (`A[1]`, `row(M, 1)`, `max(M, 1)`), end-inclusive ranges,
+// and lazy `and`/`or`/`??` via `rawArgs` (which the standalone compiler in
+// expression/src/compiler honors). Only the EXPRESSION namespace gets these —
+// the programmatic API stays zero-based, exactly like mathjs.
+{
+  const mwt = factoryScope.mathWithTransform as Record<string, unknown>;
+  for (const key of [
+    'and',
+    'bitAnd',
+    'bitOr',
+    'column',
+    'concat',
+    'cumsum',
+    'diff',
+    'filter',
+    'forEach',
+    'index',
+    'map',
+    'mapSlices',
+    'max',
+    'mean',
+    'min',
+    'nullish',
+    'or',
+    'print',
+    'quantileSeq',
+    'range',
+    'row',
+    'std',
+    'subset',
+    'sum',
+    'variance',
+  ]) {
+    if (typeof mwt[key] === 'function') mathScope[key] = mwt[key];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Step 2: Reuse parse from index.ts (already built with node constructors)
 // ---------------------------------------------------------------------------
 

@@ -10,6 +10,7 @@
  * rewriting each one.
  */
 
+import { mathTyped } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Pre-initialise the shared backend manager so the accelerated `multiply` /
@@ -54,6 +55,42 @@ function matrixIndexSelectors(index: MatrixIndexLike): number[][] {
  * Stores data as nested number[][] (what mathjs factories expect) while
  * providing conversion to/from the native Float64Array-backed DenseMatrix.
  */
+/**
+ * Adapt a callback so it is invoked with as many arguments as it can accept —
+ * the mathjs callback contract. Typed functions (e.g. compiled expression
+ * lambdas, signature 'any,any') reject surplus arguments, so probe the widest
+ * arity they resolve; plain functions use their declared length (rest-args
+ * closures, length 0, receive everything).
+ */
+function _adaptCallbackArity(
+  callback: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  const t = mathTyped as unknown as {
+    isTypedFunction(fn: unknown): boolean;
+    resolve(fn: unknown, args: unknown[]): unknown;
+  };
+  if (t.isTypedFunction(callback)) {
+    let arity: number | undefined;
+    return (...args: unknown[]) => {
+      if (arity === undefined) {
+        for (let k = args.length; k >= 1; k--) {
+          if (t.resolve(callback, args.slice(0, k))) {
+            arity = k;
+            break;
+          }
+        }
+        if (arity === undefined) arity = args.length; // let typed report the real mismatch
+      }
+      return callback(...args.slice(0, arity));
+    };
+  }
+  const declared = callback.length;
+  if (declared >= 1 && declared < 3) {
+    return (...args: unknown[]) => callback(...args.slice(0, declared));
+  }
+  return callback;
+}
+
 export class MathJSDenseMatrix {
   _data: number[][];
   _size: number[];
@@ -146,30 +183,44 @@ export class MathJSDenseMatrix {
 
   /**
    * Map over all elements, producing a new matrix.
+   *
+   * Callbacks are invoked ARITY-APPROPRIATELY (mathjs contract): a typed or
+   * fixed-arity callback declared as `(value)` or `(value, index)` must not be
+   * force-fed 3 arguments — a typed 2-arg expression lambda (`f(x, i) = …`)
+   * previously threw "Too many arguments" out of the expression language.
    */
   map(
     callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => number
   ): MathJSDenseMatrix {
+    const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
     if (this._size.length === 1) {
-      const flat = (this._data as unknown as number[]).map((val, i) => callback(val, [i], this));
-      const m = new MathJSDenseMatrix(flat as unknown as number[][]);
-      m._size = [...this._size];
+      const flat = (this._data as unknown as number[]).map(
+        (val, i) => cb(val, [i], this) as number
+      );
+      // Keep the 1-D layout: constructing from the flat array would let
+      // inferSize re-shape it as an n×1 column (nested rows), which breaks
+      // toArray()/valueOf() for vectors.
+      const m = new MathJSDenseMatrix({
+        data: flat as unknown as number[][],
+        size: [...this._size],
+      });
       return m;
     }
-    const result = this._data.map((row, i) => row.map((val, j) => callback(val, [i, j], this)));
+    const result = this._data.map((row, i) => row.map((val, j) => cb(val, [i, j], this) as number));
     return new MathJSDenseMatrix(result);
   }
 
   /**
-   * Iterate over all elements.
+   * Iterate over all elements (callback invoked arity-appropriately; see map).
    */
   forEach(callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => void): void {
+    const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
     if (this._size.length === 1) {
-      (this._data as unknown as number[]).forEach((val, i) => callback(val, [i], this));
+      (this._data as unknown as number[]).forEach((val, i) => cb(val, [i], this));
       return;
     }
     this._data.forEach((row, i) => {
-      row.forEach((val, j) => callback(val, [i, j], this));
+      row.forEach((val, j) => cb(val, [i, j], this));
     });
   }
 

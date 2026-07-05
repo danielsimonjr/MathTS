@@ -1,27 +1,22 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createSubset } from '../../function/matrix/subset.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
 }
 
 interface Dependencies {
+  subset: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  zeros: (...args: unknown[]) => unknown;
-  add: TypedFunction;
 }
 
 const name = 'subset';
-const dependencies = ['typed', 'matrix', 'zeros', 'add'];
+const dependencies = ['typed', 'subset'];
 
 export const createSubsetTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, zeros, add }: Dependencies) => {
-    const subset = createSubset({ typed, matrix, zeros, add });
-
+  ({ typed, subset }: Dependencies) => {
     /**
      * Attach a transform function to math.subset
      * Adds a property transform containing the transform function.

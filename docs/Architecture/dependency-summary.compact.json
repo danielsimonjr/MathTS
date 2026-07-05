@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 863, "e": 4398, "re": 1501 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 894, "e": 4454, "re": 1527 },
   "s": {
-    "loc": 160524,
+    "loc": 162296,
     "cls": 51,
     "int": 374,
-    "fn": 1486,
-    "tg": 155,
+    "fn": 1490,
+    "tg": 156,
     "en": 0,
-    "co": 1398,
+    "co": 1425,
     "toi": 494
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -1001,9 +1001,23 @@
       ],
       "int": ["CompiledExpression", "StringOptions"]
     },
-    "expression/transform": { "f": 1, "exp": ["errorTransform"] },
+    "expression/transform": {
+      "f": 31,
+      "exp": [
+        "createAndTransform",
+        "createBitAndTransform",
+        "createBitOrTransform",
+        "createColumnTransform",
+        "createConcatTransform",
+        "createCumSumTransform",
+        "createDiffTransform",
+        "createFilterTransform",
+        "createForEachTransform",
+        "createIndexTransform"
+      ]
+    },
     "expression/utils": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "arraySize",
         "validate",
@@ -1482,10 +1496,10 @@
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
+    { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "wasm/WasmLoader.ts", "i": 2, "o": 44 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "src/index.ts", "i": 36, "o": 0 },
-    { "p": "src/types.ts", "i": 4, "o": 30 }
+    { "p": "utils/is.ts", "i": 0, "o": 40 }
   ]
 }

@@ -1659,3 +1659,77 @@ export { mapSlices as apply, indexFn as index };
 // Update mathWithTransform with all activated factories
 // ---------------------------------------------------------------------------
 Object.assign(_mathWithTransform, factoryScope);
+
+// ---------------------------------------------------------------------------
+// Expression-language transforms (wired 2026-07-05 — the "proxy for now" above
+// is now a real mathWithTransform). Inside the expression language, mathjs
+// semantics differ from the programmatic API: indices/dimensions are ONE-based
+// (`A[1]` is the first element, `row(M, 1)` the first row, `max(M, 1)` a
+// 1-based dim), ranges include their end (`1:3` = [1,2,3]), and `and`/`or`/`??`
+// short-circuit lazily (`rawArgs`). Each transform factory takes its BASE
+// function as an injected dependency; factoryScope supplies the mathjs-lineage
+// implementations the transforms wrap (dim-capable reductions,
+// callback(value, index[], matrix)). Only the compile-time namespace
+// (_mathWithTransform) is overridden — the programmatic API stays zero-based.
+// Before this, the language was internally inconsistent: the parser is
+// documented one-based, but the compiled `math.index(...)` was zero-based.
+import {
+  createAndTransform,
+  createBitAndTransform,
+  createBitOrTransform,
+  createColumnTransform,
+  createConcatTransform,
+  createCumSumTransform,
+  createDiffTransform,
+  createFilterTransform,
+  createForEachTransform,
+  createIndexTransform,
+  createMapTransform,
+  createMapSlicesTransform,
+  createMaxTransform,
+  createMeanTransform,
+  createMinTransform,
+  createNullishTransform,
+  createOrTransform,
+  createPrintTransform,
+  createQuantileSeqTransform,
+  createRangeTransform,
+  createRowTransform,
+  createStdTransform,
+  createSubsetTransform,
+  createSumTransform,
+  createVarianceTransform,
+} from '@danielsimonjr/mathts-expression';
+
+{
+  const transformFactories = [
+    createAndTransform,
+    createBitAndTransform,
+    createBitOrTransform,
+    createColumnTransform,
+    createConcatTransform,
+    createCumSumTransform,
+    createDiffTransform,
+    createFilterTransform,
+    createForEachTransform,
+    createIndexTransform,
+    createMapTransform,
+    createMapSlicesTransform,
+    createMaxTransform,
+    createMeanTransform,
+    createMinTransform,
+    createNullishTransform,
+    createOrTransform,
+    createPrintTransform,
+    createQuantileSeqTransform,
+    createRangeTransform,
+    createRowTransform,
+    createStdTransform,
+    createSubsetTransform,
+    createSumTransform,
+    createVarianceTransform,
+  ] as unknown as ReadonlyArray<((deps: Record<string, unknown>) => unknown) & { fn: string }>;
+  for (const create of transformFactories) {
+    _mathWithTransform[create.fn] = create(factoryScope as Record<string, unknown>);
+  }
+}

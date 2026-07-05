@@ -1,10 +1,5 @@
-import { createOr } from '../../function/logical/or.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
-
-interface TypedFunction<T = unknown> {
-  (...args: unknown[]): T;
-}
 
 interface Node {
   compile(): CompiledExpression;
@@ -20,23 +15,17 @@ interface TransformFunction {
 }
 
 interface Dependencies {
-  typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  equalScalar: (...args: unknown[]) => unknown;
-  DenseMatrix: new (...args: unknown[]) => unknown;
-  concat: (...args: unknown[]) => unknown;
+  or: (...args: unknown[]) => unknown;
 }
 
 const name = 'or';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
+const dependencies = ['or'];
 
 export const createOrTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, DenseMatrix, concat }: Dependencies) => {
-    const or = createOr({ typed, matrix, equalScalar, DenseMatrix, concat });
-
-    function orTransform(args: Node[], math: unknown, scope: unknown): unknown {
+  ({ or }: Dependencies) => {
+    function orTransform(args: Node[], _math: unknown, scope: unknown): unknown {
       const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1) && or(condition1, false)) {
         return true;

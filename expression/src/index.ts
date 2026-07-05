@@ -40,3 +40,8 @@ export { createParenthesisNode } from './node/ParenthesisNode.js';
 export { createRangeNode } from './node/RangeNode.js';
 export { createRelationalNode } from './node/RelationalNode.js';
 export { createSymbolNode } from './node/SymbolNode.js';
+
+// Expression-language transforms (1-based indices/dims, lazy logical operators).
+// Each factory takes its base function as an injected dependency; hosts assemble
+// them into their expression evaluation scope (see functions/factories/evaluate).
+export * from './transform/index.js';

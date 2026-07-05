@@ -1,10 +1,5 @@
-import { createBitAnd } from '../../function/bitwise/bitAnd.js';
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
-
-interface TypedFunction<T = unknown> {
-  (...args: unknown[]): T;
-}
 
 interface Node {
   compile(): CompiledExpression;
@@ -20,27 +15,20 @@ interface TransformFunction {
 }
 
 interface Dependencies {
-  typed: TypedFunction;
-  matrix: (...args: unknown[]) => unknown;
-  equalScalar: (...args: unknown[]) => unknown;
-  zeros: (...args: unknown[]) => unknown;
-  not: (...args: unknown[]) => unknown;
-  concat: (...args: unknown[]) => unknown;
+  bitAnd: (...args: unknown[]) => unknown;
 }
 
 const name = 'bitAnd';
-const dependencies = ['typed', 'matrix', 'zeros', 'add', 'equalScalar', 'not', 'concat'];
+const dependencies = ['bitAnd'];
 
 export const createBitAndTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, zeros, not, concat }: Dependencies) => {
-    const bitAnd = createBitAnd({ typed, matrix, equalScalar, zeros, not, concat });
-
-    function bitAndTransform(args: Node[], math: unknown, scope: unknown): unknown {
+  ({ bitAnd }: Dependencies) => {
+    function bitAndTransform(args: Node[], _math: unknown, scope: unknown): unknown {
       const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1)) {
-        if (isNaN(condition1)) {
+        if (isNaN(condition1 as number)) {
           return NaN;
         }
         if (condition1 === 0 || condition1 === false) {

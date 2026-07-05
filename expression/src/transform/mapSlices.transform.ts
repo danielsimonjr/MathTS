@@ -1,6 +1,5 @@
 import { errorTransform } from './utils/errorTransform.js';
 import { factory } from '../utils/factory.js';
-import { createMapSlices } from '../../function/matrix/mapSlices.js';
 import { isBigNumber, isNumber } from '../utils/is.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,12 +7,12 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  mapSlices: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  isInteger: (x: unknown) => boolean;
 }
 
 const name = 'mapSlices';
-const dependencies = ['typed', 'isInteger'];
+const dependencies = ['typed', 'mapSlices'];
 
 /**
  * Attach a transform function to math.mapSlices
@@ -25,9 +24,7 @@ const dependencies = ['typed', 'isInteger'];
 export const createMapSlicesTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, isInteger }: Dependencies) => {
-    const mapSlices = createMapSlices({ typed, isInteger });
-
+  ({ typed, mapSlices }: Dependencies) => {
     // @see: comment of concat itself
     return typed('mapSlices', {
       '...any': function (args: unknown[]): unknown {
@@ -37,7 +34,7 @@ export const createMapSlicesTransform = /* #__PURE__ */ factory(
         if (isNumber(dim)) {
           args[1] = dim - 1;
         } else if (isBigNumber(dim)) {
-          args[1] = (dim as { minus(n: number): unknown }).minus(1);
+          args[1] = (dim as unknown as { minus(n: number): unknown }).minus(1);
         }
 
         try {
@@ -48,5 +45,5 @@ export const createMapSlicesTransform = /* #__PURE__ */ factory(
       },
     });
   },
-  { isTransformFunction: true, ...createMapSlices.meta }
+  { isTransformFunction: true }
 );

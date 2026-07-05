@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createMean } from '../../function/statistics/mean.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,20 +7,17 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  mean: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  add: TypedFunction;
-  divide: TypedFunction;
 }
 
 const name = 'mean';
-const dependencies = ['typed', 'add', 'divide'];
+const dependencies = ['typed', 'mean'];
 
 export const createMeanTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, divide }: Dependencies) => {
-    const mean = createMean({ typed, add, divide });
-
+  ({ typed, mean }: Dependencies) => {
     /**
      * Attach a transform function to math.mean
      * Adds a property transform containing the transform function.

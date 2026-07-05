@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createMax } from '../../function/statistics/max.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,22 +7,17 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  max: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  config: Record<string, unknown>;
-  numeric: TypedFunction;
-  larger: TypedFunction;
-  isNaN: (x: unknown) => boolean;
 }
 
 const name = 'max';
-const dependencies = ['typed', 'config', 'numeric', 'larger', 'isNaN'];
+const dependencies = ['typed', 'max'];
 
 export const createMaxTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, numeric, larger, isNaN: mathIsNaN }: Dependencies) => {
-    const max = createMax({ typed, config, numeric, larger, isNaN: mathIsNaN });
-
+  ({ typed, max }: Dependencies) => {
     /**
      * Attach a transform function to math.max
      * Adds a property transform containing the transform function.

@@ -1,73 +1,21 @@
 import { factory } from '../utils/factory.js';
-import { createRange } from '../../function/matrix/range.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
 }
 
 interface Dependencies {
+  range: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  config: Record<string, unknown>;
-  matrix?: (...args: unknown[]) => unknown;
-  bignumber?: (...args: unknown[]) => unknown;
-  equal: TypedFunction;
-  smaller: TypedFunction;
-  smallerEq: TypedFunction;
-  larger: TypedFunction;
-  largerEq: TypedFunction;
-  add: TypedFunction;
-  isZero: (x: unknown) => boolean;
-  isPositive: (x: unknown) => boolean;
 }
 
 const name = 'range';
-const dependencies = [
-  'typed',
-  'config',
-  '?matrix',
-  '?bignumber',
-  'equal',
-  'smaller',
-  'smallerEq',
-  'larger',
-  'largerEq',
-  'add',
-  'isZero',
-  'isPositive',
-];
+const dependencies = ['typed', 'range'];
 
 export const createRangeTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    matrix,
-    bignumber,
-    equal,
-    smaller,
-    smallerEq,
-    larger,
-    largerEq,
-    add,
-    isZero,
-    isPositive,
-  }: Dependencies) => {
-    const range = createRange({
-      typed,
-      config,
-      matrix,
-      bignumber,
-      equal,
-      smaller,
-      smallerEq,
-      larger,
-      largerEq,
-      add,
-      isZero,
-      isPositive,
-    });
-
+  ({ typed, range }: Dependencies) => {
     /**
      * Attach a transform function to math.range
      * Adds a property transform containing the transform function.

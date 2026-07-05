@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
-import { createMin } from '../../function/statistics/min.js';
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
@@ -8,22 +7,17 @@ interface TypedFunction<T = unknown> {
 }
 
 interface Dependencies {
+  min: (...args: unknown[]) => unknown;
   typed: TypedFunction;
-  config: Record<string, unknown>;
-  numeric: (...args: unknown[]) => unknown;
-  smaller: (...args: unknown[]) => unknown;
-  isNaN: (x: unknown) => boolean;
 }
 
 const name = 'min';
-const dependencies = ['typed', 'config', 'numeric', 'smaller', 'isNaN'];
+const dependencies = ['typed', 'min'];
 
 export const createMinTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, numeric, smaller, isNaN: mathIsNaN }: Dependencies) => {
-    const min = createMin({ typed, config, numeric, smaller, isNaN: mathIsNaN });
-
+  ({ typed, min }: Dependencies) => {
     /**
      * Attach a transform function to math.min
      * Adds a property transform containing the transform function.
