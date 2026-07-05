@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-trigonometry
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [779fcde]
+- Updated dependencies [5f3b401]
+  - @danielsimonjr/mathts-functions@0.12.0
+
 ## 0.1.12
 
 ### Patch Changes

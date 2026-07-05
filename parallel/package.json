@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-parallel",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "WebWorker parallelization for MathTS computations",
   "author": "Daniel Simon Jr.",
   "license": "MIT",

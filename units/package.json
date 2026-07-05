@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-units",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Standalone units & dimensional-analysis for MathTS -- the Unit class, unit registry, and SI prefixes, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.4.0",
+    "@danielsimonjr/mathts-core": "^0.5.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
