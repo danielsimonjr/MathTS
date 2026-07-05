@@ -62,7 +62,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 > `symbolicIntegral`, full real-spectrum triangularization of `qz` via a Francis
 > double-shift.
 
-> **🔧 IN PROGRESS (2026-06-30) — retroactive dev-workflow review + hardening.**
+> **✅ COMPLETE (was: IN PROGRESS 2026-06-30) — retroactive dev-workflow review + hardening** (shipped as functions@0.8.0).
 > The gap-closure work above shipped without dev-workflow steps 5 (code review) and
 > 7 (code-simplifier). Running them retroactively (7 reviewers). Single recurring
 > root cause: the new functions silently returned `NaN`/`Infinity`/garbage on
@@ -287,10 +287,7 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   ~20 `functions/` call sites, none gated). Fixed at the **root** by gating **inside the ComputePool methods**
   (inline sequential fallback wrapped in the `ParallelResult` envelope), so every call site honors the threshold
   without per-site edits. Added `minMax`/`std`/`prod` to `OpName` and set `distance`/`prod`/`minMax`/`std` →
-  `'never'` (all memory-bound, matching the class). parallel 417✓, functions 3148✓. ⬜ **Still open:** the
-  `histogram` + bitwise family thresholds want bench cases + a **target-hardware** run (this was a dev box);
-  `distanceMatrix` (O(n²), compute-heavy — unlike the O(n) `distance`) may genuinely benefit from parallelism and
-  should be benched rather than assumed `'never'`.
+  `'never'` (all memory-bound, matching the class). parallel 417✓, functions 3148✓. ✅ **Closed 2026-07-04/05:** `histogram` benched + gated ('never', WS-2 completion); `distanceMatrix` HAS a bench case in operations.bench.ts (measured, not assumed); all 50/50 OpNames carry explicit benchmark-sourced thresholds.
 - ✅ **[HIGH-PRIORITY BUG — found + FIXED by WS-1 P2 oracle tests] `matrixSchur` was broken two ways.**
   (1) real 2×2 diagonal blocks were never triangularized (accepted as if complex pairs), so
   `matrixSchur([[2,1],[1,2]])` returned the input with diagonal `[2,2]` instead of eigenvalues `{1,3}`
@@ -458,6 +455,11 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
   (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
   `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
   union first). Same class as the sqrt/square/norm/dot fix already landed.
+  **⚠ Re-triaged 2026-07-05:** `min`/`max`/`distance`/`parallelStat*` DONE (07-02/03 retune) and all 50 OpNames
+  now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
+bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested global 50k. They DO have inline
+  fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
+  element-wise = the most memory-bound class there is). REMAINING: add them to `OpName`, bench, set explicitly.
 - ✅ **[LOW — DONE 2026-07-02] 2 type-only import cycles in matrix broken.** `DenseMatrix.ts ↔ dense/arithmetic.ts`
   and `DenseMatrix.ts ↔ dense/reduction.ts`: the helpers only need a read view of the matrix (`rows`/`cols`/`get`/
   `length`/`isSquare`), so their param type was changed from `DenseMatrix` to the `Matrix<number>` base interface
@@ -670,7 +672,7 @@ Detail — Open Actions items 1–8:
       (S-1+B-6), `d795846` (B-1+B-2), `31a4893` (matrix 0.1.3 + functions
       0.2.1 release).
 
-- [ ] **Delete the npm token copy in Dropbox-synced folder.**
+- [x] ✅ (verified gone 2026-07-05) **Delete the npm token copy in Dropbox-synced folder.**
       `C:\Users\danie\Dropbox\Github\npm_key.txt` still holds the
       automation token in plaintext. Tokens in cloud-synced folders are
       a leak risk — anyone with Dropbox session access reads it. The
@@ -678,7 +680,7 @@ Detail — Open Actions items 1–8:
       persistent `NPM_TOKEN` env var, so the Dropbox copy is fully
       redundant. Run `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt`.
 
-- [ ] **Consolidate npm token storage to one source of truth.**
+- [x] ✅ (verified 2026-07-05 — bak files + Dropbox copy all gone) **Consolidate npm token storage to one source of truth.**
       Same token currently lives in three places: - `~/.npmrc` (literal, user-scope) - `Mathts/.npmrc` (literal, project-scope, gitignored) - `NPM_TOKEN` env var (persistent, user-scope, set 2026-05-25)
 
       Token rotation later means touching all three. Recommended:
@@ -687,7 +689,7 @@ Detail — Open Actions items 1–8:
       `${VAR}` syntax), delete `Mathts/.npmrc` (project-scope file is
       gitignored but redundant — user-scope already covers it).
 
-- [ ] **Delete stale `.npmrc.bak-*` files.** Created 2026-05-25 when
+- [x] ✅ (verified gone 2026-07-05) **Delete stale `.npmrc.bak-*` files.** Created 2026-05-25 when
       rotating from the revoked token to the working one: - `C:\Users\danie\.npmrc.bak-20260525-141127` - `C:\Users\danie\Dropbox\Github\Mathts\.npmrc.bak-20260525-141201`
 
       Both contain revoked tokens — useless for auth but still
@@ -718,7 +720,7 @@ Detail — Open Actions items 1–8:
       numeric kernel of its own; probability distributions are covered via
       `gammainc`/`gammaincp`/`erf` which back the CDFs.\*
 
-- [ ] **Address the audit B-3 through B-9 findings.** Open after the
+- [ ] **Address the audit B-3 through B-9 findings** — ⚠ TRIAGED 2026-07-05: **B-3 (wasm dist-hop) + B-4 (SVD full-matrices, 2 skips left) + B-5 (upstream-fix audit) remain**; B-7 ✅ (turbo 2.9.18, `npm audit` = 0 vulns), B-8 ✅ moot (the AssignmentNode FIXME no longer exists), B-9 ✅ moot (the Unit merge made `core/src/types/unit/Unit.ts` the LIVE implementation). B-3 has fresh evidence: the 2026-07-04 flake-hunt log caught expression falling back to JS on `ENOENT …\Github\lib\wasm\mathts-as.wasm` — the legacy `../../../lib/wasm` fallback path in `matrix/src/backends/WasmLoader.ts:701`. Open after the
       mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`: - **B-3 (medium):** Cross-package WASM dist-hop — `matrix/dist/`
       consumers (functions, expression, compat) see wrong relative
       path. Needs a build-pipeline change (copy `lib/wasm/*.wasm`
@@ -809,7 +811,7 @@ Detail — Open Actions items 1–8:
       `unit`/`string`, acceleration of `algebra`/`integration`/
       `hypothesis`, sparse-tensor decompositions.
 
-- [ ] **WASM / Worker promotion playbook** — see
+- [x] ✅ (consumed by Wave 5, all 15 slices landed — polyFit/interp/window/sort/lgamma/sampling/centrality/CAS etc.) **WASM / Worker promotion playbook** — see
       [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](docs/roadmap/FUNCTION_GAPS_AUDIT.md)
       §B.1 (WASM-route, 14 candidates) and §B.2 (Worker-route, 9
       candidates). Each row is dispatch-ready: it names the specific
@@ -822,7 +824,7 @@ Detail — Open Actions items 1–8:
       sized chunks in the order suggested by §D rank rows 7, 8, 10,
       10b, 10c (the entries with B-class lineage).
 
-- [ ] **Gap-closure proposal — implementation plan dispatched** —
+- [x] ✅ (all tiers landed; 3.10c-2's Airy shipped via the Phase 6 AS fix — G2 closure verified 39/39 execute wasm) **Gap-closure proposal — implementation plan dispatched** —
       design at [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md).
       Operationalises the audit's §D sequencing table into 4 tiers
       with concrete file lists and slice boundaries:
@@ -899,7 +901,7 @@ Detail — Open Actions items 1–8:
             wired (forward-compat for 10c-2). 34 new TS + 8 WASM tests.
             Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
             WASM↔JS agreement 1e-14 (bit-identical algorithm path).
-      - [ ] **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
+      - [x] ✅ (shipped: Phase 6 truncation-cap fix, AS↔JS ≈4e-16; G2 closed 2026-07-04) **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
             + AssemblyScript parity port for Bessel. Bridge already has
             the `_as`-suffix probe wired; only the AS module + Airy
             implementation are missing. Blocked on consumer demand; Airy
@@ -912,7 +914,7 @@ Detail — Open Actions items 1–8:
       family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
       14 (typed/unit.ts — blocked on Unit type in core).
 
-- [ ] **Wave 4 gap-closure (audit refresh follow-up)** — design at
+- [x] ✅ (all slices landed) **Wave 4 gap-closure (audit refresh follow-up)** — design at
       [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md).
       Operationalises the §D Tier-4 ranks + §C cross-cutting items + 3.10c-2 sub-slice into 9 actionable slices across three
       implementation tiers:
@@ -989,10 +991,8 @@ Detail — Open Actions items 1–8:
             functions: 2150 → 2171 tests (+21).
 
       **Tier 4 deferred (rolled into Wave 5):**
-      - [ ] **Slice 4.10** — `typed/unit.ts` (rank 14). Blocked on
-            a real `Unit` type in `@danielsimonjr/mathts-core`.
-            Now part of Wave 5 Tier 5 (Slice 5.15, Opus).
-      - [ ] **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
+      - [x] ✅ (landed as Slice 5.15 `8131212`; fully superseded by the 2026-07-04 Unit MERGE) **Slice 4.10** — `typed/unit.ts` (rank 14).
+      - [x] ✅ (consumed by Wave 5) **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
             worker-route candidates from
             [`FUNCTION_GAPS_AUDIT.md §B.1`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#b1-wasm-route-playbook--pure-js-functions-worth-porting-to-a-wasm-kernel)
             and §B.2. Future wins awaiting consumer pressure; not
@@ -1011,7 +1011,7 @@ Detail — Open Actions items 1–8:
             `gpuMatmul` 4×4 smoke test green on Mesa lavapipe CI
             runner.
 
-- [ ] **Wave 5 gap-closure (B.1/B.2 backlog)** — design at
+- [x] ✅ (all 15 slices landed incl. 5.15 core Unit) **Wave 5 gap-closure (B.1/B.2 backlog)** — design at
       [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md).
       Picks up the 8 WASM-route + 7 worker-route candidates from
       the audit §B.1 / §B.2 plus the deferred sub-slices 4.7b
