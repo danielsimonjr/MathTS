@@ -17491,12 +17491,7 @@
         "description": "Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../factories/evaluate.js",
-            "imports": ["parse"]
-          }
-        ],
+        "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
           "normalize",
@@ -29546,18 +29541,10 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [
-        [
-          "functions/src/factories/evaluate.ts",
-          "functions/src/typed/index.ts",
-          "functions/src/typed/algebra.ts",
-          "functions/src/typed/polynomial-ideal.ts",
-          "functions/src/factories/evaluate.ts"
-        ]
-      ],
+      "runtime": [],
       "typeOnly": [],
-      "total": 1,
-      "runtimeCount": 1,
+      "total": 0,
+      "runtimeCount": 0,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -30721,7 +30708,7 @@
   "statistics": {
     "totalTypeScriptFiles": 863,
     "totalModules": 72,
-    "totalLinesOfCode": 160447,
+    "totalLinesOfCode": 160524,
     "totalExports": 4398,
     "totalClasses": 51,
     "totalInterfaces": 374,
@@ -30731,7 +30718,7 @@
     "totalConstants": 1398,
     "totalReExports": 1501,
     "totalTypeOnlyImports": 494,
-    "runtimeCircularDeps": 1,
+    "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 218

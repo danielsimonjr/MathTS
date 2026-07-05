@@ -11,7 +11,6 @@
  * Scope: small systems (the CAS surface's documented target). Iteration and
  * basis-size caps throw an honest error instead of returning wrong results.
  */
-import { parse } from '../factories/evaluate.js';
 
 /** One monomial: coefficient × Π varsᵢ^powersᵢ (dense exponent vector). */
 export interface Term {
@@ -78,29 +77,36 @@ function polyPow(a: Poly, n: number, nVars: number): Poly {
 }
 
 // ---------------------------------------------------------------------------
-// Exact AST → Poly
+// Exact expression → Poly (self-contained recursive-descent parser)
 // ---------------------------------------------------------------------------
-
-interface AstNode {
-  type: string;
-  op?: string;
-  fn?: string;
-  args?: AstNode[];
-  value?: unknown;
-  name?: string;
-  content?: AstNode;
-}
+//
+// Deliberately dependency-free: importing the factory-scope `parse` from
+// `factories/evaluate.js` created the runtime cycle
+//   factories/evaluate → typed/index → typed/algebra → polynomial-ideal → factories/evaluate
+// (the same cycle `cas.ts` avoids only by being excluded from typed/index).
+// The polynomial grammar is small enough to parse exactly here:
+//
+//   expr   := term (('+' | '-') term)*
+//   term   := factor (('*' | '/') factor)*
+//   factor := ('+' | '-')* atom ('^' unsigned-integer)?
+//   atom   := number | identifier | '(' expr ')'
+//
+// Division only by a nonzero numeric constant; exponents only non-negative
+// integer literals. Anything else throws — no fabricated coefficients.
 
 /**
- * Convert a parsed expression AST to a polynomial over `vars` — exactly.
- * Supports numeric constants, the given variables, `+ − * ^` (non-negative
- * integer constant exponents), unary minus, parentheses, and division by a
- * nonzero numeric constant. Anything else (other symbols, functions, variable
- * exponents) throws — no fabricated coefficients.
+ * Convert a polynomial expression string to a {@link Poly} over `vars` — exactly.
+ * Supports numeric constants, the given variables, `+ − * / ^`, unary minus and
+ * parentheses, with `/` restricted to nonzero numeric-constant divisors and `^`
+ * to non-negative integer literal exponents. Unknown symbols throw.
  */
 export function polyFromExpression(expr: string, vars: string[]): Poly {
   const nVars = vars.length;
   const varIndex = new Map(vars.map((v, i) => [v, i]));
+  let pos = 0;
+
+  const constPoly = (v: number): Poly =>
+    normalize([{ coeff: v, powers: new Array<number>(nVars).fill(0) }]);
 
   function constOf(p: Poly): number | null {
     if (p.length === 0) return 0;
@@ -108,65 +114,120 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
     return null;
   }
 
-  function walk(node: AstNode): Poly {
-    switch (node.type) {
-      case 'ConstantNode': {
-        const v = Number(node.value);
-        if (!Number.isFinite(v)) throw new Error(`polynomial parse: non-finite constant`);
-        return normalize([{ coeff: v, powers: new Array<number>(nVars).fill(0) }]);
-      }
-      case 'SymbolNode': {
-        const idx = varIndex.get(node.name ?? '');
-        if (idx === undefined) {
-          throw new Error(
-            `polynomial parse: unknown symbol '${node.name}' (declared variables: ${vars.join(', ')})`
-          );
-        }
-        const powers = new Array<number>(nVars).fill(0);
-        powers[idx] = 1;
-        return [{ coeff: 1, powers }];
-      }
-      case 'ParenthesisNode':
-        return walk(node.content as AstNode);
-      case 'OperatorNode': {
-        const args = (node.args ?? []).map((a) => a);
-        if (node.op === '-' && args.length === 1) return polyNeg(walk(args[0]));
-        if (node.op === '+' && args.length === 1) return walk(args[0]);
-        if (args.length !== 2) {
-          throw new Error(`polynomial parse: unsupported operator arity for '${node.op}'`);
-        }
-        const [l, r] = args;
-        switch (node.op) {
-          case '+':
-            return polyAdd(walk(l), walk(r));
-          case '-':
-            return polySub(walk(l), walk(r));
-          case '*':
-            return polyMul(walk(l), walk(r));
-          case '/': {
-            const denom = constOf(walk(r));
-            if (denom === null || Math.abs(denom) <= EPS) {
-              throw new Error('polynomial parse: division only by a nonzero numeric constant');
-            }
-            return normalize(walk(l).map((t) => ({ coeff: t.coeff / denom, powers: t.powers })));
-          }
-          case '^': {
-            const e = constOf(walk(r));
-            if (e === null || !Number.isInteger(e) || e < 0) {
-              throw new Error('polynomial parse: exponent must be a non-negative integer constant');
-            }
-            return polyPow(walk(l), e, nVars);
-          }
-          default:
-            throw new Error(`polynomial parse: unsupported operator '${node.op}'`);
-        }
-      }
-      default:
-        throw new Error(`polynomial parse: unsupported expression node '${node.type}'`);
-    }
+  const skipWs = (): void => {
+    while (pos < expr.length && /\s/.test(expr[pos])) pos++;
+  };
+  const peek = (): string => {
+    skipWs();
+    return expr[pos] ?? '';
+  };
+  const fail = (msg: string): never => {
+    throw new Error(`polynomial parse: ${msg} (at position ${pos} in '${expr}')`);
+  };
+
+  function parseNumber(): number {
+    skipWs();
+    const m = /^\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(expr.slice(pos));
+    if (!m) return fail('expected a number');
+    pos += m[0].length;
+    return Number(m[0]);
   }
 
-  return walk(parse(expr) as unknown as AstNode);
+  function parseAtom(): Poly {
+    const c = peek();
+    if (c === '(') {
+      pos++;
+      const inner = parseExpr();
+      if (peek() !== ')') fail("expected ')'");
+      pos++;
+      return inner;
+    }
+    if (/[0-9.]/.test(c)) return constPoly(parseNumber());
+    const m = /^[A-Za-z_][A-Za-z0-9_]*/.exec(expr.slice(pos));
+    if (m) {
+      pos += m[0].length;
+      const idx = varIndex.get(m[0]);
+      if (idx === undefined) {
+        return fail(`unknown symbol '${m[0]}' (declared variables: ${vars.join(', ')})`);
+      }
+      const powers = new Array<number>(nVars).fill(0);
+      powers[idx] = 1;
+      return [{ coeff: 1, powers }];
+    }
+    return fail(`unexpected character '${c}'`);
+  }
+
+  function parseFactor(): Poly {
+    let sign = 1;
+    while (peek() === '+' || peek() === '-') {
+      if (expr[pos] === '-') sign = -sign;
+      pos++;
+    }
+    let base = parseAtom();
+    if (peek() === '^') {
+      pos++;
+      // exponent: an unsigned integer literal (optionally parenthesized)
+      let e: number;
+      if (peek() === '(') {
+        pos++;
+        const inner = constOf(parseExpr());
+        if (peek() !== ')') fail("expected ')' after exponent");
+        pos++;
+        if (inner === null) return fail('exponent must be a numeric constant');
+        e = inner;
+      } else {
+        e = parseNumber();
+      }
+      if (!Number.isInteger(e) || e < 0) {
+        return fail('exponent must be a non-negative integer constant');
+      }
+      base = polyPow(base, e, nVars);
+    }
+    return sign === 1 ? base : polyNeg(base);
+  }
+
+  function parseTerm(): Poly {
+    let p = parseFactor();
+    for (;;) {
+      const c = peek();
+      if (c === '*') {
+        pos++;
+        p = polyMul(p, parseFactor());
+      } else if (c === '/') {
+        pos++;
+        const denom = constOf(parseFactor());
+        if (denom === null || Math.abs(denom) <= EPS) {
+          return fail('division only by a nonzero numeric constant');
+        }
+        p = normalize(p.map((t) => ({ coeff: t.coeff / denom, powers: t.powers })));
+      } else {
+        break;
+      }
+    }
+    return p;
+  }
+
+  function parseExpr(): Poly {
+    let p = parseTerm();
+    for (;;) {
+      const c = peek();
+      if (c === '+') {
+        pos++;
+        p = polyAdd(p, parseTerm());
+      } else if (c === '-') {
+        pos++;
+        p = polySub(p, parseTerm());
+      } else {
+        break;
+      }
+    }
+    return p;
+  }
+
+  const result = parseExpr();
+  skipWs();
+  if (pos !== expr.length) fail(`unexpected trailing input '${expr.slice(pos)}'`);
+  return result;
 }
 
 // ---------------------------------------------------------------------------

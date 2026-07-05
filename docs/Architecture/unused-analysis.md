@@ -267,7 +267,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `polyMul` (function) — 5 in-file refs
 - `polyReduce` (function) — 3 in-file refs
 - `Term` (interface) — 2 in-file refs
-- `Poly` (type) — 37 in-file refs
+- `Poly` (type) — 42 in-file refs
 
 ### `functions/src/utils/array.ts`
 

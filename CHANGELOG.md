@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — runtime import cycle introduced by polynomial-ideal.ts (caught by DGT)
+
+The pre-G5 DGT run found 1 runtime cycle (previously 0): `factories/evaluate → typed/index
+→ typed/algebra → polynomial-ideal → factories/evaluate`. `cas.ts` avoids this exact loop
+only by being excluded from `typed/index`; the new `polynomial-ideal.ts` (B-5) re-created
+it through `algebra.ts` by importing the factory-scope `parse`. Root fix: the polynomial
+grammar is tiny, so `polyFromExpression` now uses a **self-contained recursive-descent
+parser** (numbers, declared variables, `+ − * / ^`, unary minus, parentheses; `/` only by
+nonzero constants, `^` only non-negative integer literals) — zero imports, cycle
+structurally impossible, everything stays synchronous. All 228 cas/algebra tests + the 12
+Gröbner/eliminate oracle pins pass unchanged; cycles back to **0/0**.
+
 ### Fixed (2026-07-05) — B-5 upstream audit: groebnerBasis + eliminate were fakes; Unit gains astronomical units
 
 Audited all 61 upstream mathjs drift commits since the dead sync (verdicts:

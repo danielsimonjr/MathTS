@@ -7780,11 +7780,6 @@ graph LR
 
 ### `functions/src/typed/polynomial-ideal.ts` - Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../factories/evaluate.js` | `parse` | Import |
-
 **Exports:**
 
 - Interfaces: `Term`
@@ -12754,18 +12749,7 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**1 circular dependencies detected:**
-
-- **Runtime cycles**: 1 (require attention)
-- **Type-only cycles**: 0 (safe, no runtime impact)
-
-### Runtime Circular Dependencies
-
-These cycles involve runtime imports and may cause issues:
-
-- functions/src/factories/evaluate.ts -> functions/src/typed/index.ts -> functions/src/typed/algebra.ts -> functions/src/typed/polynomial-ideal.ts -> functions/src/factories/evaluate.ts
-
----
+## **No circular dependencies detected.**
 
 <a id="visual-dependency-graph"></a>
 
@@ -13465,7 +13449,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 863    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 160447 |
+| Total Lines of Code     | 160524 |
 | Total Exports           | 4398   |
 | Total Re-exports        | 1501   |
 | Total Classes           | 51     |
@@ -13474,7 +13458,7 @@ graph TD
 | Total Type Guards       | 155    |
 | Total Enums             | 0      |
 | Type-only Imports       | 494    |
-| Runtime Circular Deps   | 1      |
+| Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
 ---
