@@ -385,6 +385,11 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   `ArgumentsError.ts`). Orphaned 11 → 2 (both kept: test-reachable `core/types/index.ts`, deliberate
   `workerpool-browser-shim.ts`). All gates green.
 
+- ✅ **[Expression package FULLY integrated 2026-07-05]** Final step after transforms + embeddedDocs:
+  deleted the last 3 dead-duplicate files `function/{compile,evaluate,help}.ts` (mathjs-lineage factories
+  superseded by the active `compiler`/`evaluator`/`Help.ts`; unwireable — name-collide with evaluator's
+  `createEvaluate`). Test pruned to its live `createParser` block. Expression dormant files: 0.
+
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
 Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,

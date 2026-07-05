@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 12
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 9
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
-  - **Test-only (exercised by a test, ships nothing)**: 10
+  - **Test-only (exercised by a test, ships nothing)**: 7
 - **Potentially unused exports**: 231
   - **Unreferenced anywhere (deletion candidates)**: 0
   - **Referenced in-module (type contracts / helpers backing live exports)**: 231
@@ -38,12 +38,6 @@ directly. Not dead; not shipped. No action needed.
 - `core/src/types.ts`
 - `core/src/types/matrix/Range.ts`
 - `core/src/utils.ts`
-
-### `expression` (3)
-
-- `expression/src/function/compile.ts`
-- `expression/src/function/evaluate.ts`
-- `expression/src/function/help.ts`
 
 ### `functions` (2)
 

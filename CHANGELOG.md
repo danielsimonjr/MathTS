@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed (2026-07-05) — expression package fully integrated: 3 superseded factory duplicates deleted
+
+Answering "is the expression package fully integrated?": it wasn't — three files remained in a
+dead-duplicate state. `expression/src/function/{compile,evaluate,help}.ts` (`createCompile`/
+`createEvaluate`/`createHelp`) were mathjs-lineage dependency-injection factories duplicating the
+active `compiler/compile.ts`, `evaluator/evaluate.ts` (a 228-line superset), and `Help.ts` — the
+MathTS-native implementations (positional signatures) that `functions`/`workbook` actually import.
+They were unreachable from the package index and could not even be wired without colliding with the
+`createEvaluate` already exported by `evaluator/index.ts`; only one test touched them. Deleted, with
+that test pruned to its surviving `createParser` block (parser.ts stays — it is live, used by the
+`Parser` class). **The expression package now has zero dormant files** — every source file is
+reachable from a public entry point. Gates: expression build/typecheck clean, full test 44/44,
+eslint clean, cycles 0/0, published surface unchanged.
+
 ### Added/Changed (2026-07-05) — DGT (dependency-graph tool) now reports DORMANT FILES + 4 reachability fixes; 8 dead files deleted
 
 The dependency-graph tool (`npm run docs:deps`) gained a **Dormant Files** section in
