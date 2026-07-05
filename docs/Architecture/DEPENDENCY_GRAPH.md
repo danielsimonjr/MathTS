@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-04
+**Version**: 0.1.0 | **Last Updated**: 2026-07-05
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -773,7 +773,7 @@ graph LR
 **Exports:**
 
 - Functions: `getPrefix`
-- Constants: `SI_PREFIXES`, `SI_PREFIX_KEYS`, `BEST_PREFIXES`
+- Constants: `SI_PREFIXES`, `BEST_PREFIXES`
 
 ---
 
@@ -3106,7 +3106,7 @@ graph LR
 
 **Exports:**
 
-- Constants: `createNthRoot`, `createNthRootNumber`
+- Constants: `createNthRoot`
 
 ---
 
@@ -4016,7 +4016,6 @@ graph LR
 **Exports:**
 
 - Classes: `ArgumentsError`
-- Functions: `createArgumentsError`
 
 ---
 
@@ -4033,7 +4032,6 @@ graph LR
 **Exports:**
 
 - Classes: `IndexError`
-- Functions: `createIndexError`
 
 ---
 
@@ -4049,17 +4047,11 @@ graph LR
 
 ## Functions/expression Dependencies
 
-### `functions/src/expression/operators.ts` - Returns the first non-parenthesis internal node, but only
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../utils/object.js` | `hasOwnProperty` | Import |
-| `../utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
+### `functions/src/expression/operators.ts` - Get the operator associated with a function name.
 
 **Exports:**
 
-- Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
+- Functions: `getOperator`
 - Constants: `properties`
 
 ---
@@ -5718,7 +5710,7 @@ graph LR
 
 **Exports:**
 
-- Constants: `createCompareText`, `createCompareTextNumber`
+- Constants: `createCompareText`
 
 ---
 
@@ -5784,7 +5776,7 @@ graph LR
 
 **Exports:**
 
-- Constants: `createEqualScalar`, `createEqualScalarNumber`
+- Constants: `createEqualScalar`
 
 ---
 
@@ -6952,16 +6944,10 @@ graph LR
 |---------|--------|
 | `decimal.js` | `Decimal` |
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/factory.js` | `factory` | Import |
-
 **Exports:**
 
-- Interfaces: `BigNumberJSON`, `ConfigChangeEvent`, `BigNumberClass`, `BigNumberInstance`
+- Interfaces: `BigNumberJSON`, `BigNumberClass`, `BigNumberInstance`
 - Types: `BigNumber`
-- Constants: `createBigNumberClass`
 
 ---
 
@@ -7004,17 +6990,9 @@ graph LR
 |---------|--------|
 | `complex.js` | `Complex, ComplexJs` |
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/number.js` | `format` | Import |
-| `../../utils/is.js` | `isNumber, isUnit` | Import |
-| `../../utils/factory.js` | `factory` | Import |
-
 **Exports:**
 
 - Interfaces: `ComplexJSON`, `PolarCoordinates`, `ComplexFormatOptions`, `Complex`, `PolarInput`, `AbsArgInput`, `ComplexConstructor`
-- Constants: `createComplexClass`
 
 ---
 
@@ -7099,8 +7077,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `DenseMatrixJSON`, `SparseMatrixJSON`, `ImmutableDenseMatrixJSON`, `RangeJSON`, `IndexJSON`, `MatrixEntry`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeFormatOptions`, `RangeInterface`
-- Types: `MathNumericValue`, `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`, `RangeForEachCallback`, `RangeMapCallback`
+- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `ImmutableDenseMatrixJSON`, `RangeJSON`, `IndexJSON`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeFormatOptions`, `RangeInterface`
+- Types: `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`, `RangeForEachCallback`, `RangeMapCallback`
 
 ---
 
@@ -8036,8 +8014,8 @@ graph LR
 **Exports:**
 
 - Interfaces: `IdentifiedValue`
-- Types: `NestedArray`, `ArrayOrScalar`
-- Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
+- Types: `NestedArray`
+- Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
 
 ---
 
@@ -8184,7 +8162,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -8345,7 +8323,7 @@ graph LR
 **Exports:**
 
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
-- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
+- Functions: `createEmptyMap`, `createMap`, `assign`, `isObjectWrappingMap`
 
 ---
 
@@ -8366,7 +8344,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `noBignumber`, `noFraction`, `noMatrix`, `noIndex`, `noSubset`
+- Functions: `noBignumber`, `noFraction`, `noMatrix`
 
 ---
 
@@ -8473,7 +8451,7 @@ graph LR
 **Exports:**
 
 - Types: `GeneralFormatOptions`
-- Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
+- Functions: `format`, `stringify`, `compareText`
 
 ---
 
@@ -8643,7 +8621,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJDispatch`, `besselYDispatch`, `lgammaJS`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetCarlsonWasm`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`
+- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJDispatch`, `besselYDispatch`, `lgammaJS`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`
 - Constants: `WASM_SPECIAL_THRESHOLD`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `airyAiDispatch`, `airyBiDispatch`, `lgammaDispatch`, `ellipticKDispatch`, `ellipticEDispatch`
 
 ---
@@ -8660,7 +8638,6 @@ graph LR
 
 - Classes: `WasmLoader`
 - Interfaces: `WasmModule`, `LoadingMetrics`
-- Functions: `initWasm`
 - Constants: `wasmLoader`
 
 ---
@@ -11548,7 +11525,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `IdentifiedValue`
-- Types: `NestedArray`, `ArrayOrScalar`
+- Types: `NestedArray`
 - Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
 
 ---
@@ -11659,7 +11636,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `escapeMathML`, `toMathMLSymbol`, `numberToMathML`, `constantToMathML`, `operatorPrecedence`, `inlineOperator`, `parenthesizeLower`, `mathMLDocument`, `mathMLError`
+- Functions: `escapeMathML`, `toMathMLSymbol`, `numberToMathML`, `constantToMathML`, `inlineOperator`, `parenthesizeLower`, `mathMLDocument`, `mathMLError`
 
 ---
 
@@ -12646,8 +12623,7 @@ graph LR
 **Exports:**
 
 - Classes: `Complex`
-- Functions: `complex`, `complexFromPolar`, `complexFromReal`, `complexFromImaginary`
-- Constants: `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_I`, `COMPLEX_NEG_ONE`
+- Functions: `complex`, `complexFromPolar`
 
 ---
 
@@ -12714,23 +12690,23 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
-| `functions/src/utils/factory`                          | 2 files      | 262 files  |
+| `functions/src/utils/factory`                          | 2 files      | 260 files  |
 | `expression/src/embeddedDocs/embeddedDocs`             | 253 files    | 1 file     |
 | `functions/src/factories/index`                        | 243 files    | 8 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
-| `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
+| `functions/src/utils/is`                               | 0 files      | 61 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
-| `functions/src/utils/number`                           | 0 files      | 48 files   |
+| `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 44 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `functions/src/types`                                  | 4 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
-| `functions/src/utils/object`                           | 0 files      | 30 files   |
-| `functions/src/type/bignumber/BigNumber`               | 1 file       | 27 files   |
+| `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/typed/index`                            | 26 files     | 2 files    |
+| `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `expression/src/index`                                 | 27 files     | 0 files    |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
 | `expression/src/utils/is`                              | 0 files      | 23 files   |
@@ -12743,12 +12719,12 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
-| `functions/src/type/complex/Complex`                   | 3 files      | 15 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
+| `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
 | `workbook/src/cli`                                     | 15 files     | 0 files    |
 | `functions/src/bitwise/rightLogShift`                  | 13 files     | 1 file     |
 | `functions/src/type/matrix/utils/matAlgo02xDS0`        | 3 files      | 11 files   |
@@ -13461,13 +13437,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 862    |
 | Total Modules           | 72     |
-| Total Lines of Code     | 160542 |
-| Total Exports           | 4415   |
+| Total Lines of Code     | 159864 |
+| Total Exports           | 4388   |
 | Total Re-exports        | 1501   |
 | Total Classes           | 51     |
-| Total Interfaces        | 377    |
-| Total Functions         | 1493   |
-| Total Type Guards       | 156    |
+| Total Interfaces        | 373    |
+| Total Functions         | 1476   |
+| Total Type Guards       | 155    |
 | Total Enums             | 0      |
 | Type-only Imports       | 494    |
 | Runtime Circular Deps   | 0      |
@@ -13475,5 +13451,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-04
+_Last Updated_: 2026-07-05
 _Version_: 0.1.0

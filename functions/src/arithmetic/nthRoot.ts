@@ -64,9 +64,7 @@ export const createNthRoot = /* #__PURE__ */ factory(
     // (signature, callback) call signature here.
     const referTo = typed.referTo as unknown as (
       signature: string,
-      callback: (
-        ...refs: Array<(...args: unknown[]) => unknown>
-      ) => (...args: never[]) => unknown
+      callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
     ) => (...args: unknown[]) => unknown;
 
     /**
@@ -243,16 +241,5 @@ export const createNthRoot = /* #__PURE__ */ factory(
       x = a.isNeg() ? x.neg() : x;
       return new BigNumber((inv ? one.div(x) : x).toPrecision(precision));
     }
-  }
-);
-
-export const createNthRootNumber = /* #__PURE__ */ factory(
-  name,
-  ['typed'] as const,
-  ({ typed }: { typed: TypedFunction }): TypedFunction => {
-    return typed(name, {
-      number: nthRootNumber,
-      'number, number': nthRootNumber,
-    }) as TypedFunction;
   }
 );

@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-04",
+    "lastUpdated": "2026-07-05",
     "totalFiles": 862,
     "totalModules": 72,
-    "totalExports": 4415
+    "totalExports": 4388
   },
   "entryPoints": [
     {
@@ -1900,9 +1900,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["SI_PREFIXES", "SI_PREFIX_KEYS", "BEST_PREFIXES", "getPrefix"],
+        "exports": ["SI_PREFIXES", "BEST_PREFIXES", "getPrefix"],
         "functions": ["getPrefix"],
-        "constants": ["SI_PREFIXES", "SI_PREFIX_KEYS", "BEST_PREFIXES"]
+        "constants": ["SI_PREFIXES", "BEST_PREFIXES"]
       },
       "core/src/types/unit.ts": {
         "description": "The core `Unit` — now the single, feature-complete implementation under",
@@ -6596,8 +6596,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createNthRoot", "createNthRootNumber"],
-        "constants": ["createNthRoot", "createNthRootNumber"]
+        "exports": ["createNthRoot"],
+        "constants": ["createNthRoot"]
       },
       "functions/src/arithmetic/nthRoots.ts": {
         "description": "Each function here returns a real multiple of i as a Complex value.",
@@ -8781,9 +8781,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["createArgumentsError", "ArgumentsError"],
-        "classes": ["ArgumentsError"],
-        "functions": ["createArgumentsError"]
+        "exports": ["ArgumentsError"],
+        "classes": ["ArgumentsError"]
       },
       "functions/src/error/DimensionError.ts": {
         "description": "Create a range error with the message:",
@@ -8800,9 +8799,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["createIndexError", "IndexError"],
-        "classes": ["IndexError"],
-        "functions": ["createIndexError"]
+        "exports": ["IndexError"],
+        "classes": ["IndexError"]
       },
       "functions/src/error/MathjsError.ts": {
         "description": "Custom error type for Mathjs errors",
@@ -8816,28 +8814,13 @@
     },
     "functions/expression": {
       "functions/src/expression/operators.ts": {
-        "description": "Returns the first non-parenthesis internal node, but only",
+        "description": "Get the operator associated with a function name.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../utils/object.js",
-            "imports": ["hasOwnProperty"]
-          },
-          {
-            "file": "../utils/is.js",
-            "imports": ["isConstantNode", "isParenthesisNode", "rule2Node"]
-          }
-        ],
+        "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": [
-          "properties",
-          "getPrecedence",
-          "getAssociativity",
-          "isAssociativeWith",
-          "getOperator"
-        ],
-        "functions": ["getPrecedence", "getAssociativity", "isAssociativeWith", "getOperator"],
+        "exports": ["properties", "getOperator"],
+        "functions": ["getOperator"],
         "constants": ["properties"]
       }
     },
@@ -12908,8 +12891,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createCompareText", "createCompareTextNumber"],
-        "constants": ["createCompareText", "createCompareTextNumber"]
+        "exports": ["createCompareText"],
+        "constants": ["createCompareText"]
       },
       "functions/src/relational/compareUnits.ts": {
         "description": "Type definitions for compareUnits",
@@ -13024,8 +13007,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createEqualScalar", "createEqualScalarNumber"],
-        "constants": ["createEqualScalar", "createEqualScalarNumber"]
+        "exports": ["createEqualScalar"],
+        "constants": ["createEqualScalar"]
       },
       "functions/src/relational/equalText.ts": {
         "description": "Check equality of two strings. Comparison is case sensitive.",
@@ -15140,16 +15123,10 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../../utils/factory.js",
-            "imports": ["factory"]
-          }
-        ],
+        "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["createBigNumberClass"],
-        "interfaces": ["BigNumberJSON", "ConfigChangeEvent", "BigNumberClass", "BigNumberInstance"],
-        "constants": ["createBigNumberClass"]
+        "exports": [],
+        "interfaces": ["BigNumberJSON", "BigNumberClass", "BigNumberInstance"]
       },
       "functions/src/type/chain/Chain.ts": {
         "description": "JSON representation of a Chain",
@@ -15210,22 +15187,9 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../../utils/number.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../../utils/is.js",
-            "imports": ["isNumber", "isUnit"]
-          },
-          {
-            "file": "../../utils/factory.js",
-            "imports": ["factory"]
-          }
-        ],
+        "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["createComplexClass"],
+        "exports": [],
         "interfaces": [
           "ComplexJSON",
           "PolarCoordinates",
@@ -15234,8 +15198,7 @@
           "PolarInput",
           "AbsArgInput",
           "ComplexConstructor"
-        ],
-        "constants": ["createComplexClass"]
+        ]
       },
       "functions/src/type/matrix/FibonacciHeap.ts": {
         "description": "Comparison function type for heap operations.",
@@ -15385,12 +15348,9 @@
           "DenseMatrixInterface",
           "SparseMatrixInterface",
           "MatrixFormatOptions",
-          "DenseMatrixJSON",
-          "SparseMatrixJSON",
           "ImmutableDenseMatrixJSON",
           "RangeJSON",
           "IndexJSON",
-          "MatrixEntry",
           "DenseMatrixConstructorData",
           "SparseMatrixConstructorData",
           "ImmutableDenseMatrixConstructorData",
@@ -18252,7 +18212,6 @@
           "generalize",
           "getArrayDataType",
           "last",
-          "initial",
           "concat",
           "broadcastSizes",
           "checkBroadcastingRules",
@@ -18286,7 +18245,6 @@
           "generalize",
           "getArrayDataType",
           "last",
-          "initial",
           "concat",
           "broadcastSizes",
           "checkBroadcastingRules",
@@ -18555,7 +18513,6 @@
           "isBlockNode",
           "isConditionalNode",
           "isConstantNode",
-          "rule2Node",
           "isFunctionAssignmentNode",
           "isFunctionNode",
           "isIndexNode",
@@ -18632,7 +18589,6 @@
           "isBlockNode",
           "isConditionalNode",
           "isConstantNode",
-          "rule2Node",
           "isFunctionAssignmentNode",
           "isFunctionNode",
           "isIndexNode",
@@ -18918,14 +18874,13 @@
         "exports": [
           "createEmptyMap",
           "createMap",
-          "toObject",
           "assign",
           "isObjectWrappingMap",
           "ObjectWrappingMap",
           "PartitionedMap"
         ],
         "classes": ["ObjectWrappingMap", "PartitionedMap"],
-        "functions": ["createEmptyMap", "createMap", "toObject", "assign", "isObjectWrappingMap"]
+        "functions": ["createEmptyMap", "createMap", "assign", "isObjectWrappingMap"]
       },
       "functions/src/utils/node.ts": {
         "description": "Type definitions for Math.js AST nodes",
@@ -19000,8 +18955,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["noBignumber", "noFraction", "noMatrix", "noIndex", "noSubset"],
-        "functions": ["noBignumber", "noFraction", "noMatrix", "noIndex", "noSubset"]
+        "exports": ["noBignumber", "noFraction", "noMatrix"],
+        "functions": ["noBignumber", "noFraction", "noMatrix"]
       },
       "functions/src/utils/number.ts": {
         "description": "Number formatting, parsing, and Math polyfills.",
@@ -19284,8 +19239,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["endsWith", "format", "stringify", "escape", "compareText"],
-        "functions": ["endsWith", "format", "stringify", "escape", "compareText"]
+        "exports": ["format", "stringify", "compareText"],
+        "functions": ["format", "stringify", "compareText"]
       },
       "functions/src/utils/switch.ts": {
         "description": "Transpose a matrix",
@@ -19708,7 +19663,6 @@
           "ellipticFIncompleteDispatch",
           "ellipticEIncompleteDispatch",
           "ellipticPiIncompleteDispatch",
-          "resetCarlsonWasm",
           "resetBesselWasm",
           "resetAiryWasm",
           "resetEllipticWasm",
@@ -19749,7 +19703,6 @@
           "ellipticFIncompleteDispatch",
           "ellipticEIncompleteDispatch",
           "ellipticPiIncompleteDispatch",
-          "resetCarlsonWasm",
           "resetBesselWasm",
           "resetAiryWasm",
           "resetEllipticWasm",
@@ -19785,10 +19738,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["wasmLoader", "initWasm", "WasmLoader"],
+        "exports": ["wasmLoader", "WasmLoader"],
         "classes": ["WasmLoader"],
         "interfaces": ["WasmModule", "LoadingMetrics"],
-        "functions": ["initWasm"],
         "constants": ["wasmLoader"]
       }
     },
@@ -24570,7 +24522,6 @@
           "toMathMLSymbol",
           "numberToMathML",
           "constantToMathML",
-          "operatorPrecedence",
           "inlineOperator",
           "parenthesizeLower",
           "mathMLDocument",
@@ -24581,7 +24532,6 @@
           "toMathMLSymbol",
           "numberToMathML",
           "constantToMathML",
-          "operatorPrecedence",
           "inlineOperator",
           "parenthesizeLower",
           "mathMLDocument",
@@ -29255,20 +29205,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": [
-          "COMPLEX_ZERO",
-          "COMPLEX_ONE",
-          "COMPLEX_I",
-          "COMPLEX_NEG_ONE",
-          "complex",
-          "complexFromPolar",
-          "complexFromReal",
-          "complexFromImaginary",
-          "Complex"
-        ],
+        "exports": ["complex", "complexFromPolar", "Complex"],
         "classes": ["Complex"],
-        "functions": ["complex", "complexFromPolar", "complexFromReal", "complexFromImaginary"],
-        "constants": ["COMPLEX_ZERO", "COMPLEX_ONE", "COMPLEX_I", "COMPLEX_NEG_ONE"]
+        "functions": ["complex", "complexFromPolar"]
       }
     },
     "compat": {
@@ -30730,19 +30669,19 @@
   "statistics": {
     "totalTypeScriptFiles": 862,
     "totalModules": 72,
-    "totalLinesOfCode": 160542,
-    "totalExports": 4415,
+    "totalLinesOfCode": 159864,
+    "totalExports": 4388,
     "totalClasses": 51,
-    "totalInterfaces": 377,
-    "totalFunctions": 1493,
-    "totalTypeGuards": 156,
+    "totalInterfaces": 373,
+    "totalFunctions": 1476,
+    "totalTypeGuards": 155,
     "totalEnums": 0,
-    "totalConstants": 1408,
+    "totalConstants": 1398,
     "totalReExports": 1501,
     "totalTypeOnlyImports": 494,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 243
+    "unusedExportsCount": 210
   }
 }

@@ -214,24 +214,6 @@ export function createMap<K = unknown, V = unknown>(
 }
 
 /**
- * Unwraps a map into an object.
- *
- * @param map - Map to convert to object
- * @returns Plain object
- */
-export function toObject<V = unknown>(map: Map<unknown, V>): Record<string, V> {
-  if (map instanceof ObjectWrappingMap) {
-    return map.wrappedObject;
-  }
-  const object: Record<string, V> = {};
-  for (const key of map.keys()) {
-    const value = map.get(key)!;
-    setSafeProperty(object, key as string, value);
-  }
-  return object;
-}
-
-/**
  * Copies the contents of key-value pairs from each `objects` in to `map`.
  *
  * Object is `objects` can be a `Map` or object.

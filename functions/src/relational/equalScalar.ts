@@ -55,15 +55,3 @@ export const createEqualScalar = /* #__PURE__ */ factory(
     );
   }
 );
-
-export const createEqualScalarNumber = factory(
-  name,
-  ['typed', 'config'],
-  ({ typed, config }: { typed: TypedFunction; config: ConfigOptions }) => {
-    return typed(name, {
-      'number, number': function (x: number, y: number): boolean {
-        return nearlyEqual(x, y, config.relTol, config.absTol);
-      },
-    });
-  }
-);

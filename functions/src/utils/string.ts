@@ -23,17 +23,6 @@ interface FormattableObject {
 }
 
 /**
- * Check if a text ends with a certain string.
- * @param {string} text
- * @param {string} search
- */
-export function endsWith(text: string, search: string): boolean {
-  const start = text.length - search.length;
-  const end = text.length;
-  return text.substring(start, end) === search;
-}
-
-/**
  * Format a value of any type into a string.
  *
  * Usage:
@@ -167,23 +156,6 @@ const controlCharacters = {
   '\r': '\\r',
   '\t': '\\t',
 };
-
-/**
- * Escape special HTML characters
- * @param {*} value
- * @return {string}
- */
-export function escape(value: unknown): string {
-  let text = String(value);
-  text = text
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  return text;
-}
 
 /**
  * Recursively format an n-dimensional matrix

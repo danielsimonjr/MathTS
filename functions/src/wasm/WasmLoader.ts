@@ -1346,10 +1346,3 @@ export class WasmLoader {
  * Global WASM loader instance
  */
 export const wasmLoader = WasmLoader.getInstance();
-
-/**
- * Initialize WASM module (call once at startup)
- */
-export async function initWasm(wasmPath?: string): Promise<WasmModule> {
-  return wasmLoader.load(wasmPath);
-}

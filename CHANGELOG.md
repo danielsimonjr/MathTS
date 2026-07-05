@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed (2026-07-04) — dead-export sweep: all 31 deletion candidates gone (WS-3 P2 complete)
+
+Deleted every export the fixed unused-analysis flagged as unreferenced-anywhere, plus 4
+cascade orphans surfaced by re-running the analysis after each pass (~630 LOC across core,
+functions, expression, assembly). Each symbol was verified with a second method (repo-wide
+import grep incl. tests/docs + factory name-string dynamic-dispatch check) before deletion:
+mathjs number-only-bundle factory remnants (`createNthRootNumber`/`createCompareTextNumber`/
+`createEqualScalarNumber`/`createBigNumberClass` [61 LOC]/`createComplexClass` [204 LOC]/
+`createArgumentsError`/`createIndexError`), the dead `functions/src/expression/operators.ts`
+precedence/associativity chain (`getPrecedence`/`getAssociativity`/`isAssociativeWith`/
+`unwrapParen` — the live copy is expression's own `operators.ts`), orphan utils (`initial`,
+`toObject`, `noIndex`/`noSubset`, `endsWith`/`escape`, `operatorPrecedence`, functions'
+`rule2Node`), unused JSON/type contracts (`DenseMatrixJSON`/`SparseMatrixJSON`/`MatrixEntry`/
+`MathNumericValue`/`ArrayOrScalar`×2), `SI_PREFIX_KEYS`, `resetCarlsonWasm`, functions'
+`initWasm`, and 6 AssemblyScript complex helpers. None were public API. Gates: build 22/22,
+test 44/44, typecheck 28/28, `build:wasm` + AS tests green (worst score 1.78e-15).
+**Unused-analysis deletion candidates: 31 → 0.**
+
 ### Changed (2026-07-04) — DGT: `bin`/entry files are reachability roots (5th fix)
 
 `workbook/src/cli.ts` (the `mtsw` bin entry) was unreachable from `src/index.ts`, so the

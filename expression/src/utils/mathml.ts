@@ -7,27 +7,74 @@
 
 /** Symbol-name → glyph (the MathML analog of latexSymbols). */
 const mathmlSymbols: Record<string, string> = {
-  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', zeta: 'ζ', eta: 'η',
-  theta: 'θ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ',
-  omicron: 'ο', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'φ',
-  chi: 'χ', psi: 'ψ', omega: 'ω',
-  Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ',
-  Upsilon: 'Υ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω',
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  delta: 'δ',
+  epsilon: 'ε',
+  zeta: 'ζ',
+  eta: 'η',
+  theta: 'θ',
+  iota: 'ι',
+  kappa: 'κ',
+  lambda: 'λ',
+  mu: 'μ',
+  nu: 'ν',
+  xi: 'ξ',
+  omicron: 'ο',
+  pi: 'π',
+  rho: 'ρ',
+  sigma: 'σ',
+  tau: 'τ',
+  upsilon: 'υ',
+  phi: 'φ',
+  chi: 'χ',
+  psi: 'ψ',
+  omega: 'ω',
+  Gamma: 'Γ',
+  Delta: 'Δ',
+  Theta: 'Θ',
+  Lambda: 'Λ',
+  Xi: 'Ξ',
+  Pi: 'Π',
+  Sigma: 'Σ',
+  Upsilon: 'Υ',
+  Phi: 'Φ',
+  Psi: 'Ψ',
+  Omega: 'Ω',
 };
 
 /** Operator precedence (higher binds tighter) — for adding visual parens. */
 const PRECEDENCE: Record<string, number> = {
-  equal: 1, unequal: 1, smaller: 1, larger: 1, smallerEq: 1, largerEq: 1,
-  add: 2, subtract: 2,
-  multiply: 3, divide: 3, dotMultiply: 3, dotDivide: 3, mod: 3,
-  unaryMinus: 4, unaryPlus: 4,
+  equal: 1,
+  unequal: 1,
+  smaller: 1,
+  larger: 1,
+  smallerEq: 1,
+  largerEq: 1,
+  add: 2,
+  subtract: 2,
+  multiply: 3,
+  divide: 3,
+  dotMultiply: 3,
+  dotDivide: 3,
+  mod: 3,
+  unaryMinus: 4,
+  unaryPlus: 4,
   pow: 5,
 };
 
 /** Operator fn → inline glyph (used between operands). */
 const INLINE_OP: Record<string, string> = {
-  add: '+', subtract: '-', equal: '=', unequal: '≠',
-  smaller: '<', larger: '>', smallerEq: '≤', largerEq: '≥', mod: 'mod',
+  add: '+',
+  subtract: '-',
+  equal: '=',
+  unequal: '≠',
+  smaller: '<',
+  larger: '>',
+  smallerEq: '≤',
+  largerEq: '≥',
+  mod: 'mod',
 };
 
 /** Escape text for a MathML/HTML text node. */
@@ -75,11 +122,6 @@ export function constantToMathML(value: unknown): string {
   return `<mtext>${escapeMathML(value === null ? 'null' : String(value))}</mtext>`;
 }
 
-/** Precedence of an operator fn (0 if unknown). */
-export function operatorPrecedence(fn: string): number {
-  return PRECEDENCE[fn] ?? 0;
-}
-
 /** The inline `<mo>` glyph for a binary operator fn (falls back to its `op`). */
 export function inlineOperator(fn: string, op: string): string {
   return `<mo>${escapeMathML(INLINE_OP[fn] ?? op)}</mo>`;
@@ -87,7 +129,11 @@ export function inlineOperator(fn: string, op: string): string {
 
 /** Wrap an already-rendered child fragment in parens when it is a lower-precedence
  * operator under `parentFn` (so `(a+b)*c` reads correctly inline). */
-export function parenthesizeLower(childFragment: string, childFn: string | undefined, parentFn: string): string {
+export function parenthesizeLower(
+  childFragment: string,
+  childFn: string | undefined,
+  parentFn: string
+): string {
   if (childFn !== undefined) {
     const cp = PRECEDENCE[childFn] ?? 0;
     const pp = PRECEDENCE[parentFn] ?? 0;

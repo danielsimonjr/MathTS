@@ -9,11 +9,3 @@ export function noFraction(): never {
 export function noMatrix(): never {
   throw new Error('No "matrix" implementation available');
 }
-
-export function noIndex(): never {
-  throw new Error('No "index" implementation available');
-}
-
-export function noSubset(): never {
-  throw new Error('No "matrix" implementation available');
-}

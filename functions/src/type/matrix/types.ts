@@ -56,12 +56,6 @@ export interface FractionLike {
 // =============================================================================
 
 /**
- * Core numeric types supported by mathjs matrices.
- * Used for specific operations that only work on numeric values.
- */
-export type MathNumericValue = number | BigNumberLike | ComplexLike | FractionLike;
-
-/**
  * General matrix element value type.
  *
  * INTENTIONAL ANY: Matrix elements can be any type due to typed-function's
@@ -350,28 +344,6 @@ export interface MatrixFormatOptions {
 // =============================================================================
 
 /**
- * JSON representation of a DenseMatrix
- */
-export interface DenseMatrixJSON<T = MatrixValue> {
-  mathjs: 'DenseMatrix';
-  data: DenseMatrixData<T>;
-  size: number[];
-  datatype?: DataType;
-}
-
-/**
- * JSON representation of a SparseMatrix
- */
-export interface SparseMatrixJSON<T = MatrixValue> {
-  mathjs: 'SparseMatrix';
-  values?: T[];
-  index: number[];
-  ptr: number[];
-  size: [number, number];
-  datatype?: DataType;
-}
-
-/**
  * JSON representation of an ImmutableDenseMatrix
  */
 export interface ImmutableDenseMatrixJSON<T = MatrixValue> {
@@ -404,14 +376,6 @@ export interface IndexJSON {
 // =============================================================================
 // Matrix Entry Type (for iteration)
 // =============================================================================
-
-/**
- * Entry yielded when iterating over a matrix
- */
-export interface MatrixEntry<T = MatrixValue> {
-  value: T;
-  index: number[];
-}
 
 // =============================================================================
 // Constructor/Factory Types

@@ -58,8 +58,3 @@ export class IndexError extends RangeError {
     }
   }
 }
-
-// Backward compatibility - allow calling as a function (with new operator)
-export function createIndexError(index: number, min?: number, max?: number): IndexError {
-  return new IndexError(index, min, max);
-}

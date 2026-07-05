@@ -1,13 +1,13 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-04
+**Generated**: 2026-07-05
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 243
-  - **Unreferenced anywhere (deletion candidates)**: 31
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 212
+- **Potentially unused exports**: 210
+  - **Unreferenced anywhere (deletion candidates)**: 0
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 210
 
 ## Potentially Unused Files
 
@@ -17,94 +17,6 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
-
-### `core/src/types/unit-prefixes.ts`
-
-- `SI_PREFIX_KEYS` (constant)
-
-### `functions/src/arithmetic/nthRoot.ts`
-
-- `createNthRootNumber` (constant)
-
-### `functions/src/error/ArgumentsError.ts`
-
-- `createArgumentsError` (function)
-
-### `functions/src/error/IndexError.ts`
-
-- `createIndexError` (function)
-
-### `functions/src/expression/operators.ts`
-
-- `getAssociativity` (function)
-- `isAssociativeWith` (function)
-
-### `functions/src/relational/compareText.ts`
-
-- `createCompareTextNumber` (constant)
-
-### `functions/src/relational/equalScalar.ts`
-
-- `createEqualScalarNumber` (constant)
-
-### `functions/src/type/bignumber/BigNumber.ts`
-
-- `createBigNumberClass` (constant)
-
-### `functions/src/type/complex/Complex.ts`
-
-- `createComplexClass` (constant)
-
-### `functions/src/type/matrix/types.ts`
-
-- `DenseMatrixJSON` (interface)
-- `SparseMatrixJSON` (interface)
-- `MatrixEntry` (interface)
-- `MathNumericValue` (type)
-
-### `functions/src/utils/array.ts`
-
-- `initial` (function)
-- `ArrayOrScalar` (type)
-
-### `functions/src/utils/map.ts`
-
-- `toObject` (function)
-
-### `functions/src/utils/noop.ts`
-
-- `noIndex` (function)
-- `noSubset` (function)
-
-### `functions/src/utils/string.ts`
-
-- `endsWith` (function)
-- `escape` (function)
-
-### `functions/src/wasm/special/wasm-bridge.ts`
-
-- `resetCarlsonWasm` (function)
-
-### `functions/src/wasm/WasmLoader.ts`
-
-- `initWasm` (function)
-
-### `expression/src/utils/array.ts`
-
-- `ArrayOrScalar` (type)
-
-### `expression/src/utils/mathml.ts`
-
-- `operatorPrecedence` (function)
-
-### `assembly/src/types/complex.ts`
-
-- `complexFromReal` (function)
-- `complexFromImaginary` (function)
-- `COMPLEX_ZERO` (constant)
-- `COMPLEX_ONE` (constant)
-- `COMPLEX_I` (constant)
-- `COMPLEX_NEG_ONE` (constant)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -242,8 +154,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/expression/operators.ts`
 
-- `getPrecedence` (function) — 2 in-file refs
-- `properties` (constant) — 6 in-file refs
+- `properties` (constant) — 2 in-file refs
 
 ### `functions/src/matrix/native-accel.ts`
 
@@ -297,10 +208,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/type/bignumber/BigNumber.ts`
 
-- `BigNumberJSON` (interface) — 4 in-file refs
-- `ConfigChangeEvent` (interface) — 4 in-file refs
-- `BigNumberClass` (interface) — 3 in-file refs
-- `BigNumberInstance` (interface) — 9 in-file refs
+- `BigNumberJSON` (interface) — 2 in-file refs
+- `BigNumberClass` (interface) — 1 in-file ref
+- `BigNumberInstance` (interface) — 3 in-file refs
 
 ### `functions/src/type/chain/Chain.ts`
 
@@ -310,10 +220,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/type/complex/Complex.ts`
 
-- `ComplexJSON` (interface) — 6 in-file refs
-- `PolarCoordinates` (interface) — 2 in-file refs
-- `ComplexFormatOptions` (interface) — 3 in-file refs
-- `PolarInput` (interface) — 4 in-file refs
+- `ComplexJSON` (interface) — 4 in-file refs
+- `PolarCoordinates` (interface) — 1 in-file ref
+- `ComplexFormatOptions` (interface) — 1 in-file ref
+- `PolarInput` (interface) — 3 in-file refs
 - `AbsArgInput` (interface) — 2 in-file refs
 - `ComplexConstructor` (interface) — 1 in-file ref
 
@@ -324,9 +234,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/type/matrix/types.ts`
 
-- `BigNumberLike` (interface) — 13 in-file refs
-- `ComplexLike` (interface) — 9 in-file refs
-- `FractionLike` (interface) — 9 in-file refs
+- `BigNumberLike` (interface) — 12 in-file refs
+- `ComplexLike` (interface) — 8 in-file refs
+- `FractionLike` (interface) — 8 in-file refs
 - `DenseMatrixInterface` (interface) — 5 in-file refs
 - `SparseMatrixInterface` (interface) — 3 in-file refs
 - `MatrixFormatOptions` (interface) — 1 in-file ref
@@ -356,13 +266,13 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `map` (function) — 5 in-file refs
 - `forEach` (function) — 5 in-file refs
 - `join` (function) — 2 in-file refs
-- `last` (function) — 6 in-file refs
+- `last` (function) — 5 in-file refs
 - `checkBroadcastingRules` (function) — 2 in-file refs
 - `broadcastArrays` (function) — 1 in-file ref
 - `stretch` (function) — 1 in-file ref
 - `clone` (function) — 1 in-file ref
 - `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 80 in-file refs
+- `NestedArray` (type) — 79 in-file refs
 
 ### `functions/src/utils/bignumber/bitwise.ts`
 
@@ -395,7 +305,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `ResultSet` (interface) — 1 in-file ref
 - `Help` (interface) — 1 in-file ref
 - `Chain` (interface) — 1 in-file ref
-- `Node` (interface) — 19 in-file refs
+- `Node` (interface) — 18 in-file refs
 - `AccessorNode` (interface) — 1 in-file ref
 - `ArrayNode` (interface) — 1 in-file ref
 - `AssignmentNode` (interface) — 1 in-file ref
@@ -406,7 +316,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `FunctionNode` (interface) — 1 in-file ref
 - `IndexNode` (interface) — 1 in-file ref
 - `ObjectNode` (interface) — 1 in-file ref
-- `OperatorNode` (interface) — 2 in-file refs
+- `OperatorNode` (interface) — 1 in-file ref
 - `ParenthesisNode` (interface) — 1 in-file ref
 - `RangeNode` (interface) — 1 in-file ref
 - `RelationalNode` (interface) — 1 in-file ref
@@ -416,7 +326,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/utils/map.ts`
 
 - `assign` (function) — 1 in-file ref
-- `ObjectWrappingMap` (class) — 5 in-file refs
+- `ObjectWrappingMap` (class) — 4 in-file refs
 - `PartitionedMap` (class) — 2 in-file refs
 
 ### `functions/src/utils/string.ts`
@@ -444,7 +354,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `expression/src/utils/array.ts`
 
 - `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 80 in-file refs
+- `NestedArray` (type) — 79 in-file refs
 
 ### `expression/src/utils/factory.ts`
 

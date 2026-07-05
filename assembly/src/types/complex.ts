@@ -406,35 +406,9 @@ export function complexFromPolar(r: f64, theta: f64): Complex {
   return new Complex(r * Math.cos(theta), r * Math.sin(theta));
 }
 
-/**
- * Create a complex number from a real value (im = 0)
- */
-export function complexFromReal(value: f64): Complex {
-  return new Complex(value, 0.0);
-}
-
-/**
- * Create a complex number from an imaginary value (re = 0)
- */
-export function complexFromImaginary(value: f64): Complex {
-  return new Complex(0.0, value);
-}
-
 // =============================================================================
 // Constants
 // =============================================================================
-
-/** Complex zero */
-export const COMPLEX_ZERO: Complex = new Complex(0.0, 0.0);
-
-/** Complex one */
-export const COMPLEX_ONE: Complex = new Complex(1.0, 0.0);
-
-/** Complex imaginary unit i */
-export const COMPLEX_I: Complex = new Complex(0.0, 1.0);
-
-/** Complex negative one */
-export const COMPLEX_NEG_ONE: Complex = new Complex(-1.0, 0.0);
 
 // =============================================================================
 // Math helpers (AS doesn't have Math.sinh, Math.cosh by default in older versions)

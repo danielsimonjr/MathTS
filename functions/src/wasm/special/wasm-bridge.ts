@@ -642,10 +642,6 @@ export function ellipticPiIncompleteDispatch(
   );
 }
 
-export function resetCarlsonWasm(): void {
-  wasmLoader.reset();
-}
-
 /**
  * Test-only hook — re-exported so tests can reset loader state
  * without importing WasmLoader directly.

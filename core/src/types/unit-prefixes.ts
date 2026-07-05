@@ -42,15 +42,6 @@ export const SI_PREFIXES: Record<string, number> = {
 };
 
 /**
- * Ordered list of prefixes, longest-first.
- *
- * Used by the parser to ensure `"da"` is matched before `"d"`, etc.
- */
-export const SI_PREFIX_KEYS: ReadonlyArray<string> = Object.keys(SI_PREFIXES).sort(
-  (a, b) => b.length - a.length
-);
-
-/**
  * Set of "good" prefixes to use in `toBest()` selection.
  *
  * Excludes `h`, `da`, `d`, `c` (commonly only used for centimeters and similar

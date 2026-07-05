@@ -7,7 +7,6 @@ import { deepStrictEqual } from './object.js';
 
 // Type definitions
 export type NestedArray<T> = T | NestedArray<T>[];
-export type ArrayOrScalar<T> = T | T[] | NestedArray<T>;
 
 // Type for objects with value and identifier properties
 export interface IdentifiedValue<T> {
@@ -704,15 +703,6 @@ export function getArrayDataType(
  */
 export function last<T>(array: T[]): T {
   return array[array.length - 1];
-}
-
-/**
- * Get all but the last element of array.
- * @param {Array} array
- * @returns {Array}
- */
-export function initial<T>(array: T[]): T[] {
-  return array.slice(0, array.length - 1);
 }
 
 /**

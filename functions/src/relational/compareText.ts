@@ -67,9 +67,3 @@ export const createCompareText = /* #__PURE__ */ factory(
     );
   }
 );
-
-export const createCompareTextNumber = /* #__PURE__ */ factory(
-  name,
-  ['typed'],
-  ({ typed }: { typed: TypedFunction }) => typed(name, _compareText)
-);

@@ -7,7 +7,6 @@ import { deepStrictEqual } from './object.js';
 
 // Type definitions
 export type NestedArray<T> = T | NestedArray<T>[];
-export type ArrayOrScalar<T> = T | T[] | NestedArray<T>;
 
 // Type for objects with value and identifier properties
 export interface IdentifiedValue<T> {

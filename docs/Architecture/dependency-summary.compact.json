@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-04", "f": 862, "e": 4415, "re": 1501 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 862, "e": 4388, "re": 1501 },
   "s": {
-    "loc": 160542,
+    "loc": 159864,
     "cls": 51,
-    "int": 377,
-    "fn": 1493,
-    "tg": 156,
+    "int": 373,
+    "fn": 1476,
+    "tg": 155,
     "en": 0,
-    "co": 1408,
+    "co": 1398,
     "toi": 494
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -566,20 +566,10 @@
     },
     "functions/error": {
       "f": 4,
-      "exp": [
-        "createArgumentsError",
-        "ArgumentsError",
-        "DimensionError",
-        "createIndexError",
-        "IndexError",
-        "MathjsError"
-      ],
+      "exp": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"],
       "cls": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"]
     },
-    "functions/expression": {
-      "f": 1,
-      "exp": ["properties", "getPrecedence", "getAssociativity", "isAssociativeWith", "getOperator"]
-    },
+    "functions/expression": { "f": 1, "exp": ["properties", "getOperator"] },
     "functions/factories": {
       "f": 4,
       "exp": [
@@ -697,13 +687,11 @@
         "createCompareNumber",
         "createCompareNatural",
         "createCompareText",
-        "createCompareTextNumber",
         "createCompareUnits",
         "createDeepEqual",
         "createEqual",
         "createEqualNumber",
         "createEqualScalar",
-        "createEqualScalarNumber",
         "createEqualText",
         "createLarger",
         "createLargerNumber",
@@ -712,7 +700,9 @@
         "createSmaller",
         "createSmallerNumber",
         "createSmallerEq",
-        "createSmallerEqNumber"
+        "createSmallerEqNumber",
+        "createUnequal",
+        "createUnequalNumber"
       ]
     },
     "functions/set": {
@@ -783,10 +773,8 @@
     "functions/type": {
       "f": 31,
       "exp": [
-        "createBigNumberClass",
         "createChainClass",
         "createChain",
-        "createComplexClass",
         "createFibonacciHeapClass",
         "createIndex",
         "createImmutableDenseMatrixClass",
@@ -802,11 +790,12 @@
         "createMatAlgo07xSSf",
         "createMatAlgo08xS0Sid",
         "createMatAlgo09xS0Sf",
-        "createMatAlgo10xSids"
+        "createMatAlgo10xSids",
+        "createMatAlgo11xS0s",
+        "createMatAlgo12xSfs"
       ],
       "int": [
         "BigNumberJSON",
-        "ConfigChangeEvent",
         "BigNumberClass",
         "BigNumberInstance",
         "ChainJSON",
@@ -814,7 +803,8 @@
         "ChainConstructor",
         "ComplexJSON",
         "PolarCoordinates",
-        "ComplexFormatOptions"
+        "ComplexFormatOptions",
+        "Complex"
       ]
     },
     "functions/typed": {
@@ -1451,17 +1441,7 @@
     },
     "assembly/types": {
       "f": 1,
-      "exp": [
-        "COMPLEX_ZERO",
-        "COMPLEX_ONE",
-        "COMPLEX_I",
-        "COMPLEX_NEG_ONE",
-        "complex",
-        "complexFromPolar",
-        "complexFromReal",
-        "complexFromImaginary",
-        "Complex"
-      ],
+      "exp": ["complex", "complexFromPolar", "Complex"],
       "cls": ["Complex"]
     },
     "compat": {
@@ -1492,17 +1472,17 @@
     }
   },
   "hp": [
-    { "p": "utils/factory.ts", "i": 2, "o": 262 },
+    { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 253, "o": 1 },
     { "p": "factories/index.ts", "i": 244, "o": 8 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
+    { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/number.ts", "i": 0, "o": 48 },
+    { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "wasm/WasmLoader.ts", "i": 2, "o": 44 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
     { "p": "src/index.ts", "i": 36, "o": 0 },

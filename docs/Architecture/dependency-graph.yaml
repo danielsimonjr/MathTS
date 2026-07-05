@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-04'
+  lastUpdated: '2026-07-05'
   totalFiles: 862
   totalModules: 72
-  totalExports: 4415
+  totalExports: 4388
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1804,14 +1804,12 @@ modules:
       workspaceDependencies: []
       exports:
         - SI_PREFIXES
-        - SI_PREFIX_KEYS
         - BEST_PREFIXES
         - getPrefix
       functions:
         - getPrefix
       constants:
         - SI_PREFIXES
-        - SI_PREFIX_KEYS
         - BEST_PREFIXES
     core/src/types/unit.ts:
       description: The core `Unit` — now the single, feature-complete implementation under
@@ -6217,10 +6215,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createNthRoot
-        - createNthRootNumber
       constants:
         - createNthRoot
-        - createNthRootNumber
     functions/src/arithmetic/nthRoots.ts:
       description: Each function here returns a real multiple of i as a Complex value.
       externalDependencies: []
@@ -8209,12 +8205,9 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - createArgumentsError
         - ArgumentsError
       classes:
         - ArgumentsError
-      functions:
-        - createArgumentsError
     functions/src/error/DimensionError.ts:
       description: 'Create a range error with the message:'
       externalDependencies: []
@@ -8232,12 +8225,9 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - createIndexError
         - IndexError
       classes:
         - IndexError
-      functions:
-        - createIndexError
     functions/src/error/MathjsError.ts:
       description: Custom error type for Mathjs errors
       externalDependencies: []
@@ -8250,29 +8240,15 @@ modules:
         - MathjsError
   functions/expression:
     functions/src/expression/operators.ts:
-      description: Returns the first non-parenthesis internal node, but only
+      description: Get the operator associated with a function name.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/object.js
-          imports:
-            - hasOwnProperty
-        - file: ../utils/is.js
-          imports:
-            - isConstantNode
-            - isParenthesisNode
-            - rule2Node
+      internalDependencies: []
       workspaceDependencies: []
       exports:
         - properties
-        - getPrecedence
-        - getAssociativity
-        - isAssociativeWith
         - getOperator
       functions:
-        - getPrecedence
-        - getAssociativity
-        - isAssociativeWith
         - getOperator
       constants:
         - properties
@@ -11807,10 +11783,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createCompareText
-        - createCompareTextNumber
       constants:
         - createCompareText
-        - createCompareTextNumber
     functions/src/relational/compareUnits.ts:
       description: Type definitions for compareUnits
       externalDependencies: []
@@ -11912,10 +11886,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createEqualScalar
-        - createEqualScalarNumber
       constants:
         - createEqualScalar
-        - createEqualScalarNumber
     functions/src/relational/equalText.ts:
       description: Check equality of two strings. Comparison is case sensitive.
       externalDependencies: []
@@ -13731,20 +13703,13 @@ modules:
           imports:
             - Decimal
       nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/factory.js
-          imports:
-            - factory
+      internalDependencies: []
       workspaceDependencies: []
-      exports:
-        - createBigNumberClass
+      exports: []
       interfaces:
         - BigNumberJSON
-        - ConfigChangeEvent
         - BigNumberClass
         - BigNumberInstance
-      constants:
-        - createBigNumberClass
     functions/src/type/chain/Chain.ts:
       description: JSON representation of a Chain
       externalDependencies: []
@@ -13800,20 +13765,9 @@ modules:
             - Complex
             - ComplexJs
       nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/number.js
-          imports:
-            - format
-        - file: ../../utils/is.js
-          imports:
-            - isNumber
-            - isUnit
-        - file: ../../utils/factory.js
-          imports:
-            - factory
+      internalDependencies: []
       workspaceDependencies: []
-      exports:
-        - createComplexClass
+      exports: []
       interfaces:
         - ComplexJSON
         - PolarCoordinates
@@ -13822,8 +13776,6 @@ modules:
         - PolarInput
         - AbsArgInput
         - ComplexConstructor
-      constants:
-        - createComplexClass
     functions/src/type/matrix/FibonacciHeap.ts:
       description: Comparison function type for heap operations.
       externalDependencies: []
@@ -13964,12 +13916,9 @@ modules:
         - DenseMatrixInterface
         - SparseMatrixInterface
         - MatrixFormatOptions
-        - DenseMatrixJSON
-        - SparseMatrixJSON
         - ImmutableDenseMatrixJSON
         - RangeJSON
         - IndexJSON
-        - MatrixEntry
         - DenseMatrixConstructorData
         - SparseMatrixConstructorData
         - ImmutableDenseMatrixConstructorData
@@ -16576,7 +16525,6 @@ modules:
         - generalize
         - getArrayDataType
         - last
-        - initial
         - concat
         - broadcastSizes
         - checkBroadcastingRules
@@ -16610,7 +16558,6 @@ modules:
         - generalize
         - getArrayDataType
         - last
-        - initial
         - concat
         - broadcastSizes
         - checkBroadcastingRules
@@ -16876,7 +16823,6 @@ modules:
         - isBlockNode
         - isConditionalNode
         - isConstantNode
-        - rule2Node
         - isFunctionAssignmentNode
         - isFunctionNode
         - isIndexNode
@@ -16951,7 +16897,6 @@ modules:
         - isBlockNode
         - isConditionalNode
         - isConstantNode
-        - rule2Node
         - isFunctionAssignmentNode
         - isFunctionNode
         - isIndexNode
@@ -17202,7 +17147,6 @@ modules:
       exports:
         - createEmptyMap
         - createMap
-        - toObject
         - assign
         - isObjectWrappingMap
         - ObjectWrappingMap
@@ -17213,7 +17157,6 @@ modules:
       functions:
         - createEmptyMap
         - createMap
-        - toObject
         - assign
         - isObjectWrappingMap
     functions/src/utils/node.ts:
@@ -17286,14 +17229,10 @@ modules:
         - noBignumber
         - noFraction
         - noMatrix
-        - noIndex
-        - noSubset
       functions:
         - noBignumber
         - noFraction
         - noMatrix
-        - noIndex
-        - noSubset
     functions/src/utils/number.ts:
       description: Number formatting, parsing, and Math polyfills.
       externalDependencies: []
@@ -17553,16 +17492,12 @@ modules:
             - format
       workspaceDependencies: []
       exports:
-        - endsWith
         - format
         - stringify
-        - escape
         - compareText
       functions:
-        - endsWith
         - format
         - stringify
-        - escape
         - compareText
     functions/src/utils/switch.ts:
       description: Transpose a matrix
@@ -17977,7 +17912,6 @@ modules:
         - ellipticFIncompleteDispatch
         - ellipticEIncompleteDispatch
         - ellipticPiIncompleteDispatch
-        - resetCarlsonWasm
         - resetBesselWasm
         - resetAiryWasm
         - resetEllipticWasm
@@ -18017,7 +17951,6 @@ modules:
         - ellipticFIncompleteDispatch
         - ellipticEIncompleteDispatch
         - ellipticPiIncompleteDispatch
-        - resetCarlsonWasm
         - resetBesselWasm
         - resetAiryWasm
         - resetEllipticWasm
@@ -18050,15 +17983,12 @@ modules:
       workspaceDependencies: []
       exports:
         - wasmLoader
-        - initWasm
         - WasmLoader
       classes:
         - WasmLoader
       interfaces:
         - WasmModule
         - LoadingMetrics
-      functions:
-        - initWasm
       constants:
         - wasmLoader
   expression/compiler:
@@ -22745,7 +22675,6 @@ modules:
         - toMathMLSymbol
         - numberToMathML
         - constantToMathML
-        - operatorPrecedence
         - inlineOperator
         - parenthesizeLower
         - mathMLDocument
@@ -22755,7 +22684,6 @@ modules:
         - toMathMLSymbol
         - numberToMathML
         - constantToMathML
-        - operatorPrecedence
         - inlineOperator
         - parenthesizeLower
         - mathMLDocument
@@ -27213,27 +27141,14 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - COMPLEX_ZERO
-        - COMPLEX_ONE
-        - COMPLEX_I
-        - COMPLEX_NEG_ONE
         - complex
         - complexFromPolar
-        - complexFromReal
-        - complexFromImaginary
         - Complex
       classes:
         - Complex
       functions:
         - complex
         - complexFromPolar
-        - complexFromReal
-        - complexFromImaginary
-      constants:
-        - COMPLEX_ZERO
-        - COMPLEX_ONE
-        - COMPLEX_I
-        - COMPLEX_NEG_ONE
   compat:
     compat/src/chain.ts:
       description: GC12 — mathjs-style fluent `chain` API.
@@ -28526,17 +28441,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 862
   totalModules: 72
-  totalLinesOfCode: 160542
-  totalExports: 4415
+  totalLinesOfCode: 159864
+  totalExports: 4388
   totalClasses: 51
-  totalInterfaces: 377
-  totalFunctions: 1493
-  totalTypeGuards: 156
+  totalInterfaces: 373
+  totalFunctions: 1476
+  totalTypeGuards: 155
   totalEnums: 0
-  totalConstants: 1408
+  totalConstants: 1398
   totalReExports: 1501
   totalTypeOnlyImports: 494
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 243
+  unusedExportsCount: 210
