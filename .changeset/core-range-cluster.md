@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-core': minor
+---
+
+**Wire `Range` into the public API** and remove the vestigial guard cluster. The complete, tested `createRangeClass` factory (a lazy `start:step:end` numeric sequence, mathjs parity) was reachable only from its own test; it is now exported from the package index — `Range` (ready-made class) + `createRangeClass` + the `Range*` types — alongside `Complex`/`Fraction`/`BigNumber`. Its four `private` memoization fields were converted to ECMAScript `#private` so the class survives declaration emit when public (TS4094). Removed `core/src/utils.ts` and `core/src/types.ts`: dead, unexported, production-unused scaffolding riddled with phantom imports (`utils.ts` imported a `ComplexNumber` type defined nowhere; `types.ts` re-exported from a non-existent `../types/index.js`). Their duplicate guards (`isNumeric` duplicated `arithmetic/scalar`'s; `isComplexLike`/`isMatrixArray` were unused) and self-referential tests were pruned. No production code referenced any of it; published behavior is unchanged apart from the new `Range` export.

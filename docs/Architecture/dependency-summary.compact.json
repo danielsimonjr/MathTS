@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 994, "e": 4576, "re": 1532 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-05", "f": 995, "e": 4584, "re": 1538 },
   "s": {
-    "loc": 165423,
+    "loc": 165861,
     "cls": 55,
-    "int": 381,
+    "int": 383,
     "fn": 1501,
     "tg": 156,
     "en": 0,
-    "co": 1527,
-    "toi": 500
+    "co": 1529,
+    "toi": 501
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -176,7 +176,7 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",

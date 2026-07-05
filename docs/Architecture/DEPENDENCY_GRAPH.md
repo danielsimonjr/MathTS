@@ -103,7 +103,7 @@ The codebase is organized into the following modules:
 - **core/error**: 1 file
 - **core/factory**: 2 files
 - **core/typed**: 3 files
-- **core/types**: 14 files
+- **core/types**: 15 files
 - **matrix/backends**: 22 files
 - **matrix**: 4 files
 - **matrix/operations**: 14 files
@@ -180,7 +180,7 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 4              | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 30             | 4               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 31             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
@@ -405,6 +405,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./types/complex.js` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE` | Re-export |
+| `./types/matrix/Range.js` | `createRangeClass, Range` | Re-export |
 | `./types/dual.js` | `Dual, isDual` | Re-export |
 | `./types/dual-rules.js` | `DUAL_UNARY_RULES` | Re-export |
 | `./constants.js` | `PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E` | Re-export |
@@ -417,6 +418,7 @@ graph LR
 | `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export |
 | `./factory/index.js` | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG` | Re-export |
 | `./types/interfaces.js` | `MathTSValue, Scalar, BackendType, NumericType, MatrixBackend, IMatrix, IComplex, IFraction, IBigNumber, MatrixDimensions` | Re-export (type-only) |
+| `./types/matrix/Range.js` | `RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON` | Re-export (type-only) |
 | `./types/dual-rules.js` | `DualUnaryRule, DualUnaryRuleName` | Re-export (type-only) |
 | `./types/bignumber.js` | `BigNumberConfig, RoundingMode` | Re-export (type-only) |
 | `./arithmetic/scalar.js` | `NumericScalar` | Re-export (type-only) |
@@ -427,7 +429,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -688,6 +690,23 @@ graph LR
 
 - Interfaces: `MathTSValue`, `Scalar`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`
 - Types: `BackendType`, `NumericType`
+
+---
+
+### `core/src/types/matrix/Range.ts` - Callback function for Range forEach operations
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../is.js` | `isBigInt, isBigNumber` | Import |
+| `../../number.js` | `format, sign, nearlyEqual` | Import |
+| `../../factory.js` | `factory` | Import |
+
+**Exports:**
+
+- Interfaces: `RangeFormatOptions`, `RangeJSON`
+- Types: `RangeForEachCallback`, `RangeMapCallback`
+- Constants: `createRangeClass`, `Range`
 
 ---
 
@@ -14134,8 +14153,8 @@ graph LR
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
 | `workbook/src/cli`                                     | 15 files     | 0 files    |
+| `core/src/index`                                       | 14 files     | 0 files    |
 | `functions/src/bitwise/rightLogShift`                  | 13 files     | 1 file     |
-| `functions/src/type/matrix/utils/matAlgo02xDS0`        | 3 files      | 11 files   |
 
 ---
 
@@ -14200,11 +14219,11 @@ graph TD
         N24[dual]
         N25[fraction]
         N26[interfaces]
-        N27[dependencies]
-        N28[errors]
-        N29[index]
-        N30[unit-types]
-        N31[...4 more]
+        N27[Range]
+        N28[dependencies]
+        N29[errors]
+        N30[index]
+        N31[...5 more]
     end
 
     subgraph Matrix/backends
@@ -14785,6 +14804,7 @@ graph TD
     N8 --> N13
     N8 --> N15
     N9 --> N22
+    N9 --> N27
     N9 --> N24
     N9 --> N23
     N9 --> N7
@@ -14798,7 +14818,6 @@ graph TD
     N10 --> N12
     N10 --> N13
     N10 --> N14
-    N10 --> N29
     N10 --> N30
     N12 --> N11
     N13 --> N11
@@ -14816,17 +14835,17 @@ graph TD
     N22 --> N26
     N24 --> N23
     N25 --> N26
-    N27 --> N5
-    N27 --> N6
     N27 --> N11
     N27 --> N12
-    N27 --> N21
-    N27 --> N22
-    N27 --> N25
-    N27 --> N30
-    N29 --> N27
-    N29 --> N30
-    N30 --> N11
+    N27 --> N8
+    N28 --> N5
+    N28 --> N6
+    N28 --> N11
+    N28 --> N12
+    N28 --> N21
+    N28 --> N22
+    N28 --> N25
+    N30 --> N28
     N32 --> N60
     N33 --> N60
     N33 --> N32
@@ -14858,17 +14877,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 994    |
+| Total TypeScript Files  | 995    |
 | Total Modules           | 73     |
-| Total Lines of Code     | 165423 |
-| Total Exports           | 4576   |
-| Total Re-exports        | 1532   |
+| Total Lines of Code     | 165861 |
+| Total Exports           | 4584   |
+| Total Re-exports        | 1538   |
 | Total Classes           | 55     |
-| Total Interfaces        | 381    |
+| Total Interfaces        | 383    |
 | Total Functions         | 1501   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 500    |
+| Type-only Imports       | 501    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

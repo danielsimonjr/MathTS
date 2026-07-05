@@ -110,10 +110,10 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Cached primitive array representation
        */
-      private _cache: number[] | null = null;
-      private _cacheStart?: number;
-      private _cacheEnd?: number;
-      private _cacheStep?: number;
+      #cache: number[] | null = null;
+      #cacheStart?: number;
+      #cacheEnd?: number;
+      #cacheStep?: number;
 
       constructor(
         start?: number | bigint | BigNumber | null,
@@ -344,19 +344,19 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       valueOf(): number[] {
         if (
-          this._cache !== null &&
-          this.start === this._cacheStart &&
-          this.end === this._cacheEnd &&
-          this.step === this._cacheStep
+          this.#cache !== null &&
+          this.start === this.#cacheStart &&
+          this.end === this.#cacheEnd &&
+          this.step === this.#cacheStep
         ) {
-          return this._cache;
+          return this.#cache;
         }
 
-        this._cache = this.toArray();
-        this._cacheStart = this.start;
-        this._cacheEnd = this.end;
-        this._cacheStep = this.step;
-        return this._cache;
+        this.#cache = this.toArray();
+        this.#cacheStart = this.start;
+        this.#cacheEnd = this.end;
+        this.#cacheStep = this.step;
+        return this.#cache;
       }
 
       /**
@@ -419,3 +419,10 @@ export const createRangeClass = /* #__PURE__ */ factory(
   },
   { isClass: true }
 );
+
+/**
+ * Ready-made `Range` class (the factory instantiated with no dependencies),
+ * exported for direct use from the package index — mirrors how core ships a
+ * ready-made `Complex`/`Fraction`/`Unit` alongside its factory.
+ */
+export const Range = createRangeClass({});

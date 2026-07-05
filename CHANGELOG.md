@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added/Removed (2026-07-05) — core `Range` wired into public API; vestigial guard cluster removed
+
+Completing the dormancy sweep ("full integration, no deference"): the core package's
+test-only files were each resolved at root cause.
+- **`Range` wired** — the complete, tested `createRangeClass` factory (lazy `start:step:end`
+  sequence, mathjs parity) was reachable only from its own test. Now exported from the index
+  (`Range` + `createRangeClass` + `Range*` types) alongside Complex/Fraction/BigNumber. Its four
+  `private` cache fields became ECMAScript `#private` so the class survives public declaration
+  emit (was TS4094).
+- **`core/src/utils.ts` + `core/src/types.ts` deleted** — dead, unexported, production-unused
+  scaffolding with phantom imports (`utils.ts` imported a `ComplexNumber` type defined nowhere;
+  `types.ts` re-exported from a non-existent `../types/index.js`). Duplicate guards (`isNumeric`
+  duplicated `arithmetic/scalar`; `isComplexLike`/`isMatrixArray` unused) + self-referential
+  tests pruned.
+
+DGT after: **0 orphaned, 0 unused files, 0 dead exports, 0 cycles**; the 4 remaining dormant
+files are all documented-intentional test-only (signal `fft`/`conv` kept-for-tests, the
+`WorkerPool` security-invariant plumbing, `ParallelMatrix` feature tests). Gates: build 22/22,
+typecheck 28/28, test 44/44, eslint clean.
+
 ### Removed/Tooling (2026-07-05) — both remaining orphaned files resolved (0 orphaned, 0 unused files)
 
 Resolved the two dormant files previously left as "report-only", at root cause:

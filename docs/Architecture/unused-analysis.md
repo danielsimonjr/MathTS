@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 7
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 7
+  - **Test-only (exercised by a test, ships nothing)**: 4
 - **Potentially unused exports**: 231
   - **Unreferenced anywhere (deletion candidates)**: 0
   - **Referenced in-module (type contracts / helpers backing live exports)**: 231
@@ -26,12 +26,6 @@ _None._
 Not reachable from any package entry point, but imported by a test — deliberately
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
-
-### `core` (3)
-
-- `core/src/types.ts`
-- `core/src/types/matrix/Range.ts`
-- `core/src/utils.ts`
 
 ### `functions` (2)
 

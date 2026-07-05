@@ -22,7 +22,6 @@ import {
   isMatrix,
 } from '../src/index.js';
 import { typeOf } from '../src/is.js';
-import { isComplexLike, isMatrixArray } from '../src/utils.js';
 
 describe('typeOf — canonical names for core numeric types (bundler-mangling proof)', () => {
   it('returns the merge/dispatch names, not the (possibly mangled) constructor name', () => {
@@ -99,24 +98,5 @@ describe('canonical isMatrix (duck-types a Matrix object, not number[][])', () =
   it('rejects unrelated values', () => {
     expect(isMatrix(null)).toBe(false);
     expect(isMatrix(42)).toBe(false);
-  });
-});
-
-describe('disambiguation invariant: utils structural variants do NOT shadow canonical names', () => {
-  it('isComplexLike is structural where canonical isComplex is instanceof', () => {
-    const plain = { re: 1, im: 2 };
-    // The two guards intentionally DISAGREE on a plain object; distinct names
-    // make that explicit at the call site.
-    expect(isComplexLike(plain)).toBe(true);
-    expect(isComplex(plain)).toBe(false);
-  });
-
-  it('isMatrixArray detects number[][] where canonical isMatrix does not', () => {
-    const grid = [
-      [1, 2],
-      [3, 4],
-    ];
-    expect(isMatrixArray(grid)).toBe(true);
-    expect(isMatrix(grid)).toBe(false);
   });
 });

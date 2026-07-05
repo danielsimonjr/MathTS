@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-05",
-    "totalFiles": 994,
+    "totalFiles": 995,
     "totalModules": 73,
-    "totalExports": 4576
+    "totalExports": 4584
   },
   "entryPoints": [
     {
@@ -453,6 +453,11 @@
             "reExport": true
           },
           {
+            "file": "./types/matrix/Range.js",
+            "imports": ["createRangeClass", "Range"],
+            "reExport": true
+          },
+          {
             "file": "./types/dual.js",
             "imports": ["Dual", "isDual"],
             "reExport": true
@@ -600,6 +605,17 @@
             "typeOnly": true
           },
           {
+            "file": "./types/matrix/Range.js",
+            "imports": [
+              "RangeForEachCallback",
+              "RangeMapCallback",
+              "RangeFormatOptions",
+              "RangeJSON"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./types/dual-rules.js",
             "imports": ["DualUnaryRule", "DualUnaryRuleName"],
             "reExport": true,
@@ -652,6 +668,8 @@
           "COMPLEX_ZERO",
           "COMPLEX_ONE",
           "COMPLEX_NEG_ONE",
+          "createRangeClass",
+          "Range",
           "Dual",
           "isDual",
           "DUAL_UNARY_RULES",
@@ -748,6 +766,10 @@
           "IFraction",
           "IBigNumber",
           "MatrixDimensions",
+          "RangeForEachCallback",
+          "RangeMapCallback",
+          "RangeFormatOptions",
+          "RangeJSON",
           "DualUnaryRule",
           "DualUnaryRuleName",
           "BigNumberConfig",
@@ -775,6 +797,8 @@
           "COMPLEX_ZERO",
           "COMPLEX_ONE",
           "COMPLEX_NEG_ONE",
+          "createRangeClass",
+          "Range",
           "Dual",
           "isDual",
           "DUAL_UNARY_RULES",
@@ -869,6 +893,10 @@
           "IFraction",
           "IBigNumber",
           "MatrixDimensions",
+          "RangeForEachCallback",
+          "RangeMapCallback",
+          "RangeFormatOptions",
+          "RangeJSON",
           "DualUnaryRule",
           "DualUnaryRuleName",
           "BigNumberConfig",
@@ -1672,6 +1700,29 @@
           "IBigNumber",
           "MatrixDimensions"
         ]
+      },
+      "core/src/types/matrix/Range.ts": {
+        "description": "Callback function for Range forEach operations",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../is.js",
+            "imports": ["isBigInt", "isBigNumber"]
+          },
+          {
+            "file": "../../number.js",
+            "imports": ["format", "sign", "nearlyEqual"]
+          },
+          {
+            "file": "../../factory.js",
+            "imports": ["factory"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createRangeClass", "Range"],
+        "interfaces": ["RangeFormatOptions", "RangeJSON"],
+        "constants": ["createRangeClass", "Range"]
       },
       "core/src/types/unit/dependencies.ts": {
         "description": "The dependency object injected into the relocated mathjs `Unit` factory",
@@ -31797,6 +31848,7 @@
           "core/src/types/dual.ts",
           "core/src/types/fraction.ts",
           "core/src/types/interfaces.ts",
+          "core/src/types/matrix/Range.ts",
           "core/src/types/unit/dependencies.ts",
           "core/src/types/unit/errors.ts",
           "core/src/types/unit/index.ts",
@@ -33037,18 +33089,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 994,
+    "totalTypeScriptFiles": 995,
     "totalModules": 73,
-    "totalLinesOfCode": 165423,
-    "totalExports": 4576,
+    "totalLinesOfCode": 165861,
+    "totalExports": 4584,
     "totalClasses": 55,
-    "totalInterfaces": 381,
+    "totalInterfaces": 383,
     "totalFunctions": 1501,
     "totalTypeGuards": 156,
     "totalEnums": 0,
-    "totalConstants": 1527,
-    "totalReExports": 1532,
-    "totalTypeOnlyImports": 500,
+    "totalConstants": 1529,
+    "totalReExports": 1538,
+    "totalTypeOnlyImports": 501,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

@@ -396,6 +396,11 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   `new URL(...)` roots + exclude them from unused-files. DGT: 0 orphaned / 0 unused files / 0 dead
   exports / 0 cycles.
 
+- ✅ **[Core dormancy fully resolved 2026-07-05]** Range wired into public API (#private fix for
+  declaration emit); dead `utils.ts`/`types.ts` guard cluster (phantom imports, unused dups) deleted +
+  tests pruned. Repo DGT: 0 orphaned / 0 unused files / 0 dead exports / 0 cycles; 4 remaining dormant
+  are all documented-intentional test-only (signal fft/conv, WorkerPool security invariant, ParallelMatrix).
+
 ### DGT diagnostic sweep (2026-07-02) — gaps found in the generated reports
 
 Ran `npm run docs:deps` and read the reports (DEPENDENCY_GRAPH, TEST_COVERAGE, unused-analysis,

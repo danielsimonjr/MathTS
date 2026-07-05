@@ -31,6 +31,15 @@ export {
   COMPLEX_NEG_ONE,
 } from './types/complex.js';
 
+// Range (lazy start:step:end numeric sequence — mathjs parity)
+export { createRangeClass, Range } from './types/matrix/Range.js';
+export type {
+  RangeForEachCallback,
+  RangeMapCallback,
+  RangeFormatOptions,
+  RangeJSON,
+} from './types/matrix/Range.js';
+
 // Dual numbers (forward-mode automatic differentiation)
 export { Dual, isDual } from './types/dual.js';
 // Shared elementary-function derivative table (used by Dual + autograd's DualTensor)
