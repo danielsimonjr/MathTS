@@ -358,7 +358,12 @@ Hygiene/guardrails first (bounded), then the B8 acceleration thread (the actual 
   workstreams (WS-0…WS-8): [`docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md`](docs/roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md).
   ✅ **First sprint done** (WS-0 bench harness · WS-1 P1 oracle-coverage audit · WS-3 P1 export triage —
   the last found the 452 "unused" figure is mostly a DGT re-export false positive, only ~30 truly dead).
-  **Now in progress:** WS-1 P2 (above) + WS-2 threshold retune (sqrt/square/norm/dot done).
+  **Now in progress:** WS-1 P2 (above). ✅ **WS-2 threshold retune COMPLETE 2026-07-04:** the last 5 unmapped
+  OpNames (histogram/transpose/matvec/outer/integrateChunk) benchmarked (ws2-missing-ops.mjs: 0.00–0.56×,
+  no break-even, memory-bound) → 'never'; the 4 previously UNGATED ComputePool methods (dispatched to workers
+  unconditionally) now gate with inline sequential fallbacks (a speedup for every caller). All 50/50 OpNames
+  have explicit benchmark-sourced thresholds. Caveat: benched on the dev box (medians of 9 interleaved reps);
+  the 0.00–0.5× margins are far too wide for noise to flip the verdicts.
   **Decision gates awaiting maintainer:** G1 fast-check dep · G2 wasm kernel fix-vs-retire · G3 unit-dispatch
   spec · G4 notebook host · G5 plotting approach.
 

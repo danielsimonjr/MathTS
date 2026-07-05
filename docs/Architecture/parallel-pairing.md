@@ -89,7 +89,7 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelFFTPower`      | `applyKernel`, `applyKernel2` | 50000 (global kernel), 50000 (global) | signal        |
 | `parallelIFFT`          | `applyKernel`                 | 50000 (global kernel)                 | signal        |
 | `parallelStatCorr`      | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
-| `parallelStatHistogram` | `applyKernel`, `histogram`    | 50000 (global kernel), 50000 (global) | statistics    |
+| `parallelStatHistogram` | `applyKernel`, `histogram`    | 50000 (global kernel), never          | statistics    |
 | `parallelStatMAD`       | `applyKernel`, `mean`         | 50000 (global kernel), never          | statistics    |
 | `parallelStatMedian`    | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
 | `parallelStatMode`      | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
@@ -187,13 +187,15 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `exp`                      | never                 |    —    |           1 |
 | `fft2d`                    | never                 |    —    |           0 |
 | `fftBatch`                 | 50000 (global)        |    ✓    |           1 |
-| `histogram`                | 50000 (global)        |    ✓    |           1 |
+| `histogram`                | never                 |    —    |           1 |
+| `integrateChunk`           | never                 |    —    |           0 |
 | `kolmogorovSmirnovTest`    | 4096                  |    ✓    |           0 |
 | `leftShift`                | 50000 (global)        |    ✓    |           1 |
 | `log`                      | never                 |    —    |           1 |
 | `mannWhitneyTest`          | 4096                  |    ✓    |           0 |
 | `matmul`                   | 4096                  |    ✓    |           0 |
 | `matrixPower`              | 9216                  |    ✓    |           0 |
+| `matvec`                   | never                 |    —    |           0 |
 | `max`                      | never                 |    —    |           2 |
 | `mean`                     | never                 |    —    |           3 |
 | `min`                      | never                 |    —    |           2 |
@@ -202,6 +204,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `negate`                   | never                 |    —    |           1 |
 | `norm`                     | never                 |    —    |           2 |
 | `normalCDF`                | never                 |    —    |           0 |
+| `outer`                    | never                 |    —    |           0 |
 | `parallelConv`             | never                 |    —    |           0 |
 | `parallelFFT`              | never                 |    —    |           0 |
 | `parallelStatProd`         | never                 |    —    |           0 |
@@ -222,6 +225,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `sum`                      | never                 |    —    |           2 |
 | `tan`                      | never                 |    —    |           1 |
 | `tensordot`                | 8192                  |    ✓    |           0 |
+| `transpose`                | never                 |    —    |           0 |
 | `variance`                 | never                 |    —    |           4 |
 
 ## Non-parallel functions (no worker-pool path)

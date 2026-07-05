@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-04) — WS-2 threshold retune COMPLETE: last 5 ops benchmarked + gated
+
+The five `OpName`s absent from `DEFAULT_THRESHOLD_BY_OP` (`histogram`/`transpose`/`matvec`/
+`outer`/`integrateChunk`) silently rode the untested 50 000 global default — and the first
+four `ComputePool` methods dispatched to workers **unconditionally** (no `shouldParallelize`
+gate at all). Benchmarked on this machine (`tools/benchmarks/ws2-missing-ops.mjs`, medians
+of 9 interleaved reps to damp load noise): histogram 0.23–0.56×, transpose 0.01–0.28×,
+matvec 0.00–0.05×, outer 0.01–0.50× at every size up to 4.2M elements; `integrateFanOut`
+0.01–0.02× on a cheap integrand. All memory-bound/copy-dominated with no break-even →
+`'never'`, matching their class siblings. The four methods now gate with inline sequential
+fallbacks (dimension validation preserved — an existing test caught the inline path
+initially dropping matvec's dimension check). **Every `OpName` (50/50) now has an explicit,
+benchmark-sourced threshold.** New `parallel/tests/ws2-gated-ops.test.ts` pins exact
+closed-form results + `parallelized: false` on the default path. Gates: parallel 423/423,
+build 22/22, test 44/44.
+
 ### Removed (2026-07-04) — dead-export sweep: all 31 deletion candidates gone (WS-3 P2 complete)
 
 Deleted every export the fixed unused-analysis flagged as unreferenced-anywhere, plus 4

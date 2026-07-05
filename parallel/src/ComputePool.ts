@@ -226,6 +226,25 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   prod: 'never',
   distance: 'never',
 
+  // Added 2026-07-04 (WS-2 completion): the five OpNames that were absent from
+  // this map and silently rode the untested 50 000 global default. Benchmarked
+  // (tools/benchmarks/ws2-missing-ops.mjs, medians of 9 interleaved reps):
+  // histogram 0.23-0.56x, transpose 0.01-0.28x, matvec 0.00-0.05x, outer
+  // 0.01-0.50x at every size up to 4.2M elements - memory-bound / copy-dominated,
+  // no break-even -> 'never'. Their ComputePool methods previously dispatched to
+  // the worker pool UNCONDITIONALLY (no shouldParallelize gate); they now gate
+  // with an inline sequential fallback like the reductions above.
+  histogram: 'never',
+  transpose: 'never',
+  matvec: 'never',
+  outer: 'never',
+  // integrateFanOut loses ~50-100x for cheap integrands (0.01-0.02x at 128-32768
+  // evals). The fan-out is CALLER-OPT-IN (integration.ts dispatches only when the
+  // caller passes workerCount > 1), so this entry documents the default posture;
+  // no shouldParallelize call consults it. Expensive (ms-scale) integrands are the
+  // one case where the fan-out pays off.
+  integrateChunk: 'never',
+
   // signal: overhead dominates or break-even never reached
   parallelFFT: 'never',
   parallelConv: 'never',
@@ -630,6 +649,16 @@ export class ComputePool {
     rows: number,
     cols: number
   ): Promise<ParallelResult<Float64Array>> {
+    if (!this.shouldParallelize(data.length, 'transpose')) {
+      if (data.length !== rows * cols) {
+        throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
+      }
+      const out = new Float64Array(rows * cols);
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) out[j * rows + i] = data[i * cols + j];
+      }
+      return this.seqResult(out);
+    }
     const result = await this.workerPool.transpose(data, rows, cols);
     return toParallelResult(result);
   }
@@ -750,6 +779,27 @@ export class ComputePool {
     min?: number,
     max?: number
   ): Promise<ParallelResult<number[]>> {
+    if (!this.shouldParallelize(data.length, 'histogram')) {
+      let lo = min;
+      let hi = max;
+      if (lo === undefined || hi === undefined) {
+        lo = Infinity;
+        hi = -Infinity;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i] < lo) lo = data[i];
+          if (data[i] > hi) hi = data[i];
+        }
+      }
+      const counts = new Array<number>(bins).fill(0);
+      const width = (hi - lo) / bins || 1;
+      for (let i = 0; i < data.length; i++) {
+        let b = Math.floor((data[i] - lo) / width);
+        if (b >= bins) b = bins - 1;
+        if (b < 0) b = 0;
+        counts[b]++;
+      }
+      return this.seqResult(counts);
+    }
     const result = await this.workerPool.histogram(data, bins, min, max);
     return toParallelResult(result);
   }
@@ -1022,6 +1072,21 @@ export class ComputePool {
     cols: number,
     vector: Float64Array
   ): Promise<ParallelResult<Float64Array>> {
+    if (!this.shouldParallelize(matrix.length, 'matvec')) {
+      if (matrix.length !== rows * cols) {
+        throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
+      }
+      if (vector.length !== cols) {
+        throw new Error(`matvec: vector length ${vector.length} !== cols (${cols})`);
+      }
+      const out = new Float64Array(rows);
+      for (let i = 0; i < rows; i++) {
+        let s = 0;
+        for (let j = 0; j < cols; j++) s += matrix[i * cols + j] * vector[j];
+        out[i] = s;
+      }
+      return this.seqResult(out);
+    }
     const result = await this.workerPool.matvec(matrix, rows, cols, vector);
     return toParallelResult(result);
   }
@@ -1030,6 +1095,13 @@ export class ComputePool {
    * Parallel outer product
    */
   async outer(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    if (!this.shouldParallelize(a.length * b.length, 'outer')) {
+      const out = new Float64Array(a.length * b.length);
+      for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < b.length; j++) out[i * b.length + j] = a[i] * b[j];
+      }
+      return this.seqResult(out);
+    }
     const result = await this.workerPool.outer(a, b);
     return toParallelResult(result);
   }

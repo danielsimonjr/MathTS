@@ -572,7 +572,7 @@
       "name": "parallelStatHistogram",
       "file": "statistics.ts",
       "ops": ["applyKernel", "histogram"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "thresholds": ["50000 (global kernel)", "never"],
       "effectiveness": "effective"
     },
     {
@@ -1113,9 +1113,15 @@
     },
     {
       "op": "histogram",
-      "threshold": "50000 (global)",
-      "active": true,
+      "threshold": "never",
+      "active": false,
       "functions": ["parallelStatHistogram"]
+    },
+    {
+      "op": "integrateChunk",
+      "threshold": "never",
+      "active": false,
+      "functions": []
     },
     {
       "op": "kolmogorovSmirnovTest",
@@ -1151,6 +1157,12 @@
       "op": "matrixPower",
       "threshold": "9216",
       "active": true,
+      "functions": []
+    },
+    {
+      "op": "matvec",
+      "threshold": "never",
+      "active": false,
       "functions": []
     },
     {
@@ -1197,6 +1209,12 @@
     },
     {
       "op": "normalCDF",
+      "threshold": "never",
+      "active": false,
+      "functions": []
+    },
+    {
+      "op": "outer",
       "threshold": "never",
       "active": false,
       "functions": []
@@ -1319,6 +1337,12 @@
       "op": "tensordot",
       "threshold": "8192",
       "active": true,
+      "functions": []
+    },
+    {
+      "op": "transpose",
+      "threshold": "never",
+      "active": false,
       "functions": []
     },
     {

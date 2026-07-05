@@ -196,11 +196,19 @@ describe('ComputePool', () => {
 
     // --- fallback: op not in per-op map uses global thresholdElements -------
 
-    it("op not in map ('matvec') falls through to global thresholdElements", () => {
-      // 'matvec' is not in DEFAULT_THRESHOLD_BY_OP → falls back to the pool's
-      // thresholdElements (1000 in this test's pool).
-      expect(pool.shouldParallelize(999, 'matvec')).toBe(false);
-      expect(pool.shouldParallelize(1000, 'matvec')).toBe(true);
+    it('op not in map falls through to global thresholdElements', () => {
+      // Every real OpName now has an explicit DEFAULT_THRESHOLD_BY_OP entry
+      // (WS-2 completion, 2026-07-04 — 'matvec' was in the last stragglers' class),
+      // so create the missing-entry premise explicitly with an empty per-op map
+      // on the initialized shared pool, restoring the default map afterwards.
+      const prev = pool.getConfig().thresholdByOp;
+      pool.updateConfig({ thresholdByOp: {} });
+      try {
+        expect(pool.shouldParallelize(999, 'matvec')).toBe(false);
+        expect(pool.shouldParallelize(1000, 'matvec')).toBe(true);
+      } finally {
+        pool.updateConfig({ thresholdByOp: prev });
+      }
     });
 
     it('no op argument uses global thresholdElements (backward compat)', () => {
