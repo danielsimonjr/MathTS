@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-expression
 
+## 0.5.0
+
+### Minor Changes
+
+- ce8f929: **Expression-language transforms wired** (the formerly-dormant `expression/src/transform` pocket — 25 transforms, mathjs-verified). Inside the expression language, semantics now match mathjs exactly (verified against mathjs 15 output): indices and dimensions are **one-based** (`A[1]` is the first element — previously zero-based, contradicting the parser's documented one-based design; `A[end]` works; `row(M, 1)`/`column(M, 1)` return the first row/column; `max`/`min`/`sum`/`mean`/`std`/`variance`/`cumsum` accept 1-based `dim` arguments — previously rejected), ranges include their end (`1:3` = `[1,2,3]`), map/filter/forEach callbacks receive one-based index arrays, and `and`/`or`/`??` short-circuit lazily (`rawArgs` — `true or undefinedVar` no longer throws). Each transform factory takes its base function as an **injected dependency** (no parallel implementation layer); the standalone compiler gained `rawArgs` and `end` support; the `MathJSDenseMatrix` bridge now invokes callbacks arity-appropriately (a typed 2-arg expression lambda previously threw "Too many arguments"). The programmatic API is unchanged — only the expression namespace gets transform semantics, exactly like mathjs. **This is a breaking change for expression strings that relied on the old zero-based indexing.**
+
+### Patch Changes
+
+- 598e72d: Wire the 92 formerly-dormant `embeddedDocs` entries (MathTS-native extensions: CAS/algebra, geometry, numeric, probability, signal, special) into the docs index — `help('polyFit')`, `help('gaussQuad')`, `help('besselJ0')`, etc. now work; previously these doc files existed but were invisible to `help()`. The one doc for a nonexistent function (`distribution`, a removed mathjs factory) was deleted rather than wired. A completeness test now pins that every documented function exists in the surface (docs never lie). Combined with the transform wiring, the expression package's dormant-file count drops 127 → ~4.
+
 ## 0.4.5
 
 ### Patch Changes

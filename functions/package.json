@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-functions",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "description": "Mathematical functions for MathTS - arithmetic, algebra, trigonometry, statistics, and more",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.5.0",
-    "@danielsimonjr/mathts-expression": "^0.4.5",
+    "@danielsimonjr/mathts-expression": "^0.5.0",
     "@danielsimonjr/mathts-matrix": "^0.2.0",
     "@danielsimonjr/mathts-parallel": "^0.3.2",
     "bignumber.js": "^9.1.2",
