@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (833 exports).
+> `@danielsimonjr/mathts-functions` (835 exports).
 
 ### Functions by category
 
@@ -495,7 +495,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (4): `bartlettTest`, `config`, `kolmogorovSmirnov2Test`, `leveneTest`
+**Other exports (uncategorized)** (6): `bartlettTest`, `config`, `hypergeometricDist`, `kolmogorovSmirnov2Test`, `leveneTest`, `negativeBinomialDist`
 
 ### Constants & values (61)
 

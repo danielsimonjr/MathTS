@@ -110,33 +110,34 @@ function _normalQuantileStd(p: f64): f64 {
   if (p >= 1) return Infinity;
   const a = [
     -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.38357751867269e2,
-    -3.066479806614716e1, 2.506628277459239e0,
+    -3.066479806614716e1, 2.506628277459239,
   ];
   const b = [
     -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1,
     -1.328068155288572e1,
   ];
   const c = [
-    -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838e0, -2.549732539343734e0,
-    4.374664141464968e0, 2.938163982698783e0,
+    -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838, -2.549732539343734,
+    4.374664141464968, 2.938163982698783,
   ];
-  const d = [
-    7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996e0, 3.754408661907416e0,
-  ];
+  const d = [7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996, 3.754408661907416];
   const pLow = 0.02425;
   let x: f64;
   if (p < pLow) {
     const q = Math.sqrt(-2 * Math.log(p));
-    x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+    x =
+      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
       ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
   } else if (p <= 1 - pLow) {
     const q = p - 0.5;
     const r = q * q;
-    x = ((((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q) /
+    x =
+      ((((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q) /
       (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
   } else {
     const q = Math.sqrt(-2 * Math.log(1 - p));
-    x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+    x =
+      -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
       ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
   }
   // One Halley refinement: e = Φ(x) − p, u = e·√(2π)·exp(x²/2).
@@ -1081,6 +1082,153 @@ export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
           const u = rng();
           out[i] = lambda * Math.pow(-Math.log(u < 1e-300 ? 1e-300 : u), 1 / k);
         }
+        return out;
+      }),
+  };
+}
+
+// =============================================================================
+// hypergeometricDist / negativeBinomialDist (Wave 3 — stats completeness)
+// =============================================================================
+
+/** log C(n, r) = ln(n! / (r!·(n−r)!)) via log-factorials (integer args). */
+function _logChoose(n: number, r: number): f64 {
+  if (r < 0 || r > n) return -Infinity;
+  return _logFactorial(n) - _logFactorial(r) - _logFactorial(n - r);
+}
+
+/**
+ * Exact binomial coefficient C(n, r) via the stable multiplicative recurrence
+ * (each partial `C(n,i)` is an exact integer). Exact in double precision while
+ * `C(n,r) < 2^53` — i.e. for the moderate populations hypergeometric sampling
+ * uses in practice — avoiding the ~1e-8 Stirling error of the log-factorial path.
+ */
+function _choose(n: number, r: number): f64 {
+  if (r < 0 || r > n) return 0;
+  const k = Math.min(r, n - r);
+  let c = 1;
+  for (let i = 0; i < k; i++) c = (c * (n - i)) / (i + 1);
+  return c;
+}
+
+/** Inverse-transform sampler for a discrete distribution: smallest k with cdf(k) ≥ u. */
+function _discreteSample(cdf: (k: f64) => f64, rng: () => number, cap: number): f64 {
+  const u = rng();
+  for (let k = 0; k <= cap; k++) {
+    if (cdf(k) >= u) return k;
+  }
+  return cap;
+}
+
+/**
+ * Hypergeometric distribution — the number of successes in `draws` samples drawn
+ * WITHOUT replacement from a `population` containing `successes` successes.
+ * `hypergeometricDist(population, successes, draws)` matches
+ * `scipy.stats.hypergeom(M=population, n=successes, N=draws)`.
+ *
+ * @example hypergeometricDist(50, 5, 10).pmf(1) // 0.4313371972
+ */
+export function hypergeometricDist(
+  population: number,
+  successes: number,
+  draws: number
+): Distribution {
+  if (![population, successes, draws].every((v) => Number.isInteger(v) && v >= 0)) {
+    throw new Error(
+      'hypergeometricDist: population, successes, draws must be non-negative integers'
+    );
+  }
+  if (successes > population || draws > population) {
+    throw new Error('hypergeometricDist: successes and draws cannot exceed population');
+  }
+  const M = population;
+  const K = successes;
+  const N = draws;
+  const kMin = Math.max(0, N - (M - K));
+  const kMax = Math.min(K, N);
+  // Exact binomials when C(M,N) fits in a double (the common case → full
+  // precision); fall back to the log path for very large populations.
+  const useExact = M <= 1000;
+  const pmf = (k: f64): f64 => {
+    if (!Number.isInteger(k) || k < kMin || k > kMax) return 0;
+    return useExact
+      ? (_choose(K, k) * _choose(M - K, N - k)) / _choose(M, N)
+      : Math.exp(_logChoose(K, k) + _logChoose(M - K, N - k) - _logChoose(M, N));
+  };
+  const cdf = (k: f64): f64 => {
+    if (k < kMin) return 0;
+    const kk = Math.min(Math.floor(k), kMax);
+    let sum = 0;
+    for (let i = kMin; i <= kk; i++) sum += pmf(i);
+    return Math.min(1, sum);
+  };
+  const mean = (N * K) / M;
+  const variance = N * (K / M) * ((M - K) / M) * ((M - N) / (M - 1));
+  return {
+    pdf: pmf,
+    cdf,
+    quantile: (p: f64) => {
+      if (p <= 0) return kMin;
+      if (p >= 1) return kMax;
+      for (let k = kMin; k <= kMax; k++) if (cdf(k) >= p) return k;
+      return kMax;
+    },
+    mean,
+    variance,
+    sample: () => _discreteSample(cdf, Math.random, kMax),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _discreteSample(cdf, rng, kMax);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Negative-binomial distribution — the number of failures before the `r`-th
+ * success in i.i.d. Bernoulli(`p`) trials. `negativeBinomialDist(r, p)` matches
+ * `scipy.stats.nbinom(r, p)` (integer `r`).
+ *
+ * @example negativeBinomialDist(5, 0.4).pmf(3) // 0.0774144
+ */
+export function negativeBinomialDist(r: number, p: f64): Distribution {
+  if (!Number.isInteger(r) || r < 1)
+    throw new Error('negativeBinomialDist: r must be a positive integer');
+  if (p <= 0 || p > 1) throw new Error('negativeBinomialDist: p must be in (0, 1]');
+  const pmf = (k: f64): f64 => {
+    if (!Number.isInteger(k) || k < 0) return 0;
+    return Math.exp(_logChoose(k + r - 1, k) + r * Math.log(p) + k * Math.log(1 - p));
+  };
+  // P(X ≤ k) = I_p(r, k+1) — regularized incomplete beta (matches scipy nbinom.cdf).
+  const cdf = (k: f64): f64 => {
+    if (k < 0) return 0;
+    return Math.min(1, _betainc(p, r, Math.floor(k) + 1));
+  };
+  const mean = (r * (1 - p)) / p;
+  const variance = (r * (1 - p)) / (p * p);
+  return {
+    pdf: pmf,
+    cdf,
+    quantile: (prob: f64) => {
+      if (prob <= 0) return 0;
+      if (prob >= 1) return Infinity;
+      let cumul = 0;
+      for (let k = 0; k < 100000; k++) {
+        cumul += pmf(k);
+        if (cumul >= prob) return k;
+      }
+      return Infinity;
+    },
+    mean,
+    variance,
+    sample: () =>
+      _discreteSample(cdf, Math.random, Math.ceil(mean + 20 * Math.sqrt(variance) + 20)),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        const cap = Math.ceil(mean + 20 * Math.sqrt(variance) + 20);
+        for (let j = 0; j < count; j++) out[j] = _discreteSample(cdf, rng, cap);
         return out;
       }),
   };

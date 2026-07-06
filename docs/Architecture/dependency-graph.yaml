@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-06'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4589
+  totalExports: 4591
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15249,6 +15249,8 @@ modules:
         - tDist
         - uniformDist
         - weibullDist
+        - hypergeometricDist
+        - negativeBinomialDist
       interfaces:
         - SampleNOptions
         - Distribution
@@ -15265,6 +15267,8 @@ modules:
         - tDist
         - uniformDist
         - weibullDist
+        - hypergeometricDist
+        - negativeBinomialDist
       constants:
         - DIST_WORKER_THRESHOLD
     functions/src/typed/distributions.ts:
@@ -30806,11 +30810,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166097
-  totalExports: 4589
+  totalLinesOfCode: 166236
+  totalExports: 4591
   totalClasses: 55
   totalInterfaces: 384
-  totalFunctions: 1505
+  totalFunctions: 1507
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529

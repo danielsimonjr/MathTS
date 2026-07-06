@@ -14,6 +14,7 @@ completeness was not). Each function pinned to scipy 1.17.1.
 - **Wave 1**: `kolmogorovSmirnov2Test` — two-sample KS (D pinned to `scipy.stats.ks_2samp`,
   p to the asymptotic `kstwobign` survival function). The prior KS was one-sample only.
 - **Wave 2**: `leveneTest` (Brown-Forsythe median-centered default) + `bartlettTest` variance-homogeneity tests, pinned to `scipy.stats.levene`/`bartlett`.
+- **Wave 3**: `hypergeometricDist`/`negativeBinomialDist` (pmf/cdf/mean/variance/quantile/sample) pinned to `scipy.stats.hypergeom`/`nbinom`; exact-binomial pmf for full precision.
 
 ### Added/Fixed (2026-07-05) — `config()` drives behavior; compat uses the real functions types (GC12)
 

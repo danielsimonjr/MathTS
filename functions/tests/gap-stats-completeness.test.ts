@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { kolmogorovSmirnov2Test, leveneTest, bartlettTest } from '../src/index.js';
+import {
+  kolmogorovSmirnov2Test,
+  leveneTest,
+  bartlettTest,
+  hypergeometricDist,
+  negativeBinomialDist,
+} from '../src/index.js';
 
 /**
  * Statistics/probability completeness waves (2026-07-06) — closing the breadth
@@ -69,5 +75,37 @@ describe('Wave 2: Levene + Bartlett vs scipy', () => {
   it('both reject <2 groups', () => {
     expect(() => leveneTest([g1])).toThrow(/at least 2/);
     expect(() => bartlettTest([g1])).toThrow(/at least 2/);
+  });
+});
+
+describe('Wave 3: hypergeometric + negative-binomial vs scipy', () => {
+  it('hypergeometricDist(50,5,10) pmf/cdf/mean/var match scipy.stats.hypergeom', () => {
+    const h = hypergeometricDist(50, 5, 10);
+    const pmf = [0.310562782, 0.4313371972, 0.2098397176, 0.0441767826, 0.0039645831, 0.0001189375];
+    pmf.forEach((v, k) => expect(h.pdf(k)).toBeCloseTo(v, 10));
+    expect(h.cdf(2)).toBeCloseTo(0.9517396968, 9);
+    expect(h.mean).toBeCloseTo(1.0, 12);
+    expect(h.variance).toBeCloseTo(0.7346938776, 9);
+    // pmf sums to 1 over support
+    let s = 0;
+    for (let k = 0; k <= 5; k++) s += h.pdf(k);
+    expect(s).toBeCloseTo(1, 10);
+  });
+
+  it('negativeBinomialDist(5,0.4) pmf/cdf/mean/var match scipy.stats.nbinom', () => {
+    const nb = negativeBinomialDist(5, 0.4);
+    expect(nb.pdf(0)).toBeCloseTo(0.01024, 10);
+    expect(nb.pdf(3)).toBeCloseTo(0.0774144, 10);
+    expect(nb.pdf(5)).toBeCloseTo(0.1003290624, 9);
+    expect(nb.pdf(10)).toBeCloseTo(0.0619792816, 9);
+    expect(nb.cdf(5)).toBeCloseTo(0.3668967424, 8);
+    expect(nb.mean).toBeCloseTo(7.5, 10);
+    expect(nb.variance).toBeCloseTo(18.75, 10);
+  });
+
+  it('reject invalid params', () => {
+    expect(() => hypergeometricDist(10, 20, 5)).toThrow();
+    expect(() => negativeBinomialDist(0, 0.5)).toThrow();
+    expect(() => negativeBinomialDist(5, 1.5)).toThrow();
   });
 });
