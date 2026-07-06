@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — `expand` distribution bug (caught by new CAS-vs-sympy oracle, GC11)
+
+`expand('(x + 1)*(x - 2)')` returned `x*x - 2 + 1*x - 2` (value x²+x−4) instead of x²−x−2: it
+split each factor on `+` only, so `x - 2` stayed one term and the `−2` dangled through
+distribution. Fixed by normalizing binary subtraction to a signed term (`x - 2` →
+`["x", "-2"]`) before distributing. Found by a new external-oracle test
+(`gap-cas-sympy-oracle.test.ts`, GC11) pinning derivative/simplify/expand/factor/rationalize to
+**sympy 1.14.0** via numeric agreement at sample points — implementation-independent, not
+self-referential. 17 oracle pins; 177 algebra/cas regression tests green.
+
 ### Fixed (2026-07-05) — `cbrt(number, allRoots)` real two-arg form (was broken)
 
 `cbrt(8, true)` threw "Too many arguments (expected 1, actual 2)"; only the `Complex`

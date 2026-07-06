@@ -536,13 +536,23 @@ export function expand(expr: string): string {
   // Handle (expr)^2 => (expr)*(expr)
   result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
 
-  // Handle (a+b)*(c+d) by distributing
+  // Split a factor into its additive terms, treating binary subtraction as a
+  // signed term: "x - 2" → ["x", "-2"] (NOT ["x - 2"]). Without this the minus
+  // dangled and `x*(x-2)` distributed to "x*x - 2" instead of "x*x + x*-2".
+  const splitTerms = (factor: string): string[] =>
+    factor
+      .replace(/\s*-\s*/g, ' + -')
+      .split(/\s*\+\s*/)
+      .map((t) => t.trim())
+      .filter((t) => t !== '');
+
+  // Handle (a±b)*(c±d) by distributing
   const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
   let match: RegExpExecArray | null;
 
   while ((match = mulPattern.exec(result)) !== null) {
-    const leftTerms = match[1].split(/\s*\+\s*/);
-    const rightTerms = match[2].split(/\s*\+\s*/);
+    const leftTerms = splitTerms(match[1]);
+    const rightTerms = splitTerms(match[2]);
     const products: string[] = [];
     for (const l of leftTerms) {
       for (const r of rightTerms) {

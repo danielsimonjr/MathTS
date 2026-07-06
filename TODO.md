@@ -658,7 +658,21 @@ Consolidated, deduplicated, and prioritized from the two refreshed reports —
 (type-dispatch / parity / correctness-coverage) and
 [`GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` Part 5](docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md#part-5--revision-3-re-validation-2026-06-29)
 (the 10 integration bridges). Effort key: **S** ≤ 1 day · **M** ≈ 2–5 days · **L** ≈ 1–2 weeks.
-Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
+
+> **Status reconciliation (verified 2026-07-05 against code/tests, not markers).** The table
+> rows below predate several sessions and understate completion. Actually **DONE** (each has a
+> passing test): **GC1** (`variance-normalization-consistency.test.ts`), **GC3** (scipy-pinned
+> `normal-cdf-accuracy` + `gap-distribution-oracles`), **GC8** (`tensorSvdWasm`/`tensorEigWasm`
+> wired), **GC9** (`tape-pow-taped-ad.test.ts` — variable-exponent AD), **GC10** (acsc/asec/acot
+> BigNumber paths), **GC14** (FFT `shouldParallelize` size-dispatch; `ThresholdDispatcher` is an
+> unused-but-harmless abstraction). **PARTIAL** (real remaining work): **GC2** (generator +
+> `docs:functions:check` exist but no hook/CI gates the drift-check), **GC6** (lgamma/gamma
+> complex oracles exist; `zeta(Complex)` unimplemented — larger numeric effort), **GC11**
+> (decomposition + units oracles done; **CAS-vs-sympy oracle DONE 2026-07-05** — sympy-1.14 numeric pins; caught + fixed a real `expand` distribution bug),
+> **GC12** (chain API done; `config()` inert + `functions.d.ts` narrow — needs a core runtime-config
+> mechanism, an architectural effort). **OPEN but HELD:** **GC13** (workbook `tensor`/`export`
+> cells parse-reject) — deferred with the workbook hold. `cbrt(number, allRoots)` FIXED 2026-07-05.
+> Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
 
 | ID         | Action                                                                                                                          | Source        | Effort   | Priority | Why now                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
