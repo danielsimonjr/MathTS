@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-statistics",
   "version": "0.1.16",
-  "description": "Standalone statistics functions for MathTS, re-exported as a focused package",
+  "description": "Statistics & probability for MathTS — descriptive stats, distributions, hypothesis tests, and combinatorics, every function externally oracle-pinned (SciPy/NumPy/closed-form)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -52,8 +52,21 @@
     "math",
     "typescript",
     "statistics",
-    "mean",
-    "variance",
-    "quantile"
+    "probability",
+    "distribution",
+    "hypothesis-test",
+    "anova",
+    "t-test",
+    "ks-test",
+    "levene",
+    "bartlett",
+    "kendall",
+    "spearman",
+    "normal",
+    "gamma",
+    "beta",
+    "binomial",
+    "poisson",
+    "scipy"
   ]
 }

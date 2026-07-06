@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-06) — @danielsimonjr/mathts-statistics is now a full statistics & probability library
+
+The focused statistics package graduated from a narrow parallelStat* re-export (~23 names) to a
+comprehensive statistics & probability library (~100 exports): descriptive statistics (incl.
+kendallTau/spearman/skewness/kurtosis/cov/corrcoef), 14 probability distributions with full
+object methods, the complete hypothesis-test suite (t/paired-t/ANOVA/chi-square/one+two-sample
+KS/Mann-Whitney/Shapiro-Wilk/Levene/Bartlett/proportion-z/binomial/F/Jarque-Bera/Kruskal-Wallis/
+Wilcoxon/Fisher-exact/Tukey-HSD/PCA), and probability & combinatorics (counting + seedable RNG).
+Every function is externally oracle-pinned in the functions suite; re-exported, not duplicated.
+
 ### Added (2026-07-06) — statistics/probability completeness waves (scipy-pinned)
 
 Closing the breadth gap identified by the oracle audit (rigor was already at matrix level;
