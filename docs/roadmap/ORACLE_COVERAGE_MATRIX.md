@@ -1,6 +1,16 @@
 <!-- prettier-ignore-start -->
 # Oracle Coverage Matrix
 
+> **Completeness waves (2026-07-06).** The statistics/probability domain was audited against
+> the matrix package's "every function present AND value-pinned" bar. Rigor already matched;
+> the gap was *breadth*. Eight standard functions were added, each scipy-1.17.1-pinned
+> (`functions/tests/gap-stats-completeness.test.ts`): **`kolmogorovSmirnov2Test`** (two-sample
+> KS), **`leveneTest`** + **`bartlettTest`** (variance homogeneity), **`hypergeometricDist`** +
+> **`negativeBinomialDist`**, **`studentTTestPaired`**, **`proportionZTest`** (one/two-sample),
+> **`binomialTest`**, **`kendallTau`** (τ_b) — and external pins were added for
+> `poissonDist.cdf` / `logNormalDist.quantile` / `weibullDist.quantile` (previously round-trip
+> only). Statistics/probability is now at matrix-level completeness *and* rigor.
+
 > **What this is.** A per-domain matrix of which public typed functions are verified
 > against an **external oracle** (pinned reference values from SciPy / NumPy / mpmath /
 > DLMF / Abramowitz&Stegun, or a mathematically-independent closed form) versus those
