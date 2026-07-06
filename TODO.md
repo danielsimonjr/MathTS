@@ -1527,11 +1527,13 @@ below are limited to operations that genuinely clear that bar.
       single source of closed-form roots; `solve` keeps coefficient extraction,
       root cleaning, and the numeric fallback for degree ≥ 4 / transcendental.
 
-- [ ] **(Minor, open) `cbrt(number, allRoots=true)` is still unimplemented.**
-      `cbrt(8, true)` throws "Too many arguments (expected 1, actual 2)"; stock
-      mathjs returns the three complex cube roots. Only the **real-number** 2-arg
-      form is missing — the `Complex` allRoots path used by `polynomialRoot`
-      works. Low priority (no current consumer needs the real-number form).
+- [x] **`cbrt(number, allRoots)` implemented 2026-07-05.** `cbrt(8, true)` returns
+      the three complex cube roots `[2, -1±i√3]`, `cbrt(8, false)` the principal root —
+      mathjs-15 parity, on both the programmatic (`typed/arithmetic`) and expression-language
+      (`arithmetic/cbrt` factory) paths. Root cause: typed-function did not synthesize
+      `number, boolean` from a number→Complex conversion as the source comment assumed;
+      explicit `number, boolean` / `Complex, boolean` signatures added. Oracle-pinned
+      (`gap-cbrt-allroots.test.ts`: roots cube back to input).
 
 ### Fixed (2026-05-22)
 

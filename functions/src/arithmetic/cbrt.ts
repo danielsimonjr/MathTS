@@ -118,8 +118,18 @@ export const createCbrt = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: cbrtNumber,
-      // note: signature 'number, boolean' is also supported,
-      //       created by typed as it knows how to convert number to Complex
+
+      // The two-argument real form. mathjs assumes typed-function synthesizes
+      // this from `Complex, boolean` via a number→Complex conversion, but the
+      // MathTS typed instance does not, so it is registered explicitly: route
+      // through the complex cube-root path (all three roots when allRoots, the
+      // principal Complex root otherwise) — matching mathjs `cbrt(8, true)`.
+      'number, boolean': function (
+        x: number,
+        allRoots: boolean
+      ): ComplexType | ComplexType[] | unknown {
+        return _cbrtComplex(new Complex(x, 0), allRoots);
+      },
 
       Complex: _cbrtComplex,
 

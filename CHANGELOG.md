@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — `cbrt(number, allRoots)` real two-arg form (was broken)
+
+`cbrt(8, true)` threw "Too many arguments (expected 1, actual 2)"; only the `Complex`
+allRoots path existed. The source assumed typed-function would synthesize `number, boolean`
+via a number→Complex conversion — the MathTS instance does not. Added explicit
+`number, boolean` / `Complex, boolean` signatures on both the programmatic (`typed/arithmetic`)
+and expression-language (`arithmetic/cbrt` factory) cbrt: `cbrt(8, true)` → `[2, -1±i√3]`,
+`cbrt(8, false)` → principal root (mathjs-15 parity). Oracle-pinned (each root cubes back to
+the input).
+
 ### Added/Removed (2026-07-05) — core `Range` wired into public API; vestigial guard cluster removed
 
 Completing the dormancy sweep ("full integration, no deference"): the core package's

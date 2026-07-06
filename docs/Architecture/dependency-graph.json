@@ -2,7 +2,7 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-05",
+    "lastUpdated": "2026-07-06",
     "totalFiles": 995,
     "totalModules": 73,
     "totalExports": 4584
@@ -33091,7 +33091,7 @@
   "statistics": {
     "totalTypeScriptFiles": 995,
     "totalModules": 73,
-    "totalLinesOfCode": 165861,
+    "totalLinesOfCode": 165895,
     "totalExports": 4584,
     "totalClasses": 55,
     "totalInterfaces": 383,

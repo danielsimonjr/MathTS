@@ -622,6 +622,17 @@ export const cube = mathTyped('cube', {
 });
 
 /**
+ * The three complex cube roots of `z`, principal first: |z|^(1/3)·e^(i·arg/3)
+ * rotated by 0, +2π/3, −2π/3. Matches mathjs `cbrt(x, true)` ordering.
+ */
+function cbrtAllRoots(z: Complex): Complex[] {
+  const arg3 = z.arg() / 3;
+  const r = Math.cbrt(z.abs());
+  const rotate = (theta: number): Complex => new Complex(r, 0).mul(new Complex(0, theta).exp());
+  return [rotate(arg3), rotate(arg3 + (Math.PI * 2) / 3), rotate(arg3 - (Math.PI * 2) / 3)];
+}
+
+/**
  * Cube root
  */
 export const cbrt = mathTyped('cbrt', {
@@ -629,6 +640,18 @@ export const cbrt = mathTyped('cbrt', {
   Complex: (a: Complex): Complex => a.pow(1 / 3),
   BigNumber: (a: BigNumber): BigNumber => a.cbrt(),
   Dual: (a: Dual): Dual => a.powConst(1 / 3),
+
+  // Two-argument allRoots forms (mathjs parity). When `allRoots` is true, all
+  // three complex cube roots are returned (principal first); otherwise the
+  // principal complex root. The real `number` case routes through the complex
+  // path exactly like mathjs `cbrt(8, true)` → [2, -1±i√3].
+  'number, boolean': (a: f64, allRoots: boolean): Complex | Complex[] => {
+    const z = new Complex(a, 0);
+    return allRoots ? cbrtAllRoots(z) : cbrtAllRoots(z)[0];
+  },
+  'Complex, boolean': (a: Complex, allRoots: boolean): Complex | Complex[] => {
+    return allRoots ? cbrtAllRoots(a) : cbrtAllRoots(a)[0];
+  },
 
   // Parallel array cbrt
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
