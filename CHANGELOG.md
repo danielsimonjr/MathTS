@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-05) — function-reference drift now auto-gated in pre-commit (GC2); docs resynced
+
+The function/export reference (`docs/api/*.md`, `docs/reference/functions.md[.html]`) is a pure
+function of the exported surface, so a `src/` change can silently stale it — which just happened
+(the core `Range` wiring left `Range`/`createRangeClass` undocumented). Added `docs:functions`
+regeneration to `.husky/pre-commit`, gated on `src/` changes exactly like the existing `docs:deps`
+block (build-free, ~8s), so the reference can no longer drift (GC2 — CI editing was off-limits, so
+the pre-commit is the automation surface). Regenerated all 7 doc blocks to sync the current 829-export
+surface (incl. the new `Range`).
+
 ### Fixed (2026-07-05) — `expand` distribution bug (caught by new CAS-vs-sympy oracle, GC11)
 
 `expand('(x + 1)*(x - 2)')` returned `x*x - 2 + 1*x - 2` (value x²+x−4) instead of x²−x−2: it

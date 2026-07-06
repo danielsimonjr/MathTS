@@ -309,18 +309,18 @@ See [typed-function documentation](https://github.com/josdejong/typed-function) 
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (92 exports).
+> `@danielsimonjr/mathts-core` (94 exports).
 
-### Functions (43)
+### Functions (44)
 
-`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `number`, `pow`, `registerNativeTypes`, `round`, `subtractScalar`, `typed`, `UnitParseError`
+`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `number`, `pow`, `registerNativeTypes`, `round`, `subtractScalar`, `typed`, `UnitParseError`
 
 ### Constants & values (42)
 
 `ALL_UNITS`, `BASE_UNITS`, `BEST_PREFIXES`, `BIGNUMBER_E`, `BIGNUMBER_LN10`, `BIGNUMBER_LN2`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_TEN`, `BIGNUMBER_ZERO`, `COMPLEX_NEG_ONE`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `DEFAULT_CONFIG`, `DERIVED_UNITS`, `DIMENSIONLESS`, `DUAL_UNARY_RULES`, `E`, `FRACTION_HALF`, `FRACTION_NEG_ONE`, `FRACTION_ONE`, `FRACTION_QUARTER`, `FRACTION_THIRD`, `FRACTION_ZERO`, `I`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `math`, `MATHTS_CONVERSIONS`, `MATHTS_TYPES`, `PHI`, `PI`, `registry`, `SI_PREFIXES`, `SQRT1_2`, `SQRT2`, `TAU`, `UNIT_ALIASES`, `VERSION`
 
-### Classes & types (7)
+### Classes & types (8)
 
-`BigNumber`, `Complex`, `Dual`, `Fraction`, `FunctionRegistry`, `TypeRegistry`, `Unit`
+`BigNumber`, `Complex`, `Dual`, `Fraction`, `FunctionRegistry`, `Range`, `TypeRegistry`, `Unit`
 
 <!-- END GENERATED EXPORT INDEX -->
