@@ -7722,7 +7722,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`
-- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`
+- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`
 
 ---
 
@@ -14894,12 +14894,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 996    |
 | Total Modules           | 73     |
-| Total Lines of Code     | 165947 |
-| Total Exports           | 4586   |
+| Total Lines of Code     | 166006 |
+| Total Exports           | 4587   |
 | Total Re-exports        | 1539   |
 | Total Classes           | 55     |
 | Total Interfaces        | 383    |
-| Total Functions         | 1502   |
+| Total Functions         | 1503   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 502    |

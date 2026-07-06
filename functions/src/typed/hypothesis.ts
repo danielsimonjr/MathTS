@@ -1387,3 +1387,63 @@ export function principalComponentAnalysis(data: f64[][], k?: number): PCAResult
 
   return { components: eigenvectors, explained, scores };
 }
+
+// =============================================================================
+// kolmogorovSmirnov2Test — two-sample KS (Wave 1, GC-stats completeness)
+// =============================================================================
+
+/**
+ * Survival function of the limiting Kolmogorov distribution (`kstwobign` in
+ * scipy): Q(x) = 2 Σ_{k=1}^∞ (-1)^(k-1) e^(-2 k² x²), clamped to [0, 1]. This is
+ * the large-sample asymptotic used for the two-sample KS p-value.
+ */
+function _kstwobignSf(x: f64): f64 {
+  if (x <= 0) return 1;
+  let sum = 0;
+  for (let k = 1; k <= 100; k++) {
+    const term = 2 * (k % 2 === 1 ? 1 : -1) * Math.exp(-2 * k * k * x * x);
+    sum += term;
+    if (Math.abs(term) < 1e-15) break;
+  }
+  return Math.max(0, Math.min(1, sum));
+}
+
+/**
+ * Two-sample Kolmogorov–Smirnov test: are two samples drawn from the same
+ * continuous distribution? The statistic is the maximum gap between the two
+ * empirical CDFs, D = maxₓ |F₁(x) − F₂(x)|; the p-value is the large-sample
+ * asymptotic Q(√(n₁n₂/(n₁+n₂))·D) (the `kstwobign` survival function, matching
+ * scipy's asymptotic method for large n). Distinct from the one-sample
+ * {@link kolmogorovSmirnovTest}, which compares one sample to a CDF *function*.
+ *
+ * @param sample1 - first sample (non-empty)
+ * @param sample2 - second sample (non-empty)
+ * @returns `{ statistic: D, pValue }`
+ *
+ * @example
+ * kolmogorovSmirnov2Test([0.1, 0.4, 0.6], [0.3, 0.5, 0.9]) // { statistic, pValue }
+ */
+export function kolmogorovSmirnov2Test(sample1: f64[], sample2: f64[]): KSTestResult {
+  const n1 = sample1.length;
+  const n2 = sample2.length;
+  if (n1 < 1 || n2 < 1) {
+    throw new Error('kolmogorovSmirnov2Test: both samples must be non-empty');
+  }
+  const a = sample1.slice().sort((x, y) => x - y);
+  const b = sample2.slice().sort((x, y) => x - y);
+
+  // Merge-walk the two sorted samples, advancing past all ties at each distinct
+  // value so the empirical-CDF comparison is evaluated only at step points.
+  let i = 0;
+  let j = 0;
+  let d = 0;
+  while (i < n1 && j < n2) {
+    const x = Math.min(a[i], b[j]);
+    while (i < n1 && a[i] <= x) i++;
+    while (j < n2 && b[j] <= x) j++;
+    d = Math.max(d, Math.abs(i / n1 - j / n2));
+  }
+
+  const en = Math.sqrt((n1 * n2) / (n1 + n2));
+  return { statistic: d, pValue: _kstwobignSf(en * d) };
+}

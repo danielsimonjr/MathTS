@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-06) — statistics/probability completeness waves (scipy-pinned)
+
+Closing the breadth gap identified by the oracle audit (rigor was already at matrix level;
+completeness was not). Each function pinned to scipy 1.17.1.
+- **Wave 1**: `kolmogorovSmirnov2Test` — two-sample KS (D pinned to `scipy.stats.ks_2samp`,
+  p to the asymptotic `kstwobign` survival function). The prior KS was one-sample only.
+
 ### Added/Fixed (2026-07-05) — `config()` drives behavior; compat uses the real functions types (GC12)
 
 - **functions** gains `config()` (`config-api.ts`): read the global runtime config or merge a

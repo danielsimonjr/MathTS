@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-06",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4586
+    "totalExports": 4587
   },
   "entryPoints": [
     {
@@ -17072,7 +17072,8 @@
           "kolmogorovSmirnovTest",
           "mannWhitneyTest",
           "shapiroWilkTest",
-          "principalComponentAnalysis"
+          "principalComponentAnalysis",
+          "kolmogorovSmirnov2Test"
         ],
         "interfaces": [
           "TTestResult",
@@ -17095,7 +17096,8 @@
           "kolmogorovSmirnovTest",
           "mannWhitneyTest",
           "shapiroWilkTest",
-          "principalComponentAnalysis"
+          "principalComponentAnalysis",
+          "kolmogorovSmirnov2Test"
         ]
       },
       "functions/src/typed/index.ts": {
@@ -33118,11 +33120,11 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 165947,
-    "totalExports": 4586,
+    "totalLinesOfCode": 166006,
+    "totalExports": 4587,
     "totalClasses": 55,
     "totalInterfaces": 383,
-    "totalFunctions": 1502,
+    "totalFunctions": 1503,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
