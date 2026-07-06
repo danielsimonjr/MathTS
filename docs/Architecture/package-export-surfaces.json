@@ -2287,6 +2287,7 @@
       "jsDivergence",
       "kdTree",
       "kdTreeNearest",
+      "kendallTau",
       "kernelSource",
       "kldivergence",
       "klitzing",

@@ -231,3 +231,41 @@ export function corrcoef(matrix: number[][]): number[][] {
     Array.from({ length: n }, (_, j) => c[i][j] / (d[i] * d[j]))
   );
 }
+
+/**
+ * Kendall's τ_b rank correlation coefficient — a tie-corrected measure of
+ * ordinal association based on the difference between concordant and discordant
+ * pairs. Complements {@link spearman} (rank Pearson) and Pearson `corr`.
+ * Returns τ_b = (P − Q) / √((n₀ − n₁)(n₀ − n₂)), matching `scipy.stats.kendalltau`
+ * (`variant='b'`, its default), where n₀ = n(n−1)/2 and n₁/n₂ are the tie-pair
+ * counts in x and y respectively.
+ *
+ * @example kendallTau([1,2,3,4,5], [2,1,4,3,5]) // 0.6
+ */
+export function kendallTau(x: Vec, y: Vec): number {
+  const n = x.length;
+  if (n !== y.length) throw new Error('kendallTau: inputs must have equal length');
+  if (n < 2) return NaN;
+  let P = 0;
+  let Q = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const s = Math.sign(x[j] - x[i]) * Math.sign(y[j] - y[i]);
+      if (s > 0) P++;
+      else if (s < 0) Q++;
+    }
+  }
+  const n0 = (n * (n - 1)) / 2;
+  const tiePairs = (arr: Vec): number => {
+    const counts = new Map<number, number>();
+    for (const v of arr) counts.set(v, (counts.get(v) ?? 0) + 1);
+    let s = 0;
+    for (const c of counts.values()) s += (c * (c - 1)) / 2;
+    return s;
+  };
+  const n1 = tiePairs(x);
+  const n2 = tiePairs(y);
+  const denom = Math.sqrt((n0 - n1) * (n0 - n2));
+  if (denom === 0) return NaN;
+  return (P - Q) / denom;
+}

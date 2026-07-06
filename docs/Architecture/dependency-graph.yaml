@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-06'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4594
+  totalExports: 4596
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7095,6 +7095,7 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - kendallTau
       functions:
         - rankdata
         - spearman
@@ -7108,6 +7109,7 @@ modules:
         - zscore
         - cov
         - corrcoef
+        - kendallTau
     functions/src/distribution-functions.ts:
       description: Standalone distribution CDF / quantile functions (Wave B / bridge C4).
       externalDependencies: []
@@ -7340,6 +7342,7 @@ modules:
             - corrcoef
             - rankdata
             - spearman
+            - kendallTau
           reExport: true
         - file: ./numeric-extra.js
           imports:
@@ -7508,6 +7511,7 @@ modules:
         - corrcoef
         - rankdata
         - spearman
+        - kendallTau
         - clamp
         - sigmoid
         - logsumexp
@@ -7621,6 +7625,7 @@ modules:
         - corrcoef
         - rankdata
         - spearman
+        - kendallTau
         - clamp
         - sigmoid
         - logsumexp
@@ -30820,15 +30825,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166346
-  totalExports: 4594
+  totalLinesOfCode: 166385
+  totalExports: 4596
   totalClasses: 55
   totalInterfaces: 385
-  totalFunctions: 1510
+  totalFunctions: 1511
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1539
+  totalReExports: 1540
   totalTypeOnlyImports: 502
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

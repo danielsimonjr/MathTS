@@ -8,6 +8,10 @@ import {
   studentTTestPaired,
   proportionZTest,
   binomialTest,
+  kendallTau,
+  poissonDist,
+  logNormalDist,
+  weibullDist,
 } from '../src/index.js';
 
 /**
@@ -142,5 +146,33 @@ describe('Wave 4: paired-t / proportion-z / binomial test vs scipy', () => {
   it('rejects malformed inputs', () => {
     expect(() => studentTTestPaired([1, 2], [1])).toThrow();
     expect(() => binomialTest(25, 20, 0.5)).toThrow();
+  });
+});
+
+describe('Wave 5: Kendall tau + external pins for 3 round-trip methods', () => {
+  it('kendallTau (no ties) matches scipy.stats.kendalltau', () => {
+    expect(kendallTau([1, 2, 3, 4, 5], [2, 1, 4, 3, 5])).toBeCloseTo(0.6, 12);
+  });
+
+  it('kendallTau (with ties, τ_b correction) matches scipy', () => {
+    expect(kendallTau([1, 2, 2, 3, 4], [1, 3, 2, 4, 5])).toBeCloseTo(0.9486832981, 9);
+  });
+
+  it('kendallTau perfect concordance/discordance', () => {
+    expect(kendallTau([1, 2, 3, 4], [1, 2, 3, 4])).toBeCloseTo(1, 12);
+    expect(kendallTau([1, 2, 3, 4], [4, 3, 2, 1])).toBeCloseTo(-1, 12);
+  });
+
+  // External scipy pins for methods previously verified only by inversion round-trips
+  it('poissonDist(3).cdf(2) pinned to scipy.stats.poisson', () => {
+    expect(poissonDist(3).cdf(2)).toBeCloseTo(0.423190081127, 11);
+  });
+
+  it('logNormalDist(0,1).quantile(0.9) pinned to scipy.stats.lognorm.ppf', () => {
+    expect(logNormalDist(0, 1).quantile(0.9)).toBeCloseTo(3.602224479279, 10);
+  });
+
+  it('weibullDist(2,1).quantile(0.5) pinned to scipy.stats.weibull_min.ppf', () => {
+    expect(weibullDist(2, 1).quantile(0.5)).toBeCloseTo(0.832554611158, 11);
   });
 });
