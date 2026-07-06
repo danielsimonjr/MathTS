@@ -7718,11 +7718,12 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
+| `./special.js` | `erfcScalar` | Import |
 
 **Exports:**
 
-- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `VarianceTestResult`
-- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`
+- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `VarianceTestResult`, `ProportionZResult`
+- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`
 
 ---
 
@@ -14894,12 +14895,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 996    |
 | Total Modules           | 73     |
-| Total Lines of Code     | 166236 |
-| Total Exports           | 4591   |
+| Total Lines of Code     | 166346 |
+| Total Exports           | 4594   |
 | Total Re-exports        | 1539   |
 | Total Classes           | 55     |
-| Total Interfaces        | 384    |
-| Total Functions         | 1507   |
+| Total Interfaces        | 385    |
+| Total Functions         | 1510   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 502    |

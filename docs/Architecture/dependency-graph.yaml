@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-06'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4591
+  totalExports: 4594
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15501,6 +15501,9 @@ modules:
           imports:
             - sortF64Dispatch
             - WASM_SORT_THRESHOLD
+        - file: ./special.js
+          imports:
+            - erfcScalar
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -15517,6 +15520,9 @@ modules:
         - kolmogorovSmirnov2Test
         - leveneTest
         - bartlettTest
+        - studentTTestPaired
+        - proportionZTest
+        - binomialTest
       interfaces:
         - TTestResult
         - ChiSquareResult
@@ -15531,6 +15537,7 @@ modules:
         - SWBootstrapResult
         - ChiSquareBootstrapResult
         - VarianceTestResult
+        - ProportionZResult
       functions:
         - studentTTest
         - chiSquareTest
@@ -15542,6 +15549,9 @@ modules:
         - kolmogorovSmirnov2Test
         - leveneTest
         - bartlettTest
+        - studentTTestPaired
+        - proportionZTest
+        - binomialTest
     functions/src/typed/index.ts:
       description: Typed Functions Index (Parallel-First)
       externalDependencies: []
@@ -30810,11 +30820,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166236
-  totalExports: 4591
+  totalLinesOfCode: 166346
+  totalExports: 4594
   totalClasses: 55
-  totalInterfaces: 384
-  totalFunctions: 1507
+  totalInterfaces: 385
+  totalFunctions: 1510
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529

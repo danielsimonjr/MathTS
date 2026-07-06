@@ -15,6 +15,7 @@ completeness was not). Each function pinned to scipy 1.17.1.
   p to the asymptotic `kstwobign` survival function). The prior KS was one-sample only.
 - **Wave 2**: `leveneTest` (Brown-Forsythe median-centered default) + `bartlettTest` variance-homogeneity tests, pinned to `scipy.stats.levene`/`bartlett`.
 - **Wave 3**: `hypergeometricDist`/`negativeBinomialDist` (pmf/cdf/mean/variance/quantile/sample) pinned to `scipy.stats.hypergeom`/`nbinom`; exact-binomial pmf for full precision.
+- **Wave 4**: `studentTTestPaired` (ttest_rel), `proportionZTest` (one/two-sample, pooled), `binomialTest` (exact two-sided) — pinned to scipy; proportion p-value uses the accurate erfc for full precision.
 
 ### Added/Fixed (2026-07-05) — `config()` drives behavior; compat uses the real functions types (GC12)
 

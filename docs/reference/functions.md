@@ -2040,7 +2040,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (835 exports).
+> `@danielsimonjr/mathts-functions` (838 exports).
 
 ### Functions by category
 
@@ -2096,7 +2096,7 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (6): `bartlettTest`, `config`, `hypergeometricDist`, `kolmogorovSmirnov2Test`, `leveneTest`, `negativeBinomialDist`
+**Other exports (uncategorized)** (9): `bartlettTest`, `binomialTest`, `config`, `hypergeometricDist`, `kolmogorovSmirnov2Test`, `leveneTest`, `negativeBinomialDist`, `proportionZTest`, `studentTTestPaired`
 
 ### Constants & values (61)
 

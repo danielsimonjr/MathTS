@@ -32,6 +32,7 @@
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
+import { erfcScalar } from './special.js';
 
 // =============================================================================
 // Type Definitions
@@ -1537,4 +1538,104 @@ export function bartlettTest(groups: f64[][]): VarianceTestResult {
   const C = 1 + (sumInv - 1 / (N - k)) / (3 * (k - 1));
   const T = numerator / C;
   return { statistic: T, pValue: _chiSquaredPValue(T, k - 1), degreesOfFreedom: k - 1 };
+}
+
+// =============================================================================
+// Wave 4 — paired t-test, proportion z-test, binomial test
+// =============================================================================
+
+/**
+ * Paired (dependent-samples) t-test: tests whether the mean of the paired
+ * differences x−y is zero. Distinct from the two-sample Welch test in
+ * {@link studentTTest}, which assumes independent samples. Pinned to
+ * `scipy.stats.ttest_rel`.
+ *
+ * @example studentTTestPaired([1.2,2.3,3.1], [1.0,2.0,3.5]) // { statistic, pValue, degreesOfFreedom }
+ */
+export function studentTTestPaired(sample1: f64[], sample2: f64[]): TTestResult {
+  const n = sample1.length;
+  if (n < 2 || sample2.length !== n) {
+    throw new Error('studentTTestPaired: samples must be the same length ≥ 2');
+  }
+  const d = sample1.map((x, i) => x - sample2[i]);
+  const dBar = _mean(d);
+  const sd = Math.sqrt(_variance(d, 1));
+  const df = n - 1;
+  const t = dBar / (sd / Math.sqrt(n));
+  return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
+}
+
+/** z-test result (statistic + two-tailed p-value). */
+export interface ProportionZResult {
+  statistic: f64;
+  pValue: f64;
+}
+
+/**
+ * Proportion z-test (large-sample, two-tailed).
+ * - **One-sample**: `proportionZTest(successes, n, p0)` tests p̂ = successes/n
+ *   against a hypothesized proportion `p0`.
+ * - **Two-sample**: `proportionZTest([s1, s2], [n1, n2])` tests p̂₁ = p̂₂ using
+ *   the pooled-variance z (equivalent to `statsmodels.proportions_ztest`).
+ *
+ * @example proportionZTest(40, 100, 0.5)        // one-sample: z=-2, p≈0.0455
+ * @example proportionZTest([40, 30], [100, 100]) // two-sample: z≈1.482, p≈0.138
+ */
+export function proportionZTest(
+  count: number | [number, number],
+  nobs: number | [number, number],
+  value?: number
+): ProportionZResult {
+  let z: f64;
+  if (Array.isArray(count) && Array.isArray(nobs)) {
+    const [c1, c2] = count;
+    const [n1, n2] = nobs;
+    const p1 = c1 / n1;
+    const p2 = c2 / n2;
+    const pPool = (c1 + c2) / (n1 + n2);
+    z = (p1 - p2) / Math.sqrt(pPool * (1 - pPool) * (1 / n1 + 1 / n2));
+  } else if (typeof count === 'number' && typeof nobs === 'number') {
+    const p0 = value ?? 0.5;
+    const pHat = count / nobs;
+    z = (pHat - p0) / Math.sqrt((p0 * (1 - p0)) / nobs);
+  } else {
+    throw new Error('proportionZTest: count and nobs must both be numbers or both be [a, b] pairs');
+  }
+  // Two-tailed p = 2·(1 − Φ(|z|)) = erfc(|z|/√2); use the accurate erfc
+  // (continued-fraction tail, ~1e-15) rather than the ~1e-7 A&S _normalCDF.
+  const pValue = erfcScalar(Math.abs(z) / Math.SQRT2);
+  return { statistic: z, pValue };
+}
+
+/** Exact binomial pmf C(n,k) p^k (1−p)^(n−k) via log-gamma (stable for large n). */
+function _binomPmf(k: number, n: number, p: f64): f64 {
+  if (k < 0 || k > n) return 0;
+  const logC = _lgamma(n + 1) - _lgamma(k + 1) - _lgamma(n - k + 1);
+  return Math.exp(logC + k * Math.log(p) + (n - k) * Math.log(1 - p));
+}
+
+/**
+ * Exact binomial test — is the observed success count consistent with success
+ * probability `p`? The two-tailed p-value is the total probability of all
+ * outcomes no more likely than the observed one (scipy's method-of-small-p).
+ * Pinned to `scipy.stats.binomtest`.
+ *
+ * @example binomialTest(8, 20, 0.5) // { pValue: 0.5034446716 }
+ */
+export function binomialTest(
+  successes: number,
+  n: number,
+  p: f64 = 0.5
+): { statistic: f64; pValue: f64 } {
+  if (!Number.isInteger(successes) || !Number.isInteger(n) || successes < 0 || successes > n) {
+    throw new Error('binomialTest: successes must be an integer in [0, n]');
+  }
+  const dObs = _binomPmf(successes, n, p);
+  const rel = 1 + 1e-7;
+  let pValue = 0;
+  for (let k = 0; k <= n; k++) {
+    const pk = _binomPmf(k, n, p);
+    if (pk <= dObs * rel) pValue += pk;
+  }
+  return { statistic: successes / n, pValue: Math.min(1, pValue) };
 }

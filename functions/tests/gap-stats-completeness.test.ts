@@ -5,6 +5,9 @@ import {
   bartlettTest,
   hypergeometricDist,
   negativeBinomialDist,
+  studentTTestPaired,
+  proportionZTest,
+  binomialTest,
 } from '../src/index.js';
 
 /**
@@ -107,5 +110,37 @@ describe('Wave 3: hypergeometric + negative-binomial vs scipy', () => {
     expect(() => hypergeometricDist(10, 20, 5)).toThrow();
     expect(() => negativeBinomialDist(0, 0.5)).toThrow();
     expect(() => negativeBinomialDist(5, 1.5)).toThrow();
+  });
+});
+
+describe('Wave 4: paired-t / proportion-z / binomial test vs scipy', () => {
+  it('studentTTestPaired matches scipy.stats.ttest_rel', () => {
+    const r = studentTTestPaired([1.2, 2.3, 3.1, 4.8, 5.2], [1.0, 2.0, 3.5, 4.0, 5.0]);
+    expect(r.statistic).toBeCloseTo(1.1531133204, 8);
+    expect(r.pValue).toBeCloseTo(0.3130803955, 8);
+    expect(r.degreesOfFreedom).toBe(4);
+  });
+
+  it('one-sample proportionZTest (40/100 vs 0.5)', () => {
+    const r = proportionZTest(40, 100, 0.5);
+    expect(r.statistic).toBeCloseTo(-2.0, 10);
+    expect(r.pValue).toBeCloseTo(0.0455002639, 9);
+  });
+
+  it('two-sample proportionZTest (40/100 vs 30/100)', () => {
+    const r = proportionZTest([40, 30], [100, 100]);
+    expect(r.statistic).toBeCloseTo(1.4824986333, 8);
+    expect(r.pValue).toBeCloseTo(0.138207667, 8);
+  });
+
+  it('binomialTest(8,20,0.5) matches scipy.stats.binomtest (two-sided)', () => {
+    const r = binomialTest(8, 20, 0.5);
+    expect(r.pValue).toBeCloseTo(0.5034446716, 9);
+    expect(r.statistic).toBeCloseTo(0.4, 12);
+  });
+
+  it('rejects malformed inputs', () => {
+    expect(() => studentTTestPaired([1, 2], [1])).toThrow();
+    expect(() => binomialTest(25, 20, 0.5)).toThrow();
   });
 });

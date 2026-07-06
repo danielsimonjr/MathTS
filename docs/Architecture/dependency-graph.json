@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-06",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4591
+    "totalExports": 4594
   },
   "entryPoints": [
     {
@@ -17060,6 +17060,10 @@
           {
             "file": "../wasm/sort/wasm-bridge.js",
             "imports": ["sortF64Dispatch", "WASM_SORT_THRESHOLD"]
+          },
+          {
+            "file": "./special.js",
+            "imports": ["erfcScalar"]
           }
         ],
         "workspaceDependencies": [
@@ -17079,7 +17083,10 @@
           "principalComponentAnalysis",
           "kolmogorovSmirnov2Test",
           "leveneTest",
-          "bartlettTest"
+          "bartlettTest",
+          "studentTTestPaired",
+          "proportionZTest",
+          "binomialTest"
         ],
         "interfaces": [
           "TTestResult",
@@ -17094,7 +17101,8 @@
           "MWBootstrapResult",
           "SWBootstrapResult",
           "ChiSquareBootstrapResult",
-          "VarianceTestResult"
+          "VarianceTestResult",
+          "ProportionZResult"
         ],
         "functions": [
           "studentTTest",
@@ -17106,7 +17114,10 @@
           "principalComponentAnalysis",
           "kolmogorovSmirnov2Test",
           "leveneTest",
-          "bartlettTest"
+          "bartlettTest",
+          "studentTTestPaired",
+          "proportionZTest",
+          "binomialTest"
         ]
       },
       "functions/src/typed/index.ts": {
@@ -33129,11 +33140,11 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 166236,
-    "totalExports": 4591,
+    "totalLinesOfCode": 166346,
+    "totalExports": 4594,
     "totalClasses": 55,
-    "totalInterfaces": 384,
-    "totalFunctions": 1507,
+    "totalInterfaces": 385,
+    "totalFunctions": 1510,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
