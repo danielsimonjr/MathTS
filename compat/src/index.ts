@@ -179,17 +179,24 @@ export function create(
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
   const currentConfig: MathJSConfig = { ...defaultConfig, ...config };
+  // Push this instance's initial overrides into the shared functions config so
+  // they take effect immediately (the functions surface is a process singleton).
+  if (Object.keys(config).length > 0) {
+    mathFunctions.config(config as Partial<MathJSConfig>);
+  }
 
   const instance: MathInstance = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...factories,
 
-    // Configuration
+    // Configuration — forwards to the shared functions runtime config so it
+    // actually DRIVES behavior (e.g. `config({ matrix: 'Array' })` changes the
+    // return type of matrix-producing ops). `currentConfig` mirrors it for the
+    // read path and seeds the functions config with this instance's overrides.
     config: (newConfig?: Partial<MathJSConfig>) => {
-      if (newConfig) {
-        Object.assign(currentConfig, newConfig);
-      }
+      const merged = mathFunctions.config(newConfig as Partial<MathJSConfig>);
+      Object.assign(currentConfig, merged);
       return { ...currentConfig };
     },
 

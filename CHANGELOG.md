@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added/Fixed (2026-07-05) — `config()` drives behavior; compat uses the real functions types (GC12)
+
+- **functions** gains `config()` (`config-api.ts`): read the global runtime config or merge a
+  partial. Functions read this shared object live at call time (`identity`/`range`'s
+  `config.matrix` return-type switch, `zeta`'s `config.relTol`), so `config({ matrix: 'Array' })`
+  genuinely changes results. Process-global (singleton surface), not per-instance.
+- **compat** `config()` was inert (mutated a private object nothing read); it now forwards to
+  `functions.config`, and `create(all, {…})` seeds it.
+- Deleted `compat/src/functions.d.ts` — an outdated ambient `declare module` stub (21 fns) that
+  was **shadowing** the real functions types, so `import * as F` saw an empty namespace
+  (`F.zeta`/`F.cbrt`/`F.config` all invisible). compat now type-checks against the real 829-export
+  surface. Root-cause close of GC12's "widen functions.d.ts". A `delegation` test asserting
+  per-instance config isolation was updated (config is process-global now). Gates: build 22/22,
+  typecheck 28/28, compat 138 tests, functions completeness test green.
+
 ### Fixed (2026-07-05) — `zeta` NaN on the whole Re=1 line (caught by new complex-ζ oracle, GC6)
 
 `zetaComplex` returned `NaN` for every `s` with `Re(s)=1`, but the simple pole is only the

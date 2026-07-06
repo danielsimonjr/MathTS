@@ -114,7 +114,7 @@ The codebase is organized into the following modules:
 - **functions/algebra**: 45 files
 - **functions/arithmetic**: 38 files
 - **functions/bitwise**: 8 files
-- **functions**: 17 files
+- **functions**: 18 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
@@ -184,7 +184,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 391            | 4               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 392            | 4               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                       | 425            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                 | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                       | 1              | 0               |
@@ -199,7 +199,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 12             | 2               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 1               |
+| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
 
 ### Package Dependency Diagram
 
@@ -3600,6 +3600,20 @@ graph LR
 
 ---
 
+### `functions/src/config-api.ts` - Runtime configuration accessor (GC12) — standalone module.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./factories/scope.js` | `factoryScope` | Import |
+| `./core/config.js` | `ConfigOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `config`
+
+---
+
 ### `functions/src/descriptive-stats.ts` - Descriptive-statistics composites (Wave A of the domain gap analysis).
 
 **Internal Dependencies:**
@@ -3699,6 +3713,7 @@ graph LR
 | `./typed/index.js` | `*` | Re-export |
 | `./typed/cas.js` | `*` | Re-export |
 | `./factories/index.js` | `*` | Re-export |
+| `./config-api.js` | `config` | Re-export |
 | `./typed/unit.js` | `to, toBest` | Re-export |
 | `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, reviver, replacer` | Re-export |
 | `./help.js` | `help` | Re-export |
@@ -3724,7 +3739,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`, `help`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `movingAverage`, `ewma`, `detrend`, `acf`, `linearRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `kmeans`, `spectralClustering`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `DualFn`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `LinregressResult`, `OptimizeResult`, `LMResult`, `KMeansResult`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`, `help`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `movingAverage`, `ewma`, `detrend`, `acf`, `linearRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `kmeans`, `spectralClustering`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `DualFn`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `LinregressResult`, `OptimizeResult`, `LMResult`, `KMeansResult`
 
 ---
 
@@ -14121,7 +14136,7 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
-| `functions/src/core/config`                            | 0 files      | 55 files   |
+| `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 2 files      | 46 files   |
@@ -14138,10 +14153,10 @@ graph LR
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 18 files   |
+| `functions/src/index`                                  | 21 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
-| `functions/src/index`                                  | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
@@ -14343,14 +14358,14 @@ graph TD
         N115[calculus-extra]
         N116[cas-integration]
         N117[clustering-extra]
-        N118[descriptive-stats]
-        N119[distribution-functions]
-        N120[geometry-extra]
-        N121[grad-forward]
-        N122[help]
-        N123[hypothesis-extra]
-        N124[index]
-        N125[...7 more]
+        N118[config-api]
+        N119[descriptive-stats]
+        N120[distribution-functions]
+        N121[geometry-extra]
+        N122[grad-forward]
+        N123[help]
+        N124[hypothesis-extra]
+        N125[...8 more]
     end
 
     subgraph Functions/combinatorics
@@ -14877,17 +14892,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 995    |
+| Total TypeScript Files  | 996    |
 | Total Modules           | 73     |
-| Total Lines of Code     | 165907 |
-| Total Exports           | 4584   |
-| Total Re-exports        | 1538   |
+| Total Lines of Code     | 165947 |
+| Total Exports           | 4586   |
+| Total Re-exports        | 1539   |
 | Total Classes           | 55     |
 | Total Interfaces        | 383    |
-| Total Functions         | 1501   |
+| Total Functions         | 1502   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 501    |
+| Type-only Imports       | 502    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

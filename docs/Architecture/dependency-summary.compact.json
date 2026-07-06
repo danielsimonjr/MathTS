@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-06", "f": 995, "e": 4584, "re": 1538 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-06", "f": 996, "e": 4586, "re": 1539 },
   "s": {
-    "loc": 165907,
+    "loc": 165947,
     "cls": 55,
     "int": 383,
-    "fn": 1501,
+    "fn": 1502,
     "tg": 156,
     "en": 0,
     "co": 1529,
-    "toi": 501
+    "toi": 502
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -512,13 +512,14 @@
       ]
     },
     "functions": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "gradient",
         "hessian",
         "symbolicIntegral",
         "kmeans",
         "spectralClustering",
+        "config",
         "rankdata",
         "spearman",
         "gmean",
@@ -532,8 +533,7 @@
         "cov",
         "corrcoef",
         "normalQuantile",
-        "studentTCDF",
-        "studentTQuantile"
+        "studentTCDF"
       ],
       "int": [
         "KMeansResult",
@@ -1502,7 +1502,7 @@
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
-    { "p": "core/config.ts", "i": 0, "o": 55 },
+    { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "typed/index.ts", "i": 51, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },

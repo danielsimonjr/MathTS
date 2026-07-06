@@ -19,6 +19,7 @@ export * from './typed/cas.js';
 
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
+export { config } from './config-api.js'; // GC12: runtime config accessor
 
 // Explicit re-export to resolve `to` / `toBest` ambiguity between the
 // synced-mathjs factory layer (factories/index.js) and the new typed Unit

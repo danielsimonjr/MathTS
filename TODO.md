@@ -667,8 +667,7 @@ Consolidated, deduplicated, and prioritized from the two refreshed reports —
 > BigNumber paths), **GC14** (FFT `shouldParallelize` size-dispatch; `ThresholdDispatcher` is an
 > unused-but-harmless abstraction). **PARTIAL** (real remaining work): **GC2** (generator + drift-check exist; **auto-regen now gated in `.husky/pre-commit` 2026-07-05** — mirrors the docs:deps block; CI edit was off-limits so pre-commit is the automation surface), **GC6** DONE 2026-07-05 (lgamma/gamma complex oracles existed; `zeta(Complex)` was in fact fully implemented — audit looked in typed/ not the factory — but untested: added mpmath-pinned oracle across all 3 regions + fixed a real NaN-on-Re=1-line bug), **GC11**
 > (decomposition + units oracles done; **CAS-vs-sympy oracle DONE 2026-07-05** — sympy-1.14 numeric pins; caught + fixed a real `expand` distribution bug),
-> **GC12** (chain API done; `config()` inert + `functions.d.ts` narrow — needs a core runtime-config
-> mechanism, an architectural effort). **OPEN but HELD:** **GC13** (workbook `tensor`/`export`
+> **GC12** DONE 2026-07-05 (chain API already done; `config()` now drives behavior via a new `functions.config()` forwarding to the shared runtime config read live by identity/range/zeta; the narrow `functions.d.ts` was an outdated ambient stub _shadowing_ the real types — deleted, compat now uses the real 829-export surface). **OPEN but HELD:** **GC13** (workbook `tensor`/`export`
 > cells parse-reject) — deferred with the workbook hold. `cbrt(number, allRoots)` FIXED 2026-07-05.
 > Source tags: `Gn` = FUNCTION_GAPS §7, `Nn`/`Rn` = BRIDGES Part 5.
 

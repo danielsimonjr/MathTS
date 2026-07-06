@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-06'
-  totalFiles: 995
+  totalFiles: 996
   totalModules: 73
-  totalExports: 4584
+  totalExports: 4586
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7051,6 +7051,23 @@ modules:
       functions:
         - kmeans
         - spectralClustering
+    functions/src/config-api.ts:
+      description: Runtime configuration accessor (GC12) — standalone module.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./factories/scope.js
+          imports:
+            - factoryScope
+        - file: ./core/config.js
+          imports:
+            - ConfigOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - config
+      functions:
+        - config
     functions/src/descriptive-stats.ts:
       description: Descriptive-statistics composites (Wave A of the domain gap analysis).
       externalDependencies: []
@@ -7281,6 +7298,10 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./config-api.js
+          imports:
+            - config
+          reExport: true
         - file: ./typed/unit.js
           imports:
             - to
@@ -7462,6 +7483,7 @@ modules:
           typeOnly: true
       workspaceDependencies: []
       exports:
+        - config
         - to
         - toBest
         - evaluate
@@ -7574,6 +7596,7 @@ modules:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
         - '* from ./factories/index.js'
+        - config
         - to
         - toBest
         - evaluate
@@ -29872,6 +29895,7 @@ dependencyGraph:
         - functions/src/calculus-extra.ts
         - functions/src/cas-integration.ts
         - functions/src/clustering-extra.ts
+        - functions/src/config-api.ts
         - functions/src/descriptive-stats.ts
         - functions/src/distribution-functions.ts
         - functions/src/geometry-extra.ts
@@ -30773,18 +30797,18 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 995
+  totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 165907
-  totalExports: 4584
+  totalLinesOfCode: 165947
+  totalExports: 4586
   totalClasses: 55
   totalInterfaces: 383
-  totalFunctions: 1501
+  totalFunctions: 1502
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1538
-  totalTypeOnlyImports: 501
+  totalReExports: 1539
+  totalTypeOnlyImports: 502
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
