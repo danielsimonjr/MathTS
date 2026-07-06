@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-functions
 
+## 0.13.3
+
+### Patch Changes
+
+- b550758: Fix `cbrt(number, allRoots)` — the real-number two-argument form now works instead of throwing "Too many arguments in function cbrt (expected: 1, actual: 2)". Both the programmatic `cbrt` and the expression-language `cbrt` gained explicit `number, boolean` / `Complex, boolean` signatures that route through the complex cube-root path: `cbrt(8, true)` returns all three cube roots `[2, -1±i√3]` and `cbrt(8, false)` the principal root (matching mathjs 15). The source previously assumed typed-function would synthesize `number, boolean` via a number→Complex conversion, which the MathTS typed instance does not.
+- a267d80: **Fix `expand` distribution bug + add a CAS-vs-sympy oracle (GC11).** `expand('(x + 1)*(x - 2)')` returned `x*x - 2 + 1*x - 2` (value x²+x−4) instead of the correct x²−x−2 — it split each factor on `+` only, so `x - 2` stayed a single term and the `−2` dangled through distribution. Fixed by normalizing binary subtraction to a signed additive term (`x - 2` → `["x", "-2"]`) before distributing. Surfaced by a new external-oracle test (`gap-cas-sympy-oracle.test.ts`) that pins `derivative`/`simplify`/`expand`/`factor`/`rationalize` to **sympy 1.14.0** by numeric agreement at sample points — the implementation-independent discipline (never assert a CAS result against its own re-serialization).
+
 ## 0.13.2
 
 ### Patch Changes
