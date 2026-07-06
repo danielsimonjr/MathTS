@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-functions
 
+## 0.14.0
+
+### Minor Changes
+
+- 1df691c: **GC12 — `config()` now drives behavior + compat uses the real functions types.**
+
+  - functions gains a `config()` accessor (`config-api.ts`): read the global runtime config, or pass a partial to merge it. Functions read this shared object live at call time (e.g. `identity`/`range`'s `config.matrix === 'Array'` return-type switch, `zeta`'s `config.relTol`), so `config({ matrix: 'Array' })` genuinely changes results. It is process-global (the functions surface is a singleton), not per-instance like mathjs `create()`.
+  - compat's `config()` was **inert** (mutated a private object nothing read); it now forwards to `functions.config`, so `math.config({ matrix: 'Array' })` drives the functions surface, and `create(all, { … })` seeds it.
+  - Deleted `compat/src/functions.d.ts` — an outdated ambient `declare module` stub (21 functions) whose own header said "until the functions package has proper .d.ts files." It was **shadowing** the real, complete functions types, so `import * as F` saw an empty namespace (even `F.zeta`/`F.cbrt` were invisible). compat now type-checks against the real 829-export surface. This closes GC12's "widen functions.d.ts" at root cause.
+
+  Config is now process-global: a `delegation` test that asserted per-instance isolation was updated to reflect this (isolation was only ever "true" because config did nothing).
+
+### Patch Changes
+
+- f2211c8: **Fix `zeta` on the line Re=1 + add a complex-ζ oracle (GC6).** `zetaComplex` returned `NaN` for the _entire_ vertical line Re=1, but the simple pole is only the point s=1 — `ζ(1+it)` for `t≠0` is finite (e.g. `ζ(1+i) = 0.5822 − 0.9268i`). Fixed the guard (`s.re === 1` → `s.re === 1 && s.im === 0`). Added `gap-zeta-complex-oracle.test.ts` pinning `ζ(complex)` to **mpmath 1.3.0** (dps=40) across all three regions — convergent Re>1, the critical strip, and Re<1 via the functional equation — plus the pole and the first two nontrivial zeros on Re=1/2. Measured accuracy ~1e-14 (convergent/strip), ~1e-11 (reflection); the complex path was already implemented (Gourdon–Sebah / Borwein) but had no external oracle.
+
 ## 0.13.3
 
 ### Patch Changes
