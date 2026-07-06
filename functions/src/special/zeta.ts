@@ -172,7 +172,10 @@ export const createZeta = /* #__PURE__ */ factory(
       if (s.re === 0 && s.im === 0) {
         return new Complex!(-0.5);
       }
-      if (s.re === 1) {
+      // The simple pole is only at the POINT s = 1, not the whole line Re = 1.
+      // ζ(1 + it) for t ≠ 0 is finite (e.g. ζ(1+i) = 0.5822 − 0.9268i); the old
+      // `s.re === 1` guard wrongly returned NaN across the entire vertical line.
+      if (s.re === 1 && s.im === 0) {
         return new Complex!(NaN, NaN);
       }
       if (s.re === Infinity && s.im === 0) {

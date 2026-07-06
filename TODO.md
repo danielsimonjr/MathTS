@@ -665,8 +665,7 @@ Consolidated, deduplicated, and prioritized from the two refreshed reports —
 > `normal-cdf-accuracy` + `gap-distribution-oracles`), **GC8** (`tensorSvdWasm`/`tensorEigWasm`
 > wired), **GC9** (`tape-pow-taped-ad.test.ts` — variable-exponent AD), **GC10** (acsc/asec/acot
 > BigNumber paths), **GC14** (FFT `shouldParallelize` size-dispatch; `ThresholdDispatcher` is an
-> unused-but-harmless abstraction). **PARTIAL** (real remaining work): **GC2** (generator + drift-check exist; **auto-regen now gated in `.husky/pre-commit` 2026-07-05** — mirrors the docs:deps block; CI edit was off-limits so pre-commit is the automation surface), **GC6** (lgamma/gamma
-> complex oracles exist; `zeta(Complex)` unimplemented — larger numeric effort), **GC11**
+> unused-but-harmless abstraction). **PARTIAL** (real remaining work): **GC2** (generator + drift-check exist; **auto-regen now gated in `.husky/pre-commit` 2026-07-05** — mirrors the docs:deps block; CI edit was off-limits so pre-commit is the automation surface), **GC6** DONE 2026-07-05 (lgamma/gamma complex oracles existed; `zeta(Complex)` was in fact fully implemented — audit looked in typed/ not the factory — but untested: added mpmath-pinned oracle across all 3 regions + fixed a real NaN-on-Re=1-line bug), **GC11**
 > (decomposition + units oracles done; **CAS-vs-sympy oracle DONE 2026-07-05** — sympy-1.14 numeric pins; caught + fixed a real `expand` distribution bug),
 > **GC12** (chain API done; `config()` inert + `functions.d.ts` narrow — needs a core runtime-config
 > mechanism, an architectural effort). **OPEN but HELD:** **GC13** (workbook `tensor`/`export`

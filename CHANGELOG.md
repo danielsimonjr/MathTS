@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-05) — `zeta` NaN on the whole Re=1 line (caught by new complex-ζ oracle, GC6)
+
+`zetaComplex` returned `NaN` for every `s` with `Re(s)=1`, but the simple pole is only the
+POINT `s=1` — `ζ(1+it)` for `t≠0` is finite (`ζ(1+i)=0.5822−0.9268i`). Fixed the guard to
+`s.re === 1 && s.im === 0`. Added `gap-zeta-complex-oracle.test.ts` pinning `ζ(complex)` to
+**mpmath 1.3.0** (dps=40) across the convergent region, the critical strip, and Re<1 (functional
+equation), plus the pole and the first two nontrivial zeros. The complex path itself
+(Gourdon–Sebah / Borwein + reflection) was already implemented and accurate (~1e-14
+convergent/strip, ~1e-11 via reflection) but previously had no external oracle. 14 pins; 50
+zeta-touching regression tests green.
+
 ### Changed (2026-07-05) — function-reference drift now auto-gated in pre-commit (GC2); docs resynced
 
 The function/export reference (`docs/api/*.md`, `docs/reference/functions.md[.html]`) is a pure
