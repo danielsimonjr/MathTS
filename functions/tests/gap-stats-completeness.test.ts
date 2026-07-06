@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { kolmogorovSmirnov2Test } from '../src/index.js';
+import { kolmogorovSmirnov2Test, leveneTest, bartlettTest } from '../src/index.js';
 
 /**
  * Statistics/probability completeness waves (2026-07-06) — closing the breadth
@@ -38,5 +38,36 @@ describe('Wave 1: kolmogorovSmirnov2Test vs scipy.ks_2samp', () => {
 
   it('rejects empty samples', () => {
     expect(() => kolmogorovSmirnov2Test([], [1, 2])).toThrow(/non-empty/);
+  });
+});
+
+describe('Wave 2: Levene + Bartlett vs scipy', () => {
+  const g1 = [8.1, 8.3, 7.9, 8.0, 8.2];
+  const g2 = [9.1, 9.5, 8.9, 9.3, 9.0];
+  const g3 = [7.1, 7.3, 6.9, 7.5, 7.0];
+
+  it('leveneTest (median-centered) matches scipy.stats.levene', () => {
+    const r = leveneTest([g1, g2, g3]);
+    expect(r.statistic).toBeCloseTo(0.3529411765, 8);
+    expect(r.pValue).toBeCloseTo(0.7096733516, 7);
+    expect(r.degreesOfFreedom).toEqual([2, 12]);
+  });
+
+  it('leveneTest (mean-centered) matches scipy', () => {
+    const r = leveneTest([g1, g2, g3], 'mean');
+    expect(r.statistic).toBeCloseTo(0.8404669261, 8);
+    expect(r.pValue).toBeCloseTo(0.4553999912, 7);
+  });
+
+  it('bartlettTest matches scipy.stats.bartlett', () => {
+    const r = bartlettTest([g1, g2, g3]);
+    expect(r.statistic).toBeCloseTo(0.758451453, 8);
+    expect(r.pValue).toBeCloseTo(0.68439111, 7);
+    expect(r.degreesOfFreedom).toBe(2);
+  });
+
+  it('both reject <2 groups', () => {
+    expect(() => leveneTest([g1])).toThrow(/at least 2/);
+    expect(() => bartlettTest([g1])).toThrow(/at least 2/);
   });
 });

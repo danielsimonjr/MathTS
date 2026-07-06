@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-06",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4587
+    "totalExports": 4589
   },
   "entryPoints": [
     {
@@ -17073,7 +17073,9 @@
           "mannWhitneyTest",
           "shapiroWilkTest",
           "principalComponentAnalysis",
-          "kolmogorovSmirnov2Test"
+          "kolmogorovSmirnov2Test",
+          "leveneTest",
+          "bartlettTest"
         ],
         "interfaces": [
           "TTestResult",
@@ -17087,7 +17089,8 @@
           "KSBootstrapResult",
           "MWBootstrapResult",
           "SWBootstrapResult",
-          "ChiSquareBootstrapResult"
+          "ChiSquareBootstrapResult",
+          "VarianceTestResult"
         ],
         "functions": [
           "studentTTest",
@@ -17097,7 +17100,9 @@
           "mannWhitneyTest",
           "shapiroWilkTest",
           "principalComponentAnalysis",
-          "kolmogorovSmirnov2Test"
+          "kolmogorovSmirnov2Test",
+          "leveneTest",
+          "bartlettTest"
         ]
       },
       "functions/src/typed/index.ts": {
@@ -33120,11 +33125,11 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 166006,
-    "totalExports": 4587,
+    "totalLinesOfCode": 166097,
+    "totalExports": 4589,
     "totalClasses": 55,
-    "totalInterfaces": 383,
-    "totalFunctions": 1503,
+    "totalInterfaces": 384,
+    "totalFunctions": 1505,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,

@@ -1447,3 +1447,94 @@ export function kolmogorovSmirnov2Test(sample1: f64[], sample2: f64[]): KSTestRe
   const en = Math.sqrt((n1 * n2) / (n1 + n2));
   return { statistic: d, pValue: _kstwobignSf(en * d) };
 }
+
+// =============================================================================
+// leveneTest / bartlettTest — variance homogeneity (Wave 2)
+// =============================================================================
+
+/** Median of an array (sorted copy; average of the two middles when even). */
+function _median(arr: f64[]): f64 {
+  const s = arr.slice().sort((a, b) => a - b);
+  const n = s.length;
+  const m = n >> 1;
+  return n % 2 === 1 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+/** Variance-homogeneity test result. `degreesOfFreedom` is `[d1, d2]` for the
+ *  F-based Levene test, a single number for the χ²-based Bartlett test. */
+export interface VarianceTestResult {
+  statistic: f64;
+  pValue: f64;
+  degreesOfFreedom: number | [number, number];
+}
+
+/**
+ * Levene's test for equality of variances across ≥2 groups (the ANOVA
+ * prerequisite). Robust to non-normality — it runs a one-way ANOVA F-test on the
+ * absolute deviations from each group's center. `center` defaults to `'median'`
+ * (the Brown–Forsythe variant, scipy's default); `'mean'` gives the original
+ * Levene test. Pinned to `scipy.stats.levene`.
+ *
+ * @example leveneTest([[8.1,8.3,7.9],[9.1,9.5,8.9]]) // { statistic, pValue, degreesOfFreedom }
+ */
+export function leveneTest(
+  groups: f64[][],
+  center: 'median' | 'mean' = 'median'
+): VarianceTestResult {
+  const k = groups.length;
+  if (k < 2) throw new Error('leveneTest: need at least 2 groups');
+  let N = 0;
+  for (const g of groups) {
+    if (g.length < 1) throw new Error('leveneTest: every group must be non-empty');
+    N += g.length;
+  }
+  // z_ij = |x_ij − center_i|, then a one-way ANOVA F on the z's.
+  const z = groups.map((g) => {
+    const c = center === 'median' ? _median(g) : _mean(g);
+    return g.map((x) => Math.abs(x - c));
+  });
+  const allZ: f64[] = [];
+  for (const zi of z) for (const v of zi) allZ.push(v);
+  const zBarAll = _mean(allZ);
+  let num = 0;
+  let den = 0;
+  for (const zi of z) {
+    const zBarI = _mean(zi);
+    num += zi.length * (zBarI - zBarAll) * (zBarI - zBarAll);
+    for (const v of zi) den += (v - zBarI) * (v - zBarI);
+  }
+  const W = ((N - k) / (k - 1)) * (num / den);
+  return { statistic: W, pValue: _fPValue(W, k - 1, N - k), degreesOfFreedom: [k - 1, N - k] };
+}
+
+/**
+ * Bartlett's test for equality of variances across ≥2 groups. More powerful than
+ * Levene when the data are normal, but sensitive to departures from normality.
+ * Statistic is χ²-distributed with k−1 df. Pinned to `scipy.stats.bartlett`.
+ *
+ * @example bartlettTest([[8.1,8.3,7.9],[9.1,9.5,8.9]]) // { statistic, pValue, degreesOfFreedom }
+ */
+export function bartlettTest(groups: f64[][]): VarianceTestResult {
+  const k = groups.length;
+  if (k < 2) throw new Error('bartlettTest: need at least 2 groups');
+  let N = 0;
+  for (const g of groups) {
+    if (g.length < 2) throw new Error('bartlettTest: every group needs ≥2 observations');
+    N += g.length;
+  }
+  let pooledNum = 0;
+  let sumLnVar = 0;
+  let sumInv = 0;
+  for (const g of groups) {
+    const ni = g.length;
+    const si2 = _variance(g, 1); // sample variance (ddof=1)
+    pooledNum += (ni - 1) * si2;
+    sumLnVar += (ni - 1) * Math.log(si2);
+    sumInv += 1 / (ni - 1);
+  }
+  const sp2 = pooledNum / (N - k);
+  const numerator = (N - k) * Math.log(sp2) - sumLnVar;
+  const C = 1 + (sumInv - 1 / (N - k)) / (3 * (k - 1));
+  const T = numerator / C;
+  return { statistic: T, pValue: _chiSquaredPValue(T, k - 1), degreesOfFreedom: k - 1 };
+}
