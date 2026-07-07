@@ -373,3 +373,78 @@ describe('Wave F: common distributions vs scipy', () => {
     expect(m.pdf([0.5, 1])).toBeCloseTo(0.0904101042, 9);
   });
 });
+
+import {
+  meanCI,
+  proportionCI,
+  bootstrapCI,
+  permutationTest,
+  mahalanobis,
+  hotellingT2,
+  mean as statMean,
+} from '../src/index.js';
+
+describe('Wave G/H: confidence intervals, resampling, multivariate vs scipy', () => {
+  it('meanCI matches scipy.stats.t.interval', () => {
+    const d = [2.1, 3.4, 1.9, 4.2, 2.8, 3.1, 2.5, 3.9, 2.2, 3.6];
+    const ci = meanCI(d, 0.95);
+    expect(ci.estimate).toBeCloseTo(2.97, 10);
+    expect(ci.lower).toBeCloseTo(2.3996551908, 8);
+    expect(ci.upper).toBeCloseTo(3.5403448092, 8);
+  });
+
+  it('proportionCI (Wald) matches the normal-approximation interval', () => {
+    const ci = proportionCI(40, 100, 0.95);
+    expect(ci.lower).toBeCloseTo(0.3039817665, 9);
+    expect(ci.upper).toBeCloseTo(0.4960182335, 9);
+  });
+
+  it('bootstrapCI brackets the point estimate (seeded, deterministic)', () => {
+    const d = [2.1, 3.4, 1.9, 4.2, 2.8, 3.1, 2.5, 3.9, 2.2, 3.6];
+    const ci = bootstrapCI(d, (s) => statMean(s) as number, { seed: 42, resamples: 3000 });
+    expect(ci.estimate).toBeCloseTo(2.97, 10);
+    expect(ci.lower).toBeLessThan(ci.estimate);
+    expect(ci.upper).toBeGreaterThan(ci.estimate);
+    // percentile bootstrap CI should be near the analytic t-interval (~[2.40, 3.54])
+    expect(ci.lower).toBeGreaterThan(2.2);
+    expect(ci.upper).toBeLessThan(3.7);
+  });
+
+  it('permutationTest returns a valid p-value; identical groups → p≈1', () => {
+    const diffMean = (x: number[], y: number[]) =>
+      (statMean(x) as number) - (statMean(y) as number);
+    const same = permutationTest([1, 2, 3, 4], [1, 2, 3, 4], diffMean, { seed: 1, resamples: 500 });
+    expect(same.pValue).toBeGreaterThan(0.9);
+    const diff = permutationTest([1, 2, 3], [10, 11, 12], diffMean, { seed: 1, resamples: 500 });
+    expect(diff.pValue).toBeLessThan(0.2);
+  });
+
+  it('mahalanobis matches scipy.spatial.distance.mahalanobis', () => {
+    expect(
+      mahalanobis(
+        [1, 2],
+        [2.5, 1],
+        [
+          [2, 0.5],
+          [0.5, 1],
+        ]
+      )
+    ).toBeCloseTo(1.8126539343, 9);
+  });
+
+  it('hotellingT2 one-sample matches the F-transform', () => {
+    const data = [
+      [6, 9],
+      [6, 6],
+      [5, 8],
+      [7, 9],
+      [8, 10],
+      [7, 7],
+    ];
+    const r = hotellingT2(data, [5, 7]);
+    expect(r.statistic).toBeCloseTo(12.4295774648, 8);
+    expect(r.fStatistic).toBeCloseTo(4.9718309859, 8);
+    expect(r.pValue).toBeCloseTo(0.0822936435, 8);
+    expect(r.degreesOfFreedom).toEqual([2, 4]);
+  });
+});

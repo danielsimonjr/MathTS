@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-07",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4793
+    "totalExports": 4809
   },
   "entryPoints": [
     {
@@ -17161,6 +17161,10 @@
           {
             "file": "./special.js",
             "imports": ["erfcScalar"]
+          },
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["studentTQuantile", "normalQuantile"]
           }
         ],
         "workspaceDependencies": [
@@ -17188,7 +17192,13 @@
           "dagostinoTest",
           "friedmanTest",
           "anova2",
-          "multipleComparison"
+          "multipleComparison",
+          "meanCI",
+          "proportionCI",
+          "bootstrapCI",
+          "permutationTest",
+          "mahalanobis",
+          "hotellingT2"
         ],
         "interfaces": [
           "TTestResult",
@@ -17207,7 +17217,11 @@
           "ProportionZResult",
           "NormalityTestResult",
           "Anova2Effect",
-          "Anova2Result"
+          "Anova2Result",
+          "ConfidenceInterval",
+          "BootstrapCIOptions",
+          "PermutationOptions",
+          "HotellingResult"
         ],
         "functions": [
           "studentTTest",
@@ -17227,7 +17241,13 @@
           "dagostinoTest",
           "friedmanTest",
           "anova2",
-          "multipleComparison"
+          "multipleComparison",
+          "meanCI",
+          "proportionCI",
+          "bootstrapCI",
+          "permutationTest",
+          "mahalanobis",
+          "hotellingT2"
         ]
       },
       "functions/src/typed/index.ts": {
@@ -28149,6 +28169,18 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
+            "imports": [
+              "meanCI",
+              "proportionCI",
+              "bootstrapCI",
+              "permutationTest",
+              "mahalanobis",
+              "hotellingT2"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
             "imports": ["Distribution", "SampleNOptions"]
           },
           {
@@ -28170,6 +28202,16 @@
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
             "imports": ["MultivariateDistribution"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": [
+              "ConfidenceInterval",
+              "BootstrapCIOptions",
+              "PermutationOptions",
+              "HotellingResult"
+            ]
           }
         ],
         "exports": [
@@ -28349,6 +28391,12 @@
           "gumbelDist",
           "invGaussDist",
           "multivariateNormal",
+          "meanCI",
+          "proportionCI",
+          "bootstrapCI",
+          "permutationTest",
+          "mahalanobis",
+          "hotellingT2",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
@@ -28358,7 +28406,11 @@
           "NormalityTestResult",
           "Anova2Effect",
           "Anova2Result",
-          "MultivariateDistribution"
+          "MultivariateDistribution",
+          "ConfidenceInterval",
+          "BootstrapCIOptions",
+          "PermutationOptions",
+          "HotellingResult"
         ],
         "reExported": [
           "mean",
@@ -28537,6 +28589,12 @@
           "gumbelDist",
           "invGaussDist",
           "multivariateNormal",
+          "meanCI",
+          "proportionCI",
+          "bootstrapCI",
+          "permutationTest",
+          "mahalanobis",
+          "hotellingT2",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
@@ -28546,7 +28604,11 @@
           "NormalityTestResult",
           "Anova2Effect",
           "Anova2Result",
-          "MultivariateDistribution"
+          "MultivariateDistribution",
+          "ConfidenceInterval",
+          "BootstrapCIOptions",
+          "PermutationOptions",
+          "HotellingResult"
         ]
       }
     },
@@ -33802,15 +33864,15 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 167363,
-    "totalExports": 4793,
+    "totalLinesOfCode": 167585,
+    "totalExports": 4809,
     "totalClasses": 55,
-    "totalInterfaces": 393,
-    "totalFunctions": 1532,
+    "totalInterfaces": 397,
+    "totalFunctions": 1538,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
-    "totalReExports": 1716,
+    "totalReExports": 1726,
     "totalTypeOnlyImports": 503,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

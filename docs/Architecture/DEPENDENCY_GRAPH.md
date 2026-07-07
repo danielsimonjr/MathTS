@@ -7723,11 +7723,12 @@ graph LR
 |------|---------|------|
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
 | `./special.js` | `erfcScalar` | Import |
+| `../distribution-functions.js` | `studentTQuantile, normalQuantile` | Import |
 
 **Exports:**
 
-- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `VarianceTestResult`, `ProportionZResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`
-- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`
+- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `VarianceTestResult`, `ProportionZResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
+- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`
 
 ---
 
@@ -13275,14 +13276,16 @@ graph LR
 | `@danielsimonjr/mathts-functions` | `linregress, pearsonr, spearmanr, kendalltau, ptp, variation, trimmedMean, describe, histogram` |
 | `@danielsimonjr/mathts-functions` | `andersonDarlingTest, dagostinoTest, friedmanTest, anova2, multipleComparison` |
 | `@danielsimonjr/mathts-functions` | `paretoDist, rayleighDist, triangularDist, discreteUniformDist, gumbelDist, invGaussDist, multivariateNormal` |
+| `@danielsimonjr/mathts-functions` | `meanCI, proportionCI, bootstrapCI, permutationTest, mahalanobis, hotellingT2` |
 | `@danielsimonjr/mathts-functions` | `Distribution, SampleNOptions` |
 | `@danielsimonjr/mathts-functions` | `LinRegressResult, CorrelationTestResult, DescribeResult, HistogramResult` |
 | `@danielsimonjr/mathts-functions` | `NormalityTestResult, Anova2Effect, Anova2Result` |
 | `@danielsimonjr/mathts-functions` | `MultivariateDistribution` |
+| `@danielsimonjr/mathts-functions` | `ConfidenceInterval, BootstrapCIOptions, PermutationOptions, HotellingResult` |
 
 **Exports:**
 
-- Re-exports: `mean`, `median`, `mode`, `variance`, `std`, `quantileSeq`, `mad`, `corr`, `cumsum`, `sum`, `prod`, `min`, `max`, `rankdata`, `spearman`, `kendallTau`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`, `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `DIST_WORKER_THRESHOLD`, `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `entropy`, `jsDivergence`, `typedDistributions`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `studentTTest`, `studentTTestPaired`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `kolmogorovSmirnov2Test`, `mannWhitneyTest`, `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `principalComponentAnalysis`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `combinations`, `combinationsWithRep`, `permutations`, `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, `random`, `randomInt`, `pickRandom`, `seedProbabilityRng`, `typedProbability`, `linearRegression`, `polyFit`, `cummax`, `cummin`, `cumprod`, `cumtrapz`, `trapzF64`, `movingAverage`, `ewma`, `detrend`, `acf`, `logsumexp`, `softmax`, `kmeans`, `spectralClustering`, `beta`, `digamma`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`, `Distribution`, `SampleNOptions`, `LinRegressResult`, `CorrelationTestResult`, `DescribeResult`, `HistogramResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `MultivariateDistribution`
+- Re-exports: `mean`, `median`, `mode`, `variance`, `std`, `quantileSeq`, `mad`, `corr`, `cumsum`, `sum`, `prod`, `min`, `max`, `rankdata`, `spearman`, `kendallTau`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`, `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `DIST_WORKER_THRESHOLD`, `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `entropy`, `jsDivergence`, `typedDistributions`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `studentTTest`, `studentTTestPaired`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `kolmogorovSmirnov2Test`, `mannWhitneyTest`, `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `principalComponentAnalysis`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `combinations`, `combinationsWithRep`, `permutations`, `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, `random`, `randomInt`, `pickRandom`, `seedProbabilityRng`, `typedProbability`, `linearRegression`, `polyFit`, `cummax`, `cummin`, `cumprod`, `cumtrapz`, `trapzF64`, `movingAverage`, `ewma`, `detrend`, `acf`, `logsumexp`, `softmax`, `kmeans`, `spectralClustering`, `beta`, `digamma`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`, `Distribution`, `SampleNOptions`, `LinRegressResult`, `CorrelationTestResult`, `DescribeResult`, `HistogramResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `MultivariateDistribution`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
 
 ---
 
@@ -14911,12 +14914,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 996    |
 | Total Modules           | 73     |
-| Total Lines of Code     | 167363 |
-| Total Exports           | 4793   |
-| Total Re-exports        | 1716   |
+| Total Lines of Code     | 167585 |
+| Total Exports           | 4809   |
+| Total Re-exports        | 1726   |
 | Total Classes           | 55     |
-| Total Interfaces        | 393    |
-| Total Functions         | 1532   |
+| Total Interfaces        | 397    |
+| Total Functions         | 1538   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 503    |

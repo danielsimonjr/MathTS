@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-07'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4793
+  totalExports: 4809
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15596,6 +15596,10 @@ modules:
         - file: ./special.js
           imports:
             - erfcScalar
+        - file: ../distribution-functions.js
+          imports:
+            - studentTQuantile
+            - normalQuantile
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -15620,6 +15624,12 @@ modules:
         - friedmanTest
         - anova2
         - multipleComparison
+        - meanCI
+        - proportionCI
+        - bootstrapCI
+        - permutationTest
+        - mahalanobis
+        - hotellingT2
       interfaces:
         - TTestResult
         - ChiSquareResult
@@ -15638,6 +15648,10 @@ modules:
         - NormalityTestResult
         - Anova2Effect
         - Anova2Result
+        - ConfidenceInterval
+        - BootstrapCIOptions
+        - PermutationOptions
+        - HotellingResult
       functions:
         - studentTTest
         - chiSquareTest
@@ -15657,6 +15671,12 @@ modules:
         - friedmanTest
         - anova2
         - multipleComparison
+        - meanCI
+        - proportionCI
+        - bootstrapCI
+        - permutationTest
+        - mahalanobis
+        - hotellingT2
     functions/src/typed/index.ts:
       description: Typed Functions Index (Parallel-First)
       externalDependencies: []
@@ -26106,6 +26126,15 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
+            - meanCI
+            - proportionCI
+            - bootstrapCI
+            - permutationTest
+            - mahalanobis
+            - hotellingT2
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
             - Distribution
             - SampleNOptions
         - package: '@danielsimonjr/mathts-functions'
@@ -26125,6 +26154,13 @@ modules:
           directory: functions
           imports:
             - MultivariateDistribution
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - ConfidenceInterval
+            - BootstrapCIOptions
+            - PermutationOptions
+            - HotellingResult
       exports:
         - mean
         - median
@@ -26302,6 +26338,12 @@ modules:
         - gumbelDist
         - invGaussDist
         - multivariateNormal
+        - meanCI
+        - proportionCI
+        - bootstrapCI
+        - permutationTest
+        - mahalanobis
+        - hotellingT2
         - Distribution
         - SampleNOptions
         - LinRegressResult
@@ -26312,6 +26354,10 @@ modules:
         - Anova2Effect
         - Anova2Result
         - MultivariateDistribution
+        - ConfidenceInterval
+        - BootstrapCIOptions
+        - PermutationOptions
+        - HotellingResult
       reExported:
         - mean
         - median
@@ -26489,6 +26535,12 @@ modules:
         - gumbelDist
         - invGaussDist
         - multivariateNormal
+        - meanCI
+        - proportionCI
+        - bootstrapCI
+        - permutationTest
+        - mahalanobis
+        - hotellingT2
         - Distribution
         - SampleNOptions
         - LinRegressResult
@@ -26499,6 +26551,10 @@ modules:
         - Anova2Effect
         - Anova2Result
         - MultivariateDistribution
+        - ConfidenceInterval
+        - BootstrapCIOptions
+        - PermutationOptions
+        - HotellingResult
   signal:
     signal/src/index.ts:
       description: Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
@@ -31450,15 +31506,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 167363
-  totalExports: 4793
+  totalLinesOfCode: 167585
+  totalExports: 4809
   totalClasses: 55
-  totalInterfaces: 393
-  totalFunctions: 1532
+  totalInterfaces: 397
+  totalFunctions: 1538
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1716
+  totalReExports: 1726
   totalTypeOnlyImports: 503
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

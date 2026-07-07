@@ -33,6 +33,7 @@
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 import { erfcScalar } from './special.js';
+import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 
 // =============================================================================
 // Type Definitions
@@ -1860,4 +1861,207 @@ export function multipleComparison(
     }
   }
   return out;
+}
+
+// =============================================================================
+// Wave G — confidence intervals & resampling (statistics gap-closure)
+// =============================================================================
+
+/** A confidence interval with the point estimate it brackets. */
+export interface ConfidenceInterval {
+  estimate: f64;
+  lower: f64;
+  upper: f64;
+  confidence: f64;
+}
+
+/**
+ * Confidence interval for the population mean via the Student-t distribution
+ * (`scipy.stats.t.interval`). `confidence` defaults to 0.95.
+ */
+export function meanCI(data: f64[], confidence = 0.95): ConfidenceInterval {
+  const n = data.length;
+  if (n < 2) throw new Error('meanCI: need at least 2 observations');
+  const m = _mean(data);
+  const se = Math.sqrt(_variance(data, 1) / n);
+  const tcrit = studentTQuantile((1 + confidence) / 2, n - 1);
+  return { estimate: m, lower: m - tcrit * se, upper: m + tcrit * se, confidence };
+}
+
+/**
+ * Wald confidence interval for a binomial proportion (normal approximation).
+ * `confidence` defaults to 0.95.
+ */
+export function proportionCI(successes: number, n: number, confidence = 0.95): ConfidenceInterval {
+  if (n <= 0 || successes < 0 || successes > n) {
+    throw new Error('proportionCI: require 0 <= successes <= n, n > 0');
+  }
+  const p = successes / n;
+  const z = normalQuantile((1 + confidence) / 2);
+  const half = z * Math.sqrt((p * (1 - p)) / n);
+  return { estimate: p, lower: p - half, upper: p + half, confidence };
+}
+
+/** Options for `bootstrapCI`. */
+export interface BootstrapCIOptions {
+  confidence?: number;
+  resamples?: number;
+  seed?: number;
+}
+
+/**
+ * Percentile bootstrap confidence interval for an arbitrary statistic of a
+ * single sample (`scipy.stats.bootstrap`, percentile method). Resampling is
+ * deterministic when `seed` is given. Returns the CI plus the observed estimate.
+ */
+export function bootstrapCI(
+  data: f64[],
+  statistic: (sample: f64[]) => f64,
+  opts: BootstrapCIOptions = {}
+): ConfidenceInterval {
+  const n = data.length;
+  if (n < 2) throw new Error('bootstrapCI: need at least 2 observations');
+  const confidence = opts.confidence ?? 0.95;
+  const B = opts.resamples ?? 2000;
+  const rng = opts.seed !== undefined ? _makeMulberry32(opts.seed) : Math.random;
+  const stats = new Float64Array(B);
+  const resample = new Array<f64>(n);
+  for (let b = 0; b < B; b++) {
+    for (let i = 0; i < n; i++) resample[i] = data[Math.floor(rng() * n)];
+    stats[b] = statistic(resample);
+  }
+  stats.sort();
+  const loIdx = Math.floor(((1 - confidence) / 2) * B);
+  const hiIdx = Math.min(B - 1, Math.ceil((1 - (1 - confidence) / 2) * B) - 1);
+  return { estimate: statistic(data), lower: stats[loIdx], upper: stats[hiIdx], confidence };
+}
+
+/** Options for `permutationTest`. */
+export interface PermutationOptions {
+  resamples?: number;
+  seed?: number;
+}
+
+/**
+ * Two-sample permutation test for an arbitrary statistic `statistic(a, b)`.
+ * The combined pool is repeatedly shuffled and re-split; the two-tailed p-value
+ * is the fraction of permuted statistics at least as extreme (in absolute value)
+ * as the observed one (`scipy.stats.permutation_test`). Deterministic with `seed`.
+ */
+export function permutationTest(
+  a: f64[],
+  b: f64[],
+  statistic: (x: f64[], y: f64[]) => f64,
+  opts: PermutationOptions = {}
+): { statistic: f64; pValue: f64 } {
+  const na = a.length;
+  const nb = b.length;
+  const B = opts.resamples ?? 2000;
+  const rng = opts.seed !== undefined ? _makeMulberry32(opts.seed) : Math.random;
+  const observed = statistic(a, b);
+  const pool = new Float64Array(na + nb);
+  for (let i = 0; i < na; i++) pool[i] = a[i];
+  for (let i = 0; i < nb; i++) pool[na + i] = b[i];
+  let extreme = 1; // +1 for the observed arrangement (scipy convention)
+  for (let p = 0; p < B; p++) {
+    _shuffle(pool, rng);
+    const x = Array.from(pool.subarray(0, na));
+    const y = Array.from(pool.subarray(na));
+    if (Math.abs(statistic(x, y)) >= Math.abs(observed) - 1e-12) extreme++;
+  }
+  return { statistic: observed, pValue: extreme / (B + 1) };
+}
+
+// =============================================================================
+// Wave H — multivariate: Mahalanobis distance, Hotelling's T^2
+// =============================================================================
+
+/** Inverse of a square matrix via Gauss-Jordan elimination with partial pivoting. */
+function _matInverse(m: number[][]): number[][] {
+  const n = m.length;
+  const a = m.map((row, i) => [...row, ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(a[r][col]) > Math.abs(a[pivot][col])) pivot = r;
+    if (Math.abs(a[pivot][col]) < 1e-15) throw new Error('matrix inverse: singular matrix');
+    [a[col], a[pivot]] = [a[pivot], a[col]];
+    const d = a[col][col];
+    for (let j = 0; j < 2 * n; j++) a[col][j] /= d;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const f = a[r][col];
+      for (let j = 0; j < 2 * n; j++) a[r][j] -= f * a[col][j];
+    }
+  }
+  return a.map((row) => row.slice(n));
+}
+
+/** Quadratic form dᵀ·M·d. */
+function _quadForm(d: number[], M: number[][]): f64 {
+  const n = d.length;
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    let mi = 0;
+    for (let j = 0; j < n; j++) mi += M[i][j] * d[j];
+    s += d[i] * mi;
+  }
+  return s;
+}
+
+/**
+ * Mahalanobis distance between two vectors `u` and `v` under covariance `cov`:
+ * √((u−v)ᵀ Σ⁻¹ (u−v)). Matches `scipy.spatial.distance.mahalanobis(u, v, inv(cov))`
+ * (this form takes the covariance directly and inverts it internally).
+ *
+ * @example mahalanobis([1,2], [2.5,1], [[2,0.5],[0.5,1]]) // 1.8126539343
+ */
+export function mahalanobis(u: number[], v: number[], cov: number[][]): f64 {
+  if (u.length !== v.length || cov.length !== u.length) {
+    throw new Error('mahalanobis: u, v, and cov dimensions must match');
+  }
+  const inv = _matInverse(cov);
+  const d = u.map((ui, i) => ui - v[i]);
+  return Math.sqrt(_quadForm(d, inv));
+}
+
+/** One-sample Hotelling's T² result. */
+export interface HotellingResult {
+  statistic: f64;
+  fStatistic: f64;
+  pValue: f64;
+  degreesOfFreedom: [number, number];
+}
+
+/**
+ * One-sample Hotelling's T² test — the multivariate generalization of the
+ * one-sample t-test: is the mean vector of `data` (rows = observations, columns
+ * = variables) equal to `mu0`? T² = n·(x̄−μ₀)ᵀ S⁻¹ (x̄−μ₀), and
+ * F = (n−p)/(p(n−1))·T² ~ F(p, n−p) under H₀.
+ *
+ * @example hotellingT2(data, [5, 7]) // { statistic, fStatistic, pValue, degreesOfFreedom }
+ */
+export function hotellingT2(data: f64[][], mu0: f64[]): HotellingResult {
+  const n = data.length;
+  const p = mu0.length;
+  if (n <= p) throw new Error('hotellingT2: need more observations than variables');
+  if (data.some((row) => row.length !== p))
+    throw new Error('hotellingT2: every row must have length p');
+  const xbar = Array.from({ length: p }, (_, j) => _mean(data.map((row) => row[j])));
+  // Sample covariance matrix S (ddof=1).
+  const S = Array.from({ length: p }, () => new Array<number>(p).fill(0));
+  for (const row of data) {
+    for (let i = 0; i < p; i++) {
+      for (let j = 0; j < p; j++) S[i][j] += (row[i] - xbar[i]) * (row[j] - xbar[j]);
+    }
+  }
+  for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) S[i][j] /= n - 1;
+  const diff = xbar.map((x, i) => x - mu0[i]);
+  const t2 = n * _quadForm(diff, _matInverse(S));
+  const f = ((n - p) / (p * (n - 1))) * t2;
+  return {
+    statistic: t2,
+    fStatistic: f,
+    pValue: _fPValue(f, p, n - p),
+    degreesOfFreedom: [p, n - p],
+  };
 }

@@ -270,3 +270,21 @@ export {
   multivariateNormal,
 } from '@danielsimonjr/mathts-functions';
 export type { MultivariateDistribution } from '@danielsimonjr/mathts-functions';
+
+// ---------------------------------------------------------------------------
+// Confidence intervals, resampling, and multivariate statistics (waves G/H)
+// ---------------------------------------------------------------------------
+export {
+  meanCI,
+  proportionCI,
+  bootstrapCI,
+  permutationTest,
+  mahalanobis,
+  hotellingT2,
+} from '@danielsimonjr/mathts-functions';
+export type {
+  ConfidenceInterval,
+  BootstrapCIOptions,
+  PermutationOptions,
+  HotellingResult,
+} from '@danielsimonjr/mathts-functions';

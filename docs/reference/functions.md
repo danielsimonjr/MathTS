@@ -2040,7 +2040,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (860 exports).
+> `@danielsimonjr/mathts-functions` (866 exports).
 
 ### Functions by category
 
@@ -2096,7 +2096,7 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (21): `andersonDarlingTest`, `anova2`, `dagostinoTest`, `describe`, `discreteUniformDist`, `friedmanTest`, `gumbelDist`, `histogram`, `invGaussDist`, `kendalltau`, `linregress`, `multipleComparison`, `multivariateNormal`, `paretoDist`, `pearsonr`, `ptp`, `rayleighDist`, `spearmanr`, `triangularDist`, `trimmedMean`, `variation`
+**Other exports (uncategorized)** (27): `andersonDarlingTest`, `anova2`, `bootstrapCI`, `dagostinoTest`, `describe`, `discreteUniformDist`, `friedmanTest`, `gumbelDist`, `histogram`, `hotellingT2`, `invGaussDist`, `kendalltau`, `linregress`, `mahalanobis`, `meanCI`, `multipleComparison`, `multivariateNormal`, `paretoDist`, `pearsonr`, `permutationTest`, `proportionCI`, `ptp`, `rayleighDist`, `spearmanr`, `triangularDist`, `trimmedMean`, `variation`
 
 ### Constants & values (61)
 
