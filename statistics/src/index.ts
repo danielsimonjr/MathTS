@@ -219,3 +219,24 @@ export {
   beta,
   digamma,
 } from '@danielsimonjr/mathts-functions';
+
+// ---------------------------------------------------------------------------
+// Regression & inference, correlation tests, descriptive conveniences (waves B/C/D)
+// ---------------------------------------------------------------------------
+export {
+  linregress,
+  pearsonr,
+  spearmanr,
+  kendalltau,
+  ptp,
+  variation,
+  trimmedMean,
+  describe,
+  histogram,
+} from '@danielsimonjr/mathts-functions';
+export type {
+  LinRegressResult,
+  CorrelationTestResult,
+  DescribeResult,
+  HistogramResult,
+} from '@danielsimonjr/mathts-functions';

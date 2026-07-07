@@ -17,6 +17,8 @@
  */
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
+import { studentTCDF as _studentTCDF } from './distribution-functions.js';
+import { normalCDF as _normalCDF } from './typed/distributions.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
 
@@ -268,4 +270,232 @@ export function kendallTau(x: Vec, y: Vec): number {
   const denom = Math.sqrt((n0 - n1) * (n0 - n2));
   if (denom === 0) return NaN;
   return (P - Q) / denom;
+}
+
+// ===========================================================================
+// Regression & inference — Wave B (statistics gap-closure)
+// ===========================================================================
+
+/** Two-tailed Student-t p-value: 2·(1 − T_df(|t|)). */
+function _tTwoTail(t: number, df: number): number {
+  return 2 * (1 - (_studentTCDF(Math.abs(t), df) as number));
+}
+
+/** Result of a simple linear regression with inference. */
+export interface LinRegressResult {
+  slope: number;
+  intercept: number;
+  rValue: number;
+  pValue: number;
+  stdErr: number;
+  interceptStdErr: number;
+}
+
+/**
+ * OLS simple linear regression **with inference** — `y ≈ slope·x + intercept`,
+ * plus the correlation coefficient, the slope p-value (t-test, df = n−2), and
+ * the slope/intercept standard errors. Matches `scipy.stats.linregress`.
+ */
+export function linregress(x: Vec, y: Vec): LinRegressResult {
+  const n = x.length;
+  if (n !== y.length) throw new Error('linregress: x and y must have equal length');
+  if (n < 3) throw new Error('linregress: need at least 3 points for inference');
+  const xa = Array.from(x);
+  const ya = Array.from(y);
+  const xbar = mean(xa);
+  const ybar = mean(ya);
+  let sxx = 0;
+  let sxy = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xa[i] - xbar;
+    const dy = ya[i] - ybar;
+    sxx += dx * dx;
+    sxy += dx * dy;
+    syy += dy * dy;
+  }
+  const slope = sxy / sxx;
+  const intercept = ybar - slope * xbar;
+  const rValue = sxy / Math.sqrt(sxx * syy);
+  const df = n - 2;
+  const s2 = (syy - slope * sxy) / df;
+  const stdErr = Math.sqrt(s2 / sxx);
+  const interceptStdErr = Math.sqrt(s2 * (1 / n + (xbar * xbar) / sxx));
+  return {
+    slope,
+    intercept,
+    rValue,
+    pValue: _tTwoTail(slope / stdErr, df),
+    stdErr,
+    interceptStdErr,
+  };
+}
+
+// ===========================================================================
+// Correlation TESTS (coefficient + p-value) — Wave C
+// ===========================================================================
+
+/** A correlation coefficient with its two-tailed significance p-value. */
+export interface CorrelationTestResult {
+  coefficient: number;
+  pValue: number;
+}
+
+/** t-test p-value for a correlation coefficient r on df = n−2. */
+function _corrTPValue(r: number, n: number): number {
+  const df = n - 2;
+  if (df <= 0 || Math.abs(r) >= 1) return Math.abs(r) >= 1 ? 0 : 1;
+  const t = r * Math.sqrt(df / (1 - r * r));
+  return _tTwoTail(t, df);
+}
+
+/** Pearson correlation coefficient of two equal-length vectors. */
+function _pearson(x: Vec, y: Vec): number {
+  const xa = Array.from(x);
+  const ya = Array.from(y);
+  const n = xa.length;
+  if (n !== ya.length) throw new Error('pearsonr: inputs must have equal length');
+  const mx = mean(xa);
+  const my = mean(ya);
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xa[i] - mx;
+    const dy = ya[i] - my;
+    sxy += dx * dy;
+    sxx += dx * dx;
+    syy += dy * dy;
+  }
+  return sxy / Math.sqrt(sxx * syy);
+}
+
+/** Pearson correlation **test** (coefficient + two-tailed p, t-test). `scipy.stats.pearsonr`. */
+export function pearsonr(x: Vec, y: Vec): CorrelationTestResult {
+  const r = _pearson(x, y);
+  return { coefficient: r, pValue: _corrTPValue(r, x.length) };
+}
+
+/** Spearman rank-correlation **test** (rho + two-tailed p, t-test). `scipy.stats.spearmanr`. */
+export function spearmanr(x: Vec, y: Vec): CorrelationTestResult {
+  const rho = spearman(x, y);
+  return { coefficient: rho, pValue: _corrTPValue(rho, x.length) };
+}
+
+/**
+ * Kendall's τ **test** — τ_b coefficient and two-tailed p via the normal
+ * approximation `z = 3τ√(n(n−1)) / √(2(2n+5))` (standard large-sample form;
+ * scipy's small-n exact p is version/table-specific).
+ */
+export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
+  const tau = kendallTau(x, y);
+  const n = x.length;
+  const z = (3 * tau * Math.sqrt(n * (n - 1))) / Math.sqrt(2 * (2 * n + 5));
+  return { coefficient: tau, pValue: 2 * (1 - (_normalCDF(Math.abs(z)) as number)) };
+}
+
+// ===========================================================================
+// Descriptive conveniences — Wave D
+// ===========================================================================
+
+/** Peak-to-peak / statistical range: max − min. (`np.ptp`; `range` is taken.) */
+export function ptp(x: Vec): number {
+  const a = Array.from(x);
+  if (a.length === 0) return NaN;
+  let lo = a[0];
+  let hi = a[0];
+  for (const v of a) {
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  return hi - lo;
+}
+
+/** Coefficient of variation: population-std / mean (`scipy.stats.variation`, ddof=0). */
+export function variation(x: Vec): number {
+  const a = Array.from(x);
+  return stdPop(a) / mean(a);
+}
+
+/** Trimmed mean — drop `proportion` of the sorted data from each tail. `scipy.stats.trim_mean`. */
+export function trimmedMean(x: Vec, proportion: number): number {
+  if (proportion < 0 || proportion >= 0.5) {
+    throw new Error('trimmedMean: proportion must be in [0, 0.5)');
+  }
+  const a = Array.from(x).sort((p, q) => p - q);
+  const k = Math.floor(a.length * proportion);
+  return mean(a.slice(k, a.length - k));
+}
+
+/** Summary statistics bundle (`scipy.stats.describe`): sample variance (ddof=1); biased Fisher skew/kurtosis. */
+export interface DescribeResult {
+  nobs: number;
+  min: number;
+  max: number;
+  mean: number;
+  variance: number;
+  skewness: number;
+  kurtosis: number;
+}
+
+export function describe(x: Vec): DescribeResult {
+  const a = Array.from(x);
+  const n = a.length;
+  if (n < 1) throw new Error('describe: input must be non-empty');
+  const m = mean(a);
+  let m2 = 0;
+  let m3 = 0;
+  let m4 = 0;
+  let lo = a[0];
+  let hi = a[0];
+  for (const v of a) {
+    const d = v - m;
+    m2 += d * d;
+    m3 += d * d * d;
+    m4 += d * d * d * d;
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  const mu2 = m2 / n;
+  return {
+    nobs: n,
+    min: lo,
+    max: hi,
+    mean: m,
+    variance: m2 / (n - 1),
+    skewness: m3 / n / Math.pow(mu2, 1.5),
+    kurtosis: m4 / n / (mu2 * mu2) - 3,
+  };
+}
+
+/** Histogram counts and bin edges (`np.histogram`) — `bins` equal-width bins over [min, max]. */
+export interface HistogramResult {
+  counts: number[];
+  edges: number[];
+}
+
+export function histogram(x: Vec, bins = 10): HistogramResult {
+  const a = Array.from(x);
+  if (a.length === 0) throw new Error('histogram: input must be non-empty');
+  if (!Number.isInteger(bins) || bins < 1)
+    throw new Error('histogram: bins must be a positive integer');
+  let lo = a[0];
+  let hi = a[0];
+  for (const v of a) {
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  if (lo === hi) {
+    lo -= 0.5;
+    hi += 0.5;
+  }
+  const width = (hi - lo) / bins;
+  const edges = Array.from({ length: bins + 1 }, (_, i) => lo + i * width);
+  const counts = new Array<number>(bins).fill(0);
+  for (const v of a) {
+    let idx = Math.floor((v - lo) / width);
+    if (idx === bins) idx = bins - 1;
+    if (idx >= 0 && idx < bins) counts[idx]++;
+  }
+  return { counts, edges };
 }

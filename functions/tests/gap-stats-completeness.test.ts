@@ -176,3 +176,59 @@ describe('Wave 5: Kendall tau + external pins for 3 round-trip methods', () => {
     expect(weibullDist(2, 1).quantile(0.5)).toBeCloseTo(0.832554611158, 11);
   });
 });
+
+import {
+  linregress,
+  pearsonr,
+  spearmanr,
+  kendalltau,
+  ptp,
+  variation,
+  trimmedMean,
+  describe as statDescribe,
+  histogram,
+} from '../src/index.js';
+
+describe('Wave B/C/D: regression, correlation tests, descriptive vs scipy', () => {
+  it('linregress matches scipy.stats.linregress', () => {
+    const r = linregress([1, 2, 3, 4, 5, 6], [2.1, 3.9, 6.2, 7.8, 10.1, 11.9]);
+    expect(r.slope).toBeCloseTo(1.9771428571, 9);
+    expect(r.intercept).toBeCloseTo(0.08, 9);
+    expect(r.rValue).toBeCloseTo(0.9991907325, 9);
+    expect(r.pValue).toBeCloseTo(0.0000009821, 10);
+    expect(r.stdErr).toBeCloseTo(0.0397953951, 9);
+    expect(r.interceptStdErr).toBeCloseTo(0.1549807976, 8);
+  });
+
+  it('pearsonr / spearmanr match scipy (r + p)', () => {
+    const a = [1, 2, 3, 4, 5, 6, 7];
+    const b = [2, 1, 4, 3, 6, 5, 7];
+    const p = pearsonr(a, b);
+    expect(p.coefficient).toBeCloseTo(0.8928571429, 9);
+    expect(p.pValue).toBeCloseTo(0.0068071874, 9);
+    const s = spearmanr(a, b);
+    expect(s.coefficient).toBeCloseTo(0.8928571429, 9);
+    expect(s.pValue).toBeCloseTo(0.0068071874, 9);
+  });
+
+  it('kendalltau coefficient matches scipy; p via normal approximation', () => {
+    const k = kendalltau([1, 2, 3, 4, 5, 6, 7], [2, 1, 4, 3, 6, 5, 7]);
+    expect(k.coefficient).toBeCloseTo(0.7142857143, 9);
+    expect(k.pValue).toBeCloseTo(0.0242706404, 9); // normal-approx (scipy exact = 0.03016)
+  });
+
+  it('ptp / variation / trimmedMean / describe / histogram match numpy/scipy', () => {
+    const d = [2, 4, 4, 4, 5, 5, 7, 9];
+    expect(ptp(d)).toBe(7);
+    expect(variation(d)).toBeCloseTo(0.4, 12);
+    expect(trimmedMean(d, 0.25)).toBeCloseTo(4.5, 12);
+    const de = statDescribe(d);
+    expect(de.nobs).toBe(8);
+    expect(de.variance).toBeCloseTo(4.5714285714, 9); // sample ddof=1
+    expect(de.skewness).toBeCloseTo(0.65625, 9); // biased
+    expect(de.kurtosis).toBeCloseTo(-0.21875, 9); // biased Fisher
+    const h = histogram([1, 2, 2, 3, 3, 3, 4, 4, 4, 4], 4);
+    expect(h.counts).toEqual([1, 2, 3, 4]);
+    expect(h.edges).toEqual([1, 1.75, 2.5, 3.25, 4]);
+  });
+});

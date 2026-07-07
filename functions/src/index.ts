@@ -53,6 +53,15 @@ export {
   rankdata,
   spearman,
   kendallTau,
+  linregress,
+  pearsonr,
+  spearmanr,
+  kendalltau,
+  ptp,
+  variation,
+  trimmedMean,
+  describe,
+  histogram,
 } from './descriptive-stats.js';
 
 // Gap-analysis Wave A — elementwise / cumulative / log-domain primitives.

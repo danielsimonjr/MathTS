@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-07'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4730
+  totalExports: 4761
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7081,6 +7081,12 @@ modules:
         - file: ./factories/index.js
           imports:
             - quantileSeq
+        - file: ./distribution-functions.js
+          imports:
+            - studentTCDF
+        - file: ./typed/distributions.js
+          imports:
+            - normalCDF
       workspaceDependencies: []
       exports:
         - rankdata
@@ -7096,6 +7102,20 @@ modules:
         - cov
         - corrcoef
         - kendallTau
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
+      interfaces:
+        - LinRegressResult
+        - CorrelationTestResult
+        - DescribeResult
+        - HistogramResult
       functions:
         - rankdata
         - spearman
@@ -7110,6 +7130,15 @@ modules:
         - cov
         - corrcoef
         - kendallTau
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
     functions/src/distribution-functions.ts:
       description: Standalone distribution CDF / quantile functions (Wave B / bridge C4).
       externalDependencies: []
@@ -7343,6 +7372,15 @@ modules:
             - rankdata
             - spearman
             - kendallTau
+            - linregress
+            - pearsonr
+            - spearmanr
+            - kendalltau
+            - ptp
+            - variation
+            - trimmedMean
+            - describe
+            - histogram
           reExport: true
         - file: ./numeric-extra.js
           imports:
@@ -7512,6 +7550,15 @@ modules:
         - rankdata
         - spearman
         - kendallTau
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
         - clamp
         - sigmoid
         - logsumexp
@@ -7626,6 +7673,15 @@ modules:
         - rankdata
         - spearman
         - kendallTau
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
         - clamp
         - sigmoid
         - logsumexp
@@ -25976,8 +26032,27 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
+            - linregress
+            - pearsonr
+            - spearmanr
+            - kendalltau
+            - ptp
+            - variation
+            - trimmedMean
+            - describe
+            - histogram
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
             - Distribution
             - SampleNOptions
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - LinRegressResult
+            - CorrelationTestResult
+            - DescribeResult
+            - HistogramResult
       exports:
         - mean
         - median
@@ -26134,8 +26209,21 @@ modules:
         - spectralClustering
         - beta
         - digamma
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
         - Distribution
         - SampleNOptions
+        - LinRegressResult
+        - CorrelationTestResult
+        - DescribeResult
+        - HistogramResult
       reExported:
         - mean
         - median
@@ -26292,8 +26380,21 @@ modules:
         - spectralClustering
         - beta
         - digamma
+        - linregress
+        - pearsonr
+        - spearmanr
+        - kendalltau
+        - ptp
+        - variation
+        - trimmedMean
+        - describe
+        - histogram
         - Distribution
         - SampleNOptions
+        - LinRegressResult
+        - CorrelationTestResult
+        - DescribeResult
+        - HistogramResult
   signal:
     signal/src/index.ts:
       description: Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
@@ -31245,17 +31346,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166571
-  totalExports: 4730
+  totalLinesOfCode: 166823
+  totalExports: 4761
   totalClasses: 55
-  totalInterfaces: 385
-  totalFunctions: 1511
+  totalInterfaces: 389
+  totalFunctions: 1520
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1674
+  totalReExports: 1696
   totalTypeOnlyImports: 502
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 231
+  unusedExportsCount: 235

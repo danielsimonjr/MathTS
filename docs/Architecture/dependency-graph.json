@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-07",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4730
+    "totalExports": 4761
   },
   "entryPoints": [
     {
@@ -7585,6 +7585,14 @@
           {
             "file": "./factories/index.js",
             "imports": ["quantileSeq"]
+          },
+          {
+            "file": "./distribution-functions.js",
+            "imports": ["studentTCDF"]
+          },
+          {
+            "file": "./typed/distributions.js",
+            "imports": ["normalCDF"]
           }
         ],
         "workspaceDependencies": [],
@@ -7601,7 +7609,22 @@
           "zscore",
           "cov",
           "corrcoef",
-          "kendallTau"
+          "kendallTau",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram"
+        ],
+        "interfaces": [
+          "LinRegressResult",
+          "CorrelationTestResult",
+          "DescribeResult",
+          "HistogramResult"
         ],
         "functions": [
           "rankdata",
@@ -7616,7 +7639,16 @@
           "zscore",
           "cov",
           "corrcoef",
-          "kendallTau"
+          "kendallTau",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram"
         ]
       },
       "functions/src/distribution-functions.ts": {
@@ -7860,7 +7892,16 @@
               "corrcoef",
               "rankdata",
               "spearman",
-              "kendallTau"
+              "kendallTau",
+              "linregress",
+              "pearsonr",
+              "spearmanr",
+              "kendalltau",
+              "ptp",
+              "variation",
+              "trimmedMean",
+              "describe",
+              "histogram"
             ],
             "reExport": true
           },
@@ -8050,6 +8091,15 @@
           "rankdata",
           "spearman",
           "kendallTau",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -8165,6 +8215,15 @@
           "rankdata",
           "spearman",
           "kendallTau",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram",
           "clamp",
           "sigmoid",
           "logsumexp",
@@ -28005,7 +28064,32 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
+            "imports": [
+              "linregress",
+              "pearsonr",
+              "spearmanr",
+              "kendalltau",
+              "ptp",
+              "variation",
+              "trimmedMean",
+              "describe",
+              "histogram"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
             "imports": ["Distribution", "SampleNOptions"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": [
+              "LinRegressResult",
+              "CorrelationTestResult",
+              "DescribeResult",
+              "HistogramResult"
+            ]
           }
         ],
         "exports": [
@@ -28164,8 +28248,21 @@
           "spectralClustering",
           "beta",
           "digamma",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram",
           "Distribution",
-          "SampleNOptions"
+          "SampleNOptions",
+          "LinRegressResult",
+          "CorrelationTestResult",
+          "DescribeResult",
+          "HistogramResult"
         ],
         "reExported": [
           "mean",
@@ -28323,8 +28420,21 @@
           "spectralClustering",
           "beta",
           "digamma",
+          "linregress",
+          "pearsonr",
+          "spearmanr",
+          "kendalltau",
+          "ptp",
+          "variation",
+          "trimmedMean",
+          "describe",
+          "histogram",
           "Distribution",
-          "SampleNOptions"
+          "SampleNOptions",
+          "LinRegressResult",
+          "CorrelationTestResult",
+          "DescribeResult",
+          "HistogramResult"
         ]
       }
     },
@@ -33580,19 +33690,19 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 166571,
-    "totalExports": 4730,
+    "totalLinesOfCode": 166823,
+    "totalExports": 4761,
     "totalClasses": 55,
-    "totalInterfaces": 385,
-    "totalFunctions": 1511,
+    "totalInterfaces": 389,
+    "totalFunctions": 1520,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
-    "totalReExports": 1674,
+    "totalReExports": 1696,
     "totalTypeOnlyImports": 502,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 231
+    "unusedExportsCount": 235
   }
 }

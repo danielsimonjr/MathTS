@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Closing the STATISTICS_GAP_AUDIT_2026-07-06 findings. **Wave A**: surfaced 16 already-implemented
 functions in the statistics library (linearRegression, polyFit, cummax/cummin/cumprod, cumtrapz,
 trapzF64, movingAverage, ewma, detrend, acf, logsumexp, softmax, kmeans, spectralClustering, beta,
-digamma).
+digamma). **Waves B/C/D**: linregress (slope/intercept/r/p/stderr), pearsonr/spearmanr/kendalltau tests (r,p), ptp/variation/trimmedMean/describe/histogram — scipy-pinned.
 
 ### Added (2026-07-06) — @danielsimonjr/mathts-statistics is now a full statistics & probability library
 
