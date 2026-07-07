@@ -63,6 +63,12 @@ export {
   describe,
   histogram,
 } from './descriptive-stats.js';
+export type {
+  LinRegressResult,
+  CorrelationTestResult,
+  DescribeResult,
+  HistogramResult,
+} from './descriptive-stats.js';
 
 // Gap-analysis Wave A — elementwise / cumulative / log-domain primitives.
 export {

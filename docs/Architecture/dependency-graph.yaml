@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-07'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4761
+  totalExports: 4765
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7496,6 +7496,14 @@ modules:
             - DualFn
           reExport: true
           typeOnly: true
+        - file: ./descriptive-stats.js
+          imports:
+            - LinRegressResult
+            - CorrelationTestResult
+            - DescribeResult
+            - HistogramResult
+          reExport: true
+          typeOnly: true
         - file: ./hypothesis-extra.js
           imports:
             - FTestResult
@@ -7633,6 +7641,10 @@ modules:
         - quaternionRotate
         - quaternionToRotationMatrix
         - DualFn
+        - LinRegressResult
+        - CorrelationTestResult
+        - DescribeResult
+        - HistogramResult
         - FTestResult
         - JarqueBeraResult
         - KruskalResult
@@ -7756,6 +7768,10 @@ modules:
         - quaternionRotate
         - quaternionToRotationMatrix
         - DualFn
+        - LinRegressResult
+        - CorrelationTestResult
+        - DescribeResult
+        - HistogramResult
         - FTestResult
         - JarqueBeraResult
         - KruskalResult
@@ -31346,17 +31362,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166823
-  totalExports: 4761
+  totalLinesOfCode: 166837
+  totalExports: 4765
   totalClasses: 55
   totalInterfaces: 389
   totalFunctions: 1520
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1696
-  totalTypeOnlyImports: 502
+  totalReExports: 1700
+  totalTypeOnlyImports: 503
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 235
+  unusedExportsCount: 231
