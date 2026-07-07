@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-07'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4778
+  totalExports: 4793
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15328,9 +15328,17 @@ modules:
         - weibullDist
         - hypergeometricDist
         - negativeBinomialDist
+        - paretoDist
+        - rayleighDist
+        - triangularDist
+        - discreteUniformDist
+        - gumbelDist
+        - invGaussDist
+        - multivariateNormal
       interfaces:
         - SampleNOptions
         - Distribution
+        - MultivariateDistribution
       functions:
         - normalDist
         - betaDist
@@ -15346,6 +15354,13 @@ modules:
         - weibullDist
         - hypergeometricDist
         - negativeBinomialDist
+        - paretoDist
+        - rayleighDist
+        - triangularDist
+        - discreteUniformDist
+        - gumbelDist
+        - invGaussDist
+        - multivariateNormal
       constants:
         - DIST_WORKER_THRESHOLD
     functions/src/typed/distributions.ts:
@@ -26081,6 +26096,16 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
+            - paretoDist
+            - rayleighDist
+            - triangularDist
+            - discreteUniformDist
+            - gumbelDist
+            - invGaussDist
+            - multivariateNormal
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
             - Distribution
             - SampleNOptions
         - package: '@danielsimonjr/mathts-functions'
@@ -26096,6 +26121,10 @@ modules:
             - NormalityTestResult
             - Anova2Effect
             - Anova2Result
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - MultivariateDistribution
       exports:
         - mean
         - median
@@ -26266,6 +26295,13 @@ modules:
         - friedmanTest
         - anova2
         - multipleComparison
+        - paretoDist
+        - rayleighDist
+        - triangularDist
+        - discreteUniformDist
+        - gumbelDist
+        - invGaussDist
+        - multivariateNormal
         - Distribution
         - SampleNOptions
         - LinRegressResult
@@ -26275,6 +26311,7 @@ modules:
         - NormalityTestResult
         - Anova2Effect
         - Anova2Result
+        - MultivariateDistribution
       reExported:
         - mean
         - median
@@ -26445,6 +26482,13 @@ modules:
         - friedmanTest
         - anova2
         - multipleComparison
+        - paretoDist
+        - rayleighDist
+        - triangularDist
+        - discreteUniformDist
+        - gumbelDist
+        - invGaussDist
+        - multivariateNormal
         - Distribution
         - SampleNOptions
         - LinRegressResult
@@ -26454,6 +26498,7 @@ modules:
         - NormalityTestResult
         - Anova2Effect
         - Anova2Result
+        - MultivariateDistribution
   signal:
     signal/src/index.ts:
       description: Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
@@ -31405,15 +31450,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 167073
-  totalExports: 4778
+  totalLinesOfCode: 167363
+  totalExports: 4793
   totalClasses: 55
-  totalInterfaces: 392
-  totalFunctions: 1525
+  totalInterfaces: 393
+  totalFunctions: 1532
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1708
+  totalReExports: 1716
   totalTypeOnlyImports: 503
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

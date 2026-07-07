@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-07",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4778
+    "totalExports": 4793
   },
   "entryPoints": [
     {
@@ -16882,9 +16882,16 @@
           "uniformDist",
           "weibullDist",
           "hypergeometricDist",
-          "negativeBinomialDist"
+          "negativeBinomialDist",
+          "paretoDist",
+          "rayleighDist",
+          "triangularDist",
+          "discreteUniformDist",
+          "gumbelDist",
+          "invGaussDist",
+          "multivariateNormal"
         ],
-        "interfaces": ["SampleNOptions", "Distribution"],
+        "interfaces": ["SampleNOptions", "Distribution", "MultivariateDistribution"],
         "functions": [
           "normalDist",
           "betaDist",
@@ -16899,7 +16906,14 @@
           "uniformDist",
           "weibullDist",
           "hypergeometricDist",
-          "negativeBinomialDist"
+          "negativeBinomialDist",
+          "paretoDist",
+          "rayleighDist",
+          "triangularDist",
+          "discreteUniformDist",
+          "gumbelDist",
+          "invGaussDist",
+          "multivariateNormal"
         ],
         "constants": ["DIST_WORKER_THRESHOLD"]
       },
@@ -28122,6 +28136,19 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
+            "imports": [
+              "paretoDist",
+              "rayleighDist",
+              "triangularDist",
+              "discreteUniformDist",
+              "gumbelDist",
+              "invGaussDist",
+              "multivariateNormal"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
             "imports": ["Distribution", "SampleNOptions"]
           },
           {
@@ -28138,6 +28165,11 @@
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
             "imports": ["NormalityTestResult", "Anova2Effect", "Anova2Result"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": ["MultivariateDistribution"]
           }
         ],
         "exports": [
@@ -28310,6 +28342,13 @@
           "friedmanTest",
           "anova2",
           "multipleComparison",
+          "paretoDist",
+          "rayleighDist",
+          "triangularDist",
+          "discreteUniformDist",
+          "gumbelDist",
+          "invGaussDist",
+          "multivariateNormal",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
@@ -28318,7 +28357,8 @@
           "HistogramResult",
           "NormalityTestResult",
           "Anova2Effect",
-          "Anova2Result"
+          "Anova2Result",
+          "MultivariateDistribution"
         ],
         "reExported": [
           "mean",
@@ -28490,6 +28530,13 @@
           "friedmanTest",
           "anova2",
           "multipleComparison",
+          "paretoDist",
+          "rayleighDist",
+          "triangularDist",
+          "discreteUniformDist",
+          "gumbelDist",
+          "invGaussDist",
+          "multivariateNormal",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
@@ -28498,7 +28545,8 @@
           "HistogramResult",
           "NormalityTestResult",
           "Anova2Effect",
-          "Anova2Result"
+          "Anova2Result",
+          "MultivariateDistribution"
         ]
       }
     },
@@ -33754,15 +33802,15 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 167073,
-    "totalExports": 4778,
+    "totalLinesOfCode": 167363,
+    "totalExports": 4793,
     "totalClasses": 55,
-    "totalInterfaces": 392,
-    "totalFunctions": 1525,
+    "totalInterfaces": 393,
+    "totalFunctions": 1532,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
-    "totalReExports": 1708,
+    "totalReExports": 1716,
     "totalTypeOnlyImports": 503,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -301,3 +301,75 @@ describe('Wave E: normality + repeated-measures tests vs scipy', () => {
     [0.025, 0.05, 0.05, 0.025, 0.2].forEach((v, i) => expect(bh[i]).toBeCloseTo(v, 10));
   });
 });
+
+import {
+  paretoDist,
+  rayleighDist,
+  triangularDist,
+  discreteUniformDist,
+  gumbelDist,
+  invGaussDist,
+  multivariateNormal,
+} from '../src/index.js';
+
+describe('Wave F: common distributions vs scipy', () => {
+  it('paretoDist(3,2) matches scipy.stats.pareto', () => {
+    const d = paretoDist(3, 2);
+    expect(d.pdf(3)).toBeCloseTo(0.2962962963, 9);
+    expect(d.cdf(4)).toBeCloseTo(0.875, 10);
+    expect(d.mean).toBeCloseTo(3.0, 10);
+    expect(d.variance).toBeCloseTo(3.0, 10);
+    expect(d.quantile(0.5)).toBeCloseTo(2.5198420998, 9);
+  });
+
+  it('rayleighDist(2) matches scipy.stats.rayleigh', () => {
+    const d = rayleighDist(2);
+    expect(d.pdf(2)).toBeCloseTo(0.3032653299, 9);
+    expect(d.cdf(3)).toBeCloseTo(0.6753475326, 9);
+    expect(d.mean).toBeCloseTo(2.5066282746, 9);
+    expect(d.variance).toBeCloseTo(1.7168146928, 9);
+  });
+
+  it('triangularDist(0,4,6) matches scipy.stats.triang', () => {
+    const d = triangularDist(0, 4, 6);
+    expect(d.pdf(3)).toBeCloseTo(0.25, 10);
+    expect(d.cdf(4)).toBeCloseTo(0.6666666667, 9);
+    expect(d.mean).toBeCloseTo(3.3333333333, 9);
+    expect(d.variance).toBeCloseTo(1.5555555556, 9);
+  });
+
+  it('discreteUniformDist(1,6) matches scipy.stats.randint', () => {
+    const d = discreteUniformDist(1, 6);
+    expect(d.pdf(3)).toBeCloseTo(0.1666666667, 9);
+    expect(d.cdf(4)).toBeCloseTo(0.6666666667, 9);
+    expect(d.mean).toBeCloseTo(3.5, 10);
+    expect(d.variance).toBeCloseTo(2.9166666667, 9);
+  });
+
+  it('gumbelDist(1,2) matches scipy.stats.gumbel_r', () => {
+    const d = gumbelDist(1, 2);
+    expect(d.pdf(2)).toBeCloseTo(0.1653521494, 9);
+    expect(d.cdf(3)).toBeCloseTo(0.6922006276, 9);
+    expect(d.mean).toBeCloseTo(2.1544313298, 9);
+    expect(d.quantile(0.5)).toBeCloseTo(1.7330258412, 8);
+  });
+
+  it('invGaussDist(1,1) matches scipy.stats.invgauss', () => {
+    const d = invGaussDist(1, 1);
+    expect(d.pdf(1)).toBeCloseTo(0.3989422804, 9);
+    expect(d.cdf(1.5)).toBeCloseTo(0.810767993, 8);
+    expect(d.mean).toBeCloseTo(1.0, 10);
+  });
+
+  it('multivariateNormal matches scipy.stats.multivariate_normal.pdf', () => {
+    const m = multivariateNormal(
+      [0, 0],
+      [
+        [1, 0.5],
+        [0.5, 2],
+      ]
+    );
+    expect(m.pdf([0, 0])).toBeCloseTo(0.1203098284, 9);
+    expect(m.pdf([0.5, 1])).toBeCloseTo(0.0904101042, 9);
+  });
+});

@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-07", "f": 996, "e": 4778, "re": 1708 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-07", "f": 996, "e": 4793, "re": 1716 },
   "s": {
-    "loc": 167073,
+    "loc": 167363,
     "cls": 55,
-    "int": 392,
-    "fn": 1525,
+    "int": 393,
+    "fn": 1532,
     "tg": 156,
     "en": 0,
     "co": 1529,
@@ -838,14 +838,14 @@
       "int": [
         "SampleNOptions",
         "Distribution",
+        "MultivariateDistribution",
         "KDTreeNode",
         "CentralityRestartOptions",
         "PageRankOptions",
         "PageRankResult",
         "PageRankRestartResult",
         "BetweennessOptions",
-        "BetweennessResult",
-        "BetweennessRestartResult"
+        "BetweennessResult"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },

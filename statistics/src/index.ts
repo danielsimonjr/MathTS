@@ -256,3 +256,17 @@ export type {
   Anova2Effect,
   Anova2Result,
 } from '@danielsimonjr/mathts-functions';
+
+// ---------------------------------------------------------------------------
+// Additional common distributions (wave F)
+// ---------------------------------------------------------------------------
+export {
+  paretoDist,
+  rayleighDist,
+  triangularDist,
+  discreteUniformDist,
+  gumbelDist,
+  invGaussDist,
+  multivariateNormal,
+} from '@danielsimonjr/mathts-functions';
+export type { MultivariateDistribution } from '@danielsimonjr/mathts-functions';

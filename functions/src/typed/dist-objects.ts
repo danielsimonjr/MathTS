@@ -1233,3 +1233,278 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
       }),
   };
 }
+
+// =============================================================================
+// Wave F — common distributions: Pareto, Rayleigh, triangular, discrete-uniform,
+// Gumbel, inverse-Gaussian (Wald), and multivariate normal (stats gap-closure)
+// =============================================================================
+
+const EULER_GAMMA = 0.5772156649015329;
+
+/** Inverse-transform continuous sampler using a distribution's quantile. */
+function _contSample(quantile: (p: f64) => f64, rng: () => number): f64 {
+  return quantile(rng());
+}
+
+/**
+ * Pareto distribution (shape `b` > 0, scale `xm` > 0) — `scipy.stats.pareto(b, scale=xm)`.
+ * @example paretoDist(3, 2).cdf(4) // 0.875
+ */
+export function paretoDist(b: number, xm: number): Distribution {
+  if (b <= 0 || xm <= 0) throw new Error('paretoDist: shape b and scale xm must be positive');
+  const quantile = (p: f64): f64 => (p <= 0 ? xm : p >= 1 ? Infinity : xm / Math.pow(1 - p, 1 / b));
+  return {
+    pdf: (x: f64) => (x < xm ? 0 : (b * Math.pow(xm, b)) / Math.pow(x, b + 1)),
+    cdf: (x: f64) => (x < xm ? 0 : 1 - Math.pow(xm / x, b)),
+    quantile,
+    mean: b > 1 ? (b * xm) / (b - 1) : Infinity,
+    variance: b > 2 ? (xm * xm * b) / ((b - 1) * (b - 1) * (b - 2)) : Infinity,
+    sample: () => _contSample(quantile, Math.random),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Rayleigh distribution (scale `sigma` > 0) — `scipy.stats.rayleigh(scale=sigma)`.
+ * @example rayleighDist(2).mean // 2.5066282746
+ */
+export function rayleighDist(sigma: number): Distribution {
+  if (sigma <= 0) throw new Error('rayleighDist: sigma must be positive');
+  const s2 = sigma * sigma;
+  const quantile = (p: f64): f64 =>
+    p <= 0 ? 0 : p >= 1 ? Infinity : sigma * Math.sqrt(-2 * Math.log(1 - p));
+  return {
+    pdf: (x: f64) => (x < 0 ? 0 : (x / s2) * Math.exp(-(x * x) / (2 * s2))),
+    cdf: (x: f64) => (x < 0 ? 0 : 1 - Math.exp(-(x * x) / (2 * s2))),
+    quantile,
+    mean: sigma * Math.sqrt(Math.PI / 2),
+    variance: ((4 - Math.PI) / 2) * s2,
+    sample: () => _contSample(quantile, Math.random),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Triangular distribution on `[a, b]` with mode `c` — matches
+ * `scipy.stats.triang((c-a)/(b-a), loc=a, scale=b-a)`.
+ * @example triangularDist(0, 4, 6).mean // 3.3333333333
+ */
+export function triangularDist(a: number, c: number, b: number): Distribution {
+  if (!(a <= c && c <= b && a < b))
+    throw new Error('triangularDist: require a <= mode <= b, a < b');
+  const quantile = (p: f64): f64 => {
+    if (p <= 0) return a;
+    if (p >= 1) return b;
+    const fc = (c - a) / (b - a);
+    return p < fc
+      ? a + Math.sqrt(p * (b - a) * (c - a))
+      : b - Math.sqrt((1 - p) * (b - a) * (b - c));
+  };
+  return {
+    pdf: (x: f64) => {
+      if (x < a || x > b) return 0;
+      if (x < c) return (2 * (x - a)) / ((b - a) * (c - a));
+      if (x > c) return (2 * (b - x)) / ((b - a) * (b - c));
+      return 2 / (b - a);
+    },
+    cdf: (x: f64) => {
+      if (x <= a) return 0;
+      if (x >= b) return 1;
+      return x < c
+        ? ((x - a) * (x - a)) / ((b - a) * (c - a))
+        : 1 - ((b - x) * (b - x)) / ((b - a) * (b - c));
+    },
+    quantile,
+    mean: (a + c + b) / 3,
+    variance: (a * a + c * c + b * b - a * c - a * b - c * b) / 18,
+    sample: () => _contSample(quantile, Math.random),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Discrete uniform distribution on the integers `lo..hi` (inclusive) — matches
+ * `scipy.stats.randint(lo, hi+1)`.
+ * @example discreteUniformDist(1, 6).pmf(3) // 0.1666666667
+ */
+export function discreteUniformDist(lo: number, hi: number): Distribution {
+  if (!Number.isInteger(lo) || !Number.isInteger(hi) || hi < lo) {
+    throw new Error('discreteUniformDist: require integer lo <= hi');
+  }
+  const k = hi - lo + 1;
+  const cdf = (x: f64): f64 => {
+    if (x < lo) return 0;
+    if (x >= hi) return 1;
+    return (Math.floor(x) - lo + 1) / k;
+  };
+  return {
+    pdf: (x: f64) => (Number.isInteger(x) && x >= lo && x <= hi ? 1 / k : 0),
+    cdf,
+    quantile: (p: f64) => {
+      if (p <= 0) return lo;
+      if (p >= 1) return hi;
+      return Math.min(hi, lo + Math.ceil(p * k) - 1);
+    },
+    mean: (lo + hi) / 2,
+    variance: (k * k - 1) / 12,
+    sample: () => lo + Math.floor(Math.random() * k),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = lo + Math.floor(rng() * k);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Gumbel (right / maximum) distribution (location `mu`, scale `beta` > 0) —
+ * `scipy.stats.gumbel_r(loc=mu, scale=beta)`.
+ * @example gumbelDist(1, 2).cdf(3) // 0.6922006276
+ */
+export function gumbelDist(mu: number, beta: number): Distribution {
+  if (beta <= 0) throw new Error('gumbelDist: scale beta must be positive');
+  const quantile = (p: f64): f64 =>
+    p <= 0 ? -Infinity : p >= 1 ? Infinity : mu - beta * Math.log(-Math.log(p));
+  return {
+    pdf: (x: f64) => {
+      const z = (x - mu) / beta;
+      return (1 / beta) * Math.exp(-(z + Math.exp(-z)));
+    },
+    cdf: (x: f64) => Math.exp(-Math.exp(-(x - mu) / beta)),
+    quantile,
+    mean: mu + beta * EULER_GAMMA,
+    variance: ((Math.PI * Math.PI) / 6) * beta * beta,
+    sample: () => _contSample(quantile, Math.random),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
+        return out;
+      }),
+  };
+}
+
+/**
+ * Inverse-Gaussian (Wald) distribution — mean `mu` > 0, shape `lambda` > 0.
+ * Matches `scipy.stats.invgauss(mu, scale=lambda)` where the scipy mean is
+ * `mu*scale`; here `mu` is the actual mean directly.
+ * @example invGaussDist(1, 1).pdf(1) // 0.3989422804
+ */
+export function invGaussDist(mu: number, lambda: number): Distribution {
+  if (mu <= 0 || lambda <= 0) throw new Error('invGaussDist: mu and lambda must be positive');
+  const quantile = (p: f64): f64 => {
+    // No closed form — bisection on the (monotone) CDF.
+    if (p <= 0) return 0;
+    if (p >= 1) return Infinity;
+    let lo = 1e-9;
+    let hi = mu * 100;
+    for (let it = 0; it < 200; it++) {
+      const mid = (lo + hi) / 2;
+      if (cdf(mid) < p) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  };
+  const cdf = (x: f64): f64 => {
+    if (x <= 0) return 0;
+    const a = Math.sqrt(lambda / x) * (x / mu - 1);
+    const b = -Math.sqrt(lambda / x) * (x / mu + 1);
+    return _normalCdfStd(a) + Math.exp((2 * lambda) / mu) * _normalCdfStd(b);
+  };
+  return {
+    pdf: (x: f64) => {
+      if (x <= 0) return 0;
+      return (
+        Math.sqrt(lambda / (2 * Math.PI * x * x * x)) *
+        Math.exp((-lambda * (x - mu) * (x - mu)) / (2 * mu * mu * x))
+      );
+    },
+    cdf,
+    quantile,
+    mean: mu,
+    variance: (mu * mu * mu) / lambda,
+    sample: () => _contSample(quantile, Math.random),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) out[j] = _contSample(quantile, rng);
+        return out;
+      }),
+  };
+}
+
+/** Lower-triangular Cholesky factor L (Σ = LLᵀ) of a symmetric positive-definite matrix. */
+function _cholesky(m: number[][]): number[][] {
+  const n = m.length;
+  const L = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let s = m[i][j];
+      for (let k = 0; k < j; k++) s -= L[i][k] * L[j][k];
+      if (i === j) {
+        if (s <= 0) throw new Error('multivariateNormal: covariance is not positive-definite');
+        L[i][j] = Math.sqrt(s);
+      } else {
+        L[i][j] = s / L[j][j];
+      }
+    }
+  }
+  return L;
+}
+
+/** A multivariate distribution exposing a density function. */
+export interface MultivariateDistribution {
+  pdf: (x: number[]) => f64;
+  mean: number[];
+  cov: number[][];
+}
+
+/**
+ * Multivariate normal distribution with the given `mean` vector and `cov`
+ * covariance matrix. Density via a Cholesky factorization (stable log-det +
+ * triangular solve). Matches `scipy.stats.multivariate_normal(mean, cov).pdf`.
+ *
+ * @example multivariateNormal([0, 0], [[1, 0.5],[0.5, 2]]).pdf([0, 0]) // 0.1203098284
+ */
+export function multivariateNormal(mean: number[], cov: number[][]): MultivariateDistribution {
+  const k = mean.length;
+  if (cov.length !== k || cov.some((row) => row.length !== k)) {
+    throw new Error('multivariateNormal: cov must be a k×k matrix matching mean');
+  }
+  const L = _cholesky(cov);
+  let logDet = 0;
+  for (let i = 0; i < k; i++) logDet += 2 * Math.log(L[i][i]);
+  return {
+    mean,
+    cov,
+    pdf: (x: number[]): f64 => {
+      if (x.length !== k) throw new Error('multivariateNormal.pdf: x must have length k');
+      // Solve L z = (x − mean); quadratic form = zᵀz.
+      const z = new Array<number>(k).fill(0);
+      for (let i = 0; i < k; i++) {
+        let s = x[i] - mean[i];
+        for (let j = 0; j < i; j++) s -= L[i][j] * z[j];
+        z[i] = s / L[i][i];
+      }
+      let quad = 0;
+      for (let i = 0; i < k; i++) quad += z[i] * z[i];
+      return Math.exp(-0.5 * (k * Math.log(2 * Math.PI) + logDet + quad));
+    },
+  };
+}
