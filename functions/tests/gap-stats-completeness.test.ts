@@ -232,3 +232,72 @@ describe('Wave B/C/D: regression, correlation tests, descriptive vs scipy', () =
     expect(h.edges).toEqual([1, 1.75, 2.5, 3.25, 4]);
   });
 });
+
+import {
+  andersonDarlingTest,
+  dagostinoTest,
+  friedmanTest,
+  anova2,
+  multipleComparison,
+} from '../src/index.js';
+
+describe('Wave E: normality + repeated-measures tests vs scipy', () => {
+  it('andersonDarlingTest A2 statistic matches scipy.stats.anderson', () => {
+    const d = [2.1, 3.4, 1.9, 4.2, 2.8, 3.1, 2.5, 3.9, 2.2, 3.6];
+    const r = andersonDarlingTest(d);
+    expect(r.statistic).toBeCloseTo(0.2060815568, 8);
+    expect(r.pValue).toBeGreaterThan(0.5); // clearly normal-looking
+  });
+
+  it('dagostinoTest (normaltest) matches scipy.stats.normaltest', () => {
+    const big = [
+      1.1, 2.3, 1.8, 4.5, 2.2, 3.1, 2.9, 3.5, 1.5, 2.8, 3.3, 2.1, 4.0, 1.9, 2.6, 3.8, 2.4, 3.0, 2.7,
+      3.2,
+    ];
+    const r = dagostinoTest(big);
+    expect(r.statistic).toBeCloseTo(0.0667893601, 7);
+    expect(r.pValue).toBeCloseTo(0.9671567668, 7);
+  });
+
+  it('friedmanTest matches scipy.stats.friedmanchisquare', () => {
+    const r = friedmanTest([
+      [1, 2, 3, 4, 5],
+      [2, 3, 4, 5, 6],
+      [1, 1, 2, 2, 3],
+    ]);
+    expect(r.statistic).toBeCloseTo(9.5789473684, 8);
+    expect(r.pValue).toBeCloseTo(0.0083168335, 8);
+    expect(r.degreesOfFreedom).toBe(2);
+  });
+
+  it('anova2 two-way F-tests match the balanced SS decomposition', () => {
+    const data = [
+      [
+        [10, 12],
+        [14, 16],
+        [18, 20],
+      ],
+      [
+        [11, 13],
+        [15, 17],
+        [19, 21],
+      ],
+    ];
+    const r = anova2(data);
+    expect(r.factorA.F).toBeCloseTo(1.5, 6);
+    expect(r.factorB.F).toBeCloseTo(32.0, 6);
+    expect(r.factorA.pValue).toBeCloseTo(0.2665697, 6);
+    expect(r.factorB.pValue).toBeCloseTo(0.00062974, 7);
+    expect(r.factorA.degreesOfFreedom).toEqual([1, 6]);
+    expect(r.factorB.degreesOfFreedom).toEqual([2, 6]);
+  });
+
+  it('multipleComparison matches bonferroni / holm / BH-FDR', () => {
+    const p = [0.01, 0.04, 0.03, 0.005, 0.2];
+    expect(multipleComparison(p, 'bonferroni')).toEqual([0.05, 0.2, 0.15, 0.025, 1.0]);
+    const holm = multipleComparison(p, 'holm');
+    [0.04, 0.09, 0.09, 0.025, 0.2].forEach((v, i) => expect(holm[i]).toBeCloseTo(v, 10));
+    const bh = multipleComparison(p, 'bh');
+    [0.025, 0.05, 0.05, 0.025, 0.2].forEach((v, i) => expect(bh[i]).toBeCloseTo(v, 10));
+  });
+});

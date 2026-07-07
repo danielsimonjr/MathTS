@@ -240,3 +240,19 @@ export type {
   DescribeResult,
   HistogramResult,
 } from '@danielsimonjr/mathts-functions';
+
+// ---------------------------------------------------------------------------
+// Normality & repeated-measures tests + multiple-comparison correction (wave E)
+// ---------------------------------------------------------------------------
+export {
+  andersonDarlingTest,
+  dagostinoTest,
+  friedmanTest,
+  anova2,
+  multipleComparison,
+} from '@danielsimonjr/mathts-functions';
+export type {
+  NormalityTestResult,
+  Anova2Effect,
+  Anova2Result,
+} from '@danielsimonjr/mathts-functions';

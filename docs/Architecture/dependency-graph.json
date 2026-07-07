@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-07",
     "totalFiles": 996,
     "totalModules": 73,
-    "totalExports": 4765
+    "totalExports": 4778
   },
   "entryPoints": [
     {
@@ -17169,7 +17169,12 @@
           "bartlettTest",
           "studentTTestPaired",
           "proportionZTest",
-          "binomialTest"
+          "binomialTest",
+          "andersonDarlingTest",
+          "dagostinoTest",
+          "friedmanTest",
+          "anova2",
+          "multipleComparison"
         ],
         "interfaces": [
           "TTestResult",
@@ -17185,7 +17190,10 @@
           "SWBootstrapResult",
           "ChiSquareBootstrapResult",
           "VarianceTestResult",
-          "ProportionZResult"
+          "ProportionZResult",
+          "NormalityTestResult",
+          "Anova2Effect",
+          "Anova2Result"
         ],
         "functions": [
           "studentTTest",
@@ -17200,7 +17208,12 @@
           "bartlettTest",
           "studentTTestPaired",
           "proportionZTest",
-          "binomialTest"
+          "binomialTest",
+          "andersonDarlingTest",
+          "dagostinoTest",
+          "friedmanTest",
+          "anova2",
+          "multipleComparison"
         ]
       },
       "functions/src/typed/index.ts": {
@@ -28098,6 +28111,17 @@
           {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
+            "imports": [
+              "andersonDarlingTest",
+              "dagostinoTest",
+              "friedmanTest",
+              "anova2",
+              "multipleComparison"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
             "imports": ["Distribution", "SampleNOptions"]
           },
           {
@@ -28109,6 +28133,11 @@
               "DescribeResult",
               "HistogramResult"
             ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-functions",
+            "directory": "functions",
+            "imports": ["NormalityTestResult", "Anova2Effect", "Anova2Result"]
           }
         ],
         "exports": [
@@ -28276,12 +28305,20 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "andersonDarlingTest",
+          "dagostinoTest",
+          "friedmanTest",
+          "anova2",
+          "multipleComparison",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
           "CorrelationTestResult",
           "DescribeResult",
-          "HistogramResult"
+          "HistogramResult",
+          "NormalityTestResult",
+          "Anova2Effect",
+          "Anova2Result"
         ],
         "reExported": [
           "mean",
@@ -28448,12 +28485,20 @@
           "trimmedMean",
           "describe",
           "histogram",
+          "andersonDarlingTest",
+          "dagostinoTest",
+          "friedmanTest",
+          "anova2",
+          "multipleComparison",
           "Distribution",
           "SampleNOptions",
           "LinRegressResult",
           "CorrelationTestResult",
           "DescribeResult",
-          "HistogramResult"
+          "HistogramResult",
+          "NormalityTestResult",
+          "Anova2Effect",
+          "Anova2Result"
         ]
       }
     },
@@ -33709,15 +33754,15 @@
   "statistics": {
     "totalTypeScriptFiles": 996,
     "totalModules": 73,
-    "totalLinesOfCode": 166837,
-    "totalExports": 4765,
+    "totalLinesOfCode": 167073,
+    "totalExports": 4778,
     "totalClasses": 55,
-    "totalInterfaces": 389,
-    "totalFunctions": 1520,
+    "totalInterfaces": 392,
+    "totalFunctions": 1525,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1529,
-    "totalReExports": 1700,
+    "totalReExports": 1708,
     "totalTypeOnlyImports": 503,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

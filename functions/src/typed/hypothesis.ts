@@ -1639,3 +1639,225 @@ export function binomialTest(
   }
   return { statistic: successes / n, pValue: Math.min(1, pValue) };
 }
+
+// =============================================================================
+// Wave E — Anderson-Darling, D'Agostino normaltest, Friedman, two-way ANOVA,
+// multiple-comparison correction (statistics gap-closure)
+// =============================================================================
+
+/** Biased (population) skewness and Pearson kurtosis of a sample. */
+function _skewKurt(a: f64[]): { skew: f64; kurtPearson: f64 } {
+  const n = a.length;
+  const m = _mean(a);
+  let m2 = 0;
+  let m3 = 0;
+  let m4 = 0;
+  for (const v of a) {
+    const d = v - m;
+    m2 += d * d;
+    m3 += d * d * d;
+    m4 += d * d * d * d;
+  }
+  const mu2 = m2 / n;
+  return { skew: m3 / n / Math.pow(mu2, 1.5), kurtPearson: m4 / n / (mu2 * mu2) };
+}
+
+/** Normality-test result (statistic + p-value). */
+export interface NormalityTestResult {
+  statistic: f64;
+  pValue: f64;
+}
+
+/**
+ * Anderson-Darling test for normality. Returns the A^2 statistic (matching
+ * scipy.stats.anderson, standardized with the ddof=1 sample std) and a p-value
+ * from the D'Agostino-Stephens approximation on the small-sample-corrected A^2*.
+ */
+export function andersonDarlingTest(data: f64[]): NormalityTestResult {
+  const n = data.length;
+  if (n < 8) throw new Error('andersonDarlingTest: need at least 8 observations');
+  const sorted = data.slice().sort((p, q) => p - q);
+  const mean = _mean(sorted);
+  const s = Math.sqrt(_variance(sorted, 1));
+  // Accurate Φ via erfc (the shared _normalCDF is only ~7 digits) so the A²
+  // statistic matches scipy to full precision.
+  const phi = (z: f64): f64 => 0.5 * erfcScalar(-z / Math.SQRT2);
+  let sumTerm = 0;
+  for (let i = 0; i < n; i++) {
+    const wi = (sorted[i] - mean) / s;
+    const wj = (sorted[n - 1 - i] - mean) / s;
+    sumTerm += ((2 * (i + 1) - 1) / n) * (Math.log(phi(wi)) + Math.log(1 - phi(wj)));
+  }
+  const a2 = -n - sumTerm;
+  const a2s = a2 * (1 + 0.75 / n + 2.25 / (n * n));
+  let p: f64;
+  if (a2s < 0.2) p = 1 - Math.exp(-13.436 + 101.14 * a2s - 223.73 * a2s * a2s);
+  else if (a2s < 0.34) p = 1 - Math.exp(-8.318 + 42.796 * a2s - 59.938 * a2s * a2s);
+  else if (a2s < 0.6) p = Math.exp(0.9177 - 4.279 * a2s - 1.38 * a2s * a2s);
+  else if (a2s < 10) p = Math.exp(1.2937 - 5.709 * a2s + 0.0186 * a2s * a2s);
+  else p = 0;
+  return { statistic: a2, pValue: Math.max(0, Math.min(1, p)) };
+}
+
+/**
+ * D'Agostino-Pearson omnibus normality test (scipy.stats.normaltest):
+ * K2 = Z1^2 + Z2^2 (skew + kurtosis Z-tests), chi-square with 2 df, p = e^(-K2/2).
+ */
+export function dagostinoTest(data: f64[]): NormalityTestResult {
+  const n = data.length;
+  if (n < 8) throw new Error('dagostinoTest: need at least 8 observations');
+  const { skew, kurtPearson } = _skewKurt(data);
+  const y = skew * Math.sqrt(((n + 1) * (n + 3)) / (6 * (n - 2)));
+  const beta2 =
+    (3 * (n * n + 27 * n - 70) * (n + 1) * (n + 3)) / ((n - 2) * (n + 5) * (n + 7) * (n + 9));
+  const w2 = -1 + Math.sqrt(2 * (beta2 - 1));
+  const delta = 1 / Math.sqrt(0.5 * Math.log(w2));
+  const alpha = Math.sqrt(2 / (w2 - 1));
+  const yy = y === 0 ? 1 : y;
+  const z1 = delta * Math.log(yy / alpha + Math.sqrt((yy / alpha) * (yy / alpha) + 1));
+  const E = (3 * (n - 1)) / (n + 1);
+  const varb2 = (24 * n * (n - 2) * (n - 3)) / ((n + 1) * (n + 1) * (n + 3) * (n + 5));
+  const xx = (kurtPearson - E) / Math.sqrt(varb2);
+  const sqrtbeta1 =
+    ((6 * (n * n - 5 * n + 2)) / ((n + 7) * (n + 9))) *
+    Math.sqrt((6 * (n + 3) * (n + 5)) / (n * (n - 2) * (n - 3)));
+  const A = 6 + (8 / sqrtbeta1) * (2 / sqrtbeta1 + Math.sqrt(1 + 4 / (sqrtbeta1 * sqrtbeta1)));
+  const term1 = 1 - 2 / (9 * A);
+  const denom = 1 + xx * Math.sqrt(2 / (A - 4));
+  const term2 = Math.sign(denom) * Math.cbrt((1 - 2 / A) / Math.abs(denom));
+  const z2 = (term1 - term2) / Math.sqrt(2 / (9 * A));
+  const k2 = z1 * z1 + z2 * z2;
+  return { statistic: k2, pValue: Math.exp(-k2 / 2) };
+}
+
+/**
+ * Friedman test - non-parametric repeated-measures ANOVA across k related
+ * groups of the same n blocks. chi-square with k-1 df. scipy.stats.friedmanchisquare.
+ */
+export function friedmanTest(groups: f64[][]): {
+  statistic: f64;
+  pValue: f64;
+  degreesOfFreedom: number;
+} {
+  const k = groups.length;
+  if (k < 3) throw new Error('friedmanTest: need at least 3 related groups');
+  const n = groups[0].length;
+  for (const g of groups)
+    if (g.length !== n) throw new Error('friedmanTest: all groups must be the same length');
+  const rankSums = new Array<number>(k).fill(0);
+  let tieCorrection = 0;
+  for (let block = 0; block < n; block++) {
+    const row = groups.map((g) => g[block]);
+    const order = row.map((_, i) => i).sort((i, j) => row[i] - row[j]);
+    const ranks = new Array<number>(k);
+    for (let i = 0; i < k; ) {
+      let j = i;
+      while (j < k && row[order[j]] === row[order[i]]) j++;
+      const avg = (i + 1 + j) / 2;
+      const t = j - i;
+      if (t > 1) tieCorrection += t * t * t - t;
+      for (let m = i; m < j; m++) ranks[order[m]] = avg;
+      i = j;
+    }
+    for (let g = 0; g < k; g++) rankSums[g] += ranks[g];
+  }
+  let stat =
+    (12 / (n * k * (k + 1))) * rankSums.reduce((acc, rr) => acc + rr * rr, 0) - 3 * n * (k + 1);
+  const c = 1 - tieCorrection / (n * k * (k * k - 1));
+  if (c !== 0) stat /= c;
+  const df = k - 1;
+  return { statistic: stat, pValue: _chiSquaredPValue(stat, df), degreesOfFreedom: df };
+}
+
+/** One factor's line in a two-way ANOVA table. */
+export interface Anova2Effect {
+  F: f64;
+  pValue: f64;
+  degreesOfFreedom: [number, number];
+}
+
+/** Balanced two-way (with-replication) ANOVA result. */
+export interface Anova2Result {
+  factorA: Anova2Effect;
+  factorB: Anova2Effect;
+  interaction: Anova2Effect;
+}
+
+/**
+ * Balanced two-way ANOVA with replication. data[i][j] holds the r replicates for
+ * level i of factor A x level j of factor B (all cells equal size). Equivalent to
+ * MATLAB anova2.
+ */
+export function anova2(data: f64[][][]): Anova2Result {
+  const nA = data.length;
+  const nB = data[0].length;
+  const r = data[0][0].length;
+  if (nA < 2 || nB < 2 || r < 2)
+    throw new Error('anova2: need at least 2 levels per factor and 2 replicates');
+  const all: f64[] = [];
+  for (const row of data) for (const cell of row) for (const v of cell) all.push(v);
+  const grand = _mean(all);
+  const aMeans = data.map((row) => _mean(row.flat()));
+  const bMeans = Array.from({ length: nB }, (_, j) => _mean(data.map((row) => row[j]).flat()));
+  const cellMeans = data.map((row) => row.map((cell) => _mean(cell)));
+  let ssA = 0;
+  for (const am of aMeans) ssA += (am - grand) * (am - grand);
+  ssA *= nB * r;
+  let ssB = 0;
+  for (const bm of bMeans) ssB += (bm - grand) * (bm - grand);
+  ssB *= nA * r;
+  let ssAB = 0;
+  let sse = 0;
+  for (let i = 0; i < nA; i++) {
+    for (let j = 0; j < nB; j++) {
+      const d = cellMeans[i][j] - aMeans[i] - bMeans[j] + grand;
+      ssAB += d * d;
+      for (const v of data[i][j]) sse += (v - cellMeans[i][j]) * (v - cellMeans[i][j]);
+    }
+  }
+  ssAB *= r;
+  const dfA = nA - 1;
+  const dfB = nB - 1;
+  const dfAB = dfA * dfB;
+  const dfE = nA * nB * (r - 1);
+  const mse = sse / dfE;
+  const fA = ssA / dfA / mse;
+  const fB = ssB / dfB / mse;
+  const fAB = ssAB / dfAB / mse;
+  return {
+    factorA: { F: fA, pValue: _fPValue(fA, dfA, dfE), degreesOfFreedom: [dfA, dfE] },
+    factorB: { F: fB, pValue: _fPValue(fB, dfB, dfE), degreesOfFreedom: [dfB, dfE] },
+    interaction: { F: fAB, pValue: _fPValue(fAB, dfAB, dfE), degreesOfFreedom: [dfAB, dfE] },
+  };
+}
+
+/**
+ * Multiple-comparison p-value correction: bonferroni, holm (step-down), or bh
+ * (Benjamini-Hochberg FDR). Matches statsmodels multipletests.
+ */
+export function multipleComparison(
+  pValues: f64[],
+  method: 'bonferroni' | 'holm' | 'bh' = 'bh'
+): f64[] {
+  const m = pValues.length;
+  if (m === 0) return [];
+  if (method === 'bonferroni') return pValues.map((p) => Math.min(p * m, 1));
+  const order = pValues.map((_, i) => i).sort((i, j) => pValues[i] - pValues[j]);
+  const out = new Array<f64>(m);
+  if (method === 'holm') {
+    let running = 0;
+    for (let rank = 0; rank < m; rank++) {
+      const idx = order[rank];
+      running = Math.max(running, (m - rank) * pValues[idx]);
+      out[idx] = Math.min(running, 1);
+    }
+  } else {
+    let prev = 1;
+    for (let rank = m - 1; rank >= 0; rank--) {
+      const idx = order[rank];
+      prev = Math.min(prev, (pValues[idx] * m) / (rank + 1));
+      out[idx] = Math.min(prev, 1);
+    }
+  }
+  return out;
+}

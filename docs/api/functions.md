@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (848 exports).
+> `@danielsimonjr/mathts-functions` (853 exports).
 
 ### Functions by category
 
@@ -495,7 +495,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (9): `describe`, `histogram`, `kendalltau`, `linregress`, `pearsonr`, `ptp`, `spearmanr`, `trimmedMean`, `variation`
+**Other exports (uncategorized)** (14): `andersonDarlingTest`, `anova2`, `dagostinoTest`, `describe`, `friedmanTest`, `histogram`, `kendalltau`, `linregress`, `multipleComparison`, `pearsonr`, `ptp`, `spearmanr`, `trimmedMean`, `variation`
 
 ### Constants & values (61)
 
