@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-06'
+  lastUpdated: '2026-07-07'
   totalFiles: 996
   totalModules: 73
-  totalExports: 4713
+  totalExports: 4730
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -25956,6 +25956,26 @@ modules:
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
+            - linearRegression
+            - polyFit
+            - cummax
+            - cummin
+            - cumprod
+            - cumtrapz
+            - trapzF64
+            - movingAverage
+            - ewma
+            - detrend
+            - acf
+            - logsumexp
+            - softmax
+            - kmeans
+            - spectralClustering
+            - beta
+            - digamma
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
             - Distribution
             - SampleNOptions
       exports:
@@ -26097,6 +26117,23 @@ modules:
         - pickRandom
         - seedProbabilityRng
         - typedProbability
+        - linearRegression
+        - polyFit
+        - cummax
+        - cummin
+        - cumprod
+        - cumtrapz
+        - trapzF64
+        - movingAverage
+        - ewma
+        - detrend
+        - acf
+        - logsumexp
+        - softmax
+        - kmeans
+        - spectralClustering
+        - beta
+        - digamma
         - Distribution
         - SampleNOptions
       reExported:
@@ -26238,6 +26275,23 @@ modules:
         - pickRandom
         - seedProbabilityRng
         - typedProbability
+        - linearRegression
+        - polyFit
+        - cummax
+        - cummin
+        - cumprod
+        - cumtrapz
+        - trapzF64
+        - movingAverage
+        - ewma
+        - detrend
+        - acf
+        - logsumexp
+        - softmax
+        - kmeans
+        - spectralClustering
+        - beta
+        - digamma
         - Distribution
         - SampleNOptions
   signal:
@@ -31191,15 +31245,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 996
   totalModules: 73
-  totalLinesOfCode: 166540
-  totalExports: 4713
+  totalLinesOfCode: 166571
+  totalExports: 4730
   totalClasses: 55
   totalInterfaces: 385
   totalFunctions: 1511
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1529
-  totalReExports: 1657
+  totalReExports: 1674
   totalTypeOnlyImports: 502
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

@@ -188,3 +188,34 @@ export {
   seedProbabilityRng,
   typedProbability,
 } from '@danielsimonjr/mathts-functions';
+
+// ---------------------------------------------------------------------------
+// Regression, time-series descriptives, log-domain & special functions
+// (already implemented in functions/, surfaced here for the stats/probability
+// audience — see docs/roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md §0)
+// ---------------------------------------------------------------------------
+export {
+  // regression / fitting
+  linearRegression,
+  polyFit,
+  // cumulative reductions & integration
+  cummax,
+  cummin,
+  cumprod,
+  cumtrapz,
+  trapzF64,
+  // time-series descriptives
+  movingAverage,
+  ewma,
+  detrend,
+  acf,
+  // numerically-stable log-domain
+  logsumexp,
+  softmax,
+  // clustering
+  kmeans,
+  spectralClustering,
+  // special functions used across distributions
+  beta,
+  digamma,
+} from '@danielsimonjr/mathts-functions';
