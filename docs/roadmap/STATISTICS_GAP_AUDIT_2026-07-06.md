@@ -1,5 +1,17 @@
 # Statistics Library Gap Audit — vs NumPy/SciPy, MATLAB, Mathematica
 
+> **STATUS 2026-07-06 — CLOSED (waves A–H).** The ranked P1/P2 plan below was
+> implemented and released (`functions@0.16.0`, `statistics@0.3.0`, 138 → 182
+> exports). Added, each scipy-pinned in `functions/tests/gap-stats-completeness.test.ts`:
+> the 16 re-export gaps (§0); `linregress` (inference); `pearsonr`/`spearmanr`/
+> `kendalltau` (correlation tests with p-values); `ptp`/`variation`/`trimmedMean`/
+> `describe`/`histogram`; `andersonDarlingTest`/`dagostinoTest`/`friedmanTest`/
+> `anova2`/`multipleComparison`; `paretoDist`/`rayleighDist`/`triangularDist`/
+> `discreteUniformDist`/`gumbelDist`/`invGaussDist`/`multivariateNormal`;
+> `meanCI`/`proportionCI`/`bootstrapCI`/`permutationTest`; `mahalanobis`/`hotellingT2`.
+> Remaining items are all **P3 specialist** (obscure distributions, niche tests,
+> full GLM/robust regression) — deferred as genuinely rare.
+
 **Date:** 2026-07-06 · **Package:** `@danielsimonjr/mathts-statistics@0.2.0` (138 exports) ·
 **Reference libraries:** `numpy` + `scipy.stats` (1.17), MATLAB _Statistics & Machine Learning
 Toolbox_ (R2024), _Mathematica_ 14.
