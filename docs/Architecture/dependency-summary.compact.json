@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-07", "f": 996, "e": 4809, "re": 1726 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 997, "e": 4810, "re": 1726 },
   "s": {
-    "loc": 167585,
+    "loc": 167589,
     "cls": 55,
     "int": 397,
     "fn": 1538,
     "tg": 156,
     "en": 0,
-    "co": 1529,
+    "co": 1530,
     "toi": 503
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -1493,7 +1493,8 @@
         "subtract"
       ],
       "int": ["Chain", "MathJSConfig", "MathInstance"]
-    }
+    },
+    "plot": { "f": 1, "exp": ["VERSION"] }
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },

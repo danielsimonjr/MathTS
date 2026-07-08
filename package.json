@@ -28,7 +28,8 @@
     "parallel",
     "workbook",
     "assembly",
-    "compat"
+    "compat",
+    "plot"
   ],
   "engines": {
     "node": ">=20.0.0"

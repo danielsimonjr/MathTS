@@ -17,6 +17,7 @@ export default defineConfig({
       'expression/tests/**/*.test.ts',
       'workbook/tests/**/*.test.ts',
       'compat/tests/**/*.test.ts',
+      'plot/tests/**/*.test.ts',
       'tests/integration/**/*.test.ts',
       'tests/wasm/**/*.test.ts',
       'tests/benchmark/**/*.test.ts',

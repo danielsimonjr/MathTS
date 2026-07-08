@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-07'
-  totalFiles: 996
-  totalModules: 73
-  totalExports: 4809
+  lastUpdated: '2026-07-08'
+  totalFiles: 997
+  totalModules: 74
+  totalExports: 4810
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -72,6 +72,9 @@ entryPoints:
   - file: compat/src/index.ts
     type: main
     description: mathjs Compatibility Layer
+  - file: plot/src/index.ts
+    type: main
+    description: Entry Point
 modules:
   packages/typed-function:
     packages/typed-function/src/index.ts:
@@ -30353,6 +30356,17 @@ modules:
         - Infinity_
         - NaN_
         - shims
+  plot:
+    plot/src/index.ts:
+      description: Entry point exporting 1 symbols
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - VERSION
+      constants:
+        - VERSION
 dependencyGraph:
   circularDependencies:
     runtime: []
@@ -31503,17 +31517,20 @@ dependencyGraph:
         - compat/src/chain.ts
         - compat/src/index.ts
         - compat/src/shims.ts
+    - name: Plot
+      files:
+        - plot/src/index.ts
 statistics:
-  totalTypeScriptFiles: 996
-  totalModules: 73
-  totalLinesOfCode: 167585
-  totalExports: 4809
+  totalTypeScriptFiles: 997
+  totalModules: 74
+  totalLinesOfCode: 167589
+  totalExports: 4810
   totalClasses: 55
   totalInterfaces: 397
   totalFunctions: 1538
   totalTypeGuards: 156
   totalEnums: 0
-  totalConstants: 1529
+  totalConstants: 1530
   totalReExports: 1726
   totalTypeOnlyImports: 503
   runtimeCircularDeps: 0

@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-07
+**Version**: 0.1.0 | **Last Updated**: 2026-07-08
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -83,10 +83,11 @@ This document provides a comprehensive dependency graph of all files, components
 73. [Assembly/ops Dependencies](#assembly-ops-dependencies)
 74. [Assembly/types Dependencies](#assembly-types-dependencies)
 75. [Compat Dependencies](#compat-dependencies)
-76. [Dependency Matrix](#dependency-matrix)
-77. [Circular Dependency Analysis](#circular-dependency-analysis)
-78. [Visual Dependency Graph](#visual-dependency-graph)
-79. [Summary Statistics](#summary-statistics)
+76. [Plot Dependencies](#plot-dependencies)
+77. [Dependency Matrix](#dependency-matrix)
+78. [Circular Dependency Analysis](#circular-dependency-analysis)
+79. [Visual Dependency Graph](#visual-dependency-graph)
+80. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -169,6 +170,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
+- **plot**: 1 file
 
 ---
 
@@ -200,6 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | (none)                                                                                                                             | 1              | 0               |
 
 ### Package Dependency Diagram
 
@@ -227,6 +230,7 @@ graph LR
     P19[workbook]
     P20[assembly]
     P21[compat]
+    P22[plot]
     P3 --> P18
     P3 --> P2
     P4 --> P3
@@ -14142,6 +14146,18 @@ graph LR
 
 ---
 
+<a id="plot-dependencies"></a>
+
+## Plot Dependencies
+
+### `plot/src/index.ts` - Entry point exporting 1 symbols
+
+**Exports:**
+
+- Constants: `VERSION`
+
+---
+
 <a id="dependency-matrix"></a>
 
 ## Dependency Matrix
@@ -14827,6 +14843,10 @@ graph TD
         N402[shims]
     end
 
+    subgraph Plot
+        N403[index]
+    end
+
     N2 --> N1
     N3 --> N1
     N5 --> N6
@@ -14912,10 +14932,10 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 996    |
-| Total Modules           | 73     |
-| Total Lines of Code     | 167585 |
-| Total Exports           | 4809   |
+| Total TypeScript Files  | 997    |
+| Total Modules           | 74     |
+| Total Lines of Code     | 167589 |
+| Total Exports           | 4810   |
 | Total Re-exports        | 1726   |
 | Total Classes           | 55     |
 | Total Interfaces        | 397    |
@@ -14928,5 +14948,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-07
+_Last Updated_: 2026-07-08
 _Version_: 0.1.0
