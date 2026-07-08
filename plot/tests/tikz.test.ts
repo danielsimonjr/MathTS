@@ -79,4 +79,20 @@ describe('emitTikZ', () => {
     );
     expect(out).toContain('rotate=-90');
   });
+
+  it('escapes a literal backslash without re-escaping its own braces', () => {
+    const out = emitTikZ(
+      scene([{ k: 'text', x: 1, y: 1, s: 'a\\b', fill: '#111111', anchor: 'middle', size: 12 }]),
+      { tikz: { standalone: false, scale: 1 } }
+    );
+    expect(out).toContain('a\\textbackslash{}b');
+    expect(out).not.toContain('\\textbackslash\\{\\}');
+  });
+
+  it('honors an 8-hex circle fill alpha as fill opacity', () => {
+    const out = emitTikZ(scene([{ k: 'circle', cx: 5, cy: 5, r: 3, fill: '#2a4d8f80' }]), {
+      tikz: { standalone: false, scale: 1 },
+    });
+    expect(out).toContain('fill opacity=0.5'); // 0x80/255 ≈ 0.502 → round(0.502*1)=0.5
+  });
 });

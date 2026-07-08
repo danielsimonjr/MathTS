@@ -1,13 +1,21 @@
 import type { Scene, Prim } from './scene.js';
 import type { PlotOptions } from './types.js';
 
-/** Escape the LaTeX specials that break a plain \node/text body. */
+/** Escape the LaTeX specials that break a plain \node body. Single-pass so an
+ * escape's own backslash/braces are never re-processed. */
 export function texEsc(s: string): string {
-  return s
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/([&%$#_{}])/g, '\\$1')
-    .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+  return s.replace(/[\\&%$#_{}~^]/g, (c) => {
+    switch (c) {
+      case '\\':
+        return '\\textbackslash{}';
+      case '~':
+        return '\\textasciitilde{}';
+      case '^':
+        return '\\textasciicircum{}';
+      default:
+        return `\\${c}`;
+    }
+  });
 }
 
 /** A hex color (#rrggbb / #rrggbbaa) or a passthrough tikz color name, with alpha. */
@@ -57,8 +65,8 @@ function primTikZ(p: Prim, X: (x: number) => number, Y: (y: number) => number, s
     }
     case 'circle': {
       const f = tikzColor(p.fill);
-      const op =
-        p.opacity !== undefined && p.opacity < 1 ? `,fill opacity=${round(p.opacity)}` : '';
+      const a = (p.opacity ?? 1) * f.alpha;
+      const op = a < 1 ? `,fill opacity=${round(a)}` : '';
       return `\\filldraw[fill=${f.color},draw=none${op}] ${pt(p.cx, p.cy)} circle (${round(p.r * s)}pt);`;
     }
     case 'text': {
