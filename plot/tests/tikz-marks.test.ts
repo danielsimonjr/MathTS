@@ -42,4 +42,22 @@ describe('TikZ end-to-end (format option + toTikZ)', () => {
   it('SVG remains the default (no format)', () => {
     expect(line([0, 1], [0, 1])).toMatch(/^<svg/);
   });
+  it('toTikZ(x, y) emits a tikzpicture (x+y shape)', () => {
+    const out = toTikZ([0, 1, 2, 3], [0, 1, 4, 9]);
+    expect(out).toContain('\\begin{tikzpicture}');
+    expect(out).not.toContain('<svg');
+  });
+  it('toTikZ(y) emits a tikzpicture (single-series shape)', () => {
+    const out = toTikZ([1, 4, 9]);
+    expect(out).toContain('\\begin{tikzpicture}');
+  });
+  it('toTikZ(layers) overlays in tikz (layer-array shape)', () => {
+    const out = toTikZ([
+      { type: 'line', x: [0, 1], y: [0, 1], label: 'a' },
+      { type: 'scatter', x: [0, 1], y: [1, 0], label: 'b' },
+    ]);
+    expect(out).toContain('\\begin{tikzpicture}');
+    expect(out).toMatch(/\\draw/);
+    expect(out).toMatch(/\\filldraw/);
+  });
 });

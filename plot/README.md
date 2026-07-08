@@ -79,6 +79,36 @@ plot([
 ]);
 ```
 
+### TikZ / LaTeX output
+
+Every function also accepts `{ format: 'tikz' }` (default is `'svg'`), and there's a
+generic `toTikZ()` mirroring `plot()`. The geometry matches the SVG output exactly (a
+deterministic y-flip maps SVG's top-left origin to TikZ's bottom-left); only
+`\usepackage{tikz}` is required to compile the result.
+
+```ts
+import { toTikZ, line, surface } from '@danielsimonjr/mathts-plot';
+
+// generic entry point, expression source → line
+const tex = toTikZ('sin(x)', { from: 0, to: Math.PI });
+
+// per-type function via the format option
+const tex2 = line([0, 1, 2, 3], [0, 1, 4, 9], { format: 'tikz' });
+
+// standalone: false → a bare tikzpicture for \input, not a compilable document
+const z = [
+  [0, 1, 2],
+  [1, 2, 3],
+  [2, 3, 4],
+];
+const fragment = surface(z, { format: 'tikz', tikz: { standalone: false } });
+```
+
+`toTikZ`/`{ format: 'tikz' }` return a LaTeX string, not SVG. With `standalone`
+(default `true`) the string is a complete `\documentclass{...}` document you can
+compile as-is; `standalone: false` returns just the `tikzpicture` environment, meant
+to be pulled in via `\input{...}` from a larger document.
+
 ## What it provides
 
 Per-type mark functions, each `(x, y, opts?) => string` unless noted:

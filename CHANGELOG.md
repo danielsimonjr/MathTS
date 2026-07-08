@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — @danielsimonjr/mathts-plot TikZ backend (0.2.0)
+
+`plot` now renders to **TikZ** as well as SVG. Internals refactored to Approach A
+(scene + pluggable backend): every mark emits an intermediate scene of drawing
+primitives, serialized by `emitSVG` (SVG output byte-identical to 0.1.0, locked by
+golden-master snapshots) or the new `emitTikZ`. New public surface: a `format:
+'svg' | 'tikz'` option on all functions, a `tikz: { standalone, scale }` option, and a
+generic `toTikZ()` entry mirroring `plot()`. Pure TikZ (only `\usepackage{tikz}`);
+geometry matches the SVG via a deterministic y-flip. All 15 marks supported.
+
 ### Added (2026-07-08) — @danielsimonjr/mathts-plot (G5 plotting)
 
 New headless SVG 2D/3D plotting package on the bedrock (core/functions/expression):
