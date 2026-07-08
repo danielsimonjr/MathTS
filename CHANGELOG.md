@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Workbook LaTeX export (`mtsw export --format tex`)
+
+`mtsw export` now renders a notebook to a standalone (or `--fragment`) LaTeX
+document, alongside the existing HTML export: markdown → LaTeX (`markdownToTex`),
+equations → the expression package's `.toTex()` (`\[ … \]`), code → `listings`,
+tests → colored pass/fail lines, data → `verbatim`, and charts → embedded TikZ
+via `plot.toTikZ()` (a `tikzpicture` fragment). New `workbook/src/tex.ts`
+(`toTeX`) mirrors the HTML `toHTML`. Only `\usepackage{tikz}` + standard packages
+required. Known v1 limit: `lstlisting`/`verbatim` bodies are raw (a literal
+`\end{…}` in cell content would need escaping).
+
 ### Added — @danielsimonjr/mathts-plot TikZ backend (0.2.0)
 
 `plot` now renders to **TikZ** as well as SVG. Internals refactored to Approach A
