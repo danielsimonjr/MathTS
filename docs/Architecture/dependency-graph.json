@@ -32606,12 +32606,21 @@
           },
           {
             "file": "./svg.js",
-            "imports": ["THEMES", "line", "svgDoc", "text"]
+            "imports": ["THEMES"]
           },
           {
             "file": "./types.js",
             "imports": ["PlotOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "./scene.js",
+            "imports": ["Prim", "Scene"],
+            "typeOnly": true
+          },
+          {
+            "file": "./emit.js",
+            "imports": ["emit"]
           }
         ],
         "workspaceDependencies": [],
@@ -32697,12 +32706,21 @@
           },
           {
             "file": "./svg.js",
-            "imports": ["THEMES", "rect", "svgDoc", "text"]
+            "imports": ["THEMES"]
           },
           {
             "file": "./types.js",
             "imports": ["PlotOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "./scene.js",
+            "imports": ["Prim", "Scene"],
+            "typeOnly": true
+          },
+          {
+            "file": "./emit.js",
+            "imports": ["emit"]
           }
         ],
         "workspaceDependencies": [],
@@ -34434,7 +34452,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1015,
     "totalModules": 75,
-    "totalLinesOfCode": 168756,
+    "totalLinesOfCode": 168815,
     "totalExports": 4868,
     "totalClasses": 55,
     "totalInterfaces": 404,
@@ -34443,10 +34461,10 @@
     "totalEnums": 0,
     "totalConstants": 1531,
     "totalReExports": 1746,
-    "totalTypeOnlyImports": 521,
+    "totalTypeOnlyImports": 523,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 231
+    "unusedExportsCount": 233
   }
 }

@@ -14186,8 +14186,10 @@ graph LR
 | `./coerce.js` | `coerce2d` | Import |
 | `./scale.js` | `linearScale` | Import |
 | `./palette.js` | `viridis` | Import |
-| `./svg.js` | `THEMES, line, svgDoc, text` | Import |
+| `./svg.js` | `THEMES` | Import |
 | `./types.js` | `PlotOptions` | Import (type-only) |
+| `./scene.js` | `Prim, Scene` | Import (type-only) |
+| `./emit.js` | `emit` | Import |
 
 **Exports:**
 
@@ -14236,8 +14238,10 @@ graph LR
 |------|---------|------|
 | `./coerce.js` | `coerce2d` | Import |
 | `./palette.js` | `viridis` | Import |
-| `./svg.js` | `THEMES, rect, svgDoc, text` | Import |
+| `./svg.js` | `THEMES` | Import |
 | `./types.js` | `PlotOptions` | Import (type-only) |
+| `./scene.js` | `Prim, Scene` | Import (type-only) |
+| `./emit.js` | `emit` | Import |
 
 **Exports:**
 
@@ -15242,7 +15246,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1015   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168756 |
+| Total Lines of Code     | 168815 |
 | Total Exports           | 4868   |
 | Total Re-exports        | 1746   |
 | Total Classes           | 55     |
@@ -15250,7 +15254,7 @@ graph TD
 | Total Functions         | 1575   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 521    |
+| Type-only Imports       | 523    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

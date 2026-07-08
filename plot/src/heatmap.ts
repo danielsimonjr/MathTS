@@ -1,7 +1,9 @@
 import { coerce2d } from './coerce.js';
 import { viridis } from './palette.js';
-import { THEMES, rect, svgDoc, text } from './svg.js';
+import { THEMES } from './svg.js';
 import type { PlotOptions } from './types.js';
+import type { Prim, Scene } from './scene.js';
+import { emit } from './emit.js';
 
 const MARGIN = { top: 34, right: 22, bottom: 30, left: 40 };
 
@@ -14,12 +16,23 @@ export function heatmap(z: unknown, opts: PlotOptions = {}): string {
   const rows = grid.length;
   const cols = rows ? grid[0].length : 0;
   if (rows === 0 || cols === 0) {
-    return svgDoc(
+    const scene: Scene = {
       width,
       height,
-      text(width / 2, height / 2, 'no data', theme.muted, 'middle', 13),
-      theme.bg
-    );
+      bg: theme.bg,
+      prims: [
+        {
+          k: 'text',
+          x: width / 2,
+          y: height / 2,
+          s: 'no data',
+          fill: theme.muted,
+          anchor: 'middle',
+          size: 13,
+        },
+      ],
+    };
+    return emit(scene, opts);
   }
   let lo = Infinity;
   let hi = -Infinity;
@@ -32,14 +45,30 @@ export function heatmap(z: unknown, opts: PlotOptions = {}): string {
   const span = hi > lo ? hi - lo : 1;
   const cw = (width - MARGIN.left - MARGIN.right) / cols;
   const ch = (height - MARGIN.top - MARGIN.bottom) / rows;
-  const cells: string[] = [];
+  const prims: Prim[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const v = grid[r][c];
       const color = Number.isFinite(v) ? viridis((v - lo) / span) : theme.grid;
-      cells.push(rect(MARGIN.left + c * cw, MARGIN.top + r * ch, cw + 0.5, ch + 0.5, color));
+      prims.push({
+        k: 'rect',
+        x: MARGIN.left + c * cw,
+        y: MARGIN.top + r * ch,
+        w: cw + 0.5,
+        h: ch + 0.5,
+        fill: color,
+      });
     }
   }
-  const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
-  return svgDoc(width, height, cells.join('') + title, theme.bg);
+  if (opts.title)
+    prims.push({
+      k: 'text',
+      x: width / 2,
+      y: 20,
+      s: opts.title,
+      fill: theme.fg,
+      anchor: 'middle',
+      size: 14,
+    });
+  return emit({ width, height, bg: theme.bg, prims }, opts);
 }

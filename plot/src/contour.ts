@@ -1,8 +1,10 @@
 import { coerce2d } from './coerce.js';
 import { linearScale } from './scale.js';
 import { viridis } from './palette.js';
-import { THEMES, line as svgLine, svgDoc, text } from './svg.js';
+import { THEMES } from './svg.js';
 import type { PlotOptions } from './types.js';
+import type { Prim, Scene } from './scene.js';
+import { emit } from './emit.js';
 
 const MARGIN = { top: 34, right: 22, bottom: 30, left: 40 };
 
@@ -15,12 +17,23 @@ export function contour(z: unknown, opts: PlotOptions & { levels?: number } = {}
   const rows = grid.length;
   const cols = rows ? grid[0].length : 0;
   if (rows < 2 || cols < 2) {
-    return svgDoc(
+    const scene: Scene = {
       width,
       height,
-      text(width / 2, height / 2, 'no data', theme.muted, 'middle', 13),
-      theme.bg
-    );
+      bg: theme.bg,
+      prims: [
+        {
+          k: 'text',
+          x: width / 2,
+          y: height / 2,
+          s: 'no data',
+          fill: theme.muted,
+          anchor: 'middle',
+          size: 13,
+        },
+      ],
+    };
+    return emit(scene, opts);
   }
   let lo = Infinity;
   let hi = -Infinity;
@@ -33,7 +46,7 @@ export function contour(z: unknown, opts: PlotOptions & { levels?: number } = {}
   const nLevels = opts.levels ?? 10;
   const px = linearScale([0, cols - 1], [MARGIN.left, width - MARGIN.right]);
   const py = linearScale([0, rows - 1], [height - MARGIN.bottom, MARGIN.top]);
-  const segs: string[] = [];
+  const prims: Prim[] = [];
   const span = hi > lo ? hi - lo : 1;
   for (let li = 1; li <= nLevels; li++) {
     const level = lo + (span * li) / (nLevels + 1);
@@ -56,11 +69,28 @@ export function contour(z: unknown, opts: PlotOptions & { levels?: number } = {}
         for (let k = 0; k + 1 < cross.length; k += 2) {
           const [ax, ay] = cross[k];
           const [bx, by] = cross[k + 1];
-          segs.push(svgLine(px(ax), py(ay), px(bx), py(by), color, 1.5));
+          prims.push({
+            k: 'line',
+            x1: px(ax),
+            y1: py(ay),
+            x2: px(bx),
+            y2: py(by),
+            stroke: color,
+            w: 1.5,
+          });
         }
       }
     }
   }
-  const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
-  return svgDoc(width, height, segs.join('') + title, theme.bg);
+  if (opts.title)
+    prims.push({
+      k: 'text',
+      x: width / 2,
+      y: 20,
+      s: opts.title,
+      fill: theme.fg,
+      anchor: 'middle',
+      size: 14,
+    });
+  return emit({ width, height, bg: theme.bg, prims }, opts);
 }
