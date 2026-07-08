@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | (none)                                                                                                                             | 1              | 11              |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | (none)                                                                                                                             | 1              | 12              |
 
 ### Package Dependency Diagram
 
