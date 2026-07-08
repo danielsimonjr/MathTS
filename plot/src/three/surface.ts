@@ -1,7 +1,9 @@
 import { coerce2d } from '../coerce.js';
 import { project, type Camera } from './project.js';
 import { viridis } from '../palette.js';
-import { THEMES, polygon, polyline, svgDoc, text } from '../svg.js';
+import { THEMES } from '../svg.js';
+import type { Prim, Scene } from '../scene.js';
+import { emit } from '../emit.js';
 import type { PlotOptions } from '../types.js';
 
 const MARGIN = 40;
@@ -22,12 +24,23 @@ export function surface(
   const rows = grid.length;
   const cols = rows ? grid[0].length : 0;
   if (rows < 2 || cols < 2) {
-    return svgDoc(
+    const scene: Scene = {
       width,
       height,
-      text(width / 2, height / 2, 'no data', theme.muted, 'middle', 13),
-      theme.bg
-    );
+      bg: theme.bg,
+      prims: [
+        {
+          k: 'text',
+          x: width / 2,
+          y: height / 2,
+          s: 'no data',
+          fill: theme.muted,
+          anchor: 'middle',
+          size: 13,
+        },
+      ],
+    };
+    return emit(scene, opts as PlotOptions);
   }
   const cam: Camera = { azim: opts.azim ?? 45, elev: opts.elev ?? 25 };
   let zlo = Infinity;
@@ -69,17 +82,17 @@ export function surface(
   ];
 
   const kind = opts.kind ?? 'filled';
-  const body: string[] = [];
+  const prims: Prim[] = [];
   if (kind === 'wireframe') {
-    for (let r = 0; r < rows; r++) body.push(polyline(proj[r].map(toScreen), theme.series[0], 1));
+    for (let r = 0; r < rows; r++)
+      prims.push({ k: 'polyline', pts: proj[r].map(toScreen), stroke: theme.series[0], w: 1 });
     for (let c = 0; c < cols; c++)
-      body.push(
-        polyline(
-          proj.map((row) => toScreen(row[c])),
-          theme.series[0],
-          1
-        )
-      );
+      prims.push({
+        k: 'polyline',
+        pts: proj.map((row) => toScreen(row[c])),
+        stroke: theme.series[0],
+        w: 1,
+      });
   } else {
     // build quads, sort back-to-front by mean depth (painter's algorithm)
     const quads: Array<{ depth: number; pts: Array<[number, number]>; shade: number }> = [];
@@ -92,8 +105,18 @@ export function surface(
       }
     }
     quads.sort((a, b) => b.depth - a.depth); // far (large depth) first — painter's: draw far first, near last
-    for (const q of quads) body.push(polygon(q.pts, viridis(q.shade), theme.grid));
+    for (const q of quads)
+      prims.push({ k: 'polygon', pts: q.pts, fill: viridis(q.shade), stroke: theme.grid });
   }
-  const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
-  return svgDoc(width, height, body.join('') + title, theme.bg);
+  if (opts.title)
+    prims.push({
+      k: 'text',
+      x: width / 2,
+      y: 20,
+      s: opts.title,
+      fill: theme.fg,
+      anchor: 'middle',
+      size: 14,
+    });
+  return emit({ width, height, bg: theme.bg, prims }, opts as PlotOptions);
 }

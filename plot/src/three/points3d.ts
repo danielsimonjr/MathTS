@@ -1,6 +1,8 @@
 import { coerce1d } from '../coerce.js';
 import { project, type Camera } from './project.js';
-import { THEMES, circle, polyline, svgDoc, text } from '../svg.js';
+import { THEMES } from '../svg.js';
+import type { Prim, Scene } from '../scene.js';
+import { emit } from '../emit.js';
 import type { PlotOptions } from '../types.js';
 
 const MARGIN = 40;
@@ -52,12 +54,23 @@ function render(x: unknown, y: unknown, z: unknown, opts: P3Opts, mode: 'points'
   const cam: Camera = { azim: opts.azim ?? 45, elev: opts.elev ?? 25 };
   const { screen } = projectAll(x, y, z, cam);
   if (screen.length === 0) {
-    return svgDoc(
+    const scene: Scene = {
       width,
       height,
-      text(width / 2, height / 2, 'no data', theme.muted, 'middle', 13),
-      theme.bg
-    );
+      bg: theme.bg,
+      prims: [
+        {
+          k: 'text',
+          x: width / 2,
+          y: height / 2,
+          s: 'no data',
+          fill: theme.muted,
+          anchor: 'middle',
+          size: 13,
+        },
+      ],
+    };
+    return emit(scene, opts);
   }
   let sxlo = Infinity,
     sxhi = -Infinity,
@@ -76,26 +89,33 @@ function render(x: unknown, y: unknown, z: unknown, opts: P3Opts, mode: 'points'
     height - MARGIN - ((p[1] - sylo) / sySpan) * (height - 2 * MARGIN),
   ];
   const color = theme.series[0];
-  let body: string;
+  const prims: Prim[] = [];
   if (mode === 'line') {
-    body = polyline(screen.map(toScreen), color, 2);
+    prims.push({ k: 'polyline', pts: screen.map(toScreen), stroke: color, w: 2 });
   } else {
     const depths = screen.map((p) => p[2]);
     const dlo = minOf(depths);
     const dhi = maxOf(depths);
     const dspan = dhi > dlo ? dhi - dlo : 1;
     const sorted = screen.slice().sort((a, b) => b[2] - a[2]); // far (large depth) first — painter's order
-    body = sorted
-      .map((p) => {
-        const [sx, sy] = toScreen(p);
-        const near = 1 - (p[2] - dlo) / dspan; // 1 = nearest, 0 = farthest
-        const opacity = 0.4 + 0.6 * near; // nearest fully opaque (1.0), farthest 0.4
-        return circle(sx, sy, 3, color, opacity);
-      })
-      .join('');
+    for (const p of sorted) {
+      const [sx, sy] = toScreen(p);
+      const near = 1 - (p[2] - dlo) / dspan; // 1 = nearest, 0 = farthest
+      const opacity = 0.4 + 0.6 * near; // nearest fully opaque (1.0), farthest 0.4
+      prims.push({ k: 'circle', cx: sx, cy: sy, r: 3, fill: color, opacity });
+    }
   }
-  const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
-  return svgDoc(width, height, body + title, theme.bg);
+  if (opts.title)
+    prims.push({
+      k: 'text',
+      x: width / 2,
+      y: 20,
+      s: opts.title,
+      fill: theme.fg,
+      anchor: 'middle',
+      size: 14,
+    });
+  return emit({ width, height, bg: theme.bg, prims }, opts);
 }
 
 /** 3-D scatter of (x,y,z) point triples, projected to 2-D SVG. */

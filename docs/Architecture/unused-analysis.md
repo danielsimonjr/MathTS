@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 233
+- **Potentially unused exports**: 236
   - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 233
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 236
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -485,3 +485,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `line` (function) — 3 in-file refs
 - `rect` (function) — 4 in-file refs
+- `polyline` (function) — 3 in-file refs
+- `polygon` (function) — 3 in-file refs
+- `text` (function) — 8 in-file refs

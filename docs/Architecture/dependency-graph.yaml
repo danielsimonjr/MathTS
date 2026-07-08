@@ -30850,10 +30850,14 @@ modules:
         - file: ../svg.js
           imports:
             - THEMES
-            - circle
-            - polyline
-            - svgDoc
-            - text
+        - file: ../scene.js
+          imports:
+            - Prim
+            - Scene
+          typeOnly: true
+        - file: ../emit.js
+          imports:
+            - emit
         - file: ../types.js
           imports:
             - PlotOptions
@@ -30895,10 +30899,14 @@ modules:
         - file: ../svg.js
           imports:
             - THEMES
-            - polygon
-            - polyline
-            - svgDoc
-            - text
+        - file: ../scene.js
+          imports:
+            - Prim
+            - Scene
+          typeOnly: true
+        - file: ../emit.js
+          imports:
+            - emit
         - file: ../types.js
           imports:
             - PlotOptions
@@ -32084,7 +32092,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1015
   totalModules: 75
-  totalLinesOfCode: 168815
+  totalLinesOfCode: 168858
   totalExports: 4868
   totalClasses: 55
   totalInterfaces: 404
@@ -32093,8 +32101,8 @@ statistics:
   totalEnums: 0
   totalConstants: 1531
   totalReExports: 1746
-  totalTypeOnlyImports: 523
+  totalTypeOnlyImports: 525
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 233
+  unusedExportsCount: 236
