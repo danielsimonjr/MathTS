@@ -20,3 +20,18 @@ describe('plot (data forms)', () => {
     expect(svg).toContain('<circle');
   });
 });
+
+describe('plot (expression form)', () => {
+  it('plots a 1-var expression as a line', () => {
+    const svg = plot('sin(x)', { from: 0, to: Math.PI, samples: 50 });
+    expect(svg).toContain('<polyline');
+  });
+  it('plots a 2-var expression as a contour by default', () => {
+    const svg = plot('x^2 + y^2', { from: -2, to: 2, samples: 15 });
+    expect(svg).toMatch(/<line|<polygon/); // contour segments (or surface if kind set)
+  });
+  it('plots a 2-var expression as a surface when kind is 3d', () => {
+    const svg = plot('x^2 + y^2', { from: -2, to: 2, samples: 10, kind: 'surface' });
+    expect(svg).toContain('<polygon');
+  });
+});
