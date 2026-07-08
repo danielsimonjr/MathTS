@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-07-08) — @danielsimonjr/mathts-plot (G5 plotting)
+
+New headless SVG 2D/3D plotting package on the bedrock (core/functions/expression):
+per-type functions — `line`, `scatter`, `bar`, `area`, `step`, `histogram` (dogfoods
+`functions.histogram`), `errorbar`, `quiver`, `contour` (marching squares), `heatmap`,
+`surface` (painter's-algorithm 3D), `scatter3d`, `curve3d` — plus an `overlay` combinator
+and a generic polymorphic `plot()` that also renders expression sources via
+`functions.parse`/`evaluate`. All functions return self-contained SVG strings and never
+throw on bad data (empty/NaN/∞ → a "no data" SVG). `workbook` charts now render via this
+package (its private SVG plotter was removed).
+
 ### Added (2026-07-06) — statistics/probability gap-closure vs NumPy/SciPy/MATLAB/Mathematica
 
 Closing the STATISTICS_GAP_AUDIT_2026-07-06 findings. **Wave A**: surfaced 16 already-implemented
