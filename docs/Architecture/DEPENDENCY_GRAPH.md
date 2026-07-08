@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 1               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 2               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 20             | 0               |
@@ -15265,7 +15265,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1016   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169110 |
+| Total Lines of Code     | 169254 |
 | Total Exports           | 4874   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 55     |
