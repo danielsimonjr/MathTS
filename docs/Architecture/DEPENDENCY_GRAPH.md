@@ -13713,7 +13713,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `markdownToHtml`
+- Functions: `markdownToHtml`, `texEscape`, `markdownToTex`
 
 ---
 
@@ -15265,12 +15265,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1016   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168967 |
-| Total Exports           | 4872   |
+| Total Lines of Code     | 169069 |
+| Total Exports           | 4874   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 55     |
 | Total Interfaces        | 404    |
-| Total Functions         | 1578   |
+| Total Functions         | 1580   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 527    |

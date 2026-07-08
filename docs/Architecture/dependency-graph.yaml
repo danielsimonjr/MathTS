@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-08'
   totalFiles: 1016
   totalModules: 75
-  totalExports: 4872
+  totalExports: 4874
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27974,8 +27974,12 @@ modules:
       workspaceDependencies: []
       exports:
         - markdownToHtml
+        - texEscape
+        - markdownToTex
       functions:
         - markdownToHtml
+        - texEscape
+        - markdownToTex
     workbook/src/parser.ts:
       description: Workbook YAML parser
       externalDependencies:
@@ -32122,11 +32126,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1016
   totalModules: 75
-  totalLinesOfCode: 168967
-  totalExports: 4872
+  totalLinesOfCode: 169069
+  totalExports: 4874
   totalClasses: 55
   totalInterfaces: 404
-  totalFunctions: 1578
+  totalFunctions: 1580
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531

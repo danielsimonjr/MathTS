@@ -13,10 +13,10 @@ function esc(s: string): string {
 /**
  * Allow only http(s)/mailto absolute URLs and clearly-relative links; reject
  * protocol-relative (`//host`) and every other scheme, after percent-decoding +
- * lowercasing so encoded/cased tricks can't slip past. Returns the
- * quote-escaped href to use, or null to drop the link.
+ * lowercasing so encoded/cased tricks can't slip past.
+ * The allowlist decision, returning the raw safe href (unescaped) or null.
  */
-function sanitizeHref(href: string): string | null {
+function sanitizeHrefRaw(href: string): string | null {
   const h = href.trim();
   let probe = h.replace(/&amp;/g, '&');
   try {
@@ -26,14 +26,23 @@ function sanitizeHref(href: string): string | null {
   }
   probe = probe.trim().toLowerCase();
   if (probe.startsWith('//')) return null;
-  if (probe.startsWith('http://') || probe.startsWith('https://') || probe.startsWith('mailto:')) {
-    return h.replace(/"/g, '&quot;');
-  }
-  if (probe.startsWith('/') || probe.startsWith('./') || probe.startsWith('../') || probe.startsWith('#')) {
-    return h.replace(/"/g, '&quot;');
-  }
+  if (probe.startsWith('http://') || probe.startsWith('https://') || probe.startsWith('mailto:'))
+    return h;
+  if (
+    probe.startsWith('/') ||
+    probe.startsWith('./') ||
+    probe.startsWith('../') ||
+    probe.startsWith('#')
+  )
+    return h;
   if (/^[a-z][a-z0-9+.-]*:/.test(probe)) return null;
   return null;
+}
+
+/** HTML: allowlisted href, quote-escaped for an attribute (or null to drop). */
+function sanitizeHref(href: string): string | null {
+  const raw = sanitizeHrefRaw(href);
+  return raw === null ? null : raw.replace(/"/g, '&quot;');
 }
 
 function inline(escaped: string): string {
@@ -126,4 +135,97 @@ export function markdownToHtml(src: string): string {
   }
 
   return out.join('\n');
+}
+
+/** Escape LaTeX specials in a single pass (an escape's own backslash/braces are never re-scanned). */
+export function texEscape(s: string): string {
+  return s.replace(/[\\&%$#_{}~^]/g, (c) => {
+    switch (c) {
+      case '\\':
+        return '\\textbackslash{}';
+      case '~':
+        return '\\textasciitilde{}';
+      case '^':
+        return '\\textasciicircum{}';
+      default:
+        return `\\${c}`;
+    }
+  });
+}
+
+function inlineTex(text: string): string {
+  // Escape first, then apply inline markers to the escaped text (markers are ASCII, unaffected by texEscape).
+  let s = texEscape(text);
+  s = s.replace(/`([^`]+)`/g, (_m, code: string) => `\\texttt{${code}}`);
+  s = s.replace(/\*\*([^*]+)\*\*/g, '\\textbf{$1}');
+  s = s.replace(/\*([^*]+)\*/g, '\\emph{$1}');
+  s = s.replace(/\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, label: string, href: string) => {
+    const raw = sanitizeHrefRaw(href);
+    return raw ? `\\href{${texEscape(raw)}}{${label}}` : label;
+  });
+  return s;
+}
+
+/** Minimal Markdown → LaTeX, same subset + safety discipline as markdownToHtml. */
+export function markdownToTex(src: string): string {
+  if (!src) return '';
+  const lines = src.replace(/\r\n?/g, '\n').split('\n');
+  const out: string[] = [];
+  let i = 0;
+  const SEC = ['\\section*', '\\subsection*', '\\subsubsection*', '\\paragraph'];
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^```/.test(line.trim())) {
+      const buf: string[] = [];
+      i++;
+      while (i < lines.length && !/^```/.test(lines[i].trim())) {
+        buf.push(lines[i]);
+        i++;
+      }
+      i++;
+      out.push(`\\begin{lstlisting}\n${buf.join('\n')}\n\\end{lstlisting}`);
+      continue;
+    }
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+    if (HR.test(line)) {
+      out.push('\\par\\noindent\\rule{\\linewidth}{0.4pt}\\par');
+      i++;
+      continue;
+    }
+    const h = HEADING.exec(line);
+    if (h) {
+      const lvl = Math.min(h[1].length, 4);
+      out.push(`${SEC[lvl - 1]}{${inlineTex(h[2].trim())}}`);
+      i++;
+      continue;
+    }
+    if (UL.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && UL.test(lines[i])) {
+        items.push(`  \\item ${inlineTex(lines[i].replace(UL, ''))}`);
+        i++;
+      }
+      out.push(`\\begin{itemize}\n${items.join('\n')}\n\\end{itemize}`);
+      continue;
+    }
+    if (OL.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && OL.test(lines[i])) {
+        items.push(`  \\item ${inlineTex(lines[i].replace(OL, ''))}`);
+        i++;
+      }
+      out.push(`\\begin{enumerate}\n${items.join('\n')}\n\\end{enumerate}`);
+      continue;
+    }
+    const para: string[] = [];
+    while (i < lines.length && !isBlockStart(lines[i])) {
+      para.push(lines[i]);
+      i++;
+    }
+    out.push(inlineTex(para.join(' ')));
+  }
+  return out.join('\n\n');
 }
