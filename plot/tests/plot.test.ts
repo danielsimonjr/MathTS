@@ -34,4 +34,8 @@ describe('plot (expression form)', () => {
     const svg = plot('x^2 + y^2', { from: -2, to: 2, samples: 10, kind: 'surface' });
     expect(svg).toContain('<polygon');
   });
+  it('plots a 1-var expression using a non-allowlisted function (tanh) as a line', () => {
+    const svg = plot('tanh(x)', { from: -3, to: 3, samples: 40 });
+    expect(svg).toContain('<polyline'); // was blank before the freeVars fix (tanh mistaken for a 2nd var)
+  });
 });

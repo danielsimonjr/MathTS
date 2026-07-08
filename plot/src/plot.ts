@@ -18,20 +18,21 @@ function isLayerArray(v: unknown): v is Layer2D[] {
 /** Collect the free symbol names used in a parsed expression (minus known constants/functions). */
 function freeVars(source: string): string[] {
   const names = new Set<string>();
+  const funcs = new Set<string>();
   try {
     const node = parse(source) as { traverse?: (cb: (n: unknown) => void) => void };
     if (typeof node.traverse === 'function') {
       node.traverse((n: unknown) => {
         const nn = n as { type?: string; name?: string };
         if (nn.type === 'SymbolNode' && nn.name) names.add(nn.name);
+        if (nn.type === 'FunctionNode' && nn.name) funcs.add(nn.name);
       });
     }
   } catch {
     /* unparseable → no free vars */
   }
-  ['pi', 'e', 'tau', 'sin', 'cos', 'tan', 'exp', 'log', 'sqrt', 'abs'].forEach((k) =>
-    names.delete(k)
-  );
+  funcs.forEach((f) => names.delete(f)); // function callees are not plot variables
+  ['pi', 'e', 'tau'].forEach((c) => names.delete(c)); // common constants
   return [...names];
 }
 

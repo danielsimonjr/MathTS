@@ -10,6 +10,17 @@ interface P3Opts extends PlotOptions {
   elev?: number;
 }
 
+function minOf(a: readonly number[]): number {
+  let m = Infinity;
+  for (const v of a) if (v < m) m = v;
+  return m;
+}
+function maxOf(a: readonly number[]): number {
+  let m = -Infinity;
+  for (const v of a) if (v > m) m = v;
+  return m;
+}
+
 function projectAll(
   x: unknown,
   y: unknown,
@@ -21,8 +32,8 @@ function projectAll(
   const zs = coerce1d(z);
   const n = Math.min(xs.length, ys.length, zs.length);
   const nx = (a: number[]) => {
-    const lo = Math.min(...a);
-    const hi = Math.max(...a);
+    const lo = minOf(a);
+    const hi = maxOf(a);
     const s = hi > lo ? hi - lo : 1;
     return (v: number) => ((v - lo) / s) * 2 - 1;
   };
@@ -70,8 +81,8 @@ function render(x: unknown, y: unknown, z: unknown, opts: P3Opts, mode: 'points'
     body = polyline(screen.map(toScreen), color, 2);
   } else {
     const depths = screen.map((p) => p[2]);
-    const dlo = Math.min(...depths);
-    const dhi = Math.max(...depths);
+    const dlo = minOf(depths);
+    const dhi = maxOf(depths);
     const dspan = dhi > dlo ? dhi - dlo : 1;
     const sorted = screen.slice().sort((a, b) => b[2] - a[2]); // far (large depth) first — painter's order
     body = sorted

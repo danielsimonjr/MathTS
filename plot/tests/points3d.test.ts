@@ -26,4 +26,13 @@ describe('scatter3d + curve3d', () => {
     // far point emitted FIRST (lower opacity ~0.4); near point SECOND (opacity 1.0, no attr)
     expect(op(circles[0])).toBeLessThan(op(circles[1]));
   });
+  it('does not throw on a very large series (no Math.min/max spread overflow)', () => {
+    const n = 200000;
+    const xs = Array.from({ length: n }, (_, i) => Math.cos(i / 100));
+    const ys = Array.from({ length: n }, (_, i) => Math.sin(i / 100));
+    const zs = Array.from({ length: n }, (_, i) => i / n);
+    // curve3d renders ONE polyline (cheap) but shares projectAll's min/max path.
+    expect(() => curve3d(xs, ys, zs)).not.toThrow();
+    expect(curve3d(xs, ys, zs)).toMatch(/^<svg/);
+  });
 });
