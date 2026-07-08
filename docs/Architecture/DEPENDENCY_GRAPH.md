@@ -171,7 +171,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **plot**: 14 files
+- **plot**: 15 files
 - **plot/three**: 3 files
 
 ---
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 17             | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 18             | 1               |
 
 ### Package Dependency Diagram
 
@@ -14354,12 +14354,26 @@ graph LR
 
 ---
 
+### `plot/src/scene.ts` - Type definitions (1 interfaces, 1 type aliases)
+
+**Exports:**
+
+- Interfaces: `Scene`
+- Types: `Prim`
+
+---
+
 ### `plot/src/svg.ts` - svg module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./scene.js` | `Scene, Prim` | Import (type-only) |
 
 **Exports:**
 
 - Interfaces: `Theme`
-- Functions: `esc`, `fmt`, `svgDoc`, `line`, `circle`, `rect`, `polyline`, `polygon`, `text`
+- Functions: `esc`, `fmt`, `svgDoc`, `line`, `circle`, `rect`, `polyline`, `polygon`, `text`, `emitSVG`
 - Constants: `THEMES`
 
 ---
@@ -15115,7 +15129,7 @@ graph TD
         N410[overlay]
         N411[palette]
         N412[plot]
-        N413[...4 more]
+        N413[...5 more]
     end
 
     subgraph Plot/three
@@ -15209,17 +15223,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1013   |
+| Total TypeScript Files  | 1014   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168594 |
-| Total Exports           | 4866   |
+| Total Lines of Code     | 168648 |
+| Total Exports           | 4867   |
 | Total Re-exports        | 1746   |
 | Total Classes           | 55     |
-| Total Interfaces        | 403    |
-| Total Functions         | 1573   |
+| Total Interfaces        | 404    |
+| Total Functions         | 1574   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 516    |
+| Type-only Imports       | 517    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

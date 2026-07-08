@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-08'
-  totalFiles: 1013
+  totalFiles: 1014
   totalModules: 75
-  totalExports: 4866
+  totalExports: 4867
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30744,11 +30744,25 @@ modules:
         - linearScale
         - logScale
         - niceTicks
+    plot/src/scene.ts:
+      description: Type definitions (1 interfaces, 1 type aliases)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - Scene
     plot/src/svg.ts:
       description: svg module
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./scene.js
+          imports:
+            - Scene
+            - Prim
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - THEMES
@@ -30761,6 +30775,7 @@ modules:
         - polyline
         - polygon
         - text
+        - emitSVG
       interfaces:
         - Theme
       functions:
@@ -30773,6 +30788,7 @@ modules:
         - polyline
         - polygon
         - text
+        - emitSVG
       constants:
         - THEMES
     plot/src/types.ts:
@@ -32024,6 +32040,7 @@ dependencyGraph:
         - plot/src/plot.ts
         - plot/src/render-core.ts
         - plot/src/scale.ts
+        - plot/src/scene.ts
         - plot/src/svg.ts
         - plot/src/types.ts
     - name: Plot/three
@@ -32032,18 +32049,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1013
+  totalTypeScriptFiles: 1014
   totalModules: 75
-  totalLinesOfCode: 168594
-  totalExports: 4866
+  totalLinesOfCode: 168648
+  totalExports: 4867
   totalClasses: 55
-  totalInterfaces: 403
-  totalFunctions: 1573
+  totalInterfaces: 404
+  totalFunctions: 1574
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531
   totalReExports: 1746
-  totalTypeOnlyImports: 516
+  totalTypeOnlyImports: 517
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

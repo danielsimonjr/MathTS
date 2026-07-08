@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1013, "e": 4866, "re": 1746 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1014, "e": 4867, "re": 1746 },
   "s": {
-    "loc": 168594,
+    "loc": 168648,
     "cls": 55,
-    "int": 403,
-    "fn": 1573,
+    "int": 404,
+    "fn": 1574,
     "tg": 156,
     "en": 0,
     "co": 1531,
-    "toi": 516
+    "toi": 517
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1495,7 +1495,7 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "plot": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "coerce1d",
         "coerce1dPositional",
@@ -1515,7 +1515,7 @@
         "overlay",
         "surface"
       ],
-      "int": ["Frame", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
+      "int": ["Frame", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
     },
     "plot/three": {
       "f": 3,

@@ -1,3 +1,5 @@
+import type { Scene, Prim } from './scene.js';
+
 export interface Theme {
   fg: string;
   muted: string;
@@ -94,4 +96,30 @@ export function text(
   size = 12
 ): string {
   return `<text x="${r2(x)}" y="${r2(y)}" text-anchor="${anchor}" font-family="system-ui,sans-serif" font-size="${size}" fill="${fill}">${esc(s)}</text>`;
+}
+
+function primSVG(p: Prim): string {
+  switch (p.k) {
+    case 'line':
+      return line(p.x1, p.y1, p.x2, p.y2, p.stroke, p.w);
+    case 'circle':
+      return circle(p.cx, p.cy, p.r, p.fill, p.opacity);
+    case 'rect':
+      return rect(p.x, p.y, p.w, p.h, p.fill);
+    case 'polyline':
+      return polyline(p.pts, p.stroke, p.w);
+    case 'polygon':
+      return polygon(p.pts, p.fill, p.stroke);
+    case 'text':
+      // rotate branch reproduces frame.ts's former hand-written y-label string exactly
+      // (no r2 on the translate coords — matches the prior output byte-for-byte).
+      return p.rotate !== undefined
+        ? `<text transform="translate(${p.x},${p.y}) rotate(${p.rotate})" text-anchor="${p.anchor}" font-family="system-ui,sans-serif" font-size="${p.size}" fill="${p.fill}">${esc(p.s)}</text>`
+        : text(p.x, p.y, p.s, p.fill, p.anchor, p.size);
+  }
+}
+
+/** Serialize a Scene to a self-contained SVG string (reuses the exported builders). */
+export function emitSVG(scene: Scene): string {
+  return svgDoc(scene.width, scene.height, scene.prims.map(primSVG).join(''), scene.bg);
 }
