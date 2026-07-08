@@ -1,15 +1,23 @@
-import { coerce1d } from './coerce.js';
+import { coerce1dPositional } from './coerce.js';
 import { circle, polyline } from './svg.js';
 import { draw2D, type Frame } from './frame.js';
 import type { Layer2D, PlotOptions } from './types.js';
 
-/** x defaults to 0..n-1 when a layer omits it. */
+/**
+ * x defaults to 0..n-1 when a layer omits it. x/y are coerced positionally
+ * (NaN gaps kept in place, not dropped) so a non-finite entry in one series
+ * can't shift the other series' values onto the wrong index — see
+ * coerce1dPositional. Pairs are dropped only after zipping, when either side
+ * is non-finite.
+ */
 function xy(layer: Layer2D): Array<[number, number]> {
-  const ys = coerce1d(layer.y);
-  const xs = layer.x ? coerce1d(layer.x) : ys.map((_, i) => i);
+  const ys = coerce1dPositional(layer.y);
+  const xs = layer.x ? coerce1dPositional(layer.x) : ys.map((_, i) => i);
   const n = Math.min(xs.length, ys.length);
   const pts: Array<[number, number]> = [];
-  for (let i = 0; i < n; i++) pts.push([xs[i], ys[i]]);
+  for (let i = 0; i < n; i++) {
+    if (Number.isFinite(xs[i]) && Number.isFinite(ys[i])) pts.push([xs[i], ys[i]]);
+  }
   return pts;
 }
 

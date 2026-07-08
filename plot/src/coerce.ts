@@ -46,6 +46,13 @@ export function coerce1d(raw: Data): number[] {
   return out;
 }
 
+/** Like coerce1d but position-preserving: non-finite stays NaN (no dropping). */
+export function coerce1dPositional(raw: Data): number[] {
+  const u = unwrap(raw);
+  const arr = Array.isArray(u) ? u.flat(Infinity) : u instanceof Float64Array ? Array.from(u) : [];
+  return arr.map((v) => scalar(v));
+}
+
 /** Coerce a 2-D grid; each cell → number (non-finite kept as NaN gaps). */
 export function coerce2d(raw: Data): number[][] {
   const u = unwrap(raw);

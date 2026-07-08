@@ -20,4 +20,14 @@ describe('line', () => {
   it('returns a no-data svg for empty input, never throws', () => {
     expect(line([], [])).toContain('no data');
   });
+  it('keeps x/y aligned across a NaN gap (drop the gap point, not shift the rest)', () => {
+    const svg = line([0, 1, 2, 3], [0, 1, NaN, 9], { width: 520, height: 320 });
+    const m = svg.match(/points="([^"]+)"/);
+    expect(m).toBeTruthy();
+    const pts = m![1].split(' ').map((p) => p.split(',').map(Number));
+    // 3 finite points: (0,0),(1,1),(3,9). The x=2 (gap) point is dropped; x=3 stays with y=9.
+    expect(pts.length).toBe(3);
+    // last point's x must map to data-x=3 → inner-right edge px 500 (width520,left64,right20)
+    expect(pts[2][0]).toBeCloseTo(500, 0);
+  });
 });
