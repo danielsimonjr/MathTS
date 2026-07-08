@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 19             | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 19             | 1               |
 
 ### Package Dependency Diagram
 
@@ -15250,7 +15250,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1015   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168858 |
+| Total Lines of Code     | 168860 |
 | Total Exports           | 4868   |
 | Total Re-exports        | 1746   |
 | Total Classes           | 55     |

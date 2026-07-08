@@ -25,6 +25,8 @@ export interface PlotOptions {
   samples?: number;
   kind?: '2d' | '3d' | 'surface';
   scope?: Record<string, unknown>;
+  format?: 'svg' | 'tikz';
+  tikz?: { standalone?: boolean; scale?: number };
 }
 
 /** One drawable 2-D layer for the shared draw2D core / overlay. */
