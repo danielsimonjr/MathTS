@@ -39,4 +39,12 @@ describe('markdownToTex', () => {
     expect(bad).not.toContain('javascript');
     expect(bad).toContain('x');
   });
+  it('does not double-escape special chars in a link href', () => {
+    const out = markdownToTex('see [page](./a_b.md#sec?x=1&y=2)');
+    expect(out).toContain('\\href{./a\\_b.md\\#sec?x=1\\&y=2}{page}');
+    expect(out).not.toContain('\\textbackslash'); // nothing got re-escaped
+  });
+  it('still escapes special chars in a link label (once)', () => {
+    expect(markdownToTex('[50% off](https://x.com)')).toContain('{50\\% off}');
+  });
 });

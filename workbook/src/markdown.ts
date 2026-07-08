@@ -153,17 +153,33 @@ export function texEscape(s: string): string {
   });
 }
 
-function inlineTex(text: string): string {
-  // Escape first, then apply inline markers to the escaped text (markers are ASCII, unaffected by texEscape).
+/** Escape a non-link prose span, then apply inline markers (their delimiters
+ * survive texEscape, so escaping first is safe here). */
+function escapeInlineNonLink(text: string): string {
   let s = texEscape(text);
   s = s.replace(/`([^`]+)`/g, (_m, code: string) => `\\texttt{${code}}`);
   s = s.replace(/\*\*([^*]+)\*\*/g, '\\textbf{$1}');
   s = s.replace(/\*([^*]+)\*/g, '\\emph{$1}');
-  s = s.replace(/\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, label: string, href: string) => {
-    const raw = sanitizeHrefRaw(href);
-    return raw ? `\\href{${texEscape(raw)}}{${label}}` : label;
-  });
   return s;
+}
+
+function inlineTex(text: string): string {
+  // Links are handled on the RAW text so the href stays raw for sanitize + single-escape;
+  // everything between/around links is escaped as prose.
+  const linkRe = /\[([^\]]*)\]\(([^)\s]+)\)/g;
+  let out = '';
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = linkRe.exec(text)) !== null) {
+    out += escapeInlineNonLink(text.slice(last, m.index));
+    const raw = sanitizeHrefRaw(m[2]);
+    out += raw
+      ? `\\href{${texEscape(raw)}}{${escapeInlineNonLink(m[1])}}`
+      : escapeInlineNonLink(m[1]);
+    last = linkRe.lastIndex;
+  }
+  out += escapeInlineNonLink(text.slice(last));
+  return out;
 }
 
 /** Minimal Markdown → LaTeX, same subset + safety discipline as markdownToHtml. */
