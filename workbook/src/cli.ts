@@ -103,7 +103,12 @@ Notes:
  * anchors/aliases) or a BigInt must still produce a valid envelope, preserving
  * the "envelope always emitted" contract.
  */
-function jsonEnvelope(command: string, ok: boolean, data: unknown, problems: string[] = []): string {
+function jsonEnvelope(
+  command: string,
+  ok: boolean,
+  data: unknown,
+  problems: string[] = []
+): string {
   const seen = new WeakSet<object>();
   const replacer = (_key: string, value: unknown): unknown => {
     if (typeof value === 'bigint') return `${value}n`;
@@ -122,9 +127,25 @@ function jsonEnvelope(command: string, ok: boolean, data: unknown, problems: str
 
 /** Flags that consume the following argument as their value. */
 const VALUE_FLAGS = new Set([
-  '-f', '--format', '-t', '--template', '-c', '--cell',
-  '--id', '--content', '--content-file', '--depends-on', '--before', '--after', '--at',
-  '--title', '--author', '--description', '--tags', '-o', '--output',
+  '-f',
+  '--format',
+  '-t',
+  '--template',
+  '-c',
+  '--cell',
+  '--id',
+  '--content',
+  '--content-file',
+  '--depends-on',
+  '--before',
+  '--after',
+  '--at',
+  '--title',
+  '--author',
+  '--description',
+  '--tags',
+  '-o',
+  '--output',
 ]);
 
 /**
@@ -153,10 +174,11 @@ function readFile(file: string): { content?: string; error?: string } {
   try {
     return { content: readFileSync(file, 'utf-8') };
   } catch (error) {
-    return { error: `Cannot read file '${file}': ${error instanceof Error ? error.message : String(error)}` };
+    return {
+      error: `Cannot read file '${file}': ${error instanceof Error ? error.message : String(error)}`,
+    };
   }
 }
-
 
 /** Scaffold template for `mtsw new`. `<NAME>` is replaced with the bare name. */
 const BASIC_TEMPLATE = `version: "1.0"
@@ -249,9 +271,13 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
 
   const file = firstPositional(args);
   if (!file) {
-    return json ? fail(['Usage: mtsw run <file> [-c <id>] [-v] [--json] [--write]']) : {
-      stdout: '', stderr: 'Usage: mtsw run <file> [-c <id>] [-v] [--json] [--write]', exitCode: 1,
-    };
+    return json
+      ? fail(['Usage: mtsw run <file> [-c <id>] [-v] [--json] [--write]'])
+      : {
+          stdout: '',
+          stderr: 'Usage: mtsw run <file> [-c <id>] [-v] [--json] [--write]',
+          exitCode: 1,
+        };
   }
 
   const read = readFile(file);
@@ -260,16 +286,24 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
   const parsed = parseWorkbook(read.content!);
   if (!parsed.success) {
     const problems = parsed.errors ?? [];
-    return json ? fail(problems, { cells: [] }) : {
-      stdout: '', stderr: `Parse errors:\n${bullets(problems)}`, exitCode: 1,
-    };
+    return json
+      ? fail(problems, { cells: [] })
+      : {
+          stdout: '',
+          stderr: `Parse errors:\n${bullets(problems)}`,
+          exitCode: 1,
+        };
   }
 
   const cellId = flagValue(args, '-c') ?? flagValue(args, '--cell');
   if (cellId !== undefined && !parsed.workbook!.cells.some((c) => c.id === cellId)) {
-    return json ? fail([`No such cell: '${cellId}'`], { cells: [] }) : {
-      stdout: '', stderr: `No such cell: '${cellId}'`, exitCode: 1,
-    };
+    return json
+      ? fail([`No such cell: '${cellId}'`], { cells: [] })
+      : {
+          stdout: '',
+          stderr: `No such cell: '${cellId}'`,
+          exitCode: 1,
+        };
   }
 
   const verbose = args.includes('-v') || args.includes('--verbose');
@@ -288,10 +322,17 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
     try {
       writeFileAtomic(file, serializeWorkbook(parsed.workbook!));
     } catch (error) {
-      return fail([`Failed to write '${file}': ${errMessage(error)}`], { cells: jsonCells(report.cells) });
+      return fail([`Failed to write '${file}': ${errMessage(error)}`], {
+        cells: jsonCells(report.cells),
+      });
     }
     if (json) {
-      const stdout = jsonEnvelope('run', report.ok, { cells: jsonCells(report.cells), written: file }, problems);
+      const stdout = jsonEnvelope(
+        'run',
+        report.ok,
+        { cells: jsonCells(report.cells), written: file },
+        problems
+      );
       return { stdout, stderr: '', exitCode: report.ok ? 0 : 1 };
     }
     // Keep stdout clean for pipelines; confirmation + any failures to stderr.
@@ -368,7 +409,11 @@ export function validateCommand(args: string[]): CommandResult {
   const file = firstPositional(args);
   if (!file) {
     return json
-      ? { stdout: jsonEnvelope('validate', false, null, ['Usage: mtsw validate <file>']), stderr: '', exitCode: 1 }
+      ? {
+          stdout: jsonEnvelope('validate', false, null, ['Usage: mtsw validate <file>']),
+          stderr: '',
+          exitCode: 1,
+        }
       : { stdout: '', stderr: 'Usage: mtsw validate <file>', exitCode: 1 };
   }
 
@@ -385,7 +430,11 @@ export function validateCommand(args: string[]): CommandResult {
   const cellCount = parsed.workbook ? parsed.workbook.cells.length : 0;
 
   if (json) {
-    return { stdout: jsonEnvelope('validate', ok, { cellCount }, problems), stderr: '', exitCode: ok ? 0 : 1 };
+    return {
+      stdout: jsonEnvelope('validate', ok, { cellCount }, problems),
+      stderr: '',
+      exitCode: ok ? 0 : 1,
+    };
   }
   if (ok) {
     return { stdout: `OK: '${file}' is valid (${cellCount} cell(s))`, stderr: '', exitCode: 0 };
@@ -398,7 +447,11 @@ export function describeCommand(args: string[]): CommandResult {
   const file = firstPositional(args);
   if (!file) {
     return json
-      ? { stdout: jsonEnvelope('describe', false, null, ['Usage: mtsw describe <file>']), stderr: '', exitCode: 1 }
+      ? {
+          stdout: jsonEnvelope('describe', false, null, ['Usage: mtsw describe <file>']),
+          stderr: '',
+          exitCode: 1,
+        }
       : { stdout: '', stderr: 'Usage: mtsw describe <file>', exitCode: 1 };
   }
 
@@ -416,7 +469,11 @@ export function describeCommand(args: string[]): CommandResult {
   const cells = data.cells;
 
   if (json) {
-    return { stdout: jsonEnvelope('describe', ok, data, problems), stderr: '', exitCode: ok ? 0 : 1 };
+    return {
+      stdout: jsonEnvelope('describe', ok, data, problems),
+      stderr: '',
+      exitCode: ok ? 0 : 1,
+    };
   }
 
   if (!parsed.success) {
@@ -449,11 +506,18 @@ export function capabilitiesCommand(args: string[]): CommandResult {
 }
 
 export function templatesCommand(args: string[]): CommandResult {
-  const templates = Object.entries(TEMPLATES).map(([name, t]) => ({ name, description: t.description }));
+  const templates = Object.entries(TEMPLATES).map(([name, t]) => ({
+    name,
+    description: t.description,
+  }));
   if (args.includes('--json')) {
     return { stdout: jsonEnvelope('templates', true, { templates }, []), stderr: '', exitCode: 0 };
   }
-  return { stdout: templates.map((t) => `${t.name} - ${t.description}`).join('\n'), stderr: '', exitCode: 0 };
+  return {
+    stdout: templates.map((t) => `${t.name} - ${t.description}`).join('\n'),
+    stderr: '',
+    exitCode: 0,
+  };
 }
 
 export function functionsCommand(args: string[]): CommandResult {
@@ -488,7 +552,8 @@ export function metaCommand(args: string[]): CommandResult {
   const wb = parsed.workbook!;
 
   if (verb === 'get') {
-    if (json) return { stdout: jsonEnvelope('meta', true, wb.metadata, []), stderr: '', exitCode: 0 };
+    if (json)
+      return { stdout: jsonEnvelope('meta', true, wb.metadata, []), stderr: '', exitCode: 0 };
     const lines = Object.entries(wb.metadata).map(
       ([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`
     );
@@ -503,7 +568,11 @@ export function metaCommand(args: string[]): CommandResult {
   const description = flagValue(vargs, '--description');
   if (description !== undefined) changes.description = description;
   const tags = flagValue(vargs, '--tags');
-  if (tags !== undefined) changes.tags = tags.split(',').map((s) => s.trim()).filter(Boolean);
+  if (tags !== undefined)
+    changes.tags = tags
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
   if (Object.keys(changes).length === 0) {
     return fail(['meta set requires at least one of --title/--author/--description/--tags']);
   }
@@ -519,12 +588,17 @@ export function metaCommand(args: string[]): CommandResult {
   } catch (error) {
     return fail([`Failed to write '${file}': ${errMessage(error)}`]);
   }
-  if (json) return { stdout: jsonEnvelope('meta', true, next.metadata, []), stderr: '', exitCode: 0 };
+  if (json)
+    return { stdout: jsonEnvelope('meta', true, next.metadata, []), stderr: '', exitCode: 0 };
   return { stdout: '', stderr: `Updated metadata in ${file}`, exitCode: 0 };
 }
 
 /** Map a workbook (+ optional run results) to the generic render document. */
-function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null): RenderDoc {
+function buildRenderDoc(
+  workbook: Workbook,
+  byId: Map<string, CellResult> | null,
+  format: 'svg' | 'tikz' = 'svg'
+): RenderDoc {
   // Resolve a chart data reference: a cell id -> that cell's output, or an inline array.
   const lookup = (ref: unknown): unknown => {
     if (typeof ref !== 'string') return ref;
@@ -543,11 +617,14 @@ function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null
           x?: { label?: string; data?: unknown };
           y?: { label?: string; data?: unknown };
         };
-        rc.chartSvg = renderChart(
+        const rendered = renderChart(
           { type: spec?.type, title: spec?.title, xLabel: spec?.x?.label, yLabel: spec?.y?.label },
           lookup(spec?.x?.data),
-          lookup(spec?.y?.data)
+          lookup(spec?.y?.data),
+          format
         );
+        if (format === 'tikz') rc.chartTikz = rendered;
+        else rc.chartSvg = rendered;
         // Diagnostic: flag data references that didn't resolve to a value, so an
         // empty chart explains itself instead of silently showing "no data".
         const unresolved: string[] = [];
@@ -564,7 +641,9 @@ function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null
           rc.note = `chart data did not resolve: ${unresolved.join(', ')}${byId ? '' : ' (try without --no-run)'}`;
         }
       } catch (error) {
-        rc.chartSvg = renderChart({}, [], []); // "no data" placeholder
+        const placeholder = renderChart({}, [], [], format); // "no data" placeholder
+        if (format === 'tikz') rc.chartTikz = placeholder;
+        else rc.chartSvg = placeholder;
         rc.note = `invalid chart spec: ${errMessage(error)}`;
       }
       return rc;
@@ -639,7 +718,12 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
     } catch (error) {
       return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
     }
-    if (json) return { stdout: jsonEnvelope('export', true, { path: outPath, bytes }, []), stderr: '', exitCode: 0 };
+    if (json)
+      return {
+        stdout: jsonEnvelope('export', true, { path: outPath, bytes }, []),
+        stderr: '',
+        exitCode: 0,
+      };
     return { stdout: '', stderr: `Exported ${file} -> ${outPath} (${bytes} bytes)`, exitCode: 0 };
   }
   if (json) return { stdout: jsonEnvelope('export', true, { bytes }, []), stderr: '', exitCode: 0 };
@@ -684,11 +768,18 @@ export function runServer(
         return;
       }
       if (Array.isArray(request)) {
-        write({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Batch requests are not supported' } });
+        write({
+          jsonrpc: '2.0',
+          id: null,
+          error: { code: -32600, message: 'Batch requests are not supported' },
+        });
         return;
       }
       try {
-        const { response, events, shutdown } = await handleRequest(session, request as JsonRpcRequest);
+        const { response, events, shutdown } = await handleRequest(
+          session,
+          request as JsonRpcRequest
+        );
         for (const event of events) write(event);
         write(response);
         if (shutdown) finish();
@@ -730,7 +821,9 @@ export function graphCommand(args: string[]): CommandResult {
   // Answer a mistaken `--json` with a parseable envelope, not surprise text.
   if (args.includes('--json')) {
     return {
-      stdout: jsonEnvelope('graph', false, null, ['graph has no --json output; use `describe --json` for structured graph data']),
+      stdout: jsonEnvelope('graph', false, null, [
+        'graph has no --json output; use `describe --json` for structured graph data',
+      ]),
       stderr: '',
       exitCode: 1,
     };
@@ -819,14 +912,23 @@ cells:
 `;
 
 const TEMPLATES: Record<string, { content: string; description: string }> = {
-  basic: { content: BASIC_TEMPLATE, description: 'Markdown intro + a code cell + a passing test cell' },
+  basic: {
+    content: BASIC_TEMPLATE,
+    description: 'Markdown intro + a code cell + a passing test cell',
+  },
   empty: { content: EMPTY_TEMPLATE, description: 'A blank workbook (no cells)' },
-  chart: { content: CHART_TEMPLATE, description: 'A line chart over two data cells (visualization example)' },
+  chart: {
+    content: CHART_TEMPLATE,
+    description: 'A line chart over two data cells (visualization example)',
+  },
 };
 
 /** Windows reserved device names (case-insensitive), which cannot be filenames. */
 const RESERVED_DEVICE_NAMES = new Set([
-  'CON', 'PRN', 'AUX', 'NUL',
+  'CON',
+  'PRN',
+  'AUX',
+  'NUL',
   ...Array.from({ length: 9 }, (_unused, i) => `COM${i + 1}`),
   ...Array.from({ length: 9 }, (_unused, i) => `LPT${i + 1}`),
 ]);
@@ -836,7 +938,7 @@ export function newCommand(args: string[]): CommandResult {
   const name = firstPositional(args);
   const templateName = args.includes('--empty')
     ? 'empty'
-    : flagValue(args, '-t') ?? flagValue(args, '--template') ?? 'basic';
+    : (flagValue(args, '-t') ?? flagValue(args, '--template') ?? 'basic');
   const template = TEMPLATES[templateName];
   if (!template) {
     return {
@@ -870,7 +972,12 @@ export function newCommand(args: string[]): CommandResult {
       };
     }
     bare = name.endsWith('.mtsw') ? name.slice(0, -'.mtsw'.length) : name;
-    if (bare === '' || bare === '.' || bare === '..' || RESERVED_DEVICE_NAMES.has(bare.toUpperCase())) {
+    if (
+      bare === '' ||
+      bare === '.' ||
+      bare === '..' ||
+      RESERVED_DEVICE_NAMES.has(bare.toUpperCase())
+    ) {
       return { stdout: '', stderr: `Invalid name '${name}'`, exitCode: 1 };
     }
     target = `${bare}.mtsw`;
@@ -897,9 +1004,17 @@ export function newCommand(args: string[]): CommandResult {
   } catch (error) {
     const e = error as NodeJS.ErrnoException;
     if (e.code === 'EEXIST') {
-      return { stdout: '', stderr: `File '${target}' already exists (use --force to overwrite)`, exitCode: 1 };
+      return {
+        stdout: '',
+        stderr: `File '${target}' already exists (use --force to overwrite)`,
+        exitCode: 1,
+      };
     }
-    return { stdout: '', stderr: `Failed to create '${target}': ${errMessage(error)}`, exitCode: 1 };
+    return {
+      stdout: '',
+      stderr: `Failed to create '${target}': ${errMessage(error)}`,
+      exitCode: 1,
+    };
   }
 
   return { stdout: `Created ${target}`, stderr: '', exitCode: 0 };
@@ -939,10 +1054,20 @@ export function importCommand(args: string[]): CommandResult {
     } catch (error) {
       return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
     }
-    if (json) return { stdout: jsonEnvelope('import', true, { path: outPath, cells: count }, []), stderr: '', exitCode: 0 };
+    if (json)
+      return {
+        stdout: jsonEnvelope('import', true, { path: outPath, cells: count }, []),
+        stderr: '',
+        exitCode: 0,
+      };
     return { stdout: '', stderr: `Imported ${count} cell(s) -> ${outPath}`, exitCode: 0 };
   }
-  if (json) return { stdout: jsonEnvelope('import', true, { content, cells: count }, []), stderr: '', exitCode: 0 };
+  if (json)
+    return {
+      stdout: jsonEnvelope('import', true, { content, cells: count }, []),
+      stderr: '',
+      exitCode: 0,
+    };
   return { stdout: content, stderr: '', exitCode: 0 };
 }
 
@@ -964,7 +1089,14 @@ function positionals(args: string[]): string[] {
 function parseDependsOn(args: string[]): string[] | undefined {
   const value = flagValue(args, '--depends-on');
   if (value === undefined) return undefined;
-  return [...new Set(value.split(',').map((s) => s.trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function parsePosition(args: string[]): CellPosition | undefined {
@@ -992,7 +1124,9 @@ function resolveContent(args: string[]): { content?: string; error?: string } {
   if (fromFile !== undefined) {
     if (fromFile === '-') {
       if (process.stdin.isTTY) {
-        return { error: 'No piped input for --content-file - (pipe content via stdin, or use --content)' };
+        return {
+          error: 'No piped input for --content-file - (pipe content via stdin, or use --content)',
+        };
       }
       try {
         return { content: readFileSync(0, 'utf-8') };
@@ -1043,7 +1177,12 @@ export function cellCommand(args: string[]): CommandResult {
         if (content.error) return fail([content.error]);
         result = addCell(
           wb,
-          { id, type: type as CellType, content: content.content, dependsOn: parseDependsOn(vargs) },
+          {
+            id,
+            type: type as CellType,
+            content: content.content,
+            dependsOn: parseDependsOn(vargs),
+          },
           parsePosition(vargs)
         );
         break;
@@ -1097,7 +1236,12 @@ export function cellCommand(args: string[]): CommandResult {
 
   if (vargs.includes('--dry-run')) {
     if (json) {
-      const data = { dryRun: true, changed, content: after, ...(changedCells.length ? { changedCells } : {}) };
+      const data = {
+        dryRun: true,
+        changed,
+        content: after,
+        ...(changedCells.length ? { changedCells } : {}),
+      };
       return { stdout: jsonEnvelope('cell', true, data, []), stderr: '', exitCode: 0 };
     }
     return { stdout: after, stderr: '', exitCode: 0 };
@@ -1112,7 +1256,11 @@ export function cellCommand(args: string[]): CommandResult {
   }
 
   if (json) {
-    const data = { changed, ...(changedCells.length ? { changedCells } : {}), ...describeData(result) };
+    const data = {
+      changed,
+      ...(changedCells.length ? { changedCells } : {}),
+      ...describeData(result),
+    };
     return { stdout: jsonEnvelope('cell', true, data, []), stderr: '', exitCode: 0 };
   }
   const note = changed ? `Updated ${file}` : `No change (${file})`;
@@ -1170,7 +1318,11 @@ export async function dispatch(argv: string[]): Promise<CommandResult> {
     // the envelope contract when --json was requested.
     const message = error instanceof Error ? error.message : String(error);
     if (rest.includes('--json')) {
-      return { stdout: jsonEnvelope(command, false, null, [`Internal error: ${message}`]), stderr: '', exitCode: 1 };
+      return {
+        stdout: jsonEnvelope(command, false, null, [`Internal error: ${message}`]),
+        stderr: '',
+        exitCode: 1,
+      };
     }
     return { stdout: '', stderr: `Internal error: ${message}`, exitCode: 1 };
   }

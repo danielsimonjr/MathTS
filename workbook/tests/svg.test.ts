@@ -3,7 +3,11 @@ import { renderChart } from '../src/svg.js';
 
 describe('renderChart', () => {
   it('renders a self-contained line chart SVG', () => {
-    const svg = renderChart({ type: 'line', title: 'T', xLabel: 'x', yLabel: 'y' }, [1, 2, 3], [10, 20, 30]);
+    const svg = renderChart(
+      { type: 'line', title: 'T', xLabel: 'x', yLabel: 'y' },
+      [1, 2, 3],
+      [10, 20, 30]
+    );
     expect(svg).toMatch(/^<svg /);
     expect(svg).toContain('width="100%"');
     expect(svg).toContain('<polyline');
@@ -32,5 +36,17 @@ describe('renderChart', () => {
     const svg = renderChart({ title: '<script>x</script>', xLabel: '<b>' }, [1], [2]);
     expect(svg).not.toContain('<script>');
     expect(svg).toContain('&lt;script&gt;');
+  });
+});
+
+describe('renderChart tikz format', () => {
+  it('emits a tikzpicture fragment (no <svg>, no standalone documentclass)', () => {
+    const out = renderChart({ type: 'line', title: 'T' }, [0, 1, 2], [0, 1, 4], 'tikz');
+    expect(out).toContain('\\begin{tikzpicture}');
+    expect(out).not.toContain('<svg');
+    expect(out).not.toContain('documentclass'); // fragment, embeddable
+  });
+  it('default format is still svg (backward compatible)', () => {
+    expect(renderChart({ type: 'line' }, [0, 1], [0, 1])).toMatch(/^<svg/);
   });
 });

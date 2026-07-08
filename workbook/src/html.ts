@@ -24,6 +24,8 @@ export interface RenderCell {
   passed?: boolean;
   /** For `chart` cells: pre-rendered inline SVG. */
   chartSvg?: string;
+  /** For `chart` cells in a TeX export: pre-rendered embeddable TikZ. */
+  chartTikz?: string;
   /** Optional diagnostic note (e.g. a chart whose data didn't resolve). */
   note?: string;
 }
@@ -74,7 +76,8 @@ function renderCell(cell: RenderCell, parse?: (expr: string) => unknown): string
       const src = `<pre class="src"><code>${esc(cell.content)}</code></pre>`;
       let res = '';
       if (cell.error !== undefined) res = `<div class="cell-error">${esc(cell.error)}</div>`;
-      else if (cell.output !== undefined) res = `<div class="cell-output">${esc(cell.output)}</div>`;
+      else if (cell.output !== undefined)
+        res = `<div class="cell-output">${esc(cell.output)}</div>`;
       return `<figure class="cell cell-code">${cap}${src}${res}</figure>`;
     }
     case 'test': {

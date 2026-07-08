@@ -40,11 +40,25 @@ function toNums(raw: unknown): number[] {
   return Array.isArray(arr) ? arr.flat(Infinity).map(coerce) : [];
 }
 
-/** Render an SVG chart from a spec plus raw x/y data, via the plot package. */
-export function renderChart(spec: ChartSpec, xRaw: unknown, yRaw: unknown): string {
+/** Render an SVG (default) or embeddable TikZ chart from a spec plus raw x/y data. */
+export function renderChart(
+  spec: ChartSpec,
+  xRaw: unknown,
+  yRaw: unknown,
+  format: 'svg' | 'tikz' = 'svg'
+): string {
   const xs = toNums(xRaw);
   const ys = toNums(yRaw);
-  const opts = { title: spec.title, xLabel: spec.xLabel, yLabel: spec.yLabel };
+  const opts =
+    format === 'tikz'
+      ? {
+          title: spec.title,
+          xLabel: spec.xLabel,
+          yLabel: spec.yLabel,
+          format: 'tikz' as const,
+          tikz: { standalone: false },
+        }
+      : { title: spec.title, xLabel: spec.xLabel, yLabel: spec.yLabel };
   if (spec.type === 'scatter') return scatter(xs, ys, opts);
   if (spec.type === 'bar') return bar(xs, ys, opts);
   return line(xs, ys, opts);
