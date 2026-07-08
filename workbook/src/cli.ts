@@ -27,6 +27,7 @@ import type { CellPosition } from './edit';
 import type { CellResult, Workbook, ParseResult, CellType } from './types';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html';
+import { toTeX } from './tex';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
@@ -78,9 +79,11 @@ Usage:
   mtsw functions [--json]                    List functions/constants cells can call
   mtsw meta get <file> [--json]             Show workbook metadata
   mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
-  mtsw export <file> [--format html] [-o out.html] [--no-run]
-                                            Render to a self-contained HTML document
-                                            (MathML equations + charts, no external deps)
+  mtsw export <file> [--format html|tex] [--fragment] [-o out] [--no-run]
+                                            Render to a self-contained HTML or LaTeX
+                                            document (MathML/TikZ equations + charts,
+                                            no external deps). --fragment (tex only)
+                                            omits the preamble for \\input.
   mtsw serve [<file>]                        JSON-RPC over stdio (persistent session
                                             w/ streaming events + incremental run)
 
@@ -686,10 +689,13 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
 
   const format = flagValue(args, '--format') ?? 'html';
-  if (format !== 'html') return fail([`Unknown format '${format}' (supported: html)`]);
+  if (format !== 'html' && format !== 'tex') {
+    return fail([`Unknown format '${format}' (supported: html, tex)`]);
+  }
 
   const file = firstPositional(args);
-  if (!file) return fail(['Usage: mtsw export <file> [--format html] [-o out.html] [--no-run]']);
+  if (!file)
+    return fail(['Usage: mtsw export <file> [--format html|tex] [--fragment] [-o out] [--no-run]']);
 
   const read = readFile(file);
   if (read.error) return fail([read.error]);
@@ -708,13 +714,17 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
     byId = new Map(report.cells.map((r) => [r.id, r]));
   }
 
-  const html = toHTML(buildRenderDoc(workbook, byId), { parse });
-  const bytes = Buffer.byteLength(html, 'utf-8');
+  const fragment = args.includes('--fragment');
+  const rendered =
+    format === 'tex'
+      ? toTeX(buildRenderDoc(workbook, byId, 'tikz'), { parse, fragment })
+      : toHTML(buildRenderDoc(workbook, byId), { parse });
+  const bytes = Buffer.byteLength(rendered, 'utf-8');
   const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
 
   if (outPath) {
     try {
-      writeFileAtomic(outPath, html);
+      writeFileAtomic(outPath, rendered);
     } catch (error) {
       return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
     }
@@ -727,7 +737,7 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
     return { stdout: '', stderr: `Exported ${file} -> ${outPath} (${bytes} bytes)`, exitCode: 0 };
   }
   if (json) return { stdout: jsonEnvelope('export', true, { bytes }, []), stderr: '', exitCode: 0 };
-  return { stdout: html, stderr: '', exitCode: 0 };
+  return { stdout: rendered, stderr: '', exitCode: 0 };
 }
 
 /**

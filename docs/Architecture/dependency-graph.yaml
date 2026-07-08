@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-08'
-  totalFiles: 1016
+  totalFiles: 1017
   totalModules: 75
-  totalExports: 4874
+  totalExports: 4875
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27563,6 +27563,9 @@ modules:
         - file: ./html
           imports:
             - toHTML
+        - file: ./tex
+          imports:
+            - toTeX
         - file: ./svg
           imports:
             - renderChart
@@ -28117,6 +28120,27 @@ modules:
         - ChartSpec
       functions:
         - renderChart
+    workbook/src/tex.ts:
+      description: Assemble a RenderDoc into one self-contained LaTeX document (or a fragment
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./html.js
+          imports:
+            - RenderDoc
+            - RenderCell
+          typeOnly: true
+        - file: ./markdown.js
+          imports:
+            - markdownToTex
+            - texEscape
+      workspaceDependencies: []
+      exports:
+        - toTeX
+      interfaces:
+        - ToTexOptions
+      functions:
+        - toTeX
     workbook/src/types.ts:
       description: Workbook type definitions
       externalDependencies: []
@@ -32055,6 +32079,7 @@ dependencyGraph:
         - workbook/src/rpc.ts
         - workbook/src/session.ts
         - workbook/src/svg.ts
+        - workbook/src/tex.ts
         - workbook/src/types.ts
         - workbook/src/yaml-safe.ts
     - name: Assembly/algebra
@@ -32124,19 +32149,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1016
+  totalTypeScriptFiles: 1017
   totalModules: 75
-  totalLinesOfCode: 169254
-  totalExports: 4874
+  totalLinesOfCode: 169356
+  totalExports: 4875
   totalClasses: 55
-  totalInterfaces: 404
-  totalFunctions: 1580
+  totalInterfaces: 405
+  totalFunctions: 1581
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531
   totalReExports: 1747
-  totalTypeOnlyImports: 527
+  totalTypeOnlyImports: 528
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 237
+  unusedExportsCount: 238

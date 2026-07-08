@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1016, "e": 4874, "re": 1747 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1017, "e": 4875, "re": 1747 },
   "s": {
-    "loc": 169254,
+    "loc": 169356,
     "cls": 55,
-    "int": 404,
-    "fn": 1580,
+    "int": 405,
+    "fn": 1581,
     "tg": 156,
     "en": 0,
     "co": 1531,
-    "toi": 527
+    "toi": 528
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1360,7 +1360,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 18,
+      "f": 19,
       "exp": [
         "runCommand",
         "validateCommand",

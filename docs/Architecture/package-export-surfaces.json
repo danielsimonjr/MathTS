@@ -3845,6 +3845,7 @@
       "toHTML",
       "toMermaid",
       "topologicalSort",
+      "toTeX",
       "validateCommand",
       "VERSION",
       "Workbook",
