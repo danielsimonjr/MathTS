@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-08'
-  totalFiles: 1015
+  totalFiles: 1016
   totalModules: 75
-  totalExports: 4868
+  totalExports: 4872
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30424,7 +30424,7 @@ modules:
       functions:
         - contour
     plot/src/emit.ts:
-      description: Serialize a Scene via the chosen backend. The tikz branch is wired in a later
+      description: emit module
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -30435,6 +30435,9 @@ modules:
         - file: ./svg.js
           imports:
             - emitSVG
+        - file: ./tikz.js
+          imports:
+            - emitTikZ
         - file: ./types.js
           imports:
             - PlotOptions
@@ -30541,13 +30544,14 @@ modules:
       functions:
         - histogram
     plot/src/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-plot (re-exports 20 symbols)
+      description: Package entry point for @danielsimonjr/mathts-plot (re-exports 21 symbols)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./plot.js
           imports:
             - plot
+            - toTikZ
           reExport: true
         - file: ./marks2d.js
           imports:
@@ -30599,6 +30603,7 @@ modules:
       workspaceDependencies: []
       exports:
         - plot
+        - toTikZ
         - line
         - scatter
         - bar
@@ -30621,6 +30626,7 @@ modules:
         - Layer2D
       reExported:
         - plot
+        - toTikZ
         - line
         - scatter
         - bar
@@ -30731,8 +30737,10 @@ modules:
             - range
       exports:
         - plot
+        - toTikZ
       functions:
         - plot
+        - toTikZ
     plot/src/render-core.ts:
       description: Shared rendering context, computed once per `draw2D` call and threaded
       externalDependencies: []
@@ -30823,6 +30831,27 @@ modules:
         - emitSVG
       constants:
         - THEMES
+    plot/src/tikz.ts:
+      description: tikz module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./scene.js
+          imports:
+            - Scene
+            - Prim
+          typeOnly: true
+        - file: ./types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - texEsc
+        - emitTikZ
+      functions:
+        - texEsc
+        - emitTikZ
     plot/src/types.ts:
       description: Type definitions (3 interfaces, 1 type aliases)
       externalDependencies: []
@@ -32083,6 +32112,7 @@ dependencyGraph:
         - plot/src/scale.ts
         - plot/src/scene.ts
         - plot/src/svg.ts
+        - plot/src/tikz.ts
         - plot/src/types.ts
     - name: Plot/three
       files:
@@ -32090,19 +32120,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1015
+  totalTypeScriptFiles: 1016
   totalModules: 75
-  totalLinesOfCode: 168860
-  totalExports: 4868
+  totalLinesOfCode: 168967
+  totalExports: 4872
   totalClasses: 55
   totalInterfaces: 404
-  totalFunctions: 1575
+  totalFunctions: 1578
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531
-  totalReExports: 1746
-  totalTypeOnlyImports: 525
+  totalReExports: 1747
+  totalTypeOnlyImports: 527
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 236
+  unusedExportsCount: 237

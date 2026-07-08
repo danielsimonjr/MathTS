@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1015, "e": 4868, "re": 1746 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1016, "e": 4872, "re": 1747 },
   "s": {
-    "loc": 168860,
+    "loc": 168967,
     "cls": 55,
     "int": 404,
-    "fn": 1575,
+    "fn": 1578,
     "tg": 156,
     "en": 0,
     "co": 1531,
-    "toi": 525
+    "toi": 527
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1495,7 +1495,7 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "plot": {
-      "f": 16,
+      "f": 17,
       "exp": [
         "coerce1d",
         "coerce1dPositional",
@@ -1506,14 +1506,14 @@
         "heatmap",
         "histogram",
         "plot",
+        "toTikZ",
         "line",
         "scatter",
         "bar",
         "area",
         "step",
         "errorbar",
-        "quiver",
-        "overlay"
+        "quiver"
       ],
       "int": ["Frame", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
     },

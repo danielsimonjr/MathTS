@@ -88,3 +88,19 @@ export function plot(a: unknown, b?: unknown, c?: PlotOptions): string {
   // single series → indices for x
   return line(undefined, a as Layer2D['y'], (b as PlotOptions) ?? {});
 }
+
+/** Generic TikZ entry — same polymorphism as plot(), forced to the TikZ backend. */
+export function toTikZ(a: unknown, b?: unknown, c?: PlotOptions): string {
+  if (typeof a === 'string') return plot(a, { ...((b as PlotOptions) ?? {}), format: 'tikz' });
+  if (
+    Array.isArray(a) &&
+    a.length > 0 &&
+    typeof a[0] === 'object' &&
+    a[0] !== null &&
+    'type' in (a[0] as object)
+  )
+    return plot(a, { ...((b as PlotOptions) ?? {}), format: 'tikz' });
+  if (Array.isArray(b) || b instanceof Float64Array)
+    return plot(a as never, b as never, { ...(c ?? {}), format: 'tikz' });
+  return plot(a as never, { ...((b as PlotOptions) ?? {}), format: 'tikz' });
+}

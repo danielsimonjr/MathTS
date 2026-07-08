@@ -3424,6 +3424,7 @@
       "draw2D",
       "emit",
       "emitSVG",
+      "emitTikZ",
       "errorbar",
       "esc",
       "extent",
@@ -3449,8 +3450,10 @@
       "step",
       "surface",
       "svgDoc",
+      "texEsc",
       "text",
       "THEMES",
+      "toTikZ",
       "VERSION",
       "viridis"
     ],

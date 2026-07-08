@@ -40,7 +40,7 @@ export function surface(
         },
       ],
     };
-    return emit(scene, opts as PlotOptions);
+    return emit(scene, opts);
   }
   const cam: Camera = { azim: opts.azim ?? 45, elev: opts.elev ?? 25 };
   let zlo = Infinity;
@@ -118,5 +118,5 @@ export function surface(
       anchor: 'middle',
       size: 14,
     });
-  return emit({ width, height, bg: theme.bg, prims }, opts as PlotOptions);
+  return emit({ width, height, bg: theme.bg, prims }, opts);
 }
