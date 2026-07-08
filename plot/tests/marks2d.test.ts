@@ -1,0 +1,23 @@
+import { describe, it, expect } from 'vitest';
+import { line } from '../src/marks2d.js';
+
+describe('line', () => {
+  it('renders a polyline through N points and returns an svg', () => {
+    const svg = line([0, 1, 2, 3], [0, 1, 4, 9], { title: 'sq' });
+    expect(svg).toMatch(/^<svg/);
+    expect(svg).toContain('<polyline');
+    expect(svg).toContain('sq');
+  });
+  it('maps the first/last x to the inner plot edges (geometry oracle)', () => {
+    // width 520, left margin 64, right 20 → inner x spans [64, 500]
+    const svg = line([0, 10], [0, 0], { width: 520, height: 320 });
+    const m = svg.match(/points="([^"]+)"/);
+    expect(m).toBeTruthy();
+    const pts = m![1].split(' ').map((p) => p.split(',').map(Number));
+    expect(pts[0][0]).toBeCloseTo(64, 0);
+    expect(pts[1][0]).toBeCloseTo(500, 0);
+  });
+  it('returns a no-data svg for empty input, never throws', () => {
+    expect(line([], [])).toContain('no data');
+  });
+});
