@@ -84,10 +84,11 @@ This document provides a comprehensive dependency graph of all files, components
 74. [Assembly/types Dependencies](#assembly-types-dependencies)
 75. [Compat Dependencies](#compat-dependencies)
 76. [Plot Dependencies](#plot-dependencies)
-77. [Dependency Matrix](#dependency-matrix)
-78. [Circular Dependency Analysis](#circular-dependency-analysis)
-79. [Visual Dependency Graph](#visual-dependency-graph)
-80. [Summary Statistics](#summary-statistics)
+77. [Plot/three Dependencies](#plot-three-dependencies)
+78. [Dependency Matrix](#dependency-matrix)
+79. [Circular Dependency Analysis](#circular-dependency-analysis)
+80. [Visual Dependency Graph](#visual-dependency-graph)
+81. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -170,7 +171,8 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **plot**: 1 file
+- **plot**: 14 files
+- **plot/three**: 3 files
 
 ---
 
@@ -202,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | (none)                                                                                                                             | 1              | 15              |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 17             | 0               |
 
 ### Package Dependency Diagram
 
@@ -258,6 +260,8 @@ graph LR
     P21 --> P2
     P21 --> P3
     P21 --> P18
+    P22 --> P2
+    P22 --> P6
 ```
 
 ---
@@ -14150,11 +14154,262 @@ graph LR
 
 ## Plot Dependencies
 
-### `plot/src/index.ts` - Entry point exporting 1 symbols
+### `plot/src/coerce.ts` - coerce module
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `isMatrix, isComplex, isBigNumber, isFraction, number` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `Data` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `coerce1d`, `coerce1dPositional`, `coerce2d`
+
+---
+
+### `plot/src/contour.ts` - contour module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./coerce.js` | `coerce2d` | Import |
+| `./scale.js` | `linearScale` | Import |
+| `./palette.js` | `viridis` | Import |
+| `./svg.js` | `THEMES, line, svgDoc, text` | Import |
+| `./types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `contour`
+
+---
+
+### `plot/src/frame.ts` - frame module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./coerce.js` | `coerce1d` | Import |
+| `./scale.js` | `extent, linearScale, logScale, niceTicks` | Import |
+| `./svg.js` | `THEMES, Theme, esc, fmt, svgDoc, line, text` | Import |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+| `./render-core.js` | `renderLayer, Frame` | Import |
+
+**Exports:**
+
+- Functions: `draw2D`
+
+---
+
+### `plot/src/heatmap.ts` - heatmap module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./coerce.js` | `coerce2d` | Import |
+| `./palette.js` | `viridis` | Import |
+| `./svg.js` | `THEMES, rect, svgDoc, text` | Import |
+| `./types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `heatmap`
+
+---
+
+### `plot/src/histogram.ts` - histogram module
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `histogram` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./coerce.js` | `coerce1d` | Import |
+| `./frame.js` | `draw2D` | Import |
+| `./types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `histogram`
+
+---
+
+### `plot/src/index.ts` - Package entry point for @danielsimonjr/mathts-plot (re-exports 20 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./plot.js` | `plot` | Re-export |
+| `./marks2d.js` | `line, scatter, bar, area, step, errorbar, quiver` | Re-export |
+| `./histogram.js` | `histogram` | Re-export |
+| `./heatmap.js` | `heatmap` | Re-export |
+| `./contour.js` | `contour` | Re-export |
+| `./overlay.js` | `overlay` | Re-export |
+| `./three/surface.js` | `surface` | Re-export |
+| `./three/points3d.js` | `scatter3d, curve3d` | Re-export |
+| `./palette.js` | `viridis` | Re-export |
+| `./types.js` | `Data, PlotOptions, AxisSpec, Layer2D` | Re-export (type-only) |
 
 **Exports:**
 
 - Constants: `VERSION`
+- Re-exports: `plot`, `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`, `histogram`, `heatmap`, `contour`, `overlay`, `surface`, `scatter3d`, `curve3d`, `viridis`, `Data`, `PlotOptions`, `AxisSpec`, `Layer2D`
+
+---
+
+### `plot/src/marks2d.ts` - marks2d module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./frame.js` | `draw2D` | Import |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `line`, `scatter`, `bar`, `area`, `step`, `errorbar`, `quiver`
+
+---
+
+### `plot/src/overlay.ts` - overlay module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./frame.js` | `draw2D` | Import |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `overlay`
+
+---
+
+### `plot/src/palette.ts` - 9 anchor stops of the viridis colormap (perceptually uniform), interpolated in sRGB.
+
+**Exports:**
+
+- Functions: `viridis`
+
+---
+
+### `plot/src/plot.ts` - Generic entry point. Data forms:
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-functions` | `parse, evaluate, range` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./marks2d.js` | `line` | Import |
+| `./overlay.js` | `overlay` | Import |
+| `./contour.js` | `contour` | Import |
+| `./three/surface.js` | `surface` | Import |
+| `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `plot`
+
+---
+
+### `plot/src/render-core.ts` - Shared rendering context, computed once per `draw2D` call and threaded
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./coerce.js` | `coerce1dPositional` | Import |
+| `./svg.js` | `circle, line, polygon, polyline, rect` | Import |
+| `./svg.js` | `Theme` | Import (type-only) |
+| `./types.js` | `Layer2D` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `Frame`
+- Functions: `renderLayer`
+
+---
+
+### `plot/src/scale.ts` - scale module
+
+**Exports:**
+
+- Functions: `extent`, `linearScale`, `logScale`, `niceTicks`
+
+---
+
+### `plot/src/svg.ts` - svg module
+
+**Exports:**
+
+- Interfaces: `Theme`
+- Functions: `esc`, `fmt`, `svgDoc`, `line`, `circle`, `rect`, `polyline`, `polygon`, `text`
+- Constants: `THEMES`
+
+---
+
+### `plot/src/types.ts` - Type definitions (3 interfaces, 1 type aliases)
+
+**Exports:**
+
+- Interfaces: `AxisSpec`, `PlotOptions`, `Layer2D`
+- Types: `Data`
+
+---
+
+<a id="plot-three-dependencies"></a>
+
+## Plot/three Dependencies
+
+### `plot/src/three/points3d.ts` - points3d module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../coerce.js` | `coerce1d` | Import |
+| `./project.js` | `project, Camera` | Import |
+| `../svg.js` | `THEMES, circle, polyline, svgDoc, text` | Import |
+| `../types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `scatter3d`, `curve3d`
+
+---
+
+### `plot/src/three/project.ts` - Orthographic projection of a 3-D point to screen [x, y, depth].
+
+**Exports:**
+
+- Interfaces: `Camera`
+- Functions: `project`
+
+---
+
+### `plot/src/three/surface.ts` - surface module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../coerce.js` | `coerce2d` | Import |
+| `./project.js` | `project, Camera` | Import |
+| `../palette.js` | `viridis` | Import |
+| `../svg.js` | `THEMES, polygon, polyline, svgDoc, text` | Import |
+| `../types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `surface`
 
 ---
 
@@ -14844,7 +15099,23 @@ graph TD
     end
 
     subgraph Plot
-        N403[index]
+        N403[coerce]
+        N404[contour]
+        N405[frame]
+        N406[heatmap]
+        N407[histogram]
+        N408[index]
+        N409[marks2d]
+        N410[overlay]
+        N411[palette]
+        N412[plot]
+        N413[...4 more]
+    end
+
+    subgraph Plot/three
+        N414[points3d]
+        N415[project]
+        N416[surface]
     end
 
     N2 --> N1
@@ -14932,17 +15203,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 997    |
-| Total Modules           | 74     |
-| Total Lines of Code     | 167589 |
-| Total Exports           | 4810   |
-| Total Re-exports        | 1726   |
+| Total TypeScript Files  | 1013   |
+| Total Modules           | 75     |
+| Total Lines of Code     | 168673 |
+| Total Exports           | 4866   |
+| Total Re-exports        | 1746   |
 | Total Classes           | 55     |
-| Total Interfaces        | 397    |
-| Total Functions         | 1538   |
+| Total Interfaces        | 403    |
+| Total Functions         | 1573   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 503    |
+| Type-only Imports       | 516    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

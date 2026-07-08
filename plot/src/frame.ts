@@ -2,20 +2,9 @@ import { coerce1d } from './coerce.js';
 import { extent, linearScale, logScale, niceTicks } from './scale.js';
 import { THEMES, type Theme, esc, fmt, svgDoc, line as svgLine, text } from './svg.js';
 import type { Layer2D, PlotOptions } from './types.js';
-import { renderLayer } from './marks2d.js';
+import { renderLayer, type Frame } from './render-core.js';
 
 const MARGIN = { top: 34, right: 20, bottom: 46, left: 64 };
-
-export interface Frame {
-  px: (x: number) => number;
-  py: (y: number) => number;
-  xdom: [number, number];
-  ydom: [number, number];
-  theme: Theme;
-  width: number;
-  height: number;
-  color: (i: number) => string;
-}
 
 /** Combined [min,max] of a coord across every layer that carries it. */
 function combinedExtent(layers: Layer2D[], pick: (l: Layer2D) => number[]): [number, number] {

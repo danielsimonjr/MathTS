@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 997, "e": 4810, "re": 1726 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-08", "f": 1013, "e": 4866, "re": 1746 },
   "s": {
-    "loc": 167589,
+    "loc": 168673,
     "cls": 55,
-    "int": 397,
-    "fn": 1538,
+    "int": 403,
+    "fn": 1573,
     "tg": 156,
     "en": 0,
-    "co": 1530,
-    "toi": 503
+    "co": 1531,
+    "toi": 516
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1494,7 +1494,34 @@
       ],
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
-    "plot": { "f": 1, "exp": ["VERSION"] }
+    "plot": {
+      "f": 14,
+      "exp": [
+        "coerce1d",
+        "coerce1dPositional",
+        "coerce2d",
+        "contour",
+        "draw2D",
+        "heatmap",
+        "histogram",
+        "plot",
+        "line",
+        "scatter",
+        "bar",
+        "area",
+        "step",
+        "errorbar",
+        "quiver",
+        "overlay",
+        "surface"
+      ],
+      "int": ["Frame", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
+    },
+    "plot/three": {
+      "f": 3,
+      "exp": ["scatter3d", "curve3d", "project", "surface"],
+      "int": ["Camera"]
+    }
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },

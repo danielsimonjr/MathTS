@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-08'
-  totalFiles: 997
-  totalModules: 74
-  totalExports: 4810
+  totalFiles: 1013
+  totalModules: 75
+  totalExports: 4866
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30357,16 +30357,503 @@ modules:
         - NaN_
         - shims
   plot:
+    plot/src/coerce.ts:
+      description: coerce module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - Data
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - isMatrix
+            - isComplex
+            - isBigNumber
+            - isFraction
+            - number
+      exports:
+        - coerce1d
+        - coerce1dPositional
+        - coerce2d
+      functions:
+        - coerce1d
+        - coerce1dPositional
+        - coerce2d
+    plot/src/contour.ts:
+      description: contour module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./coerce.js
+          imports:
+            - coerce2d
+        - file: ./scale.js
+          imports:
+            - linearScale
+        - file: ./palette.js
+          imports:
+            - viridis
+        - file: ./svg.js
+          imports:
+            - THEMES
+            - line
+            - svgDoc
+            - text
+        - file: ./types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - contour
+      functions:
+        - contour
+    plot/src/frame.ts:
+      description: frame module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./coerce.js
+          imports:
+            - coerce1d
+        - file: ./scale.js
+          imports:
+            - extent
+            - linearScale
+            - logScale
+            - niceTicks
+        - file: ./svg.js
+          imports:
+            - THEMES
+            - Theme
+            - esc
+            - fmt
+            - svgDoc
+            - line
+            - text
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+        - file: ./render-core.js
+          imports:
+            - renderLayer
+            - Frame
+      workspaceDependencies: []
+      exports:
+        - draw2D
+      functions:
+        - draw2D
+    plot/src/heatmap.ts:
+      description: heatmap module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./coerce.js
+          imports:
+            - coerce2d
+        - file: ./palette.js
+          imports:
+            - viridis
+        - file: ./svg.js
+          imports:
+            - THEMES
+            - rect
+            - svgDoc
+            - text
+        - file: ./types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - heatmap
+      functions:
+        - heatmap
+    plot/src/histogram.ts:
+      description: histogram module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./coerce.js
+          imports:
+            - coerce1d
+        - file: ./frame.js
+          imports:
+            - draw2D
+        - file: ./types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - histogram
+      exports:
+        - histogram
+      functions:
+        - histogram
     plot/src/index.ts:
-      description: Entry point exporting 1 symbols
+      description: Package entry point for @danielsimonjr/mathts-plot (re-exports 20 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./plot.js
+          imports:
+            - plot
+          reExport: true
+        - file: ./marks2d.js
+          imports:
+            - line
+            - scatter
+            - bar
+            - area
+            - step
+            - errorbar
+            - quiver
+          reExport: true
+        - file: ./histogram.js
+          imports:
+            - histogram
+          reExport: true
+        - file: ./heatmap.js
+          imports:
+            - heatmap
+          reExport: true
+        - file: ./contour.js
+          imports:
+            - contour
+          reExport: true
+        - file: ./overlay.js
+          imports:
+            - overlay
+          reExport: true
+        - file: ./three/surface.js
+          imports:
+            - surface
+          reExport: true
+        - file: ./three/points3d.js
+          imports:
+            - scatter3d
+            - curve3d
+          reExport: true
+        - file: ./palette.js
+          imports:
+            - viridis
+          reExport: true
+        - file: ./types.js
+          imports:
+            - Data
+            - PlotOptions
+            - AxisSpec
+            - Layer2D
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - plot
+        - line
+        - scatter
+        - bar
+        - area
+        - step
+        - errorbar
+        - quiver
+        - histogram
+        - heatmap
+        - contour
+        - overlay
+        - surface
+        - scatter3d
+        - curve3d
+        - viridis
+        - VERSION
+        - Data
+        - PlotOptions
+        - AxisSpec
+        - Layer2D
+      reExported:
+        - plot
+        - line
+        - scatter
+        - bar
+        - area
+        - step
+        - errorbar
+        - quiver
+        - histogram
+        - heatmap
+        - contour
+        - overlay
+        - surface
+        - scatter3d
+        - curve3d
+        - viridis
+        - Data
+        - PlotOptions
+        - AxisSpec
+        - Layer2D
+      constants:
+        - VERSION
+    plot/src/marks2d.ts:
+      description: marks2d module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./frame.js
+          imports:
+            - draw2D
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - line
+        - scatter
+        - bar
+        - area
+        - step
+        - errorbar
+        - quiver
+      functions:
+        - line
+        - scatter
+        - bar
+        - area
+        - step
+        - errorbar
+        - quiver
+    plot/src/overlay.ts:
+      description: overlay module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./frame.js
+          imports:
+            - draw2D
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - overlay
+      functions:
+        - overlay
+    plot/src/palette.ts:
+      description: 9 anchor stops of the viridis colormap (perceptually uniform), interpolated in sRGB.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - VERSION
+        - viridis
+      functions:
+        - viridis
+    plot/src/plot.ts:
+      description: 'Generic entry point. Data forms:'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./marks2d.js
+          imports:
+            - line
+        - file: ./overlay.js
+          imports:
+            - overlay
+        - file: ./contour.js
+          imports:
+            - contour
+        - file: ./three/surface.js
+          imports:
+            - surface
+        - file: ./types.js
+          imports:
+            - Layer2D
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-functions'
+          directory: functions
+          imports:
+            - parse
+            - evaluate
+            - range
+      exports:
+        - plot
+      functions:
+        - plot
+    plot/src/render-core.ts:
+      description: Shared rendering context, computed once per `draw2D` call and threaded
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./coerce.js
+          imports:
+            - coerce1dPositional
+        - file: ./svg.js
+          imports:
+            - circle
+            - line
+            - polygon
+            - polyline
+            - rect
+        - file: ./svg.js
+          imports:
+            - Theme
+          typeOnly: true
+        - file: ./types.js
+          imports:
+            - Layer2D
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - renderLayer
+      interfaces:
+        - Frame
+      functions:
+        - renderLayer
+    plot/src/scale.ts:
+      description: scale module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - extent
+        - linearScale
+        - logScale
+        - niceTicks
+      functions:
+        - extent
+        - linearScale
+        - logScale
+        - niceTicks
+    plot/src/svg.ts:
+      description: svg module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - THEMES
+        - esc
+        - fmt
+        - svgDoc
+        - line
+        - circle
+        - rect
+        - polyline
+        - polygon
+        - text
+      interfaces:
+        - Theme
+      functions:
+        - esc
+        - fmt
+        - svgDoc
+        - line
+        - circle
+        - rect
+        - polyline
+        - polygon
+        - text
       constants:
-        - VERSION
+        - THEMES
+    plot/src/types.ts:
+      description: Type definitions (3 interfaces, 1 type aliases)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - AxisSpec
+        - PlotOptions
+        - Layer2D
+  plot/three:
+    plot/src/three/points3d.ts:
+      description: points3d module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../coerce.js
+          imports:
+            - coerce1d
+        - file: ./project.js
+          imports:
+            - project
+            - Camera
+        - file: ../svg.js
+          imports:
+            - THEMES
+            - circle
+            - polyline
+            - svgDoc
+            - text
+        - file: ../types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - scatter3d
+        - curve3d
+      functions:
+        - scatter3d
+        - curve3d
+    plot/src/three/project.ts:
+      description: Orthographic projection of a 3-D point to screen [x, y, depth].
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - project
+      interfaces:
+        - Camera
+      functions:
+        - project
+    plot/src/three/surface.ts:
+      description: surface module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../coerce.js
+          imports:
+            - coerce2d
+        - file: ./project.js
+          imports:
+            - project
+            - Camera
+        - file: ../palette.js
+          imports:
+            - viridis
+        - file: ../svg.js
+          imports:
+            - THEMES
+            - polygon
+            - polyline
+            - svgDoc
+            - text
+        - file: ../types.js
+          imports:
+            - PlotOptions
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - surface
+      functions:
+        - surface
 dependencyGraph:
   circularDependencies:
     runtime: []
@@ -31519,20 +32006,38 @@ dependencyGraph:
         - compat/src/shims.ts
     - name: Plot
       files:
+        - plot/src/coerce.ts
+        - plot/src/contour.ts
+        - plot/src/frame.ts
+        - plot/src/heatmap.ts
+        - plot/src/histogram.ts
         - plot/src/index.ts
+        - plot/src/marks2d.ts
+        - plot/src/overlay.ts
+        - plot/src/palette.ts
+        - plot/src/plot.ts
+        - plot/src/render-core.ts
+        - plot/src/scale.ts
+        - plot/src/svg.ts
+        - plot/src/types.ts
+    - name: Plot/three
+      files:
+        - plot/src/three/points3d.ts
+        - plot/src/three/project.ts
+        - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 997
-  totalModules: 74
-  totalLinesOfCode: 167589
-  totalExports: 4810
+  totalTypeScriptFiles: 1013
+  totalModules: 75
+  totalLinesOfCode: 168673
+  totalExports: 4866
   totalClasses: 55
-  totalInterfaces: 397
-  totalFunctions: 1538
+  totalInterfaces: 403
+  totalFunctions: 1573
   totalTypeGuards: 156
   totalEnums: 0
-  totalConstants: 1530
-  totalReExports: 1726
-  totalTypeOnlyImports: 503
+  totalConstants: 1531
+  totalReExports: 1746
+  totalTypeOnlyImports: 516
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
