@@ -1,8 +1,10 @@
 import { coerce1d } from './coerce.js';
 import { extent, linearScale, logScale, niceTicks } from './scale.js';
-import { THEMES, type Theme, esc, fmt, svgDoc, line as svgLine, text } from './svg.js';
+import { THEMES, type Theme, fmt } from './svg.js';
 import type { Layer2D, PlotOptions } from './types.js';
 import { renderLayer, type Frame } from './render-core.js';
+import type { Prim, Scene } from './scene.js';
+import { emit } from './emit.js';
 
 const MARGIN = { top: 34, right: 20, bottom: 46, left: 64 };
 
@@ -13,16 +15,26 @@ function combinedExtent(layers: Layer2D[], pick: (l: Layer2D) => number[]): [num
   return extent(all);
 }
 
-function noData(width: number, height: number, theme: Theme): string {
-  return svgDoc(
+function noDataScene(width: number, height: number, theme: Theme): Scene {
+  return {
     width,
     height,
-    text(width / 2, height / 2, 'no data', theme.muted, 'middle', 13),
-    theme.bg
-  );
+    bg: theme.bg,
+    prims: [
+      {
+        k: 'text',
+        x: width / 2,
+        y: height / 2,
+        s: 'no data',
+        fill: theme.muted,
+        anchor: 'middle',
+        size: 13,
+      },
+    ],
+  };
 }
 
-/** Shared 2-D rendering core: axes + ticks + grid + labels + legend + layer marks. Never throws. */
+/** Shared 2-D rendering core: builds a Scene (axes+ticks+grid+labels+legend+marks). Never throws. */
 export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
   const width = opts.width ?? 520;
   const height = opts.height ?? 320;
@@ -31,13 +43,14 @@ export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
     // "has data" is decided on the y-series alone (x may legitimately default to indices);
     // an empty/all-non-finite y for every layer means nothing is plottable.
     const yAll = layers.flatMap((l) => coerce1d(l.y));
-    if (yAll.length === 0) return noData(width, height, theme);
+    if (yAll.length === 0) return emit(noDataScene(width, height, theme), opts);
 
     const xdom = combinedExtent(layers, (l) =>
       l.x ? coerce1d(l.x) : coerce1d(l.y).map((_, i) => i)
     );
     const ydom = combinedExtent(layers, (l) => coerce1d(l.y));
-    if (!Number.isFinite(xdom[0]) || !Number.isFinite(ydom[0])) return noData(width, height, theme);
+    if (!Number.isFinite(xdom[0]) || !Number.isFinite(ydom[0]))
+      return emit(noDataScene(width, height, theme), opts);
 
     const innerX: [number, number] = [MARGIN.left, width - MARGIN.right];
     const innerY: [number, number] = [height - MARGIN.bottom, MARGIN.top];
@@ -56,68 +69,125 @@ export function draw2D(layers: Layer2D[], opts: PlotOptions = {}): string {
       color: (i: number) => theme.series[i % theme.series.length],
     };
 
-    // grid + ticks
+    const prims: Prim[] = [];
     const xticks = niceTicks(xdom[0], xdom[1]).filter((t) => t >= xdom[0] && t <= xdom[1]);
     const yticks = niceTicks(ydom[0], ydom[1]).filter((t) => t >= ydom[0] && t <= ydom[1]);
-    const grid =
-      xticks.map((t) => svgLine(px(t), innerY[0], px(t), innerY[1], theme.grid, 1)).join('') +
-      yticks.map((t) => svgLine(innerX[0], py(t), innerX[1], py(t), theme.grid, 1)).join('');
-    const axes =
-      svgLine(
-        MARGIN.left,
-        height - MARGIN.bottom,
-        width - MARGIN.right,
-        height - MARGIN.bottom,
-        theme.axis,
-        1
-      ) + svgLine(MARGIN.left, MARGIN.top, MARGIN.left, height - MARGIN.bottom, theme.axis, 1);
-    const xtickLabels = xticks
-      .map((t) => text(px(t), height - MARGIN.bottom + 16, fmt(t), theme.muted, 'middle', 11))
-      .join('');
-    const ytickLabels = yticks
-      .map((t) => text(MARGIN.left - 8, py(t) + 4, fmt(t), theme.muted, 'end', 11))
-      .join('');
-
-    // titles + axis labels
-    const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
-    const xlab = opts.xLabel
-      ? text(
-          MARGIN.left + (width - MARGIN.left - MARGIN.right) / 2,
-          height - 8,
-          opts.xLabel,
-          theme.fg,
-          'middle',
-          12
-        )
-      : '';
-    const ylab = opts.yLabel
-      ? `<text transform="translate(16,${MARGIN.top + (height - MARGIN.top - MARGIN.bottom) / 2}) rotate(-90)" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="${theme.fg}">${esc(opts.yLabel)}</text>`
-      : '';
-
+    // grid
+    for (const t of xticks)
+      prims.push({
+        k: 'line',
+        x1: px(t),
+        y1: innerY[0],
+        x2: px(t),
+        y2: innerY[1],
+        stroke: theme.grid,
+        w: 1,
+      });
+    for (const t of yticks)
+      prims.push({
+        k: 'line',
+        x1: innerX[0],
+        y1: py(t),
+        x2: innerX[1],
+        y2: py(t),
+        stroke: theme.grid,
+        w: 1,
+      });
+    // axes
+    prims.push({
+      k: 'line',
+      x1: MARGIN.left,
+      y1: height - MARGIN.bottom,
+      x2: width - MARGIN.right,
+      y2: height - MARGIN.bottom,
+      stroke: theme.axis,
+      w: 1,
+    });
+    prims.push({
+      k: 'line',
+      x1: MARGIN.left,
+      y1: MARGIN.top,
+      x2: MARGIN.left,
+      y2: height - MARGIN.bottom,
+      stroke: theme.axis,
+      w: 1,
+    });
+    // tick labels
+    for (const t of xticks)
+      prims.push({
+        k: 'text',
+        x: px(t),
+        y: height - MARGIN.bottom + 16,
+        s: fmt(t),
+        fill: theme.muted,
+        anchor: 'middle',
+        size: 11,
+      });
+    for (const t of yticks)
+      prims.push({
+        k: 'text',
+        x: MARGIN.left - 8,
+        y: py(t) + 4,
+        s: fmt(t),
+        fill: theme.muted,
+        anchor: 'end',
+        size: 11,
+      });
+    // title + axis labels
+    if (opts.title)
+      prims.push({
+        k: 'text',
+        x: width / 2,
+        y: 20,
+        s: opts.title,
+        fill: theme.fg,
+        anchor: 'middle',
+        size: 14,
+      });
+    if (opts.xLabel)
+      prims.push({
+        k: 'text',
+        x: MARGIN.left + (width - MARGIN.left - MARGIN.right) / 2,
+        y: height - 8,
+        s: opts.xLabel,
+        fill: theme.fg,
+        anchor: 'middle',
+        size: 12,
+      });
+    if (opts.yLabel)
+      prims.push({
+        k: 'text',
+        x: 16,
+        y: MARGIN.top + (height - MARGIN.top - MARGIN.bottom) / 2,
+        s: opts.yLabel,
+        fill: theme.fg,
+        anchor: 'middle',
+        size: 12,
+        rotate: -90,
+      });
+    // marks
+    layers.forEach((l, i) => prims.push(...renderLayer(l, frame, i)));
     // legend
-    let legend = '';
     if (opts.legend && layers.some((l) => l.label)) {
-      legend = layers
-        .map((l, i) => {
-          if (!l.label) return '';
-          const ly = MARGIN.top + 4 + i * 16;
-          const c = l.color ?? frame.color(i);
-          return (
-            `<rect x="${width - MARGIN.right - 120}" y="${ly - 8}" width="10" height="10" fill="${c}"/>` +
-            text(width - MARGIN.right - 106, ly + 1, l.label, theme.fg, 'start', 11)
-          );
-        })
-        .join('');
+      layers.forEach((l, i) => {
+        if (!l.label) return;
+        const ly = MARGIN.top + 4 + i * 16;
+        const c = l.color ?? frame.color(i);
+        prims.push({ k: 'rect', x: width - MARGIN.right - 120, y: ly - 8, w: 10, h: 10, fill: c });
+        prims.push({
+          k: 'text',
+          x: width - MARGIN.right - 106,
+          y: ly + 1,
+          s: l.label,
+          fill: theme.fg,
+          anchor: 'start',
+          size: 11,
+        });
+      });
     }
 
-    const marks = layers.map((l, i) => renderLayer(l, frame, i)).join('');
-    return svgDoc(
-      width,
-      height,
-      grid + axes + xtickLabels + ytickLabels + title + xlab + ylab + marks + legend,
-      theme.bg
-    );
+    return emit({ width, height, bg: theme.bg, prims }, opts);
   } catch {
-    return noData(width, height, theme);
+    return emit(noDataScene(width, height, theme), opts);
   }
 }

@@ -171,7 +171,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **plot**: 15 files
+- **plot**: 16 files
 - **plot/three**: 3 files
 
 ---
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 18             | 1               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 19             | 0               |
 
 ### Package Dependency Diagram
 
@@ -14195,6 +14195,21 @@ graph LR
 
 ---
 
+### `plot/src/emit.ts` - Serialize a Scene via the chosen backend. The tikz branch is wired in a later
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./scene.js` | `Scene` | Import (type-only) |
+| `./svg.js` | `emitSVG` | Import |
+| `./types.js` | `PlotOptions` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `emit`
+
+---
+
 ### `plot/src/frame.ts` - frame module
 
 **Internal Dependencies:**
@@ -14202,9 +14217,11 @@ graph LR
 |------|---------|------|
 | `./coerce.js` | `coerce1d` | Import |
 | `./scale.js` | `extent, linearScale, logScale, niceTicks` | Import |
-| `./svg.js` | `THEMES, Theme, esc, fmt, svgDoc, line, text` | Import |
+| `./svg.js` | `THEMES, Theme, fmt` | Import |
 | `./types.js` | `Layer2D, PlotOptions` | Import (type-only) |
 | `./render-core.js` | `renderLayer, Frame` | Import |
+| `./scene.js` | `Prim, Scene` | Import (type-only) |
+| `./emit.js` | `emit` | Import |
 
 **Exports:**
 
@@ -14335,9 +14352,9 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./coerce.js` | `coerce1dPositional` | Import |
-| `./svg.js` | `circle, line, polygon, polyline, rect` | Import |
 | `./svg.js` | `Theme` | Import (type-only) |
 | `./types.js` | `Layer2D` | Import (type-only) |
+| `./scene.js` | `Prim` | Import (type-only) |
 
 **Exports:**
 
@@ -15121,15 +15138,15 @@ graph TD
     subgraph Plot
         N403[coerce]
         N404[contour]
-        N405[frame]
-        N406[heatmap]
-        N407[histogram]
-        N408[index]
-        N409[marks2d]
-        N410[overlay]
-        N411[palette]
-        N412[plot]
-        N413[...5 more]
+        N405[emit]
+        N406[frame]
+        N407[heatmap]
+        N408[histogram]
+        N409[index]
+        N410[marks2d]
+        N411[overlay]
+        N412[palette]
+        N413[...6 more]
     end
 
     subgraph Plot/three
@@ -15223,17 +15240,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1014   |
+| Total TypeScript Files  | 1015   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168648 |
-| Total Exports           | 4867   |
+| Total Lines of Code     | 168756 |
+| Total Exports           | 4868   |
 | Total Re-exports        | 1746   |
 | Total Classes           | 55     |
 | Total Interfaces        | 404    |
-| Total Functions         | 1574   |
+| Total Functions         | 1575   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 517    |
+| Type-only Imports       | 521    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

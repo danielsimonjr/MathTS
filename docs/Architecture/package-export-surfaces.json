@@ -3422,6 +3422,7 @@
       "curve3d",
       "Data",
       "draw2D",
+      "emit",
       "emitSVG",
       "errorbar",
       "esc",

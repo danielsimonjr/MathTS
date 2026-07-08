@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-08",
-    "totalFiles": 1014,
+    "totalFiles": 1015,
     "totalModules": 75,
-    "totalExports": 4867
+    "totalExports": 4868
   },
   "entryPoints": [
     {
@@ -32618,6 +32618,30 @@
         "exports": ["contour"],
         "functions": ["contour"]
       },
+      "plot/src/emit.ts": {
+        "description": "Serialize a Scene via the chosen backend. The tikz branch is wired in a later",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scene.js",
+            "imports": ["Scene"],
+            "typeOnly": true
+          },
+          {
+            "file": "./svg.js",
+            "imports": ["emitSVG"]
+          },
+          {
+            "file": "./types.js",
+            "imports": ["PlotOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["emit"],
+        "functions": ["emit"]
+      },
       "plot/src/frame.ts": {
         "description": "frame module",
         "externalDependencies": [],
@@ -32633,7 +32657,7 @@
           },
           {
             "file": "./svg.js",
-            "imports": ["THEMES", "Theme", "esc", "fmt", "svgDoc", "line", "text"]
+            "imports": ["THEMES", "Theme", "fmt"]
           },
           {
             "file": "./types.js",
@@ -32643,6 +32667,15 @@
           {
             "file": "./render-core.js",
             "imports": ["renderLayer", "Frame"]
+          },
+          {
+            "file": "./scene.js",
+            "imports": ["Prim", "Scene"],
+            "typeOnly": true
+          },
+          {
+            "file": "./emit.js",
+            "imports": ["emit"]
           }
         ],
         "workspaceDependencies": [],
@@ -32905,16 +32938,17 @@
           },
           {
             "file": "./svg.js",
-            "imports": ["circle", "line", "polygon", "polyline", "rect"]
-          },
-          {
-            "file": "./svg.js",
             "imports": ["Theme"],
             "typeOnly": true
           },
           {
             "file": "./types.js",
             "imports": ["Layer2D"],
+            "typeOnly": true
+          },
+          {
+            "file": "./scene.js",
+            "imports": ["Prim"],
             "typeOnly": true
           }
         ],
@@ -34371,6 +34405,7 @@
         "files": [
           "plot/src/coerce.ts",
           "plot/src/contour.ts",
+          "plot/src/emit.ts",
           "plot/src/frame.ts",
           "plot/src/heatmap.ts",
           "plot/src/histogram.ts",
@@ -34397,18 +34432,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1014,
+    "totalTypeScriptFiles": 1015,
     "totalModules": 75,
-    "totalLinesOfCode": 168648,
-    "totalExports": 4867,
+    "totalLinesOfCode": 168756,
+    "totalExports": 4868,
     "totalClasses": 55,
     "totalInterfaces": 404,
-    "totalFunctions": 1574,
+    "totalFunctions": 1575,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1531,
     "totalReExports": 1746,
-    "totalTypeOnlyImports": 517,
+    "totalTypeOnlyImports": 521,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
