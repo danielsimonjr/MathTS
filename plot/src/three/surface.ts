@@ -91,7 +91,7 @@ export function surface(
         quads.push({ depth, pts: corners.map(toScreen), shade: (meanZ - zlo) / zspan });
       }
     }
-    quads.sort((a, b) => a.depth - b.depth); // far (small depth) first
+    quads.sort((a, b) => b.depth - a.depth); // far (large depth) first — painter's: draw far first, near last
     for (const q of quads) body.push(polygon(q.pts, viridis(q.shade), theme.grid));
   }
   const title = opts.title ? text(width / 2, 20, opts.title, theme.fg, 'middle', 14) : '';
