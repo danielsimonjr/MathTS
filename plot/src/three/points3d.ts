@@ -69,11 +69,17 @@ function render(x: unknown, y: unknown, z: unknown, opts: P3Opts, mode: 'points'
   if (mode === 'line') {
     body = polyline(screen.map(toScreen), color, 2);
   } else {
-    const sorted = screen.slice().sort((a, b) => a[2] - b[2]); // depth-cued draw order
+    const depths = screen.map((p) => p[2]);
+    const dlo = Math.min(...depths);
+    const dhi = Math.max(...depths);
+    const dspan = dhi > dlo ? dhi - dlo : 1;
+    const sorted = screen.slice().sort((a, b) => b[2] - a[2]); // far (large depth) first — painter's order
     body = sorted
       .map((p) => {
         const [sx, sy] = toScreen(p);
-        return circle(sx, sy, 3, color);
+        const near = 1 - (p[2] - dlo) / dspan; // 1 = nearest, 0 = farthest
+        const opacity = 0.4 + 0.6 * near; // nearest fully opaque (1.0), farthest 0.4
+        return circle(sx, sy, 3, color, opacity);
       })
       .join('');
   }

@@ -67,8 +67,12 @@ export function line(
 ): string {
   return `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${w}"/>`;
 }
-export function circle(cx: number, cy: number, r: number, fill: string): string {
-  return `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r}" fill="${fill}"/>`;
+export function circle(cx: number, cy: number, r: number, fill: string, opacity?: number): string {
+  const op =
+    opacity !== undefined && opacity < 1
+      ? ` fill-opacity="${Math.round(opacity * 1000) / 1000}"`
+      : '';
+  return `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r}" fill="${fill}"${op}/>`;
 }
 export function rect(x: number, y: number, w: number, h: number, fill: string): string {
   return `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" fill="${fill}"/>`;
