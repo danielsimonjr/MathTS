@@ -30238,11 +30238,17 @@
         "interfaces": ["WorkbookEventLite"]
       },
       "workbook/src/svg.ts": {
-        "description": "Render numeric data series to a self-contained inline SVG chart — a",
+        "description": "Adapter: workbook ChartSpec → @danielsimonjr/mathts-plot per-type functions.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-plot",
+            "directory": "plot",
+            "imports": ["line", "scatter", "bar"]
+          }
+        ],
         "exports": ["renderChart"],
         "interfaces": ["ChartSpec"],
         "functions": ["renderChart"]
@@ -34375,7 +34381,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1013,
     "totalModules": 75,
-    "totalLinesOfCode": 168673,
+    "totalLinesOfCode": 168582,
     "totalExports": 4866,
     "totalClasses": 55,
     "totalInterfaces": 403,

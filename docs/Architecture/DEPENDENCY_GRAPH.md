@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`                                                              | 18             | 1               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 18             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 17             | 0               |
@@ -256,6 +256,7 @@ graph LR
     P18 --> P1
     P19 --> P6
     P19 --> P7
+    P19 --> P22
     P21 --> P6
     P21 --> P2
     P21 --> P3
@@ -13779,7 +13780,12 @@ graph LR
 
 ---
 
-### `workbook/src/svg.ts` - Render numeric data series to a self-contained inline SVG chart — a
+### `workbook/src/svg.ts` - Adapter: workbook ChartSpec → @danielsimonjr/mathts-plot per-type functions.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-plot` | `line, scatter, bar` |
 
 **Exports:**
 
@@ -15205,7 +15211,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1013   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 168673 |
+| Total Lines of Code     | 168582 |
 | Total Exports           | 4866   |
 | Total Re-exports        | 1746   |
 | Total Classes           | 55     |

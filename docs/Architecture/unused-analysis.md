@@ -479,4 +479,4 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `workbook/src/svg.ts`
 
-- `ChartSpec` (interface) — 1 in-file ref
+- `ChartSpec` (interface) — 2 in-file refs
