@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { line, scatter, bar, area, step } from '../src/marks2d.js';
+import { line, scatter, bar, area, step, errorbar, quiver } from '../src/marks2d.js';
 
 describe('line', () => {
   it('renders a polyline through N points and returns an svg', () => {
@@ -51,5 +51,26 @@ describe('area + step', () => {
     const svg = step([0, 1, 2], [1, 2, 3]);
     const m = svg.match(/points="([^"]+)"/);
     expect(m![1].trim().split(' ').length).toBe(5); // 2*3-1
+  });
+});
+
+describe('errorbar + quiver', () => {
+  it('errorbar draws a vertical whisker per point + the point', () => {
+    const svg = errorbar([0, 1, 2], [1, 2, 3], [0.2, 0.2, 0.2]);
+    expect((svg.match(/<line/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect((svg.match(/<circle/g) ?? []).length).toBe(3);
+  });
+  it('quiver draws one arrow line per vector', () => {
+    const svg = quiver([0, 1], [0, 0], [1, 1], [1, -1]);
+    expect((svg.match(/<line/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  });
+  it('errorbar drops a NaN-gap point without misaligning the rest', () => {
+    const svg = errorbar([0, 1, 2], [1, NaN, 3], [0.2, 0.9, 0.2]);
+    expect((svg.match(/<circle/g) ?? []).length).toBe(2); // middle point dropped
+  });
+  it('quiver drops a vector with a non-finite component', () => {
+    const svg = quiver([0, 1, 2], [0, 0, 0], [1, NaN, 1], [1, 1, -1]);
+    // filter to the mark's own lines (stroke-width 1.5) — grid/axis lines use width 1
+    expect((svg.match(/<line[^>]*stroke-width="1.5"/g) ?? []).length).toBe(6); // 2 surviving vectors × 3 lines
   });
 });
