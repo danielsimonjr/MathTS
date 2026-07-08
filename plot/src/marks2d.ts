@@ -1,5 +1,5 @@
 import { coerce1dPositional } from './coerce.js';
-import { circle, polyline, rect } from './svg.js';
+import { circle, polygon, polyline, rect } from './svg.js';
 import { draw2D, type Frame } from './frame.js';
 import type { Layer2D, PlotOptions } from './types.js';
 
@@ -47,6 +47,26 @@ function renderBar(layer: Layer2D, f: Frame, i: number): string {
     .join('');
 }
 
+function renderArea(layer: Layer2D, f: Frame, i: number): string {
+  const color = layer.color ?? f.color(i);
+  const pts = xy(layer).map(([x, y]) => [f.px(x), f.py(y)] as [number, number]);
+  if (pts.length === 0) return '';
+  const base = f.py(Math.max(0, f.ydom[0]));
+  const poly: Array<[number, number]> = [[pts[0][0], base], ...pts, [pts[pts.length - 1][0], base]];
+  return polygon(poly, color + '55', 'none') + polyline(pts, color, 2);
+}
+
+function renderStep(layer: Layer2D, f: Frame, i: number): string {
+  const color = layer.color ?? f.color(i);
+  const pts = xy(layer).map(([x, y]) => [f.px(x), f.py(y)] as [number, number]);
+  const stepped: Array<[number, number]> = [];
+  for (let k = 0; k < pts.length; k++) {
+    stepped.push(pts[k]);
+    if (k < pts.length - 1) stepped.push([pts[k + 1][0], pts[k][1]]);
+  }
+  return polyline(stepped, color, 2);
+}
+
 /** Dispatch a layer to its renderer (extended in later tasks). */
 export function renderLayer(layer: Layer2D, f: Frame, i: number): string {
   switch (layer.type) {
@@ -56,6 +76,10 @@ export function renderLayer(layer: Layer2D, f: Frame, i: number): string {
       return renderScatter(layer, f, i);
     case 'bar':
       return renderBar(layer, f, i);
+    case 'area':
+      return renderArea(layer, f, i);
+    case 'step':
+      return renderStep(layer, f, i);
     default:
       return renderLine(layer, f, i);
   }
@@ -74,4 +98,14 @@ export function scatter(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): s
 /** Public: bar chart of one or many series. */
 export function bar(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
   return draw2D([{ type: 'bar', x, y }], opts);
+}
+
+/** Public: filled area under one or many series. */
+export function area(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
+  return draw2D([{ type: 'area', x, y }], opts);
+}
+
+/** Public: step chart (horizontal-then-vertical) of one or many series. */
+export function step(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
+  return draw2D([{ type: 'step', x, y }], opts);
 }

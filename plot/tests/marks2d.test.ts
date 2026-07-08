@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { line, scatter, bar } from '../src/marks2d.js';
+import { line, scatter, bar, area, step } from '../src/marks2d.js';
 
 describe('line', () => {
   it('renders a polyline through N points and returns an svg', () => {
@@ -40,5 +40,16 @@ describe('scatter + bar', () => {
   it('bar emits one rect per bar', () => {
     const svg = bar([0, 1, 2], [3, 1, 2]);
     expect((svg.match(/<rect/g) ?? []).length).toBeGreaterThanOrEqual(3); // + bg rect
+  });
+});
+
+describe('area + step', () => {
+  it('area emits a filled polygon', () => {
+    expect(area([0, 1, 2], [1, 2, 1])).toContain('<polygon');
+  });
+  it('step emits a polyline with 2N-1 vertices', () => {
+    const svg = step([0, 1, 2], [1, 2, 3]);
+    const m = svg.match(/points="([^"]+)"/);
+    expect(m![1].trim().split(' ').length).toBe(5); // 2*3-1
   });
 });
