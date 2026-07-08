@@ -1,5 +1,5 @@
 import { coerce1dPositional } from './coerce.js';
-import { circle, polyline } from './svg.js';
+import { circle, polyline, rect } from './svg.js';
 import { draw2D, type Frame } from './frame.js';
 import type { Layer2D, PlotOptions } from './types.js';
 
@@ -27,11 +27,35 @@ function renderLine(layer: Layer2D, f: Frame, i: number): string {
   return polyline(pts, color, 2) + pts.map(([x, y]) => circle(x, y, 2.5, color)).join('');
 }
 
+function renderScatter(layer: Layer2D, f: Frame, i: number): string {
+  const color = layer.color ?? f.color(i);
+  return xy(layer)
+    .map(([x, y]) => circle(f.px(x), f.py(y), 3, color))
+    .join('');
+}
+
+function renderBar(layer: Layer2D, f: Frame, i: number): string {
+  const color = layer.color ?? f.color(i);
+  const pts = xy(layer);
+  const base = f.py(Math.max(0, f.ydom[0]));
+  const bw = pts.length > 1 ? Math.abs(f.px(pts[1][0]) - f.px(pts[0][0])) * 0.7 : 20;
+  return pts
+    .map(([x, y]) => {
+      const yp = f.py(y);
+      return rect(f.px(x) - bw / 2, Math.min(yp, base), bw, Math.abs(base - yp), color);
+    })
+    .join('');
+}
+
 /** Dispatch a layer to its renderer (extended in later tasks). */
 export function renderLayer(layer: Layer2D, f: Frame, i: number): string {
   switch (layer.type) {
     case 'line':
       return renderLine(layer, f, i);
+    case 'scatter':
+      return renderScatter(layer, f, i);
+    case 'bar':
+      return renderBar(layer, f, i);
     default:
       return renderLine(layer, f, i);
   }
@@ -40,4 +64,14 @@ export function renderLayer(layer: Layer2D, f: Frame, i: number): string {
 /** Public: line chart of one or many series. */
 export function line(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
   return draw2D([{ type: 'line', x, y }], opts);
+}
+
+/** Public: scatter plot of one or many series. */
+export function scatter(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
+  return draw2D([{ type: 'scatter', x, y }], opts);
+}
+
+/** Public: bar chart of one or many series. */
+export function bar(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
+  return draw2D([{ type: 'bar', x, y }], opts);
 }
