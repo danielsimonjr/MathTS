@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 12
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 13
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 12
+  - **Test-only (exercised by a test, ships nothing)**: 13
 - **Potentially unused exports**: 231
   - **Unreferenced anywhere (deletion candidates)**: 0
   - **Referenced in-module (type contracts / helpers backing live exports)**: 231
@@ -37,10 +37,11 @@ directly. Not dead; not shipped. No action needed.
 - `parallel/src/ParallelMatrix.ts`
 - `parallel/src/WorkerPool.ts`
 
-### `plot` (8)
+### `plot` (9)
 
 - `plot/src/coerce.ts`
 - `plot/src/frame.ts`
+- `plot/src/heatmap.ts`
 - `plot/src/histogram.ts`
 - `plot/src/marks2d.ts`
 - `plot/src/palette.ts`
