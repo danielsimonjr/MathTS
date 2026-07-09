@@ -251,6 +251,13 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 
 - `create-dependency-graph/` - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`)
 - `roadmap-check/` - advisory feature-lifecycle consistency gate (`npm run docs:roadmap-check`): verifies ROADMAP "Recently Shipped" `pkg@version` claims against the live npm registry + flags unchecked TODO items whose referenced file already exists. See `docs/FEATURE_WORKFLOW.md`.
+- `graph-query/` - query surface + derived reports over DGT's `dependency-graph.json` (no re-parse). Emits `dependency-reverse.json` (reverse edges) + `node-safety.json` (node:-taint + browser-safety leaks) as part of `npm run docs:deps`. **Consult it before grepping for structure** (`npm run docs:graph -- <query>`):
+  - `dependents <file>` — who imports this file (intra-package)
+  - `symbol-users <symbol>` — who imports this symbol (any package, cross-package)
+  - `is-public <pkg> <symbol>` — is it in the package's public export surface?
+  - `node-safety [pkg]` — node:-using files reachable from a browser-safe `.` entry
+  - `cycles` — circular dependencies
+  - Gate: `npm run check:browser-safety` (exit 1 if plot's `.` entry reaches node: code).
 - `compress-for-context/` - compresses code for LLM context windows
 - `chunking-for-files/` - splits large files into chunks
 - `mathjs-port/` - one-off JS→TS porting scaffolding/drafts for pulling new upstream mathjs work now that the `.ts→.ts` sync model is dead (see "Syncing from mathjs"). Not a workspace member; not built.

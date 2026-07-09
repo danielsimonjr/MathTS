@@ -53,8 +53,16 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
   Does the intended edge create a cycle? Is there dormant or existing code that
   already does this? This is what surfaced, e.g., that `workbook → plot` already
   exists (so `latexToPdf` belongs in plot, reused by workbook, zero new edges).
-- **Merge gate** (per task in dev-workflow): the change keeps **0 cycles and 0 new
-  dormant** files.
+- **Merge gate** (per task in dev-workflow): the change keeps **0 cycles**, **0 new
+  dormant** files, and **0 browser-safety leaks** (`npm run check:browser-safety` —
+  a browser-safe package's `.` entry must not reach `node:` code).
+
+**Query surface — consult it before grepping for structure.** `npm run docs:graph`
+answers the placement-probe questions directly over DGT's data (no re-parse):
+`dependents <file>` (who imports this), `symbol-users <symbol>` (cross-package
+usage), `is-public <pkg> <symbol>` (public vs internal), `node-safety [pkg]`,
+`cycles`. `docs:deps` also emits `dependency-reverse.json` (reverse edges) and
+`node-safety.json` (node:-taint + leaks).
 
 **Discipline:** regenerate the committed graph **canonically** — never with
 `--all` (that writes the dormant-included variant and pollutes the committed

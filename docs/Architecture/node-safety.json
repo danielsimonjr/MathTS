@@ -1,0 +1,13 @@
+{
+  "generated": "2026-07-09",
+  "browserSafePackages": ["plot"],
+  "nodeTaintedFiles": [
+    "plot/src/render-file.ts",
+    "workbook/src/cli.ts",
+    "workbook/src/fs-atomic.ts",
+    "workbook/src/session.ts"
+  ],
+  "leaks": {
+    "plot": []
+  }
+}
