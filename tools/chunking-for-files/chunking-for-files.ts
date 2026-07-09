@@ -222,7 +222,7 @@ function parseJsonSections(content: string): Section[] {
         });
       }
     }
-  } catch (e) {
+  } catch {
     // If JSON parsing fails, treat as single chunk
     const lines = normalizedContent.split('\n');
     sections.push({
@@ -239,7 +239,7 @@ function parseJsonSections(content: string): Section[] {
 
 // Merge JSON chunks back together
 function mergeJsonChunks(chunks: string[]): string {
-  const merged: Record<string, any> = {};
+  const merged: Record<string, unknown> = {};
 
   for (const chunk of chunks) {
     try {
@@ -247,7 +247,7 @@ function mergeJsonChunks(chunks: string[]): string {
       if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
         Object.assign(merged, parsed);
       }
-    } catch (e) {
+    } catch {
       // Skip invalid JSON chunks
       console.error('Warning: Skipping invalid JSON chunk');
     }
@@ -392,7 +392,7 @@ function parseTypeScriptSections(content: string): Section[] {
           }
         }
         // These characters typically precede a regex, not a division operator
-        if (/[(\[=!&|:;{},]/.test(lastNonWs) || lastNonWs === '' || i === 0) {
+        if (/[([=!&|:;{},]/.test(lastNonWs) || lastNonWs === '' || i === 0) {
           // Likely a regex, but make sure next char isn't = (for /=)
           if (nextChar !== '=' && nextChar !== '*' && nextChar !== '/') {
             stringState.inRegex = true;
@@ -1241,14 +1241,23 @@ WORKFLOW:
 // CLI
 // ============================================================================
 
+interface ParsedOptions {
+  output?: string;
+  level?: number;
+  maxLines?: number;
+  type?: string;
+  dryRun?: boolean;
+  help?: boolean;
+}
+
 function parseArgs(args: string[]): {
   command: string;
   target: string;
-  options: Record<string, any>;
+  options: ParsedOptions;
 } {
   const command = args[0] || 'help';
   const target = args[1] || '';
-  const options: Record<string, any> = {};
+  const options: ParsedOptions = {};
 
   for (let i = 2; i < args.length; i++) {
     const arg = args[i];

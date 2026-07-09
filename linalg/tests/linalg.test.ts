@@ -10,14 +10,31 @@ import * as linalg from '../src/index.js';
 describe('@danielsimonjr/mathts-linalg re-export surface', () => {
   it('exposes the decomposition operations', () => {
     const ops = [
-      'eig', 'eigvals', 'powerIteration',
-      'svd', 'singularValues', 'pinv', 'lowRankApprox', 'cond', 'norm2', 'normFro',
-      'eigWasm', 'eigvalsWasm', 'spectralRadiusWasm', 'svdWasm',
-      'matrixPinv', 'qr', 'lu', 'cholesky',
-      'matrixExpm', 'matrixLogm', 'matrixSqrtm', 'matrixSchur',
+      'eig',
+      'eigvals',
+      'powerIteration',
+      'svd',
+      'singularValues',
+      'pinv',
+      'lowRankApprox',
+      'cond',
+      'norm2',
+      'normFro',
+      'eigWasm',
+      'eigvalsWasm',
+      'spectralRadiusWasm',
+      'svdWasm',
+      'matrixPinv',
+      'qr',
+      'lu',
+      'cholesky',
+      'matrixExpm',
+      'matrixLogm',
+      'matrixSqrtm',
+      'matrixSchur',
     ];
     for (const name of ops) {
-      expect(typeof (linalg as Record<string, any>)[name]).toBe('function');
+      expect(typeof (linalg as Record<string, unknown>)[name]).toBe('function');
     }
   });
 });

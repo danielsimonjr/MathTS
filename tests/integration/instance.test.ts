@@ -3,7 +3,7 @@
  * Sprint 25: Main Package Assembly
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   mathTyped,
   createMathTSTyped,
@@ -14,7 +14,6 @@ import {
   isFraction,
   isBigNumber,
   isNumber,
-  isMatrix,
   FunctionRegistry,
   createFactory,
   registry,

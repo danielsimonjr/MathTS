@@ -11,7 +11,6 @@
  */
 
 import {
-  GPUBackend,
   getGlobalGPUBackend,
   destroyGlobalGPUBackend,
 } from '../../../matrix/src/backends/GPUBackend.js';

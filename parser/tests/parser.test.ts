@@ -9,24 +9,30 @@ import * as parser from '../src/index.js';
  * from what `expression` provides. The parser's behaviour itself is covered by
  * the expression package's own `parse`/`Parser` tests.
  */
+interface NodeFactory {
+  isFactory: boolean;
+  fn: string;
+  dependencies: unknown[];
+}
+
 describe('@danielsimonjr/mathts-parser re-export surface', () => {
   it('exposes the parse function factory', () => {
     expect(typeof parser.createParse).toBe('function');
-    expect((parser.createParse as any).isFactory).toBe(true);
-    expect((parser.createParse as any).fn).toBe('parse');
-    expect(Array.isArray((parser.createParse as any).dependencies)).toBe(true);
+    expect((parser.createParse as unknown as NodeFactory).isFactory).toBe(true);
+    expect((parser.createParse as unknown as NodeFactory).fn).toBe('parse');
+    expect(Array.isArray((parser.createParse as unknown as NodeFactory).dependencies)).toBe(true);
   });
 
   it('exposes the Parser class factory', () => {
     expect(typeof parser.createParserClass).toBe('function');
-    expect((parser.createParserClass as any).isFactory).toBe(true);
-    expect((parser.createParserClass as any).fn).toBe('Parser');
+    expect((parser.createParserClass as unknown as NodeFactory).isFactory).toBe(true);
+    expect((parser.createParserClass as unknown as NodeFactory).fn).toBe('Parser');
   });
 
   it('exposes the parser() instance factory', () => {
     expect(typeof parser.createParser).toBe('function');
-    expect((parser.createParser as any).isFactory).toBe(true);
-    expect((parser.createParser as any).fn).toBe('parser');
+    expect((parser.createParser as unknown as NodeFactory).isFactory).toBe(true);
+    expect((parser.createParser as unknown as NodeFactory).fn).toBe('parser');
   });
 
   it('exposes the AST node constructors the parser produces', () => {
@@ -50,7 +56,7 @@ describe('@danielsimonjr/mathts-parser re-export surface', () => {
     ];
     for (const f of nodeFactories) {
       expect(typeof f).toBe('function');
-      expect((f as any).isFactory).toBe(true);
+      expect((f as unknown as NodeFactory).isFactory).toBe(true);
     }
   });
 

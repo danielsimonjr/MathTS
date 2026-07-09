@@ -72,62 +72,6 @@ type FileFormat =
   | 'html';
 type CompressionLevel = 'light' | 'medium' | 'aggressive';
 
-// ============================================================================
-// Common Patterns for Aggressive Compression
-// ============================================================================
-
-/**
- * Common programming patterns that can be safely abbreviated.
- */
-const COMMON_PATTERNS: Record<string, string> = {
-  // JavaScript/TypeScript keywords and patterns
-  'function ': 'ƒ ',
-  'return ': 'ʀ ',
-  'const ': 'ᴄ ',
-  'export ': 'ᴇ ',
-  'import ': 'ɪ ',
-  'interface ': 'ɪɴᴛ ',
-  'class ': 'ᴄʟs ',
-  'async ': 'ᴀ ',
-  'await ': 'ᴀᴡ ',
-  undefined: 'ᴜɴᴅ',
-  null: 'ɴᴜʟ',
-  true: 'ᴛ',
-  false: 'ꜰ',
-
-  // Common markdown patterns
-  '```typescript': '```ts',
-  '```javascript': '```js',
-  '## ': '⸫ ',
-  '### ': '⸬ ',
-  '#### ': '⸭ ',
-
-  // Common JSON patterns
-  '"description"': '"desc"',
-  '"dependencies"': '"deps"',
-  '"devDependencies"': '"devDeps"',
-  '"repository"': '"repo"',
-  '"homepage"': '"home"',
-  '"keywords"': '"keys"',
-  '"license"': '"lic"',
-  '"version"': '"ver"',
-  '"required"': '"req"',
-  '"optional"': '"opt"',
-  '"default"': '"def"',
-  '"example"': '"ex"',
-  '"properties"': '"props"',
-  '"additionalProperties"': '"addProps"',
-
-  // Common path patterns
-  'node_modules/': 'nm/',
-  'src/': 's/',
-  'dist/': 'd/',
-  'test/': 't/',
-  'tests/': 't/',
-  '.typescript': '.ts',
-  '.javascript': '.js',
-};
-
 interface Compressor {
   compress(content: string, level: CompressionLevel): CompressionResult;
 }
@@ -203,7 +147,7 @@ function findRepeatedSubstrings(
 
   // Find substrings at natural boundaries (words, punctuation, etc.)
   // Split text into tokens at natural break points
-  const tokens = text.split(/(\s+|[{}()\[\]<>:;,."'`|=])/);
+  const tokens = text.split(/(\s+|[{}()[\]<>:;,."'`|=])/);
 
   // Build n-grams of consecutive tokens
   for (let n = 1; n <= 6; n++) {
@@ -216,7 +160,7 @@ function findRepeatedSubstrings(
       if ((ngram.match(/\s/g) || []).length > ngram.length * 0.5) continue;
 
       // Skip substrings with unbalanced brackets or quotes
-      const opens = (ngram.match(/[{(\[<]/g) || []).length;
+      const opens = (ngram.match(/[{([<]/g) || []).length;
       const closes = (ngram.match(/[})\]>]/g) || []).length;
       if (opens !== closes) continue;
 
@@ -353,42 +297,6 @@ function calculateStats(original: string, compressed: string): CompressionStats 
 }
 
 /**
- * Apply common pattern replacements for aggressive compression.
- */
-function applyCommonPatterns(
-  text: string,
-  level: CompressionLevel
-): { text: string; legend: Record<string, string> } {
-  if (level !== 'aggressive') {
-    return { text, legend: {} };
-  }
-
-  let result = text;
-  const legend: Record<string, string> = {};
-
-  // Apply patterns that provide savings
-  for (const [pattern, replacement] of Object.entries(COMMON_PATTERNS)) {
-    const count = (result.match(new RegExp(escapeRegex(pattern), 'g')) || []).length;
-    const savings = (pattern.length - replacement.length) * count;
-
-    if (savings > pattern.length + replacement.length + 5) {
-      // Only if net positive
-      legend[replacement] = pattern;
-      result = result.split(pattern).join(replacement);
-    }
-  }
-
-  return { text: result, legend };
-}
-
-/**
- * Escape special regex characters in a string.
- */
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
  * Decompress a CTON-compressed file back to original.
  */
 function decompress(content: string, format: FileFormat): string {
@@ -476,10 +384,6 @@ function decompress(content: string, format: FileFormat): string {
   for (const [abbrev, original] of sortedLegend) {
     result = result.split(abbrev).join(original);
   }
-
-  // Note: COMMON_PATTERNS reversal is skipped as those patterns
-  // are not currently applied during compression. The patterns exist
-  // for potential future use with code compression.
 
   return result;
 }
@@ -675,7 +579,7 @@ class YAMLCompressor implements Compressor {
     const minLength = level === 'light' ? 6 : level === 'medium' ? 4 : 3;
     const keyMap = new Map<string, string>();
 
-    for (const [key, freq] of keyFrequency.entries()) {
+    for (const [key] of keyFrequency.entries()) {
       if (key.length >= minLength) {
         const abbrev = generateAbbreviation(key, existingAbbrevs);
         keyMap.set(key, abbrev);
@@ -892,7 +796,6 @@ class TextCompressor implements Compressor {
   compress(content: string, level: CompressionLevel): CompressionResult {
     let compressed = content;
     const legend: Record<string, string> = {};
-    const existingAbbrevs = new Set<string>();
 
     // Normalize line endings
     compressed = compressed.replace(/\r\n/g, '\n');

@@ -15,7 +15,10 @@ describe('@danielsimonjr/mathts-evaluator re-export surface', () => {
   });
 
   it('createEvaluate builds an evaluate function', () => {
-    const evaluate = evaluator.createEvaluate(((expr: string) => expr) as any, {});
+    const evaluate = evaluator.createEvaluate(
+      ((expr: string) => expr) as unknown as Parameters<typeof evaluator.createEvaluate>[0],
+      {}
+    );
     expect(typeof evaluate).toBe('function');
   });
 });
