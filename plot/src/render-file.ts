@@ -55,6 +55,10 @@ export function runTool(
     );
     child.on('close', (code) => resolve({ code, stdout: Buffer.concat(out), stderr: err }));
     if (opts.input !== undefined) {
+      // If the child exits mid-read, writing stdin can emit EPIPE; swallow it so the
+      // real failure surfaces via the 'close'/'error' handlers as PlotRenderError,
+      // not an uncaught stream error.
+      child.stdin.on('error', () => {});
       child.stdin.end(opts.input);
     }
   });
