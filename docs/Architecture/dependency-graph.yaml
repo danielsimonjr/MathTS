@@ -23658,6 +23658,10 @@ modules:
         - file: ../utils/is.js
           imports:
             - isNode
+            - isConstantNode
+            - isSymbolNode
+            - isOperatorNode
+            - isFunctionNode
         - file: ../utils/mathml.js
           imports:
             - escapeMathML
@@ -32151,7 +32155,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1017
   totalModules: 75
-  totalLinesOfCode: 169402
+  totalLinesOfCode: 169451
   totalExports: 4875
   totalClasses: 55
   totalInterfaces: 405

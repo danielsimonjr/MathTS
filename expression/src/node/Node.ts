@@ -1,4 +1,10 @@
-import { isNode } from '../utils/is.js';
+import {
+  isNode,
+  isConstantNode,
+  isSymbolNode,
+  isOperatorNode,
+  isFunctionNode,
+} from '../utils/is.js';
 import { escapeMathML } from '../utils/mathml.js';
 
 import { keywords } from '../keywords.js';
@@ -48,6 +54,31 @@ export const createNode = /* #__PURE__ */ factory(
           );
         }
       }
+    }
+
+    /**
+     * Escape a label for safe embedding inside a DOT `label="..."` attribute.
+     * @param {string} s
+     * @return {string}
+     */
+    function dotEscape(s: string): string {
+      return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    }
+
+    /**
+     * Build the (unescaped) DOT label for a single AST node: its type, plus
+     * the defining value/name for leaf-ish node kinds.
+     * @param {Node} node
+     * @return {string}
+     */
+    function dotNodeLabel(node: Node): string {
+      const t = node.type;
+      if (isConstantNode(node))
+        return `${t}: ${String((node as unknown as { value: unknown }).value)}`;
+      if (isSymbolNode(node)) return `${t}: ${(node as unknown as { name: string }).name}`;
+      if (isOperatorNode(node)) return `${t}: ${node.op}`;
+      if (isFunctionNode(node)) return `${t}: ${(node as unknown as { name: string }).name}`;
+      return t;
     }
 
     class Node {
@@ -378,6 +409,31 @@ export const createNode = /* #__PURE__ */ factory(
       toMarkdown(options?: { inline?: boolean } & StringOptions): string {
         const tex = this.toTex(options);
         return options?.inline ? '$' + tex + '$' : '$$\n' + tex + '\n$$';
+      }
+
+      /**
+       * Render the AST subtree rooted at this node as a Graphviz digraph: one
+       * DOT node per AST node (label = node type + a value for leaves), with
+       * parent→child edges. Never throws.
+       * @param {Object} [options]
+       * @return {string}
+       */
+      toDOT(options?: { name?: string }): string {
+        const ids = new Map<Node, string>();
+        const nodes: string[] = [];
+        const edges: string[] = [];
+        let counter = 0;
+        this.traverse((node: Node, _path: string | null, parent: Node | null) => {
+          const id = 'n' + counter++;
+          ids.set(node, id);
+          nodes.push(`  ${id} [label="${dotEscape(dotNodeLabel(node))}"];`);
+          if (parent) {
+            const pid = ids.get(parent);
+            if (pid) edges.push(`  ${pid} -> ${id};`);
+          }
+        });
+        const name = options?.name ?? 'AST';
+        return `digraph ${name} {\n${nodes.concat(edges).join('\n')}\n}`;
       }
 
       /**

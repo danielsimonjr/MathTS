@@ -12299,7 +12299,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/is.js` | `isNode` | Import |
+| `../utils/is.js` | `isNode, isConstantNode, isSymbolNode, isOperatorNode, isFunctionNode` | Import |
 | `../utils/mathml.js` | `escapeMathML` | Import |
 | `../keywords.js` | `keywords` | Import |
 | `../utils/object.js` | `deepStrictEqual` | Import |
@@ -15281,7 +15281,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1017   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169402 |
+| Total Lines of Code     | 169451 |
 | Total Exports           | 4875   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 55     |

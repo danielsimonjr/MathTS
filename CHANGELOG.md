@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — expression: `Node.toMarkdown()` and `Node.toDOT()`
+
+Two new AST node serializers on the base `Node` class. `toMarkdown(options?)`
+wraps `toTex()` in Markdown math delimiters (`$$…$$` display by default,
+`$…$` when `options.inline` is true) — a thin wrapper that adds no failure
+mode beyond `toTex`'s own. `toDOT(options?)` renders the subtree rooted at
+the node as a Graphviz digraph: one DOT node per AST node (label = node
+type, plus the defining value/name for `ConstantNode`/`SymbolNode`/
+`OperatorNode`/`FunctionNode`), with parent→child edges; `options.name` sets
+the digraph name (default `AST`). Never throws.
+
 ### Fixed — workbook LaTeX export: unparseable equations no longer break math mode
 
 `workbook/src/tex.ts`'s equation fallback (used when no parser is supplied, or
