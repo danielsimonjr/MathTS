@@ -5,7 +5,7 @@
  * so `node:child_process`/`node:fs` never enter the browser-safe main bundle.
  */
 import { spawn } from 'node:child_process';
-import { writeFile, rm, mkdtemp, readFile } from 'node:fs/promises';
+import { writeFile, rm, rename, mkdtemp, readFile } from 'node:fs/promises';
 import { extname, join as joinPath } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -26,6 +26,9 @@ export interface RenderOptions {
   timeoutMs?: number;
   density?: number;
   background?: string;
+  /** Enable LaTeX \write18 shell-escape. UNSAFE for untrusted TeX — allows
+   *  arbitrary command execution during compile. Default false. */
+  shellEscape?: boolean;
 }
 
 interface RunResult {
@@ -89,37 +92,71 @@ export async function renderToFile(
   const candidates = opts.tool ? [opts.tool] : ['rsvg-convert', 'resvg'];
   for (const tool of candidates) {
     if (!(await hasTool(tool))) continue;
+    const tmpOut = outPath + '.tmp';
     if (tool === 'rsvg-convert') {
-      const args = ['-f', format, '-o', outPath];
+      const args = ['-f', format, '-o', tmpOut];
       if (format === 'png' && opts.density)
         args.push('--dpi-x', String(opts.density), '--dpi-y', String(opts.density));
       if (format === 'png' && opts.background) args.push('--background-color', opts.background);
       const r = await runTool('rsvg-convert', args, { timeoutMs: opts.timeoutMs, input: svg });
-      if (r.code !== 0) throw new PlotRenderError(`rsvg-convert failed: ${r.stderr}`);
+      if (r.code !== 0) {
+        await rm(tmpOut, { force: true });
+        throw new PlotRenderError(`rsvg-convert failed: ${r.stderr}`);
+      }
+      await rename(tmpOut, outPath);
       return;
     }
     // resvg reads an input SVG path; write svg to a temp file alongside outPath
     const tmpSvg = outPath + '.tmp.svg';
     await writeFile(tmpSvg, svg, 'utf-8');
     try {
-      const args = [tmpSvg, outPath];
+      const args = [tmpSvg, tmpOut];
       const r = await runTool('resvg', args, { timeoutMs: opts.timeoutMs });
-      if (r.code !== 0) throw new PlotRenderError(`resvg failed: ${r.stderr}`);
+      if (r.code !== 0) {
+        await rm(tmpOut, { force: true });
+        throw new PlotRenderError(`resvg failed: ${r.stderr}`);
+      }
     } finally {
       await rm(tmpSvg, { force: true });
     }
     if (format === 'pdf') {
+      await rm(tmpOut, { force: true });
       throw new PlotRenderError(
         'resvg does not emit PDF; install rsvg-convert for SVG→PDF',
         'rsvg-convert'
       );
     }
+    await rename(tmpOut, outPath);
     return;
   }
   throw new PlotRenderError(
     `No SVG converter found for .${format}. Install rsvg-convert (librsvg) or resvg and ensure it is on PATH.`,
     'rsvg-convert'
   );
+}
+
+/** Build the CLI args for a LaTeX engine. Shell-escape (\write18) is OFF unless
+ *  `shellEscape` is true — enabling it is UNSAFE for untrusted TeX (arbitrary
+ *  command execution during compile). */
+export function latexArgs(
+  engine: string,
+  workDir: string,
+  texPath: string,
+  shellEscape: boolean
+): string[] {
+  if (engine === 'tectonic') {
+    // tectonic: shell-escape is off by default; only add the enabling flag when asked.
+    return [...(shellEscape ? ['-Z', 'shell-escape'] : []), '--outdir', workDir, texPath];
+  }
+  // pdflatex/xelatex/lualatex: explicitly pass -no-shell-escape by default.
+  return [
+    shellEscape ? '-shell-escape' : '-no-shell-escape',
+    '-interaction=nonstopmode',
+    '-halt-on-error',
+    '-output-directory',
+    workDir,
+    texPath,
+  ];
 }
 
 /** Standalone LaTeX/TikZ source → PDF via pdflatex (preferred) or tectonic.
@@ -151,10 +188,7 @@ export async function latexToPdf(
   try {
     const texPath = joinPath(work, 'doc.tex');
     await writeFile(texPath, texSource, 'utf-8');
-    const args =
-      engine === 'tectonic'
-        ? ['--outdir', work, texPath]
-        : ['-interaction=nonstopmode', '-halt-on-error', '-output-directory', work, texPath];
+    const args = latexArgs(engine, work, texPath, opts.shellEscape === true);
     const r = await runTool(engine, args, { timeoutMs: opts.timeoutMs ?? 60000 });
     const pdfPath = joinPath(work, 'doc.pdf');
     let pdf: Buffer;

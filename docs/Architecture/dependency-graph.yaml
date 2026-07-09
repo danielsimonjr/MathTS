@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-09'
   totalFiles: 1018
   totalModules: 75
-  totalExports: 4881
+  totalExports: 4882
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30814,6 +30814,7 @@ modules:
           imports:
             - writeFile
             - rm
+            - rename
             - mkdtemp
             - readFile
         - module: path
@@ -30829,6 +30830,7 @@ modules:
         - runTool
         - hasTool
         - renderToFile
+        - latexArgs
         - latexToPdf
         - PlotRenderError
       classes:
@@ -30839,6 +30841,7 @@ modules:
         - runTool
         - hasTool
         - renderToFile
+        - latexArgs
         - latexToPdf
     plot/src/scale.ts:
       description: scale module
@@ -32196,11 +32199,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1018
   totalModules: 75
-  totalLinesOfCode: 169657
-  totalExports: 4881
+  totalLinesOfCode: 169691
+  totalExports: 4882
   totalClasses: 56
   totalInterfaces: 406
-  totalFunctions: 1586
+  totalFunctions: 1587
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531

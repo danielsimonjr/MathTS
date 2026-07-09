@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { renderToFile, latexToPdf, PlotRenderError } from '../src/render-file.js';
+import { renderToFile, latexToPdf, latexArgs, PlotRenderError } from '../src/render-file.js';
 
 let dir: string;
 beforeAll(() => {
@@ -48,5 +48,26 @@ describe('latexToPdf', () => {
   });
   it('requires a .pdf output path', async () => {
     await expect(latexToPdf(TEX, join(dir, 'x.png'))).rejects.toBeInstanceOf(PlotRenderError);
+  });
+});
+
+describe('latexArgs — shell-escape safe by default', () => {
+  it('pdflatex gets -no-shell-escape by default', () => {
+    const a = latexArgs('pdflatex', '/w', '/w/d.tex', false);
+    expect(a).toContain('-no-shell-escape');
+    expect(a).not.toContain('-shell-escape');
+  });
+  it('pdflatex gets -shell-escape only when opted in', () => {
+    const a = latexArgs('pdflatex', '/w', '/w/d.tex', true);
+    expect(a).toContain('-shell-escape');
+    expect(a).not.toContain('-no-shell-escape');
+  });
+  it('tectonic has no shell-escape flag by default', () => {
+    expect(latexArgs('tectonic', '/w', '/w/d.tex', false).join(' ')).not.toContain('shell-escape');
+  });
+  it('tectonic enables shell-escape only when opted in', () => {
+    expect(latexArgs('tectonic', '/w', '/w/d.tex', true)).toEqual(
+      expect.arrayContaining(['-Z', 'shell-escape'])
+    );
   });
 });

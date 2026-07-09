@@ -14390,7 +14390,7 @@ graph LR
 | Module | Import |
 |--------|--------|
 | `child_process` | `spawn` |
-| `fs/promises` | `writeFile, rm, mkdtemp, readFile` |
+| `fs/promises` | `writeFile, rm, rename, mkdtemp, readFile` |
 | `path` | `extname, join` |
 | `os` | `tmpdir` |
 
@@ -14398,7 +14398,7 @@ graph LR
 
 - Classes: `PlotRenderError`
 - Interfaces: `RenderOptions`
-- Functions: `runTool`, `hasTool`, `renderToFile`, `latexToPdf`
+- Functions: `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
 
 ---
 
@@ -15299,12 +15299,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1018   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169657 |
-| Total Exports           | 4881   |
+| Total Lines of Code     | 169691 |
+| Total Exports           | 4882   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 56     |
 | Total Interfaces        | 406    |
-| Total Functions         | 1586   |
+| Total Functions         | 1587   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 528    |
