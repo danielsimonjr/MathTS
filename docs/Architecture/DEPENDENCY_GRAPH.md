@@ -13542,7 +13542,7 @@ graph LR
 | `./introspect` | `capabilitiesInfo, listFunctions` | Import |
 | `./edit` | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata` | Import |
 | `./edit` | `CellPosition` | Import (type-only) |
-| `./types` | `CellResult, Workbook, ParseResult, CellType` | Import (type-only) |
+| `./types` | `CellResult, Workbook, ParseResult, CellType, RunResult` | Import (type-only) |
 | `./html` | `toHTML` | Import |
 | `./tex` | `toTeX` | Import |
 | `./svg` | `renderChart` | Import |
@@ -15299,7 +15299,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1018   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169691 |
+| Total Lines of Code     | 169741 |
 | Total Exports           | 4882   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 56     |

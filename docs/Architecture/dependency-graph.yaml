@@ -27564,6 +27564,7 @@ modules:
             - Workbook
             - ParseResult
             - CellType
+            - RunResult
           typeOnly: true
         - file: ./html
           imports:
@@ -32199,7 +32200,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1018
   totalModules: 75
-  totalLinesOfCode: 169691
+  totalLinesOfCode: 169741
   totalExports: 4882
   totalClasses: 56
   totalInterfaces: 406

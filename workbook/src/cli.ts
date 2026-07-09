@@ -24,7 +24,7 @@ import { describeData } from './doc';
 import { capabilitiesInfo, listFunctions } from './introspect';
 import { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit';
 import type { CellPosition } from './edit';
-import type { CellResult, Workbook, ParseResult, CellType } from './types';
+import type { CellResult, Workbook, ParseResult, CellType, RunResult } from './types';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html';
 import { toTeX } from './tex';
@@ -79,11 +79,13 @@ Usage:
   mtsw functions [--json]                    List functions/constants cells can call
   mtsw meta get <file> [--json]             Show workbook metadata
   mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
-  mtsw export <file> [--format html|tex] [--fragment] [-o out] [--no-run]
+  mtsw export <file> [--format html|tex|json] [--fragment] [-o out] [--no-run]
                                             Render to a self-contained HTML or LaTeX
                                             document (MathML/TikZ equations + charts,
-                                            no external deps). --fragment (tex only)
-                                            omits the preamble for \\input.
+                                            no external deps), or emit the executed
+                                            run report as JSON. --fragment (tex only)
+                                            omits the preamble for \\input; --no-run is
+                                            incompatible with --format json.
   mtsw serve [<file>]                        JSON-RPC over stdio (persistent session
                                             w/ streaming events + incremental run)
 
@@ -689,13 +691,15 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
 
   const format = flagValue(args, '--format') ?? 'html';
-  if (format !== 'html' && format !== 'tex') {
-    return fail([`Unknown format '${format}' (supported: html, tex)`]);
+  if (format !== 'html' && format !== 'tex' && format !== 'json') {
+    return fail([`Unknown format '${format}' (supported: html, tex, json)`]);
   }
 
   const file = firstPositional(args);
   if (!file)
-    return fail(['Usage: mtsw export <file> [--format html|tex] [--fragment] [-o out] [--no-run]']);
+    return fail([
+      'Usage: mtsw export <file> [--format html|tex|json] [--fragment] [-o out] [--no-run]',
+    ]);
 
   const read = readFile(file);
   if (read.error) return fail([read.error]);
@@ -704,14 +708,60 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
   const workbook = parsed.workbook!;
 
   let byId: Map<string, CellResult> | null = null;
+  let report: RunResult | null = null;
   if (!args.includes('--no-run')) {
-    const report = await createExecutor(workbook).runReport();
+    report = await createExecutor(workbook).runReport();
     // A whole-run failure (e.g. a dependency cycle) surfaces as a synthetic
     // '(workbook)' result that maps to no real cell — fail loudly rather than
     // emit a misleading "nothing ran" document with exit 0.
     const fatal = report.cells.find((r) => r.id === '(workbook)');
     if (fatal) return fail([fatal.error ?? 'workbook run failed']);
     byId = new Map(report.cells.map((r) => [r.id, r]));
+  }
+
+  if (format === 'json') {
+    // Unlike html/tex (which can render a static, never-run document), the
+    // json export IS the run report — there's nothing meaningful to emit
+    // with --no-run.
+    if (!report) {
+      return fail(['--format json requires running the notebook (remove --no-run)']);
+    }
+    const payload = {
+      ok: report.ok,
+      cells: report.cells.map((c) => ({
+        id: c.id,
+        type: c.type,
+        status: c.status,
+        output: c.output === undefined ? undefined : formatResult(c.output),
+        error: c.error,
+      })),
+    };
+    const jsonStr = JSON.stringify(payload, null, 2);
+    const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
+    if (outPath) {
+      try {
+        writeFileAtomic(outPath, jsonStr);
+      } catch (error) {
+        return fail([`Failed to write '${outPath}': ${errMessage(error)}`]);
+      }
+      if (json)
+        return {
+          stdout: jsonEnvelope(
+            'export',
+            true,
+            { path: outPath, bytes: Buffer.byteLength(jsonStr) },
+            []
+          ),
+          stderr: '',
+          exitCode: 0,
+        };
+      return {
+        stdout: '',
+        stderr: `Exported ${file} -> ${outPath} (${Buffer.byteLength(jsonStr)} bytes)`,
+        exitCode: 0,
+      };
+    }
+    return { stdout: jsonStr, stderr: '', exitCode: 0 };
   }
 
   const fragment = args.includes('--fragment');
