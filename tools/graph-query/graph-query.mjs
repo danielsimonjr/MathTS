@@ -17,14 +17,26 @@
  *   node graph-query.mjs cycles               # circular dependencies
  *   node graph-query.mjs --check-browser-safety   # exit 1 if a browser-safe pkg leaks node: code
  *
- * Packages whose `.` (browser-facing) entry must stay free of node: builtins:
+ * Every package's `.` (browser-facing) entry must stay free of node: builtins,
+ * EXCEPT the designated Node runtimes below.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
-const BROWSER_SAFE_PACKAGES = ['plot'];
+// Node runtimes by design — their `.` entry may use node: builtins (e.g. the
+// workbook CLI/serve runtime uses node:fs). Every OTHER package's `.` entry must
+// stay browser-safe; new packages are enforced by default.
+const NODE_RUNTIME_PACKAGES = new Set(['workbook']);
+
+/** Browser-safe packages = every `.` (main) entry package minus the Node runtimes. */
+export function browserSafePackages(graph) {
+  return graph.entryPoints
+    .filter((e) => e.type === 'main')
+    .map((e) => e.file.replace(/\/src\/index\.ts$/, ''))
+    .filter((pkg) => !NODE_RUNTIME_PACKAGES.has(pkg));
+}
 
 // ── pure helpers (unit-tested) ──────────────────────────────────────────────
 
@@ -156,14 +168,15 @@ function symbolUsers(symbol, fileEntries) {
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
   const [cmd, ...args] = process.argv.slice(2);
-  const { graph, surfaces, fileEntries, allFiles, forward } = loadData(root);
+  const { graph, surfaces, fileEntries, forward } = loadData(root);
 
   if (!cmd || cmd === '--emit') {
     const reverse = invert(forward);
     const { direct } = computeTaint(forward, fileEntries);
     const tainted = [...direct.entries()].filter(([, v]) => v).map(([f]) => f).sort();
+    const bsp = browserSafePackages(graph);
     const leaks = {};
-    for (const pkg of BROWSER_SAFE_PACKAGES) leaks[pkg] = findLeaks(pkg, forward, direct);
+    for (const pkg of bsp) leaks[pkg] = findLeaks(pkg, forward, direct);
     writeFileSync(
       join(root, 'docs/Architecture/dependency-reverse.json'),
       JSON.stringify({ generated: graph.metadata.lastUpdated, dependents: reverse }, null, 2)
@@ -171,7 +184,7 @@ function main() {
     writeFileSync(
       join(root, 'docs/Architecture/node-safety.json'),
       JSON.stringify(
-        { generated: graph.metadata.lastUpdated, browserSafePackages: BROWSER_SAFE_PACKAGES, nodeTaintedFiles: tainted, leaks },
+        { generated: graph.metadata.lastUpdated, browserSafePackages: bsp, nodeTaintedFiles: tainted, leaks },
         null,
         2
       )
@@ -201,7 +214,7 @@ function main() {
   }
   if (cmd === 'node-safety') {
     const { direct } = computeTaint(forward, fileEntries);
-    const pkgs = args[0] ? [args[0]] : BROWSER_SAFE_PACKAGES;
+    const pkgs = args[0] ? [args[0]] : browserSafePackages(graph);
     for (const pkg of pkgs) {
       const leaks = findLeaks(pkg, forward, direct);
       console.log(`${pkg}: ${leaks.length ? `⚠ ${leaks.length} node: file(s) reachable from .:\n  ${leaks.join('\n  ')}` : '✓ clean (. entry reaches no node: code)'}`);
@@ -216,15 +229,14 @@ function main() {
   if (cmd === '--check-browser-safety') {
     const { direct } = computeTaint(forward, fileEntries);
     let bad = 0;
-    for (const pkg of BROWSER_SAFE_PACKAGES) {
+    for (const pkg of browserSafePackages(graph)) {
       const leaks = findLeaks(pkg, forward, direct);
       if (leaks.length) {
         bad += leaks.length;
         console.log(`✖ ${pkg}: browser-safe . entry reaches node: code: ${leaks.join(', ')}`);
-      } else {
-        console.log(`✓ ${pkg}: . entry is node-free`);
       }
     }
+    if (!bad) console.log(`✓ all ${browserSafePackages(graph).length} browser-safe packages: . entries are node-free`);
     process.exit(bad ? 1 : 0);
   }
 

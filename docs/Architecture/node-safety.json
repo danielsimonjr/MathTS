@@ -1,6 +1,29 @@
 {
   "generated": "2026-07-09",
-  "browserSafePackages": ["plot"],
+  "browserSafePackages": [
+    "packages/typed-function",
+    "packages/workerpool",
+    "core",
+    "matrix",
+    "tensor",
+    "autograd",
+    "functions",
+    "expression",
+    "parser",
+    "units",
+    "numbers",
+    "ast",
+    "evaluator",
+    "linalg",
+    "arithmetic",
+    "trigonometry",
+    "statistics",
+    "signal",
+    "parallel",
+    "assembly",
+    "compat",
+    "plot"
+  ],
   "nodeTaintedFiles": [
     "plot/src/render-file.ts",
     "workbook/src/cli.ts",
@@ -8,6 +31,27 @@
     "workbook/src/session.ts"
   ],
   "leaks": {
+    "packages/typed-function": [],
+    "packages/workerpool": [],
+    "core": [],
+    "matrix": [],
+    "tensor": [],
+    "autograd": [],
+    "functions": [],
+    "expression": [],
+    "parser": [],
+    "units": [],
+    "numbers": [],
+    "ast": [],
+    "evaluator": [],
+    "linalg": [],
+    "arithmetic": [],
+    "trigonometry": [],
+    "statistics": [],
+    "signal": [],
+    "parallel": [],
+    "assembly": [],
+    "compat": [],
     "plot": []
   }
 }

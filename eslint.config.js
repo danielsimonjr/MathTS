@@ -10,8 +10,17 @@ export default tseslint.config(
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
+      // Not source: vestigial pre-monorepo mathjs scaffolding at the repo-root
+      // `src/` (NOT a workspace, not built), documentation snapshots under
+      // `docs/`, and the git-ignored `.remember/` scratch/memory area. None are
+      // part of any package's `src` and must not be linted.
+      'src/**',
+      'docs/**',
+      '.remember/**',
       '**/*.js',
-      '**/*.mjs',
+      // NOTE: `.mjs` is intentionally NOT ignored — maintained tool/test scripts
+      // under tools/, */scripts/, and *.test.mjs are linted (build output stays
+      // ignored via `**/build/**` above). `.js`/`.cjs` remain config/build glue.
       '**/*.cjs',
       // AssemblyScript source: compiled + type-checked by `asc` (npm run
       // build:wasm) and exercised by `npm run test:wasm`, NOT by

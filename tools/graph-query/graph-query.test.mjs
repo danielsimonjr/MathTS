@@ -7,6 +7,7 @@ import {
   computeTaint,
   reachableFrom,
   findLeaks,
+  browserSafePackages,
 } from './graph-query.mjs';
 
 // Fixture mirrors the real render-file.ts scenario:
@@ -61,4 +62,22 @@ test('findLeaks flags node: files reachable from . but not subpath-only ones', (
   const { direct } = computeTaint(forward, entries);
   const leaks = findLeaks('plot', forward, direct);
   assert.deepEqual(leaks, ['plot/src/b.ts']); // b leaks; node-only.ts does not (unreachable from .)
+});
+
+test('browserSafePackages = main entries minus Node runtimes (workbook)', () => {
+  const graph = {
+    entryPoints: [
+      { file: 'plot/src/index.ts', type: 'main' },
+      { file: 'core/src/index.ts', type: 'main' },
+      { file: 'workbook/src/index.ts', type: 'main' },
+      { file: 'packages/typed-function/src/index.ts', type: 'main' },
+      { file: 'plot/src/render-file.ts', type: 'subpath' }, // non-main → ignored
+    ],
+  };
+  const bsp = browserSafePackages(graph);
+  assert.ok(bsp.includes('plot'));
+  assert.ok(bsp.includes('core'));
+  assert.ok(bsp.includes('packages/typed-function'));
+  assert.ok(!bsp.includes('workbook')); // Node runtime excluded
+  assert.ok(!bsp.includes('plot/src/render-file')); // non-main entry not a package
 });

@@ -210,9 +210,9 @@ for (const [op, spec] of Object.entries(ELEMENTWISE)) {
 // ---------------------------------------------------------------------------
 // Bessel general integer-order — JS reference (verbatim from the special bridge).
 // ---------------------------------------------------------------------------
-const _SF_GAMMA = 0.5772156649015328606;
-const _SF_2_PI = 0.63661977236758134308;
-const _SF_1_PI = 0.31830988618379067154;
+const _SF_GAMMA = 0.5772156649015329; // Euler–Mascheroni (f64-exact)
+const _SF_2_PI = 0.6366197723675814; // 2/π (f64-exact)
+const _SF_1_PI = 0.3183098861837907; // 1/π (f64-exact)
 const _BESSEL_SERIES_MAX = 13.0;
 function _besselHankel(nu, x, wantY) {
   const mu = 4 * nu * nu;

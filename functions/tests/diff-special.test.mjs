@@ -35,7 +35,7 @@ for (const rec of golden.records) {
   try {
     actual = fn(...rec.args);
     if (actual && typeof actual.then === 'function') actual = NaN; // unexpected async for scalars
-  } catch (e) {
+  } catch {
     actual = NaN;
   }
   rows.push({ label: `${rec.name}(${rec.args.join(',')})`, score: score(actual, rec.expected), actual, expected: rec.expected });
