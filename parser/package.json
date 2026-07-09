@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-parser",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.6.0",
-    "@danielsimonjr/mathts-expression": "^0.5.3",
+    "@danielsimonjr/mathts-expression": "^0.6.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {

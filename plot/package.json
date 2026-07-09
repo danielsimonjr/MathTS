@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-plot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Headless SVG 2D/3D plotting for MathTS — dependency-light, expression-aware, built on core/functions/expression",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.6.0",
-    "@danielsimonjr/mathts-functions": "^0.16.0",
-    "@danielsimonjr/mathts-expression": "^0.5.2"
+    "@danielsimonjr/mathts-functions": "^0.16.1",
+    "@danielsimonjr/mathts-expression": "^0.6.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",

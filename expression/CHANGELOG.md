@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-expression
 
+## 0.6.0
+
+### Minor Changes
+
+- fd3e417: Add two AST node serializers: `Node.toMarkdown()` (display/inline math wrapper over `toTex`) and `Node.toDOT()` (Graphviz digraph of the expression tree).
+
 ## 0.5.3
 
 ### Patch Changes
