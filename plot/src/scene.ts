@@ -1,6 +1,15 @@
 /** Backend-agnostic drawing primitives. Marks build these; a backend serializes them. */
 export type Prim =
-  | { k: 'line'; x1: number; y1: number; x2: number; y2: number; stroke: string; w: number }
+  | {
+      k: 'line';
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      stroke: string;
+      w: number;
+      opacity?: number;
+    }
   | { k: 'circle'; cx: number; cy: number; r: number; fill: string; opacity?: number }
   | { k: 'rect'; x: number; y: number; w: number; h: number; fill: string }
   | { k: 'polyline'; pts: Array<[number, number]>; stroke: string; w: number }

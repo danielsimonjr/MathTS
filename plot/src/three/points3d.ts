@@ -91,7 +91,25 @@ function render(x: unknown, y: unknown, z: unknown, opts: P3Opts, mode: 'points'
   const color = theme.series[0];
   const prims: Prim[] = [];
   if (mode === 'line') {
-    prims.push({ k: 'polyline', pts: screen.map(toScreen), stroke: color, w: 2 });
+    const depths = screen.map((p) => p[2]);
+    const dlo = minOf(depths);
+    const dhi = maxOf(depths);
+    const dspan = dhi > dlo ? dhi - dlo : 1;
+    const segs: Array<{ a: [number, number, number]; b: [number, number, number]; depth: number }> =
+      [];
+    for (let i = 0; i + 1 < screen.length; i++) {
+      const a = screen[i];
+      const b = screen[i + 1];
+      segs.push({ a, b, depth: (a[2] + b[2]) / 2 });
+    }
+    segs.sort((s1, s2) => s2.depth - s1.depth); // far first — painter's order
+    for (const sg of segs) {
+      const near = 1 - (sg.depth - dlo) / dspan;
+      const opacity = 0.4 + 0.6 * near;
+      const [x1, y1] = toScreen(sg.a);
+      const [x2, y2] = toScreen(sg.b);
+      prims.push({ k: 'line', x1, y1, x2, y2, stroke: color, w: 2, opacity });
+    }
   } else {
     const depths = screen.map((p) => p[2]);
     const dlo = minOf(depths);

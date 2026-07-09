@@ -6,10 +6,26 @@ describe('scatter3d + curve3d', () => {
     const svg = scatter3d([0, 1, 2], [0, 1, 0], [1, 0, 1]);
     expect((svg.match(/<circle/g) ?? []).length).toBe(3);
   });
-  it('curve3d emits a projected polyline', () => {
-    const t = Array.from({ length: 20 }, (_, i) => i / 3);
-    const svg = curve3d(t.map(Math.cos), t.map(Math.sin), t);
-    expect(svg).toContain('<polyline');
+  it('curve3d emits depth-cued per-segment lines, not a single polyline', () => {
+    const svg = curve3d([0, 1, 2], [0, 1, 0], [0, 0.5, 1]);
+    expect(svg).not.toContain('<polyline');
+    const lines = [...svg.matchAll(/<line[^>]*\/>/g)].map((m) => m[0]);
+    expect(lines.length).toBeGreaterThanOrEqual(2);
+    const opacities = lines
+      .map((l) => l.match(/stroke-opacity="([\d.]+)"/))
+      .filter((m): m is RegExpMatchArray => m !== null)
+      .map((m) => Number(m[1]));
+    expect(opacities.length).toBeGreaterThanOrEqual(1);
+    const eps = 1e-9;
+    for (const op of opacities) {
+      expect(op).toBeGreaterThanOrEqual(0.4 - eps);
+      expect(op).toBeLessThanOrEqual(1.0 + eps);
+    }
+    expect(Math.min(...opacities)).toBeLessThan(Math.max(...opacities));
+  });
+  it('curve3d TikZ path emits draw opacity per segment', () => {
+    const tex = curve3d([0, 1, 2], [0, 1, 0], [0, 0.5, 1], { format: 'tikz' });
+    expect(tex).toContain('draw opacity=');
   });
   it('mismatched lengths still render (truncate), no throw', () => {
     expect(scatter3d([0, 1], [0], [1, 2, 3])).toMatch(/^<svg/);
@@ -31,8 +47,10 @@ describe('scatter3d + curve3d', () => {
     const xs = Array.from({ length: n }, (_, i) => Math.cos(i / 100));
     const ys = Array.from({ length: n }, (_, i) => Math.sin(i / 100));
     const zs = Array.from({ length: n }, (_, i) => i / n);
-    // curve3d renders ONE polyline (cheap) but shares projectAll's min/max path.
+    // curve3d now renders per-segment depth-cued lines (one <line> per point pair,
+    // vs a single compact polyline), so this genuinely does more work than before —
+    // extended timeout, not a regression. Shares projectAll's min/max path either way.
     expect(() => curve3d(xs, ys, zs)).not.toThrow();
     expect(curve3d(xs, ys, zs)).toMatch(/^<svg/);
-  });
+  }, 20000);
 });

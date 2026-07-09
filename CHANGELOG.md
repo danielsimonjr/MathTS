@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — @danielsimonjr/mathts-plot `curve3d` now depth-cues opacity
+
+`curve3d` drew a single flat `polyline` with no depth cue, unlike `scatter3d`
+(which fades points by depth). It now draws per-segment `line` prims — each
+segment's opacity set by the mean depth of its two endpoints, same formula and
+far-first painter's order as `scatter3d` — closing that v0.1 gap. Required
+giving the `line` scene prim an optional `opacity`, taught to both backends
+(`stroke-opacity` in SVG, `draw opacity` in TikZ). Existing callers that pass
+no opacity are unaffected (attribute omitted, byte-identical output).
+
 ### Added — Workbook LaTeX export (`mtsw export --format tex`)
 
 `mtsw export` now renders a notebook to a standalone (or `--fragment`) LaTeX

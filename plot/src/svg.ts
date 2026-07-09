@@ -65,9 +65,14 @@ export function line(
   x2: number,
   y2: number,
   stroke: string,
-  w = 1
+  w = 1,
+  opacity?: number
 ): string {
-  return `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${w}"/>`;
+  const op =
+    opacity !== undefined && opacity < 1
+      ? ` stroke-opacity="${Math.round(opacity * 1000) / 1000}"`
+      : '';
+  return `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${w}"${op}/>`;
 }
 export function circle(cx: number, cy: number, r: number, fill: string, opacity?: number): string {
   const op =
@@ -101,7 +106,7 @@ export function text(
 function primSVG(p: Prim): string {
   switch (p.k) {
     case 'line':
-      return line(p.x1, p.y1, p.x2, p.y2, p.stroke, p.w);
+      return line(p.x1, p.y1, p.x2, p.y2, p.stroke, p.w, p.opacity);
     case 'circle':
       return circle(p.cx, p.cy, p.r, p.fill, p.opacity);
     case 'rect':

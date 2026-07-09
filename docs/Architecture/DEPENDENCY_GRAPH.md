@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-08
+**Version**: 0.1.0 | **Last Updated**: 2026-07-09
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -15281,7 +15281,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1017   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169356 |
+| Total Lines of Code     | 169389 |
 | Total Exports           | 4875   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 55     |
@@ -15295,5 +15295,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-08
+_Last Updated_: 2026-07-09
 _Version_: 0.1.0

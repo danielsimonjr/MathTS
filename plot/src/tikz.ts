@@ -45,7 +45,9 @@ function primTikZ(p: Prim, X: (x: number) => number, Y: (y: number) => number, s
   switch (p.k) {
     case 'line': {
       const { color } = tikzColor(p.stroke);
-      return `\\draw[color=${color},line width=${round(p.w * s)}pt] ${pt(p.x1, p.y1)} -- ${pt(p.x2, p.y2)};`;
+      const op =
+        p.opacity !== undefined && p.opacity < 1 ? `,draw opacity=${round(p.opacity)}` : '';
+      return `\\draw[color=${color},line width=${round(p.w * s)}pt${op}] ${pt(p.x1, p.y1)} -- ${pt(p.x2, p.y2)};`;
     }
     case 'polyline': {
       const { color } = tikzColor(p.stroke);
