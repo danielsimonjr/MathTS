@@ -369,6 +369,18 @@ export const createNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Render this node as Markdown-embeddable math. Display (block) math by
+       * default (`$$…$$`), inline (`$…$`) when `options.inline` is true. Thin
+       * wrapper over toTex(); adds no failure mode beyond toTex's own.
+       * @param {Object} [options]
+       * @return {string}
+       */
+      toMarkdown(options?: { inline?: boolean } & StringOptions): string {
+        const tex = this.toTex(options);
+        return options?.inline ? '$' + tex + '$' : '$$\n' + tex + '\n$$';
+      }
+
+      /**
        * Render this node to a MathML fragment (the MathML analog of `toTex`).
        * Like `toTex`, this returns the body — wrap it in a `<math>` element with
        * `mathMLDocument(node)` to render. Never throws: a failing node degrades
