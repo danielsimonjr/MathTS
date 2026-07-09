@@ -773,7 +773,9 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
     } catch (error) {
       return fail([`PDF export failed: ${errMessage(error)}`]);
     }
-    return { stdout: jsonEnvelope('export', true, { path: outPath }, []), stderr: '', exitCode: 0 };
+    return json
+      ? { stdout: jsonEnvelope('export', true, { path: outPath }, []), stderr: '', exitCode: 0 }
+      : { stdout: '', stderr: `Exported ${file} -> ${outPath}`, exitCode: 0 };
   }
 
   const fragment = args.includes('--fragment');
