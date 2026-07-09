@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — workbook LaTeX export: unparseable equations no longer break math mode
+
+`workbook/src/tex.ts`'s equation fallback (used when no parser is supplied, or
+the parser throws) wrapped `texEscape`'d source in `\[ … \]` display math —
+but `texEscape` emits **text-mode** macros (`\textbackslash{}`,
+`\textasciicircum{}`, `\textasciitilde{}`), which are invalid inside math
+mode. A malformed equation containing `\`, `^`, or `~` would fail to compile.
+The fallback now renders `\texttt{${texEscape(content)}}` (text mode),
+matching how `test`/`code` cells already render raw content. The successful-
+parse path (`\[ node.toTex() \]`) is unchanged.
+
 ### Fixed — @danielsimonjr/mathts-plot `curve3d` now depth-cues opacity
 
 `curve3d` drew a single flat `polyline` with no depth cue, unlike `scatter3d`

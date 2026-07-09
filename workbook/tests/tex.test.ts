@@ -29,10 +29,36 @@ describe('toTeX', () => {
     expect(out).toContain('\\sin'); // from expression .toTex()
     expect(out).toContain('\\]');
   });
-  it('equation parse failure → escaped-source fallback, no throw', () => {
-    const out = toTeX(doc([{ type: 'equation', content: 'a %% b' }]), { parse });
-    expect(out).toContain('\\['); // still emits a display-math block
-    expect(() => toTeX(doc([{ type: 'equation', content: ')(' }]), { parse })).not.toThrow();
+  it('equation parse failure → \\texttt{} text-mode fallback, no throw', () => {
+    const throwingParse = () => {
+      throw new Error('bad');
+    };
+    const out = toTeX(doc([{ type: 'equation', content: 'a %% b' }]), { parse: throwingParse });
+    expect(out).toContain('\\texttt{');
+    expect(out).not.toContain('\\[');
+    expect(() =>
+      toTeX(doc([{ type: 'equation', content: ')(' }]), { parse: throwingParse })
+    ).not.toThrow();
+  });
+  it('equation with no parser → \\texttt{} text-mode fallback', () => {
+    const out = toTeX(doc([{ type: 'equation', content: 'x + 1' }]), {});
+    expect(out).toContain('\\texttt{');
+    expect(out).not.toContain('\\[');
+  });
+  it('equation with working parser → \\[ .toTex() \\] unchanged', () => {
+    const out = toTeX(doc([{ type: 'equation', content: 'x^2' }]), {
+      parse: () => ({ toTex: () => 'x^2' }),
+    });
+    expect(out).toContain('\\[ x^2 \\]');
+  });
+  it('equation parse failure with math-special chars → no math-mode text macro', () => {
+    const throwingParse = () => {
+      throw new Error('bad');
+    };
+    const out = toTeX(doc([{ type: 'equation', content: 'a^b~c' }]), { parse: throwingParse });
+    expect(out).not.toContain('\\['); // no display-math block to leak text-mode escapes into
+    expect(out).toContain('\\textasciicircum{}');
+    expect(out).toContain('\\textasciitilde{}');
   });
   it('code → lstlisting, output → verbatim, error → red', () => {
     const ok = toTeX(doc([{ type: 'code', content: 'a := 1', output: '1' }]));

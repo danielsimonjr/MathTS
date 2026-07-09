@@ -35,7 +35,7 @@ function renderEquationTex(content: string, parse?: (expr: string) => unknown): 
       /* fall through to escaped source */
     }
   }
-  return `\\[ ${texEscape(content)} \\]`;
+  return `\\texttt{${texEscape(content)}}`;
 }
 
 function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): string {
