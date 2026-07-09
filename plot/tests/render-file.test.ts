@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { renderToFile, PlotRenderError } from '../src/render-file.js';
+import { renderToFile, latexToPdf, PlotRenderError } from '../src/render-file.js';
 
 let dir: string;
 beforeAll(() => {
@@ -36,5 +36,17 @@ describe('renderToFile', () => {
       expect(e).toBeInstanceOf(PlotRenderError);
       expect((e as PlotRenderError).message).toMatch(/rsvg-convert|resvg|install/i);
     }
+  });
+});
+
+describe('latexToPdf', () => {
+  const TEX = '\\documentclass{article}\\begin{document}hello\\end{document}';
+  it('rejects with PlotRenderError naming a LaTeX engine when none is present', async () => {
+    await expect(
+      latexToPdf(TEX, join(dir, 'x.pdf'), { tool: '__definitely_not_a_real_tool__' })
+    ).rejects.toBeInstanceOf(PlotRenderError);
+  });
+  it('requires a .pdf output path', async () => {
+    await expect(latexToPdf(TEX, join(dir, 'x.png'))).rejects.toBeInstanceOf(PlotRenderError);
   });
 });

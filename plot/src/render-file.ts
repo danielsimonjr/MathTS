@@ -5,8 +5,9 @@
  * so `node:child_process`/`node:fs` never enter the browser-safe main bundle.
  */
 import { spawn } from 'node:child_process';
-import { writeFile, rm } from 'node:fs/promises';
-import { extname } from 'node:path';
+import { writeFile, rm, mkdtemp, readFile } from 'node:fs/promises';
+import { extname, join as joinPath } from 'node:path';
+import { tmpdir } from 'node:os';
 
 /** Thrown when an external tool is missing or a conversion fails. Deliberate
  *  exception to plot's never-throw rule: I/O and missing tools must surface. */
@@ -119,4 +120,53 @@ export async function renderToFile(
     `No SVG converter found for .${format}. Install rsvg-convert (librsvg) or resvg and ensure it is on PATH.`,
     'rsvg-convert'
   );
+}
+
+/** Standalone LaTeX/TikZ source → PDF via pdflatex (preferred) or tectonic.
+ *  Compiles in an OS temp dir and copies the resulting PDF to `outPath`.
+ *  Rejects with PlotRenderError naming the engine to install if none is found. */
+export async function latexToPdf(
+  texSource: string,
+  outPath: string,
+  opts: RenderOptions = {}
+): Promise<void> {
+  if (extname(outPath).toLowerCase() !== '.pdf') {
+    throw new PlotRenderError(`latexToPdf output must be a .pdf path (got '${outPath}')`);
+  }
+  const candidates = opts.tool ? [opts.tool] : ['pdflatex', 'tectonic'];
+  let engine: string | undefined;
+  for (const c of candidates) {
+    if (await hasTool(c)) {
+      engine = c;
+      break;
+    }
+  }
+  if (!engine) {
+    throw new PlotRenderError(
+      'No LaTeX engine found. Install TeX Live (pdflatex) or tectonic and ensure it is on PATH.',
+      'pdflatex'
+    );
+  }
+  const work = await mkdtemp(joinPath(tmpdir(), 'plot-tex-'));
+  try {
+    const texPath = joinPath(work, 'doc.tex');
+    await writeFile(texPath, texSource, 'utf-8');
+    const args =
+      engine === 'tectonic'
+        ? ['--outdir', work, texPath]
+        : ['-interaction=nonstopmode', '-halt-on-error', '-output-directory', work, texPath];
+    const r = await runTool(engine, args, { timeoutMs: opts.timeoutMs ?? 60000 });
+    const pdfPath = joinPath(work, 'doc.pdf');
+    let pdf: Buffer;
+    try {
+      pdf = await readFile(pdfPath);
+    } catch {
+      throw new PlotRenderError(
+        `${engine} produced no PDF (exit ${r.code}): ${r.stderr || r.stdout.toString().slice(-500)}`
+      );
+    }
+    await writeFile(outPath, pdf);
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
 }

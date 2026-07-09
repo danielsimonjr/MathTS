@@ -3432,6 +3432,7 @@
       "hasTool",
       "heatmap",
       "histogram",
+      "latexToPdf",
       "Layer2D",
       "line",
       "linearScale",

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — @danielsimonjr/mathts-plot `./render` subpath: `renderToFile` + `latexToPdf`
+
+A Node-only render bridge exposed via the `./render` subpath (never enters the
+browser-safe main bundle). `renderToFile(svg, outPath, opts?)` writes SVG
+straight through for `.svg`, or shells out to `rsvg-convert` (preferred) or
+`resvg` for `.png`/`.pdf`. `latexToPdf(texSource, outPath, opts?)` compiles
+standalone LaTeX/TikZ source to PDF via `pdflatex` (preferred) or `tectonic`
+in a scratch temp dir, then copies the result to `outPath` — the shared
+primitive `workbook.toPDF` will reuse. Both reject with `PlotRenderError`
+naming the external tool to install when none is found; no rendering
+dependencies are bundled.
+
 ### Added — expression: `Node.toMarkdown()` and `Node.toDOT()`
 
 Two new AST node serializers on the base `Node` class. `toMarkdown(options?)`
