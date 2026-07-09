@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-09'
   totalFiles: 1018
   totalModules: 75
-  totalExports: 4880
+  totalExports: 4881
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27531,6 +27531,7 @@ modules:
             - buildDependencyGraph
             - detectCycles
             - toMermaid
+            - toDOT
         - file: ./formatter
           imports:
             - formatResult
@@ -27772,6 +27773,7 @@ modules:
         - getDependents
         - getAncestors
         - toMermaid
+        - toDOT
         - detectCycles
       functions:
         - buildDependencyGraph
@@ -27779,6 +27781,7 @@ modules:
         - getDependents
         - getAncestors
         - toMermaid
+        - toDOT
         - detectCycles
     workbook/src/html.ts:
       description: Assemble a generic document structure into one self-contained HTML5 file —
@@ -32193,11 +32196,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1018
   totalModules: 75
-  totalLinesOfCode: 169631
-  totalExports: 4880
+  totalLinesOfCode: 169657
+  totalExports: 4881
   totalClasses: 56
   totalInterfaces: 406
-  totalFunctions: 1585
+  totalFunctions: 1586
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531

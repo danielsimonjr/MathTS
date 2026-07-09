@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-09",
     "totalFiles": 1018,
     "totalModules": 75,
-    "totalExports": 4880
+    "totalExports": 4881
   },
   "entryPoints": [
     {
@@ -29660,7 +29660,7 @@
           },
           {
             "file": "./graph",
-            "imports": ["buildDependencyGraph", "detectCycles", "toMermaid"]
+            "imports": ["buildDependencyGraph", "detectCycles", "toMermaid", "toDOT"]
           },
           {
             "file": "./formatter",
@@ -29897,6 +29897,7 @@
           "getDependents",
           "getAncestors",
           "toMermaid",
+          "toDOT",
           "detectCycles"
         ],
         "functions": [
@@ -29905,6 +29906,7 @@
           "getDependents",
           "getAncestors",
           "toMermaid",
+          "toDOT",
           "detectCycles"
         ]
       },
@@ -34557,11 +34559,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1018,
     "totalModules": 75,
-    "totalLinesOfCode": 169631,
-    "totalExports": 4880,
+    "totalLinesOfCode": 169657,
+    "totalExports": 4881,
     "totalClasses": 56,
     "totalInterfaces": 406,
-    "totalFunctions": 1585,
+    "totalFunctions": 1586,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1531,

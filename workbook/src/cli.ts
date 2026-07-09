@@ -17,7 +17,7 @@ import { Session } from './session';
 import { handleRequest, type JsonRpcRequest } from './rpc';
 import { parseWorkbook, serializeWorkbook, stripOutputs, importWorkbook } from './parser';
 import { createExecutor } from './executor';
-import { buildDependencyGraph, detectCycles, toMermaid } from './graph';
+import { buildDependencyGraph, detectCycles, toMermaid, toDOT } from './graph';
 import { formatResult } from './formatter';
 import { SCHEMA_VERSION, VERSION } from './contract';
 import { describeData } from './doc';
@@ -58,7 +58,7 @@ Usage:
                                             outputs back to the file.
   mtsw describe <file> [--json]             Structured document model (cells, graph)
   mtsw validate <file> [--json]             Validate structure (ids, deps, cycles)
-  mtsw graph <file> [-f mermaid]            Print the dependency graph
+  mtsw graph <file> [-f mermaid|dot]        Print the dependency graph
   mtsw strip <file> [-w|--write]            Strip outputs (stdout, or -w to rewrite)
   mtsw new <name> [-t basic|empty|chart] [--empty] [-o <path>] [--force]
                                             Scaffold a new workbook (-o for any path)
@@ -841,7 +841,7 @@ export function graphCommand(args: string[]): CommandResult {
 
   const file = firstPositional(args);
   if (!file) {
-    return { stdout: '', stderr: 'Usage: mtsw graph <file> [-f mermaid]', exitCode: 1 };
+    return { stdout: '', stderr: 'Usage: mtsw graph <file> [-f mermaid|dot]', exitCode: 1 };
   }
 
   const read = readFile(file);
@@ -856,6 +856,10 @@ export function graphCommand(args: string[]): CommandResult {
 
   if (flagValue(args, '-f') === 'mermaid' || flagValue(args, '--format') === 'mermaid') {
     return { stdout: toMermaid(graph), stderr: '', exitCode: 0 };
+  }
+
+  if (flagValue(args, '-f') === 'dot' || flagValue(args, '--format') === 'dot') {
+    return { stdout: toDOT(graph), stderr: '', exitCode: 0 };
   }
 
   const lines = [...graph.nodes].map(([id, node]) => `${id}: [${node.dependencies.join(', ')}]`);

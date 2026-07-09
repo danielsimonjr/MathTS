@@ -13535,7 +13535,7 @@ graph LR
 | `./rpc` | `handleRequest, JsonRpcRequest` | Import |
 | `./parser` | `parseWorkbook, serializeWorkbook, stripOutputs, importWorkbook` | Import |
 | `./executor` | `createExecutor` | Import |
-| `./graph` | `buildDependencyGraph, detectCycles, toMermaid` | Import |
+| `./graph` | `buildDependencyGraph, detectCycles, toMermaid, toDOT` | Import |
 | `./formatter` | `formatResult` | Import |
 | `./contract` | `SCHEMA_VERSION, VERSION` | Import |
 | `./doc` | `describeData` | Import |
@@ -13646,7 +13646,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `buildDependencyGraph`, `topologicalSort`, `getDependents`, `getAncestors`, `toMermaid`, `detectCycles`
+- Functions: `buildDependencyGraph`, `topologicalSort`, `getDependents`, `getAncestors`, `toMermaid`, `toDOT`, `detectCycles`
 
 ---
 
@@ -15299,12 +15299,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1018   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169631 |
-| Total Exports           | 4880   |
+| Total Lines of Code     | 169657 |
+| Total Exports           | 4881   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 56     |
 | Total Interfaces        | 406    |
-| Total Functions         | 1585   |
+| Total Functions         | 1586   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 528    |
