@@ -171,7 +171,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **plot**: 17 files
+- **plot**: 18 files
 - **plot/three**: 3 files
 
 ---
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 19             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 20             | 0               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 21             | 0               |
 
 ### Package Dependency Diagram
 
@@ -14384,6 +14384,23 @@ graph LR
 
 ---
 
+### `plot/src/render-file.ts` - Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `child_process` | `spawn` |
+| `fs/promises` | `writeFile, rm` |
+| `path` | `extname` |
+
+**Exports:**
+
+- Classes: `PlotRenderError`
+- Interfaces: `RenderOptions`
+- Functions: `runTool`, `hasTool`, `renderToFile`
+
+---
+
 ### `plot/src/scale.ts` - scale module
 
 **Exports:**
@@ -15185,7 +15202,7 @@ graph TD
         N410[marks2d]
         N411[overlay]
         N412[palette]
-        N413[...7 more]
+        N413[...8 more]
     end
 
     subgraph Plot/three
@@ -15279,14 +15296,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1017   |
+| Total TypeScript Files  | 1018   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169451 |
-| Total Exports           | 4875   |
+| Total Lines of Code     | 169581 |
+| Total Exports           | 4879   |
 | Total Re-exports        | 1747   |
-| Total Classes           | 55     |
-| Total Interfaces        | 405    |
-| Total Functions         | 1581   |
+| Total Classes           | 56     |
+| Total Interfaces        | 406    |
+| Total Functions         | 1584   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 528    |

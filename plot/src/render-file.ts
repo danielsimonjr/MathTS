@@ -1,0 +1,122 @@
+/**
+ * Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling
+ * out to external tools already on the user's PATH. Bundles NO rendering deps —
+ * preserves plot's zero-dependency guarantee. Exposed via the `./render` subpath
+ * so `node:child_process`/`node:fs` never enter the browser-safe main bundle.
+ */
+import { spawn } from 'node:child_process';
+import { writeFile, rm } from 'node:fs/promises';
+import { extname } from 'node:path';
+
+/** Thrown when an external tool is missing or a conversion fails. Deliberate
+ *  exception to plot's never-throw rule: I/O and missing tools must surface. */
+export class PlotRenderError extends Error {
+  constructor(
+    message: string,
+    readonly missingTool?: string
+  ) {
+    super(message);
+    this.name = 'PlotRenderError';
+  }
+}
+
+export interface RenderOptions {
+  tool?: string;
+  timeoutMs?: number;
+  density?: number;
+  background?: string;
+}
+
+interface RunResult {
+  code: number | null;
+  stdout: Buffer;
+  stderr: string;
+}
+
+/** Spawn a command, feeding optional stdin, collecting stdout/stderr. Rejects
+ *  with PlotRenderError(ENOENT) if the binary is not found. */
+export function runTool(
+  cmd: string,
+  args: string[],
+  opts: { timeoutMs?: number; input?: string } = {}
+): Promise<RunResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { timeout: opts.timeoutMs ?? 30000 });
+    const out: Buffer[] = [];
+    let err = '';
+    child.stdout.on('data', (d: Buffer) => out.push(d));
+    child.stderr.on('data', (d: Buffer) => (err += d.toString()));
+    child.on('error', (e: NodeJS.ErrnoException) =>
+      reject(new PlotRenderError(`${cmd} could not be run: ${e.message}`, cmd))
+    );
+    child.on('close', (code) => resolve({ code, stdout: Buffer.concat(out), stderr: err }));
+    if (opts.input !== undefined) {
+      child.stdin.end(opts.input);
+    }
+  });
+}
+
+/** True if `name` responds to a version probe (i.e. is on PATH). */
+export async function hasTool(name: string): Promise<boolean> {
+  try {
+    const r = await runTool(name, ['--version'], { timeoutMs: 5000 });
+    return r.code === 0;
+  } catch {
+    return false;
+  }
+}
+
+/** SVG string → file. Extension of `outPath` selects the target: `.svg` writes
+ *  the SVG through; `.png`/`.pdf` convert via rsvg-convert (preferred) or resvg.
+ *  Rejects with PlotRenderError naming the tool to install if none is present. */
+export async function renderToFile(
+  svg: string,
+  outPath: string,
+  opts: RenderOptions = {}
+): Promise<void> {
+  const ext = extname(outPath).toLowerCase();
+  if (ext === '.svg') {
+    await writeFile(outPath, svg, 'utf-8');
+    return;
+  }
+  if (ext !== '.png' && ext !== '.pdf') {
+    throw new PlotRenderError(
+      `Unsupported output extension '${ext}' (expected .svg, .png, or .pdf)`
+    );
+  }
+  const format = ext.slice(1); // 'png' | 'pdf'
+  const candidates = opts.tool ? [opts.tool] : ['rsvg-convert', 'resvg'];
+  for (const tool of candidates) {
+    if (!(await hasTool(tool))) continue;
+    if (tool === 'rsvg-convert') {
+      const args = ['-f', format, '-o', outPath];
+      if (format === 'png' && opts.density)
+        args.push('--dpi-x', String(opts.density), '--dpi-y', String(opts.density));
+      if (format === 'png' && opts.background) args.push('--background-color', opts.background);
+      const r = await runTool('rsvg-convert', args, { timeoutMs: opts.timeoutMs, input: svg });
+      if (r.code !== 0) throw new PlotRenderError(`rsvg-convert failed: ${r.stderr}`);
+      return;
+    }
+    // resvg reads an input SVG path; write svg to a temp file alongside outPath
+    const tmpSvg = outPath + '.tmp.svg';
+    await writeFile(tmpSvg, svg, 'utf-8');
+    try {
+      const args = [tmpSvg, outPath];
+      const r = await runTool('resvg', args, { timeoutMs: opts.timeoutMs });
+      if (r.code !== 0) throw new PlotRenderError(`resvg failed: ${r.stderr}`);
+    } finally {
+      await rm(tmpSvg, { force: true });
+    }
+    if (format === 'pdf') {
+      throw new PlotRenderError(
+        'resvg does not emit PDF; install rsvg-convert for SVG→PDF',
+        'rsvg-convert'
+      );
+    }
+    return;
+  }
+  throw new PlotRenderError(
+    `No SVG converter found for .${format}. Install rsvg-convert (librsvg) or resvg and ensure it is on PATH.`,
+    'rsvg-convert'
+  );
+}

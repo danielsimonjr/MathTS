@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-09", "f": 1017, "e": 4875, "re": 1747 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-09", "f": 1018, "e": 4879, "re": 1747 },
   "s": {
-    "loc": 169451,
-    "cls": 55,
-    "int": 405,
-    "fn": 1581,
+    "loc": 169581,
+    "cls": 56,
+    "int": 406,
+    "fn": 1584,
     "tg": 156,
     "en": 0,
     "co": 1531,
@@ -1495,7 +1495,7 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "plot": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "coerce1d",
         "coerce1dPositional",
@@ -1515,7 +1515,8 @@
         "errorbar",
         "quiver"
       ],
-      "int": ["Frame", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
+      "cls": ["PlotRenderError"],
+      "int": ["Frame", "RenderOptions", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
     },
     "plot/three": {
       "f": 3,

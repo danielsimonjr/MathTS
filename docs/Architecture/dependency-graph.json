@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-09",
-    "totalFiles": 1017,
+    "totalFiles": 1018,
     "totalModules": 75,
-    "totalExports": 4875
+    "totalExports": 4879
   },
   "entryPoints": [
     {
@@ -33011,6 +33011,30 @@
         "interfaces": ["Frame"],
         "functions": ["renderLayer"]
       },
+      "plot/src/render-file.ts": {
+        "description": "Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "child_process",
+            "imports": ["spawn"]
+          },
+          {
+            "module": "fs/promises",
+            "imports": ["writeFile", "rm"]
+          },
+          {
+            "module": "path",
+            "imports": ["extname"]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["runTool", "hasTool", "renderToFile", "PlotRenderError"],
+        "classes": ["PlotRenderError"],
+        "interfaces": ["RenderOptions"],
+        "functions": ["runTool", "hasTool", "renderToFile"]
+      },
       "plot/src/scale.ts": {
         "description": "scale module",
         "externalDependencies": [],
@@ -34508,6 +34532,7 @@
           "plot/src/palette.ts",
           "plot/src/plot.ts",
           "plot/src/render-core.ts",
+          "plot/src/render-file.ts",
           "plot/src/scale.ts",
           "plot/src/scene.ts",
           "plot/src/svg.ts",
@@ -34526,13 +34551,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1017,
+    "totalTypeScriptFiles": 1018,
     "totalModules": 75,
-    "totalLinesOfCode": 169451,
-    "totalExports": 4875,
-    "totalClasses": 55,
-    "totalInterfaces": 405,
-    "totalFunctions": 1581,
+    "totalLinesOfCode": 169581,
+    "totalExports": 4879,
+    "totalClasses": 56,
+    "totalInterfaces": 406,
+    "totalFunctions": 1584,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1531,
