@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 238
+- **Potentially unused exports**: 239
   - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 238
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 239
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -466,6 +466,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `workbook/src/html.ts`
 
 - `ToHtmlOptions` (interface) — 1 in-file ref
+
+### `workbook/src/pdf.ts`
+
+- `ToPdfOptions` (interface) — 1 in-file ref
 
 ### `workbook/src/rpc.ts`
 

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-09", "f": 1018, "e": 4882, "re": 1747 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-09", "f": 1019, "e": 4883, "re": 1747 },
   "s": {
-    "loc": 169741,
+    "loc": 169771,
     "cls": 56,
-    "int": 406,
-    "fn": 1587,
+    "int": 407,
+    "fn": 1588,
     "tg": 156,
     "en": 0,
     "co": 1531,
-    "toi": 528
+    "toi": 529
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1360,7 +1360,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 19,
+      "f": 20,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1392,9 +1392,9 @@
         "RenderCell",
         "RenderDoc",
         "ToHtmlOptions",
+        "ToPdfOptions",
         "JsonRpcRequest",
-        "JsonRpcResponse",
-        "JsonRpcEvent"
+        "JsonRpcResponse"
       ]
     },
     "assembly/algebra": {

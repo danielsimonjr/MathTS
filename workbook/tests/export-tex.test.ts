@@ -35,7 +35,7 @@ describe('mtsw export --format tex', () => {
     expect(r.stdout).not.toContain('\\documentclass');
   });
   it('rejects an unknown format', async () => {
-    const r = await exportCommand([writeTmp(), '--format', 'pdf', '--no-run']);
+    const r = await exportCommand([writeTmp(), '--format', 'bogus', '--no-run']);
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toMatch(/format/i);
   });

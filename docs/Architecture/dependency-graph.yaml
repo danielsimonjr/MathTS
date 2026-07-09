@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-09'
-  totalFiles: 1018
+  totalFiles: 1019
   totalModules: 75
-  totalExports: 4882
+  totalExports: 4883
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27572,6 +27572,9 @@ modules:
         - file: ./tex
           imports:
             - toTeX
+        - file: ./pdf
+          imports:
+            - toPDF
         - file: ./svg
           imports:
             - renderChart
@@ -28034,6 +28037,31 @@ modules:
         - importWorkbook
       constants:
         - SUPPORTED_CELL_TYPES
+    workbook/src/pdf.ts:
+      description: "Render a workbook RenderDoc to a PDF file. Reuses plot's latexToPdf primitive:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./tex.js
+          imports:
+            - toTeX
+        - file: ./html.js
+          imports:
+            - RenderDoc
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-plot'
+          directory: plot
+          imports:
+            - latexToPdf
+            - RenderOptions
+          subpath: render
+      exports:
+        - toPDF
+      interfaces:
+        - ToPdfOptions
+      functions:
+        - toPDF
     workbook/src/rpc.ts:
       description: Pure JSON-RPC 2.0 router for `mtsw serve`. `handleRequest(session, request)`
       externalDependencies: []
@@ -32124,6 +32152,7 @@ dependencyGraph:
         - workbook/src/introspect.ts
         - workbook/src/markdown.ts
         - workbook/src/parser.ts
+        - workbook/src/pdf.ts
         - workbook/src/rpc.ts
         - workbook/src/session.ts
         - workbook/src/svg.ts
@@ -32198,19 +32227,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1018
+  totalTypeScriptFiles: 1019
   totalModules: 75
-  totalLinesOfCode: 169741
-  totalExports: 4882
+  totalLinesOfCode: 169771
+  totalExports: 4883
   totalClasses: 56
-  totalInterfaces: 406
-  totalFunctions: 1587
+  totalInterfaces: 407
+  totalFunctions: 1588
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1531
   totalReExports: 1747
-  totalTypeOnlyImports: 528
+  totalTypeOnlyImports: 529
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 238
+  unusedExportsCount: 239

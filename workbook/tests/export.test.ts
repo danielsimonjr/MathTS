@@ -64,7 +64,7 @@ describe('mtsw export', () => {
   });
 
   it('rejects an unknown format', async () => {
-    const r = await dispatch(['export', fixture(WB), '--format', 'pdf']);
+    const r = await dispatch(['export', fixture(WB), '--format', 'bogus']);
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toContain('Unknown format');
   });
@@ -114,4 +114,3 @@ describe('mtsw export', () => {
     expect(r.stdout).toContain('Demo Chart');
   });
 });
-

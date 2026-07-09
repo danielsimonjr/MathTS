@@ -28,6 +28,7 @@ import type { CellResult, Workbook, ParseResult, CellType, RunResult } from './t
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html';
 import { toTeX } from './tex';
+import { toPDF } from './pdf';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
@@ -691,14 +692,14 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
 
   const format = flagValue(args, '--format') ?? 'html';
-  if (format !== 'html' && format !== 'tex' && format !== 'json') {
-    return fail([`Unknown format '${format}' (supported: html, tex, json)`]);
+  if (format !== 'html' && format !== 'tex' && format !== 'json' && format !== 'pdf') {
+    return fail([`Unknown format '${format}' (supported: html, tex, json, pdf)`]);
   }
 
   const file = firstPositional(args);
   if (!file)
     return fail([
-      'Usage: mtsw export <file> [--format html|tex|json] [--fragment] [-o out] [--no-run]',
+      'Usage: mtsw export <file> [--format html|tex|json|pdf] [--fragment] [-o out] [--no-run]',
     ]);
 
   const read = readFile(file);
@@ -762,6 +763,17 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       };
     }
     return { stdout: jsonStr, stderr: '', exitCode: 0 };
+  }
+
+  if (format === 'pdf') {
+    const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
+    if (!outPath) return fail(['--format pdf requires an output path: -o <file.pdf>']);
+    try {
+      await toPDF(buildRenderDoc(workbook, byId, 'tikz'), outPath, { parse });
+    } catch (error) {
+      return fail([`PDF export failed: ${errMessage(error)}`]);
+    }
+    return { stdout: jsonEnvelope('export', true, { path: outPath }, []), stderr: '', exitCode: 0 };
   }
 
   const fragment = args.includes('--fragment');

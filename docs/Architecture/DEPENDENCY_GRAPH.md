@@ -164,7 +164,7 @@ The codebase is organized into the following modules:
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
-- **workbook**: 19 files
+- **workbook**: 20 files
 - **assembly/algebra**: 1 file
 - **assembly/bindings**: 2 files
 - **assembly**: 7 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 19             | 1               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 20             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 21             | 0               |
@@ -13545,6 +13545,7 @@ graph LR
 | `./types` | `CellResult, Workbook, ParseResult, CellType, RunResult` | Import (type-only) |
 | `./html` | `toHTML` | Import |
 | `./tex` | `toTeX` | Import |
+| `./pdf` | `toPDF` | Import |
 | `./svg` | `renderChart` | Import |
 | `./html` | `RenderDoc, RenderCell` | Import (type-only) |
 | `./yaml-safe` | `parseYamlHardened` | Import |
@@ -13736,6 +13737,26 @@ graph LR
 
 - Functions: `isValidIdentifier`, `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `importWorkbook`
 - Constants: `SUPPORTED_CELL_TYPES`
+
+---
+
+### `workbook/src/pdf.ts` - Render a workbook RenderDoc to a PDF file. Reuses plot's latexToPdf primitive:
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-plot` | `latexToPdf, RenderOptions` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./tex.js` | `toTeX` | Import |
+| `./html.js` | `RenderDoc` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `ToPdfOptions`
+- Functions: `toPDF`
 
 ---
 
@@ -14547,9 +14568,9 @@ graph LR
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
+| `workbook/src/cli`                                     | 17 files     | 0 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
-| `workbook/src/cli`                                     | 16 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
@@ -15146,7 +15167,7 @@ graph TD
         N374[graph]
         N375[html]
         N376[index]
-        N377[...9 more]
+        N377[...10 more]
     end
 
     subgraph Assembly/algebra
@@ -15297,17 +15318,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1018   |
+| Total TypeScript Files  | 1019   |
 | Total Modules           | 75     |
-| Total Lines of Code     | 169741 |
-| Total Exports           | 4882   |
+| Total Lines of Code     | 169771 |
+| Total Exports           | 4883   |
 | Total Re-exports        | 1747   |
 | Total Classes           | 56     |
-| Total Interfaces        | 406    |
-| Total Functions         | 1587   |
+| Total Interfaces        | 407    |
+| Total Functions         | 1588   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 528    |
+| Type-only Imports       | 529    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Workbook: `mtsw graph -f dot`, `export --format json`, `export --format pdf`
+
+Three additions to the export-formats expansion, alongside the existing
+`html`/`tex` export and `mermaid` graph output:
+
+- **`mtsw graph -f dot`** — emit the dependency graph as a Graphviz digraph
+  (`toDOT(graph)` in `graph.ts`), for the same document `mermaid` already renders.
+- **`mtsw export --format json`** — the executed run report (per-cell
+  id/type/status/output/error) as JSON, instead of a rendered document.
+  Unlike `html`/`tex` (which can render a static, never-run document), this
+  format IS the run report, so it requires running the notebook (incompatible
+  with `--no-run`).
+- **`mtsw export --format pdf`** — render a notebook straight to a PDF file
+  (new `workbook/src/pdf.ts`, `toPDF(doc, outPath, options?)`), reusing plot's
+  `latexToPdf`: `toTeX(doc, { fragment: false })` → LaTeX → PDF, with charts
+  as native vector TikZ (no rasterization). PDF is binary, so `-o <file.pdf>`
+  is required; a clear error surfaces when no LaTeX engine (`pdflatex`/
+  `tectonic`) is on PATH.
+
 ### Added — @danielsimonjr/mathts-plot `./render` subpath: `renderToFile` + `latexToPdf`
 
 A Node-only render bridge exposed via the `./render` subpath (never enters the
