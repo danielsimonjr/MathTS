@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Scan for .ts files in mathjs that are missing from mathts."""
+"""Scan for .ts files in mathjs that are missing from mathts.
 
+DEPRECATED (2026-07-09): the `.ts -> .ts` sync model is dead — upstream mathjs did a
+TS-split (commit e62bcd749, 2026-04-10) that removed all `.ts` files, so there is nothing
+for this to scan. Kept for reference only. New upstream work is a manual JS->TS port via
+`tools/mathjs-port/`. Paths below are env-overridable if a local mathjs checkout exists.
+"""
+
+import os
 from pathlib import Path
 
-MATHJS = Path.home() / "Dropbox" / "Github" / "Mathjs"
-MATHTS = Path.home() / "Dropbox" / "Github" / "Mathts"
+MATHJS = Path(os.environ.get("MATHJS_DIR", Path.home() / "Github" / "Mathjs"))
+MATHTS = Path(os.environ.get("MATHTS_DIR", Path.home() / "Github" / "Mathts"))
 
 
 def norm(p):

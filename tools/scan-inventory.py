@@ -2,6 +2,10 @@
 """
 Full codebase inventory scanner for math.js reorg planning.
 Outputs: tools/codebase-inventory.json + console report
+
+NOTE (2026-07-09): pre-monorepo tool — it scans the root `src/` layout (now vestigial
+pre-monorepo mathjs scaffolding, not the per-package `*/src/` workspaces). Kept for
+reference; for current structure use CDG (`npm run docs:deps`) / QDG (`npm run docs:graph`).
 """
 
 import os, re, json

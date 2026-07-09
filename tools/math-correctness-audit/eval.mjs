@@ -5,7 +5,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = "C:/Users/danie/Github/Mathts";
+// Repo root derived from this file's location (tools/math-correctness-audit/) — portable.
+const REPO = resolve(HERE, "..", "..");
 const url = (p) => pathToFileURL(resolve(REPO, ...p)).href;
 
 const fns = await import(url(["functions", "dist", "index.js"]));

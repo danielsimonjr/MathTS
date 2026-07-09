@@ -1,10 +1,13 @@
-# DeepThinking MCP Tools
+# create-dependency-graph (CDG)
 
-This directory contains utility scripts for maintaining the DeepThinking MCP codebase.
+The MathTS dependency-graph **generator** — a heavy TypeScript parse (run via `tsx`) that
+scans the whole codebase and emits the `docs/Architecture/*` documentation. Its read-only
+consumer counterpart is `tools/query-dependency-graph` (QDG), which reads the JSON this
+tool produces without re-parsing.
 
-## Available Tools
+> **CDG** is the current nickname; the legacy nickname **DGT** refers to this same tool.
 
-### create-dependency-graph.ts
+## create-dependency-graph.ts
 
 Scans the codebase and generates comprehensive dependency documentation.
 
