@@ -1,8 +1,48 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-03
+Updated: 2026-07-09
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
+
+> **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
+> working tracker + completed-work history; the queue below is the live short list.
+
+## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
+
+Newest/most-actionable first. Detailed history for each area is in its section below.
+
+### Scientific Workbook — remaining deferred capabilities
+
+- [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
+      **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
+      _(Highest-value robustness gap.)_
+- [ ] **`ipynb` export** — Jupyter-notebook export; sibling of the shipped
+      `mtsw export --format html|tex|json|pdf` (verified absent in `workbook/src`).
+- [ ] **SVG math typesetting** (vs MathML) · **interactive (JS) charts** ·
+      **multi-doc serve** · **mid-run event streaming** · **`--expect-hash` optimistic lock**.
+- [ ] **Electron GUI** — pure presentation over the CLI/serve contract
+      (`electron-vite-react`); on hold pending workbook release-readiness.
+- [ ] 🔒 **Workbook release-readiness** — `@danielsimonjr/mathts-workbook` stays
+      changeset-ignored / unpublished per the explicit 2026-06-29 hold.
+
+### Audit follow-ups (open subset of `BUG_AUDIT_2026-05-25.md`)
+
+- [ ] **B-3** cross-package WASM dist-hop · **B-5** mathjs upstream drift tracking ·
+      **B-7** accepted dev-only esbuild/tsup advisory (re-evaluate when `tsup ≥ 8.6`
+      ships `esbuild ^0.28`). _(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck`
+      verified RESOLVED 2026-07-09.)_
+
+> **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
+> below): `eigs`/SVD acceleration · `polyFit`/`leastSquares` · unified f32 WebGPU path.
+
+> **Recently shipped** (full detail in `ROADMAP.md` → Recently Shipped, and per-package
+> CHANGELOGs): **2026-07-09 export-formats expansion** — plot@0.3.0 Node-only `./render`
+> PNG/PDF bridge, expression@0.6.0 `.toMarkdown`/`.toDOT`, workbook `toDOT(graph)` +
+> `graph -f dot` + `export --format json`/`--format pdf`. **2026-07-08/09 LaTeX output** —
+> plot@0.2.0 `toTikZ`, workbook `export --format tex`. Together these closed the deferred
+> **PDF export** and **Markdown** capabilities (checked off below).
+
+---
 
 > ## ✅ UNIT MERGE — COMPLETE (2026-07-04)
 >
@@ -1294,9 +1334,24 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 - [x] **Published `@danielsimonjr/mathts-expression@0.3.0`** (2026-06-29, release commit `221f7f4`, tag `@danielsimonjr/mathts-expression@0.3.0` + GitHub release) — `Node.toMathML()` + `mathMLDocument`/`mathMLError`/`escapeMathML`/`toMathMLSymbol`. Bumped 0.2.4 → 0.3.0; CHANGELOG + README generator docs; the 2 mixed changesets detangled to workbook-only so only `expression` versioned. Verified live on npm (`dist-tags.latest = 0.3.0`).
 - [ ] **Workbook package is NOT release-ready** (explicit, 2026-06-29) — hold `@danielsimonjr/mathts-workbook` until further notice.
 - [ ] **Electron GUI** — the eventual app, pure presentation over the CLI/serve contract (`electron-vite-react` base).
-- [ ] Deferred capabilities: `--expect-hash` optimistic lock · multi-doc serve · mid-run event streaming · PDF/markdown/ipynb export · SVG math typesetting (vs MathML) · interactive (JS) charts · worker-thread run timeout (sandboxed exec is currently synchronous, no hard timeout).
+- Deferred capabilities (tracked in **Active / Pending** at the top of this file):
+  - [x] **PDF export** — shipped 2026-07-09 (`mtsw export --format pdf` / `toPDF`, via plot's `latexToPdf`; charts as native TikZ).
+  - [x] **Markdown** math — shipped 2026-07-09 (`expression` `Node.toMarkdown()`).
+  - [ ] `ipynb` export · `--expect-hash` optimistic lock · multi-doc serve · mid-run event streaming · SVG math typesetting (vs MathML) · interactive (JS) charts · worker-thread run timeout (sandboxed exec is currently synchronous, no hard timeout).
 
 ## ✅ Completed
+
+### 2026-07-09 session — Export-formats expansion (published)
+
+- [x] **plot@0.3.0** — Node-only `./render` subpath: `renderToFile` (SVG→PNG/PDF via rsvg-convert/resvg) + `latexToPdf` (LaTeX/TikZ→PDF via pdflatex/tectonic). External-tool bridge, **zero bundled deps**, main entry stays browser-safe. **Security: LaTeX shell-escape OFF by default** (opt-in via unsafe `shellEscape`), caught by automated review and fixed before publish.
+- [x] **expression@0.6.0** — `Node.toMarkdown()` (display/inline math over `toTex`) + `Node.toDOT()` (Graphviz digraph of the AST via `traverse`).
+- [x] **workbook** (internal 0.1.8) — `toDOT(graph)` + `mtsw graph -f dot`; `export --format json` (executed run report); `toPDF` + `export --format pdf` (reuses plot `latexToPdf`; charts as native TikZ).
+- [x] Dependency-consistency republishes: `functions@0.16.1`, `ast`/`evaluator@0.1.10`, `parser@0.1.11`. Subagent-driven (7 tasks + hardening + 2-Minor fix wave, opus final review READY). All 6 verified live on npm.
+
+### 2026-07-08/09 session — LaTeX output (published)
+
+- [x] **plot@0.2.0** — scene + pluggable backend refactor; `toTikZ()` / `format:'tikz'` (SVG output byte-identical, golden-master locked); curve3d depth-cue + tex text-mode fallback polishes.
+- [x] **workbook** — `mtsw export --format tex` (+ `--fragment`): standalone/fragment LaTeX via `toTeX`, equations through `.toTex()`, charts through `plot.toTikZ()`.
 
 ### 2026-06-27 session — Rust removal · dormant purge · strict mode · lint cleanup
 
