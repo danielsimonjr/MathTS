@@ -249,9 +249,9 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 
 `tools/` contains standalone utility packages (not workspace members):
 
-- `create-dependency-graph/` - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`)
+- `create-dependency-graph/` (**CDG**) - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`). _**CDG** and the legacy nickname **DGT** are shorthand for this same tool — prefer CDG._
 - `roadmap-check/` - advisory feature-lifecycle consistency gate (`npm run docs:roadmap-check`): verifies ROADMAP "Recently Shipped" `pkg@version` claims against the live npm registry + flags unchecked TODO items whose referenced file already exists. See `docs/FEATURE_WORKFLOW.md`.
-- `query-dependency-graph/` - query surface + derived reports over DGT's `dependency-graph.json` (no re-parse; the read-only consumer counterpart to `create-dependency-graph`). Emits `dependency-reverse.json` (reverse edges) + `node-safety.json` (node:-taint + browser-safety leaks) as part of `npm run docs:deps`. **Consult it before grepping for structure** (`npm run docs:graph -- <query>`):
+- `query-dependency-graph/` (**QDG**) - query surface + derived reports over CDG's `dependency-graph.json` (no re-parse; the read-only consumer counterpart to `create-dependency-graph`). Emits `dependency-reverse.json` (reverse edges) + `node-safety.json` (node:-taint + browser-safety leaks) as part of `npm run docs:deps`. **Consult it before grepping for structure** (`npm run docs:graph -- <query>`):
   - `dependents <file>` — who imports this file (intra-package)
   - `symbol-users <symbol>` — who imports this symbol (any package, cross-package)
   - `is-public <pkg> <symbol>` — is it in the package's public export surface?

@@ -1,11 +1,11 @@
 # query-dependency-graph
 
-The **read-only consumer** counterpart to `create-dependency-graph` (DGT). It reads
-DGT's `docs/Architecture/dependency-graph.json` (+ `package-export-surfaces.json`) — it
+The **read-only consumer** counterpart to `create-dependency-graph` (CDG). It reads
+CDG's `docs/Architecture/dependency-graph.json` (+ `package-export-surfaces.json`) — it
 does **not** re-parse the codebase — and answers the structural questions an agent
 otherwise greps for, plus emits two derived artifacts.
 
-Zero dependencies (plain Node ESM). DGT generates; this tool queries.
+Zero dependencies (plain Node ESM). CDG generates; this tool queries.
 
 ## Usage
 
@@ -40,13 +40,13 @@ is derived from the graph's main entry points, so new packages are enforced by d
 `--check-browser-safety` fails (exit 1) if any browser-safe package's `.` entry
 transitively reaches a `node:`-using file.
 
-## Relationship to create-dependency-graph (DGT)
+## Relationship to create-dependency-graph (CDG)
 
 ```
 create-dependency-graph  →  dependency-graph.json  →  query-dependency-graph
    (parse, ~40s, tsx)         (the interface)          (instant, node .mjs)
 ```
 
-Deliberately kept separate: DGT is a heavy TypeScript parse; this is an instant JSON
-reader. See `docs/FEATURE_WORKFLOW.md` for how DGT is used at brainstorm (placement
+Deliberately kept separate: CDG is a heavy TypeScript parse; this is an instant JSON
+reader. See `docs/FEATURE_WORKFLOW.md` for how CDG is used at brainstorm (placement
 probe) and merge-gate (0 cycles / 0 new dormant / 0 browser-safety leaks) time.

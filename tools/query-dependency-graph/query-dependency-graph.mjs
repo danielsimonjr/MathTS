@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * query-dependency-graph — agent-facing query surface + derived reports over the
- * create-dependency-graph (DGT) output. The read-only consumer counterpart to DGT.
+ * create-dependency-graph (CDG) output. The read-only consumer counterpart to CDG.
  *
  * Reads docs/Architecture/dependency-graph.json (+ package-export-surfaces.json)
  * — it does NOT re-parse the codebase — and answers the structural questions an

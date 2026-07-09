@@ -8,13 +8,13 @@ changes), and the auto-memory (cross-session context).
 ## Pipeline
 
 ```
-IDEA  ──►  brainstorm (lightweight)  ──►  DGT placement/gap probe  ──►  ROADMAP entry
+IDEA  ──►  brainstorm (lightweight)  ──►  CDG placement/gap probe  ──►  ROADMAP entry
                                                                             │  promote (Definition of Ready)
                                                                             ▼
 ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN  ──►  TODO (active)
                                                                             │
                                                                             ▼
-                                              dev-workflow / subagent-driven (DGT = merge gate)
+                                              dev-workflow / subagent-driven (CDG = merge gate)
                                                                             │
                               ┌─────────────────────────────────────────────┤
                               ▼ done                                         ▼ gap / defer found
@@ -24,7 +24,7 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
 ## Stages
 
 1. **Idea → ROADMAP (lightweight).** A raw idea gets a _short_ brainstorm — just
-   enough to state what it is and why. Run the **DGT placement/gap probe** (below)
+   enough to state what it is and why. Run the **CDG placement/gap probe** (below)
    to fix a rough home and confirm it doesn't create a cycle. Land it as a
    one-line ROADMAP entry (candidate or near-term). **Do not spec it yet** — most
    ROADMAP ideas won't be built next, and a stale spec is worse than none (YAGNI).
@@ -35,7 +35,7 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
    happen, and the item enters `TODO.md` as active work.
 
 3. **TODO → shipped (execution).** Run the plan through `dev-workflow` /
-   `superpowers:subagent-driven-development`. DGT is the **merge gate** on every
+   `superpowers:subagent-driven-development`. CDG is the **merge gate** on every
    task (0 cycles / 0 new dormant).
 
 4. **Close the loop (bidirectional).** Execution feeds back:
@@ -45,7 +45,7 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
      (non-decisions)" with the rationale.
    - **New gap found mid-work** → add a ROADMAP candidate; don't lose it.
 
-## The two roles of DGT
+## The two roles of CDG
 
 `npm run docs:deps` serves two distinct purposes — keep them straight:
 
@@ -58,7 +58,7 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
   a browser-safe package's `.` entry must not reach `node:` code).
 
 **Query surface — consult it before grepping for structure.** `npm run docs:graph`
-answers the placement-probe questions directly over DGT's data (no re-parse):
+answers the placement-probe questions directly over CDG's data (no re-parse):
 `dependents <file>` (who imports this), `symbol-users <symbol>` (cross-package
 usage), `is-public <pkg> <symbol>` (public vs internal), `node-safety [pkg]`,
 `cycles`. `docs:deps` also emits `dependency-reverse.json` (reverse edges) and
@@ -72,7 +72,7 @@ artifact). Commit the regenerated `docs/Architecture/*` with the change.
 
 An item may be promoted to the active TODO queue only when **all** hold:
 
-- [ ] **Placement is DGT-validated** — a concrete target package, no cycle.
+- [ ] **Placement is CDG-validated** — a concrete target package, no cycle.
 - [ ] **Rough size** is known (S / M / L) and it fits one spec/plan cycle
       (an epic is split into features first — see below).
 - [ ] **No blocking dependency** — prerequisites are shipped or scheduled first.

@@ -8,7 +8,7 @@ lives in per-package `CHANGELOG.md` files and in `TODO.md` (the working tracker)
 _Last updated: 2026-07-09._
 
 > **Process:** features follow the lifecycle in [`docs/FEATURE_WORKFLOW.md`](docs/FEATURE_WORKFLOW.md)
-> — idea → (lightweight brainstorm + DGT placement probe) → ROADMAP entry →
+> — idea → (lightweight brainstorm + CDG placement probe) → ROADMAP entry →
 > (Definition of Ready) → SPEC → PLAN → `TODO.md` → dev-workflow. Run
 > `npm run docs:roadmap-check` when reconciling this file.
 
@@ -85,7 +85,7 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
-- _(none yet — add candidates as they surface from DGT gaps, user requests, or upstream drift)_
+- _(none yet — add candidates as they surface from CDG gaps, user requests, or upstream drift)_
 
 ## Recently shipped
 
