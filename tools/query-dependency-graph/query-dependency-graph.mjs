@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * graph-query — agent-facing query surface + derived reports over DGT's output.
+ * query-dependency-graph — agent-facing query surface + derived reports over the
+ * create-dependency-graph (DGT) output. The read-only consumer counterpart to DGT.
  *
  * Reads docs/Architecture/dependency-graph.json (+ package-export-surfaces.json)
  * — it does NOT re-parse the codebase — and answers the structural questions an
@@ -190,7 +191,7 @@ function main() {
       )
     );
     const nLeaks = Object.values(leaks).reduce((a, l) => a + l.length, 0);
-    console.log(`graph-query: wrote dependency-reverse.json (${Object.keys(reverse).length} files) + node-safety.json (${tainted.length} node-tainted, ${nLeaks} leak(s)).`);
+    console.log(`query-dependency-graph: wrote dependency-reverse.json (${Object.keys(reverse).length} files) + node-safety.json (${tainted.length} node-tainted, ${nLeaks} leak(s)).`);
     return;
   }
 

@@ -32,6 +32,16 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       ships `esbuild ^0.28`). _(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck`
       verified RESOLVED 2026-07-09.)_
 
+### Housekeeping (discovered 2026-07-09, low-priority)
+
+- [ ] **Root `vitest.config.ts` omits 5 re-export packages** — its `include` list doesn't
+      cover `ast`/`evaluator`/`linalg`/`parser`/`signal` test dirs, so a root `npx vitest run`
+      (and `test:coverage`) silently skips them. They ARE run by `turbo run test` (each has its
+      own `vitest.config.ts`), so it's a root-aggregate/coverage gap, not a test-execution gap.
+- [ ] **Vestigial root `src/`** (10 pre-monorepo mathjs files — `mainAny.ts`/`factoriesAny.ts`/…;
+      not a workspace, not built) + a stray `docs/Architecture/Workbook/index 2.ts` duplicate.
+      eslint-ignored 2026-07-09; candidates for deletion (verify truly unreferenced first).
+
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
 > below): `eigs`/SVD acceleration · `polyFit`/`leastSquares` · unified f32 WebGPU path.
 

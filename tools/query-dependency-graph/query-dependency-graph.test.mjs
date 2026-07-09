@@ -8,7 +8,7 @@ import {
   reachableFrom,
   findLeaks,
   browserSafePackages,
-} from './graph-query.mjs';
+} from './query-dependency-graph.mjs';
 
 // Fixture mirrors the real render-file.ts scenario:
 //   plot/src/index.ts → a, b            (public entry)
