@@ -3005,6 +3005,135 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
 }
 
 /**
+ * WebGPU accelerator ↔ function pairing analysis.
+ *
+ * The GPU analog of {@link analyzeWasmPairing}. Scans the SAME public typed API
+ * (`functions/src/typed/*.ts`) for a WebGPU-routing marker — a `*GpuDispatch`
+ * bridge (mirroring the `*Dispatch` WASM convention) or a GPU pool/backend
+ * reference (`gpuPool` / `getGlobalGPUBackend` / `GPUBackend`).
+ *
+ * WebGPU acceleration is NOT yet wired into the functions typed layer (only
+ * matrix's experimental `GPUBackend.matmul` exists), so this reports 0 today. It
+ * exists so the WebGPU tier is TRACKED the same way WASM is, once it lands (see
+ * ROADMAP "WebGPU acceleration tier"): route through the `*GpuDispatch` convention
+ * and this report auto-populates.
+ */
+interface WebGPUPairingEntry {
+  name: string;
+  file: string;
+  routing: 'gpu' | 'none';
+  markers: string[];
+}
+interface WebGPUPairing {
+  generated: string;
+  status: string;
+  total: number;
+  gpuAcceleratedCount: number;
+  noneCount: number;
+  gpuAccelerated: WebGPUPairingEntry[];
+  none: string[];
+  byFile: Record<string, { gpu: number; none: number }>;
+}
+
+function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
+  const candidates = [join(rootDir, 'functions', 'src', 'typed'), join(rootDir, 'src', 'typed')];
+  const typedDir = candidates.find((d) => existsSync(d));
+  if (!typedDir) return null;
+
+  const gpuAccelerated: WebGPUPairingEntry[] = [];
+  const none: string[] = [];
+  const byFile: Record<string, { gpu: number; none: number }> = {};
+  // Future WebGPU-routing markers (none present yet): a `*GpuDispatch` bridge
+  // (the GPU analog of the `*Dispatch` WASM bridge) or a GPU pool/backend ref.
+  const gpuDispatchRe = /\b\w+GpuDispatch\b/g;
+  const gpuRefRe = /\b(?:gpuPool|getGlobalGPUBackend|GPUBackend)\b/;
+
+  for (const fname of readdirSync(typedDir)) {
+    if (!fname.endsWith('.ts')) continue;
+    const src = readFileSync(join(typedDir, fname), 'utf-8');
+    const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src)) !== null) {
+      const name = m[1];
+      // Brace-match the mathTyped({...}) object literal starting at its `{`.
+      let depth = 0;
+      const start = m.index + m[0].length - 1;
+      let end = start;
+      for (let i = start; i < src.length; i++) {
+        const c = src[i];
+        if (c === '{') depth++;
+        else if (c === '}') {
+          depth--;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+      const block = src.slice(start, end + 1);
+      const markers = Array.from(new Set(block.match(gpuDispatchRe) ?? []));
+      const refMatch = block.match(gpuRefRe);
+      if (refMatch) markers.push(refMatch[0]);
+      const uniq = Array.from(new Set(markers)).sort();
+      if (!byFile[fname]) byFile[fname] = { gpu: 0, none: 0 };
+      if (uniq.length > 0) {
+        gpuAccelerated.push({ name, file: fname, routing: 'gpu', markers: uniq });
+        byFile[fname].gpu++;
+      } else {
+        none.push(name);
+        byFile[fname].none++;
+      }
+    }
+  }
+
+  gpuAccelerated.sort((a, b) => a.name.localeCompare(b.name));
+  none.sort();
+  return {
+    generated: new Date().toISOString().split('T')[0],
+    status:
+      gpuAccelerated.length === 0
+        ? 'No WebGPU accelerators are wired into the functions typed layer yet — forward-looking tracker (see ROADMAP "WebGPU acceleration tier"). Auto-populates when a function routes to a *GpuDispatch bridge or a GPU pool/backend.'
+        : `${gpuAccelerated.length} function(s) route to WebGPU.`,
+    total: gpuAccelerated.length + none.length,
+    gpuAcceleratedCount: gpuAccelerated.length,
+    noneCount: none.length,
+    gpuAccelerated,
+    none,
+    byFile,
+  };
+}
+
+function generateWebGPUPairingMarkdown(p: WebGPUPairing): string {
+  let md = '# WebGPU Accelerator ↔ Function Pairing\n\n';
+  md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `The GPU analog of \`wasm-pairing.md\`. Per public \`mathTyped\` function in `;
+  md += `\`functions/src/typed/\`, whether it routes to a **WebGPU** path — detected via a `;
+  md += `\`*GpuDispatch\` bridge (mirroring the \`*Dispatch\` WASM convention) or a GPU `;
+  md += `pool/backend reference (\`gpuPool\` / \`getGlobalGPUBackend\` / \`GPUBackend\`).\n\n`;
+  md += `> **Status:** ${p.status}\n\n`;
+  md += `> WebGPU is an experimental, flag-gated future tier (browser only). \`matrix\`'s `;
+  md += `\`GPUBackend.matmul\` is the experimental starting point; it is NOT counted here (it `;
+  md += `lives in the matrix backend, not the functions typed dispatch). Bench harness: `;
+  md += `\`tools/benchmark/gpu/bench-3way.*\`.\n\n`;
+  md += `| Routing (static) | Count |\n| --- | --: |\n`;
+  md += `| WebGPU | ${p.gpuAcceleratedCount} |\n`;
+  md += `| None | ${p.noneCount} |\n`;
+  md += `| **Total** | **${p.total}** |\n\n`;
+  if (p.gpuAccelerated.length > 0) {
+    md += `## WebGPU-accelerated functions\n\n| Function | Markers | Module |\n| --- | --- | --- |\n`;
+    for (const e of p.gpuAccelerated) {
+      md += `| \`${e.name}\` | \`${e.markers.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+    }
+    md += `\n`;
+  }
+  md += `## Per-module counts\n\n| Module | WebGPU | None |\n| --- | --: | --: |\n`;
+  for (const f of Object.keys(p.byFile).sort()) {
+    md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].gpu} | ${p.byFile[f].none} |\n`;
+  }
+  return md;
+}
+
+/**
  * Parallel (worker-pool) ↔ function pairing analysis.
  *
  * The parallel analog of {@link analyzeWasmPairing}. Scans the `functions`
@@ -3775,6 +3904,22 @@ async function main(): Promise<void> {
       `Written: ${join(OUTPUT_DIR, 'parallel-pairing.md')} ` +
         `(${parallelPairing.effectiveCount}/${parallelPairing.parallelizedCount} effectively parallelized, ` +
         `${parallelPairing.disabledCount} disabled)`
+    );
+  }
+
+  // WebGPU (browser, flag-gated) <-> function pairing — the GPU analog of
+  // wasm-pairing. Forward-looking tracker: 0 until functions route to a
+  // *GpuDispatch bridge / GPU pool/backend (see ROADMAP "WebGPU acceleration tier").
+  const webgpuPairing = analyzeWebGPUPairing(ROOT_DIR);
+  if (webgpuPairing) {
+    writeFileSync(join(OUTPUT_DIR, 'webgpu-pairing.json'), JSON.stringify(webgpuPairing, null, 2));
+    writeFileSync(
+      join(OUTPUT_DIR, 'webgpu-pairing.md'),
+      generateWebGPUPairingMarkdown(webgpuPairing)
+    );
+    console.log(
+      `Written: ${join(OUTPUT_DIR, 'webgpu-pairing.md')} ` +
+        `(${webgpuPairing.gpuAcceleratedCount}/${webgpuPairing.total} WebGPU-accelerated)`
     );
   }
 

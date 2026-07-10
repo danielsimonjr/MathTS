@@ -38,6 +38,12 @@ npx tsx tools/create-dependency-graph.ts
   active or `'never'` (wired but always inline JS). Thresholds are parsed from
   `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP` + `thresholdElements`);
   generated only when `functions/src/typed/` is in scope
+- `docs/Architecture/webgpu-pairing.md` / `webgpu-pairing.json` - the GPU analog of
+  wasm-pairing: which public `mathTyped` functions route to a WebGPU path (a
+  `*GpuDispatch` bridge or a GPU pool/backend ref). Forward-looking — reports 0 until
+  the flag-gated WebGPU tier lands (see ROADMAP); auto-populates then. `matrix`'s
+  experimental `GPUBackend.matmul` is NOT counted (it's a matrix backend, not the
+  functions typed dispatch)
 
 **Features:**
 
