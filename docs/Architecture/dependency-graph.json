@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-10",
-    "totalFiles": 1025,
+    "totalFiles": 1022,
     "totalModules": 76,
-    "totalExports": 4921
+    "totalExports": 4912
   },
   "entryPoints": [
     {
@@ -2107,84 +2107,43 @@
         "description": "GPU Batch Executor",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./GPUContext.js",
-            "imports": ["GPUContext"],
-            "typeOnly": true
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUContext"]
           },
           {
-            "file": "./ShaderManager.js",
-            "imports": ["ShaderManager"],
-            "typeOnly": true
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["ShaderManager"]
           },
           {
-            "file": "./BufferPool.js",
-            "imports": ["BufferPool"],
-            "typeOnly": true
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["BufferPool"]
           }
         ],
-        "workspaceDependencies": [],
         "exports": ["BatchExecutor"],
         "classes": ["BatchExecutor"],
         "interfaces": ["BatchOperation", "BatchResult", "BatchOptions"]
       },
-      "matrix/src/backends/gpu/BufferPool.ts": {
-        "description": "GPU Buffer Pool",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./GPUContext.js",
-            "imports": ["GPUContext"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["BufferPool"],
-        "classes": ["BufferPool"],
-        "interfaces": ["BufferPoolOptions"]
-      },
-      "matrix/src/backends/gpu/detect.ts": {
-        "description": "WebGPU Detection and Capability Checking",
+      "matrix/src/backends/gpu/builtin-shaders.ts": {
+        "description": "Matrix-domain WGSL kernels.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": [
-          "hasWebGPU",
-          "isBrowser",
-          "getGPUAdapter",
-          "detectGPUCapabilities",
-          "isGPUSuitableForMatrixOps",
-          "getRecommendedWorkgroupSize",
-          "getMaxMatrixSize"
-        ],
-        "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
-        "functions": [
-          "hasWebGPU",
-          "isBrowser",
-          "getGPUAdapter",
-          "detectGPUCapabilities",
-          "isGPUSuitableForMatrixOps",
-          "getRecommendedWorkgroupSize",
-          "getMaxMatrixSize"
-        ]
-      },
-      "matrix/src/backends/gpu/GPUContext.ts": {
-        "description": "WebGPU Context Management",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
+        "workspaceDependencies": [
           {
-            "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["ShaderManager"]
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
-        "classes": ["GPUContext"],
-        "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+        "exports": ["BUILTIN_SHADERS", "registerBuiltinShaders"],
+        "functions": ["registerBuiltinShaders"],
+        "constants": ["BUILTIN_SHADERS"]
       },
       "matrix/src/backends/gpu/index.ts": {
         "description": "GPU Backend Exports",
@@ -2192,41 +2151,8 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./detect.js",
-            "imports": [
-              "hasWebGPU",
-              "isBrowser",
-              "getGPUAdapter",
-              "detectGPUCapabilities",
-              "isGPUSuitableForMatrixOps",
-              "getRecommendedWorkgroupSize",
-              "getMaxMatrixSize",
-              "GPUAdapterInfo",
-              "GPUCapabilities"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./GPUContext.js",
-            "imports": [
-              "GPUContext",
-              "getGlobalGPUContext",
-              "initializeGlobalGPU",
-              "destroyGlobalGPU",
-              "GPUContextOptions",
-              "GPUContextStatus",
-              "DeviceLostEvent"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./BufferPool.js",
-            "imports": ["BufferPool", "BufferPoolOptions"],
-            "reExport": true
-          },
-          {
-            "file": "./ShaderManager.js",
-            "imports": ["ShaderManager", "BUILTIN_SHADERS", "ShaderSource", "PipelineConfig"],
+            "file": "./builtin-shaders.js",
+            "imports": ["BUILTIN_SHADERS", "registerBuiltinShaders"],
             "reExport": true
           },
           {
@@ -2254,7 +2180,37 @@
             "reExport": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": [
+              "hasWebGPU",
+              "isBrowser",
+              "getGPUAdapter",
+              "detectGPUCapabilities",
+              "isGPUSuitableForMatrixOps",
+              "getRecommendedWorkgroupSize",
+              "getMaxMatrixSize",
+              "GPUContext",
+              "getGlobalGPUContext",
+              "initializeGlobalGPU",
+              "destroyGlobalGPU",
+              "getGpuDevice",
+              "resetGpuDevice",
+              "BufferPool",
+              "ShaderManager",
+              "GPUAdapterInfo",
+              "GPUCapabilities",
+              "GPUContextOptions",
+              "GPUContextStatus",
+              "DeviceLostEvent",
+              "BufferPoolOptions",
+              "ShaderSource",
+              "PipelineConfig"
+            ]
+          }
+        ],
         "exports": [
           "hasWebGPU",
           "isBrowser",
@@ -2263,21 +2219,24 @@
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
-          "GPUAdapterInfo",
-          "GPUCapabilities",
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
           "destroyGlobalGPU",
+          "getGpuDevice",
+          "resetGpuDevice",
+          "BufferPool",
+          "ShaderManager",
+          "GPUAdapterInfo",
+          "GPUCapabilities",
           "GPUContextOptions",
           "GPUContextStatus",
           "DeviceLostEvent",
-          "BufferPool",
           "BufferPoolOptions",
-          "ShaderManager",
-          "BUILTIN_SHADERS",
           "ShaderSource",
           "PipelineConfig",
+          "BUILTIN_SHADERS",
+          "registerBuiltinShaders",
           "BatchExecutor",
           "BatchOperation",
           "BatchOperationType",
@@ -2299,21 +2258,24 @@
           "isGPUSuitableForMatrixOps",
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
-          "GPUAdapterInfo",
-          "GPUCapabilities",
           "GPUContext",
           "getGlobalGPUContext",
           "initializeGlobalGPU",
           "destroyGlobalGPU",
+          "getGpuDevice",
+          "resetGpuDevice",
+          "BufferPool",
+          "ShaderManager",
+          "GPUAdapterInfo",
+          "GPUCapabilities",
           "GPUContextOptions",
           "GPUContextStatus",
           "DeviceLostEvent",
-          "BufferPool",
           "BufferPoolOptions",
-          "ShaderManager",
-          "BUILTIN_SHADERS",
           "ShaderSource",
           "PipelineConfig",
+          "BUILTIN_SHADERS",
+          "registerBuiltinShaders",
           "BatchExecutor",
           "BatchOperation",
           "BatchOperationType",
@@ -2328,39 +2290,23 @@
           "SyncConfig"
         ]
       },
-      "matrix/src/backends/gpu/ShaderManager.ts": {
-        "description": "GPU Shader Manager",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./GPUContext.js",
-            "imports": ["GPUContext"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["BUILTIN_SHADERS", "ShaderManager"],
-        "classes": ["ShaderManager"],
-        "interfaces": ["ShaderSource", "PipelineConfig"],
-        "constants": ["BUILTIN_SHADERS"]
-      },
       "matrix/src/backends/gpu/Sync.ts": {
         "description": "GPU-CPU Synchronization Strategy",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./GPUContext.js",
-            "imports": ["GPUContext"],
-            "typeOnly": true
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUContext"]
           },
           {
-            "file": "./BufferPool.js",
-            "imports": ["BufferPool"],
-            "typeOnly": true
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["BufferPool"]
           }
         ],
-        "workspaceDependencies": [],
         "exports": ["createSyncManager", "SyncManager"],
         "classes": ["SyncManager"],
         "interfaces": ["TransferRequest", "TransferResult", "SyncConfig"],
@@ -2372,7 +2318,14 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./gpu/index.js",
+            "file": "./gpu/builtin-shaders.js",
+            "imports": ["registerBuiltinShaders"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
             "imports": [
               "GPUContext",
               "GPUContextOptions",
@@ -2386,7 +2339,6 @@
             ]
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "getGlobalGPUBackend",
           "initializeGlobalGPUBackend",
@@ -2427,13 +2379,15 @@
               "initializeGlobalGPUBackend",
               "GPUBackendOptions"
             ]
-          },
+          }
+        ],
+        "workspaceDependencies": [
           {
-            "file": "./gpu/index.js",
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
             "imports": ["hasWebGPU", "detectGPUCapabilities", "GPUCapabilities"]
           }
         ],
-        "workspaceDependencies": [],
         "exports": ["gpuMatrixBackend", "createGPUMatrixBackend", "GPUMatrixBackend"],
         "classes": ["GPUMatrixBackend"],
         "interfaces": ["GPUMatrixBackendConfig"],
@@ -33532,11 +33486,8 @@
           "matrix/src/backends/Backend.ts",
           "matrix/src/backends/BackendManager.ts",
           "matrix/src/backends/gpu/BatchExecutor.ts",
-          "matrix/src/backends/gpu/BufferPool.ts",
-          "matrix/src/backends/gpu/detect.ts",
-          "matrix/src/backends/gpu/GPUContext.ts",
+          "matrix/src/backends/gpu/builtin-shaders.ts",
           "matrix/src/backends/gpu/index.ts",
-          "matrix/src/backends/gpu/ShaderManager.ts",
           "matrix/src/backends/gpu/Sync.ts",
           "matrix/src/backends/GPUBackend.ts",
           "matrix/src/backends/GPUMatrixBackend.ts",
@@ -34801,18 +34752,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1025,
+    "totalTypeScriptFiles": 1022,
     "totalModules": 76,
-    "totalLinesOfCode": 170956,
-    "totalExports": 4921,
-    "totalClasses": 59,
-    "totalInterfaces": 414,
-    "totalFunctions": 1600,
-    "totalTypeGuards": 158,
+    "totalLinesOfCode": 169838,
+    "totalExports": 4912,
+    "totalClasses": 56,
+    "totalInterfaces": 407,
+    "totalFunctions": 1591,
+    "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1531,
-    "totalReExports": 1770,
-    "totalTypeOnlyImports": 529,
+    "totalReExports": 1773,
+    "totalTypeOnlyImports": 524,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

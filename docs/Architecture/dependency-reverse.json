@@ -127,33 +127,12 @@
       "matrix/src/backends/BackendManager.ts",
       "matrix/src/backends/index.ts"
     ],
-    "matrix/src/backends/gpu/GPUContext.ts": [
-      "matrix/src/backends/gpu/BatchExecutor.ts",
-      "matrix/src/backends/gpu/BufferPool.ts",
-      "matrix/src/backends/gpu/ShaderManager.ts",
-      "matrix/src/backends/gpu/Sync.ts",
-      "matrix/src/backends/gpu/index.ts"
-    ],
-    "matrix/src/backends/gpu/ShaderManager.ts": [
-      "matrix/src/backends/gpu/BatchExecutor.ts",
-      "matrix/src/backends/gpu/index.ts"
-    ],
-    "matrix/src/backends/gpu/BufferPool.ts": [
-      "matrix/src/backends/gpu/BatchExecutor.ts",
-      "matrix/src/backends/gpu/Sync.ts",
-      "matrix/src/backends/gpu/index.ts"
-    ],
-    "matrix/src/backends/gpu/detect.ts": [
-      "matrix/src/backends/gpu/GPUContext.ts",
+    "matrix/src/backends/gpu/builtin-shaders.ts": [
+      "matrix/src/backends/GPUBackend.ts",
       "matrix/src/backends/gpu/index.ts"
     ],
     "matrix/src/backends/gpu/BatchExecutor.ts": ["matrix/src/backends/gpu/index.ts"],
     "matrix/src/backends/gpu/Sync.ts": ["matrix/src/backends/gpu/index.ts"],
-    "matrix/src/backends/gpu/index.ts": [
-      "matrix/src/backends/GPUBackend.ts",
-      "matrix/src/backends/GPUMatrixBackend.ts",
-      "matrix/src/backends/index.ts"
-    ],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
       "matrix/src/backends/index.ts"
@@ -166,6 +145,7 @@
     "matrix/src/backends/GPUMatrixBackend.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/BackendManager.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/wasm/index.ts": ["matrix/src/backends/index.ts"],
+    "matrix/src/backends/gpu/index.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/WasmLoader.ts": ["matrix/src/backends/wasm/fft-wasm.ts"],
     "matrix/src/backends/wasm/detect.ts": [
       "matrix/src/backends/WASMBackend.ts",

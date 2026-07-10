@@ -14,13 +14,9 @@ import {
   getRecommendedWorkgroupSize,
   getMaxMatrixSize,
   type GPUCapabilities,
-} from '../../src/backends/gpu/detect.js';
-import {
-  GPUContext,
-  getGlobalGPUContext,
-  destroyGlobalGPU,
-} from '../../src/backends/gpu/GPUContext.js';
-import { BUILTIN_SHADERS } from '../../src/backends/gpu/ShaderManager.js';
+} from '@danielsimonjr/mathts-gpu';
+import { GPUContext, getGlobalGPUContext, destroyGlobalGPU } from '@danielsimonjr/mathts-gpu';
+import { BUILTIN_SHADERS } from '../../src/backends/gpu/builtin-shaders.js';
 import {
   GPUBackend,
   getGlobalGPUBackend,

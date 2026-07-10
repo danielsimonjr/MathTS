@@ -6,18 +6,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { GPUContext } from '../../src/backends/gpu/GPUContext.js';
-import { BufferPool } from '../../src/backends/gpu/BufferPool.js';
-import { ShaderManager, BUILTIN_SHADERS } from '../../src/backends/gpu/ShaderManager.js';
-import {
-  BatchExecutor,
-  type BatchOperation,
-} from '../../src/backends/gpu/BatchExecutor.js';
-import {
-  SyncManager,
-  createSyncManager,
-  type SyncStrategy,
-} from '../../src/backends/gpu/Sync.js';
+import { GPUContext } from '@danielsimonjr/mathts-gpu';
+import { BufferPool } from '@danielsimonjr/mathts-gpu';
+import { ShaderManager } from '@danielsimonjr/mathts-gpu';
+import { BUILTIN_SHADERS } from '../../src/backends/gpu/builtin-shaders.js';
+import { BatchExecutor, type BatchOperation } from '../../src/backends/gpu/BatchExecutor.js';
+import { SyncManager, createSyncManager, type SyncStrategy } from '../../src/backends/gpu/Sync.js';
 
 describe('BatchExecutor', () => {
   describe('Queue management', () => {

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1025, "e": 4921, "re": 1770 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1022, "e": 4912, "re": 1773 },
   "s": {
-    "loc": 170956,
-    "cls": 59,
-    "int": 414,
-    "fn": 1600,
-    "tg": 158,
+    "loc": 169838,
+    "cls": 56,
+    "int": 407,
+    "fn": 1591,
+    "tg": 156,
     "en": 0,
     "co": 1531,
-    "toi": 529
+    "toi": 524
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -221,7 +221,7 @@
       ]
     },
     "matrix/backends": {
-      "f": 22,
+      "f": 19,
       "exp": [
         "DEFAULT_BACKEND_HINTS",
         "backendRegistry",
@@ -231,7 +231,8 @@
         "createBackendManager",
         "BackendManager",
         "BatchExecutor",
-        "BufferPool",
+        "BUILTIN_SHADERS",
+        "registerBuiltinShaders",
         "hasWebGPU",
         "isBrowser",
         "getGPUAdapter",
@@ -239,18 +240,14 @@
         "isGPUSuitableForMatrixOps",
         "getRecommendedWorkgroupSize",
         "getMaxMatrixSize",
+        "GPUContext",
         "getGlobalGPUContext",
-        "initializeGlobalGPU",
-        "destroyGlobalGPU",
-        "GPUContext"
+        "initializeGlobalGPU"
       ],
       "cls": [
         "BackendRegistry",
         "BackendManager",
         "BatchExecutor",
-        "BufferPool",
-        "GPUContext",
-        "ShaderManager",
         "SyncManager",
         "GPUBackend",
         "GPUMatrixBackend",
@@ -266,10 +263,10 @@
         "BatchOperation",
         "BatchResult",
         "BatchOptions",
-        "BufferPoolOptions",
-        "GPUAdapterInfo",
-        "GPUCapabilities",
-        "GPUContextOptions"
+        "TransferRequest",
+        "TransferResult",
+        "SyncConfig",
+        "GPUBackendOptions"
       ]
     },
     "matrix": {

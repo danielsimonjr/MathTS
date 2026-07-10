@@ -8,8 +8,8 @@
  * @packageDocumentation
  */
 
-import type { GPUContext } from './GPUContext.js';
-import type { BufferPool } from './BufferPool.js';
+import type { GPUContext } from '@danielsimonjr/mathts-gpu';
+import type { BufferPool } from '@danielsimonjr/mathts-gpu';
 
 /**
  * Synchronization strategy type

@@ -6,7 +6,7 @@
 
 import {
   GPUContext,
-  GPUContextOptions,
+  type GPUContextOptions,
   getGlobalGPUContext,
   BufferPool,
   ShaderManager,
@@ -14,7 +14,8 @@ import {
   detectGPUCapabilities,
   getRecommendedWorkgroupSize,
   type GPUCapabilities,
-} from './gpu/index.js';
+} from '@danielsimonjr/mathts-gpu';
+import { registerBuiltinShaders } from './gpu/builtin-shaders.js';
 
 /**
  * GPU Backend status
@@ -134,11 +135,10 @@ export class GPUBackend {
       // Create buffer pool
       this.bufferPool = new BufferPool(this.context, options.bufferPoolOptions);
 
-      // Create shader manager
+      // Create shader manager and register the matrix-domain kernels
       this.shaderManager = new ShaderManager(this.context);
-
-      // Precompile builtin shaders
-      this.shaderManager.precompileBuiltins();
+      registerBuiltinShaders(this.shaderManager);
+      this.shaderManager.precompileRegistered();
 
       // Get recommended workgroup size
       this.workgroupSize = getRecommendedWorkgroupSize(this._capabilities);
@@ -222,7 +222,7 @@ export class GPUBackend {
     ctx.writeBuffer(bufferParams, new Uint32Array([rows, cols, 0, 0]));
 
     // Get pipeline
-    const pipeline = shaders.getBuiltinPipeline('matrixAdd');
+    const pipeline = shaders.getRegisteredPipeline('matrixAdd');
 
     // Create bind group
     const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
@@ -277,7 +277,7 @@ export class GPUBackend {
     ctx.writeBuffer(bufferParams, new Uint32Array([M, N, K, 0]));
 
     // Get pipeline
-    const pipeline = shaders.getBuiltinPipeline('matmul');
+    const pipeline = shaders.getRegisteredPipeline('matmul');
 
     // Create bind group
     const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
@@ -322,7 +322,7 @@ export class GPUBackend {
     ctx.writeBuffer(bufferParams, new Uint32Array([rows, cols, 0, 0]));
 
     // Get pipeline
-    const pipeline = shaders.getBuiltinPipeline('transpose');
+    const pipeline = shaders.getRegisteredPipeline('transpose');
 
     // Create bind group
     const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
@@ -365,7 +365,7 @@ export class GPUBackend {
     ctx.writeBuffer(bufferParams, new Float32Array([scalar, a.length, 0, 0]));
 
     // Get pipeline
-    const pipeline = shaders.getBuiltinPipeline('scalarMul');
+    const pipeline = shaders.getRegisteredPipeline('scalarMul');
 
     // Create bind group
     const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [

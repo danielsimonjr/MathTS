@@ -107,7 +107,7 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core/typed**: 3 files
 - **core/types**: 15 files
-- **matrix/backends**: 22 files
+- **matrix/backends**: 19 files
 - **matrix**: 4 files
 - **matrix/operations**: 14 files
 - **matrix/types**: 6 files
@@ -187,7 +187,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 4              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 31             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                        | 43             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                       | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 392            | 4               |
@@ -237,6 +237,7 @@ graph LR
     P21[compat]
     P22[gpu]
     P23[plot]
+    P3 --> P22
     P3 --> P18
     P3 --> P2
     P4 --> P3
@@ -883,12 +884,12 @@ graph LR
 
 ### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./ShaderManager.js` | `ShaderManager` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPUContext` |
+| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
+| `@danielsimonjr/mathts-gpu` | `BufferPool` |
 
 **Exports:**
 
@@ -898,85 +899,47 @@ graph LR
 
 ---
 
-### `matrix/src/backends/gpu/BufferPool.ts` - GPU Buffer Pool
+### `matrix/src/backends/gpu/builtin-shaders.ts` - Matrix-domain WGSL kernels.
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-
-- Classes: `BufferPool`
-- Interfaces: `BufferPoolOptions`
-
----
-
-### `matrix/src/backends/gpu/detect.ts` - WebGPU Detection and Capability Checking
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
 
 **Exports:**
 
-- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
-
----
-
-### `matrix/src/backends/gpu/GPUContext.ts` - WebGPU Context Management
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
-
-**Exports:**
-
-- Classes: `GPUContext`
-- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+- Functions: `registerBuiltinShaders`
+- Constants: `BUILTIN_SHADERS`
 
 ---
 
 ### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, getGpuDevice, resetGpuDevice, BufferPool, ShaderManager, GPUAdapterInfo, GPUCapabilities, GPUContextOptions, GPUContextStatus, DeviceLostEvent, BufferPoolOptions, ShaderSource, PipelineConfig` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
-| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
-| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
+| `./builtin-shaders.js` | `BUILTIN_SHADERS, registerBuiltinShaders` | Re-export |
 | `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
 | `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
-
----
-
-### `matrix/src/backends/gpu/ShaderManager.ts` - GPU Shader Manager
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-
-- Classes: `ShaderManager`
-- Interfaces: `ShaderSource`, `PipelineConfig`
-- Constants: `BUILTIN_SHADERS`
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `ShaderManager`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPoolOptions`, `ShaderSource`, `PipelineConfig`, `BUILTIN_SHADERS`, `registerBuiltinShaders`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
 
 ---
 
 ### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPUContext` |
+| `@danielsimonjr/mathts-gpu` | `BufferPool` |
 
 **Exports:**
 
@@ -989,10 +952,15 @@ graph LR
 
 ### `matrix/src/backends/GPUBackend.ts` - GPU Backend for Matrix Operations
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./gpu/index.js` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` | Import |
+| `./gpu/builtin-shaders.js` | `registerBuiltinShaders` | Import |
 
 **Exports:**
 
@@ -1005,6 +973,11 @@ graph LR
 
 ### `matrix/src/backends/GPUMatrixBackend.ts` - GPU Matrix Backend Adapter
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `hasWebGPU, detectGPUCapabilities, GPUCapabilities` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1012,7 +985,6 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 | `./JSBackend.js` | `jsBackend` | Import |
 | `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, GPUBackendOptions` | Import |
-| `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, GPUCapabilities` | Import |
 
 **Exports:**
 
@@ -14742,14 +14714,14 @@ graph TD
         N32[Backend]
         N33[BackendManager]
         N34[BatchExecutor]
-        N35[BufferPool]
-        N36[detect]
-        N37[GPUContext]
-        N38[index]
-        N39[ShaderManager]
-        N40[Sync]
-        N41[GPUBackend]
-        N42[...12 more]
+        N35[builtin-shaders]
+        N36[index]
+        N37[Sync]
+        N38[GPUBackend]
+        N39[GPUMatrixBackend]
+        N40[index]
+        N41[JSBackend]
+        N42[...9 more]
     end
 
     subgraph Matrix
@@ -15390,24 +15362,24 @@ graph TD
     N32 --> N60
     N33 --> N60
     N33 --> N32
+    N33 --> N41
     N33 --> N43
-    N34 --> N37
-    N34 --> N39
-    N34 --> N35
-    N35 --> N37
-    N37 --> N36
-    N38 --> N36
-    N38 --> N37
+    N36 --> N35
+    N36 --> N34
+    N36 --> N37
     N38 --> N35
-    N38 --> N39
-    N38 --> N34
-    N38 --> N40
-    N39 --> N37
-    N40 --> N37
-    N40 --> N35
-    N41 --> N38
-    N43 --> N32
-    N44 --> N61
+    N39 --> N32
+    N39 --> N60
+    N39 --> N41
+    N39 --> N38
+    N40 --> N32
+    N40 --> N41
+    N40 --> N39
+    N40 --> N38
+    N40 --> N33
+    N40 --> N36
+    N41 --> N60
+    N41 --> N32
 ```
 
 ---
@@ -15418,17 +15390,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1025   |
+| Total TypeScript Files  | 1022   |
 | Total Modules           | 76     |
-| Total Lines of Code     | 170956 |
-| Total Exports           | 4921   |
-| Total Re-exports        | 1770   |
-| Total Classes           | 59     |
-| Total Interfaces        | 414    |
-| Total Functions         | 1600   |
-| Total Type Guards       | 158    |
+| Total Lines of Code     | 169838 |
+| Total Exports           | 4912   |
+| Total Re-exports        | 1773   |
+| Total Classes           | 56     |
+| Total Interfaces        | 407    |
+| Total Functions         | 1591   |
+| Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 529    |
+| Type-only Imports       | 524    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

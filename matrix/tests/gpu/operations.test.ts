@@ -7,10 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  GPUBackend,
-  destroyGlobalGPUBackend,
-} from '../../src/backends/GPUBackend.js';
+import { GPUBackend, destroyGlobalGPUBackend } from '../../src/backends/GPUBackend.js';
 
 /**
  * CPU reference implementations for verification
@@ -388,7 +385,7 @@ describe('WGSL Shader Content', () => {
 
   describe('ShaderManager builtin shaders', () => {
     it('should have properly formatted elementwise shaders', async () => {
-      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/ShaderManager.js');
+      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/builtin-shaders.js');
 
       expect(BUILTIN_SHADERS.matrixAdd).toContain('@compute');
       expect(BUILTIN_SHADERS.matrixAdd).toContain('@workgroup_size');
@@ -396,7 +393,7 @@ describe('WGSL Shader Content', () => {
     });
 
     it('should have properly formatted matmul shader', async () => {
-      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/ShaderManager.js');
+      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/builtin-shaders.js');
 
       expect(BUILTIN_SHADERS.matmul).toContain('@compute');
       // Params are accessed via vec4 components: x=M, y=N, z=K
@@ -406,7 +403,7 @@ describe('WGSL Shader Content', () => {
     });
 
     it('should have properly formatted reduce shader', async () => {
-      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/ShaderManager.js');
+      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/builtin-shaders.js');
 
       expect(BUILTIN_SHADERS.sumReduce).toContain('@compute');
       expect(BUILTIN_SHADERS.sumReduce).toContain('workgroupBarrier');
@@ -414,7 +411,7 @@ describe('WGSL Shader Content', () => {
     });
 
     it('should have properly formatted transpose shader', async () => {
-      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/ShaderManager.js');
+      const { BUILTIN_SHADERS } = await import('../../src/backends/gpu/builtin-shaders.js');
 
       expect(BUILTIN_SHADERS.transpose).toContain('@compute');
       // Uses params.x for rows and params.y for cols

@@ -7,9 +7,9 @@
  * @packageDocumentation
  */
 
-import type { GPUContext } from './GPUContext.js';
-import type { ShaderManager } from './ShaderManager.js';
-import type { BufferPool } from './BufferPool.js';
+import type { GPUContext } from '@danielsimonjr/mathts-gpu';
+import type { ShaderManager } from '@danielsimonjr/mathts-gpu';
+import type { BufferPool } from '@danielsimonjr/mathts-gpu';
 
 /**
  * Operation types that can be batched
@@ -340,10 +340,8 @@ export class BatchExecutor {
    */
   private encodeOperation(encoder: GPUCommandEncoder, op: BatchOperation): void {
     // Get the appropriate pipeline
-    const pipelineName = this.getPipelineName(op.type) as Parameters<
-      ShaderManager['getBuiltinPipeline']
-    >[0];
-    const pipeline = this.shaders.getBuiltinPipeline(pipelineName);
+    const pipelineName = this.getPipelineName(op.type);
+    const pipeline = this.shaders.getRegisteredPipeline(pipelineName);
 
     // Create bind group entries
     const entries: GPUBindGroupEntry[] = [{ binding: 0, resource: { buffer: op.inputA } }];

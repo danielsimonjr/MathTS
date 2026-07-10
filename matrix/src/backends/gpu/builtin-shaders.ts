@@ -1,47 +1,12 @@
 /**
- * GPU Shader Manager
+ * Matrix-domain WGSL kernels.
  *
- * Manages WGSL shader loading, compilation, and caching.
+ * These live in matrix — the @danielsimonjr/mathts-gpu foundation ships no
+ * domain kernels. GPUBackend registers them onto a ShaderManager at init.
  */
 
-import { GPUContext } from './GPUContext.js';
+import type { ShaderManager } from '@danielsimonjr/mathts-gpu';
 
-/**
- * Shader cache entry
- */
-interface ShaderCacheEntry {
-  module: GPUShaderModule;
-  pipelines: Map<string, GPUComputePipeline>;
-  createdAt: number;
-}
-
-/**
- * Shader source definition
- */
-export interface ShaderSource {
-  /** Shader WGSL code */
-  code: string;
-  /** Entry point name */
-  entryPoint: string;
-  /** Optional label for debugging */
-  label?: string;
-}
-
-/**
- * Pipeline configuration
- */
-export interface PipelineConfig {
-  /** Entry point function name */
-  entryPoint: string;
-  /** Pipeline layout ('auto' or custom) */
-  layout?: GPUPipelineLayout | 'auto';
-  /** Optional label for debugging */
-  label?: string;
-}
-
-/**
- * Built-in shader library
- */
 export const BUILTIN_SHADERS = {
   /** Matrix addition shader */
   matrixAdd: `
@@ -211,139 +176,11 @@ export const BUILTIN_SHADERS = {
       }
     }
   `,
-};
+} as const;
 
-/**
- * Shader Manager for compiling and caching GPU shaders
- */
-export class ShaderManager {
-  private context: GPUContext;
-  private cache: Map<string, ShaderCacheEntry> = new Map();
-
-  constructor(context: GPUContext) {
-    this.context = context;
-  }
-
-  /**
-   * Get or compile a shader module
-   */
-  getShaderModule(name: string, code: string): GPUShaderModule {
-    // Check cache
-    let entry = this.cache.get(name);
-    if (entry) {
-      return entry.module;
-    }
-
-    // Compile shader
-    const module = this.context.createShaderModule(code, name);
-
-    // Cache it
-    entry = {
-      module,
-      pipelines: new Map(),
-      createdAt: Date.now(),
-    };
-    this.cache.set(name, entry);
-
-    return module;
-  }
-
-  /**
-   * Get a builtin shader module
-   */
-  getBuiltinShader(name: keyof typeof BUILTIN_SHADERS): GPUShaderModule {
-    const code = BUILTIN_SHADERS[name];
-    if (!code) {
-      throw new Error(`Unknown builtin shader: ${name}`);
-    }
-    return this.getShaderModule(`builtin:${name}`, code);
-  }
-
-  /**
-   * Get or create a compute pipeline
-   */
-  getPipeline(
-    shaderName: string,
-    entryPoint: string,
-    code?: string,
-    layout?: GPUPipelineLayout | 'auto'
-  ): GPUComputePipeline {
-    const pipelineKey = `${shaderName}:${entryPoint}`;
-
-    // Check if shader is cached
-    let entry = this.cache.get(shaderName);
-    if (entry) {
-      // Check if pipeline is cached
-      const pipeline = entry.pipelines.get(pipelineKey);
-      if (pipeline) {
-        return pipeline;
-      }
-    } else if (code) {
-      // Compile shader first
-      this.getShaderModule(shaderName, code);
-      entry = this.cache.get(shaderName)!;
-    } else {
-      throw new Error(`Shader not found: ${shaderName}`);
-    }
-
-    // Create pipeline
-    const pipeline = this.context.createComputePipeline(
-      entry.module,
-      entryPoint,
-      layout,
-      pipelineKey
-    );
-
-    entry.pipelines.set(pipelineKey, pipeline);
-
-    return pipeline;
-  }
-
-  /**
-   * Get a builtin compute pipeline
-   */
-  getBuiltinPipeline(
-    name: keyof typeof BUILTIN_SHADERS,
-    entryPoint: string = 'main'
-  ): GPUComputePipeline {
-    const shaderName = `builtin:${name}`;
-    const code = BUILTIN_SHADERS[name];
-
-    return this.getPipeline(shaderName, entryPoint, code);
-  }
-
-  /**
-   * Precompile all builtin shaders
-   */
-  precompileBuiltins(): void {
-    for (const name of Object.keys(BUILTIN_SHADERS)) {
-      this.getBuiltinShader(name as keyof typeof BUILTIN_SHADERS);
-      this.getBuiltinPipeline(name as keyof typeof BUILTIN_SHADERS);
-    }
-  }
-
-  /**
-   * Clear shader cache
-   */
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  /**
-   * Get cache statistics
-   */
-  getStats(): {
-    cachedShaders: number;
-    cachedPipelines: number;
-  } {
-    let cachedShaders = 0;
-    let cachedPipelines = 0;
-
-    for (const entry of this.cache.values()) {
-      cachedShaders++;
-      cachedPipelines += entry.pipelines.size;
-    }
-
-    return { cachedShaders, cachedPipelines };
+/** Register every builtin matrix kernel onto a ShaderManager. */
+export function registerBuiltinShaders(sm: ShaderManager): void {
+  for (const [name, code] of Object.entries(BUILTIN_SHADERS)) {
+    sm.registerShader(name, code);
   }
 }

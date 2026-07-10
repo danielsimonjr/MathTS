@@ -1,10 +1,13 @@
 /**
  * GPU Backend Exports
  *
- * WebGPU infrastructure for accelerated matrix operations.
+ * WebGPU infrastructure for accelerated matrix operations. The generic
+ * foundation now lives in @danielsimonjr/mathts-gpu and is re-exported here
+ * so matrix's public surface is unchanged. Matrix-domain kernels and the
+ * (unextracted) batch/sync helpers stay local.
  */
 
-// Detection utilities
+// Shared foundation (re-exported from the gpu leaf for back-compat)
 export {
   hasWebGPU,
   isBrowser,
@@ -13,33 +16,28 @@ export {
   isGPUSuitableForMatrixOps,
   getRecommendedWorkgroupSize,
   getMaxMatrixSize,
-  type GPUAdapterInfo,
-  type GPUCapabilities,
-} from './detect.js';
-
-// GPU Context
-export {
   GPUContext,
   getGlobalGPUContext,
   initializeGlobalGPU,
   destroyGlobalGPU,
+  getGpuDevice,
+  resetGpuDevice,
+  BufferPool,
+  ShaderManager,
+  type GPUAdapterInfo,
+  type GPUCapabilities,
   type GPUContextOptions,
   type GPUContextStatus,
   type DeviceLostEvent,
-} from './GPUContext.js';
-
-// Buffer Pool
-export { BufferPool, type BufferPoolOptions } from './BufferPool.js';
-
-// Shader Manager
-export {
-  ShaderManager,
-  BUILTIN_SHADERS,
+  type BufferPoolOptions,
   type ShaderSource,
   type PipelineConfig,
-} from './ShaderManager.js';
+} from '@danielsimonjr/mathts-gpu';
 
-// Batch Executor
+// Matrix-domain kernels (stay in matrix)
+export { BUILTIN_SHADERS, registerBuiltinShaders } from './builtin-shaders.js';
+
+// Batch Executor (not extracted — YAGNI)
 export {
   BatchExecutor,
   type BatchOperation,
@@ -48,7 +46,7 @@ export {
   type BatchOptions,
 } from './BatchExecutor.js';
 
-// Synchronization
+// Synchronization (not extracted — YAGNI)
 export {
   SyncManager,
   createSyncManager,

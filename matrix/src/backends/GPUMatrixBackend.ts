@@ -16,7 +16,7 @@ import {
   initializeGlobalGPUBackend,
   type GPUBackendOptions,
 } from './GPUBackend.js';
-import { hasWebGPU, detectGPUCapabilities, type GPUCapabilities } from './gpu/index.js';
+import { hasWebGPU, detectGPUCapabilities, type GPUCapabilities } from '@danielsimonjr/mathts-gpu';
 
 /**
  * Configuration for GPU Matrix Backend
