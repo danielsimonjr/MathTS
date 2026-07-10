@@ -172,7 +172,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **gpu**: 2 files
+- **gpu**: 4 files
 - **plot**: 18 files
 - **plot/three**: 3 files
 
@@ -206,7 +206,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 20             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                             | 2              | 0               |
+| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                             | 4              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 21             | 0               |
 
 ### Package Dependency Diagram
@@ -14210,16 +14210,47 @@ graph LR
 
 ---
 
-### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 9 symbols)
+### `gpu/src/device.ts` - Shared GPU device singleton.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `getGlobalGPUContext, GPUContextOptions` | Import |
+
+**Exports:**
+
+- Functions: `getGpuDevice`, `resetGpuDevice`
+
+---
+
+### `gpu/src/GPUContext.ts` - WebGPU Context Management
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+
+**Exports:**
+
+- Classes: `GPUContext`
+- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
+- Types: `GPUContextStatus`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+
+---
+
+### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 18 symbols)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
+| `./device.js` | `getGpuDevice, resetGpuDevice` | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`
 
 ---
 
@@ -15245,27 +15276,29 @@ graph TD
 
     subgraph Gpu
         N403[detect]
-        N404[index]
+        N404[device]
+        N405[GPUContext]
+        N406[index]
     end
 
     subgraph Plot
-        N405[coerce]
-        N406[contour]
-        N407[emit]
-        N408[frame]
-        N409[heatmap]
-        N410[histogram]
-        N411[index]
-        N412[marks2d]
-        N413[overlay]
-        N414[palette]
-        N415[...8 more]
+        N407[coerce]
+        N408[contour]
+        N409[emit]
+        N410[frame]
+        N411[heatmap]
+        N412[histogram]
+        N413[index]
+        N414[marks2d]
+        N415[overlay]
+        N416[palette]
+        N417[...8 more]
     end
 
     subgraph Plot/three
-        N416[points3d]
-        N417[project]
-        N418[surface]
+        N418[points3d]
+        N419[project]
+        N420[surface]
     end
 
     N2 --> N1
@@ -15353,14 +15386,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1021   |
+| Total TypeScript Files  | 1023   |
 | Total Modules           | 76     |
-| Total Lines of Code     | 170040 |
-| Total Exports           | 4899   |
-| Total Re-exports        | 1756   |
-| Total Classes           | 56     |
-| Total Interfaces        | 409    |
-| Total Functions         | 1595   |
+| Total Lines of Code     | 170495 |
+| Total Exports           | 4914   |
+| Total Re-exports        | 1765   |
+| Total Classes           | 57     |
+| Total Interfaces        | 411    |
+| Total Functions         | 1600   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 529    |

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-10",
-    "totalFiles": 1021,
+    "totalFiles": 1023,
     "totalModules": 76,
-    "totalExports": 4899
+    "totalExports": 4914
   },
   "entryPoints": [
     {
@@ -32660,8 +32660,38 @@
           "getMaxMatrixSize"
         ]
       },
+      "gpu/src/device.ts": {
+        "description": "Shared GPU device singleton.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./GPUContext.js",
+            "imports": ["getGlobalGPUContext", "GPUContextOptions"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["getGpuDevice", "resetGpuDevice"],
+        "functions": ["getGpuDevice", "resetGpuDevice"]
+      },
+      "gpu/src/GPUContext.ts": {
+        "description": "WebGPU Context Management",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "classes": ["GPUContext"],
+        "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
+        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
+      },
       "gpu/src/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 9 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 18 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -32679,6 +32709,24 @@
               "GPUCapabilities"
             ],
             "reExport": true
+          },
+          {
+            "file": "./GPUContext.js",
+            "imports": [
+              "GPUContext",
+              "getGlobalGPUContext",
+              "initializeGlobalGPU",
+              "destroyGlobalGPU",
+              "GPUContextOptions",
+              "GPUContextStatus",
+              "DeviceLostEvent"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./device.js",
+            "imports": ["getGpuDevice", "resetGpuDevice"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -32691,7 +32739,16 @@
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
           "GPUAdapterInfo",
-          "GPUCapabilities"
+          "GPUCapabilities",
+          "GPUContext",
+          "getGlobalGPUContext",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContextOptions",
+          "GPUContextStatus",
+          "DeviceLostEvent",
+          "getGpuDevice",
+          "resetGpuDevice"
         ],
         "reExported": [
           "hasWebGPU",
@@ -32702,7 +32759,16 @@
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize",
           "GPUAdapterInfo",
-          "GPUCapabilities"
+          "GPUCapabilities",
+          "GPUContext",
+          "getGlobalGPUContext",
+          "initializeGlobalGPU",
+          "destroyGlobalGPU",
+          "GPUContextOptions",
+          "GPUContextStatus",
+          "DeviceLostEvent",
+          "getGpuDevice",
+          "resetGpuDevice"
         ]
       }
     },
@@ -34642,7 +34708,12 @@
       },
       {
         "name": "Gpu",
-        "files": ["gpu/src/detect.ts", "gpu/src/index.ts"]
+        "files": [
+          "gpu/src/detect.ts",
+          "gpu/src/device.ts",
+          "gpu/src/GPUContext.ts",
+          "gpu/src/index.ts"
+        ]
       },
       {
         "name": "Plot",
@@ -34678,17 +34749,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1021,
+    "totalTypeScriptFiles": 1023,
     "totalModules": 76,
-    "totalLinesOfCode": 170040,
-    "totalExports": 4899,
-    "totalClasses": 56,
-    "totalInterfaces": 409,
-    "totalFunctions": 1595,
+    "totalLinesOfCode": 170495,
+    "totalExports": 4914,
+    "totalClasses": 57,
+    "totalInterfaces": 411,
+    "totalFunctions": 1600,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1531,
-    "totalReExports": 1756,
+    "totalReExports": 1765,
     "totalTypeOnlyImports": 529,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
