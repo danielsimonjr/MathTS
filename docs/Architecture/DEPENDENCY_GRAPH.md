@@ -83,12 +83,13 @@ This document provides a comprehensive dependency graph of all files, components
 73. [Assembly/ops Dependencies](#assembly-ops-dependencies)
 74. [Assembly/types Dependencies](#assembly-types-dependencies)
 75. [Compat Dependencies](#compat-dependencies)
-76. [Plot Dependencies](#plot-dependencies)
-77. [Plot/three Dependencies](#plot-three-dependencies)
-78. [Dependency Matrix](#dependency-matrix)
-79. [Circular Dependency Analysis](#circular-dependency-analysis)
-80. [Visual Dependency Graph](#visual-dependency-graph)
-81. [Summary Statistics](#summary-statistics)
+76. [Gpu Dependencies](#gpu-dependencies)
+77. [Plot Dependencies](#plot-dependencies)
+78. [Plot/three Dependencies](#plot-three-dependencies)
+79. [Dependency Matrix](#dependency-matrix)
+80. [Circular Dependency Analysis](#circular-dependency-analysis)
+81. [Visual Dependency Graph](#visual-dependency-graph)
+82. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -171,6 +172,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
+- **gpu**: 2 files
 - **plot**: 18 files
 - **plot/three**: 3 files
 
@@ -204,6 +206,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 20             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
+| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                             | 2              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 21             | 0               |
 
 ### Package Dependency Diagram
@@ -232,7 +235,8 @@ graph LR
     P19[workbook]
     P20[assembly]
     P21[compat]
-    P22[plot]
+    P22[gpu]
+    P23[plot]
     P3 --> P18
     P3 --> P2
     P4 --> P3
@@ -256,13 +260,13 @@ graph LR
     P18 --> P1
     P19 --> P6
     P19 --> P7
-    P19 --> P22
+    P19 --> P23
     P21 --> P6
     P21 --> P2
     P21 --> P3
     P21 --> P18
-    P22 --> P2
-    P22 --> P6
+    P23 --> P2
+    P23 --> P6
 ```
 
 ---
@@ -14193,6 +14197,32 @@ graph LR
 
 ---
 
+<a id="gpu-dependencies"></a>
+
+## Gpu Dependencies
+
+### `gpu/src/detect.ts` - WebGPU Detection and Capability Checking
+
+**Exports:**
+
+- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
+- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+
+---
+
+### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 9 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+
+**Exports:**
+
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`
+
+---
+
 <a id="plot-dependencies"></a>
 
 ## Plot Dependencies
@@ -15213,24 +15243,29 @@ graph TD
         N402[shims]
     end
 
+    subgraph Gpu
+        N403[detect]
+        N404[index]
+    end
+
     subgraph Plot
-        N403[coerce]
-        N404[contour]
-        N405[emit]
-        N406[frame]
-        N407[heatmap]
-        N408[histogram]
-        N409[index]
-        N410[marks2d]
-        N411[overlay]
-        N412[palette]
-        N413[...8 more]
+        N405[coerce]
+        N406[contour]
+        N407[emit]
+        N408[frame]
+        N409[heatmap]
+        N410[histogram]
+        N411[index]
+        N412[marks2d]
+        N413[overlay]
+        N414[palette]
+        N415[...8 more]
     end
 
     subgraph Plot/three
-        N414[points3d]
-        N415[project]
-        N416[surface]
+        N416[points3d]
+        N417[project]
+        N418[surface]
     end
 
     N2 --> N1
@@ -15318,15 +15353,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1019   |
-| Total Modules           | 75     |
-| Total Lines of Code     | 169777 |
-| Total Exports           | 4883   |
-| Total Re-exports        | 1747   |
+| Total TypeScript Files  | 1021   |
+| Total Modules           | 76     |
+| Total Lines of Code     | 170040 |
+| Total Exports           | 4899   |
+| Total Re-exports        | 1756   |
 | Total Classes           | 56     |
-| Total Interfaces        | 407    |
-| Total Functions         | 1588   |
-| Total Type Guards       | 156    |
+| Total Interfaces        | 409    |
+| Total Functions         | 1595   |
+| Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 529    |
 | Runtime Circular Deps   | 0      |

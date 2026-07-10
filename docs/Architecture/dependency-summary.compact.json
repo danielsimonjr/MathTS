@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1019, "e": 4883, "re": 1747 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1021, "e": 4899, "re": 1756 },
   "s": {
-    "loc": 169777,
+    "loc": 170040,
     "cls": 56,
-    "int": 407,
-    "fn": 1588,
-    "tg": 156,
+    "int": 409,
+    "fn": 1595,
+    "tg": 158,
     "en": 0,
     "co": 1531,
     "toi": 529
@@ -1493,6 +1493,21 @@
         "subtract"
       ],
       "int": ["Chain", "MathJSConfig", "MathInstance"]
+    },
+    "gpu": {
+      "f": 2,
+      "exp": [
+        "hasWebGPU",
+        "isBrowser",
+        "getGPUAdapter",
+        "detectGPUCapabilities",
+        "isGPUSuitableForMatrixOps",
+        "getRecommendedWorkgroupSize",
+        "getMaxMatrixSize",
+        "GPUAdapterInfo",
+        "GPUCapabilities"
+      ],
+      "int": ["GPUAdapterInfo", "GPUCapabilities"]
     },
     "plot": {
       "f": 18,

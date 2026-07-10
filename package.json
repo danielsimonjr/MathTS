@@ -29,6 +29,7 @@
     "workbook",
     "assembly",
     "compat",
+    "gpu",
     "plot"
   ],
   "engines": {

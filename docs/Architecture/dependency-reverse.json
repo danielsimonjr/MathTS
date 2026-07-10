@@ -3550,6 +3550,7 @@
     "assembly/src/ops/complex-array.ts": ["assembly/src/index.ts"],
     "compat/src/shims.ts": ["compat/src/index.ts"],
     "compat/src/chain.ts": ["compat/src/index.ts"],
+    "gpu/src/detect.ts": ["gpu/src/index.ts"],
     "plot/src/types.ts": [
       "plot/src/coerce.ts",
       "plot/src/contour.ts",

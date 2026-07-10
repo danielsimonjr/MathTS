@@ -2910,6 +2910,17 @@
       "zscore",
       "zTransform"
     ],
+    "gpu": [
+      "detectGPUCapabilities",
+      "getGPUAdapter",
+      "getMaxMatrixSize",
+      "getRecommendedWorkgroupSize",
+      "GPUAdapterInfo",
+      "GPUCapabilities",
+      "hasWebGPU",
+      "isBrowser",
+      "isGPUSuitableForMatrixOps"
+    ],
     "linalg": [
       "cholesky",
       "CholeskyResult",

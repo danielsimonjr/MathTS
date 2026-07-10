@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-10",
-    "totalFiles": 1019,
-    "totalModules": 75,
-    "totalExports": 4883
+    "totalFiles": 1021,
+    "totalModules": 76,
+    "totalExports": 4899
   },
   "entryPoints": [
     {
@@ -117,6 +117,11 @@
       "file": "compat/src/index.ts",
       "type": "main",
       "description": "mathjs Compatibility Layer"
+    },
+    {
+      "file": "gpu/src/index.ts",
+      "type": "main",
+      "description": "Entry Point"
     },
     {
       "file": "plot/src/index.ts",
@@ -32628,6 +32633,79 @@
         ]
       }
     },
+    "gpu": {
+      "gpu/src/detect.ts": {
+        "description": "WebGPU Detection and Capability Checking",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "hasWebGPU",
+          "isBrowser",
+          "getGPUAdapter",
+          "detectGPUCapabilities",
+          "isGPUSuitableForMatrixOps",
+          "getRecommendedWorkgroupSize",
+          "getMaxMatrixSize"
+        ],
+        "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
+        "functions": [
+          "hasWebGPU",
+          "isBrowser",
+          "getGPUAdapter",
+          "detectGPUCapabilities",
+          "isGPUSuitableForMatrixOps",
+          "getRecommendedWorkgroupSize",
+          "getMaxMatrixSize"
+        ]
+      },
+      "gpu/src/index.ts": {
+        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 9 symbols)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": [
+              "hasWebGPU",
+              "isBrowser",
+              "getGPUAdapter",
+              "detectGPUCapabilities",
+              "isGPUSuitableForMatrixOps",
+              "getRecommendedWorkgroupSize",
+              "getMaxMatrixSize",
+              "GPUAdapterInfo",
+              "GPUCapabilities"
+            ],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "hasWebGPU",
+          "isBrowser",
+          "getGPUAdapter",
+          "detectGPUCapabilities",
+          "isGPUSuitableForMatrixOps",
+          "getRecommendedWorkgroupSize",
+          "getMaxMatrixSize",
+          "GPUAdapterInfo",
+          "GPUCapabilities"
+        ],
+        "reExported": [
+          "hasWebGPU",
+          "isBrowser",
+          "getGPUAdapter",
+          "detectGPUCapabilities",
+          "isGPUSuitableForMatrixOps",
+          "getRecommendedWorkgroupSize",
+          "getMaxMatrixSize",
+          "GPUAdapterInfo",
+          "GPUCapabilities"
+        ]
+      }
+    },
     "plot": {
       "plot/src/coerce.ts": {
         "description": "coerce module",
@@ -34563,6 +34641,10 @@
         "files": ["compat/src/chain.ts", "compat/src/index.ts", "compat/src/shims.ts"]
       },
       {
+        "name": "Gpu",
+        "files": ["gpu/src/detect.ts", "gpu/src/index.ts"]
+      },
+      {
         "name": "Plot",
         "files": [
           "plot/src/coerce.ts",
@@ -34596,17 +34678,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1019,
-    "totalModules": 75,
-    "totalLinesOfCode": 169777,
-    "totalExports": 4883,
+    "totalTypeScriptFiles": 1021,
+    "totalModules": 76,
+    "totalLinesOfCode": 170040,
+    "totalExports": 4899,
     "totalClasses": 56,
-    "totalInterfaces": 407,
-    "totalFunctions": 1588,
-    "totalTypeGuards": 156,
+    "totalInterfaces": 409,
+    "totalFunctions": 1595,
+    "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1531,
-    "totalReExports": 1747,
+    "totalReExports": 1756,
     "totalTypeOnlyImports": 529,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -22,6 +22,7 @@
     "parallel",
     "assembly",
     "compat",
+    "gpu",
     "plot"
   ],
   "nodeTaintedFiles": [
@@ -52,6 +53,7 @@
     "parallel": [],
     "assembly": [],
     "compat": [],
+    "gpu": [],
     "plot": []
   }
 }
