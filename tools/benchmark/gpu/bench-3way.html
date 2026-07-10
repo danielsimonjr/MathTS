@@ -20,6 +20,13 @@
   </head>
   <body>
     <h1>MathTS matmul — JS/TS vs WASM vs WebGPU</h1>
+    <p style="background: #fff8e1; border: 1px solid #e0c060; padding: 0.5rem 0.75rem; border-radius: 4px">
+      ⚠️ <b>WebGPU is experimental scaffolding — not a production accelerator yet</b> (unlike
+      the matured AssemblyScript/WASM backend). Today's real comparison is <b>JS vs WASM</b>;
+      the WebGPU column measures the incomplete <code>GPUBackend</code> path and will only
+      become meaningful once real WebGPU accelerators land. Intended for future WebGPU
+      testing in a WebGPU-capable browser (Chrome + DevTools).
+    </p>
     <p>
       Square-matrix multiply across the three real matrix backends. Sizes:
       <input id="sizes" value="128,256,512,1024" size="24" /> · reps

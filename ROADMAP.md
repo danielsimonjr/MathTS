@@ -85,7 +85,12 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
-- _(none yet — add candidates as they surface from CDG gaps, user requests, or upstream drift)_
+- **WebGPU matrix accelerators** — `matrix`'s `GPUBackend` (matmul compute shader) is
+  experimental scaffolding, not yet a production accelerator like the AssemblyScript/WASM
+  backend, and isn't meaningfully routed by `BackendManager` (very high gpu threshold). A
+  real WebGPU acceleration pass (validated kernels + routing) is future work. The 3-way
+  bench harness (`tools/benchmark/gpu/bench-3way.*`, run in Chrome + DevTools) is ready to
+  measure it once the accelerators exist.
 
 ## Recently shipped
 

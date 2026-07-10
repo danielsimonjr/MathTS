@@ -37,8 +37,12 @@ Drives the REAL matrix backends (`jsBackend.multiply`, `WASMBackend.multiply` AS
 `GPUBackend.matmul` WebGPU). WebGPU only runs in a browser, so it's esbuild-bundled and
 opened as a page: `npm run bench:backends:serve` (builds + serves on :8099 + opens the
 page), then click **Run**. `bench:backends:build` just produces the bundle (gitignored
-artifact). JS-vs-WASM also validated headless (~11× at n=256, f64-exact); the WebGPU
-column needs a real GPU/browser.
+artifact). JS-vs-WASM validated headless (~11× at n=256, f64-exact).
+
+> ⚠️ **WebGPU is experimental, not a production accelerator yet** (unlike the matured
+> WASM backend). The WebGPU column exercises the incomplete `GPUBackend` path — a
+> forward-looking placeholder to run in a WebGPU-capable browser (Chrome + DevTools)
+> **once real WebGPU accelerators land**. Today's real acceleration story is JS vs WASM.
 
 ## LLM-context helpers
 

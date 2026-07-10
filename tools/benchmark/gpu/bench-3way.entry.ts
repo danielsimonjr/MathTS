@@ -6,6 +6,11 @@
  * (WebGPU compute shader). WebGPU only runs in a browser, so this is bundled
  * (esbuild, browser target) and driven from a page — see bench-3way.html.
  *
+ * NOTE: WASM (AssemblyScript) is the matured accelerator; the WebGPU/`GPUBackend`
+ * path is EXPERIMENTAL and not yet a production accelerator — its column is a
+ * forward-looking placeholder, meant to be exercised in a WebGPU-capable browser
+ * (Chrome + DevTools) once real WebGPU accelerators exist. Today: JS vs WASM is real.
+ *
  * Build:  npm run bench:backends:build   (esbuild → bench-3way.bundle.js)
  * Run:    serve the repo on localhost, open the page, click Run.
  */
