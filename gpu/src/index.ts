@@ -26,3 +26,7 @@ export {
 } from './GPUContext.js';
 
 export { getGpuDevice, resetGpuDevice } from './device.js';
+
+export { BufferPool, type BufferPoolOptions } from './BufferPool.js';
+
+export { ShaderManager, type ShaderSource, type PipelineConfig } from './ShaderManager.js';

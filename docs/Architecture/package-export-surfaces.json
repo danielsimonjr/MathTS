@@ -2911,6 +2911,8 @@
       "zTransform"
     ],
     "gpu": [
+      "BufferPool",
+      "BufferPoolOptions",
       "destroyGlobalGPU",
       "detectGPUCapabilities",
       "DeviceLostEvent",
@@ -2928,7 +2930,10 @@
       "initializeGlobalGPU",
       "isBrowser",
       "isGPUSuitableForMatrixOps",
-      "resetGpuDevice"
+      "PipelineConfig",
+      "resetGpuDevice",
+      "ShaderManager",
+      "ShaderSource"
     ],
     "linalg": [
       "cholesky",

@@ -172,7 +172,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
-- **gpu**: 4 files
+- **gpu**: 6 files
 - **plot**: 18 files
 - **plot/three**: 3 files
 
@@ -206,7 +206,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                | 20             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 3              | 0               |
-| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                             | 4              | 0               |
+| `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                             | 6              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                    | 21             | 0               |
 
 ### Package Dependency Diagram
@@ -14201,6 +14201,20 @@ graph LR
 
 ## Gpu Dependencies
 
+### `gpu/src/BufferPool.ts` - GPU Buffer Pool
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+
+- Classes: `BufferPool`
+- Interfaces: `BufferPoolOptions`
+
+---
+
 ### `gpu/src/detect.ts` - WebGPU Detection and Capability Checking
 
 **Exports:**
@@ -14239,7 +14253,7 @@ graph LR
 
 ---
 
-### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 18 symbols)
+### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 23 symbols)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -14247,10 +14261,26 @@ graph LR
 | `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
 | `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
 | `./device.js` | `getGpuDevice, resetGpuDevice` | Re-export |
+| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
+| `./ShaderManager.js` | `ShaderManager, ShaderSource, PipelineConfig` | Re-export |
 
 **Exports:**
 
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `ShaderSource`, `PipelineConfig`
+
+---
+
+### `gpu/src/ShaderManager.ts` - GPU Shader Manager (generic)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+
+- Classes: `ShaderManager`
+- Interfaces: `ShaderSource`, `PipelineConfig`
 
 ---
 
@@ -15275,30 +15305,32 @@ graph TD
     end
 
     subgraph Gpu
-        N403[detect]
-        N404[device]
-        N405[GPUContext]
-        N406[index]
+        N403[BufferPool]
+        N404[detect]
+        N405[device]
+        N406[GPUContext]
+        N407[index]
+        N408[ShaderManager]
     end
 
     subgraph Plot
-        N407[coerce]
-        N408[contour]
-        N409[emit]
-        N410[frame]
-        N411[heatmap]
-        N412[histogram]
-        N413[index]
-        N414[marks2d]
-        N415[overlay]
-        N416[palette]
-        N417[...8 more]
+        N409[coerce]
+        N410[contour]
+        N411[emit]
+        N412[frame]
+        N413[heatmap]
+        N414[histogram]
+        N415[index]
+        N416[marks2d]
+        N417[overlay]
+        N418[palette]
+        N419[...8 more]
     end
 
     subgraph Plot/three
-        N418[points3d]
-        N419[project]
-        N420[surface]
+        N420[points3d]
+        N421[project]
+        N422[surface]
     end
 
     N2 --> N1
@@ -15386,13 +15418,13 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1023   |
+| Total TypeScript Files  | 1025   |
 | Total Modules           | 76     |
-| Total Lines of Code     | 170495 |
-| Total Exports           | 4914   |
-| Total Re-exports        | 1765   |
-| Total Classes           | 57     |
-| Total Interfaces        | 411    |
+| Total Lines of Code     | 170956 |
+| Total Exports           | 4921   |
+| Total Re-exports        | 1770   |
+| Total Classes           | 59     |
+| Total Interfaces        | 414    |
 | Total Functions         | 1600   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |

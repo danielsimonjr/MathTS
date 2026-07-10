@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-10",
-    "totalFiles": 1023,
+    "totalFiles": 1025,
     "totalModules": 76,
-    "totalExports": 4914
+    "totalExports": 4921
   },
   "entryPoints": [
     {
@@ -32634,6 +32634,21 @@
       }
     },
     "gpu": {
+      "gpu/src/BufferPool.ts": {
+        "description": "GPU Buffer Pool",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./GPUContext.js",
+            "imports": ["GPUContext"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["BufferPool"],
+        "classes": ["BufferPool"],
+        "interfaces": ["BufferPoolOptions"]
+      },
       "gpu/src/detect.ts": {
         "description": "WebGPU Detection and Capability Checking",
         "externalDependencies": [],
@@ -32691,7 +32706,7 @@
         "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
       },
       "gpu/src/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 18 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 23 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -32727,6 +32742,16 @@
             "file": "./device.js",
             "imports": ["getGpuDevice", "resetGpuDevice"],
             "reExport": true
+          },
+          {
+            "file": "./BufferPool.js",
+            "imports": ["BufferPool", "BufferPoolOptions"],
+            "reExport": true
+          },
+          {
+            "file": "./ShaderManager.js",
+            "imports": ["ShaderManager", "ShaderSource", "PipelineConfig"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -32748,7 +32773,12 @@
           "GPUContextStatus",
           "DeviceLostEvent",
           "getGpuDevice",
-          "resetGpuDevice"
+          "resetGpuDevice",
+          "BufferPool",
+          "BufferPoolOptions",
+          "ShaderManager",
+          "ShaderSource",
+          "PipelineConfig"
         ],
         "reExported": [
           "hasWebGPU",
@@ -32768,8 +32798,28 @@
           "GPUContextStatus",
           "DeviceLostEvent",
           "getGpuDevice",
-          "resetGpuDevice"
+          "resetGpuDevice",
+          "BufferPool",
+          "BufferPoolOptions",
+          "ShaderManager",
+          "ShaderSource",
+          "PipelineConfig"
         ]
+      },
+      "gpu/src/ShaderManager.ts": {
+        "description": "GPU Shader Manager (generic)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./GPUContext.js",
+            "imports": ["GPUContext"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["ShaderManager"],
+        "classes": ["ShaderManager"],
+        "interfaces": ["ShaderSource", "PipelineConfig"]
       }
     },
     "plot": {
@@ -34709,10 +34759,12 @@
       {
         "name": "Gpu",
         "files": [
+          "gpu/src/BufferPool.ts",
           "gpu/src/detect.ts",
           "gpu/src/device.ts",
           "gpu/src/GPUContext.ts",
-          "gpu/src/index.ts"
+          "gpu/src/index.ts",
+          "gpu/src/ShaderManager.ts"
         ]
       },
       {
@@ -34749,17 +34801,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1023,
+    "totalTypeScriptFiles": 1025,
     "totalModules": 76,
-    "totalLinesOfCode": 170495,
-    "totalExports": 4914,
-    "totalClasses": 57,
-    "totalInterfaces": 411,
+    "totalLinesOfCode": 170956,
+    "totalExports": 4921,
+    "totalClasses": 59,
+    "totalInterfaces": 414,
     "totalFunctions": 1600,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1531,
-    "totalReExports": 1765,
+    "totalReExports": 1770,
     "totalTypeOnlyImports": 529,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

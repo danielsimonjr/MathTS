@@ -1,9 +1,9 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1023, "e": 4914, "re": 1765 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-10", "f": 1025, "e": 4921, "re": 1770 },
   "s": {
-    "loc": 170495,
-    "cls": 57,
-    "int": 411,
+    "loc": 170956,
+    "cls": 59,
+    "int": 414,
     "fn": 1600,
     "tg": 158,
     "en": 0,
@@ -1495,8 +1495,9 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "gpu": {
-      "f": 4,
+      "f": 6,
       "exp": [
+        "BufferPool",
         "hasWebGPU",
         "isBrowser",
         "getGPUAdapter",
@@ -1511,8 +1512,16 @@
         "destroyGlobalGPU",
         "GPUContext"
       ],
-      "cls": ["GPUContext"],
-      "int": ["GPUAdapterInfo", "GPUCapabilities", "GPUContextOptions", "DeviceLostEvent"]
+      "cls": ["BufferPool", "GPUContext", "ShaderManager"],
+      "int": [
+        "BufferPoolOptions",
+        "GPUAdapterInfo",
+        "GPUCapabilities",
+        "GPUContextOptions",
+        "DeviceLostEvent",
+        "ShaderSource",
+        "PipelineConfig"
+      ]
     },
     "plot": {
       "f": 18,
