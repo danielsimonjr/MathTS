@@ -85,12 +85,22 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
-- **WebGPU matrix accelerators** — `matrix`'s `GPUBackend` (matmul compute shader) is
-  experimental scaffolding, not yet a production accelerator like the AssemblyScript/WASM
-  backend, and isn't meaningfully routed by `BackendManager` (very high gpu threshold). A
-  real WebGPU acceleration pass (validated kernels + routing) is future work. The 3-way
-  bench harness (`tools/benchmark/gpu/bench-3way.*`, run in Chrome + DevTools) is ready to
-  measure it once the accelerators exist.
+- **WebGPU acceleration tier (browser flag-gated)** — add WebGPU as a THIRD acceleration
+  backend behind the existing WASM/parallel dispatch, selected by size **and** an in-browser
+  WebGPU-enabled flag (mirroring how the WASM/parallel tiers are chosen today). `matrix`'s
+  `GPUBackend.matmul` is the experimental starting point — currently NOT routed by
+  `BackendManager` (very high gpu threshold) and not validated. Harness ready:
+  `tools/benchmark/gpu/bench-3way.*` (browser via the `claude-in-chrome` plugin). See
+  [`project-webgpu-experimental-wasm-real`] memory.
+  - **Baseline coverage** (CDG `wasm-pairing`/`parallel-pairing`, 218 functions): **39 WASM ·
+    52 parallel-only · 127 none**.
+  - **WebGPU targets = data-parallel ops**: elementwise arithmetic/transcendental/special
+    functions, reductions (`sum/mean/std/min/max/norm/dot`), `matmul`, FFT — where GPU wins
+    at scale. Plus the ~28 GPU-friendly JS-only elementwise (`besselI/K`, distributions
+    `*PDF/*CDF/*PMF`, `digamma`, `erfi`, `hermiteH/laguerreL/legendreP`, …).
+  - **NOT WebGPU targets** (~39): scalar/structural — relational (`compare/equal/…`),
+    number-theory (`gcd/divisors/eulerPhi/…`), combinatorics, complex-scalar (`arg/conj`),
+    formatting. Branch-heavy + small; no GPU benefit.
 
 ## Recently shipped
 
