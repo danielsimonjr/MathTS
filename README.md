@@ -10,7 +10,7 @@ ESM-only npm workspaces monorepo. It accelerates computation through an Assembly
 WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and an optional
 WebGPU backend for large matrix operations. The acceleration path is
 **TypeScript → AssemblyScript WASM → WebGPU (matrix)**.
-All 22 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
+All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
 ## Contents
 
@@ -170,20 +170,22 @@ Override defaults via `ComputePoolConfig.thresholdByOp` (see
 
 ### Packages
 
-| Package                                | Role                                                                     |
-| -------------------------------------- | ------------------------------------------------------------------------ |
-| `@danielsimonjr/mathts-typed-function` | Symbol-based typed dispatch (forked, survives minification)              |
-| `@danielsimonjr/mathts-workerpool`     | Worker pool management (forked, SharedArrayBuffer support)               |
-| `@danielsimonjr/mathts-core`           | Complex, Fraction, BigNumber types; mathTyped; FunctionRegistry          |
-| `@danielsimonjr/mathts-matrix`         | DenseMatrix, SparseMatrix; JS/WASM/GPU backends; SVD/eig/QR/LU/Cholesky  |
-| `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction              |
-| `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor           |
-| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`                     |
-| `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch               |
-| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes)          |
-| `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                             |
-| `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                            |
-| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the sole WASM backend (functions + matrix) |
+| Package                                | Role                                                                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-typed-function` | Symbol-based typed dispatch (forked, survives minification)                                                  |
+| `@danielsimonjr/mathts-workerpool`     | Worker pool management (forked, SharedArrayBuffer support)                                                   |
+| `@danielsimonjr/mathts-core`           | Complex, Fraction, BigNumber types; mathTyped; FunctionRegistry                                              |
+| `@danielsimonjr/mathts-matrix`         | DenseMatrix, SparseMatrix; JS/WASM/GPU backends; SVD/eig/QR/LU/Cholesky                                      |
+| `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels) |
+| `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                  |
+| `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                               |
+| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`                                                         |
+| `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                   |
+| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes)                                              |
+| `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                 |
+| `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                                                                |
+| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the sole WASM backend (functions + matrix)                                     |
+| `@danielsimonjr/mathts-plot`           | 2D/3D plotting; SVG/TikZ + PNG/PDF render bridge; workbook chart adapter                                     |
 
 ### Dependency graph
 
@@ -194,7 +196,9 @@ workerpool <- parallel ------+          |
                     ^                   |
                     +-------------------+
 matrix <- tensor <- autograd
-core <- workbook
+gpu <- matrix
+core, functions, expression <- plot
+core, functions, expression, plot <- workbook
 core, matrix, functions, parallel <- compat
 ```
 
@@ -281,7 +285,7 @@ cd functions && npx vitest run
 
 ## Status
 
-MathTS is an actively developed monorepo of 22 independently-versioned packages.
+MathTS is an actively developed monorepo of 24 independently-versioned packages.
 The dependency graph has **0 runtime circular dependencies** (verified by
 `tools/create-dependency-graph`, which regenerates the reports below).
 

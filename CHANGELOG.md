@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `@danielsimonjr/mathts-gpu`: shared WebGPU foundation (Spec 1a)
+
+New leaf package holding the generic WebGPU foundation extracted from
+`matrix/src/backends/gpu/`: `GPUContext` (device/adapter lifecycle),
+`BufferPool`, `detect` (capability probing), a **generic** `ShaderManager`
+(compile/cache/pipeline + a name→code registration API, no domain kernels),
+and a shared `getGpuDevice()` singleton. The device path is hardened to
+**never throw**: concurrent `GPUContext.initialize()` callers await one
+in-flight promise, and an unavailable device resolves to `null`/`false`.
+
+`@danielsimonjr/mathts-matrix` now depends on this package (minor bump) and
+re-exports the whole foundation for back-compat, so no downstream consumer
+breaks. `BUILTIN_SHADERS` (matmul/transpose/reduce WGSL) stays in matrix and
+is registered onto the shared `ShaderManager` at `GPUBackend` init. Pure
+refactor — no behavior change; the full matrix suite (incl. headless GPU
+tests) stays green. First slice of the WebGPU acceleration epic
+(design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`).
+
+The new package publishes at its initial `0.1.0` (no bumping changeset, so it
+does not overshoot); matrix takes a minor bump for the new dependency + surface
+reshuffle.
+
 ### Added — Workbook: `mtsw graph -f dot`, `export --format json`, `export --format pdf`
 
 Three additions to the export-formats expansion, alongside the existing

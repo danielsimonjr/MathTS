@@ -78,7 +78,11 @@ These are **not** backlog; each has a written rationale and was deliberately not
   fast symmetric path was **removed** after it was found to return wrong eigenvalues.
   There is no correct sync speedup left to capture.
 - **`polyFit` / `leastSquares`** — deferral re-validated (2026-05-23).
-- **Unified f32 WebGPU path** — design spec written; not pursued.
+- **Unified f32 WebGPU path** — design spec written; not pursued as a standalone
+  effort. Superseded by the phased WebGPU acceleration design
+  (`docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`); its first
+  slice, Spec 1a (shared GPU foundation extraction), has now landed — see
+  Candidates/Icebox below.
 
 ## Candidates / Icebox
 
@@ -92,6 +96,16 @@ the Definition of Ready (see the process doc). Add here so ideas aren't lost.
   `BackendManager` (very high gpu threshold) and not validated. Harness ready:
   `tools/benchmark/gpu/bench-3way.*` (browser via the `claude-in-chrome` plugin). See
   [`project-webgpu-experimental-wasm-real`] memory.
+  - **Spec 1a — shared GPU foundation extraction: LANDED (2026-07-10).** `GPUContext`,
+    `BufferPool`, `detect`, and a generic `ShaderManager` moved into a new leaf package
+    `@danielsimonjr/mathts-gpu`; `matrix`'s `GPUBackend` registers its own
+    matmul/transpose/reduce WGSL onto the shared `ShaderManager` at init, and re-exports
+    the whole foundation for back-compat. Pure refactor, no routing/behavior change.
+  - **Spec 1b — next.** `enableGpu()` flag + Float32 matmul routing through
+    `BackendManager` (still opt-in; validated in-browser via `claude-in-chrome` before
+    the size threshold is lowered).
+  - **Spec 2+** — `functions` package `*GpuDispatch` bridges for the data-parallel ops
+    below, mirroring the existing `*Dispatch` WASM-bridge pattern.
   - **Baseline coverage** (CDG `wasm-pairing`/`parallel-pairing`, 218 functions): **39 WASM ·
     52 parallel-only · 127 none**.
   - **WebGPU targets = data-parallel ops**: elementwise arithmetic/transcendental/special
@@ -107,6 +121,11 @@ the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 > Short rolling window (most recent first). Full history lives in per-package
 > `CHANGELOG.md`; prune this list periodically so ROADMAP stays forward-looking.
 
+- **2026-07-10 — WebGPU foundation extraction (Spec 1a).** New leaf package
+  `@danielsimonjr/mathts-gpu` (`GPUContext`, `BufferPool`, `detect`, generic
+  `ShaderManager`); `matrix`'s `GPUBackend` rewired onto it, full back-compat
+  re-export, no behavior change. Design:
+  `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`.
 - **2026-07-09 — Export-formats expansion.** `plot@0.3.0` Node-only `./render` bridge
   (`renderToFile` SVG→PNG/PDF, `latexToPdf` LaTeX→PDF; external-tool, zero bundled deps,
   shell-escape off by default); `expression@0.6.0` `Node.toMarkdown()` / `Node.toDOT()`;

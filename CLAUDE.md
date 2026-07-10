@@ -55,13 +55,14 @@ npm run test:coverage
 
 ### Workspaces (in `package.json`)
 
-22 npm workspace packages:
+24 npm workspace packages:
 
 ```
 packages/typed-function/   # @danielsimonjr/mathts-typed-function - forked type dispatch system
 packages/workerpool/       # @danielsimonjr/mathts-workerpool - forked worker pool management
 core/                      # @danielsimonjr/mathts-core - types, typed-function integration, factory
 matrix/                    # @danielsimonjr/mathts-matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
+gpu/                       # @danielsimonjr/mathts-gpu - shared WebGPU foundation (GPUContext/BufferPool/ShaderManager/detect; no domain kernels)
 tensor/                    # @danielsimonjr/mathts-tensor - rank-N dense Tensor (Float64Array-backed)
 autograd/                  # @danielsimonjr/mathts-autograd - forward + reverse-mode autodiff over Tensor
 functions/                 # @danielsimonjr/mathts-functions - math functions via typed dispatch
@@ -70,6 +71,7 @@ expression/                # @danielsimonjr/mathts-expression - parser/evaluator
 workbook/                  # @danielsimonjr/mathts-workbook - .mtsw notebook runtime + CLI
 assembly/                  # @danielsimonjr/mathts-wasm - AssemblyScript WASM (the sole WASM backend; build: asbuild:debug/release)
 compat/                    # @danielsimonjr/mathts-compat - mathjs API compatibility shim
+plot/                      # @danielsimonjr/mathts-plot - 2D/3D plotting (SVG/TikZ + PNG/PDF render bridge; workbook chart adapter)
 
 # Focused re-export packages (thin entry points; no duplicated implementation):
 parser/                    # @danielsimonjr/mathts-parser - expression parser surface (re-exports expression)
@@ -91,21 +93,23 @@ signal/                    # @danielsimonjr/mathts-signal - signal-processing do
 core        → typed-function
 parallel    → workerpool                          # low-level; NOT core/matrix
 expression  → core
-matrix      → core, parallel
+matrix      → core, parallel, gpu
 tensor      → core, matrix
 autograd    → core, tensor
 functions   → core, matrix, parallel, expression
-workbook    → core, functions
+workbook    → core, functions, expression, plot
 compat      → core, matrix, parallel, functions
+plot        → core, functions, expression
 
 # Same edges read as "← is depended on by":
 typed-function ← core
 workerpool     ← parallel
-core           ← expression, matrix, tensor, autograd, functions, workbook, compat
+core           ← expression, matrix, tensor, autograd, functions, workbook, compat, plot
 parallel       ← matrix, functions, compat
-expression     ← functions
+expression     ← functions, plot, workbook
 matrix         ← tensor, functions, compat
 tensor         ← autograd
+gpu            ← matrix
 
 # Focused re-export packages (leaf; depend only on the package they re-export):
 core       ← numbers, units
@@ -156,7 +160,7 @@ Three main systems:
 
 - **JSBackend** - Pure TypeScript (default, always available)
 - **WASMBackend** - AssemblyScript (source: `assembly/src/`, binary `mathts-as.wasm`; the repo's one AS binary). **Scoped by the 2026-07 WASM audit to where SIMD actually wins:** matrix **multiply** (SIMD `f64x2` kernel, engages ≥256 elements) and the dense **LU/QR/Cholesky/inverse/determinant** decompositions. Element-wise ops, transpose, reductions, `eig`, and `svd` run on **JS** — they were measured 0.2–6× _slower_ on WASM (memory-bound, or scalar iterative kernels), so their WASM paths were retired and the eig/svd AS kernels deleted (see CHANGELOG / `tools/benchmarks/`). Falls back to JS when no AS binary has been built. (FFT/signal WASM is a separate `functions/src/wasm/signal/` path, not this backend.)
-- **GPUBackend** - WebGPU compute shaders (>100K elements)
+- **GPUBackend** - WebGPU compute shaders (>100K elements). The generic foundation (`GPUContext` device/adapter lifecycle, `BufferPool`, capability `detect`, and the generic `ShaderManager` compile/cache/pipeline API) now lives in the shared leaf package `@danielsimonjr/mathts-gpu`; matrix re-exports the whole foundation for back-compat and keeps only its own domain kernels (`BUILTIN_SHADERS` — matmul/transpose/reduce WGSL), registering them onto the shared `ShaderManager` at `GPUBackend` init.
 
 ### `@danielsimonjr/mathts-compat` Pattern
 

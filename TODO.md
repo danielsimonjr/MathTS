@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-09
+Updated: 2026-07-10
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -10,6 +10,20 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
+
+### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
+
+- [x] **Spec 1a — shared GPU foundation extraction** — ✅ DONE (2026-07-10). New leaf
+      package `@danielsimonjr/mathts-gpu` (`GPUContext`/`BufferPool`/`detect`/generic
+      `ShaderManager` + hardened never-throw `getGpuDevice()`); `matrix`'s `GPUBackend`
+      rewired onto it (registers `BUILTIN_SHADERS` at init), full back-compat re-export,
+      no behavior change.
+- [ ] **Spec 1b — next** — `enableGpu()` flag + Float32 matmul routing through
+      `BackendManager` (opt-in; validate in-browser via `claude-in-chrome` before
+      lowering the size threshold).
+- [ ] **Spec 2+** — `functions` package `*GpuDispatch` bridges for the data-parallel ops
+      (elementwise/transcendental/special, reductions, FFT), mirroring the existing
+      `*Dispatch` WASM-bridge pattern.
 
 ### Scientific Workbook — remaining deferred capabilities
 
