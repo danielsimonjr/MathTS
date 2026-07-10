@@ -32,6 +32,14 @@ CDG generates; QDG queries. Deliberately kept separate (heavy parse vs instant r
 
 Source-code provenance comments cite **both** dirs. (Consolidation is a known cleanup candidate.)
 
+**3-way backend bench (JS/TS vs WASM vs WebGPU)** — `benchmark/gpu/bench-3way.{entry.ts,html}`.
+Drives the REAL matrix backends (`jsBackend.multiply`, `WASMBackend.multiply` AS-SIMD,
+`GPUBackend.matmul` WebGPU). WebGPU only runs in a browser, so it's esbuild-bundled and
+opened as a page: `npm run bench:backends:serve` (builds + serves on :8099 + opens the
+page), then click **Run**. `bench:backends:build` just produces the bundle (gitignored
+artifact). JS-vs-WASM also validated headless (~11× at n=256, f64-exact); the WebGPU
+column needs a real GPU/browser.
+
 ## LLM-context helpers
 
 | Tool                    | What                                                               | Run                                                                             |

@@ -97,3 +97,4 @@ docs/.docusaurus/
 .mcp.txt
 CUsersdanieAppDataLocalTempclaudecoverage.txt
 .npmrc
+tools/benchmark/gpu/bench-3way.bundle.js

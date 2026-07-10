@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MathTS matmul — JS vs WASM vs WebGPU</title>
+    <style>
+      body { font: 14px/1.5 system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { font-size: 1.3rem; }
+      button { font: inherit; padding: 0.5rem 1rem; cursor: pointer; }
+      table { border-collapse: collapse; margin-top: 1rem; width: 100%; }
+      th, td { border: 1px solid #ccc; padding: 0.35rem 0.6rem; text-align: right; }
+      th:first-child, td:first-child { text-align: left; }
+      thead { background: #f4f4f4; }
+      .ms { font-variant-numeric: tabular-nums; }
+      .win { font-weight: 700; }
+      #status { margin: 0.75rem 0; color: #555; }
+      .bad { color: #b00; }
+      code { background: #f4f4f4; padding: 0 0.3rem; border-radius: 3px; }
+    </style>
+  </head>
+  <body>
+    <h1>MathTS matmul — JS/TS vs WASM vs WebGPU</h1>
+    <p>
+      Square-matrix multiply across the three real matrix backends. Sizes:
+      <input id="sizes" value="128,256,512,1024" size="24" /> · reps
+      <input id="reps" value="5" size="3" />
+      <button id="run">Run benchmark</button>
+    </p>
+    <div id="status">Loading backends…</div>
+    <table id="results" hidden>
+      <thead>
+        <tr>
+          <th>n (n×n)</th>
+          <th>JS (ms)</th>
+          <th>WASM (ms)</th>
+          <th>WebGPU (ms)</th>
+          <th>WASM ×JS</th>
+          <th>GPU ×JS</th>
+          <th>WASM maxdiff</th>
+          <th>GPU maxdiff</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script type="module">
+      import './bench-3way.bundle.js';
+      const $ = (id) => document.getElementById(id);
+      const fmt = (x) => (Number.isNaN(x) ? '—' : x.toFixed(x < 10 ? 2 : 1));
+      const fx = (x) => (Number.isNaN(x) ? '—' : x.toFixed(1) + '×');
+      const ex = (x) => (Number.isNaN(x) ? '—' : x.toExponential(1));
+
+      $('status').textContent = 'Ready. WebGPU: ' + (navigator.gpu ? 'available' : 'NOT available');
+
+      $('run').addEventListener('click', async () => {
+        const sizes = $('sizes').value.split(',').map((s) => parseInt(s.trim(), 10)).filter(Boolean);
+        const reps = parseInt($('reps').value, 10) || 5;
+        $('run').disabled = true;
+        $('status').textContent = 'Running…';
+        try {
+          const { rows, wasmActive, gpuStatus } = await globalThis.runBench(sizes, reps);
+          const tb = $('results').querySelector('tbody');
+          tb.innerHTML = '';
+          for (const r of rows) {
+            const best = Math.min(r.jsMs, r.wasmMs, Number.isNaN(r.gpuMs) ? Infinity : r.gpuMs);
+            const cell = (v, ms) => `<td class="ms ${ms === best ? 'win' : ''}">${fmt(v)}</td>`;
+            tb.insertAdjacentHTML(
+              'beforeend',
+              `<tr><td>${r.n}</td>${cell(r.jsMs, r.jsMs)}${cell(r.wasmMs, r.wasmMs)}${cell(r.gpuMs, r.gpuMs)}` +
+                `<td>${fx(r.wasmVsJs)}</td><td>${fx(r.gpuVsJs)}</td><td>${ex(r.wasmMaxDiff)}</td><td>${ex(r.gpuMaxDiff)}</td></tr>`
+            );
+          }
+          $('results').hidden = false;
+          $('status').innerHTML =
+            `Done. WASM backend: <b>${wasmActive ? 'active (AS SIMD)' : 'FELL BACK TO JS'}</b> · ` +
+            `WebGPU: <b>${gpuStatus}</b>. Lowest ms per row is <span class="win">bold</span>. ` +
+            `GPU maxdiff is larger (f32 vs JS f64).`;
+        } catch (e) {
+          $('status').innerHTML = `<span class="bad">Error: ${e && e.message ? e.message : e}</span>`;
+        } finally {
+          $('run').disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
