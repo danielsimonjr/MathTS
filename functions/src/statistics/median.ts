@@ -15,15 +15,16 @@ interface MedianDependencies {
   divide: TypedFunction;
   compare: (a: unknown, b: unknown) => number;
   partitionSelect: TypedFunction;
+  mapSlices: TypedFunction;
 }
 
 const name = 'median';
-const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect'];
+const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect', 'mapSlices'];
 
 export const createMedian = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, divide, compare, partitionSelect }: MedianDependencies) => {
+  ({ typed, add, divide, compare, partitionSelect, mapSlices }: MedianDependencies) => {
     /**
      * Recursively calculate the median of an n-dimensional array
      * @param {Array | Matrix} array - Input array or matrix
@@ -116,9 +117,8 @@ export const createMedian = /* #__PURE__ */ factory(
         _array: unknown[] | MatrixType,
         _dim: number | { valueOf(): number }
       ): unknown {
-        // TODO: implement median(A, dim)
-        throw new Error('median(A, dim) is not yet supported');
-        // return reduce(arguments[0], arguments[1], ...)
+        const dimValue = typeof _dim === 'number' ? _dim : _dim.valueOf();
+        return mapSlices(_array, dimValue, (x: unknown) => _median(x as unknown[] | MatrixType));
       },
 
       // median(a, b, c, d, ...)
