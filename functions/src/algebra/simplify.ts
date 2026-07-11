@@ -935,8 +935,6 @@ export const createSimplify = /* #__PURE__ */ factory(
       }
 
       if (matches) {
-        // const before = res.toString({parenthesis: 'all'})
-
         // Create a new node by cloning the rhs of the matched rule
         // we keep any implicit multiplication state if relevant
         const implicit = (res as NodeLike).implicit;
@@ -956,9 +954,6 @@ export const createSimplify = /* #__PURE__ */ factory(
             return node;
           }
         });
-
-        // const after = res.toString({parenthesis: 'all'})
-        // console.log('Simplified ' + before + ' to ' + after)
       }
 
       if (rule.repeat && res !== node) {
