@@ -145,22 +145,33 @@ export const createDerivative = /* #__PURE__ */ factory(
     function plainDerivative(
       expr: MathNode,
       variable: SymbolNode,
-      options: { simplify?: boolean } = { simplify: true }
+      options: { simplify?: boolean; order?: number } = { simplify: true }
     ): MathNode {
-      const cache = new Map<MathNode, boolean>();
-      const variableName = variable.name;
-      function isConstCached(node: MathNode): boolean {
-        const cached = cache.get(node);
-        if (cached !== undefined) {
-          return cached;
-        }
-        const res = _isConst(isConstCached, node, variableName);
-        cache.set(node, res);
-        return res;
+      const order = options.order !== undefined ? options.order : 1;
+      if (!Number.isInteger(order) || order < 0) {
+        throw new TypeError('Option "order" must be a non-negative integer');
       }
 
-      const res = _derivative(expr, isConstCached);
-      return options.simplify ? simplify(res) : res;
+      let res = expr;
+      for (let i = 0; i < order; i++) {
+        const cache = new Map<MathNode, boolean>();
+        const variableName = variable.name;
+        function isConstCached(node: MathNode): boolean {
+          const cached = cache.get(node);
+          if (cached !== undefined) {
+            return cached;
+          }
+          const r = _isConst(isConstCached, node, variableName);
+          cache.set(node, r);
+          return r;
+        }
+
+        res = _derivative(res, isConstCached);
+        if (options.simplify !== false && i < order - 1) {
+          res = simplify(res);
+        }
+      }
+      return options.simplify !== false ? simplify(res) : res;
     }
 
     function parseIdentifier(string: string): SymbolNode {
@@ -179,19 +190,11 @@ export const createDerivative = /* #__PURE__ */ factory(
       'Node, SymbolNode, Object': plainDerivative,
       'Node, string': (node: MathNode, symbol: string) =>
         plainDerivative(node, parseIdentifier(symbol)),
-      'Node, string, Object': (node: MathNode, symbol: string, options: { simplify?: boolean }) =>
-        plainDerivative(node, parseIdentifier(symbol), options),
-
-      /* TODO: implement and test syntax with order of derivatives -> implement as an option {order: number}
-    'Node, SymbolNode, ConstantNode': function (expr, variable, {order}) {
-      let res = expr
-      for (let i = 0; i < order; i++) {
-        <create caching isConst>
-        res = _derivative(res, isConst)
-      }
-      return res
-    }
-    */
+      'Node, string, Object': (
+        node: MathNode,
+        symbol: string,
+        options: { simplify?: boolean; order?: number }
+      ) => plainDerivative(node, parseIdentifier(symbol), options),
     }) as unknown as TypedFunction & {
       _simplify?: boolean;
       toTex?: (deriv: { args: unknown[] }) => string;
@@ -208,7 +211,11 @@ export const createDerivative = /* #__PURE__ */ factory(
     const _derivTex = typed('_derivTex', {
       'Node, SymbolNode': function (expr: MathNode, x: SymbolNode): string {
         if (isConstantNode(expr) && typeOf((expr as unknown as ConstNodeLike).value) === 'string') {
-          return _derivTex(parse((expr as unknown as ConstNodeLike).value as string).toString(), x.toString(), 1);
+          return _derivTex(
+            parse((expr as unknown as ConstNodeLike).value as string).toString(),
+            x.toString(),
+            1
+          );
         } else {
           return _derivTex(expr.toTex(), x.toString(), 1);
         }
@@ -321,7 +328,9 @@ export const createDerivative = /* #__PURE__ */ factory(
         node: ParenthesisNode,
         isConst: (node: MathNode) => boolean
       ): ParenthesisNode {
-        return new ParenthesisNode(_derivative((node as unknown as ParenNodeLike).content, isConst));
+        return new ParenthesisNode(
+          _derivative((node as unknown as ParenNodeLike).content, isConst)
+        );
       },
 
       'FunctionAssignmentNode, function': function (
@@ -572,7 +581,7 @@ export const createDerivative = /* #__PURE__ */ factory(
             ]);
             break;
           case 'acosh':
-            // d/dx(acosh(x)) = 1 / sqrt(x^2 - 1); XXX potentially only for x >= 1 (the real spectrum)
+            // d/dx(acosh(x)) = 1 / sqrt(x^2 - 1) (domain: x >= 1 for the real spectrum)
             div = true;
             funcDerivative = new FunctionNode('sqrt', [
               new OperatorNode('-', 'subtract', [
@@ -774,7 +783,8 @@ export const createDerivative = /* #__PURE__ */ factory(
             // If is secretly constant; 0^f(x) = 1 (in JS), 1^f(x) = 1
             if (
               isConstantNode(arg0) &&
-              (isZero((arg0 as unknown as ConstNodeLike).value) || equal((arg0 as unknown as ConstNodeLike).value, 1))
+              (isZero((arg0 as unknown as ConstNodeLike).value) ||
+                equal((arg0 as unknown as ConstNodeLike).value, 1))
             ) {
               return createConstantNode(0);
             }
