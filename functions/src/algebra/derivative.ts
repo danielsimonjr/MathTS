@@ -190,8 +190,11 @@ export const createDerivative = /* #__PURE__ */ factory(
       'Node, SymbolNode, Object': plainDerivative,
       'Node, string': (node: MathNode, symbol: string) =>
         plainDerivative(node, parseIdentifier(symbol)),
-      'Node, string, Object': (node: MathNode, symbol: string, options: { simplify?: boolean; order?: number }) =>
-        plainDerivative(node, parseIdentifier(symbol), options),
+      'Node, string, Object': (
+        node: MathNode,
+        symbol: string,
+        options: { simplify?: boolean; order?: number }
+      ) => plainDerivative(node, parseIdentifier(symbol), options),
     }) as unknown as TypedFunction & {
       _simplify?: boolean;
       toTex?: (deriv: { args: unknown[] }) => string;
@@ -208,7 +211,11 @@ export const createDerivative = /* #__PURE__ */ factory(
     const _derivTex = typed('_derivTex', {
       'Node, SymbolNode': function (expr: MathNode, x: SymbolNode): string {
         if (isConstantNode(expr) && typeOf((expr as unknown as ConstNodeLike).value) === 'string') {
-          return _derivTex(parse((expr as unknown as ConstNodeLike).value as string).toString(), x.toString(), 1);
+          return _derivTex(
+            parse((expr as unknown as ConstNodeLike).value as string).toString(),
+            x.toString(),
+            1
+          );
         } else {
           return _derivTex(expr.toTex(), x.toString(), 1);
         }
@@ -321,7 +328,9 @@ export const createDerivative = /* #__PURE__ */ factory(
         node: ParenthesisNode,
         isConst: (node: MathNode) => boolean
       ): ParenthesisNode {
-        return new ParenthesisNode(_derivative((node as unknown as ParenNodeLike).content, isConst));
+        return new ParenthesisNode(
+          _derivative((node as unknown as ParenNodeLike).content, isConst)
+        );
       },
 
       'FunctionAssignmentNode, function': function (
@@ -774,7 +783,8 @@ export const createDerivative = /* #__PURE__ */ factory(
             // If is secretly constant; 0^f(x) = 1 (in JS), 1^f(x) = 1
             if (
               isConstantNode(arg0) &&
-              (isZero((arg0 as unknown as ConstNodeLike).value) || equal((arg0 as unknown as ConstNodeLike).value, 1))
+              (isZero((arg0 as unknown as ConstNodeLike).value) ||
+                equal((arg0 as unknown as ConstNodeLike).value, 1))
             ) {
               return createConstantNode(0);
             }

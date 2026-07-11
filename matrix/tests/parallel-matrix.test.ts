@@ -67,7 +67,7 @@ describe('parallel-matrix operations', () => {
       m = m.set(1, 0, -3);
       m = m.set(1, 1, 4);
 
-      const result = await parallelMatrixAbs(m) as DenseMatrix;
+      const result = (await parallelMatrixAbs(m)) as DenseMatrix;
       const parallelModule = await import('@danielsimonjr/mathts-parallel');
 
       expect(parallelModule.computePool.abs).toHaveBeenCalledTimes(1);
@@ -83,7 +83,7 @@ describe('parallel-matrix operations', () => {
     it('should calculate absolute values for Float64Array directly', async () => {
       const arr = new Float64Array([-1.5, 2.5, -3.0]);
 
-      const result = await parallelMatrixAbs(arr) as Float64Array;
+      const result = (await parallelMatrixAbs(arr)) as Float64Array;
       const parallelModule = await import('@danielsimonjr/mathts-parallel');
 
       expect(parallelModule.computePool.abs).toHaveBeenCalledTimes(1);
@@ -114,7 +114,7 @@ describe('parallel-matrix operations', () => {
       m2 = m2.set(1, 0, 30);
       m2 = m2.set(1, 1, 40);
 
-      const result = await parallelMatrixAdd(m1, m2) as DenseMatrix;
+      const result = (await parallelMatrixAdd(m1, m2)) as DenseMatrix;
       const parallelModule = await import('@danielsimonjr/mathts-parallel');
 
       expect(parallelModule.computePool.add).toHaveBeenCalledTimes(1);
@@ -132,7 +132,7 @@ describe('parallel-matrix operations', () => {
       m = m.set(1, 0, 3);
       m = m.set(1, 1, 4);
 
-      const result = await parallelMatrixAdd(m, 5) as DenseMatrix;
+      const result = (await parallelMatrixAdd(m, 5)) as DenseMatrix;
 
       expect(result.get(0, 0)).toBe(6);
       expect(result.get(0, 1)).toBe(7);
@@ -151,7 +151,7 @@ describe('parallel-matrix operations', () => {
       const a = new Float64Array([1, 2, 3]);
       const b = new Float64Array([10, 20, 30]);
 
-      const result = await parallelMatrixAdd(a, b) as Float64Array;
+      const result = (await parallelMatrixAdd(a, b)) as Float64Array;
 
       expect(result[0]).toBe(11);
       expect(result[1]).toBe(22);

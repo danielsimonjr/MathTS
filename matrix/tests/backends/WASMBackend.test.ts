@@ -32,8 +32,14 @@ describe('WASMBackend', () => {
 
   describe('JS Fallback Operations', () => {
     const backend = new WASMBackend({ minElements: 100 });
-    const a = new DenseMatrix(2, 2, [[1, 2], [3, 4]]);
-    const b = new DenseMatrix(2, 2, [[5, 6], [7, 8]]);
+    const a = new DenseMatrix(2, 2, [
+      [1, 2],
+      [3, 4],
+    ]);
+    const b = new DenseMatrix(2, 2, [
+      [5, 6],
+      [7, 8],
+    ]);
 
     it('add should fallback to JS', () => {
       const result = backend.add(a, b);
@@ -61,7 +67,10 @@ describe('WASMBackend', () => {
     });
 
     it('abs should fallback to JS', () => {
-      const negA = new DenseMatrix(2, 2, [[-1, -2], [-3, -4]]);
+      const negA = new DenseMatrix(2, 2, [
+        [-1, -2],
+        [-3, -4],
+      ]);
       const result = backend.abs(negA);
       expect(result.toArray()).toEqual(jsBackend.abs(negA).toArray());
     });
@@ -107,41 +116,69 @@ describe('WASMBackend', () => {
     const backend = new WASMBackend();
 
     it('luDecomposition should throw on non-square matrix', async () => {
-      const a = new DenseMatrix(2, 3, [[1, 2, 3], [4, 5, 6]]);
-      await expect(backend.luDecomposition(a)).rejects.toThrow('LU decomposition requires a square matrix');
+      const a = new DenseMatrix(2, 3, [
+        [1, 2, 3],
+        [4, 5, 6],
+      ]);
+      await expect(backend.luDecomposition(a)).rejects.toThrow(
+        'LU decomposition requires a square matrix'
+      );
     });
 
     it('inverse should throw on non-square matrix', async () => {
-      const a = new DenseMatrix(2, 3, [[1, 2, 3], [4, 5, 6]]);
+      const a = new DenseMatrix(2, 3, [
+        [1, 2, 3],
+        [4, 5, 6],
+      ]);
       await expect(backend.inverse(a)).rejects.toThrow('Matrix inverse requires a square matrix');
     });
 
     it('determinantWasm should throw on non-square matrix', async () => {
-      const a = new DenseMatrix(2, 3, [[1, 2, 3], [4, 5, 6]]);
-      await expect(backend.determinantWasm(a)).rejects.toThrow('Determinant requires a square matrix');
+      const a = new DenseMatrix(2, 3, [
+        [1, 2, 3],
+        [4, 5, 6],
+      ]);
+      await expect(backend.determinantWasm(a)).rejects.toThrow(
+        'Determinant requires a square matrix'
+      );
     });
 
     it('choleskyDecomposition should throw on non-square matrix', async () => {
-      const a = new DenseMatrix(2, 3, [[1, 2, 3], [4, 5, 6]]);
-      await expect(backend.choleskyDecomposition(a)).rejects.toThrow('Cholesky decomposition requires a square matrix');
+      const a = new DenseMatrix(2, 3, [
+        [1, 2, 3],
+        [4, 5, 6],
+      ]);
+      await expect(backend.choleskyDecomposition(a)).rejects.toThrow(
+        'Cholesky decomposition requires a square matrix'
+      );
     });
 
     it('luDecomposition should use JS fallback and mark singular', async () => {
-      const singular = new DenseMatrix(2, 2, [[0, 0], [0, 0]]);
+      const singular = new DenseMatrix(2, 2, [
+        [0, 0],
+        [0, 0],
+      ]);
       const result = await backend.luDecomposition(singular);
       expect(result.singular).toBe(true);
     });
 
     it('luDecomposition should use JS fallback for non-singular', async () => {
-        const a = new DenseMatrix(2, 2, [[4, 3], [6, 3]]);
-        const result = await backend.luDecomposition(a);
-        expect(result.singular).toBe(false);
-        expect(result.lu.rows).toBe(2);
-        expect(result.lu.cols).toBe(2);
+      const a = new DenseMatrix(2, 2, [
+        [4, 3],
+        [6, 3],
+      ]);
+      const result = await backend.luDecomposition(a);
+      expect(result.singular).toBe(false);
+      expect(result.lu.rows).toBe(2);
+      expect(result.lu.cols).toBe(2);
     });
 
     it('qrDecomposition should use JS fallback', async () => {
-      const a = new DenseMatrix(3, 2, [[1, 2], [3, 4], [5, 6]]);
+      const a = new DenseMatrix(3, 2, [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]);
       const result = await backend.qrDecomposition(a);
       expect(result.q.rows).toBe(3);
       expect(result.q.cols).toBe(3);
@@ -150,38 +187,56 @@ describe('WASMBackend', () => {
     });
 
     it('inverse should use JS fallback and mark singular', async () => {
-      const singular = new DenseMatrix(2, 2, [[0, 0], [0, 0]]);
+      const singular = new DenseMatrix(2, 2, [
+        [0, 0],
+        [0, 0],
+      ]);
       const result = await backend.inverse(singular);
       expect(result.singular).toBe(true);
     });
 
     it('inverse should use JS fallback for non-singular', async () => {
-      const a = new DenseMatrix(2, 2, [[4, 7], [2, 6]]);
+      const a = new DenseMatrix(2, 2, [
+        [4, 7],
+        [2, 6],
+      ]);
       const result = await backend.inverse(a);
       expect(result.singular).toBe(false);
       expect(result.inverse.rows).toBe(2);
     });
 
     it('determinantWasm should use JS fallback and handle singular matrix', async () => {
-      const singular = new DenseMatrix(2, 2, [[0, 0], [0, 0]]);
+      const singular = new DenseMatrix(2, 2, [
+        [0, 0],
+        [0, 0],
+      ]);
       const result = await backend.determinantWasm(singular);
       expect(result).toBe(0);
     });
 
     it('determinantWasm should use JS fallback and return determinant', async () => {
-      const a = new DenseMatrix(2, 2, [[4, 6], [3, 8]]);
+      const a = new DenseMatrix(2, 2, [
+        [4, 6],
+        [3, 8],
+      ]);
       const result = await backend.determinantWasm(a);
       expect(result).toBeCloseTo(14);
     });
 
     it('choleskyDecomposition should use JS fallback and mark non-positive definite', async () => {
-      const nonPD = new DenseMatrix(2, 2, [[1, 2], [2, 1]]);
+      const nonPD = new DenseMatrix(2, 2, [
+        [1, 2],
+        [2, 1],
+      ]);
       const result = await backend.choleskyDecomposition(nonPD);
       expect(result.positiveDefinite).toBe(false);
     });
 
     it('choleskyDecomposition should use JS fallback for positive definite', async () => {
-      const pd = new DenseMatrix(2, 2, [[4, 12], [12, 37]]);
+      const pd = new DenseMatrix(2, 2, [
+        [4, 12],
+        [12, 37],
+      ]);
       const result = await backend.choleskyDecomposition(pd);
       expect(result.positiveDefinite).toBe(true);
       expect(result.l.rows).toBe(2);
@@ -189,20 +244,20 @@ describe('WASMBackend', () => {
   });
 
   describe('Module Initialization Failure', () => {
-      it('should gracefully fail initialization if path is bad and WebAssembly exists', async () => {
-          const originalWarn = console.warn;
-          const warnMock = vi.fn();
-          console.warn = warnMock;
+    it('should gracefully fail initialization if path is bad and WebAssembly exists', async () => {
+      const originalWarn = console.warn;
+      const warnMock = vi.fn();
+      console.warn = warnMock;
 
-          const backend = new WASMBackend({ wasmPath: '/bad/path/to/nowhere.wasm' });
-          await backend.initialize();
+      const backend = new WASMBackend({ wasmPath: '/bad/path/to/nowhere.wasm' });
+      await backend.initialize();
 
-          expect(warnMock).toHaveBeenCalledWith(
-              expect.stringContaining('Failed to load AssemblyScript WASM module, falling back to JS:'),
-              expect.anything()
-          );
+      expect(warnMock).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to load AssemblyScript WASM module, falling back to JS:'),
+        expect.anything()
+      );
 
-          console.warn = originalWarn;
-      });
+      console.warn = originalWarn;
+    });
   });
 });
