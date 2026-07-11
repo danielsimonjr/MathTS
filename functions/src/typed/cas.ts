@@ -44,6 +44,65 @@ type MathNode = ReturnType<typeof parse>;
 // =============================================================================
 
 /**
+ * Helper to safely evaluate a pure numeric expression string.
+ * This function avoids `new Function` and uses a simple recursive-descent
+ * parser to compute the result of basic arithmetic safely.
+ */
+function _evalNumeric(exprStr: string): string | undefined {
+  let pos = 0;
+  const s = exprStr.replace(/\s+/g, '');
+  const parseExpr = (): number => {
+    let val = parseTerm();
+    while (pos < s.length) {
+      if (s[pos] === '+') { pos++; val += parseTerm(); }
+      else if (s[pos] === '-') { pos++; val -= parseTerm(); }
+      else break;
+    }
+    return val;
+  };
+  const parseTerm = (): number => {
+    let val = parseFactor();
+    while (pos < s.length) {
+      if (s[pos] === '*') { pos++; val *= parseFactor(); }
+      else if (s[pos] === '/') { pos++; val /= parseFactor(); }
+      else break;
+    }
+    return val;
+  };
+  const parseFactor = (): number => {
+    let val = parseBase();
+    if (pos < s.length && s[pos] === '^') {
+      pos++;
+      val = Math.pow(val, parseFactor());
+    }
+    return val;
+  };
+  const parseBase = (): number => {
+    if (s[pos] === '+') { pos++; return parseBase(); }
+    if (s[pos] === '-') { pos++; return -parseBase(); }
+    if (s[pos] === '(') {
+      pos++;
+      const val = parseExpr();
+      if (s[pos] === ')') pos++;
+      return val;
+    }
+    const start = pos;
+    while (pos < s.length && /[\d.]/.test(s[pos])) pos++;
+    if (start === pos) throw new Error();
+    return parseFloat(s.substring(start, pos));
+  };
+  try {
+    const val = parseExpr();
+    if (pos === s.length && typeof val === 'number' && isFinite(val)) {
+      return String(val);
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return undefined;
+}
+
+/**
  * Evaluate an expression with a single variable binding.
  */
 function evalAt(expr: string, varName: string, value: f64): f64 {
@@ -2356,13 +2415,8 @@ function _casSimplifyOne(expr: string): string {
   // Evaluate pure-numeric expressions (digits, operators, parens)
   const numericPattern = /^[\d\s+\-*/().^]+$/;
   if (numericPattern.test(r)) {
-    try {
-      const jsExpr = r.replace(/\^/g, '**');
-      const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
-      if (typeof val === 'number' && isFinite(val)) return String(val);
-    } catch {
-      // fall through
-    }
+    const val = _evalNumeric(r);
+    if (val !== undefined) return val;
   }
 
   // Combine like terms: c1*x + c2*x → (c1+c2)*x, x + x → 2*x, etc.
@@ -2709,6 +2763,61 @@ export function casSimplify(
   // The closure must be self-contained (no captured imports).
   return computePool
     .map<string, string>(strs, (exprStr) => {
+      // --- self-contained eval kernel ---
+      function _evalNumeric(exprStr: string): string | undefined {
+        let pos = 0;
+        const s = exprStr.replace(/\s+/g, '');
+        const parseExpr = (): number => {
+          let val = parseTerm();
+          while (pos < s.length) {
+            if (s[pos] === '+') { pos++; val += parseTerm(); }
+            else if (s[pos] === '-') { pos++; val -= parseTerm(); }
+            else break;
+          }
+          return val;
+        };
+        const parseTerm = (): number => {
+          let val = parseFactor();
+          while (pos < s.length) {
+            if (s[pos] === '*') { pos++; val *= parseFactor(); }
+            else if (s[pos] === '/') { pos++; val /= parseFactor(); }
+            else break;
+          }
+          return val;
+        };
+        const parseFactor = (): number => {
+          let val = parseBase();
+          if (pos < s.length && s[pos] === '^') {
+            pos++;
+            val = Math.pow(val, parseFactor());
+          }
+          return val;
+        };
+        const parseBase = (): number => {
+          if (s[pos] === '+') { pos++; return parseBase(); }
+          if (s[pos] === '-') { pos++; return -parseBase(); }
+          if (s[pos] === '(') {
+            pos++;
+            const val = parseExpr();
+            if (s[pos] === ')') pos++;
+            return val;
+          }
+          const start = pos;
+          while (pos < s.length && /[\d.]/.test(s[pos])) pos++;
+          if (start === pos) throw new Error();
+          return parseFloat(s.substring(start, pos));
+        };
+        try {
+          const val = parseExpr();
+          if (pos === s.length && typeof val === 'number' && isFinite(val)) {
+            return String(val);
+          }
+        } catch {
+          // ignore parse errors
+        }
+        return undefined;
+      }
+
       // --- self-contained simplify kernel (copied from _casSimplifyOne) ---
       function _combineLikeTermsW(expr: string): string {
         const normalised = expr.replace(/\s*-\s*/g, ' + -');
@@ -2774,13 +2883,8 @@ export function casSimplify(
       r = r.replace(/\s*\+\s*0\b/g, '');
       r = r.replace(/\b0\s*\*\s*[^+-]*/g, '0');
       if (/^[\d\s+\-*/().^]+$/.test(r)) {
-        try {
-          const jsExpr = r.replace(/\^/g, '**');
-          const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
-          if (typeof val === 'number' && isFinite(val as number)) return String(val);
-        } catch {
-          /**/
-        }
+        const val = _evalNumeric(r);
+        if (val !== undefined) return val;
       }
       return _combineLikeTermsW(r) || '0';
     })
