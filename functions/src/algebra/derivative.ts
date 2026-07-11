@@ -572,7 +572,7 @@ export const createDerivative = /* #__PURE__ */ factory(
             ]);
             break;
           case 'acosh':
-            // d/dx(acosh(x)) = 1 / sqrt(x^2 - 1); XXX potentially only for x >= 1 (the real spectrum)
+            // d/dx(acosh(x)) = 1 / sqrt(x^2 - 1) (domain: x >= 1 for the real spectrum)
             div = true;
             funcDerivative = new FunctionNode('sqrt', [
               new OperatorNode('-', 'subtract', [
