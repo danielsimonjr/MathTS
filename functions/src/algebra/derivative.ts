@@ -145,22 +145,33 @@ export const createDerivative = /* #__PURE__ */ factory(
     function plainDerivative(
       expr: MathNode,
       variable: SymbolNode,
-      options: { simplify?: boolean } = { simplify: true }
+      options: { simplify?: boolean; order?: number } = { simplify: true }
     ): MathNode {
-      const cache = new Map<MathNode, boolean>();
-      const variableName = variable.name;
-      function isConstCached(node: MathNode): boolean {
-        const cached = cache.get(node);
-        if (cached !== undefined) {
-          return cached;
-        }
-        const res = _isConst(isConstCached, node, variableName);
-        cache.set(node, res);
-        return res;
+      const order = options.order !== undefined ? options.order : 1;
+      if (!Number.isInteger(order) || order < 0) {
+        throw new TypeError('Option "order" must be a non-negative integer');
       }
 
-      const res = _derivative(expr, isConstCached);
-      return options.simplify ? simplify(res) : res;
+      let res = expr;
+      for (let i = 0; i < order; i++) {
+        const cache = new Map<MathNode, boolean>();
+        const variableName = variable.name;
+        function isConstCached(node: MathNode): boolean {
+          const cached = cache.get(node);
+          if (cached !== undefined) {
+            return cached;
+          }
+          const r = _isConst(isConstCached, node, variableName);
+          cache.set(node, r);
+          return r;
+        }
+
+        res = _derivative(res, isConstCached);
+        if (options.simplify !== false && i < order - 1) {
+          res = simplify(res);
+        }
+      }
+      return options.simplify !== false ? simplify(res) : res;
     }
 
     function parseIdentifier(string: string): SymbolNode {
@@ -179,19 +190,8 @@ export const createDerivative = /* #__PURE__ */ factory(
       'Node, SymbolNode, Object': plainDerivative,
       'Node, string': (node: MathNode, symbol: string) =>
         plainDerivative(node, parseIdentifier(symbol)),
-      'Node, string, Object': (node: MathNode, symbol: string, options: { simplify?: boolean }) =>
+      'Node, string, Object': (node: MathNode, symbol: string, options: { simplify?: boolean; order?: number }) =>
         plainDerivative(node, parseIdentifier(symbol), options),
-
-      /* TODO: implement and test syntax with order of derivatives -> implement as an option {order: number}
-    'Node, SymbolNode, ConstantNode': function (expr, variable, {order}) {
-      let res = expr
-      for (let i = 0; i < order; i++) {
-        <create caching isConst>
-        res = _derivative(res, isConst)
-      }
-      return res
-    }
-    */
     }) as unknown as TypedFunction & {
       _simplify?: boolean;
       toTex?: (deriv: { args: unknown[] }) => string;
