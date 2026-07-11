@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { containsCollections, deepForEach, deepMap, reduce } from '../src/utils/collection.js';
+import { DimensionError } from '../src/error/DimensionError.js';
 
 // ---------------------------------------------------------------------------
 // containsCollections
@@ -113,7 +114,7 @@ describe('reduce (collection)', () => {
   });
 
   it('throws DimensionError for out-of-range dim', () => {
-    expect(() => reduce([1, 2, 3], 5, (a: number, b: number) => a + b)).toThrow();
-    expect(() => reduce([1, 2, 3], -1, (a: number, b: number) => a + b)).toThrow();
+    expect(() => reduce([1, 2, 3], 5, (a: number, b: number) => a + b)).toThrow(DimensionError);
+    expect(() => reduce([1, 2, 3], -1, (a: number, b: number) => a + b)).toThrow(DimensionError);
   });
 });
