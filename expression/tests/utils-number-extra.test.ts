@@ -45,13 +45,13 @@ describe('number normalizeFormatOptions - BigNumber-typed branches', () => {
   });
 });
 
-describe('number format - BigNumber lowerExp/upperExp (via direct BigNumber comparison)', () => {
-  it('uses a BigNumber upperExp', () => {
+describe('number format - BigNumber lowerExp/upperExp (_toNumberOrDefault)', () => {
+  it('uses a BigNumber upperExp via _toNumberOrDefault', () => {
     const result = format(1e7, { upperExp: fbn(2) as unknown as number });
     expect(result).toMatch(/e/);
   });
 
-  it('uses a BigNumber lowerExp', () => {
+  it('uses a BigNumber lowerExp via _toNumberOrDefault', () => {
     const result = format(0.01, { lowerExp: fbn(-1) as unknown as number });
     expect(result).toMatch(/e/);
   });

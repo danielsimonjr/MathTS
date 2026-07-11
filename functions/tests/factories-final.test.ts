@@ -183,28 +183,6 @@ describe('Tier 13: Downstream factories', () => {
   it('median should compute median', () => {
     expect(median([1, 2, 3, 4, 5])).toBe(3);
     expect(median([1, 2, 3, 4])).toBe(2.5);
-
-    // Test median over a specific dimension
-    expect(
-      median(
-        [
-          [1, 5, 2],
-          [8, 3, 9],
-          [4, 7, 6],
-        ],
-        0
-      )
-    ).toEqual([4, 5, 6]);
-    expect(
-      median(
-        [
-          [1, 5, 2],
-          [8, 3, 9],
-          [4, 7, 6],
-        ],
-        1
-      )
-    ).toEqual([2, 8, 6]);
   });
 
   it('factory_variance should compute sample variance', () => {

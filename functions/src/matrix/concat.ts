@@ -1,6 +1,7 @@
 import { isBigNumber, isMatrix, isNumber } from '../utils/is.js';
 import { clone } from '../utils/object.js';
 import { arraySize, concat as _concat } from '../utils/array.js';
+import { IndexError } from '../error/IndexError.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -80,7 +81,8 @@ export const createConcat = /* #__PURE__ */ factory(
             }
 
             if (dim < 0 || (i > 0 && dim > prevDim)) {
-              throw new DimensionError(dim, prevDim + 1);
+              // TODO: would be more clear when throwing a DimensionError here
+              throw new IndexError(dim, prevDim + 1);
             }
           } else {
             // this is a matrix or array

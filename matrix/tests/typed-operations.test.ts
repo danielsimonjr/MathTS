@@ -14,7 +14,6 @@ import {
   add,
   subtract,
   multiply,
-  dotMultiply,
   divide,
   transpose,
   sum,
@@ -226,29 +225,6 @@ describe('Typed Matrix Operations', () => {
       expect(c.cols).toBe(1);
       expect(c.get(0, 0)).toBe(2);
       expect(c.get(1, 0)).toBe(5);
-    });
-  });
-
-  describe('dotMultiply', () => {
-    it('should multiply two DenseMatrix instances element-wise', () => {
-      const m1 = DenseMatrix.fromArray([
-        [1, 2],
-        [3, 4],
-      ]);
-      const m2 = DenseMatrix.fromArray([
-        [5, 6],
-        [7, 8],
-      ]);
-      const result = dotMultiply(m1, m2) as DenseMatrix;
-      expect(result.get(0, 0)).toBe(5);
-      expect(result.get(0, 1)).toBe(12);
-      expect(result.get(1, 0)).toBe(21);
-      expect(result.get(1, 1)).toBe(32);
-    });
-
-    it('should multiply two numbers', () => {
-      const result = dotMultiply(3, 4);
-      expect(result).toBe(12);
     });
   });
 

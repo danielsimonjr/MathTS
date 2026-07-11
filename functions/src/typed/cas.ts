@@ -54,18 +54,26 @@ function _evalNumeric(exprStr: string): string | undefined {
   const parseExpr = (): number => {
     let val = parseTerm();
     while (pos < s.length) {
-      if (s[pos] === '+') { pos++; val += parseTerm(); }
-      else if (s[pos] === '-') { pos++; val -= parseTerm(); }
-      else break;
+      if (s[pos] === '+') {
+        pos++;
+        val += parseTerm();
+      } else if (s[pos] === '-') {
+        pos++;
+        val -= parseTerm();
+      } else break;
     }
     return val;
   };
   const parseTerm = (): number => {
     let val = parseFactor();
     while (pos < s.length) {
-      if (s[pos] === '*') { pos++; val *= parseFactor(); }
-      else if (s[pos] === '/') { pos++; val /= parseFactor(); }
-      else break;
+      if (s[pos] === '*') {
+        pos++;
+        val *= parseFactor();
+      } else if (s[pos] === '/') {
+        pos++;
+        val /= parseFactor();
+      } else break;
     }
     return val;
   };
@@ -78,8 +86,14 @@ function _evalNumeric(exprStr: string): string | undefined {
     return val;
   };
   const parseBase = (): number => {
-    if (s[pos] === '+') { pos++; return parseBase(); }
-    if (s[pos] === '-') { pos++; return -parseBase(); }
+    if (s[pos] === '+') {
+      pos++;
+      return parseBase();
+    }
+    if (s[pos] === '-') {
+      pos++;
+      return -parseBase();
+    }
     if (s[pos] === '(') {
       pos++;
       const val = parseExpr();
@@ -2770,18 +2784,26 @@ export function casSimplify(
         const parseExpr = (): number => {
           let val = parseTerm();
           while (pos < s.length) {
-            if (s[pos] === '+') { pos++; val += parseTerm(); }
-            else if (s[pos] === '-') { pos++; val -= parseTerm(); }
-            else break;
+            if (s[pos] === '+') {
+              pos++;
+              val += parseTerm();
+            } else if (s[pos] === '-') {
+              pos++;
+              val -= parseTerm();
+            } else break;
           }
           return val;
         };
         const parseTerm = (): number => {
           let val = parseFactor();
           while (pos < s.length) {
-            if (s[pos] === '*') { pos++; val *= parseFactor(); }
-            else if (s[pos] === '/') { pos++; val /= parseFactor(); }
-            else break;
+            if (s[pos] === '*') {
+              pos++;
+              val *= parseFactor();
+            } else if (s[pos] === '/') {
+              pos++;
+              val /= parseFactor();
+            } else break;
           }
           return val;
         };
@@ -2794,8 +2816,14 @@ export function casSimplify(
           return val;
         };
         const parseBase = (): number => {
-          if (s[pos] === '+') { pos++; return parseBase(); }
-          if (s[pos] === '-') { pos++; return -parseBase(); }
+          if (s[pos] === '+') {
+            pos++;
+            return parseBase();
+          }
+          if (s[pos] === '-') {
+            pos++;
+            return -parseBase();
+          }
           if (s[pos] === '(') {
             pos++;
             const val = parseExpr();

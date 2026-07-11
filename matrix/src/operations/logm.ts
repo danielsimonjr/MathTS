@@ -166,18 +166,14 @@ function logPade(X: number[][]): number[][] {
   const result: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   const I = eye(n);
 
-  const M: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-
   for (let q = 0; q < GL16_NODES.length; q++) {
     const t = GL16_NODES[q];
     const w = GL16_WEIGHTS[q];
 
-    // Build M = I + t * X (in-place update)
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        M[i][j] = I[i][j] + t * X[i][j];
-      }
-    }
+    // Build M = I + t * X
+    const M: number[][] = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => I[i][j] + t * X[i][j])
+    );
 
     // Solve M * col_j(Y) = col_j(X) for each column j
     // Then result += w * Y

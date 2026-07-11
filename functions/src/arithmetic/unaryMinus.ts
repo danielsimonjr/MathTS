@@ -19,16 +19,15 @@ interface UnaryMinusDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   bignumber?: (value: number) => unknown;
-  fraction?: (value: number) => unknown;
 }
 
 const name = 'unaryMinus';
-const dependencies = ['typed', 'config', '?bignumber', '?fraction'];
+const dependencies = ['typed', 'config', '?bignumber'];
 
 export const createUnaryMinus = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, bignumber, fraction }: UnaryMinusDependencies) => {
+  ({ typed, config, bignumber }: UnaryMinusDependencies) => {
     /**
      * Inverse the sign of a value, apply a unary minus operation.
      *
@@ -84,10 +83,8 @@ export const createUnaryMinus = /* #__PURE__ */ factory(
             return BigInt(negValue);
 
           case 'Fraction':
-            if (!fraction) {
-              throw new Error('Fraction not available. Configure mathjs with Fraction support.');
-            }
-            return fraction(negValue);
+            // TODO: Add Fraction support when dependency available
+            return negValue;
 
           case 'number':
           default:

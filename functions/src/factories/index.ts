@@ -1477,7 +1477,6 @@ import {
   createSackurTetrode,
   createStefanBoltzmann,
   createFirstRadiation,
-  createSpectralRadiance,
   createSecondRadiation,
   createWienDisplacement,
   createElectronMass,
@@ -1577,9 +1576,6 @@ export const stefanBoltzmann = createStefanBoltzmann(
 );
 export const firstRadiation = createFirstRadiation(
   factoryScope as Parameters<typeof createFirstRadiation>[0]
-);
-export const spectralRadiance = createSpectralRadiance(
-  factoryScope as Parameters<typeof createSpectralRadiance>[0]
 );
 export const secondRadiation = createSecondRadiation(
   factoryScope as Parameters<typeof createSecondRadiation>[0]

@@ -20,37 +20,20 @@ interface BigNumberConstructor {
   new (value: number): BigNumberType;
 }
 
-interface FractionType {
-  isInteger(): boolean;
-  isZero(): boolean;
-  lessThan(other: FractionType): boolean;
-  negate(): FractionType;
-  divide(other: FractionType): FractionType;
-  mod(other: FractionType): FractionType;
-  floor(): FractionType;
-  subtract(other: FractionType): FractionType;
-  multiply(other: FractionType): FractionType;
-}
-
-interface FractionConstructor {
-  new (value: number | bigint): FractionType;
-}
-
 interface XgcdDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   matrix: (arr: unknown[]) => unknown;
   BigNumber: BigNumberConstructor;
-  Fraction: FractionConstructor;
 }
 
 const name = 'xgcd';
-const dependencies = ['typed', 'config', 'matrix', 'BigNumber', 'Fraction'];
+const dependencies = ['typed', 'config', 'matrix', 'BigNumber'];
 
 export const createXgcd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, matrix, BigNumber, Fraction }: XgcdDependencies): TypedFunction => {
+  ({ typed, config, matrix, BigNumber }: XgcdDependencies): TypedFunction => {
     /**
      * Calculate the extended greatest common divisor for two values.
      * See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm.
@@ -69,8 +52,8 @@ export const createXgcd = /* #__PURE__ */ factory(
      *
      *    gcd, lcm
      *
-     * @param {number | BigNumber | Fraction} a  An integer number
-     * @param {number | BigNumber | Fraction} b  An integer number
+     * @param {number | BigNumber} a  An integer number
+     * @param {number | BigNumber} b  An integer number
      * @return {Array}              Returns an array containing 3 integers `[div, m, n]`
      *                              where `div = gcd(a, b)` and `a*m + b*n = div`
      */
@@ -81,7 +64,7 @@ export const createXgcd = /* #__PURE__ */ factory(
         return config.matrix === 'Array' ? res : matrix(res);
       },
       'BigNumber, BigNumber': _xgcdBigNumber,
-      'Fraction, Fraction': _xgcdFraction,
+      // TODO: implement support for Fraction
     }) as TypedFunction;
 
     /**
@@ -132,55 +115,6 @@ export const createXgcd = /* #__PURE__ */ factory(
       let res: (BigNumberType | number)[];
       if (a.lt(zero)) {
         res = [a.neg(), lastx.neg(), lasty.neg()];
-      } else {
-        res = [a, !a.isZero() ? lastx : 0, lasty];
-      }
-      return config.matrix === 'Array' ? res : matrix(res);
-    }
-
-    /**
-     * Calculate xgcd for two Fractions
-     * @param {Fraction} a
-     * @param {Fraction} b
-     * @return {Fraction[]} result
-     * @private
-     */
-    function _xgcdFraction(a: FractionType, b: FractionType): unknown {
-      // source: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-      let t: FractionType;
-      let q: FractionType;
-      let r: FractionType;
-
-      const zero = new Fraction(0);
-      const one = new Fraction(1);
-      let x: FractionType = zero;
-      let lastx: FractionType = one;
-      let y: FractionType = one;
-      let lasty: FractionType = zero;
-
-      if (!a.isInteger() || !b.isInteger()) {
-        throw new Error('Parameters in function xgcd must be integer numbers');
-      }
-
-      while (!b.isZero()) {
-        q = a.divide(b).floor();
-        r = a.mod(b);
-
-        t = x;
-        x = lastx.subtract(q.multiply(x));
-        lastx = t;
-
-        t = y;
-        y = lasty.subtract(q.multiply(y));
-        lasty = t;
-
-        a = b;
-        b = r;
-      }
-
-      let res: (FractionType | number)[];
-      if (a.lessThan(zero)) {
-        res = [a.negate(), lastx.negate(), lasty.negate()];
       } else {
         res = [a, !a.isZero() ? lastx : 0, lasty];
       }
