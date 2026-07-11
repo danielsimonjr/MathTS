@@ -3,7 +3,7 @@ import { factory } from '../utils/factory.js';
 import { _switch } from '../utils/switch.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { arraySize } from '../utils/array.js';
-import { IndexError } from '../error/IndexError.js';
+import { DimensionError } from '../error/DimensionError.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
@@ -169,8 +169,7 @@ export const createCumSum = /* #__PURE__ */ factory(
       const size = arraySize(array);
       const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
       if (dimValue < 0 || dimValue >= size.length) {
-        // TODO: would be more clear when throwing a DimensionError here
-        throw new IndexError(dimValue, 0, size.length);
+        throw new DimensionError(dimValue, size.length, '<');
       }
 
       try {
