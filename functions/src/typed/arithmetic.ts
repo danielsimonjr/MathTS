@@ -967,46 +967,6 @@ export const lcm = mathTyped('lcm', {
  * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients)
  */
 export const xgcd = mathTyped('xgcd', {
-  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction[] => {
-    if (!a.isInteger() || !b.isInteger()) {
-      throw new Error('Parameters in function xgcd must be integer numbers');
-    }
-
-    let t: Fraction;
-    let q: Fraction;
-    let r: Fraction;
-
-    const zero = new Fraction(0n, 1n);
-    const one = new Fraction(1n, 1n);
-    let x: Fraction = zero;
-    let lastx: Fraction = one;
-    let y: Fraction = one;
-    let lasty: Fraction = zero;
-
-    while (!b.isZero()) {
-      q = a.divide(b).floor();
-      r = a.mod(b);
-
-      t = x;
-      x = lastx.subtract(q.multiply(x)) as Fraction;
-      lastx = t;
-
-      t = y;
-      y = lasty.subtract(q.multiply(y)) as Fraction;
-      lasty = t;
-
-      a = b;
-      b = r;
-    }
-
-    let res: Fraction[];
-    if (a.lessThan(zero)) {
-      res = [a.negate(), lastx.negate(), lasty.negate()];
-    } else {
-      res = [a, !a.isZero() ? lastx : zero, lasty];
-    }
-    return res;
-  },
   'number, number': (a: f64, b: f64): [f64, f64, f64] => {
     a = Math.floor(a);
     b = Math.floor(b);

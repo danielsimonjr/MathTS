@@ -122,12 +122,12 @@ export const createDot = /* #__PURE__ */ factory(
 
       const adata = isMatrix(a) ? (a as DenseMatrix)._data : a;
       const adt = isMatrix(a)
-        ? (a as DenseMatrix)._datatype || (typeof (a as DenseMatrix).getDataType === 'function' ? (a as DenseMatrix).getDataType() : undefined)
+        ? (a as DenseMatrix)._datatype || (a as DenseMatrix).getDataType()
         : undefined;
 
       const bdata = isMatrix(b) ? (b as DenseMatrix)._data : b;
       const bdt = isMatrix(b)
-        ? (b as DenseMatrix)._datatype || (typeof (b as DenseMatrix).getDataType === 'function' ? (b as DenseMatrix).getDataType() : undefined)
+        ? (b as DenseMatrix)._datatype || (b as DenseMatrix).getDataType()
         : undefined;
 
       // are these 2-dimensional column vectors? (as opposed to 1-dimensional vectors)
@@ -141,8 +141,8 @@ export const createDot = /* #__PURE__ */ factory(
       if (adt && bdt && adt === bdt && typeof adt === 'string' && adt !== 'mixed') {
         const dt = adt;
         // find signatures that matches (dt, dt)
-        add = typed.find(addScalar, [dt, dt]) || add;
-        mul = typed.find(multiplyScalar, [dt, dt]) || mul;
+        add = typed.find(addScalar, [dt, dt]);
+        mul = typed.find(multiplyScalar, [dt, dt]);
       }
 
       // both vectors 1-dimensional
@@ -193,23 +193,14 @@ export const createDot = /* #__PURE__ */ factory(
 
       const xindex = x._index!;
       const xvalues = x._values!;
-      const xdt = x._datatype || (typeof x.getDataType === 'function' ? x.getDataType() : undefined);
 
       const yindex = y._index!;
       const yvalues = y._values!;
-      const ydt = y._datatype || (typeof y.getDataType === 'function' ? y.getDataType() : undefined);
 
+      // TODO optimize add & mul using datatype
       let c: unknown = 0;
-      let add: ScalarFn = addScalar;
-      let mul: ScalarFn = multiplyScalar;
-
-      // process data types
-      if (xdt && ydt && xdt === ydt && typeof xdt === 'string' && xdt !== 'mixed') {
-        const dt = xdt;
-        // find signatures that matches (dt, dt)
-        add = typed.find(addScalar, [dt, dt]) || add;
-        mul = typed.find(multiplyScalar, [dt, dt]) || mul;
-      }
+      const add: ScalarFn = addScalar;
+      const mul: ScalarFn = multiplyScalar;
 
       let i = 0;
       let j = 0;

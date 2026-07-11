@@ -1,4 +1,4 @@
-import { isBigNumber } from '../is.js';
+import { isBigNumber, isNumber } from '../is.js';
 import { isInteger, normalizeFormatOptions, type FormatOptions } from '../number.js';
 
 /**
@@ -201,9 +201,10 @@ export function format(
 
     case 'auto': {
       // determine lower and upper bound for exponential notation.
+      // TODO: implement support for upper and lower to be BigNumbers themselves
       const optionsObject = typeof options === 'object' ? options : undefined;
-      const lowerExp = optionsObject?.lowerExp !== undefined ? optionsObject.lowerExp : -3;
-      const upperExp = optionsObject?.upperExp !== undefined ? optionsObject.upperExp : 5;
+      const lowerExp = _toNumberOrDefault(optionsObject?.lowerExp, -3);
+      const upperExp = _toNumberOrDefault(optionsObject?.upperExp, 5);
 
       // handle special case zero
       if (value.isZero()) return '0';
@@ -212,14 +213,7 @@ export function format(
       let str;
       const rounded = value.toSignificantDigits(precision);
       const exp = rounded.e;
-      const expGteLower = isBigNumber(lowerExp)
-        ? !(lowerExp as unknown as DecimalLike).gt(exp)
-        : exp >= (lowerExp as number);
-      const expLtUpper = isBigNumber(upperExp)
-        ? (upperExp as unknown as DecimalLike).gt(exp)
-        : exp < (upperExp as number);
-
-      if (expGteLower && expLtUpper) {
+      if (exp >= lowerExp && exp < upperExp) {
         // normal number notation
         str = rounded.toFixed();
       } else {
@@ -291,4 +285,14 @@ export function toExponential(value: DecimalLike, precision?: number) {
  */
 export function toFixed(value: DecimalLike, precision?: number) {
   return value.toFixed(precision);
+}
+
+function _toNumberOrDefault(value: unknown, defaultValue: number): number {
+  if (isNumber(value)) {
+    return value;
+  } else if (isBigNumber(value)) {
+    return (value as unknown as DecimalLike).toNumber();
+  } else {
+    return defaultValue;
+  }
 }

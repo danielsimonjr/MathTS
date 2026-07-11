@@ -1,4 +1,4 @@
-import { isBigNumber } from '../is.js';
+import { isBigNumber, isNumber } from '../is.js';
 import { isInteger, normalizeFormatOptions, type FormatOptions } from '../number.js';
 
 /**
@@ -192,9 +192,10 @@ export function format(value: unknown, options?: unknown): string {
 
     case 'auto': {
       // determine lower and upper bound for exponential notation.
+      // TODO: implement support for upper and lower to be BigNumbers themselves
       const optionsObj = options as { lowerExp?: unknown; upperExp?: unknown } | undefined;
-      const lowerExp = optionsObj?.lowerExp !== undefined ? optionsObj.lowerExp : -3;
-      const upperExp = optionsObj?.upperExp !== undefined ? optionsObj.upperExp : 5;
+      const lowerExp = _toNumberOrDefault(optionsObj?.lowerExp, -3);
+      const upperExp = _toNumberOrDefault(optionsObj?.upperExp, 5);
 
       // handle special case zero
       if (v.isZero()) return '0';
@@ -203,14 +204,7 @@ export function format(value: unknown, options?: unknown): string {
       let str;
       const rounded = v.toSignificantDigits(precision);
       const exp = rounded.e;
-      const expGteLower = isBigNumber(lowerExp)
-        ? !(lowerExp as unknown as BigNumberValue).gt(exp)
-        : exp >= (lowerExp as number);
-      const expLtUpper = isBigNumber(upperExp)
-        ? (upperExp as unknown as BigNumberValue).gt(exp)
-        : exp < (upperExp as number);
-
-      if (expGteLower && expLtUpper) {
+      if (exp >= lowerExp && exp < upperExp) {
         // normal number notation
         str = rounded.toFixed();
       } else {
@@ -282,4 +276,14 @@ export function toExponential(value: BigNumberValue, precision?: number): string
  */
 export function toFixed(value: BigNumberValue, precision?: number): string {
   return value.toFixed(precision);
+}
+
+function _toNumberOrDefault(value: unknown, defaultValue: number): number {
+  if (isNumber(value)) {
+    return value;
+  } else if (isBigNumber(value)) {
+    return (value as unknown as BigNumberValue).toNumber();
+  } else {
+    return defaultValue;
+  }
 }
