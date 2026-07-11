@@ -19,6 +19,7 @@ import type {
   WorkbookEvent,
   WorkbookEventHandler,
 } from './types';
+import { evaluate } from '@danielsimonjr/mathts-functions';
 import {
   buildDependencyGraph,
   topologicalSort,
@@ -230,16 +231,14 @@ export class WorkbookExecutor {
   }
 
   private async executeTensorCell(cell: TensorCell): Promise<CellOutput> {
-    // TODO: Integrate with MathTS tensor engine
-    // For now, parse and validate the tensor notation
-
     const tensorDef = cell.tensor;
+    const scope = this.buildScope(cell.id);
 
-    // Simple parser for tensor notation
-    // Full implementation would use MathTS symbolic engine
+    const evaluatedValue = evaluate(tensorDef, scope);
+
     const result = {
       type: 'tensor' as const,
-      value: { raw: tensorDef, notation: cell.notation },
+      value: evaluatedValue,
       latex: this.tensorToLatex(tensorDef),
     };
 
