@@ -230,9 +230,9 @@ export { createForEach } from './function/matrix/forEach.js';
 export { createMap } from './function/matrix/map.js';
 export { createRange } from './function/matrix/range.js';
 export { createSize } from './function/matrix/size.js';
-// FIXME: create a lightweight "number" implementation of subset only supporting plain objects/arrays
+// TODO: create a lightweight "number" implementation of subset only supporting plain objects/arrays
 export const createIndex = /* #__PURE__ */ factory('index', [], () => noIndex);
-export const createMatrix = /* #__PURE__ */ factory('matrix', [], () => noMatrix); // FIXME: needed now because subset transform needs it. Remove the need for it in subset
+export const createMatrix = /* #__PURE__ */ factory('matrix', [], () => noMatrix); // TODO: needed now because subset transform needs it. Remove the need for it in subset
 export const createSubset = /* #__PURE__ */ factory('subset', [], () => noSubset);
 // TODO: provide number+array implementations for map, filter, forEach, zeros, ...?
 // TODO: create range implementation for range?
