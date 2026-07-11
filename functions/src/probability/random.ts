@@ -20,20 +20,28 @@ interface RandomDependencies {
 const name = 'random';
 const dependencies = ['typed', 'config', '?on'];
 
+function _createRandomFunction(config: ConfigOptions, on?: RandomDependencies['on']) {
+  // seeded pseudo random number generator
+  let rng = createRng(config.randomSeed);
+
+  if (on) {
+    on('config', function (curr: ConfigOptions, prev: ConfigOptions) {
+      if (curr.randomSeed !== prev.randomSeed) {
+        rng = createRng(curr.randomSeed);
+      }
+    });
+  }
+
+  return function _random(min: number, max: number): number {
+    return min + rng() * (max - min);
+  };
+}
+
 export const createRandom = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, on }: RandomDependencies) => {
-    // seeded pseudo random number generator
-    let rng = createRng(config.randomSeed);
-
-    if (on) {
-      on('config', function (curr: ConfigOptions, prev: ConfigOptions) {
-        if (curr.randomSeed !== prev.randomSeed) {
-          rng = createRng(curr.randomSeed);
-        }
-      });
-    }
+    const _random = _createRandomFunction(config, on);
 
     /**
      * Return a random number larger or equal to `min` and smaller than `max`
@@ -86,38 +94,20 @@ export const createRandom = /* #__PURE__ */ factory(
       );
       return isMatrix(size) ? (size as MatrixType).create(res as unknown[], 'number') : res;
     }
-
-    function _random(min: number, max: number): number {
-      return min + rng() * (max - min);
-    }
   }
 );
 
 // number only implementation of random, no matrix support
-// TODO: there is quite some duplicate code in both createRandom and createRandomNumber, can we improve that?
 export const createRandomNumber = /* #__PURE__ */ factory(
   name,
   ['typed', 'config', '?on'],
   ({ typed, config, on }: RandomDependencies) => {
-    // seeded pseudo random number generator1
-    let rng = createRng(config.randomSeed);
-
-    if (on) {
-      on('config', function (curr: ConfigOptions, prev: ConfigOptions) {
-        if (curr.randomSeed !== prev.randomSeed) {
-          rng = createRng(curr.randomSeed);
-        }
-      });
-    }
+    const _random = _createRandomFunction(config, on);
 
     return typed(name, {
       '': () => _random(0, 1),
       number: (max: number) => _random(0, max),
       'number, number': (min: number, max: number) => _random(min, max),
     });
-
-    function _random(min: number, max: number): number {
-      return min + rng() * (max - min);
-    }
   }
 );
