@@ -69,9 +69,9 @@ function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number
   for (let k = 0; k < minMN; k++) {
     // Left Householder to zero out column below diagonal
     if (k < m - 1) {
-      const col: number[] = [];
+      const col = new Array(m - k);
       for (let i = k; i < m; i++) {
-        col.push(B[i][k]);
+        col[i - k] = B[i][k];
       }
 
       const { v, beta } = householder(col);
@@ -84,9 +84,9 @@ function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number
 
     // Right Householder to zero out row past superdiagonal
     if (k < n - 2) {
-      const row: number[] = [];
+      const row = new Array(n - (k + 1));
       for (let j = k + 1; j < n; j++) {
-        row.push(B[k][j]);
+        row[j - (k + 1)] = B[k][j];
       }
 
       const { v, beta } = householder(row);
