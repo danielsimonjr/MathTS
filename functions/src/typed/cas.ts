@@ -2357,8 +2357,7 @@ function _casSimplifyOne(expr: string): string {
   const numericPattern = /^[\d\s+\-*/().^]+$/;
   if (numericPattern.test(r)) {
     try {
-      const jsExpr = r.replace(/\^/g, '**');
-      const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
+      const val = evaluate(r);
       if (typeof val === 'number' && isFinite(val)) return String(val);
     } catch {
       // fall through
@@ -2709,6 +2708,7 @@ export function casSimplify(
   // The closure must be self-contained (no captured imports).
   return computePool
     .map<string, string>(strs, (exprStr) => {
+
       // --- self-contained simplify kernel (copied from _casSimplifyOne) ---
       function _combineLikeTermsW(expr: string): string {
         const normalised = expr.replace(/\s*-\s*/g, ' + -');
@@ -2775,9 +2775,33 @@ export function casSimplify(
       r = r.replace(/\b0\s*\*\s*[^+-]*/g, '0');
       if (/^[\d\s+\-*/().^]+$/.test(r)) {
         try {
-          const jsExpr = r.replace(/\^/g, '**');
-          const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
-          if (typeof val === 'number' && isFinite(val as number)) return String(val);
+          // Internal safe numeric evaluator for worker (handles ^, *, /, +, - and parens)
+          const safeEvaluate = (exp: string): number => {
+            const tk = exp.match(/(?:\d+\.?\d*|\.\d+)|[+\-*/^()]/g);
+            if (!tk) throw new Error();
+            const os: string[] = [], vs: number[] = [];
+            const pr: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 };
+            const op = () => {
+              const o = os.pop()!, b = vs.pop()!, a = vs.pop()!;
+              if (o === '+') vs.push(a + b); else if (o === '-') vs.push(a - b);
+              else if (o === '*') vs.push(a * b); else if (o === '/') vs.push(a / b);
+              else if (o === '^') vs.push(Math.pow(a, b));
+            };
+            for (let i = 0; i < tk.length; i++) {
+              const t = tk[i];
+              if (t === '(') os.push(t);
+              else if (t === ')') { while (os.length && os[os.length - 1] !== '(') op(); os.pop(); }
+              else if (pr[t]) {
+                if ((t === '-' || t === '+') && (i === 0 || pr[tk[i-1]] || tk[i-1] === '(')) vs.push(0);
+                while (os.length && pr[os[os.length - 1]] >= pr[t] && !(t === '^' && os[os.length - 1] === '^')) op();
+                os.push(t);
+              } else vs.push(Number(t));
+            }
+            while (os.length) op();
+            return vs[0];
+          };
+          const val = safeEvaluate(r);
+          if (typeof val === 'number' && isFinite(val)) return String(val);
         } catch {
           /**/
         }
