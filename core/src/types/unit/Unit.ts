@@ -850,12 +850,6 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
       if (res.value !== null) {
         res.value = pow(res.value, p);
-
-        // only allow numeric output, we don't want to return a Complex number
-        // if (!isNumeric(res.value)) {
-        //  res.value = NaN
-        // }
-        // Update: Complex supported now
       } else {
         res.value = null;
       }
