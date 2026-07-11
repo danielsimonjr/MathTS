@@ -207,8 +207,7 @@ export const createSubset = /* #__PURE__ */ factory(
  */
 function _getSubstring(str: string, index: IndexLike): string {
   if (!isIndex(index)) {
-    // TODO: better error message
-    throw new TypeError('Index expected');
+    throw new TypeError('Index expected as index to retrieve a substring');
   }
 
   if (isEmptyIndex(index)) {
@@ -257,8 +256,7 @@ function _setSubstring(
   defaultValue?: string
 ): string {
   if (!index || index.isIndex !== true) {
-    // TODO: better error message
-    throw new TypeError('Index expected');
+    throw new TypeError('Index expected as index to replace a substring');
   }
   if (isEmptyIndex(index)) {
     return str;
