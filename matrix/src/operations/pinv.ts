@@ -61,13 +61,14 @@ export function pinv(A: DenseMatrix, opts?: PinvOptions): DenseMatrix {
   const k = S.length; // min(m, n)
   const pinvData = new Float64Array(n * m);
   for (let i = 0; i < n; i++) {
-    for (let j = 0; j < m; j++) {
-      let sum = 0;
-      for (let l = 0; l < k; l++) {
-        // V[i][l] * Sinv[l] * U[j][l]   (Uᵀ[l][j] = U[j][l])
-        sum += V[i][l] * Sinv[l] * U[j][l];
+    for (let l = 0; l < k; l++) {
+      const val = V[i][l] * Sinv[l];
+      if (val !== 0) {
+        for (let j = 0; j < m; j++) {
+          // Uᵀ[l][j] = U[j][l]
+          pinvData[i * m + j] += val * U[j][l];
+        }
       }
-      pinvData[i * m + j] = sum;
     }
   }
 
