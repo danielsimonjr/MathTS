@@ -347,21 +347,17 @@ function product(array: number[]): number {
  */
 
 function _reshape<T>(array: T[], sizes: number[]): NestedArray<T> {
-  // testing if there are enough elements for the requested shape
   let tmpArray: NestedArray<T>[] = array;
   let tmpArray2: NestedArray<T>[][];
 
-  // for each dimension starting by the last one and ignoring the first one
   for (let sizeIndex = sizes.length - 1; sizeIndex > 0; sizeIndex--) {
     const size = sizes[sizeIndex];
     tmpArray2 = [];
 
-    // aggregate the elements of the current tmpArray in elements of the requested size
     const length = tmpArray.length / size;
     for (let i = 0; i < length; i++) {
       tmpArray2.push(tmpArray.slice(i * size, (i + 1) * size));
     }
-    // set it as the new tmpArray for the next loop turn or for return
     tmpArray = tmpArray2;
   }
 

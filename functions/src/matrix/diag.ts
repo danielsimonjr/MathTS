@@ -82,58 +82,51 @@ export const createDiag = /* #__PURE__ */ factory(
      * @returns {Matrix | Array} Diagonal matrix from input vector, or diagonal from input matrix.
      */
     return typed(name, {
-      // FIXME: simplify this huge amount of signatures as soon as typed-function supports optional arguments
-
-      Array: function (x: unknown[]): unknown[] | unknown[][] | Matrix {
-        return _diag(x, 0, arraySize(x), null);
+      'Array | Matrix': function (x: Matrix | unknown[]): Matrix | unknown[] | unknown[][] {
+        const isMat = isMatrix(x);
+        return _diag(
+          x,
+          0,
+          isMat ? (x as Matrix).size() : arraySize(x as unknown[]),
+          isMat ? (x as Matrix).storage() : null
+        );
       },
 
-      'Array, number': function (x: unknown[], k: number): unknown[] | unknown[][] | Matrix {
-        return _diag(x, k, arraySize(x), null);
+      'Array | Matrix, number | BigNumber': function (
+        x: Matrix | unknown[],
+        k: number | BigNumber
+      ): Matrix | unknown[] | unknown[][] {
+        const isMat = isMatrix(x);
+        const kNum = typeof k === 'number' ? k : k.toNumber();
+        return _diag(
+          x,
+          kNum,
+          isMat ? (x as Matrix).size() : arraySize(x as unknown[]),
+          isMat ? (x as Matrix).storage() : null
+        );
       },
 
-      'Array, BigNumber': function (x: unknown[], k: BigNumber): unknown[] | unknown[][] | Matrix {
-        return _diag(x, k.toNumber(), arraySize(x), null);
-      },
-
-      'Array, string': function (x: unknown[], format: string): Matrix {
-        return _diag(x, 0, arraySize(x), format) as Matrix;
-      },
-
-      'Array, number, string': function (x: unknown[], k: number, format: string): Matrix {
-        return _diag(x, k, arraySize(x), format) as Matrix;
-      },
-
-      'Array, BigNumber, string': function (x: unknown[], k: BigNumber, format: string): Matrix {
-        return _diag(x, k.toNumber(), arraySize(x), format) as Matrix;
-      },
-
-      Matrix: function (x: Matrix): Matrix {
-        return _diag(x, 0, x.size(), x.storage()) as Matrix;
-      },
-
-      'Matrix, number': function (x: Matrix, k: number): Matrix | unknown[] {
-        return _diag(x, k, x.size(), x.storage());
-      },
-
-      'Matrix, BigNumber': function (x: Matrix, k: BigNumber): Matrix | unknown[] {
-        return _diag(x, k.toNumber(), x.size(), x.storage());
-      },
-
-      'Matrix, string': function (x: Matrix, format: string): Matrix {
-        return _diag(x, 0, x.size(), format) as Matrix;
-      },
-
-      'Matrix, number, string': function (x: Matrix, k: number, format: string): Matrix | unknown[] {
-        return _diag(x, k, x.size(), format);
-      },
-
-      'Matrix, BigNumber, string': function (
-        x: Matrix,
-        k: BigNumber,
+      'Array | Matrix, string': function (
+        x: Matrix | unknown[],
         format: string
-      ): Matrix | unknown[] {
-        return _diag(x, k.toNumber(), x.size(), format);
+      ): Matrix | unknown[] | unknown[][] {
+        const isMat = isMatrix(x);
+        return _diag(
+          x,
+          0,
+          isMat ? (x as Matrix).size() : arraySize(x as unknown[]),
+          format
+        ) as Matrix;
+      },
+
+      'Array | Matrix, number | BigNumber, string': function (
+        x: Matrix | unknown[],
+        k: number | BigNumber,
+        format: string
+      ): Matrix | unknown[] | unknown[][] {
+        const isMat = isMatrix(x);
+        const kNum = typeof k === 'number' ? k : k.toNumber();
+        return _diag(x, kNum, isMat ? (x as Matrix).size() : arraySize(x as unknown[]), format);
       },
     });
 

@@ -55,9 +55,9 @@ describe('bignumber formatter - auto notation branches', () => {
     expect(result).toBe('2');
   });
 
-  it('accepts BigNumber lowerExp/upperExp (via _toNumberOrDefault)', () => {
-    // upperExp given as a BigNumber exercises the isBigNumber branch of
-    // _toNumberOrDefault (value.toNumber()). 1e7 has exp 7 >= upperExp 2 => exp.
+  it('accepts BigNumber lowerExp/upperExp (via direct BigNumber comparison)', () => {
+    // upperExp given as a BigNumber exercises the isBigNumber branch.
+    // 1e7 has exp 7 >= upperExp 2 => exp.
     const result = format(bn(1e7), { upperExp: bn(2) });
     expect(result).toMatch(/e/);
   });

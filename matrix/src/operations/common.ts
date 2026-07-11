@@ -106,11 +106,18 @@ export function normInf(A: number[][]): number {
 export function norm1(A: number[][]): number {
   const m = A.length;
   const n = A[0].length;
+  const colSums = new Float64Array(n);
+
+  for (let i = 0; i < m; i++) {
+    const row = A[i];
+    for (let j = 0; j < n; j++) {
+      colSums[j] += Math.abs(row[j]);
+    }
+  }
+
   let maxColSum = 0;
   for (let j = 0; j < n; j++) {
-    let colSum = 0;
-    for (let i = 0; i < m; i++) colSum += Math.abs(A[i][j]);
-    if (colSum > maxColSum) maxColSum = colSum;
+    if (colSums[j] > maxColSum) maxColSum = colSums[j];
   }
   return maxColSum;
 }

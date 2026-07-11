@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { gcd, lcm, mod, xgcd, nthRoot, norm } from '../src/typed/arithmetic.js';
 import { hypot } from '../src/typed/trigonometry.js';
+import { Fraction } from '@danielsimonjr/mathts-core';
 
 describe('Extended Arithmetic Functions (Sprint 18)', () => {
   describe('Greatest Common Divisor (gcd)', () => {
@@ -110,6 +111,30 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
       const [g, x, y] = xgcd(35, 15);
       expect(g).toBe(5);
       expect(35 * x + 15 * y).toBe(5);
+    });
+
+    it('should work with Fraction', () => {
+      const f1 = new Fraction(12n, 1n);
+      const f2 = new Fraction(8n, 1n);
+      const [g, x, y] = xgcd(f1, f2) as Fraction[];
+
+      expect(g.equals(new Fraction(4n, 1n))).toBe(true);
+      expect(x.equals(new Fraction(1n, 1n))).toBe(true);
+      expect(y.equals(new Fraction(-1n, 1n))).toBe(true);
+
+      const resG = f1.multiply(x).add(f2.multiply(y)) as Fraction;
+      expect(resG.equals(g)).toBe(true);
+
+      const f3 = new Fraction(36163n, 1n);
+      const f4 = new Fraction(21199n, 1n);
+      const [g2, x2, y2] = xgcd(f3, f4) as Fraction[];
+
+      expect(g2.equals(new Fraction(1247n, 1n))).toBe(true);
+      expect(x2.equals(new Fraction(-7n, 1n))).toBe(true);
+      expect(y2.equals(new Fraction(12n, 1n))).toBe(true);
+
+      const resG2 = f3.multiply(x2).add(f4.multiply(y2)) as Fraction;
+      expect(resG2.equals(g2)).toBe(true);
     });
   });
 
