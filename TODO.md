@@ -52,11 +52,19 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       return type, and a dual-package instance would make it a silent no-op. Add a per-call
       `{ gpu?: boolean }` option. - GPU vs CPU disagree on domain edges (`log(0)`, `atanh(1)`): WGSL says _indeterminate_, JS
       says `-Infinity`/`NaN`. The oracle test skips non-finite expectations, so this is invisible. - `createComputePipelineAsync` instead of the blocking sync variant.
-- [ ] **Unidentified flake in the full `functions` suite** (seen once, 2026-07-13) — one test
-      failed during a full-suite run and passed on two subsequent clean runs (3414 passed). The
-      test name was lost (the capture filter discarded it). Known regime: the full parallel suite
-      is a distinct load profile (worker contention/timeouts). Re-run with full output captured
-      and identify it; do not dismiss as noise.
+- [ ] 🔴 **Intermittent worker-pool flake — IDENTIFIED, not root-caused** (2026-07-13).
+      `functions/tests/special.test.ts` → _"Special function parallel array overloads >
+      single-argument overloads match the scalar implementation"_. Seen **2×** under
+      `npm run test` (turbo running all packages' suites concurrently — a heavier load regime than
+      a single package's vitest). **Not reproducible in 6 attempts** since: 3× isolated (42/42),
+      2× full `functions` suite (3414 passed), 1× full turbo gate (48/48, exit 0). The assertion
+      message was never captured.
+      **Why it's suspicious:** the test lowers `computePool` `thresholdElements` to 64 to _force_
+      the worker path, then fires **10 concurrent worker-pool promises at once**. Under contention
+      that is either (a) a test-harness timeout — benign, or (b) **`WorkerPool` returning wrong or
+      partial results under load — a real product bug**. I could not distinguish the two, and that
+      distinction matters. Next: run the turbo gate in a loop with full output captured, and add a
+      worker-pool stress test that asserts result _correctness_ under saturation.
 - [ ] **WASM is dead in the browser** (found 2026-07-13) — `elementwiseChainDispatch` returns
       `null` under Chrome, so browser users silently get the **pure-JS** path and the WASM tier
       never engages. This is why the GPU benchmark's baseline is JS. Likely a Node-only loader /
