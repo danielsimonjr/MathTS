@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-compat",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "mathjs compatibility layer for MathTS",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.6.0",
-    "@danielsimonjr/mathts-functions": "^0.17.0",
+    "@danielsimonjr/mathts-functions": "^0.18.0",
     "@danielsimonjr/mathts-matrix": "^0.3.0",
     "@danielsimonjr/mathts-parallel": "^0.3.2"
   },
