@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — the browser WebGPU gate now actually runs GPU kernels (and caught a dead shader)
+
+The `test:browser` suite passed for months **without ever executing a WGSL kernel**, for
+two independent reasons: it launched Playwright's bundled `chrome-headless-shell`, which
+ships **no GPU adapter** (so `requestAdapter()` returned `null`), and its 4×4 matrix sat far
+below the 65,536-element GPU threshold (so even with an adapter it took the CPU path). Both
+were swallowed by a `catch` that "passed trivially" — a gate that cannot fail proves nothing.
+
+- **`vitest.config.browser.ts`** now launches the **system Chrome** (`channel: 'chrome'`),
+  which exposes the real adapter (verified: NVIDIA Pascal).
+- **`gpu-smoke.browser.test.ts`** rewritten as a real gate: it **skips loudly** when no
+  adapter is present (never passes as if verified), dispatches an actual compute shader,
+  and validates `gpuMatmul` **above** the GPU threshold against an f64 CPU oracle. It uses
+  **irrational** operands deliberately — integers below 2²⁴ are exact in f32, so an
+  integer-valued matmul cannot distinguish the f32 GPU path from the f64 CPU fallback. The
+  resulting error (**4.5e-7**, non-zero and f32-sized) now *proves* the GPU computed it.
+- **Fixed a genuinely dead kernel this exposed:** the `sumReduce` WGSL shader named its
+  workgroup array `shared`, a **reserved keyword in WGSL**, so it never compiled and GPU
+  reduction was permanently broken. The compile error surfaced only as an uncaptured
+  `GPUValidationError` that nothing asserted on. Renamed to `sdata`, plus a regression guard
+  that compiles every builtin kernel via `getCompilationInfo()` and fails on any error.
+
 ### Fixed — WebGPU wrappers now honor their never-throw fallback contract
 
 `gpuMatmul` / `gpuAdd` / `gpuTranspose` / `gpuScale` (`functions/src/typed/gpu.ts`)

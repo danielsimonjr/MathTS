@@ -140,7 +140,11 @@ export const BUILTIN_SHADERS = {
     @group(0) @binding(1) var<storage, read_write> output: array<f32>;
     @group(0) @binding(2) var<uniform> params: vec4<u32>; // inputLength, outputLength, _, _
 
-    var<workgroup> shared: array<f32, 256>;
+    // NOTE: 'shared' is a RESERVED KEYWORD in WGSL — naming this workgroup
+    // array 'shared' made this shader fail to compile, which (because
+    // GPUBackend.initialize() precompiles every registered shader) poisoned
+    // backend init and silently forced ALL GPU ops onto the CPU fallback.
+    var<workgroup> sdata: array<f32, 256>;
 
     @compute @workgroup_size(256)
     fn main(
@@ -158,21 +162,21 @@ export const BUILTIN_SHADERS = {
       if (idx + 256u < inputLength) {
         sum = sum + input[idx + 256u];
       }
-      shared[lid.x] = sum;
+      sdata[lid.x] = sum;
 
       workgroupBarrier();
 
       // Reduce within workgroup
       for (var s: u32 = 128u; s > 0u; s = s >> 1u) {
         if (lid.x < s) {
-          shared[lid.x] = shared[lid.x] + shared[lid.x + s];
+          sdata[lid.x] = sdata[lid.x] + sdata[lid.x + s];
         }
         workgroupBarrier();
       }
 
       // Write result
       if (lid.x == 0u) {
-        output[wid.x] = shared[0];
+        output[wid.x] = sdata[0];
       }
     }
   `,

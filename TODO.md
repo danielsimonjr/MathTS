@@ -26,6 +26,14 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       regress_ the working `gpuMatmul` in browsers (invisible to CI) and that the flag's real
       home is Spec 2's implicit routing. Shipped instead: the honest residue — a preexisting
       never-throw bug fix on the GPU path + accurate `functions.md` coverage docs.
+- [x] **Browser GPU gate made real** (2026-07-10) — `test:browser` had **never executed a WGSL
+      kernel** (bundled `chrome-headless-shell` has no adapter; the 4×4 matrix was below the
+      65,536-element threshold; both swallowed by a trivially-passing `catch`). Now launches the
+      **system Chrome** (real NVIDIA adapter), skips loudly when no GPU, and validates `gpuMatmul`
+      above the threshold against an f64 oracle using **irrational** operands (integers <2²⁴ are
+      exact in f32 and cannot discriminate GPU-f32 from CPU-f64). Measured **4.5e-7** — the GPU
+      path is now _proven_. Exposed + fixed a dead kernel: `sumReduce` used the WGSL **reserved
+      keyword** `shared` and never compiled; added a compile guard over every builtin shader.
 - [ ] **Spec 2 — the real GPU tier (next)** — `enableGpu()`/`isGpuEnabled()` flag (default
       OFF, in the `gpu` leaf) **plus** the first `*GpuDispatch` bridge, landed together so the
       flag has a real implicit consumer to gate. Target the GPU-friendly categories only

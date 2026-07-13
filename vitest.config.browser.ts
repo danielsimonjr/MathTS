@@ -29,16 +29,18 @@ export default defineConfig({
       enabled: true,
       provider: playwright({
         launchOptions: {
-          args: [
-            '--enable-unsafe-webgpu',
-            '--enable-features=Vulkan',
-            '--use-angle=vulkan',
-            '--ignore-gpu-blocklist',
-          ],
+          // Use the SYSTEM Chrome, not Playwright's bundled Chromium. The
+          // bundled `chrome-headless-shell` build ships without a GPU adapter,
+          // so `navigator.gpu.requestAdapter()` resolves to `null` there and no
+          // WGSL kernel can ever execute — which silently made this suite a
+          // no-op. System Chrome exposes the real adapter (verified: NVIDIA
+          // Pascal). Headed for the same reason: the headless shell has no GPU.
+          channel: 'chrome',
+          args: ['--enable-unsafe-webgpu'],
         },
       }),
       instances: [{ browser: 'chromium' }],
-      headless: true,
+      headless: false,
     },
   },
 });
