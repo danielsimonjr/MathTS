@@ -72,7 +72,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky",
     "build:prod": "turbo run build:prod",
-    "release": "changeset version && npm run build"
+    "release": "changeset version && npm run build",
+    "test:bench": "vitest run --config vitest.config.bench.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

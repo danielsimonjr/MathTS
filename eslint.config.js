@@ -10,11 +10,12 @@ export default tseslint.config(
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
-      // Not source: vestigial pre-monorepo mathjs scaffolding at the repo-root
-      // `src/` (NOT a workspace, not built), documentation snapshots under
-      // `docs/`, and the git-ignored `.remember/` scratch/memory area. None are
-      // part of any package's `src` and must not be linted.
-      'src/**',
+      // Not source: documentation snapshots under `docs/` and the git-ignored
+      // `.remember/` scratch/memory area. Neither is part of any package's `src`.
+      //
+      // (The repo-root `src/` ignore was dropped when that directory was deleted:
+      // 11 vestigial pre-monorepo mathjs files, not a workspace, not built, and
+      // referenced by nothing — verified against the dependency graph.)
       'docs/**',
       '.remember/**',
       '**/*.js',

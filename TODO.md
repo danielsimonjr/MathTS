@@ -88,13 +88,31 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 
 ### Housekeeping (discovered 2026-07-09, low-priority)
 
-- [ ] **Root `vitest.config.ts` omits 5 re-export packages** — its `include` list doesn't
-      cover `ast`/`evaluator`/`linalg`/`parser`/`signal` test dirs, so a root `npx vitest run`
-      (and `test:coverage`) silently skips them. They ARE run by `turbo run test` (each has its
-      own `vitest.config.ts`), so it's a root-aggregate/coverage gap, not a test-execution gap.
-- [ ] **Vestigial root `src/`** (10 pre-monorepo mathjs files — `mainAny.ts`/`factoriesAny.ts`/…;
-      not a workspace, not built) + a stray `docs/Architecture/Workbook/index 2.ts` duplicate.
-      eslint-ignored 2026-07-09; candidates for deletion (verify truly unreferenced first).
+- [x] ✅ **Root `vitest.config.ts` test-collection gap — FIXED** (2026-07-13). The hand-listed
+      `include` omitted **11** packages, not the 5 originally noted — `arithmetic`, `ast`,
+      `evaluator`, **`gpu`**, `linalg`, `numbers`, `parser`, `signal`, `statistics`,
+      `trigonometry`, `units` — so a root `npx vitest run` / `test:coverage` silently skipped
+      them. (`gpu` was missing from the day it was created, which is exactly how an enumerated
+      list rots.) Replaced with a **glob** (`*/tests/**`), verified every `*/tests` dir belongs to
+      a workspace package. Coverage `include` also gained `gpu/src/**` + `functions/src/gpu/**`.
+      `turbo run test` was never affected — it runs each package's own config.
+- [x] ✅ **Wall-clock benchmarks isolated** (2026-07-13, found by the above). `tests/benchmark/**`
+      makes timing assertions ("100 ops under 200ms") and was running INSIDE the root aggregate
+      alongside ~8,900 tests, so it measured machine contention, not code: `DenseMatrix transpose
+  100x100` passes at ~100ms alone and **failed at 212ms** there. Widening the threshold would
+      have hidden that. Moved to `vitest.config.bench.ts` (single-thread, no parallelism) behind
+      **`npm run test:bench`** — the only configuration where a wall-clock threshold means
+      anything. Root aggregate: 440 files / 8790 passed. Bench: 31/31.
+- [x] ✅ **Vestigial root `src/` deleted** (2026-07-13) — 11 pre-monorepo mathjs files
+      (`mainAny.ts`/`factoriesAny.ts`/…). Verified dead first: **0 references in the dependency
+      graph**, not a workspace, absent from every tsconfig/turbo/script, and self-referential only.
+      The now-dead `src/**` eslint ignore was removed with it. Also deleted the stray
+      `docs/Architecture/Workbook/index 2.ts` (unreferenced snapshot).
+      ⚠️ **Surfaced, NOT deleted:** the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`,
+      `executor.ts`, `graph.ts`, `index.ts`) are stale snapshots of `workbook/src/` that have
+      already rotted — `index.ts` (446 lines) actually contains the **YAML parser**, not an index.
+      They are unreferenced and unbuilt. Left in place because they are docs content, not mine to
+      remove unilaterally; recommend deleting them.
 
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
 > below): `eigs`/SVD acceleration · `polyFit`/`leastSquares`.
