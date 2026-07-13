@@ -53,17 +53,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       @1M. WASM still wins; tier order unchanged.
 
 - [x] ✅ **WASM dead in the browser — FIXED** (2026-07-13). `WasmLoader` browser branch made a single relative-URL guess with no fallback; `resolveBrowserWasm()` now probes candidates via `fetch(HEAD)` like the Node resolver. SHA-384 integrity untouched. This INVALIDATED the GPU benchmark: WASM is ~1.9x FASTER than the GPU for element-wise chains, so `fuseUnaryChainAsync` tier order was corrected to WASM→GPU→JS.
-      `null` under Chrome, so browser users silently get the **pure-JS** path and the WASM tier
-      never engages. This is why the GPU benchmark's baseline is JS. Likely a Node-only loader /
-      missing `.wasm` in the browser bundle. Potentially a **bigger win than the GPU** if fixed.
-- [ ] **Spec 3 — remaining GPU-friendly categories** — `enableGpu()`/`isGpuEnabled()` flag (default
-      OFF, in the `gpu` leaf) **plus** the first `*GpuDispatch` bridge, landed together so the
-      flag has a real implicit consumer to gate. Target the GPU-friendly categories only
-      (fused elementwise chains → reductions → FFT); the transfer-dominated long tail is a
-      non-goal (measured slower on GPU, same as the retired WASM elementwise path). Also
-      folds in: unify/delete the divergent dead GPU thresholds (65536 live vs 100000/50000/
-      10000/200000 dead). Kernel correctness is a **browser** gate (`bench-3way` +
-      `claude-in-chrome`), not headless CI.
+- [ ] **Spec 3 — reductions + FFT on the GPU** (the only GPU-friendly categories left).
+      The flag and the first `*GpuDispatch` bridge already shipped in Spec 2, so this is purely
+      the two remaining kernels. **Do the economics first:** element-wise chains turned out to
+      LOSE to WASM (~1.9×) — reductions and FFT must be measured against **WASM**, not JS, before
+      any kernel is written, or we repeat that mistake. FFT is the more likely win (compute-bound,
+      like matmul); a plain reduction is memory-bound and will probably lose.
+      Also folds in: **unify/delete the divergent dead GPU thresholds** (65,536 live vs
+      100,000 / 50,000 / 10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts`) — dead
+      constants on the unregistered-GPU `BackendManager` route.
+      Note `sumReduce`'s WGSL now compiles (the `shared` reserved-keyword fix) but has **never
+      been executed** — it is registered, not wired to anything.
 
 ### Scientific Workbook — remaining deferred capabilities
 
@@ -97,7 +97,9 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       eslint-ignored 2026-07-09; candidates for deletion (verify truly unreferenced first).
 
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
-> below): `eigs`/SVD acceleration · `polyFit`/`leastSquares` · unified f32 WebGPU path.
+> below): `eigs`/SVD acceleration · `polyFit`/`leastSquares`.
+> _(The "unified f32 WebGPU path" was previously listed here as not-pursued — it has since been
+> pursued and shipped; see the WebGPU epic above.)_
 
 > **Recently shipped** (full detail in `ROADMAP.md` → Recently Shipped, and per-package
 > CHANGELOGs): **2026-07-09 export-formats expansion** — plot@0.3.0 Node-only `./render`
@@ -1618,12 +1620,13 @@ below are limited to operations that genuinely clear that bar.
 
 - [x] Worker-distributed FFT — `parallelFFT` / `parallelIFFT` use a four-step
       (transpose) decomposition built on `fftBatch`.
-- [ ] Unified f32 WebGPU path — **not pursued; design spec written.** A
-      coherent GPU path (shared WGSL shader library, GPU-resident `GpuArray`
-      handles for operation fusion, Stockham FFT shaders, a generalized backend
-      router) is scoped in
-      [`docs/roadmap/UNIFIED_WEBGPU_PATH.md`](../roadmap/UNIFIED_WEBGPU_PATH.md) —
-      a separate research effort beyond the existing matrix-op `gpu*` functions.
+- [x] Unified f32 WebGPU path — **PURSUED AND SHIPPED** (2026-07-10..13; supersedes the old
+      "not pursued" note). `@danielsimonjr/mathts-gpu` leaf + `enableGpu()` opt-in +
+      `fuseUnaryChainAsync` (fused element-wise chains) + validated `gpuMatmul`. **Key finding:
+      the GPU LOSES to WASM (~1.9×) on memory-bound element-wise work and is f32 vs WASM's f64**,
+      so it is tried AFTER WASM and only wins on compute-bound work (matmul). The old
+      `docs/roadmap/UNIFIED_WEBGPU_PATH.md` research sketch is superseded by
+      `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`.
 
 ## 🐞 Known Defects
 
