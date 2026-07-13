@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-workerpool",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Worker pool management for MathTS parallel computations",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
