@@ -71,8 +71,10 @@ WebGPU device is unavailable.
 > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
 
 > **WebGPU coverage at the typed-dispatch layer is zero — deliberately.** The
-> generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) reports
-> **0 GPU-accelerated of 218 typed functions**, and that is the honest number: no
+> generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists the
+> **6 standalone functions** that do route to the GPU (`fuseUnaryChainAsync`,
+> `elementwiseChainGpuDispatch`, and the four `gpu*` matrix helpers), and reports
+> **0 GPU-accelerated of 218 typed functions**. That 0 is the honest number: no
 > `mathTyped` function routes to the GPU. This is a design decision, not a gap.
 > A GPU dispatch costs an upload and a readback, so a _single_ element-wise op
 > (`sin(xs)`) is pure transfer tax and would be **slower** than JS or WASM — the

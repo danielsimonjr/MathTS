@@ -1,6 +1,6 @@
 {
   "generated": "2026-07-13",
-  "status": "No WebGPU accelerators are wired into the functions typed layer yet — forward-looking tracker (see ROADMAP \"WebGPU acceleration tier\"). Auto-populates when a function routes to a *GpuDispatch bridge or a GPU pool/backend.",
+  "status": "6 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).",
   "total": 218,
   "gpuAcceleratedCount": 0,
   "noneCount": 218,
@@ -290,5 +290,44 @@
       "gpu": 0,
       "none": 2
     }
-  }
+  },
+  "standaloneAcceleratedCount": 6,
+  "standaloneAccelerated": [
+    {
+      "name": "elementwiseChainGpuDispatch",
+      "file": "gpu/elementwise-gpu.ts",
+      "routing": "gpu",
+      "markers": ["getGpuDevice"]
+    },
+    {
+      "name": "fuseUnaryChainAsync",
+      "file": "typed/fused.ts",
+      "routing": "gpu",
+      "markers": ["elementwiseChainGpuDispatch"]
+    },
+    {
+      "name": "gpuAdd",
+      "file": "typed/gpu.ts",
+      "routing": "gpu",
+      "markers": ["gpuMatrixBackend"]
+    },
+    {
+      "name": "gpuMatmul",
+      "file": "typed/gpu.ts",
+      "routing": "gpu",
+      "markers": ["gpuMatrixBackend"]
+    },
+    {
+      "name": "gpuScale",
+      "file": "typed/gpu.ts",
+      "routing": "gpu",
+      "markers": ["gpuMatrixBackend"]
+    },
+    {
+      "name": "gpuTranspose",
+      "file": "typed/gpu.ts",
+      "routing": "gpu",
+      "markers": ["gpuMatrixBackend"]
+    }
+  ]
 }

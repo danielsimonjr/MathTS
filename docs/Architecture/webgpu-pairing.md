@@ -2,11 +2,30 @@
 
 **Generated**: 2026-07-13 (by tools/create-dependency-graph)
 
-The GPU analog of `wasm-pairing.md`. Per public `mathTyped` function in `functions/src/typed/`, whether it routes to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a GPU pool/backend reference (`gpuPool` / `getGlobalGPUBackend` / `GPUBackend`).
+The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a direct GPU backend/device reference (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`).
 
-> **Status:** No WebGPU accelerators are wired into the functions typed layer yet — forward-looking tracker (see ROADMAP "WebGPU acceleration tier"). Auto-populates when a function routes to a \*GpuDispatch bridge or a GPU pool/backend.
+> **Status:** 6 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).
 
-> WebGPU is an experimental, flag-gated future tier (browser only). `matrix`'s `GPUBackend.matmul` is the experimental starting point; it is NOT counted here (it lives in the matrix backend, not the functions typed dispatch). Bench harness: `tools/benchmark/gpu/bench-3way.*`.
+## WebGPU-accelerated functions (6)
+
+Standalone exports — this is where the GPU acceleration actually lives.
+
+| Function                      | Markers                       | Module              |
+| ----------------------------- | ----------------------------- | ------------------- |
+| `elementwiseChainGpuDispatch` | `getGpuDevice`                | gpu/elementwise-gpu |
+| `fuseUnaryChainAsync`         | `elementwiseChainGpuDispatch` | typed/fused         |
+| `gpuAdd`                      | `gpuMatrixBackend`            | typed/gpu           |
+| `gpuMatmul`                   | `gpuMatrixBackend`            | typed/gpu           |
+| `gpuScale`                    | `gpuMatrixBackend`            | typed/gpu           |
+| `gpuTranspose`                | `gpuMatrixBackend`            | typed/gpu           |
+
+## Typed-dispatch layer: 0 of 218
+
+> **A count of 0 here is EXPECTED and correct — it is a design decision, not a gap.**
+>
+> A GPU dispatch costs an upload and a readback. A _single_ typed op (`sin(xs)`) is therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the same economics that retired element-wise ops from the WASM backend. The GPU only pays off where the work amortizes that transfer: a **fused chain** of ops (`fuseUnaryChainAsync`, ~2–2.9× measured) or a large **matmul**. Those are standalone functions, listed above.
+>
+> Wiring every `mathTyped` function to a GPU path would make this number look better and make the library slower. So we don't.
 
 | Routing (static) |   Count |
 | ---------------- | ------: |
@@ -14,7 +33,7 @@ The GPU analog of `wasm-pairing.md`. Per public `mathTyped` function in `functio
 | None             |     218 |
 | **Total**        | **218** |
 
-## Per-module counts
+## Per-module counts (typed layer)
 
 | Module        | WebGPU | None |
 | ------------- | -----: | ---: |

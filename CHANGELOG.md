@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — CDG now reports the GPU-accelerated functions
+
+`webgpu-pairing` only scanned `mathTyped(...)` blocks, so it structurally could not see
+any of the GPU code the library actually ships — every GPU path is a *standalone* export.
+It now reports two buckets:
+
+- **`standaloneAccelerated` (6)** — `fuseUnaryChainAsync`, `elementwiseChainGpuDispatch`,
+  and the four `gpu*` matrix helpers. This is where the GPU acceleration lives.
+- **`gpuAccelerated` (0 of 218 typed)** — unchanged, and the report now explains that **0
+  is expected and correct**, not a gap: a GPU dispatch costs an upload + readback, so a
+  single typed op (`sin(xs)`) is transfer-dominated and would be *slower* on the GPU. The
+  GPU only wins where the work amortizes that transfer — a fused chain, or a large matmul
+  — and those are standalone functions.
+
+Marker detection also now recognises `gpuMatrixBackend` and `getGpuDevice` alongside
+`*GpuDispatch` / `GPUBackend`.
+
 ### Added — WebGPU f32 tier for fused element-wise chains (opt-in, measured)
 
 The GPU now genuinely accelerates element-wise work — but only where it actually

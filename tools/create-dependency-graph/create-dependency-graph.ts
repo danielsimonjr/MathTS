@@ -3033,6 +3033,32 @@ interface WebGPUPairing {
   gpuAccelerated: WebGPUPairingEntry[];
   none: string[];
   byFile: Record<string, { gpu: number; none: number }>;
+  /**
+   * GPU-accelerated functions that are NOT `mathTyped` typed-dispatch entries —
+   * standalone exports like `fuseUnaryChainAsync` or `gpuMatmul`.
+   *
+   * This is a separate bucket on purpose. The GPU only pays off where work is
+   * amortized over the upload/readback (a fused chain, a large matmul); a single
+   * typed op like `sin(xs)` would be transfer-dominated and SLOWER on the GPU.
+   * So the typed-layer count above is expected to stay 0, and these standalone
+   * entries are where the real GPU acceleration lives.
+   */
+  standaloneAcceleratedCount: number;
+  standaloneAccelerated: WebGPUPairingEntry[];
+}
+
+/** Brace-match a block starting at `startBrace` (index of its `{`). */
+function matchBraceBlock(src: string, startBrace: number): string {
+  let depth = 0;
+  for (let i = startBrace; i < src.length; i++) {
+    const c = src[i];
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) return src.slice(startBrace, i + 1);
+    }
+  }
+  return src.slice(startBrace);
 }
 
 function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
@@ -3043,10 +3069,10 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
   const gpuAccelerated: WebGPUPairingEntry[] = [];
   const none: string[] = [];
   const byFile: Record<string, { gpu: number; none: number }> = {};
-  // Future WebGPU-routing markers (none present yet): a `*GpuDispatch` bridge
-  // (the GPU analog of the `*Dispatch` WASM bridge) or a GPU pool/backend ref.
+  // WebGPU-routing markers: a `*GpuDispatch` bridge (the GPU analog of the
+  // `*Dispatch` WASM bridge), or a direct GPU pool / backend / device reference.
   const gpuDispatchRe = /\b\w+GpuDispatch\b/g;
-  const gpuRefRe = /\b(?:gpuPool|getGlobalGPUBackend|GPUBackend)\b/;
+  const gpuRefRe = /\b(?:gpuPool|getGlobalGPUBackend|GPUBackend|gpuMatrixBackend|getGpuDevice)\b/;
 
   for (const fname of readdirSync(typedDir)) {
     if (!fname.endsWith('.ts')) continue;
@@ -3086,47 +3112,115 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
     }
   }
 
+  // --- Standalone (non-mathTyped) GPU-accelerated exports -------------------
+  //
+  // The GPU wins only where the work amortizes the upload/readback: a FUSED
+  // CHAIN of ops, or a large matmul. Those do not live behind `mathTyped`
+  // per-function dispatch (a single `sin(xs)` on the GPU would be
+  // transfer-dominated and slower), so scanning only `mathTyped` blocks misses
+  // every GPU path the library actually ships. Scan plain exported functions too.
+  const standaloneAccelerated: WebGPUPairingEntry[] = [];
+  const standaloneDirs = [
+    join(rootDir, 'functions', 'src', 'typed'),
+    join(rootDir, 'functions', 'src', 'gpu'),
+  ].filter((d) => existsSync(d));
+
+  const exportedFnRe = /export\s+(?:async\s+)?function\s+(\w+)/g;
+  for (const dir of standaloneDirs) {
+    const rel = relative(join(rootDir, 'functions', 'src'), dir).replace(/\\/g, '/');
+    for (const fname of readdirSync(dir)) {
+      if (!fname.endsWith('.ts')) continue;
+      const src = readFileSync(join(dir, fname), 'utf-8');
+      let m: RegExpExecArray | null;
+      exportedFnRe.lastIndex = 0;
+      while ((m = exportedFnRe.exec(src)) !== null) {
+        const brace = src.indexOf('{', m.index + m[0].length);
+        if (brace === -1) continue;
+        const body = matchBraceBlock(src, brace);
+        const markers = Array.from(new Set(body.match(gpuDispatchRe) ?? []));
+        const refMatch = body.match(gpuRefRe);
+        if (refMatch) markers.push(refMatch[0]);
+        const uniq = Array.from(new Set(markers)).sort();
+        if (uniq.length > 0) {
+          standaloneAccelerated.push({
+            name: m[1],
+            file: `${rel}/${fname}`,
+            routing: 'gpu',
+            markers: uniq,
+          });
+        }
+      }
+    }
+  }
+
   gpuAccelerated.sort((a, b) => a.name.localeCompare(b.name));
+  standaloneAccelerated.sort((a, b) => a.name.localeCompare(b.name));
   none.sort();
+
+  const typedCount = gpuAccelerated.length;
+  const standaloneCount = standaloneAccelerated.length;
+  const status =
+    typedCount === 0 && standaloneCount === 0
+      ? 'No WebGPU accelerators are wired yet — forward-looking tracker (see ROADMAP "WebGPU acceleration tier").'
+      : `${standaloneCount} standalone function(s) route to WebGPU; ${typedCount} of ${typedCount + none.length} typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).`;
+
   return {
     generated: new Date().toISOString().split('T')[0],
-    status:
-      gpuAccelerated.length === 0
-        ? 'No WebGPU accelerators are wired into the functions typed layer yet — forward-looking tracker (see ROADMAP "WebGPU acceleration tier"). Auto-populates when a function routes to a *GpuDispatch bridge or a GPU pool/backend.'
-        : `${gpuAccelerated.length} function(s) route to WebGPU.`,
-    total: gpuAccelerated.length + none.length,
-    gpuAcceleratedCount: gpuAccelerated.length,
+    status,
+    total: typedCount + none.length,
+    gpuAcceleratedCount: typedCount,
     noneCount: none.length,
     gpuAccelerated,
     none,
     byFile,
+    standaloneAcceleratedCount: standaloneCount,
+    standaloneAccelerated,
   };
 }
 
 function generateWebGPUPairingMarkdown(p: WebGPUPairing): string {
   let md = '# WebGPU Accelerator ↔ Function Pairing\n\n';
   md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
-  md += `The GPU analog of \`wasm-pairing.md\`. Per public \`mathTyped\` function in `;
-  md += `\`functions/src/typed/\`, whether it routes to a **WebGPU** path — detected via a `;
-  md += `\`*GpuDispatch\` bridge (mirroring the \`*Dispatch\` WASM convention) or a GPU `;
-  md += `pool/backend reference (\`gpuPool\` / \`getGlobalGPUBackend\` / \`GPUBackend\`).\n\n`;
+  md += `The GPU analog of \`wasm-pairing.md\`. Which functions route to a **WebGPU** path — `;
+  md += `detected via a \`*GpuDispatch\` bridge (mirroring the \`*Dispatch\` WASM convention) `;
+  md += `or a direct GPU backend/device reference (\`GPUBackend\` / \`gpuMatrixBackend\` / `;
+  md += `\`getGpuDevice\`).\n\n`;
   md += `> **Status:** ${p.status}\n\n`;
-  md += `> WebGPU is an experimental, flag-gated future tier (browser only). \`matrix\`'s `;
-  md += `\`GPUBackend.matmul\` is the experimental starting point; it is NOT counted here (it `;
-  md += `lives in the matrix backend, not the functions typed dispatch). Bench harness: `;
-  md += `\`tools/benchmark/gpu/bench-3way.*\`.\n\n`;
+
+  md += `## WebGPU-accelerated functions (${p.standaloneAcceleratedCount})\n\n`;
+  if (p.standaloneAccelerated.length > 0) {
+    md += `Standalone exports — this is where the GPU acceleration actually lives.\n\n`;
+    md += `| Function | Markers | Module |\n| --- | --- | --- |\n`;
+    for (const e of p.standaloneAccelerated) {
+      md += `| \`${e.name}\` | \`${e.markers.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+    }
+    md += `\n`;
+  } else {
+    md += `_None yet._\n\n`;
+  }
+
+  md += `## Typed-dispatch layer: ${p.gpuAcceleratedCount} of ${p.total}\n\n`;
+  md += `> **A count of 0 here is EXPECTED and correct — it is a design decision, not a gap.**\n>\n`;
+  md += `> A GPU dispatch costs an upload and a readback. A *single* typed op (\`sin(xs)\`) is `;
+  md += `therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the `;
+  md += `same economics that retired element-wise ops from the WASM backend. The GPU only pays `;
+  md += `off where the work amortizes that transfer: a **fused chain** of ops `;
+  md += `(\`fuseUnaryChainAsync\`, ~2–2.9× measured) or a large **matmul**. Those are standalone `;
+  md += `functions, listed above.\n>\n`;
+  md += `> Wiring every \`mathTyped\` function to a GPU path would make this number look better `;
+  md += `and make the library slower. So we don't.\n\n`;
   md += `| Routing (static) | Count |\n| --- | --: |\n`;
   md += `| WebGPU | ${p.gpuAcceleratedCount} |\n`;
   md += `| None | ${p.noneCount} |\n`;
   md += `| **Total** | **${p.total}** |\n\n`;
   if (p.gpuAccelerated.length > 0) {
-    md += `## WebGPU-accelerated functions\n\n| Function | Markers | Module |\n| --- | --- | --- |\n`;
+    md += `### Typed functions routing to WebGPU\n\n| Function | Markers | Module |\n| --- | --- | --- |\n`;
     for (const e of p.gpuAccelerated) {
       md += `| \`${e.name}\` | \`${e.markers.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
     }
     md += `\n`;
   }
-  md += `## Per-module counts\n\n| Module | WebGPU | None |\n| --- | --: | --: |\n`;
+  md += `## Per-module counts (typed layer)\n\n| Module | WebGPU | None |\n| --- | --: | --: |\n`;
   for (const f of Object.keys(p.byFile).sort()) {
     md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].gpu} | ${p.byFile[f].none} |\n`;
   }
@@ -3919,7 +4013,7 @@ async function main(): Promise<void> {
     );
     console.log(
       `Written: ${join(OUTPUT_DIR, 'webgpu-pairing.md')} ` +
-        `(${webgpuPairing.gpuAcceleratedCount}/${webgpuPairing.total} WebGPU-accelerated)`
+        `(${webgpuPairing.standaloneAcceleratedCount} standalone + ${webgpuPairing.gpuAcceleratedCount}/${webgpuPairing.total} typed WebGPU-accelerated)`
     );
   }
 

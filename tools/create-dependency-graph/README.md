@@ -39,11 +39,21 @@ npx tsx tools/create-dependency-graph.ts
   `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP` + `thresholdElements`);
   generated only when `functions/src/typed/` is in scope
 - `docs/Architecture/webgpu-pairing.md` / `webgpu-pairing.json` - the GPU analog of
-  wasm-pairing: which public `mathTyped` functions route to a WebGPU path (a
-  `*GpuDispatch` bridge or a GPU pool/backend ref). Forward-looking — reports 0 until
-  the flag-gated WebGPU tier lands (see ROADMAP); auto-populates then. `matrix`'s
-  experimental `GPUBackend.matmul` is NOT counted (it's a matrix backend, not the
-  functions typed dispatch)
+  wasm-pairing. Reports GPU routing in **two buckets**, because the GPU pays off in a
+  different shape than WASM does:
+  - **`standaloneAccelerated`** — plain exported functions that route to WebGPU
+    (`fuseUnaryChainAsync`, `elementwiseChainGpuDispatch`, `gpuMatmul`/`gpuAdd`/
+    `gpuTranspose`/`gpuScale`). **This is where the GPU acceleration actually lives.**
+  - **`gpuAccelerated`** — public `mathTyped` typed-dispatch functions that route to
+    WebGPU. **A count of 0 here is EXPECTED and correct, not a gap:** a GPU dispatch
+    costs an upload + readback, so a _single_ typed op (`sin(xs)`) is transfer-dominated
+    and would be _slower_ on the GPU than JS/WASM. The GPU only wins where the work
+    amortizes that transfer — a fused chain, or a large matmul — and those are
+    standalone functions. Wiring every typed function to a GPU path would improve the
+    number and degrade the library.
+
+  Detected via a `*GpuDispatch` bridge or a direct GPU backend/device reference
+  (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`)
 
 **Features:**
 
