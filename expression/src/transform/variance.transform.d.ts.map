@@ -1,0 +1,1 @@
+{"version":3,"file":"variance.transform.d.ts","sourceRoot":"","sources":["variance.transform.ts"],"names":[],"mappings":"AAIA,UAAU,aAAa,CAAC,CAAC,GAAG,OAAO;IACjC,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,GAAG,CAAC,CAAC;CACzB;AAED,UAAU,YAAY;IACpB,QAAQ,EAAE,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,KAAK,OAAO,CAAC;IAC1C,KAAK,EAAE,aAAa,CAAC;CACtB;AAKD;;;;;;GAMG;AACH,eAAO,MAAM,uBAAuB,sEAiBnC,CAAC"}

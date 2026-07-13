@@ -7,6 +7,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — WASM was DEAD in the browser (and it invalidated our GPU benchmark)
+
+`elementwiseChainDispatch` returned `null` for *every* call in a browser, so browser
+users silently got the pure-JS scalar path and the WASM tier never ran at all.
+
+**Root cause:** `WasmLoader.getDefaultWasmPath()`'s browser branch made a single
+relative-URL guess (`new URL('./wasm/<file>', import.meta.url)`) with no fallback,
+while the Node branch walks parent directories until it finds the binary. The guess
+resolved to a path that has never existed. The bridge's never-throw contract then
+swallowed the load failure as a `null`, so it failed **silently**. Fixed by adding
+`resolveBrowserWasm()`, the browser counterpart to the Node resolver: it probes the
+same candidate shapes with `fetch(HEAD)` (browsers have no filesystem). The SHA-384
+integrity check is untouched — this only changes *where* the loader looks, never
+whether the tamper check runs.
+
+**This invalidated a claim we shipped.** The GPU fused-chain tier was benchmarked at
+"2.33×–2.88× faster" — but only because its CPU baseline was JS, *because WASM was
+dead*. With WASM actually loading, measured in Chrome on an NVIDIA Pascal adapter
+(chain `sin→exp→tanh→cos`):
+
+| n         | JS      | WASM       | GPU    | GPU vs WASM |
+| --------- | ------- | ---------- | ------ | ----------- |
+| 65,536    | 67 ms   | **16 ms**  | 30 ms  | **0.52×**   |
+| 262,144   | 290 ms  | **62 ms**  | 115 ms | **0.54×**   |
+| 1,048,576 | 1167 ms | **254 ms** | 470 ms | **0.54×**   |
+
+**WASM is ~1.9× FASTER than the GPU — and f64-exact where the GPU is f32.** For
+element-wise chains the GPU is therefore *both slower and less precise*.
+
+### Changed — `fuseUnaryChainAsync` tier order: WASM before GPU
+
+The order was **GPU → WASM → JS**. That was backwards: opting into the GPU made
+element-wise code *slower and less precise* wherever WASM was available. It is now
+**WASM (f64) → GPU (f32) → JS (f64)**. The GPU still earns its place where WASM
+cannot load (it beats the JS scalar pass ~2–2.5× there), and it still wins
+decisively on **compute-bound** work such as a large `gpuMatmul` (O(n³) arithmetic
+amortizes the O(n²) transfer) — this ordering is specific to memory-bound
+element-wise work. Pinned by `functions/tests/gpu-vs-wasm.browser.test.ts`, which
+fails loudly if the GPU ever pre-empts WASM again.
+
+### Fixed — published type declarations did not compile for consumers
+
+A consumer building with `skipLibCheck: false` could not compile against our packages:
+
+- **`TS7016`** — the `workerpool` fork declares `types: types/index.d.ts`, but that is a build
+  output never committed and never generated for a `github:` dependency, so the module resolved
+  **fully untyped**. `@danielsimonjr/mathts-workerpool` now ships a canonical ambient declaration
+  from `dist/` and references it from its own `index.d.ts`. The internal `paths` shims that had
+  papered over this (compile-time only, never shipped) were removed — ending the two-tier reality
+  where our builds passed and consumers' broke.
+- **`TS2665`** — `matrix`'s emitted `.d.ts` carried an illegal `declare module 'workerpool'`
+  augmentation, inlined by the dts bundler from **516 stale generated `.d.ts` files that had
+  accumulated inside `src/`** (untracked `tsc` emissions shadowing their sibling `.ts`). They were
+  being consumed as build input and corrupting the published surface. Removed.
+
+Verified with a real consumer compiled at `skipLibCheck: false`: **zero errors**.
+
+### Fixed — the intermittent test flake was systemic, not one test
+
+Three separate "flaky tests" (`functions/special.test.ts`, `plot/points3d.test.ts`,
+`workerpool`'s real-worker spawn test) turned out to be one bug: **no package set `testTimeout`,
+so vitest's 5000 ms default applied** — never calibrated for `npm run test`, which runs *every*
+package's suite concurrently, each with its own worker pool. Measured: `special.test.ts` runs in
+~486 ms alone but ~3.3 s under that contention. That left <10× headroom.
+
+Not a blind threshold widen — the variance source is named (CPU + worker contention during the
+concurrent gate), and **worker-pool correctness under saturation is now pinned separately** by
+`functions/tests/workerpool-stress.test.ts` (40 rounds × 5 concurrent chunked kernels, every
+element checked for exactness, passing under full CPU saturation). So the pool does *not* corrupt
+results under load — it was only slow. All 23 vitest configs now carry a calibrated 30 s timeout;
+a genuine hang still fails.
+
+### Fixed — intermittent worker-pool test flake (superseded by the systemic fix above)
+
+`functions/tests/special.test.ts` flaked intermittently under the full `npm run test`
+gate. Root cause: **no package set `testTimeout`, so vitest's 5000 ms default applied**
+— never calibrated for suites that dispatch to a worker pool. The test runs in ~486 ms
+unloaded but ~3.3 s under CPU contention (measured), and the full gate runs *every*
+package's suite concurrently, each with its own pool. That left <10× headroom.
+
+Not a blind threshold widen: the variance source is named (CPU + worker contention
+during the concurrent gate), and **worker-pool correctness under saturation is now
+pinned separately** by `functions/tests/workerpool-stress.test.ts` — 40 rounds × 5
+concurrent chunked kernels, every element checked for exactness, which passes under
+full CPU saturation. So the pool does *not* corrupt results under load; it was only
+slow. `testTimeout`/`hookTimeout` set to 30 s in the five worker-pool packages
+(functions, parallel, matrix, tensor, compat); a genuine hang still fails, at 30 s.
+
+
 ### Changed — CDG now reports the GPU-accelerated functions
 
 `webgpu-pairing` only scanned `mathTyped(...)` blocks, so it structurally could not see

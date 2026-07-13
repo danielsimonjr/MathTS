@@ -2661,6 +2661,7 @@
       "residue",
       "resize",
       "resolve",
+      "resolveBrowserWasm",
       "resolvePackagedWasm",
       "resultant",
       "resultantDispatch",

@@ -6,9 +6,7 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "paths": {
-      "workerpool": ["../parallel/types/workerpool.d.ts"]
-    }
+    "paths": {}
   },
   "include": ["src/index.ts", "types/**/*.d.ts"]
 }

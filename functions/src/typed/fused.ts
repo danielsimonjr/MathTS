@@ -68,22 +68,47 @@ function jsChain(ops: readonly WasmElementwiseOp[], xs: Float64Array): Float64Ar
  * `fuseUnaryChain`, because a GPU dispatch is inherently asynchronous and
  * `fuseUnaryChain`'s synchronous signature is public API.
  *
- * Tiers, in order: **GPU (f32)** → WASM (f64) → JS (f64).
+ * Tiers, in order: **WASM (f64) → GPU (f32) → JS (f64)**.
  *
- * The GPU tier engages only when the caller has opted in via `enableGpu()`, a
- * device is available, the array clears `GPU_MIN_ELEMENTS`, and every op in the
- * chain has a GPU kernel. Otherwise this behaves exactly like `fuseUnaryChain`.
+ * ### Why WASM is tried BEFORE the GPU
  *
- * **Precision:** when the GPU tier engages the result is a `Float32Array`
+ * Measured in Chrome on an NVIDIA Pascal adapter, chain `sin→exp→tanh→cos`:
+ *
+ * | n         | JS      | WASM    | GPU     | GPU vs WASM |
+ * | --------- | ------- | ------- | ------- | ----------- |
+ * | 65,536    | 90 ms   | 16 ms   | 28 ms   | **0.57×**   |
+ * | 262,144   | 400 ms  | 60 ms   | 103 ms  | **0.59×**   |
+ * | 1,048,576 | 1613 ms | 250 ms  | 457 ms  | **0.55×**   |
+ *
+ * **WASM is ~1.8× faster than the GPU — and it is f64-exact while the GPU is
+ * f32.** For element-wise chains the GPU is therefore both slower *and* less
+ * precise, so it must never pre-empt WASM. (An earlier revision had GPU first;
+ * that only looked like a win because a separate bug meant WASM never loaded in
+ * browsers, making the baseline pure JS.)
+ *
+ * The GPU still earns its place where WASM is **unavailable** — there it beats
+ * the JS scalar pass ~2–2.5×. It engages only when the caller opted in via
+ * `enableGpu()`, WASM declined, a device exists, the array clears
+ * `GPU_MIN_ELEMENTS`, and every op has a GPU kernel.
+ *
+ * (The GPU *does* win decisively for compute-bound work like a large matmul —
+ * see `gpuMatmul`. This ordering is specific to memory-bound element-wise work.)
+ *
+ * **Precision:** the result is a `Float32Array` only when the GPU tier ran
  * (~7 significant digits); otherwise it is an exact-f64 `Float64Array`. The
- * return type tells you which path ran — that is the precision contract, and it
- * is why the GPU tier is opt-in rather than automatic.
+ * return type tells you which path ran.
  */
 export async function fuseUnaryChainAsync(
   ops: WasmElementwiseOp[],
   xs: Float64Array
 ): Promise<Float64Array | Float32Array> {
+  // WASM first: faster AND exact. See the table above.
+  const wasm = elementwiseChainDispatch(ops, xs);
+  if (wasm) return wasm;
+
+  // GPU only when WASM declined (unavailable / below its threshold).
   const gpu = await elementwiseChainGpuDispatch(ops, xs);
   if (gpu) return gpu;
-  return fuseUnaryChain(ops, xs);
+
+  return jsChain(ops, xs);
 }

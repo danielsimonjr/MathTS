@@ -1,0 +1,1 @@
+{"version":3,"file":"sum.transform.d.ts","sourceRoot":"","sources":["sum.transform.ts"],"names":[],"mappings":"AAIA,UAAU,aAAa,CAAC,CAAC,GAAG,OAAO;IACjC,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,GAAG,CAAC,CAAC;CACzB;AAED,UAAU,YAAY;IACpB,GAAG,EAAE,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,KAAK,OAAO,CAAC;IACrC,KAAK,EAAE,aAAa,CAAC;CACtB;AAYD,eAAO,MAAM,kBAAkB,sEAiB9B,CAAC"}

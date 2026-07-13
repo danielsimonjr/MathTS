@@ -12,7 +12,6 @@
       "@danielsimonjr/mathts-expression": ["../expression/src"],
       "@danielsimonjr/mathts-matrix": ["../matrix/src"],
       "@danielsimonjr/mathts-parallel": ["../parallel/src"],
-      "workerpool": ["../parallel/types/workerpool.d.ts"],
       "@danielsimonjr/mathts-gpu": ["../gpu/src"]
     }
   },

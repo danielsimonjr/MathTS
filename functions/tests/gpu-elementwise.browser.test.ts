@@ -157,11 +157,16 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
 
 describe.skipIf(!HAS_GPU)('MEASUREMENT — does the GPU actually win?', () => {
   /**
-   * NOTE ON THE BASELINE: in the browser the WASM tier does NOT load
-   * (`elementwiseChainDispatch` returns null there), so `fuseUnaryChain`
-   * degrades to the pure-JS scalar pass. The comparison below is therefore
-   * **GPU vs JS** — which is the honest real-world comparison for a browser,
-   * because JS is what actually runs there today. It is NOT a GPU-vs-WASM
+   * NOTE ON THE BASELINE: this suite never calls `wasmLoader.load()` (only
+   * `enableGpu()` in `beforeAll`), so `elementwiseChainDispatch` still
+   * returns `null` HERE and `fuseUnaryChain` degrades to the pure-JS scalar
+   * pass — same as every other caller that hasn't awaited an explicit WASM
+   * load. (This is not a browser-specific limitation: as of the 2026-07-13
+   * fix, `wasmLoader.load()` resolves and engages the AS binary in the
+   * browser too — see `elementwise-wasm.browser.test.ts` — it's just not
+   * invoked in this file, since this suite measures the GPU tier.) The
+   * comparison below is therefore **GPU vs JS**, the honest baseline for a
+   * consumer who hasn't opted into the WASM tier. It is NOT a GPU-vs-WASM
    * claim.
    *
    * Sizes start AT the threshold: below it the dispatcher returns `null`
@@ -185,7 +190,10 @@ describe.skipIf(!HAS_GPU)('MEASUREMENT — does the GPU actually win?', () => {
     const rows: { n: number; cpu: number; gpu: number }[] = [];
     for (const n of sizes) {
       const xs = sample(n);
-      // In-browser this is the pure-JS scalar pass (WASM does not load here).
+      // NOTE: this is fuseUnaryChain WITHOUT an awaited wasmLoader.load(), so the
+      // sync WASM bridge has no module yet and this measures the JS scalar pass.
+      // The true GPU-vs-WASM comparison lives in gpu-vs-wasm.browser.test.ts:
+      // WASM is ~1.8x FASTER than the GPU for element-wise chains.
       const cpu = await time(() => fuseUnaryChain(ops, xs));
       const gpu = await time(() => elementwiseChainGpuDispatch(ops, xs));
       rows.push({ n, cpu, gpu });

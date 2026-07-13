@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-13",
     "totalFiles": 1024,
     "totalModules": 77,
-    "totalExports": 4932
+    "totalExports": 4933
   },
   "entryPoints": [
     {
@@ -19885,8 +19885,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["resolvePackagedWasm", "defaultWasmLocation"],
-        "functions": ["resolvePackagedWasm", "defaultWasmLocation"]
+        "exports": ["resolvePackagedWasm", "resolveBrowserWasm", "defaultWasmLocation"],
+        "functions": ["resolvePackagedWasm", "resolveBrowserWasm", "defaultWasmLocation"]
       },
       "functions/src/wasm/signal/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for spectral signal kernels — Slice 5.6.",
@@ -20174,7 +20174,7 @@
           },
           {
             "file": "./resolve.js",
-            "imports": ["resolvePackagedWasm", "defaultWasmLocation"]
+            "imports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"]
           }
         ],
         "workspaceDependencies": [],
@@ -34836,11 +34836,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1024,
     "totalModules": 77,
-    "totalLinesOfCode": 170342,
-    "totalExports": 4932,
+    "totalLinesOfCode": 170415,
+    "totalExports": 4933,
     "totalClasses": 56,
     "totalInterfaces": 407,
-    "totalFunctions": 1597,
+    "totalFunctions": 1598,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1533,

@@ -65,7 +65,7 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       partial results under load — a real product bug**. I could not distinguish the two, and that
       distinction matters. Next: run the turbo gate in a loop with full output captured, and add a
       worker-pool stress test that asserts result _correctness_ under saturation.
-- [ ] **WASM is dead in the browser** (found 2026-07-13) — `elementwiseChainDispatch` returns
+- [x] ✅ **WASM dead in the browser — FIXED** (2026-07-13). `WasmLoader` browser branch made a single relative-URL guess with no fallback; `resolveBrowserWasm()` now probes candidates via `fetch(HEAD)` like the Node resolver. SHA-384 integrity untouched. This INVALIDATED the GPU benchmark: WASM is ~1.9x FASTER than the GPU for element-wise chains, so `fuseUnaryChainAsync` tier order was corrected to WASM→GPU→JS.
       `null` under Chrome, so browser users silently get the **pure-JS** path and the WASM tier
       never engages. This is why the GPU benchmark's baseline is JS. Likely a Node-only loader /
       missing `.wasm` in the browser bundle. Potentially a **bigger win than the GPU** if fixed.
@@ -2334,7 +2334,7 @@ All 46 test files created for src/wasm/ modules:
 
 ### Publishing / types debt
 
-- [ ] **`workerpool` ships no type declarations** — a consumer compiling with
+- [x] ✅ **`workerpool` types — FIXED** (2026-07-13). Fork promises `types/` it never ships (no `prepare` for a `github:` dep). `@danielsimonjr/mathts-workerpool` now ships a canonical ambient decl; internal `paths` shims removed. Also deleted 516 stale generated `.d.ts` polluting `src/` and corrupting published types. Consumer compiles at `skipLibCheck:false` with 0 errors.
       `skipLibCheck: false` gets `TS7016` ("Could not find a declaration file for module
       'workerpool'") and `TS2665` (invalid module augmentation in `matrix/dist/index.d.ts`).
       Pre-existing, surfaced while verifying the WebGPU `.d.ts` fix; affects the published

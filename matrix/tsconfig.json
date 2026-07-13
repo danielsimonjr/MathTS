@@ -4,10 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["@webgpu/types", "node"],
-    "skipLibCheck": true,
-    "paths": {
-      "workerpool": ["../parallel/types/workerpool.d.ts"]
-    }
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "assembly", "gpu", "../node_modules/**"]

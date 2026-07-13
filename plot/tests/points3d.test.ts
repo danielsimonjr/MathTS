@@ -52,5 +52,5 @@ describe('scatter3d + curve3d', () => {
     // extended timeout, not a regression. Shares projectAll's min/max path either way.
     expect(() => curve3d(xs, ys, zs)).not.toThrow();
     expect(curve3d(xs, ys, zs)).toMatch(/^<svg/);
-  }, 20000);
+  }, 60_000); // 200k-point series; the inline cap must clear the concurrent-gate contention (see vitest.config.ts)
 });

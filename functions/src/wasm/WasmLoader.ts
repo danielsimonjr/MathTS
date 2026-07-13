@@ -16,7 +16,7 @@
  */
 
 import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js';
-import { resolvePackagedWasm, defaultWasmLocation } from './resolve.js';
+import { resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm } from './resolve.js';
 
 export interface WasmModule {
   // Matrix operations
@@ -950,7 +950,9 @@ export class WasmLoader {
    *
    * Returns an async result because the Node branch dynamically imports
    * `node:url` (fileURLToPath) so the path is resolved relative to this
-   * source file's location rather than process.cwd().
+   * source file's location rather than process.cwd(). The browser branch
+   * probes candidate URLs with `fetch(..., { method: 'HEAD' })` for the same
+   * reason Node walks the filesystem — see {@link resolveBrowserWasm}.
    */
   private async getDefaultWasmPath(): Promise<string> {
     const wasmFile = 'mathts-as.wasm';
@@ -965,7 +967,7 @@ export class WasmLoader {
       // location so the missing-binary warning is actionable (run the build).
       return defaultWasmLocation(import.meta.url, wasmFile);
     }
-    return defaultWasmLocation(import.meta.url, wasmFile, { browser: true });
+    return resolveBrowserWasm(import.meta.url, wasmFile);
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
