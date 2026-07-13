@@ -870,22 +870,27 @@ adapter for the chain `sin→exp→tanh→log1p`, against the browser's CPU path
 
 | n         | CPU (JS) | GPU      | speedup   |
 | --------- | -------- | -------- | --------- |
-| 65,536    | 43.2 ms  | 21.9 ms  | **1.97×** |
-| 262,144   | 176.5 ms | 71.5 ms  | **2.47×** |
-| 1,048,576 | 692.7 ms | 301.2 ms | **2.30×** |
-| 4,194,304 | 3211 ms  | 1853 ms  | **1.73×** |
+| 65,536    | 61.6 ms  | 26.4 ms  | **2.33×** |
+| 262,144   | 215.6 ms | 74.8 ms  | **2.88×** |
+| 1,048,576 | 805.6 ms | 317.2 ms | **2.54×** |
+| 4,194,304 | 3607 ms  | 1710 ms  | **2.11×** |
 
 The 65,536 threshold is where the GPU starts winning, and is set from these
 measurements. Note the CPU column is **JS**: the WASM tier does not currently
 load in browsers, so JS is what the GPU actually competes against there.
 
-**Supported ops** (chains outside this set fall back): `abs`, `sin`, `cos`,
-`tan`, `exp`, `log`, `atan`, `sinh`, `tanh`, `atanh`, `log2`, `log10`, `expm1`,
-`log1p`, `sec`, `csc`, `cot`. `erfc` is deliberately **excluded** — WGSL has no
-`erfc` builtin, and hand-rolling an approximation would silently change the
-accuracy contract. Every kernel is validated against a JS oracle on a real GPU
-(max relative error 3e-8 – 4e-6; `expm1`/`log1p` use naive identities and lose
-relative precision near zero).
+**Supported ops** (15; chains outside this set fall back to the exact CPU
+tiers): `abs`, `sin`, `cos`, `tan`, `exp`, `log`, `atan`, `sinh`, `tanh`,
+`atanh`, `log2`, `log10`, `sec`, `csc`, `cot`.
+
+**Deliberately excluded: `erfc`, `expm1`, `log1p`.** WGSL has no builtin for any
+of them. For `expm1`/`log1p` the naive identities (`exp(x)-1`, `log(1+x)`) are
+~100% wrong near zero in f32 — `1.0 + 1e-8` rounds to exactly `1.0f` — and even
+the Kahan-compensated forms measured **38%** and **62%** max relative error on
+real hardware, because the compensation needs an accurate `log()` near 1.0 and
+the GPU's fast-math `log()` isn't. An f32 fast path may be _less precise_; it may
+not be _wrong_. Every shipped kernel is validated against a JS oracle on a real
+GPU (max relative error 3e-8 – 4e-6).
 
 ### WebGPU-accelerated matrix operations
 

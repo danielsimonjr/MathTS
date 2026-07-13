@@ -10,14 +10,14 @@
  *     the threshold is chosen from data rather than guessed.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   elementwiseChainGpuDispatch,
   GPU_ELEMENTWISE_OPS,
   type GpuElementwiseOp,
 } from '../src/gpu/elementwise-gpu.js';
-import { fuseUnaryChain } from '../src/typed/fused.js';
-import { enableGpu, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
+import { fuseUnaryChain, fuseUnaryChainAsync } from '../src/typed/fused.js';
+import { enableGpu, disableGpu, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 
 const adapter =
   typeof navigator !== 'undefined' && 'gpu' in navigator
@@ -39,12 +39,13 @@ const ORACLE: Record<GpuElementwiseOp, (x: number) => number> = {
   atanh: Math.atanh,
   log2: Math.log2,
   log10: Math.log10,
-  expm1: Math.expm1,
-  log1p: Math.log1p,
   sec: (x) => 1 / Math.cos(x),
   csc: (x) => 1 / Math.sin(x),
   cot: (x) => 1 / Math.tan(x),
 };
+
+/** Oracles for ops the GPU deliberately does NOT support (used to check fallback). */
+const ORACLE_ALL = { expm1: Math.expm1, log1p: Math.log1p } as const;
 
 /**
  * Inputs in (0, 1) — inside the domain of every op above (log/atanh need
@@ -54,18 +55,35 @@ function sample(n: number): Float64Array {
   return Float64Array.from({ length: n }, (_, i) => 0.05 + (0.9 * (i % 977)) / 977);
 }
 
+/**
+ * TRUE relative error.
+ *
+ * An earlier version divided by `Math.max(1, |w|)`, which silently degrades to
+ * an ABSOLUTE error for every |w| < 1 — i.e. for every value in the sampled
+ * domain. That made the metric structurally incapable of catching a
+ * catastrophic relative error near zero (it missed `log1p` returning 0 for
+ * 1e-8, a 100% relative error). Divide by |w|, with only a denormal-scale floor.
+ */
 function maxRelErr(got: ArrayLike<number>, want: (i: number) => number): number {
   let m = 0;
   for (let i = 0; i < got.length; i++) {
     const w = want(i);
     if (!Number.isFinite(w)) continue;
-    m = Math.max(m, Math.abs(got[i] - w) / Math.max(1, Math.abs(w)));
+    const denom = Math.abs(w);
+    m = Math.max(m, Math.abs(got[i] - w) / (denom > 1e-30 ? denom : 1e-30));
   }
   return m;
 }
 
 beforeAll(() => {
   enableGpu();
+});
+
+// `enableGpu()` flips PROCESS-GLOBAL state. Always put it back — this file is
+// also collected by `functions/vitest.config.ts` under Node (where it self-skips),
+// and a leaked flag would silently change sibling suites' behaviour.
+afterAll(() => {
+  disableGpu();
 });
 
 describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
@@ -76,12 +94,42 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     expect(got, `${op} returned null — the GPU tier did not engage`).not.toBeNull();
 
     const err = maxRelErr(got!, (i) => ORACLE[op](xs[i]));
-    // expm1/log1p use naive identities in f32 and lose relative precision near
-    // zero; the rest track the hardware transcendentals closely.
-    const tol = op === 'expm1' || op === 'log1p' ? 1e-3 : 1e-4;
     console.log(`[gpu] ${op}: max rel err = ${err.toExponential(2)}`);
-    expect(err).toBeLessThan(tol);
+    expect(err).toBeLessThan(1e-4);
   });
+
+  /**
+   * Near-zero regression guard for `expm1` / `log1p`.
+   *
+   * The naive identities `exp(x)-1` and `log(1+x)` are CATASTROPHIC here in
+   * f32: `1.0 + 1e-8` rounds to exactly 1.0f, so `log(1+x)` returns 0 where the
+   * true value is 1e-8 — a 100% relative error. The main sample domain
+   * ([0.05, 0.95]) never goes near zero, so it cannot catch this. The kernels
+   * use compensated (Kahan) forms; this test is what holds them to it.
+   */
+  it.each(['expm1', 'log1p'] as const)(
+    '%s has NO GPU kernel and falls back (it cannot be computed accurately in f32)',
+    async (op) => {
+      const tiny = Float64Array.from({ length: GPU_MIN_ELEMENTS }, (_, i) =>
+        // 1e-9 .. 1e-3, log-spaced — squarely in the catastrophic region.
+        Math.pow(10, -9 + (6 * (i % 1000)) / 1000)
+      );
+
+      // Refusing to run is the CONTRACT, not a gap. WGSL has no expm1/log1p
+      // builtin; the naive identity is ~100% wrong near zero, and even the
+      // Kahan-compensated form measured 38%/62% max relative error on real
+      // hardware (the GPU's fast-math `log()` is inaccurate near 1.0). An f32
+      // fast path may be less precise; it may not be wrong.
+      expect(await elementwiseChainGpuDispatch([op], tiny)).toBeNull();
+      expect(GPU_ELEMENTWISE_OPS).not.toContain(op);
+
+      // ...and the caller still gets an exact answer, from the CPU tiers.
+      const viaChain = await fuseUnaryChainAsync([op], tiny);
+      const err = maxRelErr(viaChain, (i) => ORACLE_ALL[op](tiny[i]));
+      console.log(`[gpu] ${op} fell back; CPU max rel err = ${err.toExponential(2)}`);
+      expect(err).toBeLessThan(1e-12);
+    }
+  );
 
   it('fused chain exp(sin(x)) matches the composed oracle', async () => {
     const got = await elementwiseChainGpuDispatch(['sin', 'exp'], xs);
@@ -91,9 +139,14 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     expect(err).toBeLessThan(1e-4);
   });
 
-  it('a 4-op chain stays correct (proves the ping-pong buffers are wired right)', async () => {
-    // An odd/even mix of chain lengths catches a swapped src/dst buffer.
-    const ops: GpuElementwiseOp[] = ['sin', 'abs', 'log1p', 'tanh'];
+  // Ping-pong parity: the buffers swap once per op, so an ODD-length chain ends
+  // in the opposite buffer from an EVEN-length one. Both parities must read back
+  // the last op's output. (Length 1 and 2 are already covered by the single-op
+  // and exp(sin(x)) tests; 3 and 4 pin it again at depth.)
+  it.each([
+    [['sin', 'abs', 'tanh'] as GpuElementwiseOp[]], // odd
+    [['sin', 'abs', 'tanh', 'atan'] as GpuElementwiseOp[]], // even
+  ])('chain %s reads back the final op (ping-pong parity)', async (ops) => {
     const got = await elementwiseChainGpuDispatch(ops, xs);
     expect(got).not.toBeNull();
     const err = maxRelErr(got!, (i) => ops.reduce((acc, op) => ORACLE[op](acc), xs[i] as number));
@@ -115,7 +168,7 @@ describe.skipIf(!HAS_GPU)('MEASUREMENT — does the GPU actually win?', () => {
    * immediately, so timing it would measure a no-op, not GPU work.
    */
   it('benchmarks GPU vs the browser CPU path for a fused chain across sizes', async () => {
-    const ops: GpuElementwiseOp[] = ['sin', 'exp', 'tanh', 'log1p'];
+    const ops: GpuElementwiseOp[] = ['sin', 'exp', 'tanh', 'cos'];
     const sizes = [GPU_MIN_ELEMENTS, 1 << 18, 1 << 20, 1 << 22];
     const REPS = 5;
 

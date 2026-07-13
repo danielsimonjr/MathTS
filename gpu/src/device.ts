@@ -23,7 +23,19 @@ export function getGpuDevice(options?: GPUContextOptions): Promise<GPUDevice | n
     const ctx = getGlobalGPUContext();
     try {
       const ok = await ctx.initialize(options);
-      return ok ? ctx.getDevice() : null;
+      if (!ok) return null;
+      const device = ctx.getDevice();
+
+      // Device loss is recoverable, but only if we stop handing out the corpse.
+      // Without this, a lost device stays cached forever: every later call
+      // rebuilds buffers, submits, waits for a rejected map, and falls back —
+      // the GPU tier is permanently dead with a per-call latency tax. Dropping
+      // the cache lets the next caller re-acquire a fresh device.
+      void device.lost.then(() => {
+        resetGpuDevice();
+      });
+
+      return device;
     } catch {
       return null;
     }

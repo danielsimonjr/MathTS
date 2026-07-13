@@ -41,6 +41,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       (**1.97×** at 65,536 → **2.47×** at 262,144 vs the browser CPU path). Only _fused chains_
       are wired — a single element-wise op on GPU is transfer-dominated and would be slower.
       `erfc` excluded (no WGSL builtin). CDG `webgpu-pairing` stays 0/218 **by design**.
+- [ ] **GPU tier follow-ups** (from the 2026-07-13 adversarial review; correctness items already
+      fixed — these are design/ergonomics): - `fuseUnaryChainAsync` returns `Float64Array | Float32Array`. That union is a TS footgun:
+      `.map`/`.filter`/`.set` on it are TS2349 errors, forcing every caller to narrow. Consider
+      `{ data, precision }` instead. **Unpublished — free to change now.** - `elementwise-gpu.ts` builds its own `pipelineCache` + raw `createBuffer`, using **neither**
+      the `ShaderManager` nor the `BufferPool` that Spec 1a extracted for exactly this. Arch drift
+      one commit after the extraction. **Trap if pooling later:** the `arrayLength(&inp)` bounds
+      guard is only valid because buffers are sized exactly `n*4`; `BufferPool` rounds up, so pass
+      `n` in a uniform BEFORE adopting the pool. - `enableGpu()` is process-global mutable state: any dependency flipping it changes _your_
+      return type, and a dual-package instance would make it a silent no-op. Add a per-call
+      `{ gpu?: boolean }` option. - GPU vs CPU disagree on domain edges (`log(0)`, `atanh(1)`): WGSL says _indeterminate_, JS
+      says `-Infinity`/`NaN`. The oracle test skips non-finite expectations, so this is invisible. - `createComputePipelineAsync` instead of the blocking sync variant.
 - [ ] **Unidentified flake in the full `functions` suite** (seen once, 2026-07-13) — one test
       failed during a full-suite run and passed on two subsequent clean runs (3414 passed). The
       test name was lost (the capture filter discarded it). Known regime: the full parallel suite

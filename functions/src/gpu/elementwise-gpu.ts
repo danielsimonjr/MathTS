@@ -33,38 +33,50 @@ import {
  * change the accuracy contract. A chain containing an unsupported op returns
  * `null` and falls back, rather than quietly computing something else.
  */
-const WGSL_OP_EXPR = {
-  abs: 'abs(x)',
-  sin: 'sin(x)',
-  cos: 'cos(x)',
-  tan: 'tan(x)',
-  exp: 'exp(x)',
-  log: 'log(x)',
-  atan: 'atan(x)',
-  sinh: 'sinh(x)',
-  tanh: 'tanh(x)',
-  atanh: 'atanh(x)',
-  log2: 'log2(x)',
-  // WGSL has no log10 builtin; log(x)/log(10) in f32.
-  log10: 'log(x) * 0.4342944819032518',
-  // No expm1/log1p builtins. These are the naive identities; near zero they
-  // lose relative precision, which is acceptable inside an explicitly-f32,
-  // opt-in path but is why the browser test pins their tolerance.
-  expm1: 'exp(x) - 1.0',
-  log1p: 'log(1.0 + x)',
-  sec: '1.0 / cos(x)',
-  csc: '1.0 / sin(x)',
-  cot: '1.0 / tan(x)',
+const WGSL_OP_BODY = {
+  abs: 'return abs(x);',
+  sin: 'return sin(x);',
+  cos: 'return cos(x);',
+  tan: 'return tan(x);',
+  exp: 'return exp(x);',
+  log: 'return log(x);',
+  atan: 'return atan(x);',
+  sinh: 'return sinh(x);',
+  tanh: 'return tanh(x);',
+  atanh: 'return atanh(x);',
+  log2: 'return log2(x);',
+  // WGSL has no log10 builtin; log(x) * 1/ln(10).
+  log10: 'return log(x) * 0.4342944819032518;',
+
+  // NOTE — `expm1` and `log1p` are DELIBERATELY ABSENT, like `erfc`.
+  //
+  // WGSL has no builtin for either. The naive identities (`exp(x)-1`,
+  // `log(1+x)`) are catastrophically wrong near zero in f32: `1.0 + 1e-8`
+  // rounds to exactly 1.0f, so `log(1+x)` returns 0 where the true value is
+  // 1e-8 — a 100% relative error.
+  //
+  // The standard Kahan-compensated forms were implemented and MEASURED on real
+  // hardware (NVIDIA Pascal). They still scored 38% (expm1) and 62% (log1p) max
+  // relative error over x in [1e-9, 1e-3], because the compensation relies on
+  // `log()` being accurate for arguments near 1.0, and the GPU's fast-math
+  // `log()` is not.
+  //
+  // An f32 fast path is allowed to be less precise. It is not allowed to be
+  // WRONG. Chains containing these fall back to the exact WASM/JS tiers.
+
+  sec: 'return 1.0 / cos(x);',
+  csc: 'return 1.0 / sin(x);',
+  cot: 'return 1.0 / tan(x);',
 } as const;
 
 /** Ops that have a GPU kernel. A chain outside this set falls back. */
-export type GpuElementwiseOp = keyof typeof WGSL_OP_EXPR;
+export type GpuElementwiseOp = keyof typeof WGSL_OP_BODY;
 
-export const GPU_ELEMENTWISE_OPS = Object.keys(WGSL_OP_EXPR) as GpuElementwiseOp[];
+export const GPU_ELEMENTWISE_OPS = Object.keys(WGSL_OP_BODY) as GpuElementwiseOp[];
 
 /** Whether every op in the chain has a GPU kernel. */
-export function isGpuChainSupported(ops: readonly string[]): ops is GpuElementwiseOp[] {
-  return ops.every((op) => op in WGSL_OP_EXPR);
+export function isGpuChainSupported(ops: readonly string[]): ops is readonly GpuElementwiseOp[] {
+  return ops.every((op) => op in WGSL_OP_BODY);
 }
 
 const WORKGROUP_SIZE = 256;
@@ -74,12 +86,15 @@ function wgslFor(op: GpuElementwiseOp): string {
     @group(0) @binding(0) var<storage, read> inp: array<f32>;
     @group(0) @binding(1) var<storage, read_write> outp: array<f32>;
 
+    fn apply(x: f32) -> f32 {
+      ${WGSL_OP_BODY[op]}
+    }
+
     @compute @workgroup_size(${WORKGROUP_SIZE})
     fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
       let i = gid.x;
       if (i >= arrayLength(&inp)) { return; }
-      let x = inp[i];
-      outp[i] = ${WGSL_OP_EXPR[op]};
+      outp[i] = apply(inp[i]);
     }
   `;
 }
@@ -128,74 +143,114 @@ export async function elementwiseChainGpuDispatch(
   if (n < GPU_MIN_ELEMENTS) return null;
   if (!isGpuChainSupported(ops)) return null;
 
-  try {
-    const device = await getGpuDevice(options);
-    if (!device) return null;
+  const bytes = n * 4;
+  const workgroups = Math.ceil(n / WORKGROUP_SIZE);
 
-    const bytes = n * 4;
+  let bufA: GPUBuffer | undefined;
+  let bufB: GPUBuffer | undefined;
+  let staging: GPUBuffer | undefined;
+  let scopePopped = false;
+  let device: GPUDevice | undefined;
+
+  try {
+    const d = await getGpuDevice(options);
+    if (!d) return null;
+    device = d;
+
+    // DEVICE LIMITS — refuse rather than produce zeros.
+    //
+    // This is the subtle one. A WebGPU validation error does NOT throw: it is
+    // reported asynchronously and *invalidates the command buffer*. `submit()`
+    // then does nothing, the staging buffer keeps its spec-mandated
+    // zero-initialized contents, `mapAsync` resolves happily, and we would
+    // return an array of ZEROS as a successful result — a silently wrong
+    // answer, worse than any exception. Exceeding any of these limits is
+    // exactly such an error, so we bail to the CPU tiers instead.
+    const limits = device.limits;
+    if (workgroups > limits.maxComputeWorkgroupsPerDimension) return null;
+    if (bytes > limits.maxStorageBufferBindingSize) return null;
+    if (bytes > limits.maxBufferSize) return null;
+
     const input = xs instanceof Float32Array ? xs : Float32Array.from(xs);
 
+    // Catch any *other* validation error the limit checks above don't predict
+    // (a bad bind group, a future shader regression). Without this scope such
+    // an error would, again, surface as a buffer full of zeros.
+    device.pushErrorScope('validation');
+
     // Two storage buffers, ping-ponged across the chain: upload once, read once.
-    const bufA = device.createBuffer({
+    bufA = device.createBuffer({
       size: bytes,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
       label: 'chain-a',
     });
-    const bufB = device.createBuffer({
+    bufB = device.createBuffer({
       size: bytes,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
       label: 'chain-b',
     });
-    const staging = device.createBuffer({
+    staging = device.createBuffer({
       size: bytes,
       usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
       label: 'chain-staging',
     });
 
-    try {
-      // Cast: TS's ArrayBufferLike vs @webgpu/types' ArrayBuffer-only
-      // BufferSource. Same cast the matrix GPUContext uses for writeBuffer.
-      device.queue.writeBuffer(bufA, 0, input as unknown as BufferSource);
+    // Cast: TS's ArrayBufferLike vs @webgpu/types' ArrayBuffer-only
+    // BufferSource. Same cast the matrix GPUContext uses for writeBuffer.
+    device.queue.writeBuffer(bufA, 0, input as unknown as BufferSource);
 
-      const encoder = device.createCommandEncoder({ label: 'elementwise-chain' });
-      const workgroups = Math.ceil(n / WORKGROUP_SIZE);
+    const encoder = device.createCommandEncoder({ label: 'elementwise-chain' });
 
-      let src = bufA;
-      let dst = bufB;
-      for (const op of ops) {
-        const pipeline = getPipeline(device, op);
-        const bindGroup = device.createBindGroup({
-          layout: pipeline.getBindGroupLayout(0),
-          entries: [
-            { binding: 0, resource: { buffer: src } },
-            { binding: 1, resource: { buffer: dst } },
-          ],
-        });
-        const pass = encoder.beginComputePass({ label: `chain:${op}` });
-        pass.setPipeline(pipeline);
-        pass.setBindGroup(0, bindGroup);
-        pass.dispatchWorkgroups(workgroups);
-        pass.end();
+    let src = bufA;
+    let dst = bufB;
+    for (const op of ops) {
+      const pipeline = getPipeline(device, op);
+      const bindGroup = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: { buffer: src } },
+          { binding: 1, resource: { buffer: dst } },
+        ],
+      });
+      const pass = encoder.beginComputePass({ label: `chain:${op}` });
+      pass.setPipeline(pipeline);
+      pass.setBindGroup(0, bindGroup);
+      pass.dispatchWorkgroups(workgroups);
+      pass.end();
 
-        // Ping-pong: this pass's output is the next pass's input.
-        [src, dst] = [dst, src];
-      }
-
-      // After the swap, `src` holds the final result.
-      encoder.copyBufferToBuffer(src, 0, staging, 0, bytes);
-      device.queue.submit([encoder.finish()]);
-
-      await staging.mapAsync(GPUMapMode.READ);
-      const out = new Float32Array(staging.getMappedRange().slice(0));
-      staging.unmap();
-      return out;
-    } finally {
-      bufA.destroy();
-      bufB.destroy();
-      staging.destroy();
+      // Ping-pong: this pass's output is the next pass's input. After k passes
+      // and k swaps, `src` is always the buffer pass k wrote — for every k.
+      [src, dst] = [dst, src];
     }
+
+    encoder.copyBufferToBuffer(src, 0, staging, 0, bytes);
+    device.queue.submit([encoder.finish()]);
+
+    const validationError = await device.popErrorScope();
+    scopePopped = true;
+    // The work was invalidated — the readback would be zeros. Fall back.
+    if (validationError) return null;
+
+    await staging.mapAsync(GPUMapMode.READ);
+    const out = new Float32Array(staging.getMappedRange().slice(0));
+    staging.unmap();
+    return out;
   } catch {
-    // Device lost, kernel error, OOM — the GPU is best-effort. Fall back.
+    // Device lost, OOM, mapAsync rejection — the GPU is best-effort. Fall back.
     return null;
+  } finally {
+    // Keep the error-scope stack balanced even when we threw mid-encode.
+    if (device && !scopePopped) {
+      try {
+        await device.popErrorScope();
+      } catch {
+        /* device already gone — nothing to balance */
+      }
+    }
+    // Optional-chained: an early createBuffer failure leaves later ones
+    // undefined, and would otherwise leak the ones already created.
+    bufA?.destroy();
+    bufB?.destroy();
+    staging?.destroy();
   }
 }

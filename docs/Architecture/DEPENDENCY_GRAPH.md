@@ -14263,7 +14263,7 @@ graph LR
 
 ---
 
-### `gpu/src/index.ts` - Package entry point for @danielsimonjr/mathts-gpu (re-exports 27 symbols)
+### `gpu/src/index.ts` - / <reference types="@webgpu/types" />
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -15436,7 +15436,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1024   |
 | Total Modules           | 77     |
-| Total Lines of Code     | 170273 |
+| Total Lines of Code     | 170342 |
 | Total Exports           | 4932   |
 | Total Re-exports        | 1785   |
 | Total Classes           | 56     |

@@ -74,7 +74,7 @@ entryPoints:
     description: mathjs Compatibility Layer
   - file: gpu/src/index.ts
     type: main
-    description: Entry Point
+    description: / <reference types="@webgpu/types" />
   - file: plot/src/index.ts
     type: main
     description: Entry Point
@@ -30528,7 +30528,7 @@ modules:
         - initializeGlobalGPU
         - destroyGlobalGPU
     gpu/src/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-gpu (re-exports 27 symbols)
+      description: / <reference types="@webgpu/types" />
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -32462,7 +32462,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1024
   totalModules: 77
-  totalLinesOfCode: 170273
+  totalLinesOfCode: 170342
   totalExports: 4932
   totalClasses: 56
   totalInterfaces: 407

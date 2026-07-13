@@ -18,9 +18,18 @@ Add the opt-in **WebGPU f32 acceleration tier** for fused element-wise chains.
 Only a _fused chain_ is accelerated: a lone element-wise op on the GPU is pure
 transfer tax, while a chain uploads once, runs every op on-device via ping-ponged
 buffers, and reads back once. Measured on an NVIDIA Pascal adapter for
-`sin→exp→tanh→log1p` vs the browser CPU path: **1.97x at 65,536 elements, 2.47x at
-262,144, 2.30x at 1M**. The 65,536-element threshold is set from these numbers.
+`sin→exp→tanh→cos` vs the browser CPU path: **2.33x at 65,536 elements, 2.88x at
+262,144, 2.54x at 1M**. The 65,536-element threshold is set from these numbers.
 
-All 17 supported kernels are validated against JS oracles on a real GPU. `erfc` is
-deliberately excluded (no WGSL builtin; approximating it would silently change the
-accuracy contract) — chains containing it fall back.
+All 15 supported kernels are validated against JS oracles on a real GPU.
+`erfc`, `expm1` and `log1p` are deliberately excluded: WGSL has no builtin for any of
+them, and for expm1/log1p even the Kahan-compensated forms measured 38%/62% max
+relative error near zero on real hardware (the GPU's fast-math `log()` is inaccurate
+near 1.0). An f32 fast path may be less precise; it may not be wrong. Chains containing
+them fall back to the exact CPU tiers.
+
+Hardened after adversarial review: device-limit guards + a validation error scope
+(a WebGPU validation error does NOT throw — it invalidates the command buffer, and the
+zero-initialized staging buffer would have been returned as a silently WRONG all-zeros
+result); buffer cleanup on every error path; and device-lost now clears the cached
+device so the tier can recover.

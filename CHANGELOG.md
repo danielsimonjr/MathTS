@@ -28,13 +28,31 @@ is pure transfer tax (upload n floats, one flop each, read n back) and would be
 *slower* than JS/WASM — the same economics that retired element-wise ops from the WASM
 backend. A chain uploads once, runs every op on-device via ping-ponged buffers, and
 reads back once. Measured on an NVIDIA Pascal adapter, chain `sin→exp→tanh→log1p` vs
-the browser CPU path: **1.97× at 65,536 elements, 2.47× at 262,144, 2.30× at 1M**. The
+the browser CPU path: **2.33× at 65,536 elements, 2.88× at 262,144, 2.54× at 1M**. The
 65,536-element threshold is set from those numbers, not guessed.
 
-All 17 supported kernels are validated against JS oracles on a real GPU (max relative
-error 3e-8 – 4e-6). `erfc` is deliberately excluded — WGSL has no `erfc` builtin, and
-approximating it would silently change the accuracy contract; chains containing it
-fall back.
+All 15 supported kernels are validated against JS oracles on a real GPU (max relative
+error 3e-8 – 4e-6). **`erfc`, `expm1` and `log1p` are deliberately excluded**: WGSL has
+no builtin for any of them, and for `expm1`/`log1p` even the Kahan-compensated forms
+measured **38%** and **62%** max relative error near zero on real hardware (the
+compensation needs an accurate `log()` near 1.0; the GPU's fast-math `log()` isn't). An
+f32 fast path may be *less precise*; it may not be *wrong*. Chains containing them fall
+back to the exact CPU tiers.
+
+Hardened after adversarial review, all found before release:
+- **Silent all-zeros results.** A WebGPU validation error does **not** throw — it
+  invalidates the command buffer, `submit()` does nothing, and the zero-initialized
+  staging buffer would have been returned as a successful result. Now guarded by
+  explicit device-limit checks (`maxComputeWorkgroupsPerDimension` etc. — an array of
+  2²⁴ elements trips the 65,535-workgroup limit) plus a validation error scope; both
+  return `null` and fall back.
+- Buffers are now released on **every** error path (an early allocation failure used to
+  leak the ones already created).
+- **Device loss is now recoverable** — the lost device is evicted from the cache instead
+  of being handed out forever.
+- `@webgpu/types` moved from a devDependency to a real dependency of the `gpu` package:
+  its published `.d.ts` references `GPUDevice`/`GPUBuffer`, which would not have resolved
+  for consumers.
 
 **Honest coverage note:** CDG's `webgpu-pairing` still reports **0 of 218 typed
 functions** GPU-accelerated, and that stays correct — no `mathTyped` function routes to
