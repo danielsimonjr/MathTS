@@ -384,7 +384,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/utils/map.ts`
 
 - `assign` (function) — 1 in-file ref
-- `ObjectWrappingMap` (class) — 4 in-file refs
+- `ObjectWrappingMap` (class) — 5 in-file refs
 - `PartitionedMap` (class) — 2 in-file refs
 
 ### `functions/src/utils/string.ts`

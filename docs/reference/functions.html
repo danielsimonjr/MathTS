@@ -1379,11 +1379,11 @@
 
       **`fuseUnaryChainAsync(ops, xs)`** — the fused element-wise chain. It tries
       **WASM (f64) → GPU (f32) → JS (f64)** and returns a `Float32Array` only when the
-      GPU path ran (the return type *is* the precision contract). It is a separate
+      GPU path ran (the return type _is_ the precision contract). It is a separate
       `async` function rather than a change to the synchronous `fuseUnaryChain`,
       because a GPU dispatch is inherently asynchronous.
 
-      Why only a *chain*: a single element-wise op on the GPU is pure transfer tax —
+      Why only a _chain_: a single element-wise op on the GPU is pure transfer tax —
       upload n floats, do one flop each, read n floats back. A fused chain uploads
       once, runs every op on-device, and reads back once, so the transfer is amortized
       across the whole chain.
@@ -1399,7 +1399,7 @@
       | 1,048,576 | 1613 ms | **250 ms** | 457 ms | **0.55×**   |
 
       **WASM is ~1.8× faster than the GPU, and it is f64-exact while the GPU is f32.**
-      For element-wise chains the GPU is therefore *both slower and less precise*, so
+      For element-wise chains the GPU is therefore _both slower and less precise_, so
       it is tried **after** WASM, never before. It still earns its place where WASM is
       unavailable — there it beats the JS scalar pass ~2–2.5×.
 

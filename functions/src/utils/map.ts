@@ -9,14 +9,31 @@ import { isMap, isObject } from './is.js';
  * will stop using this method, as all objects will be Maps, rather than
  * more security prone objects.
  */
+/**
+ * The iterator type `Map` itself declares, derived from the installed TS lib
+ * rather than hard-coded: older libs say `IterableIterator<[K, V]>`, TS >= 5.6
+ * says `MapIterator<[K, V]>` (which additionally requires `[Symbol.dispose]`).
+ * Deriving it keeps `implements Map<K, V>` honest on every TS version.
+ */
+type MapEntryIterator<K, V> = ReturnType<Map<K, V>[typeof Symbol.iterator]>;
+
 export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
   wrappedObject: Record<string, V>;
   readonly [Symbol.toStringTag]: string = 'ObjectWrappingMap';
 
   constructor(object: Record<string, V>) {
     this.wrappedObject = object;
-    (this as unknown as { [Symbol.iterator]: () => IterableIterator<[K, V]> })[Symbol.iterator] =
-      this.entries;
+  }
+
+  /**
+   * Declared as a real method rather than assigned in the constructor through a
+   * cast. The old form satisfied the runtime but never appeared in the emitted
+   * type, so `implements Map<K, V>` was a lie that only surfaced downstream:
+   * consumers compiling with `skipLibCheck: false` got TS2420 ("incorrectly
+   * implements interface 'Map'... '[Symbol.iterator]' is missing").
+   */
+  [Symbol.iterator](): MapEntryIterator<K, V> {
+    return this.entries() as MapEntryIterator<K, V>;
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
@@ -107,8 +124,11 @@ export class PartitionedMap<K = unknown, V = unknown> implements Map<K, V> {
     this.a = a;
     this.b = b;
     this.bKeys = bKeys;
-    (this as unknown as { [Symbol.iterator]: () => IterableIterator<[K, V]> })[Symbol.iterator] =
-      this.entries;
+  }
+
+  /** See the note on `ObjectWrappingMap[Symbol.iterator]` — same fix. */
+  [Symbol.iterator](): MapEntryIterator<K, V> {
+    return this.entries() as MapEntryIterator<K, V>;
   }
 
   get(key: K): V | undefined {
