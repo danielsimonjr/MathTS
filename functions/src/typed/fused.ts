@@ -16,6 +16,7 @@ import {
   elementwiseChainDispatch,
   type WasmElementwiseOp,
 } from '../wasm/elementwise/wasm-bridge.js';
+import { elementwiseChainGpuDispatch } from '../gpu/elementwise-gpu.js';
 import { erfcScalar } from './special.js';
 
 /** Scalar implementation of every fusable op, for the JS fallback path. */
@@ -47,10 +48,42 @@ const SCALAR: Record<WasmElementwiseOp, (x: number) => number> = {
 export function fuseUnaryChain(ops: WasmElementwiseOp[], xs: Float64Array): Float64Array {
   const wasm = elementwiseChainDispatch(ops, xs);
   if (wasm) return wasm;
+  return jsChain(ops, xs);
+}
+
+/** Sequential scalar pass — the always-correct f64 fallback. */
+function jsChain(ops: readonly WasmElementwiseOp[], xs: Float64Array): Float64Array {
   const out = Float64Array.from(xs);
   for (const op of ops) {
     const f = SCALAR[op];
     for (let i = 0; i < out.length; i++) out[i] = f(out[i]);
   }
   return out;
+}
+
+/**
+ * Async sibling of {@link fuseUnaryChain} that may run the chain on the **GPU**.
+ *
+ * This exists as a separate, `async` entry point rather than changing
+ * `fuseUnaryChain`, because a GPU dispatch is inherently asynchronous and
+ * `fuseUnaryChain`'s synchronous signature is public API.
+ *
+ * Tiers, in order: **GPU (f32)** → WASM (f64) → JS (f64).
+ *
+ * The GPU tier engages only when the caller has opted in via `enableGpu()`, a
+ * device is available, the array clears `GPU_MIN_ELEMENTS`, and every op in the
+ * chain has a GPU kernel. Otherwise this behaves exactly like `fuseUnaryChain`.
+ *
+ * **Precision:** when the GPU tier engages the result is a `Float32Array`
+ * (~7 significant digits); otherwise it is an exact-f64 `Float64Array`. The
+ * return type tells you which path ran — that is the precision contract, and it
+ * is why the GPU tier is opt-in rather than automatic.
+ */
+export async function fuseUnaryChainAsync(
+  ops: WasmElementwiseOp[],
+  xs: Float64Array
+): Promise<Float64Array | Float32Array> {
+  const gpu = await elementwiseChainGpuDispatch(ops, xs);
+  if (gpu) return gpu;
+  return fuseUnaryChain(ops, xs);
 }

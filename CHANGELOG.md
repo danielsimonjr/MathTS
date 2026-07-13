@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — WebGPU f32 tier for fused element-wise chains (opt-in, measured)
+
+The GPU now genuinely accelerates element-wise work — but only where it actually
+wins, and only when you ask for it.
+
+- **`enableGpu()` / `disableGpu()` / `isGpuEnabled()`** — the tier is **OFF by
+  default**. Opting in is mandatory because the GPU computes in **f32** (WGSL has no
+  f64), and silently changing an f64 API's precision is not something a caller should
+  get by accident.
+- **`fuseUnaryChainAsync(ops, xs)`** — async sibling of `fuseUnaryChain`, tiering
+  **GPU (f32) → WASM (f64) → JS (f64)**. It returns a `Float32Array` only when the GPU
+  ran, so the return type *is* the precision contract. Added as a new async function
+  rather than breaking `fuseUnaryChain`'s synchronous signature.
+- **`elementwiseChainGpuDispatch`** — never-throw bridge (returns `null` to fall
+  back), mirroring the WASM `elementwiseChainDispatch` pattern.
+
+**Only a fused chain is accelerated, on purpose.** A lone element-wise op on the GPU
+is pure transfer tax (upload n floats, one flop each, read n back) and would be
+*slower* than JS/WASM — the same economics that retired element-wise ops from the WASM
+backend. A chain uploads once, runs every op on-device via ping-ponged buffers, and
+reads back once. Measured on an NVIDIA Pascal adapter, chain `sin→exp→tanh→log1p` vs
+the browser CPU path: **1.97× at 65,536 elements, 2.47× at 262,144, 2.30× at 1M**. The
+65,536-element threshold is set from those numbers, not guessed.
+
+All 17 supported kernels are validated against JS oracles on a real GPU (max relative
+error 3e-8 – 4e-6). `erfc` is deliberately excluded — WGSL has no `erfc` builtin, and
+approximating it would silently change the accuracy contract; chains containing it
+fall back.
+
+**Honest coverage note:** CDG's `webgpu-pairing` still reports **0 of 218 typed
+functions** GPU-accelerated, and that stays correct — no `mathTyped` function routes to
+the GPU, because per-function GPU dispatch loses to the CPU. Wiring every typed
+function to a GPU path would improve the metric and degrade the library.
+
 ### Fixed — the browser WebGPU gate now actually runs GPU kernels (and caught a dead shader)
 
 The `test:browser` suite passed for months **without ever executing a WGSL kernel**, for

@@ -2045,6 +2045,10 @@
       "functions/src/typed/distributions.ts",
       "functions/src/typed/special.ts"
     ],
+    "functions/src/gpu/elementwise-gpu.ts": [
+      "functions/src/typed/fused.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/wasm/sort/wasm-bridge.ts": [
       "functions/src/typed/geometry.ts",
       "functions/src/typed/hypothesis.ts",
@@ -3538,6 +3542,7 @@
     ],
     "gpu/src/detect.ts": ["gpu/src/GPUContext.ts", "gpu/src/index.ts"],
     "gpu/src/device.ts": ["gpu/src/index.ts"],
+    "gpu/src/flag.ts": ["gpu/src/index.ts"],
     "gpu/src/BufferPool.ts": ["gpu/src/index.ts"],
     "gpu/src/ShaderManager.ts": ["gpu/src/index.ts"],
     "plot/src/types.ts": [

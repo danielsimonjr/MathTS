@@ -105,6 +105,16 @@ export { cond } from './matrix-ops.js';
 // WebGPU-accelerated matrix operations (gpuMatmul, gpuAdd, gpuTranspose, gpuScale)
 export * from './gpu.js';
 
+// WebGPU opt-in surface. The GPU tier computes in f32 and is OFF by default;
+// `enableGpu()` is how a caller opts in (see `fuseUnaryChainAsync`).
+export { enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
+export {
+  elementwiseChainGpuDispatch,
+  isGpuChainSupported,
+  GPU_ELEMENTWISE_OPS,
+  type GpuElementwiseOp,
+} from '../gpu/elementwise-gpu.js';
+
 // Relational functions (deepEqual, unequal, compareNatural, compareText,
 //                       compareUnits, equalScalar, equalText)
 export * from './relational.js';

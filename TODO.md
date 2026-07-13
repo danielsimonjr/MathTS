@@ -34,7 +34,23 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       exact in f32 and cannot discriminate GPU-f32 from CPU-f64). Measured **4.5e-7** — the GPU
       path is now _proven_. Exposed + fixed a dead kernel: `sumReduce` used the WGSL **reserved
       keyword** `shared` and never compiled; added a compile guard over every builtin shader.
-- [ ] **Spec 2 — the real GPU tier (next)** — `enableGpu()`/`isGpuEnabled()` flag (default
+- [x] **Spec 2 — GPU tier for fused element-wise chains** — ✅ DONE (2026-07-13). `enableGpu()`
+      flag (default OFF; f32 precision is opt-in), `fuseUnaryChainAsync` (GPU→WASM→JS), and
+      `elementwiseChainGpuDispatch` (never-throw, returns null to fall back). 17 WGSL kernels
+      **validated against JS oracles on a real NVIDIA GPU**; threshold **measured**, not guessed
+      (**1.97×** at 65,536 → **2.47×** at 262,144 vs the browser CPU path). Only _fused chains_
+      are wired — a single element-wise op on GPU is transfer-dominated and would be slower.
+      `erfc` excluded (no WGSL builtin). CDG `webgpu-pairing` stays 0/218 **by design**.
+- [ ] **Unidentified flake in the full `functions` suite** (seen once, 2026-07-13) — one test
+      failed during a full-suite run and passed on two subsequent clean runs (3414 passed). The
+      test name was lost (the capture filter discarded it). Known regime: the full parallel suite
+      is a distinct load profile (worker contention/timeouts). Re-run with full output captured
+      and identify it; do not dismiss as noise.
+- [ ] **WASM is dead in the browser** (found 2026-07-13) — `elementwiseChainDispatch` returns
+      `null` under Chrome, so browser users silently get the **pure-JS** path and the WASM tier
+      never engages. This is why the GPU benchmark's baseline is JS. Likely a Node-only loader /
+      missing `.wasm` in the browser bundle. Potentially a **bigger win than the GPU** if fixed.
+- [ ] **Spec 3 — remaining GPU-friendly categories** — `enableGpu()`/`isGpuEnabled()` flag (default
       OFF, in the `gpu` leaf) **plus** the first `*GpuDispatch` bridge, landed together so the
       flag has a real implicit consumer to gate. Target the GPU-friendly categories only
       (fused elementwise chains → reductions → FFT); the transfer-dominated long tail is a

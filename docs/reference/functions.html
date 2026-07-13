@@ -575,10 +575,11 @@
         churn.
       - **`WASM`** — the function has a WebAssembly fast path for large inputs.
       - **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
-        large inputs (32-bit float precision). **Browser-only**, and carried today by
-        exactly four standalone helpers (see
-        [WebGPU-accelerated operations](#webgpu-accelerated-operations)) — no
-        typed-dispatch function has a WebGPU path yet.
+        large inputs (32-bit float precision). **Browser-only** and **opt-in**
+        (`enableGpu()`). Carried by the fused element-wise chain
+        (`fuseUnaryChainAsync`) and four standalone `gpu*` matrix helpers — see
+        [WebGPU: the opt-in f32 tier](#webgpu-the-opt-in-f32-tier). No *typed-dispatch*
+        function routes to the GPU (see the coverage note below for why).
 
       Each acceleration falls back automatically to a pure-TypeScript implementation
       when the input is small, the worker pool is not initialized, or the WASM /
@@ -594,14 +595,17 @@
       > rather than a direct compute-pool call, so their acceleration is documented in
       > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
 
-      > **WebGPU coverage is currently zero at the typed-dispatch layer.** The generated
-      > report [`docs/Architecture/webgpu-pairing.md`](../Architecture/webgpu-pairing.md)
-      > (data in `webgpu-pairing.json`) is the authoritative map; as of the last
-      > regeneration it reports **0 GPU-accelerated of 218 typed functions**. The only
-      > WebGPU code paths in this package are the four standalone `gpu*` helpers below,
-      > which are not typed-dispatch entries and so are not counted there. Wiring the
-      > typed layer to the GPU (a `*GpuDispatch` tier, behind an explicit opt-in) is a
-      > planned effort — see [`ROADMAP.md`](../../ROADMAP.md).
+      > **WebGPU coverage at the typed-dispatch layer is zero — deliberately.** The
+      > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) reports
+      > **0 GPU-accelerated of 218 typed functions**, and that is the honest number: no
+      > `mathTyped` function routes to the GPU. This is a design decision, not a gap.
+      > A GPU dispatch costs an upload and a readback, so a *single* element-wise op
+      > (`sin(xs)`) is pure transfer tax and would be **slower** than JS or WASM — the
+      > same economics that retired element-wise ops from the WASM backend. The GPU wins
+      > only where work is amortized over the transfer: a **fused chain** of ops
+      > (`fuseUnaryChainAsync`, ~2–2.5× measured) or a large **matmul**. Wiring every
+      > typed function to a GPU path would make the number look better and the library
+      > slower, so we don't.
 
       Every category below is documented in three parts: **Details** — supported
       types, return semantics, and numerical caveats; **Background & History** — the
@@ -1356,12 +1360,63 @@
       The `parallel`-marked decompositions route their O(n³) matrix products through
       the worker pool and therefore return a `Promise`.
 
-      ### WebGPU-accelerated operations
+      ### WebGPU: the opt-in f32 tier
 
-      GPU compute-shader implementations of four core matrix operations. **These four
-      are the only WebGPU code paths in the library** — they are standalone helpers,
-      deliberately named `gpu*`, not typed-dispatch entries. Calling `multiply` or
-      `transpose` never reaches the GPU.
+      The GPU tier is **OFF by default** and must be turned on explicitly:
+
+      ```ts
+      import { enableGpu, fuseUnaryChainAsync } from '@danielsimonjr/mathts-functions';
+
+      enableGpu(); // opt in — GPU results are f32, so this is never automatic
+      const ys = await fuseUnaryChainAsync(['sin', 'exp', 'tanh'], xs); // Float32Array
+      ```
+
+      Opting in is required because the GPU computes in **32-bit float** (WGSL has no
+      f64); silently routing an f64 API onto the GPU would change precision without
+      the caller asking. `enableGpu()` / `disableGpu()` / `isGpuEnabled()` control it.
+
+      **`fuseUnaryChainAsync(ops, xs)`** — the fused element-wise chain, and the one
+      place the GPU is genuinely worth using for element-wise work. It tries **GPU
+      (f32) → WASM (f64) → JS (f64)** and returns a `Float32Array` only when the GPU
+      path ran (the return type *is* the precision contract). It is a separate `async`
+      function rather than a change to the synchronous `fuseUnaryChain`, because a GPU
+      dispatch is inherently asynchronous.
+
+      Why only a *chain*: a single element-wise op on the GPU is pure transfer tax —
+      upload n floats, do one flop each, read n floats back. A fused chain uploads
+      once, runs every op on-device, and reads back once, so the transfer is amortized
+      across the whole chain. (This is the same economics that retired element-wise
+      ops from the WASM backend.)
+
+      The GPU engages only when you have opted in, a device exists, the array clears
+      **65,536 elements**, and every op in the chain has a GPU kernel. Otherwise the
+      call transparently falls through to the CPU tiers. Measured on an NVIDIA Pascal
+      adapter for the chain `sin→exp→tanh→log1p`, against the browser's CPU path:
+
+      | n         | CPU (JS) | GPU     | speedup   |
+      | --------- | -------- | ------- | --------- |
+      | 65,536    | 43.2 ms  | 21.9 ms | **1.97×** |
+      | 262,144   | 176.5 ms | 71.5 ms | **2.47×** |
+      | 1,048,576 | 692.7 ms | 301.2 ms | **2.30×** |
+      | 4,194,304 | 3211 ms  | 1853 ms | **1.73×** |
+
+      The 65,536 threshold is where the GPU starts winning, and is set from these
+      measurements. Note the CPU column is **JS**: the WASM tier does not currently
+      load in browsers, so JS is what the GPU actually competes against there.
+
+      **Supported ops** (chains outside this set fall back): `abs`, `sin`, `cos`,
+      `tan`, `exp`, `log`, `atan`, `sinh`, `tanh`, `atanh`, `log2`, `log10`, `expm1`,
+      `log1p`, `sec`, `csc`, `cot`. `erfc` is deliberately **excluded** — WGSL has no
+      `erfc` builtin, and hand-rolling an approximation would silently change the
+      accuracy contract. Every kernel is validated against a JS oracle on a real GPU
+      (max relative error 3e-8 – 4e-6; `expm1`/`log1p` use naive identities and lose
+      relative precision near zero).
+
+      ### WebGPU-accelerated matrix operations
+
+      GPU compute-shader implementations of four core matrix operations. These are
+      standalone helpers, deliberately named `gpu*`, not typed-dispatch entries —
+      calling `multiply` or `transpose` never reaches the GPU.
 
       All four are `async`. Each runs a WGSL compute shader **only when all of the
       following hold**, and otherwise computes the same result on the CPU:
@@ -2602,7 +2657,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (866 exports).
+      > `@danielsimonjr/mathts-functions` (874 exports).
 
       ### Functions by category
 
@@ -2622,7 +2677,7 @@
 
       **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
-      **Linear Algebra** (60): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `eigs`, `expm`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+      **Linear Algebra** (64): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
       **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2658,9 +2713,11 @@
 
       **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-      ### Constants & values (61)
+      **Other exports (uncategorized)** (2): `elementwiseChainGpuDispatch`, `isGpuChainSupported`
 
-      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+      ### Constants & values (63)
+
+      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
       ### Classes & types (1)
 

@@ -27,6 +27,8 @@ export {
 
 export { getGpuDevice, resetGpuDevice } from './device.js';
 
+export { enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS } from './flag.js';
+
 export { BufferPool, type BufferPoolOptions } from './BufferPool.js';
 
 export { ShaderManager, type ShaderSource, type PipelineConfig } from './ShaderManager.js';

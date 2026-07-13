@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-13",
-    "totalFiles": 1022,
-    "totalModules": 76,
-    "totalExports": 4912
+    "totalFiles": 1024,
+    "totalModules": 77,
+    "totalExports": 4932
   },
   "entryPoints": [
     {
@@ -10803,6 +10803,24 @@
         "constants": ["createIntersect"]
       }
     },
+    "functions/gpu": {
+      "functions/src/gpu/elementwise-gpu.ts": {
+        "description": "WebGPU fused element-wise chain.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["getGpuDevice", "isGpuEnabled", "GPU_MIN_ELEMENTS", "GPUContextOptions"]
+          }
+        ],
+        "exports": ["GPU_ELEMENTWISE_OPS", "isGpuChainSupported", "elementwiseChainGpuDispatch"],
+        "functions": ["isGpuChainSupported", "elementwiseChainGpuDispatch"],
+        "constants": ["GPU_ELEMENTWISE_OPS"]
+      }
+    },
     "functions/logical": {
       "functions/src/logical/and.ts": {
         "description": "Logical `and`. Test whether two values are both defined with a nonzero/nonempty value.",
@@ -16947,13 +16965,17 @@
             "imports": ["elementwiseChainDispatch", "WasmElementwiseOp"]
           },
           {
+            "file": "../gpu/elementwise-gpu.js",
+            "imports": ["elementwiseChainGpuDispatch"]
+          },
+          {
             "file": "./special.js",
             "imports": ["erfcScalar"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["fuseUnaryChain"],
-        "functions": ["fuseUnaryChain"]
+        "exports": ["fuseUnaryChain", "fuseUnaryChainAsync"],
+        "functions": ["fuseUnaryChain", "fuseUnaryChainAsync"]
       },
       "functions/src/typed/geometry.ts": {
         "description": "Typed Geometry Functions",
@@ -17468,6 +17490,16 @@
             "reExport": true
           },
           {
+            "file": "../gpu/elementwise-gpu.js",
+            "imports": [
+              "elementwiseChainGpuDispatch",
+              "isGpuChainSupported",
+              "GPU_ELEMENTWISE_OPS",
+              "GpuElementwiseOp"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./relational.js",
             "imports": ["typedRelational"],
             "reExport": true
@@ -17488,7 +17520,13 @@
             "reExport": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["enableGpu", "disableGpu", "isGpuEnabled", "GPU_MIN_ELEMENTS"]
+          }
+        ],
         "exports": [
           "typedArithmetic",
           "typedTrigonometry",
@@ -17502,6 +17540,14 @@
           "typedDistributions",
           "typedAlgebra",
           "cond",
+          "enableGpu",
+          "disableGpu",
+          "isGpuEnabled",
+          "GPU_MIN_ELEMENTS",
+          "elementwiseChainGpuDispatch",
+          "isGpuChainSupported",
+          "GPU_ELEMENTWISE_OPS",
+          "GpuElementwiseOp",
           "typedRelational",
           "typedString",
           "typedProbability",
@@ -17547,6 +17593,14 @@
           "typedDistributions",
           "typedAlgebra",
           "cond",
+          "enableGpu",
+          "disableGpu",
+          "isGpuEnabled",
+          "GPU_MIN_ELEMENTS",
+          "elementwiseChainGpuDispatch",
+          "isGpuChainSupported",
+          "GPU_ELEMENTWISE_OPS",
+          "GpuElementwiseOp",
           "typedRelational",
           "typedString",
           "typedProbability",
@@ -32643,6 +32697,16 @@
         "exports": ["getGpuDevice", "resetGpuDevice"],
         "functions": ["getGpuDevice", "resetGpuDevice"]
       },
+      "gpu/src/flag.ts": {
+        "description": "Global WebGPU opt-in flag.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["GPU_MIN_ELEMENTS", "enableGpu", "disableGpu", "isGpuEnabled"],
+        "functions": ["enableGpu", "disableGpu", "isGpuEnabled"],
+        "constants": ["GPU_MIN_ELEMENTS"]
+      },
       "gpu/src/GPUContext.ts": {
         "description": "WebGPU Context Management",
         "externalDependencies": [],
@@ -32660,7 +32724,7 @@
         "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
       },
       "gpu/src/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 23 symbols)",
+        "description": "Package entry point for @danielsimonjr/mathts-gpu (re-exports 27 symbols)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -32698,6 +32762,11 @@
             "reExport": true
           },
           {
+            "file": "./flag.js",
+            "imports": ["enableGpu", "disableGpu", "isGpuEnabled", "GPU_MIN_ELEMENTS"],
+            "reExport": true
+          },
+          {
             "file": "./BufferPool.js",
             "imports": ["BufferPool", "BufferPoolOptions"],
             "reExport": true
@@ -32728,6 +32797,10 @@
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
+          "enableGpu",
+          "disableGpu",
+          "isGpuEnabled",
+          "GPU_MIN_ELEMENTS",
           "BufferPool",
           "BufferPoolOptions",
           "ShaderManager",
@@ -32753,6 +32826,10 @@
           "DeviceLostEvent",
           "getGpuDevice",
           "resetGpuDevice",
+          "enableGpu",
+          "disableGpu",
+          "isGpuEnabled",
+          "GPU_MIN_ELEMENTS",
           "BufferPool",
           "BufferPoolOptions",
           "ShaderManager",
@@ -33769,6 +33846,10 @@
         "files": ["functions/src/geometry/distance.ts", "functions/src/geometry/intersect.ts"]
       },
       {
+        "name": "Functions/gpu",
+        "files": ["functions/src/gpu/elementwise-gpu.ts"]
+      },
+      {
         "name": "Functions/logical",
         "files": [
           "functions/src/logical/and.ts",
@@ -34713,6 +34794,7 @@
           "gpu/src/BufferPool.ts",
           "gpu/src/detect.ts",
           "gpu/src/device.ts",
+          "gpu/src/flag.ts",
           "gpu/src/GPUContext.ts",
           "gpu/src/index.ts",
           "gpu/src/ShaderManager.ts"
@@ -34752,17 +34834,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1022,
-    "totalModules": 76,
-    "totalLinesOfCode": 169986,
-    "totalExports": 4912,
+    "totalTypeScriptFiles": 1024,
+    "totalModules": 77,
+    "totalLinesOfCode": 170273,
+    "totalExports": 4932,
     "totalClasses": 56,
     "totalInterfaces": 407,
-    "totalFunctions": 1591,
-    "totalTypeGuards": 156,
+    "totalFunctions": 1597,
+    "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1531,
-    "totalReExports": 1773,
+    "totalConstants": 1533,
+    "totalReExports": 1785,
     "totalTypeOnlyImports": 524,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

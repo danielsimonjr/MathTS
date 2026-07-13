@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-13", "f": 1022, "e": 4912, "re": 1773 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-13", "f": 1024, "e": 4932, "re": 1785 },
   "s": {
-    "loc": 169986,
+    "loc": 170273,
     "cls": 56,
     "int": 407,
-    "fn": 1591,
-    "tg": 156,
+    "fn": 1597,
+    "tg": 158,
     "en": 0,
-    "co": 1531,
+    "co": 1533,
     "toi": 524
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -597,6 +597,10 @@
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
     },
     "functions/geometry": { "f": 2, "exp": ["createDistance", "createIntersect"] },
+    "functions/gpu": {
+      "f": 1,
+      "exp": ["GPU_ELEMENTWISE_OPS", "isGpuChainSupported", "elementwiseChainGpuDispatch"]
+    },
     "functions/logical": {
       "f": 5,
       "exp": ["createAnd", "createNot", "createNullish", "createOr", "createXor"]
@@ -1492,7 +1496,7 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "gpu": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "BufferPool",
         "hasWebGPU",
@@ -1504,6 +1508,10 @@
         "getMaxMatrixSize",
         "getGpuDevice",
         "resetGpuDevice",
+        "GPU_MIN_ELEMENTS",
+        "enableGpu",
+        "disableGpu",
+        "isGpuEnabled",
         "getGlobalGPUContext",
         "initializeGlobalGPU",
         "destroyGlobalGPU",
@@ -1559,7 +1567,7 @@
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
-    { "p": "typed/index.ts", "i": 51, "o": 2 },
+    { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
