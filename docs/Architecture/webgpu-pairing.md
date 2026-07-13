@@ -4,20 +4,19 @@
 
 The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a direct GPU backend/device reference (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`).
 
-> **Status:** 6 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).
+> **Status:** 5 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).
 
-## WebGPU-accelerated functions (6)
+## WebGPU-accelerated functions (5)
 
 Standalone exports — this is where the GPU acceleration actually lives.
 
-| Function                      | Markers                       | Module              |
-| ----------------------------- | ----------------------------- | ------------------- |
-| `elementwiseChainGpuDispatch` | `getGpuDevice`                | gpu/elementwise-gpu |
-| `fuseUnaryChainAsync`         | `elementwiseChainGpuDispatch` | typed/fused         |
-| `gpuAdd`                      | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuMatmul`                   | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuScale`                    | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuTranspose`                | `gpuMatrixBackend`            | typed/gpu           |
+| Function              | Markers                       | Module      |
+| --------------------- | ----------------------------- | ----------- |
+| `fuseUnaryChainAsync` | `elementwiseChainGpuDispatch` | typed/fused |
+| `gpuAdd`              | `gpuMatrixBackend`            | typed/gpu   |
+| `gpuMatmul`           | `gpuMatrixBackend`            | typed/gpu   |
+| `gpuScale`            | `gpuMatrixBackend`            | typed/gpu   |
+| `gpuTranspose`        | `gpuMatrixBackend`            | typed/gpu   |
 
 ## Typed-dispatch layer: 0 of 218
 

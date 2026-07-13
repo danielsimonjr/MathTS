@@ -131,6 +131,74 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     }
   );
 
+  /**
+   * IEEE parity at domain edges — the blind spot the old oracle could not see.
+   *
+   * `maxRelErr` SKIPS non-finite expectations, and the sample domain never hit an
+   * edge, so `log(0)` / `atanh(2)` were entirely untested. WGSL leaves those
+   * results INDETERMINATE (an implementation may return anything), while JS is
+   * exact. The kernels now pin IEEE semantics explicitly; this asserts it, so a
+   * driver that disagrees fails loudly instead of returning garbage silently.
+   */
+  it('matches JS exactly at domain edges (log(0), atanh(±1), out-of-domain NaN)', async () => {
+    const cases: Array<[GpuElementwiseOp, number[]]> = [
+      ['log', [0, -1, -0.5]],
+      ['log2', [0, -1]],
+      ['log10', [0, -1]],
+      ['atanh', [1, -1, 2, -2]],
+    ];
+    const ORACLE_EDGE: Record<string, (x: number) => number> = {
+      log: Math.log,
+      log2: Math.log2,
+      log10: Math.log10,
+      atanh: Math.atanh,
+    };
+
+    for (const [op, edges] of cases) {
+      const xs = new Float64Array(GPU_MIN_ELEMENTS);
+      edges.forEach((v, i) => (xs[i] = v));
+      const got = await elementwiseChainGpuDispatch([op], xs);
+      expect(got).not.toBeNull();
+
+      edges.forEach((v, i) => {
+        const want = ORACLE_EDGE[op](v);
+        const g = got![i];
+        if (Number.isNaN(want)) {
+          expect(Number.isNaN(g), `${op}(${v}) should be NaN, got ${g}`).toBe(true);
+        } else {
+          // -Infinity / +Infinity must match exactly, not "closely".
+          expect(g, `${op}(${v})`).toBe(want);
+        }
+      });
+    }
+  });
+
+  it('honours a per-call { gpu } override, independent of the global flag', async () => {
+    const xs = sample(GPU_MIN_ELEMENTS);
+    disableGpu(); // global OFF...
+    // ...but an explicit per-call opt-in still runs.
+    expect(await elementwiseChainGpuDispatch(['sin'], xs, { gpu: true })).not.toBeNull();
+    // ...and an explicit opt-out wins even when the global is ON.
+    enableGpu();
+    expect(await elementwiseChainGpuDispatch(['sin'], xs, { gpu: false })).toBeNull();
+    enableGpu();
+  });
+
+  it('stays correct across repeated calls (pooled buffers are reused, not stale)', async () => {
+    // BufferPool recycles and rounds sizes UP, so a later call can receive a
+    // buffer larger than its data and still holding a previous call's values.
+    // The kernel bounds-checks against the `n` uniform, so this must stay exact.
+    const big = sample(GPU_MIN_ELEMENTS * 2);
+    const small = sample(GPU_MIN_ELEMENTS);
+    await elementwiseChainGpuDispatch(['exp'], big); // dirty the pool with larger buffers
+    const got = await elementwiseChainGpuDispatch(['sin'], small);
+    expect(got).not.toBeNull();
+    expect(got!.length).toBe(small.length);
+    const err = maxRelErr(got!, (i) => Math.sin(small[i]));
+    console.log(`[gpu] pooled-reuse sin: max rel err = ${err.toExponential(2)}`);
+    expect(err).toBeLessThan(1e-4);
+  });
+
   it('fused chain exp(sin(x)) matches the composed oracle', async () => {
     const got = await elementwiseChainGpuDispatch(['sin', 'exp'], xs);
     expect(got).not.toBeNull();

@@ -4505,12 +4505,13 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-gpu` | `getGpuDevice, isGpuEnabled, GPU_MIN_ELEMENTS, GPUContextOptions` |
+| `@danielsimonjr/mathts-gpu` | `getGpuDevice, getGlobalGPUContext, isGpuEnabled, GPU_MIN_ELEMENTS, ShaderManager, BufferPool, GPUContextOptions` |
 
 **Exports:**
 
+- Interfaces: `GpuChainOptions`
 - Types: `GpuElementwiseOp`
-- Functions: `isGpuChainSupported`, `elementwiseChainGpuDispatch`
+- Functions: `isGpuChainSupported`, `resetGpuElementwise`, `elementwiseChainGpuDispatch`
 - Constants: `GPU_ELEMENTWISE_OPS`
 
 ---
@@ -7665,7 +7666,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseChainDispatch, WasmElementwiseOp` | Import |
-| `../gpu/elementwise-gpu.js` | `elementwiseChainGpuDispatch` | Import |
+| `../gpu/elementwise-gpu.js` | `elementwiseChainGpuDispatch, GpuChainOptions` | Import |
 | `./special.js` | `erfcScalar` | Import |
 
 **Exports:**
@@ -7797,7 +7798,7 @@ graph LR
 | `./distributions.js` | `typedDistributions` | Re-export |
 | `./algebra.js` | `typedAlgebra` | Re-export |
 | `./matrix-ops.js` | `cond` | Re-export |
-| `../gpu/elementwise-gpu.js` | `elementwiseChainGpuDispatch, isGpuChainSupported, GPU_ELEMENTWISE_OPS, GpuElementwiseOp` | Re-export |
+| `../gpu/elementwise-gpu.js` | `elementwiseChainGpuDispatch, isGpuChainSupported, resetGpuElementwise, GPU_ELEMENTWISE_OPS, GpuElementwiseOp, GpuChainOptions` | Re-export |
 | `./relational.js` | `typedRelational` | Re-export |
 | `./string.js` | `typedString` | Re-export |
 | `./probability.js` | `typedProbability` | Re-export |
@@ -7806,7 +7807,7 @@ graph LR
 **Exports:**
 
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `cond`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `elementwiseChainGpuDispatch`, `isGpuChainSupported`, `GPU_ELEMENTWISE_OPS`, `GpuElementwiseOp`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `cond`, `enableGpu`, `disableGpu`, `isGpuEnabled`, `GPU_MIN_ELEMENTS`, `elementwiseChainGpuDispatch`, `isGpuChainSupported`, `resetGpuElementwise`, `GPU_ELEMENTWISE_OPS`, `GpuElementwiseOp`, `GpuChainOptions`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
@@ -15436,12 +15437,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1024   |
 | Total Modules           | 77     |
-| Total Lines of Code     | 170435 |
-| Total Exports           | 4933   |
-| Total Re-exports        | 1785   |
+| Total Lines of Code     | 170534 |
+| Total Exports           | 4936   |
+| Total Re-exports        | 1787   |
 | Total Classes           | 56     |
-| Total Interfaces        | 407    |
-| Total Functions         | 1598   |
+| Total Interfaces        | 408    |
+| Total Functions         | 1599   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 524    |

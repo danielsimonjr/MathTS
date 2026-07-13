@@ -1408,6 +1408,17 @@
       element-wise work.** Opting in does not make element-wise code faster if WASM is
       available — it is there for environments where WASM cannot load.
 
+      **Per-call override.** `enableGpu()` is process-global state — any dependency could
+      flip it. Pass `{ gpu: true | false }` as the third argument to `fuseUnaryChainAsync`
+      (or to `elementwiseChainGpuDispatch`) to make a call self-describing and immune to
+      that. `resetGpuElementwise()` drops the cached GPU pipelines/buffers (after a device
+      loss, or between tests).
+
+      **Domain edges match JS exactly.** WGSL leaves `log(x<=0)`, `atanh(|x|>=1)` and
+      division-by-zero *indeterminate* — an implementation may return anything. The kernels
+      pin IEEE semantics explicitly, so `log(0)` is `-Infinity` and `atanh(2)` is `NaN` on
+      the GPU exactly as on the CPU, on every device rather than just the ones we tested.
+
       The GPU engages only when you have opted in, **WASM declined**, a device exists,
       the array clears **65,536 elements**, and every op in the chain has a GPU kernel.
       Otherwise the call transparently falls through to the CPU tiers.
@@ -2670,7 +2681,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (874 exports).
+      > `@danielsimonjr/mathts-functions` (875 exports).
 
       ### Functions by category
 
@@ -2690,7 +2701,7 @@
 
       **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
-      **Linear Algebra** (64): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+      **Linear Algebra** (66): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `resetGpuElementwise`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
       **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2726,7 +2737,7 @@
 
       **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-      **Other exports (uncategorized)** (2): `elementwiseChainGpuDispatch`, `isGpuChainSupported`
+      **Other exports (uncategorized)** (1): `isGpuChainSupported`
 
       ### Constants & values (63)
 

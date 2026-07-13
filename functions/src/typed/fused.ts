@@ -16,7 +16,7 @@ import {
   elementwiseChainDispatch,
   type WasmElementwiseOp,
 } from '../wasm/elementwise/wasm-bridge.js';
-import { elementwiseChainGpuDispatch } from '../gpu/elementwise-gpu.js';
+import { elementwiseChainGpuDispatch, type GpuChainOptions } from '../gpu/elementwise-gpu.js';
 import { erfcScalar } from './special.js';
 
 /** Scalar implementation of every fusable op, for the JS fallback path. */
@@ -94,21 +94,30 @@ function jsChain(ops: readonly WasmElementwiseOp[], xs: Float64Array): Float64Ar
  * (The GPU *does* win decisively for compute-bound work like a large matmul —
  * see `gpuMatmul`. This ordering is specific to memory-bound element-wise work.)
  *
- * **Precision:** the result is a `Float32Array` only when the GPU tier ran
- * (~7 significant digits); otherwise it is an exact-f64 `Float64Array`. The
- * return type tells you which path ran.
+ * **Precision.** Always returns a `Float64Array`. When the GPU tier runs, the
+ * *values* carry f32 precision (~7 significant digits) even though the container
+ * is f64 — the GPU cannot compute in f64 at all.
+ *
+ * It previously returned `Float64Array | Float32Array` to encode which path ran.
+ * That union was a footgun: `.map` / `.filter` / `.set` on it are TS2349 errors,
+ * so **every** caller had to narrow with `instanceof` before touching the result,
+ * and `new Float64Array(r.buffer)` silently produced garbage when the f32 branch
+ * hit. A narrowing tax on 100% of callers, for a branch most never take, is a bad
+ * trade. Callers who specifically want the raw f32 buffer can call
+ * `elementwiseChainGpuDispatch` directly — it is exported for exactly that.
  */
 export async function fuseUnaryChainAsync(
   ops: WasmElementwiseOp[],
-  xs: Float64Array
-): Promise<Float64Array | Float32Array> {
+  xs: Float64Array,
+  options?: GpuChainOptions
+): Promise<Float64Array> {
   // WASM first: faster AND exact. See the table above.
   const wasm = elementwiseChainDispatch(ops, xs);
   if (wasm) return wasm;
 
   // GPU only when WASM declined (unavailable / below its threshold).
-  const gpu = await elementwiseChainGpuDispatch(ops, xs);
-  if (gpu) return gpu;
+  const gpu = await elementwiseChainGpuDispatch(ops, xs, options);
+  if (gpu) return Float64Array.from(gpu); // widen f32 values into the f64 contract
 
   return jsChain(ops, xs);
 }

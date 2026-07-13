@@ -111,8 +111,10 @@ export { enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS } from '@danielsi
 export {
   elementwiseChainGpuDispatch,
   isGpuChainSupported,
+  resetGpuElementwise,
   GPU_ELEMENTWISE_OPS,
   type GpuElementwiseOp,
+  type GpuChainOptions,
 } from '../gpu/elementwise-gpu.js';
 
 // Relational functions (deepEqual, unequal, compareNatural, compareText,

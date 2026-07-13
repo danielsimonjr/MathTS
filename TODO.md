@@ -41,30 +41,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       (**1.97×** at 65,536 → **2.47×** at 262,144 vs the browser CPU path). Only _fused chains_
       are wired — a single element-wise op on GPU is transfer-dominated and would be slower.
       `erfc` excluded (no WGSL builtin). CDG `webgpu-pairing` stays 0/218 **by design**.
-- [ ] **GPU tier follow-ups** (from the 2026-07-13 adversarial review; correctness items already
-      fixed — these are design/ergonomics): - `fuseUnaryChainAsync` returns `Float64Array | Float32Array`. That union is a TS footgun:
-      `.map`/`.filter`/`.set` on it are TS2349 errors, forcing every caller to narrow. Consider
-      `{ data, precision }` instead. **Unpublished — free to change now.** - `elementwise-gpu.ts` builds its own `pipelineCache` + raw `createBuffer`, using **neither**
-      the `ShaderManager` nor the `BufferPool` that Spec 1a extracted for exactly this. Arch drift
-      one commit after the extraction. **Trap if pooling later:** the `arrayLength(&inp)` bounds
-      guard is only valid because buffers are sized exactly `n*4`; `BufferPool` rounds up, so pass
-      `n` in a uniform BEFORE adopting the pool. - `enableGpu()` is process-global mutable state: any dependency flipping it changes _your_
-      return type, and a dual-package instance would make it a silent no-op. Add a per-call
-      `{ gpu?: boolean }` option. - GPU vs CPU disagree on domain edges (`log(0)`, `atanh(1)`): WGSL says _indeterminate_, JS
-      says `-Infinity`/`NaN`. The oracle test skips non-finite expectations, so this is invisible. - `createComputePipelineAsync` instead of the blocking sync variant.
-- [ ] 🔴 **Intermittent worker-pool flake — IDENTIFIED, not root-caused** (2026-07-13).
-      `functions/tests/special.test.ts` → _"Special function parallel array overloads >
-      single-argument overloads match the scalar implementation"_. Seen **2×** under
-      `npm run test` (turbo running all packages' suites concurrently — a heavier load regime than
-      a single package's vitest). **Not reproducible in 6 attempts** since: 3× isolated (42/42),
-      2× full `functions` suite (3414 passed), 1× full turbo gate (48/48, exit 0). The assertion
-      message was never captured.
-      **Why it's suspicious:** the test lowers `computePool` `thresholdElements` to 64 to _force_
-      the worker path, then fires **10 concurrent worker-pool promises at once**. Under contention
-      that is either (a) a test-harness timeout — benign, or (b) **`WorkerPool` returning wrong or
-      partial results under load — a real product bug**. I could not distinguish the two, and that
-      distinction matters. Next: run the turbo gate in a loop with full output captured, and add a
-      worker-pool stress test that asserts result _correctness_ under saturation.
+- [x] ✅ **GPU tier follow-ups — ALL FIXED** (2026-07-13, from the adversarial review):
+      **domain-edge parity** (WGSL leaves `log(0)`/`atanh(2)`/div-by-zero _indeterminate_; kernels
+      now pin IEEE so they match JS on every device — NaN/±Inf bits ride in a **uniform** because
+      WGSL const-folds `bitcast<f32>(literal)` and rejects NaN); **union return type removed**
+      (`fuseUnaryChainAsync` → always `Float64Array`; the union was a TS2349 footgun for every
+      caller); **per-call `{ gpu }` override** (the global flag is process-wide mutable state);
+      **now uses the gpu leaf's `ShaderManager` + `BufferPool`** (pipelines compiled once, buffers
+      recycled — safe only because the kernel bounds-checks an `n` uniform, not `arrayLength`,
+      since the pool rounds sizes up). Net: GPU chain 30.2ms → **10.5ms** @65k, 470ms → **306ms**
+      @1M. WASM still wins; tier order unchanged.
+
 - [x] ✅ **WASM dead in the browser — FIXED** (2026-07-13). `WasmLoader` browser branch made a single relative-URL guess with no fallback; `resolveBrowserWasm()` now probes candidates via `fetch(HEAD)` like the Node resolver. SHA-384 integrity untouched. This INVALIDATED the GPU benchmark: WASM is ~1.9x FASTER than the GPU for element-wise chains, so `fuseUnaryChainAsync` tier order was corrected to WASM→GPU→JS.
       `null` under Chrome, so browser users silently get the **pure-JS** path and the WASM tier
       never engages. This is why the GPU benchmark's baseline is JS. Likely a Node-only loader /

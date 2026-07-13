@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-13'
   totalFiles: 1024
   totalModules: 77
-  totalExports: 4933
+  totalExports: 4936
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9956,15 +9956,22 @@ modules:
           directory: gpu
           imports:
             - getGpuDevice
+            - getGlobalGPUContext
             - isGpuEnabled
             - GPU_MIN_ELEMENTS
+            - ShaderManager
+            - BufferPool
             - GPUContextOptions
       exports:
         - GPU_ELEMENTWISE_OPS
         - isGpuChainSupported
+        - resetGpuElementwise
         - elementwiseChainGpuDispatch
+      interfaces:
+        - GpuChainOptions
       functions:
         - isGpuChainSupported
+        - resetGpuElementwise
         - elementwiseChainGpuDispatch
       constants:
         - GPU_ELEMENTWISE_OPS
@@ -15395,6 +15402,7 @@ modules:
         - file: ../gpu/elementwise-gpu.js
           imports:
             - elementwiseChainGpuDispatch
+            - GpuChainOptions
         - file: ./special.js
           imports:
             - erfcScalar
@@ -15859,8 +15867,10 @@ modules:
           imports:
             - elementwiseChainGpuDispatch
             - isGpuChainSupported
+            - resetGpuElementwise
             - GPU_ELEMENTWISE_OPS
             - GpuElementwiseOp
+            - GpuChainOptions
           reExport: true
         - file: ./relational.js
           imports:
@@ -15905,8 +15915,10 @@ modules:
         - GPU_MIN_ELEMENTS
         - elementwiseChainGpuDispatch
         - isGpuChainSupported
+        - resetGpuElementwise
         - GPU_ELEMENTWISE_OPS
         - GpuElementwiseOp
+        - GpuChainOptions
         - typedRelational
         - typedString
         - typedProbability
@@ -15957,8 +15969,10 @@ modules:
         - GPU_MIN_ELEMENTS
         - elementwiseChainGpuDispatch
         - isGpuChainSupported
+        - resetGpuElementwise
         - GPU_ELEMENTWISE_OPS
         - GpuElementwiseOp
+        - GpuChainOptions
         - typedRelational
         - typedString
         - typedProbability
@@ -32465,15 +32479,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1024
   totalModules: 77
-  totalLinesOfCode: 170435
-  totalExports: 4933
+  totalLinesOfCode: 170534
+  totalExports: 4936
   totalClasses: 56
-  totalInterfaces: 407
-  totalFunctions: 1598
+  totalInterfaces: 408
+  totalFunctions: 1599
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1533
-  totalReExports: 1785
+  totalReExports: 1787
   totalTypeOnlyImports: 524
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
