@@ -1,6 +1,6 @@
 # Parallel (Worker-Pool) ↔ Function Pairing
 
-**Generated**: 2026-07-11 (by tools/create-dependency-graph)
+**Generated**: 2026-07-13 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routing: a **named op** (`computePool.<op>()`, which consults a tunable threshold) or a **generic kernel** path (`applyKernel`/`mapArray`/`shouldParallelize`/a bare `parallel*` helper — gated by the global `thresholdElements`). A function counts as **effective** when at least one of its ops has a threshold ≠ `'never'`, and **disabled** when every op it touches is `'never'` (wired to the pool but always runs inline JS — the parallel analog of a WASM js-fallback).
 

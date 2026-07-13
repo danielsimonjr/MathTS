@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — WebGPU wrappers now honor their never-throw fallback contract
+
+`gpuMatmul` / `gpuAdd` / `gpuTranspose` / `gpuScale` (`functions/src/typed/gpu.ts`)
+rejected when a device that advertises WebGPU failed to actually initialize (lost
+adapter, driver refusal, revoked permission). `GPUMatrixBackend.initialize()` throws
+in that case, and the `ensureGpu()` call sat **outside** the backend's
+`executeWithFallback` CPU guard, so the rejection escaped the wrapper — contradicting
+the documented "falls back transparently to the CPU implementation" contract. The GPU
+is a best-effort fast path, never a hard dependency: an init failure now degrades to
+the CPU path. Found by adversarial review of the WebGPU Spec 1b design; covered by
+four new headless tests that simulate a failing device.
+
+### Changed — honest WebGPU documentation in the function reference
+
+`docs/reference/functions.md` now states the real WebGPU coverage instead of implying
+broad GPU acceleration: the four `gpu*` helpers are the **only** WebGPU code paths and
+are standalone (not typed-dispatch), **0 of 218 typed functions** have a GPU path (per
+the generated `webgpu-pairing` report), the GPU path is **browser-only** (Node always
+takes the CPU path), computes in **f32**, and its **WGSL kernels are not exercised in
+CI** — validated in-browser, so the GPU path is experimental. Also regenerated the
+function-reference export index, which was stale (866 exports) from recently merged
+work.
+
 ### Added — `@danielsimonjr/mathts-gpu`: shared WebGPU foundation (Spec 1a)
 
 New leaf package holding the generic WebGPU foundation extracted from

@@ -18,10 +18,22 @@
 import { gpuMatrixBackend } from '@danielsimonjr/mathts-matrix';
 import type { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-/** Initialize the WebGPU backend once, when a device is actually present. */
+/**
+ * Initialize the WebGPU backend once, when a device is actually present.
+ *
+ * Best-effort by contract: an environment can advertise WebGPU and still fail
+ * to hand out a device (lost adapter, driver refusal, revoked permission), and
+ * `initialize()` rejects in that case. The GPU is a fast path, never a hard
+ * dependency — swallow the failure and leave the backend uninitialized, so the
+ * `*Async` operations below fall back to the CPU implementation instead of
+ * rejecting out of the wrapper.
+ */
 async function ensureGpu(): Promise<void> {
-  if (gpuMatrixBackend.isAvailable()) {
+  if (!gpuMatrixBackend.isAvailable()) return;
+  try {
     await gpuMatrixBackend.initialize();
+  } catch {
+    // Leave the backend uninitialized; the CPU fallback path handles it.
   }
 }
 

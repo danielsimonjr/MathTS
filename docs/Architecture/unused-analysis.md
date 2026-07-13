@@ -1,6 +1,6 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-11
+**Generated**: 2026-07-13
 
 ## Summary
 
@@ -75,14 +75,14 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SignatureImpl` (type) — 7 in-file refs
 - `SignatureRecord` (type) — 3 in-file refs
 
+### `matrix/src/backends/wasm/integrity.ts`
+
+- `WasmManifest` (interface) — 4 in-file refs
+
 ### `matrix/src/backends/WasmLoader.ts`
 
 - `Allocation` (interface) — 10 in-file refs
 - `LoadingMetrics` (interface) — 2 in-file refs
-
-### `matrix/src/backends/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
 
 ### `matrix/src/config.ts`
 
@@ -392,14 +392,14 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `stringify` (function) — 2 in-file refs
 - `GeneralFormatOptions` (type) — 1 in-file ref
 
+### `functions/src/wasm/integrity.ts`
+
+- `WasmManifest` (interface) — 4 in-file refs
+
 ### `functions/src/wasm/WasmLoader.ts`
 
 - `WasmLoader` (class) — 7 in-file refs
 - `LoadingMetrics` (interface) — 2 in-file refs
-
-### `functions/src/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
 
 ### `expression/src/evaluator/evaluate.ts`
 

@@ -575,7 +575,10 @@
         churn.
       - **`WASM`** — the function has a WebAssembly fast path for large inputs.
       - **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
-        large inputs (32-bit float precision).
+        large inputs (32-bit float precision). **Browser-only**, and carried today by
+        exactly four standalone helpers (see
+        [WebGPU-accelerated operations](#webgpu-accelerated-operations)) — no
+        typed-dispatch function has a WebGPU path yet.
 
       Each acceleration falls back automatically to a pure-TypeScript implementation
       when the input is small, the worker pool is not initialized, or the WASM /
@@ -590,6 +593,15 @@
       > `matvec`, decompositions) parallelize through the `matrix` package backend
       > rather than a direct compute-pool call, so their acceleration is documented in
       > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
+
+      > **WebGPU coverage is currently zero at the typed-dispatch layer.** The generated
+      > report [`docs/Architecture/webgpu-pairing.md`](../Architecture/webgpu-pairing.md)
+      > (data in `webgpu-pairing.json`) is the authoritative map; as of the last
+      > regeneration it reports **0 GPU-accelerated of 218 typed functions**. The only
+      > WebGPU code paths in this package are the four standalone `gpu*` helpers below,
+      > which are not typed-dispatch entries and so are not counted there. Wiring the
+      > typed layer to the GPU (a `*GpuDispatch` tier, behind an explicit opt-in) is a
+      > planned effort — see [`ROADMAP.md`](../../ROADMAP.md).
 
       Every category below is documented in three parts: **Details** — supported
       types, return semantics, and numerical caveats; **Background & History** — the
@@ -1346,11 +1358,36 @@
 
       ### WebGPU-accelerated operations
 
-      GPU compute-shader implementations of the core matrix operations. Each runs on
-      the GPU when a WebGPU device is present and the matrix is large enough to
-      amortize the dispatch, and falls back transparently to the CPU implementation
-      otherwise. All four are `async`. The GPU path computes in 32-bit float — use
-      the standard `multiply` / `transpose` when full f64 precision is required.
+      GPU compute-shader implementations of four core matrix operations. **These four
+      are the only WebGPU code paths in the library** — they are standalone helpers,
+      deliberately named `gpu*`, not typed-dispatch entries. Calling `multiply` or
+      `transpose` never reaches the GPU.
+
+      All four are `async`. Each runs a WGSL compute shader **only when all of the
+      following hold**, and otherwise computes the same result on the CPU:
+
+      - a WebGPU device is actually present (`navigator.gpu`), and
+      - the operation is large enough to amortize the upload/readback (≥ 65,536
+        elements — a 256×256 matrix), and
+      - the device initializes successfully.
+
+      **Browser-only in practice.** Node has no `navigator.gpu`, so under Node (and
+      therefore in the test suite) these always take the CPU path and return the exact
+      f64 result. The GPU path is exercised only in a browser.
+
+      **Precision.** The GPU path computes in **32-bit float** (WGSL has no f64), so
+      its results carry ~7 significant digits. Use the standard `multiply` /
+      `transpose` when full f64 accuracy is required.
+
+      **Never-throw.** The GPU is a best-effort fast path, never a hard dependency: a
+      missing device, a failed device initialization, or a kernel error degrades to
+      the CPU implementation rather than rejecting.
+
+      > **Validation caveat.** These wrappers' CPU-fallback results are covered by the
+      > headless test suite, but the **WGSL kernels themselves are not exercised in CI**
+      > (no GPU in Node). Kernel correctness is validated in a browser against a JS
+      > reference — treat the GPU path as experimental until that gate is part of the
+      > release process.
 
       | Function          | Description           | Accel  |
       | ----------------- | --------------------- | ------ |
@@ -2565,7 +2602,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (867 exports).
+      > `@danielsimonjr/mathts-functions` (866 exports).
 
       ### Functions by category
 
@@ -2621,9 +2658,9 @@
 
       **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-      ### Constants & values (62)
+      ### Constants & values (61)
 
-      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
       ### Classes & types (1)
 

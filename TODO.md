@@ -18,12 +18,22 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       `ShaderManager` + hardened never-throw `getGpuDevice()`); `matrix`'s `GPUBackend`
       rewired onto it (registers `BUILTIN_SHADERS` at init), full back-compat re-export,
       no behavior change.
-- [ ] **Spec 1b — next** — `enableGpu()` flag + Float32 matmul routing through
-      `BackendManager` (opt-in; validate in-browser via `claude-in-chrome` before
-      lowering the size threshold).
-- [ ] **Spec 2+** — `functions` package `*GpuDispatch` bridges for the data-parallel ops
-      (elementwise/transcendental/special, reductions, FFT), mirroring the existing
-      `*Dispatch` WASM-bridge pattern.
+- [x] **Spec 1b — RETIRED / re-scoped** (2026-07-10, after Adam+Eve adversarial review —
+      `docs/superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md`). Recon killed the
+      sketched design: `BackendManager`'s GPU route is **dead** (`gpuMatrixBackend` is never
+      registered) **and sync** (GPU is async), and the matmul proof (`gpuMatmul`) already
+      exists. Both reviewers converged that a standalone default-OFF flag would _silently
+      regress_ the working `gpuMatmul` in browsers (invisible to CI) and that the flag's real
+      home is Spec 2's implicit routing. Shipped instead: the honest residue — a preexisting
+      never-throw bug fix on the GPU path + accurate `functions.md` coverage docs.
+- [ ] **Spec 2 — the real GPU tier (next)** — `enableGpu()`/`isGpuEnabled()` flag (default
+      OFF, in the `gpu` leaf) **plus** the first `*GpuDispatch` bridge, landed together so the
+      flag has a real implicit consumer to gate. Target the GPU-friendly categories only
+      (fused elementwise chains → reductions → FFT); the transfer-dominated long tail is a
+      non-goal (measured slower on GPU, same as the retired WASM elementwise path). Also
+      folds in: unify/delete the divergent dead GPU thresholds (65536 live vs 100000/50000/
+      10000/200000 dead). Kernel correctness is a **browser** gate (`bench-3way` +
+      `claude-in-chrome`), not headless CI.
 
 ### Scientific Workbook — remaining deferred capabilities
 
