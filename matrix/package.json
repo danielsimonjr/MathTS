@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-matrix",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Matrix operations for MathTS with WASM/WebGPU backend support",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean && node scripts/copy-wasm.mjs",
+    "build": "tsup src/index.ts --format esm --dts --clean && node scripts/copy-wasm.mjs && node ../tools/inject-webgpu-types-ref.mjs dist/index.d.ts",
     "copy:wasm": "node scripts/copy-wasm.mjs",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
@@ -29,16 +29,16 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake && node scripts/copy-wasm.mjs"
+    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake && node scripts/copy-wasm.mjs && node ../tools/inject-webgpu-types-ref.mjs dist/index.d.ts"
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.6.0",
     "@danielsimonjr/mathts-gpu": "^0.1.0",
-    "@danielsimonjr/mathts-parallel": "^0.3.3"
+    "@danielsimonjr/mathts-parallel": "^0.3.3",
+    "@webgpu/types": "^0.1.67"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
-    "@webgpu/types": "^0.1.67",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^4.1.5"

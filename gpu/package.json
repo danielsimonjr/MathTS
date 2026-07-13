@@ -19,7 +19,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "build": "tsup src/index.ts --format esm --dts --clean && node ../tools/inject-webgpu-types-ref.mjs dist/index.d.ts",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -28,7 +28,7 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
+    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake && node ../tools/inject-webgpu-types-ref.mjs dist/index.d.ts"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",

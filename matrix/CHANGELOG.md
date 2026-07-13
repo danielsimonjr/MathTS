@@ -1,5 +1,27 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.3.0
+
+### Minor Changes
+
+- 4b4ccd6: Extract the WebGPU foundation (device/context, buffer pool, and a generic
+  shader manager) into a new shared `@danielsimonjr/mathts-gpu` leaf package.
+  matrix's `GPUBackend` now imports the foundation from that package and registers
+  its builtin matrix kernels onto the shared `ShaderManager`; the shared GPU device
+  is coalesced behind a single, never-throw in-flight `getGpuDevice()`. Every GPU
+  foundation symbol remains re-exported from `@danielsimonjr/mathts-matrix`, so no
+  downstream consumer breaks. Pure refactor — no behavior change.
+
+### Patch Changes
+
+- b78b8bc: Fix the `sumReduce` WGSL kernel, which never compiled. It named its workgroup
+  array `shared` — a **reserved keyword in WGSL** — so the shader failed to parse
+  (`error: 'shared' is a reserved keyword`) and the reduction was permanently
+  unusable on the GPU. The failure was silent: the compile error surfaced only as an
+  uncaptured `GPUValidationError`, and nothing asserted on shader compilation. Renamed
+  to `sdata`, and added a browser regression guard that compiles every builtin WGSL
+  kernel and fails on any error-severity diagnostic.
+
 ## 0.2.2
 
 ### Patch Changes

@@ -2331,3 +2331,12 @@ All 46 test files created for src/wasm/ modules:
 - Legacy JS files are kept for comparison and benchmarking purposes
 - AssemblyScript is the sole WASM backend
 - WASM distribution: `lib/wasm/mathts-as.wasm` (AssemblyScript)
+
+### Publishing / types debt
+
+- [ ] **`workerpool` ships no type declarations** — a consumer compiling with
+      `skipLibCheck: false` gets `TS7016` ("Could not find a declaration file for module
+      'workerpool'") and `TS2665` (invalid module augmentation in `matrix/dist/index.d.ts`).
+      Pre-existing, surfaced while verifying the WebGPU `.d.ts` fix; affects the published
+      surface of `matrix` + `packages/workerpool`. Add a `declare module 'workerpool'` shim
+      or ship real types for the fork.
