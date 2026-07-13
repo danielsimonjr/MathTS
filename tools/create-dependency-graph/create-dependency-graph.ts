@@ -3125,25 +3125,52 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
     join(rootDir, 'functions', 'src', 'gpu'),
   ].filter((d) => existsSync(d));
 
-  const exportedFnRe = /export\s+(?:async\s+)?function\s+(\w+)/g;
+  // Match BOTH exported and private functions: a public function often reaches the
+  // GPU through a same-file helper (e.g. `elementwiseChainGpuDispatch` calls a
+  // private `getResources()` that owns the `getGpuDevice()` call). Scanning only the
+  // exported body would miss it and under-report — which is exactly what happened.
+  const anyFnRe = /(export\s+)?(?:async\s+)?function\s+(\w+)/g;
   for (const dir of standaloneDirs) {
     const rel = relative(join(rootDir, 'functions', 'src'), dir).replace(/\\/g, '/');
     for (const fname of readdirSync(dir)) {
       if (!fname.endsWith('.ts')) continue;
       const src = readFileSync(join(dir, fname), 'utf-8');
+
+      // Pass 1 — every function in the file, its body, and its own direct markers.
+      const fns: Array<{ name: string; exported: boolean; body: string; markers: string[] }> = [];
       let m: RegExpExecArray | null;
-      exportedFnRe.lastIndex = 0;
-      while ((m = exportedFnRe.exec(src)) !== null) {
+      anyFnRe.lastIndex = 0;
+      while ((m = anyFnRe.exec(src)) !== null) {
         const brace = src.indexOf('{', m.index + m[0].length);
         if (brace === -1) continue;
         const body = matchBraceBlock(src, brace);
         const markers = Array.from(new Set(body.match(gpuDispatchRe) ?? []));
         const refMatch = body.match(gpuRefRe);
         if (refMatch) markers.push(refMatch[0]);
-        const uniq = Array.from(new Set(markers)).sort();
+        fns.push({
+          name: m[2],
+          exported: Boolean(m[1]),
+          body,
+          markers: Array.from(new Set(markers)),
+        });
+      }
+
+      // Pass 2 — attribute a helper's markers to any function that CALLS it, so a
+      // public entry point counts even when the GPU call sits one level down.
+      const markersOf = new Map(fns.map((f) => [f.name, f.markers]));
+      for (const f of fns) {
+        if (!f.exported) continue;
+        const all = new Set(f.markers);
+        for (const [helper, helperMarkers] of markersOf) {
+          if (helper === f.name || helperMarkers.length === 0) continue;
+          if (new RegExp(`\\b${helper}\\s*\\(`).test(f.body)) {
+            helperMarkers.forEach((k) => all.add(k));
+          }
+        }
+        const uniq = Array.from(all).sort();
         if (uniq.length > 0) {
           standaloneAccelerated.push({
-            name: m[1],
+            name: f.name,
             file: `${rel}/${fname}`,
             routing: 'gpu',
             markers: uniq,

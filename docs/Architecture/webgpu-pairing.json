@@ -1,6 +1,6 @@
 {
   "generated": "2026-07-13",
-  "status": "5 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).",
+  "status": "6 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).",
   "total": 218,
   "gpuAcceleratedCount": 0,
   "noneCount": 218,
@@ -291,8 +291,14 @@
       "none": 2
     }
   },
-  "standaloneAcceleratedCount": 5,
+  "standaloneAcceleratedCount": 6,
   "standaloneAccelerated": [
+    {
+      "name": "elementwiseChainGpuDispatch",
+      "file": "gpu/elementwise-gpu.ts",
+      "routing": "gpu",
+      "markers": ["getGpuDevice"]
+    },
     {
       "name": "fuseUnaryChainAsync",
       "file": "typed/fused.ts",
