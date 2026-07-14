@@ -3155,19 +3155,43 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
         });
       }
 
-      // Pass 2 — attribute a helper's markers to any function that CALLS it, so a
-      // public entry point counts even when the GPU call sits one level down.
-      const markersOf = new Map(fns.map((f) => [f.name, f.markers]));
-      for (const f of fns) {
-        if (!f.exported) continue;
-        const all = new Set(f.markers);
-        for (const [helper, helperMarkers] of markersOf) {
-          if (helper === f.name || helperMarkers.length === 0) continue;
-          if (new RegExp(`\\b${helper}\\s*\\(`).test(f.body)) {
-            helperMarkers.forEach((k) => all.add(k));
+      // Pass 2 — propagate a callee's markers up to its callers, TRANSITIVELY.
+      //
+      // One level is not enough, and assuming it was caused a real miscount. A public
+      // entry point may sit several hops above the GPU call:
+      //
+      //   elementwiseChainGpuDispatch  ->  chainGpuDispatchImpl  ->  getResources
+      //     (thin serializing wrapper)      (no DIRECT marker)        (getGpuDevice)
+      //
+      // A one-level pass looks at the wrapper, sees a callee whose *own direct* markers
+      // are empty, and drops it — silently reporting a GPU-routed public function as
+      // not GPU-routed. So iterate to a fixed point over ALL functions (not just the
+      // exported ones — a private middleman must be able to carry markers upward), then
+      // emit the exported ones.
+      const markersOf = new Map(fns.map((f) => [f.name, new Set(f.markers)]));
+      const callsRe = new Map(fns.map((f) => [f.name, new RegExp(`\\b${f.name}\\s*\\(`)]));
+      for (let changed = true; changed; ) {
+        changed = false;
+        for (const caller of fns) {
+          const into = markersOf.get(caller.name)!;
+          for (const callee of fns) {
+            if (callee.name === caller.name) continue;
+            const from = markersOf.get(callee.name)!;
+            if (from.size === 0) continue;
+            if (!callsRe.get(callee.name)!.test(caller.body)) continue;
+            for (const k of from) {
+              if (!into.has(k)) {
+                into.add(k);
+                changed = true;
+              }
+            }
           }
         }
-        const uniq = Array.from(all).sort();
+      }
+
+      for (const f of fns) {
+        if (!f.exported) continue;
+        const uniq = Array.from(markersOf.get(f.name)!).sort();
         if (uniq.length > 0) {
           standaloneAccelerated.push({
             name: f.name,
