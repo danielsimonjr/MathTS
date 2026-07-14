@@ -90,6 +90,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
       instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
       `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
+- [ ] ⚠️ **NEEDS DANIEL — CI still cannot PUBLISH: the `NPM_TOKEN` secret is empty.** The Release
+      workflow now correctly opens the "Version Packages" PR (verified: PR #155, merged), but the
+      publish step then fails:
+      `No NPM_TOKEN found, but OIDC is available - using npm trusted publishing` → `ENEEDAUTH`.
+      The repo's `NPM_TOKEN` / `NODE_AUTH_TOKEN` are blank in the job env. Setting a secret is a human
+      action (moving a secret into a service — the auto-mode classifier blocks it, correctly). Two ways:
+      (a) `gh secret set NPM_TOKEN` with an npm automation token, or (b) configure **npm trusted
+      publishing (OIDC)** for each `@danielsimonjr/*` package on npmjs.com, which is what changesets
+      already tried to use and is the better long-term option (no long-lived token).
+      Until then releases are cut locally (`npx changeset publish`), which is how `functions@0.20.0`
+      shipped. Everything else in the release pipeline is now automated and green.
 - [x] ✅ **`Release` workflow unblocked — green for the first time** (2026-07-13). THREE stacked
       failures, each hidden behind the last: 1. _"GitHub Actions is not permitted to create or approve pull requests"_ — repo setting, flipped
       with Daniel's authorization (`can_approve_pull_request_reviews: true`).
