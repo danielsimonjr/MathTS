@@ -11,11 +11,12 @@
  * | accumulation                    | relative error |
  * | ------------------------------- | -------------- |
  * | naive `s += x`                  | **1.3e-11**    |
- * | pairwise (NumPy's `np.sum`)     | **1.1e-16**    |
+ * | pairwise (this, = NumPy's algo) | **2.9e-16**    |
  * | Neumaier compensated (`fsum`)   | **0** (exact)  |
  *
- * NumPy reports 2.9e-16 on the same input. We were ~46,000× worse than NumPy on a bog-standard
- * `sum` — and `mean`, `std`, `var` and every statistic inherit that error.
+ * NumPy 2.3.4 reports 2.9e-16 on the same input — we are now at parity. Before this, we were
+ * ~46,000× worse than NumPy on a bog-standard `sum`, and `mean`, `std`, `var` and every statistic
+ * inherit that error.
  *
  * @packageDocumentation
  */
