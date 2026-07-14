@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-13
+**Version**: 0.1.0 | **Last Updated**: 2026-07-14
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -850,6 +850,11 @@ graph LR
 
 ### `matrix/src/backends/Backend.ts` - Matrix Backend Interface
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPU_MIN_ELEMENTS` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -865,6 +870,11 @@ graph LR
 ---
 
 ### `matrix/src/backends/BackendManager.ts` - Backend Manager
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPU_MIN_ELEMENTS` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -15437,7 +15447,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1024   |
 | Total Modules           | 77     |
-| Total Lines of Code     | 170527 |
+| Total Lines of Code     | 170591 |
 | Total Exports           | 4936   |
 | Total Re-exports        | 1787   |
 | Total Classes           | 56     |
@@ -15451,5 +15461,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-13
+_Last Updated_: 2026-07-14
 _Version_: 0.1.0

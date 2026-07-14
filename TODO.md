@@ -52,18 +52,39 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       since the pool rounds sizes up). Net: GPU chain 30.2ms → **10.5ms** @65k, 470ms → **306ms**
       @1M. WASM still wins; tier order unchanged.
 
-- [x] ✅ **WASM dead in the browser — FIXED** (2026-07-13). `WasmLoader` browser branch made a single relative-URL guess with no fallback; `resolveBrowserWasm()` now probes candidates via `fetch(HEAD)` like the Node resolver. SHA-384 integrity untouched. This INVALIDATED the GPU benchmark: WASM is ~1.9x FASTER than the GPU for element-wise chains, so `fuseUnaryChainAsync` tier order was corrected to WASM→GPU→JS.
+- [x] ✅ **WASM dead in the browser — FIXED** (2026-07-13). `WasmLoader` browser branch made a
+      single relative-URL guess with no fallback; `resolveBrowserWasm()` now probes candidates via
+      `fetch(HEAD)` like the Node resolver. SHA-384 integrity untouched.
+- [x] ✅ **GPU dispatch paid a 12× JS conversion tax — FIXED** (2026-07-13). The dispatch used
+      `Float32Array.from(f64array)`: the _generic_ `Array.from` path (per-element `ToNumber`), not
+      the typed-array fast path. **433 ms vs 5.9 ms** at n=2²⁰ for the identical conversion (73×);
+      end-to-end that made the dispatch **12.2×** slower: **439.80 ms → 36.06 ms**. THREE sites, all
+      typed-array inputs: the f64→f32 input, the f32→f64 return trip, and `jsChain`'s copy (which
+      slowed the **JS tier for everyone**). Sites taking `number[]` (autograd, the bench harness) were
+      NOT affected — a plain array has no fast path to reach — and were left alone.
+      Guard: `functions/tests/gpu-dispatch-overhead.browser.test.ts`.
+      ⚠️ **Shipped in `functions@0.18.0`** (verified in the published npm tarball) — needs a release.
+- [x] ✅ **Tier order corrected AGAIN — now GPU → WASM → JS** (2026-07-13). With the tax gone the
+      GPU is **3.2–8.3× faster than WASM** (not 1.9× slower). It stays opt-in: `enableGpu()` is the
+      f32-precision consent, and with the flag off the path is exactly WASM → JS, bit-identical f64.
+      **This order has now been wrong twice, both times from a benchmark whose baseline was broken.**
+      The guard now measures all three tiers in one run and fails on a ranking change in EITHER
+      direction — and refuses to time a tier that returned `null` (a lost GPU device was being
+      recorded as `0.00 ms` = "infinitely fast").
+- [x] ✅ **Divergent dead GPU thresholds unified** (2026-07-13). 65,536 live vs 100,000 / 50,000 /
+      10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts` → all now single-source
+      `GPU_MIN_ELEMENTS`. The `Backend.test.ts` assertion pins the **constant**, not a copy of its
+      value (asserting the literal is what let them drift apart unnoticed).
 - [ ] **Spec 3 — reductions + FFT on the GPU** (the only GPU-friendly categories left).
-      The flag and the first `*GpuDispatch` bridge already shipped in Spec 2, so this is purely
-      the two remaining kernels. **Do the economics first:** element-wise chains turned out to
-      LOSE to WASM (~1.9×) — reductions and FFT must be measured against **WASM**, not JS, before
-      any kernel is written, or we repeat that mistake. FFT is the more likely win (compute-bound,
-      like matmul); a plain reduction is memory-bound and will probably lose.
-      Also folds in: **unify/delete the divergent dead GPU thresholds** (65,536 live vs
-      100,000 / 50,000 / 10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts`) — dead
-      constants on the unregistered-GPU `BackendManager` route.
-      Note `sumReduce`'s WGSL now compiles (the `shared` reserved-keyword fix) but has **never
-      been executed** — it is registered, not wired to anything.
+      **The economics changed — re-derive before writing any kernel.** The old premise ("element-wise
+      LOSES to WASM, so reductions surely will too") rested on the 12×-inflated GPU number and is
+      void. Measure against **WASM and JS in one run**, on the _fixed_ path.
+      Findings so far (raw-WGSL probe, n=2¹⁶–2²²): - A **standalone** GPU sum LOSES badly to a JS sum (8.5 ms vs 0.54 ms at 65k) — it uploads n
+      floats to return one. Do **not** build it. Reductions have no WASM kernel; the baseline is JS. - A reduction **fused onto the end of an existing GPU chain** is the real win: it replaces an
+      n-float readback with a 1-float one, measured **1.3–2.5× faster** than chain-then-CPU-sum
+      across every size. That is the structurally-motivated version and the one worth building. - FFT remains the other candidate (compute-bound, ~20 ops/element vs the chain's 4).
+      Note `sumReduce`'s WGSL compiles (after the `shared` reserved-keyword fix) but has **never been
+      executed** — it is registered, not wired to anything.
 
 ### Scientific Workbook — remaining deferred capabilities
 
@@ -99,7 +120,7 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 - [x] ✅ **Wall-clock benchmarks isolated** (2026-07-13, found by the above). `tests/benchmark/**`
       makes timing assertions ("100 ops under 200ms") and was running INSIDE the root aggregate
       alongside ~8,900 tests, so it measured machine contention, not code: `DenseMatrix transpose
-  100x100` passes at ~100ms alone and **failed at 212ms** there. Widening the threshold would
+100x100` passes at ~100ms alone and **failed at 212ms** there. Widening the threshold would
       have hidden that. Moved to `vitest.config.bench.ts` (single-thread, no parallelism) behind
       **`npm run test:bench`** — the only configuration where a wall-clock threshold means
       anything. Root aggregate: 440 files / 8790 passed. Bench: 31/31.

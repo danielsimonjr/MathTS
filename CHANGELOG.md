@@ -22,30 +22,69 @@ same candidate shapes with `fetch(HEAD)` (browsers have no filesystem). The SHA-
 integrity check is untouched — this only changes *where* the loader looks, never
 whether the tamper check runs.
 
-**This invalidated a claim we shipped.** The GPU fused-chain tier was benchmarked at
-"2.33×–2.88× faster" — but only because its CPU baseline was JS, *because WASM was
-dead*. With WASM actually loading, measured in Chrome on an NVIDIA Pascal adapter
-(chain `sin→exp→tanh→cos`):
+### Fixed — the GPU dispatch paid a 12× JS conversion tax (shipped in 0.18.0)
 
-| n         | JS      | WASM       | GPU    | GPU vs WASM |
-| --------- | ------- | ---------- | ------ | ----------- |
-| 65,536    | 67 ms   | **16 ms**  | 30 ms  | **0.52×**   |
-| 262,144   | 290 ms  | **62 ms**  | 115 ms | **0.54×**   |
-| 1,048,576 | 1167 ms | **254 ms** | 470 ms | **0.54×**   |
+`elementwiseChainGpuDispatch` converted its input with `Float32Array.from(f64array)`.
+That is **not** the typed-array fast path — it is the generic `Array.from` algorithm,
+which walks the source through the ArrayLike/iterator protocol and runs `ToNumber` on
+every element. Measured in Chrome at n=2²⁰:
 
-**WASM is ~1.9× FASTER than the GPU — and f64-exact where the GPU is f32.** For
-element-wise chains the GPU is therefore *both slower and less precise*.
+| conversion               | time         |
+| ------------------------ | ------------ |
+| `Float32Array.from(f64)` | **433.32 ms** |
+| `new Float32Array(f64)`  | **5.92 ms**   |
 
-### Changed — `fuseUnaryChainAsync` tier order: WASM before GPU
+Naming the denominators, since they differ: the **conversion alone** was **73× slower**
+(above), which made the **end-to-end dispatch 12.2× slower** — `elementwiseChainGpuDispatch`
+at n=2²⁰ went **439.80 ms → 36.06 ms** once fixed.
 
-The order was **GPU → WASM → JS**. That was backwards: opting into the GPU made
-element-wise code *slower and less precise* wherever WASM was available. It is now
-**WASM (f64) → GPU (f32) → JS (f64)**. The GPU still earns its place where WASM
-cannot load (it beats the JS scalar pass ~2–2.5× there), and it still wins
-decisively on **compute-bound** work such as a large `gpuMatmul` (O(n³) arithmetic
-amortizes the O(n²) transfer) — this ordering is specific to memory-bound
-element-wise work. Pinned by `functions/tests/gpu-vs-wasm.browser.test.ts`, which
-fails loudly if the GPU ever pre-empts WASM again.
+**Three** sites were paying it, all on typed-array inputs: the f64→f32 input conversion,
+the f32→f64 conversion on the way back out, and `jsChain`'s copy — that last one slowing
+the **JS fallback tier for every user**, GPU or not. (`Float64Array.from(number[])` is
+*not* affected: a plain JS array has no typed-array fast path to reach, so the constructor
+is no faster there. Sites taking `number[]` were left alone.)
+
+Pinned by `functions/tests/gpu-dispatch-overhead.browser.test.ts`, which budgets the
+whole dispatch at 120 ms and fails if a per-element JS cost ever returns.
+
+### Changed — `fuseUnaryChainAsync` tier order is now GPU → WASM → JS
+
+With the conversion tax gone, the GPU is the fastest tier by a wide margin. Chain
+`sin→exp→tanh→cos`, Chrome on an NVIDIA Pascal adapter, 5 reps:
+
+One run, 2026-07-13, 5 reps — the same run quoted in `fused.ts` and `docs/reference/functions.md`:
+
+| n         | JS     | WASM   | GPU        | GPU vs WASM |
+| --------- | ------ | ------ | ---------- | ----------- |
+| 65,536    | 44 ms  | 17 ms  | **5.2 ms** | **3.2×**    |
+| 262,144   | 185 ms | 63 ms  | **7.5 ms** | **8.3×**    |
+| 1,048,576 | 711 ms | 256 ms | **35 ms**  | **7.2×**    |
+
+The GPU tier remains **opt-in** (`enableGpu()`), because it computes in f32 while
+every other tier is f64-exact — that flag *is* the precision consent. With the flag
+off (the default) this function is exactly WASM → JS and returns bit-identical f64,
+so opting out costs nothing. Both properties are now pinned by
+`gpu-vs-wasm.browser.test.ts`.
+
+⚠️ **The blast radius of the process-global flag grew.** A stray `enableGpu()` from a
+transitive dependency used to be largely harmless because WASM ran first and shielded you;
+now it silently downgrades every ≥65,536-element chain to f32. Pass `{ gpu: false }` per
+call (it overrides the global) or call `disableGpu()`.
+
+> **This ordering has been wrong twice, in opposite directions — read before changing it.**
+> (1) GPU-first was originally adopted on a "2.33×–2.88× vs JS" result whose baseline was
+> only JS *because WASM was dead in the browser* (fixed above). (2) Fixing WASM made WASM
+> appear to win by ~1.9×, so **0.18.0 shipped WASM-first** — but that number was the
+> 12×-inflated GPU figure above. Both flips were made on a corrupted measurement. The
+> lesson: **a tier's number is only as good as the tier it is compared against.** The guard
+> test now measures all three tiers in a single run and fails if the ranking changes either
+> way.
+
+**Impact on 0.18.0 users:** performance only — no result was ever wrong. In 0.18.0 the
+GPU tier was gated behind WASM *and* carried the conversion tax, so `enableGpu()`
+bought effectively nothing. The benchmark's timing helper also counted a `null` return
+(device lost / gate declined) as `0.00 ms`, reporting a dead tier as infinitely fast;
+it now fails instead of inventing a number.
 
 ### Fixed — published type declarations did not compile for consumers
 

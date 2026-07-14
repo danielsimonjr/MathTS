@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-13'
+  lastUpdated: '2026-07-14'
   totalFiles: 1024
   totalModules: 77
   totalExports: 4936
@@ -1964,7 +1964,11 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-gpu'
+          directory: gpu
+          imports:
+            - GPU_MIN_ELEMENTS
       exports:
         - DEFAULT_BACKEND_HINTS
         - backendRegistry
@@ -2006,7 +2010,11 @@ modules:
             - OperationType
         - file: ./register-backends.js
           imports: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-gpu'
+          directory: gpu
+          imports:
+            - GPU_MIN_ELEMENTS
       exports:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
@@ -32479,7 +32487,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1024
   totalModules: 77
-  totalLinesOfCode: 170527
+  totalLinesOfCode: 170591
   totalExports: 4936
   totalClasses: 56
   totalInterfaces: 408

@@ -261,7 +261,7 @@ describe.skipIf(!HAS_GPU)('MEASUREMENT — does the GPU actually win?', () => {
       // NOTE: this is fuseUnaryChain WITHOUT an awaited wasmLoader.load(), so the
       // sync WASM bridge has no module yet and this measures the JS scalar pass.
       // The true GPU-vs-WASM comparison lives in gpu-vs-wasm.browser.test.ts:
-      // WASM is ~1.8x FASTER than the GPU for element-wise chains.
+      // the GPU is 3.2-8.3x FASTER than WASM for element-wise chains (and f32, not f64).
       const cpu = await time(() => fuseUnaryChain(ops, xs));
       const gpu = await time(() => elementwiseChainGpuDispatch(ops, xs));
       rows.push({ n, cpu, gpu });

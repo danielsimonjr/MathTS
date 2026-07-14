@@ -7,11 +7,18 @@
  * storage buffers, and reads back once, so the transfer is amortized across the
  * whole chain.
  *
- * **Read this before reaching for the GPU:** for element-wise work the GPU is
- * *slower* than WASM (~1.9×, measured) *and* less precise (f32 vs f64). It earns
- * its place only where WASM cannot load. `fuseUnaryChainAsync` therefore tries
- * WASM first. The GPU wins decisively on **compute-bound** work — see
- * `gpuMatmul`, where O(n³) arithmetic amortizes the O(n²) transfer.
+ * **Read this before reaching for the GPU:** for element-wise chains the GPU is
+ * the *fastest* tier (3.2–8.3× over WASM — see the table on
+ * `fuseUnaryChainAsync`), but it computes in **f32** where every CPU tier is
+ * f64-exact. That is the whole trade, and `enableGpu()` is how a caller consents
+ * to it. `fuseUnaryChainAsync` therefore tries the GPU first, but only when the
+ * flag is on; with it off (the default) the GPU never runs.
+ *
+ * An earlier revision of this comment claimed the GPU was ~1.9× *slower* than
+ * WASM. That was an artifact of a `Float32Array.from()` in this very file — the
+ * generic `Array.from` path, which cost 433 ms at n=2²⁰ where the constructor
+ * costs 5.9 ms. Do not re-derive a tier ranking from a single tier's number; see
+ * `gpu-vs-wasm.browser.test.ts`, which measures all three in one run.
  *
  * Contract (mirrors the WASM `elementwiseChainDispatch`): a **never-throw**
  * best-effort fast path. It returns `null` — never rejects — whenever the GPU is
@@ -254,7 +261,13 @@ export async function elementwiseChainGpuDispatch(
     if (bytes > limits.maxStorageBufferBindingSize) return null;
     if (bytes > limits.maxBufferSize) return null;
 
-    const input = xs instanceof Float32Array ? xs : Float32Array.from(xs);
+    // `new Float32Array(f64)` — NOT `Float32Array.from(f64)`. `.from()` is the
+    // generic Array.from algorithm: it walks the source through the ArrayLike
+    // protocol and runs ToNumber per element. The constructor takes the native
+    // typed-array-to-typed-array path. Measured at n=2^20: 433ms vs 5.9ms — the
+    // `.from()` version billed a 23ms kernel at ~470ms and made the GPU look 19x
+    // slower than it is. See gpu-dispatch-overhead.browser.test.ts.
+    const input = xs instanceof Float32Array ? xs : new Float32Array(xs);
 
     // Catch any *other* validation error the limit checks don't predict.
     // Without this, such an error would again surface as a buffer of zeros.

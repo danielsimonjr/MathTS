@@ -3232,7 +3232,7 @@ function generateWebGPUPairingMarkdown(p: WebGPUPairing): string {
   md += `therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the `;
   md += `same economics that retired element-wise ops from the WASM backend. The GPU only pays `;
   md += `off where the work amortizes that transfer: a **fused chain** of ops `;
-  md += `(\`fuseUnaryChainAsync\`, ~2–2.9× measured) or a large **matmul**. Those are standalone `;
+  md += `(\`fuseUnaryChainAsync\`, 3.2–8.3× over WASM, measured) or a large **matmul**. Those are standalone `;
   md += `functions, listed above.\n>\n`;
   md += `> Wiring every \`mathTyped\` function to a GPU path would make this number look better `;
   md += `and make the library slower. So we don't.\n\n`;

@@ -605,9 +605,9 @@
       > (`sin(xs)`) is pure transfer tax and would be **slower** than JS or WASM — the
       > same economics that retired element-wise ops from the WASM backend. The GPU wins
       > only where work is amortized over the transfer: a **fused chain** of ops
-      > (`fuseUnaryChainAsync`, ~2–2.5× measured) or a large **matmul**. Wiring every
-      > typed function to a GPU path would make the number look better and the library
-      > slower, so we don't.
+      > (`fuseUnaryChainAsync`, 3.2–8.3× over WASM, measured) or a large **matmul**.
+      > Wiring every typed function to a GPU path would make the number look better and
+      > the library slower, so we don't.
 
       Every category below is documented in three parts: **Details** — supported
       types, return semantics, and numerical caveats; **Background & History** — the
@@ -1369,8 +1369,8 @@
       ```ts
       import { enableGpu, fuseUnaryChainAsync } from '@danielsimonjr/mathts-functions';
 
-      enableGpu(); // opt in — GPU results are f32, so this is never automatic
-      const ys = await fuseUnaryChainAsync(['sin', 'exp', 'tanh'], xs); // Float32Array
+      enableGpu(); // opt in — GPU results carry f32 precision, so this is never automatic
+      const ys = await fuseUnaryChainAsync(['sin', 'exp', 'tanh'], xs); // Float64Array
       ```
 
       Opting in is required because the GPU computes in **32-bit float** (WGSL has no
@@ -1378,35 +1378,46 @@
       the caller asking. `enableGpu()` / `disableGpu()` / `isGpuEnabled()` control it.
 
       **`fuseUnaryChainAsync(ops, xs)`** — the fused element-wise chain. It tries
-      **WASM (f64) → GPU (f32) → JS (f64)** and returns a `Float32Array` only when the
-      GPU path ran (the return type _is_ the precision contract). It is a separate
-      `async` function rather than a change to the synchronous `fuseUnaryChain`,
-      because a GPU dispatch is inherently asynchronous.
+      **GPU (f32, opt-in) → WASM (f64) → JS (f64)** and always returns a
+      `Float64Array`. Note the container is f64 even when the GPU ran: the _values_
+      then carry f32 precision (~7 significant digits). It is a separate `async`
+      function rather than a change to the synchronous `fuseUnaryChain`, because a GPU
+      dispatch is inherently asynchronous.
+
+      With the flag **off** — the default — this is exactly WASM → JS and results are
+      bit-identical f64. Opting out costs nothing.
 
       Why only a _chain_: a single element-wise op on the GPU is pure transfer tax —
       upload n floats, do one flop each, read n floats back. A fused chain uploads
       once, runs every op on-device, and reads back once, so the transfer is amortized
       across the whole chain.
 
-      ### Honest measurement: for element-wise work, WASM beats the GPU
+      ### Measurement: the GPU wins, but you pay for it in precision
 
-      Chain `sin→exp→tanh→cos`, Chrome on an NVIDIA Pascal adapter:
+      Chain `sin→exp→tanh→cos`, Chrome on an NVIDIA Pascal adapter, 5 reps. Pinned by
+      `functions/tests/gpu-vs-wasm.browser.test.ts`, which measures all three tiers in
+      one run and fails if the ranking changes:
 
-      | n         | JS      | WASM       | GPU    | GPU vs WASM |
-      | --------- | ------- | ---------- | ------ | ----------- |
-      | 65,536    | 90 ms   | **16 ms**  | 28 ms  | **0.57×**   |
-      | 262,144   | 400 ms  | **60 ms**  | 103 ms | **0.59×**   |
-      | 1,048,576 | 1613 ms | **250 ms** | 457 ms | **0.55×**   |
+      | n         | JS     | WASM   | GPU        | GPU vs WASM |
+      | --------- | ------ | ------ | ---------- | ----------- |
+      | 65,536    | 44 ms  | 17 ms  | **5.2 ms** | **3.2×**    |
+      | 262,144   | 185 ms | 63 ms  | **7.5 ms** | **8.3×**    |
+      | 1,048,576 | 711 ms | 256 ms | **35 ms**  | **7.2×**    |
 
-      **WASM is ~1.8× faster than the GPU, and it is f64-exact while the GPU is f32.**
-      For element-wise chains the GPU is therefore _both slower and less precise_, so
-      it is tried **after** WASM, never before. It still earns its place where WASM is
-      unavailable — there it beats the JS scalar pass ~2–2.5×.
+      The GPU is the fastest tier by a wide margin — but it is f32 while every other
+      tier is f64-exact, which is precisely what `enableGpu()` asks you to consent to.
+      The trade is speed for ~7 significant digits.
 
-      This is why the GPU tier is opt-in and narrow: **the GPU wins on compute-bound
-      work (a large `gpuMatmul`, O(n³) over O(n²) transfer), not on memory-bound
-      element-wise work.** Opting in does not make element-wise code faster if WASM is
-      available — it is there for environments where WASM cannot load.
+      > **This table has been wrong twice, in opposite directions.** GPU-first was
+      > first adopted against a "2.3–2.9× vs JS" number that was only that good because
+      > a separate bug meant WASM never loaded in the browser. Fixing WASM made it look
+      > like WASM won, so the order was flipped — but _that_ number was inflated by a
+      > `Float32Array.from(f64array)` in the GPU dispatch (the generic `Array.from` path,
+      > which runs `ToNumber` per element). The **conversion alone** was 73× slower — 433 ms
+      > at n=2²⁰ versus 5.9 ms for `new Float32Array(x)` — which made the **end-to-end
+      > dispatch** 12.2× slower (439.80 ms → 36.06 ms). With that fixed, the GPU wins
+      > outright. The moral: a tier's number is only as good as the tier it is measured
+      > against — re-measure **all three in one run** before trusting any ranking.
 
       **Per-call override.** `enableGpu()` is process-global state — any dependency could
       flip it. Pass `{ gpu: true | false }` as the third argument to `fuseUnaryChainAsync`

@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
@@ -44,11 +45,18 @@ export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> = {
     // matmul: the SIMD-WASM kernel wins from ~256 elems (16²), solidly 1.3–2.2× (measured,
     // tools/benchmarks/matmul-threshold.mjs); below that copy/alloc overhead dominates (8²
     // loses, 12² marginal). Dropped 500→256 to stop forcing 16²–22² matmuls onto JS.
-    multiply: { wasm: 256, gpu: 50000 },
-    decomposition: { wasm: 100, gpu: 10000 },
+    // ⚠️ Every `gpu:` threshold below is DORMANT — `selectBackend` gates the GPU
+    // branch on `backendRegistry.has('gpu')`, and no 'gpu' backend is ever
+    // registered (register-backends.ts registers js + wasm only). They are aligned
+    // to the single canonical GPU_MIN_ELEMENTS rather than left as four divergent
+    // magic numbers (50_000 / 10_000 / 200_000 against a live 65_536), which would
+    // mislead whoever wires this route up. GPU matrix work currently reaches the
+    // device via `gpuMatmul` -> `gpuMatrixBackend`, not through this manager.
+    multiply: { wasm: 256, gpu: GPU_MIN_ELEMENTS },
+    decomposition: { wasm: 100, gpu: GPU_MIN_ELEMENTS },
     // transpose WASM is retired (memory-bound, lost 4–6×) — WASMBackend.transpose always uses
     // JS regardless of this gate; kept high so the manager doesn't even select the WASM backend.
-    transpose: { wasm: 2000, gpu: 200000 },
+    transpose: { wasm: 2000, gpu: GPU_MIN_ELEMENTS },
   },
   autoSIMD: true,
   fallbackOnError: true,

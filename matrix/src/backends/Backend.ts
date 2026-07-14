@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 
 /**
@@ -32,7 +33,23 @@ export interface BackendHints {
  */
 export const DEFAULT_BACKEND_HINTS: Required<BackendHints> = {
   wasmThreshold: 1000, // > 1000 elements
-  gpuThreshold: 100000, // > 100K elements
+
+  // ⚠️ THIS ROUTE IS DORMANT. Both GPU branches gate on `backendRegistry.has('gpu')`,
+  // and NOTHING ever registers a 'gpu' backend: `register-backends.ts` registers
+  // only `jsBackend` + `wasmBackend`, and no other call site calls `register()`.
+  // (`GPUMatrixBackend` does declare `type = 'gpu'` — it is simply never handed to
+  // the registry.) So `has('gpu')` is permanently false, no matrix op has ever been
+  // selected onto the GPU through the BackendManager, and this number has never been
+  // read on a live path.
+  //
+  // GPU matrix work reaches the device a different way: `gpuMatmul` and friends
+  // call `gpuMatrixBackend` directly, which gates on its own `minElements`
+  // (= GPU_MIN_ELEMENTS). This value is aligned to that single canonical
+  // threshold so the codebase no longer carries four divergent GPU magic numbers
+  // (it was 100_000 here, 50_000 / 10_000 / 200_000 in BackendManager, against a
+  // live 65_536) — a trap for whoever eventually wires this route up.
+  gpuThreshold: GPU_MIN_ELEMENTS,
+
   preferredBackend: 'js',
 };
 

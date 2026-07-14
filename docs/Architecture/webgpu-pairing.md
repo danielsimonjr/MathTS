@@ -1,6 +1,6 @@
 # WebGPU Accelerator ↔ Function Pairing
 
-**Generated**: 2026-07-13 (by tools/create-dependency-graph)
+**Generated**: 2026-07-14 (by tools/create-dependency-graph)
 
 The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a direct GPU backend/device reference (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`).
 
@@ -23,7 +23,7 @@ Standalone exports — this is where the GPU acceleration actually lives.
 
 > **A count of 0 here is EXPECTED and correct — it is a design decision, not a gap.**
 >
-> A GPU dispatch costs an upload and a readback. A _single_ typed op (`sin(xs)`) is therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the same economics that retired element-wise ops from the WASM backend. The GPU only pays off where the work amortizes that transfer: a **fused chain** of ops (`fuseUnaryChainAsync`, ~2–2.9× measured) or a large **matmul**. Those are standalone functions, listed above.
+> A GPU dispatch costs an upload and a readback. A _single_ typed op (`sin(xs)`) is therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the same economics that retired element-wise ops from the WASM backend. The GPU only pays off where the work amortizes that transfer: a **fused chain** of ops (`fuseUnaryChainAsync`, 3.2–8.3× over WASM, measured) or a large **matmul**. Those are standalone functions, listed above.
 >
 > Wiring every `mathTyped` function to a GPU path would make this number look better and make the library slower. So we don't.
 

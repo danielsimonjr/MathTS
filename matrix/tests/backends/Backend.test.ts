@@ -14,6 +14,7 @@ import {
   type MatrixBackend,
   type BackendType,
 } from '../../src/backends/Backend.js';
+import { GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 
 /** A no-frills backend stub whose availability is configurable. */
@@ -42,7 +43,13 @@ function makeFakeBackend(type: BackendType, available = true): MatrixBackend {
 describe('DEFAULT_BACKEND_HINTS', () => {
   it('uses sensible default thresholds and js as the preferred backend', () => {
     expect(DEFAULT_BACKEND_HINTS.wasmThreshold).toBe(1000);
-    expect(DEFAULT_BACKEND_HINTS.gpuThreshold).toBe(100000);
+
+    // Pin to the CONSTANT, not a copy of its value. The GPU threshold used to be
+    // a magic 100_000 here while the live GPU path gated on 65_536 (and the
+    // BackendManager carried three more divergent numbers). Asserting a literal
+    // is what let those drift apart unnoticed; asserting the shared constant is
+    // what keeps them together.
+    expect(DEFAULT_BACKEND_HINTS.gpuThreshold).toBe(GPU_MIN_ELEMENTS);
     expect(DEFAULT_BACKEND_HINTS.preferredBackend).toBe('js');
   });
 });
