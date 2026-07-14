@@ -297,15 +297,29 @@ describe('contractNetwork — greedy vs exact equivalence', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 16-tensor exact solve completes in < 10 seconds (O(3^16) DP)
+// 16-tensor exact solve terminates (O(3^16) DP) — a HANG guard, not a perf bar
 // ---------------------------------------------------------------------------
 
 describe('contractNetwork — 16-tensor exact solve', () => {
   // Vitest 4 API: options go in the 2nd argument, function in the 3rd.
-  // Vitest's default test timeout is 5000ms; the 16-tensor DP takes ~5.7s, so
-  // without the per-test override the test would be killed before the
-  // `elapsed < 10_000` assertion ran.
-  it('completes a 16-tensor exact DP without hanging (CI-tolerant)', { timeout: 30_000 }, () => {
+  //
+  // Why 120s for an operation that takes ~5.7s: this test also runs under
+  // `test:coverage`, and V8 coverage instrumentation inflates this DP by ~6x.
+  // Measured on the same machine, same commit:
+  //
+  //     vitest run <this file>              -> passes (whole file, 21 tests, 8.0s)
+  //     vitest run <this file> --coverage   -> 33,307 ms for THIS test alone
+  //
+  // At 30s it therefore passed the `Build & Test` job and failed the `Coverage`
+  // job every run — red CI that said nothing about the code. The instrumented
+  // cost is the variance source, and it is not going away, so the budget has to
+  // cover the regime the test actually runs in.
+  //
+  // This is a HANG guard, nothing more (the wall-clock assertion was removed —
+  // it flaked under shared-CI load). 120s still catches the failure it exists to
+  // catch: an exponential blowup in the exact DP does not finish in two minutes.
+  // Do not re-add a timing assertion here; time it in a quiet, uninstrumented run.
+  it('completes a 16-tensor exact DP without hanging (CI-tolerant)', { timeout: 120_000 }, () => {
     // Linear chain of 16 tensors: T0[a0,a1] - T1[a1,a2] - ... - T15[a15,a16].
     // All intermediate indices have small dim (2) to keep memory tractable.
     const labels: Index[] = [];
