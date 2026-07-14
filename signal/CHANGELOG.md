@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-signal
 
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [b7784ef]
+  - @danielsimonjr/mathts-functions@0.20.0
+
 ## 0.1.20
 
 ### Patch Changes
