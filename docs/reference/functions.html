@@ -578,6 +578,7 @@
         large inputs (32-bit float precision). **Browser-only** and **opt-in**
         (`enableGpu()`). Carried by the fused element-wise chain
         (`fuseUnaryChainAsync`), the fused chain+reduction (`fuseUnaryChainReduceAsync`),
+        the **FFT** (`fftGpuDispatch`, and `parallelFFT` / `parallelIFFT` route through it),
         and four standalone `gpu*` matrix helpers — see
         [WebGPU: the opt-in f32 tier](#webgpu-the-opt-in-f32-tier). No _typed-dispatch_
         function routes to the GPU (see the coverage note below for why).
@@ -596,20 +597,24 @@
       > rather than a direct compute-pool call, so their acceleration is documented in
       > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
 
-      > **WebGPU coverage at the typed-dispatch layer is zero — deliberately.** The
-      > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists the
-      > **8 standalone functions** that do route to the GPU (`fuseUnaryChainAsync`,
-      > `fuseUnaryChainReduceAsync`, `elementwiseChainGpuDispatch`,
-      > `elementwiseChainReduceGpuDispatch`, and the four `gpu*` matrix helpers), and reports
-      > **0 GPU-accelerated of 218 typed functions**. That 0 is the honest number: no
-      > `mathTyped` function routes to the GPU. This is a design decision, not a gap.
-      > A GPU dispatch costs an upload and a readback, so a _single_ element-wise op
-      > (`sin(xs)`) is pure transfer tax and would be **slower** than JS or WASM — the
-      > same economics that retired element-wise ops from the WASM backend. The GPU wins
-      > only where work is amortized over the transfer: a **fused chain** of ops
-      > (`fuseUnaryChainAsync`, 3.2–8.3× over WASM, measured) or a large **matmul**.
-      > Wiring every typed function to a GPU path would make the number look better and
-      > the library slower, so we don't.
+      > **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 218.** The
+      > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists **9 standalone
+      > functions** that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
+      > `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `fftGpuDispatch`, and the
+      > four `gpu*` matrix helpers) plus **2 typed-dispatch functions** — `parallelFFT` and
+      > `parallelIFFT`, which reach the GPU through `fftGpuDispatch` when you have opted in.
+      >
+      > That 2 is the honest number, and it should stay small. A GPU dispatch costs an upload and a
+      > readback, so a _single_ element-wise op (`sin(xs)`) is pure transfer tax and would be **slower**
+      > on the GPU than JS or WASM — the same economics that retired element-wise ops from the WASM
+      > backend. The GPU only pays where the work amortizes the transfer:
+      >
+      > - a **fused chain** of ops (`fuseUnaryChainAsync`, 3.2–8.3× over WASM),
+      > - a large **matmul** (O(n³) arithmetic over an O(n²) transfer),
+      > - an **FFT** (log₂(n) passes over the data — `parallelFFT` above 262,144 points, ~2.2–3.4×).
+      >
+      > Wiring every typed function to a GPU path would make the number look better and the library
+      > slower, so we don't.
 
       Every category below is documented in three parts: **Details** — supported
       types, return semantics, and numerical caveats; **Background & History** — the
@@ -1462,6 +1467,46 @@
       > was measured **3–9× slower than a plain JS sum** — there is no chain to amortise the
       > upload against. The GPU only earns the transfer when real work rides along with it.
       > (Reductions have no WASM kernel either, so the CPU baseline here is JS.)
+
+      ### GPU FFT
+
+      **`fftGpuDispatch(real, imag, inverse?, options?)`** — a radix-2 **Stockham autosort** FFT on
+      the GPU, f32. Stockham rather than the textbook Cooley-Tukey because it is _self-sorting_: each
+      pass scatters into a second buffer, so the output arrives in natural order with **no
+      bit-reversal pass** — and a bit-reversal is a pure memory shuffle, the one thing a GPU is worst
+      at.
+
+      `parallelFFT` / `parallelIFFT` route through it automatically when you have opted in with
+      `enableGpu()`; with the flag off (the default) they are bit-identical f64 as before.
+
+      Measured against `fftCoreFloat64` — the flat f64 core `parallelFFT` runs on this thread — warm
+      JIT, Chrome / NVIDIA Pascal. Regenerate with `functions/tests/gpu-fft-bench.browser.test.ts`:
+
+      | n         | CPU f64  | GPU f32  | speedup   |
+      | --------- | -------- | -------- | --------- |
+      | 65,536    | 16.8 ms  | 14.4 ms  | 1.17×     |
+      | 262,144   | 53.4 ms  | 24.0 ms  | **2.23×** |
+      | 524,288   | 87.8 ms  | 30.5 ms  | **2.88×** |
+      | 1,048,576 | 253.1 ms | 79.7 ms  | **3.18×** |
+      | 2,097,152 | 399.9 ms | 116.3 ms | **3.44×** |
+
+      **~2.2–3.4×**, and the ratio is genuinely noisy run to run — there is no single number worth
+      quoting as a headline.
+
+      > **The FFT's threshold is 262,144 — higher than `GPU_MIN_ELEMENTS` (65,536), on purpose.** At
+      > 65,536 the GPU wins by only **1.17×**: inside the noise, and nowhere near enough to justify
+      > dropping from f64 to f32. An FFT makes log₂(n) passes over the data, so it amortises the
+      > upload more slowly than the memory-bound element-wise chain does. Below the threshold — and
+      > for non-power-of-two lengths, which the CPU handles via chirp-z — it returns `null` and you
+      > keep the faster, exact f64 path.
+
+      **On f32 accuracy**, since an FFT is a harder case than an element-wise chain: error compounds
+      across log₂(n) stages, and that was the risk that could have killed the kernel. Measured **~4e-7
+      relative to the spectrum's peak magnitude even at 20 stages** — a few times f32 epsilon. Note
+      _peak_-relative: per-bin relative error is meaningless for a spectrum, because bins whose true
+      magnitude is ≈0 have unbounded relative error from any rounding at all.
+
+      Also exported: `resetGpuFft()`, `GpuFftOptions`, `GpuFftResult`.
 
       **Per-call override.** `enableGpu()` is process-global state — any dependency could
       flip it. Pass `{ gpu: true | false }` as the **last** argument — third for `fuseUnaryChainAsync` / `elementwiseChainGpuDispatch`, fourth for `fuseUnaryChainReduceAsync` / `elementwiseChainReduceGpuDispatch`
@@ -2736,7 +2781,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (878 exports).
+      > `@danielsimonjr/mathts-functions` (880 exports).
 
       ### Functions by category
 
@@ -2756,7 +2801,7 @@
 
       **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
-      **Linear Algebra** (69): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+      **Linear Algebra** (73): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
       **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2770,7 +2815,7 @@
 
       **Numerical Methods** (27): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `nullspace`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
-      **Signal Processing** (44): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelIFFT`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
+      **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 
       **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 

@@ -3213,7 +3213,7 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
   const status =
     typedCount === 0 && standaloneCount === 0
       ? 'No WebGPU accelerators are wired yet — forward-looking tracker (see ROADMAP "WebGPU acceleration tier").'
-      : `${standaloneCount} standalone function(s) route to WebGPU; ${typedCount} of ${typedCount + none.length} typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).`;
+      : `${standaloneCount} standalone function(s) route to WebGPU; ${typedCount} of ${typedCount + none.length} typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.`;
 
   return {
     generated: new Date().toISOString().split('T')[0],
@@ -3251,12 +3251,12 @@ function generateWebGPUPairingMarkdown(p: WebGPUPairing): string {
   }
 
   md += `## Typed-dispatch layer: ${p.gpuAcceleratedCount} of ${p.total}\n\n`;
-  md += `> **A count of 0 here is EXPECTED and correct — it is a design decision, not a gap.**\n>\n`;
+  md += `> **A SMALL count here is EXPECTED and correct — it is a design decision, not a gap.**\n>\n`;
   md += `> A GPU dispatch costs an upload and a readback. A *single* typed op (\`sin(xs)\`) is `;
   md += `therefore pure transfer tax and would be **slower** on the GPU than JS or WASM — the `;
   md += `same economics that retired element-wise ops from the WASM backend. The GPU only pays `;
   md += `off where the work amortizes that transfer: a **fused chain** of ops `;
-  md += `(\`fuseUnaryChainAsync\`, 3.2–8.3× over WASM, measured) or a large **matmul**. Those are standalone `;
+  md += `(\`fuseUnaryChainAsync\`, 3.2–8.3× over WASM, measured) a large **matmul**, or an **FFT** (parallelFFT/parallelIFFT above 262,144 points: log2(n) passes amortize the upload, ~2.2-3.4x measured). `;
   md += `functions, listed above.\n>\n`;
   md += `> Wiring every \`mathTyped\` function to a GPU path would make this number look better `;
   md += `and make the library slower. So we don't.\n\n`;

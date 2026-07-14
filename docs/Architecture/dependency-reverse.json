@@ -2076,6 +2076,10 @@
     "functions/src/typed/relational.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
+    "functions/src/gpu/fft-gpu.ts": [
+      "functions/src/typed/index.ts",
+      "functions/src/typed/signal.ts"
+    ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/special/scalars.ts": [
@@ -3548,6 +3552,7 @@
     "gpu/src/flag.ts": ["gpu/src/index.ts"],
     "gpu/src/BufferPool.ts": ["gpu/src/index.ts"],
     "gpu/src/ShaderManager.ts": ["gpu/src/index.ts"],
+    "gpu/src/serialize.ts": ["gpu/src/index.ts"],
     "plot/src/types.ts": [
       "plot/src/coerce.ts",
       "plot/src/contour.ts",

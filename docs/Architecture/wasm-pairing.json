@@ -1,8 +1,8 @@
 {
   "generated": "2026-07-14",
   "total": 218,
-  "acceleratedCount": 39,
-  "parallelOnlyCount": 52,
+  "acceleratedCount": 41,
+  "parallelOnlyCount": 50,
   "jsOnlyCount": 127,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 39,
@@ -233,6 +233,20 @@
       "effectiveBackend": "wasm"
     },
     {
+      "name": "parallelFFT",
+      "file": "signal.ts",
+      "routing": "wasm+parallel",
+      "dispatch": ["fftGpuDispatch"],
+      "effectiveBackend": "unknown"
+    },
+    {
+      "name": "parallelIFFT",
+      "file": "signal.ts",
+      "routing": "wasm+parallel",
+      "dispatch": ["fftGpuDispatch"],
+      "effectiveBackend": "unknown"
+    },
+    {
       "name": "parallelStatMedian",
       "file": "statistics.ts",
       "routing": "wasm",
@@ -452,13 +466,6 @@
       "effectiveBackend": "unknown"
     },
     {
-      "name": "parallelFFT",
-      "file": "signal.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
       "name": "parallelFFTMagnitude",
       "file": "signal.ts",
       "routing": "parallel",
@@ -467,13 +474,6 @@
     },
     {
       "name": "parallelFFTPower",
-      "file": "signal.ts",
-      "routing": "parallel",
-      "dispatch": [],
-      "effectiveBackend": "unknown"
-    },
-    {
-      "name": "parallelIFFT",
       "file": "signal.ts",
       "routing": "parallel",
       "dispatch": [],
@@ -829,8 +829,8 @@
       "jsOnly": 10
     },
     "signal.ts": {
-      "wasm": 0,
-      "parallel": 5,
+      "wasm": 2,
+      "parallel": 3,
       "jsOnly": 2
     },
     "special.ts": {

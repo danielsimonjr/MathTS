@@ -1,10 +1,23 @@
 {
   "generated": "2026-07-14",
-  "status": "8 standalone function(s) route to WebGPU; 0 of 218 typed-dispatch functions do (0 is EXPECTED and correct — see the note in webgpu-pairing.md).",
+  "status": "9 standalone function(s) route to WebGPU; 2 of 218 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
   "total": 218,
-  "gpuAcceleratedCount": 0,
-  "noneCount": 218,
-  "gpuAccelerated": [],
+  "gpuAcceleratedCount": 2,
+  "noneCount": 216,
+  "gpuAccelerated": [
+    {
+      "name": "parallelFFT",
+      "file": "signal.ts",
+      "routing": "gpu",
+      "markers": ["fftGpuDispatch"]
+    },
+    {
+      "name": "parallelIFFT",
+      "file": "signal.ts",
+      "routing": "gpu",
+      "markers": ["fftGpuDispatch"]
+    }
+  ],
   "none": [
     "abs",
     "acos",
@@ -148,10 +161,8 @@
     "or",
     "parallelAutoCorr",
     "parallelConv",
-    "parallelFFT",
     "parallelFFTMagnitude",
     "parallelFFTPower",
-    "parallelIFFT",
     "parallelStatCorr",
     "parallelStatCumsum",
     "parallelStatDistance",
@@ -267,8 +278,8 @@
       "none": 10
     },
     "signal.ts": {
-      "gpu": 0,
-      "none": 7
+      "gpu": 2,
+      "none": 5
     },
     "special.ts": {
       "gpu": 0,
@@ -291,7 +302,7 @@
       "none": 2
     }
   },
-  "standaloneAcceleratedCount": 8,
+  "standaloneAcceleratedCount": 9,
   "standaloneAccelerated": [
     {
       "name": "elementwiseChainGpuDispatch",
@@ -304,6 +315,12 @@
       "file": "gpu/elementwise-gpu.ts",
       "routing": "gpu",
       "markers": ["getGpuDevice"]
+    },
+    {
+      "name": "fftGpuDispatch",
+      "file": "gpu/fft-gpu.ts",
+      "routing": "gpu",
+      "markers": ["fftGpuDispatch", "getGpuDevice"]
     },
     {
       "name": "fuseUnaryChainAsync",

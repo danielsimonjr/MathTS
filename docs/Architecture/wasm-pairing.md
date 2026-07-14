@@ -8,12 +8,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Routing (static)            |   Count |
 | --------------------------- | ------: |
-| WASM (incl. wasm+parallel)  |      39 |
-| Parallel only (worker pool) |      52 |
+| WASM (incl. wasm+parallel)  |      41 |
+| Parallel only (worker pool) |      50 |
 | JS-only                     |     127 |
 | **Total**                   | **218** |
 
-**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 39 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 41 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
 
 ## WASM-accelerated functions
 
@@ -51,6 +51,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `log1p`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `log2`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
 | `noncentralChi2PDF`    | wasm          | wasm      | `lgammaDispatch`               | distributions |
+| `parallelFFT`          | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
+| `parallelIFFT`         | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelStatMedian`   | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
 | `parallelStatQuantile` | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
 | `sec`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
@@ -87,10 +89,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `multiply`              | arithmetic   |
 | `norm`                  | arithmetic   |
 | `parallelConv`          | signal       |
-| `parallelFFT`           | signal       |
 | `parallelFFTMagnitude`  | signal       |
 | `parallelFFTPower`      | signal       |
-| `parallelIFFT`          | signal       |
 | `parallelStatCorr`      | statistics   |
 | `parallelStatDistance`  | statistics   |
 | `parallelStatHistogram` | statistics   |
@@ -130,7 +130,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | probability   |    0 |        0 |       8 |
 | relational    |    0 |        0 |       7 |
 | set           |    0 |        0 |      10 |
-| signal        |    0 |        5 |       2 |
+| signal        |    2 |        3 |       2 |
 | special       |   19 |        0 |      19 |
 | statistics    |    2 |       13 |       2 |
 | string        |    0 |        0 |       5 |

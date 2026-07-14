@@ -166,12 +166,27 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       it is dead weight, not a live pessimisation. A warning sits at the route
       (`functions/src/matrix/fft.ts`). Options: retire the AS kernel (shrinks the binary) or SIMD-ize
       it. Do NOT wire it into a public path as-is.
-- [ ] **Spec 3b — FFT on the GPU** (the last GPU-friendly category). Compute-bound (~20 ops/element vs
-      the chain's 4), the profile that genuinely favours a GPU. **The baseline is now correct**: the
-      fastest CPU FFT is `parallelFFT` / the flat core at **~170 ms @ n=2²⁰** (f64) — NOT the 2987 ms
-      public `fft` and NOT the 1039 ms WASM kernel. A GPU FFT must beat ~170 ms end-to-end, in f32,
-      through the real function — and f32 error in an FFT grows with log n, so the precision story
-      needs stating before the kernel is written, not after.
+- [x] ✅ **Spec 3b — GPU FFT: MEASURED (three times), then BUILT. The WebGPU epic is COMPLETE.**
+      (2026-07-14) Radix-2 **Stockham autosort**, f32 — self-sorting, so no bit-reversal pass (a pure
+      memory shuffle is the one thing a GPU is worst at). log₂(n) passes, one encoder, one submit.
+      **~2.2–3.4× at n ≥ 262,144** vs the flat f64 core; the ratio is genuinely noisy run to run, so
+      there is no hero number. f32 error ~4e-7 peak-relative even at 20 stages — the real risk, since
+      FFT error compounds per stage; Stockham was well-behaved. Benchmark is COMMITTED
+      (`gpu-fft-bench.browser.test.ts`) so the published table is reproducible.
+      **Threshold is 262,144, NOT GPU_MIN_ELEMENTS (65,536)** — at 65,536 the GPU wins by only 1.17×,
+      inside the noise and nowhere near enough to trade f64 for f32. An FFT makes log₂(n) passes, so it
+      amortises the upload more slowly than the memory-bound element-wise chain. One shared threshold
+      would have been convenient and wrong.
+      ⚠️ **I published a wrong speedup TWICE before this landed** — 5.0–8.5×, from (a) a cold-JIT CPU
+      baseline and (b) comparing against `fftCoreFloat64` when `parallelFFT` actually took the
+      four-step worker path at every size where the GPU engages. Adversarial review caught (b). The
+      real number is ~3×. **A GPU benchmark is only as good as the CPU path the caller really takes.**
+- [x] ✅ **`parallelFFT` ignored its own benchmark-tuned threshold — FIXED** (2026-07-14). Found while
+      chasing the above. `computePool.shouldParallelize(paddedLength)` was called **without the op
+      name**, so `DEFAULT_THRESHOLD_BY_OP`'s tuned `parallelFFT: 'never'` was never consulted and the
+      global 50,000 threshold applied — every transform above 50k silently took the four-step worker
+      path. It does not pay: **n=2¹⁸, 156 ms via workers vs 77 ms on this thread** (2× slower) in
+      Chrome; a wash in Node. The tuned decision was right and simply never read.
 - [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
       **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
       _(Highest-value robustness gap.)_

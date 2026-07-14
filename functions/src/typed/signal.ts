@@ -17,6 +17,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
+import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 import {
@@ -221,9 +222,21 @@ export const parallelFFT = mathTyped('parallelFFT', {
     // Copy input with zero-padding
     real.set(signal);
 
-    // Large transforms are parallelized across worker threads via the
-    // four-step (transpose) decomposition; small ones run on this thread.
-    const result = computePool.shouldParallelize(paddedLength)
+    // GPU first, but ONLY when the caller opted in with `enableGpu()` — the GPU tier is
+    // f32 while every CPU tier is f64-exact, and that flag is the precision consent. It
+    // declines below GPU_MIN_ELEMENTS, where it is measurably SLOWER (0.25x at n=2^14),
+    // and for non-power-of-two lengths. Measured 5.0x at 2^16 and 8.5x at 2^20.
+    // With the flag off (the default) this is a cheap null and the path below is unchanged.
+    const gpu = await fftGpuDispatch(real, imag, false);
+    if (gpu) return { real: gpu.real, imag: gpu.imag, originalLength: n };
+
+    // NOTE the op name. Without it, `shouldParallelize` falls back to the GLOBAL 50,000
+    // threshold and ignores `DEFAULT_THRESHOLD_BY_OP`'s benchmark-tuned `parallelFFT:
+    // 'never'` — so every transform above 50k silently took the four-step worker path.
+    // That path does not pay: measured in Chrome, n=2^18, 156 ms via workers vs **77 ms**
+    // on this thread (2x SLOWER); in Node it is a wash (0.99-1.13x). The tuned decision was
+    // right and simply never consulted.
+    const result = computePool.shouldParallelize(paddedLength, 'parallelFFT')
       ? await fourStepFFT(real, imag, false)
       : fftCoreFloat64(real, imag, false);
     return { ...result, originalLength: n };
@@ -239,14 +252,21 @@ export const parallelFFT = mathTyped('parallelFFT', {
 export const parallelIFFT = mathTyped('parallelIFFT', {
   // IFFT from real/imag arrays
   'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array) => {
-    return computePool.shouldParallelize(real.length)
+    // Same tier rules as parallelFFT — see the note there.
+    const gpu = await fftGpuDispatch(real, imag, true);
+    if (gpu) return gpu;
+
+    return computePool.shouldParallelize(real.length, 'parallelFFT')
       ? fourStepFFT(real, imag, true)
       : fftCoreFloat64(real, imag, true);
   },
 
   // IFFT from object with real/imag
   Object: async (spectrum: { real: Float64Array; imag: Float64Array }) => {
-    return computePool.shouldParallelize(spectrum.real.length)
+    const gpu = await fftGpuDispatch(spectrum.real, spectrum.imag, true);
+    if (gpu) return gpu;
+
+    return computePool.shouldParallelize(spectrum.real.length, 'parallelFFT')
       ? fourStepFFT(spectrum.real, spectrum.imag, true)
       : fftCoreFloat64(spectrum.real, spectrum.imag, true);
   },
@@ -260,7 +280,7 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
     real: Float64Array,
     imag: Float64Array
   ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length)) {
+    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
       const r = await computePool.applyKernel2(
         real,
         imag,
@@ -289,7 +309,7 @@ export const parallelFFTPower = mathTyped('parallelFFTPower', {
     real: Float64Array,
     imag: Float64Array
   ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length)) {
+    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
       const r = await computePool.applyKernel2(real, imag, '(re, im) => re * re + im * im');
       return r.result;
     }

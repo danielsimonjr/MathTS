@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-14", "f": 1025, "e": 4944, "re": 1790 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-14", "f": 1027, "e": 4952, "re": 1795 },
   "s": {
-    "loc": 171033,
+    "loc": 171431,
     "cls": 56,
-    "int": 408,
-    "fn": 1603,
+    "int": 410,
+    "fn": 1606,
     "tg": 158,
     "en": 0,
     "co": 1534,
@@ -598,16 +598,18 @@
     },
     "functions/geometry": { "f": 2, "exp": ["createDistance", "createIntersect"] },
     "functions/gpu": {
-      "f": 1,
+      "f": 2,
       "exp": [
         "GPU_ELEMENTWISE_OPS",
         "GPU_REDUCE_OPS",
         "isGpuChainSupported",
         "resetGpuElementwise",
         "elementwiseChainGpuDispatch",
-        "elementwiseChainReduceGpuDispatch"
+        "elementwiseChainReduceGpuDispatch",
+        "resetGpuFft",
+        "fftGpuDispatch"
       ],
-      "int": ["GpuChainOptions"]
+      "int": ["GpuChainOptions", "GpuFftOptions", "GpuFftResult"]
     },
     "functions/logical": {
       "f": 5,
@@ -1507,7 +1509,7 @@
       "int": ["Chain", "MathJSConfig", "MathInstance"]
     },
     "gpu": {
-      "f": 7,
+      "f": 8,
       "exp": [
         "BufferPool",
         "hasWebGPU",
@@ -1577,8 +1579,8 @@
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
+    { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
-    { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },

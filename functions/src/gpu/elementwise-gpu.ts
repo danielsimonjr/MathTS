@@ -33,6 +33,7 @@ import {
   GPU_MIN_ELEMENTS,
   ShaderManager,
   BufferPool,
+  serializeGpu,
   type GPUContextOptions,
 } from '@danielsimonjr/mathts-gpu';
 
@@ -286,32 +287,6 @@ export interface GpuChainOptions extends GPUContextOptions {
    * explicitly makes a call self-describing and immune to that.
    */
   gpu?: boolean;
-}
-
-/**
- * Serializes GPU dispatches on this device.
- *
- * `pushErrorScope`/`popErrorScope` is a per-device **LIFO stack**, so two overlapping
- * dispatches interleave destructively: A pushes, B pushes, A submits and pops — and A
- * pops B's scope. Errors are then attributed to the wrong call, and the call that
- * actually failed sees a clean scope and returns its zero-initialised staging buffer as
- * a success (for `sum`, a perfectly plausible-looking number).
- *
- * `await Promise.all([fuseUnaryChainAsync(a), fuseUnaryChainReduceAsync(b, 'sum')])` is
- * an ordinary thing to write, so this is not a theoretical hazard.
- *
- * Serializing costs ~nothing: the work queues on a single hardware device anyway. It
- * also stops the BufferPool from allocating a duplicate buffer set per concurrent
- * caller.
- */
-let gpuQueue: Promise<unknown> = Promise.resolve();
-
-function serializeGpu<T>(run: () => Promise<T>): Promise<T> {
-  // `.then(run, run)` — a previous dispatch's failure must not skip this one.
-  const next = gpuQueue.then(run, run);
-  // Never let a rejection poison the chain for everyone behind it.
-  gpuQueue = next.catch(() => undefined);
-  return next;
 }
 
 /**

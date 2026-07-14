@@ -120,6 +120,15 @@ export {
   type GpuChainOptions,
 } from '../gpu/elementwise-gpu.js';
 
+// WebGPU FFT (Stockham autosort, f32). Opt-in like every GPU path; declines below
+// GPU_MIN_ELEMENTS, where it is MEASURABLY slower than the CPU core (0.25x at n=2^14).
+export {
+  fftGpuDispatch,
+  resetGpuFft,
+  type GpuFftOptions,
+  type GpuFftResult,
+} from '../gpu/fft-gpu.js';
+
 // Relational functions (deepEqual, unequal, compareNatural, compareText,
 //                       compareUnits, equalScalar, equalText)
 export * from './relational.js';

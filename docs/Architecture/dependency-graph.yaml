@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-14'
-  totalFiles: 1025
+  totalFiles: 1027
   totalModules: 77
-  totalExports: 4944
+  totalExports: 4952
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9969,6 +9969,7 @@ modules:
             - GPU_MIN_ELEMENTS
             - ShaderManager
             - BufferPool
+            - serializeGpu
             - GPUContextOptions
       exports:
         - GPU_ELEMENTWISE_OPS
@@ -9987,6 +9988,31 @@ modules:
       constants:
         - GPU_ELEMENTWISE_OPS
         - GPU_REDUCE_OPS
+    functions/src/gpu/fft-gpu.ts:
+      description: WebGPU FFT — Stockham autosort, radix-2, f32.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-gpu'
+          directory: gpu
+          imports:
+            - getGpuDevice
+            - getGlobalGPUContext
+            - isGpuEnabled
+            - ShaderManager
+            - BufferPool
+            - serializeGpu
+            - GPUContextOptions
+      exports:
+        - resetGpuFft
+        - fftGpuDispatch
+      interfaces:
+        - GpuFftOptions
+        - GpuFftResult
+      functions:
+        - resetGpuFft
+        - fftGpuDispatch
   functions/logical:
     functions/src/logical/and.ts:
       description: Logical `and`. Test whether two values are both defined with a nonzero/nonempty value.
@@ -15903,6 +15929,13 @@ modules:
             - GpuElementwiseOp
             - GpuChainOptions
           reExport: true
+        - file: ../gpu/fft-gpu.js
+          imports:
+            - fftGpuDispatch
+            - resetGpuFft
+            - GpuFftOptions
+            - GpuFftResult
+          reExport: true
         - file: ./relational.js
           imports:
             - typedRelational
@@ -15953,6 +15986,10 @@ modules:
         - GPU_ELEMENTWISE_OPS
         - GpuElementwiseOp
         - GpuChainOptions
+        - fftGpuDispatch
+        - resetGpuFft
+        - GpuFftOptions
+        - GpuFftResult
         - typedRelational
         - typedString
         - typedProbability
@@ -16010,6 +16047,10 @@ modules:
         - GPU_ELEMENTWISE_OPS
         - GpuElementwiseOp
         - GpuChainOptions
+        - fftGpuDispatch
+        - resetGpuFft
+        - GpuFftOptions
+        - GpuFftResult
         - typedRelational
         - typedString
         - typedProbability
@@ -16436,6 +16477,9 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+        - file: ../gpu/fft-gpu.js
+          imports:
+            - fftGpuDispatch
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
@@ -30634,6 +30678,10 @@ modules:
             - ShaderSource
             - PipelineConfig
           reExport: true
+        - file: ./serialize.js
+          imports:
+            - serializeGpu
+          reExport: true
       workspaceDependencies: []
       exports:
         - hasWebGPU
@@ -30663,6 +30711,7 @@ modules:
         - ShaderManager
         - ShaderSource
         - PipelineConfig
+        - serializeGpu
       reExported:
         - hasWebGPU
         - isBrowser
@@ -30691,6 +30740,17 @@ modules:
         - ShaderManager
         - ShaderSource
         - PipelineConfig
+        - serializeGpu
+    gpu/src/serialize.ts:
+      description: One serialization queue for every GPU dispatch in the process.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - serializeGpu
+      functions:
+        - serializeGpu
     gpu/src/ShaderManager.ts:
       description: GPU Shader Manager (generic)
       externalDependencies: []
@@ -31632,6 +31692,7 @@ dependencyGraph:
     - name: Functions/gpu
       files:
         - functions/src/gpu/elementwise-gpu.ts
+        - functions/src/gpu/fft-gpu.ts
     - name: Functions/logical
       files:
         - functions/src/logical/and.ts
@@ -32491,6 +32552,7 @@ dependencyGraph:
         - gpu/src/flag.ts
         - gpu/src/GPUContext.ts
         - gpu/src/index.ts
+        - gpu/src/serialize.ts
         - gpu/src/ShaderManager.ts
     - name: Plot
       files:
@@ -32518,17 +32580,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1025
+  totalTypeScriptFiles: 1027
   totalModules: 77
-  totalLinesOfCode: 171033
-  totalExports: 4944
+  totalLinesOfCode: 171431
+  totalExports: 4952
   totalClasses: 56
-  totalInterfaces: 408
-  totalFunctions: 1603
+  totalInterfaces: 410
+  totalFunctions: 1606
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1534
-  totalReExports: 1790
+  totalReExports: 1795
   totalTypeOnlyImports: 524
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
