@@ -109,19 +109,29 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts` → all now single-source
       `GPU_MIN_ELEMENTS`. The `Backend.test.ts` assertion pins the **constant**, not a copy of its
       value (asserting the literal is what let them drift apart unnoticed).
-- [ ] **Spec 3 — reductions + FFT on the GPU** (the only GPU-friendly categories left).
-      **The economics changed — re-derive before writing any kernel.** The old premise ("element-wise
-      LOSES to WASM, so reductions surely will too") rested on the 12×-inflated GPU number and is
-      void. Measure against **WASM and JS in one run**, on the _fixed_ path.
-      Findings so far (raw-WGSL probe, n=2¹⁶–2²²): - A **standalone** GPU sum LOSES badly to a JS sum (8.5 ms vs 0.54 ms at 65k) — it uploads n
-      floats to return one. Do **not** build it. Reductions have no WASM kernel; the baseline is JS. - A reduction **fused onto the end of an existing GPU chain** is the real win: it replaces an
-      n-float readback with a 1-float one, measured **1.3–2.5× faster** than chain-then-CPU-sum
-      across every size. That is the structurally-motivated version and the one worth building. - FFT remains the other candidate (compute-bound, ~20 ops/element vs the chain's 4).
-      Note `sumReduce`'s WGSL compiles (after the `shared` reserved-keyword fix) but has **never been
-      executed** — it is registered, not wired to anything.
-
-### Scientific Workbook — remaining deferred capabilities
-
+- [x] ✅ **Spec 3a — GPU reductions: MEASURED, then built (the reduction half is DONE)** (2026-07-13).
+      The old premise ("element-wise loses to WASM, so reductions will too") rested on the 12×-inflated
+      GPU number and was void. Re-measured end-to-end **through the shipped functions** first: - **Standalone GPU reduction: NOT BUILT, on purpose.** Uploading n floats to return one number is
+      pure transfer tax — measured **3–9× SLOWER than a plain JS sum**. `ops: []` returns `null` so the
+      caller falls back to the CPU, which is genuinely faster. (Reductions have no WASM kernel; the
+      baseline is JS.) - **Fused chain + on-device reduction: SHIPPED** — `fuseUnaryChainReduceAsync(ops, xs, 'sum'|'max'|'min')`
+      and `elementwiseChainReduceGpuDispatch`. Sends **n/256** floats back instead of n.
+      `sum(exp(sin(x)))`, n=2²²: CPU 260 ms → GPU-chain+jsSum 100 ms → **fused 72 ms**.
+      **1.35–1.7×** over the shipped GPU path, **2.6–3.8×** over the CPU tier. Quote the **1.39× at
+      n=2²²** — the only ratio that reproduces run to run; smaller sizes swing 1.19–2.83×. - A bare-WGSL prototype had suggested ~2×/8.6×. It pre-converted its input outside the timed
+      region, so it was measuring a workload no caller has. **Every doc table now quotes the
+      end-to-end production run.** (This is the third time a prototype/baseline artifact nearly
+      shipped as a headline. Measure through the real function.)
+      Found by adversarial review and fixed in the same commit: a `popErrorScope()` with no matching
+      push on the device-limit refusal paths (present in the PRE-EXISTING chain dispatch too) — a stray
+      pop lands on a concurrent dispatch's scope and lets a real validation error go unobserved, which
+      is how a zeroed buffer returns as a plausible `sum`; and the error scope being a per-device LIFO
+      **stack**, so two overlapping dispatches (`Promise.all`) corrupt each other — dispatches are now
+      serialized. Both are pinned by tests.
+- [ ] **Spec 3b — FFT on the GPU** (the remaining GPU-friendly category). Compute-bound (~20 ops/element
+      vs the chain's 4), which is the profile that actually favours the GPU — but it is a much bigger
+      kernel (Stockham autosort, complex arithmetic, bit-reversal). **Measure against the existing WASM
+      FFT first**, end-to-end through the real function, before writing a line of WGSL.
 - [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
       **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
       _(Highest-value robustness gap.)_

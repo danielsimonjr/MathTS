@@ -110,6 +110,9 @@ export * from './gpu.js';
 export { enableGpu, disableGpu, isGpuEnabled, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 export {
   elementwiseChainGpuDispatch,
+  elementwiseChainReduceGpuDispatch,
+  GPU_REDUCE_OPS,
+  type GpuReduceOp,
   isGpuChainSupported,
   resetGpuElementwise,
   GPU_ELEMENTWISE_OPS,

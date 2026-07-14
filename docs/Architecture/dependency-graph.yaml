@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-14'
   totalFiles: 1024
   totalModules: 77
-  totalExports: 4936
+  totalExports: 4942
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9972,17 +9972,21 @@ modules:
             - GPUContextOptions
       exports:
         - GPU_ELEMENTWISE_OPS
+        - GPU_REDUCE_OPS
         - isGpuChainSupported
         - resetGpuElementwise
         - elementwiseChainGpuDispatch
+        - elementwiseChainReduceGpuDispatch
       interfaces:
         - GpuChainOptions
       functions:
         - isGpuChainSupported
         - resetGpuElementwise
         - elementwiseChainGpuDispatch
+        - elementwiseChainReduceGpuDispatch
       constants:
         - GPU_ELEMENTWISE_OPS
+        - GPU_REDUCE_OPS
   functions/logical:
     functions/src/logical/and.ts:
       description: Logical `and`. Test whether two values are both defined with a nonzero/nonempty value.
@@ -15410,7 +15414,9 @@ modules:
         - file: ../gpu/elementwise-gpu.js
           imports:
             - elementwiseChainGpuDispatch
+            - elementwiseChainReduceGpuDispatch
             - GpuChainOptions
+            - GpuReduceOp
         - file: ./special.js
           imports:
             - erfcScalar
@@ -15418,9 +15424,11 @@ modules:
       exports:
         - fuseUnaryChain
         - fuseUnaryChainAsync
+        - fuseUnaryChainReduceAsync
       functions:
         - fuseUnaryChain
         - fuseUnaryChainAsync
+        - fuseUnaryChainReduceAsync
     functions/src/typed/geometry.ts:
       description: Typed Geometry Functions
       externalDependencies: []
@@ -15874,6 +15882,9 @@ modules:
         - file: ../gpu/elementwise-gpu.js
           imports:
             - elementwiseChainGpuDispatch
+            - elementwiseChainReduceGpuDispatch
+            - GPU_REDUCE_OPS
+            - GpuReduceOp
             - isGpuChainSupported
             - resetGpuElementwise
             - GPU_ELEMENTWISE_OPS
@@ -15922,6 +15933,9 @@ modules:
         - isGpuEnabled
         - GPU_MIN_ELEMENTS
         - elementwiseChainGpuDispatch
+        - elementwiseChainReduceGpuDispatch
+        - GPU_REDUCE_OPS
+        - GpuReduceOp
         - isGpuChainSupported
         - resetGpuElementwise
         - GPU_ELEMENTWISE_OPS
@@ -15976,6 +15990,9 @@ modules:
         - isGpuEnabled
         - GPU_MIN_ELEMENTS
         - elementwiseChainGpuDispatch
+        - elementwiseChainReduceGpuDispatch
+        - GPU_REDUCE_OPS
+        - GpuReduceOp
         - isGpuChainSupported
         - resetGpuElementwise
         - GPU_ELEMENTWISE_OPS
@@ -32487,15 +32504,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1024
   totalModules: 77
-  totalLinesOfCode: 170591
-  totalExports: 4936
+  totalLinesOfCode: 170976
+  totalExports: 4942
   totalClasses: 56
   totalInterfaces: 408
-  totalFunctions: 1599
+  totalFunctions: 1601
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1533
-  totalReExports: 1787
+  totalConstants: 1534
+  totalReExports: 1790
   totalTypeOnlyImports: 524
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

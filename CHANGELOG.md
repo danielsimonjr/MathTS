@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — fused GPU chain + on-device reduction (`fuseUnaryChainReduceAsync`)
+
+`sum(exp(sin(x)))` and friends now reduce **on the GPU**, returning a `number` instead
+of an array. `reduce` is `'sum' | 'max' | 'min'`.
+
+The point is the readback, not the arithmetic: reducing on the device sends `n/256`
+floats back across the bus instead of `n`. Measured end-to-end through the shipped
+functions (not a prototype), NVIDIA Pascal, `sum(exp(sin(x)))`:
+
+| n         | WASM chain + JS sum | GPU chain + JS sum | fused GPU reduce |
+| --------- | ------------------- | ------------------ | ---------------- |
+| 262,144   | 25.6 ms             | 16.7 ms            | **9.9 ms**       |
+| 1,048,576 | 96.8 ms             | 34.3 ms            | **25.4 ms**      |
+| 4,194,304 | 260.0 ms            | 100.0 ms           | **72.2 ms**      |
+
+**1.35–1.7×** over the shipped GPU path, **2.6–3.8×** over the CPU tier. If you quote one
+number, quote the **1.39× at n=2²²** — it is the only ratio here that reproduces run to run
+(1.31–1.39× across four runs). The 1.7× is the n=262,144 row, and that size swings
+1.19–2.83× between runs. Opt-in via
+`enableGpu()` like every GPU path (f32); with the flag off it is an exact-f64 CPU
+computation.
+
+**A standalone GPU reduction is deliberately NOT offered** — an empty `ops` returns
+`null`. Uploading `n` floats to produce one number is pure transfer tax, measured
+**3–9× slower than a plain JS sum**. There is no chain to amortise the upload against,
+so the honest answer is to decline and let the caller use the CPU. This was the
+question Spec 3 was written to answer, and the measurement answered it *no*.
+
+Numbers were re-measured **through the real functions** before being written down. A
+bare-WGSL prototype of the same idea showed ~2×, but it pre-converted its input outside
+the timed region — the f64→f32 conversion is an n-scaling cost that *both* paths pay,
+which dilutes the ratio. The prototype was measuring a workload no caller has.
+
+The perf guard asserts at n=2²² because that is where the ratio is *reproducible*
+(1.31–1.39× across four runs); at 2¹⁸–2²⁰ it swings 1.19–2.83× run to run, and a
+wall-clock ratio is only worth asserting where it is stable.
+
 ### Fixed — WASM was DEAD in the browser (and it invalidated our GPU benchmark)
 
 `elementwiseChainDispatch` returned `null` for *every* call in a browser, so browser

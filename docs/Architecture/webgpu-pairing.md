@@ -10,14 +10,14 @@ The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path 
 
 Standalone exports — this is where the GPU acceleration actually lives.
 
-| Function                      | Markers                       | Module              |
-| ----------------------------- | ----------------------------- | ------------------- |
-| `elementwiseChainGpuDispatch` | `getGpuDevice`                | gpu/elementwise-gpu |
-| `fuseUnaryChainAsync`         | `elementwiseChainGpuDispatch` | typed/fused         |
-| `gpuAdd`                      | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuMatmul`                   | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuScale`                    | `gpuMatrixBackend`            | typed/gpu           |
-| `gpuTranspose`                | `gpuMatrixBackend`            | typed/gpu           |
+| Function                    | Markers                             | Module      |
+| --------------------------- | ----------------------------------- | ----------- |
+| `fuseUnaryChainAsync`       | `elementwiseChainGpuDispatch`       | typed/fused |
+| `fuseUnaryChainReduceAsync` | `elementwiseChainReduceGpuDispatch` | typed/fused |
+| `gpuAdd`                    | `gpuMatrixBackend`                  | typed/gpu   |
+| `gpuMatmul`                 | `gpuMatrixBackend`                  | typed/gpu   |
+| `gpuScale`                  | `gpuMatrixBackend`                  | typed/gpu   |
+| `gpuTranspose`              | `gpuMatrixBackend`                  | typed/gpu   |
 
 ## Typed-dispatch layer: 0 of 218
 

@@ -546,7 +546,7 @@
       implementation is the public export; the factory version is also exported under
       a `factory_` prefix (`factory_add`, …).
 
-      **Coverage**: 686 callable functions across the typed and factory layers (828
+      **Coverage**: 686 callable functions across the typed and factory layers (878
       total exports, incl. 52 CODATA physical constants — see
       [Physical Constants](#physical-constants) — and 9 type-conversion functions). The
       complete, always-current export list is the [export index](#complete-export-index)
@@ -577,7 +577,8 @@
       - **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
         large inputs (32-bit float precision). **Browser-only** and **opt-in**
         (`enableGpu()`). Carried by the fused element-wise chain
-        (`fuseUnaryChainAsync`) and four standalone `gpu*` matrix helpers — see
+        (`fuseUnaryChainAsync`), the fused chain+reduction (`fuseUnaryChainReduceAsync`),
+        and four standalone `gpu*` matrix helpers — see
         [WebGPU: the opt-in f32 tier](#webgpu-the-opt-in-f32-tier). No _typed-dispatch_
         function routes to the GPU (see the coverage note below for why).
 
@@ -597,8 +598,9 @@
 
       > **WebGPU coverage at the typed-dispatch layer is zero — deliberately.** The
       > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists the
-      > **6 standalone functions** that do route to the GPU (`fuseUnaryChainAsync`,
-      > `elementwiseChainGpuDispatch`, and the four `gpu*` matrix helpers), and reports
+      > **8 standalone functions** that do route to the GPU (`fuseUnaryChainAsync`,
+      > `fuseUnaryChainReduceAsync`, `elementwiseChainGpuDispatch`,
+      > `elementwiseChainReduceGpuDispatch`, and the four `gpu*` matrix helpers), and reports
       > **0 GPU-accelerated of 218 typed functions**. That 0 is the honest number: no
       > `mathTyped` function routes to the GPU. This is a design decision, not a gap.
       > A GPU dispatch costs an upload and a readback, so a _single_ element-wise op
@@ -1419,8 +1421,50 @@
       > outright. The moral: a tier's number is only as good as the tier it is measured
       > against — re-measure **all three in one run** before trusting any ranking.
 
+      ### Fusing a reduction onto the chain
+
+      **`fuseUnaryChainReduceAsync(ops, xs, reduce)`** — applies the chain and reduces it
+      **on the device**, returning a single `number` instead of an array. `reduce` is
+      `'sum' | 'max' | 'min'`.
+
+      ```ts
+      import { enableGpu, fuseUnaryChainReduceAsync } from '@danielsimonjr/mathts-functions';
+
+      enableGpu();
+      const total = await fuseUnaryChainReduceAsync(['sin', 'exp'], xs, 'sum'); // number
+      ```
+
+      The point is the **readback**, not the arithmetic: reducing on the GPU sends `n/256`
+      floats back across the bus instead of `n`. Measured end-to-end for
+      `sum(exp(sin(x)))` on an NVIDIA Pascal adapter:
+
+      | n         | WASM chain + JS sum | GPU chain + JS sum | fused GPU reduce |
+      | --------- | ------------------- | ------------------ | ---------------- |
+      | 262,144   | 25.6 ms             | 16.7 ms            | **9.9 ms**       |
+      | 1,048,576 | 96.8 ms             | 34.3 ms            | **25.4 ms**      |
+      | 4,194,304 | 260.0 ms            | 100.0 ms           | **72.2 ms**      |
+
+      **1.35–1.7×** over the shipped GPU path, **2.6–3.8×** over the CPU tier. The figure to quote
+      is the **1.39× at n=2²²** — it is the only one that reproduces run to run (1.31–1.39× across
+      four runs); the 1.7× comes from n=262,144, where the ratio swings 1.19–2.83× between runs.
+
+      The supported reductions are listed in `GPU_REDUCE_OPS` (`'sum' | 'max' | 'min'`, the
+      `GpuReduceOp` type). A chain that produces `NaN` is a caveat: WGSL leaves `max`/`min` with
+      `NaN` **implementation-defined**, whereas JS `Math.max(NaN, x)` is always `NaN`, so the GPU
+      tier may disagree with the CPU tiers there.
+
+      Use it only when you want **just the scalar**. If you also need the transformed
+      array, call `fuseUnaryChainAsync` — you pay the `n`-float readback either way, and
+      summing it in JS afterwards costs almost nothing on top.
+
+      > **A standalone GPU reduction is deliberately not offered.** Passing an empty `ops`
+      > returns `null`. Uploading `n` floats to produce one number is pure transfer tax and
+      > was measured **3–9× slower than a plain JS sum** — there is no chain to amortise the
+      > upload against. The GPU only earns the transfer when real work rides along with it.
+      > (Reductions have no WASM kernel either, so the CPU baseline here is JS.)
+
       **Per-call override.** `enableGpu()` is process-global state — any dependency could
-      flip it. Pass `{ gpu: true | false }` as the third argument to `fuseUnaryChainAsync`
+      flip it. Pass `{ gpu: true | false }` as the **last** argument — third for `fuseUnaryChainAsync` / `elementwiseChainGpuDispatch`, fourth for `fuseUnaryChainReduceAsync` / `elementwiseChainReduceGpuDispatch`
       (or to `elementwiseChainGpuDispatch`) to make a call self-describing and immune to
       that. `resetGpuElementwise()` drops the cached GPU pipelines/buffers (after a device
       loss, or between tests).
@@ -2692,7 +2736,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (875 exports).
+      > `@danielsimonjr/mathts-functions` (878 exports).
 
       ### Functions by category
 
@@ -2712,11 +2756,11 @@
 
       **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
-      **Linear Algebra** (66): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `resetGpuElementwise`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+      **Linear Algebra** (69): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
       **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
-      **Algebra** (46): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `reduce`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
+      **Algebra** (45): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
 
       **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
@@ -2750,9 +2794,9 @@
 
       **Other exports (uncategorized)** (1): `isGpuChainSupported`
 
-      ### Constants & values (63)
+      ### Constants & values (64)
 
-      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
       ### Classes & types (1)
 

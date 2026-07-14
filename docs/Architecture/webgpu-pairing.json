@@ -294,16 +294,16 @@
   "standaloneAcceleratedCount": 6,
   "standaloneAccelerated": [
     {
-      "name": "elementwiseChainGpuDispatch",
-      "file": "gpu/elementwise-gpu.ts",
-      "routing": "gpu",
-      "markers": ["getGpuDevice"]
-    },
-    {
       "name": "fuseUnaryChainAsync",
       "file": "typed/fused.ts",
       "routing": "gpu",
       "markers": ["elementwiseChainGpuDispatch"]
+    },
+    {
+      "name": "fuseUnaryChainReduceAsync",
+      "file": "typed/fused.ts",
+      "routing": "gpu",
+      "markers": ["elementwiseChainReduceGpuDispatch"]
     },
     {
       "name": "gpuAdd",

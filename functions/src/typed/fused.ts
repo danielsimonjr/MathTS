@@ -16,7 +16,12 @@ import {
   elementwiseChainDispatch,
   type WasmElementwiseOp,
 } from '../wasm/elementwise/wasm-bridge.js';
-import { elementwiseChainGpuDispatch, type GpuChainOptions } from '../gpu/elementwise-gpu.js';
+import {
+  elementwiseChainGpuDispatch,
+  elementwiseChainReduceGpuDispatch,
+  type GpuChainOptions,
+  type GpuReduceOp,
+} from '../gpu/elementwise-gpu.js';
 import { erfcScalar } from './special.js';
 
 /** Scalar implementation of every fusable op, for the JS fallback path. */
@@ -146,4 +151,53 @@ export async function fuseUnaryChainAsync(
   if (wasm) return wasm;
 
   return jsChain(ops, xs);
+}
+
+/**
+ * Apply `ops` and then reduce to a single number — `sum(exp(sin(x)))` and friends.
+ *
+ * Tiers: **GPU (f32, opt-in) → WASM chain + JS reduce → JS chain + JS reduce.**
+ *
+ * When the GPU tier runs, the reduction happens **on the device**, so only n/256
+ * floats cross the bus instead of n. That is the whole reason this function exists.
+ * Measured end-to-end for `sum(exp(sin(x)))` on an NVIDIA Pascal adapter: **1.35-1.7x**
+ * faster than `fuseUnaryChainAsync(...)` followed by a JS loop, and **2.6-3.8x** faster
+ * than the CPU tier. (See `elementwiseChainReduceGpuDispatch` for the full table and
+ * for why the ratio shrinks as n grows.)
+ *
+ * Reach for it only when you want the **scalar**. If you also need the transformed
+ * array, use `fuseUnaryChainAsync` — you have to pay the n-float readback anyway, and
+ * summing it in JS afterwards costs almost nothing on top.
+ *
+ * Precision follows the tier that ran: f32 (~7 significant digits) on the GPU, exact
+ * f64 on WASM/JS. `enableGpu()` is the consent; with the flag off this is a pure f64
+ * computation.
+ */
+export async function fuseUnaryChainReduceAsync(
+  ops: WasmElementwiseOp[],
+  xs: Float64Array,
+  reduce: GpuReduceOp,
+  options?: GpuChainOptions
+): Promise<number> {
+  const gpu = await elementwiseChainReduceGpuDispatch(ops, xs, reduce, options);
+  if (gpu !== null) return gpu;
+
+  // CPU: run the chain on the best available tier, then reduce in f64. There is no
+  // WASM reduction kernel, so the reduce is JS either way.
+  const chained = elementwiseChainDispatch(ops, xs) ?? jsChain(ops, xs);
+  return reduceF64(chained, reduce);
+}
+
+/** f64 reduction over the chain output — the CPU counterpart of the GPU kernel. */
+function reduceF64(xs: Float64Array, reduce: GpuReduceOp): number {
+  if (reduce === 'sum') {
+    let acc = 0;
+    for (let i = 0; i < xs.length; i++) acc += xs[i];
+    return acc;
+  }
+  let acc = reduce === 'max' ? -Infinity : Infinity;
+  for (let i = 0; i < xs.length; i++) {
+    acc = reduce === 'max' ? Math.max(acc, xs[i]) : Math.min(acc, xs[i]);
+  }
+  return acc;
 }
