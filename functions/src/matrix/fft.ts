@@ -1,25 +1,10 @@
 import { arraySize } from '../utils/array.js';
+import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array size for WASM to be beneficial
-// ⚠️ MEASURE BEFORE YOU TRUST THIS ROUTE. The AssemblyScript FFT kernel is SLOWER than
-// the package's own JS core — measured on an NVIDIA-class desktop, same transform:
-//
-//   n=2^20   WASM 1039 ms   |   flat-Float64Array JS core 170 ms   (WASM is 6x SLOWER)
-//   n=2^18   WASM  141 ms   |   flat-Float64Array JS core  33 ms
-//
-// The kernel is a straightforward scalar radix-2, and the dispatch additionally copies the
-// data three times (interleave -> into wasm memory -> back out). This mirrors the 2026-07
-// WASM audit, which retired the WASM paths for element-wise ops / transpose / reductions
-// for exactly this reason — FFT was simply never audited.
-//
-// This route is currently unreachable from any PUBLIC export (the public `fft` is the typed
-// `parallelFFT`, and this factory `fft` is not exported), so it is dead weight rather than a
-// live pessimisation. Do NOT wire it into a public path on the assumption that "WASM is
-// faster" — it is not, for this kernel. See TODO.md.
-const WASM_FFT_THRESHOLD = 64; // At least 64 elements
+const FAST_FFT_THRESHOLD = 64; // below this the flat core is not worth the conversion
 
 /**
  * Check if n is a power of 2
@@ -289,27 +274,45 @@ export const createFft = /* #__PURE__ */ factory(
       const length = len ?? arr.length;
       if (length === 1) return [arr[0]];
 
-      // WASM fast path for power-of-2 sized arrays
-      const wasm = wasmLoader.getModule();
-      if (
-        wasm &&
-        length >= WASM_FFT_THRESHOLD &&
-        isPowerOf2(length) &&
-        len === undefined // Only use WASM for top-level call
-      ) {
+      // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
+      //
+      // The recursive fallback below is a Cooley-Tukey built out of ARRAY SPREADS
+      // (`[..._fft(even), ..._fft(odd)]`) whose scalar arithmetic goes through
+      // typed-function dispatch on Complex objects. Measured, n=2^18:
+      //
+      //   recursive Complex path   14889 ms
+      //   flat Float64Array core      33 ms      <- same transform, ~300x
+      //
+      // This used to route to the AssemblyScript WASM kernel instead, which is itself
+      // ~6x SLOWER than the flat JS core (1039 ms vs 170 ms at n=2^20) — so the "fast
+      // path" was a pessimisation on top of a pessimisation. It now uses the core that
+      // `parallelFFT` uses.
+      //
+      // `complexToInterleaved` returns null for anything it cannot represent as f64
+      // (BigNumber, Fraction, Unit), so those fall through to the general path below
+      // and keep their exact semantics.
+      // NOTE the guard. This used to read `len === undefined`, intended as "top-level call
+      // only" — but `_ndFft` ALWAYS passes `len` for the 1-D case (`_fft(arr, size[0])`),
+      // so the condition was never true and the fast path was DEAD. That is why the public
+      // `fft` took ~15 s at n=2^18: it always fell through to the recursive Complex path.
+      // Every call site passes `len === arr.length` (the recursion halves both together),
+      // so the honest guard is simply "are we transforming the whole array".
+      if (length === arr.length && length >= FAST_FFT_THRESHOLD && isPowerOf2(length)) {
         const interleaved = complexToInterleaved(arr, complex);
         if (interleaved) {
-          try {
-            const dataAlloc = wasmLoader.allocateFloat64Array(interleaved);
-            try {
-              wasm.fft(dataAlloc.ptr, length, 0); // 0 = forward FFT
-              return interleavedToComplex(dataAlloc.array, length, complex);
-            } finally {
-              wasmLoader.free(dataAlloc.ptr);
-            }
-          } catch {
-            // Fall back to JS implementation on WASM error
+          const real = new Float64Array(length);
+          const imag = new Float64Array(length);
+          for (let i = 0; i < length; i++) {
+            real[i] = interleaved[i * 2];
+            imag[i] = interleaved[i * 2 + 1];
           }
+          const out = fftCoreFloat64(real, imag, false);
+          const result = new Float64Array(length * 2);
+          for (let i = 0; i < length; i++) {
+            result[i * 2] = out.real[i];
+            result[i * 2 + 1] = out.imag[i];
+          }
+          return interleavedToComplex(result, length, complex);
         }
       }
 

@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — the PUBLIC `fft` was 137× slower than it should be (its fast path was dead code)
+
+**This also corrects an error in 0.20.1.** That entry said "the public `fft()` was the slowest
+FFT in the library" and quoted 2987 ms → 521 ms. Those numbers were real, but they were measured
+on `functions/src/signal/fft.ts` — which is **not** the public export. (It backs the convolution
+paths, so that fix stands on its own merit.) `import { fft } from '@danielsimonjr/mathts-functions'`
+resolves to the mathjs-derived **factory** `fft`, and it was much worse: **14,889 ms at n=2¹⁸**.
+
+**Root cause: the power-of-2 fast path could never run.** `_fft` guarded on `len === undefined`,
+intended to mean "top-level call only" — but `_ndFft` *always* passes `len` for 1-D input
+(`_fft(arr, size[0])`). The condition was never true. Every call therefore fell through to a
+recursive Cooley-Tukey built from array spreads (`[..._fft(even), ..._fft(odd)]`), doing its
+scalar arithmetic through typed-function dispatch on Complex objects.
+
+Worse, that unreachable fast path pointed at the **AssemblyScript WASM kernel**, which is ~6×
+*slower* than the package's own flat `Float64Array` core (1039 ms vs 170 ms at n=2²⁰). So it was
+a pessimisation stacked on top of dead code.
+
+The guard now expresses what it meant (`length === arr.length`) and routes to the flat core:
+
+| n       | public `fft` before | after       |
+| ------- | ------------------- | ----------- |
+| 262,144 | 14,889 ms           | **108 ms**  |
+
+`ifft` gets the same treatment (its fallback was `dotDivide(conj(fft(conj(arr))), n)` — three
+extra full passes through typed dispatch).
+
+Untouched: non-power-of-2 (chirp-z) and non-f64 element types (BigNumber, Fraction, Unit) —
+`complexToInterleaved` returns `null` for those, so they keep exact semantics. Pinned by
+`functions/tests/fft-factory-correctness.test.ts` (naive-DFT oracle, complex input, Parseval,
+ifft round-trip) and `tests/benchmark/fft-factory-surface.test.ts`.
+
+**The lesson, again: measure the symbol a consumer actually imports.** I benchmarked a source
+file, assumed it was the public `fft`, and published a claim about the wrong function.
+
 ### Fixed — the public `fft()` was the SLOWEST FFT in the library (~6× faster now)
 
 `fft()` did its butterfly arithmetic in **Complex objects** — a `{ re, im }` allocation per

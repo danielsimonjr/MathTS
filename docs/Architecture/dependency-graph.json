@@ -11428,12 +11428,12 @@
             "imports": ["arraySize"]
           },
           {
-            "file": "../utils/factory.js",
-            "imports": ["factory"]
+            "file": "../signal/fft-core-f64.js",
+            "imports": ["fftCoreFloat64"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
+            "file": "../utils/factory.js",
+            "imports": ["factory"]
           },
           {
             "file": "../core/function/typed.js",
@@ -11590,16 +11590,16 @@
             "imports": ["arraySize"]
           },
           {
+            "file": "../signal/fft-core-f64.js",
+            "imports": ["fftCoreFloat64"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
           {
             "file": "../utils/is.js",
             "imports": ["isMatrix"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -34906,7 +34906,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1025,
     "totalModules": 77,
-    "totalLinesOfCode": 171019,
+    "totalLinesOfCode": 171033,
     "totalExports": 4944,
     "totalClasses": 56,
     "totalInterfaces": 408,

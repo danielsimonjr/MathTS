@@ -139,7 +139,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       is how a zeroed buffer returns as a plausible `sum`; and the error scope being a per-device LIFO
       **stack**, so two overlapping dispatches (`Promise.all`) corrupt each other — dispatches are now
       serialized. Both are pinned by tests.
-- [x] ✅ **Public `fft()` was the SLOWEST FFT in the library — FIXED, ~6×** (2026-07-13). Found while
+- [x] ✅ **PUBLIC `fft` was 137× slower than it should be — FIXED** (2026-07-14). Its power-of-2 fast
+      path was **dead code**: `_fft` guarded on `len === undefined` ("top-level only"), but `_ndFft`
+      ALWAYS passes `len` for 1-D input, so the condition was never true and every call fell through to
+      a recursive Cooley-Tukey of array spreads doing typed-dispatch arithmetic on Complex objects.
+      And the unreachable fast path pointed at the WASM kernel, which is 6× SLOWER than the flat JS
+      core — a pessimisation stacked on dead code. n=2¹⁸: **14,889 ms → 108 ms**. Oracle-pinned
+      (naive DFT, Parseval, complex input, ifft round-trip); chirp-z + BigNumber/Fraction untouched.
+      ⚠️ **I first "fixed" the wrong function** — benchmarked `signal/fft.ts` and published a 0.20.1
+      claim about it, when the public `fft` is the FACTORY one. Corrected in the CHANGELOG.
+      **Measure the symbol a consumer actually imports, not a source file you assume is it.**
+- [x] ✅ **`signal/fft.ts` fft — also fixed, ~6×** (2026-07-13). Found while
       establishing an honest CPU baseline for a GPU FFT: `fft()` did its butterflies in **Complex
       objects** (a `{re,im}` alloc per twiddle and per butterfly) while the flat `Float64Array` core
       used by `parallelFFT` sat in the same package, 8× faster for the identical transform.

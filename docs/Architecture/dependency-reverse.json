@@ -585,8 +585,6 @@
       "functions/src/matrix/det.ts",
       "functions/src/matrix/eigs/complexEigs.ts",
       "functions/src/matrix/eigs/realSymmetric.ts",
-      "functions/src/matrix/fft.ts",
-      "functions/src/matrix/ifft.ts",
       "functions/src/matrix/inv.ts",
       "functions/src/matrix/kron.ts",
       "functions/src/matrix/partitionSelect.ts",
@@ -1926,6 +1924,11 @@
     ],
     "functions/src/matrix/eigs/complexEigs.ts": ["functions/src/matrix/eigs.ts"],
     "functions/src/matrix/eigs/realSymmetric.ts": ["functions/src/matrix/eigs.ts"],
+    "functions/src/signal/fft-core-f64.ts": [
+      "functions/src/matrix/fft.ts",
+      "functions/src/matrix/ifft.ts",
+      "functions/src/typed/signal.ts"
+    ],
     "functions/src/utils/optimizeCallback.ts": [
       "functions/src/matrix/filter.ts",
       "functions/src/matrix/forEach.ts",
@@ -2074,7 +2077,6 @@
     "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
-    "functions/src/signal/fft-core-f64.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/typed/special.ts",

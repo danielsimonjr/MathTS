@@ -4854,8 +4854,8 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/array.js` | `arraySize` | Import |
+| `../signal/fft-core-f64.js` | `fftCoreFloat64` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -4950,9 +4950,9 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/array.js` | `arraySize` | Import |
+| `../signal/fft-core-f64.js` | `fftCoreFloat64` | Import |
 | `../utils/factory.js` | `factory` | Import |
 | `../utils/is.js` | `isMatrix` | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 
@@ -14669,7 +14669,7 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 2 files      | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 44 files   |
+| `functions/src/wasm/WasmLoader`                        | 2 files      | 42 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `expression/src/utils/is`                              | 0 files      | 40 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
@@ -15457,7 +15457,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1025   |
 | Total Modules           | 77     |
-| Total Lines of Code     | 171019 |
+| Total Lines of Code     | 171033 |
 | Total Exports           | 4944   |
 | Total Re-exports        | 1790   |
 | Total Classes           | 56     |

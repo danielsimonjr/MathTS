@@ -1,10 +1,10 @@
 import { arraySize } from '../utils/array.js';
+import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { factory } from '../utils/factory.js';
 import { isMatrix } from '../utils/is.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Minimum array size for WASM to be beneficial
-const WASM_IFFT_THRESHOLD = 64; // At least 64 elements
+const FAST_IFFT_THRESHOLD = 64; // At least 64 elements
 
 /**
  * Check if n is a power of 2
@@ -120,30 +120,41 @@ export const createIfft = /* #__PURE__ */ factory(
         const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
         const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
 
-        // WASM fast path for 1D power-of-2 sized arrays
+        // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
+        //
+        // The fallback below is `dotDivide(conj(fft(conj(arr))), n)`: three full passes
+        // over the data through typed-function dispatch, on top of the forward transform.
+        // The flat Float64Array core does the inverse directly, and already applies the
+        // 1/n scaling.
+        //
+        // This used to route to the AssemblyScript WASM kernel, which is ~6x SLOWER than
+        // the flat JS core (1039 ms vs 170 ms at n=2^20).
+        //
+        // `complexToInterleaved` returns null for anything not representable as f64
+        // (BigNumber, Fraction, Unit), so those fall through and keep exact semantics.
         if (size.length === 1) {
           const length = size[0];
-          const wasm = wasmLoader.getModule();
-          if (wasm && length >= WASM_IFFT_THRESHOLD && isPowerOf2(length)) {
+          if (length >= FAST_IFFT_THRESHOLD && isPowerOf2(length)) {
             const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
             const interleaved = complexToInterleaved(arrData as unknown[], complex);
             if (interleaved) {
-              try {
-                const dataAlloc = wasmLoader.allocateFloat64Array(interleaved);
-                try {
-                  wasm.fft(dataAlloc.ptr, length, 1); // 1 = inverse FFT
-                  const result = interleavedToComplex(dataAlloc.array, length, complex);
-                  // WASM fft with inverse=1 already divides by N
-                  if (isMatrix(arr)) {
-                    return (arr as Matrix).create(result);
-                  }
-                  return result as ComplexArrayND;
-                } finally {
-                  wasmLoader.free(dataAlloc.ptr);
-                }
-              } catch {
-                // Fall back to JS implementation on WASM error
+              const real = new Float64Array(length);
+              const imag = new Float64Array(length);
+              for (let i = 0; i < length; i++) {
+                real[i] = interleaved[i * 2];
+                imag[i] = interleaved[i * 2 + 1];
               }
+              const out = fftCoreFloat64(real, imag, true); // inverse: scales by 1/n
+              const packed = new Float64Array(length * 2);
+              for (let i = 0; i < length; i++) {
+                packed[i * 2] = out.real[i];
+                packed[i * 2 + 1] = out.imag[i];
+              }
+              const result = interleavedToComplex(packed, length, complex);
+              if (isMatrix(arr)) {
+                return (arr as Matrix).create(result);
+              }
+              return result as ComplexArrayND;
             }
           }
         }
