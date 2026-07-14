@@ -21,7 +21,7 @@
 import { describe, it, expect, afterAll } from 'vitest';
 import { getGpuDevice, GPU_MIN_ELEMENTS, enableGpu, disableGpu } from '@danielsimonjr/mathts-gpu';
 import { elementwiseChainGpuDispatch } from '../src/gpu/elementwise-gpu.js';
-import { isRealGpu } from './helpers/gpu-hardware.js';
+import { isRealGpu, F32_REL_TOL } from './helpers/gpu-hardware.js';
 
 const device = await getGpuDevice().catch(() => null);
 
@@ -89,8 +89,10 @@ describe.skipIf(!device)('GPU dispatch overhead', () => {
     const out = await elementwiseChainGpuDispatch(['sin', 'exp'], xs);
     expect(out).not.toBeNull();
 
+    // Relative error, against the adapter-appropriate f32 bound.
     for (let i = 0; i < n; i += 997) {
-      expect(out![i]).toBeCloseTo(Math.exp(Math.sin(xs[i])), 5);
+      const want = Math.exp(Math.sin(xs[i]));
+      expect(Math.abs(out![i] - want) / Math.abs(want)).toBeLessThan(F32_REL_TOL);
     }
   }, 120_000);
 });

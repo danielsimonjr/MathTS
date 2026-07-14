@@ -21,7 +21,10 @@ import { getGlobalGPUContext } from '@danielsimonjr/mathts-gpu';
 import { gpuMatmul } from '../src/typed/gpu.js';
 
 /** f32 carries ~7 significant digits; allow for accumulation over K terms. */
-const F32_REL_TOL = 1e-4;
+// Adapter-aware: WGSL only guarantees sin/cos to ~4.9e-4 ABSOLUTE error, and
+// SwiftShader (CI) uses that allowance where NVIDIA does not. See
+// helpers/gpu-hardware.ts — the bound comes from the spec, not from one vendor.
+import { F32_REL_TOL } from './helpers/gpu-hardware.js';
 
 /**
  * `GPUMatrixBackend.multiplyAsync` gates the GPU on
@@ -157,8 +160,12 @@ describe.skipIf(!HAS_GPU)('WebGPU kernels execute on a real adapter', () => {
     staging.unmap();
 
     // Oracle: the closed-form composition, computed independently in f64.
+    // RELATIVE error — the right metric for f32, and the one the tolerance is
+    // expressed in. (`toBeCloseTo(_, 4)` is an ABSOLUTE 5e-5 bound, which
+    // SwiftShader's conformant-but-loose `sin` legitimately exceeds.)
     input.forEach((x, i) => {
-      expect(got[i]).toBeCloseTo(Math.exp(Math.sin(x)), 4);
+      const want = Math.exp(Math.sin(x));
+      expect(Math.abs(got[i] - want) / Math.abs(want)).toBeLessThan(F32_REL_TOL);
     });
   });
 

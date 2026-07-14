@@ -35,7 +35,7 @@ import { elementwiseChainDispatch } from '../src/wasm/elementwise/wasm-bridge.js
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { fuseUnaryChainAsync } from '../src/typed/fused.js';
 import { enableGpu, disableGpu, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
-import { isRealGpu } from './helpers/gpu-hardware.js';
+import { isRealGpu, F32_REL_TOL } from './helpers/gpu-hardware.js';
 
 const adapter =
   typeof navigator !== 'undefined' && 'gpu' in navigator
@@ -166,7 +166,7 @@ describe.skipIf(!adapter)('for element-wise chains, the GPU must beat WASM', () 
     let sawF32Precision = false;
     for (let i = 0; i < xs.length; i += 997) {
       const want = Math.exp(Math.sin(xs[i]));
-      expect(out[i]).toBeCloseTo(want, 5);
+      expect(Math.abs(out[i] - want) / Math.abs(want)).toBeLessThan(F32_REL_TOL);
       if (Math.abs(out[i] - want) > 1e-12) sawF32Precision = true;
     }
     expect(

@@ -18,6 +18,7 @@ import {
 } from '../src/gpu/elementwise-gpu.js';
 import { fuseUnaryChain, fuseUnaryChainAsync } from '../src/typed/fused.js';
 import { enableGpu, disableGpu, GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
+import { F32_REL_TOL, F32_REL_TOL_CHAIN } from './helpers/gpu-hardware.js';
 
 const adapter =
   typeof navigator !== 'undefined' && 'gpu' in navigator
@@ -95,7 +96,7 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
 
     const err = maxRelErr(got!, (i) => ORACLE[op](xs[i]));
     console.log(`[gpu] ${op}: max rel err = ${err.toExponential(2)}`);
-    expect(err).toBeLessThan(1e-4);
+    expect(err).toBeLessThan(F32_REL_TOL);
   });
 
   /**
@@ -196,7 +197,7 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     expect(got!.length).toBe(small.length);
     const err = maxRelErr(got!, (i) => Math.sin(small[i]));
     console.log(`[gpu] pooled-reuse sin: max rel err = ${err.toExponential(2)}`);
-    expect(err).toBeLessThan(1e-4);
+    expect(err).toBeLessThan(F32_REL_TOL);
   });
 
   it('fused chain exp(sin(x)) matches the composed oracle', async () => {
@@ -204,7 +205,7 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     expect(got).not.toBeNull();
     const err = maxRelErr(got!, (i) => Math.exp(Math.sin(xs[i])));
     console.log(`[gpu] chain exp(sin(x)): max rel err = ${err.toExponential(2)}`);
-    expect(err).toBeLessThan(1e-4);
+    expect(err).toBeLessThan(F32_REL_TOL);
   });
 
   // Ping-pong parity: the buffers swap once per op, so an ODD-length chain ends
@@ -219,7 +220,7 @@ describe.skipIf(!HAS_GPU)('GPU element-wise kernels vs JS oracles', () => {
     expect(got).not.toBeNull();
     const err = maxRelErr(got!, (i) => ops.reduce((acc, op) => ORACLE[op](acc), xs[i] as number));
     console.log(`[gpu] chain ${ops.join('->')}: max rel err = ${err.toExponential(2)}`);
-    expect(err).toBeLessThan(1e-3);
+    expect(err).toBeLessThan(F32_REL_TOL_CHAIN);
   });
 });
 
