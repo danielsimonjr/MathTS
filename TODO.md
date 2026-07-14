@@ -63,7 +63,9 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       slowed the **JS tier for everyone**). Sites taking `number[]` (autograd, the bench harness) were
       NOT affected — a plain array has no fast path to reach — and were left alone.
       Guard: `functions/tests/gpu-dispatch-overhead.browser.test.ts`.
-      ⚠️ **Shipped in `functions@0.18.0`** (verified in the published npm tarball) — needs a release.
+      ✅ **RELEASED** in `functions@0.19.0` + `matrix@0.4.0` (2026-07-13) — verified in the published
+      npm tarball, not just the repo: `Float32Array.from(xs)` absent from dist, and
+      `fuseUnaryChainAsync` calls the GPU dispatch first and widens with `new Float64Array(gpu)`.
 - [x] ✅ **Tier order corrected AGAIN — now GPU → WASM → JS** (2026-07-13). With the tax gone the
       GPU is **3.2–8.3× faster than WASM** (not 1.9× slower). It stays opt-in: `enableGpu()` is the
       f32-precision consent, and with the flag off the path is exactly WASM → JS, bit-identical f64.
@@ -71,6 +73,29 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       The guard now measures all three tiers in one run and fails on a ranking change in EITHER
       direction — and refuses to time a tier that returned `null` (a lost GPU device was being
       recorded as `0.00 ms` = "infinitely fast").
+- [x] ✅ **CI was RED and I hadn't noticed — both jobs fixed** (2026-07-13).
+      **Browser (WebGPU)** had failed on every commit since `b78b8bc2`: I set `channel: 'chrome'` +
+      `headless: false` to get a real GPU adapter locally, and neither is possible on a headless Linux
+      runner ("launched a headed browser without having a XServer running"). `vitest.config.browser.ts`
+      is now environment-aware — system Chrome headed locally, Playwright's full Chromium in
+      new-headless mode on CI (keeps GPU support, unlike `chrome-headless-shell`). CI now genuinely
+      **executes WGSL kernels** on its SwiftShader adapter.
+      **Coverage** failed because the 16-tensor O(3¹⁶) DP blew its own 30s timeout: V8 coverage
+      instrumentation inflates it ~6× (measured: 8.0s uninstrumented file → 33,307 ms for that one test
+      under `--coverage`). It is a HANG guard, not a perf bar, so the budget now covers the regime it
+      actually runs in. All four CI jobs green.
+- [x] ✅ **GPU f32 tolerances anchored to the WGSL spec, not to NVIDIA** (2026-07-13). Once CI's browser
+      job actually ran kernels, the accuracy oracles went red on SwiftShader (sin 1.4e-4, cos 1.9e-4 vs
+      a 1e-4 bound). Neither is broken: **WGSL allows sin/cos an absolute error of 2⁻¹¹ (~4.9e-4)** and
+      SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
+      instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
+      `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
+- [ ] ⚠️ **NEEDS DANIEL — the `Release` workflow cannot open its PR.** It fails with _"GitHub Actions is
+      not permitted to create or approve pull requests"_: the changesets action wants to open a
+      "Version Packages" PR, which requires **Settings → Actions → General → "Allow GitHub Actions to
+      create and approve pull requests"**. That is a repo permissions setting, so I have not flipped it.
+      Pre-existing and unrelated to the GPU work; releases are being cut locally in the meantime
+      (`npx changeset version && npx changeset publish`), which is what has always happened here.
 - [x] ✅ **Divergent dead GPU thresholds unified** (2026-07-13). 65,536 live vs 100,000 / 50,000 /
       10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts` → all now single-source
       `GPU_MIN_ELEMENTS`. The `Backend.test.ts` assertion pins the **constant**, not a copy of its
