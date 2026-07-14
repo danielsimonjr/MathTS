@@ -1,9 +1,9 @@
 {
   "generated": "2026-07-14",
-  "total": 218,
+  "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
-  "jsOnlyCount": 127,
+  "jsOnlyCount": 128,
   "bundledBackend": "assemblyscript",
   "wasmEffectiveCount": 39,
   "jsFallbackCount": 0,
@@ -695,6 +695,7 @@
     "format",
     "fresnelC",
     "fresnelS",
+    "fsum",
     "gammaPDF",
     "gammainc",
     "gammaincp",
@@ -781,7 +782,7 @@
     "arithmetic.ts": {
       "wasm": 9,
       "parallel": 23,
-      "jsOnly": 13
+      "jsOnly": 14
     },
     "bitwise.ts": {
       "wasm": 0,

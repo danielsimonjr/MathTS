@@ -4,7 +4,7 @@
 
 The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a direct GPU backend/device reference (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`).
 
-> **Status:** 9 standalone function(s) route to WebGPU; 2 of 218 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.
+> **Status:** 9 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.
 
 ## WebGPU-accelerated functions (9)
 
@@ -22,7 +22,7 @@ Standalone exports — this is where the GPU acceleration actually lives.
 | `gpuScale`                          | `gpuMatrixBackend`                  | typed/gpu           |
 | `gpuTranspose`                      | `gpuMatrixBackend`                  | typed/gpu           |
 
-## Typed-dispatch layer: 2 of 218
+## Typed-dispatch layer: 2 of 219
 
 > **A SMALL count here is EXPECTED and correct — it is a design decision, not a gap.**
 >
@@ -33,8 +33,8 @@ Standalone exports — this is where the GPU acceleration actually lives.
 | Routing (static) |   Count |
 | ---------------- | ------: |
 | WebGPU           |       2 |
-| None             |     216 |
-| **Total**        | **218** |
+| None             |     217 |
+| **Total**        | **219** |
 
 ### Typed functions routing to WebGPU
 
@@ -47,7 +47,7 @@ Standalone exports — this is where the GPU acceleration actually lives.
 
 | Module        | WebGPU | None |
 | ------------- | -----: | ---: |
-| arithmetic    |      0 |   45 |
+| arithmetic    |      0 |   46 |
 | bitwise       |      0 |    7 |
 | combinatorics |      0 |   21 |
 | complex       |      0 |    4 |

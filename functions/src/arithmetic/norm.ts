@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import { norm2 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 
@@ -397,6 +398,24 @@ export const createNorm = /* #__PURE__ */ factory(
      * @private
      */
     function _norm(x: MatrixType, p: number | BigNumberType | string): number | BigNumberType {
+      // ROBUST 2-NORM for a flat vector of plain numbers.
+      //
+      // The generic path below computes `sqrt(sum(|x|^p))` — it SQUARES before it adds, so it
+      // dies well inside the representable range:
+      //
+      //     norm([1e200 x 4])   -> Infinity   (the true answer, 2e200, is representable)
+      //     norm([1e-200 x 4])  -> 0          (silently wrong, which is worse)
+      //
+      // NumPy has this bug too (`np.linalg.norm([1e200]*4)` is `inf`). LAPACK's dnrm2 does not:
+      // it carries a running scale so the accumulator only ever holds ratios in [0, 1].
+      // `norm2` is that algorithm.
+      if ((p === 2 || p === 'fro') && x.size().length === 1) {
+        const v = x.valueOf() as unknown[];
+        if (v.every((e) => typeof e === 'number')) {
+          return norm2(v as number[]);
+        }
+      }
+
       // size
       const sizeX = x.size();
 

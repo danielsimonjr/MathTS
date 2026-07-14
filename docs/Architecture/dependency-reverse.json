@@ -50,6 +50,7 @@
     "core/src/types/unit-prefixes.ts": ["core/src/index.ts"],
     "core/src/typed/index.ts": ["core/src/index.ts"],
     "core/src/factory/index.ts": ["core/src/index.ts"],
+    "core/src/numeric/stable.ts": ["core/src/index.ts"],
     "core/src/types/interfaces.ts": [
       "core/src/index.ts",
       "core/src/types/bignumber.ts",
@@ -602,7 +603,6 @@
       "functions/src/statistics/min.ts",
       "functions/src/statistics/prod.ts",
       "functions/src/statistics/std.ts",
-      "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts",
       "functions/src/typed/geometry.ts",
       "functions/src/typed/numeric.ts",

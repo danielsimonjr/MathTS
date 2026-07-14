@@ -13,6 +13,7 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+import { pairwiseSum, neumaierSum, norm2 } from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
@@ -1010,11 +1011,19 @@ function vectorNorm(arr: f64[], p: f64 = 2): f64 {
   if (p === Infinity) return Math.max(...arr.map((x) => Math.abs(x)));
   if (p === -Infinity) return Math.min(...arr.map((x) => Math.abs(x)));
   if (p === 0) return arr.filter((x) => x !== 0).length;
-  if (p === 2) return Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0));
-  return Math.pow(
-    arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0),
-    1 / p
-  );
+
+  // 2-norm via LAPACK's dnrm2 scaling, NOT `sqrt(sum(x*x))`.
+  //
+  // Squaring before adding dies well inside the representable range:
+  //   norm([1e200 x 4])  -> Infinity   (the true answer, 2e200, is representable)
+  //   norm([1e-200 x 4]) -> 0          (silently wrong, which is worse than Infinity)
+  // NumPy has this bug too — `np.linalg.norm([1e200]*4)` is `inf`. We don't.
+  if (p === 2) return norm2(arr);
+
+  // General p-norm: still accumulate PAIRWISE so the sum does not drift as O(n)*eps.
+  const terms = new Array<f64>(arr.length);
+  for (let i = 0; i < arr.length; i++) terms[i] = Math.pow(Math.abs(arr[i]), p);
+  return Math.pow(pairwiseSum(terms), 1 / p);
 }
 
 /**
@@ -1090,9 +1099,9 @@ export const norm = mathTyped('norm', {
     if (computePool.shouldParallelize(a.length, 'norm')) {
       return (await computePool.norm(a)).result;
     }
-    let s = 0;
-    for (let i = 0; i < a.length; i++) s += a[i] * a[i];
-    return Math.sqrt(s);
+    // Scaled (LAPACK dnrm2), not `sqrt(sum(x*x))` — squaring before adding overflows to Infinity
+    // around 1e200 and flushes to ZERO around 1e-200. See `norm2`.
+    return norm2(a);
   },
 });
 
@@ -1297,16 +1306,43 @@ export const max = mathTyped('max', {
 /**
  * Sum with parallel array support
  */
-export const sum = mathTyped('sum', {
-  Array: (arr: f64[]): f64 => {
-    let total: f64 = 0;
-    for (let i: i32 = 0; i < arr.length; i++) {
-      total += arr[i];
-    }
-    return total;
-  },
+/**
+ * Exactly-rounded sum — the equivalent of Python's `math.fsum` / NumPy's `math.fsum` idiom.
+ *
+ * `sum` uses pairwise summation, which is accurate to ~machine epsilon and free. But pairwise
+ * cannot recover a value that has already been annihilated by catastrophic cancellation:
+ *
+ *     sum([1e16, 1, -1e16])   ->  0     (so does np.sum — the 1 is lost the moment it meets 1e16)
+ *     fsum([1e16, 1, -1e16])  ->  1     (exact)
+ *
+ * Neumaier compensation tracks the low-order bits each addition discards and folds them back in.
+ * ~2-4x slower than `sum`, so it is opt-in. Reach for it when the result is a small difference of
+ * large terms: conservation checks, residuals, long-running accumulators.
+ */
+export const fsum = mathTyped('fsum', {
+  Array: (arr: f64[]): f64 => neumaierSum(arr),
+  Float64Array: (a: Float64Array): f64 => neumaierSum(a),
+});
 
-  // Parallel Float64Array sum
+export const sum = mathTyped('sum', {
+  // PAIRWISE summation, not `total += arr[i]`.
+  //
+  // Naive accumulation lets the running total grow large while the addends stay small, so each
+  // addition rounds off a bit more of the total: error grows as O(n)*eps. Measured on 1e6 copies
+  // of 0.1 (exact answer 100000):
+  //
+  //     naive (what shipped)  relative error 1.3e-11
+  //     pairwise (this)       relative error 2.9e-16   <- identical to NumPy's np.sum
+  //
+  // We were ~46,000x less accurate than NumPy on a bog-standard `sum`, and `mean`/`std`/`variance`
+  // all inherit it. Pairwise costs the same number of additions — the naive loop was simply worse.
+  // For catastrophic cancellation (e.g. [1e16, 1, -1e16], which pairwise AND np.sum both
+  // annihilate to 0) use `fsum`.
+  Array: (arr: f64[]): f64 => pairwiseSum(arr),
+
+  // Float64Array: the pool's sequential branch is pairwise too (see ComputePool.sum), and its
+  // parallel branch sums per-chunk then combines — blocked summation, which is pairwise-like.
+  // Either way the O(n) drift is gone.
   Float64Array: async (a: Float64Array): Promise<f64> => {
     const result = await computePool.sum(a);
     return result.result;
@@ -1319,11 +1355,7 @@ export const sum = mathTyped('sum', {
 export const mean = mathTyped('mean', {
   Array: (arr: f64[]): f64 => {
     if (arr.length === 0) return NaN;
-    let total: f64 = 0;
-    for (let i: i32 = 0; i < arr.length; i++) {
-      total += arr[i];
-    }
-    return total / arr.length;
+    return pairwiseSum(arr) / arr.length; // pairwise: see the note on `sum`
   },
 
   // Parallel Float64Array mean

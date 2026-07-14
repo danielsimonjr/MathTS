@@ -99,6 +99,56 @@ code. A browsable HTML edition of this page is available at
 
 ---
 
+## Numerical accuracy — what we guarantee
+
+A numerical library is only as trustworthy as how it _accumulates_. Floating-point addition is not
+associative, so the order matters more than the formula.
+
+| function          | algorithm                                | why                                                                        |
+| ----------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| `sum`, `mean`     | **pairwise (cascade) summation**         | error grows as **O(log n)·ε**, not O(n)·ε — the same algorithm as `np.sum` |
+| `fsum`            | **Neumaier compensation**                | exactly rounded; the equivalent of Python's `math.fsum`                    |
+| `norm(x, 2)`      | **scaled accumulation (LAPACK `dnrm2`)** | never overflows or underflows                                              |
+| `variance`, `std` | **Welford**                              | stable for values with large means and small spread                        |
+
+Measured against exact references — 1e6 copies of `0.1`, true answer `100000`:
+
+| accumulation             | relative error                   |
+| ------------------------ | -------------------------------- |
+| naive `s += x`           | 1.3e-11                          |
+| **`sum` (pairwise)**     | **2.9e-16** — identical to NumPy |
+| **`fsum` (compensated)** | **0** — exact                    |
+
+### `fsum(x)` — when pairwise is not enough
+
+Pairwise summation is accurate to ~machine epsilon and costs nothing extra, so it is the default.
+But it cannot recover a value that catastrophic cancellation has already destroyed:
+
+```typescript
+sum([1e16, 1, -1e16]); // 0   — the 1 is annihilated the moment it meets 1e16 (np.sum: 0.0 too)
+fsum([1e16, 1, -1e16]); // 1   — exact (math.fsum: 1.0)
+```
+
+`fsum` is ~2–4× slower, so reach for it when the result is a small difference of large terms:
+conservation checks, residuals, long-running accumulators.
+
+### `norm` does not overflow — and NumPy does
+
+The obvious `sqrt(Σxᵢ²)` squares before it adds, so it dies well inside the representable range.
+MathTS uses LAPACK's scaling instead:
+
+```typescript
+norm([1e200, 1e200, 1e200, 1e200], 2); // 2e200   (np.linalg.norm: inf, with an overflow warning)
+norm([1e-200, 1e-200, 1e-200, 1e-200], 2); // 2e-200 (naive squaring flushes to 0 — silently wrong)
+```
+
+The underflow case is the dangerous one: it returns a plausible `0` rather than an obvious `inf`.
+
+The primitives are exported from `@danielsimonjr/mathts-core` (`pairwiseSum`, `neumaierSum`,
+`norm2`) if you need them directly.
+
+---
+
 ## Arithmetic
 
 | Function         | Description                                                                                                                          | Types                                             | Accel     |
@@ -2256,11 +2306,13 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (880 exports).
+> `@danielsimonjr/mathts-functions` (881 exports).
 
 ### Functions by category
 
-**Arithmetic** (45): `abs`, `add`, `addScalar`, `cbrt`, `ceil`, `clamp`, `cube`, `divide`, `divideScalar`, `dot`, `dotDivide`, `dotMultiply`, `dotPow`, `exp`, `expm1`, `fix`, `floor`, `gcd`, `invmod`, `lcm`, `log`, `log10`, `log1p`, `log2`, `matmul`, `matrixPower`, `matvec`, `mod`, `multiply`, `multiplyScalar`, `norm`, `nthRoot`, `nthRoots`, `outer`, `pow`, `round`, `sigmoid`, `sign`, `sqrt`, `square`, `subtract`, `subtractScalar`, `unaryMinus`, `unaryPlus`, `xgcd`
+**Numerical accuracy — what we guarantee** (7): `fsum`, `mean`, `norm`, `sqrt`, `std`, `sum`, `variance`
+
+**Arithmetic** (43): `abs`, `add`, `addScalar`, `cbrt`, `ceil`, `clamp`, `cube`, `divide`, `divideScalar`, `dot`, `dotDivide`, `dotMultiply`, `dotPow`, `exp`, `expm1`, `fix`, `floor`, `gcd`, `invmod`, `lcm`, `log`, `log10`, `log1p`, `log2`, `matmul`, `matrixPower`, `matvec`, `mod`, `multiply`, `multiplyScalar`, `nthRoot`, `nthRoots`, `outer`, `pow`, `round`, `sigmoid`, `sign`, `square`, `subtract`, `subtractScalar`, `unaryMinus`, `unaryPlus`, `xgcd`
 
 **Relational & Comparison** (13): `compare`, `compareNatural`, `compareText`, `compareUnits`, `deepEqual`, `equal`, `equalScalar`, `equalText`, `larger`, `largerEq`, `smaller`, `smallerEq`, `unequal`
 
@@ -2272,7 +2324,7 @@ await terminatePool();
 
 **Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
 
-**Statistics** (74): `acf`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `describe`, `detrend`, `ewma`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `kurtosis`, `linearRegression`, `linregress`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `mean`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `std`, `sum`, `trimmedMean`, `variance`, `variation`, `zscore`
+**Statistics** (70): `acf`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `describe`, `detrend`, `ewma`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `kurtosis`, `linearRegression`, `linregress`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
 
 **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 

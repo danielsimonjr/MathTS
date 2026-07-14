@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `sum` / `mean` were ~46,000× less accurate than NumPy
+
+`sum` accumulated naively (`s += x`), so the running total grew large while the addends stayed
+small and each addition rounded off a little more of it: error grows as **O(n)·ε**. NumPy uses
+pairwise summation — error **O(log n)·ε**. Measured on 1e6 copies of `0.1` (exact answer 100000):
+
+| accumulation | relative error |
+| ------------ | -------------- |
+| naive (what shipped) | **1.3e-11** |
+| **pairwise (now)** | **2.9e-16** — identical to `np.sum` |
+| `fsum` (new) | **0** — exact |
+
+`mean`, `std` and `variance` all inherit `sum`'s error, so this was the largest accuracy defect in
+the library. **Pairwise costs the same number of additions** — measured **1.03× faster** than the
+naive loop (eight independent accumulators break the serial dependency chain). There was no
+speed/accuracy trade to make; the naive version was simply worse.
+
+Fixed on every path a caller can reach: `sum`/`mean` (`Array` and `Float64Array`),
+`ComputePool.sum`, and the factory `sum`.
+
+### Fixed — `norm(x, 2)` overflowed and underflowed (NumPy still does)
+
+`sqrt(Σxᵢ²)` squares before it adds, so it dies well inside the representable range. Now uses
+LAPACK's `dnrm2` scaling:
+
+```ts
+norm([1e200, 1e200, 1e200, 1e200], 2);     // 2e200    (np.linalg.norm: inf + overflow warning)
+norm([1e-200, 1e-200, 1e-200, 1e-200], 2); // 2e-200   (naive squaring: 0)
+```
+
+The **underflow** case was the dangerous one: it returned a plausible `0` rather than an obvious
+`inf`.
+
+### Added — `fsum(x)`, exactly-rounded summation (`math.fsum` equivalent)
+
+Pairwise summation is accurate to ~machine epsilon and free, but it cannot recover a value that
+catastrophic cancellation has already destroyed:
+
+```ts
+sum([1e16, 1, -1e16]);  // 0   (np.sum gives 0.0 too)
+fsum([1e16, 1, -1e16]); // 1   (exact; math.fsum gives 1.0)
+```
+
+Neumaier compensation, ~2–4× slower, so opt-in. For conservation checks, residuals, and
+long-running accumulators.
+
+### Added — stable numeric primitives in `@danielsimonjr/mathts-core`
+
+`pairwiseSum`, `neumaierSum`, `norm2` are exported directly. `@danielsimonjr/mathts-parallel` now
+depends on `core` for them (0 new cycles) and uses them in `ComputePool`'s sequential reductions.
+
 ### Added — GPU FFT (Stockham autosort, f32); `parallelFFT` routes to it
 
 Radix-2 **Stockham autosort**: *self-sorting*, so each pass scatters into a second buffer and the

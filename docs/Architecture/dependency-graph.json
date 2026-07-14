@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-14",
-    "totalFiles": 1027,
-    "totalModules": 77,
-    "totalExports": 4952
+    "totalFiles": 1028,
+    "totalModules": 78,
+    "totalExports": 4959
   },
   "entryPoints": [
     {
@@ -598,6 +598,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/stable.js",
+            "imports": ["pairwiseSum", "neumaierSum", "norm2"],
+            "reExport": true
+          },
+          {
             "file": "./types/interfaces.js",
             "imports": [
               "MathTSValue",
@@ -765,6 +770,9 @@
           "registry",
           "math",
           "DEFAULT_CONFIG",
+          "pairwiseSum",
+          "neumaierSum",
+          "norm2",
           "VERSION",
           "MathTSValue",
           "Scalar",
@@ -893,6 +901,9 @@
           "registry",
           "math",
           "DEFAULT_CONFIG",
+          "pairwiseSum",
+          "neumaierSum",
+          "norm2",
           "MathTSValue",
           "Scalar",
           "BackendType",
@@ -1301,6 +1312,17 @@
           "FactoryDependencies",
           "FactoryImport"
         ]
+      }
+    },
+    "core/numeric": {
+      "core/src/numeric/stable.ts": {
+        "description": "Numerically stable reduction primitives.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["pairwiseSum", "neumaierSum", "norm2"],
+        "functions": ["pairwiseSum", "neumaierSum", "norm2"]
       }
     },
     "core/typed": {
@@ -6654,7 +6676,13 @@
             "imports": ["wasmLoader"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
         "exports": ["createNorm"],
         "constants": ["createNorm"]
       },
@@ -14396,10 +14424,6 @@
             "imports": ["improveErrorMessage"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -14410,7 +14434,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseSum"]
+          }
+        ],
         "exports": ["createSum"],
         "constants": ["createSum"]
       },
@@ -16539,6 +16569,11 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
+            "imports": ["pairwiseSum", "neumaierSum", "norm2"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": ["UnitInstance"]
           },
           {
@@ -16593,6 +16628,7 @@
           "compare",
           "min",
           "max",
+          "fsum",
           "sum",
           "mean",
           "variance",
@@ -16659,6 +16695,7 @@
           "compare",
           "min",
           "max",
+          "fsum",
           "sum",
           "mean",
           "variance",
@@ -28887,6 +28924,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseSum", "norm2"]
+          },
+          {
             "package": "@danielsimonjr/mathts-workerpool",
             "directory": "packages/workerpool",
             "imports": [
@@ -33654,6 +33696,10 @@
         "files": ["core/src/factory/factory.ts", "core/src/factory/index.ts"]
       },
       {
+        "name": "Core/numeric",
+        "files": ["core/src/numeric/stable.ts"]
+      },
+      {
         "name": "Core/typed",
         "files": [
           "core/src/typed/index.ts",
@@ -34963,17 +35009,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1027,
-    "totalModules": 77,
-    "totalLinesOfCode": 171431,
-    "totalExports": 4952,
+    "totalTypeScriptFiles": 1028,
+    "totalModules": 78,
+    "totalLinesOfCode": 171641,
+    "totalExports": 4959,
     "totalClasses": 56,
     "totalInterfaces": 410,
-    "totalFunctions": 1606,
+    "totalFunctions": 1609,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1534,
-    "totalReExports": 1795,
+    "totalConstants": 1535,
+    "totalReExports": 1798,
     "totalTypeOnlyImports": 524,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

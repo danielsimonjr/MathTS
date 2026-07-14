@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { pairwiseSum, norm2 } from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
   Transfer,
@@ -591,9 +592,10 @@ export class ComputePool {
    */
   async sum(data: Float64Array): Promise<ParallelResult<number>> {
     if (!this.shouldParallelize(data.length, 'sum')) {
-      let s = 0;
-      for (let i = 0; i < data.length; i++) s += data[i];
-      return this.seqResult(s);
+      // PAIRWISE, not `s += data[i]`. Naive accumulation grows error as O(n)*eps; pairwise as
+      // O(log n)*eps. On 1e6 elements that is 1.3e-11 vs 2.9e-16 — we were ~46,000x less accurate
+      // than NumPy's `np.sum`, and `mean`/`std`/`variance` all inherit it.
+      return this.seqResult(pairwiseSum(data));
     }
     return toParallelResult(await this.workerPool.sum(data));
   }
@@ -772,9 +774,10 @@ export class ComputePool {
    */
   async norm(data: Float64Array): Promise<ParallelResult<number>> {
     if (!this.shouldParallelize(data.length, 'norm')) {
-      let s = 0;
-      for (let i = 0; i < data.length; i++) s += data[i] * data[i];
-      return this.seqResult(Math.sqrt(s));
+      // LAPACK dnrm2 scaling, not `sqrt(sum(x*x))`: squaring before adding overflows to Infinity
+      // around 1e200 and FLUSHES TO ZERO around 1e-200 (a silently wrong answer, worse than the
+      // overflow). NumPy has this bug — `np.linalg.norm([1e200]*4)` is `inf`. We don't.
+      return this.seqResult(norm2(data));
     }
     return toParallelResult(await this.workerPool.norm(data));
   }

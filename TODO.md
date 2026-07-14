@@ -11,7 +11,27 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
-### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
+### Numerical accuracy (NumPy/SciPy parity)
+
+- [x] ✅ **`sum`/`mean` were ~46,000× less accurate than NumPy — FIXED** (2026-07-14). Naive `s += x`
+      → error O(n)·ε. Now **pairwise (cascade) summation** like `np.sum` → O(log n)·ε.
+      1e6 × 0.1: **1.3e-11 → 2.9e-16** (NumPy: 2.9e-16 — parity). `mean`/`std`/`variance` inherit it.
+      **1.03× FASTER** than naive (8 accumulators break the dependency chain) — there was no trade.
+      Fixed on EVERY reachable path: typed `sum`/`mean` (Array + Float64Array), `ComputePool.sum`,
+      factory `sum`. ⚠️ I first fixed the _factory_ layer and nothing changed — the public `sum` is a
+      FOURTH implementation in `typed/arithmetic.ts`. Same trap as the three `fft`s.
+- [x] ✅ **`norm(x,2)` overflowed/underflowed — FIXED** (2026-07-14). `sqrt(Σx²)` squares before
+      adding → `Infinity` at 1e200 and **silently 0** at 1e-200. Now LAPACK `dnrm2` scaling:
+      2e200 / 2e-200 exactly. **NumPy still gets this wrong** (`np.linalg.norm([1e200]*4)` → `inf`).
+- [x] ✅ **`fsum` added** — exactly-rounded (Neumaier) summation, the `math.fsum` equivalent.
+      `fsum([1e16,1,-1e16])` = 1 where `sum` (and `np.sum`) give 0.
+- [ ] **Continue the NumPy/SciPy accuracy audit.** Next candidates, in order of likely payoff:
+      `cumsum` (still naive), `dot`/`distance` in ComputePool (still naive), `prod` (log-space for
+      overflow?), `logsumexp` (does it exist? it should), `hypot`, `corr`/`cov` (two-pass?),
+      `quantile` interpolation modes vs `np.quantile`. **Audit the path the caller takes**, and
+      compare against real NumPy — it is installed and `python -c "import numpy"` works.
+
+### WebGPU acceleration epic### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
 
 - [x] **Spec 1a — shared GPU foundation extraction** — ✅ DONE (2026-07-10). New leaf
       package `@danielsimonjr/mathts-gpu` (`GPUContext`/`BufferPool`/`detect`/generic

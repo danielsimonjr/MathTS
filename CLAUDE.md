@@ -91,7 +91,8 @@ signal/                    # @danielsimonjr/mathts-signal - signal-processing do
 ```
 # Per-package dependencies (verified from each package.json — source of truth):
 core        → typed-function
-parallel    → workerpool                          # low-level; NOT core/matrix
+parallel    → workerpool, core                    # core ONLY for the stable numeric
+#                                                  primitives (pairwiseSum/norm2); still NOT matrix
 expression  → core
 matrix      → core, parallel, gpu
 tensor      → core, matrix
@@ -104,7 +105,7 @@ plot        → core, functions, expression
 # Same edges read as "← is depended on by":
 typed-function ← core
 workerpool     ← parallel
-core           ← expression, matrix, tensor, autograd, functions, workbook, compat, plot
+core           ← expression, matrix, tensor, autograd, functions, workbook, compat, plot, parallel
 parallel       ← matrix, functions, compat
 expression     ← functions, plot, workbook
 matrix         ← tensor, functions, compat
