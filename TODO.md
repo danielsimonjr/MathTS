@@ -90,12 +90,21 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
       instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
       `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
-- [ ] ⚠️ **NEEDS DANIEL — the `Release` workflow cannot open its PR.** It fails with _"GitHub Actions is
-      not permitted to create or approve pull requests"_: the changesets action wants to open a
-      "Version Packages" PR, which requires **Settings → Actions → General → "Allow GitHub Actions to
-      create and approve pull requests"**. That is a repo permissions setting, so I have not flipped it.
-      Pre-existing and unrelated to the GPU work; releases are being cut locally in the meantime
-      (`npx changeset version && npx changeset publish`), which is what has always happened here.
+- [x] ✅ **`Release` workflow unblocked — green for the first time** (2026-07-13). THREE stacked
+      failures, each hidden behind the last: 1. _"GitHub Actions is not permitted to create or approve pull requests"_ — repo setting, flipped
+      with Daniel's authorization (`can_approve_pull_request_reviews: true`).
+      `default_workflow_permissions` stays `read` (least privilege; release.yml declares its own
+      writes). Actions can now CREATE the Version Packages PR — it still cannot merge its own
+      output, so the no-unattended-self-merge invariant holds. 2. _"No commits between main and changeset-release/main"_ — an EMPTY PR. **11 changesets for
+      `@danielsimonjr/mathts-workbook`, which is in `ignore`** (unpublished). A changeset whose only
+      package is ignored plans ZERO bumps → empty diff → GitHub rejects the PR → red on every push,
+      forever. Parked in `.changeset-parked/` (with a restore README) rather than deleted.
+      ⚠️ A subdir _inside_ `.changeset/` does NOT work — changesets descends into it and tries to
+      read `<dir>/changes.md`. Verified, not assumed.
+      ⚠️ Do NOT "fix" this by gating the step on _"anything releasable?"_ — after a Version Packages
+      PR merges there are zero changesets, and that is exactly when the PUBLISH path runs. The
+      guard would silently disable publishing. (I nearly shipped that.) 3. `changesets/action@v1` was **not SHA-pinned**, and `v1` is a **mutable branch**, not a tag.
+      Pinned to `a45c4d5` (= v1.9.0).
 - [x] ✅ **Divergent dead GPU thresholds unified** (2026-07-13). 65,536 live vs 100,000 / 50,000 /
       10,000 / 200,000 dead across `Backend.ts` + `BackendManager.ts` → all now single-source
       `GPU_MIN_ELEMENTS`. The `Backend.test.ts` assertion pins the **constant**, not a copy of its
