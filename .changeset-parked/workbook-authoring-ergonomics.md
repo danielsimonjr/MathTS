@@ -1,5 +1,5 @@
 ---
-"@danielsimonjr/mathts-workbook": minor
+'@danielsimonjr/mathts-workbook': minor
 ---
 
 CLI authoring ergonomics for the Workbook.

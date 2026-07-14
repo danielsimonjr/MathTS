@@ -1,5 +1,5 @@
 ---
-"@danielsimonjr/mathts-workbook": minor
+'@danielsimonjr/mathts-workbook': minor
 ---
 
 Persistent `serve` session + incremental re-execution + `functions`/`meta` commands.

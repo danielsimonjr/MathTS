@@ -1,5 +1,5 @@
 ---
-"@danielsimonjr/mathts-workbook": minor
+'@danielsimonjr/mathts-workbook': minor
 ---
 
 Cell mutation via the CLI — editing a `.mtsw` is now a first-class CLI operation.

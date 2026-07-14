@@ -1,5 +1,5 @@
 ---
-"@danielsimonjr/mathts-workbook": minor
+'@danielsimonjr/mathts-workbook': minor
 ---
 
 Headless v1: the workbook runtime can now load and run `.mtsw` files end-to-end.

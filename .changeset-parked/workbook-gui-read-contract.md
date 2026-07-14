@@ -1,5 +1,5 @@
 ---
-"@danielsimonjr/mathts-workbook": minor
+'@danielsimonjr/mathts-workbook': minor
 ---
 
 Machine read-contract for GUI/tooling: a stable, versioned `--json` envelope and read/introspect/targeted-run commands.
