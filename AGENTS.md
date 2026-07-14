@@ -8,7 +8,7 @@
 
 MathTS is a TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker
 acceleration, plus a reactive `.mtsw` Scientific Workbook. npm-workspaces
-monorepo (22 packages) orchestrated by Turborepo. All packages are ESM-only,
+monorepo (24 packages) orchestrated by Turborepo. All packages are ESM-only,
 target ES2022, bundle with `tsup`, test with `vitest`. See `README.md` for the
 human-facing overview.
 
@@ -19,7 +19,7 @@ human-facing overview.
 | Task          | Command                                                 | Notes                                                                                          |
 | ------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Build all     | `npm run build`                                         | turbo, respects dep graph                                                                      |
-| Typecheck all | `npm run typecheck`                                     | turbo; **green baseline = 28/28, 0 errors**                                                    |
+| Typecheck all | `npm run typecheck`                                     | turbo; **green baseline = 32/32, 0 errors**                                                    |
 | Test all      | `npm run test`                                          | vitest via turbo                                                                               |
 | Lint / format | `npm run lint` · `npm run format`                       | eslint + prettier                                                                              |
 | Coverage      | `npm run test:coverage`                                 | measurement scoped to an include-list in vitest.config.ts                                      |
@@ -55,9 +55,21 @@ What remains in `functions/src/` is **all reachable from
 
 A few legacy synced files were intentionally KEPT because direct tests exercise
 them: `functions/src/signal/{fft,conv}.ts` and `functions/src/type/local/Decimal.ts`.
-(The vestigial pre-migration AssemblyScript-source-as-`.ts` under `functions/src/wasm/`
-was deleted 2026-06-27 — the real WASM backend is `assembly/src/`; only the active
-JS dispatch bridges + loader remain in `functions/src/wasm/`.)
+
+> ⚠️ **There are THREE different `fft`s in this repo. Know which one you are touching.**
+>
+> | symbol                     | where                                          | who reaches it                                                                  |
+> | -------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------- |
+> | `fft` (**the public one**) | `functions/src/matrix/fft.ts` (mathjs factory) | `import { fft } from '@danielsimonjr/mathts-functions'`                         |
+> | `parallelFFT`              | `functions/src/typed/signal.ts`                | exported as `parallelFFT`; Float64Array in/out; routes to the GPU when opted in |
+> | `fft` (**not exported**)   | `functions/src/signal/fft.ts`                  | internal — backs `conv.ts` only                                                 |
+>
+> All three now share one core: **`functions/src/signal/fft-core-f64.ts`**. Optimising the wrong
+> one and publishing a claim about it is a mistake that has already been made here — verify with
+> `import * as F from '@danielsimonjr/mathts-functions'; F.fft === F.parallelFFT` (it is `false`).
+> (The vestigial pre-migration AssemblyScript-source-as-`.ts` under `functions/src/wasm/`
+> was deleted 2026-06-27 — the real WASM backend is `assembly/src/`; only the active
+> JS dispatch bridges + loader remain in `functions/src/wasm/`.)
 
 `functions/tsconfig.json` now uses `strict:true` (flipped 2026-06-27). The
 former ~430 strict violations across the active graph (activated factories +
@@ -75,23 +87,25 @@ input-position param types). Trust the **export surface in
 
 ## Where to find X (navigation hub)
 
-| You want…                                                                 | Look in                                                                         |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Numeric types (Complex/Fraction/BigNumber), typed-function, factory       | `core/src/`                                                                     |
-| Dense/Sparse matrix, JS/WASM/GPU backends, BackendManager, decompositions | `matrix/src/`                                                                   |
-| Rank-N Tensor (Float64Array)                                              | `tensor/src/`                                                                   |
-| Autodiff (forward DualTensor, reverse Tape)                               | `autograd/src/`                                                                 |
-| **Live** math functions (arithmetic, trig, stats, signal, CAS, …)         | `functions/src/typed/`, `functions/src/factories/`                              |
-| ComputePool / WebWorker ops                                               | `parallel/src/`                                                                 |
-| Expression parser/compiler/evaluator                                      | `expression/src/` (wired via `functions/src/factories/evaluate.ts`)             |
-| `.mtsw` notebook runtime (parser, graph, executor)                        | `workbook/src/`                                                                 |
-| mathjs-compat shim (`create(all)`)                                        | `compat/src/`                                                                   |
-| AssemblyScript WASM source (the sole WASM backend — functions + matrix)   | `assembly/src/`                                                                 |
-| Forked typed-function / workerpool                                        | `packages/typed-function/`, `packages/workerpool/`                              |
-| Thin re-export packages (parser, ast, units, linalg, arithmetic, …)       | top-level dirs; they re-export, no impl                                         |
-| Architecture / API / inventory docs                                       | `docs/Architecture/`, `docs/api/`, `docs/inventory/`                            |
-| Roadmaps, gap analyses, WASM plans                                        | `docs/roadmap/` (active); dated one-off plans archived in `docs/archive/plans/` |
-| Standalone tools (dep-graph, benchmarks, mathjs-port)                     | `tools/`                                                                        |
+| You want…                                                                                  | Look in                                                                         |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Numeric types (Complex/Fraction/BigNumber), typed-function, factory                        | `core/src/`                                                                     |
+| Dense/Sparse matrix, JS/WASM/GPU backends, BackendManager, decompositions                  | `matrix/src/`                                                                   |
+| **Shared WebGPU foundation** (GPUContext, BufferPool, ShaderManager, `serializeGpu`, flag) | `gpu/src/` (`@danielsimonjr/mathts-gpu`)                                        |
+| **GPU kernels** (element-wise chain, fused chain+reduce, FFT)                              | `functions/src/gpu/`                                                            |
+| Rank-N Tensor (Float64Array)                                                               | `tensor/src/`                                                                   |
+| Autodiff (forward DualTensor, reverse Tape)                                                | `autograd/src/`                                                                 |
+| **Live** math functions (arithmetic, trig, stats, signal, CAS, …)                          | `functions/src/typed/`, `functions/src/factories/`                              |
+| ComputePool / WebWorker ops                                                                | `parallel/src/`                                                                 |
+| Expression parser/compiler/evaluator                                                       | `expression/src/` (wired via `functions/src/factories/evaluate.ts`)             |
+| `.mtsw` notebook runtime (parser, graph, executor)                                         | `workbook/src/`                                                                 |
+| mathjs-compat shim (`create(all)`)                                                         | `compat/src/`                                                                   |
+| AssemblyScript WASM source (the sole WASM backend — functions + matrix)                    | `assembly/src/`                                                                 |
+| Forked typed-function / workerpool                                                         | `packages/typed-function/`, `packages/workerpool/`                              |
+| Thin re-export packages (parser, ast, units, linalg, arithmetic, …)                        | top-level dirs; they re-export, no impl                                         |
+| Architecture / API / inventory docs                                                        | `docs/Architecture/`, `docs/api/`, `docs/inventory/`                            |
+| Roadmaps, gap analyses, WASM plans                                                         | `docs/roadmap/` (active); dated one-off plans archived in `docs/archive/plans/` |
+| Standalone tools (dep-graph, benchmarks, mathjs-port)                                      | `tools/`                                                                        |
 
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo
 Structure**. Don't duplicate it here — reference it.
@@ -106,6 +120,81 @@ Structure**. Don't duplicate it here — reference it.
 
 ---
 
+## Acceleration tiers — and how to not lie about them
+
+Four tiers: **JS → parallel (worker pool) → WASM (AssemblyScript) → WebGPU (f32, opt-in)**.
+Which one wins is **per-kernel and measured**, never assumed.
+
+**The GPU tier is OFF by default.** `enableGpu()` is the caller's consent to f32 precision; with
+the flag off, every path is bit-identical f64. Every GPU dispatch is **never-throw**: it returns
+`null` (unavailable / not opted in / below threshold / unsupported op) and the caller falls
+through to the exact CPU path.
+
+**Thresholds are per-kernel, not global.** `GPU_MIN_ELEMENTS` (65,536) suits the memory-bound
+element-wise chain. The **FFT's threshold is 262,144** — at 65,536 the GPU wins by only 1.17×,
+inside the noise and nowhere near enough to trade f64 for f32 (an FFT makes log₂(n) passes, so it
+amortises the upload more slowly). A shared threshold is convenient and wrong.
+
+**Things that are deliberately NOT accelerated** — each is a measured loss, not a gap:
+
+- A **standalone GPU reduction** (`ops: []`) — uploads n floats to return one number; 3–9× slower
+  than a plain JS sum. Declined on purpose.
+- A **single** element-wise op on the GPU — pure transfer tax. Only a _fused chain_ pays.
+- The **WASM FFT kernel** — 6× SLOWER than the flat JS core (1039 ms vs 170 ms at n=2²⁰).
+  Unreachable from any public export. **Do not wire it up assuming "WASM is faster".**
+
+### Benchmarking rules (learned the hard way — the tier order was wrong TWICE)
+
+1. **Measure the path the caller ACTUALLY takes.** Read the dispatch branch. A GPU speedup was
+   published against `fftCoreFloat64` while `parallelFFT` was really taking the worker path at
+   every size where the GPU engages. Claimed 8.5×; real ~3×.
+2. **Measure the symbol a consumer IMPORTS**, not a source file you assume is it. This repo has
+   three different `fft`s; the public one was not the one being optimised.
+3. **Warm the JIT** (≥5 reps) — a cold baseline inflated a CPU number 3×.
+4. **Never `TypedArray.from(typedArray)`** — it is the generic per-element `ToNumber` path,
+   ~73× slower than the constructor (433 ms vs 5.9 ms at n=2²⁰). It has corrupted a benchmark,
+   a dispatch, and a JS fallback in this repo. Use `new Float32Array(x)`.
+5. **A `null` return must FAIL the benchmark**, never be timed as ~0 ms. A dead tier once
+   reported as "infinitely fast".
+6. **Re-measure ALL tiers in ONE run** before trusting a ranking, and **commit the benchmark** —
+   a published table nothing regenerates will rot.
+7. **Gate on a reproducible row.** The crossover row is by construction the most marginal and the
+   most load-sensitive; assert where the margin is robust and print the rest.
+
+---
+
+## Browser / WebGPU testing
+
+- `npm run test:browser` → `vitest.config.browser.ts` (Playwright). Local uses **system Chrome,
+  headed** — Playwright's bundled `chrome-headless-shell` has **no GPU adapter**, which once made
+  the whole suite a silent no-op. CI uses full Chromium in new-headless mode; the config is
+  keyed off `process.env.CI`.
+- **CI has a WebGPU adapter, and it is SOFTWARE (SwiftShader).** So `skipIf(!adapter)` does **not**
+  skip there. Two consequences:
+  - **Perf assertions must gate on `REAL_GPU`** (`functions/tests/helpers/gpu-hardware.ts`).
+  - **f32 tolerances must come from the WGSL spec, not from your card.** WGSL only promises
+    `sin`/`cos` to 2⁻¹¹ (~4.9e-4) _absolute_; SwiftShader spends that allowance where NVIDIA does
+    not. Use `F32_REL_TOL` / `PEAK_REL_TOL`, which are adapter-gated.
+- Wall-clock CPU benchmarks live in `tests/benchmark/` and run **isolated** via
+  `npm run test:bench` (`vitest.config.bench.ts`, single-threaded). In the aggregate they measure
+  machine contention, not code.
+
+### WGSL gotchas (all cost real time)
+
+- `shared` is a **reserved word**.
+- WGSL **const-folds** `bitcast<f32>(0x7fc00000u)` even inside a function body and then rejects
+  NaN/±Inf. Pass IEEE bit patterns in via a **uniform**.
+- WGSL leaves `log(x<=0)`, `atanh(|x|>=1)`, and division by zero **indeterminate** — guard them or
+  the GPU disagrees with JS.
+- **A validation error does NOT throw.** It invalidates the command buffer, `submit()` does
+  nothing, and the zero-initialised staging buffer reads back as **zeros** — a silently wrong
+  answer. Check device limits _and_ use `pushErrorScope('validation')`.
+- The error scope is a **per-device LIFO stack**, so concurrent dispatches pop each other's scope.
+  Every GPU entry point must funnel through the shared `serializeGpu` (in `gpu/src/`).
+- `BufferPool` rounds sizes **up** — bounds-check against an `n` uniform, never `arrayLength()`.
+
+---
+
 ## File boundaries & conventions
 
 - **Import extensions:** use `.js` (ESM resolution). Exception: `tensor/src/`
@@ -117,7 +206,14 @@ Structure**. Don't duplicate it here — reference it.
 - **Re-export packages** (`parser/`, `ast/`, `evaluator/`, `units/`, `numbers/`,
   `linalg/`, `arithmetic/`, `trigonometry/`, `statistics/`, `signal/`) contain
   **no implementation** — edit the source package they re-export, not these.
-- **Don't `npm publish`** (2FA-gated). Versioning is via Changesets.
+- **Carry work to RELEASED.** Versioning is via Changesets. An older revision of this file said
+  "don't `npm publish` (2FA-gated)" — that is **no longer true** and was stranding work
+  undeployed. The flow is: changeset → commit → push → CI opens a "Version Packages" PR → merge
+  it → publish. CI cannot publish today (the repo's `NPM_TOKEN` secret is empty), so the session
+  lead runs `npx changeset publish` locally, then `git push --tags`.
+  **Then verify against the registry, not the publish log** — `npm pack` the published tarball
+  into a clean dir _outside_ `~` and typecheck a real consumer against it with
+  `skipLibCheck: false`. A green repo gate is not a working package.
 
 ---
 
