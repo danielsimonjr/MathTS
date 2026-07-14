@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — the public `fft()` was the SLOWEST FFT in the library (~6× faster now)
+
+`fft()` did its butterfly arithmetic in **Complex objects** — a `{ re, im }` allocation per
+twiddle step and per butterfly — while a flat `Float64Array` radix-2 core already existed in
+the same package (the one `parallelFFT` uses) and was ~8× faster for the identical transform.
+So the FFT every consumer reaches by default was the slowest path available.
+
+| n         | public `fft` before | public `fft` after | `parallelFFT` (raw Float64Array) |
+| --------- | ------------------- | ------------------ | -------------------------------- |
+| 262,144   | 607 ms              | **96 ms**          | 33 ms                            |
+| 1,048,576 | 2987 ms             | **521 ms**         | 170 ms                           |
+
+The `ComplexNumber[]` return type was **not** the cause: boxing the results once at the
+boundary is cheap; doing the *arithmetic* in boxes is what cost 8×. Both surfaces now share
+one core (`signal/fft-core-f64.ts`). Same f64 arithmetic, same 1/n inverse scaling, same
+results, unchanged public API. The residual gap to `parallelFFT` is the boxing, inherent to
+the return type.
+
+Found while establishing an honest CPU baseline for a *GPU* FFT — the GPU work would have
+been measured against a baseline that was itself 8× off. Also removed six now-dead
+Complex-object helpers.
+
+### Note — the WASM FFT kernel is SLOWER than the JS core; do not wire it up
+
+Measured on the same machine: at n=2²⁰ the AssemblyScript FFT takes **1039 ms** against
+**170 ms** for the flat JS core (6× slower); at n=2¹⁸, 141 ms vs 33 ms. The kernel is a scalar
+radix-2 and its dispatch copies the data three times. This mirrors the 2026-07 WASM audit,
+which retired the WASM paths for element-wise ops / transpose / reductions for exactly this
+reason — FFT was never audited.
+
+It is currently **unreachable from any public export**, so it is dead weight rather than a live
+pessimisation. A warning now sits at the route in `functions/src/matrix/fft.ts` so nobody wires
+it into a public path assuming "WASM is faster".
+
 ### Added — fused GPU chain + on-device reduction (`fuseUnaryChainReduceAsync`)
 
 `sum(exp(sin(x)))` and friends now reduce **on the GPU**, returning a `number` instead

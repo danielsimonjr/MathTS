@@ -2074,6 +2074,7 @@
     "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
+    "functions/src/signal/fft-core-f64.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/typed/special.ts",

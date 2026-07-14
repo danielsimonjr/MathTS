@@ -16,6 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 import {
@@ -62,92 +63,9 @@ function nextPowerOf2(n: i32): i32 {
   return Math.pow(2, Math.ceil(Math.log2(n))) as i32;
 }
 
-/**
- * Bit reverse for FFT
- */
-function bitReverse(x: i32, bits: i32): i32 {
-  let result: i32 = 0;
-  for (let i: i32 = 0; i < bits; i++) {
-    result = (result << 1) | (x & 1);
-    x >>= 1;
-  }
-  return result;
-}
-
 // =============================================================================
 // Core FFT Implementation (AssemblyScript-Friendly)
 // =============================================================================
-
-/**
- * Radix-2 FFT core using Float64Array for WASM compatibility
- */
-function fftCoreFloat64(
-  realIn: Float64Array,
-  imagIn: Float64Array,
-  inverse: boolean = false
-): { real: Float64Array; imag: Float64Array } {
-  const n: i32 = realIn.length;
-  const bits: i32 = Math.log2(n) as i32;
-
-  // Bit-reverse reorder
-  const real = new Float64Array(n);
-  const imag = new Float64Array(n);
-  for (let i: i32 = 0; i < n; i++) {
-    const j: i32 = bitReverse(i, bits);
-    real[j] = realIn[i];
-    imag[j] = imagIn[i];
-  }
-
-  // Direction factor
-  const direction: f64 = inverse ? 1.0 : -1.0;
-
-  // Butterfly operations
-  for (let size: i32 = 2; size <= n; size *= 2) {
-    const halfSize: i32 = size / 2;
-    const angle: f64 = (direction * 2.0 * Math.PI) / size;
-    const wRe: f64 = Math.cos(angle);
-    const wIm: f64 = Math.sin(angle);
-
-    for (let start: i32 = 0; start < n; start += size) {
-      let tRe: f64 = 1.0;
-      let tIm: f64 = 0.0;
-
-      for (let j: i32 = 0; j < halfSize; j++) {
-        const evenIdx: i32 = start + j;
-        const oddIdx: i32 = start + j + halfSize;
-
-        // Twiddle factor multiplication
-        const uRe: f64 = real[oddIdx] * tRe - imag[oddIdx] * tIm;
-        const uIm: f64 = real[oddIdx] * tIm + imag[oddIdx] * tRe;
-
-        // Butterfly
-        const eRe: f64 = real[evenIdx];
-        const eIm: f64 = imag[evenIdx];
-
-        real[evenIdx] = eRe + uRe;
-        imag[evenIdx] = eIm + uIm;
-        real[oddIdx] = eRe - uRe;
-        imag[oddIdx] = eIm - uIm;
-
-        // Update twiddle factor
-        const nextTRe: f64 = tRe * wRe - tIm * wIm;
-        const nextTIm: f64 = tRe * wIm + tIm * wRe;
-        tRe = nextTRe;
-        tIm = nextTIm;
-      }
-    }
-  }
-
-  // Scale for inverse
-  if (inverse) {
-    for (let i: i32 = 0; i < n; i++) {
-      real[i] /= n;
-      imag[i] /= n;
-    }
-  }
-
-  return { real, imag };
-}
 
 // =============================================================================
 // Four-Step (Cooley-Tukey transpose) FFT

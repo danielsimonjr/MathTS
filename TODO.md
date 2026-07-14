@@ -139,10 +139,29 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       is how a zeroed buffer returns as a plausible `sum`; and the error scope being a per-device LIFO
       **stack**, so two overlapping dispatches (`Promise.all`) corrupt each other — dispatches are now
       serialized. Both are pinned by tests.
-- [ ] **Spec 3b — FFT on the GPU** (the remaining GPU-friendly category). Compute-bound (~20 ops/element
-      vs the chain's 4), which is the profile that actually favours the GPU — but it is a much bigger
-      kernel (Stockham autosort, complex arithmetic, bit-reversal). **Measure against the existing WASM
-      FFT first**, end-to-end through the real function, before writing a line of WGSL.
+- [x] ✅ **Public `fft()` was the SLOWEST FFT in the library — FIXED, ~6×** (2026-07-13). Found while
+      establishing an honest CPU baseline for a GPU FFT: `fft()` did its butterflies in **Complex
+      objects** (a `{re,im}` alloc per twiddle and per butterfly) while the flat `Float64Array` core
+      used by `parallelFFT` sat in the same package, 8× faster for the identical transform.
+      n=2²⁰: **2987 ms → 521 ms**; n=2¹⁸: 607 ms → 96 ms. The `ComplexNumber[]` return type was NOT the
+      cause — boxing once at the boundary is cheap; doing the _arithmetic_ in boxes cost 8×. One shared
+      core now (`signal/fft-core-f64.ts`), same f64 results, unchanged API. 6 dead helpers deleted.
+      Guard: `tests/benchmark/fft-public-surface.test.ts`.
+      **I nearly wrote a GPU FFT against a baseline that was itself 8× wrong.**
+- [ ] ⚠️ **The WASM FFT kernel is SLOWER than the JS core — decide whether to retire it.** n=2²⁰: AS
+      WASM **1039 ms** vs flat JS core **170 ms** (6× slower); n=2¹⁸: 141 ms vs 33 ms. Scalar radix-2 +
+      three data copies per dispatch. Same conclusion as the 2026-07 WASM audit reached for
+      element-wise/transpose/reductions; FFT was simply never audited. Currently **unreachable from any
+      public export** (the public `fft` is typed `parallelFFT`; the factory `fft` is not exported), so
+      it is dead weight, not a live pessimisation. A warning sits at the route
+      (`functions/src/matrix/fft.ts`). Options: retire the AS kernel (shrinks the binary) or SIMD-ize
+      it. Do NOT wire it into a public path as-is.
+- [ ] **Spec 3b — FFT on the GPU** (the last GPU-friendly category). Compute-bound (~20 ops/element vs
+      the chain's 4), the profile that genuinely favours a GPU. **The baseline is now correct**: the
+      fastest CPU FFT is `parallelFFT` / the flat core at **~170 ms @ n=2²⁰** (f64) — NOT the 2987 ms
+      public `fft` and NOT the 1039 ms WASM kernel. A GPU FFT must beat ~170 ms end-to-end, in f32,
+      through the real function — and f32 error in an FFT grows with log n, so the precision story
+      needs stating before the kernel is written, not after.
 - [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
       **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
       _(Highest-value robustness gap.)_

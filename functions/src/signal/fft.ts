@@ -1,3 +1,4 @@
+import { fftCoreFloat64 } from './fft-core-f64.js';
 /**
  * Fast Fourier Transform (FFT)
  *
@@ -35,30 +36,6 @@ export function complex(re: number, im: number = 0): ComplexNumber {
 }
 
 /**
- * Add two complex numbers
- */
-function complexAdd(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return { re: a.re + b.re, im: a.im + b.im };
-}
-
-/**
- * Subtract two complex numbers
- */
-function complexSub(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return { re: a.re - b.re, im: a.im - b.im };
-}
-
-/**
- * Multiply two complex numbers
- */
-function complexMul(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return {
-    re: a.re * b.re - a.im * b.im,
-    im: a.re * b.im + a.im * b.re,
-  };
-}
-
-/**
  * Complex conjugate
  */
 export function complexConj(a: ComplexNumber): ComplexNumber {
@@ -80,13 +57,6 @@ export function complexArg(a: ComplexNumber): number {
 }
 
 /**
- * Scale complex by real number
- */
-function complexScale(a: ComplexNumber, s: number): ComplexNumber {
-  return { re: a.re * s, im: a.im * s };
-}
-
-/**
  * Check if a number is a power of 2
  */
 function isPowerOf2(n: number): boolean {
@@ -102,38 +72,18 @@ function nextPowerOf2(n: number): number {
 }
 
 /**
- * Bit-reverse an index for FFT reordering
- */
-function bitReverse(x: number, bits: number): number {
-  let result = 0;
-  for (let i = 0; i < bits; i++) {
-    result = (result << 1) | (x & 1);
-    x >>= 1;
-  }
-  return result;
-}
-
-/**
- * Reorder array using bit-reversal permutation
- */
-function bitReverseReorder(data: ComplexNumber[]): ComplexNumber[] {
-  const n = data.length;
-  const bits = Math.log2(n);
-  const result = new Array<ComplexNumber>(n);
-
-  for (let i = 0; i < n; i++) {
-    result[bitReverse(i, bits)] = data[i];
-  }
-
-  return result;
-}
-
-/**
- * Core Cooley-Tukey radix-2 DIT FFT implementation
+ * Radix-2 Cooley-Tukey over `ComplexNumber[]`, delegating to the package's flat core.
  *
- * @param data - Complex input data (length must be power of 2)
- * @param inverse - If true, compute inverse FFT
- * @returns Complex frequency spectrum
+ * This used to do the butterfly arithmetic in Complex OBJECTS — a `{ re, im }` allocation
+ * per twiddle step and per butterfly — which made the public `fft()` ~8x slower than
+ * `parallelFFT` for the IDENTICAL transform:
+ *
+ *   n=2^18    607 ms (objects)  vs    80 ms (flat arrays)
+ *   n=2^20   2987 ms (objects)  vs   358 ms (flat arrays)
+ *
+ * The `ComplexNumber[]` return type was never the problem: boxing the results ONCE at the
+ * boundary is cheap. Doing the arithmetic in boxes is what cost 8x. The public API is
+ * unchanged — same f64 arithmetic, same 1/n inverse scaling, same results.
  */
 function fftCore(data: ComplexNumber[], inverse: boolean = false): ComplexNumber[] {
   const n = data.length;
@@ -146,52 +96,20 @@ function fftCore(data: ComplexNumber[], inverse: boolean = false): ComplexNumber
     return [{ ...data[0] }];
   }
 
-  // Bit-reverse reorder
-  const result = bitReverseReorder(data);
-
-  // Direction factor for inverse FFT
-  const direction = inverse ? 1 : -1;
-
-  // Butterfly operations
-  for (let size = 2; size <= n; size *= 2) {
-    const halfSize = size / 2;
-
-    // Pre-compute twiddle factor base: e^(-2πi/size) or e^(2πi/size) for inverse
-    const angle = (direction * 2 * Math.PI) / size;
-    const wBase: ComplexNumber = {
-      re: Math.cos(angle),
-      im: Math.sin(angle),
-    };
-
-    for (let start = 0; start < n; start += size) {
-      let w: ComplexNumber = { re: 1, im: 0 };
-
-      for (let j = 0; j < halfSize; j++) {
-        const evenIdx = start + j;
-        const oddIdx = start + j + halfSize;
-
-        const even = result[evenIdx];
-        const odd = result[oddIdx];
-
-        // Butterfly: (even, odd) -> (even + w*odd, even - w*odd)
-        const wOdd = complexMul(w, odd);
-        result[evenIdx] = complexAdd(even, wOdd);
-        result[oddIdx] = complexSub(even, wOdd);
-
-        // Update twiddle factor
-        w = complexMul(w, wBase);
-      }
-    }
+  const real = new Float64Array(n);
+  const imag = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    real[i] = data[i].re;
+    imag[i] = data[i].im;
   }
 
-  // Scale by 1/n for inverse FFT
-  if (inverse) {
-    for (let i = 0; i < n; i++) {
-      result[i] = complexScale(result[i], 1 / n);
-    }
-  }
+  const out = fftCoreFloat64(real, imag, inverse);
 
-  return result;
+  const spectrum: ComplexNumber[] = new Array<ComplexNumber>(n);
+  for (let i = 0; i < n; i++) {
+    spectrum[i] = { re: out.real[i], im: out.imag[i] };
+  }
+  return spectrum;
 }
 
 /**

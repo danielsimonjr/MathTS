@@ -4,6 +4,21 @@ import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array size for WASM to be beneficial
+// ⚠️ MEASURE BEFORE YOU TRUST THIS ROUTE. The AssemblyScript FFT kernel is SLOWER than
+// the package's own JS core — measured on an NVIDIA-class desktop, same transform:
+//
+//   n=2^20   WASM 1039 ms   |   flat-Float64Array JS core 170 ms   (WASM is 6x SLOWER)
+//   n=2^18   WASM  141 ms   |   flat-Float64Array JS core  33 ms
+//
+// The kernel is a straightforward scalar radix-2, and the dispatch additionally copies the
+// data three times (interleave -> into wasm memory -> back out). This mirrors the 2026-07
+// WASM audit, which retired the WASM paths for element-wise ops / transpose / reductions
+// for exactly this reason — FFT was simply never audited.
+//
+// This route is currently unreachable from any PUBLIC export (the public `fft` is the typed
+// `parallelFFT`, and this factory `fft` is not exported), so it is dead weight rather than a
+// live pessimisation. Do NOT wire it into a public path on the assumption that "WASM is
+// faster" — it is not, for this kernel. See TODO.md.
 const WASM_FFT_THRESHOLD = 64; // At least 64 elements
 
 /**

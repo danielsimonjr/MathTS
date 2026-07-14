@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-14'
-  totalFiles: 1024
+  totalFiles: 1025
   totalModules: 77
-  totalExports: 4942
+  totalExports: 4944
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12659,6 +12659,18 @@ modules:
       constants:
         - createSetUnion
   functions/signal:
+    functions/src/signal/fft-core-f64.ts:
+      description: The ONE radix-2 Cooley-Tukey core for this package, on flat Float64Arrays.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - bitReverse
+        - fftCoreFloat64
+      functions:
+        - bitReverse
+        - fftCoreFloat64
     functions/src/signal/freqz.ts:
       description: Frequency response result
       externalDependencies: []
@@ -16421,6 +16433,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../signal/fft-core-f64.js
+          imports:
+            - fftCoreFloat64
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
@@ -31731,6 +31746,7 @@ dependencyGraph:
         - functions/src/set/setUnion.ts
     - name: Functions/signal
       files:
+        - functions/src/signal/fft-core-f64.ts
         - functions/src/signal/freqz.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
@@ -32502,13 +32518,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1024
+  totalTypeScriptFiles: 1025
   totalModules: 77
-  totalLinesOfCode: 170976
-  totalExports: 4942
+  totalLinesOfCode: 171019
+  totalExports: 4944
   totalClasses: 56
   totalInterfaces: 408
-  totalFunctions: 1601
+  totalFunctions: 1603
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1534
@@ -32517,4 +32533,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 239
+  unusedExportsCount: 240
