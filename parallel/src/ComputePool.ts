@@ -7,7 +7,13 @@
  * @packageDocumentation
  */
 
-import { pairwiseSum, norm2, pairwiseDot, scaledDistance } from '@danielsimonjr/mathts-core';
+import {
+  pairwiseSum,
+  norm2,
+  pairwiseDot,
+  scaledDistance,
+  sumSquaredDeviations,
+} from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
   Transfer,
@@ -761,12 +767,10 @@ export class ComputePool {
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
     if (!this.shouldParallelize(data.length, 'variance')) {
       const n = data.length;
-      let mean = 0;
-      for (let i = 0; i < n; i++) mean += data[i];
-      mean = n > 0 ? mean / n : 0;
-      let acc = 0;
-      for (let i = 0; i < n; i++) acc += (data[i] - mean) ** 2;
-      const variance = n > 0 ? acc / n : 0; // population variance (matches the worker)
+      // Corrected two-pass (pairwise mean + (Σd)²/n correction). A naive mean and an uncorrected
+      // Σ(x-mean)² lost ~7 digits on large-mean data — variance was ~1e-7 relErr vs NumPy's ~1e-13.
+      const mean = n > 0 ? pairwiseSum(data) / n : 0;
+      const variance = n > 0 ? sumSquaredDeviations(data) / n : 0; // population (matches the worker)
       return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
     }
     return toParallelResult(await this.workerPool.variance(data));

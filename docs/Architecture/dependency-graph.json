@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-15",
     "totalFiles": 1028,
     "totalModules": 78,
-    "totalExports": 4965
+    "totalExports": 4967
   },
   "entryPoints": [
     {
@@ -605,7 +605,8 @@
               "norm2",
               "pairwiseDot",
               "scaledDistance",
-              "neumaierCumsum"
+              "neumaierCumsum",
+              "sumSquaredDeviations"
             ],
             "reExport": true
           },
@@ -783,6 +784,7 @@
           "pairwiseDot",
           "scaledDistance",
           "neumaierCumsum",
+          "sumSquaredDeviations",
           "VERSION",
           "MathTSValue",
           "Scalar",
@@ -917,6 +919,7 @@
           "pairwiseDot",
           "scaledDistance",
           "neumaierCumsum",
+          "sumSquaredDeviations",
           "MathTSValue",
           "Scalar",
           "BackendType",
@@ -1340,6 +1343,7 @@
           "norm2",
           "pairwiseDot",
           "scaledDistance",
+          "sumSquaredDeviations",
           "neumaierCumsum"
         ],
         "functions": [
@@ -1348,6 +1352,7 @@
           "norm2",
           "pairwiseDot",
           "scaledDistance",
+          "sumSquaredDeviations",
           "neumaierCumsum"
         ]
       }
@@ -14418,7 +14423,7 @@
         "constants": ["createQuantileSeq"]
       },
       "functions/src/statistics/std.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Compute the standard deviation of a matrix or a  list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -14429,10 +14434,6 @@
           {
             "file": "../utils/is.js",
             "imports": ["isCollection"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -14518,16 +14519,18 @@
             "imports": ["improveErrorMessage"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["sumSquaredDeviations"]
+          }
+        ],
         "exports": ["createVariance"],
         "constants": ["createVariance"]
       }
@@ -16607,7 +16610,13 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "neumaierSum", "norm2", "pairwiseDot"]
+            "imports": [
+              "pairwiseSum",
+              "neumaierSum",
+              "norm2",
+              "pairwiseDot",
+              "sumSquaredDeviations"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -28964,7 +28973,13 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "norm2", "pairwiseDot", "scaledDistance"]
+            "imports": [
+              "pairwiseSum",
+              "norm2",
+              "pairwiseDot",
+              "scaledDistance",
+              "sumSquaredDeviations"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-workerpool",
@@ -35049,15 +35064,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1028,
     "totalModules": 78,
-    "totalLinesOfCode": 171731,
-    "totalExports": 4965,
+    "totalLinesOfCode": 171717,
+    "totalExports": 4967,
     "totalClasses": 56,
     "totalInterfaces": 410,
-    "totalFunctions": 1612,
+    "totalFunctions": 1613,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1535,
-    "totalReExports": 1801,
+    "totalReExports": 1802,
     "totalTypeOnlyImports": 523,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

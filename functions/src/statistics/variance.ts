@@ -2,11 +2,8 @@ import { deepForEach } from '../utils/collection.js';
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
+import { sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Minimum array length for WASM to be beneficial
-const WASM_VARIANCE_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -155,32 +152,31 @@ export const createVariance = /* #__PURE__ */ factory(
         throw new SyntaxError('Function variance requires one or more parameters (0 provided)');
       }
 
-      // WASM fast path for flat arrays of plain numbers
-      // Note: WASM supports unbiased (ddof=1) and uncorrected (ddof=0), but not biased
-      if (
-        Array.isArray(array) &&
-        array.length >= WASM_VARIANCE_THRESHOLD &&
-        (normalization === 'unbiased' || normalization === 'uncorrected')
-      ) {
-        if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule();
-          if (wasm) {
-            try {
-              const alloc = wasmLoader.allocateFloat64Array(array);
-              try {
-                const ddof = normalization === 'unbiased' ? 1 : 0;
-                return wasm.statsVariance(alloc.ptr, array.length, ddof);
-              } finally {
-                wasmLoader.free(alloc.ptr);
-              }
-            } catch {
-              // Fall back to JS implementation on WASM error
-            }
-          }
+      // Numerically stable fast path for a flat array of plain numbers: the corrected two-pass
+      // (pairwise mean + the (Σd)²/n mean-bias correction) in core. The old naive two-pass — and
+      // the retired WASM `statsVariance` kernel — lost ~7 digits on large-mean data: variance of
+      // 1e9-pedestal samples came out ~1e-7 relative error where NumPy is ~1e-13 and this is ~1e-16.
+      if (Array.isArray(array) && isFlatNumberArray(array)) {
+        const nn = array.length;
+        const ssd = sumSquaredDeviations(array);
+        switch (normalization) {
+          case 'uncorrected':
+            return ssd / nn;
+          case 'biased':
+            return ssd / (nn + 1);
+          case 'unbiased':
+            return nn === 1 ? 0 : ssd / (nn - 1);
+          default:
+            throw new Error(
+              'Unknown normalization "' +
+                normalization +
+                '". ' +
+                'Choose "unbiased" (default), "uncorrected", or "biased".'
+            );
         }
       }
 
-      // JavaScript fallback for mixed types, BigNumber, Complex, biased normalization, etc.
+      // JavaScript fallback for mixed types, BigNumber, Complex, and multi-dimensional input.
       let sum: unknown;
       let num = 0;
 

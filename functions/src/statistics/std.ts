@@ -1,22 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { isCollection } from '../utils/is.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Minimum array length for WASM to be beneficial
-const WASM_STD_THRESHOLD = 100;
-
-/**
- * Check if an array is a flat array of plain numbers
- */
-function isFlatNumberArray(arr: unknown[]): arr is number[] {
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] !== 'number') {
-      return false;
-    }
-  }
-  return true;
-}
 
 // Type definitions for std
 interface MatrixType {
@@ -29,8 +13,6 @@ interface StdDependencies {
   sqrt: TypedFunction;
   variance: TypedFunction;
 }
-
-type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
 
 const name = 'std';
 const dependencies = ['typed', 'map', 'sqrt', 'variance'];
@@ -112,48 +94,14 @@ export const createStd = /* #__PURE__ */ factory(
 
     function _std(...args: unknown[]): unknown {
       const array = args[0] as unknown[] | MatrixType;
-      const normalizationOrDim = args[1] as
-        | NormalizationType
-        | number
-        | { valueOf(): number }
-        | undefined;
       if ((array as unknown[]).length === 0) {
         throw new SyntaxError('Function std requires one or more parameters (0 provided)');
       }
 
-      // WASM fast path for flat arrays of plain numbers with normalization (not dimension)
-      // Only use WASM when we have a flat array and string normalization (or default)
-      const normalization: NormalizationType =
-        typeof normalizationOrDim === 'string' ? normalizationOrDim : 'unbiased';
-      const isDimension =
-        typeof normalizationOrDim === 'number' ||
-        (normalizationOrDim !== undefined && typeof normalizationOrDim === 'object');
-
-      if (
-        !isDimension &&
-        Array.isArray(array) &&
-        array.length >= WASM_STD_THRESHOLD &&
-        (normalization === 'unbiased' || normalization === 'uncorrected')
-      ) {
-        if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule();
-          if (wasm) {
-            try {
-              const alloc = wasmLoader.allocateFloat64Array(array);
-              try {
-                const ddof = normalization === 'unbiased' ? 1 : 0;
-                return wasm.statsStd(alloc.ptr, array.length, ddof);
-              } finally {
-                wasmLoader.free(alloc.ptr);
-              }
-            } catch {
-              // Fall back to JS implementation on WASM error
-            }
-          }
-        }
-      }
-
-      // JavaScript fallback
+      // std is sqrt(variance) and delegates to it — so it inherits variance's numerically stable
+      // corrected two-pass. The former WASM `statsStd` fast path is retired: it used the same
+      // one-pass kernel that lost ~7 digits on large-mean data (and was not faster — reductions
+      // are memory-bound; see the 2026-07 WASM audit).
       try {
         const v = (variance as (...a: unknown[]) => unknown)(...args);
         if (isCollection(v)) {

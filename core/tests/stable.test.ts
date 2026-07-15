@@ -10,6 +10,7 @@ import {
   pairwiseDot,
   scaledDistance,
   neumaierCumsum,
+  sumSquaredDeviations,
 } from '../src/numeric/stable.js';
 
 const naive = (xs: number[]): number => xs.reduce((a, b) => a + b, 0);
@@ -139,6 +140,48 @@ describe('scaledDistance', () => {
   it('is zero for identical vectors and propagates NaN', () => {
     expect(scaledDistance([1, 2, 3], [1, 2, 3])).toBe(0);
     expect(Number.isNaN(scaledDistance([1, NaN], [0, 0]))).toBe(true);
+  });
+});
+
+describe('sumSquaredDeviations', () => {
+  it('is near-exact on large-mean data where naive two-pass loses ~7 digits', () => {
+    // x ~ 1e9 + U(0,1): the deviations are O(1) but sit on a 1e9 pedestal, so a mean computed
+    // by naive accumulation (and an uncorrected two-pass) carries the error into every (x-mean).
+    const n = 5000;
+    const xs = new Float64Array(n);
+    let s = 987654321;
+    for (let i = 0; i < n; i++) {
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      xs[i] = 1e9 + s / 0x7fffffff;
+    }
+    // Exact reference: shift by an integer (variance is shift-invariant) so the deviations are
+    // representable, then compute the textbook sum of squared deviations in that shifted frame.
+    const shifted = Array.from(xs, (v) => v - 1e9);
+    const meanShift = shifted.reduce((a, b) => a + b, 0) / n;
+    let ref = 0;
+    for (const v of shifted) ref += (v - meanShift) * (v - meanShift);
+
+    const got = sumSquaredDeviations(xs);
+    const relErr = Math.abs(got - ref) / ref;
+    console.log(`[stable] SSD large-mean relErr = ${relErr.toExponential(2)}`);
+    expect(relErr).toBeLessThan(1e-10); // corrected two-pass lands ~1e-16; naive was ~1e-7
+  });
+
+  it('matches the definition exactly on small integer inputs', () => {
+    // variance([2,4,6,8]) uncorrected = 5 → SSD = 20
+    expect(sumSquaredDeviations([2, 4, 6, 8])).toBeCloseTo(20, 12);
+    // all-equal → 0
+    expect(sumSquaredDeviations([7, 7, 7, 7])).toBe(0);
+    expect(sumSquaredDeviations([])).toBe(0);
+    expect(sumSquaredDeviations([42])).toBe(0);
+  });
+
+  it('propagates NaN and Infinity (the round-off clamp must not swallow them)', () => {
+    // variance of data containing NaN is NaN (NumPy/mathjs semantics) — the clamp is `< 0`, not
+    // `> 0 ? … : 0`, precisely so these do not collapse to 0.
+    expect(Number.isNaN(sumSquaredDeviations([1, 2, NaN]))).toBe(true);
+    expect(Number.isNaN(sumSquaredDeviations([1, 2, Infinity]))).toBe(true);
+    expect(Number.isNaN(sumSquaredDeviations([Infinity, Infinity]))).toBe(true);
   });
 });
 

@@ -13,7 +13,13 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
-import { pairwiseSum, neumaierSum, norm2, pairwiseDot } from '@danielsimonjr/mathts-core';
+import {
+  pairwiseSum,
+  neumaierSum,
+  norm2,
+  pairwiseDot,
+  sumSquaredDeviations,
+} from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
@@ -1373,7 +1379,7 @@ export const mean = mathTyped('mean', {
  */
 export type VarNormalization = 'unbiased' | 'uncorrected' | 'biased';
 
-/** Sum of squared deviations from the mean (Welford), then normalized. */
+/** Normalize a precomputed sum of squared deviations (`m2`) by the chosen convention. */
 function varianceFromM2(m2: f64, n: i32, norm: VarNormalization): f64 {
   if (n === 0) return NaN;
   switch (norm) {
@@ -1389,15 +1395,10 @@ function varianceFromM2(m2: f64, n: i32, norm: VarNormalization): f64 {
 }
 
 function m2OfArray(arr: f64[]): f64 {
-  let m: f64 = 0;
-  let m2: f64 = 0;
-  for (let i: i32 = 0; i < arr.length; i++) {
-    const delta: f64 = arr[i] - m;
-    m += delta / (i + 1);
-    const delta2: f64 = arr[i] - m;
-    m2 += delta * delta2;
-  }
-  return m2;
+  // M2 = Σ(xᵢ − x̄)². Uses core's corrected two-pass (pairwise mean + (Σd)²/n correction), which
+  // is machine-precision even on large-mean data. Welford's online form (what was here) drifted to
+  // ~1e-7 relative error on 1e9-pedestal input, where this — and NumPy's two-pass — stay ~1e-13-16.
+  return sumSquaredDeviations(arr);
 }
 
 /**

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `variance` / `std` were ~10⁶× less accurate than NumPy on large-mean data
+
+Continuing the audit: `variance`/`std` lost ~7 digits when the mean is large. Variance of
+1e9-pedestal samples came out **relErr ~1e-7** where `np.var` is ~1e-13 and the exact value is
+representable — the small deviations sit on a huge pedestal, so mean error rides into every squared
+term. The public typed path used **Welford** (`m2OfArray`), the parallel path a **naive mean +
+uncorrected two-pass**, and the factory/`std` paths naive **WASM** kernels.
+
+New `sumSquaredDeviations` core primitive — the **corrected two-pass** `Σd² − (Σd)²/n` (pairwise
+mean; the correction cancels the residual mean-bias exactly) — now backs every path (typed,
+`ComputePool.variance`, factory, `std = √variance`); the naive WASM `statsVariance`/`statsStd` fast
+paths are retired (also not faster — memory-bound). Now **machine-precision (relErr ~0), beating
+NumPy**; verified against exact rationals and live NumPy. `std`/`zscore`/`corr` and every
+variance-derived statistic inherit the fix.
+
 ### Fixed — `corr` returned |correlation| > 1, and a class of BigNumber correctness bugs
 
 Continuing the NumPy/SciPy accuracy audit, `corr` was found returning **52** (mathematically

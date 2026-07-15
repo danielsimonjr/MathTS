@@ -199,4 +199,5 @@ export {
   pairwiseDot,
   scaledDistance,
   neumaierCumsum,
+  sumSquaredDeviations,
 } from './numeric/stable.js';

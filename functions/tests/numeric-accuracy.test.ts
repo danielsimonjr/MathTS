@@ -20,6 +20,8 @@ import {
   distance,
   cumsum,
   corr,
+  variance,
+  std,
   parallelStatDistance,
   parallelStatCumsum,
 } from '../src/index.js';
@@ -240,5 +242,56 @@ describe('corr uses a stable two-pass formula (the one-pass form gave |corr| > 1
   it('matches known correlations exactly on small inputs', () => {
     expect(corr([1, 2, 3, 4, 5], [4, 5, 6, 7, 8]) as number).toBeCloseTo(1, 12); // perfect positive
     expect(corr([1, 2, 3], [3, 2, 1]) as number).toBeCloseTo(-1, 12); // perfect negative
+  });
+});
+
+describe('variance / std use a corrected two-pass (Welford drifted ~1e-7 on large means)', () => {
+  // Exact reference via shift-invariance: variance(x) === variance(x - c). Shifting off the 1e9
+  // pedestal makes the deviations representable, so the reduced-frame computation is the truth.
+  function exactVarStd(xs: readonly number[], shift: number): { v: number; s: number } {
+    const d = xs.map((x) => x - shift);
+    const m = exactSum(d) / d.length;
+    let ss = 0;
+    for (const x of d) ss += (x - m) * (x - m);
+    const v = ss / (d.length - 1);
+    return { v, s: Math.sqrt(v) };
+  }
+
+  it('variance and std are machine-precision on large-mean data (both Array and Float64Array)', async () => {
+    const n = 2000;
+    const xs = new Array<number>(n);
+    let seed = 987654321;
+    for (let i = 0; i < n; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      xs[i] = 1e9 + seed / 0x7fffffff;
+    }
+    const { v, s } = exactVarStd(xs, 1e9);
+
+    const vArr = variance(xs) as number;
+    const sArr = std(xs) as number;
+    const vF64 = (await variance(new Float64Array(xs))) as number;
+    const sF64 = (await std(new Float64Array(xs))) as number;
+
+    console.log(
+      `[acc] variance relErr Array=${(Math.abs(vArr - v) / v).toExponential(2)} F64=${(Math.abs(vF64 - v) / v).toExponential(2)}`
+    );
+    // Welford/naive two-pass landed ~1e-7 here; corrected two-pass is ~1e-14 or better.
+    expect(Math.abs(vArr - v) / v).toBeLessThan(1e-12);
+    expect(Math.abs(sArr - s) / s).toBeLessThan(1e-12);
+    expect(Math.abs(vF64 - v) / v).toBeLessThan(1e-12);
+    expect(Math.abs(sF64 - s) / s).toBeLessThan(1e-12);
+  });
+
+  it('still correct on textbook small inputs', () => {
+    expect(variance([2, 4, 6, 8]) as number).toBeCloseTo(6.666666666666667, 12); // unbiased
+    expect(variance([2, 4, 6, 8], 'uncorrected') as number).toBeCloseTo(5, 12);
+    expect(std([2, 4, 6, 8]) as number).toBeCloseTo(Math.sqrt(6.666666666666667), 12);
+  });
+
+  it('propagates NaN (does not collapse to 0 via the round-off clamp)', async () => {
+    // NumPy: np.var([1,2,nan]) === nan. The corrected-two-pass round-off clamp must not swallow it.
+    expect(Number.isNaN(variance([1, 2, NaN]) as number)).toBe(true);
+    expect(Number.isNaN(std([1, 2, NaN]) as number)).toBe(true);
+    expect(Number.isNaN((await variance(new Float64Array([1, 2, NaN]))) as number)).toBe(true);
   });
 });

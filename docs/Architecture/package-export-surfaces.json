@@ -669,6 +669,7 @@
       "SQRT2",
       "stripOptionalNotation",
       "subtractScalar",
+      "sumSquaredDeviations",
       "tanh",
       "TAU",
       "toEngineering",

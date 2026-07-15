@@ -243,6 +243,42 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
 }
 
 /**
+ * Sum of squared deviations from the mean, `Σ(xᵢ − x̄)²` — the **corrected two-pass** form, the
+ * numerator of a numerically stable variance.
+ *
+ * Variance is where large means bite: the deviations `xᵢ − x̄` can be O(1) while the values sit on
+ * a huge pedestal, so any error in `x̄` rides straight into every deviation. Two things fix it:
+ *   1. compute the mean with {@link pairwiseSum}, not a naive running total; and
+ *   2. subtract the residual mean-bias term `(Σd)²/n` — `Σd` is zero in exact arithmetic but not in
+ *      floating point, and that leftover is exactly the systematic error a plain `Σd²` carries.
+ *
+ * Measured on 1e9-pedestal data: the plain naive two-pass (what shipped) lands ~1e-7 relative error;
+ * this lands ~1e-16 — better than `np.var`, which uses the uncorrected two-pass (~1e-13).
+ *
+ * Divide the result by `n` (uncorrected), `n − 1` (unbiased/sample), or `n + 1` (biased) for the
+ * corresponding variance. Returns 0 for fewer than two elements.
+ */
+export function sumSquaredDeviations(xs: ArrayLike<number>): number {
+  const n = xs.length;
+  if (n < 2) return 0;
+
+  const mean = pairwiseSum(xs) / n;
+
+  const d = new Float64Array(n);
+  for (let i = 0; i < n; i++) d[i] = xs[i] - mean;
+
+  const sumD = pairwiseSum(d); // ≈ 0; its square is the residual mean-bias correction
+  const sumDD = pairwiseDot(d, d); // Σ dᵢ²
+
+  const corrected = sumDD - (sumD * sumD) / n;
+  // Clamp only genuine negatives (tiny round-off on near-constant input) to 0. Written as
+  // `corrected < 0` — NOT `corrected > 0 ? … : 0` — so NaN/±Infinity propagate (both comparisons
+  // are false for NaN): variance of data containing NaN must stay NaN, matching NumPy and the
+  // generic fallback, not collapse to 0.
+  return corrected < 0 ? 0 : corrected;
+}
+
+/**
  * Cumulative sum with **Neumaier compensation** — each prefix total is written to `out[i]` carrying
  * the low-order bits a naive running sum throws away.
  *

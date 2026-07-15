@@ -62,10 +62,23 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       decimal.js code in `utils/bignumber/bitwise.ts` is shadowed/dormant, like floor/ceil/expm1/
       log1p/gcd — the typed layer handles the public path). Regression-tested in
       `functions/tests/bignumber-operations.test.ts`.
+- [x] ✅ **`variance`/`std` were ~10⁶× less accurate than NumPy — FIXED** (2026-07-15). On large-mean
+      data variance was relErr ~1e-7 (NumPy ~1e-13, exact representable). Public typed path used
+      **Welford** (`m2OfArray`), parallel path a **naive mean + uncorrected two-pass**, factory/std
+      naive **WASM** kernels. New `sumSquaredDeviations` core primitive (corrected two-pass
+      `Σd²−(Σd)²/n`, pairwise mean) backs every path; retired WASM statsVariance/statsStd. Now
+      machine-precision, **beats NumPy**. ⚠️ The `sum` trap AGAIN: public `variance` is the TYPED
+      `typed/arithmetic.ts` one (I first fixed the factory). Fixed both. std/zscore/corr inherit it.
+- [ ] **[cleanup] Dead AS `statsVariance`/`statsStd` WASM kernels.** Their JS-side call paths were
+      retired 2026-07-15 (naive + less accurate than the corrected two-pass; memory-bound so not
+      faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
+      eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
 - [ ] **Continue the NumPy/SciPy accuracy audit — remaining candidates.** `prod` (log-space for
-      overflow? — measure first; np.prod is also naive-multiply), `quantile` other interpolation
-      modes (lower/higher/nearest/midpoint) as a feature vs `np.quantile` (linear already matches).
-      **Audit the path the caller takes**, compare against real NumPy — installed, works.
+      overflow? — measure first; np.prod is also naive-multiply), `skewness` (3rd moment, ~1e-5
+      relErr on large means — likely near-zero-value inflation; compute exact before deciding),
+      `quantile` other interpolation modes (lower/higher/nearest/midpoint) as a feature vs
+      `np.quantile` (linear already matches). **Audit the path the caller takes**, compare against
+      real NumPy — installed, works.
 
 ### WebGPU acceleration epic### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
 

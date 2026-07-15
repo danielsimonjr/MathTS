@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-15", "f": 1028, "e": 4965, "re": 1801 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-15", "f": 1028, "e": 4967, "re": 1802 },
   "s": {
-    "loc": 171731,
+    "loc": 171717,
     "cls": 56,
     "int": 410,
-    "fn": 1612,
+    "fn": 1613,
     "tg": 158,
     "en": 0,
     "co": 1535,
@@ -156,6 +156,7 @@
         "norm2",
         "pairwiseDot",
         "scaledDistance",
+        "sumSquaredDeviations",
         "neumaierCumsum"
       ]
     },
@@ -1596,7 +1597,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 39 },
-    { "p": "utils/is.ts", "i": 0, "o": 40 }
+    { "p": "utils/is.ts", "i": 0, "o": 40 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 }
   ]
 }
