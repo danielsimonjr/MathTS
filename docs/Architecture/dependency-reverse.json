@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-14",
+  "generated": "2026-07-15",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
@@ -596,7 +596,6 @@
       "functions/src/signal/freqz.ts",
       "functions/src/special/erf.ts",
       "functions/src/statistics/corr.ts",
-      "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/mad.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/mean.ts",

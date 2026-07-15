@@ -4,11 +4,8 @@ import { _switch } from '../utils/switch.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { arraySize } from '../utils/array.js';
 import { IndexError } from '../error/IndexError.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
+import { neumaierCumsum } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Minimum array length for WASM to be beneficial
-const WASM_CUMSUM_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -123,31 +120,16 @@ export const createCumSum = /* #__PURE__ */ factory(
         return [];
       }
 
-      // WASM fast path for flat arrays of plain numbers
-      if (array.length >= WASM_CUMSUM_THRESHOLD && isFlatNumberArray(array)) {
-        const wasm = wasmLoader.getModule();
-        if (wasm) {
-          try {
-            // WASM statsCumsum operates in-place, so we allocate and copy
-            const alloc = wasmLoader.allocateFloat64Array(array);
-            try {
-              wasm.statsCumsum(alloc.ptr, array.length);
-              // Read results back
-              const result: number[] = new Array(array.length);
-              for (let i = 0; i < array.length; i++) {
-                result[i] = alloc.array[i];
-              }
-              return result;
-            } finally {
-              wasmLoader.free(alloc.ptr);
-            }
-          } catch {
-            // Fall back to JS implementation on WASM error
-          }
-        }
+      // Flat plain-number fast path: Neumaier-compensated prefix scan — exact prefixes where the
+      // naive `add` loop (and the retired naive WASM scan) drift O(n)·ε over long inputs. Same
+      // stable primitive the typed `cumsum` uses.
+      if (isFlatNumberArray(array)) {
+        const result = new Array<number>(array.length);
+        neumaierCumsum(array, result);
+        return result;
       }
 
-      // JavaScript fallback
+      // JavaScript fallback (BigNumber/Complex/Fraction, and n-D row-vector sums via `add`)
       const sums = [unaryPlus(array[0])]; // unaryPlus converts to number if need be
       for (let i = 1; i < array.length; ++i) {
         // Must use add below and not addScalar for the case of summing a

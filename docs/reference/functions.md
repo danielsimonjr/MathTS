@@ -144,8 +144,19 @@ norm([1e-200, 1e-200, 1e-200, 1e-200], 2); // 2e-200 (naive squaring flushes to 
 
 The underflow case is the dangerous one: it returns a plausible `0` rather than an obvious `inf`.
 
+### `dot`, `distance`, and `cumsum` are stable too
+
+The same discipline extends to the other reductions, each measured against live NumPy/SciPy:
+
+```typescript
+dot(a, b); // pairwise over the products — ~18× more accurate than a naive Σ aᵢ·bᵢ (np.dot parity)
+distance([1e200, 1e200, 1e200, 1e200], [0, 0, 0, 0]); // 2e200 (naive squaring & np.linalg.norm: inf)
+distance([1e-200, 1e-200, 1e-200, 1e-200], [0, 0, 0, 0]); // 2e-200 (naive squaring: silently 0)
+cumsum([0.1, 0.1, ...]); // Neumaier-compensated prefix scan — exact where np.cumsum drifts O(n)·ε
+```
+
 The primitives are exported from `@danielsimonjr/mathts-core` (`pairwiseSum`, `neumaierSum`,
-`norm2`) if you need them directly.
+`norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`) if you need them directly.
 
 ---
 

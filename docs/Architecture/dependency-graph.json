@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-14",
+    "lastUpdated": "2026-07-15",
     "totalFiles": 1028,
     "totalModules": 78,
-    "totalExports": 4959
+    "totalExports": 4965
   },
   "entryPoints": [
     {
@@ -599,7 +599,14 @@
           },
           {
             "file": "./numeric/stable.js",
-            "imports": ["pairwiseSum", "neumaierSum", "norm2"],
+            "imports": [
+              "pairwiseSum",
+              "neumaierSum",
+              "norm2",
+              "pairwiseDot",
+              "scaledDistance",
+              "neumaierCumsum"
+            ],
             "reExport": true
           },
           {
@@ -773,6 +780,9 @@
           "pairwiseSum",
           "neumaierSum",
           "norm2",
+          "pairwiseDot",
+          "scaledDistance",
+          "neumaierCumsum",
           "VERSION",
           "MathTSValue",
           "Scalar",
@@ -904,6 +914,9 @@
           "pairwiseSum",
           "neumaierSum",
           "norm2",
+          "pairwiseDot",
+          "scaledDistance",
+          "neumaierCumsum",
           "MathTSValue",
           "Scalar",
           "BackendType",
@@ -1321,8 +1334,22 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["pairwiseSum", "neumaierSum", "norm2"],
-        "functions": ["pairwiseSum", "neumaierSum", "norm2"]
+        "exports": [
+          "pairwiseSum",
+          "neumaierSum",
+          "norm2",
+          "pairwiseDot",
+          "scaledDistance",
+          "neumaierCumsum"
+        ],
+        "functions": [
+          "pairwiseSum",
+          "neumaierSum",
+          "norm2",
+          "pairwiseDot",
+          "scaledDistance",
+          "neumaierCumsum"
+        ]
       }
     },
     "core/typed": {
@@ -10805,7 +10832,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["scaledDistance"]
+          }
+        ],
         "exports": ["createDistance"],
         "constants": ["createDistance"]
       },
@@ -11378,7 +11411,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseDot"]
+          }
+        ],
         "exports": ["createDot"],
         "constants": ["createDot"]
       },
@@ -14103,16 +14142,18 @@
             "imports": ["IndexError"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["neumaierCumsum"]
+          }
+        ],
         "exports": ["createCumSum"],
         "constants": ["createCumSum"]
       },
@@ -16569,7 +16610,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "neumaierSum", "norm2"]
+            "imports": ["pairwiseSum", "neumaierSum", "norm2", "pairwiseDot"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -18496,7 +18537,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["mathTyped"]
+            "imports": ["mathTyped", "neumaierCumsum"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -28926,7 +28967,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "norm2"]
+            "imports": ["pairwiseSum", "norm2", "pairwiseDot", "scaledDistance"]
           },
           {
             "package": "@danielsimonjr/mathts-workerpool",
@@ -35011,15 +35052,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1028,
     "totalModules": 78,
-    "totalLinesOfCode": 171642,
-    "totalExports": 4959,
+    "totalLinesOfCode": 171736,
+    "totalExports": 4965,
     "totalClasses": 56,
     "totalInterfaces": 410,
-    "totalFunctions": 1609,
+    "totalFunctions": 1612,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1535,
-    "totalReExports": 1798,
+    "totalReExports": 1801,
     "totalTypeOnlyImports": 524,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -309,11 +309,11 @@ See [typed-function documentation](https://github.com/josdejong/typed-function) 
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (97 exports).
+> `@danielsimonjr/mathts-core` (100 exports).
 
-### Functions (47)
+### Functions (50)
 
-`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `neumaierSum`, `norm2`, `number`, `pairwiseSum`, `pow`, `registerNativeTypes`, `round`, `subtractScalar`, `typed`, `UnitParseError`
+`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `neumaierCumsum`, `neumaierSum`, `norm2`, `number`, `pairwiseDot`, `pairwiseSum`, `pow`, `registerNativeTypes`, `round`, `scaledDistance`, `subtractScalar`, `typed`, `UnitParseError`
 
 ### Constants & values (42)
 

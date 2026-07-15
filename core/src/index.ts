@@ -192,4 +192,11 @@ export const VERSION = '0.1.0';
 
 // Numerically stable reduction primitives (pairwise / Neumaier summation, scaled 2-norm).
 // `sum`, `mean`, `std` and `norm` are only as good as how they accumulate.
-export { pairwiseSum, neumaierSum, norm2 } from './numeric/stable.js';
+export {
+  pairwiseSum,
+  neumaierSum,
+  norm2,
+  pairwiseDot,
+  scaledDistance,
+  neumaierCumsum,
+} from './numeric/stable.js';

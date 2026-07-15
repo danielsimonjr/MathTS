@@ -3,7 +3,14 @@
  * Reference: NumPy 2.3.4 gives relErr 2.9e-16 on sum(1e6 x 0.1); naive gives 1.3e-11.
  */
 import { describe, it, expect } from 'vitest';
-import { pairwiseSum, neumaierSum, norm2 } from '../src/numeric/stable.js';
+import {
+  pairwiseSum,
+  neumaierSum,
+  norm2,
+  pairwiseDot,
+  scaledDistance,
+  neumaierCumsum,
+} from '../src/numeric/stable.js';
 
 const naive = (xs: number[]): number => xs.reduce((a, b) => a + b, 0);
 
@@ -68,5 +75,96 @@ describe('norm2', () => {
     expect(norm2([0, 0])).toBe(0);
     expect(norm2([0, 3, 0, 4])).toBe(5);
     expect(Number.isNaN(norm2([1, NaN]))).toBe(true);
+  });
+});
+
+describe('pairwiseDot', () => {
+  it('beats naive accumulation on an ill-conditioned dot (large mean × small factor)', () => {
+    const n = 1_000_000;
+    const a = new Float64Array(n);
+    const b = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      a[i] = 1e6 + Math.sin(i);
+      b[i] = 1.0 + 1e-3 * Math.cos(i);
+    }
+    // Neumaier over the products is the exact reference.
+    const prods = new Float64Array(n);
+    for (let i = 0; i < n; i++) prods[i] = a[i] * b[i];
+    const truth = neumaierSum(prods);
+
+    const pd = pairwiseDot(a, b);
+    let naive = 0;
+    for (let i = 0; i < n; i++) naive += a[i] * b[i];
+
+    const errPair = Math.abs(pd - truth) / Math.abs(truth);
+    const errNaive = Math.abs(naive - truth) / Math.abs(truth);
+    console.log(
+      `[stable] dot pairwise ${errPair.toExponential(2)} vs naive ${errNaive.toExponential(2)}`
+    );
+    expect(errPair).toBeLessThan(errNaive / 5); // decisively better
+  });
+
+  it('is exact on small inputs and every length (block boundaries)', () => {
+    expect(pairwiseDot([], [])).toBe(0);
+    expect(pairwiseDot([3], [4])).toBe(12);
+    for (const len of [7, 8, 9, 127, 128, 129, 255, 256, 257, 1000]) {
+      const a = Array.from({ length: len }, (_, i) => i + 1);
+      const b = Array.from({ length: len }, () => 1);
+      // Σ (i+1)·1 = n(n+1)/2
+      expect(pairwiseDot(a, b), `len=${len}`).toBe((len * (len + 1)) / 2);
+    }
+  });
+
+  it('respects start/end bounds', () => {
+    const a = [100, 2, 3, 4, 100];
+    const b = [100, 1, 1, 1, 100];
+    expect(pairwiseDot(a, b, 1, 4)).toBe(9); // 2+3+4
+  });
+});
+
+describe('scaledDistance', () => {
+  it('does not overflow where NumPy does (np.linalg.norm([1e200]*4-0) === inf)', () => {
+    expect(scaledDistance([1e200, 1e200, 1e200, 1e200], [0, 0, 0, 0])).toBe(2e200);
+  });
+
+  it('does not underflow to zero where naive squaring silently does', () => {
+    expect(scaledDistance([1e-200, 1e-200, 1e-200, 1e-200], [0, 0, 0, 0])).toBe(2e-200);
+  });
+
+  it('agrees with sqrt(sum of squared diffs) in the safe range', () => {
+    expect(scaledDistance([3, 0], [0, 4])).toBe(5);
+    expect(scaledDistance([1, 2, 3], [0, 0, 0])).toBeCloseTo(Math.sqrt(14), 12);
+  });
+
+  it('is zero for identical vectors and propagates NaN', () => {
+    expect(scaledDistance([1, 2, 3], [1, 2, 3])).toBe(0);
+    expect(Number.isNaN(scaledDistance([1, NaN], [0, 0]))).toBe(true);
+  });
+});
+
+describe('neumaierCumsum', () => {
+  it('produces exact prefix sums where naive cumsum drifts (matches np.cumsum limit)', () => {
+    const n = 1_000_000;
+    const xs = new Array<number>(n).fill(0.1);
+    const out = new Array<number>(n);
+    neumaierCumsum(xs, out);
+    // np.cumsum's last element carries relErr ~1.3e-11; Neumaier is exact.
+    expect(out[n - 1]).toBe(100_000);
+  });
+
+  it('writes into a Float64Array target as well as a number[]', () => {
+    const xs = new Float64Array([1, 2, 3, 4]);
+    const out = new Float64Array(4);
+    neumaierCumsum(xs, out);
+    expect(Array.from(out)).toEqual([1, 3, 6, 10]);
+  });
+
+  it('handles empty and single-element inputs', () => {
+    const empty: number[] = [];
+    neumaierCumsum([], empty);
+    expect(empty).toEqual([]);
+    const one = new Array<number>(1);
+    neumaierCumsum([5], one);
+    expect(one).toEqual([5]);
   });
 });

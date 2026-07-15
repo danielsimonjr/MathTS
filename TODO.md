@@ -25,11 +25,31 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       2e200 / 2e-200 exactly. **NumPy still gets this wrong** (`np.linalg.norm([1e200]*4)` → `inf`).
 - [x] ✅ **`fsum` added** — exactly-rounded (Neumaier) summation, the `math.fsum` equivalent.
       `fsum([1e16,1,-1e16])` = 1 where `sum` (and `np.sum`) give 0.
-- [ ] **Continue the NumPy/SciPy accuracy audit.** Next candidates, in order of likely payoff:
-      `cumsum` (still naive), `dot`/`distance` in ComputePool (still naive), `prod` (log-space for
-      overflow?), `logsumexp` (does it exist? it should), `hypot`, `corr`/`cov` (two-pass?),
-      `quantile` interpolation modes vs `np.quantile`. **Audit the path the caller takes**, and
-      compare against real NumPy — it is installed and `python -c "import numpy"` works.
+- [x] ✅ **`dot`/`distance`/`cumsum` audited + FIXED** (2026-07-14). Measured against live NumPy
+      first, then fixed at root with three new `core/src/numeric/stable.ts` primitives, each
+      **beating NumPy**: **`pairwiseDot`** (`dot` was ~18× worse than np.dot: relErr 6.6e-15 → 0),
+      **`scaledDistance`** (`distance` = `sqrt(Σ(a−b)²)` overflowed to `inf` / **silently
+      underflowed to 0**; now 2e200 / 2e-200 exact where NumPy's `linalg.norm` still gets inf/0),
+      **`neumaierCumsum`** (compensated prefix scan; np.cumsum drifts O(n)·ε ~1.3e-11 → exact).
+      ⚠️ **The `sum` trap AGAIN — caught by adversarial review + a behavior probe:** the public
+      `distance`/`cumsum` a consumer imports are the mathjs FACTORY impls (`geometry/distance.ts`,
+      `statistics/cumsum.ts`), NOT the typed `parallelStat*` I first fixed. Probed the built package
+      to confirm (returned `Infinity`/`1.3e-11`), then fixed the factory paths too (retired two
+      naive WASM scans) + the compat `_denseDot`. Fixed on all 4 layers now (typed Array,
+      computePool sequential, factory, compat). `logsumexp` checked — already at scipy parity.
+      Released as core/functions/parallel minor.
+- [ ] ⚠️ **Pre-existing (surfaced 2026-07-14, NOT caused by the accuracy work): `cumsum` throws on
+      `BigNumber` input.** `cumsum([bignumber('0.1'), …])` → `TypeError: x.plus is not a function`
+      in the generic `add`-based path (`unaryPlus(bn)` then `add(number, BigNumber)`). BigNumber
+      arrays skip the new flat-number fast path (correctly) and hit the same generic loop that was
+      already there, so this predates the audit. Likely a typed-dispatch/BigNumber wiring gap in
+      the factory `cumsum`. Fix separately; not a numerical-stability issue.
+- [ ] **Continue the NumPy/SciPy accuracy audit — remaining candidates.** `prod` (log-space for
+      overflow? — measure first; np.prod is also naive-multiply), `hypot` (2-arg scaled — check the
+      current impl doesn't square-and-add), `corr`/`cov` (two-pass vs one-pass — check for
+      catastrophic cancellation in the one-pass form), `quantile` interpolation modes vs
+      `np.quantile` (linear/lower/higher/nearest/midpoint parity). **Audit the path the caller
+      takes**, and compare against real NumPy — installed, `python -c "import numpy"` works.
 
 ### WebGPU acceleration epic### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
 

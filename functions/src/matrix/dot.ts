@@ -1,9 +1,18 @@
 import { factory } from '../utils/factory.js';
 import { isMatrix } from '../utils/is.js';
+import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
 
 /** A scalar implementation resolved from a typed-function (e.g. via typed.find) */
 type ScalarFn = (...args: unknown[]) => unknown;
+
+/** True when every element is a plain JS number (so pairwiseDot's real arithmetic applies). */
+function _isFlatNumbers(arr: unknown[]): arr is number[] {
+  for (let i = 0; i < arr.length; i++) {
+    if (typeof arr[i] !== 'number') return false;
+  }
+  return true;
+}
 
 interface DenseMatrix {
   _data: unknown[] | unknown[][];
@@ -143,6 +152,20 @@ export const createDot = /* #__PURE__ */ factory(
         // find signatures that matches (dt, dt)
         add = typed.find(addScalar, [dt, dt]);
         mul = typed.find(multiplyScalar, [dt, dt]);
+      }
+
+      // Plain 1-D numeric vectors with no datatype override: pairwise-accurate dot. conj/mul/add
+      // are identity/×/+ on reals, so this equals the loop below but sums the products pairwise,
+      // matching the typed `dot` (naive left-to-right was ~18× worse than np.dot).
+      if (
+        !aIsColumn &&
+        !bIsColumn &&
+        add === addScalar &&
+        mul === multiplyScalar &&
+        _isFlatNumbers(adata as unknown[]) &&
+        _isFlatNumbers(bdata as unknown[])
+      ) {
+        return pairwiseDot(adata as number[], bdata as number[]);
       }
 
       // both vectors 1-dimensional

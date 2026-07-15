@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added / Fixed — stable `dot`, `distance`, `cumsum` (NumPy/SciPy audit follow-up)
+
+Continuation of the reduction-accuracy work below. Three new stable primitives in
+`@danielsimonjr/mathts-core` (`core/src/numeric/stable.ts`), wired into every public path:
+
+- **`dot`** summed naively (`s += aᵢ·bᵢ`) — measured ~18× worse than `np.dot` on an
+  ill-conditioned dot (n = 10⁶, relErr 6.6e-15 vs 3.7e-16). New `pairwiseDot` closes it to NumPy
+  parity for the same flop count; fixed on both the `number[]` and `Float64Array` paths.
+- **`distance`** was `sqrt(Σ(aᵢ−bᵢ)²)` — the same square-before-sum bug as `norm`: `Infinity` for
+  large inputs and a **silent `0`** for tiny ones. New `scaledDistance` (BLAS `dnrm2` over the
+  difference) gives `2e200` / `2e-200` exactly where naive squaring — and NumPy's `linalg.norm` —
+  give `inf` / `0`.
+- **`cumsum`** accumulated naively like `np.cumsum` (relErr ~1.3e-11 over 10⁶ terms). A prefix scan
+  is sequential so pairwise doesn't apply; new `neumaierCumsum` carries a running compensation for
+  exact prefixes — a strict improvement over NumPy for a few extra flops per element.
+
+Fixed on **every reachable layer**, not just the typed one. The public `distance`/`cumsum` a caller
+imports resolve to the mathjs *factory* implementations (`geometry/distance.ts`,
+`statistics/cumsum.ts`) — separate naive paths from the typed `parallelStat*` ones (the same
+"wrong-layer" trap that first bit `sum`). A behavior probe against the built package confirmed the
+gap (`distance([1e200]×4) → Infinity`, `cumsum` relErr `1.3e-11`) and the fix
+(`2e200`, relErr `0`); both factory paths now route flat plain-number inputs through the stable
+primitives, retiring two naive WASM scans that shared the overflow bug. `BigNumber`/`Complex`/
+multi-dim paths are unchanged.
+
+All three verified against live NumPy 2.3.4 / SciPy 1.17.1; pinned in `core/tests/stable.test.ts`
+and `functions/tests/numeric-accuracy.test.ts` (typed and public-factory paths).
+
 ### Fixed — `sum` / `mean` were ~46,000× less accurate than NumPy
 
 `sum` accumulated naively (`s += x`), so the running total grew large while the addends stayed

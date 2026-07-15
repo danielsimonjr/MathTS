@@ -1,11 +1,9 @@
 import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import { scaledDistance } from '@danielsimonjr/mathts-core';
 import type { MathNumericType } from '../types.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// N-dimensional distance only benefits from WASM for >= 4 dimensions
-const WASM_DISTANCE_THRESHOLD = 4;
 
 // Type definitions for distance
 interface DistanceDependencies {
@@ -457,11 +455,18 @@ export const createDistance = /* #__PURE__ */ factory(
     function _euclideanDistance(x: MathNumericType[], y: MathNumericType[]): MathNumericType {
       const vectorSize = x.length;
 
-      // WASM fast path for plain number arrays with >= WASM_DISTANCE_THRESHOLD dims
-      if (vectorSize >= WASM_DISTANCE_THRESHOLD) {
-        const wasmResult = _tryWasmDistanceND(x, y, vectorSize);
-        if (wasmResult !== null) return wasmResult;
+      // Plain-number fast path: BLAS dnrm2 scaling — pairwise-accurate and, unlike the
+      // square-then-sum loop below (and the retired naive WASM kernel, which had the same bug),
+      // does not overflow to Infinity near 1e154 or silently underflow to 0. This is the same
+      // stable primitive the typed `distance` uses; the two now agree bit-for-bit on numbers.
+      let allNumbers = true;
+      for (let i = 0; i < vectorSize; i++) {
+        if (typeof x[i] !== 'number' || typeof y[i] !== 'number') {
+          allNumbers = false;
+          break;
+        }
       }
+      if (allNumbers) return scaledDistance(x as number[], y as number[]);
 
       let result: MathNumericType = 0;
       for (let i = 0; i < vectorSize; i++) {
@@ -469,33 +474,6 @@ export const createDistance = /* #__PURE__ */ factory(
         result = addScalar(multiplyScalar(diff, diff), result);
       }
       return sqrt(result);
-    }
-
-    /**
-     * Try WASM-accelerated N-dimensional Euclidean distance for plain number arrays.
-     * Returns null if WASM is unavailable or values are not plain numbers.
-     */
-    function _tryWasmDistanceND(
-      x: MathNumericType[],
-      y: MathNumericType[],
-      n: number
-    ): number | null {
-      const wasm = wasmLoader.getModule();
-      if (!wasm) return null;
-
-      // Verify all values are plain numbers
-      for (let i = 0; i < n; i++) {
-        if (typeof x[i] !== 'number' || typeof y[i] !== 'number') return null;
-      }
-
-      const p1Alloc = wasmLoader.allocateFloat64Array(x as number[]);
-      const p2Alloc = wasmLoader.allocateFloat64Array(y as number[]);
-      try {
-        return wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, n);
-      } finally {
-        wasmLoader.free(p1Alloc.ptr);
-        wasmLoader.free(p2Alloc.ptr);
-      }
     }
 
     function _distancePairwise(a: MathNumericType[][]): MathNumericType[] {

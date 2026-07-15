@@ -11,7 +11,17 @@
  *   np.linalg.norm([1e200] x 4)  inf              <- NumPy OVERFLOWS here; we should not
  */
 import { describe, it, expect } from 'vitest';
-import { sum, mean, norm, fsum } from '../src/index.js';
+import {
+  sum,
+  mean,
+  norm,
+  fsum,
+  dot,
+  distance,
+  cumsum,
+  parallelStatDistance,
+  parallelStatCumsum,
+} from '../src/index.js';
 
 /** Neumaier compensated summation — the exact oracle, independent of the implementation. */
 function exactSum(xs: readonly number[]): number {
@@ -113,5 +123,94 @@ describe('fsum — exact summation (math.fsum equivalent)', () => {
 
   it('accepts Float64Array', () => {
     expect(fsum(Float64Array.from([1e16, 1, -1e16]))).toBe(1);
+  });
+});
+
+describe('dot / distance / cumsum accuracy (NumPy/SciPy audit follow-ups)', () => {
+  it('dot accumulates pairwise, not naively (both Array and Float64Array paths)', async () => {
+    const n = 500_000;
+    const a = new Array<number>(n);
+    const b = new Array<number>(n);
+    for (let i = 0; i < n; i++) {
+      a[i] = 1e6 + Math.sin(i);
+      b[i] = 1.0 + 1e-3 * Math.cos(i);
+    }
+    const want = exactSum(a.map((ai, i) => ai * b[i]));
+
+    // Array path (synchronous typed-function branch).
+    const gotArr = dot(a, b) as number;
+    const relArr = Math.abs(gotArr - want) / Math.abs(want);
+
+    // Float64Array path (routes through computePool.dot's sequential fallback).
+    const gotF64 = (await dot(new Float64Array(a), new Float64Array(b))) as number;
+    const relF64 = Math.abs(gotF64 - want) / Math.abs(want);
+
+    console.log(`[acc] dot relErr Array=${relArr.toExponential(2)} F64=${relF64.toExponential(2)}`);
+    // Naive lands ~6.6e-15 here; pairwise is well below 1e-15.
+    expect(relArr).toBeLessThan(1e-15);
+    expect(relF64).toBeLessThan(1e-15);
+  });
+
+  it('distance does not overflow where naive squaring gives inf', async () => {
+    const a = new Float64Array([1e200, 1e200, 1e200, 1e200]);
+    const b = new Float64Array([0, 0, 0, 0]);
+    const got = (await parallelStatDistance(a, b)) as number;
+    console.log(`[acc] distance([1e200 x4], 0) = ${got}  (exact 2e200; naive gives inf)`);
+    expect(Number.isFinite(got)).toBe(true);
+    expect(Math.abs(got - 2e200) / 2e200).toBeLessThan(1e-15);
+  });
+
+  it('distance does not underflow to zero where naive squaring flushes to 0', async () => {
+    const a = new Float64Array([1e-200, 1e-200, 1e-200, 1e-200]);
+    const b = new Float64Array([0, 0, 0, 0]);
+    const got = (await parallelStatDistance(a, b)) as number;
+    console.log(`[acc] distance([1e-200 x4], 0) = ${got}  (exact 2e-200; naive gives 0)`);
+    expect(got).toBeGreaterThan(0);
+    expect(Math.abs(got - 2e-200) / 2e-200).toBeLessThan(1e-15);
+  });
+
+  it('cumsum prefix totals stay exact where np.cumsum drifts O(n)*eps', () => {
+    const n = 1_000_000;
+    const xs = new Float64Array(n).fill(0.1);
+    const out = parallelStatCumsum(xs) as Float64Array;
+    const relErr = Math.abs(out[n - 1] - 100_000) / 100_000;
+    console.log(`[acc] cumsum last relErr = ${relErr.toExponential(2)} (np.cumsum: 1.3e-11)`);
+    // Naive prefix scan lands ~1.3e-11; Neumaier compensation is exact.
+    expect(relErr).toBeLessThan(1e-14);
+  });
+});
+
+// The symbols a CONSUMER imports (`distance`, `cumsum`) resolve to the mathjs FACTORY
+// implementations, which are separate code paths from the typed ones above. These were still
+// naive after the typed fix — the same "wrong layer" trap that bit `sum`. Pin them directly.
+describe('public factory paths carry the fix (not just the typed layer)', () => {
+  it('public distance does not overflow (was Infinity) or underflow (was 0)', () => {
+    const big = distance([1e200, 1e200, 1e200, 1e200], [0, 0, 0, 0]) as number;
+    const small = distance([1e-200, 1e-200, 1e-200, 1e-200], [0, 0, 0, 0]) as number;
+    console.log(`[acc] public distance big=${big} small=${small} (exact 2e200 / 2e-200)`);
+    expect(Number.isFinite(big)).toBe(true);
+    expect(Math.abs(big - 2e200) / 2e200).toBeLessThan(1e-15);
+    expect(small).toBeGreaterThan(0);
+    expect(Math.abs(small - 2e-200) / 2e-200).toBeLessThan(1e-15);
+  });
+
+  it('public distance still agrees with the plain answer in the safe range', () => {
+    expect(distance([0, 0], [3, 4])).toBe(5);
+  });
+
+  it('public cumsum prefix totals stay exact where np.cumsum drifts', () => {
+    const n = 1_000_000;
+    const xs = new Array<number>(n).fill(0.1);
+    const out = cumsum(xs) as number[];
+    const relErr = Math.abs(out[n - 1] - 100_000) / 100_000;
+    console.log(
+      `[acc] public cumsum last relErr = ${relErr.toExponential(2)} (np.cumsum: 1.3e-11)`
+    );
+    expect(relErr).toBeLessThan(1e-14);
+  });
+
+  it('public cumsum still returns correct small flat sums (fast-path exactness)', () => {
+    expect(cumsum([1, 2, 3, 4])).toEqual([1, 3, 6, 10]);
+    expect(cumsum([0.5, -0.25, 0.25])).toEqual([0.5, 0.25, 0.5]);
   });
 });

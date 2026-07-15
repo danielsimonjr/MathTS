@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-14",
+  "generated": "2026-07-15",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -629,12 +629,14 @@
       "MemoizedFunction",
       "multiplyScalar",
       "nearlyEqual",
+      "neumaierCumsum",
       "neumaierSum",
       "norm2",
       "normalizeFormatOptions",
       "number",
       "NumericScalar",
       "NumericType",
+      "pairwiseDot",
       "pairwiseSum",
       "PHI",
       "PI",
@@ -655,6 +657,7 @@
       "RoundingMode",
       "safeNumberType",
       "Scalar",
+      "scaledDistance",
       "set",
       "SI_PREFIXES",
       "sign",

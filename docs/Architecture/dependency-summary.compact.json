@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-14", "f": 1028, "e": 4959, "re": 1798 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-15", "f": 1028, "e": 4965, "re": 1801 },
   "s": {
-    "loc": 171642,
+    "loc": 171736,
     "cls": 56,
     "int": 410,
-    "fn": 1609,
+    "fn": 1612,
     "tg": 158,
     "en": 0,
     "co": 1535,
@@ -148,7 +148,17 @@
       "cls": ["FunctionRegistry"],
       "int": ["MathTSConfig", "FactoryFunction", "FactoryDependencies"]
     },
-    "core/numeric": { "f": 1, "exp": ["pairwiseSum", "neumaierSum", "norm2"] },
+    "core/numeric": {
+      "f": 1,
+      "exp": [
+        "pairwiseSum",
+        "neumaierSum",
+        "norm2",
+        "pairwiseDot",
+        "scaledDistance",
+        "neumaierCumsum"
+      ]
+    },
     "core/typed": {
       "f": 3,
       "exp": [
@@ -1585,7 +1595,7 @@
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 41 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 40 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
     { "p": "utils/is.ts", "i": 0, "o": 40 }
   ]

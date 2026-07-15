@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-14'
+  lastUpdated: '2026-07-15'
   totalFiles: 1028
   totalModules: 78
-  totalExports: 4959
+  totalExports: 4965
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -556,6 +556,9 @@ modules:
             - pairwiseSum
             - neumaierSum
             - norm2
+            - pairwiseDot
+            - scaledDistance
+            - neumaierCumsum
           reExport: true
         - file: ./types/interfaces.js
           imports:
@@ -720,6 +723,9 @@ modules:
         - pairwiseSum
         - neumaierSum
         - norm2
+        - pairwiseDot
+        - scaledDistance
+        - neumaierCumsum
         - VERSION
         - MathTSValue
         - Scalar
@@ -850,6 +856,9 @@ modules:
         - pairwiseSum
         - neumaierSum
         - norm2
+        - pairwiseDot
+        - scaledDistance
+        - neumaierCumsum
         - MathTSValue
         - Scalar
         - BackendType
@@ -1254,10 +1263,16 @@ modules:
         - pairwiseSum
         - neumaierSum
         - norm2
+        - pairwiseDot
+        - scaledDistance
+        - neumaierCumsum
       functions:
         - pairwiseSum
         - neumaierSum
         - norm2
+        - pairwiseDot
+        - scaledDistance
+        - neumaierCumsum
   core/typed:
     core/src/typed/index.ts:
       description: typed-function integration exports
@@ -9951,7 +9966,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - scaledDistance
       exports:
         - createDistance
       constants:
@@ -10438,7 +10457,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
       exports:
         - createDot
       constants:
@@ -12863,14 +12886,15 @@ modules:
         - file: ../error/IndexError.js
           imports:
             - IndexError
-        - file: ../wasm/WasmLoader.js
-          imports:
-            - wasmLoader
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - neumaierCumsum
       exports:
         - createCumSum
       constants:
@@ -15012,6 +15036,7 @@ modules:
             - pairwiseSum
             - neumaierSum
             - norm2
+            - pairwiseDot
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -16799,6 +16824,7 @@ modules:
           directory: core
           imports:
             - mathTyped
+            - neumaierCumsum
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
@@ -26839,6 +26865,8 @@ modules:
           imports:
             - pairwiseSum
             - norm2
+            - pairwiseDot
+            - scaledDistance
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -32630,15 +32658,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1028
   totalModules: 78
-  totalLinesOfCode: 171642
-  totalExports: 4959
+  totalLinesOfCode: 171736
+  totalExports: 4965
   totalClasses: 56
   totalInterfaces: 410
-  totalFunctions: 1609
+  totalFunctions: 1612
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1535
-  totalReExports: 1798
+  totalReExports: 1801
   totalTypeOnlyImports: 524
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { pairwiseSum, norm2 } from '@danielsimonjr/mathts-core';
+import { pairwiseSum, norm2, pairwiseDot, scaledDistance } from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
   Transfer,
@@ -216,6 +216,11 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   // to the global threshold; benchmarked memory-bound (0.09–1.19×, occasional noise
   // spikes but no persistent win) → 'never'.
   norm: 'never',
+  // ACCURACY NOTE: `dot`/`distance` staying 'never' is also what keeps them stable. The
+  // sequential fallbacks use core's pairwiseDot / scaledDistance, but the worker kernels
+  // (dotChunk / distanceChunk in workerpool) still accumulate naively. Do NOT tune these off
+  // 'never' without giving those kernels the same pairwise/scaled accumulation first, or large
+  // inputs — the regime where O(n)·ε is worst — would silently revert to naive accuracy.
   dot: 'never',
   // Added 2026-07-02 (WS-2): `min`/`max` are now `OpName`s (added to the union) so
   // they're tunable. Same memory-bound reduction profile as sum/mean/norm above →
@@ -618,9 +623,7 @@ export class ComputePool {
   async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
     if (!this.shouldParallelize(a.length, 'dot')) {
       if (a.length !== b.length) throw new Error('dot: vectors must have the same length');
-      let s = 0;
-      for (let i = 0; i < a.length; i++) s += a[i] * b[i];
-      return this.seqResult(s);
+      return this.seqResult(pairwiseDot(a, b));
     }
     return toParallelResult(await this.workerPool.dot(a, b));
   }
@@ -788,9 +791,7 @@ export class ComputePool {
   async distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
     if (!this.shouldParallelize(a.length, 'distance')) {
       if (a.length !== b.length) throw new Error('distance: vectors must have the same length');
-      let s = 0;
-      for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2;
-      return this.seqResult(Math.sqrt(s));
+      return this.seqResult(scaledDistance(a, b));
     }
     return toParallelResult(await this.workerPool.distance(a, b));
   }

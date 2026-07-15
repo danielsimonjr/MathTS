@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-14
+**Version**: 0.1.0 | **Last Updated**: 2026-07-15
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -437,7 +437,7 @@ graph LR
 | `./types/unit-prefixes.js` | `SI_PREFIXES, BEST_PREFIXES, getPrefix` | Re-export |
 | `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export |
 | `./factory/index.js` | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG` | Re-export |
-| `./numeric/stable.js` | `pairwiseSum, neumaierSum, norm2` | Re-export |
+| `./numeric/stable.js` | `pairwiseSum, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum` | Re-export |
 | `./types/interfaces.js` | `MathTSValue, Scalar, BackendType, NumericType, MatrixBackend, IMatrix, IComplex, IFraction, IBigNumber, MatrixDimensions` | Re-export (type-only) |
 | `./types/matrix/Range.js` | `RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON` | Re-export (type-only) |
 | `./types/dual-rules.js` | `DualUnaryRule, DualUnaryRuleName` | Re-export (type-only) |
@@ -450,7 +450,7 @@ graph LR
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -578,7 +578,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `pairwiseSum`, `neumaierSum`, `norm2`
+- Functions: `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`
 
 ---
 
@@ -4495,6 +4495,11 @@ graph LR
 
 ### `functions/src/geometry/distance.ts` - Calculates:
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `scaledDistance` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -4807,6 +4812,11 @@ graph LR
 ---
 
 ### `functions/src/matrix/dot.ts` - Calculate the dot product of two vectors. The dot product of
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `pairwiseDot` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -6314,6 +6324,11 @@ graph LR
 
 ### `functions/src/statistics/cumsum.ts` - Check if an array is a flat array of plain numbers
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `neumaierCumsum` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -6323,7 +6338,6 @@ graph LR
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import |
 | `../utils/array.js` | `arraySize` | Import |
 | `../error/IndexError.js` | `IndexError` | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -7593,7 +7607,7 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, Dual` |
-| `@danielsimonjr/mathts-core` | `pairwiseSum, neumaierSum, norm2` |
+| `@danielsimonjr/mathts-core` | `pairwiseSum, neumaierSum, norm2, pairwiseDot` |
 | `@danielsimonjr/mathts-core` | `UnitInstance` |
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager, singularValues` |
 | `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
@@ -8073,7 +8087,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-core` | `mathTyped, neumaierCumsum` |
 | `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Internal Dependencies:**
@@ -13391,7 +13405,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `pairwiseSum, norm2` |
+| `@danielsimonjr/mathts-core` | `pairwiseSum, norm2, pairwiseDot, scaledDistance` |
 | `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Internal Dependencies:**
@@ -14721,7 +14735,7 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 2 files      | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 41 files   |
+| `functions/src/wasm/WasmLoader`                        | 2 files      | 40 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `expression/src/utils/is`                              | 0 files      | 40 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
@@ -15515,12 +15529,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1028   |
 | Total Modules           | 78     |
-| Total Lines of Code     | 171642 |
-| Total Exports           | 4959   |
-| Total Re-exports        | 1798   |
+| Total Lines of Code     | 171736 |
+| Total Exports           | 4965   |
+| Total Re-exports        | 1801   |
 | Total Classes           | 56     |
 | Total Interfaces        | 410    |
-| Total Functions         | 1609   |
+| Total Functions         | 1612   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 524    |
@@ -15529,5 +15543,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-14
+_Last Updated_: 2026-07-15
 _Version_: 0.1.0

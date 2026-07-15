@@ -13,7 +13,7 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
-import { pairwiseSum, neumaierSum, norm2 } from '@danielsimonjr/mathts-core';
+import { pairwiseSum, neumaierSum, norm2, pairwiseDot } from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
@@ -1455,11 +1455,7 @@ export const dot = mathTyped('dot', {
     if (a.length !== b.length) {
       throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
     }
-    let total: f64 = 0;
-    for (let i: i32 = 0; i < a.length; i++) {
-      total += a[i] * b[i];
-    }
-    return total;
+    return pairwiseDot(a, b);
   },
 
   // Parallel Float64Array dot product

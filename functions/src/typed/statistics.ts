@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped } from '@danielsimonjr/mathts-core';
+import { mathTyped, neumaierCumsum } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 
@@ -591,25 +591,17 @@ export const parallelStatMAD = mathTyped('parallelStatMAD', {
  * Parallel cumulative sum
  */
 export const parallelStatCumsum = mathTyped('parallelStatCumsum', {
-  // Float64Array
+  // Float64Array — Neumaier-compensated prefix scan (exact where np.cumsum drifts O(n)·ε).
   Float64Array: (data: Float64Array): Float64Array => {
     const result = new Float64Array(data.length);
-    let sum: f64 = 0;
-    for (let i: i32 = 0; i < data.length; i++) {
-      sum += data[i];
-      result[i] = sum;
-    }
+    neumaierCumsum(data, result);
     return result;
   },
 
   // Number array
   Array: (arr: number[]): number[] => {
-    const result: number[] = [];
-    let sum: f64 = 0;
-    for (let i: i32 = 0; i < arr.length; i++) {
-      sum += arr[i];
-      result.push(sum);
-    }
+    const result = new Array<number>(arr.length);
+    neumaierCumsum(arr, result);
     return result;
   },
 });
