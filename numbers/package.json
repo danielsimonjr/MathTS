@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-numbers",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Standalone numeric types for MathTS -- Complex, Fraction, and BigNumber, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.9.0"
+    "@danielsimonjr/mathts-core": "^0.10.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
