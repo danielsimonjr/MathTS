@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-statistics
 
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies [397493e]
+  - @danielsimonjr/mathts-functions@0.24.0
+
 ## 0.3.7
 
 ### Patch Changes

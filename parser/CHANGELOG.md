@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-parser
 
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [397493e]
+  - @danielsimonjr/mathts-core@0.9.0
+  - @danielsimonjr/mathts-expression@0.6.3
+
 ## 0.1.13
 
 ### Patch Changes
