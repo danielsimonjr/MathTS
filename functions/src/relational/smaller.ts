@@ -12,7 +12,7 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for smaller
 interface BigNumberType {
-  lt(n: BigNumberType): boolean;
+  lessThan(n: BigNumberType): boolean;
 }
 
 interface FractionType {
@@ -115,7 +115,7 @@ export const createSmaller = /* #__PURE__ */ factory(
      * @return {boolean | Array | Matrix} Returns true when the x is smaller than y, else returns false
      */
     function bignumSmaller(x: BigNumberType, y: BigNumberType): boolean {
-      return x.lt(y) && !bigNearlyEqual(x, y, config.relTol, config.absTol);
+      return x.lessThan(y) && !bigNearlyEqual(x, y, config.relTol, config.absTol);
     }
 
     return typed(

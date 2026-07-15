@@ -36,7 +36,7 @@ export const createEqualScalar = /* #__PURE__ */ factory(
         },
 
         'BigNumber, BigNumber': function (x: BigNumber, y: BigNumber): boolean {
-          return x.eq(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
+          return x.equals(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): boolean {

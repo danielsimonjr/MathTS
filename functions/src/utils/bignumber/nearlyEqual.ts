@@ -18,18 +18,21 @@
  * Internal structural contract for the BigNumber values compared here. Inputs
  * are accepted as `unknown` (callers pass a variety of duck-typed BigNumber
  * shapes) and narrowed to this contract for the actual comparison.
+ *
+ * Uses MathTS core's BigNumber method names (`equals`/`sub`/`greaterThanOrEqual`/
+ * `lessThanOrEqual`), not decimal.js's (`eq`/`minus`/`gte`/`lte`) — core's BigNumber
+ * does not implement the latter, so the old decimal.js-shaped calls crashed every
+ * BigNumber comparison (compare/smaller/larger/equal, and thus median/sort).
  */
 interface BigNumberLike {
   isNaN(): boolean;
   isFinite(): boolean;
-  eq(other: BigNumberLike): boolean;
-  minus(other: BigNumberLike): BigNumberLike;
+  equals(other: BigNumberLike): boolean;
+  sub(other: BigNumberLike): BigNumberLike;
   mul(factor: number): BigNumberLike;
   abs(): BigNumberLike;
-  lte(other: BigNumberLike): boolean;
-  constructor: {
-    max(...values: Array<BigNumberLike | number>): BigNumberLike;
-  };
+  greaterThanOrEqual(other: BigNumberLike): boolean;
+  lessThanOrEqual(other: BigNumberLike | number): boolean;
 }
 
 export function nearlyEqual(a: unknown, b: unknown, relTol = 1e-9, absTol = 0): boolean {
@@ -50,15 +53,19 @@ export function nearlyEqual(a: unknown, b: unknown, relTol = 1e-9, absTol = 0): 
   }
 
   if (!x.isFinite() || !y.isFinite()) {
-    return x.eq(y);
+    return x.equals(y);
   }
   // use "==" operator, handles infinities
-  if (x.eq(y)) {
+  if (x.equals(y)) {
     return true;
   }
-  // abs(a-b) <= max(relTol * max(abs(a), abs(b)), absTol)
-  return x
-    .minus(y)
-    .abs()
-    .lte(x.constructor.max(x.constructor.max(x.abs(), y.abs()).mul(relTol), absTol));
+  // abs(a-b) <= max(relTol * max(abs(a), abs(b)), absTol).
+  // `diff <= max(P, Q)` is equivalent to `diff <= P || diff <= Q`, which avoids constructing a
+  // BigNumber from the plain-number absTol (core's BigNumber has no number-arg constructor).
+  const ax = x.abs();
+  const ay = y.abs();
+  const maxAbs = ax.greaterThanOrEqual(ay) ? ax : ay;
+  const relBound = maxAbs.mul(relTol);
+  const diff = x.sub(y).abs();
+  return diff.lessThanOrEqual(relBound) || diff.lessThanOrEqual(absTol);
 }

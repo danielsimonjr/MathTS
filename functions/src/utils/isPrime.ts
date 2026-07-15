@@ -2,22 +2,24 @@ import { deepMap } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
-// Type definitions for isPrime
+// Type definitions for isPrime.
+// Uses MathTS core's BigNumber method names (lessThanOrEqual/lessThan/equals/toBigInt), not
+// decimal.js's (lte/lt/eq). Core's BigNumber is bigint-backed, so integer arithmetic is already
+// exact — the decimal.js precision-cloning dance (constructor.clone) that this used to do is
+// unnecessary and its API does not exist on core's BigNumber.
 interface BigNumberType {
-  lte(n: number): boolean;
+  lessThanOrEqual(n: number): boolean;
   gt(n: number): boolean;
-  lt(n: number | string): boolean;
+  lessThan(n: number): boolean;
   mod(n: number): BigNumberType;
-  eq(n: number): boolean;
+  equals(n: number): boolean;
   sub(n: number | BigNumberType): BigNumberType;
   div(n: number): BigNumberType;
   add(n: number): BigNumberType;
   mul(n: BigNumberType | number): BigNumberType;
   toNumber(): number;
+  toBigInt(): bigint;
   toFixed(n: number): string;
-  constructor: {
-    clone(config: { precision: number }): new (value: BigNumberType | number) => BigNumberType;
-  };
 }
 
 interface IsPrimeDependencies {
@@ -91,9 +93,9 @@ export const createIsPrime = /* #__PURE__ */ factory(
       },
 
       BigNumber: function (n: BigNumberType): boolean {
-        if (n.lte(3)) return n.gt(1);
-        if (n.mod(2).eq(0) || n.mod(3).eq(0)) return false;
-        if (n.lt(Math.pow(2, 32))) {
+        if (n.lessThanOrEqual(3)) return n.gt(1);
+        if (n.mod(2).equals(0) || n.mod(3).equals(0)) return false;
+        if (n.lessThan(Math.pow(2, 32))) {
           const x = n.toNumber();
           for (let i = 5; i * i <= x; i += 6) {
             if (x % i === 0 || x % (i + 2) === 0) {
@@ -110,8 +112,8 @@ export const createIsPrime = /* #__PURE__ */ factory(
         ): BigNumberType | number {
           // exponent can be huge, use non-recursive variant
           let accumulator: BigNumberType | number = 1;
-          while (!exponent.eq(0)) {
-            if (exponent.mod(2).eq(0)) {
+          while (!exponent.equals(0)) {
+            if (exponent.mod(2).equals(0)) {
               exponent = exponent.div(2);
               base = base.mul(base).mod(modulus as unknown as number) as unknown as BigNumberType;
             } else {
@@ -123,19 +125,17 @@ export const createIsPrime = /* #__PURE__ */ factory(
         }
 
         // https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Deterministic_variants
-        const Decimal = n.constructor.clone({
-          precision: n.toFixed(0).length * 2,
-        });
-        n = new Decimal(n);
+        // core's BigNumber is bigint-backed → integer mul/mod are already exact, so no precision
+        // clone is needed (decimal.js's constructor.clone does not exist on it).
         let r = 0;
         let d = n.sub(1);
-        while (d.mod(2).eq(0)) {
+        while (d.mod(2).equals(0)) {
           d = d.div(2);
           r += 1;
         }
         let bases: number[] | null = null;
         // https://en.wikipedia.org/wiki/Miller–Rabin_primality_test#Testing_against_small_sets_of_bases
-        if (n.lt('3317044064679887385961981')) {
+        if (n.toBigInt() < 3317044064679887385961981n) {
           bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41].filter((x) => x < n.toNumber());
         } else {
           const max = Math.min(
@@ -150,10 +150,10 @@ export const createIsPrime = /* #__PURE__ */ factory(
         for (let i = 0; i < bases.length; i += 1) {
           const a = bases[i];
           const adn = modPow(n.sub(n).add(a), d, n);
-          if (!(adn as BigNumberType).eq(1)) {
+          if (!(adn as BigNumberType).equals(1)) {
             for (
               let i = 0, x = adn as BigNumberType;
-              !x.eq(n.sub(1) as unknown as number);
+              !x.equals(n.sub(1) as unknown as number);
               i += 1, x = x.mul(x).mod(n as unknown as number) as unknown as BigNumberType
             ) {
               if (i === r - 1) {

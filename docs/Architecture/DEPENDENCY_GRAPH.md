@@ -5661,7 +5661,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 | `../plain/number/index.js` | `gammaG, gammaNumber, gammaP` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
 
@@ -6309,11 +6308,15 @@ graph LR
 
 ### `functions/src/statistics/corr.ts` - Check if an array contains only plain numbers
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `pairwiseSum, pairwiseDot` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -14730,13 +14733,13 @@ graph LR
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/utils/is`                               | 0 files      | 61 files   |
-| `functions/src/core/config`                            | 0 files      | 56 files   |
+| `functions/src/core/config`                            | 0 files      | 55 files   |
 | `functions/src/utils/array`                            | 6 files      | 49 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 2 files      | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 40 files   |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
+| `functions/src/wasm/WasmLoader`                        | 2 files      | 39 files   |
 | `expression/src/utils/is`                              | 0 files      | 40 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -15529,7 +15532,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1028   |
 | Total Modules           | 78     |
-| Total Lines of Code     | 171736 |
+| Total Lines of Code     | 171731 |
 | Total Exports           | 4965   |
 | Total Re-exports        | 1801   |
 | Total Classes           | 56     |
@@ -15537,7 +15540,7 @@ graph TD
 | Total Functions         | 1612   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 524    |
+| Type-only Imports       | 523    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

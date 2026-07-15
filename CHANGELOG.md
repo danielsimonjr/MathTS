@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `corr` returned |correlation| > 1, and a class of BigNumber correctness bugs
+
+Continuing the NumPy/SciPy accuracy audit, `corr` was found returning **52** (mathematically
+impossible) for a true correlation of **−1** on large-mean data. It used the one-pass computational
+formula `n·ΣXY − ΣX·ΣY`, which catastrophically cancels — two ~1e28 quantities subtracted. Rewritten
+to the stable **two-pass** form; now matches `np.corrcoef`. Pinned by the implementation-independent
+invariant `|corr| ≤ 1`.
+
+Chasing a reported `cumsum(BigNumber[])` crash uncovered a systematic incompatibility: the
+mathjs-lineage factory layer assumed a **decimal.js BigNumber API** (`plus`/`minus`/`lte`/`gte`/
+`eq`/`cmp`) that MathTS core's BigNumber does not implement (it uses `add`/`sub`/`lessThanOrEqual`/
+`equals`/`compareTo`). Two root causes fixed:
+
+- **Core** — BigNumber comparison methods (`equals`/`lessThan`/`lessThanOrEqual`/`greaterThan`/
+  `greaterThanOrEqual`/`compareTo`) now **coerce a number/string argument** like `add`/`gt` do.
+  Before, `bignumber(8).lessThanOrEqual(3)` returned `true`.
+- **functions** — method-name fixes across `addScalar`, `subtractScalar`, `nearlyEqual`, `compare`,
+  `smaller`/`smallerEq`/`largerEq`/`equalScalar`, `cumsum`, `quantileSeq`, `factorial`, `gamma`, and
+  `isPrime` (whose Miller-Rabin path, and `gamma`'s factorial, also dropped an unnecessary decimal.js
+  precision-clone — core is bigint-backed and exact). Plus a non-idempotent `bignumber()` conversion:
+  `bignumber(aBigNumber)` returned `Infinity`. This restores `sort`/`median`/`min`/`max`/`cumsum`/
+  `corr`/`quantileSeq`/`factorial`/`gamma`/`isPrime` on BigNumber inputs — all previously crashed or
+  silently mis-ordered.
+
+These BigNumber paths were previously **untested**, which is why they stayed broken under a green
+suite; regression coverage added (`core/tests/bignumber-comparison-coercion.test.ts`,
+`functions/tests/bignumber-operations.test.ts`). Verified against live NumPy 2.3.4; full functions
+suite and core suite green.
+
 ### Added / Fixed — stable `dot`, `distance`, `cumsum` (NumPy/SciPy audit follow-up)
 
 Continuation of the reduction-accuracy work below. Three new stable primitives in

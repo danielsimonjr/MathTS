@@ -12,7 +12,7 @@ interface BigNumberType {
   times(n: number): BigNumberType;
   floor(): BigNumberType;
   toNumber(): number;
-  minus(n: number | BigNumberType): BigNumberType;
+  sub(n: number | BigNumberType): BigNumberType;
   valueOf(): number;
 }
 
@@ -241,7 +241,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         : (index as BigNumberType).floor().toNumber();
       const fracPart = isNumber(prob)
         ? (index as number) % 1
-        : (index as BigNumberType).minus(integerPart);
+        : (index as BigNumberType).sub(integerPart);
 
       if (isInteger(index)) {
         return sorted

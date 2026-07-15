@@ -1,14 +1,14 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-15", "f": 1028, "e": 4965, "re": 1801 },
   "s": {
-    "loc": 171736,
+    "loc": 171731,
     "cls": 56,
     "int": 410,
     "fn": 1612,
     "tg": 158,
     "en": 0,
     "co": 1535,
-    "toi": 524
+    "toi": 523
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1589,14 +1589,14 @@
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
-    { "p": "core/config.ts", "i": 0, "o": 56 },
+    { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 40 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 39 },
     { "p": "utils/is.ts", "i": 0, "o": 40 }
   ]
 }

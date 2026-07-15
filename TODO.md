@@ -40,18 +40,32 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       ✅ **RELEASED + verified live** (2026-07-14): core@0.8.0, functions@0.23.0, parallel@0.5.0
       (+ dependency cascade). Confirmed by downloading the published tarballs — core dist defines
       the three primitives, functions dist calls them in the factory paths.
-- [ ] ⚠️ **Pre-existing (surfaced 2026-07-14, NOT caused by the accuracy work): `cumsum` throws on
-      `BigNumber` input.** `cumsum([bignumber('0.1'), …])` → `TypeError: x.plus is not a function`
-      in the generic `add`-based path (`unaryPlus(bn)` then `add(number, BigNumber)`). BigNumber
-      arrays skip the new flat-number fast path (correctly) and hit the same generic loop that was
-      already there, so this predates the audit. Likely a typed-dispatch/BigNumber wiring gap in
-      the factory `cumsum`. Fix separately; not a numerical-stability issue.
+- [x] ✅ **`corr` returned |corr| > 1 — FIXED** (2026-07-15). One-pass computational formula
+      `n·ΣXY − ΣX·ΣY` catastrophically cancels on large means → `corr` of two ~1e9 series returned
+      **52** for a true **−1**. Rewrote to stable two-pass (center, then `Σdx·dy/√(Σdx²·Σdy²)`),
+      pairwise-accurate; matches `np.corrcoef`. Pinned by `|corr|≤1`. `cov` verified at NumPy parity
+      (~1e-13), `hypot`/`prod`/`quantileSeq`-linear verified at parity — no defect there.
+- [x] ✅ **BigNumber decimal.js-API incompatibility — LARGE FIX** (2026-07-15). Chasing the reported
+      `cumsum(BigNumber[])` crash uncovered a systematic issue: the mathjs-lineage factory layer
+      assumed decimal.js methods (`plus`/`minus`/`lte`/`gte`/`eq`/`cmp`) that core's BigNumber lacks
+      (it has `add`/`sub`/`lessThanOrEqual`/`equals`/`compareTo`). **Root-cause CORE fix:** BigNumber
+      comparison methods now coerce number/string args (`bignumber(8).lessThanOrEqual(3)` was `true`).
+      Plus method-name fixes across addScalar/subtractScalar/nearlyEqual/compare/smaller/smallerEq/
+      largerEq/equalScalar/cumsum/quantileSeq/factorial/isPrime. Restores sort/median/min/max/cumsum/
+      corr/isPrime on BigNumbers (all previously crashed or mis-ordered). Full suites green.
+- [x] ✅ **BigNumber factory follow-up — ALSO FIXED** (2026-07-15, from the adversarial review).
+      `factorial`/`gamma(BigNumber)` (rewrote `bigFactorial` to core's exact bigint arithmetic,
+      dropping the decimal.js `BigNumber.clone`/`.precision`/`.minus`/`new BigNumber(n)`) and
+      scalar-BigNumber `quantileSeq` (root cause was `bignumber(aBigNumber) → Infinity`, a
+      non-idempotent conversion in `factories/scope.ts`, now guards `instanceof BigNumber` + handles
+      Fraction/numeric-like). `bitwise` ops on BigNumbers **verified already working** (the
+      decimal.js code in `utils/bignumber/bitwise.ts` is shadowed/dormant, like floor/ceil/expm1/
+      log1p/gcd — the typed layer handles the public path). Regression-tested in
+      `functions/tests/bignumber-operations.test.ts`.
 - [ ] **Continue the NumPy/SciPy accuracy audit — remaining candidates.** `prod` (log-space for
-      overflow? — measure first; np.prod is also naive-multiply), `hypot` (2-arg scaled — check the
-      current impl doesn't square-and-add), `corr`/`cov` (two-pass vs one-pass — check for
-      catastrophic cancellation in the one-pass form), `quantile` interpolation modes vs
-      `np.quantile` (linear/lower/higher/nearest/midpoint parity). **Audit the path the caller
-      takes**, and compare against real NumPy — installed, `python -c "import numpy"` works.
+      overflow? — measure first; np.prod is also naive-multiply), `quantile` other interpolation
+      modes (lower/higher/nearest/midpoint) as a feature vs `np.quantile` (linear already matches).
+      **Audit the path the caller takes**, compare against real NumPy — installed, works.
 
 ### WebGPU acceleration epic### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
 

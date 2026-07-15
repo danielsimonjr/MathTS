@@ -12,11 +12,12 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for compare
 interface BigNumberType {
-  cmp(n: BigNumberType): number;
+  compareTo(n: BigNumberType): number;
 }
 
 interface BigNumberConstructor {
   new (value: number | string | BigNumberType): BigNumberType;
+  fromNumber(n: number): BigNumberType;
 }
 
 interface FractionType {
@@ -132,9 +133,12 @@ export const createCompare = /* #__PURE__ */ factory(
         },
 
         'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): BigNumberType {
-          return bigNearlyEqual(x, y, config.relTol, config.absTol)
-            ? new BigNumber(0)
-            : new BigNumber(x.cmp(y));
+          // core's BigNumber exposes `.compareTo` (decimal.js's `.cmp` does not exist on it), and
+          // its raw constructor is private — a numeric result must be built via `.fromNumber`, not
+          // `new BigNumber(n)`. `x.cmp(y)` + `new BigNumber(n)` both silently failed here, so this
+          // factory compare (used by sort/median/quantileSeq) left BigNumber arrays unsorted.
+          const cmp = bigNearlyEqual(x, y, config.relTol, config.absTol) ? 0 : x.compareTo(y);
+          return BigNumber.fromNumber(cmp);
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): bigint {

@@ -7,10 +7,6 @@ interface HasAddMethod {
   add(other: unknown): unknown;
 }
 
-interface HasPlusMethod {
-  plus(other: unknown): unknown;
-}
-
 interface UnitType {
   value: unknown;
   equalBase(other: UnitType): boolean;
@@ -49,8 +45,10 @@ export const createAddScalar = /* #__PURE__ */ factory(
         return x.add(y);
       },
 
-      'BigNumber, BigNumber': function (x: HasPlusMethod, y: HasPlusMethod): unknown {
-        return x.plus(y);
+      'BigNumber, BigNumber': function (x: HasAddMethod, y: HasAddMethod): unknown {
+        // MathTS core's BigNumber exposes `.add` (decimal.js's `.plus` does not exist on it);
+        // calling `.plus` here crashed every factory-layer BigNumber addition, e.g. cumsum.
+        return x.add(y);
       },
 
       'bigint, bigint': function (x: bigint, y: bigint): bigint {

@@ -4,7 +4,7 @@ import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for factorial
 interface BigNumberType {
-  plus(n: number): BigNumberType;
+  add(n: number): BigNumberType;
   isNegative(): boolean;
 }
 
@@ -56,7 +56,7 @@ export const createFactorial = /* #__PURE__ */ factory(
           throw new Error('Value must be non-negative');
         }
 
-        return gamma(n.plus(1));
+        return gamma(n.add(1)); // core BigNumber uses `.add`, not decimal.js's `.plus`
       },
 
       'Array | Matrix': typed.referToSelf(

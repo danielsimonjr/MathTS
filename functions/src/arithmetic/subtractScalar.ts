@@ -7,10 +7,6 @@ interface HasSubMethod {
   sub(other: unknown): unknown;
 }
 
-interface HasMinusMethod {
-  minus(other: unknown): unknown;
-}
-
 interface UnitType {
   value: unknown;
   equalBase(other: UnitType): boolean;
@@ -49,8 +45,9 @@ export const createSubtractScalar = /* #__PURE__ */ factory(
         return x.sub(y);
       },
 
-      'BigNumber, BigNumber': function (x: HasMinusMethod, y: HasMinusMethod): unknown {
-        return x.minus(y);
+      'BigNumber, BigNumber': function (x: HasSubMethod, y: HasSubMethod): unknown {
+        // MathTS core's BigNumber exposes `.sub` (decimal.js's `.minus` does not exist on it).
+        return x.sub(y);
       },
 
       'bigint, bigint': function (x: bigint, y: bigint): bigint {

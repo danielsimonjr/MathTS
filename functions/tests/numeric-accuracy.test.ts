@@ -19,6 +19,7 @@ import {
   dot,
   distance,
   cumsum,
+  corr,
   parallelStatDistance,
   parallelStatCumsum,
 } from '../src/index.js';
@@ -212,5 +213,32 @@ describe('public factory paths carry the fix (not just the typed layer)', () => 
   it('public cumsum still returns correct small flat sums (fast-path exactness)', () => {
     expect(cumsum([1, 2, 3, 4])).toEqual([1, 3, 6, 10]);
     expect(cumsum([0.5, -0.25, 0.25])).toEqual([0.5, 0.25, 0.5]);
+  });
+});
+
+describe('corr uses a stable two-pass formula (the one-pass form gave |corr| > 1)', () => {
+  it('never exceeds 1 in magnitude, even with a huge mean (was 52 for a true -1)', () => {
+    // The old one-pass computational formula (n*SXY - SX*SY) subtracts two ~1e28 quantities and
+    // catastrophically cancels; it returned 52. The mathematical invariant |corr| <= 1 is the
+    // implementation-independent oracle that catches it.
+    const n = 100_000;
+    const x = new Array<number>(n);
+    const y = new Array<number>(n);
+    let seed = 1234567;
+    for (let i = 0; i < n; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      const u = seed / 0x7fffffff;
+      x[i] = 1e9 + u;
+      y[i] = 1e9 + (1 - u) * 0.5 + u * 0.3; // strongly anti-correlated with x
+    }
+    const r = corr(x, y) as number;
+    console.log(`[acc] corr(large-mean) = ${r}  (np.corrcoef ~ -1)`);
+    expect(Math.abs(r)).toBeLessThanOrEqual(1);
+    expect(r).toBeLessThan(-0.99); // np.corrcoef gives -0.9999999999996905
+  });
+
+  it('matches known correlations exactly on small inputs', () => {
+    expect(corr([1, 2, 3, 4, 5], [4, 5, 6, 7, 8]) as number).toBeCloseTo(1, 12); // perfect positive
+    expect(corr([1, 2, 3], [3, 2, 1]) as number).toBeCloseTo(-1, 12); // perfect negative
   });
 });

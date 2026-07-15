@@ -12926,11 +12926,6 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
-          },
-          {
-            "file": "../core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -14099,16 +14094,18 @@
             "imports": ["factory"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseSum", "pairwiseDot"]
+          }
+        ],
         "exports": ["createCorr"],
         "constants": ["createCorr"]
       },
@@ -35052,7 +35049,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1028,
     "totalModules": 78,
-    "totalLinesOfCode": 171736,
+    "totalLinesOfCode": 171731,
     "totalExports": 4965,
     "totalClasses": 56,
     "totalInterfaces": 410,
@@ -35061,7 +35058,7 @@
     "totalEnums": 0,
     "totalConstants": 1535,
     "totalReExports": 1801,
-    "totalTypeOnlyImports": 524,
+    "totalTypeOnlyImports": 523,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

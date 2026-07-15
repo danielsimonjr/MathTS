@@ -51,7 +51,9 @@ const extraTypes = [
   {
     name: 'ParenthesisNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isParenthesisNode === true,
+      typeof x === 'object' &&
+      x !== null &&
+      (x as Record<string, unknown>).isParenthesisNode === true,
   },
   {
     name: 'AccessorNode',
@@ -66,7 +68,9 @@ const extraTypes = [
   {
     name: 'AssignmentNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isAssignmentNode === true,
+      typeof x === 'object' &&
+      x !== null &&
+      (x as Record<string, unknown>).isAssignmentNode === true,
   },
   {
     name: 'BlockNode',
@@ -76,12 +80,16 @@ const extraTypes = [
   {
     name: 'ConditionalNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isConditionalNode === true,
+      typeof x === 'object' &&
+      x !== null &&
+      (x as Record<string, unknown>).isConditionalNode === true,
   },
   {
     name: 'FunctionAssignmentNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isFunctionAssignmentNode === true,
+      typeof x === 'object' &&
+      x !== null &&
+      (x as Record<string, unknown>).isFunctionAssignmentNode === true,
   },
   {
     name: 'IndexNode',
@@ -101,7 +109,9 @@ const extraTypes = [
   {
     name: 'RelationalNode',
     test: (x: unknown): x is object =>
-      typeof x === 'object' && x !== null && (x as Record<string, unknown>).isRelationalNode === true,
+      typeof x === 'object' &&
+      x !== null &&
+      (x as Record<string, unknown>).isRelationalNode === true,
   },
   // Index type — stub that matches objects with isIndex flag
   {
@@ -151,12 +161,22 @@ export const factoryScope: Record<string, unknown> = {
 
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
   complex: (re: number, im: number) => new Complex(re, im),
-  bignumber: (x: number | string) =>
-    typeof x === 'string' ? BigNumber.parse(x) : BigNumber.fromNumber(x),
+  bignumber: (x: number | string | BigNumber | { valueOf(): number }) => {
+    // Idempotent: a BigNumber passed back in must return unchanged. Previously this fell through
+    // to `BigNumber.fromNumber(x)` with `x` an object, which `fromNumber` read as non-finite and
+    // turned into `Infinity` — corrupting e.g. `quantileSeq(BigNumber[], …)` (which re-wraps its
+    // BigNumber result) and Fraction→BigNumber conversions in the relational operators.
+    if (x instanceof BigNumber) return x;
+    if (typeof x === 'string') return BigNumber.parse(x);
+    if (typeof x === 'number') return BigNumber.fromNumber(x);
+    return BigNumber.fromNumber(Number(x.valueOf())); // Fraction / other numeric-like
+  },
   fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
   number: Number,
 
   // Matrix helper factories
-  createDenseMatrix: (data: ConstructorParameters<typeof MathJSDenseMatrix>[0]) => new MathJSDenseMatrix(data),
-  createSparseMatrix: (data: ConstructorParameters<typeof MathJSSparseMatrix>[0]) => new MathJSSparseMatrix(data),
+  createDenseMatrix: (data: ConstructorParameters<typeof MathJSDenseMatrix>[0]) =>
+    new MathJSDenseMatrix(data),
+  createSparseMatrix: (data: ConstructorParameters<typeof MathJSSparseMatrix>[0]) =>
+    new MathJSSparseMatrix(data),
 };

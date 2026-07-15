@@ -1,14 +1,11 @@
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
+import { pairwiseSum, pairwiseDot } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for corr
 interface MatrixType {
   toArray(): unknown[];
 }
-
-// Minimum array length for WASM to be beneficial
-const WASM_CORR_THRESHOLD = 200;
 
 /**
  * Check if an array contains only plain numbers
@@ -23,35 +20,22 @@ function isPlainNumberArray(arr: unknown[]): arr is number[] {
 }
 
 const name = 'corr';
-const dependencies = [
-  'typed',
-  'matrix',
-  'mean',
-  'sqrt',
-  'sum',
-  'add',
-  'subtract',
-  'multiply',
-  'pow',
-  'divide',
-];
+const dependencies = ['typed', 'matrix', 'sqrt', 'sum', 'subtract', 'multiply', 'divide'];
 
 interface CorrDependencies {
   typed: TypedFunction;
   matrix: (arr: unknown[]) => MatrixType;
   sqrt: TypedFunction;
   sum: TypedFunction;
-  add: TypedFunction;
   subtract: TypedFunction;
   multiply: TypedFunction;
-  pow: TypedFunction;
   divide: TypedFunction;
 }
 
 export const createCorr = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, sqrt, sum, add, subtract, multiply, pow, divide }: CorrDependencies) => {
+  ({ typed, matrix, sqrt, sum, subtract, multiply, divide }: CorrDependencies) => {
     /**
      * Compute the correlation coefficient of a two list with values, For matrices, the matrix correlation coefficient is calculated.
      *
@@ -116,42 +100,36 @@ export const createCorr = /* #__PURE__ */ factory(
     function correlation(A: unknown[], B: unknown[]): unknown {
       const n = A.length;
 
-      // Try WASM for large arrays with plain numbers
-      const wasm = wasmLoader.getModule();
-      if (wasm && n >= WASM_CORR_THRESHOLD && isPlainNumberArray(A) && isPlainNumberArray(B)) {
-        try {
-          const aAlloc = wasmLoader.allocateFloat64Array(A);
-          const bAlloc = wasmLoader.allocateFloat64Array(B);
-
-          try {
-            const result = wasm.statsCorrelation(aAlloc.ptr, bAlloc.ptr, n);
-            return result;
-          } finally {
-            wasmLoader.free(aAlloc.ptr);
-            wasmLoader.free(bAlloc.ptr);
-          }
-        } catch {
-          // Fall back to JS implementation on WASM error
+      // Numerically stable TWO-PASS Pearson correlation. The previous one-pass "computational
+      // formula" (n·ΣXY − ΣX·ΣY over sqrt of the analogous variance terms) catastrophically
+      // cancels when the data has a large mean: it subtracts two ~equal ~1e28 quantities, so
+      // corr of two ~1e9 series returned 52 (impossible: |corr| ≤ 1) for a true value of −1.
+      // Centering by the mean first removes the cancellation entirely. (The old WASM kernel used
+      // the same one-pass formula and is retired for correlation.)
+      if (isPlainNumberArray(A) && isPlainNumberArray(B)) {
+        const meanX = pairwiseSum(A) / n;
+        const meanY = pairwiseSum(B) / n;
+        const dX = new Float64Array(n);
+        const dY = new Float64Array(n);
+        for (let i = 0; i < n; i++) {
+          dX[i] = A[i] - meanX;
+          dY[i] = B[i] - meanY;
         }
+        const sxy = pairwiseDot(dX, dY);
+        const sxx = pairwiseDot(dX, dX);
+        const syy = pairwiseDot(dY, dY);
+        return sxy / Math.sqrt(sxx * syy);
       }
 
-      // JavaScript fallback
-      const sumX = sum(A);
-      const sumY = sum(B);
-      const sumXY = A.reduce(
-        (acc: unknown, x: unknown, index: number) => add(acc, multiply(x, B[index])),
-        0
-      );
-      const sumXSquare = sum(A.map((x: unknown) => pow(x, 2)));
-      const sumYSquare = sum(B.map((y: unknown) => pow(y, 2)));
-      const numerator = subtract(multiply(n, sumXY), multiply(sumX, sumY));
-      const denominator = sqrt(
-        multiply(
-          subtract(multiply(n, sumXSquare), pow(sumX, 2)),
-          subtract(multiply(n, sumYSquare), pow(sumY, 2))
-        )
-      );
-      return divide(numerator, denominator);
+      // Generic fallback (BigNumber/Complex/Fraction): the same stable two-pass via typed operators.
+      const meanX = divide(sum(A), n);
+      const meanY = divide(sum(B), n);
+      const dX = A.map((x: unknown) => subtract(x, meanX));
+      const dY = B.map((y: unknown) => subtract(y, meanY));
+      const sxy = sum(dX.map((dx: unknown, i: number) => multiply(dx, dY[i])));
+      const sxx = sum(dX.map((dx: unknown) => multiply(dx, dx)));
+      const syy = sum(dY.map((dy: unknown) => multiply(dy, dy)));
+      return divide(sxy, sqrt(multiply(sxx, syy)));
     }
   }
 );

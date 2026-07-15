@@ -1,7 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { gammaG, gammaNumber, gammaP } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
-import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for gamma
 interface ComplexType {
@@ -26,21 +25,17 @@ interface BigNumberType {
   isNegative(): boolean;
   isZero(): boolean;
   isFinite(): boolean;
-  minus(n: number | BigNumberType): BigNumberType;
-  times(n: BigNumberType): BigNumberType;
+  sub(n: number | BigNumberType): BigNumberType;
+  mul(n: number | BigNumberType): BigNumberType;
   toNumber(): number;
-  toPrecision(n: number): string;
 }
 
 interface BigNumberConstructor {
-  new (value: number | string | BigNumberType): BigNumberType;
-  precision: number;
-  clone(config: { precision: number }): BigNumberConstructor;
+  fromNumber(n: number): BigNumberType;
 }
 
 interface GammaDependencies {
   typed: TypedFunction;
-  config: ConfigOptions;
   multiplyScalar: TypedFunction;
   pow: TypedFunction;
   BigNumber: BigNumberConstructor;
@@ -48,14 +43,13 @@ interface GammaDependencies {
 }
 
 const name = 'gamma';
-const dependencies = ['typed', 'config', 'multiplyScalar', 'pow', 'BigNumber', 'Complex'];
+const dependencies = ['typed', 'multiplyScalar', 'pow', 'BigNumber', 'Complex'];
 
 export const createGamma = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({
     typed,
-    config,
     multiplyScalar: _multiplyScalar,
     pow: _pow,
     BigNumber,
@@ -135,11 +129,13 @@ export const createGamma = /* #__PURE__ */ factory(
       Complex: gammaComplex,
       BigNumber: function (n: BigNumberType): BigNumberType {
         if (n.isInteger()) {
-          return n.isNegative() || n.isZero() ? new BigNumber(Infinity) : bigFactorial(n.minus(1));
+          return n.isNegative() || n.isZero()
+            ? BigNumber.fromNumber(Infinity)
+            : bigFactorial(n.sub(1));
         }
 
         if (!n.isFinite()) {
-          return new BigNumber(n.isNegative() ? NaN : Infinity);
+          return BigNumber.fromNumber(n.isNegative() ? NaN : Infinity);
         }
 
         throw new Error('Integer BigNumber expected');
@@ -147,34 +143,24 @@ export const createGamma = /* #__PURE__ */ factory(
     });
 
     /**
-     * Calculate factorial for a BigNumber
+     * Calculate factorial for a BigNumber.
+     * core's BigNumber is bigint-backed, so the integer product is exact — no precision-cloning
+     * (the decimal.js `BigNumber.clone({precision})` API core does not have) is needed. Uses core's
+     * `.mul` (not decimal.js `.times`) and `.fromNumber` (core's constructor is private).
      * @param {BigNumber} n
      * @returns {BigNumber} Returns the factorial of n
      */
     function bigFactorial(n: BigNumberType): BigNumberType {
       const nNum = n.toNumber();
       if (nNum < 8) {
-        return new BigNumber([1, 1, 2, 6, 24, 120, 720, 5040][nNum]);
+        return BigNumber.fromNumber([1, 1, 2, 6, 24, 120, 720, 5040][nNum]);
       }
 
-      const precision = config.precision + (Math.log(nNum) | 0);
-      const Big = BigNumber.clone({ precision });
-
-      if (nNum % 2 === 1) {
-        return n.times(bigFactorial(n.minus(1)));
+      let prod = BigNumber.fromNumber(1);
+      for (let k = 2; k <= nNum; k++) {
+        prod = prod.mul(k);
       }
-
-      let p = nNum;
-      let prod = new Big(nNum);
-      let sum = nNum;
-
-      while (p > 2) {
-        p -= 2;
-        sum += p;
-        prod = prod.times(new BigNumber(sum));
-      }
-
-      return new BigNumber(prod.toPrecision(BigNumber.precision));
+      return prod;
     }
   }
 );

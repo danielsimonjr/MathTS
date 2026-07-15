@@ -734,31 +734,36 @@ export class BigNumber implements MathTSValue {
   // Comparison Methods
   // ============================================================
 
-  equals(other: BigNumber): boolean {
-    return BigNumber.compare(this, other) === 0;
+  // All comparisons coerce their argument (number/string → BigNumber) exactly like the arithmetic
+  // methods, so `bignumber(8).lessThanOrEqual(3)` behaves like `.add(3)` does. Without the
+  // coercion the raw number reached the static comparator, which read `undefined._sign` and
+  // returned garbage — silently breaking every factory-layer consumer that compares against a
+  // number literal (isPrime, quantiles, …).
+  equals(other: BigNumber | number | string): boolean {
+    return BigNumber.compare(this, this.ensureBigNumber(other)) === 0;
   }
 
-  lessThan(other: BigNumber): boolean {
-    return BigNumber.compare(this, other) < 0;
+  lessThan(other: BigNumber | number | string): boolean {
+    return BigNumber.compare(this, this.ensureBigNumber(other)) < 0;
   }
 
-  lessThanOrEqual(other: BigNumber): boolean {
-    return BigNumber.compare(this, other) <= 0;
+  lessThanOrEqual(other: BigNumber | number | string): boolean {
+    return BigNumber.compare(this, this.ensureBigNumber(other)) <= 0;
   }
 
-  greaterThan(other: BigNumber): boolean {
-    return BigNumber.compare(this, other) > 0;
+  greaterThan(other: BigNumber | number | string): boolean {
+    return BigNumber.compare(this, this.ensureBigNumber(other)) > 0;
   }
 
-  greaterThanOrEqual(other: BigNumber): boolean {
-    return BigNumber.compare(this, other) >= 0;
+  greaterThanOrEqual(other: BigNumber | number | string): boolean {
+    return BigNumber.compare(this, this.ensureBigNumber(other)) >= 0;
   }
 
-  compareTo(other: BigNumber): number {
-    return BigNumber.compare(this, other);
+  compareTo(other: BigNumber | number | string): number {
+    return BigNumber.compare(this, this.ensureBigNumber(other));
   }
 
-  compare(other: BigNumber): number {
+  compare(other: BigNumber | number | string): number {
     return this.compareTo(other);
   }
 
@@ -768,7 +773,7 @@ export class BigNumber implements MathTSValue {
    * Named `gt` for Decimal.js / mathjs formatter compatibility.
    */
   gt(other: BigNumber | number | string): boolean {
-    return this.greaterThan(this.ensureBigNumber(other));
+    return this.greaterThan(other);
   }
 
   // ============================================================

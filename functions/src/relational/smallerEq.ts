@@ -12,7 +12,7 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for smallerEq
 interface BigNumberType {
-  lte(n: BigNumberType): boolean;
+  lessThanOrEqual(n: BigNumberType): boolean;
 }
 
 interface FractionType {
@@ -96,7 +96,7 @@ export const createSmallerEq = /* #__PURE__ */ factory(
         'boolean, boolean': (x: boolean, y: boolean): boolean => x <= y,
 
         'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): boolean {
-          return x.lte(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
+          return x.lessThanOrEqual(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
         },
 
         'bigint, bigint': (x: bigint, y: bigint): boolean => x <= y,
