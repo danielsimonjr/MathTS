@@ -73,12 +73,29 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       retired 2026-07-15 (naive + less accurate than the corrected two-pass; memory-bound so not
       faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
       eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
-- [ ] **Continue the NumPy/SciPy accuracy audit — remaining candidates.** `prod` (log-space for
-      overflow? — measure first; np.prod is also naive-multiply), `skewness` (3rd moment, ~1e-5
-      relErr on large means — likely near-zero-value inflation; compute exact before deciding),
-      `quantile` other interpolation modes (lower/higher/nearest/midpoint) as a feature vs
-      `np.quantile` (linear already matches). **Audit the path the caller takes**, compare against
-      real NumPy — installed, works.
+
+  > **Reduction/statistics accuracy audit — SUBSTANTIALLY COMPLETE (2026-07-15).** Every common
+  > reduction is now at or beyond NumPy: `sum`/`mean` (core@0.7.0), `norm`/`fsum` (0.7.0),
+  > `dot`/`distance`/`cumsum` (0.8.0), `corr` (0.9.0), `variance`/`std` (0.10.0). Verified at-parity
+  > (no defect): `cov` (~1e-13), `hypot` (scaled), `geomean`/`kurtosis` (~1e-8), `quantileSeq`-linear,
+  > `mad`. The remaining items below are **documented non-decisions or features**, not accuracy defects.
+
+- ⬜ **[documented non-decision] `prod` overflows on representable results — NOT fixing.**
+  `prod([1e300,1e300,1e-300,1e-300])` → `Infinity` (true value 1) because intermediate products
+  overflow. Same _class_ as the norm/distance silent-overflow, BUT: (1) the trigger (600-order
+  magnitude span in the factors) is far rarer; (2) `np.prod`/`math.prod`/every mainstream lib
+  behave identically — no competitive gap; (3) a correct overflow-safe product needs
+  exponent-tracking (`frexp`/`ldexp`) whose 0/Inf/NaN edge cases (`0×Inf`, a zero alongside
+  overflowing normal factors) are fiddly and MORE commonly hit than the case fixed — the fix's
+  risk exceeds its benefit. If ever pursued: scale the mantissa by powers of 2 each step
+  (exact), accumulate the exponent, `ldexp` at the end; handle 0/Inf/NaN via a separate
+  order-preserving accumulator.
+- [ ] **[feature, not defect] `quantile`/`quantileSeq` non-linear interpolation modes.** `np.quantile`
+      offers lower/higher/nearest/midpoint; MathTS does linear only (which already matches np's
+      default exactly). Adding the other modes is a feature-parity nicety, not an accuracy fix.
+- ⬜ **[non-decision] `skewness` ~1e-6 abs error on large-mean data is near-zero-value inflation**
+  (the 3rd central moment of near-symmetric data is ~0, so abs ~7e-7 reads as large relative
+  error). For any genuinely-skewed distribution it's accurate. Not a real defect; leave.
 
 ### WebGPU acceleration epic### WebGPU acceleration epic (design: `docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`)
 
