@@ -74,7 +74,23 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
       eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
 
-  ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
+  ### Functionality expansion (2026-07-15, per "best scientific/engineering modeling library")
+
+- [x] ✅ **`solveODE` was 100% broken on its JS path — FIXED + hardened** (2026-07-15). The RK stage
+      combination used mathjs `multiply(h,a[i],k)` (vector·matrix semantics MathTS's typed multiply
+      rejects) → threw on EVERY call; masked in CI because the test env loads WASM (scalar ODEs and
+      WASM-less consumers always broke). Now combines stages term-by-term (`stageCombo`), works for
+      scalar + vector systems, both RK23/RK45, forward/backward. Also added a Hairer initial-step
+      heuristic (was using the whole interval as step 1 → RK23 silently returned 1/3 for y'=-y).
+      Verified vs closed forms; `functions/tests/solveode-jspath.test.ts`.
+- [ ] **[HIGH-VALUE feature] Stiff ODE solver (BDF / Rosenbrock).** `solveODE` only has explicit
+      adaptive methods (RK23/RK45); these fail or crawl on stiff systems (chemical kinetics, circuits,
+      control, reaction-diffusion — core engineering modeling). scipy has BDF/Radau/LSODA, MATLAB
+      ode15s/ode23s. Add a linearly-implicit **Rosenbrock** method (ode23s-style: FD Jacobian + the
+      existing matrix LU solve, single-step, adaptive) as a `method:'Rosenbrock'` option. Verify vs
+      scipy BDF on Van der Pol(μ=1000)/Robertson. This is the clearest remaining modeling gap.
+
+### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 
 Fresh sweep of the whole special-function + distribution surface. **Overwhelmingly machine-precision**
 already: gamma/lgamma/digamma/erf/erfc/beta/betainc/gammainc/besselJ/besselI/elliptic/expm1/log1p all

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `solveODE` was fully broken on its JS path; add initial-step selection (functionality)
+
+`solveODE`'s JavaScript reference path threw `multiply(Array, Array) requires two 2-D matrices` on
+every call — the RK stage combination used mathjs `multiply(h, a[i], k)` (vector·matrix semantics
+MathTS's typed `multiply` rejects). It only stayed green because CI loads a WASM kernel; scalar ODEs
+and WASM-less consumers always hit the broken path. Stages are now combined term-by-term via
+scalar-broadcasting `multiply`/`add` (`stageCombo`), so scalar and vector systems both work (verified
+vs closed forms: `y'=-y→e⁻¹`, logistic, harmonic oscillator, backward integration; RK23 + RK45). Also
+added a Hairer initial-step heuristic (`h₀≈0.01·‖y0‖/‖f‖`) replacing the whole-interval first step,
+which had let RK23 silently accept `1/3` instead of `e⁻¹` on `y'=-y`.
+
 ### Fixed — `zeta` negative arguments (~1.5e-7 → 1.9e-14) and `besselK` transition band
 
 A fresh mpmath/SciPy sweep of the whole special-function + distribution surface found it

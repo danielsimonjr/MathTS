@@ -149,6 +149,13 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return true;
     }
 
+    /** Root-mean-square norm of a plain-number state vector, used for initial-step selection. */
+    function _rmsNorm(v: number[]): number {
+      let s = 0;
+      for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+      return Math.sqrt(s / v.length);
+    }
+
     /**
      * WASM-accelerated Runge-Kutta inner loop for plain number vector ODEs.
      *
@@ -178,17 +185,24 @@ export const createSolveODE = /* #__PURE__ */ factory(
       const t0 = tspan[0] as number;
       const tf = tspan[1] as number;
       const isForwards = tf > t0;
-      const steps = 1;
       const tol = options.tol ? options.tol : 1e-4;
       const minDelta = options.minDelta ? options.minDelta : 0.2;
       const maxDelta = options.maxDelta ? options.maxDelta : 5;
       const maxIter = options.maxIter ? options.maxIter : 10_000;
 
-      let h = options.firstStep
-        ? isForwards
-          ? (options.firstStep as number)
-          : -(options.firstStep as number)
-        : (tf - t0) / steps;
+      let h;
+      if (options.firstStep) {
+        h = isForwards ? (options.firstStep as number) : -(options.firstStep as number);
+      } else {
+        // Same Hairer initial-step heuristic as the JS path (h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖) — a
+        // whole-interval first step can slip past the embedded error test and accept a crude result.
+        const f0 = f(t0, y0) as number[];
+        const d0 = _rmsNorm(y0);
+        const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
+        const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
+        const hMag = Math.min(h0, Math.abs(tf - t0));
+        h = isForwards ? hMag : -hMag;
+      }
 
       const maxStepVal = options.maxStep as number | undefined;
       const minStepVal = options.minStep as number | undefined;
@@ -432,15 +446,49 @@ export const createSolveODE = /* #__PURE__ */ factory(
             ]
           : [butcherTableau.a, butcherTableau.c, butcherTableau.b, butcherTableau.bp];
 
-        let h = firstStep
-          ? isForwards
-            ? firstStep
-            : unaryMinus(firstStep)
-          : divide(subtract(tf, t0), steps); // define the first step size
+        let h;
+        if (firstStep) {
+          h = isForwards ? firstStep : unaryMinus(firstStep);
+        } else if (
+          !hasBigNumbers &&
+          !tspan.some(isUnit) &&
+          (y0 as unknown[]).every((v) => typeof v === 'number')
+        ) {
+          // Choose a sensible first step (Hairer's heuristic h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖) rather than
+          // spanning the whole interval. A whole-interval first step can slip past an embedded error
+          // test — e.g. BS23/RK23 on y'=-y, whose 3rd-2nd-order estimate vanishes exactly at h=span —
+          // and silently accept a crude low-order result (y(1)=1/3 instead of e⁻¹). Gated on plain
+          // numeric state — `_rmsNorm` would produce NaN on Unit/Complex/BigNumber elements — so those
+          // fall through to the whole-interval step below.
+          const f0 = f(t0 as MathNumericType, y0 as MathNumericType | MathArray);
+          const f0arr = (Array.isArray(f0) ? f0 : [f0]) as number[];
+          const d0 = _rmsNorm(y0 as number[]);
+          const d1 = _rmsNorm(f0arr);
+          const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
+          const hMag = Math.min(h0, Math.abs((tf as number) - (t0 as number)));
+          h = isForwards ? hMag : -hMag;
+        } else {
+          h = divide(subtract(tf, t0), steps); // fallback first step size
+        }
         const t: unknown[] = [t0]; // start the time array
         const y: unknown[] = [y0]; // start the solution array
 
         const deltaB = subtract(b, bp); // b - bp
+
+        // Weighted sum of Runge-Kutta stages: Σⱼ coeffs[j]·k[j]. Each k[j] is the state's shape —
+        // a scalar (number/BigNumber/Unit) for a scalar ODE, or a vector for a system. Done term by
+        // term through the injected scalar-broadcasting `multiply`/`add` (multiply(scalar, vector)
+        // scales; add is element-wise). The old mathjs form `multiply(h, a[i], k)` relied on
+        // vector·matrix / vector·vector multiply semantics, which MathTS's typed `multiply` rejects
+        // for 1-D operands (it routes those to `dot`) — so solveODE threw on EVERY call.
+        function stageCombo(coeffs: unknown[], stages: unknown[]): unknown {
+          const m = Math.min(coeffs.length, stages.length);
+          let acc = multiply(coeffs[0], stages[0]);
+          for (let j = 1; j < m; j++) {
+            acc = add(acc, multiply(coeffs[j], stages[j]));
+          }
+          return acc;
+        }
 
         let n = 0;
         let iter = 0;
@@ -458,18 +506,18 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
           // calculate the rest of the values of k
           for (let i = 1; i < (c as unknown[]).length; ++i) {
-            k.push(f(add(t[n], multiply(c[i], h)), add(y[n], multiply(h, a[i], k))));
+            k.push(f(add(t[n], multiply(c[i], h)), add(y[n], multiply(h, stageCombo(a[i], k)))));
           }
 
           // estimate the error by comparing solutions of different orders
-          const TE = max(
-            abs(map(multiply(deltaB, k), (X: unknown) => (isUnit(X) ? (X as Unit).value : X)))
-          );
+          const errComb = stageCombo(deltaB, k);
+          const errArr = Array.isArray(errComb) ? errComb : [errComb];
+          const TE = max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
 
           if (TE < tol && tol / TE > 1 / 4) {
             // push solution if within tol
             t.push(add(t[n], h));
-            y.push(add(y[n], multiply(h, b, k)));
+            y.push(add(y[n], multiply(h, stageCombo(b, k))));
             n++;
           }
 
