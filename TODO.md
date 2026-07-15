@@ -37,7 +37,9 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       to confirm (returned `Infinity`/`1.3e-11`), then fixed the factory paths too (retired two
       naive WASM scans) + the compat `_denseDot`. Fixed on all 4 layers now (typed Array,
       computePool sequential, factory, compat). `logsumexp` checked — already at scipy parity.
-      Released as core/functions/parallel minor.
+      ✅ **RELEASED + verified live** (2026-07-14): core@0.8.0, functions@0.23.0, parallel@0.5.0
+      (+ dependency cascade). Confirmed by downloading the published tarballs — core dist defines
+      the three primitives, functions dist calls them in the factory paths.
 - [ ] ⚠️ **Pre-existing (surfaced 2026-07-14, NOT caused by the accuracy work): `cumsum` throws on
       `BigNumber` input.** `cumsum([bignumber('0.1'), …])` → `TypeError: x.plus is not a function`
       in the generic `add`-based path (`unaryPlus(bn)` then `add(number, BigNumber)`). BigNumber
