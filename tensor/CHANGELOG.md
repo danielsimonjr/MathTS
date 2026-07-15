@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.10
+
+### Patch Changes
+
+- Updated dependencies [a726fd7]
+  - @danielsimonjr/mathts-core@0.8.0
+  - @danielsimonjr/mathts-matrix@0.4.3
+
 ## 0.2.9
 
 ### Patch Changes

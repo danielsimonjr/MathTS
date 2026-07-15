@@ -34,10 +34,10 @@
     "build:prod": "tsup src/index.ts src/cli.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.7.0",
-    "@danielsimonjr/mathts-expression": "^0.6.1",
-    "@danielsimonjr/mathts-functions": "^0.22.0",
-    "@danielsimonjr/mathts-plot": "^0.3.6",
+    "@danielsimonjr/mathts-core": "^0.8.0",
+    "@danielsimonjr/mathts-expression": "^0.6.2",
+    "@danielsimonjr/mathts-functions": "^0.23.0",
+    "@danielsimonjr/mathts-plot": "^0.3.7",
     "yaml": "^2.3.0"
   },
   "devDependencies": {
