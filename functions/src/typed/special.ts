@@ -260,9 +260,13 @@ function besselK1Series(x: f64): f64 {
 function besselKScalar(n: f64, x: f64): f64 {
   const ni = Math.round(Math.abs(n));
   if (x <= 0) return NaN;
-  // Series for small/moderate x (cancellation bounded), asymptotic above.
-  const k0 = x <= 9 ? besselK0Series(x) : besselKAsym(0, x);
-  const k1 = x <= 9 ? besselK1Series(x) : besselKAsym(1, x);
+  // Series for small x, asymptotic above. Crossover at 8 (not 9): the ascending series subtracts
+  // two O(I0(x)) terms to leave a tiny K(x), so its cancellation error grows with x — measured
+  // ~5e-9 at x=9. The asymptotic overtakes it by x≈8.5, so 8 caps the peak near the crossover at
+  // ~1.6e-9 (vs 5.3e-9 at 9). Machine precision across the gap needs a uniformly-accurate CF/Temme
+  // method (see TODO); everywhere outside x∈[8,11] both branches are already ~1e-13 or better.
+  const k0 = x <= 8 ? besselK0Series(x) : besselKAsym(0, x);
+  const k1 = x <= 8 ? besselK1Series(x) : besselKAsym(1, x);
   if (ni === 0) return k0;
   if (ni === 1) return k1;
   // Upward recurrence in order is stable for K (K_n grows with n).
@@ -553,7 +557,9 @@ export const erfc = mathTyped('erfc', {
   Float64Array: (x: Float64Array): Promise<Float64Array> => {
     const wasm = elementwiseUnaryDispatch('erfc', x);
     if (wasm) return Promise.resolve(wasm);
-    return mapArray(x, erfcScalar, () => kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)'));
+    return mapArray(x, erfcScalar, () =>
+      kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)')
+    );
   },
 });
 
@@ -785,7 +791,10 @@ export const besselY0 = mathTyped('besselY0', {
       return Promise.resolve(besselY0Dispatch(x));
     }
     return mapArray(x, besselY0Scalar, () =>
-      kernelSource([besselHankel, besselJ0Series, besselY0Series, besselY0Scalar], '(x) => besselY0Scalar(x)')
+      kernelSource(
+        [besselHankel, besselJ0Series, besselY0Series, besselY0Scalar],
+        '(x) => besselY0Scalar(x)'
+      )
     );
   },
 });
@@ -806,7 +815,10 @@ export const besselY1 = mathTyped('besselY1', {
       return Promise.resolve(besselY1Dispatch(x));
     }
     return mapArray(x, besselY1Scalar, () =>
-      kernelSource([besselHankel, besselJ1Series, besselY1Series, besselY1Scalar], '(x) => besselY1Scalar(x)')
+      kernelSource(
+        [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
+        '(x) => besselY1Scalar(x)'
+      )
     );
   },
 });
@@ -832,7 +844,14 @@ export const besselJ = mathTyped('besselJ', {
       (v) => besselJScalar(n, v),
       () =>
         kernelSource(
-          [besselHankel, besselJ0Series, besselJ1Series, besselJ0Scalar, besselJ1Scalar, besselJScalar],
+          [
+            besselHankel,
+            besselJ0Series,
+            besselJ1Series,
+            besselJ0Scalar,
+            besselJ1Scalar,
+            besselJScalar,
+          ],
           `(x) => besselJScalar(${n}, x)`
         )
     );
@@ -860,7 +879,18 @@ export const besselY = mathTyped('besselY', {
       (v) => besselYScalar(n, v),
       () =>
         kernelSource(
-          [besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
+          [
+            besselHankel,
+            besselJ0Series,
+            besselJ1Series,
+            besselY0Series,
+            besselY1Series,
+            besselJ0Scalar,
+            besselJ1Scalar,
+            besselY0Scalar,
+            besselY1Scalar,
+            besselYScalar,
+          ],
           `(x) => besselYScalar(${n}, x)`
         )
     );
@@ -1181,7 +1211,9 @@ export const airyAi = mathTyped('airyAi', {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return Promise.resolve(airyAiDispatch(x));
     }
-    return mapArray(x, airyAiScalar, () => kernelSource([airyUCoeffs, airyAsymPQ, airyAiScalar], '(x) => airyAiScalar(x)'));
+    return mapArray(x, airyAiScalar, () =>
+      kernelSource([airyUCoeffs, airyAsymPQ, airyAiScalar], '(x) => airyAiScalar(x)')
+    );
   },
 });
 
@@ -1205,7 +1237,9 @@ export const airyBi = mathTyped('airyBi', {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return Promise.resolve(airyBiDispatch(x));
     }
-    return mapArray(x, airyBiScalar, () => kernelSource([airyUCoeffs, airyAsymPQ, airyBiScalar], '(x) => airyBiScalar(x)'));
+    return mapArray(x, airyBiScalar, () =>
+      kernelSource([airyUCoeffs, airyAsymPQ, airyBiScalar], '(x) => airyBiScalar(x)')
+    );
   },
 });
 
@@ -1249,7 +1283,11 @@ export const carlsonRC = mathTyped('carlsonRC', {
  */
 export const carlsonRF = mathTyped('carlsonRF', {
   'number, number, number': carlsonRFScalar,
-  'Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array => {
+  'Float64Array, Float64Array, Float64Array': (
+    xs: Float64Array,
+    ys: Float64Array,
+    zs: Float64Array
+  ): Float64Array => {
     if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRFDispatch(xs, ys, zs);
     return carlsonRFJS(xs, ys, zs);
   },
@@ -1266,7 +1304,11 @@ export const carlsonRF = mathTyped('carlsonRF', {
  */
 export const carlsonRD = mathTyped('carlsonRD', {
   'number, number, number': carlsonRDScalar,
-  'Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array => {
+  'Float64Array, Float64Array, Float64Array': (
+    xs: Float64Array,
+    ys: Float64Array,
+    zs: Float64Array
+  ): Float64Array => {
     if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRDDispatch(xs, ys, zs);
     return carlsonRDJS(xs, ys, zs);
   },
@@ -1281,7 +1323,12 @@ export const carlsonRD = mathTyped('carlsonRD', {
  */
 export const carlsonRJ = mathTyped('carlsonRJ', {
   'number, number, number, number': carlsonRJScalar,
-  'Float64Array, Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array => {
+  'Float64Array, Float64Array, Float64Array, Float64Array': (
+    xs: Float64Array,
+    ys: Float64Array,
+    zs: Float64Array,
+    ps: Float64Array
+  ): Float64Array => {
     if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRJDispatch(xs, ys, zs, ps);
     return carlsonRJJS(xs, ys, zs, ps);
   },
@@ -1355,7 +1402,11 @@ export const ellipticEIncomplete = mathTyped('ellipticEIncomplete', {
  */
 export const ellipticPi = mathTyped('ellipticPi', {
   'number, number, number': ellipticPiIncompleteScalar,
-  'Float64Array, Float64Array, Float64Array': (ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array => {
+  'Float64Array, Float64Array, Float64Array': (
+    ns: Float64Array,
+    phis: Float64Array,
+    ms: Float64Array
+  ): Float64Array => {
     if (ns.length >= WASM_SPECIAL_THRESHOLD) return ellipticPiIncompleteDispatch(ns, phis, ms);
     return ellipticPiIncompleteJS(ns, phis, ms);
   },

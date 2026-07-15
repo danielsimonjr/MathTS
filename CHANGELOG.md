@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `zeta` negative arguments (~1.5e-7 → 1.9e-14) and `besselK` transition band
+
+A fresh mpmath/SciPy sweep of the whole special-function + distribution surface found it
+overwhelmingly machine-precision already (gamma/erf/digamma/elliptic/besselJ·I and every distribution
+CDF/quantile, even deep in the tails — `normalCDF(-10)=7.6e-24` correct to 14 digits). Two fixes:
+`zeta` at negative real `s` now reflects via the functional equation (the direct Borwein series
+cancels for `Re(s)<0`), fixing `zeta(-3)` from 1.5e-7 off to ~1.9e-14; and `besselK`'s series→asymptotic
+crossover moved to x=8, capping the transition-band peak from ~5.3e-9 to ~1.6e-9.
+
 ### Fixed — `variance` / `std` were ~10⁶× less accurate than NumPy on large-mean data
 
 Continuing the audit: `variance`/`std` lost ~7 digits when the mean is large. Variance of

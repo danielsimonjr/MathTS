@@ -207,7 +207,13 @@ export const createZeta = /* #__PURE__ */ factory(
       getRe: (value: T) => number
     ): NumericValue {
       const n = determineDigits(s);
-      if (getRe(s) > -(n - 1) / 2) {
+      // Reflect for the entire left half-plane (Re(s) < 0), not just Re(s) ≤ -(n-1)/2. The direct
+      // Borwein series suffers catastrophic cancellation for negative Re — its terms d(k,n)/kˢ grow
+      // like k^|Re s| and alternate — so e.g. ζ(-3) came out ~1.5e-7 off its exact value 1/120. The
+      // functional equation routes it through ζ(1-s) with Re(1-s) > 1 (where the series is most
+      // accurate) times an accurate prefactor. Re(s) ≥ 0 keeps the verified-accurate direct path
+      // (critical strip included).
+      if (getRe(s) >= 0) {
         return f(s, createValue(n), createValue);
       } else {
         // Function Equation for reflection to x < 1

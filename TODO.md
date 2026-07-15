@@ -74,11 +74,36 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
       eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
 
-  > **Reduction/statistics accuracy audit — SUBSTANTIALLY COMPLETE (2026-07-15).** Every common
-  > reduction is now at or beyond NumPy: `sum`/`mean` (core@0.7.0), `norm`/`fsum` (0.7.0),
-  > `dot`/`distance`/`cumsum` (0.8.0), `corr` (0.9.0), `variance`/`std` (0.10.0). Verified at-parity
-  > (no defect): `cov` (~1e-13), `hypot` (scaled), `geomean`/`kurtosis` (~1e-8), `quantileSeq`-linear,
-  > `mad`. The remaining items below are **documented non-decisions or features**, not accuracy defects.
+  ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
+
+Fresh sweep of the whole special-function + distribution surface. **Overwhelmingly machine-precision**
+already: gamma/lgamma/digamma/erf/erfc/beta/betainc/gammainc/besselJ/besselI/elliptic/expm1/log1p all
+~1e-14 to 1e-16; every distribution CDF/quantile/PMF ~1e-14 even deep in the tails (`normalCDF(-10)=
+7.6e-24` correct to 14 digits; `gammaCDF` exact) — the prior oracle-pinning sprints paid off. Two real
+defects found + fixed:
+
+- [x] ✅ **`zeta` at negative arguments — FIXED** (2026-07-15). `zeta(-3)` (exact 1/120) was **1.5e-7**
+      off: the direct Borwein series cancels for negative Re (terms grow like k^|Re s|). Now reflects
+      via the functional equation for Re(s) < 0 → routes through ζ(1-s), Re>1. **1.5e-7 → 1.9e-14**
+      (~8×10⁶ better); every negative arg now machine-precision; positive/critical-strip/complex
+      unchanged. `special/zeta.ts`.
+- [x] ✅ **`besselK` transition band (x≈8–11) — IMPROVED** (2026-07-15). The K0/K1 ascending series
+      cancels two O(I0(x)) terms, so its error grows with x — ~5.3e-9 at the old x=9 crossover. Moved
+      the series→asymptotic crossover to x=8 (asymptotic overtakes by x≈8.5): peak **5.3e-9 → 1.6e-9**
+      (~3×). Machine-precision below x=5 and above x=15 throughout.
+- [ ] **[follow-up] Machine-precision `besselK`/`besselY` across the whole range.** The series
+      (cancellation) vs asymptotic (divergent) split floors K at ~1.6e-9 in x∈[8,11]. A uniformly
+      accurate **continued-fraction (NR `bessik` / Steed) or Temme** method would hit ~1e-15
+      everywhere. Scoped rewrite of `besselK0Series`/`K1Series`/`Asym` in `typed/special.ts`; verify
+      against mpmath across x∈[0.1,50]. `besselY` order≥2 forward-recurses off Y0/Y1 (fine; Y series
+      has no exponential cancellation, ~1e-13). Also `zeta` near the pole s→1 degrades to ~4e-13
+      (inherent; leave).
+
+> **Reduction/statistics accuracy audit — SUBSTANTIALLY COMPLETE (2026-07-15).** Every common
+> reduction is now at or beyond NumPy: `sum`/`mean` (core@0.7.0), `norm`/`fsum` (0.7.0),
+> `dot`/`distance`/`cumsum` (0.8.0), `corr` (0.9.0), `variance`/`std` (0.10.0). Verified at-parity
+> (no defect): `cov` (~1e-13), `hypot` (scaled), `geomean`/`kurtosis` (~1e-8), `quantileSeq`-linear,
+> `mad`. The remaining items below are **documented non-decisions or features**, not accuracy defects.
 
 - ⬜ **[documented non-decision] `prod` overflows on representable results — NOT fixing.**
   `prod([1e300,1e300,1e-300,1e-300])` → `Infinity` (true value 1) because intermediate products
