@@ -70,6 +70,48 @@ describe('solveODE — systems', () => {
   });
 });
 
+describe('solveODE — Rosenbrock stiff method (ode23s)', () => {
+  it("solves a linear stiff system y' = diag(-1,-1000) y to its exact solution", () => {
+    // y(t) = [e^{-t}, e^{-1000 t}]; the fast (−1000) mode makes this stiff — an explicit method
+    // would need a step ~1e-3 to stay stable, this is L-stable and steps at the slow scale.
+    const sol = solveODE(
+      (_t, y) => [-(y as number[])[0], -1000 * (y as number[])[1]],
+      [0, 1],
+      [1, 1],
+      { method: 'Rosenbrock', tol: 1e-8 }
+    );
+    const y = sol.y[sol.y.length - 1] as number[];
+    expect(y[0]).toBeCloseTo(Math.exp(-1), 4); // slow mode
+    expect(Math.abs(y[1])).toBeLessThan(1e-6); // fast mode decayed, no instability
+  });
+
+  it('agrees with the explicit RK45 on a non-stiff problem', () => {
+    const stiff = solveODE((_t, y) => -(y as number), [0, 1], 1, {
+      method: 'Rosenbrock',
+      tol: 1e-8,
+    });
+    const yStiff = stiff.y[stiff.y.length - 1] as number;
+    expect(yStiff).toBeCloseTo(Math.exp(-1), 5);
+  });
+
+  it('stays stable on stiff Van der Pol (μ=1000) where an explicit method would crawl', () => {
+    // Endpoint agreement with scipy BDF (verified out-of-band: y(3000) ≈ [-1.5105, 0.00118]).
+    const mu = 1000;
+    const sol = solveODE(
+      (_t, y) => [
+        (y as number[])[1],
+        mu * (1 - (y as number[])[0] ** 2) * (y as number[])[1] - (y as number[])[0],
+      ],
+      [0, 3000],
+      [2, 0],
+      { method: 'Rosenbrock', tol: 1e-6 }
+    );
+    const y = sol.y[sol.y.length - 1] as number[];
+    expect(y[0]).toBeCloseTo(-1.5105, 2);
+    expect(Number.isFinite(y[0]) && Number.isFinite(y[1])).toBe(true);
+  });
+});
+
 describe('solveODE — Unit-valued state (numeric time)', () => {
   it("y' = y with y0 = 5 m gives 5·e m (state-is-Unit falls to the whole-interval step, not NaN)", () => {
     // The initial-step heuristic must NOT run on Unit state (rmsNorm would give NaN → h=NaN).

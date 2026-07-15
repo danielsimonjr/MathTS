@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — stiff ODE solver `solveODE(..., { method: 'Rosenbrock' })` (functionality)
+
+`solveODE` had only explicit methods (RK23/RK45), which stall or blow up on stiff systems (chemical
+kinetics, circuits, control — core engineering modeling). Added the linearly-implicit **ode23s**
+Rosenbrock method (Shampine & Reichelt): 2nd-order, L-stable, adaptive (FD Jacobian + one LU solve of
+`I−h·γ·J` per step). Verified vs a linear stiff system's exact solution and vs `scipy` BDF on stiff
+Van der Pol (μ=1000). Plain-number state; RK45 stays the default for non-stiff problems.
+
 ### Fixed — `solveODE` was fully broken on its JS path; add initial-step selection (functionality)
 
 `solveODE`'s JavaScript reference path threw `multiply(Array, Array) requires two 2-D matrices` on

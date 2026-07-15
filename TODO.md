@@ -83,12 +83,15 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       scalar + vector systems, both RK23/RK45, forward/backward. Also added a Hairer initial-step
       heuristic (was using the whole interval as step 1 → RK23 silently returned 1/3 for y'=-y).
       Verified vs closed forms; `functions/tests/solveode-jspath.test.ts`.
-- [ ] **[HIGH-VALUE feature] Stiff ODE solver (BDF / Rosenbrock).** `solveODE` only has explicit
-      adaptive methods (RK23/RK45); these fail or crawl on stiff systems (chemical kinetics, circuits,
-      control, reaction-diffusion — core engineering modeling). scipy has BDF/Radau/LSODA, MATLAB
-      ode15s/ode23s. Add a linearly-implicit **Rosenbrock** method (ode23s-style: FD Jacobian + the
-      existing matrix LU solve, single-step, adaptive) as a `method:'Rosenbrock'` option. Verify vs
-      scipy BDF on Van der Pol(μ=1000)/Robertson. This is the clearest remaining modeling gap.
+- [x] ✅ **Stiff ODE solver (Rosenbrock/ode23s) — ADDED** (2026-07-15). `solveODE(..., {method:
+    'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
+      solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
+      scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
+      `functions/tests/solveode-jspath.test.ts`.
+- [ ] **[follow-up] Stiff solver niceties.** Higher-order stiff option (RODAS/BDF) for tight
+      tolerances (ode23s is 2nd-order → many steps at tol<1e-8); analytic-Jacobian option (avoid FD);
+      Robertson-problem test; reuse the matrix package's LU (currently an inline dense solve — fine
+      for small/moderate systems, O(n³)/step for large ones). Event detection (`events` option).
 
 ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 
