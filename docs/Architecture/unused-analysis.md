@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 246
+- **Potentially unused exports**: 245
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 245
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 244
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -331,7 +331,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `polyMul` (function) — 5 in-file refs
 - `polyReduce` (function) — 3 in-file refs
 - `Term` (interface) — 2 in-file refs
-- `Poly` (type) — 42 in-file refs
 
 ### `functions/src/utils/array.ts`
 

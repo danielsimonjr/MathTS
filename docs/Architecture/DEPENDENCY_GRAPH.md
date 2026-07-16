@@ -8176,7 +8176,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
-| `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString` | Import |
+| `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString, Poly` | Import |
 
 **Exports:**
 
@@ -16161,7 +16161,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1067   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 182308 |
+| Total Lines of Code     | 182674 |
 | Total Exports           | 5326   |
 | Total Re-exports        | 1998   |
 | Total Classes           | 57     |

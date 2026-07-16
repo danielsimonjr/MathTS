@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — real `expand`/`factor`/`together`/`apart` for univariate polynomials/rationals (Phase 8 Task 6, final task)
+
+`expand`/`factor`/`apart`/`together` (`functions/src/typed/algebra.ts`) were documented no-ops
+(Phase 0's `docs/reference/functions.md` ⚠️ pass-through annotations + the
+`cas-passthrough-documented.test.ts` characterization test) for the exact inputs these tests
+exercise. All four now perform real transforms for the **univariate** case, verified against
+sympy 1.14.0: `expand('(x+1)^3')` → `1*x^3 + 3*x^2 + 3*x + 1` (sympy: `x**3 + 3*x**2 + 3*x + 1`);
+`factor('x^2-1')` → `(x - 1)*(x + 1)` (sympy: `(x-1)*(x+1)`); `together('1/x+1/(x+1)')` →
+`(1 + 2*x)/((x)*((x+1)))` (sympy: `(2*x+1)/(x*(x+1))`); `apart('1/(x^2-1)')` →
+`1/(2*(x - 1)) - 1/(2*(x + 1))` (sympy: `-1/(2*(x+1)) + 1/(2*(x-1))`) — same value, term order
+differs. `expand`/`factor` route through the existing exact-polynomial parser
+(`polyFromExpression`/`polyToString` in `functions/src/typed/polynomial-ideal.ts`); `factor` adds a
+rational-root-theorem search (candidates ±divisors(constant)/divisors(leading), each confirmed root
+divided out exactly via `polynomialQuotient`/`polynomialRemainder`); `together` combines a sum of
+rational terms over the product of their denominators; `apart` decomposes a proper rational function
+whose denominator factors into **distinct** rational linear factors via the cover-up/residue method
+(`Aᵢ = N(rᵢ)/D'(rᵢ)`, computed in exact rational arithmetic). Inputs outside this scope (multiple
+variables, non-integer coefficients, function calls, a denominator with a repeated or irreducible
+higher-degree factor) fall back unchanged to each function's original implementation (`factor`'s
+integer-GCD extraction, `together`/`apart`'s numeric-only fraction arithmetic), so none of the
+pre-existing multivariate/numeric pinned tests changed. Flipped the Phase-0 pass-through
+characterization test (`functions/tests/cas-passthrough-documented.test.ts`) to assert the new
+numeric behavior for these four (implementation-independent — evaluated at sample points, not pinned
+to a specific string form) and removed their stale ⚠️ doc annotations; `casExpand`/`casFactor`
+(the separate worker-batchable kernels in `functions/src/typed/cas.ts`) are unchanged and remain
+documented pass-throughs (out of this task's scope). New test: `functions/tests/cas-engine.test.ts`.
+Multivariate symbolic expansion/factorization and symbolic integration remain future work. This
+closes out Phase 8.
+
 ### Added — Interval arithmetic (Phase 8 Task 5)
 
 Added `functions/src/numeric/interval.ts`, exported from `@danielsimonjr/mathts-functions`:

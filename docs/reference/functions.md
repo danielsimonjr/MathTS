@@ -1456,40 +1456,40 @@ reshape([1, 2, 3, 4, 5, 6], [2, 3]); // 2×3 matrix
 
 Polynomial arithmetic and symbolic manipulation.
 
-| Function                                               | Description                                                                     |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `polyval(coeffs, x)`                                   | Evaluate a polynomial (Horner)                                                  |
-| `polyadd(a, b)` `polymul(a, b)`                        | Polynomial add / multiply                                                       |
-| `polyder(coeffs[, n])`                                 | nth polynomial derivative                                                       |
-| `polynomialGCD(a, b)` `polynomialLCM(a, b)`            | Polynomial GCD / LCM                                                            |
-| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division                                                             |
-| `polynomialRoot(coeffs)`                               | Polynomial roots (factory layer)                                                |
-| `degree(coeffs)`                                       | Polynomial degree                                                               |
-| `discriminant(coeffs)`                                 | Discriminant                                                                    |
-| `coefficientList(expr, var)`                           | Extract coefficients                                                            |
-| `resultant(p, q)`                                      | Resultant of two polynomials                                                    |
-| `differences(arr[, n])`                                | nth finite differences                                                          |
-| `variables(expr)`                                      | Free variables of an expression                                                 |
-| `substitute(expr, var, val)`                           | Variable substitution                                                           |
-| `element(expr, i)`                                     | Extract a sub-expression                                                        |
-| `expand(expr)`                                         | Expand (distribute) — ⚠️ pass-through (not yet implemented; planned)            |
-| `factor(expr)`                                         | Factor into irreducibles — ⚠️ pass-through (not yet implemented; planned)       |
-| `collect(expr, var)`                                   | Collect like terms                                                              |
-| `combine(expr)`                                        | Combine fractions                                                               |
-| `cancel(expr)`                                         | Cancel common factors                                                           |
-| `apart(expr)`                                          | Partial fraction decomposition — ⚠️ pass-through (not yet implemented; planned) |
-| `together(expr)`                                       | Combine into a single fraction — ⚠️ pass-through (not yet implemented; planned) |
-| `reduce(expr)`                                         | Reduce an expression                                                            |
-| `normalForm(expr)`                                     | Canonical normal form                                                           |
-| `powerExpand(expr)`                                    | Expand powers                                                                   |
-| `functionExpand(expr)`                                 | Expand special functions                                                        |
-| `complexExpand(expr)`                                  | Expand complex expressions                                                      |
-| `trigExpand(expr)` `trigReduce(expr)`                  | Trig expansion / reduction                                                      |
-| `expToTrig(expr)` `trigToExp(expr)`                    | Convert between exp and trig forms                                              |
-| `fullSimplify(expr)`                                   | Full algebraic simplification                                                   |
-| `eliminate(system, var)`                               | Eliminate a variable from a system                                              |
-| `tangentLine(expr, var, point)`                        | Tangent line                                                                    |
-| `symbolicPartialDerivative(expr, var)`                 | Symbolic partial derivative                                                     |
+| Function                                               | Description                                                                                                                                          |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `polyval(coeffs, x)`                                   | Evaluate a polynomial (Horner)                                                                                                                       |
+| `polyadd(a, b)` `polymul(a, b)`                        | Polynomial add / multiply                                                                                                                            |
+| `polyder(coeffs[, n])`                                 | nth polynomial derivative                                                                                                                            |
+| `polynomialGCD(a, b)` `polynomialLCM(a, b)`            | Polynomial GCD / LCM                                                                                                                                 |
+| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division                                                                                                                                  |
+| `polynomialRoot(coeffs)`                               | Polynomial roots (factory layer)                                                                                                                     |
+| `degree(coeffs)`                                       | Polynomial degree                                                                                                                                    |
+| `discriminant(coeffs)`                                 | Discriminant                                                                                                                                         |
+| `coefficientList(expr, var)`                           | Extract coefficients                                                                                                                                 |
+| `resultant(p, q)`                                      | Resultant of two polynomials                                                                                                                         |
+| `differences(arr[, n])`                                | nth finite differences                                                                                                                               |
+| `variables(expr)`                                      | Free variables of an expression                                                                                                                      |
+| `substitute(expr, var, val)`                           | Variable substitution                                                                                                                                |
+| `element(expr, i)`                                     | Extract a sub-expression                                                                                                                             |
+| `expand(expr)`                                         | Expand (distribute); univariate polynomials expand exactly, everything else falls back to distribute-only                                            |
+| `factor(expr)`                                         | Factor into irreducibles; univariate polynomials factor over ℚ via the rational-root theorem, everything else falls back to integer-GCD extraction   |
+| `collect(expr, var)`                                   | Collect like terms                                                                                                                                   |
+| `combine(expr)`                                        | Combine fractions                                                                                                                                    |
+| `cancel(expr)`                                         | Cancel common factors                                                                                                                                |
+| `apart(expr)`                                          | Partial fraction decomposition; univariate rationals with distinct rational roots decompose via residues, everything else falls back to numeric-only |
+| `together(expr)`                                       | Combine into a single fraction; univariate rationals combine exactly over a common denominator, everything else falls back to numeric-only           |
+| `reduce(expr)`                                         | Reduce an expression                                                                                                                                 |
+| `normalForm(expr)`                                     | Canonical normal form                                                                                                                                |
+| `powerExpand(expr)`                                    | Expand powers                                                                                                                                        |
+| `functionExpand(expr)`                                 | Expand special functions                                                                                                                             |
+| `complexExpand(expr)`                                  | Expand complex expressions                                                                                                                           |
+| `trigExpand(expr)` `trigReduce(expr)`                  | Trig expansion / reduction                                                                                                                           |
+| `expToTrig(expr)` `trigToExp(expr)`                    | Convert between exp and trig forms                                                                                                                   |
+| `fullSimplify(expr)`                                   | Full algebraic simplification                                                                                                                        |
+| `eliminate(system, var)`                               | Eliminate a variable from a system                                                                                                                   |
+| `tangentLine(expr, var, point)`                        | Tangent line                                                                                                                                         |
+| `symbolicPartialDerivative(expr, var)`                 | Symbolic partial derivative                                                                                                                          |
 
 The factory layer adds the expression-tree functions `simplify`,
 `simplifyConstant`, `simplifyCore`, `derivative`, `rationalize`,
@@ -1503,11 +1503,20 @@ The factory layer adds the expression-tree functions `simplify`,
   rounding error.
 - Symbolic functions (`simplify`, `collect`, …) accept either an expression
   string or an already-parsed AST node and return the transformed expression.
-- ⚠️ `expand`, `factor`, `apart`, and `together` are currently **pass-through**
-  — they return the input expression unchanged (as a string). Full polynomial
-  expansion/factorization and partial-fraction decomposition/recombination
-  are planned (roadmap Phase 8); until then, do not rely on these four for
-  actual transformation.
+- `expand`, `factor`, `apart`, and `together` perform real transforms for the
+  **univariate** case (a single variable): `expand`/`factor` handle any
+  integer-coefficient polynomial (factor via the rational-root theorem, with
+  an irreducible remainder left as-is when no further rational root exists);
+  `together` combines any sum of rational terms over a common denominator;
+  `apart` decomposes a proper rational function whose denominator factors
+  into **distinct** rational linear factors (repeated roots and irreducible
+  higher-degree factors are out of scope and pass through unchanged). Inputs
+  outside this scope (multiple variables, non-integer coefficients, function
+  calls) fall back to each function's original regex-based implementation
+  (`factor`'s integer-GCD extraction, `together`/`apart`'s numeric-only
+  fraction arithmetic) — Phase 8, Task 6 (see `docs/superpowers/specs/`).
+  Multivariate symbolic expansion/factorization and symbolic integration
+  remain future work.
 - **WASM acceleration:** `polymul`, `polynomialGCD`, `polynomialLCM`,
   `polynomialQuotient`, and `polynomialRemainder` route to an AssemblyScript WASM
   kernel for coefficient arrays of length ≥ 256 (`WASM_POLY_THRESHOLD`).
@@ -1523,8 +1532,9 @@ rather than as floating-point numbers — was pioneered by systems such as Macsy
 for William Horner (1819), was known to Chinese mathematician Qin Jiushao in
 1247 and even to Isaac Newton. Keeping results symbolic preserves exactness and
 human readability — the goal is that an expansion like `(x+1)^3` yields a
-polynomial a reader can verify rather than a numerical approximation, though
-`expand` itself does not yet perform that transformation (see ⚠️ note above).
+polynomial a reader can verify rather than a numerical approximation; for the
+univariate case, `expand` now performs exactly that transformation (see note
+above).
 
 ### Examples
 
@@ -1532,8 +1542,8 @@ polynomial a reader can verify rather than a numerical approximation, though
 import { polyval, factor, expand } from '@danielsimonjr/mathts-functions';
 
 polyval([1, 0, -1], 3); // 8  (x² - 1 at x = 3)
-factor('x^2 - 1'); // 'x^2 - 1' — ⚠️ pass-through; full factorization is planned (roadmap Phase 8)
-expand('(x + 1)^3'); // '(x + 1)^3' — ⚠️ pass-through; full expansion is planned (roadmap Phase 8)
+factor('x^2 - 1'); // '(x - 1)*(x + 1)'
+expand('(x + 1)^3'); // '1*x^3 + 3*x^2 + 3*x + 1'
 ```
 
 ---

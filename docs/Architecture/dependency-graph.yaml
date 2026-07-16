@@ -16617,6 +16617,7 @@ modules:
             - polyFromExpression
             - buchberger
             - polyToString
+            - Poly
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -34410,7 +34411,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1067
   totalModules: 82
-  totalLinesOfCode: 182308
+  totalLinesOfCode: 182674
   totalExports: 5326
   totalClasses: 57
   totalInterfaces: 469
@@ -34423,4 +34424,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 246
+  unusedExportsCount: 245

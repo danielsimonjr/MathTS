@@ -21,6 +21,7 @@ import {
   polyFromExpression,
   buchberger,
   polyToString as idealPolyToString,
+  type Poly,
 } from './polynomial-ideal.js';
 
 // =============================================================================
@@ -518,9 +519,233 @@ export function substitute(expr: string, vars: Record<string, string>): string {
   return result;
 }
 
+// =============================================================================
+// Univariate polynomial/rational CAS engine (Phase 8 Task 6)
+// =============================================================================
+//
+// `expand`/`factor`/`together`/`apart` below were originally flat regex
+// patterns (multi-variable distribution, integer-GCD factoring, numeric-only
+// fractions) — real transforms for a few narrow shapes, pass-through
+// otherwise. For the univariate case — a polynomial or rational function in
+// exactly one variable — each of these four now routes through EXACT
+// polynomial arithmetic first: `polyFromExpression`/`polyToString` (from
+// `polynomial-ideal.ts`) parse/format the polynomial, and the dense
+// coefficient-array helpers above (`polynomialQuotient`, `polynomialRemainder`,
+// `polyder`, `degree`) drive division and root-finding. When the univariate
+// path cannot handle the input (more than one variable, non-integer
+// coefficients, a function call, a denominator that doesn't factor into
+// distinct rational linear factors, a repeated root, ...) it throws and the
+// caller falls back to the legacy implementation, so the pre-existing
+// (multivariate / purely-numeric) behavior is unchanged.
+
+/** True when `c` is within floating-point noise of an integer. */
+function isNearInt(c: number): boolean {
+  return Math.abs(c - Math.round(c)) < 1e-7;
+}
+
+/** Convert a single-variable `Poly` (from `polynomial-ideal.ts`) to a dense,
+ *  ascending coefficient array (index = power) — this file's `number[]`
+ *  polynomial convention. */
+function polyToDense(p: Poly): number[] {
+  let maxPow = 0;
+  for (const t of p) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
+  const dense = new Array<number>(maxPow + 1).fill(0);
+  for (const t of p) dense[t.powers[0]] += t.coeff;
+  return trimPoly(dense);
+}
+
+/** Convert a dense ascending coefficient array back to a single-variable `Poly`. */
+function denseToPoly(coeffs: number[]): Poly {
+  return coeffs
+    .map((coeff, i) => ({ coeff, powers: [i] }))
+    .filter((t) => Math.abs(t.coeff) > 1e-10);
+}
+
+/** Positive divisors of `round(|n|)` (always includes 1). */
+function divisorsOf(n: number): number[] {
+  const m = Math.abs(Math.round(n)) || 1;
+  const divs: number[] = [];
+  for (let i = 1; i <= m; i++) if (m % i === 0) divs.push(i);
+  return divs;
+}
+
+/** A rational number `n/d`, always stored reduced with `d > 0`. */
+interface Rat {
+  n: number;
+  d: number;
+}
+
+function ratReduce(r: Rat): Rat {
+  let { n, d } = r;
+  if (d < 0) {
+    n = -n;
+    d = -d;
+  }
+  const g = gcdNum(Math.abs(n), Math.abs(d)) || 1;
+  return { n: n / g, d: d / g };
+}
+
+/** Evaluate an integer-coefficient dense polynomial at a rational point, exactly (Horner). */
+function ratPolyval(coeffs: number[], r: Rat): Rat {
+  let acc: Rat = { n: 0, d: 1 };
+  for (let i = coeffs.length - 1; i >= 0; i--) {
+    acc = ratReduce({
+      n: acc.n * r.n + coeffs[i] * acc.d * r.d,
+      d: acc.d * r.d,
+    });
+  }
+  return acc;
+}
+
+interface RationalRootResult {
+  /** Rational roots found (with multiplicity — a repeated root appears twice). */
+  roots: Rat[];
+  /** What remains after dividing out every found linear factor. */
+  remainder: number[];
+  /** True if any root was found more than once (a repeated/multiple root). */
+  repeated: boolean;
+}
+
+/**
+ * Find every rational root of an integer-coefficient univariate polynomial
+ * (rational-root theorem), dividing each one out of `poly` as it's found.
+ *
+ * @param poly - Dense ascending integer coefficients
+ * @returns The roots found (in discovery order), the leftover polynomial,
+ *   and whether any root repeated — `factor`/`apart` treat a repeated root
+ *   as out of scope (they don't express it as a power / higher-order pole).
+ */
+function findRationalLinearFactors(poly: number[]): RationalRootResult {
+  let cur = trimPoly(poly.map((c) => Math.round(c)));
+  const roots: Rat[] = [];
+  let repeated = false;
+  const hasRoot = (r: Rat): boolean => roots.some((x) => x.n === r.n && x.d === r.d);
+
+  for (;;) {
+    const deg = cur.length - 1;
+    if (deg < 1) break;
+
+    if (cur[0] === 0) {
+      const r: Rat = { n: 0, d: 1 };
+      if (hasRoot(r)) repeated = true;
+      roots.push(r);
+      cur = trimPoly(cur.slice(1));
+      continue;
+    }
+
+    const ps = divisorsOf(cur[0]);
+    const qs = divisorsOf(cur[cur.length - 1]);
+
+    let found: Rat | null = null;
+    let quotient: number[] | null = null;
+    outer: for (const q of qs) {
+      for (const pAbs of ps) {
+        for (const sign of [1, -1]) {
+          const candidate = ratReduce({ n: sign * pAbs, d: q });
+          const divisor = trimPoly([-candidate.n, candidate.d]);
+          const rem = polynomialRemainder(cur, divisor);
+          if (rem.length === 1 && Math.abs(rem[0]) < 1e-6) {
+            found = candidate;
+            quotient = polynomialQuotient(cur, divisor).map((c) => Math.round(c * 1e6) / 1e6);
+            break outer;
+          }
+        }
+      }
+    }
+
+    if (!found || !quotient) break;
+    if (hasRoot(found)) repeated = true;
+    roots.push(found);
+    cur = trimPoly(quotient);
+  }
+
+  return { roots, remainder: cur, repeated };
+}
+
+/** Format a rational root as a linear factor: `(x - 1)`, `(2*x + 1)`, `(x)`, ... */
+function formatLinearFactor(r: Rat, varName: string): string {
+  const base = r.d === 1 ? varName : `${r.d}*${varName}`;
+  if (r.n === 0) return `(${base})`;
+  return r.n > 0 ? `(${base} - ${r.n})` : `(${base} + ${-r.n})`;
+}
+
+/** Format a single partial-fraction term `A/(x - r)` for a simple pole. */
+function formatPartialTerm(a: Rat, root: Rat, varName: string): string {
+  const rootExpr =
+    root.d === 1
+      ? root.n === 0
+        ? varName
+        : root.n > 0
+          ? `${varName} - ${root.n}`
+          : `${varName} + ${-root.n}`
+      : `${varName} - ${root.n}/${root.d}`;
+  const denomExpr = a.d === 1 ? `(${rootExpr})` : `(${a.d}*(${rootExpr}))`;
+  if (a.n === 1) return `1/${denomExpr}`;
+  if (a.n === -1) return `-1/${denomExpr}`;
+  return `${a.n}/${denomExpr}`;
+}
+
+/**
+ * Split an expression into its top-level additive terms (respecting
+ * parenthesis depth), each retaining its leading sign.
+ *
+ * @example splitTopLevelSum('1/x+1/(x+1)') // ['1/x', '+1/(x+1)']
+ */
+function splitTopLevelSum(expr: string): string[] {
+  const s = expr.replace(/\s+/g, '');
+  const terms: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (depth === 0 && (c === '+' || c === '-') && i > start) {
+      const prev = s[i - 1];
+      if (!/[*/^(+-]/.test(prev)) {
+        terms.push(s.slice(start, i));
+        start = i;
+      }
+    }
+  }
+  terms.push(s.slice(start));
+  return terms.filter((t) => t !== '');
+}
+
+/**
+ * Split a single additive term into its multiplicative numerator/denominator
+ * factors (respecting parenthesis depth):
+ * `1/(x+1)` → `{ nums: ['1'], dens: ['(x+1)'] }`.
+ */
+function splitProductChain(term: string): { nums: string[]; dens: string[] } {
+  const nums: string[] = [];
+  const dens: string[] = [];
+  let depth = 0;
+  let start = 0;
+  let op: '*' | '/' = '*';
+  for (let i = 0; i <= term.length; i++) {
+    const c = term[i];
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    if (depth === 0 && (c === '*' || c === '/' || i === term.length)) {
+      const piece = term.slice(start, i).trim();
+      if (piece !== '') (op === '*' ? nums : dens).push(piece);
+      if (i < term.length) op = c as '*' | '/';
+      start = i + 1;
+    }
+  }
+  return { nums, dens };
+}
+
 /**
  * Expand an expression string by distributing multiplication over addition.
- * Basic implementation: handles simple products of sums.
+ *
+ * **Univariate polynomials** (a single variable, integer/no non-integer
+ * powers, no function calls) are expanded EXACTLY via `polyFromExpression` +
+ * `polyToString`: `expand('(x+1)^3')` → `'1*x^3 + 3*x^2 + 3*x + 1'`.
+ *
+ * Everything else (multiple variables, non-polynomial pieces) falls back to
+ * the original regex-based distributor below.
  *
  * @param expr - Expression string
  * @returns Expanded expression string
@@ -528,9 +753,20 @@ export function substitute(expr: string, vars: Record<string, string>): string {
  * @example
  * ```typescript
  * expand('(a+b)*(c+d)'); // 'a*c + a*d + b*c + b*d'
+ * expand('(x+1)^3');     // '1*x^3 + 3*x^2 + 3*x + 1'
  * ```
  */
 export function expand(expr: string): string {
+  const univariateVars = variables(expr);
+  if (univariateVars.length === 1) {
+    try {
+      return idealPolyToString(polyFromExpression(expr, univariateVars), univariateVars);
+    } catch {
+      // Not a pure single-variable polynomial (function call, non-integer
+      // exponent, division by a non-constant, ...) — fall back below.
+    }
+  }
+
   let result = expr;
 
   // Handle (expr)^2 => (expr)*(expr)
@@ -571,12 +807,45 @@ export function expand(expr: string): string {
 
 /**
  * Factor an expression string.
- * Basic implementation: factors out common numeric factors and GCDs from terms.
+ *
+ * **Univariate polynomials** (a single variable, integer coefficients,
+ * degree ≥ 2) are factored over ℚ via the rational-root theorem: candidate
+ * roots ±(divisors of the constant term)/(divisors of the leading
+ * coefficient) are tested, each confirmed root's linear factor is divided
+ * out exactly, and any irreducible remainder is left as-is:
+ * `factor('x^2-1')` → `'(x - 1)*(x + 1)'`.
+ *
+ * Everything else (multiple variables, no rational root) falls back to the
+ * original common-integer-factor extraction below.
  *
  * @param expr - Expression string
  * @returns Factored expression string
  */
 export function factor(expr: string): string {
+  const univariateVars = variables(expr);
+  if (univariateVars.length === 1) {
+    try {
+      const v = univariateVars[0];
+      const dense = polyToDense(polyFromExpression(expr, [v]));
+      if (degree(dense) >= 2 && dense.every(isNearInt)) {
+        const intDense = dense.map((c) => Math.round(c));
+        const { roots, remainder } = findRationalLinearFactors(intDense);
+        if (roots.length > 0) {
+          const factors = roots.map((r) => formatLinearFactor(r, v));
+          if (degree(remainder) >= 1) {
+            factors.push(`(${idealPolyToString(denseToPoly(remainder), [v])})`);
+          } else if (remainder[0] !== 1) {
+            factors.unshift(String(remainder[0]));
+          }
+          return factors.join('*');
+        }
+      }
+    } catch {
+      // Not a pure single-variable integer polynomial, or no rational root
+      // exists — fall back to the legacy GCD-based factoring below.
+    }
+  }
+
   // Normalize subtraction so negative terms are handled as "+ -coeff*var"
   const normalized = expr.replace(/\s*-\s*/g, ' + -');
   const terms = normalized.split(/\s*\+\s*/).filter((t) => t.trim() !== '');
@@ -734,12 +1003,46 @@ export function cancel(expr: string): string {
 }
 
 /**
- * Combine fractions to a common denominator.
+ * Combine a sum of rational terms into a single fraction over a common
+ * (not necessarily lowest) denominator.
+ *
+ * **Univariate rationals** (a single variable, e.g. `1/x + 1/(x+1)`) are
+ * combined EXACTLY: the common denominator is the product of every term's
+ * denominator, and the numerator is the exact polynomial sum
+ * `Σ numᵢ · Π_{j≠i} denⱼ`, simplified via `polyFromExpression`/`polyToString`:
+ * `together('1/x + 1/(x+1)')` → `'(2*x + 1)/((x)*((x+1)))'`.
+ *
+ * Everything else (no variable, i.e. purely numeric) falls back to the
+ * original numeric-fraction addition below.
  *
  * @param expr - Expression string
  * @returns Combined expression
  */
 export function together(expr: string): string {
+  const univariateVars = variables(expr);
+  if (univariateVars.length === 1) {
+    try {
+      const v = univariateVars[0];
+      const terms = splitTopLevelSum(expr).map(splitProductChain);
+      const denParts = terms.flatMap((t) => t.dens);
+      if (denParts.length > 0) {
+        const denominatorStr = denParts.map((d) => `(${d})`).join('*');
+        const numeratorExpr = terms
+          .map((t, i) => {
+            const otherDens = terms.flatMap((t2, j) => (j === i ? [] : t2.dens));
+            const parts = [...t.nums, ...otherDens].map((p) => `(${p})`);
+            return parts.length ? parts.join('*') : '1';
+          })
+          .join(' + ');
+        const numeratorStr = idealPolyToString(polyFromExpression(numeratorExpr, [v]), [v]);
+        return `(${numeratorStr})/(${denominatorStr})`;
+      }
+    } catch {
+      // Not a pure single-variable rational expression — fall back to the
+      // legacy numeric-only path below.
+    }
+  }
+
   const match = expr.match(/^\s*(-?\d+)\s*\/\s*(-?\d+)\s*\+\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/);
   if (match) {
     const a = parseInt(match[1], 10);
@@ -757,10 +1060,73 @@ export function together(expr: string): string {
 /**
  * Partial fraction decomposition.
  *
+ * **Univariate rationals with a fully-factorable denominator** (distinct
+ * rational roots only — repeated roots are out of scope) are decomposed via
+ * the cover-up/residue method: `apart('1/(x^2-1)')` →
+ * `'1/(2*(x - 1)) - 1/(2*(x + 1))'`. An improper fraction (numerator degree ≥
+ * denominator degree) is first split into a polynomial quotient + proper
+ * remainder via `polynomialQuotient`/`polynomialRemainder`.
+ *
+ * Everything else (no variable — i.e. purely numeric — multiple variables,
+ * or a denominator that doesn't factor into distinct rational linear
+ * factors) falls back to the original numeric-only path below.
+ *
  * @param expr - Expression string
  * @returns Decomposed expression
  */
 export function apart(expr: string): string {
+  const univariateVars = variables(expr);
+  if (univariateVars.length === 1) {
+    try {
+      const v = univariateVars[0];
+      const topTerms = splitTopLevelSum(expr);
+      if (topTerms.length === 1) {
+        const { nums, dens } = splitProductChain(topTerms[0]);
+        if (dens.length > 0) {
+          const numStr = nums.length ? nums.join('*') : '1';
+          const denStr = dens.join('*');
+          const N = polyToDense(polyFromExpression(numStr, [v]));
+          const D = polyToDense(polyFromExpression(denStr, [v]));
+          if (degree(D) >= 1 && N.every(isNearInt) && D.every(isNearInt)) {
+            let Nint = N.map((c) => Math.round(c));
+            const Dint = D.map((c) => Math.round(c));
+
+            let quotientPrefix = '';
+            if (degree(Nint) >= degree(Dint)) {
+              const q = polynomialQuotient(Nint, Dint);
+              const r = polynomialRemainder(Nint, Dint);
+              if (degree(r) === 0 && r[0] === 0) {
+                return idealPolyToString(denseToPoly(q), [v]);
+              }
+              quotientPrefix = `${idealPolyToString(denseToPoly(q), [v])} + `;
+              Nint = r.map((c) => Math.round(c));
+            }
+
+            const { roots, remainder, repeated } = findRationalLinearFactors(Dint);
+            if (!repeated && degree(remainder) === 0 && roots.length === degree(Dint)) {
+              const Dprime = polyder(Dint);
+              const termStrs = roots.map((root) => {
+                const nAtRoot = ratPolyval(Nint, root);
+                const dAtRoot = ratPolyval(Dprime, root);
+                if (dAtRoot.n === 0) throw new Error('apart: derivative vanished at root');
+                const a = ratReduce({
+                  n: nAtRoot.n * dAtRoot.d,
+                  d: nAtRoot.d * dAtRoot.n,
+                });
+                return formatPartialTerm(a, root, v);
+              });
+              return (quotientPrefix + termStrs.join(' + ')).replace(/\+ -/g, '- ');
+            }
+          }
+        }
+      }
+    } catch {
+      // Not a pure single-variable rational expression, or the denominator
+      // doesn't factor into distinct rational linear factors — fall back to
+      // the legacy numeric-only path below.
+    }
+  }
+
   const match = expr.match(/^\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/);
   if (match) {
     const num = parseInt(match[1], 10);
