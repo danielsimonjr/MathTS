@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Iterative Krylov solvers: cg/gmres/bicgstab/minres (Phase 7 Task 1)
+
+Added `functions/src/numeric/krylov.ts`, exported from `@danielsimonjr/mathts-functions`:
+iterative Krylov solvers `cg` (SPD), `minres` (symmetric indefinite), `gmres` (restarted),
+`bicgstab` (nonsymmetric) — each accepting a dense matrix OR a matvec callback
+(`(x: number[]) => number[]`, LinearOperator style) plus an optional Jacobi preconditioner
+(`M⁻¹ = diag(1/A_ii)`, dense-matrix only, or a custom `(r) => M⁻¹r` function), for the large
+sparse systems dense factorization (`lusolve`/`qr`/…) can't handle. Convergence is measured on
+the relative residual `‖b − A x‖₂ / ‖b‖₂ < tol` (default `tol=1e-10`,
+`maxIter=min(10n, 1000)`). Pinned: `cg([[4,1],[1,3]],[1,2])` = `[1/11, 7/11]`.
+
+Documented in `docs/reference/functions.md` under Linear Algebra, new "Iterative Solvers"
+subsection. `npm run docs:functions` / `npm run docs:deps` regenerated; docs-completeness gate
+green. `functions/tests/krylov.test.ts` (10 tests: the pinned SPD oracle, larger SPD/nonsymmetric/
+indefinite systems verified by direct residual, matvec-operator input, Jacobi + custom
+preconditioners, and the matvec-only-Jacobi error path). Full `functions` regression: 3678
+passed, 94 skipped, 0 failed.
+
 ### Added — Spectral estimation + peak analysis: csd/coherence/findPeaks/peakWidths/stft/istft/decimate (Phase 6 Task 5)
 
 Added `functions/src/signal/spectral-peaks.ts`, exported from `@danielsimonjr/mathts-functions`

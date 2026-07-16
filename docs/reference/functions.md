@@ -990,6 +990,43 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 The `parallel`-marked decompositions route their O(n³) matrix products through
 the worker pool and therefore return a `Promise`.
 
+### Iterative Solvers
+
+Krylov-subspace iterative solvers for `Ax = b` (Phase 7 Task 1) — for the
+large sparse systems a dense factorization (`lusolve`, `qr`, …) can't handle.
+Each accepts `A` as either a dense matrix or a **matvec callback**
+`(x: number[]) => number[]` (a linear-operator style, so `A` never needs to be
+formed or filled in), plus an optional preconditioner:
+
+| Function                 | Applicability                    |
+| ------------------------ | -------------------------------- |
+| `cg(A, b[, opts])`       | Symmetric positive-definite      |
+| `minres(A, b[, opts])`   | Symmetric, possibly indefinite   |
+| `gmres(A, b[, opts])`    | General nonsymmetric (restarted) |
+| `bicgstab(A, b[, opts])` | General nonsymmetric             |
+
+All four share the same options shape and return shape:
+
+```ts
+solver(A, b, {
+  x0, // initial guess (default: zero vector)
+  tol, // relative-residual tolerance, default 1e-10
+  maxIter, // default min(10 * n, 1000)
+  preconditioner, // 'jacobi' or a custom (r) => M⁻¹r callback
+});
+// => { x, iterations, converged, residual }
+```
+
+Convergence is measured as the relative residual `‖b − A x‖₂ / ‖b‖₂ < tol`.
+`gmres` additionally accepts `restart` (default 30).
+
+The `'jacobi'` preconditioner (`M⁻¹ = diag(1/A_ii)`) requires a dense matrix
+— the diagonal isn't observable through a matvec callback alone — and throws
+a clear error if requested with a matvec-only `A`. Pass a custom
+`(r) => M⁻¹r` function to precondition a matvec operator.
+
+Pinned: `cg([[4, 1], [1, 3]], [1, 2])` → `x = [1/11, 7/11]`.
+
 ### WebGPU: the opt-in f32 tier
 
 The GPU tier is **OFF by default** and must be turned on explicitly:
@@ -2529,7 +2566,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (972 exports).
+> `@danielsimonjr/mathts-functions` (976 exports).
 
 ### Functions by category
 
@@ -2551,7 +2588,7 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (75): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (79): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 

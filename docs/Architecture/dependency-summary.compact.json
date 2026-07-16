@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1057, "e": 5227, "re": 1939 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1058, "e": 5240, "re": 1948 },
   "s": {
-    "loc": 179099,
+    "loc": 179627,
     "cls": 56,
-    "int": 455,
-    "fn": 1733,
+    "int": 458,
+    "fn": 1737,
     "tg": 159,
     "en": 0,
     "co": 1542,
-    "toi": 542
+    "toi": 543
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -700,13 +700,17 @@
       ]
     },
     "functions/numeric": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "quad",
         "bfgs",
         "root",
         "fsolve",
         "rootsLegendre",
+        "cg",
+        "minres",
+        "gmres",
+        "bicgstab",
         "minimizeScalar",
         "nnls",
         "lsqBounded",
@@ -724,10 +728,10 @@
         "BfgsResult",
         "FsolveOptions",
         "RootsLegendreResult",
-        "MinimizeScalarOptions",
-        "MinimizeScalarResult",
-        "NnlsOptions",
-        "NnlsResult"
+        "KrylovOptions",
+        "GmresOptions",
+        "KrylovResult",
+        "MinimizeScalarOptions"
       ]
     },
     "functions/plain": {
@@ -1736,7 +1740,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 73, "o": 0 },
+    { "p": "src/index.ts", "i": 75, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

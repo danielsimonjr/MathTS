@@ -185,6 +185,19 @@ export type { NewtonOptions, SecantOptions, HalleyOptions } from './numeric/open
 export { fsolve, root } from './numeric/fsolve.js';
 export type { FsolveOptions } from './numeric/fsolve.js';
 
+// Phase 7 Task 1 — iterative Krylov-subspace linear solvers (cg/minres for
+// symmetric systems, gmres/bicgstab for general nonsymmetric ones) for the
+// large sparse systems a dense factorization can't handle. Each accepts a
+// dense matrix or a matvec callback plus an optional Jacobi preconditioner.
+export { cg, minres, gmres, bicgstab } from './numeric/krylov.js';
+export type {
+  LinearOperatorInput,
+  Preconditioner,
+  KrylovOptions,
+  GmresOptions,
+  KrylovResult,
+} from './numeric/krylov.js';
+
 // Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
 // parabolic interpolation). Distinct from root-finding; complements the
 // vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.

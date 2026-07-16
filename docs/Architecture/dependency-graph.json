@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1057,
+    "totalFiles": 1058,
     "totalModules": 81,
-    "totalExports": 5227
+    "totalExports": 5240
   },
   "entryPoints": [
     {
@@ -8056,6 +8056,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/krylov.js",
+            "imports": ["cg", "minres", "gmres", "bicgstab"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["minimizeScalar"],
             "reExport": true
@@ -8272,6 +8277,18 @@
           {
             "file": "./numeric/fsolve.js",
             "imports": ["FsolveOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/krylov.js",
+            "imports": [
+              "LinearOperatorInput",
+              "Preconditioner",
+              "KrylovOptions",
+              "GmresOptions",
+              "KrylovResult"
+            ],
             "reExport": true,
             "typeOnly": true
           },
@@ -8498,6 +8515,10 @@
           "halley",
           "fsolve",
           "root",
+          "cg",
+          "minres",
+          "gmres",
+          "bicgstab",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8617,6 +8638,11 @@
           "SecantOptions",
           "HalleyOptions",
           "FsolveOptions",
+          "LinearOperatorInput",
+          "Preconditioner",
+          "KrylovOptions",
+          "GmresOptions",
+          "KrylovResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -8763,6 +8789,10 @@
           "halley",
           "fsolve",
           "root",
+          "cg",
+          "minres",
+          "gmres",
+          "bicgstab",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8882,6 +8912,11 @@
           "SecantOptions",
           "HalleyOptions",
           "FsolveOptions",
+          "LinearOperatorInput",
+          "Preconditioner",
+          "KrylovOptions",
+          "GmresOptions",
+          "KrylovResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -13175,6 +13210,16 @@
         "exports": ["rootsLegendre"],
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
+      },
+      "functions/src/numeric/krylov.ts": {
+        "description": "Iterative Krylov-subspace linear solvers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["cg", "minres", "gmres", "bicgstab"],
+        "interfaces": ["KrylovOptions", "GmresOptions", "KrylovResult"],
+        "functions": ["cg", "minres", "gmres", "bicgstab"]
       },
       "functions/src/numeric/minimize-scalar.ts": {
         "description": "Scalar (1-D) function minimization via Brent's method.",
@@ -35302,6 +35347,7 @@
           "functions/src/numeric/bfgs.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/krylov.ts",
           "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
@@ -36257,18 +36303,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1057,
+    "totalTypeScriptFiles": 1058,
     "totalModules": 81,
-    "totalLinesOfCode": 179099,
-    "totalExports": 5227,
+    "totalLinesOfCode": 179627,
+    "totalExports": 5240,
     "totalClasses": 56,
-    "totalInterfaces": 455,
-    "totalFunctions": 1733,
+    "totalInterfaces": 458,
+    "totalFunctions": 1737,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1939,
-    "totalTypeOnlyImports": 542,
+    "totalReExports": 1948,
+    "totalTypeOnlyImports": 543,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
