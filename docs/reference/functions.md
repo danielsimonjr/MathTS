@@ -444,7 +444,7 @@ leftShift(1, 4); // 16
 | `erf(x)`                                    | Error function (factory layer)                                                | —                      |
 | `erfi(x)`                                   | Imaginary error function                                                      | parallel               |
 | `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                              | parallel               |
-| `betainc(x, a, b)`                          | Incomplete beta function                                                      | parallel               |
+| `betainc(a, b, x)`                          | Incomplete beta function                                                      | parallel               |
 | `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)`                                  | parallel               |
 | `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)`                                  | parallel               |
 | `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                                                        | parallel               |
@@ -1250,40 +1250,40 @@ reshape([1, 2, 3, 4, 5, 6], [2, 3]); // 2×3 matrix
 
 Polynomial arithmetic and symbolic manipulation.
 
-| Function                                               | Description                        |
-| ------------------------------------------------------ | ---------------------------------- |
-| `polyval(coeffs, x)`                                   | Evaluate a polynomial (Horner)     |
-| `polyadd(a, b)` `polymul(a, b)`                        | Polynomial add / multiply          |
-| `polyder(coeffs[, n])`                                 | nth polynomial derivative          |
-| `polynomialGCD(a, b)` `polynomialLCM(a, b)`            | Polynomial GCD / LCM               |
-| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division                |
-| `polynomialRoot(coeffs)`                               | Polynomial roots (factory layer)   |
-| `degree(coeffs)`                                       | Polynomial degree                  |
-| `discriminant(coeffs)`                                 | Discriminant                       |
-| `coefficientList(expr, var)`                           | Extract coefficients               |
-| `resultant(p, q)`                                      | Resultant of two polynomials       |
-| `differences(arr[, n])`                                | nth finite differences             |
-| `variables(expr)`                                      | Free variables of an expression    |
-| `substitute(expr, var, val)`                           | Variable substitution              |
-| `element(expr, i)`                                     | Extract a sub-expression           |
-| `expand(expr)`                                         | Expand (distribute)                |
-| `factor(expr)`                                         | Factor into irreducibles           |
-| `collect(expr, var)`                                   | Collect like terms                 |
-| `combine(expr)`                                        | Combine fractions                  |
-| `cancel(expr)`                                         | Cancel common factors              |
-| `apart(expr)`                                          | Partial fraction decomposition     |
-| `together(expr)`                                       | Combine into a single fraction     |
-| `reduce(expr)`                                         | Reduce an expression               |
-| `normalForm(expr)`                                     | Canonical normal form              |
-| `powerExpand(expr)`                                    | Expand powers                      |
-| `functionExpand(expr)`                                 | Expand special functions           |
-| `complexExpand(expr)`                                  | Expand complex expressions         |
-| `trigExpand(expr)` `trigReduce(expr)`                  | Trig expansion / reduction         |
-| `expToTrig(expr)` `trigToExp(expr)`                    | Convert between exp and trig forms |
-| `fullSimplify(expr)`                                   | Full algebraic simplification      |
-| `eliminate(system, var)`                               | Eliminate a variable from a system |
-| `tangentLine(expr, var, point)`                        | Tangent line                       |
-| `symbolicPartialDerivative(expr, var)`                 | Symbolic partial derivative        |
+| Function                                               | Description                                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `polyval(coeffs, x)`                                   | Evaluate a polynomial (Horner)                                                  |
+| `polyadd(a, b)` `polymul(a, b)`                        | Polynomial add / multiply                                                       |
+| `polyder(coeffs[, n])`                                 | nth polynomial derivative                                                       |
+| `polynomialGCD(a, b)` `polynomialLCM(a, b)`            | Polynomial GCD / LCM                                                            |
+| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division                                                             |
+| `polynomialRoot(coeffs)`                               | Polynomial roots (factory layer)                                                |
+| `degree(coeffs)`                                       | Polynomial degree                                                               |
+| `discriminant(coeffs)`                                 | Discriminant                                                                    |
+| `coefficientList(expr, var)`                           | Extract coefficients                                                            |
+| `resultant(p, q)`                                      | Resultant of two polynomials                                                    |
+| `differences(arr[, n])`                                | nth finite differences                                                          |
+| `variables(expr)`                                      | Free variables of an expression                                                 |
+| `substitute(expr, var, val)`                           | Variable substitution                                                           |
+| `element(expr, i)`                                     | Extract a sub-expression                                                        |
+| `expand(expr)`                                         | Expand (distribute) — ⚠️ pass-through (not yet implemented; planned)            |
+| `factor(expr)`                                         | Factor into irreducibles — ⚠️ pass-through (not yet implemented; planned)       |
+| `collect(expr, var)`                                   | Collect like terms                                                              |
+| `combine(expr)`                                        | Combine fractions                                                               |
+| `cancel(expr)`                                         | Cancel common factors                                                           |
+| `apart(expr)`                                          | Partial fraction decomposition — ⚠️ pass-through (not yet implemented; planned) |
+| `together(expr)`                                       | Combine into a single fraction — ⚠️ pass-through (not yet implemented; planned) |
+| `reduce(expr)`                                         | Reduce an expression                                                            |
+| `normalForm(expr)`                                     | Canonical normal form                                                           |
+| `powerExpand(expr)`                                    | Expand powers                                                                   |
+| `functionExpand(expr)`                                 | Expand special functions                                                        |
+| `complexExpand(expr)`                                  | Expand complex expressions                                                      |
+| `trigExpand(expr)` `trigReduce(expr)`                  | Trig expansion / reduction                                                      |
+| `expToTrig(expr)` `trigToExp(expr)`                    | Convert between exp and trig forms                                              |
+| `fullSimplify(expr)`                                   | Full algebraic simplification                                                   |
+| `eliminate(system, var)`                               | Eliminate a variable from a system                                              |
+| `tangentLine(expr, var, point)`                        | Tangent line                                                                    |
+| `symbolicPartialDerivative(expr, var)`                 | Symbolic partial derivative                                                     |
 
 The factory layer adds the expression-tree functions `simplify`,
 `simplifyConstant`, `simplifyCore`, `derivative`, `rationalize`,
@@ -1295,13 +1295,13 @@ The factory layer adds the expression-tree functions `simplify`,
   order: `[1, 0, -1]` denotes `x² − 1`.
 - `polyval` uses Horner's method, which minimises both operation count and
   rounding error.
-- Symbolic functions (`expand`, `factor`, `simplify`, `collect`, …) accept
-  either an expression string or an already-parsed AST node and return the
-  transformed expression.
-- `factor` works over the rationals; it will not introduce irrational or
-  complex roots unless they are already present.
-- `apart` / `together` are inverses: partial-fraction decomposition versus
-  recombination into a single rational expression.
+- Symbolic functions (`simplify`, `collect`, …) accept either an expression
+  string or an already-parsed AST node and return the transformed expression.
+- ⚠️ `expand`, `factor`, `apart`, and `together` are currently **pass-through**
+  — they return the input expression unchanged (as a string). Full polynomial
+  expansion/factorization and partial-fraction decomposition/recombination
+  are planned (roadmap Phase 8); until then, do not rely on these four for
+  actual transformation.
 - **WASM acceleration:** `polymul`, `polynomialGCD`, `polynomialLCM`,
   `polynomialQuotient`, and `polynomialRemainder` route to an AssemblyScript WASM
   kernel for coefficient arrays of length ≥ 256 (`WASM_POLY_THRESHOLD`).
@@ -1316,8 +1316,9 @@ rather than as floating-point numbers — was pioneered by systems such as Macsy
 (MIT, 1968) and Reduce. Horner's method for polynomial evaluation, though named
 for William Horner (1819), was known to Chinese mathematician Qin Jiushao in
 1247 and even to Isaac Newton. Keeping results symbolic preserves exactness and
-human readability: `expand((x+1)^3)` yields a polynomial a reader can verify,
-not a numerical approximation.
+human readability — the goal is that an expansion like `(x+1)^3` yields a
+polynomial a reader can verify rather than a numerical approximation, though
+`expand` itself does not yet perform that transformation (see ⚠️ note above).
 
 ### Examples
 
@@ -1325,8 +1326,8 @@ not a numerical approximation.
 import { polyval, factor, expand } from '@danielsimonjr/mathts-functions';
 
 polyval([1, 0, -1], 3); // 8  (x² - 1 at x = 3)
-factor('x^2 - 1'); // '(x - 1)(x + 1)'
-expand('(x + 1)^3'); // 'x^3 + 3*x^2 + 3*x + 1'
+factor('x^2 - 1'); // 'x^2 - 1' — ⚠️ pass-through; full factorization is planned (roadmap Phase 8)
+expand('(x + 1)^3'); // '(x + 1)^3' — ⚠️ pass-through; full expansion is planned (roadmap Phase 8)
 ```
 
 ---
@@ -1371,8 +1372,8 @@ Symbolic calculus, transforms, and equation solving.
 | `symbolicIntegral(expr[, variable])`       | Recursive symbolic antiderivative (power rule, linearity, `1/x`, linear-substitution of `sin`/`cos`/`exp`/`ln`/`sinh`/`cosh`); returns an unevaluated `integral(expr, variable)` marker when out of scope |
 | `casSimplify(expr)`                        | Parallel-first symbolic simplification of an expression string or `MathNode` (array overload fans out to the worker pool)                                                                                 |
 | `casDerivative(expr, variable)`            | Symbolic derivative w.r.t. `variable` (array overload fans out to the worker pool)                                                                                                                        |
-| `casExpand(expr)`                          | Expand products / powers of an expression (array overload fans out to the worker pool)                                                                                                                    |
-| `casFactor(expr)`                          | Factor common terms out of an expression (array overload fans out to the worker pool)                                                                                                                     |
+| `casExpand(expr)`                          | Expand products / powers of an expression (array overload fans out to the worker pool) — ⚠️ pass-through (not yet implemented; planned)                                                                   |
+| `casFactor(expr)`                          | Factor common terms out of an expression (array overload fans out to the worker pool) — ⚠️ pass-through (not yet implemented; planned)                                                                    |
 
 ### Details
 

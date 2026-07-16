@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — corrected `betainc` documented argument order; annotated pass-through CAS/algebra transforms (docs honesty)
+
+`betainc`'s implementation was always correct (`betainc(a, b, x)` = regularized incomplete beta
+`I_x(a,b)`, scipy order; verified vs mpmath: `betainc(2,3,0.5)=0.6875`, `betainc(2,3,0.7)=0.9163`,
+`betainc(1,1,0.3)=0.3`) but `docs/reference/functions.md` documented the signature as
+`betainc(x, a, b)` — the wrong order. Corrected the doc and pinned the real order with a regression
+test (`functions/tests/betainc-order.test.ts`).
+
+Separately, probing the CAS/algebra transform functions on the built `dist/` found that
+`factor`/`expand`/`apart`/`together` (and their CAS-layer counterparts `casFactor`/`casExpand`) are
+currently **pass-through** — they return their input expression unchanged — despite being
+documented with false worked examples (e.g. `factor('x^2 - 1') // '(x - 1)(x + 1)'`, which does not
+happen). Annotated all six as `⚠️ pass-through (not yet implemented; planned)` in the Algebra/CAS
+tables, replaced the false worked examples with their actual output, and softened overclaiming prose
+(`factor` "works over the rationals", `apart`/`together` "are inverses"). Added a characterization
+test (`functions/tests/cas-passthrough-documented.test.ts`) pinning current pass-through behavior so
+a future Phase 8 implementation trips these tests and the docs get updated alongside the fix. No
+implementation code changed — `betainc` needed no fix, and the transform functions are intentionally
+out of scope here (full symbolic transforms are planned for Phase 8).
+
 ### Fixed — `linprog` could return an INFEASIBLE optimum on degenerate cases
 
 The simplex iteration solved correctly, but the solution-extraction loop marked a structural
