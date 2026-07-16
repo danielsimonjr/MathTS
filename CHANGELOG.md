@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `chi2Contingency` + `multipleTest` (Phase 3 Task 6)
+
+Added `chi2Contingency(table, opts?)` — chi-square test of independence on a contingency table:
+expected counts `E_ij = rowSum_i · colSum_j / total`, the Yates continuity correction
+`(|O_ij − E_ij| − 0.5)²/E_ij` applied on 2×2 tables by default (`opts.correction !== false`,
+matching scipy's default), `dof = (rows−1)(cols−1)`, `pValue = 1 − chiSquaredCDF(chi2, dof)`, and
+Cramér's V `sqrt(chi2 / (total · min(rows−1, cols−1)))` as an effect-size companion. Pinned vs
+`scipy.stats.chi2_contingency([[10,20],[30,40]], correction=False)`: chi2 = 0.7937, p = 0.373,
+expected[0][0] = 12. Added `multipleTest(pValues, method)` — multiple-testing p-value adjustment
+(`'bonferroni'` / `'holm'` step-down / `'bh'` Benjamini–Hochberg step-up FDR), returned in the
+original input order; matches `statsmodels.stats.multitest.multipletests`.
+
 ### Added — `gaussianKDE` kernel density estimation (Phase 3 Task 5)
 
 Added `gaussianKDE(samples, { bandwidth? })` — 1-D Gaussian kernel density estimation with

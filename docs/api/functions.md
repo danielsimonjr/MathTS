@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (903 exports).
+> `@danielsimonjr/mathts-functions` (905 exports).
 
 ### Functions by category
 
@@ -481,7 +481,7 @@ ceil(2.1); // 3
 
 **Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-**Hypothesis Tests** (26): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+**Hypothesis Tests** (28): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
 **Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 

@@ -1965,21 +1965,23 @@ minimumSpanningTree(adj); // MST edge list
 
 All return structured result objects.
 
-| Function                                   | Returns             | Description                                                                                             |
-| ------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| `studentTTest(sample1[, sample2])`         | `TTestResult`       | One/two-sample t-test                                                                                   |
-| `chiSquareTest(observed, expected)`        | `ChiSquareResult`   | Chi-square test                                                                                         |
-| `anova(groups)`                            | `AnovaResult`       | One-way ANOVA                                                                                           |
-| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`      | K-S test                                                                                                |
-| `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult` | Mann–Whitney U test                                                                                     |
-| `shapiroWilkTest(sample)`                  | `ShapiroWilkResult` | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8) |
-| `principalComponentAnalysis(data[, k])`    | `PCAResult`         | PCA                                                                                                     |
-| `fTest(x, y)`                              | `FTestResult`       | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                  |
-| `jarqueBera(x)`                            | `JarqueBeraResult`  | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                             |
-| `kruskalWallis(...groups)`                 | `KruskalResult`     | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                             |
-| `wilcoxon(x[, y])`                         | `WilcoxonResult`    | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`   |
-| `fisherExact(table)`                       | `FisherExactResult` | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                |
-| `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]` | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`            |
+| Function                                   | Returns                 | Description                                                                                                                                                      |
+| ------------------------------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `studentTTest(sample1[, sample2])`         | `TTestResult`           | One/two-sample t-test                                                                                                                                            |
+| `chiSquareTest(observed, expected)`        | `ChiSquareResult`       | Chi-square test                                                                                                                                                  |
+| `anova(groups)`                            | `AnovaResult`           | One-way ANOVA                                                                                                                                                    |
+| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`          | K-S test                                                                                                                                                         |
+| `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult`     | Mann–Whitney U test                                                                                                                                              |
+| `shapiroWilkTest(sample)`                  | `ShapiroWilkResult`     | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                          |
+| `principalComponentAnalysis(data[, k])`    | `PCAResult`             | PCA                                                                                                                                                              |
+| `fTest(x, y)`                              | `FTestResult`           | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                           |
+| `jarqueBera(x)`                            | `JarqueBeraResult`      | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                      |
+| `kruskalWallis(...groups)`                 | `KruskalResult`         | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                      |
+| `wilcoxon(x[, y])`                         | `WilcoxonResult`        | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`                                                            |
+| `fisherExact(table)`                       | `FisherExactResult`     | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                         |
+| `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]`     | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                     |
+| `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency` |
+| `multipleTest(pValues, method)`            | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`              |
 
 ### Details
 
@@ -2394,7 +2396,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (903 exports).
+> `@danielsimonjr/mathts-functions` (905 exports).
 
 ### Functions by category
 
@@ -2436,7 +2438,7 @@ await terminatePool();
 
 **Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-**Hypothesis Tests** (26): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+**Hypothesis Tests** (28): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
 **Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 

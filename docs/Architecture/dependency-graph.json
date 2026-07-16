@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1041,
-    "totalModules": 79,
-    "totalExports": 5039
+    "totalFiles": 1042,
+    "totalModules": 80,
+    "totalExports": 5046
   },
   "entryPoints": [
     {
@@ -8092,6 +8092,11 @@
             "reExport": true
           },
           {
+            "file": "./stats/inference-extra.js",
+            "imports": ["chi2Contingency", "multipleTest"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/bfgs.js",
             "imports": ["bfgs"],
             "reExport": true
@@ -8225,6 +8230,12 @@
           {
             "file": "./ml/kde.js",
             "imports": ["GaussianKDEOptions", "GaussianKDEResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./stats/inference-extra.js",
+            "imports": ["Chi2ContingencyOptions", "Chi2ContingencyResult", "MultipleTestMethod"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8372,6 +8383,8 @@
           "knnClassify",
           "knnRegress",
           "gaussianKDE",
+          "chi2Contingency",
+          "multipleTest",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -8426,6 +8439,9 @@
           "LMResult",
           "GaussianKDEOptions",
           "GaussianKDEResult",
+          "Chi2ContingencyOptions",
+          "Chi2ContingencyResult",
+          "MultipleTestMethod",
           "BfgsOptions",
           "BfgsResult",
           "KMeansResult",
@@ -8550,6 +8566,8 @@
           "knnClassify",
           "knnRegress",
           "gaussianKDE",
+          "chi2Contingency",
+          "multipleTest",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -8604,6 +8622,9 @@
           "LMResult",
           "GaussianKDEOptions",
           "GaussianKDEResult",
+          "Chi2ContingencyOptions",
+          "Chi2ContingencyResult",
+          "MultipleTestMethod",
           "BfgsOptions",
           "BfgsResult",
           "KMeansResult",
@@ -14949,6 +14970,23 @@
         ],
         "exports": ["createVariance"],
         "constants": ["createVariance"]
+      }
+    },
+    "functions/stats": {
+      "functions/src/stats/inference-extra.ts": {
+        "description": "Chi-square test of independence + multiple-testing correction (Phase 3 Task 6).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["chiSquaredCDF"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["chi2Contingency", "multipleTest"],
+        "interfaces": ["Chi2ContingencyResult", "Chi2ContingencyOptions"],
+        "functions": ["chi2Contingency", "multipleTest"]
       }
     },
     "functions/string": {
@@ -34693,6 +34731,10 @@
         ]
       },
       {
+        "name": "Functions/stats",
+        "files": ["functions/src/stats/inference-extra.ts"]
+      },
+      {
         "name": "Functions/string",
         "files": [
           "functions/src/string/bin.ts",
@@ -35520,18 +35562,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1041,
-    "totalModules": 79,
-    "totalLinesOfCode": 174511,
-    "totalExports": 5039,
+    "totalTypeScriptFiles": 1042,
+    "totalModules": 80,
+    "totalLinesOfCode": 174658,
+    "totalExports": 5046,
     "totalClasses": 56,
-    "totalInterfaces": 435,
-    "totalFunctions": 1638,
+    "totalInterfaces": 437,
+    "totalFunctions": 1640,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1852,
-    "totalTypeOnlyImports": 535,
+    "totalReExports": 1857,
+    "totalTypeOnlyImports": 536,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

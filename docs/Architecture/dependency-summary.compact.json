@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1041, "e": 5039, "re": 1852 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1042, "e": 5046, "re": 1857 },
   "s": {
-    "loc": 174511,
+    "loc": 174658,
     "cls": 56,
-    "int": 435,
-    "fn": 1638,
+    "int": 437,
+    "fn": 1640,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 535
+    "toi": 536
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -823,6 +823,11 @@
         "improveErrorMessage",
         "createVariance"
       ]
+    },
+    "functions/stats": {
+      "f": 1,
+      "exp": ["chi2Contingency", "multipleTest"],
+      "int": ["Chi2ContingencyResult", "Chi2ContingencyOptions"]
     },
     "functions/string": {
       "f": 5,
@@ -1647,7 +1652,7 @@
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
-    { "p": "src/index.ts", "i": 52, "o": 0 },
+    { "p": "src/index.ts", "i": 54, "o": 0 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },

@@ -221,6 +221,15 @@ export { dbscan, knnClassify, knnRegress } from './ml/dbscan-knn.js';
 export { gaussianKDE } from './ml/kde.js';
 export type { GaussianKDEOptions, GaussianKDEResult } from './ml/kde.js';
 
+// Phase 3 Task 6 — chi-square test of independence (Yates correction +
+// Cramer's V) and multiple-testing p-value correction (Bonferroni/Holm/BH).
+export { chi2Contingency, multipleTest } from './stats/inference-extra.js';
+export type {
+  Chi2ContingencyOptions,
+  Chi2ContingencyResult,
+  MultipleTestMethod,
+} from './stats/inference-extra.js';
+
 // Phase 2 Task 1 — BFGS quasi-Newton minimizer (inverse-Hessian update +
 // Armijo line search; optional analytic gradient or box-bounds projection).
 // The smooth-optimization workhorse complementing derivative-free `minimize`

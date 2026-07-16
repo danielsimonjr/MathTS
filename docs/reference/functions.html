@@ -1263,20 +1263,20 @@
 
       ### Density / mass functions
 
-      | Function                    | Description                                 | Accel    |
-      | --------------------------- | ------------------------------------------- | -------- |
-      | `normalPDF(x[, mu, sigma])` | Normal PDF                                  | parallel |
-      | `normalCDF(x[, mu, sigma])` | Normal CDF                                  | parallel |
-      | `exponentialPDF(x, lambda)` | Exponential PDF                             | parallel |
-      | `exponentialCDF(x, lambda)` | Exponential CDF                             | parallel |
-      | `poissonPMF(k, lambda)`     | Poisson PMF                                 | parallel |
-      | `binomialPMF(k, n, p)`      | Binomial PMF                                | parallel |
-      | `geometricPMF(k, p)`        | Geometric PMF                               | parallel |
-      | `bernoulliPMF(k, p)`        | Bernoulli PMF                               | parallel |
-      | `entropy(probs)`            | Shannon entropy (bits)                      | —        |
-      | `jsDivergence(p, q)`        | Jensen–Shannon divergence                   | —        |
-      | `kldivergence(p, q)`        | Kullback–Leibler divergence (factory layer) | —        |
-      | `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | — |
+      | Function                       | Description                                                                                                                                                                             | Accel    |
+      | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+      | `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | parallel |
+      | `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | parallel |
+      | `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | parallel |
+      | `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | parallel |
+      | `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | parallel |
+      | `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | parallel |
+      | `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | parallel |
+      | `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | parallel |
+      | `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —        |
+      | `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —        |
+      | `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —        |
+      | `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —        |
 
       ### Distribution objects
 
@@ -2505,6 +2505,8 @@
       | `wilcoxon(x[, y])`                         | `WilcoxonResult`    | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`   |
       | `fisherExact(table)`                       | `FisherExactResult` | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                |
       | `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]` | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`            |
+      | `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency` |
+      | `multipleTest(pValues, method)`            | `number[]`           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests` |
 
       ### Details
 
@@ -2919,7 +2921,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (903 exports).
+      > `@danielsimonjr/mathts-functions` (905 exports).
 
       ### Functions by category
 
@@ -2961,7 +2963,7 @@
 
       **Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-      **Hypothesis Tests** (26): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+      **Hypothesis Tests** (28): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
       **Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 
