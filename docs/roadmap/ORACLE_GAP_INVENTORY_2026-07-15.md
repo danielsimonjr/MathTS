@@ -366,7 +366,14 @@ _(original scope below)_
   `idwt`+families/`wavedec`/`waverec`/CWT/STFT · `csd`/`coherence`/`find_peaks`/`peak_widths`/`resample`.
   Oracle scipy.signal + pywt. **≈ L.**
 
-### Phase 7 — Advanced linear algebra & large-scale numerics
+### Phase 7 — Advanced linear algebra — ✅ RELEASED `functions@0.35.0` (2026-07-16)
+
+Shipped: Krylov cg/gmres/bicgstab/minres, eigsh (Lanczos), thomasSolve/solveBanded/toeplitzSolve/ldl,
+funm/cosm/sinm, dlyap/care/dare. Oracle-pinned vs scipy, tarball-verified. Rank-revealing QR + rq/ql/lq deferred.
+
+_(original scope below)_
+
+#### Phase 7 — Advanced linear algebra & large-scale numerics (original)
 
 Iterative Krylov `cg`/`gmres`/`bicgstab`/`minres` + preconditioners (L1, L) · sparse eigensolver
 `eigs`/`eigsh` Lanczos/Arnoldi (L2, L) · complex matrix functions Schur–Parlett `sqrtm`/`logm`/`cosm`/

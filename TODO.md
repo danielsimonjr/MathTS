@@ -60,8 +60,12 @@ oracle-pinned, subagent-driven. Phase plan:
       wavelets (idwt/wavedec/waverec/cwt) · spectral+peaks (csd/coherence/findPeaks/peakWidths/stft/istft/
       decimate). **Resolves the Phase-0 butter/firwin lowpass-only note.** Oracle-pinned vs scipy.signal,
       tarball-verified. Follow-ups: csd/coherence not hard-pinned; wavelets Haar/db1 only; remez approximate.
-- [ ] **Phase 7 — Advanced linalg.** iterative Krylov (cg/gmres) · sparse eigensolver · complex matrix
-      functions (Schur–Parlett) · LDLᵀ · Riccati · banded/Toeplitz solvers · rank-revealing QR.
+- [x] **Phase 7 — Advanced linalg — ✅ RELEASED `functions@0.35.0`** (2026-07-16). Krylov `cg`/`gmres`/
+      `bicgstab`/`minres` (+Jacobi precond, dense-or-matvec) · `eigsh` (Lanczos) · structured solvers
+      `thomasSolve`/`solveBanded`/`toeplitzSolve`/`ldl` · complex matrix fns `funm`/`cosm`/`sinm` · control
+      eqns `dlyap`/`care`/`dare` (sign-fn / SDA). Oracle-pinned vs scipy, tarball-verified. Follow-ups:
+      matrix `eig` returns only real eigenvector cols (zeroes complex pairs — blocked Hamiltonian care);
+      rank-revealing QR + rq/ql/lq deferred; funm defective-matrix unsupported; minres O(k³).
 - [ ] **Phase 8 — Graph/geometry/CAS/PDE/intervals.** directed graph + traversal + max-flow · quaternion
       slerp/Euler · N-D interpolation · BVP collocation · real CAS expand/factor/apart · interval type.
 
