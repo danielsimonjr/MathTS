@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1049, "e": 5110, "re": 1894 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1050, "e": 5128, "re": 1903 },
   "s": {
-    "loc": 176069,
+    "loc": 176538,
     "cls": 56,
     "int": 447,
-    "fn": 1667,
+    "fn": 1676,
     "tg": 158,
     "en": 0,
     "co": 1536,
@@ -683,6 +683,20 @@
         "RidgeOptions",
         "CoordinateDescentOptions",
         "RegularizedRegressionResult"
+      ]
+    },
+    "functions/numbertheory": {
+      "f": 1,
+      "exp": [
+        "continuedFraction",
+        "eulerNumbers",
+        "stirlingS1",
+        "discreteLog",
+        "primitiveRoot",
+        "multiplicativeOrder",
+        "kroneckerSymbol",
+        "combinationsGen",
+        "permutationsGen"
       ]
     },
     "functions/numeric": {
@@ -1692,7 +1706,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 8 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 65, "o": 0 },
+    { "p": "src/index.ts", "i": 66, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

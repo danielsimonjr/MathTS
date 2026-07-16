@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — number-theory fills (Phase 5 Task 4)
+
+Added `functions/src/numbertheory/extra.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `continuedFraction(x, maxTerms?)` — simple continued fraction expansion `[a0, a1, ...]`.
+- `eulerNumbers(n)` — Euler numbers `E_0..E_n` via the standard secant-number recurrence.
+- `stirlingS1(n, k)` — signed Stirling number of the first kind (DP recurrence), complementing
+  the existing unsigned `stirlingS2`.
+- `discreteLog(g, h, p)` — discrete logarithm via baby-step giant-step (`BigInt` modular
+  exponentiation/inversion to avoid overflow).
+- `primitiveRoot(p)` — smallest primitive root modulo a prime, via prime-factorization of `p-1`.
+- `multiplicativeOrder(a, n)` — multiplicative order of `a` mod `n` (`-1` if `gcd(a,n) !== 1`).
+- `kroneckerSymbol(a, n)` — Kronecker symbol, generalizing the existing `jacobiSymbol` to all
+  integer `n` (even, negative, zero).
+- `permutationsGen(arr, k?)` / `combinationsGen(arr, k)` — lexicographic tuple *enumerators*
+  complementing the existing `permutations`/`combinations`, which only return counts.
+
+Pinned vs sympy (`stirling(5,2,kind=1,signed=True)=-50`; `euler(6)=-61`;
+`discrete_log(5,3,2)=3` i.e. `2^3≡3 mod 5`; `primitive_root(7)=3`; `n_order(2,7)=3`;
+`jacobi_symbol(2,3)=-1`). Documented in `docs/reference/functions.md` under
+Combinatorics & Number Theory.
+
 ### Added — Jacobi elliptic sn/cn/dn + Gauss–Legendre nodes/weights (Phase 5 Task 3)
 
 Added `functions/src/special/jacobi-elliptic.ts` and `functions/src/numeric/gauss-nodes.ts`,

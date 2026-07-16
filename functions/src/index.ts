@@ -34,6 +34,22 @@ export { evaluate, compileExpr, parse, parser, reviver, replacer } from './facto
 // GC4 — mathjs canonical `help(search)` export (Help class + embedded docs).
 export { help } from './help.js';
 
+// Number-theory fills (Task 4): continued fractions, Euler numbers, signed
+// Stirling 1st kind, discrete log (BSGS), primitive roots, multiplicative
+// order, Kronecker symbol, and lexicographic permutation/combination
+// enumerators (the existing `permutations`/`combinations` only count).
+export {
+  continuedFraction,
+  eulerNumbers,
+  stirlingS1,
+  discreteLog,
+  primitiveRoot,
+  multiplicativeOrder,
+  kroneckerSymbol,
+  permutationsGen,
+  combinationsGen,
+} from './numbertheory/extra.js';
+
 // Forward-mode AD over the plain functions surface (Dual-number overloading).
 export { derivativeAt, valueAndDerivativeAt, gradientAt } from './grad-forward.js';
 export type { DualFn } from './grad-forward.js';

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1049,
-    "totalModules": 80,
-    "totalExports": 5110
+    "totalFiles": 1050,
+    "totalModules": 81,
+    "totalExports": 5128
   },
   "entryPoints": [
     {
@@ -7912,6 +7912,21 @@
             "reExport": true
           },
           {
+            "file": "./numbertheory/extra.js",
+            "imports": [
+              "continuedFraction",
+              "eulerNumbers",
+              "stirlingS1",
+              "discreteLog",
+              "primitiveRoot",
+              "multiplicativeOrder",
+              "kroneckerSymbol",
+              "permutationsGen",
+              "combinationsGen"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["derivativeAt", "valueAndDerivativeAt", "gradientAt"],
             "reExport": true
@@ -8355,6 +8370,15 @@
           "reviver",
           "replacer",
           "help",
+          "continuedFraction",
+          "eulerNumbers",
+          "stirlingS1",
+          "discreteLog",
+          "primitiveRoot",
+          "multiplicativeOrder",
+          "kroneckerSymbol",
+          "permutationsGen",
+          "combinationsGen",
           "derivativeAt",
           "valueAndDerivativeAt",
           "gradientAt",
@@ -8575,6 +8599,15 @@
           "reviver",
           "replacer",
           "help",
+          "continuedFraction",
+          "eulerNumbers",
+          "stirlingS1",
+          "discreteLog",
+          "primitiveRoot",
+          "multiplicativeOrder",
+          "kroneckerSymbol",
+          "permutationsGen",
+          "combinationsGen",
           "derivativeAt",
           "valueAndDerivativeAt",
           "gradientAt",
@@ -12924,6 +12957,37 @@
         "exports": ["ridge", "lasso", "elasticNet"],
         "interfaces": ["RidgeOptions", "CoordinateDescentOptions", "RegularizedRegressionResult"],
         "functions": ["ridge", "lasso", "elasticNet"]
+      }
+    },
+    "functions/numbertheory": {
+      "functions/src/numbertheory/extra.ts": {
+        "description": "Number-theory fills — closes gaps left by the existing combinatorics/number-theory",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "continuedFraction",
+          "eulerNumbers",
+          "stirlingS1",
+          "discreteLog",
+          "primitiveRoot",
+          "multiplicativeOrder",
+          "kroneckerSymbol",
+          "combinationsGen",
+          "permutationsGen"
+        ],
+        "functions": [
+          "continuedFraction",
+          "eulerNumbers",
+          "stirlingS1",
+          "discreteLog",
+          "primitiveRoot",
+          "multiplicativeOrder",
+          "kroneckerSymbol",
+          "combinationsGen",
+          "permutationsGen"
+        ]
       }
     },
     "functions/numeric": {
@@ -34900,6 +34964,10 @@
         ]
       },
       {
+        "name": "Functions/numbertheory",
+        "files": ["functions/src/numbertheory/extra.ts"]
+      },
+      {
         "name": "Functions/numeric",
         "files": [
           "functions/src/numeric/adaptive-quad.ts",
@@ -35854,17 +35922,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1049,
-    "totalModules": 80,
-    "totalLinesOfCode": 176069,
-    "totalExports": 5110,
+    "totalTypeScriptFiles": 1050,
+    "totalModules": 81,
+    "totalLinesOfCode": 176538,
+    "totalExports": 5128,
     "totalClasses": 56,
     "totalInterfaces": 447,
-    "totalFunctions": 1667,
+    "totalFunctions": 1676,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1894,
+    "totalReExports": 1903,
     "totalTypeOnlyImports": 540,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

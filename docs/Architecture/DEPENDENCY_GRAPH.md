@@ -41,59 +41,60 @@ This document provides a comprehensive dependency graph of all files, components
 31. [Functions/logical Dependencies](#functions-logical-dependencies)
 32. [Functions/matrix Dependencies](#functions-matrix-dependencies)
 33. [Functions/ml Dependencies](#functions-ml-dependencies)
-34. [Functions/numeric Dependencies](#functions-numeric-dependencies)
-35. [Functions/plain Dependencies](#functions-plain-dependencies)
-36. [Functions/probability Dependencies](#functions-probability-dependencies)
-37. [Functions/relational Dependencies](#functions-relational-dependencies)
-38. [Functions/set Dependencies](#functions-set-dependencies)
-39. [Functions/signal Dependencies](#functions-signal-dependencies)
-40. [Functions/special Dependencies](#functions-special-dependencies)
-41. [Functions/statistics Dependencies](#functions-statistics-dependencies)
-42. [Functions/stats Dependencies](#functions-stats-dependencies)
-43. [Functions/string Dependencies](#functions-string-dependencies)
-44. [Functions/trigonometry Dependencies](#functions-trigonometry-dependencies)
-45. [Functions/type Dependencies](#functions-type-dependencies)
-46. [Functions/typed Dependencies](#functions-typed-dependencies)
-47. [Functions/unit Dependencies](#functions-unit-dependencies)
-48. [Functions/utils Dependencies](#functions-utils-dependencies)
-49. [Functions/wasm Dependencies](#functions-wasm-dependencies)
-50. [Expression/compiler Dependencies](#expression-compiler-dependencies)
-51. [Expression/embeddedDocs Dependencies](#expression-embeddeddocs-dependencies)
-52. [Expression/error Dependencies](#expression-error-dependencies)
-53. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
-54. [Expression/function Dependencies](#expression-function-dependencies)
-55. [Expression Dependencies](#expression-dependencies)
-56. [Expression/node Dependencies](#expression-node-dependencies)
-57. [Expression/transform Dependencies](#expression-transform-dependencies)
-58. [Expression/utils Dependencies](#expression-utils-dependencies)
-59. [Parser Dependencies](#parser-dependencies)
-60. [Units Dependencies](#units-dependencies)
-61. [Numbers Dependencies](#numbers-dependencies)
-62. [Ast Dependencies](#ast-dependencies)
-63. [Evaluator Dependencies](#evaluator-dependencies)
-64. [Linalg Dependencies](#linalg-dependencies)
-65. [Arithmetic Dependencies](#arithmetic-dependencies)
-66. [Trigonometry Dependencies](#trigonometry-dependencies)
-67. [Statistics Dependencies](#statistics-dependencies)
-68. [Signal Dependencies](#signal-dependencies)
-69. [Parallel Dependencies](#parallel-dependencies)
-70. [Parallel/operations Dependencies](#parallel-operations-dependencies)
-71. [Parallel/ops Dependencies](#parallel-ops-dependencies)
-72. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
-73. [Workbook Dependencies](#workbook-dependencies)
-74. [Assembly/algebra Dependencies](#assembly-algebra-dependencies)
-75. [Assembly/bindings Dependencies](#assembly-bindings-dependencies)
-76. [Assembly Dependencies](#assembly-dependencies)
-77. [Assembly/ops Dependencies](#assembly-ops-dependencies)
-78. [Assembly/types Dependencies](#assembly-types-dependencies)
-79. [Compat Dependencies](#compat-dependencies)
-80. [Gpu Dependencies](#gpu-dependencies)
-81. [Plot Dependencies](#plot-dependencies)
-82. [Plot/three Dependencies](#plot-three-dependencies)
-83. [Dependency Matrix](#dependency-matrix)
-84. [Circular Dependency Analysis](#circular-dependency-analysis)
-85. [Visual Dependency Graph](#visual-dependency-graph)
-86. [Summary Statistics](#summary-statistics)
+34. [Functions/numbertheory Dependencies](#functions-numbertheory-dependencies)
+35. [Functions/numeric Dependencies](#functions-numeric-dependencies)
+36. [Functions/plain Dependencies](#functions-plain-dependencies)
+37. [Functions/probability Dependencies](#functions-probability-dependencies)
+38. [Functions/relational Dependencies](#functions-relational-dependencies)
+39. [Functions/set Dependencies](#functions-set-dependencies)
+40. [Functions/signal Dependencies](#functions-signal-dependencies)
+41. [Functions/special Dependencies](#functions-special-dependencies)
+42. [Functions/statistics Dependencies](#functions-statistics-dependencies)
+43. [Functions/stats Dependencies](#functions-stats-dependencies)
+44. [Functions/string Dependencies](#functions-string-dependencies)
+45. [Functions/trigonometry Dependencies](#functions-trigonometry-dependencies)
+46. [Functions/type Dependencies](#functions-type-dependencies)
+47. [Functions/typed Dependencies](#functions-typed-dependencies)
+48. [Functions/unit Dependencies](#functions-unit-dependencies)
+49. [Functions/utils Dependencies](#functions-utils-dependencies)
+50. [Functions/wasm Dependencies](#functions-wasm-dependencies)
+51. [Expression/compiler Dependencies](#expression-compiler-dependencies)
+52. [Expression/embeddedDocs Dependencies](#expression-embeddeddocs-dependencies)
+53. [Expression/error Dependencies](#expression-error-dependencies)
+54. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
+55. [Expression/function Dependencies](#expression-function-dependencies)
+56. [Expression Dependencies](#expression-dependencies)
+57. [Expression/node Dependencies](#expression-node-dependencies)
+58. [Expression/transform Dependencies](#expression-transform-dependencies)
+59. [Expression/utils Dependencies](#expression-utils-dependencies)
+60. [Parser Dependencies](#parser-dependencies)
+61. [Units Dependencies](#units-dependencies)
+62. [Numbers Dependencies](#numbers-dependencies)
+63. [Ast Dependencies](#ast-dependencies)
+64. [Evaluator Dependencies](#evaluator-dependencies)
+65. [Linalg Dependencies](#linalg-dependencies)
+66. [Arithmetic Dependencies](#arithmetic-dependencies)
+67. [Trigonometry Dependencies](#trigonometry-dependencies)
+68. [Statistics Dependencies](#statistics-dependencies)
+69. [Signal Dependencies](#signal-dependencies)
+70. [Parallel Dependencies](#parallel-dependencies)
+71. [Parallel/operations Dependencies](#parallel-operations-dependencies)
+72. [Parallel/ops Dependencies](#parallel-ops-dependencies)
+73. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
+74. [Workbook Dependencies](#workbook-dependencies)
+75. [Assembly/algebra Dependencies](#assembly-algebra-dependencies)
+76. [Assembly/bindings Dependencies](#assembly-bindings-dependencies)
+77. [Assembly Dependencies](#assembly-dependencies)
+78. [Assembly/ops Dependencies](#assembly-ops-dependencies)
+79. [Assembly/types Dependencies](#assembly-types-dependencies)
+80. [Compat Dependencies](#compat-dependencies)
+81. [Gpu Dependencies](#gpu-dependencies)
+82. [Plot Dependencies](#plot-dependencies)
+83. [Plot/three Dependencies](#plot-three-dependencies)
+84. [Dependency Matrix](#dependency-matrix)
+85. [Circular Dependency Analysis](#circular-dependency-analysis)
+86. [Visual Dependency Graph](#visual-dependency-graph)
+87. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -134,6 +135,7 @@ The codebase is organized into the following modules:
 - **functions/logical**: 5 files
 - **functions/matrix**: 45 files
 - **functions/ml**: 5 files
+- **functions/numbertheory**: 1 file
 - **functions/numeric**: 9 files
 - **functions/plain**: 10 files
 - **functions/probability**: 14 files
@@ -198,7 +200,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 416            | 4               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 417            | 4               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 425            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3749,6 +3751,7 @@ graph LR
 | `./typed/unit.js` | `to, toBest` | Re-export |
 | `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, reviver, replacer` | Re-export |
 | `./help.js` | `help` | Re-export |
+| `./numbertheory/extra.js` | `continuedFraction, eulerNumbers, stirlingS1, discreteLog, primitiveRoot, multiplicativeOrder, kroneckerSymbol, permutationsGen, combinationsGen` | Re-export |
 | `./grad-forward.js` | `derivativeAt, valueAndDerivativeAt, gradientAt` | Re-export |
 | `./descriptive-stats.js` | `gmean, hmean, moment, skewness, kurtosis, iqr, sem, zscore, cov, corrcoef, rankdata, spearman, kendallTau, linregress, pearsonr, spearmanr, kendalltau, kendallTauTest, ptp, variation, trimmedMean, describe, histogram` | Re-export |
 | `./numeric-extra.js` | `clamp, sigmoid, logsumexp, softmax, cumprod, cummax, cummin, cumtrapz` | Re-export |
@@ -3810,7 +3813,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`, `help`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `minimizeScalar`, `quad`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `minimizeScalar`, `quad`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`
 
 ---
 
@@ -5559,6 +5562,18 @@ graph LR
 
 - Interfaces: `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`
 - Functions: `ridge`, `lasso`, `elasticNet`
+
+---
+
+<a id="functions-numbertheory-dependencies"></a>
+
+## Functions/numbertheory Dependencies
+
+### `functions/src/numbertheory/extra.ts` - Number-theory fills — closes gaps left by the existing combinatorics/number-theory
+
+**Exports:**
+
+- Functions: `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `combinationsGen`, `permutationsGen`
 
 ---
 
@@ -15053,7 +15068,7 @@ graph LR
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 2 files      | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/index`                                  | 42 files     | 0 files    |
+| `functions/src/index`                                  | 43 files     | 0 files    |
 | `functions/src/utils/collection`                       | 4 files      | 37 files   |
 | `expression/src/utils/is`                              | 0 files      | 40 files   |
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 37 files   |
@@ -15364,426 +15379,430 @@ graph TD
         N173[regularized-regression]
     end
 
+    subgraph Functions/numbertheory
+        N174[extra]
+    end
+
     subgraph Functions/numeric
-        N174[adaptive-quad]
-        N175[bfgs]
-        N176[fsolve]
-        N177[gauss-nodes]
-        N178[minimize-scalar]
-        N179[nnls]
-        N180[numeric-jacobian]
-        N181[open-root-finders]
-        N182[solveODE]
+        N175[adaptive-quad]
+        N176[bfgs]
+        N177[fsolve]
+        N178[gauss-nodes]
+        N179[minimize-scalar]
+        N180[nnls]
+        N181[numeric-jacobian]
+        N182[open-root-finders]
+        N183[solveODE]
     end
 
     subgraph Functions/plain
-        N183[arithmetic]
-        N184[bitwise]
-        N185[combinations]
-        N186[constants]
-        N187[index]
-        N188[logical]
-        N189[probability]
-        N190[relational]
-        N191[trigonometry]
-        N192[utils]
+        N184[arithmetic]
+        N185[bitwise]
+        N186[combinations]
+        N187[constants]
+        N188[index]
+        N189[logical]
+        N190[probability]
+        N191[relational]
+        N192[trigonometry]
+        N193[utils]
     end
 
     subgraph Functions/probability
-        N193[bernoulli]
-        N194[combinations]
-        N195[combinationsWithRep]
-        N196[factorial]
-        N197[gamma]
-        N198[kldivergence]
-        N199[lgamma]
-        N200[multinomial]
-        N201[permutations]
-        N202[pickRandom]
-        N203[...4 more]
+        N194[bernoulli]
+        N195[combinations]
+        N196[combinationsWithRep]
+        N197[factorial]
+        N198[gamma]
+        N199[kldivergence]
+        N200[lgamma]
+        N201[multinomial]
+        N202[permutations]
+        N203[pickRandom]
+        N204[...4 more]
     end
 
     subgraph Functions/relational
-        N204[compare]
-        N205[compareNatural]
-        N206[compareText]
-        N207[compareUnits]
-        N208[deepEqual]
-        N209[equal]
-        N210[equalScalar]
-        N211[equalText]
-        N212[larger]
-        N213[largerEq]
-        N214[...3 more]
+        N205[compare]
+        N206[compareNatural]
+        N207[compareText]
+        N208[compareUnits]
+        N209[deepEqual]
+        N210[equal]
+        N211[equalScalar]
+        N212[equalText]
+        N213[larger]
+        N214[largerEq]
+        N215[...3 more]
     end
 
     subgraph Functions/set
-        N215[setCartesian]
-        N216[setDifference]
-        N217[setDistinct]
-        N218[setIntersect]
-        N219[setIsSubset]
-        N220[setMultiplicity]
-        N221[setPowerset]
-        N222[setSize]
-        N223[setSymDifference]
-        N224[setUnion]
+        N216[setCartesian]
+        N217[setDifference]
+        N218[setDistinct]
+        N219[setIntersect]
+        N220[setIsSubset]
+        N221[setMultiplicity]
+        N222[setPowerset]
+        N223[setSize]
+        N224[setSymDifference]
+        N225[setUnion]
     end
 
     subgraph Functions/signal
-        N225[fft-core-f64]
-        N226[freqz]
-        N227[zpk2tf]
+        N226[fft-core-f64]
+        N227[freqz]
+        N228[zpk2tf]
     end
 
     subgraph Functions/special
-        N228[erf]
-        N229[hypergeometric]
-        N230[jacobi-elliptic]
-        N231[polygamma-orthopoly]
-        N232[zeta]
+        N229[erf]
+        N230[hypergeometric]
+        N231[jacobi-elliptic]
+        N232[polygamma-orthopoly]
+        N233[zeta]
     end
 
     subgraph Functions/statistics
-        N233[corr]
-        N234[cumsum]
-        N235[mad]
-        N236[max]
-        N237[mean]
-        N238[median]
-        N239[min]
-        N240[mode]
-        N241[prod]
-        N242[quantileSeq]
-        N243[...4 more]
+        N234[corr]
+        N235[cumsum]
+        N236[mad]
+        N237[max]
+        N238[mean]
+        N239[median]
+        N240[min]
+        N241[mode]
+        N242[prod]
+        N243[quantileSeq]
+        N244[...4 more]
     end
 
     subgraph Functions/stats
-        N244[fit-distribution]
-        N245[inference-extra]
-        N246[inference-extra2]
-        N247[timeseries]
+        N245[fit-distribution]
+        N246[inference-extra]
+        N247[inference-extra2]
+        N248[timeseries]
     end
 
     subgraph Functions/string
-        N248[bin]
-        N249[format]
-        N250[hex]
-        N251[oct]
-        N252[print]
+        N249[bin]
+        N250[format]
+        N251[hex]
+        N252[oct]
+        N253[print]
     end
 
     subgraph Functions/trigonometry
-        N253[acos]
-        N254[acosh]
-        N255[acot]
-        N256[acoth]
-        N257[acsc]
-        N258[acsch]
-        N259[asec]
-        N260[asech]
-        N261[asin]
-        N262[asinh]
-        N263[...16 more]
+        N254[acos]
+        N255[acosh]
+        N256[acot]
+        N257[acoth]
+        N258[acsc]
+        N259[acsch]
+        N260[asec]
+        N261[asech]
+        N262[asin]
+        N263[asinh]
+        N264[...16 more]
     end
 
     subgraph Functions/type
-        N264[BigNumber]
-        N265[Chain]
-        N266[chain]
-        N267[Complex]
-        N268[Decimal]
-        N269[FibonacciHeap]
-        N270[index]
-        N271[ImmutableDenseMatrix]
-        N272[MatrixIndex]
-        N273[Spa]
-        N274[...22 more]
+        N265[BigNumber]
+        N266[Chain]
+        N267[chain]
+        N268[Complex]
+        N269[Decimal]
+        N270[FibonacciHeap]
+        N271[index]
+        N272[ImmutableDenseMatrix]
+        N273[MatrixIndex]
+        N274[Spa]
+        N275[...22 more]
     end
 
     subgraph Functions/typed
-        N275[algebra]
-        N276[arithmetic]
-        N277[bitwise]
-        N278[cas]
-        N279[combinatorics]
-        N280[complex]
-        N281[dist-objects]
-        N282[distributions]
-        N283[fused]
-        N284[geometry]
-        N285[...21 more]
+        N276[algebra]
+        N277[arithmetic]
+        N278[bitwise]
+        N279[cas]
+        N280[combinatorics]
+        N281[complex]
+        N282[dist-objects]
+        N283[distributions]
+        N284[fused]
+        N285[geometry]
+        N286[...21 more]
     end
 
     subgraph Functions/unit
-        N286[to]
-        N287[toBest]
+        N287[to]
+        N288[toBest]
     end
 
     subgraph Functions/utils
-        N288[array]
-        N289[bigint]
-        N290[bitwise]
-        N291[formatter]
-        N292[nearlyEqual]
-        N293[clone]
-        N294[collection]
-        N295[complex]
-        N296[customs]
-        N297[emitter]
-        N298[...25 more]
+        N289[array]
+        N290[bigint]
+        N291[bitwise]
+        N292[formatter]
+        N293[nearlyEqual]
+        N294[clone]
+        N295[collection]
+        N296[complex]
+        N297[customs]
+        N298[emitter]
+        N299[...25 more]
     end
 
     subgraph Functions/wasm
-        N299[wasm-bridge]
-        N300[common]
-        N301[wasm-bridge]
-        N302[integrity]
-        N303[wasm-bridge]
+        N300[wasm-bridge]
+        N301[common]
+        N302[wasm-bridge]
+        N303[integrity]
         N304[wasm-bridge]
-        N305[resolve]
-        N306[wasm-bridge]
+        N305[wasm-bridge]
+        N306[resolve]
         N307[wasm-bridge]
-        N308[scalars]
-        N309[...2 more]
+        N308[wasm-bridge]
+        N309[scalars]
+        N310[...2 more]
     end
 
     subgraph Expression/compiler
-        N310[compile]
-        N311[index]
+        N311[compile]
+        N312[index]
     end
 
     subgraph Expression/embeddedDocs
-        N312[e]
-        N313[false]
-        N314[i]
-        N315[Infinity]
-        N316[LN10]
-        N317[LN2]
-        N318[LOG10E]
-        N319[LOG2E]
-        N320[NaN]
-        N321[null]
-        N322[...336 more]
+        N313[e]
+        N314[false]
+        N315[i]
+        N316[Infinity]
+        N317[LN10]
+        N318[LN2]
+        N319[LOG10E]
+        N320[LOG2E]
+        N321[NaN]
+        N322[null]
+        N323[...336 more]
     end
 
     subgraph Expression/error
-        N323[DimensionError]
-        N324[IndexError]
-        N325[MathjsError]
+        N324[DimensionError]
+        N325[IndexError]
+        N326[MathjsError]
     end
 
     subgraph Expression/evaluator
-        N326[evaluate]
-        N327[index]
+        N327[evaluate]
+        N328[index]
     end
 
     subgraph Expression/function
-        N328[parser]
+        N329[parser]
     end
 
     subgraph Expression
-        N329[Help]
-        N330[index]
-        N331[keywords]
-        N332[operators]
-        N333[parse]
-        N334[Parser]
-        N335[types]
+        N330[Help]
+        N331[index]
+        N332[keywords]
+        N333[operators]
+        N334[parse]
+        N335[Parser]
+        N336[types]
     end
 
     subgraph Expression/node
-        N336[AccessorNode]
-        N337[ArrayNode]
-        N338[AssignmentNode]
-        N339[BlockNode]
-        N340[ConditionalNode]
-        N341[ConstantNode]
-        N342[FunctionAssignmentNode]
-        N343[FunctionNode]
-        N344[IndexNode]
-        N345[Node]
-        N346[...8 more]
+        N337[AccessorNode]
+        N338[ArrayNode]
+        N339[AssignmentNode]
+        N340[BlockNode]
+        N341[ConditionalNode]
+        N342[ConstantNode]
+        N343[FunctionAssignmentNode]
+        N344[FunctionNode]
+        N345[IndexNode]
+        N346[Node]
+        N347[...8 more]
     end
 
     subgraph Expression/transform
-        N347[and.transform]
-        N348[bitAnd.transform]
-        N349[bitOr.transform]
-        N350[column.transform]
-        N351[concat.transform]
-        N352[cumsum.transform]
-        N353[diff.transform]
-        N354[filter.transform]
-        N355[forEach.transform]
-        N356[index.transform]
-        N357[...21 more]
+        N348[and.transform]
+        N349[bitAnd.transform]
+        N350[bitOr.transform]
+        N351[column.transform]
+        N352[concat.transform]
+        N353[cumsum.transform]
+        N354[diff.transform]
+        N355[filter.transform]
+        N356[forEach.transform]
+        N357[index.transform]
+        N358[...21 more]
     end
 
     subgraph Expression/utils
-        N358[array]
-        N359[formatter]
-        N360[collection]
-        N361[customs]
-        N362[factory]
-        N363[is]
-        N364[latex]
-        N365[map]
-        N366[mathml]
-        N367[number]
-        N368[...5 more]
+        N359[array]
+        N360[formatter]
+        N361[collection]
+        N362[customs]
+        N363[factory]
+        N364[is]
+        N365[latex]
+        N366[map]
+        N367[mathml]
+        N368[number]
+        N369[...5 more]
     end
 
     subgraph Parser
-        N369[index]
-    end
-
-    subgraph Units
         N370[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N371[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N372[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N373[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N374[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N375[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N376[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N377[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N378[index]
     end
 
+    subgraph Signal
+        N379[index]
+    end
+
     subgraph Parallel
-        N379[ComputePool]
-        N380[index]
-        N381[matrix.worker]
+        N380[ComputePool]
+        N381[index]
+        N382[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N382[elementwise]
-        N383[index]
-        N384[map]
-        N385[matmul]
-        N386[reduce]
+        N383[elementwise]
+        N384[index]
+        N385[map]
+        N386[matmul]
+        N387[reduce]
     end
 
     subgraph Parallel/ops
-        N387[bitwise]
+        N388[bitwise]
     end
 
     subgraph Parallel/strategies
-        N388[chunk]
-        N389[index]
-        N390[threshold]
+        N389[chunk]
+        N390[index]
+        N391[threshold]
     end
 
     subgraph Workbook
-        N391[cli]
-        N392[contract]
-        N393[doc]
-        N394[edit]
-        N395[executor]
-        N396[formatter]
-        N397[fs-atomic]
-        N398[graph]
-        N399[html]
-        N400[index]
-        N401[...10 more]
+        N392[cli]
+        N393[contract]
+        N394[doc]
+        N395[edit]
+        N396[executor]
+        N397[formatter]
+        N398[fs-atomic]
+        N399[graph]
+        N400[html]
+        N401[index]
+        N402[...10 more]
     end
 
     subgraph Assembly/algebra
-        N402[decomposition]
+        N403[decomposition]
     end
 
     subgraph Assembly/bindings
-        N403[index]
-        N404[wasm-loader]
+        N404[index]
+        N405[wasm-loader]
     end
 
     subgraph Assembly
-        N405[elementwise]
-        N406[index]
-        N407[poly]
-        N408[signal]
-        N409[sort]
-        N410[special]
-        N411[tridiag]
+        N406[elementwise]
+        N407[index]
+        N408[poly]
+        N409[signal]
+        N410[sort]
+        N411[special]
+        N412[tridiag]
     end
 
     subgraph Assembly/ops
-        N412[approx]
-        N413[array]
-        N414[bitwise]
-        N415[complex-array]
-        N416[complex-ops]
-        N417[curvefit]
-        N418[fft]
-        N419[linalg]
-        N420[matrix]
-        N421[number-theory]
-        N422[...6 more]
+        N413[approx]
+        N414[array]
+        N415[bitwise]
+        N416[complex-array]
+        N417[complex-ops]
+        N418[curvefit]
+        N419[fft]
+        N420[linalg]
+        N421[matrix]
+        N422[number-theory]
+        N423[...6 more]
     end
 
     subgraph Assembly/types
-        N423[complex]
+        N424[complex]
     end
 
     subgraph Compat
-        N424[chain]
-        N425[index]
-        N426[shims]
+        N425[chain]
+        N426[index]
+        N427[shims]
     end
 
     subgraph Gpu
-        N427[BufferPool]
-        N428[detect]
-        N429[device]
-        N430[flag]
-        N431[GPUContext]
-        N432[index]
-        N433[serialize]
-        N434[ShaderManager]
+        N428[BufferPool]
+        N429[detect]
+        N430[device]
+        N431[flag]
+        N432[GPUContext]
+        N433[index]
+        N434[serialize]
+        N435[ShaderManager]
     end
 
     subgraph Plot
-        N435[coerce]
-        N436[contour]
-        N437[emit]
-        N438[frame]
-        N439[heatmap]
-        N440[histogram]
-        N441[index]
-        N442[marks2d]
-        N443[overlay]
-        N444[palette]
-        N445[...8 more]
+        N436[coerce]
+        N437[contour]
+        N438[emit]
+        N439[frame]
+        N440[heatmap]
+        N441[histogram]
+        N442[index]
+        N443[marks2d]
+        N444[overlay]
+        N445[palette]
+        N446[...8 more]
     end
 
     subgraph Plot/three
-        N446[points3d]
-        N447[project]
-        N448[surface]
+        N447[points3d]
+        N448[project]
+        N449[surface]
     end
 
     N2 --> N1
@@ -15871,14 +15890,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1049   |
-| Total Modules           | 80     |
-| Total Lines of Code     | 176069 |
-| Total Exports           | 5110   |
-| Total Re-exports        | 1894   |
+| Total TypeScript Files  | 1050   |
+| Total Modules           | 81     |
+| Total Lines of Code     | 176538 |
+| Total Exports           | 5128   |
+| Total Re-exports        | 1903   |
 | Total Classes           | 56     |
 | Total Interfaces        | 447    |
-| Total Functions         | 1667   |
+| Total Functions         | 1676   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 540    |

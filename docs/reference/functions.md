@@ -563,38 +563,47 @@ lambertW(1); // ~0.5671 (omega constant)
 
 ## Combinatorics & Number Theory
 
-| Function                       | Description                                   |
-| ------------------------------ | --------------------------------------------- |
-| `factorial(n)`                 | Factorial `n!` (factory layer)                |
-| `combinations(n, k)`           | Binomial coefficient `C(n, k)`                |
-| `combinationsWithRep(n, k)`    | Combinations with repetition                  |
-| `permutations(n[, k])`         | Permutations                                  |
-| `multinomial(k)`               | Multinomial coefficient                       |
-| `composition(n, k)`            | Number of compositions                        |
-| `catalan(n)`                   | nth Catalan number                            |
-| `stirlingS2(n, k)`             | Stirling number of the second kind            |
-| `bellNumbers(n)`               | nth Bell number                               |
-| `bernoulli(n)`                 | nth Bernoulli number                          |
-| `fibonacci(n)`                 | nth Fibonacci number (O(log n) fast doubling) |
-| `lucas(n)` `lucasL(n)`         | nth Lucas number                              |
-| `doubleFactorial(n)`           | Double factorial `n!!`                        |
-| `risingFactorial(x, n)`        | Pochhammer symbol `x·(x+1)·…·(x+n-1)`         |
-| `fallingFactorial(x, n)`       | Falling factorial `x·(x-1)·…·(x-n+1)`         |
-| `subfactorial(n)`              | Derangement count `!n`                        |
-| `harmonicNumber(n)`            | nth harmonic number                           |
-| `prime(n)`                     | nth prime                                     |
-| `nextPrime(n)`                 | Next prime after `n`                          |
-| `primePi(n)`                   | Prime-counting function `π(n)`                |
-| `primeFactors(n)`              | Prime factorization                           |
-| `divisors(n)`                  | List of divisors                              |
-| `divisorSigma(n[, k])`         | Sum-of-divisors function                      |
-| `eulerPhi(n)`                  | Euler totient `φ(n)`                          |
-| `carmichaelLambda(n)`          | Carmichael function `λ(n)`                    |
-| `moebiusMu(n)`                 | Möbius function `μ(n)`                        |
-| `jacobiSymbol(a, n)`           | Jacobi symbol                                 |
-| `chineseRemainder(rems, mods)` | Chinese Remainder Theorem                     |
-| `partitions(n)`                | Integer partition count                       |
-| `integerDigits(n[, base])`     | Digits of an integer                          |
+| Function                       | Description                                      |
+| ------------------------------ | ------------------------------------------------ |
+| `factorial(n)`                 | Factorial `n!` (factory layer)                   |
+| `combinations(n, k)`           | Binomial coefficient `C(n, k)`                   |
+| `combinationsWithRep(n, k)`    | Combinations with repetition                     |
+| `permutations(n[, k])`         | Permutations                                     |
+| `multinomial(k)`               | Multinomial coefficient                          |
+| `composition(n, k)`            | Number of compositions                           |
+| `catalan(n)`                   | nth Catalan number                               |
+| `stirlingS2(n, k)`             | Stirling number of the second kind               |
+| `bellNumbers(n)`               | nth Bell number                                  |
+| `bernoulli(n)`                 | nth Bernoulli number                             |
+| `fibonacci(n)`                 | nth Fibonacci number (O(log n) fast doubling)    |
+| `lucas(n)` `lucasL(n)`         | nth Lucas number                                 |
+| `doubleFactorial(n)`           | Double factorial `n!!`                           |
+| `risingFactorial(x, n)`        | Pochhammer symbol `x·(x+1)·…·(x+n-1)`            |
+| `fallingFactorial(x, n)`       | Falling factorial `x·(x-1)·…·(x-n+1)`            |
+| `subfactorial(n)`              | Derangement count `!n`                           |
+| `harmonicNumber(n)`            | nth harmonic number                              |
+| `prime(n)`                     | nth prime                                        |
+| `nextPrime(n)`                 | Next prime after `n`                             |
+| `primePi(n)`                   | Prime-counting function `π(n)`                   |
+| `primeFactors(n)`              | Prime factorization                              |
+| `divisors(n)`                  | List of divisors                                 |
+| `divisorSigma(n[, k])`         | Sum-of-divisors function                         |
+| `eulerPhi(n)`                  | Euler totient `φ(n)`                             |
+| `carmichaelLambda(n)`          | Carmichael function `λ(n)`                       |
+| `moebiusMu(n)`                 | Möbius function `μ(n)`                           |
+| `jacobiSymbol(a, n)`           | Jacobi symbol                                    |
+| `chineseRemainder(rems, mods)` | Chinese Remainder Theorem                        |
+| `partitions(n)`                | Integer partition count                          |
+| `integerDigits(n[, base])`     | Digits of an integer                             |
+| `continuedFraction(x[, n])`    | Simple continued fraction expansion              |
+| `eulerNumbers(n)`              | Euler numbers `E_0..E_n`                         |
+| `stirlingS1(n, k)`             | Signed Stirling number of the first kind         |
+| `discreteLog(g, h, p)`         | Discrete logarithm (baby-step giant-step)        |
+| `primitiveRoot(p)`             | Smallest primitive root mod prime `p`            |
+| `multiplicativeOrder(a, n)`    | Multiplicative order of `a` mod `n`              |
+| `kroneckerSymbol(a, n)`        | Kronecker symbol (Jacobi generalized to all `n`) |
+| `permutationsGen(arr[, k])`    | Enumerate permutation tuples (lexicographic)     |
+| `combinationsGen(arr, k)`      | Enumerate combination tuples (lexicographic)     |
 
 ### Details
 
@@ -609,6 +618,11 @@ lambertW(1); // ~0.5671 (omega constant)
 - `eulerPhi`, `divisorSigma`, `moebiusMu`, and `carmichaelLambda` are
   multiplicative arithmetic functions; `jacobiSymbol` and `chineseRemainder`
   support modular-arithmetic workflows.
+- `discreteLog` (baby-step giant-step over `BigInt`), `primitiveRoot`, and
+  `multiplicativeOrder` round out the modular-arithmetic toolkit; `kroneckerSymbol`
+  generalizes `jacobiSymbol` to all integer moduli (including even/negative `n`).
+- `permutationsGen`/`combinationsGen` enumerate the actual tuples in lexicographic
+  order — unlike `permutations`/`combinations`, which return only counts.
 
 ### Background & History
 
@@ -2468,7 +2482,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (932 exports).
+> `@danielsimonjr/mathts-functions` (941 exports).
 
 ### Functions by category
 
@@ -2484,7 +2498,7 @@ await terminatePool();
 
 **Special Functions** (53): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
 
-**Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
+**Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 
 **Statistics** (83): `acf`, `adfuller`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `durbinWatson`, `elasticNet`, `ewma`, `fitDistribution`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `ljungBox`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `ols`, `pacf`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `ridge`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
 
