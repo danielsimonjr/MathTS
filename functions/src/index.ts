@@ -213,6 +213,19 @@ export type { EigshOperatorInput, EigshOptions, EigshResult } from './numeric/ei
 export { thomasSolve, solveBanded, toeplitzSolve, ldl } from './numeric/structured-solvers.js';
 export type { LDLResult } from './numeric/structured-solvers.js';
 
+// Phase 7 Task 4 — complex matrix functions: `funm(A, f)` evaluates a general
+// matrix function returning a complex-valued result (via diagonal fast path
+// or Lagrange-Sylvester interpolation on the spectrum for diagonalizable
+// matrices with distinct eigenvalues), plus `cosm`/`sinm` built on it — so
+// indefinite/complex-spectrum inputs work where `sqrtm`/`matrixLogm` only
+// handle real positive spectra.
+export { funm, cosm, sinm, complexCos, complexSin } from './numeric/matrix-functions.js';
+export type {
+  ComplexValue,
+  ComplexMatrix,
+  ScalarComplexFunction,
+} from './numeric/matrix-functions.js';
+
 // Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
 // parabolic interpolation). Distinct from root-finding; complements the
 // vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.

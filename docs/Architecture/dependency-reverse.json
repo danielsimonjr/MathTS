@@ -1655,6 +1655,7 @@
     "functions/src/numeric/krylov.ts": ["functions/src/index.ts"],
     "functions/src/numeric/eigsh.ts": ["functions/src/index.ts"],
     "functions/src/numeric/structured-solvers.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/matrix-functions.ts": ["functions/src/index.ts"],
     "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
     "functions/src/numeric/adaptive-quad.ts": [
       "functions/src/index.ts",

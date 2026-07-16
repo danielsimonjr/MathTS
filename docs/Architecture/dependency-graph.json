@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1060,
+    "totalFiles": 1061,
     "totalModules": 81,
-    "totalExports": 5254
+    "totalExports": 5267
   },
   "entryPoints": [
     {
@@ -8071,6 +8071,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/matrix-functions.js",
+            "imports": ["funm", "cosm", "sinm", "complexCos", "complexSin"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["minimizeScalar"],
             "reExport": true
@@ -8315,6 +8320,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/matrix-functions.js",
+            "imports": ["ComplexValue", "ComplexMatrix", "ScalarComplexFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["MinimizeScalarOptions", "MinimizeScalarResult"],
             "reExport": true,
@@ -8546,6 +8557,11 @@
           "solveBanded",
           "toeplitzSolve",
           "ldl",
+          "funm",
+          "cosm",
+          "sinm",
+          "complexCos",
+          "complexSin",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8674,6 +8690,9 @@
           "EigshOptions",
           "EigshResult",
           "LDLResult",
+          "ComplexValue",
+          "ComplexMatrix",
+          "ScalarComplexFunction",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -8829,6 +8848,11 @@
           "solveBanded",
           "toeplitzSolve",
           "ldl",
+          "funm",
+          "cosm",
+          "sinm",
+          "complexCos",
+          "complexSin",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8957,6 +8981,9 @@
           "EigshOptions",
           "EigshResult",
           "LDLResult",
+          "ComplexValue",
+          "ComplexMatrix",
+          "ScalarComplexFunction",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -13270,6 +13297,22 @@
         "exports": ["cg", "minres", "gmres", "bicgstab"],
         "interfaces": ["KrylovOptions", "GmresOptions", "KrylovResult"],
         "functions": ["cg", "minres", "gmres", "bicgstab"]
+      },
+      "functions/src/numeric/matrix-functions.ts": {
+        "description": "Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["eig"]
+          }
+        ],
+        "exports": ["funm", "complexCos", "complexSin", "cosm", "sinm"],
+        "interfaces": ["ComplexValue", "ComplexMatrix"],
+        "functions": ["funm", "complexCos", "complexSin", "cosm", "sinm"]
       },
       "functions/src/numeric/minimize-scalar.ts": {
         "description": "Scalar (1-D) function minimization via Brent's method.",
@@ -35409,6 +35452,7 @@
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
           "functions/src/numeric/krylov.ts",
+          "functions/src/numeric/matrix-functions.ts",
           "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
@@ -36365,18 +36409,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1060,
+    "totalTypeScriptFiles": 1061,
     "totalModules": 81,
-    "totalLinesOfCode": 180272,
-    "totalExports": 5254,
+    "totalLinesOfCode": 180547,
+    "totalExports": 5267,
     "totalClasses": 56,
-    "totalInterfaces": 461,
-    "totalFunctions": 1742,
+    "totalInterfaces": 463,
+    "totalFunctions": 1747,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1957,
-    "totalTypeOnlyImports": 545,
+    "totalReExports": 1965,
+    "totalTypeOnlyImports": 546,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

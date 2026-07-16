@@ -1301,19 +1301,22 @@ the CPU implementation rather than rejecting.
 
 ### Decompositions & matrix functions (gap analysis)
 
-| Function               | Description                                                                                                                                                                                             |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `logdet(A)`            | Natural log of the absolute determinant via LU (the `logabsdet` part of numpy `slogdet`), stable where `log(det(A))` overflows; returns `{ sign, value }` with `det = sign · exp(value)`                |
-| `generalizedEig(A, B)` | Generalized eigenvalues of the pencil `A x = λ B x` (`B` nonsingular) via the eigendecomposition of `B⁻¹A`; eigenvalues match `scipy.linalg.eig(A, B)`                                                  |
-| `qz(A, B)`             | Generalized (QZ) Schur decomposition of `(A, B)`; returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with `A = Q·AA·Zᵀ`, `B = Q·BB·Zᵀ` (matches `scipy.linalg.qz`; factors not unique) |
-| `singularValues(A)`    | Singular values in descending order (length `min(m, n)`, all non-negative)                                                                                                                              |
-| `orth(A[, opts])`      | Orthonormal basis for the column space of `A` — the leading columns of `svd(A).U` above a rank tolerance (default `max(m, n) · S[0] · 2.22e-16`)                                                        |
-| `lowRankApprox(A, k)`  | Best rank-`k` approximation in the Frobenius-norm sense via truncated SVD: `A_k = U[:, :k] · diag(S[:k]) · V[:, :k]ᵀ`                                                                                   |
-| `norm2(A)`             | Spectral norm (2-norm) of a matrix — the largest singular value                                                                                                                                         |
-| `normFro(A)`           | Frobenius norm of a matrix — `sqrt(sum(A_ij²))`                                                                                                                                                         |
-| `matrixExpm(A)`        | Matrix exponential via Padé-13 scaling-and-squaring (Higham 2005)                                                                                                                                       |
-| `matrixLogm(A)`        | Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive/complex eigenvalues                                                                 |
-| `matrixSqrtm(A)`       | Principal matrix square root via Newton iteration (eigendecomposition fallback); throws for negative/complex eigenvalues                                                                                |
+| Function               | Description                                                                                                                                                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logdet(A)`            | Natural log of the absolute determinant via LU (the `logabsdet` part of numpy `slogdet`), stable where `log(det(A))` overflows; returns `{ sign, value }` with `det = sign · exp(value)`                                                                                        |
+| `generalizedEig(A, B)` | Generalized eigenvalues of the pencil `A x = λ B x` (`B` nonsingular) via the eigendecomposition of `B⁻¹A`; eigenvalues match `scipy.linalg.eig(A, B)`                                                                                                                          |
+| `qz(A, B)`             | Generalized (QZ) Schur decomposition of `(A, B)`; returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with `A = Q·AA·Zᵀ`, `B = Q·BB·Zᵀ` (matches `scipy.linalg.qz`; factors not unique)                                                                         |
+| `singularValues(A)`    | Singular values in descending order (length `min(m, n)`, all non-negative)                                                                                                                                                                                                      |
+| `orth(A[, opts])`      | Orthonormal basis for the column space of `A` — the leading columns of `svd(A).U` above a rank tolerance (default `max(m, n) · S[0] · 2.22e-16`)                                                                                                                                |
+| `lowRankApprox(A, k)`  | Best rank-`k` approximation in the Frobenius-norm sense via truncated SVD: `A_k = U[:, :k] · diag(S[:k]) · V[:, :k]ᵀ`                                                                                                                                                           |
+| `norm2(A)`             | Spectral norm (2-norm) of a matrix — the largest singular value                                                                                                                                                                                                                 |
+| `normFro(A)`           | Frobenius norm of a matrix — `sqrt(sum(A_ij²))`                                                                                                                                                                                                                                 |
+| `matrixExpm(A)`        | Matrix exponential via Padé-13 scaling-and-squaring (Higham 2005)                                                                                                                                                                                                               |
+| `matrixLogm(A)`        | Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive/complex eigenvalues                                                                                                                                         |
+| `matrixSqrtm(A)`       | Principal matrix square root via Newton iteration (eigendecomposition fallback); throws for negative/complex eigenvalues                                                                                                                                                        |
+| `funm(A, f)`           | General matrix function `f(A)` returning a complex-valued matrix `{ re, im }` — diagonal fast path, else Lagrange-Sylvester interpolation on the spectrum for diagonalizable matrices with distinct eigenvalues; throws for defective/repeated-eigenvalue non-diagonal matrices |
+| `cosm(A)`              | Matrix cosine `cos(A)` via `funm`, valid for any real spectrum (unlike `matrixSqrtm`/`matrixLogm`, which require positive/real spectra)                                                                                                                                         |
+| `sinm(A)`              | Matrix sine `sin(A)` via `funm`, valid for any real spectrum                                                                                                                                                                                                                    |
 
 ### Details
 
@@ -2616,7 +2619,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (981 exports).
+> `@danielsimonjr/mathts-functions` (986 exports).
 
 ### Functions by category
 
@@ -2638,7 +2641,7 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (84): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (87): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2674,7 +2677,7 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (1): `isGpuChainSupported`
+**Other exports (uncategorized)** (3): `complexCos`, `complexSin`, `isGpuChainSupported`
 
 ### Constants & values (64)
 

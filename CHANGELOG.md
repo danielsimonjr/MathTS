@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Complex matrix functions: funm/cosm/sinm (Phase 7 Task 4)
+
+Added `functions/src/numeric/matrix-functions.ts`, exported from `@danielsimonjr/mathts-functions`:
+`funm(A, f)` — a general matrix function returning a complex-valued matrix `{ re, im }` — plus
+`cosm`/`sinm` built on it, so indefinite and complex-spectrum inputs work where the existing
+`sqrtm`/`matrixLogm` only handle real positive spectra.
+
+- `funm(A, f)` — diagonal matrices are handled exactly (elementwise, any multiplicity);
+  otherwise the eigenvalues are computed via `@danielsimonjr/mathts-matrix`'s `eig` and, when
+  pairwise distinct, the Lagrange–Sylvester interpolation formula for a diagonalizable matrix
+  with simple spectrum is applied in complex arithmetic:
+  `f(A) = Σ_i f(λ_i) · Π_{j≠i} (A − λ_j I) / (λ_i − λ_j)` — needing only eigenvalues, not
+  eigenvectors. Throws for non-diagonal matrices with repeated/numerically-indistinguishable
+  eigenvalues (defective/non-diagonalizable case) — a documented limitation; a full
+  Schur–Parlett block recurrence would lift it but isn't required by current call sites.
+- `cosm(A)` / `sinm(A)` — `funm(A, complexCos)` / `funm(A, complexSin)`, with
+  `cos(z) = cos(re)cosh(im) − i·sin(re)sinh(im)` and `sin(z) = sin(re)cosh(im) + i·cos(re)sinh(im)`.
+
+Pinned vs scipy: `cosm([[0,1],[-1,0]])` = `diag(cosh 1)` = `diag(1.5430806348)` (eigenvalues
+±i); `funm(diag(-4,-9), sqrt)` = `diag(2i, 3i)`.
+
+Documented in `docs/reference/functions.md` under Linear Algebra → "Decompositions & matrix
+functions". `npm run docs:functions` / `npm run docs:deps` regenerated; docs-completeness gate
+green. `functions/tests/matrix-functions.test.ts` (4 tests: rotation-matrix cosm vs `cosh(1)`,
+`funm` sqrt of a negative diagonal, diagonal cosm, zero-matrix sinm). Full `functions`
+regression: 3691 passed, 94 skipped, 0 failed. `tsc --noEmit` and targeted `eslint` both 0
+problems.
+
 ### Added — Structured & indefinite solvers: thomasSolve/solveBanded/toeplitzSolve/ldl (Phase 7 Task 3)
 
 Added `functions/src/numeric/structured-solvers.ts`, exported from `@danielsimonjr/mathts-functions`:
