@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — hypergeometric functions: `hyp0f1`/`hyp1f1`/`hyp2f1` + generic `pFq` (Phase 5 Task 1)
+
+Added `functions/src/special/hypergeometric.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `hyp0f1(b, z)` — confluent hypergeometric limit function `0F1(; b; z)`, entire in `z`.
+- `hyp1f1(a, b, z)` — Kummer's confluent hypergeometric function `1F1(a; b; z)` (Kummer's M),
+  entire in `z` (ascending series targets moderate `|z|`; large `|z|` is not yet optimized).
+- `hyp2f1(a, b, c, z)` — Gauss's hypergeometric function `2F1(a, b; c; z)`; the ascending series
+  converges only for `|z| < 1` and throws otherwise (analytic continuation not yet implemented).
+- `pFq(a[], b[], z)` — the generic generalized hypergeometric series engine (ascending
+  Pochhammer-ratio method) that the three above delegate to.
+
+These are the hypergeometric **master functions** from which Bessel, Legendre, the error
+function, and the incomplete gamma/beta functions all derive as special cases. Pinned vs mpmath
+(`hyp2f1(1,2,3,0.5) = 1.5451774445`, `hyp1f1(1,2,0.5) = 1.2974425414`, `hyp0f1(2,0.5) =
+1.2717234563`). Documented in `docs/reference/functions.md` under Special Functions.
+
 ### Added — noncentral CDFs, circular statistics, McNemar/Cochran-Q (Phase 4 Task 4)
 
 Added `functions/src/stats/inference-extra2.ts`, exported from `@danielsimonjr/mathts-functions`:

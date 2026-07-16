@@ -1675,6 +1675,7 @@
     "functions/src/signal-filter-extra.ts": ["functions/src/index.ts"],
     "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
+    "functions/src/special/hypergeometric.ts": ["functions/src/index.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [

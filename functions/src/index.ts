@@ -305,3 +305,7 @@ export type {
   McNemarResult,
   CochranQResult,
 } from './stats/inference-extra2.js';
+
+// Phase 5 Task 1 — hypergeometric master functions (0F1/1F1/2F1) + the
+// generic pFq series engine they delegate to.
+export { hyp0f1, hyp1f1, hyp2f1, pFq } from './special/hypergeometric.js';

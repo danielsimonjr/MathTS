@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1045,
+    "totalFiles": 1046,
     "totalModules": 80,
-    "totalExports": 5085
+    "totalExports": 5093
   },
   "entryPoints": [
     {
@@ -8161,6 +8161,11 @@
             "reExport": true
           },
           {
+            "file": "./special/hypergeometric.js",
+            "imports": ["hyp0f1", "hyp1f1", "hyp2f1", "pFq"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8466,6 +8471,10 @@
           "vonMisesPDF",
           "mcnemar",
           "cochranQ",
+          "hyp0f1",
+          "hyp1f1",
+          "hyp2f1",
+          "pFq",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8673,6 +8682,10 @@
           "vonMisesPDF",
           "mcnemar",
           "cochranQ",
+          "hyp0f1",
+          "hyp1f1",
+          "hyp2f1",
+          "pFq",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -14590,6 +14603,15 @@
         "workspaceDependencies": [],
         "exports": ["createErf"],
         "constants": ["createErf"]
+      },
+      "functions/src/special/hypergeometric.ts": {
+        "description": "Hypergeometric functions.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["pFq", "hyp0f1", "hyp1f1", "hyp2f1"],
+        "functions": ["pFq", "hyp0f1", "hyp1f1", "hyp2f1"]
       },
       "functions/src/special/zeta.ts": {
         "description": "Compute the Riemann Zeta function of a value using an infinite series for",
@@ -34895,7 +34917,11 @@
       },
       {
         "name": "Functions/special",
-        "files": ["functions/src/special/erf.ts", "functions/src/special/zeta.ts"]
+        "files": [
+          "functions/src/special/erf.ts",
+          "functions/src/special/hypergeometric.ts",
+          "functions/src/special/zeta.ts"
+        ]
       },
       {
         "name": "Functions/statistics",
@@ -35753,17 +35779,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1045,
+    "totalTypeScriptFiles": 1046,
     "totalModules": 80,
-    "totalLinesOfCode": 175534,
-    "totalExports": 5085,
+    "totalLinesOfCode": 175670,
+    "totalExports": 5093,
     "totalClasses": 56,
     "totalInterfaces": 446,
-    "totalFunctions": 1655,
+    "totalFunctions": 1659,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1881,
+    "totalReExports": 1885,
     "totalTypeOnlyImports": 539,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
