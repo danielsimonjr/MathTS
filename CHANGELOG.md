@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — implementation-independent invariants for `csd`/`coherence`
+
+`csd`/`coherence` (`functions/src/signal/spectral-peaks.ts`) had no hard-pinned tests. New
+`functions/tests/gap-csd-coherence-oracle.test.ts` pins mathematical invariants instead of exact
+numbers (a seeded numpy RNG won't reproduce JS's PRNG stream): coherence values lie in `[0, 1]`;
+coherence of a noiseless scaled copy (`y = 3x`) is ~1 at the signal's frequency bins; `csd(x,x)`
+matches the package's independent `welchPSD` estimator up to the well-known one-sided PSD doubling
+convention (interior bins ×2, DC/Nyquist bins ×1); and `csd(x,y)`/`csd(y,x)` have equal magnitude
+with `|Re(Pxy)| <= |Pxy|` verified via the polarization identity
+`Re(Pxy) = (P(x+y,x+y) - Pxx - Pyy) / 2` across four independently-computed `csd` calls. All four
+invariants passed on the first run — no bug found; this closes the "not hard-pinned" follow-up.
+
 ### Added — scipy-pinned oracle for `linprog`'s free-variable (lower=null) bounds path
 
 `linprog`'s options form (`functions/src/typed/numeric.ts`) splits a variable whose bounds lower is
