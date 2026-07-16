@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.34.0
+
+### Minor Changes
+
+- Phase 6 signal processing breadth (oracle-gap roadmap): FFT helpers `rfft`/`irfft`/`fftshift`/`ifftshift`/`fftfreq`/`rfftfreq`/`fftn`; IIR filter design `cheby1`/`cheby2`/`ellip` (elliptic via exact nome/Landen) + `butter` now honors `btype` (high/bandpass/bandstop; 2-arg lowpass unchanged) + `sosfilt`/`zpk2sos`/`bilinear`/`buttord`; FIR + smoothing `firwinBandpass`/`firls`/`remez`/`savgol`/`wiener`/`deconvolve`; wavelets `idwt`/`wavedec`/`waverec`/`cwt`; and spectral/peak analysis `findPeaks`/`peakWidths`/`csd`/`coherence`/`stft`/`istft`/`decimate`. Filter coefficients oracle-pinned vs scipy.signal; resolves the Phase-0 note that `butter`/`firwin` were lowpass/scalar-only.
+
 ## 0.33.0
 
 ### Minor Changes
