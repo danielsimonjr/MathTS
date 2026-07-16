@@ -314,3 +314,11 @@ export { hyp0f1, hyp1f1, hyp2f1, pFq } from './special/hypergeometric.js';
 // the Jacobi/Gegenbauer orthogonal polynomials, generalizing the existing
 // Chebyshev/Hermite/Laguerre/Legendre family.
 export { polygamma, trigamma, jacobiP, gegenbauerC } from './special/polygamma-orthopoly.js';
+
+// Phase 5 Task 3 — Jacobi elliptic functions sn/cn/dn (AGM/descending-Landen;
+// parameter m = k^2), the elliptic *functions* complementing the existing
+// elliptic *integrals*, plus rootsLegendre(n) (Gauss-Legendre quadrature
+// nodes/weights via Newton refinement) for custom-order quadrature.
+export { jacobiSN, jacobiCN, jacobiDN } from './special/jacobi-elliptic.js';
+export { rootsLegendre } from './numeric/gauss-nodes.js';
+export type { RootsLegendreResult } from './numeric/gauss-nodes.js';

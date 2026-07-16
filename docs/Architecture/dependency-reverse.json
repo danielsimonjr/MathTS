@@ -1678,6 +1678,8 @@
     "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
     "functions/src/special/hypergeometric.ts": ["functions/src/index.ts"],
     "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
+    "functions/src/special/jacobi-elliptic.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [

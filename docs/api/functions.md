@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (928 exports).
+> `@danielsimonjr/mathts-functions` (932 exports).
 
 ### Functions by category
 
@@ -453,7 +453,7 @@ ceil(2.1); // 3
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (50): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiP`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
+**Special Functions** (53): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
 
@@ -469,7 +469,7 @@ ceil(2.1); // 3
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (9): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
+**Numerical Integration** (10): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 

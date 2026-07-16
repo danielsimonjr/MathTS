@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1047
+  totalFiles: 1049
   totalModules: 80
-  totalExports: 5101
+  totalExports: 5110
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7602,6 +7602,16 @@ modules:
             - jacobiP
             - gegenbauerC
           reExport: true
+        - file: ./special/jacobi-elliptic.js
+          imports:
+            - jacobiSN
+            - jacobiCN
+            - jacobiDN
+          reExport: true
+        - file: ./numeric/gauss-nodes.js
+          imports:
+            - rootsLegendre
+          reExport: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -7741,6 +7751,11 @@ modules:
             - McNemarOptions
             - McNemarResult
             - CochranQResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/gauss-nodes.js
+          imports:
+            - RootsLegendreResult
           reExport: true
           typeOnly: true
       workspaceDependencies:
@@ -7909,6 +7924,10 @@ modules:
         - trigamma
         - jacobiP
         - gegenbauerC
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+        - rootsLegendre
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -7964,6 +7983,7 @@ modules:
         - McNemarOptions
         - McNemarResult
         - CochranQResult
+        - RootsLegendreResult
       reExported:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
@@ -8123,6 +8143,10 @@ modules:
         - trigamma
         - jacobiP
         - gegenbauerC
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+        - rootsLegendre
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -8178,6 +8202,7 @@ modules:
         - McNemarOptions
         - McNemarResult
         - CochranQResult
+        - RootsLegendreResult
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -11882,6 +11907,18 @@ modules:
         - fsolve
       constants:
         - root
+    functions/src/numeric/gauss-nodes.ts:
+      description: Gauss-Legendre quadrature nodes and weights.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rootsLegendre
+      interfaces:
+        - RootsLegendreResult
+      functions:
+        - rootsLegendre
     functions/src/numeric/minimize-scalar.ts:
       description: Scalar (1-D) function minimization via Brent's method.
       externalDependencies: []
@@ -13434,6 +13471,20 @@ modules:
         - hyp0f1
         - hyp1f1
         - hyp2f1
+    functions/src/special/jacobi-elliptic.ts:
+      description: Jacobi elliptic functions sn, cn, dn.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+      functions:
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
     functions/src/special/polygamma-orthopoly.ts:
       description: Polygamma functions and classical orthogonal polynomials.
       externalDependencies: []
@@ -32603,6 +32654,7 @@ dependencyGraph:
         - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/bfgs.ts
         - functions/src/numeric/fsolve.ts
+        - functions/src/numeric/gauss-nodes.ts
         - functions/src/numeric/minimize-scalar.ts
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/numeric-jacobian.ts
@@ -32672,6 +32724,7 @@ dependencyGraph:
       files:
         - functions/src/special/erf.ts
         - functions/src/special/hypergeometric.ts
+        - functions/src/special/jacobi-elliptic.ts
         - functions/src/special/polygamma-orthopoly.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
@@ -33446,18 +33499,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1047
+  totalTypeScriptFiles: 1049
   totalModules: 80
-  totalLinesOfCode: 175845
-  totalExports: 5101
+  totalLinesOfCode: 176069
+  totalExports: 5110
   totalClasses: 56
-  totalInterfaces: 446
-  totalFunctions: 1663
+  totalInterfaces: 447
+  totalFunctions: 1667
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1889
-  totalTypeOnlyImports: 539
+  totalReExports: 1894
+  totalTypeOnlyImports: 540
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

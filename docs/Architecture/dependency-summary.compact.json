@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1047, "e": 5101, "re": 1889 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1049, "e": 5110, "re": 1894 },
   "s": {
-    "loc": 175845,
+    "loc": 176069,
     "cls": 56,
-    "int": 446,
-    "fn": 1663,
+    "int": 447,
+    "fn": 1667,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 539
+    "toi": 540
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -686,12 +686,13 @@
       ]
     },
     "functions/numeric": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "quad",
         "bfgs",
         "root",
         "fsolve",
+        "rootsLegendre",
         "minimizeScalar",
         "nnls",
         "lsqBounded",
@@ -708,11 +709,11 @@
         "BfgsOptions",
         "BfgsResult",
         "FsolveOptions",
+        "RootsLegendreResult",
         "MinimizeScalarOptions",
         "MinimizeScalarResult",
         "NnlsOptions",
-        "NnlsResult",
-        "NumericJacobianOptions"
+        "NnlsResult"
       ]
     },
     "functions/plain": {
@@ -805,13 +806,16 @@
       "exp": ["bitReverse", "fftCoreFloat64", "createFreqz", "createZpk2tf"]
     },
     "functions/special": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "createErf",
         "pFq",
         "hyp0f1",
         "hyp1f1",
         "hyp2f1",
+        "jacobiSN",
+        "jacobiCN",
+        "jacobiDN",
         "polygamma",
         "trigamma",
         "jacobiP",
@@ -1688,7 +1692,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 8 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 62, "o": 0 },
+    { "p": "src/index.ts", "i": 65, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Jacobi elliptic sn/cn/dn + Gauss–Legendre nodes/weights (Phase 5 Task 3)
+
+Added `functions/src/special/jacobi-elliptic.ts` and `functions/src/numeric/gauss-nodes.ts`,
+exported from `@danielsimonjr/mathts-functions`:
+
+- `jacobiSN(u, m)` / `jacobiCN(u, m)` / `jacobiDN(u, m)` — the Jacobi elliptic functions
+  (parameter convention `m = k²`, matching scipy/mpmath), the elliptic *functions* complementing
+  the existing elliptic *integrals* (`ellipticK`/`ellipticF`/etc.). Computed via the descending
+  Landen transformation / arithmetic-geometric mean (AGM) method (Abramowitz & Stegun 16.4), with
+  closed-form fast paths at `m = 0` (circular functions) and `m = 1` (hyperbolic functions).
+- `rootsLegendre(n)` — `n`-point Gauss–Legendre quadrature nodes and weights on `[-1, 1]`, found
+  by Newton's method on the Legendre three-term recurrence from the standard asymptotic initial
+  guess, for custom quadrature (complements the existing fixed-order `gaussQuad`).
+
+Pinned vs mpmath/scipy (`jacobiSN/CN/DN(0.5, 0.3) = 0.4742156227 / 0.8804087364 / 0.9656789647`;
+`rootsLegendre(3)` nodes `[-0.7745966692, 0, 0.7745966692]`, weights `[0.5555555556, 0.8888888889,
+0.5555555556]`). Documented in `docs/reference/functions.md` under Special Functions
+(`jacobiSN`/`CN`/`DN`) and Numerical Integration (`rootsLegendre`).
+
 ### Added — polygamma/trigamma + Jacobi/Gegenbauer orthogonal polynomials (Phase 5 Task 2)
 
 Added `functions/src/special/polygamma-orthopoly.ts`, exported from `@danielsimonjr/mathts-functions`:

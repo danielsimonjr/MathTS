@@ -481,6 +481,9 @@ leftShift(1, 4); // 16
 | `trigamma(x)`                               | Trigamma function `ψ'(x)` (= `polygamma(1, x)`)                               | —                      |
 | `jacobiP(n, alpha, beta, x)`                | Jacobi polynomial `P_n^(alpha,beta)(x)`                                       | —                      |
 | `gegenbauerC(n, alpha, x)`                  | Gegenbauer (ultraspherical) polynomial `C_n^(alpha)(x)`                       | —                      |
+| `jacobiSN(u, m)`                            | Jacobi elliptic function `sn(u, m)` (parameter `m = k²`)                      | —                      |
+| `jacobiCN(u, m)`                            | Jacobi elliptic function `cn(u, m)` (parameter `m = k²`)                      | —                      |
+| `jacobiDN(u, m)`                            | Jacobi elliptic function `dn(u, m)` (parameter `m = k²`)                      | —                      |
 
 ### Details
 
@@ -495,6 +498,13 @@ leftShift(1, 4); // 16
   and `legendreP` are evaluated by stable three-term recurrences.
 - `ellipticK(m)` and `ellipticE(m)` take the **parameter** `m = k²`, not the
   modulus `k`.
+- `jacobiSN`/`jacobiCN`/`jacobiDN` are the Jacobi elliptic **functions** (as
+  opposed to the elliptic **integrals** `ellipticK`/`ellipticF`/etc. above),
+  also using the `m = k²` parameter convention. They are computed via the
+  descending Landen transformation / arithmetic-geometric mean (AGM) method
+  (Abramowitz & Stegun 16.4). Degenerate cases: at `m = 0`, `sn = sin(u)`,
+  `cn = cos(u)`, `dn = 1`; at `m = 1`, `sn = tanh(u)`, `cn = dn = sech(u)`.
+  They satisfy `sn² + cn² = 1` and `dn² + m·sn² = 1`.
 - `lambertW` solves `w·e^w = x`; pass `branch = 0` for the principal branch
   (default) or `branch = -1` for the lower real branch on `[-1/e, 0)`.
 - **WASM acceleration:** `besselJ0` / `besselJ1` / `besselJ(n, x)`,
@@ -1479,15 +1489,16 @@ solve('x^2 - 4', 'x'); // [-2, 2]
 
 ## Numerical Integration
 
-| Function                     | Description                                |
-| ---------------------------- | ------------------------------------------ |
-| `trapz(y[, x])`              | Trapezoidal rule on sampled data           |
-| `simpson(f, a, b[, n])`      | Simpson's 1/3 rule (`n` even)              |
-| `simpsons(f, a, b[, n])`     | Simpson's rule variant (numeric layer)     |
-| `gaussQuad(f, a, b[, n])`    | Gauss–Legendre quadrature                  |
-| `romberg(f, a, b[, tol])`    | Romberg integration                        |
-| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration             |
-| `quad(f, a, b[, opts])`      | Adaptive Gauss–Kronrod (G7-K15) quadrature |
+| Function                     | Description                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| `trapz(y[, x])`              | Trapezoidal rule on sampled data                     |
+| `simpson(f, a, b[, n])`      | Simpson's 1/3 rule (`n` even)                        |
+| `simpsons(f, a, b[, n])`     | Simpson's rule variant (numeric layer)               |
+| `gaussQuad(f, a, b[, n])`    | Gauss–Legendre quadrature                            |
+| `romberg(f, a, b[, tol])`    | Romberg integration                                  |
+| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration                       |
+| `quad(f, a, b[, opts])`      | Adaptive Gauss–Kronrod (G7-K15) quadrature           |
+| `rootsLegendre(n)`           | Gauss–Legendre quadrature nodes/weights on `[-1, 1]` |
 
 ### Details
 
@@ -1497,6 +1508,13 @@ solve('x^2 - 4', 'x'); // [-2, 2]
 - `gaussQuad` with `n` nodes integrates polynomials up to degree `2n − 1`
   exactly — far more accurate per evaluation than equally spaced rules for
   smooth integrands.
+- `rootsLegendre(n)` returns the raw `{ nodes, weights }` table underlying
+  Gauss-Legendre quadrature: the `n` roots of the degree-`n` Legendre
+  polynomial (found by Newton's method from the standard asymptotic initial
+  guess) and their matching weights, ascending on `[-1, 1]`. `gaussQuad`
+  already wraps this for a fixed callable/interval; use `rootsLegendre`
+  directly when building custom quadrature (e.g. a fixed node count reused
+  across many integrands, or a multi-dimensional product rule).
 - `romberg` and `nintegrate` refine adaptively until a tolerance is met; prefer
   `nintegrate` for integrands with peaks or mild singularities.
 - `nintegrate` is now implemented in terms of `quad`: an adaptive Gauss-Kronrod
@@ -2450,7 +2468,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (928 exports).
+> `@danielsimonjr/mathts-functions` (932 exports).
 
 ### Functions by category
 
@@ -2464,7 +2482,7 @@ await terminatePool();
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (50): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiP`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
+**Special Functions** (53): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
 
@@ -2480,7 +2498,7 @@ await terminatePool();
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (9): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
+**Numerical Integration** (10): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
