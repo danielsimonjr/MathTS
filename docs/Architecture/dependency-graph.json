@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1044,
+    "totalFiles": 1045,
     "totalModules": 80,
-    "totalExports": 5063
+    "totalExports": 5085
   },
   "entryPoints": [
     {
@@ -8146,6 +8146,21 @@
             "reExport": true
           },
           {
+            "file": "./stats/inference-extra2.js",
+            "imports": [
+              "noncentralChi2CDF",
+              "noncentralFCDF",
+              "noncentralTCDF",
+              "circmean",
+              "circstd",
+              "circvar",
+              "vonMisesPDF",
+              "mcnemar",
+              "cochranQ"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8281,6 +8296,12 @@
           {
             "file": "./numeric/nnls.js",
             "imports": ["NnlsOptions", "NnlsResult", "LsqBoundedOptions", "LsqBoundedResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./stats/inference-extra2.js",
+            "imports": ["CircularOptions", "McNemarOptions", "McNemarResult", "CochranQResult"],
             "reExport": true,
             "typeOnly": true
           }
@@ -8436,6 +8457,15 @@
           "quaternionFromAxisAngle",
           "quaternionRotate",
           "quaternionToRotationMatrix",
+          "noncentralChi2CDF",
+          "noncentralFCDF",
+          "noncentralTCDF",
+          "circmean",
+          "circstd",
+          "circvar",
+          "vonMisesPDF",
+          "mcnemar",
+          "cochranQ",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8486,7 +8516,11 @@
           "NnlsOptions",
           "NnlsResult",
           "LsqBoundedOptions",
-          "LsqBoundedResult"
+          "LsqBoundedResult",
+          "CircularOptions",
+          "McNemarOptions",
+          "McNemarResult",
+          "CochranQResult"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -8630,6 +8664,15 @@
           "quaternionFromAxisAngle",
           "quaternionRotate",
           "quaternionToRotationMatrix",
+          "noncentralChi2CDF",
+          "noncentralFCDF",
+          "noncentralTCDF",
+          "circmean",
+          "circstd",
+          "circvar",
+          "vonMisesPDF",
+          "mcnemar",
+          "cochranQ",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8680,7 +8723,11 @@
           "NnlsOptions",
           "NnlsResult",
           "LsqBoundedOptions",
-          "LsqBoundedResult"
+          "LsqBoundedResult",
+          "CircularOptions",
+          "McNemarOptions",
+          "McNemarResult",
+          "CochranQResult"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -15059,6 +15106,49 @@
         "exports": ["chi2Contingency", "multipleTest"],
         "interfaces": ["Chi2ContingencyResult", "Chi2ContingencyOptions"],
         "functions": ["chi2Contingency", "multipleTest"]
+      },
+      "functions/src/stats/inference-extra2.ts": {
+        "description": "Noncentral distribution CDFs, circular statistics, and paired-categorical",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["chiSquaredCDF", "fCDF"]
+          },
+          {
+            "file": "../typed/dist-objects.js",
+            "imports": ["chiSquaredDist", "normalDist"]
+          },
+          {
+            "file": "../wasm/special/scalars.js",
+            "imports": ["besselIScalar"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "noncentralChi2CDF",
+          "noncentralFCDF",
+          "noncentralTCDF",
+          "circmean",
+          "circvar",
+          "circstd",
+          "vonMisesPDF",
+          "mcnemar",
+          "cochranQ"
+        ],
+        "interfaces": ["CircularOptions", "McNemarOptions", "McNemarResult", "CochranQResult"],
+        "functions": [
+          "noncentralChi2CDF",
+          "noncentralFCDF",
+          "noncentralTCDF",
+          "circmean",
+          "circvar",
+          "circstd",
+          "vonMisesPDF",
+          "mcnemar",
+          "cochranQ"
+        ]
       },
       "functions/src/stats/timeseries.ts": {
         "description": "Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit",
@@ -34831,6 +34921,7 @@
         "files": [
           "functions/src/stats/fit-distribution.ts",
           "functions/src/stats/inference-extra.ts",
+          "functions/src/stats/inference-extra2.ts",
           "functions/src/stats/timeseries.ts"
         ]
       },
@@ -35662,18 +35753,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1044,
+    "totalTypeScriptFiles": 1045,
     "totalModules": 80,
-    "totalLinesOfCode": 175219,
-    "totalExports": 5063,
+    "totalLinesOfCode": 175534,
+    "totalExports": 5085,
     "totalClasses": 56,
-    "totalInterfaces": 442,
-    "totalFunctions": 1646,
+    "totalInterfaces": 446,
+    "totalFunctions": 1655,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1868,
-    "totalTypeOnlyImports": 538,
+    "totalReExports": 1881,
+    "totalTypeOnlyImports": 539,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

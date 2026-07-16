@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — noncentral CDFs, circular statistics, McNemar/Cochran-Q (Phase 4 Task 4)
+
+Added `functions/src/stats/inference-extra2.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `noncentralChi2CDF(x, df, nc)` / `noncentralFCDF(x, dfn, dfd, nc)` — Poisson-mixture series
+  over the existing `chiSquaredCDF`/`fCDF`, truncated once the cumulative Poisson mass covers
+  `1 − 1e-12`; matches `scipy.stats.ncx2.cdf`/`ncf.cdf` (pinned: `noncentralChi2CDF(10,3,2) =
+  0.8985649635`, `noncentralFCDF(2,3,10,4) = 0.4663642160`).
+- `noncentralTCDF(t, df, nc)` — Simpson-quadrature evaluation of the mixture representation
+  `F(t) = E_V[Φ(t·sqrt(V/ν) − δ)]`, `V ~ χ²_ν`; matches `scipy.stats.nct.cdf` to ~3 digits
+  (pinned: `noncentralTCDF(1.5,10,2) = 0.3047854474`).
+- `circmean`/`circstd`/`circvar` — circular mean/std/variance via `atan2(Σsinθ, Σcosθ)` and the
+  mean resultant length `R`; matches `scipy.stats.circmean`/`circstd`/`circvar` (pinned:
+  `circmean([0.1,0.2,6.2]) = 0.0723638036`).
+- `vonMisesPDF(theta, mu, kappa)` — von Mises (circular normal) PDF using the shared
+  `besselIScalar` special-function primitive; matches `scipy.stats.vonmises.pdf` (pinned:
+  `vonMisesPDF(0,0,2) = 0.5158854120`).
+- `mcnemar(table[, opts])` — McNemar's test on a 2×2 paired table (continuity correction default
+  on); matches `statsmodels` `mcnemar`.
+- `cochranQ(data)` — Cochran's Q test (McNemar generalized to `k > 2` matched binary
+  treatments); matches `statsmodels` `cochrans_q`.
+
+Documented in `docs/reference/functions.md`: noncentral CDFs under Probability Distributions →
+Standalone CDF/PDF/quantile surface, a new "Circular Statistics" subsection, and `mcnemar`/
+`cochranQ` under Hypothesis Tests.
+
 ### Added — time-series inference: `pacf`, `ljungBox`, `durbinWatson`, `adfuller` (Phase 4 Task 3)
 
 Added `functions/src/stats/timeseries.ts`, exported from `@danielsimonjr/mathts-functions`:

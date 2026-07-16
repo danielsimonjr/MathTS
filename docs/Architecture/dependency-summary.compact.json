@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1044, "e": 5063, "re": 1868 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1045, "e": 5085, "re": 1881 },
   "s": {
-    "loc": 175219,
+    "loc": 175534,
     "cls": 56,
-    "int": 442,
-    "fn": 1646,
+    "int": 446,
+    "fn": 1655,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 538
+    "toi": 539
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -825,11 +825,20 @@
       ]
     },
     "functions/stats": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "fitDistribution",
         "chi2Contingency",
         "multipleTest",
+        "noncentralChi2CDF",
+        "noncentralFCDF",
+        "noncentralTCDF",
+        "circmean",
+        "circvar",
+        "circstd",
+        "vonMisesPDF",
+        "mcnemar",
+        "cochranQ",
         "pacf",
         "ljungBox",
         "durbinWatson",
@@ -839,6 +848,10 @@
         "FitDistributionResult",
         "Chi2ContingencyResult",
         "Chi2ContingencyOptions",
+        "CircularOptions",
+        "McNemarOptions",
+        "McNemarResult",
+        "CochranQResult",
         "LjungBoxResult",
         "AdfullerResult"
       ]
@@ -1663,7 +1676,7 @@
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
-    { "p": "src/index.ts", "i": 58, "o": 0 },
+    { "p": "src/index.ts", "i": 60, "o": 0 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },

@@ -283,3 +283,25 @@ export {
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
 // module's export list for consumers).
+
+// Phase 4 Task 4 — noncentral distribution CDFs (Poisson-mixture series over
+// the existing central chiSquaredCDF/fCDF, plus a Simpson-quadrature
+// noncentral-t), circular statistics (circmean/circstd/circvar + von Mises
+// PDF), and paired-categorical tests (McNemar / Cochran's Q).
+export {
+  noncentralChi2CDF,
+  noncentralFCDF,
+  noncentralTCDF,
+  circmean,
+  circstd,
+  circvar,
+  vonMisesPDF,
+  mcnemar,
+  cochranQ,
+} from './stats/inference-extra2.js';
+export type {
+  CircularOptions,
+  McNemarOptions,
+  McNemarResult,
+  CochranQResult,
+} from './stats/inference-extra2.js';

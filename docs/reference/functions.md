@@ -800,23 +800,37 @@ Constructors returning objects with `pdf`, `cdf`, `ppf` (quantile), and
 
 Free functions giving the SciPy-style standalone surface (`chi2.cdf(x, k)` → `chiSquaredCDF(x, k)`) and the quantile symmetry the density table lacked (`normalCDF` existed; `normalQuantile` did not). The CDF/quantile wrappers delegate to the `*Dist` objects and re-implement no distribution math — they surface the accurate incomplete-beta (`betainc`) / incomplete-gamma (`gammainc`) / `erfc` primitives that back those objects.
 
-| Function                          | Description                                                 | Accel |
-| --------------------------------- | ----------------------------------------------------------- | ----- |
-| `normalQuantile(p[, mu, sigma])`  | Normal quantile (inverse CDF); defaults standard normal     | —     |
-| `studentTCDF(x, df)`              | Student-t CDF, `df` degrees of freedom                      | —     |
-| `studentTPDF(x, df)`              | Student-t PDF                                               | —     |
-| `studentTQuantile(p, df)`         | Student-t quantile                                          | —     |
-| `chiSquaredCDF(x, df)`            | Chi-squared CDF                                             | —     |
-| `chiSquaredQuantile(p, df)`       | Chi-squared quantile                                        | —     |
-| `fCDF(x, d1, d2)`                 | F-distribution CDF, `d1`/`d2` degrees of freedom            | —     |
-| `fQuantile(p, d1, d2)`            | F-distribution quantile                                     | —     |
-| `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                 | —     |
-| `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                            | —     |
-| `gammaQuantile(p, shape[, rate])` | Gamma quantile                                              | —     |
-| `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                         | —     |
-| `betaPDF(x, alpha, beta_)`        | Beta PDF                                                    | —     |
-| `betaQuantile(p, a, b)`           | Beta quantile                                               | —     |
-| `noncentralChi2PDF(x, df, ncp)`   | Noncentral chi-squared PDF (Poisson-mixture, `ncp = λ ≥ 0`) | —     |
+| Function                          | Description                                                                                                                   | Accel |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `normalQuantile(p[, mu, sigma])`  | Normal quantile (inverse CDF); defaults standard normal                                                                       | —     |
+| `studentTCDF(x, df)`              | Student-t CDF, `df` degrees of freedom                                                                                        | —     |
+| `studentTPDF(x, df)`              | Student-t PDF                                                                                                                 | —     |
+| `studentTQuantile(p, df)`         | Student-t quantile                                                                                                            | —     |
+| `chiSquaredCDF(x, df)`            | Chi-squared CDF                                                                                                               | —     |
+| `chiSquaredQuantile(p, df)`       | Chi-squared quantile                                                                                                          | —     |
+| `fCDF(x, d1, d2)`                 | F-distribution CDF, `d1`/`d2` degrees of freedom                                                                              | —     |
+| `fQuantile(p, d1, d2)`            | F-distribution quantile                                                                                                       | —     |
+| `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                                                                                   | —     |
+| `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                                                                                              | —     |
+| `gammaQuantile(p, shape[, rate])` | Gamma quantile                                                                                                                | —     |
+| `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                                                                                           | —     |
+| `betaPDF(x, alpha, beta_)`        | Beta PDF                                                                                                                      | —     |
+| `betaQuantile(p, a, b)`           | Beta quantile                                                                                                                 | —     |
+| `noncentralChi2PDF(x, df, ncp)`   | Noncentral chi-squared PDF (Poisson-mixture, `ncp = λ ≥ 0`)                                                                   | —     |
+| `noncentralChi2CDF(x, df, nc)`    | Noncentral chi-squared CDF (Poisson-mixture over `chiSquaredCDF`); matches `scipy.stats.ncx2.cdf`                             | —     |
+| `noncentralFCDF(x, dfn, dfd, nc)` | Noncentral F CDF (Poisson-mixture over `fCDF`); matches `scipy.stats.ncf.cdf`                                                 | —     |
+| `noncentralTCDF(t, df, nc)`       | Noncentral Student-t CDF (Simpson quadrature of the `Φ(t·sqrt(V/ν) − δ)` mixture); matches `scipy.stats.nct.cdf` to ~3 digits | —     |
+
+### Circular Statistics
+
+Statistics on angular data (radians), matching `scipy.stats.circmean`/`circstd`/`circvar` and the von Mises (circular normal) distribution.
+
+| Function                        | Description                                                                                               | Accel |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- | ----- |
+| `circmean(angles[, opts])`      | Circular mean via `atan2(Σsinθ, Σcosθ)`; `opts.low`/`opts.high` set the angular range (default `[0, 2π)`) | —     |
+| `circstd(angles[, opts])`       | Circular standard deviation, `sqrt(−2·ln R))`, `R` = mean resultant length                                | —     |
+| `circvar(angles[, opts])`       | Circular variance, `1 − R`, `R ∈ [0, 1]`                                                                  | —     |
+| `vonMisesPDF(theta, mu, kappa)` | Von Mises (circular normal) PDF, `exp(κ·cos(θ−μ)) / (2π·I₀(κ))`                                           | —     |
 
 ### Closed-form heavy-tail / location families
 
@@ -1998,6 +2012,8 @@ All return structured result objects.
 | `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                     |
 | `multipleTest(pValues, method)`            | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`                                  |
 | `kendallTauTest(x, y)`                     | `KendallTauTestResult`  | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names |
+| `mcnemar(table[, opts])`                   | `McNemarResult`         | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                     |
+| `cochranQ(data)`                           | `CochranQResult`        | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                       |
 
 ### Details
 
@@ -2412,7 +2428,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (911 exports).
+> `@danielsimonjr/mathts-functions` (920 exports).
 
 ### Functions by category
 
@@ -2432,7 +2448,7 @@ await terminatePool();
 
 **Statistics** (83): `acf`, `adfuller`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `durbinWatson`, `elasticNet`, `ewma`, `fitDistribution`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `ljungBox`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `ols`, `pacf`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `ridge`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
 
-**Probability Distributions** (64): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
+**Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
 **Linear Algebra** (75): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
@@ -2454,7 +2470,7 @@ await terminatePool();
 
 **Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-**Hypothesis Tests** (29): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+**Hypothesis Tests** (31): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
 **Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 

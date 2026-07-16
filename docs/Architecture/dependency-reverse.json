@@ -1596,6 +1596,7 @@
       "functions/src/ml/ols.ts",
       "functions/src/regression-extra.ts",
       "functions/src/stats/inference-extra.ts",
+      "functions/src/stats/inference-extra2.ts",
       "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
     ],
@@ -1606,6 +1607,7 @@
     ],
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
@@ -1672,6 +1674,7 @@
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
     "functions/src/signal-filter-extra.ts": ["functions/src/index.ts"],
     "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [
@@ -2032,6 +2035,11 @@
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts"
     ],
+    "functions/src/wasm/special/scalars.ts": [
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
       "functions/src/typed/string.ts"
@@ -2120,10 +2128,6 @@
     ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
-    "functions/src/wasm/special/scalars.ts": [
-      "functions/src/typed/special.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
     "functions/src/error/MathjsError.ts": ["functions/src/utils/factory.ts"],
     "functions/src/utils/bignumber/formatter.ts": ["functions/src/utils/string.ts"],
     "functions/src/wasm/bridges/common.ts": [
