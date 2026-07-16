@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `besselK` uniform machine precision (continued fraction)
+
+`functions/src/typed/special.ts`'s `besselKScalar` previously split K0/K1 into an ascending series
+(`x ≤ 8`) and an asymptotic expansion (`x > 8`). Both cancel/diverge near the crossover, flooring the
+relative error at ~1.3e-10 in the band `x ∈ [8, 11]` (measured at `K0(8)`). K0/K1 now use the
+uniformly-accurate Numerical Recipes `bessik` method specialized to integer order (fractional part
+`mu = 0`): Temme's power series for `x < 2` and Steed's continued fraction CF2 for `x ≥ 2`, with K1
+from the same recurrence. Relative error is now `< 8e-16` across the whole range `x ∈ [0.1, 50]` vs
+mpmath (dps=30) — band worst-case `5.3e-16` (down from ~1.3e-10). The `K_{n+1} = (2n/x)K_n + K_{n-1}`
+upward order recurrence for `n ≥ 2` is unchanged. New oracle test
+`functions/tests/gap-besselk-precision-oracle.test.ts` pins K0/K1 to mpmath at 15 points (tight in
+the `[8,11]` band) plus K2/K3 via recurrence. The retired `besselKAsym`/`besselK0Series`/
+`besselK1Series` helpers are removed.
+
 ### Added — `eig` exposes complex eigenvectors via `vectorsIm`
 
 `matrix/src/operations/eig.ts`'s JAMA-derived `orthes`/`hqr2` solver already computes complex

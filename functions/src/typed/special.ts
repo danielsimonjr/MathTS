@@ -197,76 +197,86 @@ function digammaScalar(x: f64): f64 {
 // self-contained (inlined literals) so kernelSource can serialize them.
 // ---------------------------------------------------------------------------
 
-// Modified Bessel K asymptotic (x large): K_nu(x) ~ sqrt(pi/(2x)) e^{-x} Sum a_k/x^k,
-//   a_0 = 1, a_k = a_{k-1}(4nu^2 - (2k-1)^2)/(8k); summed to optimal truncation.
-function besselKAsym(nu: f64, x: f64): f64 {
-  const mu = 4 * nu * nu;
-  let a = 1.0;
-  let xk = 1.0;
-  let sum = 1.0;
-  let prevMag = Infinity;
-  for (let k = 1; k <= 40; k++) {
-    const t1 = 2 * k - 1;
-    a = (a * (mu - t1 * t1)) / (8 * k);
-    xk *= x;
-    const t = a / xk;
-    if (Math.abs(t) > prevMag) break;
-    prevMag = Math.abs(t);
-    sum += t;
+// Modified Bessel K_0 and K_1 by the uniformly-accurate Numerical Recipes
+// `bessik` method, specialized to the fractional order mu = 0 (integer order).
+// Two regimes, both machine-precision — no series/asymptotic crossover to
+// floor the error near x≈8..11:
+//   x <  2 : Temme's power series (DLMF 10.31 / NR §6.7), with the mu=0 limits
+//            gam1 = -gamma (Euler), gam2 = gampl = gammi = 1.
+//   x >= 2 : Steed's continued fraction CF2 (NR eq. 6.7.34) + normalization by
+//            the exp(-x)*sqrt(pi/2x) prefactor; K1 from the Wronskian relation.
+// Returns [K0(x), K1(x)]; caller handles x<=0 and the order recurrence for n>=2.
+function besselK01(x: f64): f64[] {
+  const EPS = 1e-16;
+  const xi = 1.0 / x;
+  const xi2 = 2.0 * xi;
+  let rkmu: f64;
+  let rk1: f64;
+  if (x < 2.0) {
+    // Temme series (mu = 0): gam1 = -gamma, gam2 = 1, gampl = gammi = 1.
+    const x2 = 0.5 * x;
+    const d = -Math.log(x2);
+    let ff = -0.5772156649015328606 + d; // f0 = gam1 - gam2*ln(x/2) = -(ln(x/2)+gamma)
+    let sum = ff;
+    let p = 0.5; // p0 = 0.5*e/gampl, e=1
+    let q = 0.5; // q0 = 0.5/(e*gammi)
+    let c = 1.0;
+    const dd = x2 * x2;
+    let sum1 = p;
+    for (let i = 1; i <= 10000; i++) {
+      ff = (i * ff + p + q) / (i * i); // xmu2 = 0
+      c *= dd / i;
+      p /= i;
+      q /= i;
+      const del = c * ff;
+      sum += del;
+      sum1 += c * (p - i * ff);
+      if (Math.abs(del) < Math.abs(sum) * EPS) break;
+    }
+    rkmu = sum;
+    rk1 = sum1 * xi2;
+  } else {
+    // Steed's CF2 (mu = 0). a1 = 0.25 - xmu2 = 0.25.
+    const a1 = 0.25;
+    let b = 2.0 * (1.0 + x);
+    let d = 1.0 / b;
+    let h = d;
+    let delh = d;
+    let q1 = 0.0;
+    let q2 = 1.0;
+    let q = a1;
+    let cc = a1;
+    let a = -a1;
+    let s = 1.0 + q * delh;
+    for (let i = 2; i <= 10000; i++) {
+      a -= 2 * (i - 1);
+      cc = (-a * cc) / i;
+      const qnew = (q1 - b * q2) / a;
+      q1 = q2;
+      q2 = qnew;
+      q += cc * qnew;
+      b += 2.0;
+      d = 1.0 / (b + a * d);
+      delh = (b * d - 1.0) * delh;
+      h += delh;
+      const dels = q * delh;
+      s += dels;
+      if (Math.abs(dels / s) < EPS) break;
+    }
+    h = a1 * h;
+    rkmu = (Math.sqrt(Math.PI / (2.0 * x)) * Math.exp(-x)) / s;
+    rk1 = rkmu * (x + 0.5 - h) * xi; // xmu = 0
   }
-  return Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x) * sum;
-}
-
-// K0 ascending series (DLMF 10.31.2):
-//   K0 = -(ln(x/2)+gamma) I0(x) + sum_{k>=1} H_k (x^2/4)^k/(k!)^2.
-function besselK0Series(x: f64): f64 {
-  const z = 0.25 * x * x;
-  let t = 1.0; // (x^2/4)^k/(k!)^2
-  let I0 = 1.0;
-  let h = 0.0;
-  let s = 0.0;
-  for (let k = 1; k <= 80; k++) {
-    t *= z / (k * k);
-    I0 += t;
-    h += 1 / k;
-    s += h * t;
-    if (k > 2 && t <= I0 * 1e-18) break;
-  }
-  return -(Math.log(0.5 * x) + 0.5772156649015328606) * I0 + s;
-}
-
-// K1 ascending series (DLMF 10.31.2, n=1):
-//   K1 = 1/x + (x/2)(ln(x/2)+gamma) S1 - (x/4) S2,
-//   w_k = (x^2/4)^k/(k!(k+1)!), S1 = sum w_k, S2 = sum (H_k + H_{k+1}) w_k.
-function besselK1Series(x: f64): f64 {
-  const z = 0.25 * x * x;
-  let w = 1.0;
-  let S1 = 1.0;
-  let hk = 0.0;
-  let hk1 = 1.0;
-  let S2 = (hk + hk1) * 1.0; // k=0
-  for (let k = 1; k <= 80; k++) {
-    w *= z / (k * (k + 1));
-    S1 += w;
-    hk += 1 / k;
-    hk1 += 1 / (k + 1);
-    S2 += (hk + hk1) * w;
-    if (k > 2 && w <= S1 * 1e-18) break;
-  }
-  return 1 / x + 0.5 * x * (Math.log(0.5 * x) + 0.5772156649015328606) * S1 - 0.25 * x * S2;
+  return [rkmu, rk1];
 }
 
 /** Modified Bessel function of the second kind, K_n(x). */
 function besselKScalar(n: f64, x: f64): f64 {
   const ni = Math.round(Math.abs(n));
   if (x <= 0) return NaN;
-  // Series for small x, asymptotic above. Crossover at 8 (not 9): the ascending series subtracts
-  // two O(I0(x)) terms to leave a tiny K(x), so its cancellation error grows with x — measured
-  // ~5e-9 at x=9. The asymptotic overtakes it by x≈8.5, so 8 caps the peak near the crossover at
-  // ~1.6e-9 (vs 5.3e-9 at 9). Machine precision across the gap needs a uniformly-accurate CF/Temme
-  // method (see TODO); everywhere outside x∈[8,11] both branches are already ~1e-13 or better.
-  const k0 = x <= 8 ? besselK0Series(x) : besselKAsym(0, x);
-  const k1 = x <= 8 ? besselK1Series(x) : besselKAsym(1, x);
+  const k01 = besselK01(x);
+  const k0 = k01[0];
+  const k1 = k01[1];
   if (ni === 0) return k0;
   if (ni === 1) return k1;
   // Upward recurrence in order is stable for K (K_n grows with n).
@@ -948,11 +958,7 @@ export const besselK = mathTyped('besselK', {
     mapArray(
       x,
       (v) => besselKScalar(n, v),
-      () =>
-        kernelSource(
-          [besselKAsym, besselK0Series, besselK1Series, besselKScalar],
-          `(x) => besselKScalar(${n}, x)`
-        )
+      () => kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${n}, x)`)
     ),
 });
 
