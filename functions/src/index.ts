@@ -443,3 +443,14 @@ export {
   harmonicCentrality,
 } from './graph/traversal-centrality.js';
 export type { BellmanFordResult } from './graph/traversal-centrality.js';
+
+// Phase 8 Task 2 — graph optimization: Edmonds-Karp max-flow/min-cut, A*
+// heuristic shortest path (reduces to Dijkstra with heuristic = 0), and the
+// Kuhn-Munkres Hungarian algorithm for optimal (minimum-cost) assignment.
+export { maxFlow, minCut, astar, hungarian } from './graph/optimization.js';
+export type {
+  MaxFlowResult,
+  MinCutResult,
+  AStarResult,
+  HungarianResult,
+} from './graph/optimization.js';

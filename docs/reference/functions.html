@@ -2691,12 +2691,16 @@
       | `pageRank(adj[, opts])`              | PageRank centrality (power iteration; `dampingFactor` default 0.85) — `async` |
       | `betweennessCentrality(adj[, opts])` | Brandes betweenness centrality — `async`                                      |
       | `eigenvectorCentrality(adj[, opts])` | Power-iteration eigenvector centrality — `async`                              |
-      | `bfs(adj, start)`                    | Breadth-first traversal order (ascending-index neighbor visitation)          |
-      | `dfs(adj, start)`                    | Depth-first traversal order (ascending-index neighbor visitation)            |
-      | `floydWarshall(adj)`                 | All-pairs shortest-path distances (negative weights okay)                    |
-      | `bellmanFord(adj, source)`           | Single-source shortest paths + negative-cycle detection                      |
-      | `closenessCentrality(adj)`           | Distance-based closeness centrality (networkx convention)                    |
-      | `harmonicCentrality(adj)`            | Distance-based harmonic centrality (networkx convention)                     |
+      | `bfs(adj, start)`                    | Breadth-first traversal order (ascending-index neighbor visitation)           |
+      | `dfs(adj, start)`                    | Depth-first traversal order (ascending-index neighbor visitation)             |
+      | `floydWarshall(adj)`                 | All-pairs shortest-path distances (negative weights okay)                     |
+      | `bellmanFord(adj, source)`           | Single-source shortest paths + negative-cycle detection                       |
+      | `closenessCentrality(adj)`           | Distance-based closeness centrality (networkx convention)                     |
+      | `harmonicCentrality(adj)`            | Distance-based harmonic centrality (networkx convention)                      |
+      | `maxFlow(capacity, source, sink)`    | Maximum flow (Edmonds-Karp) → `{ maxFlow, flow }`                             |
+      | `minCut(capacity, source, sink)`     | Minimum s-t cut via max-flow-min-cut → `{ value, partition: [S, T] }`         |
+      | `astar(adj, start, goal, heuristic)` | A\* heuristic shortest path → `{ path, cost }` (reduces to Dijkstra at h=0)   |
+      | `hungarian(cost)`                    | Kuhn-Munkres optimal assignment (minimize) → `{ assignment, cost }`           |
 
       ### Details
 
@@ -2721,10 +2725,26 @@
         negative-weight cycle reachable from the source.
       - `closenessCentrality`/`harmonicCentrality` are built on `floydWarshall` and
         match `networkx.closeness_centrality`/`harmonic_centrality`'s directed-graph
-        default: they sum *incoming* distances to a node (how reachable it is from
+        default: they sum _incoming_ distances to a node (how reachable it is from
         the rest of the graph), not outgoing. `closenessCentrality` applies the
         Wasserman–Faust disconnected-graph scaling `(r-1)/(n-1) · (r-1)/Σd`, which
         reduces to `(n-1)/Σd` when every node is reachable.
+      - `maxFlow`/`minCut` treat `capacity` as a directed adjacency matrix (0 or
+        negative = no edge). `maxFlow` runs Edmonds-Karp (Ford-Fulkerson with BFS
+        shortest-augmenting-path selection, O(V·E²)); `minCut` reuses its residual
+        graph and BFSes from `source` — reachable nodes form the `S` partition,
+        the rest `T` — with `value` equal to the max-flow value by the
+        max-flow-min-cut theorem. Pinned against `networkx.maximum_flow_value`.
+      - `astar` runs A\* on a weighted adjacency matrix (finite, nonzero
+        `adj[i][j]` = edge i → j) guided by an admissible `heuristic(node)`
+        estimating remaining cost to `goal`; passing `() => 0` reduces it to plain
+        Dijkstra. Returns `{ path: [], cost: Infinity }` when `goal` is
+        unreachable.
+      - `hungarian` finds the cost-minimizing assignment on a square `cost`
+        matrix via the classical O(n³) Kuhn-Munkres (Hungarian) algorithm with
+        row/column potentials and shortest augmenting paths;
+        `assignment[i]` is the column assigned to row `i`. Pinned against
+        `scipy.optimize.linear_sum_assignment`.
 
       ### Background & History
 
@@ -3197,7 +3217,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (995 exports).
+      > `@danielsimonjr/mathts-functions` (999 exports).
 
       ### Functions by category
 
@@ -3237,7 +3257,7 @@
 
       **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 
-      **Graph Theory** (17): `adjacencyMatrix`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphDistance`, `harmonicCentrality`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
+      **Graph Theory** (21): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
       **Hypothesis Tests** (31): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 

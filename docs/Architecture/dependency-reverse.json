@@ -1701,6 +1701,7 @@
     ],
     "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
     "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
+    "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [

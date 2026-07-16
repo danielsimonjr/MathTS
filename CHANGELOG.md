@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Graph optimization: maxFlow/minCut, astar, hungarian (Phase 8 Task 2)
+
+Added `functions/src/graph/optimization.ts`, exported from `@danielsimonjr/mathts-functions`:
+`maxFlow`/`minCut` (Edmonds-Karp), `astar` (heuristic pathfinding), and `hungarian` (Kuhn-Munkres
+optimal assignment) — combinatorial-optimization algorithms complementing the existing graph
+traversal/shortest-path/centrality functions.
+
+- `maxFlow(capacity, source, sink)` — Edmonds-Karp max-flow (Ford-Fulkerson with BFS
+  shortest-augmenting-path selection on the residual graph); returns `{ maxFlow, flow }`. Pinned
+  against `networkx.maximum_flow_value` — the initially-drafted oracle value of 4 for the sample
+  4-node network was wrong; the verified value is 5.
+- `minCut(capacity, source, sink)` — the induced minimum s-t cut via the max-flow-min-cut theorem:
+  reuses `maxFlow`'s residual graph, BFS from `source` gives the `S`/`T` partition, and `value`
+  equals the max-flow value.
+- `astar(adj, start, goal, heuristic)` — heuristic-guided shortest path on a weighted adjacency
+  matrix; reduces to Dijkstra with `heuristic = () => 0`. Returns `{ path: [], cost: Infinity }`
+  when unreachable.
+- `hungarian(cost)` — Kuhn-Munkres optimal assignment minimizing total cost on a square cost
+  matrix via the classical O(n³) potential/shortest-augmenting-path formulation; returns
+  `{ assignment, cost }`. Pinned against `scipy.optimize.linear_sum_assignment` (3x3 and 4x4).
+
 ### Added — Graph traversal, all-pairs shortest paths, and distance centrality (Phase 8 Task 1)
 
 Added `functions/src/graph/traversal-centrality.ts`, exported from `@danielsimonjr/mathts-functions`:

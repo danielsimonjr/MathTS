@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1063,
+    "totalFiles": 1064,
     "totalModules": 82,
-    "totalExports": 5286
+    "totalExports": 5298
   },
   "entryPoints": [
     {
@@ -8258,6 +8258,11 @@
             "reExport": true
           },
           {
+            "file": "./graph/optimization.js",
+            "imports": ["maxFlow", "minCut", "astar", "hungarian"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8453,6 +8458,12 @@
           {
             "file": "./graph/traversal-centrality.js",
             "imports": ["BellmanFordResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./graph/optimization.js",
+            "imports": ["MaxFlowResult", "MinCutResult", "AStarResult", "HungarianResult"],
             "reExport": true,
             "typeOnly": true
           }
@@ -8692,6 +8703,10 @@
           "bellmanFord",
           "closenessCentrality",
           "harmonicCentrality",
+          "maxFlow",
+          "minCut",
+          "astar",
+          "hungarian",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8765,7 +8780,11 @@
           "McNemarResult",
           "CochranQResult",
           "RootsLegendreResult",
-          "BellmanFordResult"
+          "BellmanFordResult",
+          "MaxFlowResult",
+          "MinCutResult",
+          "AStarResult",
+          "HungarianResult"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -8993,6 +9012,10 @@
           "bellmanFord",
           "closenessCentrality",
           "harmonicCentrality",
+          "maxFlow",
+          "minCut",
+          "astar",
+          "hungarian",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -9066,7 +9089,11 @@
           "McNemarResult",
           "CochranQResult",
           "RootsLegendreResult",
-          "BellmanFordResult"
+          "BellmanFordResult",
+          "MaxFlowResult",
+          "MinCutResult",
+          "AStarResult",
+          "HungarianResult"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -11692,6 +11719,16 @@
       }
     },
     "functions/graph": {
+      "functions/src/graph/optimization.ts": {
+        "description": "Graph Optimization — Max-Flow/Min-Cut, A* Search, Hungarian Assignment",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["maxFlow", "minCut", "astar", "hungarian"],
+        "interfaces": ["MaxFlowResult", "MinCutResult", "AStarResult", "HungarianResult"],
+        "functions": ["maxFlow", "minCut", "astar", "hungarian"]
+      },
       "functions/src/graph/traversal-centrality.ts": {
         "description": "Graph Traversal, All-Pairs Shortest Paths, and Distance-Based Centrality",
         "externalDependencies": [],
@@ -35454,7 +35491,10 @@
       },
       {
         "name": "Functions/graph",
-        "files": ["functions/src/graph/traversal-centrality.ts"]
+        "files": [
+          "functions/src/graph/optimization.ts",
+          "functions/src/graph/traversal-centrality.ts"
+        ]
       },
       {
         "name": "Functions/logical",
@@ -36497,18 +36537,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1063,
+    "totalTypeScriptFiles": 1064,
     "totalModules": 82,
-    "totalLinesOfCode": 181244,
-    "totalExports": 5286,
+    "totalLinesOfCode": 181621,
+    "totalExports": 5298,
     "totalClasses": 56,
-    "totalInterfaces": 464,
-    "totalFunctions": 1756,
+    "totalInterfaces": 468,
+    "totalFunctions": 1760,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1975,
-    "totalTypeOnlyImports": 547,
+    "totalReExports": 1983,
+    "totalTypeOnlyImports": 548,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
