@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1035,
+    "totalFiles": 1036,
     "totalModules": 78,
-    "totalExports": 5004
+    "totalExports": 5012
   },
   "entryPoints": [
     {
@@ -8072,6 +8072,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/nnls.js",
+            "imports": ["nnls", "lsqBounded"],
+            "reExport": true
+          },
+          {
             "file": "./cas-integration.js",
             "imports": ["symbolicIntegral"],
             "reExport": true
@@ -8183,6 +8188,12 @@
           {
             "file": "./clustering-extra.js",
             "imports": ["KMeansResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/nnls.js",
+            "imports": ["NnlsOptions", "NnlsResult", "LsqBoundedOptions", "LsqBoundedResult"],
             "reExport": true,
             "typeOnly": true
           }
@@ -8304,6 +8315,8 @@
           "kmeans",
           "spectralClustering",
           "bfgs",
+          "nnls",
+          "lsqBounded",
           "symbolicIntegral",
           "firwin",
           "butter",
@@ -8348,7 +8361,11 @@
           "LMResult",
           "BfgsOptions",
           "BfgsResult",
-          "KMeansResult"
+          "KMeansResult",
+          "NnlsOptions",
+          "NnlsResult",
+          "LsqBoundedOptions",
+          "LsqBoundedResult"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -8458,6 +8475,8 @@
           "kmeans",
           "spectralClustering",
           "bfgs",
+          "nnls",
+          "lsqBounded",
           "symbolicIntegral",
           "firwin",
           "butter",
@@ -8502,7 +8521,11 @@
           "LMResult",
           "BfgsOptions",
           "BfgsResult",
-          "KMeansResult"
+          "KMeansResult",
+          "NnlsOptions",
+          "NnlsResult",
+          "LsqBoundedOptions",
+          "LsqBoundedResult"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -12633,6 +12656,21 @@
         "exports": ["minimizeScalar"],
         "interfaces": ["MinimizeScalarOptions", "MinimizeScalarResult"],
         "functions": ["minimizeScalar"]
+      },
+      "functions/src/numeric/nnls.ts": {
+        "description": "Constrained least squares: `nnls` (Lawson–Hanson active-set non-negative",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["leastSquares"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["nnls", "lsqBounded"],
+        "interfaces": ["NnlsOptions", "NnlsResult"],
+        "functions": ["nnls", "lsqBounded"]
       },
       "functions/src/numeric/numeric-jacobian.ts": {
         "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
@@ -34381,6 +34419,7 @@
           "functions/src/numeric/bfgs.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/minimize-scalar.ts",
+          "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/solveODE.ts"
@@ -35312,18 +35351,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1035,
+    "totalTypeScriptFiles": 1036,
     "totalModules": 78,
-    "totalLinesOfCode": 172980,
-    "totalExports": 5004,
+    "totalLinesOfCode": 173242,
+    "totalExports": 5012,
     "totalClasses": 56,
-    "totalInterfaces": 422,
-    "totalFunctions": 1625,
+    "totalInterfaces": 424,
+    "totalFunctions": 1627,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1828,
-    "totalTypeOnlyImports": 530,
+    "totalReExports": 1834,
+    "totalTypeOnlyImports": 531,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

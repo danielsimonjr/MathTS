@@ -1649,6 +1649,7 @@
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
     "functions/src/signal-filter-extra.ts": ["functions/src/index.ts"],
     "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
@@ -1956,6 +1957,7 @@
     ],
     "functions/src/typed/numeric.ts": [
       "functions/src/numeric/fsolve.ts",
+      "functions/src/numeric/nnls.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/utils/product.ts": [

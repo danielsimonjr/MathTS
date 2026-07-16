@@ -201,6 +201,17 @@ export { bfgs } from './numeric/bfgs.js';
 export type { BfgsOptions, BfgsResult } from './numeric/bfgs.js';
 export type { KMeansResult } from './clustering-extra.js';
 
+// Phase 2 Task 2 — nnls (Lawson-Hanson non-negative least squares) + lsqBounded
+// (projected-gradient box-constrained least squares); complements the
+// unconstrained `leastSquares` (typed/numeric.ts).
+export { nnls, lsqBounded } from './numeric/nnls.js';
+export type {
+  NnlsOptions,
+  NnlsResult,
+  LsqBoundedOptions,
+  LsqBoundedResult,
+} from './numeric/nnls.js';
+
 // Gap-analysis Wave D — symbolic indefinite integration (complements numeric integrate).
 export { symbolicIntegral } from './cas-integration.js';
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `nnls` + `lsqBounded` constrained least squares (Phase 2 Task 2)
+
+Added `nnls(A, b, { tol?, maxIter? })` — Lawson–Hanson active-set non-negative least squares
+(`min ||Ax - b||_2 s.t. x >= 0`), solving each restricted passive-set subproblem via the existing
+`leastSquares`. Added `lsqBounded(A, b, lower, upper, { tol?, maxIter? })` — box-constrained least
+squares via projected-gradient descent with backtracking. Both return `{ x, residual }`
+(`residual = ||Ax - b||_2`). Pinned: `nnls(I, [3,-2]) -> [3,0]`, `nnls(I, [3,5]) -> [3,5]` (both
+exact-recoverable cases), a 3x2 case checked against `scipy.optimize.nnls` (`[0.5, 0]`, matched
+exactly), and `lsqBounded(I, [5,-3], [0,0], [2,2]) -> [2,0]`.
+
 ### Added — BFGS quasi-Newton minimizer (Phase 2 Task 1)
 
 Added `bfgs(f, x0, { grad?, bounds? })` — BFGS quasi-Newton minimization with the classic

@@ -2082,6 +2082,8 @@
       | `root(F, x0[, opts])`               | Alias of `fsolve`                                                       | —     |
       | `linsolve(A, b)`                    | Solve a linear system `Ax = b`                                          | —     |
       | `leastSquares(A, b)`                | Least-squares solution (overdetermined)                                 | WASM  |
+      | `nnls(A, b[, opts])`                 | Non-negative least squares (Lawson–Hanson active-set); returns `{ x, residual }` | —     |
+      | `lsqBounded(A, b, lower, upper[, opts])` | Box-constrained least squares (projected-gradient); returns `{ x, residual }` | —     |
       | `minimize(f, x0[, opts])`           | Local minimization                                                      | —     |
       | `minimizeScalar(f[, opts])`         | 1-D minimization via Brent's method (golden-section + parabolic interp) | —     |
       | `maximize(f, x0[, opts])`           | Local maximization                                                      | —     |
@@ -2102,13 +2104,13 @@
 
       ### Optimization
 
-      | Function                                   | Description                                                                                                                                     |
-      | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-      | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`            |
-      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                       |
-      | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }` |
+      | Function                                   | Description                                                                                                                                                                                                          |
+      | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+      | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`                                                                                 |
+      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                                                                                            |
+      | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }`                                                                      |
       | `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }` |
-      | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                     |
+      | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                                                                                          |
 
       ### Differentiation
 
@@ -2900,7 +2902,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (892 exports).
+      > `@danielsimonjr/mathts-functions` (894 exports).
 
       ### Functions by category
 
@@ -2934,7 +2936,7 @@
 
       **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-      **Numerical Methods** (35): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+      **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
       **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 
