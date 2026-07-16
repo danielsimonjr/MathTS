@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — FFT helpers (Phase 6 Task 1)
+
+Added `functions/src/signal/fft-helpers.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `rfft(x)` / `irfft(spec, n)` — real FFT built on the package's own exported `fft`/`ifft`:
+  `rfft` keeps the non-redundant first `floor(n/2)+1` bins of the full transform; `irfft`
+  rebuilds the conjugate-symmetric length-`n` spectrum and inverse-FFTs it.
+- `fftshift(x)` / `ifftshift(x)` — roll the zero-frequency component to center / undo it.
+- `fftfreq(n[, d])` / `rfftfreq(n[, d])` — DFT sample frequencies for `fft`/`rfft` output.
+- `fftn(x)` — 2-D FFT (FFT each row, then each column), delegating to the existing
+  N-dimensional `fft`.
+
+Pinned vs numpy (`numpy.fft.rfft([1,2,3,4])` → `re=[10,-2,-2]`, `im=[0,2,0]`;
+`numpy.fft.fftfreq(4)` = `[0,0.25,-0.5,-0.25]`; `numpy.fft.rfftfreq(4)` = `[0,0.25,0.5]`;
+`numpy.fft.fftshift([0,1,2,3])` = `[2,3,0,1]`). Documented in `docs/reference/functions.md`
+under Signal Processing.
+
 ### Added — number-theory fills (Phase 5 Task 4)
 
 Added `functions/src/numbertheory/extra.ts`, exported from `@danielsimonjr/mathts-functions`:

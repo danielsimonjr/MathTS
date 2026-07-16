@@ -1088,47 +1088,47 @@
 
       ## Combinatorics & Number Theory
 
-      | Function                       | Description                                   |
-      | ------------------------------ | --------------------------------------------- |
-      | `factorial(n)`                 | Factorial `n!` (factory layer)                |
-      | `combinations(n, k)`           | Binomial coefficient `C(n, k)`                |
-      | `combinationsWithRep(n, k)`    | Combinations with repetition                  |
-      | `permutations(n[, k])`         | Permutations                                  |
-      | `multinomial(k)`               | Multinomial coefficient                       |
-      | `composition(n, k)`            | Number of compositions                        |
-      | `catalan(n)`                   | nth Catalan number                            |
-      | `stirlingS2(n, k)`             | Stirling number of the second kind            |
-      | `bellNumbers(n)`               | nth Bell number                               |
-      | `bernoulli(n)`                 | nth Bernoulli number                          |
-      | `fibonacci(n)`                 | nth Fibonacci number (O(log n) fast doubling) |
-      | `lucas(n)` `lucasL(n)`         | nth Lucas number                              |
-      | `doubleFactorial(n)`           | Double factorial `n!!`                        |
-      | `risingFactorial(x, n)`        | Pochhammer symbol `x·(x+1)·…·(x+n-1)`         |
-      | `fallingFactorial(x, n)`       | Falling factorial `x·(x-1)·…·(x-n+1)`         |
-      | `subfactorial(n)`              | Derangement count `!n`                        |
-      | `harmonicNumber(n)`            | nth harmonic number                           |
-      | `prime(n)`                     | nth prime                                     |
-      | `nextPrime(n)`                 | Next prime after `n`                          |
-      | `primePi(n)`                   | Prime-counting function `π(n)`                |
-      | `primeFactors(n)`              | Prime factorization                           |
-      | `divisors(n)`                  | List of divisors                              |
-      | `divisorSigma(n[, k])`         | Sum-of-divisors function                      |
-      | `eulerPhi(n)`                  | Euler totient `φ(n)`                          |
-      | `carmichaelLambda(n)`          | Carmichael function `λ(n)`                    |
-      | `moebiusMu(n)`                 | Möbius function `μ(n)`                        |
-      | `jacobiSymbol(a, n)`           | Jacobi symbol                                 |
-      | `chineseRemainder(rems, mods)` | Chinese Remainder Theorem                     |
-      | `partitions(n)`                | Integer partition count                       |
-      | `integerDigits(n[, base])`     | Digits of an integer                          |
-      | `continuedFraction(x[, n])`    | Simple continued fraction expansion           |
-      | `eulerNumbers(n)`              | Euler numbers `E_0..E_n`                      |
-      | `stirlingS1(n, k)`             | Signed Stirling number of the first kind      |
-      | `discreteLog(g, h, p)`         | Discrete logarithm (baby-step giant-step)     |
-      | `primitiveRoot(p)`             | Smallest primitive root mod prime `p`         |
-      | `multiplicativeOrder(a, n)`    | Multiplicative order of `a` mod `n`           |
+      | Function                       | Description                                      |
+      | ------------------------------ | ------------------------------------------------ |
+      | `factorial(n)`                 | Factorial `n!` (factory layer)                   |
+      | `combinations(n, k)`           | Binomial coefficient `C(n, k)`                   |
+      | `combinationsWithRep(n, k)`    | Combinations with repetition                     |
+      | `permutations(n[, k])`         | Permutations                                     |
+      | `multinomial(k)`               | Multinomial coefficient                          |
+      | `composition(n, k)`            | Number of compositions                           |
+      | `catalan(n)`                   | nth Catalan number                               |
+      | `stirlingS2(n, k)`             | Stirling number of the second kind               |
+      | `bellNumbers(n)`               | nth Bell number                                  |
+      | `bernoulli(n)`                 | nth Bernoulli number                             |
+      | `fibonacci(n)`                 | nth Fibonacci number (O(log n) fast doubling)    |
+      | `lucas(n)` `lucasL(n)`         | nth Lucas number                                 |
+      | `doubleFactorial(n)`           | Double factorial `n!!`                           |
+      | `risingFactorial(x, n)`        | Pochhammer symbol `x·(x+1)·…·(x+n-1)`            |
+      | `fallingFactorial(x, n)`       | Falling factorial `x·(x-1)·…·(x-n+1)`            |
+      | `subfactorial(n)`              | Derangement count `!n`                           |
+      | `harmonicNumber(n)`            | nth harmonic number                              |
+      | `prime(n)`                     | nth prime                                        |
+      | `nextPrime(n)`                 | Next prime after `n`                             |
+      | `primePi(n)`                   | Prime-counting function `π(n)`                   |
+      | `primeFactors(n)`              | Prime factorization                              |
+      | `divisors(n)`                  | List of divisors                                 |
+      | `divisorSigma(n[, k])`         | Sum-of-divisors function                         |
+      | `eulerPhi(n)`                  | Euler totient `φ(n)`                             |
+      | `carmichaelLambda(n)`          | Carmichael function `λ(n)`                       |
+      | `moebiusMu(n)`                 | Möbius function `μ(n)`                           |
+      | `jacobiSymbol(a, n)`           | Jacobi symbol                                    |
+      | `chineseRemainder(rems, mods)` | Chinese Remainder Theorem                        |
+      | `partitions(n)`                | Integer partition count                          |
+      | `integerDigits(n[, base])`     | Digits of an integer                             |
+      | `continuedFraction(x[, n])`    | Simple continued fraction expansion              |
+      | `eulerNumbers(n)`              | Euler numbers `E_0..E_n`                         |
+      | `stirlingS1(n, k)`             | Signed Stirling number of the first kind         |
+      | `discreteLog(g, h, p)`         | Discrete logarithm (baby-step giant-step)        |
+      | `primitiveRoot(p)`             | Smallest primitive root mod prime `p`            |
+      | `multiplicativeOrder(a, n)`    | Multiplicative order of `a` mod `n`              |
       | `kroneckerSymbol(a, n)`        | Kronecker symbol (Jacobi generalized to all `n`) |
-      | `permutationsGen(arr[, k])`    | Enumerate permutation tuples (lexicographic)  |
-      | `combinationsGen(arr, k)`      | Enumerate combination tuples (lexicographic)  |
+      | `permutationsGen(arr[, k])`    | Enumerate permutation tuples (lexicographic)     |
+      | `combinationsGen(arr, k)`      | Enumerate combination tuples (lexicographic)     |
 
       ### Details
 
@@ -2341,6 +2341,18 @@
       | `freqz(b, a)`                                   | Digital filter frequency response (factory layer)    | —              |
       | `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)   | —              |
 
+      ### numpy.fft-style helpers (vs `numpy.fft`)
+
+      | Function           | Description                                                                                                                                                       |
+      | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+      | `rfft(x)`          | Real FFT: full `fft(x)` truncated to the non-redundant first `floor(n/2)+1` bins → `{ re, im }` — `numpy.fft.rfft`                                                |
+      | `irfft(spec, n)`   | Inverse real FFT: rebuilds the conjugate-symmetric length-`n` spectrum from `rfft`'s half-spectrum, inverse-FFTs, and returns the real parts — `numpy.fft.irfft`  |
+      | `fftshift(x)`      | Roll the zero-frequency component to the center of the spectrum (roll by `floor(n/2)`) — `numpy.fft.fftshift`                                                     |
+      | `ifftshift(x)`     | Inverse of `fftshift` (roll by `ceil(n/2)`) — `numpy.fft.ifftshift`                                                                                                |
+      | `fftfreq(n[, d])`  | DFT sample frequencies for a length-`n` `fft`, sample spacing `d` (default 1) — `numpy.fft.fftfreq`                                                                |
+      | `rfftfreq(n[, d])` | DFT sample frequencies for an `rfft` output (`0..floor(n/2)`) — `numpy.fft.rfftfreq`                                                                               |
+      | `fftn(x)`          | 2-D FFT: FFT each row, then FFT each column → `{ re, im }` — `numpy.fft.fft2`                                                                                      |
+
       ### Digital filter design & application (vs `scipy.signal`)
 
       | Function                  | Description                                                                                                                                                                                      |
@@ -3007,7 +3019,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (941 exports).
+      > `@danielsimonjr/mathts-functions` (948 exports).
 
       ### Functions by category
 
@@ -3043,7 +3055,7 @@
 
       **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
-      **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
+      **Signal Processing** (49): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `rfft`, `rfftfreq`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 
       **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 

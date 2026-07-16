@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1050, "e": 5128, "re": 1903 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1051, "e": 5142, "re": 1910 },
   "s": {
-    "loc": 176538,
+    "loc": 176680,
     "cls": 56,
     "int": 447,
-    "fn": 1676,
+    "fn": 1683,
     "tg": 158,
     "en": 0,
     "co": 1536,
@@ -816,8 +816,20 @@
       ]
     },
     "functions/signal": {
-      "f": 3,
-      "exp": ["bitReverse", "fftCoreFloat64", "createFreqz", "createZpk2tf"]
+      "f": 4,
+      "exp": [
+        "bitReverse",
+        "fftCoreFloat64",
+        "rfft",
+        "irfft",
+        "fftshift",
+        "ifftshift",
+        "fftfreq",
+        "rfftfreq",
+        "fftn",
+        "createFreqz",
+        "createZpk2tf"
+      ]
     },
     "functions/special": {
       "f": 5,
@@ -1704,9 +1716,9 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
-    { "p": "factories/index.ts", "i": 244, "o": 8 },
+    { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 66, "o": 0 },
+    { "p": "src/index.ts", "i": 67, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

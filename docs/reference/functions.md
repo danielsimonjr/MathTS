@@ -1816,6 +1816,18 @@ back to the sequential radix-2 implementation on the calling thread.
 | `freqz(b, a)`                                   | Digital filter frequency response (factory layer)    | —              |
 | `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)   | —              |
 
+### numpy.fft-style helpers (vs `numpy.fft`)
+
+| Function           | Description                                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rfft(x)`          | Real FFT: full `fft(x)` truncated to the non-redundant first `floor(n/2)+1` bins → `{ re, im }` — `numpy.fft.rfft`                                               |
+| `irfft(spec, n)`   | Inverse real FFT: rebuilds the conjugate-symmetric length-`n` spectrum from `rfft`'s half-spectrum, inverse-FFTs, and returns the real parts — `numpy.fft.irfft` |
+| `fftshift(x)`      | Roll the zero-frequency component to the center of the spectrum (roll by `floor(n/2)`) — `numpy.fft.fftshift`                                                    |
+| `ifftshift(x)`     | Inverse of `fftshift` (roll by `ceil(n/2)`) — `numpy.fft.ifftshift`                                                                                              |
+| `fftfreq(n[, d])`  | DFT sample frequencies for a length-`n` `fft`, sample spacing `d` (default 1) — `numpy.fft.fftfreq`                                                              |
+| `rfftfreq(n[, d])` | DFT sample frequencies for an `rfft` output (`0..floor(n/2)`) — `numpy.fft.rfftfreq`                                                                             |
+| `fftn(x)`          | 2-D FFT: FFT each row, then FFT each column → `{ re, im }` — `numpy.fft.fft2`                                                                                    |
+
 ### Digital filter design & application (vs `scipy.signal`)
 
 | Function                  | Description                                                                                                                                                                                      |
@@ -2482,7 +2494,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (941 exports).
+> `@danielsimonjr/mathts-functions` (948 exports).
 
 ### Functions by category
 
@@ -2518,7 +2530,7 @@ await terminatePool();
 
 **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
-**Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
+**Signal Processing** (49): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `rfft`, `rfftfreq`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 
 **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 

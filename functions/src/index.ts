@@ -283,6 +283,9 @@ export { symbolicIntegral } from './cas-integration.js';
 // Gap-analysis Wave D — digital filter design + application (vs scipy.signal).
 export { firwin, butter, lfilter, lfilterZi, filtfilt } from './signal-filter-extra.js';
 
+// Phase 6 Task 1 — numpy.fft-style helpers (rfft/irfft, fftshift/ifftshift, fftfreq/rfftfreq, fftn).
+export { rfft, irfft, fftshift, ifftshift, fftfreq, rfftfreq, fftn } from './signal/fft-helpers.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,

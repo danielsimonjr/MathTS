@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1050,
+    "totalFiles": 1051,
     "totalModules": 81,
-    "totalExports": 5128
+    "totalExports": 5142
   },
   "entryPoints": [
     {
@@ -8146,6 +8146,11 @@
             "reExport": true
           },
           {
+            "file": "./signal/fft-helpers.js",
+            "imports": ["rfft", "irfft", "fftshift", "ifftshift", "fftfreq", "rfftfreq", "fftn"],
+            "reExport": true
+          },
+          {
             "file": "./geometry-extra.js",
             "imports": [
               "haversine",
@@ -8498,6 +8503,13 @@
           "lfilter",
           "lfilterZi",
           "filtfilt",
+          "rfft",
+          "irfft",
+          "fftshift",
+          "ifftshift",
+          "fftfreq",
+          "rfftfreq",
+          "fftn",
           "haversine",
           "EARTH_RADIUS_KM",
           "slerp",
@@ -8727,6 +8739,13 @@
           "lfilter",
           "lfilterZi",
           "filtfilt",
+          "rfft",
+          "irfft",
+          "fftshift",
+          "ifftshift",
+          "fftfreq",
+          "rfftfreq",
+          "fftn",
           "haversine",
           "EARTH_RADIUS_KM",
           "slerp",
@@ -14641,6 +14660,20 @@
         "workspaceDependencies": [],
         "exports": ["bitReverse", "fftCoreFloat64"],
         "functions": ["bitReverse", "fftCoreFloat64"]
+      },
+      "functions/src/signal/fft-helpers.ts": {
+        "description": "numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/index.js",
+            "imports": ["fft", "ifft", "complex"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["rfft", "irfft", "fftshift", "ifftshift", "fftfreq", "rfftfreq", "fftn"],
+        "functions": ["rfft", "irfft", "fftshift", "ifftshift", "fftfreq", "rfftfreq", "fftn"]
       },
       "functions/src/signal/freqz.ts": {
         "description": "Frequency response result",
@@ -35052,6 +35085,7 @@
         "name": "Functions/signal",
         "files": [
           "functions/src/signal/fft-core-f64.ts",
+          "functions/src/signal/fft-helpers.ts",
           "functions/src/signal/freqz.ts",
           "functions/src/signal/zpk2tf.ts"
         ]
@@ -35922,17 +35956,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1050,
+    "totalTypeScriptFiles": 1051,
     "totalModules": 81,
-    "totalLinesOfCode": 176538,
-    "totalExports": 5128,
+    "totalLinesOfCode": 176680,
+    "totalExports": 5142,
     "totalClasses": 56,
     "totalInterfaces": 447,
-    "totalFunctions": 1676,
+    "totalFunctions": 1683,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1903,
+    "totalReExports": 1910,
     "totalTypeOnlyImports": 540,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
