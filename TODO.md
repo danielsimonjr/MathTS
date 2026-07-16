@@ -243,13 +243,12 @@ defects found + fixed:
       cancels two O(I0(x)) terms, so its error grows with x — ~5.3e-9 at the old x=9 crossover. Moved
       the series→asymptotic crossover to x=8 (asymptotic overtakes by x≈8.5): peak **5.3e-9 → 1.6e-9**
       (~3×). Machine-precision below x=5 and above x=15 throughout.
-- [ ] **[follow-up] Machine-precision `besselK`/`besselY` across the whole range.** The series
-      (cancellation) vs asymptotic (divergent) split floors K at ~1.6e-9 in x∈[8,11]. A uniformly
-      accurate **continued-fraction (NR `bessik` / Steed) or Temme** method would hit ~1e-15
-      everywhere. Scoped rewrite of `besselK0Series`/`K1Series`/`Asym` in `typed/special.ts`; verify
-      against mpmath across x∈[0.1,50]. `besselY` order≥2 forward-recurses off Y0/Y1 (fine; Y series
-      has no exponential cancellation, ~1e-13). Also `zeta` near the pole s→1 degrades to ~4e-13
-      (inherent; leave).
+- [x] ✅ **Machine-precision `besselK` — DONE 2026-07-16 (functions@0.38.0).** Replaced the series/
+      asymptotic split with the uniformly-accurate **NR `bessik`** method (Temme series x<2, Steed CF2
+      x≥2) for K0/K1; order recurrence n≥2 unchanged. Worst-case relerr across x∈[0.1,50] now **~8e-16**
+      (band x∈[8,11]: 1.3e-10 → **5.3e-16**, independently re-verified on dist). mpmath-pinned in
+      `gap-besselk-precision-oracle.test.ts`. `besselY` was already fine (~1e-13, no exponential
+      cancellation) — untouched. `zeta` near s→1 (~4e-13, inherent) left as documented.
 
 > **Reduction/statistics accuracy audit — SUBSTANTIALLY COMPLETE (2026-07-15).** Every common
 > reduction is now at or beyond NumPy: `sum`/`mean` (core@0.7.0), `norm`/`fsum` (0.7.0),
@@ -267,9 +266,10 @@ defects found + fixed:
   risk exceeds its benefit. If ever pursued: scale the mantissa by powers of 2 each step
   (exact), accumulate the exponent, `ldexp` at the end; handle 0/Inf/NaN via a separate
   order-preserving accumulator.
-- [ ] **[feature, not defect] `quantile`/`quantileSeq` non-linear interpolation modes.** `np.quantile`
-      offers lower/higher/nearest/midpoint; MathTS does linear only (which already matches np's
-      default exactly). Adding the other modes is a feature-parity nicety, not an accuracy fix.
+- [x] ✅ **`quantileSeq` non-linear interpolation modes — DONE 2026-07-16 (functions@0.38.0).** Added
+      numpy's `lower`/`higher`/`nearest`/`midpoint` via an optional trailing `mode` arg (`linear`
+      stays the default → all existing calls unchanged). Oracle-pinned vs numpy in
+      `gap-quantile-modes-oracle.test.ts` (incl. round-half-to-even ties).
 - ⬜ **[non-decision] `skewness` ~1e-6 abs error on large-mean data is near-zero-value inflation**
   (the 3rd central moment of near-symmetric data is ~0, so abs ~7e-7 reads as large relative
   error). For any genuinely-skewed distribution it's accurate. Not a real defect; leave.
