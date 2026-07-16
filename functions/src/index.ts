@@ -477,3 +477,9 @@ export type {
   AStarResult,
   HungarianResult,
 } from './graph/optimization.js';
+
+// Phase 8 Task 5 — rigorous interval arithmetic with outward rounding
+// (Interval type, add/sub/mul/div/neg, width/mid/contains, sqrt/exp/log/pow),
+// the first verified-bounds numeric type in the library (mpmath.iv / INTLAB
+// analogue).
+export { interval, Interval } from './numeric/interval.js';

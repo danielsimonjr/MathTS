@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1066, "e": 5322, "re": 1996 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1067, "e": 5326, "re": 1998 },
   "s": {
-    "loc": 182120,
-    "cls": 56,
+    "loc": 182308,
+    "cls": 57,
     "int": 469,
-    "fn": 1771,
+    "fn": 1772,
     "tg": 159,
     "en": 0,
     "co": 1542,
@@ -739,7 +739,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "quad",
         "bfgs",
@@ -751,6 +751,8 @@
         "fsolve",
         "rootsLegendre",
         "interpn",
+        "interval",
+        "Interval",
         "cg",
         "minres",
         "gmres",
@@ -758,10 +760,9 @@
         "funm",
         "complexCos",
         "complexSin",
-        "cosm",
-        "sinm",
-        "minimizeScalar"
+        "cosm"
       ],
+      "cls": ["Interval"],
       "int": [
         "QuadOptions",
         "QuadResult",
@@ -1781,7 +1782,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 90, "o": 0 },
+    { "p": "src/index.ts", "i": 91, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

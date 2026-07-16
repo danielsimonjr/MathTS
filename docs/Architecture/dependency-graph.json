@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1066,
+    "totalFiles": 1067,
     "totalModules": 82,
-    "totalExports": 5322
+    "totalExports": 5326
   },
   "entryPoints": [
     {
@@ -8284,6 +8284,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/interval.js",
+            "imports": ["interval", "Interval"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8751,6 +8756,8 @@
           "minCut",
           "astar",
           "hungarian",
+          "interval",
+          "Interval",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -9073,6 +9080,8 @@
           "minCut",
           "astar",
           "hungarian",
+          "interval",
+          "Interval",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -13522,6 +13531,16 @@
         "workspaceDependencies": [],
         "exports": ["interpn"],
         "functions": ["interpn"]
+      },
+      "functions/src/numeric/interval.ts": {
+        "description": "Interval arithmetic with outward rounding.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["interval", "Interval"],
+        "classes": ["Interval"],
+        "functions": ["interval"]
       },
       "functions/src/numeric/krylov.ts": {
         "description": "Iterative Krylov-subspace linear solvers.",
@@ -35699,6 +35718,7 @@
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
           "functions/src/numeric/interpn.ts",
+          "functions/src/numeric/interval.ts",
           "functions/src/numeric/krylov.ts",
           "functions/src/numeric/matrix-functions.ts",
           "functions/src/numeric/minimize-scalar.ts",
@@ -36657,17 +36677,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1066,
+    "totalTypeScriptFiles": 1067,
     "totalModules": 82,
-    "totalLinesOfCode": 182120,
-    "totalExports": 5322,
-    "totalClasses": 56,
+    "totalLinesOfCode": 182308,
+    "totalExports": 5326,
+    "totalClasses": 57,
     "totalInterfaces": 469,
-    "totalFunctions": 1771,
+    "totalFunctions": 1772,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1996,
+    "totalReExports": 1998,
     "totalTypeOnlyImports": 550,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

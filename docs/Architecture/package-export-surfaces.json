@@ -2346,6 +2346,8 @@
       "intersect",
       "intersectLines2D",
       "intersectSegments2D",
+      "interval",
+      "Interval",
       "inv",
       "inverseConductanceQuantum",
       "inverseLaplace",

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Interval arithmetic (Phase 8 Task 5)
+
+Added `functions/src/numeric/interval.ts`, exported from `@danielsimonjr/mathts-functions`:
+`interval(lo, hi)` / the `Interval` class — rigorous interval arithmetic with outward-rounded
+`add`/`sub`/`mul`/`div`/`neg`, `width`/`mid`/`contains`, and monotonic-aware `sqrt`/`exp`/`log`/`pow`.
+Since JavaScript has no directed-rounding-mode control, every result's `lo` is nudged down and `hi`
+nudged up by a relative epsilon (`Number.EPSILON`) plus one ULP (`Number.MIN_VALUE`) so the true
+real-valued result is always contained — the first verified-bounds numeric type in the library (the
+`mpmath.iv` / INTLAB analogue). Pinned: `interval(1,2).add(interval(3,4))` = `[4,6]`,
+`interval(-1,2).mul(interval(2,3))` = `[-3,6]`, `interval(1,4).sqrt()` = `[1,2]`; `div` throws when
+the divisor interval contains zero.
+
 ### Added — N-D regular-grid interpolation `interpn` (Phase 8 Task 4)
 
 Added `functions/src/numeric/interpn.ts`, exported from `@danielsimonjr/mathts-functions`:

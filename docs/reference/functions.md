@@ -1818,6 +1818,45 @@ Root-finding, optimization, linear systems, and differential equations.
 | `gradientAt(f, x)`               | Exact gradient of `f: ℝⁿ → ℝ` at `x` by `n` forward-mode passes                                                                                                                  |
 | `valueAndDerivativeAt(f, x)`     | Value plus the exact forward-mode derivative of `f` at `x`; returns `{ value, deriv }`                                                                                           |
 
+### Interval Arithmetic
+
+Rigorous interval arithmetic with outward rounding — a verified-bounds numeric
+type (the `mpmath.iv` / INTLAB analogue), distinct from every other function
+in this table in that its guarantee is over _containment_, not a single
+floating-point value.
+
+| Function           | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `interval(lo, hi)` | Construct an `Interval` `[lo, hi]`; throws if `lo > hi` |
+
+`Interval` instance methods (fluent):
+
+| Method         | Description                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| `.add(b)`      | `[lo+b.lo, hi+b.hi]`, outward-rounded                                                       |
+| `.sub(b)`      | `[lo-b.hi, hi-b.lo]`, outward-rounded                                                       |
+| `.mul(b)`      | `[min, max]` of all four endpoint products, outward-rounded                                 |
+| `.div(b)`      | `[min, max]` of all four endpoint quotients, outward-rounded; throws if `b` contains `0`    |
+| `.neg()`       | `[-hi, -lo]`, outward-rounded                                                               |
+| `.width()`     | `hi - lo`                                                                                   |
+| `.mid()`       | `(lo + hi) / 2`                                                                             |
+| `.contains(x)` | Whether the closed interval contains the real number `x`                                    |
+| `.sqrt()`      | Monotonic square root; throws if the interval contains negative values                      |
+| `.exp()`       | Monotonic exponential                                                                       |
+| `.log()`       | Monotonic natural log; throws if the interval is not strictly positive                      |
+| `.pow(n)`      | Integer power, monotonic-aware (even powers over an interval spanning `0` have minimum `0`) |
+
+- **Outward rounding.** JavaScript has no access to IEEE-754 directed
+  rounding modes, so as a practical surrogate every result's `lo` is nudged
+  down and `hi` nudged up by a tiny relative epsilon
+  (`lo - |lo|*Number.EPSILON - Number.MIN_VALUE`,
+  `hi + |hi|*Number.EPSILON + Number.MIN_VALUE`) after each operation. This
+  guarantees the true real-valued result of any op on points drawn from the
+  operand intervals lies inside the returned interval.
+- Example: `interval(1, 2).add(interval(3, 4))` = `[4, 6]`;
+  `interval(-1, 2).mul(interval(2, 3))` = `[-3, 6]`;
+  `interval(1, 4).sqrt()` = `[1, 2]`.
+
 ### Details
 
 - `findRoot` requires a sign change across the bracket `[a, b]`; it combines the
@@ -2719,7 +2758,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1010 exports).
+> `@danielsimonjr/mathts-functions` (1012 exports).
 
 ### Functions by category
 
@@ -2753,7 +2792,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (24): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (36): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
@@ -2783,9 +2822,9 @@ await terminatePool();
 
 `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
-### Classes & types (1)
+### Classes & types (2)
 
-`Chain`
+`Chain`, `Interval`
 
 ### Factory-shadowed (`factory_*`, 64)
 
