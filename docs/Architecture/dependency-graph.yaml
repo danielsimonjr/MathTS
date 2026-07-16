@@ -17395,6 +17395,9 @@ modules:
           imports:
             - studentTQuantile
             - normalQuantile
+        - file: ../stats/inference-extra.js
+          imports:
+            - multipleTest
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -34411,7 +34414,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1067
   totalModules: 82
-  totalLinesOfCode: 182733
+  totalLinesOfCode: 182736
   totalExports: 5326
   totalClasses: 57
   totalInterfaces: 469

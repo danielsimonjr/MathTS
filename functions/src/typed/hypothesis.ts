@@ -34,6 +34,7 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 import { erfcScalar } from './special.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
+import { multipleTest } from '../stats/inference-extra.js';
 
 // =============================================================================
 // Type Definitions
@@ -473,6 +474,13 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
  * resampled with replacement from a multinomial distribution (preserving the
  * total count), the statistic is re-computed for each resample, and the
  * empirical p-value is the fraction of resampled statistics ≥ the base.
+ *
+ * Complementary to (NOT a duplicate of) `chi2Contingency`
+ * (`stats/inference-extra.js`): this function's 2D form is a plain
+ * independence test, while `chi2Contingency` is the
+ * `scipy.stats.chi2_contingency`-parity contingency test, adding the Yates
+ * continuity correction (2x2 tables), an expected-frequency table, and
+ * Cramér's V effect size.
  *
  * @param observed - 1D observed counts, OR 2D contingency table (rows x cols)
  * @param expected - 1D expected counts (required for 1D form; omit for 2D)
@@ -1975,32 +1983,16 @@ export function anova2(data: f64[][][]): Anova2Result {
 /**
  * Multiple-comparison p-value correction: bonferroni, holm (step-down), or bh
  * (Benjamini-Hochberg FDR). Matches statsmodels multipletests.
+ *
+ * Same algorithm as {@link multipleTest} (`../stats/inference-extra.js`) —
+ * an equivalent alias kept for backward-compatible naming; both names are
+ * supported and always return identical results.
  */
 export function multipleComparison(
   pValues: f64[],
   method: 'bonferroni' | 'holm' | 'bh' = 'bh'
 ): f64[] {
-  const m = pValues.length;
-  if (m === 0) return [];
-  if (method === 'bonferroni') return pValues.map((p) => Math.min(p * m, 1));
-  const order = pValues.map((_, i) => i).sort((i, j) => pValues[i] - pValues[j]);
-  const out = new Array<f64>(m);
-  if (method === 'holm') {
-    let running = 0;
-    for (let rank = 0; rank < m; rank++) {
-      const idx = order[rank];
-      running = Math.max(running, (m - rank) * pValues[idx]);
-      out[idx] = Math.min(running, 1);
-    }
-  } else {
-    let prev = 1;
-    for (let rank = m - 1; rank >= 0; rank--) {
-      const idx = order[rank];
-      prev = Math.min(prev, (pValues[idx] * m) / (rank + 1));
-      out[idx] = Math.min(prev, 1);
-    }
-  }
-  return out;
+  return multipleTest(pValues, method);
 }
 
 // =============================================================================

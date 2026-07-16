@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — unified duplicate `multipleComparison`/`multipleTest` implementation
+
+`multipleComparison` (`functions/src/typed/hypothesis.ts`) and `multipleTest`
+(`functions/src/stats/inference-extra.ts`) were two independent implementations of the identical
+Bonferroni/Holm/Benjamini-Hochberg p-value correction. Verified no import cycle (`inference-extra.ts`'s
+transitive closure — `distribution-functions.ts` → `typed/dist-objects.ts` — never reaches
+`typed/hypothesis.ts`), so `multipleComparison` now delegates to `multipleTest`; both public names
+and signatures are unchanged, and both always return identical results (locked by
+`functions/tests/gap-multiple-testing-consolidation.test.ts`, including a pinned BH result on
+`[0.01, 0.02, 0.03, 0.04, 0.05]` — all ties at 0.05). Added cross-reference docs (both directions)
+noting the alias pair, and clarified `chiSquareTest`'s 2D form vs `chi2Contingency` are
+complementary (goodness-of-fit + plain independence test vs the `scipy`-parity contingency test with
+Yates correction/expected counts/Cramér's V), not redundant. `docs/reference/functions.md` gained a
+`multipleComparison` row (previously undocumented in the curated table) and both descriptions were
+updated; `npm run docs:functions` regenerated `functions.html` accordingly.
+
 ### Added — implementation-independent invariants for `csd`/`coherence`
 
 `csd`/`coherence` (`functions/src/signal/spectral-peaks.ts`) had no hard-pinned tests. New

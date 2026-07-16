@@ -1676,7 +1676,10 @@
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
     "functions/src/ml/kde.ts": ["functions/src/index.ts"],
-    "functions/src/stats/inference-extra.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/hypothesis.ts"
+    ],
     "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
     "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
     "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],

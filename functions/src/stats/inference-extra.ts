@@ -37,6 +37,13 @@ export interface Chi2ContingencyOptions {
  * 1 - chiSquaredCDF(chi2, dof)`. `cramersV = sqrt(chi2 / (total *
  * min(rows-1, cols-1)))`.
  *
+ * Complementary to (NOT a duplicate of) `chiSquareTest`'s 2D form
+ * (`typed/hypothesis.js`): `chiSquareTest` covers 1D goodness-of-fit plus a
+ * plain 2D independence test, while `chi2Contingency` is the
+ * `scipy.stats.chi2_contingency`-parity contingency test — it adds the Yates
+ * continuity correction (2x2 tables) and returns the expected-frequency
+ * table plus Cramér's V effect size that `chiSquareTest` does not.
+ *
  * @example
  * chi2Contingency([[10, 20], [30, 40]], { correction: false });
  * // { chi2: 0.7937, pValue: 0.373, dof: 1, expected: [[12, 18], [28, 42]], cramersV }
@@ -101,6 +108,10 @@ export type MultipleTestMethod = 'bonferroni' | 'holm' | 'bh';
  * - `bh` (Benjamini-Hochberg FDR, step-up): sort ascending; adjusted_(k) =
  *   `min(1, min_{j>=k} (n / j) * p_(j))`, enforced monotonic non-decreasing
  *   from the largest p-value down.
+ *
+ * Same algorithm as `multipleComparison` (`typed/hypothesis.js`) — an
+ * equivalent alias kept for the `statsmodels`-matching name; both names are
+ * supported and always return identical results.
  *
  * @example multipleTest([0.01, 0.04, 0.5], 'bonferroni'); // [0.03, 0.12, 1]
  */

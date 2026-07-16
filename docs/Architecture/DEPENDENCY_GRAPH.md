@@ -8390,6 +8390,7 @@ graph LR
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
 | `./special.js` | `erfcScalar` | Import |
 | `../distribution-functions.js` | `studentTQuantile, normalQuantile` | Import |
+| `../stats/inference-extra.js` | `multipleTest` | Import |
 
 **Exports:**
 
@@ -16161,7 +16162,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1067   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 182733 |
+| Total Lines of Code     | 182736 |
 | Total Exports           | 5326   |
 | Total Re-exports        | 1998   |
 | Total Classes           | 57     |
