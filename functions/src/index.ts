@@ -184,6 +184,11 @@ export type { QuadOptions, QuadResult } from './numeric/adaptive-quad.js';
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 
+// Phase 4 Task 3 — time-series inference (pacf, portmanteau/autocorrelation
+// diagnostics, unit-root test) built on the basics above + `ols`.
+export { pacf, ljungBox, durbinWatson, adfuller } from './stats/timeseries.js';
+export type { LjungBoxResult, AdfullerResult } from './stats/timeseries.js';
+
 // Gap-analysis Wave D — OLS regression (bridge statistics ↔ linear algebra).
 export { linearRegression } from './regression-extra.js';
 export type { LinregressResult } from './regression-extra.js';

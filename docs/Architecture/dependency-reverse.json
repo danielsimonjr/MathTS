@@ -1596,6 +1596,7 @@
       "functions/src/ml/ols.ts",
       "functions/src/regression-extra.ts",
       "functions/src/stats/inference-extra.ts",
+      "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
     ],
     "functions/src/typed/distributions.ts": [
@@ -1651,9 +1652,13 @@
       "functions/src/index.ts",
       "functions/src/typed/numeric.ts"
     ],
-    "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
+    "functions/src/timeseries-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/timeseries.ts"
+    ],
+    "functions/src/stats/timeseries.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
-    "functions/src/ml/ols.ts": ["functions/src/index.ts"],
+    "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],

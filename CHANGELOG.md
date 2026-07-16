@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — time-series inference: `pacf`, `ljungBox`, `durbinWatson`, `adfuller` (Phase 4 Task 3)
+
+Added `functions/src/stats/timeseries.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `pacf(x, nlags)` — partial autocorrelation via the Levinson-Durbin recursion on the existing
+  biased `acf`; matches `statsmodels.tsa.stattools.pacf(..., method='ldb')` (pinned:
+  `[1,2,3,2,1,2,3,2,1,2,3,2]`, nlags=3 → `[1, 0, -0.8333..., 0]`).
+- `ljungBox(x, lags)` — portmanteau test for residual autocorrelation, `Q =
+  n(n+2)Σρ_k²/(n−k)`, `pValue = 1 − chiSquaredCDF(Q, lags)`; matches
+  `statsmodels.stats.diagnostic.acorr_ljungbox` (pinned: `[1,2,1,2,...]` (n=10), lags=3 →
+  `Q=28.8`).
+- `durbinWatson(residuals)` — `Σ(eₜ−eₜ₋₁)²/Σeₜ²`; matches
+  `statsmodels.stats.stattools.durbin_watson` exactly (verified: alternating `[1,-1,...]`,
+  n=6 → `10/3`, **not** the textbook asymptotic "~4" bound, which only holds as n→∞).
+- `adfuller(x[, maxlag])` — Augmented Dickey-Fuller unit-root test (constant-only model) via
+  OLS of `Δxₜ` on `[1, xₜ₋₁, Δxₜ₋₁, …]` (reusing `ols`); default `maxlag =
+  floor(12(n/100)^0.25)`, auto-clamped downward when the design is ill-posed (insufficient
+  observations or a near-singular/NaN-producing fit). `pValue` uses a small built-in
+  MacKinnon (1994)-style critical-value table with linear interpolation — an **approximate**
+  p-value, documented as such (not the exact MacKinnon response-surface method).
+
+Documented in `docs/reference/functions.md` under Statistics → new "Time-series inference"
+subsection.
+
 ### Added — `kendallTauTest` (Phase 4 Task 2)
 
 Added `kendallTauTest(x, y)` — Kendall's τ_b rank-correlation test returning `{ tau, pValue }`

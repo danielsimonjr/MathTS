@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1043
+  totalFiles: 1044
   totalModules: 80
-  totalExports: 5053
+  totalExports: 5063
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7488,6 +7488,13 @@ modules:
             - detrend
             - acf
           reExport: true
+        - file: ./stats/timeseries.js
+          imports:
+            - pacf
+            - ljungBox
+            - durbinWatson
+            - adfuller
+          reExport: true
         - file: ./regression-extra.js
           imports:
             - linearRegression
@@ -7626,6 +7633,12 @@ modules:
           imports:
             - QuadOptions
             - QuadResult
+          reExport: true
+          typeOnly: true
+        - file: ./stats/timeseries.js
+          imports:
+            - LjungBoxResult
+            - AdfullerResult
           reExport: true
           typeOnly: true
         - file: ./regression-extra.js
@@ -7805,6 +7818,10 @@ modules:
         - ewma
         - detrend
         - acf
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
         - linearRegression
         - ols
         - ridge
@@ -7866,6 +7883,8 @@ modules:
         - MinimizeScalarResult
         - QuadOptions
         - QuadResult
+        - LjungBoxResult
+        - AdfullerResult
         - LinregressResult
         - OlsOptions
         - OlsResult
@@ -7992,6 +8011,10 @@ modules:
         - ewma
         - detrend
         - acf
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
         - linearRegression
         - ols
         - ridge
@@ -8053,6 +8076,8 @@ modules:
         - MinimizeScalarResult
         - QuadOptions
         - QuadResult
+        - LjungBoxResult
+        - AdfullerResult
         - LinregressResult
         - OlsOptions
         - OlsResult
@@ -13766,6 +13791,34 @@ modules:
       functions:
         - chi2Contingency
         - multipleTest
+    functions/src/stats/timeseries.ts:
+      description: Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../timeseries-extra.js
+          imports:
+            - acf
+        - file: ../distribution-functions.js
+          imports:
+            - chiSquaredCDF
+        - file: ../ml/ols.js
+          imports:
+            - ols
+      workspaceDependencies: []
+      exports:
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
+      interfaces:
+        - LjungBoxResult
+        - AdfullerResult
+      functions:
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
   functions/string:
     functions/src/string/bin.ts:
       description: Format a number as binary.
@@ -32486,6 +32539,7 @@ dependencyGraph:
       files:
         - functions/src/stats/fit-distribution.ts
         - functions/src/stats/inference-extra.ts
+        - functions/src/stats/timeseries.ts
     - name: Functions/string
       files:
         - functions/src/string/bin.ts
@@ -33236,18 +33290,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1043
+  totalTypeScriptFiles: 1044
   totalModules: 80
-  totalLinesOfCode: 174992
-  totalExports: 5053
+  totalLinesOfCode: 175219
+  totalExports: 5063
   totalClasses: 56
-  totalInterfaces: 440
-  totalFunctions: 1642
+  totalInterfaces: 442
+  totalFunctions: 1646
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1862
-  totalTypeOnlyImports: 537
+  totalReExports: 1868
+  totalTypeOnlyImports: 538
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
