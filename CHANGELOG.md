@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Graph traversal, all-pairs shortest paths, and distance centrality (Phase 8 Task 1)
+
+Added `functions/src/graph/traversal-centrality.ts`, exported from `@danielsimonjr/mathts-functions`:
+`bfs`/`dfs` (visitation-order traversal), all-pairs `floydWarshall`, single-source `bellmanFord`
+(negative-weight/cycle-aware), and `closenessCentrality`/`harmonicCentrality` — complementing the
+existing Dijkstra `shortestPath`/`graphDistance` in `typed/graph.ts`.
+
+- `bfs(adj, start)` / `dfs(adj, start)` — visitation order over a directed adjacency-matrix reading
+  (any finite, nonzero off-diagonal `adj[i][j]` is an edge i → j; neighbors visited in ascending
+  index order; the matrix is never symmetrized).
+- `floydWarshall(adj)` — all-pairs shortest-path distances via the standard O(V³) triple loop;
+  tolerates negative edge weights (both `Infinity` and `0` off-diagonal mean "no edge").
+- `bellmanFord(adj, source)` — single-source shortest paths, negative-weight-aware: relaxes all
+  edges `|V|-1` times then one more pass to detect a negative-weight cycle reachable from the
+  source, returning `{ dist, hasNegativeCycle }`.
+- `closenessCentrality(adj)` / `harmonicCentrality(adj)` — distance-based centrality built on
+  `floydWarshall`, pinned against `networkx.closeness_centrality`/`harmonic_centrality`. Matches
+  networkx's directed-graph default of summing *incoming* distances to a node; `closenessCentrality`
+  applies the Wasserman–Faust disconnected-graph scaling `(r-1)/(n-1) · (r-1)/Σd`.
+
 ### Added — Control-theory matrix equations: dlyap/care/dare (Phase 7 Task 5)
 
 Added `functions/src/numeric/control-equations.ts`, exported from `@danielsimonjr/mathts-functions`:

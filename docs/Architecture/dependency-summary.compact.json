@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1062, "e": 5273, "re": 1968 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1063, "e": 5286, "re": 1975 },
   "s": {
-    "loc": 180906,
+    "loc": 181244,
     "cls": 56,
-    "int": 463,
-    "fn": 1750,
+    "int": 464,
+    "fn": 1756,
     "tg": 159,
     "en": 0,
     "co": 1542,
-    "toi": 546
+    "toi": 547
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -622,6 +622,18 @@
         "fftGpuDispatch"
       ],
       "int": ["GpuChainOptions", "GpuFftOptions", "GpuFftResult"]
+    },
+    "functions/graph": {
+      "f": 1,
+      "exp": [
+        "bfs",
+        "dfs",
+        "floydWarshall",
+        "bellmanFord",
+        "closenessCentrality",
+        "harmonicCentrality"
+      ],
+      "int": ["BellmanFordResult"]
     },
     "functions/logical": {
       "f": 5,
@@ -1742,7 +1754,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 82, "o": 0 },
+    { "p": "src/index.ts", "i": 84, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

@@ -2166,6 +2166,12 @@ Algorithms over adjacency-matrix representations.
 | `pageRank(adj[, opts])`              | PageRank centrality (power iteration; `dampingFactor` default 0.85) — `async` |
 | `betweennessCentrality(adj[, opts])` | Brandes betweenness centrality — `async`                                      |
 | `eigenvectorCentrality(adj[, opts])` | Power-iteration eigenvector centrality — `async`                              |
+| `bfs(adj, start)`                    | Breadth-first traversal order (ascending-index neighbor visitation)           |
+| `dfs(adj, start)`                    | Depth-first traversal order (ascending-index neighbor visitation)             |
+| `floydWarshall(adj)`                 | All-pairs shortest-path distances (negative weights okay)                     |
+| `bellmanFord(adj, source)`           | Single-source shortest paths + negative-cycle detection                       |
+| `closenessCentrality(adj)`           | Distance-based closeness centrality (networkx convention)                     |
+| `harmonicCentrality(adj)`            | Distance-based harmonic centrality (networkx convention)                      |
 
 ### Details
 
@@ -2177,6 +2183,23 @@ Algorithms over adjacency-matrix representations.
   topological order impossible.
 - `stronglyConnectedComponents` (Kosaraju's algorithm) applies to directed
   graphs; `connectedComponents` to undirected ones.
+- `bfs`/`dfs` treat any finite, nonzero off-diagonal `adj[i][j]` as a directed
+  edge i → j (visited in ascending neighbor-index order); the graph is read
+  as directed and never symmetrized.
+- `floydWarshall` computes all-pairs distances in O(V³) and tolerates
+  negative edge weights (both `Infinity` and `0` off-diagonal mean "no
+  edge"); a negative value left on the diagonal after the triple loop
+  indicates a negative cycle through that node, but this is not flagged —
+  use `bellmanFord` for explicit detection.
+- `bellmanFord` returns `{ dist, hasNegativeCycle }` for a single source,
+  relaxing all edges `|V|-1` times then one more pass to detect a
+  negative-weight cycle reachable from the source.
+- `closenessCentrality`/`harmonicCentrality` are built on `floydWarshall` and
+  match `networkx.closeness_centrality`/`harmonic_centrality`'s directed-graph
+  default: they sum _incoming_ distances to a node (how reachable it is from
+  the rest of the graph), not outgoing. `closenessCentrality` applies the
+  Wasserman–Faust disconnected-graph scaling `(r-1)/(n-1) · (r-1)/Σd`, which
+  reduces to `(n-1)/Σd` when every node is reachable.
 
 ### Background & History
 
@@ -2649,7 +2672,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (986 exports).
+> `@danielsimonjr/mathts-functions` (995 exports).
 
 ### Functions by category
 
@@ -2671,7 +2694,7 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (88): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `linsolve`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (91): `bicgstab`, `care`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `dare`, `det`, `disableGpu`, `dlyap`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `linsolve`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2689,7 +2712,7 @@ await terminatePool();
 
 **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 
-**Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
+**Graph Theory** (17): `adjacencyMatrix`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphDistance`, `harmonicCentrality`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
 **Hypothesis Tests** (31): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 

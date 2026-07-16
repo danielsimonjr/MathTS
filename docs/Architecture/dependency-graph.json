@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1062,
-    "totalModules": 81,
-    "totalExports": 5273
+    "totalFiles": 1063,
+    "totalModules": 82,
+    "totalExports": 5286
   },
   "entryPoints": [
     {
@@ -8246,6 +8246,18 @@
             "reExport": true
           },
           {
+            "file": "./graph/traversal-centrality.js",
+            "imports": [
+              "bfs",
+              "dfs",
+              "floydWarshall",
+              "bellmanFord",
+              "closenessCentrality",
+              "harmonicCentrality"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8435,6 +8447,12 @@
           {
             "file": "./numeric/gauss-nodes.js",
             "imports": ["RootsLegendreResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./graph/traversal-centrality.js",
+            "imports": ["BellmanFordResult"],
             "reExport": true,
             "typeOnly": true
           }
@@ -8668,6 +8686,12 @@
           "jacobiCN",
           "jacobiDN",
           "rootsLegendre",
+          "bfs",
+          "dfs",
+          "floydWarshall",
+          "bellmanFord",
+          "closenessCentrality",
+          "harmonicCentrality",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8740,7 +8764,8 @@
           "McNemarOptions",
           "McNemarResult",
           "CochranQResult",
-          "RootsLegendreResult"
+          "RootsLegendreResult",
+          "BellmanFordResult"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -8962,6 +8987,12 @@
           "jacobiCN",
           "jacobiDN",
           "rootsLegendre",
+          "bfs",
+          "dfs",
+          "floydWarshall",
+          "bellmanFord",
+          "closenessCentrality",
+          "harmonicCentrality",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -9034,7 +9065,8 @@
           "McNemarOptions",
           "McNemarResult",
           "CochranQResult",
-          "RootsLegendreResult"
+          "RootsLegendreResult",
+          "BellmanFordResult"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -11657,6 +11689,32 @@
         "exports": ["resetGpuFft", "fftGpuDispatch"],
         "interfaces": ["GpuFftOptions", "GpuFftResult"],
         "functions": ["resetGpuFft", "fftGpuDispatch"]
+      }
+    },
+    "functions/graph": {
+      "functions/src/graph/traversal-centrality.ts": {
+        "description": "Graph Traversal, All-Pairs Shortest Paths, and Distance-Based Centrality",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "bfs",
+          "dfs",
+          "floydWarshall",
+          "bellmanFord",
+          "closenessCentrality",
+          "harmonicCentrality"
+        ],
+        "interfaces": ["BellmanFordResult"],
+        "functions": [
+          "bfs",
+          "dfs",
+          "floydWarshall",
+          "bellmanFord",
+          "closenessCentrality",
+          "harmonicCentrality"
+        ]
       }
     },
     "functions/logical": {
@@ -35395,6 +35453,10 @@
         "files": ["functions/src/gpu/elementwise-gpu.ts", "functions/src/gpu/fft-gpu.ts"]
       },
       {
+        "name": "Functions/graph",
+        "files": ["functions/src/graph/traversal-centrality.ts"]
+      },
+      {
         "name": "Functions/logical",
         "files": [
           "functions/src/logical/and.ts",
@@ -36435,18 +36497,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1062,
-    "totalModules": 81,
-    "totalLinesOfCode": 180906,
-    "totalExports": 5273,
+    "totalTypeScriptFiles": 1063,
+    "totalModules": 82,
+    "totalLinesOfCode": 181244,
+    "totalExports": 5286,
     "totalClasses": 56,
-    "totalInterfaces": 463,
-    "totalFunctions": 1750,
+    "totalInterfaces": 464,
+    "totalFunctions": 1756,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1968,
-    "totalTypeOnlyImports": 546,
+    "totalReExports": 1975,
+    "totalTypeOnlyImports": 547,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

@@ -429,3 +429,17 @@ export { polygamma, trigamma, jacobiP, gegenbauerC } from './special/polygamma-o
 export { jacobiSN, jacobiCN, jacobiDN } from './special/jacobi-elliptic.js';
 export { rootsLegendre } from './numeric/gauss-nodes.js';
 export type { RootsLegendreResult } from './numeric/gauss-nodes.js';
+
+// Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
+// single-source Bellman-Ford (negative-weight/cycle-aware), and
+// closeness/harmonic centrality, complementing the existing Dijkstra
+// shortestPath/graphDistance in typed/graph.ts.
+export {
+  bfs,
+  dfs,
+  floydWarshall,
+  bellmanFord,
+  closenessCentrality,
+  harmonicCentrality,
+} from './graph/traversal-centrality.js';
+export type { BellmanFordResult } from './graph/traversal-centrality.js';
