@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1037, "e": 5016, "re": 1837 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1038, "e": 5025, "re": 1843 },
   "s": {
-    "loc": 173795,
+    "loc": 174063,
     "cls": 56,
-    "int": 428,
-    "fn": 1630,
+    "int": 431,
+    "fn": 1633,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 532
+    "toi": 533
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -660,7 +660,17 @@
         "Dependencies"
       ]
     },
-    "functions/ml": { "f": 1, "exp": ["ols"], "int": ["OlsOptions", "OlsResult"] },
+    "functions/ml": {
+      "f": 2,
+      "exp": ["ols", "ridge", "lasso", "elasticNet"],
+      "int": [
+        "OlsOptions",
+        "OlsResult",
+        "RidgeOptions",
+        "CoordinateDescentOptions",
+        "RegularizedRegressionResult"
+      ]
+    },
     "functions/numeric": {
       "f": 8,
       "exp": [
@@ -1625,8 +1635,8 @@
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
+    { "p": "src/index.ts", "i": 47, "o": 0 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "src/index.ts", "i": 45, "o": 0 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
     { "p": "utils/is.ts", "i": 0, "o": 40 }
   ]

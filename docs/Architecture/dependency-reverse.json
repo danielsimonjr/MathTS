@@ -1648,6 +1648,7 @@
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/ols.ts": ["functions/src/index.ts"],
+    "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
@@ -1958,6 +1959,7 @@
       "functions/src/utils/map.ts"
     ],
     "functions/src/typed/numeric.ts": [
+      "functions/src/ml/regularized-regression.ts",
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/nnls.ts",
       "functions/src/typed/index.ts"

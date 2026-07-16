@@ -190,6 +190,14 @@ export type { LinregressResult } from './regression-extra.js';
 export { ols } from './ml/ols.js';
 export type { OlsOptions, OlsResult } from './ml/ols.js';
 
+// Phase 3 Task 2 — regularized regression (ridge/lasso/elastic net).
+export { ridge, lasso, elasticNet } from './ml/regularized-regression.js';
+export type {
+  RidgeOptions,
+  CoordinateDescentOptions,
+  RegularizedRegressionResult,
+} from './ml/regularized-regression.js';
+
 // Gap-analysis Wave D — named optimizers + nonlinear least squares.
 export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
 export type { OptimizeResult, LMResult } from './optimization-extra.js';

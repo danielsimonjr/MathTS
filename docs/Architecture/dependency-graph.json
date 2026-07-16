@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1037,
+    "totalFiles": 1038,
     "totalModules": 79,
-    "totalExports": 5016
+    "totalExports": 5025
   },
   "entryPoints": [
     {
@@ -8062,6 +8062,11 @@
             "reExport": true
           },
           {
+            "file": "./ml/regularized-regression.js",
+            "imports": ["ridge", "lasso", "elasticNet"],
+            "reExport": true
+          },
+          {
             "file": "./optimization-extra.js",
             "imports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
             "reExport": true
@@ -8181,6 +8186,12 @@
           {
             "file": "./ml/ols.js",
             "imports": ["OlsOptions", "OlsResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ml/regularized-regression.js",
+            "imports": ["RidgeOptions", "CoordinateDescentOptions", "RegularizedRegressionResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8321,6 +8332,9 @@
           "acf",
           "linearRegression",
           "ols",
+          "ridge",
+          "lasso",
+          "elasticNet",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8371,6 +8385,9 @@
           "LinregressResult",
           "OlsOptions",
           "OlsResult",
+          "RidgeOptions",
+          "CoordinateDescentOptions",
+          "RegularizedRegressionResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -8484,6 +8501,9 @@
           "acf",
           "linearRegression",
           "ols",
+          "ridge",
+          "lasso",
+          "elasticNet",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8534,6 +8554,9 @@
           "LinregressResult",
           "OlsOptions",
           "OlsResult",
+          "RidgeOptions",
+          "CoordinateDescentOptions",
+          "RegularizedRegressionResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -12638,6 +12661,21 @@
         "exports": ["ols"],
         "interfaces": ["OlsOptions", "OlsResult"],
         "functions": ["ols"]
+      },
+      "functions/src/ml/regularized-regression.ts": {
+        "description": "Regularized linear regression — ridge (L2), lasso (L1), and elastic net (L1+L2).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["linsolve"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["ridge", "lasso", "elasticNet"],
+        "interfaces": ["RidgeOptions", "CoordinateDescentOptions", "RegularizedRegressionResult"],
+        "functions": ["ridge", "lasso", "elasticNet"]
       }
     },
     "functions/numeric": {
@@ -34456,7 +34494,7 @@
       },
       {
         "name": "Functions/ml",
-        "files": ["functions/src/ml/ols.ts"]
+        "files": ["functions/src/ml/ols.ts", "functions/src/ml/regularized-regression.ts"]
       },
       {
         "name": "Functions/numeric",
@@ -35397,18 +35435,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1037,
+    "totalTypeScriptFiles": 1038,
     "totalModules": 79,
-    "totalLinesOfCode": 173795,
-    "totalExports": 5016,
+    "totalLinesOfCode": 174063,
+    "totalExports": 5025,
     "totalClasses": 56,
-    "totalInterfaces": 428,
-    "totalFunctions": 1630,
+    "totalInterfaces": 431,
+    "totalFunctions": 1633,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1837,
-    "totalTypeOnlyImports": 532,
+    "totalReExports": 1843,
+    "totalTypeOnlyImports": 533,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

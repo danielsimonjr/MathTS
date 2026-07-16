@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `ridge`/`lasso`/`elasticNet` regularized regression (Phase 3 Task 2)
+
+Added `ridge(X, y, alpha, opts?)` — closed-form L2-penalized regression (`β = (XᵀX + αI)⁻¹Xᵀy` on
+centered data). Added `lasso(X, y, alpha, opts?)` — L1-penalized regression via cyclic coordinate
+descent with soft-thresholding on standardized columns, giving exact sparsity for large `alpha`.
+Added `elasticNet(X, y, alpha, l1Ratio, opts?)` — combined L1/L2 via the same coordinate descent
+(`l1Ratio` mixes lasso and ridge penalties). All three center X/y so the intercept is never
+penalized, and recover `intercept = ȳ − x̄·β` on the original scale. Verified directionally vs
+scikit-learn 1.8.0 (`Ridge`/`Lasso`): `alpha=0` recovers the OLS slope (`y=2x` -> `2.0`); large
+`alpha` shrinks ridge toward 0 and drives lasso exactly to 0.
+
 ### Added — `ols(X, y)` multiple regression with inference (Phase 3 Task 1)
 
 Added `ols(X, y, opts?)` — multiple/multivariate linear regression over a general design matrix
