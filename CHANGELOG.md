@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `windowFunction` silently returned a rectangular window for unknown types
+
+`windowFunction(n, type)`'s `switch` `default` case was shared with `'rectangular'`/`'rect'` and
+filled the window with ones, so every unimplemented window type (`kaiser`/`tukey`/`gaussian`/
+`blackmanharris`/…) silently returned a rectangular window instead of an error. `rectangular`/
+`rect` now have their own explicit case; `default` throws `windowFunction: unknown window type
+'<type>'`. Implementing the missing window types is a later phase.
+
 ### Fixed — `lambertW`'s documented `branch` argument was unimplemented
 
 The docs promised `lambertW(x[, branch])` (`branch = 0` for the principal branch, `branch = -1`

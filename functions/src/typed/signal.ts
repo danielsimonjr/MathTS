@@ -1447,9 +1447,10 @@ export function windowFunction(n: i32, type: string): number[] {
       break;
     case 'rectangular':
     case 'rect':
-    default:
       for (let i: i32 = 0; i < n; i++) w[i] = 1;
       break;
+    default:
+      throw new Error(`windowFunction: unknown window type '${type}'`);
   }
 
   return w;
