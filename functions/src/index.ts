@@ -198,6 +198,13 @@ export type {
   RegularizedRegressionResult,
 } from './ml/regularized-regression.js';
 
+// Phase 3 Task 3 — binary logistic regression via IRLS (first classifier/GLM).
+export { logisticRegression } from './ml/logistic-regression.js';
+export type {
+  LogisticRegressionOptions,
+  LogisticRegressionResult,
+} from './ml/logistic-regression.js';
+
 // Gap-analysis Wave D — named optimizers + nonlinear least squares.
 export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
 export type { OptimizeResult, LMResult } from './optimization-extra.js';

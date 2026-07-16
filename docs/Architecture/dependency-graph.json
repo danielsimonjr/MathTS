@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1038,
+    "totalFiles": 1039,
     "totalModules": 79,
-    "totalExports": 5025
+    "totalExports": 5029
   },
   "entryPoints": [
     {
@@ -8067,6 +8067,11 @@
             "reExport": true
           },
           {
+            "file": "./ml/logistic-regression.js",
+            "imports": ["logisticRegression"],
+            "reExport": true
+          },
+          {
             "file": "./optimization-extra.js",
             "imports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
             "reExport": true
@@ -8192,6 +8197,12 @@
           {
             "file": "./ml/regularized-regression.js",
             "imports": ["RidgeOptions", "CoordinateDescentOptions", "RegularizedRegressionResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ml/logistic-regression.js",
+            "imports": ["LogisticRegressionOptions", "LogisticRegressionResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8335,6 +8346,7 @@
           "ridge",
           "lasso",
           "elasticNet",
+          "logisticRegression",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8388,6 +8400,8 @@
           "RidgeOptions",
           "CoordinateDescentOptions",
           "RegularizedRegressionResult",
+          "LogisticRegressionOptions",
+          "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -8504,6 +8518,7 @@
           "ridge",
           "lasso",
           "elasticNet",
+          "logisticRegression",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8557,6 +8572,8 @@
           "RidgeOptions",
           "CoordinateDescentOptions",
           "RegularizedRegressionResult",
+          "LogisticRegressionOptions",
+          "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -12647,6 +12664,21 @@
       }
     },
     "functions/ml": {
+      "functions/src/ml/logistic-regression.ts": {
+        "description": "Binary logistic regression via IRLS (Wave — ML primitives, Phase 3 Task 3).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["linsolve"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["logisticRegression"],
+        "interfaces": ["LogisticRegressionOptions", "LogisticRegressionResult"],
+        "functions": ["logisticRegression"]
+      },
       "functions/src/ml/ols.ts": {
         "description": "Ordinary least-squares regression for a general design matrix (Wave — ML primitives).",
         "externalDependencies": [],
@@ -34494,7 +34526,11 @@
       },
       {
         "name": "Functions/ml",
-        "files": ["functions/src/ml/ols.ts", "functions/src/ml/regularized-regression.ts"]
+        "files": [
+          "functions/src/ml/logistic-regression.ts",
+          "functions/src/ml/ols.ts",
+          "functions/src/ml/regularized-regression.ts"
+        ]
       },
       {
         "name": "Functions/numeric",
@@ -35435,18 +35471,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1038,
+    "totalTypeScriptFiles": 1039,
     "totalModules": 79,
-    "totalLinesOfCode": 174063,
-    "totalExports": 5025,
+    "totalLinesOfCode": 174232,
+    "totalExports": 5029,
     "totalClasses": 56,
-    "totalInterfaces": 431,
-    "totalFunctions": 1633,
+    "totalInterfaces": 433,
+    "totalFunctions": 1634,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1843,
-    "totalTypeOnlyImports": 533,
+    "totalReExports": 1846,
+    "totalTypeOnlyImports": 534,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

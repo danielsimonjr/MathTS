@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `logisticRegression(X, y)` binary classifier via IRLS (Phase 3 Task 3)
+
+Added `logisticRegression(X, y, opts?)` — binary logistic regression (`y ∈ {0,1}`) fit by
+iteratively reweighted least squares (Newton-Raphson on the Bernoulli log-likelihood): each step
+solves `(XᵀWX) Δ = Xᵀ(y - p)` for the Newton update, `W = diag(p(1-p))` (floored at `1e-9`), via
+`linsolve`. Returns `{ coefficients, intercept, predict, predictProba }` — the first
+classifier/GLM in the library. A small ridge term (`1e-8`) on `XᵀWX`'s diagonal keeps the solve
+stable when predictors are exactly or near-collinear (a rank-deficient design would otherwise abort
+IRLS on its first step), and the Newton step is capped at a max-norm of 25 to keep perfectly
+separable data (where the unconstrained MLE diverges) from overshooting into NaN. Pinned: separable
+1-D data gives a positive slope and `predictProba([[0]]) ≈ 0.5` at the symmetric boundary; a 2-D
+collinear-but-separable case still classifies both sides correctly.
+
 ### Added — `ridge`/`lasso`/`elasticNet` regularized regression (Phase 3 Task 2)
 
 Added `ridge(X, y, alpha, opts?)` — closed-form L2-penalized regression (`β = (XᵀX + αI)⁻¹Xᵀy` on
