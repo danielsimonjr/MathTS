@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.29.0
+
+### Minor Changes
+
+- Phase 1 foundational numeric primitives (oracle-gap roadmap): `numericJacobian(f, x0)` (central-difference Jacobian for F:ℝⁿ→ℝᵐ) and a polymorphic `jacobian` (numeric when the first arg is a function; symbolic path unchanged); open scalar root-finders `newton`/`secant`/`halley` (complementing the bracketing `findRoot`); nonlinear system solver `fsolve`/`root` (damped Newton with backtracking line search); scalar minimizer `minimizeScalar` (Brent); adaptive Gauss–Kronrod `quad` (G7–K15 with error estimate) which also fixes `nintegrate`'s endpoint-singular accuracy (∫₀¹ x^-1/2 was ~1.7e-6 off, now ~1e-10); and full `svd` (re-exported from the matrix package) plus `orth` (column-space basis) on the functions surface. All oracle-pinned vs scipy/numpy/closed forms.
+
 ## 0.28.0
 
 ### Minor Changes
