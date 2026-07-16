@@ -24,13 +24,23 @@
  *     any polynomial or entire function `f` (cos, sin, sqrt, exp, log, …)
  *     whenever the spectrum is simple.
  *
- * Limitation (documented, not yet implemented): matrices with repeated (or
- * numerically indistinguishable) eigenvalues that are NOT diagonal — i.e.
- * genuinely defective/non-diagonalizable matrices, or diagonalizable
- * matrices with a repeated eigenvalue and off-diagonal structure — are not
- * supported; `funm` throws rather than silently return a wrong answer. A
- * full Schur-Parlett block recurrence (Higham 2008 Ch. 9) would lift this
- * restriction; that is future work, not required by the current call sites.
+ * Defective / repeated-eigenvalue matrices (confluent Hermite interpolation):
+ *   - When eigenvalues repeat (or cluster within `EIGENVALUE_DISTINCT_REL_TOL`),
+ *     `f(A)` depends on `f` AND its derivatives at each repeated eigenvalue —
+ *     for a Jordan block `J = λI + N` (N nilpotent, `N^s = 0`),
+ *       f(J) = Σ_{k=0}^{s-1} f^(k)(λ)/k! · N^k.
+ *     `funm` builds the confluent node list (each distinct eigenvalue repeated
+ *     to its multiplicity) and evaluates the Newton divided-difference form
+ *       f(A) = Σ_k f[z_0,…,z_k] · Π_{i<k}(A − z_i I),
+ *     where a run of equal nodes contributes the Taylor coefficient
+ *     `f^(L)(z)/L!`. This subsumes the simple-spectrum Lagrange path.
+ *   - Derivatives of `f` come from the optional `fDerivs` argument
+ *     (`fDerivs[k] = f^(k+1)`, machine precision — wired for `cosm`/`sinm`) or,
+ *     when omitted, from finite-difference stencils (~1e-6 accuracy).
+ *   - `funm` throws (rather than return a wrong/`NaN` answer) only when `f` or a
+ *     derivative is genuinely singular at a repeated eigenvalue (e.g.
+ *     `sqrt`/`log` at 0) or when a needed numerical derivative order exceeds the
+ *     built-in stencils (multiplicity > 5 with no analytic derivatives).
  *
  * @packageDocumentation
  */
@@ -60,6 +70,15 @@ function cSub(a: ComplexValue, b: ComplexValue): ComplexValue {
   return { re: a.re - b.re, im: a.im - b.im };
 }
 
+function cAdd(a: ComplexValue, b: ComplexValue): ComplexValue {
+  return { re: a.re + b.re, im: a.im + b.im };
+}
+
+/** Multiply a complex number by a real scalar. */
+function cScale(a: ComplexValue, s: number): ComplexValue {
+  return { re: a.re * s, im: a.im * s };
+}
+
 function cMul(a: ComplexValue, b: ComplexValue): ComplexValue {
   return { re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re };
 }
@@ -79,6 +98,13 @@ function cZeros(n: number): ComplexMatrix {
     re: Array.from({ length: n }, () => new Array(n).fill(0)),
     im: Array.from({ length: n }, () => new Array(n).fill(0)),
   };
+}
+
+/** `n x n` complex identity matrix. */
+function cIdentity(n: number): ComplexMatrix {
+  const m = cZeros(n);
+  for (let i = 0; i < n; i++) m.re[i][i] = 1;
+  return m;
 }
 
 /** Embed a real matrix as a complex matrix (zero imaginary part). */
@@ -166,23 +192,158 @@ function isDiagonal(A: number[][], n: number): boolean {
   return true;
 }
 
+/** A distinct eigenvalue and how many times it occurs in the spectrum. */
+interface EigCluster {
+  value: ComplexValue;
+  count: number;
+}
+
+/**
+ * Cluster a spectrum into distinct eigenvalues with multiplicities. Two
+ * eigenvalues within `tol` of each other are the "same" (defective / repeated
+ * case); the cluster representative is the running mean of its members (more
+ * robust than picking one QR-perturbed value). Σ(count) = spectrum length.
+ */
+function clusterEigenvalues(values: ComplexValue[], tol: number): EigCluster[] {
+  const acc: { sumRe: number; sumIm: number; count: number }[] = [];
+  for (const v of values) {
+    let placed = false;
+    for (const c of acc) {
+      const rep = { re: c.sumRe / c.count, im: c.sumIm / c.count };
+      if (cAbs(cSub(v, rep)) < tol) {
+        c.sumRe += v.re;
+        c.sumIm += v.im;
+        c.count += 1;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) acc.push({ sumRe: v.re, sumIm: v.im, count: 1 });
+  }
+  return acc.map((c) => ({
+    value: { re: c.sumRe / c.count, im: c.sumIm / c.count },
+    count: c.count,
+  }));
+}
+
+/** k! as a floating-point number (k small — bounded by matrix dimension). */
+function factorialNum(k: number): number {
+  let r = 1;
+  for (let i = 2; i <= k; i++) r *= i;
+  return r;
+}
+
+/**
+ * `f^(order)(z)` by a central finite-difference stencil (perturbing the real
+ * part; for analytic `f` the real-direction derivative equals the complex
+ * derivative). Steps are order-tuned to balance truncation vs round-off; these
+ * are O(h²)-accurate and honest to ~1e-6..1e-10, NOT machine precision — supply
+ * analytic derivatives via `funm`'s third argument for full accuracy.
+ */
+function numericalDerivative(
+  f: ScalarComplexFunction,
+  z: ComplexValue,
+  order: number
+): ComplexValue {
+  const at = (dx: number): ComplexValue => f({ re: z.re + dx, im: z.im });
+  switch (order) {
+    case 1: {
+      const h = 1e-6;
+      return cScale(cSub(at(h), at(-h)), 1 / (2 * h));
+    }
+    case 2: {
+      const h = 1e-4;
+      const t = cSub(cAdd(at(h), at(-h)), cScale(at(0), 2));
+      return cScale(t, 1 / (h * h));
+    }
+    case 3: {
+      const h = 1e-3;
+      // (f(2h) - 2f(h) + 2f(-h) - f(-2h)) / (2 h^3)
+      const t = cSub(cAdd(at(2 * h), cScale(at(-h), 2)), cAdd(cScale(at(h), 2), at(-2 * h)));
+      return cScale(t, 1 / (2 * h * h * h));
+    }
+    case 4: {
+      const h = 1e-2;
+      // (f(2h) - 4f(h) + 6f(0) - 4f(-h) + f(-2h)) / h^4
+      let t = at(2 * h);
+      t = cSub(t, cScale(at(h), 4));
+      t = cAdd(t, cScale(at(0), 6));
+      t = cSub(t, cScale(at(-h), 4));
+      t = cAdd(t, at(-2 * h));
+      return cScale(t, 1 / (h * h * h * h));
+    }
+    default:
+      throw new Error(
+        `funm: numerical derivatives of order ${order} are not supported (eigenvalue ` +
+          `multiplicity ${order + 1} exceeds the finite-difference stencils); supply analytic ` +
+          `derivatives via the fDerivs argument (fDerivs[k] = f^(k+1))`
+      );
+  }
+}
+
+/**
+ * Taylor coefficients `f^(L)(z)/L!` for `L = 0..maxOrder` at a repeated
+ * eigenvalue `z`. `fDerivs[k]` (if supplied and long enough) is `f^(k+1)`
+ * (machine precision); otherwise the derivative is computed numerically.
+ */
+function taylorCoeffs(
+  f: ScalarComplexFunction,
+  fDerivs: ScalarComplexFunction[] | undefined,
+  z: ComplexValue,
+  maxOrder: number
+): ComplexValue[] {
+  const coeffs: ComplexValue[] = [f(z)];
+  for (let L = 1; L <= maxOrder; L++) {
+    const deriv = fDerivs && fDerivs.length >= L ? fDerivs[L - 1](z) : numericalDerivative(f, z, L);
+    coeffs.push(cScale(deriv, 1 / factorialNum(L)));
+  }
+  return coeffs;
+}
+
+/** True iff every entry of the complex matrix is finite. */
+function cIsFinite(M: ComplexMatrix): boolean {
+  for (let i = 0; i < M.re.length; i++) {
+    for (let j = 0; j < M.re.length; j++) {
+      if (!Number.isFinite(M.re[i][j]) || !Number.isFinite(M.im[i][j])) return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Evaluate the matrix function `f(A)` for a square real matrix `A`, returning
  * a complex matrix `{re, im}`.
  *
- * Supports diagonal matrices unconditionally (exact, elementwise), and
- * general diagonalizable matrices whose eigenvalues are pairwise distinct
- * (Lagrange-Sylvester interpolation on the spectrum — see module docs).
- * Throws for matrices with repeated or numerically indistinguishable
- * eigenvalues that are not diagonal (defective / non-diagonalizable case;
- * not yet supported — see module docs for the Schur-Parlett follow-up).
+ * Supports:
+ *   - diagonal matrices unconditionally (exact, elementwise);
+ *   - diagonalizable matrices with pairwise-distinct eigenvalues
+ *     (Lagrange-Sylvester interpolation — the fast simple-spectrum branch);
+ *   - defective / non-diagonalizable matrices with repeated (or numerically
+ *     clustered) eigenvalues, via **confluent Hermite interpolation** (Newton
+ *     divided differences over repeated eigenvalue nodes). A matrix function of
+ *     a defective matrix depends on `f` AND its derivatives at each repeated
+ *     eigenvalue (for a Jordan block `J = λI + N`, `f(J) = Σ_k f^(k)(λ)/k! · N^k`),
+ *     so this branch needs derivatives of `f`: pass them analytically via
+ *     `fDerivs` for machine precision, or they are approximated numerically.
+ *
+ * Throws (rather than return a wrong/`NaN` answer) when `f` or its derivatives
+ * are singular at a repeated eigenvalue (e.g. `sqrt`/`log` at 0), or when a
+ * needed numerical derivative order exceeds the built-in stencils.
  *
  * @param A - Square real matrix, as a plain 2-D array.
- * @param f - Scalar function to apply to each eigenvalue, e.g. `cos`, `sin`,
+ * @param f - Scalar function to apply to the spectrum, e.g. `cos`, `sin`,
  *   `sqrt`, `exp`, `log`, extended to complex arguments.
+ * @param fDerivs - Optional analytic derivatives of `f`: `fDerivs[k]` is
+ *   `f^(k+1)`. Needed only for defective matrices; when omitted, derivatives
+ *   are computed by finite differences (~1e-6 accuracy). Additive and
+ *   non-breaking — distinct-spectrum inputs never consult it.
  * @returns `{ re, im }` — the (possibly complex) matrix `f(A)`.
  */
-export function funm(A: number[][], f: ScalarComplexFunction): ComplexMatrix {
+export function funm(
+  A: number[][],
+  f: ScalarComplexFunction,
+  fDerivs?: ScalarComplexFunction[]
+): ComplexMatrix {
   const n = A.length;
   if (n === 0) return { re: [], im: [] };
   for (const row of A) {
@@ -203,37 +364,81 @@ export function funm(A: number[][], f: ScalarComplexFunction): ComplexMatrix {
 
   const maxAbs = values.reduce((m, v) => Math.max(m, cAbs(v)), 0);
   const tol = EIGENVALUE_DISTINCT_REL_TOL * Math.max(1, maxAbs);
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (cAbs(cSub(values[i], values[j])) < tol) {
-        throw new Error(
-          'funm: matrix has repeated (or numerically indistinguishable) eigenvalues and is not ' +
-            'diagonal — defective/non-diagonalizable matrices are not supported (Schur-Parlett ' +
-            'block recurrence not yet implemented)'
-        );
+  const clusters = clusterEigenvalues(values, tol);
+
+  if (clusters.length === n) {
+    // Simple spectrum (all multiplicities 1): Lagrange-Sylvester interpolation.
+    //   f(A) = sum_i f(lambda_i) * prod_{j != i} (A - lambda_j I) / (lambda_i - lambda_j)
+    //
+    // Use the raw eigenvalues (not cluster means, identical here) so the
+    // distinct-spectrum result is bit-for-bit the historical one.
+    const F = cZeros(n);
+    for (let i = 0; i < n; i++) {
+      const lambdaI = values[i];
+      let numerator: ComplexMatrix = cFromReal(A); // placeholder, overwritten on first j
+      let denom: ComplexValue = { re: 1, im: 0 };
+      let first = true;
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const factor = cShiftedReal(A, values[j]);
+        numerator = first ? factor : cMatMul(numerator, factor);
+        first = false;
+        denom = cMul(denom, cSub(lambdaI, values[j]));
+      }
+      cAccumulate(F, f(lambdaI), cMatScalarDiv(numerator, denom));
+    }
+    return F;
+  }
+
+  // Defective / repeated spectrum: confluent Hermite interpolation.
+  //
+  // Build the confluent node list z_0..z_{n-1} (each distinct eigenvalue
+  // repeated to its multiplicity, grouped consecutively) and the per-cluster
+  // Taylor coefficients f^(L)(z)/L!. The matrix function is the Newton form
+  //   f(A) = Σ_k c_k · Π_{i<k}(A − z_i I),   c_k = f[z_0,…,z_k]
+  // where c_k are confluent divided differences (a run of equal nodes yields
+  // the Taylor coefficient). This subsumes the simple-spectrum case.
+  const nodes: ComplexValue[] = [];
+  const clusterIdx: number[] = [];
+  const taylor: ComplexValue[][] = clusters.map((c) =>
+    taylorCoeffs(f, fDerivs, c.value, c.count - 1)
+  );
+  clusters.forEach((c, ci) => {
+    for (let r = 0; r < c.count; r++) {
+      nodes.push(c.value);
+      clusterIdx.push(ci);
+    }
+  });
+
+  // Confluent divided-difference table: dd[i][j] = f[z_i, …, z_j] (i <= j).
+  const dd: ComplexValue[][] = Array.from({ length: n }, () => new Array<ComplexValue>(n));
+  for (let i = 0; i < n; i++) dd[i][i] = taylor[clusterIdx[i]][0]; // f(z_i)
+  for (let L = 1; L < n; L++) {
+    for (let i = 0; i + L < n; i++) {
+      const j = i + L;
+      if (clusterIdx[i] === clusterIdx[j]) {
+        // Fully confluent span (nodes grouped): f^(L)(z)/L!.
+        dd[i][j] = taylor[clusterIdx[i]][L];
+      } else {
+        dd[i][j] = cDiv(cSub(dd[i + 1][j], dd[i][j - 1]), cSub(nodes[j], nodes[i]));
       }
     }
   }
 
-  // Lagrange-Sylvester interpolation:
-  //   f(A) = sum_i f(lambda_i) * prod_{j != i} (A - lambda_j I) / (lambda_i - lambda_j)
-  //
-  // n >= 2 here (n === 1 is always diagonal and handled above), so the inner
-  // loop always runs at least once and `numerator` is always assigned.
+  // Horner-free Newton accumulation: P_k = Π_{i<k}(A − z_i I).
   const F = cZeros(n);
-  for (let i = 0; i < n; i++) {
-    const lambdaI = values[i];
-    let numerator: ComplexMatrix = cFromReal(A); // placeholder, overwritten on first j
-    let denom: ComplexValue = { re: 1, im: 0 };
-    let first = true;
-    for (let j = 0; j < n; j++) {
-      if (j === i) continue;
-      const factor = cShiftedReal(A, values[j]);
-      numerator = first ? factor : cMatMul(numerator, factor);
-      first = false;
-      denom = cMul(denom, cSub(lambdaI, values[j]));
-    }
-    cAccumulate(F, f(lambdaI), cMatScalarDiv(numerator, denom));
+  let P = cIdentity(n);
+  cAccumulate(F, dd[0][0], P);
+  for (let k = 1; k < n; k++) {
+    P = cMatMul(P, cShiftedReal(A, nodes[k - 1]));
+    cAccumulate(F, dd[0][k], P);
+  }
+
+  if (!cIsFinite(F)) {
+    throw new Error(
+      'funm: result is non-finite — f (or one of its derivatives) is singular at a repeated ' +
+        'eigenvalue (e.g. sqrt/log at 0), so the matrix function is undefined there'
+    );
   }
 
   return F;
@@ -255,12 +460,27 @@ export function complexSin(z: ComplexValue): ComplexValue {
   };
 }
 
-/** Matrix cosine `cos(A)`, via {@link funm} with {@link complexCos}. */
-export function cosm(A: number[][]): ComplexMatrix {
-  return funm(A, complexCos);
+/**
+ * Analytic derivative array for `cos`/`sin`: `cos^(m)(z) = cos(z + mπ/2)` and
+ * `sin^(m)(z) = sin(z + mπ/2)`. Returns `fDerivs` with `fDerivs[k] = f^(k+1)`,
+ * sized to the largest derivative order a defective `n×n` matrix can need
+ * (`n-1`), so `funm`'s defective branch is machine-precise for `cosm`/`sinm`.
+ */
+function trigDerivs(base: typeof complexCos, n: number): ScalarComplexFunction[] {
+  return Array.from({ length: Math.max(0, n - 1) }, (_unused, k) => {
+    const shift = ((k + 1) * Math.PI) / 2;
+    return (z: ComplexValue) => base({ re: z.re + shift, im: z.im });
+  });
 }
 
-/** Matrix sine `sin(A)`, via {@link funm} with {@link complexSin}. */
+/** Matrix cosine `cos(A)`, via {@link funm} with {@link complexCos}. Passes
+ * exact analytic derivatives so defective matrices are machine-precise. */
+export function cosm(A: number[][]): ComplexMatrix {
+  return funm(A, complexCos, trigDerivs(complexCos, A.length));
+}
+
+/** Matrix sine `sin(A)`, via {@link funm} with {@link complexSin}. Passes
+ * exact analytic derivatives so defective matrices are machine-precise. */
 export function sinm(A: number[][]): ComplexMatrix {
-  return funm(A, complexSin);
+  return funm(A, complexSin, trigDerivs(complexSin, A.length));
 }

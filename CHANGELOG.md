@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `funm` supports defective / repeated-eigenvalue matrices
+
+`functions/src/numeric/matrix-functions.ts`'s `funm(A, f)` previously threw on defective /
+non-diagonalizable matrices (repeated or numerically clustered eigenvalues that are not diagonal),
+because a matrix function of such a matrix depends on `f` AND its derivatives at each repeated
+eigenvalue (for a Jordan block `J = λI + N`, `f(J) = Σ_k f^(k)(λ)/k! · N^k`). It now evaluates these
+via **confluent Hermite interpolation** — Newton divided differences over the confluent node list
+(each distinct eigenvalue repeated to its multiplicity), where a run of equal nodes contributes the
+Taylor coefficient `f^(L)(z)/L!`. This subsumes the existing distinct-spectrum Lagrange-Sylvester
+path (kept bit-for-bit as a fast branch, so distinct-eigenvalue results are unchanged). Derivatives
+of `f` come from a new optional third argument `fDerivs` (`fDerivs[k] = f^(k+1)`, machine precision —
+additive/non-breaking) or, when omitted, from finite-difference stencils (~1e-6). `cosm`/`sinm` now
+pass exact analytic derivatives (`cos^(m)(z) = cos(z + mπ/2)`, likewise `sin`), so they are
+machine-precise (~1e-16) on defective matrices instead of throwing. `funm` still throws — with a
+clear message — only when `f` or a derivative is genuinely singular at a repeated eigenvalue (e.g.
+`sqrt`/`log` at 0) or when a needed numerical derivative order exceeds the built-in stencils
+(multiplicity > 5, no analytic derivatives). Oracle-pinned in new
+`functions/tests/gap-funm-defective-oracle.test.ts` vs the Jordan-block closed forms and
+scipy `expm`/`sqrtm`: `funm([[2,1],[0,2]], exp) = e²·[[1,1],[0,1]]`, `…, sqrt) = √2·[[1,0.25],[0,1]]`,
+the 3×3 Jordan `exp`, `cosm`/`sinm` on a defective block, and `funm(A, exp) ≈ expm(A)` for a mixed
+defective matrix (analytic path 1e-10, numerical path measured ~3–5e-11 but asserted at the honest
+1e-6 bound). Note: scipy's own `funm` is wrong on exact Jordan blocks and was NOT used as an oracle.
+Documented in `docs/reference/functions.md` (curated `funm` row) and the module docstring.
+
 ### Added — `quantileSeq` interpolation modes (lower/higher/nearest/midpoint)
 
 `functions/src/statistics/quantileSeq.ts` gains an optional trailing `mode` string that selects how
