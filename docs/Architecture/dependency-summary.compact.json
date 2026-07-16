@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1039, "e": 5029, "re": 1846 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1040, "e": 5035, "re": 1849 },
   "s": {
-    "loc": 174232,
+    "loc": 174392,
     "cls": 56,
     "int": 433,
-    "fn": 1634,
+    "fn": 1637,
     "tg": 158,
     "en": 0,
     "co": 1536,
@@ -661,8 +661,17 @@
       ]
     },
     "functions/ml": {
-      "f": 3,
-      "exp": ["logisticRegression", "ols", "ridge", "lasso", "elasticNet"],
+      "f": 4,
+      "exp": [
+        "dbscan",
+        "knnClassify",
+        "knnRegress",
+        "logisticRegression",
+        "ols",
+        "ridge",
+        "lasso",
+        "elasticNet"
+      ],
       "int": [
         "LogisticRegressionOptions",
         "LogisticRegressionResult",
@@ -1635,7 +1644,7 @@
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
-    { "p": "src/index.ts", "i": 49, "o": 0 },
+    { "p": "src/index.ts", "i": 50, "o": 0 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },

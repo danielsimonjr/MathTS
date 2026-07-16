@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `dbscan` clustering + `knnClassify`/`knnRegress` (Phase 3 Task 4)
+
+Added `dbscan(points, eps, minPts)` — density-based clustering (DBSCAN): a point is a core point
+if its ε-neighborhood (including itself) has at least `minPts` members; clusters grow by expanding
+outward from core points, and points never reached are labeled noise (`-1`). ε-neighborhoods are
+computed by brute-force Euclidean distance (O(n²) but correct) since the exported `kdTree` has no
+radius-query method — a kd-tree range-search speedup is future work. Added `knnClassify(train,
+labels, query, k)` — k-nearest-neighbour classifier by majority vote among the `k` closest training
+points (Euclidean), ties broken by the single nearest point's label. Added `knnRegress(train,
+targets, query, k)` — k-nearest-neighbour regressor (mean of the `k` closest training targets).
+Pinned: two well-separated blobs plus a far outlier resolve to 2 clusters and the outlier labeled
+noise; kNN assigns queries to the geometrically correct cluster.
+
 ### Added — `logisticRegression(X, y)` binary classifier via IRLS (Phase 3 Task 3)
 
 Added `logisticRegression(X, y, opts?)` — binary logistic regression (`y ∈ {0,1}`) fit by

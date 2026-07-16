@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1039,
+    "totalFiles": 1040,
     "totalModules": 79,
-    "totalExports": 5029
+    "totalExports": 5035
   },
   "entryPoints": [
     {
@@ -8082,6 +8082,11 @@
             "reExport": true
           },
           {
+            "file": "./ml/dbscan-knn.js",
+            "imports": ["dbscan", "knnClassify", "knnRegress"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/bfgs.js",
             "imports": ["bfgs"],
             "reExport": true
@@ -8352,6 +8357,9 @@
           "levenbergMarquardt",
           "kmeans",
           "spectralClustering",
+          "dbscan",
+          "knnClassify",
+          "knnRegress",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -8524,6 +8532,9 @@
           "levenbergMarquardt",
           "kmeans",
           "spectralClustering",
+          "dbscan",
+          "knnClassify",
+          "knnRegress",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -12664,6 +12675,15 @@
       }
     },
     "functions/ml": {
+      "functions/src/ml/dbscan-knn.ts": {
+        "description": "Density-based clustering (DBSCAN) + k-nearest-neighbour classifier/regressor",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["dbscan", "knnClassify", "knnRegress"],
+        "functions": ["dbscan", "knnClassify", "knnRegress"]
+      },
       "functions/src/ml/logistic-regression.ts": {
         "description": "Binary logistic regression via IRLS (Wave — ML primitives, Phase 3 Task 3).",
         "externalDependencies": [],
@@ -34527,6 +34547,7 @@
       {
         "name": "Functions/ml",
         "files": [
+          "functions/src/ml/dbscan-knn.ts",
           "functions/src/ml/logistic-regression.ts",
           "functions/src/ml/ols.ts",
           "functions/src/ml/regularized-regression.ts"
@@ -35471,17 +35492,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1039,
+    "totalTypeScriptFiles": 1040,
     "totalModules": 79,
-    "totalLinesOfCode": 174232,
-    "totalExports": 5029,
+    "totalLinesOfCode": 174392,
+    "totalExports": 5035,
     "totalClasses": 56,
     "totalInterfaces": 433,
-    "totalFunctions": 1634,
+    "totalFunctions": 1637,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1846,
+    "totalReExports": 1849,
     "totalTypeOnlyImports": 534,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

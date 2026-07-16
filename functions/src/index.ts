@@ -212,6 +212,10 @@ export type { OptimizeResult, LMResult } from './optimization-extra.js';
 // Gap-analysis Wave D — clustering (kmeans + spectral, reuse laplacianMatrix + eigs).
 export { kmeans, spectralClustering } from './clustering-extra.js';
 
+// Phase 3 Task 4 — density-based clustering (DBSCAN) + k-nearest-neighbour
+// classifier/regressor (brute-force Euclidean neighbour search).
+export { dbscan, knnClassify, knnRegress } from './ml/dbscan-knn.js';
+
 // Phase 2 Task 1 — BFGS quasi-Newton minimizer (inverse-Hessian update +
 // Armijo line search; optional analytic gradient or box-bounds projection).
 // The smooth-optimization workhorse complementing derivative-free `minimize`

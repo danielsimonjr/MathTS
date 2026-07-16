@@ -1652,6 +1652,7 @@
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
     "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
     "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
