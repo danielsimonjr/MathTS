@@ -337,7 +337,13 @@ Distribution MLE `.fit(data)` across the family set (S2, M–L) · exact small-n
 (S7, M–L) · noncentral χ²/F/t CDF+quantile, circular stats + von Mises, McNemar/Cochran-Q (S8, S–M each).
 **≈ L.**
 
-### Phase 5 — Special functions & number theory
+### Phase 5 — Special functions & number theory — ✅ RELEASED `functions@0.33.0` (2026-07-16)
+
+Shipped: `hyp0f1`/`hyp1f1`/`hyp2f1`/`pFq`, `polygamma`/`trigamma`, `jacobiP`/`gegenbauerC`, Jacobi
+elliptic `jacobiSN`/`CN`/`DN`, `rootsLegendre`, and the number-theory fills. Niche extras (polylog/
+Lerch/Struve/Kelvin/Barnes-G/Coulomb/Mathieu/Riemann–Siegel) deferred. Oracle-pinned, tarball-verified.
+
+_(original scope below)_
 
 **`pFq` hypergeometric** ₀F₁/₁F₁/₂F₁ (highest leverage — Bessel/Legendre/erf/incomplete-γβ are special
 cases, M) · `polygamma`/`trigamma` (S–M) · Jacobi elliptic sn/cn/dn + theta (M) · Gauss-quadrature

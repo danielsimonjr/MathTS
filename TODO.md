@@ -48,8 +48,12 @@ oracle-pinned, subagent-driven. Phase plan:
       (MLE) · exact Mann–Whitney p (default) + KS exact opt-in + `kendallTauTest` · `pacf`/`ljungBox`/
       `durbinWatson`/`adfuller` · noncentral χ²/F/t CDFs · circular stats (`circmean`/`circstd`/`circvar`/
       `vonMisesPDF`) · `mcnemar`/`cochranQ`. Oracle-pinned vs scipy/statsmodels, tarball-verified.
-- [ ] **Phase 5 — Special functions & number theory.** `pFq` hypergeometric · polygamma · Jacobi
-      elliptic · Gauss-quad nodes/weights · orthogonal polys · continuedFraction/stirlingS1/generators.
+- [x] **Phase 5 — Special functions & number theory — ✅ RELEASED `functions@0.33.0`** (2026-07-16).
+      `hyp0f1`/`hyp1f1`/`hyp2f1`/`pFq` · `polygamma`/`trigamma` · `jacobiP`/`gegenbauerC` · Jacobi elliptic
+      `jacobiSN`/`CN`/`DN` · `rootsLegendre` · number theory (`continuedFraction`/`eulerNumbers`/
+      `stirlingS1`/`discreteLog`/`primitiveRoot`/`multiplicativeOrder`/`kroneckerSymbol`/`permutationsGen`/
+      `combinationsGen`). Oracle-pinned vs mpmath/scipy/sympy, tarball-verified. Niche extras (polylog/
+      Lerch/Struve/Kelvin/Barnes-G/Coulomb/Mathieu/Riemann–Siegel) DEFERRED to a Phase-5 extension.
 - [ ] **Phase 6 — Signal breadth.** rfft/fftshift/fftfreq · filter design (cheby/ellip/sosfilt) ·
       wavelets · STFT/find_peaks · DCT types.
 - [ ] **Phase 7 — Advanced linalg.** iterative Krylov (cg/gmres) · sparse eigensolver · complex matrix
