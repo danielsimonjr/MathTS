@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — open scalar root-finders: `newton`, `secant`, `halley` (Phase 1 Task 2)
+
+Only bracketing root-finding (`findRoot`, bisection/Brent) existed; added three classic open
+(non-bracketing) scalar root-finders that iterate from a starting point instead of requiring a
+sign-changing bracket: `newton(f, x0[, opts])` (Newton–Raphson, `x_{k+1} = x_k − f(x_k)/f'(x_k)`,
+with an optional analytic `fprime` else a central-difference estimate), `secant(f, x0, x1[, opts])`
+(no derivative required), and `halley(f, x0[, opts])` (`x_{k+1} = x_k − 2 f f' / (2 f'^2 − f f'')`,
+cubic convergence, optional analytic `fprime`/`fprime2` else central differences). All default to
+`tol = 1e-12`, `maxIter = 100`, and throw a clear `Error` on non-convergence or a (near-)zero
+denominator/derivative. Pinned against √2, cbrt(2), and the cos(x)=x fixed point.
+
 ### Added — numeric Jacobian: `numericJacobian(f, x0)` + polymorphic `jacobian` (Phase 1 Task 1)
 
 `jacobian` was symbolic-only (`jacobian(exprs, vars, scope)`) and threw `exprs.map is not a

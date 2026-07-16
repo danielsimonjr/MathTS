@@ -1533,27 +1533,30 @@ lagrangeInterp(xs, ys, 2.5); // ~6.25
 
 Root-finding, optimization, linear systems, and differential equations.
 
-| Function                            | Description                              | Accel |
-| ----------------------------------- | ---------------------------------------- | ----- |
-| `findRoot(f, a, b[, opts])`         | Bracketed root-finding (bisection/Brent) | —     |
-| `linsolve(A, b)`                    | Solve a linear system `Ax = b`           | —     |
-| `leastSquares(A, b)`                | Least-squares solution (overdetermined)  | WASM  |
-| `minimize(f, x0[, opts])`           | Local minimization                       | —     |
-| `maximize(f, x0[, opts])`           | Local maximization                       | —     |
-| `globalMinimize(f, bounds[, opts])` | Global minimization                      | —     |
-| `linprog(c, A, b[, opts])`          | Linear programming                       | —     |
-| `quadprog(Q, c, A, b[, opts])`      | Quadratic programming                    | —     |
-| `solveODE(f, tspan, y0[, opts])`    | ODE solver (factory layer)               | —     |
-| `solveODESystem(fs, tspan, y0)`     | System of ODEs                           | WASM  |
-| `solveBVP(...)`                     | Boundary value problem solver            | —     |
-| `solvePDE(...)`                     | PDE solver                               | —     |
-| `stiffODESolver(...)`               | Stiff-ODE solver                         | —     |
-| `odeAdaptiveStep(...)`              | Adaptive-step ODE integration            | —     |
-| `eventDetection(...)`               | ODE event detection                      | —     |
-| `cond(A)`                           | Condition number                         | WASM  |
-| `rank(A)`                           | Numerical rank                           | WASM  |
-| `nullspace(A)`                      | Null-space basis                         | —     |
-| `residue(b, a)`                     | Partial-fraction residues                | —     |
+| Function                            | Description                                                             | Accel |
+| ----------------------------------- | ----------------------------------------------------------------------- | ----- |
+| `findRoot(f, a, b[, opts])`         | Bracketed root-finding (bisection/Brent)                                | —     |
+| `newton(f, x0[, opts])`             | Newton–Raphson root-finding (analytic or central-difference derivative) | —     |
+| `secant(f, x0, x1[, opts])`         | Secant-method root-finding (no derivative required)                     | —     |
+| `halley(f, x0[, opts])`             | Halley's method root-finding (cubic convergence)                        | —     |
+| `linsolve(A, b)`                    | Solve a linear system `Ax = b`                                          | —     |
+| `leastSquares(A, b)`                | Least-squares solution (overdetermined)                                 | WASM  |
+| `minimize(f, x0[, opts])`           | Local minimization                                                      | —     |
+| `maximize(f, x0[, opts])`           | Local maximization                                                      | —     |
+| `globalMinimize(f, bounds[, opts])` | Global minimization                                                     | —     |
+| `linprog(c, A, b[, opts])`          | Linear programming                                                      | —     |
+| `quadprog(Q, c, A, b[, opts])`      | Quadratic programming                                                   | —     |
+| `solveODE(f, tspan, y0[, opts])`    | ODE solver (factory layer)                                              | —     |
+| `solveODESystem(fs, tspan, y0)`     | System of ODEs                                                          | WASM  |
+| `solveBVP(...)`                     | Boundary value problem solver                                           | —     |
+| `solvePDE(...)`                     | PDE solver                                                              | —     |
+| `stiffODESolver(...)`               | Stiff-ODE solver                                                        | —     |
+| `odeAdaptiveStep(...)`              | Adaptive-step ODE integration                                           | —     |
+| `eventDetection(...)`               | ODE event detection                                                     | —     |
+| `cond(A)`                           | Condition number                                                        | WASM  |
+| `rank(A)`                           | Numerical rank                                                          | WASM  |
+| `nullspace(A)`                      | Null-space basis                                                        | —     |
+| `residue(b, a)`                     | Partial-fraction residues                                               | —     |
 
 ### Optimization
 
@@ -1578,6 +1581,13 @@ Root-finding, optimization, linear systems, and differential equations.
 
 - `findRoot` requires a sign change across the bracket `[a, b]`; it combines the
   guaranteed convergence of bisection with the speed of Brent's method.
+- `newton`, `secant`, and `halley` are **open** (non-bracketing) root-finders —
+  they iterate from a starting point (or two, for `secant`) instead of a
+  sign-changing bracket, and can diverge if the guess is poor. `newton` and
+  `halley` accept an optional analytic derivative (`fprime`/`fprime2`); when
+  omitted, a central-difference estimate is used. All three default to
+  `tol = 1e-12`, `maxIter = 100`, and throw on non-convergence or a
+  (near-)zero denominator/derivative.
 - `minimize` / `maximize` find a **local** optimum near the starting point
   `x0`; `globalMinimize` searches a bounded region for a global optimum.
 - `linprog` and `quadprog` solve constrained linear and quadratic programs.
@@ -1600,9 +1610,19 @@ followed in the 1980s, opening up large-scale quadratic and convex programming.
 ### Examples
 
 ```typescript
-import { findRoot, minimize, leastSquares } from '@danielsimonjr/mathts-functions';
+import {
+  findRoot,
+  newton,
+  secant,
+  halley,
+  minimize,
+  leastSquares,
+} from '@danielsimonjr/mathts-functions';
 
 findRoot((x) => x ** 3 - x - 2, 1, 2); // ~1.5214
+newton((x) => x * x - 2, 1); // ~1.4142135623730951
+secant((x) => x * x - 2, 1, 2); // ~1.4142135623730951
+halley((x) => x ** 3 - 2, 1); // ~1.2599210498948732
 minimize((x) => (x - 3) ** 2, 0); // ~3.0
 leastSquares(
   [
@@ -2319,7 +2339,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (882 exports).
+> `@danielsimonjr/mathts-functions` (885 exports).
 
 ### Functions by category
 
@@ -2353,7 +2373,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (28): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (31): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

@@ -149,6 +149,11 @@ export { hessian, gradient } from './calculus-extra.js';
 export { numericJacobian } from './numeric/numeric-jacobian.js';
 export type { VectorField, NumericJacobianOptions } from './numeric/numeric-jacobian.js';
 
+// Phase 1 Task 2 — open (non-bracketing) scalar root-finders. Complement the
+// bracketing `findRoot` (bisection/Brent, typed/numeric.ts).
+export { newton, secant, halley } from './numeric/open-root-finders.js';
+export type { NewtonOptions, SecantOptions, HalleyOptions } from './numeric/open-root-finders.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 

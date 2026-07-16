@@ -1635,6 +1635,7 @@
       "functions/src/index.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/numeric/open-root-finders.ts": ["functions/src/index.ts"],
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],

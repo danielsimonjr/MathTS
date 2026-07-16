@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1029
+  totalFiles: 1030
   totalModules: 78
-  totalExports: 4972
+  totalExports: 4981
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7454,6 +7454,12 @@ modules:
           imports:
             - numericJacobian
           reExport: true
+        - file: ./numeric/open-root-finders.js
+          imports:
+            - newton
+            - secant
+            - halley
+          reExport: true
         - file: ./timeseries-extra.js
           imports:
             - movingAverage
@@ -7527,6 +7533,13 @@ modules:
           imports:
             - VectorField
             - NumericJacobianOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/open-root-finders.js
+          imports:
+            - NewtonOptions
+            - SecantOptions
+            - HalleyOptions
           reExport: true
           typeOnly: true
         - file: ./regression-extra.js
@@ -7631,6 +7644,9 @@ modules:
         - hessian
         - gradient
         - numericJacobian
+        - newton
+        - secant
+        - halley
         - movingAverage
         - ewma
         - detrend
@@ -7669,6 +7685,9 @@ modules:
         - TukeyComparison
         - VectorField
         - NumericJacobianOptions
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -7761,6 +7780,9 @@ modules:
         - hessian
         - gradient
         - numericJacobian
+        - newton
+        - secant
+        - halley
         - movingAverage
         - ewma
         - detrend
@@ -7799,6 +7821,9 @@ modules:
         - TukeyComparison
         - VectorField
         - NumericJacobianOptions
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -11374,6 +11399,24 @@ modules:
         - NumericJacobianOptions
       functions:
         - numericJacobian
+    functions/src/numeric/open-root-finders.ts:
+      description: Open (non-bracketing) scalar root-finders.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - newton
+        - secant
+        - halley
+      interfaces:
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
+      functions:
+        - newton
+        - secant
+        - halley
     functions/src/numeric/solveODE.ts:
       description: Butcher Tableau structure for Runge-Kutta methods
       externalDependencies: []
@@ -31869,6 +31912,7 @@ dependencyGraph:
     - name: Functions/numeric
       files:
         - functions/src/numeric/numeric-jacobian.ts
+        - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/solveODE.ts
     - name: Functions/plain
       files:
@@ -32700,18 +32744,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1029
+  totalTypeScriptFiles: 1030
   totalModules: 78
-  totalLinesOfCode: 172137
-  totalExports: 4972
+  totalLinesOfCode: 172333
+  totalExports: 4981
   totalClasses: 56
-  totalInterfaces: 411
-  totalFunctions: 1617
+  totalInterfaces: 414
+  totalFunctions: 1620
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1535
-  totalReExports: 1805
-  totalTypeOnlyImports: 524
+  totalReExports: 1811
+  totalTypeOnlyImports: 525
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
