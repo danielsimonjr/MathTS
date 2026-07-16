@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1055,
+    "totalFiles": 1056,
     "totalModules": 81,
-    "totalExports": 5201
+    "totalExports": 5209
   },
   "entryPoints": [
     {
@@ -8161,6 +8161,11 @@
             "reExport": true
           },
           {
+            "file": "./signal/wavelets.js",
+            "imports": ["idwt", "wavedec", "waverec", "cwt"],
+            "reExport": true
+          },
+          {
             "file": "./geometry-extra.js",
             "imports": [
               "haversine",
@@ -8539,6 +8544,10 @@
           "savgol",
           "wiener",
           "deconvolve",
+          "idwt",
+          "wavedec",
+          "waverec",
+          "cwt",
           "haversine",
           "EARTH_RADIUS_KM",
           "slerp",
@@ -8789,6 +8798,10 @@
           "savgol",
           "wiener",
           "deconvolve",
+          "idwt",
+          "wavedec",
+          "waverec",
+          "cwt",
           "haversine",
           "EARTH_RADIUS_KM",
           "slerp",
@@ -14905,6 +14918,24 @@
         ],
         "exports": ["cheby1", "cheby2", "ellip", "bilinear", "buttord", "zpk2sos", "sosfilt"],
         "functions": ["cheby1", "cheby2", "ellip", "bilinear", "buttord", "zpk2sos", "sosfilt"]
+      },
+      "functions/src/signal/wavelets.ts": {
+        "description": "Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/signal.js",
+            "imports": ["dwt"]
+          },
+          {
+            "file": "./conv.js",
+            "imports": ["convDirect"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["idwt", "wavedec", "waverec", "cwt"],
+        "functions": ["idwt", "wavedec", "waverec", "cwt"]
       },
       "functions/src/signal/zpk2tf.ts": {
         "description": "Transfer function representation [numerator, denominator]",
@@ -35299,6 +35330,7 @@
           "functions/src/signal/fir-smoothing.ts",
           "functions/src/signal/freqz.ts",
           "functions/src/signal/iir-design.ts",
+          "functions/src/signal/wavelets.ts",
           "functions/src/signal/zpk2tf.ts"
         ]
       },
@@ -36168,17 +36200,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1055,
+    "totalTypeScriptFiles": 1056,
     "totalModules": 81,
-    "totalLinesOfCode": 178525,
-    "totalExports": 5201,
+    "totalLinesOfCode": 178668,
+    "totalExports": 5209,
     "totalClasses": 56,
     "totalInterfaces": 451,
-    "totalFunctions": 1722,
+    "totalFunctions": 1726,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1924,
+    "totalReExports": 1928,
     "totalTypeOnlyImports": 541,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

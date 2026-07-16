@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Wavelet transforms: idwt/wavedec/waverec + cwt (Phase 6 Task 4)
+
+Added `functions/src/signal/wavelets.ts`, exported from `@danielsimonjr/mathts-functions`. The
+existing `dwt` (`typed/signal.ts`) was forward, single-level only — this closes the loop with an
+inverse, multilevel decomposition/reconstruction, and a continuous transform:
+
+- `idwt(approx, detail[, wavelet])` — inverse single-level DWT. Matches `dwt`'s Haar convention
+  exactly (`s = 1/sqrt(2)`, `approx[i] = s*(x[2i]+x[2i+1])`, `detail[i] = s*(x[2i]-x[2i+1])`);
+  Haar's synthesis filters are the time-reverse of its analysis filters, a no-op for a symmetric
+  2-tap filter, giving the closed-form inverse `x[2i] = s*(approx[i]+detail[i])`,
+  `x[2i+1] = s*(approx[i]-detail[i])`. Pinned by `idwt(dwt(x).approx, dwt(x).detail) === x`.
+- `wavedec(x[, wavelet, level])` — multilevel decomposition: repeatedly `dwt`s the approximation
+  coefficients, returning `[cA_level, cD_level, cD_{level-1}, …, cD_1]` (pywt order).
+- `waverec(coeffs[, wavelet])` — inverse of `wavedec`: repeatedly `idwt`s from the coarsest level
+  up. Pinned by `waverec(wavedec(x, w, L), w) === x` (perfect reconstruction).
+- `cwt(x, scales[, wavelet])` — continuous wavelet transform: convolves `x` (via `convDirect`'s
+  `'same'` mode) with a discretized, normalized Ricker (Mexican-hat, `(1-t²)e^(-t²/2)`, default) or
+  Morlet (`cos(5t)e^(-t²/2)`) wavelet at each scale → `scales.length x x.length` matrix.
+
+Only `'haar'`/`'db1'` are supported (matching `dwt`, which throws for any other wavelet name).
+
+Documented in `docs/reference/functions.md` under Signal Processing. `npm run docs:functions` /
+`npm run docs:deps` regenerated; docs-completeness gate green.
+
 ### Added — FIR bandpass + LS/equiripple design + smoothing/deconvolution (Phase 6 Task 3)
 
 Added `functions/src/signal/fir-smoothing.ts`, exported from `@danielsimonjr/mathts-functions`:

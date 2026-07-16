@@ -1,0 +1,138 @@
+/**
+ * Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
+ * reconstruction), and the continuous wavelet transform (CWT).
+ *
+ * `idwt`/`wavedec`/`waverec` must invert the existing `dwt` (`../typed/signal.ts`)
+ * exactly, so they match its Haar convention bit-for-bit: analysis filters
+ * scaled by `s = 1/sqrt(2)`, `approx[i] = s*(x[2i]+x[2i+1])`,
+ * `detail[i] = s*(x[2i]-x[2i+1])`. Haar's synthesis (reconstruction) filters
+ * are the time-reverse of its analysis filters — for a symmetric 2-tap filter
+ * that reversal is a no-op, so the closed-form inverse below is exact:
+ * `x[2i] = s*(approx[i]+detail[i])`, `x[2i+1] = s*(approx[i]-detail[i])`.
+ *
+ * @packageDocumentation
+ */
+
+import { dwt } from '../typed/signal.js';
+import { convDirect } from './conv.js';
+
+/**
+ * Inverse single-level discrete wavelet transform. Upsamples `approx`/`detail`
+ * and combines them with the Haar synthesis filters, exactly inverting `dwt`.
+ *
+ * @param approx - Approximation (low-pass) coefficients
+ * @param detail - Detail (high-pass) coefficients, same length as `approx`
+ * @param wavelet - Wavelet name (currently only 'haar'/'db1', matching `dwt`)
+ * @returns Reconstructed signal, length `2 * approx.length`
+ */
+export function idwt(approx: number[], detail: number[], wavelet: string = 'haar'): number[] {
+  if (wavelet !== 'haar' && wavelet !== 'db1') {
+    throw new Error(`idwt: unsupported wavelet "${wavelet}"`);
+  }
+  if (approx.length !== detail.length) {
+    throw new Error('idwt: approx and detail must have equal length');
+  }
+
+  const half = approx.length;
+  const s = 1 / Math.SQRT2;
+  const x = new Array<number>(half * 2);
+  for (let i = 0; i < half; i++) {
+    x[2 * i] = s * (approx[i] + detail[i]);
+    x[2 * i + 1] = s * (approx[i] - detail[i]);
+  }
+  return x;
+}
+
+/**
+ * Multilevel discrete wavelet decomposition: repeatedly applies `dwt` to the
+ * approximation coefficients.
+ *
+ * @param x - Input signal
+ * @param wavelet - Wavelet name (passed through to `dwt`)
+ * @param level - Number of decomposition levels (>= 1)
+ * @returns `[cA_level, cD_level, cD_{level-1}, ..., cD_1]` (pywt order)
+ */
+export function wavedec(x: number[], wavelet: string = 'haar', level: number = 1): number[][] {
+  if (!Number.isInteger(level) || level < 1) {
+    throw new Error('wavedec: level must be an integer >= 1');
+  }
+
+  const coeffs: number[][] = [];
+  let approx = x.slice();
+  for (let l = 0; l < level; l++) {
+    const { approx: a, detail: d } = dwt(approx, wavelet);
+    coeffs.unshift(d);
+    approx = a;
+  }
+  coeffs.unshift(approx);
+  return coeffs;
+}
+
+/**
+ * Inverse of `wavedec`: repeatedly applies `idwt` from the coarsest level
+ * (`coeffs[0]` = cA_level) up to the finest detail (`coeffs[coeffs.length-1]`
+ * = cD_1), reconstructing the original signal.
+ *
+ * @param coeffs - Coefficient arrays as returned by `wavedec`
+ * @param wavelet - Wavelet name (passed through to `idwt`)
+ * @returns Reconstructed signal
+ */
+export function waverec(coeffs: number[][], wavelet: string = 'haar'): number[] {
+  if (coeffs.length < 2) {
+    throw new Error('waverec: coeffs must contain at least [cA, cD]');
+  }
+
+  let approx = coeffs[0].slice();
+  for (let i = 1; i < coeffs.length; i++) {
+    approx = idwt(approx, coeffs[i], wavelet);
+  }
+  return approx;
+}
+
+/** Discretized, normalized Ricker (Mexican-hat) wavelet: `(1-t^2)e^(-t^2/2)`. */
+function rickerWavelet(points: number, scale: number): number[] {
+  const amplitude = 2 / (Math.sqrt(3 * scale) * Math.pow(Math.PI, 0.25));
+  const out = new Array<number>(points);
+  const center = (points - 1) / 2;
+  for (let i = 0; i < points; i++) {
+    const t = (i - center) / scale;
+    const t2 = t * t;
+    out[i] = amplitude * (1 - t2) * Math.exp(-t2 / 2);
+  }
+  return out;
+}
+
+/** Discretized, normalized real Morlet wavelet: `cos(5t)e^(-t^2/2)`. */
+function morletWavelet(points: number, scale: number): number[] {
+  const norm = 1 / (Math.sqrt(scale) * Math.pow(Math.PI, 0.25));
+  const out = new Array<number>(points);
+  const center = (points - 1) / 2;
+  for (let i = 0; i < points; i++) {
+    const t = (i - center) / scale;
+    out[i] = norm * Math.cos(5 * t) * Math.exp(-(t * t) / 2);
+  }
+  return out;
+}
+
+/**
+ * Continuous wavelet transform: convolves `x` with a discretized, normalized
+ * wavelet at each requested scale.
+ *
+ * @param x - Input signal
+ * @param scales - Wavelet scales to evaluate (each > 0)
+ * @param wavelet - 'ricker' (Mexican-hat, default) or 'morlet'
+ * @returns `scales.length` x `x.length` matrix, row `i` = CWT at `scales[i]`
+ */
+export function cwt(x: number[], scales: number[], wavelet: string = 'ricker'): number[][] {
+  if (wavelet !== 'ricker' && wavelet !== 'morlet') {
+    throw new Error(`cwt: unsupported wavelet "${wavelet}"`);
+  }
+
+  const n = x.length;
+  return scales.map((scale) => {
+    if (scale <= 0) throw new Error('cwt: scales must be positive');
+    const points = Math.max(1, Math.min(Math.round(10 * scale), n));
+    const psi = wavelet === 'ricker' ? rickerWavelet(points, scale) : morletWavelet(points, scale);
+    return convDirect(x, psi, 'same');
+  });
+}

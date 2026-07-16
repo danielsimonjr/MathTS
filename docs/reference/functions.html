@@ -2325,6 +2325,10 @@
       | `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                  | WASM           |
       | `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                    | WASM           |
       | `dwt(x[, wavelet])`                             | Discrete wavelet transform                           | WASM           |
+      | `idwt(cA, cD[, wavelet])`                       | Inverse discrete wavelet transform                   | —              |
+      | `wavedec(x[, wavelet, level])`                  | Multilevel discrete wavelet decomposition            | —              |
+      | `waverec(coeffs[, wavelet])`                    | Multilevel inverse discrete wavelet transform        | —              |
+      | `cwt(x, scales[, wavelet])`                     | Continuous wavelet transform (Ricker/Morlet)         | —              |
       | `hilbertTransform(x)`                           | Hilbert transform                                    | WASM           |
       | `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                            | —              |
       | `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                             | —              |
@@ -2408,6 +2412,12 @@
         power spectral density.
       - `unwrapPhase` removes the artificial 2π jumps that appear when phase is
         computed with `atan2`.
+      - `idwt` inverts a single level of `dwt` exactly (Haar's synthesis filters are
+        the time-reverse of its analysis filters, a no-op for a symmetric 2-tap
+        filter); `wavedec`/`waverec` repeat `dwt`/`idwt` across levels
+        (`[cA_level, cD_level, …, cD_1]`, pywt order) for perfect reconstruction —
+        `waverec(wavedec(x, w, L), w) === x`. `cwt` convolves the signal with a
+        discretized, normalized Ricker (Mexican-hat) or Morlet wavelet at each scale.
 
       ### Background & History
 
@@ -3032,7 +3042,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (961 exports).
+      > `@danielsimonjr/mathts-functions` (965 exports).
 
       ### Functions by category
 
@@ -3068,7 +3078,7 @@
 
       **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
-      **Signal Processing** (62): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `unwrapPhase`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
+      **Signal Processing** (66): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `cwt`, `dct`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
       **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 

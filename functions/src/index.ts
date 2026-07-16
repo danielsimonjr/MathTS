@@ -302,6 +302,10 @@ export {
 } from './signal/fir-smoothing.js';
 export type { DeconvolveResult } from './signal/fir-smoothing.js';
 
+// Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
+// reconstruction), and the continuous wavelet transform (cwt, Ricker/Morlet).
+export { idwt, wavedec, waverec, cwt } from './signal/wavelets.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,
