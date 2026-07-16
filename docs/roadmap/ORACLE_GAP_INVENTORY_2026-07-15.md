@@ -381,7 +381,17 @@ Iterative Krylov `cg`/`gmres`/`bicgstab`/`minres` + preconditioners (L1, L) · s
 tridiagonal/Toeplitz structured solvers (L8, M) · rank-revealing/economic QR + rq/ql/lq (L9, M) ·
 `generalizedEig` via qz hardening (M). **≈ L–XL.**
 
-### Phase 8 — Graph, geometry, symbolic CAS engine, BVP/PDE, intervals
+### Phase 8 — Graph, geometry, CAS engine, BVP, intervals — ✅ RELEASED `functions@0.36.0` (2026-07-16)
+
+Shipped: graph (bfs/dfs/floydWarshall/bellmanFord/closeness/harmonic/maxFlow/minCut/astar/hungarian),
+geometry (quaternion slerp/inverse/euler, boundingBox, procrustes, kdTree kNN/radius) + set ops, N-D interpn
+
+- general solveBVP, interval arithmetic, and a **real univariate CAS** (expand/factor/apart/together — resolves
+  the Phase-0 no-ops). Oracle-pinned, tarball-verified. **🎉 ORACLE-GAP ROADMAP COMPLETE (Phases 0–8).**
+
+_(original scope below)_
+
+#### Phase 8 — original
 
 **Graph:** directed constructor + BFS/DFS, Floyd–Warshall/Bellman–Ford, closeness/harmonic/Katz,
 max-flow/min-cut, A\*, Hungarian, coloring/clique/Louvain (M–L). **Geometry:** quaternion slerp/inverse/

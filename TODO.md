@@ -66,8 +66,21 @@ oracle-pinned, subagent-driven. Phase plan:
       eqns `dlyap`/`care`/`dare` (sign-fn / SDA). Oracle-pinned vs scipy, tarball-verified. Follow-ups:
       matrix `eig` returns only real eigenvector cols (zeroes complex pairs — blocked Hamiltonian care);
       rank-revealing QR + rq/ql/lq deferred; funm defective-matrix unsupported; minres O(k³).
-- [ ] **Phase 8 — Graph/geometry/CAS/PDE/intervals.** directed graph + traversal + max-flow · quaternion
-      slerp/Euler · N-D interpolation · BVP collocation · real CAS expand/factor/apart · interval type.
+- [x] **Phase 8 — Graph/geometry/CAS/intervals — ✅ RELEASED `functions@0.36.0`** (2026-07-16). Graph
+      (`bfs`/`dfs`/`floydWarshall`/`bellmanFord`/closeness/harmonic/`maxFlow`/`minCut`/`astar`/`hungarian`)
+      · geometry (`quaternionSlerp`/`quaternionInverse`/`quaternionToEuler`/`boundingBox`/`procrustes`/
+      `kdTreeKNN`/`kdTreeRadius`) + multiset set ops · N-D `interpn` + general `solveBVP` · `interval`/
+      `Interval` · **real CAS** `expand`/`factor`/`apart`/`together` (resolves Phase-0 no-ops). Oracle-pinned
+      vs scipy/networkx/sympy, tarball-verified.
+      Deferred (logged): graph coloring/clique/Louvain/Katz; SphericalVoronoi/alpha-shapes; general PDE/MOL;
+      multivariate CAS + symbolic integration; Phase-5-ext niche special fns; matrix `eig` complex-eigenvector fix.
+
+> ## 🎉 ORACLE-GAP ROADMAP COMPLETE (Phases 0–8) — `functions@0.28.0 → 0.36.0`, 2026-07-15/16
+>
+> All 8 phases planned, executed subagent-driven, oracle-pinned vs numpy/scipy/mpmath/sklearn/statsmodels/
+> networkx/sympy, and verified in the published npm tarball. ~44 tasks across correctness fixes,
+> foundational primitives, optimization, regression/ML, statistics inference, special functions/number
+> theory, signal processing, advanced linalg, and graph/geometry/CAS/intervals.
 
 ### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
 
