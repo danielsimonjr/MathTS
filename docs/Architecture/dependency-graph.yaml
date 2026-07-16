@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1056
+  totalFiles: 1057
   totalModules: 81
-  totalExports: 5209
+  totalExports: 5227
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7612,6 +7612,16 @@ modules:
             - waverec
             - cwt
           reExport: true
+        - file: ./signal/spectral-peaks.js
+          imports:
+            - findPeaks
+            - peakWidths
+            - csd
+            - coherence
+            - stft
+            - istft
+            - decimate
+          reExport: true
         - file: ./geometry-extra.js
           imports:
             - haversine
@@ -7796,6 +7806,14 @@ modules:
         - file: ./signal/fir-smoothing.js
           imports:
             - DeconvolveResult
+          reExport: true
+          typeOnly: true
+        - file: ./signal/spectral-peaks.js
+          imports:
+            - FindPeaksOptions
+            - CsdOptions
+            - StftOptions
+            - StftResult
           reExport: true
           typeOnly: true
         - file: ./stats/inference-extra2.js
@@ -7984,6 +8002,13 @@ modules:
         - wavedec
         - waverec
         - cwt
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8066,6 +8091,10 @@ modules:
         - LsqBoundedOptions
         - LsqBoundedResult
         - DeconvolveResult
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -8237,6 +8266,13 @@ modules:
         - wavedec
         - waverec
         - cwt
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8319,6 +8355,10 @@ modules:
         - LsqBoundedOptions
         - LsqBoundedResult
         - DeconvolveResult
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -13756,6 +13796,45 @@ modules:
         - buttord
         - zpk2sos
         - sosfilt
+    functions/src/signal/spectral-peaks.ts:
+      description: Peak detection/width analysis, cross-spectral density + coherence, short-time
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft.js
+          imports:
+            - fft
+            - ifftReal
+            - ComplexNumber
+        - file: ../typed/signal.js
+          imports:
+            - windowFunction
+        - file: ../signal-filter-extra.js
+          imports:
+            - butter
+            - filtfilt
+      workspaceDependencies: []
+      exports:
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
+      interfaces:
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
+      functions:
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
     functions/src/signal/wavelets.ts:
       description: Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
       externalDependencies: []
@@ -33095,6 +33174,7 @@ dependencyGraph:
         - functions/src/signal/fir-smoothing.ts
         - functions/src/signal/freqz.ts
         - functions/src/signal/iir-design.ts
+        - functions/src/signal/spectral-peaks.ts
         - functions/src/signal/wavelets.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
@@ -33876,18 +33956,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1056
+  totalTypeScriptFiles: 1057
   totalModules: 81
-  totalLinesOfCode: 178668
-  totalExports: 5209
+  totalLinesOfCode: 179099
+  totalExports: 5227
   totalClasses: 56
-  totalInterfaces: 451
-  totalFunctions: 1726
-  totalTypeGuards: 158
+  totalInterfaces: 455
+  totalFunctions: 1733
+  totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 1928
-  totalTypeOnlyImports: 541
+  totalReExports: 1939
+  totalTypeOnlyImports: 542
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

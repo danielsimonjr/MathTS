@@ -1678,12 +1678,14 @@
     "functions/src/signal-filter-extra.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts",
-      "functions/src/signal/iir-design.ts"
+      "functions/src/signal/iir-design.ts",
+      "functions/src/signal/spectral-peaks.ts"
     ],
     "functions/src/signal/fft-helpers.ts": ["functions/src/index.ts"],
     "functions/src/signal/iir-design.ts": ["functions/src/index.ts"],
     "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
     "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
+    "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
     "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
     "functions/src/special/hypergeometric.ts": ["functions/src/index.ts"],
@@ -2039,7 +2041,10 @@
       "functions/src/relational/smallerEq.ts"
     ],
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
-    "functions/src/signal/fft.ts": ["functions/src/signal/conv.ts"],
+    "functions/src/signal/fft.ts": [
+      "functions/src/signal/conv.ts",
+      "functions/src/signal/spectral-peaks.ts"
+    ],
     "functions/src/signal/conv.ts": [
       "functions/src/signal/fir-smoothing.ts",
       "functions/src/signal/wavelets.ts"
@@ -2051,6 +2056,7 @@
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/typed/signal.ts": [
+      "functions/src/signal/spectral-peaks.ts",
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/index.ts"
     ],

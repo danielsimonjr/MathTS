@@ -306,6 +306,25 @@ export type { DeconvolveResult } from './signal/fir-smoothing.js';
 // reconstruction), and the continuous wavelet transform (cwt, Ricker/Morlet).
 export { idwt, wavedec, waverec, cwt } from './signal/wavelets.js';
 
+// Phase 6 Task 5 — peak detection (findPeaks/peakWidths), cross-spectral density +
+// magnitude-squared coherence (Welch averaging), short-time FFT + COLA-normalized
+// inverse (stft/istft), and anti-aliased decimation (decimate).
+export {
+  findPeaks,
+  peakWidths,
+  csd,
+  coherence,
+  stft,
+  istft,
+  decimate,
+} from './signal/spectral-peaks.js';
+export type {
+  FindPeaksOptions,
+  CsdOptions,
+  StftOptions,
+  StftResult,
+} from './signal/spectral-peaks.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,

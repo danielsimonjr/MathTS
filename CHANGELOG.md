@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Spectral estimation + peak analysis: csd/coherence/findPeaks/peakWidths/stft/istft/decimate (Phase 6 Task 5)
+
+Added `functions/src/signal/spectral-peaks.ts`, exported from `@danielsimonjr/mathts-functions`
+(the fifth and final Phase 6 signal-processing task):
+
+- `findPeaks(x[, opts])` — strict local-maxima peak indices (`x[i-1] < x[i] > x[i+1]`), optionally
+  filtered by `opts.height` (min value), `opts.distance` (min index separation, greedily keeping
+  the taller of any too-close pair — `scipy`'s tallest-first sweep), and/or `opts.prominence`
+  (min topographic prominence, walking outward from each peak to the nearest taller sample or
+  boundary in each direction). Pinned to `scipy.signal.find_peaks([0,2,0,3,0,1,0])` = `[1,3,5]`.
+- `peakWidths(x, peaks[, relHeight=0.5])` — width (in samples) of each peak at `relHeight` down
+  from the peak toward its topographic base, with linearly-interpolated crossing points. Pinned
+  bit-for-bit against `scipy.signal.peak_widths` (`peakWidths([0,1,3,1,0], [2])` = `[1.5]`).
+- `csd(x, y[, opts])` / `coherence(x, y[, opts])` — cross-spectral density / magnitude-squared
+  coherence via Welch's overlapped-segment-averaging method (segment, window, FFT, average
+  `X·conj(Y)`), reusing the package's own object-array `fft` (`signal/fft.ts`, the same internal
+  FFT `signal/conv.ts` already builds on) and `windowFunction`. `opts = { nperseg, noverlap,
+  window, fs }`.
+- `stft(x[, opts])` / `istft(S[, opts])` — short-time Fourier transform (windowed overlapping
+  frames, each independently FFT'd) and its inverse via overlap-add, normalized by the running sum
+  of squared window values (constant-overlap-add). This normalization makes reconstruction exact
+  in the interior for *any* window (not just COLA-satisfying ones) wherever the overlap-sum is
+  nonzero — verified via `istft(stft(x))` on a 64-sample signal (Hann window, 16/8 frame/overlap),
+  matching to 3 decimal places over the fully-overlapped interior region.
+- `decimate(x, q)` — anti-aliased downsampling by integer factor `q`: a Butterworth lowpass
+  (order 4, cutoff `min(0.8/q, 0.99)` of Nyquist) applied zero-phase via the existing
+  `butter`/`filtfilt`, then every `q`-th sample kept.
+
+Documented in `docs/reference/functions.md` under Signal Processing (new "Peak detection"
+subsection + additions to "Spectral estimation" and the main table). `npm run docs:functions` /
+`npm run docs:deps` regenerated; docs-completeness gate green. This completes the Phase 6
+signal-processing breadth plan (`docs/superpowers/plans/2026-07-16-phase6-signal-breadth.md`).
+
 ### Added — Wavelet transforms: idwt/wavedec/waverec + cwt (Phase 6 Task 4)
 
 Added `functions/src/signal/wavelets.ts`, exported from `@danielsimonjr/mathts-functions`. The

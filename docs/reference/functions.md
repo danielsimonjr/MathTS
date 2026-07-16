@@ -1785,40 +1785,43 @@ parallelize the element-wise spectra; `parallelConv` / `parallelXCorr` /
 `fft2d` likewise dispatch their batches of independent FFTs. Small inputs fall
 back to the sequential radix-2 implementation on the calling thread.
 
-| Function                                        | Description                                          | Accel          |
-| ----------------------------------------------- | ---------------------------------------------------- | -------------- |
-| `parallelFFT(x)`                                | FFT → `Complex[]`                                    | parallel       |
-| `parallelIFFT(X)`                               | Inverse FFT → `Float64Array`                         | parallel       |
-| `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                               | parallel       |
-| `parallelFFTPower(x)`                           | FFT power spectrum                                   | parallel       |
-| `parallelConv(a, b)`                            | Convolution                                          | parallel       |
-| `parallelXCorr(a, b)`                           | Cross-correlation                                    | parallel       |
-| `parallelAutoCorr(a)`                           | Auto-correlation                                     | parallel       |
-| `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer) | —              |
-| `fft2d(matrix)`                                 | 2D FFT                                               | parallel       |
-| `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                         | —              |
-| `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                  | WASM           |
-| `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                    | WASM           |
-| `dwt(x[, wavelet])`                             | Discrete wavelet transform                           | WASM           |
-| `idwt(cA, cD[, wavelet])`                       | Inverse discrete wavelet transform                   | —              |
-| `wavedec(x[, wavelet, level])`                  | Multilevel discrete wavelet decomposition            | —              |
-| `waverec(coeffs[, wavelet])`                    | Multilevel inverse discrete wavelet transform        | —              |
-| `cwt(x, scales[, wavelet])`                     | Continuous wavelet transform (Ricker/Morlet)         | —              |
-| `hilbertTransform(x)`                           | Hilbert transform                                    | WASM           |
-| `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                            | —              |
-| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                             | —              |
-| `lowpassFilter(x, fc)`                          | Low-pass filter                                      | WASM           |
-| `highpassFilter(x, fc)`                         | High-pass filter                                     | WASM           |
-| `bandpassFilter(x, f1, f2)`                     | Band-pass filter                                     | WASM           |
-| `medfilt(x[, window])`                          | Median filter                                        | —              |
-| `windowFunction(n, type)`                       | Window functions (Hamming, Hann, …)                  | —              |
-| `resample(x, ratio)`                            | Signal resampling                                    | —              |
-| `spectrogram(x[, opts])`                        | Spectrogram                                          | parallel, WASM |
-| `periodogram(x)`                                | Power spectral density estimate                      | WASM           |
-| `groupDelay(b, a, w)`                           | Filter group delay                                   | —              |
-| `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                      | —              |
-| `freqz(b, a)`                                   | Digital filter frequency response (factory layer)    | —              |
-| `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)   | —              |
+| Function                                        | Description                                                                                                                            | Accel          |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `parallelFFT(x)`                                | FFT → `Complex[]`                                                                                                                      | parallel       |
+| `parallelIFFT(X)`                               | Inverse FFT → `Float64Array`                                                                                                           | parallel       |
+| `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                 | parallel       |
+| `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                     | parallel       |
+| `parallelConv(a, b)`                            | Convolution                                                                                                                            | parallel       |
+| `parallelXCorr(a, b)`                           | Cross-correlation                                                                                                                      | parallel       |
+| `parallelAutoCorr(a)`                           | Auto-correlation                                                                                                                       | parallel       |
+| `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —              |
+| `fft2d(matrix)`                                 | 2D FFT                                                                                                                                 | parallel       |
+| `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —              |
+| `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                                                                                                    | WASM           |
+| `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                                                                                                      | WASM           |
+| `dwt(x[, wavelet])`                             | Discrete wavelet transform                                                                                                             | WASM           |
+| `idwt(cA, cD[, wavelet])`                       | Inverse discrete wavelet transform                                                                                                     | —              |
+| `wavedec(x[, wavelet, level])`                  | Multilevel discrete wavelet decomposition                                                                                              | —              |
+| `waverec(coeffs[, wavelet])`                    | Multilevel inverse discrete wavelet transform                                                                                          | —              |
+| `cwt(x, scales[, wavelet])`                     | Continuous wavelet transform (Ricker/Morlet)                                                                                           | —              |
+| `hilbertTransform(x)`                           | Hilbert transform                                                                                                                      | WASM           |
+| `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                                                                                                              | —              |
+| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                                                                                                               | —              |
+| `lowpassFilter(x, fc)`                          | Low-pass filter                                                                                                                        | WASM           |
+| `highpassFilter(x, fc)`                         | High-pass filter                                                                                                                       | WASM           |
+| `bandpassFilter(x, f1, f2)`                     | Band-pass filter                                                                                                                       | WASM           |
+| `medfilt(x[, window])`                          | Median filter                                                                                                                          | —              |
+| `windowFunction(n, type)`                       | Window functions (Hamming, Hann, …)                                                                                                    | —              |
+| `resample(x, ratio)`                            | Signal resampling                                                                                                                      | —              |
+| `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —              |
+| `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —              |
+| `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —              |
+| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel, WASM |
+| `periodogram(x)`                                | Power spectral density estimate                                                                                                        | WASM           |
+| `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —              |
+| `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —              |
+| `freqz(b, a)`                                   | Digital filter frequency response (factory layer)                                                                                      | —              |
+| `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)                                                                                     | —              |
 
 ### numpy.fft-style helpers (vs `numpy.fft`)
 
@@ -1857,13 +1860,22 @@ back to the sequential radix-2 implementation on the calling thread.
 
 ### Spectral estimation
 
-| Function                                       | Description                                                                                                                                                     | Accel |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| `welchPSD(x[, opts])`                          | Welch overlapped-segment-averaging PSD; `opts = { frameLength, overlap, window }` (defaults 256, frameLength/2, `'hann'`) → `{ psd, frequencies, frameLength }` | WASM  |
-| `bartlettPSD(x[, opts])`                       | Bartlett non-overlapped segment-averaging PSD (Welch with overlap 0, rectangular window) → `{ psd, frequencies, frameLength }`                                  | WASM  |
-| `multiTaperPSD(x[, opts])`                     | Thomson multi-taper PSD; averages `K` Slepian-tapered periodograms to cut leakage; `opts = { nfft, K }` (default K=5) → `{ psd, frequencies }`                  | WASM  |
-| `goertzel(x, targetFreq, sampleRate)`          | Goertzel algorithm: power \|X[k]\|² at a single target frequency (Hz)                                                                                           | WASM  |
-| `chirpZTransform(x, m[, phiStart[, phiStep]])` | Chirp-Z (Bluestein) transform: `m` z-transform points along a chirp contour (`phiStart`/`phiStep` in turns; default `phiStep = -1/n`) → `{ re, im }`            | WASM  |
+| Function                                       | Description                                                                                                                                                                                   | Accel |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `welchPSD(x[, opts])`                          | Welch overlapped-segment-averaging PSD; `opts = { frameLength, overlap, window }` (defaults 256, frameLength/2, `'hann'`) → `{ psd, frequencies, frameLength }`                               | WASM  |
+| `bartlettPSD(x[, opts])`                       | Bartlett non-overlapped segment-averaging PSD (Welch with overlap 0, rectangular window) → `{ psd, frequencies, frameLength }`                                                                | WASM  |
+| `multiTaperPSD(x[, opts])`                     | Thomson multi-taper PSD; averages `K` Slepian-tapered periodograms to cut leakage; `opts = { nfft, K }` (default K=5) → `{ psd, frequencies }`                                                | WASM  |
+| `goertzel(x, targetFreq, sampleRate)`          | Goertzel algorithm: power \|X[k]\|² at a single target frequency (Hz)                                                                                                                         | WASM  |
+| `chirpZTransform(x, m[, phiStart[, phiStep]])` | Chirp-Z (Bluestein) transform: `m` z-transform points along a chirp contour (`phiStart`/`phiStep` in turns; default `phiStep = -1/n`) → `{ re, im }`                                          | WASM  |
+| `csd(x, y[, opts])`                            | Cross-spectral density of `x`/`y` via Welch averaging (segment, window, FFT, average `X·conj(Y)`); `opts = { nperseg, noverlap, window, fs }` → `{ frequencies, power }` — `scipy.signal.csd` | —     |
+| `coherence(x, y[, opts])`                      | Magnitude-squared coherence `\|Pxy\|² / (Pxx·Pyy)` per Welch frequency bin (values in `[0, 1]`) → `{ frequencies, coherence }` — `scipy.signal.coherence`                                     | —     |
+
+### Peak detection
+
+| Function                                | Description                                                                                                                                                                                                                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `findPeaks(x[, opts])`                  | Strict local-maxima peak indices (`x[i-1] < x[i] > x[i+1]`), optionally filtered by `opts.height` (min value), `opts.distance` (min index separation, greedily keeps the taller peak), and/or `opts.prominence` (min topographic prominence) — `scipy.signal.find_peaks` |
+| `peakWidths(x, peaks[, relHeight=0.5])` | Width (in samples) of each peak at `relHeight` down from the peak toward its topographic base, with linearly-interpolated crossing points — `scipy.signal.peak_widths`                                                                                                   |
 
 ### Details
 
@@ -2517,7 +2529,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (965 exports).
+> `@danielsimonjr/mathts-functions` (972 exports).
 
 ### Functions by category
 
@@ -2553,7 +2565,7 @@ await terminatePool();
 
 **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
-**Signal Processing** (66): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `cwt`, `dct`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
+**Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
 **Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 

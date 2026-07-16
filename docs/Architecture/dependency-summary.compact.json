@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1056, "e": 5209, "re": 1928 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1057, "e": 5227, "re": 1939 },
   "s": {
-    "loc": 178668,
+    "loc": 179099,
     "cls": 56,
-    "int": 451,
-    "fn": 1726,
-    "tg": 158,
+    "int": 455,
+    "fn": 1733,
+    "tg": 159,
     "en": 0,
     "co": 1542,
-    "toi": 541
+    "toi": 542
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -816,7 +816,7 @@
       ]
     },
     "functions/signal": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "convDirect",
         "convFFT",
@@ -839,7 +839,15 @@
         "complexConj",
         "complexAbs"
       ],
-      "int": ["ComplexNumber", "FFTResult", "DeconvolveResult"]
+      "int": [
+        "ComplexNumber",
+        "FFTResult",
+        "DeconvolveResult",
+        "FindPeaksOptions",
+        "CsdOptions",
+        "StftOptions",
+        "StftResult"
+      ]
     },
     "functions/special": {
       "f": 5,
@@ -1728,7 +1736,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 71, "o": 0 },
+    { "p": "src/index.ts", "i": 73, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
