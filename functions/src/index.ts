@@ -309,3 +309,8 @@ export type {
 // Phase 5 Task 1 — hypergeometric master functions (0F1/1F1/2F1) + the
 // generic pFq series engine they delegate to.
 export { hyp0f1, hyp1f1, hyp2f1, pFq } from './special/hypergeometric.js';
+
+// Phase 5 Task 2 — polygamma/trigamma (higher derivatives of digamma) plus
+// the Jacobi/Gegenbauer orthogonal polynomials, generalizing the existing
+// Chebyshev/Hermite/Laguerre/Legendre family.
+export { polygamma, trigamma, jacobiP, gegenbauerC } from './special/polygamma-orthopoly.js';

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1046,
+    "totalFiles": 1047,
     "totalModules": 80,
-    "totalExports": 5093
+    "totalExports": 5101
   },
   "entryPoints": [
     {
@@ -8166,6 +8166,11 @@
             "reExport": true
           },
           {
+            "file": "./special/polygamma-orthopoly.js",
+            "imports": ["polygamma", "trigamma", "jacobiP", "gegenbauerC"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8475,6 +8480,10 @@
           "hyp1f1",
           "hyp2f1",
           "pFq",
+          "polygamma",
+          "trigamma",
+          "jacobiP",
+          "gegenbauerC",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8686,6 +8695,10 @@
           "hyp1f1",
           "hyp2f1",
           "pFq",
+          "polygamma",
+          "trigamma",
+          "jacobiP",
+          "gegenbauerC",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -14612,6 +14625,20 @@
         "workspaceDependencies": [],
         "exports": ["pFq", "hyp0f1", "hyp1f1", "hyp2f1"],
         "functions": ["pFq", "hyp0f1", "hyp1f1", "hyp2f1"]
+      },
+      "functions/src/special/polygamma-orthopoly.ts": {
+        "description": "Polygamma functions and classical orthogonal polynomials.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/special.js",
+            "imports": ["digamma"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["polygamma", "trigamma", "jacobiP", "gegenbauerC"],
+        "functions": ["polygamma", "trigamma", "jacobiP", "gegenbauerC"]
       },
       "functions/src/special/zeta.ts": {
         "description": "Compute the Riemann Zeta function of a value using an infinite series for",
@@ -34920,6 +34947,7 @@
         "files": [
           "functions/src/special/erf.ts",
           "functions/src/special/hypergeometric.ts",
+          "functions/src/special/polygamma-orthopoly.ts",
           "functions/src/special/zeta.ts"
         ]
       },
@@ -35779,17 +35807,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1046,
+    "totalTypeScriptFiles": 1047,
     "totalModules": 80,
-    "totalLinesOfCode": 175670,
-    "totalExports": 5093,
+    "totalLinesOfCode": 175845,
+    "totalExports": 5101,
     "totalClasses": 56,
     "totalInterfaces": 446,
-    "totalFunctions": 1659,
+    "totalFunctions": 1663,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1885,
+    "totalReExports": 1889,
     "totalTypeOnlyImports": 539,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

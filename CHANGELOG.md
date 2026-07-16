@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — polygamma/trigamma + Jacobi/Gegenbauer orthogonal polynomials (Phase 5 Task 2)
+
+Added `functions/src/special/polygamma-orthopoly.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `polygamma(n, x)` — the polygamma function `ψ^(n)(x)` (n-th derivative of digamma). `n === 0`
+  delegates to the existing `digamma`; `n >= 1` shifts `x` upward via the standard digamma
+  recurrence until it is large enough for the Bernoulli asymptotic expansion (DLMF 5.15.8, four
+  terms) to converge to machine precision.
+- `trigamma(x)` — the trigamma function `ψ'(x)`, equivalent to `polygamma(1, x)`.
+- `jacobiP(n, alpha, beta, x)` — the Jacobi polynomial `P_n^(alpha,beta)(x)` via the standard
+  stable three-term recurrence (DLMF 18.9.2).
+- `gegenbauerC(n, alpha, x)` — the Gegenbauer (ultraspherical) polynomial `C_n^(alpha)(x)` via the
+  standard stable three-term recurrence (DLMF 18.9.1), generalizing the existing
+  `chebyshevT`/`hermiteH`/`laguerreL`/`legendreP` family.
+
+Pinned vs mpmath/scipy (`polygamma(1,2) = trigamma(2) = 0.6449340668`, `polygamma(2,1) =
+-2.4041138063`, `jacobiP(2,1,1,0.5) = 0.1875`, `gegenbauerC(2,1,1) = 3`); agrees with mpmath to
+12+ significant digits and scipy's `eval_jacobi`/`eval_gegenbauer` exactly. Documented in
+`docs/reference/functions.md` under Special Functions.
+
 ### Added — hypergeometric functions: `hyp0f1`/`hyp1f1`/`hyp2f1` + generic `pFq` (Phase 5 Task 1)
 
 Added `functions/src/special/hypergeometric.ts`, exported from `@danielsimonjr/mathts-functions`:

@@ -477,6 +477,10 @@ leftShift(1, 4); // 16
 | `hyp1f1(a, b, z)`                           | Kummer's confluent hypergeometric function `1F1(a; b; z)` (Kummer's M)        | —                      |
 | `hyp2f1(a, b, c, z)`                        | Gauss's hypergeometric function `2F1(a, b; c; z)` (requires `\|z\| < 1`)      | —                      |
 | `pFq(a[], b[], z)`                          | Generic generalized hypergeometric function `pFq(a; b; z)`                    | —                      |
+| `polygamma(n, x)`                           | Polygamma function `ψ^(n)(x)`, the n-th derivative of digamma                 | —                      |
+| `trigamma(x)`                               | Trigamma function `ψ'(x)` (= `polygamma(1, x)`)                               | —                      |
+| `jacobiP(n, alpha, beta, x)`                | Jacobi polynomial `P_n^(alpha,beta)(x)`                                       | —                      |
+| `gegenbauerC(n, alpha, x)`                  | Gegenbauer (ultraspherical) polynomial `C_n^(alpha)(x)`                       | —                      |
 
 ### Details
 
@@ -513,6 +517,13 @@ leftShift(1, 4); // 16
   `hyp1f1` are entire (converge for all finite `z`); `hyp2f1` converges only
   for `|z| < 1` and throws otherwise — analytic continuation beyond the unit
   disk is not yet implemented.
+- `polygamma(n, x)` (and `trigamma(x) = polygamma(1, x)`) is computed by
+  shifting `x` upward via the digamma recurrence until it is large enough for
+  the Bernoulli asymptotic expansion (DLMF 5.15.8, four terms) to converge to
+  machine precision; `polygamma(0, x)` delegates to `digamma`. `jacobiP` and
+  `gegenbauerC` are evaluated with their standard stable three-term
+  recurrences (DLMF 18.9.2 / 18.9.1), the same pattern used for `chebyshevT` /
+  `hermiteH` / `laguerreL` / `legendreP`.
 
 ### Background & History
 
@@ -2439,7 +2450,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (924 exports).
+> `@danielsimonjr/mathts-functions` (928 exports).
 
 ### Functions by category
 
@@ -2453,7 +2464,7 @@ await terminatePool();
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (46): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `sinIntegral`, `zeta`
+**Special Functions** (50): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiP`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
 
