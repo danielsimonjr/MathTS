@@ -351,7 +351,14 @@ nodes/weights via Golub–Welsch (M) · Jacobi/Gegenbauer orthogonal polys (S) �
 Kelvin, Barnes-G (M each) · number-theory fills `continuedFraction`/Euler-numbers/`stirlingS1`/
 `discreteLog`/`primitiveRoot`/Kronecker/permutation-combination **generators** (S each). **≈ L.**
 
-### Phase 6 — Signal processing breadth
+### Phase 6 — Signal processing breadth — ✅ RELEASED `functions@0.34.0` (2026-07-16)
+
+Shipped: FFT helpers, IIR design (cheby1/cheby2/ellip + butter btype + sosfilt/zpk2sos/bilinear/buttord),
+FIR+smoothing (firwinBandpass/firls/remez/savgol/wiener/deconvolve), wavelets (idwt/wavedec/waverec/cwt),
+spectral+peaks (csd/coherence/findPeaks/peakWidths/stft/istft/decimate). Resolves the Phase-0 butter/firwin
+lowpass-only note. Oracle-pinned vs scipy.signal, tarball-verified.
+
+_(original scope below)_
 
 `rfft`/`irfft`/`fftshift`/`fftfreq`/`fftn` · DCT types 1/3/4 · filter design cheby1/cheby2/ellip/bessel
 

@@ -54,12 +54,28 @@ oracle-pinned, subagent-driven. Phase plan:
       `stirlingS1`/`discreteLog`/`primitiveRoot`/`multiplicativeOrder`/`kroneckerSymbol`/`permutationsGen`/
       `combinationsGen`). Oracle-pinned vs mpmath/scipy/sympy, tarball-verified. Niche extras (polylog/
       Lerch/Struve/Kelvin/Barnes-G/Coulomb/Mathieu/Riemann–Siegel) DEFERRED to a Phase-5 extension.
-- [ ] **Phase 6 — Signal breadth.** rfft/fftshift/fftfreq · filter design (cheby/ellip/sosfilt) ·
-      wavelets · STFT/find_peaks · DCT types.
+- [x] **Phase 6 — Signal breadth — ✅ RELEASED `functions@0.34.0`** (2026-07-16). FFT helpers (rfft/
+      irfft/fftshift/fftfreq/fftn) · IIR design (cheby1/cheby2/ellip[exact] + `butter` btype + sosfilt/
+      zpk2sos/bilinear/buttord) · FIR+smoothing (firwinBandpass/firls/remez/savgol/wiener/deconvolve) ·
+      wavelets (idwt/wavedec/waverec/cwt) · spectral+peaks (csd/coherence/findPeaks/peakWidths/stft/istft/
+      decimate). **Resolves the Phase-0 butter/firwin lowpass-only note.** Oracle-pinned vs scipy.signal,
+      tarball-verified. Follow-ups: csd/coherence not hard-pinned; wavelets Haar/db1 only; remez approximate.
 - [ ] **Phase 7 — Advanced linalg.** iterative Krylov (cg/gmres) · sparse eigensolver · complex matrix
       functions (Schur–Parlett) · LDLᵀ · Riccati · banded/Toeplitz solvers · rank-revealing QR.
 - [ ] **Phase 8 — Graph/geometry/CAS/PDE/intervals.** directed graph + traversal + max-flow · quaternion
       slerp/Euler · N-D interpolation · BVP collocation · real CAS expand/factor/apart · interval type.
+
+### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
+
+Already standalone repos (`~/danie/github/{typed-function,workerpool}` + github.com/danielsimonjr/\*),
+consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-forked-deps]]
+
+- [ ] **Publish pending fork changes** (awaiting Daniel's confirm on the specific actions):
+      `@danielsimonjr/typed-function` is at `5.0.0-alpha.3` on github/`develop` but only `alpha.1` on npm
+      (2 unpublished versions) → publish alpha.3. `@danielsimonjr/workerpool` has a types-fix commit on an
+      unmerged branch `fix/generate-js-api-types` → merge to `master` + publish 10.2.1.
+- [ ] **DEFERRED — first-party integration** of typed-function/workerpool (absorb like BigNumber-in-core).
+      Explicitly held until the oracle-gap gaps/functions analysis is mature (Daniel's directive 2026-07-16).
 
 ### Numerical accuracy (NumPy/SciPy parity)
 
