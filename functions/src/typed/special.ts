@@ -390,6 +390,27 @@ function lambertWScalar(x: f64): f64 {
   return w;
 }
 
+/** Lambert W function, lower real branch W_-1. Defined for x in [-1/e, 0); NaN otherwise. */
+function lambertWm1Scalar(x: f64): f64 {
+  if (x < -1 / Math.E || x >= 0) return NaN;
+  if (x === -1 / Math.E) return -1;
+
+  let w = Math.log(-x) - Math.log(-Math.log(-x));
+
+  for (let i = 0; i < 60; i++) {
+    const ew = Math.exp(w);
+    const wew = w * ew;
+    const f = wew - x;
+    const fp = ew * (w + 1);
+    const fpp = ew * (w + 2);
+    const dw = f / (fp - (f * fpp) / (2 * fp));
+    w -= dw;
+    if (Math.abs(dw) < 1e-15) break;
+  }
+
+  return w;
+}
+
 /** Cosine integral Ci(x). */
 function cosIntegralScalar(x: f64): f64 {
   if (x <= 0) return NaN;
@@ -1080,16 +1101,24 @@ export const legendreP = mathTyped('legendreP', {
 // =============================================================================
 
 /**
- * Lambert W function (principal branch W_0).
+ * Lambert W function.
  *
  * @param x - Input value (>= -1/e), or Float64Array of values
- * @returns W_0(x)
+ * @param branch - Branch selector: 0 (default, principal branch W_0) or -1
+ *   (lower real branch W_-1, defined for x in [-1/e, 0); NaN outside that range)
+ * @returns W_branch(x)
  *
  * @example
  * lambertW(1) // ~0.5671 (omega constant)
+ * lambertW(-0.3, -1) // ~-1.7813 (lower branch)
  */
 export const lambertW = mathTyped('lambertW', {
   number: lambertWScalar,
+  'number, number': (x: f64, branch: f64): f64 => {
+    if (branch === 0) return lambertWScalar(x);
+    if (branch === -1) return lambertWm1Scalar(x);
+    throw new Error('lambertW: branch must be 0 or -1');
+  },
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
     mapArray(x, lambertWScalar, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')),
 });

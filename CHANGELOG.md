@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `lambertW`'s documented `branch` argument was unimplemented
+
+The docs promised `lambertW(x[, branch])` (`branch = 0` for the principal branch, `branch = -1`
+for the lower real branch), but the implementation only accepted a single `number` — calling
+`lambertW(-0.3, -1)` threw `Too many arguments in function lambertW (expected: 1, actual: 2)`.
+Added `lambertWm1Scalar`, the lower branch W₋₁ (Halley's iteration seeded from the asymptotic
+`ln(-x) - ln(-ln(-x))`, `x ∈ [-1/e, 0)`, `NaN` outside), and a `(number, number)` dispatch
+signature. Principal branch unchanged. Pinned to mpmath: `W₋₁(-0.3) = -1.781337023421628`.
+
 ### Fixed — `invmod` threw on every call (`_BigNumber` invoked without `new`)
 
 `invmod` threw `_BigNumber cannot be invoked without 'new'` on every call (class constructor
