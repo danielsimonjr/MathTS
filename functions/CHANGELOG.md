@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.30.0
+
+### Minor Changes
+
+- Phase 2 optimization core (oracle-gap roadmap): `bfgs` — BFGS quasi-Newton minimizer with Armijo line search, numeric or analytic gradient, and optional box projection (the smooth-optimization workhorse complementing Nelder–Mead `minimize`); `nnls` (Lawson–Hanson non-negative least squares) and `lsqBounded` (projected-gradient box-constrained least squares), each returning `{ x, residual }`; and a two-phase-simplex overload of `linprog` — `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` → `{ x, fun, success, status }` supporting equality constraints, variable bounds, and infeasible/unbounded detection (the legacy positional `linprog(c, A_ub, b_ub)` signature is unchanged). All oracle-pinned vs scipy.
+
 ## 0.29.0
 
 ### Minor Changes

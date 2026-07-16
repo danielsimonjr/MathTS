@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-trigonometry",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "Standalone trigonometric functions for MathTS, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "^0.29.0",
+    "@danielsimonjr/mathts-functions": "^0.30.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
