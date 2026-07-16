@@ -11,6 +11,33 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
+### 🗺️ Oracle Gap Roadmap (comprehensive functionality + accuracy sweep vs numpy/scipy/mpmath/MATLAB/Mathematica)
+
+Full inventory: [`docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md`](docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)
+(7 parallel domain surveys, all gaps probed against live oracles). Executed autonomously per-phase,
+oracle-pinned, subagent-driven. Phase plan:
+
+- [ ] **Phase 0 — Correctness & honesty (P0 bugs; wrong answers in shipped fns).** `linprog` infeasible
+      optima · `taylor`/`series` garbage past order 3 (→autograd) · `betainc`→NaN · `invmod` throws ·
+      `lambertW` branch arg · `stiffODESolver` 71% err (→Rosenbrock) · signal `windowFunction`
+      silent-rectangular / `butter` ignores btype / `firwin` bandpass nulls · symbolic `summation`
+      symbolic-bound→0 · reconcile CAS no-op docs. **← START HERE.**
+- [ ] **Phase 1 — Foundational primitives.** numeric `jacobian` · open root-finders newton/secant/halley
+      · `fsolve`/`root` systems · `minimize_scalar` · adaptive Gauss–Kronrod `quad` · expose full `svd`.
+- [ ] **Phase 2 — Optimization core.** BFGS/L-BFGS-B · bounded LS + NNLS · proper `linprog` (two-phase).
+- [ ] **Phase 3 — Regression & ML.** multiple OLS + inference · ridge/lasso · logistic/GLM · DBSCAN+kNN
+      · Gaussian KDE · χ² contingency · multiple-testing correction.
+- [ ] **Phase 4 — Statistics inference.** distribution MLE `.fit` · exact Mann–Whitney/KS p-values ·
+      PACF/Ljung–Box/ADF time-series · noncentral CDFs · circular stats.
+- [ ] **Phase 5 — Special functions & number theory.** `pFq` hypergeometric · polygamma · Jacobi
+      elliptic · Gauss-quad nodes/weights · orthogonal polys · continuedFraction/stirlingS1/generators.
+- [ ] **Phase 6 — Signal breadth.** rfft/fftshift/fftfreq · filter design (cheby/ellip/sosfilt) ·
+      wavelets · STFT/find_peaks · DCT types.
+- [ ] **Phase 7 — Advanced linalg.** iterative Krylov (cg/gmres) · sparse eigensolver · complex matrix
+      functions (Schur–Parlett) · LDLᵀ · Riccati · banded/Toeplitz solvers · rank-revealing QR.
+- [ ] **Phase 8 — Graph/geometry/CAS/PDE/intervals.** directed graph + traversal + max-flow · quaternion
+      slerp/Euler · N-D interpolation · BVP collocation · real CAS expand/factor/apart · interval type.
+
 ### Numerical accuracy (NumPy/SciPy parity)
 
 - [x] ✅ **`sum`/`mean` were ~46,000× less accurate than NumPy — FIXED** (2026-07-14). Naive `s += x`
@@ -84,7 +111,7 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       heuristic (was using the whole interval as step 1 → RK23 silently returned 1/3 for y'=-y).
       Verified vs closed forms; `functions/tests/solveode-jspath.test.ts`.
 - [x] ✅ **Stiff ODE solver (Rosenbrock/ode23s) — ADDED** (2026-07-15). `solveODE(..., {method:
-    'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
+  'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
       solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
       scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
       `functions/tests/solveode-jspath.test.ts`.
