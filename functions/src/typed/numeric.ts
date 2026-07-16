@@ -1973,15 +1973,36 @@ export function quadprog(H: number[][], f: number[], A: number[][], b: number[])
 }
 
 /**
+ * Options form of {@link linprog}: minimize c^T x subject to A_ub x <= b_ub,
+ * A_eq x = b_eq, and per-variable bounds.
+ */
+export interface LinprogOptions {
+  A_ub?: number[][];
+  b_ub?: number[];
+  A_eq?: number[][];
+  b_eq?: number[];
+  /** Per-variable [lower, upper] bounds; null = unbounded. Default: [0, null] for every variable. */
+  bounds?: readonly (readonly [number | null, number | null])[];
+}
+
+/** Result of the options form of {@link linprog}. */
+export interface LinprogResult {
+  x: number[];
+  fun: number;
+  success: boolean;
+  status: 'optimal' | 'infeasible' | 'unbounded';
+}
+
+/**
  * Linear programming: minimize c^T x subject to Ax <= b, x >= 0.
- * Simple simplex method implementation.
+ * Simple simplex method implementation (legacy one-phase path).
  *
  * @param c - Objective coefficients (length n)
  * @param A - Constraint matrix (m x n)
  * @param b - Constraint bounds (length m, non-negative)
  * @returns Solution vector x, or null if infeasible
  */
-export function linprog(c: number[], A: number[][], b: number[]): number[] | null {
+function linprogOnePhaseLegacy(c: number[], A: number[][], b: number[]): number[] | null {
   const m = A.length;
   const n = c.length;
 
@@ -2071,6 +2092,371 @@ export function linprog(c: number[], A: number[][], b: number[]): number[] | nul
   }
 
   return x;
+}
+
+const LINPROG_TOL = 1e-9;
+
+/** How an original variable j maps onto the working (>=0) columns of the two-phase tableau. */
+type LinprogVarExpansion =
+  | { kind: 'shift'; col: number; shift: number }
+  | { kind: 'split'; colPos: number; colNeg: number };
+
+interface LinprogRawResult {
+  xWork: number[];
+  status: 'optimal' | 'infeasible' | 'unbounded';
+}
+
+/**
+ * Core two-phase primal simplex over an equality-form system `Aeq x = beq`
+ * (x >= 0). `hasSlack[i]`/`slackCol[i]` identify rows that already carry a
+ * natural +1 slack column (built by the caller for `<=` rows); all other
+ * rows get an artificial variable for Phase 1.
+ */
+function linprogSolveTwoPhase(
+  costWork: number[],
+  Aeq: number[][],
+  beq: number[],
+  hasSlack: boolean[],
+  slackCol: number[]
+): LinprogRawResult {
+  const m = Aeq.length;
+  const nw = costWork.length;
+
+  if (m === 0) {
+    for (let j = 0; j < nw; j++) {
+      if (costWork[j] < -LINPROG_TOL) return { xWork: [], status: 'unbounded' };
+    }
+    return { xWork: new Array(nw).fill(0), status: 'optimal' };
+  }
+
+  // Copy rows, flipping sign where the RHS is negative (so every row has b >= 0).
+  const rows: number[][] = [];
+  const rhs: number[] = [];
+  const flipped: boolean[] = [];
+  for (let i = 0; i < m; i++) {
+    let row = [...Aeq[i]];
+    let b = beq[i];
+    let f = false;
+    if (b < 0) {
+      row = row.map((v) => -v);
+      b = -b;
+      f = true;
+    }
+    rows.push(row);
+    rhs.push(b);
+    flipped.push(f);
+  }
+
+  // Assign an initial basis: the row's natural slack if it's already +1, else a fresh artificial.
+  const basis: number[] = new Array(m).fill(-1);
+  const artificialCols: number[] = [];
+  let nextCol = nw;
+  for (let i = 0; i < m; i++) {
+    if (hasSlack[i] && !flipped[i]) {
+      basis[i] = slackCol[i];
+    } else {
+      const col = nextCol++;
+      artificialCols.push(col);
+      basis[i] = col;
+    }
+  }
+  const totalCols = nextCol;
+  const isArtificial = new Array(totalCols).fill(false);
+  for (const col of artificialCols) isArtificial[col] = true;
+
+  const width = totalCols + 1; // + RHS column
+  const tableau: number[][] = [];
+  for (let i = 0; i < m; i++) {
+    const row = new Array(width).fill(0);
+    for (let j = 0; j < nw; j++) row[j] = rows[i][j];
+    if (isArtificial[basis[i]]) row[basis[i]] = 1;
+    row[totalCols] = rhs[i];
+    tableau.push(row);
+  }
+
+  const pivot = (pr: number, pc: number, objRow: number[]): void => {
+    const pivotVal = tableau[pr][pc];
+    for (let j = 0; j < width; j++) tableau[pr][j] /= pivotVal;
+    for (let i = 0; i < tableau.length; i++) {
+      if (i === pr) continue;
+      const factor = tableau[i][pc];
+      if (factor === 0) continue;
+      for (let j = 0; j < width; j++) tableau[i][j] -= factor * tableau[pr][j];
+    }
+    const factor = objRow[pc];
+    if (factor !== 0) {
+      for (let j = 0; j < width; j++) objRow[j] -= factor * tableau[pr][j];
+    }
+  };
+
+  const buildObjRow = (costFull: number[]): number[] => {
+    const row = new Array(width).fill(0);
+    for (let j = 0; j < totalCols; j++) row[j] = costFull[j];
+    for (let i = 0; i < tableau.length; i++) {
+      const cb = costFull[basis[i]];
+      if (cb === 0) continue;
+      for (let j = 0; j < width; j++) row[j] -= cb * tableau[i][j];
+    }
+    return row;
+  };
+
+  const runSimplex = (
+    objRow: number[],
+    excluded: boolean[],
+    maxIter = 2000
+  ): 'optimal' | 'unbounded' => {
+    for (let iter = 0; iter < maxIter; iter++) {
+      let pivotCol = -1;
+      let minVal = -LINPROG_TOL;
+      for (let j = 0; j < totalCols; j++) {
+        if (excluded[j]) continue;
+        if (objRow[j] < minVal) {
+          minVal = objRow[j];
+          pivotCol = j;
+        }
+      }
+      if (pivotCol === -1) return 'optimal';
+
+      let pivotRow = -1;
+      let minRatio = Infinity;
+      for (let i = 0; i < tableau.length; i++) {
+        if (tableau[i][pivotCol] > LINPROG_TOL) {
+          const ratio = tableau[i][totalCols] / tableau[i][pivotCol];
+          if (ratio < minRatio - 1e-12) {
+            minRatio = ratio;
+            pivotRow = i;
+          }
+        }
+      }
+      if (pivotRow === -1) return 'unbounded';
+
+      basis[pivotRow] = pivotCol;
+      pivot(pivotRow, pivotCol, objRow);
+    }
+    return 'optimal';
+  };
+
+  // Phase 1: drive the artificial variables to zero.
+  const noExclusions = new Array(totalCols).fill(false);
+  const cost1 = new Array(totalCols).fill(0);
+  for (const col of artificialCols) cost1[col] = 1;
+  const objRow1 = buildObjRow(cost1);
+  const phase1Status = runSimplex(objRow1, noExclusions);
+  if (phase1Status === 'unbounded') return { xWork: [], status: 'infeasible' };
+
+  let phase1Obj = 0;
+  for (let i = 0; i < tableau.length; i++) phase1Obj += cost1[basis[i]] * tableau[i][totalCols];
+  if (phase1Obj > 1e-7) return { xWork: [], status: 'infeasible' };
+
+  // Pivot out any artificial that is still (degenerately) basic at zero; drop redundant rows.
+  let i = 0;
+  while (i < tableau.length) {
+    if (!isArtificial[basis[i]]) {
+      i++;
+      continue;
+    }
+    let pc = -1;
+    for (let j = 0; j < nw; j++) {
+      if (Math.abs(tableau[i][j]) > 1e-8) {
+        pc = j;
+        break;
+      }
+    }
+    if (pc === -1) {
+      tableau.splice(i, 1);
+      basis.splice(i, 1);
+      continue; // row was redundant (0 = 0); don't advance, next row shifted into place
+    }
+    basis[i] = pc;
+    pivot(i, pc, new Array(width).fill(0)); // scratch objRow — rebuilt fresh for phase 2
+    i++;
+  }
+
+  // Phase 2: optimize the real objective, locking artificial columns out.
+  const costFull2 = new Array(totalCols).fill(0);
+  for (let j = 0; j < nw; j++) costFull2[j] = costWork[j];
+  const objRow2 = buildObjRow(costFull2);
+  const excludeArtificial = isArtificial.slice();
+  const phase2Status = runSimplex(objRow2, excludeArtificial);
+  if (phase2Status === 'unbounded') return { xWork: [], status: 'unbounded' };
+
+  const xWork = new Array(nw).fill(0);
+  for (let r = 0; r < tableau.length; r++) {
+    if (basis[r] < nw) xWork[basis[r]] = Math.max(0, tableau[r][totalCols]);
+  }
+  return { xWork, status: 'optimal' };
+}
+
+/**
+ * Options-form linear programming: minimize c^T x subject to `A_ub x <= b_ub`,
+ * `A_eq x = b_eq`, and per-variable bounds (default `[0, null]` = x >= 0).
+ * Uses a two-phase simplex (artificial variables in Phase 1) so it can start
+ * from equality constraints and negative-RHS/`>=`-style rows directly.
+ */
+function linprogTwoPhase(c: number[], opts: LinprogOptions): LinprogResult {
+  const n = c.length;
+  const boundsResolved: [number | null, number | null][] = [];
+  for (let j = 0; j < n; j++) {
+    const b = opts.bounds?.[j];
+    boundsResolved.push(b ? [b[0], b[1]] : [0, null]);
+  }
+
+  // Pass 1: assign working columns for each original variable (shift for a
+  // finite lower bound, split into (+)/(-) parts for a free/-Infinity lower bound).
+  let col = 0;
+  const expansions: LinprogVarExpansion[] = [];
+  for (let j = 0; j < n; j++) {
+    const low = boundsResolved[j][0];
+    if (low === null) {
+      const colPos = col++;
+      const colNeg = col++;
+      expansions.push({ kind: 'split', colPos, colNeg });
+    } else {
+      const c0 = col++;
+      expansions.push({ kind: 'shift', col: c0, shift: low });
+    }
+  }
+  const nx = col;
+
+  const expandRow = (row: number[]): number[] => {
+    const out = new Array(nx).fill(0);
+    for (let j = 0; j < n; j++) {
+      const coeff = row[j] ?? 0;
+      if (coeff === 0) continue;
+      const e = expansions[j];
+      if (e.kind === 'shift') out[e.col] += coeff;
+      else {
+        out[e.colPos] += coeff;
+        out[e.colNeg] -= coeff;
+      }
+    }
+    return out;
+  };
+  const shiftedRhs = (row: number[], rhsVal: number): number => {
+    let r = rhsVal;
+    for (let j = 0; j < n; j++) {
+      const e = expansions[j];
+      if (e.kind === 'shift' && e.shift !== 0) r -= (row[j] ?? 0) * e.shift;
+    }
+    return r;
+  };
+
+  let constant = 0;
+  const cWork = new Array(nx).fill(0);
+  for (let j = 0; j < n; j++) {
+    const e = expansions[j];
+    if (e.kind === 'shift') {
+      cWork[e.col] = c[j];
+      constant += c[j] * e.shift;
+    } else {
+      cWork[e.colPos] = c[j];
+      cWork[e.colNeg] = -c[j];
+    }
+  }
+
+  // `<=` rows: caller-provided A_ub/b_ub, plus one extra row per finite upper bound.
+  const ubRows: number[][] = [];
+  const ubRhs: number[] = [];
+  const A_ub = opts.A_ub ?? [];
+  const b_ub = opts.b_ub ?? [];
+  for (let i = 0; i < A_ub.length; i++) {
+    ubRows.push(expandRow(A_ub[i]));
+    ubRhs.push(shiftedRhs(A_ub[i], b_ub[i]));
+  }
+  for (let j = 0; j < n; j++) {
+    const high = boundsResolved[j][1];
+    if (high === null) continue;
+    const e = expansions[j];
+    const row = new Array(nx).fill(0);
+    let rhsVal: number;
+    if (e.kind === 'shift') {
+      row[e.col] = 1;
+      rhsVal = high - e.shift;
+    } else {
+      row[e.colPos] = 1;
+      row[e.colNeg] = -1;
+      rhsVal = high;
+    }
+    ubRows.push(row);
+    ubRhs.push(rhsVal);
+  }
+
+  const A_eq = opts.A_eq ?? [];
+  const b_eq = opts.b_eq ?? [];
+  const eqRows: number[][] = [];
+  const eqRhs: number[] = [];
+  for (let i = 0; i < A_eq.length; i++) {
+    eqRows.push(expandRow(A_eq[i]));
+    eqRhs.push(shiftedRhs(A_eq[i], b_eq[i]));
+  }
+
+  const mUb = ubRows.length;
+  const mEq = eqRows.length;
+  const nw = nx + mUb;
+
+  const Aeq: number[][] = [];
+  const beq: number[] = [];
+  const hasSlack: boolean[] = [];
+  const slackCol: number[] = [];
+  for (let i = 0; i < mUb; i++) {
+    const row = new Array(nw).fill(0);
+    for (let j = 0; j < nx; j++) row[j] = ubRows[i][j];
+    row[nx + i] = 1;
+    Aeq.push(row);
+    beq.push(ubRhs[i]);
+    hasSlack.push(true);
+    slackCol.push(nx + i);
+  }
+  for (let i = 0; i < mEq; i++) {
+    const row = new Array(nw).fill(0);
+    for (let j = 0; j < nx; j++) row[j] = eqRows[i][j];
+    Aeq.push(row);
+    beq.push(eqRhs[i]);
+    hasSlack.push(false);
+    slackCol.push(-1);
+  }
+
+  const costWorkFull = new Array(nw).fill(0);
+  for (let j = 0; j < nx; j++) costWorkFull[j] = cWork[j];
+
+  const raw = linprogSolveTwoPhase(costWorkFull, Aeq, beq, hasSlack, slackCol);
+  if (raw.status !== 'optimal') {
+    return { x: new Array(n).fill(NaN), fun: NaN, success: false, status: raw.status };
+  }
+
+  const x = new Array(n).fill(0);
+  for (let j = 0; j < n; j++) {
+    const e = expansions[j];
+    x[j] =
+      e.kind === 'shift' ? raw.xWork[e.col] + e.shift : raw.xWork[e.colPos] - raw.xWork[e.colNeg];
+  }
+  let fun = constant;
+  for (let j = 0; j < nx; j++) fun += cWork[j] * raw.xWork[j];
+
+  return { x, fun, success: true, status: 'optimal' };
+}
+
+/**
+ * Linear programming: minimize c^T x.
+ *
+ * Two overloads:
+ * - Legacy positional form `linprog(c, A_ub, b_ub)` — subject to `A_ub x <= b_ub`,
+ *   `x >= 0`; returns the solution vector `x` (or `null` if unbounded).
+ * - Options form `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` — a two-phase
+ *   simplex supporting equality constraints, variable bounds, and negative-RHS
+ *   rows; returns `{ x, fun, success, status }`.
+ */
+export function linprog(c: number[], A_ub: number[][], b_ub: number[]): number[] | null;
+export function linprog(c: number[], opts: LinprogOptions): LinprogResult;
+export function linprog(
+  c: number[],
+  arg2: number[][] | LinprogOptions,
+  arg3?: number[]
+): number[] | null | LinprogResult {
+  if (Array.isArray(arg2)) {
+    return linprogOnePhaseLegacy(c, arg2, arg3 as number[]);
+  }
+  return linprogTwoPhase(c, arg2);
 }
 
 /**

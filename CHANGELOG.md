@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `linprog` two-phase simplex: equality constraints, bounds, status (Phase 2 Task 3)
+
+`linprog` now accepts an options overload `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` returning
+`{ x, fun, success, status }` — a two-phase simplex (Phase 1 artificial variables find a basic
+feasible solution, handling equality constraints and negative-RHS rows; Phase 2 optimizes the real
+objective) supporting equality constraints, per-variable `bounds` (default `[0, null]`), and
+infeasible/unbounded detection (`status: 'optimal' | 'infeasible' | 'unbounded'`). The legacy
+positional signature `linprog(c, A_ub, b_ub)` is unchanged. Pinned vs `scipy.optimize.linprog`:
+`linprog([-1,-1], A_ub=[[1,1]], b_ub=[4], A_eq=[[1,-1]], b_eq=[1]) -> x=[2.5,1.5], fun=-4`; an
+infeasible case (`x<=1` and `x>=3`); and a bounds-only case (`x∈[0,5]`, minimize `-x` -> `x=5`).
+
 ### Added — `nnls` + `lsqBounded` constrained least squares (Phase 2 Task 2)
 
 Added `nnls(A, b, { tol?, maxIter? })` — Lawson–Hanson active-set non-negative least squares

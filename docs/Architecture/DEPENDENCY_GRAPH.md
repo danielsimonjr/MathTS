@@ -8076,8 +8076,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`
-- Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `cond`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`
+- Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `LinprogOptions`, `LinprogResult`
+- Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `cond`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `linprog`, `linprog`, `solvePDE`
 
 ---
 
@@ -15659,12 +15659,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1036   |
 | Total Modules           | 78     |
-| Total Lines of Code     | 173242 |
+| Total Lines of Code     | 173632 |
 | Total Exports           | 5012   |
 | Total Re-exports        | 1834   |
 | Total Classes           | 56     |
-| Total Interfaces        | 424    |
-| Total Functions         | 1627   |
+| Total Interfaces        | 426    |
+| Total Functions         | 1629   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 531    |

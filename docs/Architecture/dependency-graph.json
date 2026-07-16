@@ -18299,7 +18299,13 @@
           "linprog",
           "solvePDE"
         ],
-        "interfaces": ["FindRootOptions", "MinimizeOptions", "ODESolution"],
+        "interfaces": [
+          "FindRootOptions",
+          "MinimizeOptions",
+          "ODESolution",
+          "LinprogOptions",
+          "LinprogResult"
+        ],
         "functions": [
           "findRoot",
           "linsolve",
@@ -18333,6 +18339,8 @@
           "chebyshevApprox",
           "padeApproximant",
           "quadprog",
+          "linprog",
+          "linprog",
           "linprog",
           "solvePDE"
         ]
@@ -35353,11 +35361,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1036,
     "totalModules": 78,
-    "totalLinesOfCode": 173242,
+    "totalLinesOfCode": 173632,
     "totalExports": 5012,
     "totalClasses": 56,
-    "totalInterfaces": 424,
-    "totalFunctions": 1627,
+    "totalInterfaces": 426,
+    "totalFunctions": 1629,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,

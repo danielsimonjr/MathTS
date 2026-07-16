@@ -2072,35 +2072,36 @@
 
       Root-finding, optimization, linear systems, and differential equations.
 
-      | Function                            | Description                                                             | Accel |
-      | ----------------------------------- | ----------------------------------------------------------------------- | ----- |
-      | `findRoot(f, a, b[, opts])`         | Bracketed root-finding (bisection/Brent)                                | —     |
-      | `newton(f, x0[, opts])`             | Newton–Raphson root-finding (analytic or central-difference derivative) | —     |
-      | `secant(f, x0, x1[, opts])`         | Secant-method root-finding (no derivative required)                     | —     |
-      | `halley(f, x0[, opts])`             | Halley's method root-finding (cubic convergence)                        | —     |
-      | `fsolve(F, x0[, opts])`             | Nonlinear system solver `F(x) = 0` for `F: ℝⁿ → ℝⁿ` (damped Newton)     | —     |
-      | `root(F, x0[, opts])`               | Alias of `fsolve`                                                       | —     |
-      | `linsolve(A, b)`                    | Solve a linear system `Ax = b`                                          | —     |
-      | `leastSquares(A, b)`                | Least-squares solution (overdetermined)                                 | WASM  |
-      | `nnls(A, b[, opts])`                 | Non-negative least squares (Lawson–Hanson active-set); returns `{ x, residual }` | —     |
-      | `lsqBounded(A, b, lower, upper[, opts])` | Box-constrained least squares (projected-gradient); returns `{ x, residual }` | —     |
-      | `minimize(f, x0[, opts])`           | Local minimization                                                      | —     |
-      | `minimizeScalar(f[, opts])`         | 1-D minimization via Brent's method (golden-section + parabolic interp) | —     |
-      | `maximize(f, x0[, opts])`           | Local maximization                                                      | —     |
-      | `globalMinimize(f, bounds[, opts])` | Global minimization                                                     | —     |
-      | `linprog(c, A, b[, opts])`          | Linear programming                                                      | —     |
-      | `quadprog(Q, c, A, b[, opts])`      | Quadratic programming                                                   | —     |
-      | `solveODE(f, tspan, y0[, opts])`    | ODE solver (factory layer)                                              | —     |
-      | `solveODESystem(fs, tspan, y0)`     | System of ODEs                                                          | WASM  |
-      | `solveBVP(...)`                     | Boundary value problem solver                                           | —     |
-      | `solvePDE(...)`                     | PDE solver                                                              | —     |
-      | `stiffODESolver(...)`               | Stiff-ODE solver                                                        | —     |
-      | `odeAdaptiveStep(...)`              | Adaptive-step ODE integration                                           | —     |
-      | `eventDetection(...)`               | ODE event detection                                                     | —     |
-      | `cond(A)`                           | Condition number                                                        | WASM  |
-      | `rank(A)`                           | Numerical rank                                                          | WASM  |
-      | `nullspace(A)`                      | Null-space basis                                                        | —     |
-      | `residue(b, a)`                     | Partial-fraction residues                                               | —     |
+      | Function                                 | Description                                                                      | Accel |
+      | ---------------------------------------- | -------------------------------------------------------------------------------- | ----- |
+      | `findRoot(f, a, b[, opts])`              | Bracketed root-finding (bisection/Brent)                                         | —     |
+      | `newton(f, x0[, opts])`                  | Newton–Raphson root-finding (analytic or central-difference derivative)          | —     |
+      | `secant(f, x0, x1[, opts])`              | Secant-method root-finding (no derivative required)                              | —     |
+      | `halley(f, x0[, opts])`                  | Halley's method root-finding (cubic convergence)                                 | —     |
+      | `fsolve(F, x0[, opts])`                  | Nonlinear system solver `F(x) = 0` for `F: ℝⁿ → ℝⁿ` (damped Newton)              | —     |
+      | `root(F, x0[, opts])`                    | Alias of `fsolve`                                                                | —     |
+      | `linsolve(A, b)`                         | Solve a linear system `Ax = b`                                                   | —     |
+      | `leastSquares(A, b)`                     | Least-squares solution (overdetermined)                                          | WASM  |
+      | `nnls(A, b[, opts])`                     | Non-negative least squares (Lawson–Hanson active-set); returns `{ x, residual }` | —     |
+      | `lsqBounded(A, b, lower, upper[, opts])` | Box-constrained least squares (projected-gradient); returns `{ x, residual }`    | —     |
+      | `minimize(f, x0[, opts])`                | Local minimization                                                               | —     |
+      | `minimizeScalar(f[, opts])`              | 1-D minimization via Brent's method (golden-section + parabolic interp)          | —     |
+      | `maximize(f, x0[, opts])`                | Local maximization                                                               | —     |
+      | `globalMinimize(f, bounds[, opts])`      | Global minimization                                                              | —     |
+      | `linprog(c, A_ub, b_ub)`                 | Linear programming (legacy positional form); returns `x`                        | —     |
+      | `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` | LP via two-phase simplex — equality constraints + bounds; returns `{ x, fun, success, status }` | — |
+      | `quadprog(Q, c, A, b[, opts])`           | Quadratic programming                                                            | —     |
+      | `solveODE(f, tspan, y0[, opts])`         | ODE solver (factory layer)                                                       | —     |
+      | `solveODESystem(fs, tspan, y0)`          | System of ODEs                                                                   | WASM  |
+      | `solveBVP(...)`                          | Boundary value problem solver                                                    | —     |
+      | `solvePDE(...)`                          | PDE solver                                                                       | —     |
+      | `stiffODESolver(...)`                    | Stiff-ODE solver                                                                 | —     |
+      | `odeAdaptiveStep(...)`                   | Adaptive-step ODE integration                                                    | —     |
+      | `eventDetection(...)`                    | ODE event detection                                                              | —     |
+      | `cond(A)`                                | Condition number                                                                 | WASM  |
+      | `rank(A)`                                | Numerical rank                                                                   | WASM  |
+      | `nullspace(A)`                           | Null-space basis                                                                 | —     |
+      | `residue(b, a)`                          | Partial-fraction residues                                                        | —     |
 
       ### Optimization
 
@@ -2150,6 +2151,13 @@
         distinct enough for a reliable parabolic fit, giving guaranteed convergence
         with superlinear speed near a smooth minimum.
       - `linprog` and `quadprog` solve constrained linear and quadratic programs.
+        `linprog`'s legacy positional form `linprog(c, A_ub, b_ub)` (`Ax <= b, x >= 0`)
+        is unchanged; an additive options form `linprog(c, { A_ub, b_ub, A_eq, b_eq,
+        bounds })` runs a two-phase simplex (Phase 1 artificial variables find a
+        basic feasible solution, Phase 2 optimizes) that also handles equality
+        constraints, per-variable `bounds` (default `[0, null]`), and reports
+        `{ x, fun, success, status }` with `status` one of `'optimal'`,
+        `'infeasible'`, or `'unbounded'`.
       - The ODE family ranges from fixed-step (`solveODE`) through adaptive
         (`odeAdaptiveStep`) to `stiffODESolver` for stiff systems where explicit
         methods would require impractically small steps.
