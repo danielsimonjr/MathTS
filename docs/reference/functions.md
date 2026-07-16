@@ -686,11 +686,12 @@ returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 
 ### Regression & clustering
 
-| Function                                   | Description                                                                                                                                                 |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `linearRegression(x, y)`                   | Simple OLS fit; returns `{ slope, intercept, rValue, rSquared, pValue, stdErr }` (mirrors `scipy.stats.linregress`; needs ≥ 3 points)                       |
-| `kmeans(data, k[, opts])`                  | Lloyd's k-means on row-vectors, deterministic maximin seeding; returns `{ labels, centroids, inertia, iterations, converged }` (`opts.maxIter` default 100) |
-| `spectralClustering(adjacency, k[, opts])` | Normalized-Laplacian spectral clustering of a weighted graph; returns a label per node                                                                      |
+| Function                                   | Description                                                                                                                                                                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `linearRegression(x, y)`                   | Simple OLS fit; returns `{ slope, intercept, rValue, rSquared, pValue, stdErr }` (mirrors `scipy.stats.linregress`; needs ≥ 3 points)                                                                                                           |
+| `ols(X, y[, opts])`                        | Multiple linear regression on a design matrix (`opts.intercept` default true, prepends a column of ones); returns `{ coefficients, stderr, tValues, pValues, r2, adjR2, fStat, residuals }` — the general case `linearRegression` doesn't cover |
+| `kmeans(data, k[, opts])`                  | Lloyd's k-means on row-vectors, deterministic maximin seeding; returns `{ labels, centroids, inertia, iterations, converged }` (`opts.maxIter` default 100)                                                                                     |
+| `spectralClustering(adjacency, k[, opts])` | Normalized-Laplacian spectral clustering of a weighted graph; returns a label per node                                                                                                                                                          |
 
 ### Details
 
@@ -2385,7 +2386,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (894 exports).
+> `@danielsimonjr/mathts-functions` (895 exports).
 
 ### Functions by category
 
@@ -2403,7 +2404,7 @@ await terminatePool();
 
 **Combinatorics & Number Theory** (31): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `composition`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `nextPrime`, `partitions`, `permutations`, `prime`, `primeFactors`, `primePi`, `risingFactorial`, `stirlingS2`, `subfactorial`
 
-**Statistics** (70): `acf`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `describe`, `detrend`, `ewma`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `kurtosis`, `linearRegression`, `linregress`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
+**Statistics** (71): `acf`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `describe`, `detrend`, `ewma`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `kurtosis`, `linearRegression`, `linregress`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `ols`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
 
 **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 

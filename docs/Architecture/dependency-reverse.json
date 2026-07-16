@@ -1592,6 +1592,7 @@
       "functions/src/descriptive-stats.ts",
       "functions/src/hypothesis-extra.ts",
       "functions/src/index.ts",
+      "functions/src/ml/ols.ts",
       "functions/src/regression-extra.ts",
       "functions/src/typed/hypothesis.ts"
     ],
@@ -1646,6 +1647,7 @@
     ],
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/ols.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],

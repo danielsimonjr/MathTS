@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `ols(X, y)` multiple regression with inference (Phase 3 Task 1)
+
+Added `ols(X, y, opts?)` — multiple/multivariate linear regression over a general design matrix
+(rows = observations, cols = predictors), the general case `linearRegression` (single predictor)
+didn't cover. Solves the normal equations `β = (XᵀX)⁻¹Xᵀy` (`opts.intercept` default `true` prepends
+a column of ones) and returns full inference: `coefficients`, `stderr`, `tValues`/`pValues` (via
+`studentTCDF`), `r2`/`adjR2`, the overall model `fStat`, and `residuals`. Pinned: exact fit
+`y = 1 + 2·x1 + 3·x2` -> coefficients `[1, 2, 3]`, `r2 = 1`.
+
 ### Added — `linprog` two-phase simplex: equality constraints, bounds, status (Phase 2 Task 3)
 
 `linprog` now accepts an options overload `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` returning

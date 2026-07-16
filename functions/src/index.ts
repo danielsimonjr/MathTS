@@ -186,6 +186,10 @@ export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 export { linearRegression } from './regression-extra.js';
 export type { LinregressResult } from './regression-extra.js';
 
+// Phase 3 Task 1 — multiple linear regression (general design matrix) with inference.
+export { ols } from './ml/ols.js';
+export type { OlsOptions, OlsResult } from './ml/ols.js';
+
 // Gap-analysis Wave D — named optimizers + nonlinear least squares.
 export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
 export type { OptimizeResult, LMResult } from './optimization-extra.js';

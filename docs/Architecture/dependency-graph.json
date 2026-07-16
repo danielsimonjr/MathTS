@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1036,
-    "totalModules": 78,
-    "totalExports": 5012
+    "totalFiles": 1037,
+    "totalModules": 79,
+    "totalExports": 5016
   },
   "entryPoints": [
     {
@@ -8057,6 +8057,11 @@
             "reExport": true
           },
           {
+            "file": "./ml/ols.js",
+            "imports": ["ols"],
+            "reExport": true
+          },
+          {
             "file": "./optimization-extra.js",
             "imports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
             "reExport": true
@@ -8170,6 +8175,12 @@
           {
             "file": "./regression-extra.js",
             "imports": ["LinregressResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ml/ols.js",
+            "imports": ["OlsOptions", "OlsResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8309,6 +8320,7 @@
           "detrend",
           "acf",
           "linearRegression",
+          "ols",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8357,6 +8369,8 @@
           "QuadOptions",
           "QuadResult",
           "LinregressResult",
+          "OlsOptions",
+          "OlsResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -8469,6 +8483,7 @@
           "detrend",
           "acf",
           "linearRegression",
+          "ols",
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
@@ -8517,6 +8532,8 @@
           "QuadOptions",
           "QuadResult",
           "LinregressResult",
+          "OlsOptions",
+          "OlsResult",
           "OptimizeResult",
           "LMResult",
           "BfgsOptions",
@@ -12604,6 +12621,23 @@
         "workspaceDependencies": [],
         "exports": ["createZeros"],
         "constants": ["createZeros"]
+      }
+    },
+    "functions/ml": {
+      "functions/src/ml/ols.ts": {
+        "description": "Ordinary least-squares regression for a general design matrix (Wave — ML primitives).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["studentTCDF"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["ols"],
+        "interfaces": ["OlsOptions", "OlsResult"],
+        "functions": ["ols"]
       }
     },
     "functions/numeric": {
@@ -34421,6 +34455,10 @@
         ]
       },
       {
+        "name": "Functions/ml",
+        "files": ["functions/src/ml/ols.ts"]
+      },
+      {
         "name": "Functions/numeric",
         "files": [
           "functions/src/numeric/adaptive-quad.ts",
@@ -35359,18 +35397,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1036,
-    "totalModules": 78,
-    "totalLinesOfCode": 173632,
-    "totalExports": 5012,
+    "totalTypeScriptFiles": 1037,
+    "totalModules": 79,
+    "totalLinesOfCode": 173795,
+    "totalExports": 5016,
     "totalClasses": 56,
-    "totalInterfaces": 426,
-    "totalFunctions": 1629,
+    "totalInterfaces": 428,
+    "totalFunctions": 1630,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1834,
-    "totalTypeOnlyImports": 531,
+    "totalReExports": 1837,
+    "totalTypeOnlyImports": 532,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
