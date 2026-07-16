@@ -39,8 +39,11 @@ oracle-pinned, subagent-driven. Phase plan:
       (optional box projection) · `nnls` + `lsqBounded` · `linprog` two-phase overload (equality/bounds/
       status; legacy signature preserved). 3 tasks subagent-driven, oracle-pinned vs scipy, tarball-verified.
       Follow-up: linprog free-variable (lower=null) bounds path untested.
-- [ ] **Phase 3 — Regression & ML.** multiple OLS + inference · ridge/lasso · logistic/GLM · DBSCAN+kNN
-      · Gaussian KDE · χ² contingency · multiple-testing correction.
+- [x] **Phase 3 — Regression & ML — ✅ RELEASED `functions@0.31.0`** (2026-07-16). `ols` (multiple
+      regression + inference) · `ridge`/`lasso`/`elasticNet` · `logisticRegression` (IRLS) · `dbscan` +
+      `knnClassify`/`knnRegress` · `gaussianKDE` · `chi2Contingency` + `multipleTest`. 6 tasks,
+      oracle-pinned vs sklearn/scipy/statsmodels, tarball-verified. Follow-up: `chiSquareTest`/
+      `multipleComparison` in hypothesis.ts partially overlap the new ones — consolidation decision TBD.
 - [ ] **Phase 4 — Statistics inference.** distribution MLE `.fit` · exact Mann–Whitney/KS p-values ·
       PACF/Ljung–Box/ADF time-series · noncentral CDFs · circular stats.
 - [ ] **Phase 5 — Special functions & number theory.** `pFq` hypergeometric · polygamma · Jacobi

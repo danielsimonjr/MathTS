@@ -312,7 +312,13 @@ _(original scope below)_
 BFGS / L-BFGS-B quasi-Newton (O1, M) · bounded/robust LS + NNLS (O2/L5, M) · proper `linprog` two-phase
 simplex with equality/bounds/status, superseding the Phase-0 patch (O9, M/L). **≈ L.**
 
-### Phase 3 — Regression & ML breadth (all on primitives already in the repo)
+### Phase 3 — Regression & ML breadth — ✅ RELEASED `functions@0.31.0` (2026-07-16)
+
+Shipped: `ols` (+ inference), `ridge`/`lasso`/`elasticNet`, `logisticRegression` (IRLS), `dbscan` +
+`knnClassify`/`knnRegress`, `gaussianKDE`, `chi2Contingency` + `multipleTest`. Oracle-pinned vs
+sklearn/scipy/statsmodels, tarball-verified.
+
+_(original scope below)_
 
 Multiple/multivariate OLS with inference (O4/S1, M) · ridge/lasso/elastic-net (O5/S8, M) · logistic
 regression / GLM IRLS (O7/S6, M–L) · DBSCAN + kNN classifier (O6, kdTree ready, M/S) · Gaussian KDE
