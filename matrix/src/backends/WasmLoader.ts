@@ -375,8 +375,6 @@ export interface WasmModule {
   // Statistics operations
   statsMean: (aPtr: number, n: number) => number;
   statsMedian: (aPtr: number, n: number) => number;
-  statsVariance: (aPtr: number, n: number, ddof: number) => number;
-  statsStd: (aPtr: number, n: number, ddof: number) => number;
   statsSum: (aPtr: number, n: number) => number;
   statsProd: (aPtr: number, n: number) => number;
   statsMin: (aPtr: number, n: number) => number;

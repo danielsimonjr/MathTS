@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed — dead WASM `statsVariance`/`statsStd` type declarations
+
+The `AsModule` interfaces in `functions/src/wasm/WasmLoader.ts` and `matrix/src/backends/WasmLoader.ts`
+still declared `statsVariance`/`statsStd` kernel signatures whose JS call paths were retired 2026-07-15
+(the corrected two-pass `variance`/`std` in core beat the WASM kernels on accuracy and were not slower,
+being memory-bound). No live caller referenced them — only retirement comments in
+`functions/src/statistics/{variance,std}.ts`. Removed the four dead type declarations. TS-only change:
+the `.wasm` binary and its SHA-384 manifest are unaffected (the AS source never exported these names;
+the general-library `array_variance`/`array_stddev` kernels are retained). Broader dead-`stats*`-decl
+audit against actual binary exports remains a separate follow-up.
+
 ### Added — real univariate symbolic rational cancellation for `cancel`
 
 `cancel(expr)` (`functions/src/typed/algebra.ts`) previously only handled numeric integer fractions
