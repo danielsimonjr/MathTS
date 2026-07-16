@@ -28,9 +28,9 @@ oracle-pinned, subagent-driven. Phase plan:
       was always right — survey mis-probe) · CAS `factor`/`expand`/`apart`/`together`/`casFactor`/
       `casExpand` annotated as pass-through. **Survey re-verification demoted `butter`/`firwin` to
       Phase 6 features (documented lowpass/scalar-only, not bugs).**
-- [ ] **Phase 0 follow-up (doc honesty):** `cancel`, `rationalize`, `simplify` are ALSO currently
-      pass-through/non-transforming (found while reconciling CAS docs); annotate their `functions.md`
-      entries too. Verify each on dist first (don't assume). S.
+- [x] ✅ **Phase 0 follow-up (doc honesty) — RESOLVED 2026-07-16 (functions@0.37.0).** Verified on dist:
+      only `cancel` was pass-through (now wired to real univariate poly-GCD cancellation); `rationalize`/
+      `simplify` were already real (the stale claim is corrected). See the Pending/follow-ups entry below.
 - [x] **Phase 1 — Foundational primitives — ✅ RELEASED `functions@0.29.0`** (2026-07-15). `numericJacobian` + polymorphic `jacobian` · `newton`/`secant`/`halley` · `fsolve`/`root` (damped Newton) ·
       `minimizeScalar` (Brent) · adaptive Gauss–Kronrod `quad` (+`nintegrate` singular fix ~1.7e-6→1e-10)
       · full `svd` + `orth` exposed. 6 tasks subagent-driven, oracle-pinned vs scipy/numpy, verified in
@@ -87,10 +87,12 @@ oracle-pinned, subagent-driven. Phase plan:
 Consolidated from the per-phase records above. None gate the released work; each is an additive improvement
 or a documented scope limit worth revisiting.
 
-- [ ] **Doc honesty (Phase 0):** `cancel`/`rationalize`/`simplify` are also pass-through/non-transforming —
-      annotate their `functions.md` entries (verify each on dist first). S. _(Note: Phase-8 CAS made
-      `expand`/`factor`/`apart`/`together` real for univariate — `cancel`/`rationalize`/`simplify` could
-      likely be wired to the same engine.)_
+- [x] ✅ **Doc honesty (Phase 0) — RESOLVED 2026-07-16 (functions@0.37.0).** Rule-4 re-probe of the built
+      `dist` found the "pass-through" claim was **stale**: `rationalize` already returns a real transformed
+      Node (`(x+1)^2`→`x^2+2x+1`) and `simplify` already reduces (`2x+3x`→`5x`; it just doesn't apply trig
+      identities — a mathjs default, not a no-op). Only `cancel` was genuinely pass-through for symbolic
+      input, so it was **wired to the real engine** (univariate polynomial-GCD cancellation, matching
+      `sympy.cancel`) rather than annotated. `docs/reference/functions.md` `cancel` row updated.
 - [ ] **CAS breadth:** multivariate `expand`/`factor`; `cancel`/`rationalize`/`simplify` real transforms;
       repeated-root/irreducible `apart`; symbolic integration (by-parts/partial-frac/u-sub); `casExpand`/
       `casFactor` still pass-through.
@@ -101,9 +103,12 @@ or a documented scope limit worth revisiting.
       sparse `svds`; preconditioners beyond Jacobi (ILU/IC); `condest`; `minres` optimal Givens form (O(k³) now).
 - [ ] **funm defective matrices:** Lagrange–Sylvester path throws on repeated/near-repeated eigenvalues of
       a non-diagonal matrix — add the Schur–Parlett block recurrence. M.
-- [ ] **Signal:** hard-pin `csd`/`coherence` vs `scipy.signal.csd`/`coherence`; wavelet families beyond
-      Haar/db1 (db2+/sym/coif) for `dwt`/`idwt`/`wavedec`; `remez` exact Parks–McClellan (currently Lawson IRLS);
-      `buttord` bandpass/bandstop array form.
+- [~] **Signal:** ✅ **`csd`/`coherence` hard-pinned 2026-07-16 (functions@0.37.0)** — implementation-independent
+  invariants (coherence∈[0,1]; unity for a scaled/shifted noiseless copy; `csd(x,x)`=welchPSD via the
+  one-sided doubling convention; polarization-identity Cauchy bound). Surfaced: public `csd` returns
+  **magnitude only** (no re/im) — a pre-existing API limit worth revisiting. **Remaining:** wavelet families
+  beyond Haar/db1 (db2+/sym/coif) for `dwt`/`idwt`/`wavedec`; `remez` exact Parks–McClellan (currently Lawson
+  IRLS); `buttord` bandpass/bandstop array form.
 - [ ] **Graph breadth:** coloring / clique-finding / Louvain community / Katz centrality / isomorphism /
       incidence matrix + adjacency spectrum; directed-graph constructor (`adjacencyMatrix` still symmetrizes);
       `betweennessCentrality` `normalized` option.
@@ -115,9 +120,10 @@ or a documented scope limit worth revisiting.
       distributions (Dirichlet/Wishart/MVN sampling); power analysis.
 - [ ] **Special-fns Phase-5 extension (niche):** polylog/Lerch Φ, Struve H/L, Kelvin ber/bei, Barnes-G,
       Coulomb/Mathieu/parabolic-cylinder/spheroidal, Riemann–Siegel Z.
-- [ ] **Housekeeping:** `linprog` free-variable (lower=null) bounds path untested; `chiSquareTest`/
-      `multipleComparison` in `hypothesis.ts` partially overlap the new `chi2Contingency`/`multipleTest`
-      (consolidation decision); `constants` are CODATA-2018 (one cycle behind scipy 2022).
+- [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
+  correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
+  `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16
+  (functions@0.37.0). **Remaining:** `constants` are CODATA-2018 (one cycle behind scipy 2022).
 
 ### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
 
@@ -190,10 +196,13 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
       `Σd²−(Σd)²/n`, pairwise mean) backs every path; retired WASM statsVariance/statsStd. Now
       machine-precision, **beats NumPy**. ⚠️ The `sum` trap AGAIN: public `variance` is the TYPED
       `typed/arithmetic.ts` one (I first fixed the factory). Fixed both. std/zscore/corr inherit it.
-- [ ] **[cleanup] Dead AS `statsVariance`/`statsStd` WASM kernels.** Their JS-side call paths were
-      retired 2026-07-15 (naive + less accurate than the corrected two-pass; memory-bound so not
-      faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
-      eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
+- [x] ✅ **[cleanup] Dead `statsVariance`/`statsStd` WASM decls — REMOVED 2026-07-16 (matrix@0.4.6).**
+      Rule-4 check found the scope was **narrower** than written: only the TS `AsModule` type declarations
+      in `functions/src/wasm/WasmLoader.ts` + `matrix/src/backends/WasmLoader.ts` were dead (0 live callers,
+      only retirement comments) — the AS source never exported these names (the general-library
+      `array_variance`/`array_stddev` kernels stay). TS-only removal, so **no `build:wasm`/manifest regen**
+      needed. **Follow-up:** broader dead-`stats*`-decl audit vs actual binary exports (statsMedian/Sum/
+      Cumsum/Correlation/Covariance also show 0 refs) — verify against `WebAssembly.Module.exports()`.
 
   ### Functionality expansion (2026-07-15, per "best scientific/engineering modeling library")
 
