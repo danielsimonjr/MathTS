@@ -1633,9 +1633,11 @@
     "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/numeric-jacobian.ts": [
       "functions/src/index.ts",
+      "functions/src/numeric/fsolve.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/numeric/open-root-finders.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
@@ -1945,6 +1947,10 @@
       "functions/src/matrix/subset.ts",
       "functions/src/utils/map.ts"
     ],
+    "functions/src/typed/numeric.ts": [
+      "functions/src/numeric/fsolve.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",
       "functions/src/plain/number/probability.ts",
@@ -2072,7 +2078,6 @@
     "functions/src/typed/geometry.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/interpolation.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/numeric.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/graph.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/hypothesis.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],

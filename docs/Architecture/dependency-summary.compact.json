@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1030, "e": 4981, "re": 1811 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1031, "e": 4986, "re": 1814 },
   "s": {
-    "loc": 172333,
+    "loc": 172451,
     "cls": 56,
-    "int": 414,
-    "fn": 1620,
+    "int": 415,
+    "fn": 1621,
     "tg": 158,
     "en": 0,
-    "co": 1535,
-    "toi": 525
+    "co": 1536,
+    "toi": 526
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -661,9 +661,24 @@
       ]
     },
     "functions/numeric": {
-      "f": 3,
-      "exp": ["numericJacobian", "newton", "secant", "halley", "createSolveODE", "rosenbrockSolve"],
-      "int": ["NumericJacobianOptions", "NewtonOptions", "SecantOptions", "HalleyOptions"]
+      "f": 4,
+      "exp": [
+        "root",
+        "fsolve",
+        "numericJacobian",
+        "newton",
+        "secant",
+        "halley",
+        "createSolveODE",
+        "rosenbrockSolve"
+      ],
+      "int": [
+        "FsolveOptions",
+        "NumericJacobianOptions",
+        "NewtonOptions",
+        "SecantOptions",
+        "HalleyOptions"
+      ]
     },
     "functions/plain": {
       "f": 10,

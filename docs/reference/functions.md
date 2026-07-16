@@ -1539,6 +1539,8 @@ Root-finding, optimization, linear systems, and differential equations.
 | `newton(f, x0[, opts])`             | Newton–Raphson root-finding (analytic or central-difference derivative) | —     |
 | `secant(f, x0, x1[, opts])`         | Secant-method root-finding (no derivative required)                     | —     |
 | `halley(f, x0[, opts])`             | Halley's method root-finding (cubic convergence)                        | —     |
+| `fsolve(F, x0[, opts])`             | Nonlinear system solver `F(x) = 0` for `F: ℝⁿ → ℝⁿ` (damped Newton)     | —     |
+| `root(F, x0[, opts])`               | Alias of `fsolve`                                                       | —     |
 | `linsolve(A, b)`                    | Solve a linear system `Ax = b`                                          | —     |
 | `leastSquares(A, b)`                | Least-squares solution (overdetermined)                                 | WASM  |
 | `minimize(f, x0[, opts])`           | Local minimization                                                      | —     |
@@ -1588,6 +1590,14 @@ Root-finding, optimization, linear systems, and differential equations.
   omitted, a central-difference estimate is used. All three default to
   `tol = 1e-12`, `maxIter = 100`, and throw on non-convergence or a
   (near-)zero denominator/derivative.
+- `fsolve` (alias `root`) solves a **nonlinear system** `F(x) = 0` for
+  `F: ℝⁿ → ℝⁿ`, not a single scalar equation: at each iterate it builds
+  `J = numericJacobian(F, x)`, solves the Newton step `J·Δ = −F(x)` via
+  `linsolve`, then backtracks (`λ = 1, 1/2, 1/4, …`, up to ~20 halvings) to
+  the largest `λ` for which `‖F(x + λΔ)‖₂` improves, falling back to a full
+  Newton step (`λ = 1`) if no halving helps. Converges when
+  `max_i |F_i(x)| < tol` (default `tol = 1e-10`, `maxIter = 100`); throws on a
+  singular Jacobian or non-convergence.
 - `minimize` / `maximize` find a **local** optimum near the starting point
   `x0`; `globalMinimize` searches a bounded region for a global optimum.
 - `linprog` and `quadprog` solve constrained linear and quadratic programs.
@@ -1615,6 +1625,7 @@ import {
   newton,
   secant,
   halley,
+  fsolve,
   minimize,
   leastSquares,
 } from '@danielsimonjr/mathts-functions';
@@ -1623,6 +1634,7 @@ findRoot((x) => x ** 3 - x - 2, 1, 2); // ~1.5214
 newton((x) => x * x - 2, 1); // ~1.4142135623730951
 secant((x) => x * x - 2, 1, 2); // ~1.4142135623730951
 halley((x) => x ** 3 - 2, 1); // ~1.2599210498948732
+fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]); // ~[1, 1]
 minimize((x) => (x - 3) ** 2, 0); // ~3.0
 leastSquares(
   [
@@ -2339,7 +2351,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (885 exports).
+> `@danielsimonjr/mathts-functions` (887 exports).
 
 ### Functions by category
 
@@ -2373,7 +2385,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (31): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (33): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

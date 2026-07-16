@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — nonlinear system solver: `fsolve` / `root` (Phase 1 Task 3)
+
+No solver existed for `F(x) = 0` where `F: ℝⁿ → ℝⁿ` (only scalar root-finders). Added
+`fsolve(F, x0[, opts])` — damped Newton with a backtracking line search, reusing
+`numericJacobian` (Task 1) for `J = numericJacobian(F, x)` and `linsolve` (`typed/numeric.ts`) to
+solve the Newton step `J·Δ = −F(x)`. At each iterate, tries `λ ∈ {1, 1/2, 1/4, …}` (up to ~20
+halvings) for the largest `λ` improving `‖F(x + λΔ)‖₂`, falling back to a full Newton step
+(`λ = 1`) if none improves. Converges when `max_i |F_i(x)| < tol` (default `tol = 1e-10`,
+`maxIter = 100`); throws a clear `Error` on a singular Jacobian or non-convergence. `root` is an
+alias. Pinned against scipy.optimize.fsolve (`[x²−y, x+y−2]` from `[0.5,0.5]` → `[1,1]`;
+`[x²+y²−25, x−y−1]` from `[5,1]` → `[4,3]`).
+
 ### Added — open scalar root-finders: `newton`, `secant`, `halley` (Phase 1 Task 2)
 
 Only bracketing root-finding (`findRoot`, bisection/Brent) existed; added three classic open

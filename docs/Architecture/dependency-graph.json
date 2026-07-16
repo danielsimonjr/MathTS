@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1030,
+    "totalFiles": 1031,
     "totalModules": 78,
-    "totalExports": 4981
+    "totalExports": 4986
   },
   "entryPoints": [
     {
@@ -8027,6 +8027,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/fsolve.js",
+            "imports": ["fsolve", "root"],
+            "reExport": true
+          },
+          {
             "file": "./timeseries-extra.js",
             "imports": ["movingAverage", "ewma", "detrend", "acf"],
             "reExport": true
@@ -8110,6 +8115,12 @@
           {
             "file": "./numeric/open-root-finders.js",
             "imports": ["NewtonOptions", "SecantOptions", "HalleyOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/fsolve.js",
+            "imports": ["FsolveOptions"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8221,6 +8232,8 @@
           "newton",
           "secant",
           "halley",
+          "fsolve",
+          "root",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8262,6 +8275,7 @@
           "NewtonOptions",
           "SecantOptions",
           "HalleyOptions",
+          "FsolveOptions",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -8358,6 +8372,8 @@
           "newton",
           "secant",
           "halley",
+          "fsolve",
+          "root",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8399,6 +8415,7 @@
           "NewtonOptions",
           "SecantOptions",
           "HalleyOptions",
+          "FsolveOptions",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -12468,6 +12485,26 @@
       }
     },
     "functions/numeric": {
+      "functions/src/numeric/fsolve.ts": {
+        "description": "Nonlinear system solver: `fsolve` (damped Newton with a backtracking line",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./numeric-jacobian.js",
+            "imports": ["numericJacobian", "VectorField"]
+          },
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["linsolve"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["root", "fsolve"],
+        "interfaces": ["FsolveOptions"],
+        "functions": ["fsolve"],
+        "constants": ["root"]
+      },
       "functions/src/numeric/numeric-jacobian.ts": {
         "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
         "externalDependencies": [],
@@ -34206,6 +34243,7 @@
       {
         "name": "Functions/numeric",
         "files": [
+          "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/solveODE.ts"
@@ -35137,18 +35175,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1030,
+    "totalTypeScriptFiles": 1031,
     "totalModules": 78,
-    "totalLinesOfCode": 172333,
-    "totalExports": 4981,
+    "totalLinesOfCode": 172451,
+    "totalExports": 4986,
     "totalClasses": 56,
-    "totalInterfaces": 414,
-    "totalFunctions": 1620,
+    "totalInterfaces": 415,
+    "totalFunctions": 1621,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1535,
-    "totalReExports": 1811,
-    "totalTypeOnlyImports": 525,
+    "totalConstants": 1536,
+    "totalReExports": 1814,
+    "totalTypeOnlyImports": 526,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

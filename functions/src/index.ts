@@ -154,6 +154,11 @@ export type { VectorField, NumericJacobianOptions } from './numeric/numeric-jaco
 export { newton, secant, halley } from './numeric/open-root-finders.js';
 export type { NewtonOptions, SecantOptions, HalleyOptions } from './numeric/open-root-finders.js';
 
+// Phase 1 Task 3 — nonlinear system solver (damped Newton), reusing
+// numericJacobian (Task 1) + linsolve (typed/numeric.ts). `root` is an alias.
+export { fsolve, root } from './numeric/fsolve.js';
+export type { FsolveOptions } from './numeric/fsolve.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 
