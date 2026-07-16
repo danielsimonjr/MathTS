@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.35.0
+
+### Minor Changes
+
+- Phase 7 advanced linear algebra (oracle-gap roadmap): iterative Krylov solvers `cg`/`gmres`/`bicgstab`/`minres` (dense or matvec, optional Jacobi preconditioner); `eigsh` (Lanczos k-eigenpairs of a symmetric matrix); structured & indefinite solvers `thomasSolve` (tridiagonal), `solveBanded`, `toeplitzSolve` (Levinson–Durbin), `ldl` (Bunch–Kaufman LDLᵀ); complex matrix functions `funm`/`cosm`/`sinm` (indefinite/complex spectra); and control-theory matrix equations `dlyap` (discrete Lyapunov), `care`/`dare` (continuous/discrete algebraic Riccati via matrix sign function / structure-preserving doubling) for LQR/Kalman design. All oracle-pinned vs scipy.
+
 ## 0.34.0
 
 ### Minor Changes
