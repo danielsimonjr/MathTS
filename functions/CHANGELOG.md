@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.38.0
+
+### Minor Changes
+
+- `besselK` uniform machine precision + `quantileSeq` interpolation modes
+
+  `besselK`/`besselK0`/`besselK1` now use a uniformly-accurate Numerical-Recipes
+  `bessik` method (Temme power series for x<2, Steed continued fraction CF2 for
+  x≥2), eliminating the ~1.6e-9 relative-error floor the old series/asymptotic
+  split left in x∈[8,11]. Worst-case relative error across x∈[0.1,50] is now
+  ~8e-16 (machine precision), verified vs mpmath. The order recurrence for n≥2 is
+  unchanged.
+
+  `quantileSeq` gains numpy's `lower`/`higher`/`nearest`/`midpoint` interpolation
+  modes via an optional trailing `mode` argument; `linear` remains the default, so
+  all existing calls are unchanged. Oracle-pinned vs numpy.
+
 ## 0.37.1
 
 ### Patch Changes
