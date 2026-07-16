@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — scipy-pinned oracle for `linprog`'s free-variable (lower=null) bounds path
+
+`linprog`'s options form (`functions/src/typed/numeric.ts`) splits a variable whose bounds lower is
+`null` (unbounded below) into `x = x⁺ - x⁻` in `linprogTwoPhase` — this free-variable path had no
+direct test. New `functions/tests/gap-linprog-freevar-oracle.test.ts` pins it against scipy 1.17.1:
+minimizing `c=[1,0]` subject to `A_ub=[[0,1]] <= [3]`, `A_eq=[[1,1]] = [1]` with `x0` free reaches
+`fun=-2, x=[-2,3]` (x0 negative at the optimum — only reachable via the split path), while the same
+constraints under the default `x>=0` bounds give `fun=0`. Both matched scipy on the first run — the
+free-variable path was already correct; this closes the untested-gap follow-up as a regression guard.
+
 ### Removed — dead WASM `statsVariance`/`statsStd` type declarations
 
 The `AsModule` interfaces in `functions/src/wasm/WasmLoader.ts` and `matrix/src/backends/WasmLoader.ts`
