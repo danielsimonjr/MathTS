@@ -17,11 +17,20 @@ Full inventory: [`docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md`](docs/roadmap
 (7 parallel domain surveys, all gaps probed against live oracles). Executed autonomously per-phase,
 oracle-pinned, subagent-driven. Phase plan:
 
-- [ ] **Phase 0 — Correctness & honesty (P0 bugs; wrong answers in shipped fns).** `linprog` infeasible
-      optima · `taylor`/`series` garbage past order 3 (→autograd) · `betainc`→NaN · `invmod` throws ·
-      `lambertW` branch arg · `stiffODESolver` 71% err (→Rosenbrock) · signal `windowFunction`
-      silent-rectangular / `butter` ignores btype / `firwin` bandpass nulls · symbolic `summation`
-      symbolic-bound→0 · reconcile CAS no-op docs. **← START HERE.**
+- [x] **Phase 0 — Correctness & honesty — ✅ RELEASED `functions@0.28.0`** (2026-07-15; +patch cascade
+      compat/statistics/plot/signal/arithmetic/trigonometry). 9 tasks, subagent-driven, oracle-pinned,
+      verified in the published tarball from a clean install: `invmod` throw → fixed · `lambertW` W₋₁
+      branch implemented (Halley) · `windowFunction` throws on unknown type (was silent rectangular) ·
+      `stiffODESolver` → shared `rosenbrockSolve` engine (was 71% err / null on stiff mode) ·
+      `summation`/`symbolicProduct` throw on symbolic bound (was silent 0/1) · `taylor`/`series`/
+      `seriesCoefficient` exact via Cauchy integral (was garbage past order 3) · `linprog` feasible
+      optima (was infeasible on degenerate cases) · `betainc` doc arg-order `(a,b,x)` corrected (impl
+      was always right — survey mis-probe) · CAS `factor`/`expand`/`apart`/`together`/`casFactor`/
+      `casExpand` annotated as pass-through. **Survey re-verification demoted `butter`/`firwin` to
+      Phase 6 features (documented lowpass/scalar-only, not bugs).**
+- [ ] **Phase 0 follow-up (doc honesty):** `cancel`, `rationalize`, `simplify` are ALSO currently
+      pass-through/non-transforming (found while reconciling CAS docs); annotate their `functions.md`
+      entries too. Verify each on dist first (don't assume). S.
 - [ ] **Phase 1 — Foundational primitives.** numeric `jacobian` · open root-finders newton/secant/halley
       · `fsolve`/`root` systems · `minimize_scalar` · adaptive Gauss–Kronrod `quad` · expose full `svd`.
 - [ ] **Phase 2 — Optimization core.** BFGS/L-BFGS-B · bounded LS + NNLS · proper `linprog` (two-phase).
@@ -111,7 +120,7 @@ oracle-pinned, subagent-driven. Phase plan:
       heuristic (was using the whole interval as step 1 → RK23 silently returned 1/3 for y'=-y).
       Verified vs closed forms; `functions/tests/solveode-jspath.test.ts`.
 - [x] ✅ **Stiff ODE solver (Rosenbrock/ode23s) — ADDED** (2026-07-15). `solveODE(..., {method:
-  'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
+'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
       solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
       scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
       `functions/tests/solveode-jspath.test.ts`.

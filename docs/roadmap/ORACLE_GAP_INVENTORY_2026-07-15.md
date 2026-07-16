@@ -248,9 +248,15 @@ family of downstream features, so they precede the features that consume them. E
 **M** ≈ 2–5 days · **L** ≈ 1–2 weeks (subagent-driven). Each phase is a coherent, independently
 shippable release; execution checks in at phase boundaries.
 
-### Phase 0 — Correctness & honesty (P0; wrong answers / crashes in shipped, documented functions)
+### Phase 0 — Correctness & honesty (P0) — ✅ RELEASED `functions@0.28.0` (2026-07-15)
 
-These are the highest priority: every item is a function that ships today, is documented (several with
+**Shipped** (9 tasks, subagent-driven, oracle-pinned, verified in the published tarball): `invmod`,
+`lambertW` W₋₁, `windowFunction`, `stiffODESolver`→`rosenbrockSolve`, `summation`/`symbolicProduct`,
+`taylor`/`series`/`seriesCoefficient` (Cauchy integral), `linprog` feasibility, `betainc` doc order,
+CAS pass-through annotations. Patch cascade to compat/statistics/plot/signal/arithmetic/trigonometry.
+Follow-up logged: `cancel`/`rationalize`/`simplify` are also pass-through (doc-honesty pass, TODO).
+
+These were the highest priority: every item is a function that ships today, is documented (several with
 _worked examples that are false_), and returns a wrong answer, `NaN`, or throws. Mostly S/M; ship as
 patch/minor releases per package.
 
