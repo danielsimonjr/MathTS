@@ -1653,6 +1653,7 @@
     ],
     "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
     "functions/src/numeric/krylov.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/eigsh.ts": ["functions/src/index.ts"],
     "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
     "functions/src/numeric/adaptive-quad.ts": [
       "functions/src/index.ts",

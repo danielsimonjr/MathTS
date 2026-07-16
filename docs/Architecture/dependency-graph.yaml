@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1058
+  totalFiles: 1059
   totalModules: 81
-  totalExports: 5240
+  totalExports: 5245
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7492,6 +7492,10 @@ modules:
             - gmres
             - bicgstab
           reExport: true
+        - file: ./numeric/eigsh.js
+          imports:
+            - eigsh
+          reExport: true
         - file: ./numeric/minimize-scalar.js
           imports:
             - minimizeScalar
@@ -7733,6 +7737,13 @@ modules:
             - KrylovResult
           reExport: true
           typeOnly: true
+        - file: ./numeric/eigsh.js
+          imports:
+            - EigshOperatorInput
+            - EigshOptions
+            - EigshResult
+          reExport: true
+          typeOnly: true
         - file: ./numeric/minimize-scalar.js
           imports:
             - MinimizeScalarOptions
@@ -7961,6 +7972,7 @@ modules:
         - minres
         - gmres
         - bicgstab
+        - eigsh
         - minimizeScalar
         - quad
         - movingAverage
@@ -8085,6 +8097,9 @@ modules:
         - KrylovOptions
         - GmresOptions
         - KrylovResult
+        - EigshOperatorInput
+        - EigshOptions
+        - EigshResult
         - MinimizeScalarOptions
         - MinimizeScalarResult
         - QuadOptions
@@ -8234,6 +8249,7 @@ modules:
         - minres
         - gmres
         - bicgstab
+        - eigsh
         - minimizeScalar
         - quad
         - movingAverage
@@ -8358,6 +8374,9 @@ modules:
         - KrylovOptions
         - GmresOptions
         - KrylovResult
+        - EigshOperatorInput
+        - EigshOptions
+        - EigshResult
         - MinimizeScalarOptions
         - MinimizeScalarResult
         - QuadOptions
@@ -12128,6 +12147,19 @@ modules:
         - BfgsResult
       functions:
         - bfgs
+    functions/src/numeric/eigsh.ts:
+      description: Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - eigsh
+      interfaces:
+        - EigshOptions
+        - EigshResult
+      functions:
+        - eigsh
     functions/src/numeric/fsolve.ts:
       description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
       externalDependencies: []
@@ -33157,6 +33189,7 @@ dependencyGraph:
       files:
         - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/bfgs.ts
+        - functions/src/numeric/eigsh.ts
         - functions/src/numeric/fsolve.ts
         - functions/src/numeric/gauss-nodes.ts
         - functions/src/numeric/krylov.ts
@@ -34011,18 +34044,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1058
+  totalTypeScriptFiles: 1059
   totalModules: 81
-  totalLinesOfCode: 179627
-  totalExports: 5240
+  totalLinesOfCode: 179916
+  totalExports: 5245
   totalClasses: 56
-  totalInterfaces: 458
-  totalFunctions: 1737
+  totalInterfaces: 460
+  totalFunctions: 1738
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 1948
-  totalTypeOnlyImports: 543
+  totalReExports: 1952
+  totalTypeOnlyImports: 544
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

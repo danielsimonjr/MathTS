@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1058,
+    "totalFiles": 1059,
     "totalModules": 81,
-    "totalExports": 5240
+    "totalExports": 5245
   },
   "entryPoints": [
     {
@@ -8061,6 +8061,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/eigsh.js",
+            "imports": ["eigsh"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["minimizeScalar"],
             "reExport": true
@@ -8293,6 +8298,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/eigsh.js",
+            "imports": ["EigshOperatorInput", "EigshOptions", "EigshResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["MinimizeScalarOptions", "MinimizeScalarResult"],
             "reExport": true,
@@ -8519,6 +8530,7 @@
           "minres",
           "gmres",
           "bicgstab",
+          "eigsh",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8643,6 +8655,9 @@
           "KrylovOptions",
           "GmresOptions",
           "KrylovResult",
+          "EigshOperatorInput",
+          "EigshOptions",
+          "EigshResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -8793,6 +8808,7 @@
           "minres",
           "gmres",
           "bicgstab",
+          "eigsh",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8917,6 +8933,9 @@
           "KrylovOptions",
           "GmresOptions",
           "KrylovResult",
+          "EigshOperatorInput",
+          "EigshOptions",
+          "EigshResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -13180,6 +13199,16 @@
         "exports": ["bfgs"],
         "interfaces": ["BfgsOptions", "BfgsResult"],
         "functions": ["bfgs"]
+      },
+      "functions/src/numeric/eigsh.ts": {
+        "description": "Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["eigsh"],
+        "interfaces": ["EigshOptions", "EigshResult"],
+        "functions": ["eigsh"]
       },
       "functions/src/numeric/fsolve.ts": {
         "description": "Nonlinear system solver: `fsolve` (damped Newton with a backtracking line",
@@ -35345,6 +35374,7 @@
         "files": [
           "functions/src/numeric/adaptive-quad.ts",
           "functions/src/numeric/bfgs.ts",
+          "functions/src/numeric/eigsh.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
           "functions/src/numeric/krylov.ts",
@@ -36303,18 +36333,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1058,
+    "totalTypeScriptFiles": 1059,
     "totalModules": 81,
-    "totalLinesOfCode": 179627,
-    "totalExports": 5240,
+    "totalLinesOfCode": 179916,
+    "totalExports": 5245,
     "totalClasses": 56,
-    "totalInterfaces": 458,
-    "totalFunctions": 1737,
+    "totalInterfaces": 460,
+    "totalFunctions": 1738,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1948,
-    "totalTypeOnlyImports": 543,
+    "totalReExports": 1952,
+    "totalTypeOnlyImports": 544,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

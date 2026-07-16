@@ -198,6 +198,13 @@ export type {
   KrylovResult,
 } from './numeric/krylov.js';
 
+// Phase 7 Task 2 — eigsh: iterative Lanczos symmetric eigensolver returning
+// the k largest/smallest eigenpairs of a symmetric matrix (dense or matvec),
+// for large problems where the dense `eigs` (full eigendecomposition) is
+// prohibitive.
+export { eigsh } from './numeric/eigsh.js';
+export type { EigshOperatorInput, EigshOptions, EigshResult } from './numeric/eigsh.js';
+
 // Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
 // parabolic interpolation). Distinct from root-finding; complements the
 // vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Iterative symmetric eigensolver: eigsh (Phase 7 Task 2)
+
+Added `functions/src/numeric/eigsh.ts`, exported from `@danielsimonjr/mathts-functions`:
+`eigsh(A, k = 1, opts?)` — a Lanczos iteration returning the `k` largest (`which: 'LM'`, default)
+or smallest (`which: 'SM'`) eigenpairs of a **symmetric** matrix, for large problems the dense
+`eigs` (full eigendecomposition) can't handle. Accepts `A` as a dense matrix or a matvec callback
+(`(x: number[]) => number[]`, matching `krylov.ts`'s LinearOperator convention; `opts.n` is
+required for the matvec form). Builds the orthonormal Krylov basis with full reorthogonalization
+against every prior Lanczos vector (numerical stability at small/medium sizes), forms the small
+tridiagonal projection `T`, solves `T`'s eigenproblem via cyclic Jacobi rotations, and lifts the
+result back through the basis (Rayleigh-Ritz). Eigenvectors are returned as columns of an
+`n x k` matrix. Pinned: for tridiag `[[2,1,0],[1,2,1],[0,1,2]]`, largest = `2 + √2 ≈ 3.41421356`,
+smallest = `2 − √2 ≈ 0.58578644`.
+
+Documented in `docs/reference/functions.md` under Linear Algebra, new "Iterative Eigensolver"
+subsection. `npm run docs:functions` / `npm run docs:deps` regenerated; docs-completeness gate
+green. `functions/tests/eigsh.test.ts` (5 tests: pinned largest/smallest eigenvalues, k=2 largest,
+`Av = λv` residual check, matvec-operator input with explicit `n`). Full `functions` regression:
+3682 passed, 94 skipped, 0 failed.
+
 ### Added — Iterative Krylov solvers: cg/gmres/bicgstab/minres (Phase 7 Task 1)
 
 Added `functions/src/numeric/krylov.ts`, exported from `@danielsimonjr/mathts-functions`:
