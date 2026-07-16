@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `kendallTauTest` (Phase 4 Task 2)
+
+Added `kendallTauTest(x, y)` — Kendall's τ_b rank-correlation test returning `{ tau, pValue }`
+(the p-value via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`). It delegates to the
+pre-existing `kendalltau` (already implementing this exact formula, algebraically identical to
+`z = 3τ√(n(n−1))/√(2(2n+5))`) and only renames `coefficient` → `tau` to match the `*Test`
+result-object naming convention used by `mannWhitneyTest`/`kolmogorovSmirnovTest`/etc.
+
+### Investigated (not applied) — exact small-n p-values for `mannWhitneyTest` / `kolmogorovSmirnov2Test`
+
+Investigated adding an exact small-sample p-value path (U-distribution recurrence /
+KS lattice-path recurrence, exact when `n1·n2 ≤ 400`) to `mannWhitneyTest` and
+`kolmogorovSmirnov2Test`, per the scipy oracle (`mannwhitneyu(..., method='exact')`,
+`ks_2samp`). Not wired in: making the exact p the default for small n is a genuine regression
+against two pre-existing, *deliberately* pinned oracle tests —
+`functions/tests/gap-hypothesis-oracle.test.ts` pins the normal-approximation p for
+`mannWhitneyTest([1,2,3],[4,5,6])` into `(0.04, 0.055)` (scipy's exact p there is `0.1`, outside
+the bound), and `functions/tests/gap-stats-completeness.test.ts` pins the asymptotic
+`kstwobign` p for `kolmogorovSmirnov2Test` at `n=8,8`/`n=10,10` with an explicit comment
+choosing it deliberately over scipy's small-n exact (version-specific) p. Changing either
+default silently overturns a documented test design decision, so this was left for a human
+call rather than resolved unilaterally — see the session report for full detail and confirmed
+scipy values.
+
 ### Added — `fitDistribution` MLE parameter fitting (Phase 4 Task 1)
 
 Added `fitDistribution(name, data)` — maximum-likelihood parameter fitting for `'normal'` |

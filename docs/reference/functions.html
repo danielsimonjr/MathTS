@@ -1189,8 +1189,8 @@
 
       ### Distribution fitting
 
-      | Function                    | Description                                                                                                                                                                                                       |
-      | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+      | Function                      | Description                                                                                                                                                                                                                                                                                                                                                                                            |
+      | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
       | `fitDistribution(name, data)` | Maximum-likelihood fit of `'normal'` `\| 'exponential'` `\| 'lognormal'` `\| 'poisson'` `\| 'gamma'` to a sample; returns `{ params, logLikelihood }`. Normal/exponential/poisson are closed-form; lognormal fits a normal to `ln(data)` (requires all `> 0`); gamma solves the digamma shape equation `ln(k) − ψ(k) = ln(x̄) − mean(ln x)` via the secant method (verified vs `scipy.stats.gamma.fit`) |
 
       ### Elementwise & cumulative
@@ -2513,6 +2513,7 @@
       | `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]`     | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                     |
       | `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency` |
       | `multipleTest(pValues, method)`            | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`              |
+      | `kendallTauTest(x, y)`                     | `KendallTauTestResult`  | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names |
 
       ### Details
 
@@ -2927,7 +2928,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (906 exports).
+      > `@danielsimonjr/mathts-functions` (907 exports).
 
       ### Functions by category
 
@@ -2969,7 +2970,7 @@
 
       **Graph Theory** (11): `adjacencyMatrix`, `betweennessCentrality`, `connectedComponents`, `eigenvectorCentrality`, `graphDistance`, `isConnected`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
-      **Hypothesis Tests** (28): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
+      **Hypothesis Tests** (29): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
       **Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 

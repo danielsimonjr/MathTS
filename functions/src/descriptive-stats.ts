@@ -394,6 +394,27 @@ export function kendalltau(x: Vec, y: Vec): CorrelationTestResult {
   return { coefficient: tau, pValue: 2 * (1 - (_normalCDF(Math.abs(z)) as number)) };
 }
 
+/** Result of {@link kendallTauTest}: the τ_b coefficient plus its p-value. */
+export interface KendallTauTestResult {
+  tau: number;
+  pValue: number;
+}
+
+/**
+ * Kendall's τ **test** (hypothesis-test naming convenience) — identical to
+ * {@link kendalltau} (τ_b coefficient + two-tailed normal-approximation
+ * p-value), just returning `{ tau, pValue }` instead of `{ coefficient,
+ * pValue }` to match the `*Test` result-object convention used by
+ * `mannWhitneyTest`/`kolmogorovSmirnovTest`/etc. Does not duplicate the
+ * coefficient/p-value logic — delegates to `kendalltau`.
+ *
+ * @example kendallTauTest([1,2,3,4,5], [1,2,3,4,5]) // { tau: 1, pValue: <small> }
+ */
+export function kendallTauTest(x: Vec, y: Vec): KendallTauTestResult {
+  const { coefficient, pValue } = kendalltau(x, y);
+  return { tau: coefficient, pValue };
+}
+
 // ===========================================================================
 // Descriptive conveniences — Wave D
 // ===========================================================================

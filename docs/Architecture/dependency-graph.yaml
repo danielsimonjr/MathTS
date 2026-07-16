@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-16'
   totalFiles: 1043
   totalModules: 80
-  totalExports: 5050
+  totalExports: 5053
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7111,6 +7111,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7119,6 +7120,7 @@ modules:
       interfaces:
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
       functions:
@@ -7139,6 +7141,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7381,6 +7384,7 @@ modules:
             - pearsonr
             - spearmanr
             - kendalltau
+            - kendallTauTest
             - ptp
             - variation
             - trimmedMean
@@ -7574,6 +7578,7 @@ modules:
           imports:
             - LinRegressResult
             - CorrelationTestResult
+            - KendallTauTestResult
             - DescribeResult
             - HistogramResult
           reExport: true
@@ -7732,6 +7737,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7838,6 +7844,7 @@ modules:
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
         - FTestResult
@@ -7917,6 +7924,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -8023,6 +8031,7 @@ modules:
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
         - FTestResult
@@ -33228,15 +33237,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1043
   totalModules: 80
-  totalLinesOfCode: 174832
-  totalExports: 5050
+  totalLinesOfCode: 174852
+  totalExports: 5053
   totalClasses: 56
-  totalInterfaces: 438
-  totalFunctions: 1641
+  totalInterfaces: 439
+  totalFunctions: 1642
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1860
+  totalReExports: 1862
   totalTypeOnlyImports: 537
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

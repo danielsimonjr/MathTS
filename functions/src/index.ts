@@ -57,6 +57,7 @@ export {
   pearsonr,
   spearmanr,
   kendalltau,
+  kendallTauTest,
   ptp,
   variation,
   trimmedMean,
@@ -66,6 +67,7 @@ export {
 export type {
   LinRegressResult,
   CorrelationTestResult,
+  KendallTauTestResult,
   DescribeResult,
   HistogramResult,
 } from './descriptive-stats.js';

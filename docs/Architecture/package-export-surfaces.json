@@ -2349,6 +2349,8 @@
       "kdTreeNearest",
       "kendalltau",
       "kendallTau",
+      "kendallTauTest",
+      "KendallTauTestResult",
       "kernelSource",
       "kldivergence",
       "klitzing",

@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1043, "e": 5050, "re": 1860 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1043, "e": 5053, "re": 1862 },
   "s": {
-    "loc": 174832,
+    "loc": 174852,
     "cls": 56,
-    "int": 438,
-    "fn": 1641,
+    "int": 439,
+    "fn": 1642,
     "tg": 158,
     "en": 0,
     "co": 1536,
@@ -548,13 +548,13 @@
         "KMeansResult",
         "LinRegressResult",
         "CorrelationTestResult",
+        "KendallTauTestResult",
         "DescribeResult",
         "HistogramResult",
         "FTestResult",
         "JarqueBeraResult",
         "KruskalResult",
-        "WilcoxonResult",
-        "FisherExactResult"
+        "WilcoxonResult"
       ]
     },
     "functions/combinatorics": {
