@@ -31,8 +31,10 @@ oracle-pinned, subagent-driven. Phase plan:
 - [ ] **Phase 0 follow-up (doc honesty):** `cancel`, `rationalize`, `simplify` are ALSO currently
       pass-through/non-transforming (found while reconciling CAS docs); annotate their `functions.md`
       entries too. Verify each on dist first (don't assume). S.
-- [ ] **Phase 1 — Foundational primitives.** numeric `jacobian` · open root-finders newton/secant/halley
-      · `fsolve`/`root` systems · `minimize_scalar` · adaptive Gauss–Kronrod `quad` · expose full `svd`.
+- [x] **Phase 1 — Foundational primitives — ✅ RELEASED `functions@0.29.0`** (2026-07-15). `numericJacobian` + polymorphic `jacobian` · `newton`/`secant`/`halley` · `fsolve`/`root` (damped Newton) ·
+      `minimizeScalar` (Brent) · adaptive Gauss–Kronrod `quad` (+`nintegrate` singular fix ~1.7e-6→1e-10)
+      · full `svd` + `orth` exposed. 6 tasks subagent-driven, oracle-pinned vs scipy/numpy, verified in
+      the published tarball. (Note: matrix `svd` is synchronous, not async.)
 - [ ] **Phase 2 — Optimization core.** BFGS/L-BFGS-B · bounded LS + NNLS · proper `linprog` (two-phase).
 - [ ] **Phase 3 — Regression & ML.** multiple OLS + inference · ridge/lasso · logistic/GLM · DBSCAN+kNN
       · Gaussian KDE · χ² contingency · multiple-testing correction.

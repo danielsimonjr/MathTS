@@ -289,7 +289,13 @@ patch/minor releases per package.
 >
 > Detailed, oracle-pinned plan: [`docs/superpowers/plans/2026-07-15-phase0-correctness-fixes.md`](../superpowers/plans/2026-07-15-phase0-correctness-fixes.md) (9 tasks).
 
-### Phase 1 — Foundational numeric primitives (unlock optimization + ODE + quadrature downstream)
+### Phase 1 — Foundational numeric primitives — ✅ RELEASED `functions@0.29.0` (2026-07-15)
+
+Shipped (6 tasks, oracle-pinned, verified in tarball): `numericJacobian` + polymorphic `jacobian`,
+`newton`/`secant`/`halley`, `fsolve`/`root`, `minimizeScalar` (Brent), adaptive Gauss–Kronrod `quad`
+(+ `nintegrate` singular fix), full `svd` + `orth` exposed.
+
+_(original scope below)_
 
 `jacobian` numeric F:ℝⁿ→ℝᵐ (D1, S) · open scalar root-finders newton/secant/halley (D3, S) · nonlinear
 system solver `fsolve`/`root` (D2/O3, M) · scalar `minimize_scalar` Brent/golden (O5, S) · adaptive
