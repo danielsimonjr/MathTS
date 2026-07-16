@@ -1699,6 +1699,7 @@ quad((x) => 1 / Math.sqrt(x), 0, 1).value; // ~2.0, endpoint singularity
 | `interpolate(xs, ys, x[, method])`       | General interpolation dispatcher                                              | —     |
 | `griddata(xs, ys, values, xi, yi)`       | Scattered-data interpolation to a grid                                        | WASM  |
 | `rbfInterpolate(centers, values, query)` | Radial basis function interpolation                                           | WASM  |
+| `interpn(grids, values, query)`          | Regular-grid N-D multilinear interpolation (`scipy.interpolate.interpn`)      | —     |
 | `loess(xs, ys, x[, bandwidth])`          | LOESS local regression                                                        | WASM  |
 | `chebyshevApprox(f, a, b, n)`            | Chebyshev polynomial approximation                                            | —     |
 | `padeApproximant(coeffs, m, n)`          | Padé approximant                                                              | —     |
@@ -1723,6 +1724,12 @@ quad((x) => 1 / Math.sqrt(x), 0, 1).value; // ~2.0, endpoint singularity
   arbitrary nonlinear model from an initial parameter guess `p0`.
 - `griddata` and `rbfInterpolate` handle scattered (non-gridded) data;
   `chebyshevApprox` and `padeApproximant` approximate a known function.
+- `interpn` requires a **rectilinear grid** (`n` strictly-increasing coordinate
+  arrays, one per dimension) rather than scattered points — it locates the
+  bracketing cell along each axis (binary search) and takes the weighted
+  average of the `2^n` corner values. Exact for any function affine in each
+  coordinate; throws on an out-of-bounds query (no extrapolation), matching
+  `scipy.interpolate.interpn`'s default `bounds_error=True`.
 - **WASM acceleration:** `cubicSpline` routes its tridiagonal-solve hot loop
   to an AssemblyScript WASM kernel (Thomas algorithm) when the system has ≥ 1024
   unknowns (`WASM_TRIDIAG_THRESHOLD`). `pchip` and `akima` use analytic
@@ -1759,36 +1766,36 @@ lagrangeInterp(xs, ys, 2.5); // ~6.25
 
 Root-finding, optimization, linear systems, and differential equations.
 
-| Function                                         | Description                                                                                     | Accel |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ----- |
-| `findRoot(f, a, b[, opts])`                      | Bracketed root-finding (bisection/Brent)                                                        | —     |
-| `newton(f, x0[, opts])`                          | Newton–Raphson root-finding (analytic or central-difference derivative)                         | —     |
-| `secant(f, x0, x1[, opts])`                      | Secant-method root-finding (no derivative required)                                             | —     |
-| `halley(f, x0[, opts])`                          | Halley's method root-finding (cubic convergence)                                                | —     |
-| `fsolve(F, x0[, opts])`                          | Nonlinear system solver `F(x) = 0` for `F: ℝⁿ → ℝⁿ` (damped Newton)                             | —     |
-| `root(F, x0[, opts])`                            | Alias of `fsolve`                                                                               | —     |
-| `linsolve(A, b)`                                 | Solve a linear system `Ax = b`                                                                  | —     |
-| `leastSquares(A, b)`                             | Least-squares solution (overdetermined)                                                         | WASM  |
-| `nnls(A, b[, opts])`                             | Non-negative least squares (Lawson–Hanson active-set); returns `{ x, residual }`                | —     |
-| `lsqBounded(A, b, lower, upper[, opts])`         | Box-constrained least squares (projected-gradient); returns `{ x, residual }`                   | —     |
-| `minimize(f, x0[, opts])`                        | Local minimization                                                                              | —     |
-| `minimizeScalar(f[, opts])`                      | 1-D minimization via Brent's method (golden-section + parabolic interp)                         | —     |
-| `maximize(f, x0[, opts])`                        | Local maximization                                                                              | —     |
-| `globalMinimize(f, bounds[, opts])`              | Global minimization                                                                             | —     |
-| `linprog(c, A_ub, b_ub)`                         | Linear programming (legacy positional form); returns `x`                                        | —     |
-| `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` | LP via two-phase simplex — equality constraints + bounds; returns `{ x, fun, success, status }` | —     |
-| `quadprog(Q, c, A, b[, opts])`                   | Quadratic programming                                                                           | —     |
-| `solveODE(f, tspan, y0[, opts])`                 | ODE solver (factory layer)                                                                      | —     |
-| `solveODESystem(fs, tspan, y0)`                  | System of ODEs                                                                                  | WASM  |
-| `solveBVP(...)`                                  | Boundary value problem solver                                                                   | —     |
-| `solvePDE(...)`                                  | PDE solver                                                                                      | —     |
-| `stiffODESolver(...)`                            | Stiff-ODE solver                                                                                | —     |
-| `odeAdaptiveStep(...)`                           | Adaptive-step ODE integration                                                                   | —     |
-| `eventDetection(...)`                            | ODE event detection                                                                             | —     |
-| `cond(A)`                                        | Condition number                                                                                | WASM  |
-| `rank(A)`                                        | Numerical rank                                                                                  | WASM  |
-| `nullspace(A)`                                   | Null-space basis                                                                                | —     |
-| `residue(b, a)`                                  | Partial-fraction residues                                                                       | —     |
+| Function                                         | Description                                                                                                                                                 | Accel |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `findRoot(f, a, b[, opts])`                      | Bracketed root-finding (bisection/Brent)                                                                                                                    | —     |
+| `newton(f, x0[, opts])`                          | Newton–Raphson root-finding (analytic or central-difference derivative)                                                                                     | —     |
+| `secant(f, x0, x1[, opts])`                      | Secant-method root-finding (no derivative required)                                                                                                         | —     |
+| `halley(f, x0[, opts])`                          | Halley's method root-finding (cubic convergence)                                                                                                            | —     |
+| `fsolve(F, x0[, opts])`                          | Nonlinear system solver `F(x) = 0` for `F: ℝⁿ → ℝⁿ` (damped Newton)                                                                                         | —     |
+| `root(F, x0[, opts])`                            | Alias of `fsolve`                                                                                                                                           | —     |
+| `linsolve(A, b)`                                 | Solve a linear system `Ax = b`                                                                                                                              | —     |
+| `leastSquares(A, b)`                             | Least-squares solution (overdetermined)                                                                                                                     | WASM  |
+| `nnls(A, b[, opts])`                             | Non-negative least squares (Lawson–Hanson active-set); returns `{ x, residual }`                                                                            | —     |
+| `lsqBounded(A, b, lower, upper[, opts])`         | Box-constrained least squares (projected-gradient); returns `{ x, residual }`                                                                               | —     |
+| `minimize(f, x0[, opts])`                        | Local minimization                                                                                                                                          | —     |
+| `minimizeScalar(f[, opts])`                      | 1-D minimization via Brent's method (golden-section + parabolic interp)                                                                                     | —     |
+| `maximize(f, x0[, opts])`                        | Local maximization                                                                                                                                          | —     |
+| `globalMinimize(f, bounds[, opts])`              | Global minimization                                                                                                                                         | —     |
+| `linprog(c, A_ub, b_ub)`                         | Linear programming (legacy positional form); returns `x`                                                                                                    | —     |
+| `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` | LP via two-phase simplex — equality constraints + bounds; returns `{ x, fun, success, status }`                                                             | —     |
+| `quadprog(Q, c, A, b[, opts])`                   | Quadratic programming                                                                                                                                       | —     |
+| `solveODE(f, tspan, y0[, opts])`                 | ODE solver (factory layer)                                                                                                                                  | —     |
+| `solveODESystem(fs, tspan, y0)`                  | System of ODEs                                                                                                                                              | WASM  |
+| `solveBVP(f, bc, mesh[, y0Guess])`               | Boundary value problem solver for a general first-order system `y' = f(t,y)` via single shooting; `y0Guess` (default `[0, 0]`) sets the state dimension `n` | —     |
+| `solvePDE(...)`                                  | PDE solver                                                                                                                                                  | —     |
+| `stiffODESolver(...)`                            | Stiff-ODE solver                                                                                                                                            | —     |
+| `odeAdaptiveStep(...)`                           | Adaptive-step ODE integration                                                                                                                               | —     |
+| `eventDetection(...)`                            | ODE event detection                                                                                                                                         | —     |
+| `cond(A)`                                        | Condition number                                                                                                                                            | WASM  |
+| `rank(A)`                                        | Numerical rank                                                                                                                                              | WASM  |
+| `nullspace(A)`                                   | Null-space basis                                                                                                                                            | —     |
+| `residue(b, a)`                                  | Partial-fraction residues                                                                                                                                   | —     |
 
 ### Optimization
 
@@ -2712,7 +2719,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1009 exports).
+> `@danielsimonjr/mathts-functions` (1010 exports).
 
 ### Functions by category
 
@@ -2744,7 +2751,7 @@ await terminatePool();
 
 **Numerical Integration** (10): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
-**Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
+**Interpolation & Curve Fitting** (24): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
 **Numerical Methods** (36): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 

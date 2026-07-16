@@ -2224,6 +2224,7 @@
       | `interpolate(xs, ys, x[, method])`       | General interpolation dispatcher                                              | —     |
       | `griddata(xs, ys, values, xi, yi)`       | Scattered-data interpolation to a grid                                        | WASM  |
       | `rbfInterpolate(centers, values, query)` | Radial basis function interpolation                                           | WASM  |
+      | `interpn(grids, values, query)`          | Regular-grid N-D multilinear interpolation (`scipy.interpolate.interpn`)      | —     |
       | `loess(xs, ys, x[, bandwidth])`          | LOESS local regression                                                        | WASM  |
       | `chebyshevApprox(f, a, b, n)`            | Chebyshev polynomial approximation                                            | —     |
       | `padeApproximant(coeffs, m, n)`          | Padé approximant                                                              | —     |
@@ -2248,6 +2249,12 @@
         arbitrary nonlinear model from an initial parameter guess `p0`.
       - `griddata` and `rbfInterpolate` handle scattered (non-gridded) data;
         `chebyshevApprox` and `padeApproximant` approximate a known function.
+      - `interpn` requires a **rectilinear grid** (`n` strictly-increasing coordinate
+        arrays, one per dimension) rather than scattered points — it locates the
+        bracketing cell along each axis (binary search) and takes the weighted
+        average of the `2^n` corner values. Exact for any function affine in each
+        coordinate; throws on an out-of-bounds query (no extrapolation), matching
+        `scipy.interpolate.interpn`'s default `bounds_error=True`.
       - **WASM acceleration:** `cubicSpline` routes its tridiagonal-solve hot loop
         to an AssemblyScript WASM kernel (Thomas algorithm) when the system has ≥ 1024
         unknowns (`WASM_TRIDIAG_THRESHOLD`). `pchip` and `akima` use analytic
@@ -2305,7 +2312,7 @@
       | `quadprog(Q, c, A, b[, opts])`                   | Quadratic programming                                                                           | —     |
       | `solveODE(f, tspan, y0[, opts])`                 | ODE solver (factory layer)                                                                      | —     |
       | `solveODESystem(fs, tspan, y0)`                  | System of ODEs                                                                                  | WASM  |
-      | `solveBVP(...)`                                  | Boundary value problem solver                                                                   | —     |
+      | `solveBVP(f, bc, mesh[, y0Guess])`               | Boundary value problem solver for a general first-order system `y' = f(t,y)` via single shooting; `y0Guess` (default `[0, 0]`) sets the state dimension `n` | —     |
       | `solvePDE(...)`                                  | PDE solver                                                                                      | —     |
       | `stiffODESolver(...)`                            | Stiff-ODE solver                                                                                | —     |
       | `odeAdaptiveStep(...)`                           | Adaptive-step ODE integration                                                                   | —     |
@@ -2633,17 +2640,17 @@
 
       ### Bounding box & Procrustes alignment
 
-      | Function                    | Description                                                                          |
-      | ---------------------------- | ------------------------------------------------------------------------------------- |
-      | `boundingBox(points)`        | Axis-aligned min/max per dimension: `{ min, max }`                                     |
-      | `procrustes(A, B)`           | Orthogonal Procrustes alignment mapping `B` onto `A`; returns `{ R, scale, disparity }` |
+      | Function              | Description                                                                             |
+      | --------------------- | --------------------------------------------------------------------------------------- |
+      | `boundingBox(points)` | Axis-aligned min/max per dimension: `{ min, max }`                                      |
+      | `procrustes(A, B)`    | Orthogonal Procrustes alignment mapping `B` onto `A`; returns `{ R, scale, disparity }` |
 
       ### kd-tree kNN / radius queries
 
-      | Function                            | Description                                                    |
-      | ------------------------------------ | --------------------------------------------------------------- |
-      | `kdTreeKNN(points, query, k)`        | Indices of the `k` nearest points to `query` (brute force)      |
-      | `kdTreeRadius(points, query, r)`     | Indices of all points within radius `r` of `query` (brute force) |
+      | Function                         | Description                                                      |
+      | -------------------------------- | ---------------------------------------------------------------- |
+      | `kdTreeKNN(points, query, k)`    | Indices of the `k` nearest points to `query` (brute force)       |
+      | `kdTreeRadius(points, query, r)` | Indices of all points within radius `r` of `query` (brute force) |
 
       ### 3D convex hull
 
@@ -2871,7 +2878,7 @@
       | `setSize(a[, unique])`   | Element count; pass `true` for distinct count                     | Array | —     |
       | `setIsSuperset(a, b)`    | True when every element of `b` (with multiplicity) appears in `a` | Array | —     |
       | `setEqual(a, b)`         | True when `a` and `b` are equal as multisets                      | Array | —     |
-      | `setDisjoint(a, b)`      | True when `a` and `b` share no elements                            | Array | —     |
+      | `setDisjoint(a, b)`      | True when `a` and `b` share no elements                           | Array | —     |
 
       ### Details
 
@@ -3237,7 +3244,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1009 exports).
+      > `@danielsimonjr/mathts-functions` (1010 exports).
 
       ### Functions by category
 
@@ -3269,7 +3276,7 @@
 
       **Numerical Integration** (10): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
-      **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
+      **Interpolation & Curve Fitting** (24): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
       **Numerical Methods** (36): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 

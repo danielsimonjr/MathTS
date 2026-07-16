@@ -246,6 +246,13 @@ export type { MinimizeScalarOptions, MinimizeScalarResult } from './numeric/mini
 export { quad } from './numeric/adaptive-quad.js';
 export type { QuadOptions, QuadResult } from './numeric/adaptive-quad.js';
 
+// Phase 8 Task 4 — regular-grid N-D multilinear interpolation, matching
+// `scipy.interpolate.interpn`. Distinct from `griddata`/`rbfInterpolate`
+// (scattered-data) — this requires a rectilinear grid but is exact O(2^n)
+// per query rather than a scattered-data reconstruction.
+export { interpn } from './numeric/interpn.js';
+export type { NDArrayInput } from './numeric/interpn.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 

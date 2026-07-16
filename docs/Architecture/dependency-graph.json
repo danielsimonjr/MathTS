@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1065,
+    "totalFiles": 1066,
     "totalModules": 82,
-    "totalExports": 5319
+    "totalExports": 5322
   },
   "entryPoints": [
     {
@@ -8091,6 +8091,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/interpn.js",
+            "imports": ["interpn"],
+            "reExport": true
+          },
+          {
             "file": "./timeseries-extra.js",
             "imports": ["movingAverage", "ewma", "detrend", "acf"],
             "reExport": true
@@ -8376,6 +8381,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/interpn.js",
+            "imports": ["NDArrayInput"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./stats/timeseries.js",
             "imports": ["LjungBoxResult", "AdfullerResult"],
             "reExport": true,
@@ -8623,6 +8634,7 @@
           "dare",
           "minimizeScalar",
           "quad",
+          "interpn",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8776,6 +8788,7 @@
           "MinimizeScalarResult",
           "QuadOptions",
           "QuadResult",
+          "NDArrayInput",
           "LjungBoxResult",
           "AdfullerResult",
           "LinregressResult",
@@ -8943,6 +8956,7 @@
           "dare",
           "minimizeScalar",
           "quad",
+          "interpn",
           "movingAverage",
           "ewma",
           "detrend",
@@ -9096,6 +9110,7 @@
           "MinimizeScalarResult",
           "QuadOptions",
           "QuadResult",
+          "NDArrayInput",
           "LjungBoxResult",
           "AdfullerResult",
           "LinregressResult",
@@ -13498,6 +13513,15 @@
         "exports": ["rootsLegendre"],
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
+      },
+      "functions/src/numeric/interpn.ts": {
+        "description": "Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["interpn"],
+        "functions": ["interpn"]
       },
       "functions/src/numeric/krylov.ts": {
         "description": "Iterative Krylov-subspace linear solvers.",
@@ -35674,6 +35698,7 @@
           "functions/src/numeric/eigsh.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/interpn.ts",
           "functions/src/numeric/krylov.ts",
           "functions/src/numeric/matrix-functions.ts",
           "functions/src/numeric/minimize-scalar.ts",
@@ -36632,18 +36657,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1065,
+    "totalTypeScriptFiles": 1066,
     "totalModules": 82,
-    "totalLinesOfCode": 181948,
-    "totalExports": 5319,
+    "totalLinesOfCode": 182120,
+    "totalExports": 5322,
     "totalClasses": 56,
     "totalInterfaces": 469,
-    "totalFunctions": 1770,
+    "totalFunctions": 1771,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1994,
-    "totalTypeOnlyImports": 549,
+    "totalReExports": 1996,
+    "totalTypeOnlyImports": 550,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

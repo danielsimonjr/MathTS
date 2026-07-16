@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — N-D regular-grid interpolation `interpn` (Phase 8 Task 4)
+
+Added `functions/src/numeric/interpn.ts`, exported from `@danielsimonjr/mathts-functions`:
+`interpn(grids, values, query)` — regular-grid multilinear interpolation matching
+`scipy.interpolate.interpn` (default `method='linear'`, `bounds_error=True`). Generalizes past the
+1-D/2-D spec to arbitrary dimension `n`: locates the bracketing cell per axis via binary search and
+takes the weighted average of the `2^n` corner values. Exact on any function affine in each
+coordinate; throws on a non-increasing grid axis, a `values` shape mismatch, or an out-of-bounds
+query (no extrapolation). Pinned against `scipy.interpolate.interpn` for 1-D/2-D/3-D cases and
+out-of-bounds behavior (exact match).
+
+### Fixed — `solveBVP` generalized beyond the hardcoded 2-state case (Phase 8 Task 4)
+
+`solveBVP(f, bc, mesh)` (`functions/src/typed/numeric.ts`) hardcoded its shooting-method unknowns to
+a 2-element state vector (`const n = 2`), so it could only solve BVPs cast as the 2-state
+`[y, y']` system (the common single-2nd-order-ODE shape) — a coupled 3+-state first-order system
+threw or silently produced garbage. Added an optional 4th parameter, `y0Guess: number[] = [0, 0]`,
+whose length now sets the state dimension `n`; the core shooting/Newton loop was already
+dimension-agnostic, so this is a pure additive fix with no behavior change for existing 3-argument
+call sites (identical default `[0, 0]`). Verified with a new pinned 3-state decoupled-system test
+(`y_i' = -i·y_i`, exact solution `y_i(t) = exp(-i·t)`) alongside the required `y'' = -y` (→ `sin`)
+regression test; all pre-existing `solveBVP` tests remain green unchanged.
+
 ### Added — Geometry & sets: quaternion slerp/inverse/Euler, boundingBox, procrustes, kdTree kNN/radius, multiset ops (Phase 8 Task 3)
 
 Added `functions/src/geometry/geometry-extra.ts`, exported from `@danielsimonjr/mathts-functions`:

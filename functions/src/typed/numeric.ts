@@ -1314,19 +1314,35 @@ export function stiffODESolver(
 }
 
 /**
- * Solve boundary value problem using the shooting method.
+ * Solve a boundary value problem for a general first-order system
+ * `y' = f(t, y)` with two-point boundary condition `bc(y(t0), y(tf)) = 0`,
+ * via single shooting + Newton iteration on the initial state.
+ *
+ * The unknowns are the full initial state `y(t0)` (length `n`); Newton's
+ * method adjusts them until `bc` (the boundary residual, length `n`) is
+ * driven to zero, using a forward-difference numerical Jacobian of `shoot`
+ * (re-integrating the IVP per Jacobian column) and `linsolve` for the
+ * Newton step. `n` defaults to 2 (the original
+ * hardcoded case — a single 2nd-order ODE cast as the 2-state system
+ * `[y, y']`, the most common BVP shape) but generalizes to any state
+ * dimension via `y0Guess`, whose length becomes `n`. This makes `solveBVP`
+ * applicable to any first-order system, not just 2-state ones — pass an
+ * `n`-length initial guess for higher-order/coupled systems.
  *
  * @param f - System function (t, y) => dy/dt
- * @param bc - Boundary condition function (y0, yf) => residuals
- * @param mesh - Initial mesh points
+ * @param bc - Boundary condition function (y0, yf) => residuals (length n)
+ * @param mesh - Initial mesh points (only the endpoints are used — [mesh[0], mesh[last]])
+ * @param y0Guess - Initial guess for the shooting unknowns y(t0); its length sets
+ *   the state dimension n. Defaults to `[0, 0]` (back-compat 2-state case).
  * @returns Solution
  */
 export function solveBVP(
   f: (t: f64, y: number[]) => number[],
   bc: (y0: number[], yf: number[]) => number[],
-  mesh: number[]
+  mesh: number[],
+  y0Guess: number[] = [0, 0]
 ): ODESolution {
-  const n = 2; // Simple 2-point BVP
+  const n = y0Guess.length;
   const tspan: [f64, f64] = [mesh[0], mesh[mesh.length - 1]];
 
   // Shooting method: adjust initial conditions to satisfy BC
@@ -1336,8 +1352,9 @@ export function solveBVP(
     return bc(guess, yf);
   }
 
-  // Use simple Newton iteration
-  const s = new Array(n).fill(0);
+  // Use simple Newton iteration, starting from the caller's guess (defaults
+  // to the zero vector, matching the original hardcoded n=2 behavior).
+  const s = y0Guess.slice();
   const delta = 1e-7;
 
   for (let iter = 0; iter < 50; iter++) {
