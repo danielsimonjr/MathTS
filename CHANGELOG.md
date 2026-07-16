@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `linprog` could return an INFEASIBLE optimum on degenerate cases
+
+The simplex iteration solved correctly, but the solution-extraction loop marked a structural
+column "basic" whenever its tableau column had unit-vector shape, without enforcing a one-to-one
+mapping between constraint rows and basic variables. On a degenerate optimum
+(`linprog([-1,-1], [[1,1]], [1])` — minimize `-x-y` s.t. `x+y<=1`) both `x1`'s and `x2`'s columns
+reduced to the unit vector on row 0, so both were marked basic and both read row 0's RHS (`1`),
+returning `[1,1]` — which violates `x+y<=1` (scipy returns `[1,0]`, objective `-1`). Extraction now
+tracks claimed constraint rows (excluding the objective row) and assigns each row to exactly one
+basic variable, so the returned optimum is feasible; pinned vs scipy on the degenerate case above
+plus a non-degenerate case (unchanged) and a second degenerate/redundant-constraint case. Equality
+constraints, bounds, and status flags remain out of scope — planned for a later two-phase-simplex
+rewrite.
+
 ### Fixed — `taylor`/`series`/`seriesCoefficient` produced garbage coefficients past ~order 3
 
 All three computed the k-th derivative via a recursive finite-difference `numericalDerivative`,

@@ -2073,12 +2073,12 @@ export function linprog(c: number[], A: number[][], b: number[]): number[] | nul
     }
   }
 
-  // Extract solution
+  // Extract solution: each constraint row provides exactly one basic variable.
   const x = new Array(n).fill(0);
+  const usedRows = new Array(m).fill(false);
   for (let j = 0; j < n; j++) {
     let basicRow = -1;
     let isBasic = true;
-    // Check all rows including objective
     for (let i = 0; i <= m; i++) {
       if (Math.abs(tableau[i][j] - 1) < 1e-10) {
         if (basicRow !== -1) {
@@ -2091,8 +2091,10 @@ export function linprog(c: number[], A: number[][], b: number[]): number[] | nul
         break;
       }
     }
-    if (isBasic && basicRow !== -1) {
+    // basic only if its unit column sits in a constraint row not already claimed
+    if (isBasic && basicRow !== -1 && basicRow < m && !usedRows[basicRow]) {
       x[j] = tableau[basicRow][totalVars];
+      usedRows[basicRow] = true;
     }
   }
 
