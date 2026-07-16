@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1061,
+    "totalFiles": 1062,
     "totalModules": 81,
-    "totalExports": 5267
+    "totalExports": 5273
   },
   "entryPoints": [
     {
@@ -8076,6 +8076,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/control-equations.js",
+            "imports": ["dlyap", "care", "dare"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["minimizeScalar"],
             "reExport": true
@@ -8562,6 +8567,9 @@
           "sinm",
           "complexCos",
           "complexSin",
+          "dlyap",
+          "care",
+          "dare",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8853,6 +8861,9 @@
           "sinm",
           "complexCos",
           "complexSin",
+          "dlyap",
+          "care",
+          "dare",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -13247,6 +13258,20 @@
         "exports": ["bfgs"],
         "interfaces": ["BfgsOptions", "BfgsResult"],
         "functions": ["bfgs"]
+      },
+      "functions/src/numeric/control-equations.ts": {
+        "description": "Control-theory matrix equations — `dlyap`/`care`/`dare`.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["linsolve"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["dlyap", "care", "dare"],
+        "functions": ["dlyap", "care", "dare"]
       },
       "functions/src/numeric/eigsh.ts": {
         "description": "Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.",
@@ -35448,6 +35473,7 @@
         "files": [
           "functions/src/numeric/adaptive-quad.ts",
           "functions/src/numeric/bfgs.ts",
+          "functions/src/numeric/control-equations.ts",
           "functions/src/numeric/eigsh.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-nodes.ts",
@@ -36409,17 +36435,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1061,
+    "totalTypeScriptFiles": 1062,
     "totalModules": 81,
-    "totalLinesOfCode": 180547,
-    "totalExports": 5267,
+    "totalLinesOfCode": 180906,
+    "totalExports": 5273,
     "totalClasses": 56,
     "totalInterfaces": 463,
-    "totalFunctions": 1747,
+    "totalFunctions": 1750,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1965,
+    "totalReExports": 1968,
     "totalTypeOnlyImports": 546,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

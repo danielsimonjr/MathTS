@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Control-theory matrix equations: dlyap/care/dare (Phase 7 Task 5)
+
+Added `functions/src/numeric/control-equations.ts`, exported from `@danielsimonjr/mathts-functions`:
+`dlyap` (discrete Lyapunov), `care`/`dare` (continuous/discrete algebraic Riccati) — the matrix
+equations underlying LQR (linear-quadratic regulator) and Kalman-filter design, complementing the
+existing continuous `sylvester`/`lyap`.
+
+- `dlyap(A, Q)` — solves `A X Aᵀ − X + Q = 0` by building the Kronecker-product linear system
+  `(I − A⊗A) vec(X) = vec(Q)` explicitly (practical for the `n ≲ 20` this targets) and solving it
+  with the existing `linsolve`.
+- `care(A, B, Q, R)` — solves the continuous Riccati equation `AᵀX + XA − X B R⁻¹ Bᵀ X + Q = 0` via
+  Newton iteration for the matrix sign function of the Hamiltonian `H = [[A, −BR⁻¹Bᵀ], [−Q, −Aᵀ]]`,
+  then extracts `X = U₂U₁⁻¹` from the stable-eigenspace projector `½(I − sign(H))`. Chosen over a
+  Kleinman/Newton iteration (which needs a stabilizing initial gain — `X₀ = 0` isn't stabilizing
+  for e.g. the classic double-integrator `A = [[0,1],[0,0]]`) and over a Hamiltonian-eigenvector
+  construction (this codebase's `eig` only returns real eigenvector columns for complex
+  eigenvalues, per `matrix-functions.ts`).
+- `dare(A, B, Q, R)` — solves the discrete Riccati equation
+  `AᵀXA − X − AᵀXB(R + BᵀXB)⁻¹BᵀXA + Q = 0` via the structure-preserving doubling algorithm (SDA),
+  the discrete-time analogue of `care`'s sign-function method — likewise needs no stabilizing
+  initial gain.
+
+Pinned vs scipy: `care([[0,1],[0,0]], [[0],[1]], [[1,0],[0,1]], [[1]])` → `[[√3, 1], [1, √3]]`
+(matches `scipy.linalg.solve_continuous_are`); `dare([[1,1],[0,1]], [[0],[1]], [[1,0],[0,1]], [[1]])`
+→ `[[2.94712297, 2.36920541], [2.36920541, 4.61313426]]` (matches `scipy.linalg.solve_discrete_are`,
+independently residual-checked in-test to <1e-6); `dlyap([[0.5,0],[0,0.5]], [[1,0],[0,1]])` →
+`(4/3)·I`.
+
+Documented in `docs/reference/functions.md` under Linear Algebra (main table + new "Control-Theory
+Matrix Equations" section). `npm run docs:functions` / `npm run docs:deps` regenerated;
+docs-completeness gate green. `functions/tests/control-equations.test.ts` (3 tests). Full
+`functions` regression: 3694 passed, 94 skipped, 0 failed. `tsc --noEmit` and targeted `eslint`
+both 0 problems.
+
 ### Added — Complex matrix functions: funm/cosm/sinm (Phase 7 Task 4)
 
 Added `functions/src/numeric/matrix-functions.ts`, exported from `@danielsimonjr/mathts-functions`:

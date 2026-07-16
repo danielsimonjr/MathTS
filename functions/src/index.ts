@@ -226,6 +226,14 @@ export type {
   ScalarComplexFunction,
 } from './numeric/matrix-functions.js';
 
+// Phase 7 Task 5 — control-theory matrix equations for LQR/Kalman design:
+// `dlyap` (discrete Lyapunov, via an explicit Kronecker-product linear
+// system), `care`/`dare` (continuous/discrete algebraic Riccati, via the
+// matrix sign function / structure-preserving doubling algorithm — neither
+// needs a stabilizing initial gain or complex eigenvectors), complementing
+// the existing continuous `sylvester`/`lyap`.
+export { dlyap, care, dare } from './numeric/control-equations.js';
+
 // Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
 // parabolic interpolation). Distinct from root-finding; complements the
 // vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.

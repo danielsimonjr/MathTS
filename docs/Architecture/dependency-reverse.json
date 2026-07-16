@@ -1656,6 +1656,7 @@
     "functions/src/numeric/eigsh.ts": ["functions/src/index.ts"],
     "functions/src/numeric/structured-solvers.ts": ["functions/src/index.ts"],
     "functions/src/numeric/matrix-functions.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/control-equations.ts": ["functions/src/index.ts"],
     "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
     "functions/src/numeric/adaptive-quad.ts": [
       "functions/src/index.ts",
@@ -2005,6 +2006,7 @@
     "functions/src/typed/numeric.ts": [
       "functions/src/ml/logistic-regression.ts",
       "functions/src/ml/regularized-regression.ts",
+      "functions/src/numeric/control-equations.ts",
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/nnls.ts",
       "functions/src/typed/index.ts"

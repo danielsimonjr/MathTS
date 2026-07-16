@@ -966,6 +966,9 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 | `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)                                                           |
 | `sylvester(A, B, C)`               | Solve `AX + XB = C`                                                                            |
 | `lyap(A, Q)`                       | Solve the Lyapunov equation                                                                    |
+| `dlyap(A, Q)`                      | Discrete Lyapunov `A X Aᵀ − X + Q = 0` (see below)                                             |
+| `care(A, B, Q, R)`                 | Continuous algebraic Riccati equation, for LQR design (see below)                              |
+| `dare(A, B, Q, R)`                 | Discrete algebraic Riccati equation, for LQR design (see below)                                |
 | `expm(A)`                          | Matrix exponential                                                                             |
 | `sqrtm(A)`                         | Matrix square root                                                                             |
 | `trace(A)`                         | Trace (sum of the diagonal)                                                                    |
@@ -1076,6 +1079,33 @@ Pinned vs scipy: `thomasSolve([-1, -1], [2, 2, 2], [-1, -1], [1, 0, 1])` →
 `[1, 1, 1]`; `toeplitzSolve([2, 1], [2, 1], [1, 2])` → `[0, 1]` (matches
 `scipy.linalg.solve_toeplitz`); `ldl([[1, 2, 3], [2, 1, 4], [3, 4, 1]])`
 reconstructs `A` per the identity above (matches `scipy.linalg.ldl`).
+
+### Control-Theory Matrix Equations
+
+Phase 7 Task 5 — the matrix equations underlying LQR (linear-quadratic
+regulator) and Kalman-filter design, complementing the existing continuous
+`sylvester`/`lyap`:
+
+| Function           | Equation solved                                            | Method                                               |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `dlyap(A, Q)`      | Discrete Lyapunov `A X Aᵀ − X + Q = 0`                     | Explicit Kronecker-product linear system, `linsolve` |
+| `care(A, B, Q, R)` | Continuous Riccati `AᵀX + XA − X B R⁻¹ Bᵀ X + Q = 0`       | Matrix sign function on the Hamiltonian pencil       |
+| `dare(A, B, Q, R)` | Discrete Riccati `AᵀXA − X − AᵀXB(R + BᵀXB)⁻¹BᵀXA + Q = 0` | Structure-preserving doubling algorithm (SDA)        |
+
+`dlyap` builds the `(I − A⊗A) vec(X) = vec(Q)` system explicitly (practical
+for the `n ≲ 20` this targets) and solves it with `linsolve`. `care`/`dare`
+both converge quadratically without needing a stabilizing initial gain (the
+natural starting point is not always stabilizing — e.g. the classic
+double-integrator `A = [[0,1],[0,0]]` is only marginally stable) or complex
+eigenvectors (this codebase's `eig` only returns real eigenvector columns).
+All three return the (numerically symmetrized) stabilizing solution.
+
+Pinned vs scipy: `care([[0,1],[0,0]], [[0],[1]], [[1,0],[0,1]], [[1]])` →
+`[[√3, 1], [1, √3]]` (matches `scipy.linalg.solve_continuous_are`);
+`dare([[1,1],[0,1]], [[0],[1]], [[1,0],[0,1]], [[1]])` →
+`[[2.94712297, 2.36920541], [2.36920541, 4.61313426]]` (matches
+`scipy.linalg.solve_discrete_are`); `dlyap([[0.5,0],[0,0.5]], [[1,0],[0,1]])`
+→ `(4/3)·I`.
 
 ### WebGPU: the opt-in f32 tier
 
@@ -2641,7 +2671,7 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (87): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (88): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `linsolve`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
@@ -2653,7 +2683,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (36): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
