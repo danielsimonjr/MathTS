@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — full `svd` + `orth` on the functions surface (Phase 1 Task 6)
+
+The `matrix` package's full `svd(A) -> { U, S, V, rank }` was only reachable from `functions` through
+its `singularValues`/`pinv` wrappers; re-exported it directly (`@danielsimonjr/mathts-matrix`'s `svd`
+is synchronous, not async — verified against source before writing tests). Added `orth(A[, opts])` —
+an orthonormal basis for the column space: computes `svd(A)`, takes the numerical rank `r` as the
+count of singular values above `tol` (default `max(m, n) · S[0] · 2.22e-16`), and returns the leading
+`r` columns of `U`. Handles the all-zero matrix (`r = 0` → an `m × 0` basis). Pinned:
+`svd(diag(1,2,3)).S = [3,2,1]`; `orth` of a rank-2 3×3 matrix returns an orthonormal 3×2 `U` block.
+
 ### Added — adaptive Gauss-Kronrod quadrature: `quad` (Phase 1 Task 5)
 
 Added `quad(f, a, b[, opts])` — QUADPACK-style adaptive Gauss-Kronrod (G7-K15) quadrature. On each

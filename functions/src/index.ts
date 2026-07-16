@@ -144,6 +144,14 @@ export {
 // Gap-analysis Wave C — numeric Hessian (bridge C3); Wave D — numeric gradient.
 export { hessian, gradient } from './calculus-extra.js';
 
+// Phase 1 Task 6 — full SVD (matrix package already has it; only
+// singularValues/pinv were reachable from this surface) + orth (orthonormal
+// basis for the column space, built on svd's U).
+export { svd } from '@danielsimonjr/mathts-matrix';
+export type { SVDResult, SVDOptions } from '@danielsimonjr/mathts-matrix';
+export { orth } from './linalg-svd-extra.js';
+export type { OrthOptions } from './linalg-svd-extra.js';
+
 // Numeric Jacobian (F: R^n -> R^m, central differences) — foundation for
 // fsolve (Phase 1 Task 3). Complements the symbolic `jacobian` (typed/cas.ts).
 export { numericJacobian } from './numeric/numeric-jacobian.js';

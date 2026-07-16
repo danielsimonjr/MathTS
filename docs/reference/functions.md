@@ -863,30 +863,31 @@ poissonPMF(2, 3); // ~0.2240
 Operates on `DenseMatrix` (and `SparseMatrix` where applicable). Heavy
 operations are eligible for WASM/GPU acceleration via the matrix package.
 
-| Function                           | Description                             |
-| ---------------------------------- | --------------------------------------- |
-| `det(A)`                           | Determinant                             |
-| `inv(A)`                           | Matrix inverse                          |
-| `pinv(A)`                          | Moore–Penrose pseudoinverse             |
-| `transpose(A)`                     | Transpose                               |
-| `ctranspose(A)`                    | Conjugate (Hermitian) transpose         |
-| `eigs(A)`                          | Eigenvalues and eigenvectors            |
-| `lup(A)`                           | LU decomposition with partial pivoting  |
-| `qr(A)`                            | QR decomposition                        |
-| `schur(A)`                         | Schur decomposition                     |
-| `slu(A)`                           | Sparse LU decomposition                 |
-| `lusolve(A, b)`                    | Solve `Ax = b` via LU                   |
-| `lsolve(A, b)` / `lsolveAll(A, b)` | Forward substitution (lower-triangular) |
-| `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)    |
-| `sylvester(A, B, C)`               | Solve `AX + XB = C`                     |
-| `lyap(A, Q)`                       | Solve the Lyapunov equation             |
-| `expm(A)`                          | Matrix exponential                      |
-| `sqrtm(A)`                         | Matrix square root                      |
-| `trace(A)`                         | Trace (sum of the diagonal)             |
-| `cross(a, b)`                      | Vector cross product                    |
-| `kron(A, B)`                       | Kronecker product                       |
-| `rotationMatrix(angle[, axis])`    | Rotation matrix                         |
-| `rotate(v, angle[, axis])`         | Rotate a vector                         |
+| Function                           | Description                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `det(A)`                           | Determinant                                                             |
+| `inv(A)`                           | Matrix inverse                                                          |
+| `pinv(A)`                          | Moore–Penrose pseudoinverse                                             |
+| `svd(A)`                           | Full singular value decomposition — `{ U, S, V, rank }`, `S` descending |
+| `transpose(A)`                     | Transpose                                                               |
+| `ctranspose(A)`                    | Conjugate (Hermitian) transpose                                         |
+| `eigs(A)`                          | Eigenvalues and eigenvectors                                            |
+| `lup(A)`                           | LU decomposition with partial pivoting                                  |
+| `qr(A)`                            | QR decomposition                                                        |
+| `schur(A)`                         | Schur decomposition                                                     |
+| `slu(A)`                           | Sparse LU decomposition                                                 |
+| `lusolve(A, b)`                    | Solve `Ax = b` via LU                                                   |
+| `lsolve(A, b)` / `lsolveAll(A, b)` | Forward substitution (lower-triangular)                                 |
+| `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)                                    |
+| `sylvester(A, B, C)`               | Solve `AX + XB = C`                                                     |
+| `lyap(A, Q)`                       | Solve the Lyapunov equation                                             |
+| `expm(A)`                          | Matrix exponential                                                      |
+| `sqrtm(A)`                         | Matrix square root                                                      |
+| `trace(A)`                         | Trace (sum of the diagonal)                                             |
+| `cross(a, b)`                      | Vector cross product                                                    |
+| `kron(A, B)`                       | Kronecker product                                                       |
+| `rotationMatrix(angle[, axis])`    | Rotation matrix                                                         |
+| `rotate(v, angle[, axis])`         | Rotate a vector                                                         |
 
 ### Decompositions & analysis (typed `matrix-ops`)
 
@@ -1135,6 +1136,7 @@ the CPU implementation rather than rejecting.
 | `generalizedEig(A, B)` | Generalized eigenvalues of the pencil `A x = λ B x` (`B` nonsingular) via the eigendecomposition of `B⁻¹A`; eigenvalues match `scipy.linalg.eig(A, B)`                                                  |
 | `qz(A, B)`             | Generalized (QZ) Schur decomposition of `(A, B)`; returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with `A = Q·AA·Zᵀ`, `B = Q·BB·Zᵀ` (matches `scipy.linalg.qz`; factors not unique) |
 | `singularValues(A)`    | Singular values in descending order (length `min(m, n)`, all non-negative)                                                                                                                              |
+| `orth(A[, opts])`      | Orthonormal basis for the column space of `A` — the leading columns of `svd(A).U` above a rank tolerance (default `max(m, n) · S[0] · 2.22e-16`)                                                        |
 | `lowRankApprox(A, k)`  | Best rank-`k` approximation in the Frobenius-norm sense via truncated SVD: `A_k = U[:, :k] · diag(S[:k]) · V[:, :k]ᵀ`                                                                                   |
 | `norm2(A)`             | Spectral norm (2-norm) of a matrix — the largest singular value                                                                                                                                         |
 | `normFro(A)`           | Frobenius norm of a matrix — `sqrt(sum(A_ij²))`                                                                                                                                                         |
@@ -2372,7 +2374,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (889 exports).
+> `@danielsimonjr/mathts-functions` (891 exports).
 
 ### Functions by category
 
@@ -2394,7 +2396,7 @@ await terminatePool();
 
 **Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
-**Linear Algebra** (73): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (75): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1033
+  totalFiles: 1034
   totalModules: 78
-  totalExports: 4994
+  totalExports: 5000
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7450,6 +7450,10 @@ modules:
             - hessian
             - gradient
           reExport: true
+        - file: ./linalg-svd-extra.js
+          imports:
+            - orth
+          reExport: true
         - file: ./numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -7542,6 +7546,11 @@ modules:
             - TukeyComparison
           reExport: true
           typeOnly: true
+        - file: ./linalg-svd-extra.js
+          imports:
+            - OrthOptions
+          reExport: true
+          typeOnly: true
         - file: ./numeric/numeric-jacobian.js
           imports:
             - VectorField
@@ -7588,7 +7597,16 @@ modules:
             - KMeansResult
           reExport: true
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - SVDResult
+            - SVDOptions
       exports:
         - config
         - to
@@ -7673,6 +7691,8 @@ modules:
         - qz
         - hessian
         - gradient
+        - svd
+        - orth
         - numericJacobian
         - newton
         - secant
@@ -7717,6 +7737,9 @@ modules:
         - WilcoxonResult
         - FisherExactResult
         - TukeyComparison
+        - SVDResult
+        - SVDOptions
+        - OrthOptions
         - VectorField
         - NumericJacobianOptions
         - NewtonOptions
@@ -7818,6 +7841,8 @@ modules:
         - qz
         - hessian
         - gradient
+        - svd
+        - orth
         - numericJacobian
         - newton
         - secant
@@ -7862,6 +7887,9 @@ modules:
         - WilcoxonResult
         - FisherExactResult
         - TukeyComparison
+        - SVDResult
+        - SVDOptions
+        - OrthOptions
         - VectorField
         - NumericJacobianOptions
         - NewtonOptions
@@ -7917,6 +7945,22 @@ modules:
         - laplacianMatrix
         - logdet
         - qz
+    functions/src/linalg-svd-extra.ts:
+      description: '`orth` — orthonormal basis for the column space of a matrix.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+      exports:
+        - orth
+      interfaces:
+        - OrthOptions
+      functions:
+        - orth
     functions/src/numeric-extra.ts:
       description: Elementwise / cumulative / log-domain primitives (Wave A of the gap analysis).
       externalDependencies: []
@@ -31906,6 +31950,7 @@ dependencyGraph:
         - functions/src/hypothesis-extra.ts
         - functions/src/index.ts
         - functions/src/linalg-extra.ts
+        - functions/src/linalg-svd-extra.ts
         - functions/src/numeric-extra.ts
         - functions/src/optimization-extra.ts
         - functions/src/regression-extra.ts
@@ -32846,18 +32891,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1033
+  totalTypeScriptFiles: 1034
   totalModules: 78
-  totalLinesOfCode: 172735
-  totalExports: 4994
+  totalLinesOfCode: 172777
+  totalExports: 5000
   totalClasses: 56
-  totalInterfaces: 419
-  totalFunctions: 1623
+  totalInterfaces: 420
+  totalFunctions: 1624
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1820
-  totalTypeOnlyImports: 528
+  totalReExports: 1825
+  totalTypeOnlyImports: 529
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
