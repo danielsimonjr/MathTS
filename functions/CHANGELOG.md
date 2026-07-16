@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.28.0
+
+### Minor Changes
+
+- Phase 0 correctness & honesty fixes (oracle-gap roadmap). Bug fixes: `invmod` threw on every call; `lambertW`'s documented lower branch (W₋₁) was unimplemented and now works (Halley); `windowFunction` silently returned a rectangular window for unimplemented types (now throws); `stiffODESolver` diverged on stiff systems (fixed-point implicit Euler) and now delegates to the proven L-stable Rosenbrock engine (extracted as the shared `rosenbrockSolve` export); `summation`/`symbolicProduct` silently returned 0/1 on symbolic bounds (now throw); `taylor`/`series`/`seriesCoefficient` produced garbage coefficients past ~order 3 (finite differences) and are now exact via the Cauchy integral; `linprog` could return an infeasible optimum on degenerate cases (extraction now maps each constraint row to one basic variable). Docs honesty: corrected `betainc`'s documented argument order to `(a, b, x)` (the implementation was always correct) and annotated the pass-through CAS transforms (`factor`/`expand`/`apart`/`together`/`casFactor`/`casExpand`) as not-yet-implemented. All fixes oracle-pinned (mpmath/scipy).
+
 ## 0.27.0
 
 ### Minor Changes

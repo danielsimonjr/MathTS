@@ -36,8 +36,8 @@
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.10.0",
     "@danielsimonjr/mathts-expression": "^0.6.4",
-    "@danielsimonjr/mathts-functions": "^0.27.0",
-    "@danielsimonjr/mathts-plot": "^0.3.11",
+    "@danielsimonjr/mathts-functions": "^0.28.0",
+    "@danielsimonjr/mathts-plot": "^0.3.12",
     "yaml": "^2.3.0"
   },
   "devDependencies": {
