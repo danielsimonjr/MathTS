@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-10
+Updated: 2026-07-16 (oracle-gap roadmap Phases 0–8 complete; pending follow-ups consolidated)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -82,6 +82,43 @@ oracle-pinned, subagent-driven. Phase plan:
 > foundational primitives, optimization, regression/ML, statistics inference, special functions/number
 > theory, signal processing, advanced linalg, and graph/geometry/CAS/intervals.
 
+### 📋 Pending / follow-ups (surfaced during the roadmap — genuine future work, not blockers)
+
+Consolidated from the per-phase records above. None gate the released work; each is an additive improvement
+or a documented scope limit worth revisiting.
+
+- [ ] **Doc honesty (Phase 0):** `cancel`/`rationalize`/`simplify` are also pass-through/non-transforming —
+      annotate their `functions.md` entries (verify each on dist first). S. _(Note: Phase-8 CAS made
+      `expand`/`factor`/`apart`/`together` real for univariate — `cancel`/`rationalize`/`simplify` could
+      likely be wired to the same engine.)_
+- [ ] **CAS breadth:** multivariate `expand`/`factor`; `cancel`/`rationalize`/`simplify` real transforms;
+      repeated-root/irreducible `apart`; symbolic integration (by-parts/partial-frac/u-sub); `casExpand`/
+      `casFactor` still pass-through.
+- [ ] **matrix `eig` complex eigenvectors:** returns only real eigenvector columns (zeroes complex-conjugate
+      pairs) — blocked the Hamiltonian-eigenvector `care` (worked around via matrix sign function) and would
+      simplify `funm`. Fix in the matrix package. M.
+- [ ] **Linalg extension:** rank-revealing QR (`qr` pivoting) + `rq`/`ql`/`lq`; `generalizedEig` QZ-hardening;
+      sparse `svds`; preconditioners beyond Jacobi (ILU/IC); `condest`; `minres` optimal Givens form (O(k³) now).
+- [ ] **funm defective matrices:** Lagrange–Sylvester path throws on repeated/near-repeated eigenvalues of
+      a non-diagonal matrix — add the Schur–Parlett block recurrence. M.
+- [ ] **Signal:** hard-pin `csd`/`coherence` vs `scipy.signal.csd`/`coherence`; wavelet families beyond
+      Haar/db1 (db2+/sym/coif) for `dwt`/`idwt`/`wavedec`; `remez` exact Parks–McClellan (currently Lawson IRLS);
+      `buttord` bandpass/bandstop array form.
+- [ ] **Graph breadth:** coloring / clique-finding / Louvain community / Katz centrality / isomorphism /
+      incidence matrix + adjacency spectrum; directed-graph constructor (`adjacencyMatrix` still symmetrizes);
+      `betweennessCentrality` `normalized` option.
+- [ ] **Geometry breadth:** SphericalVoronoi, alpha-shapes, halfspace-intersection, 3-D ray/segment
+      intersections, quaternion exp/log/pow.
+- [ ] **Numerics:** general PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem`
+      error control; B-spline fitting; Monte-Carlo/QMC integration; DAE/DDE.
+- [ ] **Stats:** logistic/GLM breadth (Poisson/Gamma links); Gaussian-process regression; multivariate
+      distributions (Dirichlet/Wishart/MVN sampling); power analysis.
+- [ ] **Special-fns Phase-5 extension (niche):** polylog/Lerch Φ, Struve H/L, Kelvin ber/bei, Barnes-G,
+      Coulomb/Mathieu/parabolic-cylinder/spheroidal, Riemann–Siegel Z.
+- [ ] **Housekeeping:** `linprog` free-variable (lower=null) bounds path untested; `chiSquareTest`/
+      `multipleComparison` in `hypothesis.ts` partially overlap the new `chi2Contingency`/`multipleTest`
+      (consolidation decision); `constants` are CODATA-2018 (one cycle behind scipy 2022).
+
 ### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
 
 Already standalone repos (`~/danie/github/{typed-function,workerpool}` + github.com/danielsimonjr/\*),
@@ -91,8 +128,9 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
       `@danielsimonjr/typed-function` is at `5.0.0-alpha.3` on github/`develop` but only `alpha.1` on npm
       (2 unpublished versions) → publish alpha.3. `@danielsimonjr/workerpool` has a types-fix commit on an
       unmerged branch `fix/generate-js-api-types` → merge to `master` + publish 10.2.1.
-- [ ] **DEFERRED — first-party integration** of typed-function/workerpool (absorb like BigNumber-in-core).
-      Explicitly held until the oracle-gap gaps/functions analysis is mature (Daniel's directive 2026-07-16).
+- [ ] **First-party integration** of typed-function/workerpool (absorb like BigNumber-in-core) — its
+      blocking condition (a mature oracle-gap gaps/functions analysis) is now **MET** (roadmap complete
+      2026-07-16), so this is unblocked and revisitable on Daniel's word. Still an ADR-level call.
 
 ### Numerical accuracy (NumPy/SciPy parity)
 
