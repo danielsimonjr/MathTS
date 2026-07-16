@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.33.0
+
+### Minor Changes
+
+- Phase 5 special functions & number theory (oracle-gap roadmap): hypergeometric `hyp0f1`/`hyp1f1`/`hyp2f1` + generic `pFq` (the master functions); `polygamma`/`trigamma` (ψ⁽ⁿ⁾ — only digamma existed); orthogonal polynomials `jacobiP`/`gegenbauerC`; Jacobi elliptic functions `jacobiSN`/`jacobiCN`/`jacobiDN` (AGM; complementing the elliptic integrals); `rootsLegendre` (Gauss–Legendre nodes/weights for custom quadrature); and number-theory fills `continuedFraction`, `eulerNumbers`, signed `stirlingS1`, `discreteLog` (baby-step giant-step), `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, and lexicographic `permutationsGen`/`combinationsGen` tuple enumerators. All oracle-pinned vs mpmath/scipy/sympy.
+
 ## 0.32.0
 
 ### Minor Changes
