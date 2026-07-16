@@ -13,7 +13,7 @@ const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 
-const sinc = (x: number): number => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
+export const sinc = (x: number): number => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
 
 /**
  * FIR lowpass filter coefficients by the windowed-sinc method (Hamming window,

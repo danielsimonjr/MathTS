@@ -290,6 +290,18 @@ export { rfft, irfft, fftshift, ifftshift, fftfreq, rfftfreq, fftn } from './sig
 // above with cheby1/cheby2/ellip prototypes, btype routing, and SOS cascades).
 export { cheby1, cheby2, ellip, sosfilt, zpk2sos, bilinear, buttord } from './signal/iir-design.js';
 
+// Phase 6 Task 3 — FIR bandpass design, least-squares/equiripple FIR design,
+// Savitzky-Golay smoothing, Wiener adaptive filter, and FIR/polynomial deconvolution.
+export {
+  firwinBandpass,
+  firls,
+  remez,
+  savgol,
+  wiener,
+  deconvolve,
+} from './signal/fir-smoothing.js';
+export type { DeconvolveResult } from './signal/fir-smoothing.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,

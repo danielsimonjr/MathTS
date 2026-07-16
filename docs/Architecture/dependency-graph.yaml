@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1052
+  totalFiles: 1055
   totalModules: 81
-  totalExports: 5164
+  totalExports: 5201
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7596,6 +7596,15 @@ modules:
             - bilinear
             - buttord
           reExport: true
+        - file: ./signal/fir-smoothing.js
+          imports:
+            - firwinBandpass
+            - firls
+            - remez
+            - savgol
+            - wiener
+            - deconvolve
+          reExport: true
         - file: ./geometry-extra.js
           imports:
             - haversine
@@ -7777,6 +7786,11 @@ modules:
             - LsqBoundedResult
           reExport: true
           typeOnly: true
+        - file: ./signal/fir-smoothing.js
+          imports:
+            - DeconvolveResult
+          reExport: true
+          typeOnly: true
         - file: ./stats/inference-extra2.js
           imports:
             - CircularOptions
@@ -7953,6 +7967,12 @@ modules:
         - zpk2sos
         - bilinear
         - buttord
+        - firwinBandpass
+        - firls
+        - remez
+        - savgol
+        - wiener
+        - deconvolve
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8034,6 +8054,7 @@ modules:
         - NnlsResult
         - LsqBoundedOptions
         - LsqBoundedResult
+        - DeconvolveResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -8195,6 +8216,12 @@ modules:
         - zpk2sos
         - bilinear
         - buttord
+        - firwinBandpass
+        - firls
+        - remez
+        - savgol
+        - wiener
+        - deconvolve
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8276,6 +8303,7 @@ modules:
         - NnlsResult
         - LsqBoundedOptions
         - LsqBoundedResult
+        - DeconvolveResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -8424,6 +8452,7 @@ modules:
           imports:
             - Complex
       exports:
+        - sinc
         - cAdd
         - cSub
         - cMul
@@ -8449,6 +8478,7 @@ modules:
         - analogToDigital
         - butter
       constants:
+        - sinc
         - cAdd
         - cSub
         - cMul
@@ -13501,6 +13531,38 @@ modules:
       constants:
         - createSetUnion
   functions/signal:
+    functions/src/signal/conv.ts:
+      description: Convolution Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft.js
+          imports:
+            - fft
+            - ifft
+            - fft2
+            - ifft2
+            - complex
+            - ComplexNumber
+      workspaceDependencies: []
+      exports:
+        - convDirect
+        - convFFT
+        - conv
+        - xcorr
+        - autocorr
+        - conv2Direct
+        - conv2FFT
+        - conv2
+      functions:
+        - convDirect
+        - convFFT
+        - conv
+        - xcorr
+        - autocorr
+        - conv2Direct
+        - conv2FFT
+        - conv2
     functions/src/signal/fft-core-f64.ts:
       description: The ONE radix-2 Cooley-Tukey core for this package, on flat Float64Arrays.
       externalDependencies: []
@@ -13540,6 +13602,78 @@ modules:
         - fftfreq
         - rfftfreq
         - fftn
+    functions/src/signal/fft.ts:
+      description: Fast Fourier Transform (FFT)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft-core-f64.js
+          imports:
+            - fftCoreFloat64
+      workspaceDependencies: []
+      exports:
+        - complex
+        - complexConj
+        - complexAbs
+        - complexArg
+        - fft
+        - ifft
+        - ifftReal
+        - fftMagnitude
+        - fftPower
+        - fftPhase
+        - fftFrequencies
+        - fft2
+        - ifft2
+        - fftshift
+        - ifftshift
+      interfaces:
+        - ComplexNumber
+        - FFTResult
+      functions:
+        - complex
+        - complexConj
+        - complexAbs
+        - complexArg
+        - fft
+        - ifft
+        - ifftReal
+        - fftMagnitude
+        - fftPower
+        - fftPhase
+        - fftFrequencies
+        - fft2
+        - ifft2
+        - fftshift
+        - ifftshift
+    functions/src/signal/fir-smoothing.ts:
+      description: Phase 6 Task 3 — FIR bandpass design, least-squares/equiripple FIR design,
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../signal-filter-extra.js
+          imports:
+            - sinc
+        - file: ./conv.js
+          imports:
+            - convDirect
+      workspaceDependencies: []
+      exports:
+        - firwinBandpass
+        - savgol
+        - deconvolve
+        - wiener
+        - firls
+        - remez
+      interfaces:
+        - DeconvolveResult
+      functions:
+        - firwinBandpass
+        - savgol
+        - deconvolve
+        - wiener
+        - firls
+        - remez
     functions/src/signal/freqz.ts:
       description: Frequency response result
       externalDependencies: []
@@ -32917,8 +33051,11 @@ dependencyGraph:
         - functions/src/set/setUnion.ts
     - name: Functions/signal
       files:
+        - functions/src/signal/conv.ts
         - functions/src/signal/fft-core-f64.ts
         - functions/src/signal/fft-helpers.ts
+        - functions/src/signal/fft.ts
+        - functions/src/signal/fir-smoothing.ts
         - functions/src/signal/freqz.ts
         - functions/src/signal/iir-design.ts
         - functions/src/signal/zpk2tf.ts
@@ -33701,19 +33838,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1052
+  totalTypeScriptFiles: 1055
   totalModules: 81
-  totalLinesOfCode: 177293
-  totalExports: 5164
+  totalLinesOfCode: 178525
+  totalExports: 5201
   totalClasses: 56
-  totalInterfaces: 448
-  totalFunctions: 1693
+  totalInterfaces: 451
+  totalFunctions: 1722
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1541
-  totalReExports: 1917
-  totalTypeOnlyImports: 540
+  totalConstants: 1542
+  totalReExports: 1924
+  totalTypeOnlyImports: 541
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 243
+  unusedExportsCount: 246

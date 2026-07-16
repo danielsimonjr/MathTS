@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — FIR bandpass + LS/equiripple design + smoothing/deconvolution (Phase 6 Task 3)
+
+Added `functions/src/signal/fir-smoothing.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `firwinBandpass(numtaps, [f1, f2])` — FIR bandpass tap design by the windowed-sinc method
+  (Hamming window): `h[n] = (f2·sinc(f2·(n−M/2)) − f1·sinc(f1·(n−M/2)))·hamming[n]`. This is the
+  array-cutoff case the scalar-only `firwin` (`signal-filter-extra.ts`) didn't support — resolves
+  the Phase-0 note. `sinc` is now exported from `signal-filter-extra.ts` for reuse.
+- `firls(numtaps, bands, desired)` — least-squares linear-phase FIR design: a genuine
+  (non-approximate) LS fit via dense trapezoid-quadrature sampling of the specified bands plus a
+  cosine-basis normal-equations solve (Type I/II symmetric filter representation).
+- `remez(numtaps, bands, desired)` — Parks-McClellan-style equiripple FIR design. **Documented as
+  approximate**: implements Lawson's algorithm (iteratively reweighted least squares over the
+  `firls` normal equations), not the exact Remez-exchange algorithm — converges toward but does not
+  guarantee a true minimax/equiripple solution.
+- `savgol(x, windowLength, polyorder)` — Savitzky-Golay smoothing: per-window degree-`polyorder`
+  polynomial fit via the normal equations over a Vandermonde of window offsets; edges reuse the
+  nearest boundary window's fit evaluated at the edge point's offset (scipy's `mode='interp'`).
+  Exact on polynomials of degree <= `polyorder`; pinned bit-for-bit against
+  `scipy.signal.savgol_filter` (interior and both boundary regions, multiple window/order pairs).
+- `wiener(x[, mysize])` — Wiener adaptive filter: local mean/variance over a sliding window
+  (`convDirect`'s zero-padded `'same'` convention), output
+  `m + max(0, v−noise)/max(v, noise)·(x−m)`.
+- `deconvolve(signal, divisor)` — FIR/polynomial deconvolution via synthetic long division
+  (`signal = conv(divisor, quotient) + remainder`); pinned bit-for-bit against
+  `scipy.signal.deconvolve`, including the non-exact-division remainder case.
+
+Documented in `docs/reference/functions.md` under Signal Processing → "Digital filter design &
+application". `npm run docs:functions` / `npm run docs:deps` regenerated; docs-completeness gate
+green.
+
 ### Added — Chebyshev/elliptic IIR design (Phase 6 Task 2)
 
 Added `functions/src/signal/iir-design.ts`, exported from `@danielsimonjr/mathts-functions`:

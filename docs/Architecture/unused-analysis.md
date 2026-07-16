@@ -5,12 +5,12 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 243
-  - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 243
+  - **Test-only (exercised by a test, ships nothing)**: 2
+- **Potentially unused exports**: 246
+  - **Unreferenced anywhere (deletion candidates)**: 1
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 245
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -27,11 +27,6 @@ Not reachable from any package entry point, but imported by a test — deliberat
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
 
-### `functions` (2)
-
-- `functions/src/signal/conv.ts`
-- `functions/src/signal/fft.ts`
-
 ### `parallel` (2)
 
 - `parallel/src/ParallelMatrix.ts`
@@ -45,6 +40,10 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
+
+### `functions/src/signal/fft.ts`
+
+- `complexConj` (function)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -238,9 +237,17 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `createUnequalNumber` (constant) — 1 in-file ref
 
+### `functions/src/signal/conv.ts`
+
+- `ConvMode` (type) — 8 in-file refs
+
 ### `functions/src/signal/fft-core-f64.ts`
 
 - `bitReverse` (function) — 1 in-file ref
+
+### `functions/src/signal/fft.ts`
+
+- `FFTResult` (interface) — 1 in-file ref
 
 ### `functions/src/signal-filter-extra.ts`
 
