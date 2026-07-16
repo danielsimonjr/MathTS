@@ -324,7 +324,13 @@ Multiple/multivariate OLS with inference (O4/S1, M) · ridge/lasso/elastic-net (
 regression / GLM IRLS (O7/S6, M–L) · DBSCAN + kNN classifier (O6, kdTree ready, M/S) · Gaussian KDE
 (S3, M) · χ² contingency test (S4, S–M) · multiple-testing correction (S5, S). **≈ L.**
 
-### Phase 4 — Statistics inference
+### Phase 4 — Statistics inference — ✅ RELEASED `functions@0.32.0` (2026-07-16)
+
+Shipped: `fitDistribution` (MLE), exact MW p-values (default) + KS exact opt-in + `kendallTauTest`,
+`pacf`/`ljungBox`/`durbinWatson`/`adfuller`, noncentral CDFs, circular stats, `mcnemar`/`cochranQ`.
+Oracle-pinned vs scipy/statsmodels, tarball-verified.
+
+_(original scope below)_
 
 Distribution MLE `.fit(data)` across the family set (S2, M–L) · exact small-n p-values for Mann–Whitney
 (A1) + KS-2samp (A2) + Kendall τ p-value (M) · time-series inference PACF/Ljung–Box/Durbin–Watson/ADF

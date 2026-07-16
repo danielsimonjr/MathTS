@@ -44,8 +44,10 @@ oracle-pinned, subagent-driven. Phase plan:
       `knnClassify`/`knnRegress` · `gaussianKDE` · `chi2Contingency` + `multipleTest`. 6 tasks,
       oracle-pinned vs sklearn/scipy/statsmodels, tarball-verified. Follow-up: `chiSquareTest`/
       `multipleComparison` in hypothesis.ts partially overlap the new ones — consolidation decision TBD.
-- [ ] **Phase 4 — Statistics inference.** distribution MLE `.fit` · exact Mann–Whitney/KS p-values ·
-      PACF/Ljung–Box/ADF time-series · noncentral CDFs · circular stats.
+- [x] **Phase 4 — Statistics inference — ✅ RELEASED `functions@0.32.0`** (2026-07-16). `fitDistribution`
+      (MLE) · exact Mann–Whitney p (default) + KS exact opt-in + `kendallTauTest` · `pacf`/`ljungBox`/
+      `durbinWatson`/`adfuller` · noncentral χ²/F/t CDFs · circular stats (`circmean`/`circstd`/`circvar`/
+      `vonMisesPDF`) · `mcnemar`/`cochranQ`. Oracle-pinned vs scipy/statsmodels, tarball-verified.
 - [ ] **Phase 5 — Special functions & number theory.** `pFq` hypergeometric · polygamma · Jacobi
       elliptic · Gauss-quad nodes/weights · orthogonal polys · continuedFraction/stirlingS1/generators.
 - [ ] **Phase 6 — Signal breadth.** rfft/fftshift/fftfreq · filter design (cheby/ellip/sosfilt) ·
