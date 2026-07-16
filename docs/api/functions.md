@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (888 exports).
+> `@danielsimonjr/mathts-functions` (889 exports).
 
 ### Functions by category
 
@@ -469,7 +469,7 @@ ceil(2.1); // 3
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (8): `gaussQuad`, `nintegrate`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
+**Numerical Integration** (9): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 

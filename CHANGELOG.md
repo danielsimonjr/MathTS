@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — adaptive Gauss-Kronrod quadrature: `quad` (Phase 1 Task 5)
+
+Added `quad(f, a, b[, opts])` — QUADPACK-style adaptive Gauss-Kronrod (G7-K15) quadrature. On each
+subinterval, a 15-point Kronrod estimate is compared against its embedded 7-point Gauss estimate
+(both reuse the same 15 evaluation points); `|K − G|` is the panel's error estimate, and a panel
+exceeding `tol · |K|` (default `tol = 1e-10`) is bisected and refined recursively (default
+`maxDepth = 50`). Returns `{ value, error }`. G7-K15 node/weight constants sourced from QUADPACK's
+`dqk15.f` (Piessens et al. 1983). Pinned against closed forms: `∫₀¹ 4/(1+x²) = π`,
+`∫₀^π sin = 2`, `∫₋₁¹ 1/(1+25x²) = 0.4·atan(5)`.
+
+### Fixed — `nintegrate` endpoint-singular accuracy
+
+`nintegrate` now routes through the new adaptive `quad` (G7-K15) instead of its former fixed
+5-point Gauss-Legendre panel with Richardson-extrapolation adaptivity. That scheme converged
+slowly on endpoint singularities — `∫₀¹ x^-1/2 dx = 2` was off by ~1.7e-6 — because the error
+estimate (Richardson difference between whole- and half-panel Gauss-Legendre) underestimated the
+true error near a singular endpoint. G7-K15's embedded Kronrod/Gauss comparison resolves it
+directly, to ~1e-10. `nintegrate`'s public signature and return type are unchanged.
+
 ### Added — scalar minimizer: `minimizeScalar` (Phase 1 Task 4)
 
 No 1-D minimizer existed (only the vector Nelder–Mead `minimize` and root-finders). Added

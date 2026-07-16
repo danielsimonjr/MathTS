@@ -13,6 +13,7 @@
 
 import { wasmLoader } from '../wasm/WasmLoader.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
+import { quad } from '../numeric/adaptive-quad.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -413,13 +414,17 @@ export function leastSquares(A: number[][], b: number[]): number[] {
 // =============================================================================
 
 /**
- * Adaptive numerical integration using Gauss-Legendre quadrature
- * with recursive subdivision.
+ * Adaptive numerical integration via Gauss-Kronrod (G7-K15) quadrature (see
+ * {@link quad} in `../numeric/adaptive-quad.js`). Previously used a fixed
+ * 5-point Gauss-Legendre panel with Richardson-extrapolation adaptivity,
+ * which converged slowly on endpoint singularities (e.g. `x^-1/2` near 0,
+ * ~1.7e-6 error); G7-K15's embedded error estimate resolves those panels
+ * directly, down to ~1e-10.
  *
  * @param f - Function to integrate
  * @param a - Lower bound
  * @param b - Upper bound
- * @param opts - Options (tol, maxIter for max subdivisions)
+ * @param opts - Options (tol, maxDepth for max subdivisions)
  * @returns Approximate integral
  */
 export function nintegrate(
@@ -428,40 +433,7 @@ export function nintegrate(
   b: f64,
   opts?: { tol?: f64; maxDepth?: i32 }
 ): f64 {
-  const tol = opts?.tol ?? 1e-10;
-  const maxDepth = opts?.maxDepth ?? 30;
-
-  function adaptiveQuad(a: f64, b: f64, depth: i32): f64 {
-    const mid = (a + b) / 2;
-    const whole = gaussLegendre5(f, a, b);
-    const left = gaussLegendre5(f, a, mid);
-    const right = gaussLegendre5(f, mid, b);
-    const refined = left + right;
-
-    if (depth >= maxDepth || Math.abs(refined - whole) < 15 * tol) {
-      return refined + (refined - whole) / 15;
-    }
-
-    return adaptiveQuad(a, mid, depth + 1) + adaptiveQuad(mid, b, depth + 1);
-  }
-
-  return adaptiveQuad(a, b, 0);
-}
-
-/** 5-point Gauss-Legendre quadrature on [a,b] */
-function gaussLegendre5(f: (x: f64) => f64, a: f64, b: f64): f64 {
-  const nodes = [-0.906179845938664, -0.5384693101056831, 0, 0.5384693101056831, 0.906179845938664];
-  const weights = [
-    0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665,
-    0.2369268850561891,
-  ];
-  const hw = (b - a) / 2;
-  const mid = (a + b) / 2;
-  let sum = 0;
-  for (let i = 0; i < 5; i++) {
-    sum += weights[i] * f(hw * nodes[i] + mid);
-  }
-  return hw * sum;
+  return quad(f, a, b, opts).value;
 }
 
 /**

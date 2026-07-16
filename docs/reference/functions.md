@@ -1417,14 +1417,15 @@ solve('x^2 - 4', 'x'); // [-2, 2]
 
 ## Numerical Integration
 
-| Function                     | Description                            |
-| ---------------------------- | -------------------------------------- |
-| `trapz(y[, x])`              | Trapezoidal rule on sampled data       |
-| `simpson(f, a, b[, n])`      | Simpson's 1/3 rule (`n` even)          |
-| `simpsons(f, a, b[, n])`     | Simpson's rule variant (numeric layer) |
-| `gaussQuad(f, a, b[, n])`    | Gauss–Legendre quadrature              |
-| `romberg(f, a, b[, tol])`    | Romberg integration                    |
-| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration         |
+| Function                     | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| `trapz(y[, x])`              | Trapezoidal rule on sampled data           |
+| `simpson(f, a, b[, n])`      | Simpson's 1/3 rule (`n` even)              |
+| `simpsons(f, a, b[, n])`     | Simpson's rule variant (numeric layer)     |
+| `gaussQuad(f, a, b[, n])`    | Gauss–Legendre quadrature                  |
+| `romberg(f, a, b[, tol])`    | Romberg integration                        |
+| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration             |
+| `quad(f, a, b[, opts])`      | Adaptive Gauss–Kronrod (G7-K15) quadrature |
 
 ### Details
 
@@ -1436,6 +1437,12 @@ solve('x^2 - 4', 'x'); // [-2, 2]
   smooth integrands.
 - `romberg` and `nintegrate` refine adaptively until a tolerance is met; prefer
   `nintegrate` for integrands with peaks or mild singularities.
+- `nintegrate` is now implemented in terms of `quad`: an adaptive Gauss-Kronrod
+  (G7-K15) scheme that compares a 15-point Kronrod estimate against its
+  embedded 7-point Gauss estimate on each subinterval, bisecting where the two
+  disagree. It resolves endpoint singularities (e.g. `x^-1/2` near 0) far more
+  accurately than fixed-order adaptive rules — call `quad` directly for the
+  `{ value, error }` result shape.
 
 ### Background & History
 
@@ -1445,16 +1452,21 @@ fitting low-degree polynomials through equally spaced points. Gauss–Legendre
 quadrature (Carl Friedrich Gauss, 1814) instead chooses the _optimal_ node
 positions, doubling the degree of exactness for the same number of evaluations.
 Romberg integration (Werner Romberg, 1955) accelerates the trapezoidal rule by
-applying Richardson extrapolation to a sequence of refinements.
+applying Richardson extrapolation to a sequence of refinements. Gauss-Kronrod
+quadrature (Aleksandr Kronrod, 1964) extends a Gauss rule with additional
+nodes chosen so the original rule's points are reused, giving a higher-order
+estimate _and_ a free error estimate from the same function evaluations —
+the basis of QUADPACK (1983) and most modern adaptive quadrature libraries.
 
 ### Examples
 
 ```typescript
-import { simpson, gaussQuad, romberg } from '@danielsimonjr/mathts-functions';
+import { simpson, gaussQuad, romberg, quad } from '@danielsimonjr/mathts-functions';
 
 simpson(Math.sin, 0, Math.PI, 100); // ~2.0
 gaussQuad(Math.sin, 0, Math.PI, 5); // ~2.0
 romberg(Math.sin, 0, Math.PI); // ~2.0
+quad((x) => 1 / Math.sqrt(x), 0, 1).value; // ~2.0, endpoint singularity
 ```
 
 ---
@@ -2360,7 +2372,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (888 exports).
+> `@danielsimonjr/mathts-functions` (889 exports).
 
 ### Functions by category
 
@@ -2390,7 +2402,7 @@ await terminatePool();
 
 **Computer Algebra System (CAS)** (36): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `series`, `seriesCoefficient`, `solve`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
-**Numerical Integration** (8): `gaussQuad`, `nintegrate`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
+**Numerical Integration** (9): `gaussQuad`, `nintegrate`, `quad`, `romberg`, `simpson`, `simpsonF64`, `simpsons`, `trapz`, `trapzF64`
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 

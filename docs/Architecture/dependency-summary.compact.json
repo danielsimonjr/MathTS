@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1032, "e": 4990, "re": 1817 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1033, "e": 4994, "re": 1820 },
   "s": {
-    "loc": 172614,
+    "loc": 172735,
     "cls": 56,
-    "int": 417,
-    "fn": 1622,
+    "int": 419,
+    "fn": 1623,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 527
+    "toi": 528
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -661,8 +661,9 @@
       ]
     },
     "functions/numeric": {
-      "f": 5,
+      "f": 6,
       "exp": [
+        "quad",
         "root",
         "fsolve",
         "minimizeScalar",
@@ -674,6 +675,8 @@
         "rosenbrockSolve"
       ],
       "int": [
+        "QuadOptions",
+        "QuadResult",
         "FsolveOptions",
         "MinimizeScalarOptions",
         "MinimizeScalarResult",

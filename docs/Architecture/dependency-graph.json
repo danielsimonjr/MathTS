@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1032,
+    "totalFiles": 1033,
     "totalModules": 78,
-    "totalExports": 4990
+    "totalExports": 4994
   },
   "entryPoints": [
     {
@@ -8037,6 +8037,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/adaptive-quad.js",
+            "imports": ["quad"],
+            "reExport": true
+          },
+          {
             "file": "./timeseries-extra.js",
             "imports": ["movingAverage", "ewma", "detrend", "acf"],
             "reExport": true
@@ -8132,6 +8137,12 @@
           {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["MinimizeScalarOptions", "MinimizeScalarResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/adaptive-quad.js",
+            "imports": ["QuadOptions", "QuadResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8246,6 +8257,7 @@
           "fsolve",
           "root",
           "minimizeScalar",
+          "quad",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8290,6 +8302,8 @@
           "FsolveOptions",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
+          "QuadOptions",
+          "QuadResult",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -8389,6 +8403,7 @@
           "fsolve",
           "root",
           "minimizeScalar",
+          "quad",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8433,6 +8448,8 @@
           "FsolveOptions",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
+          "QuadOptions",
+          "QuadResult",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -12502,6 +12519,16 @@
       }
     },
     "functions/numeric": {
+      "functions/src/numeric/adaptive-quad.ts": {
+        "description": "Adaptive Gauss-Kronrod (G7-K15) quadrature.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["quad"],
+        "interfaces": ["QuadOptions", "QuadResult"],
+        "functions": ["quad"]
+      },
       "functions/src/numeric/fsolve.ts": {
         "description": "Nonlinear system solver: `fsolve` (damped Newton with a backtracking line",
         "externalDependencies": [],
@@ -18116,6 +18143,10 @@
           {
             "file": "../numeric/solveODE.js",
             "imports": ["rosenbrockSolve"]
+          },
+          {
+            "file": "../numeric/adaptive-quad.js",
+            "imports": ["quad"]
           }
         ],
         "workspaceDependencies": [],
@@ -34270,6 +34301,7 @@
       {
         "name": "Functions/numeric",
         "files": [
+          "functions/src/numeric/adaptive-quad.ts",
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/numeric-jacobian.ts",
@@ -35203,18 +35235,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1032,
+    "totalTypeScriptFiles": 1033,
     "totalModules": 78,
-    "totalLinesOfCode": 172614,
-    "totalExports": 4990,
+    "totalLinesOfCode": 172735,
+    "totalExports": 4994,
     "totalClasses": 56,
-    "totalInterfaces": 417,
-    "totalFunctions": 1622,
+    "totalInterfaces": 419,
+    "totalFunctions": 1623,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1817,
-    "totalTypeOnlyImports": 527,
+    "totalReExports": 1820,
+    "totalTypeOnlyImports": 528,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

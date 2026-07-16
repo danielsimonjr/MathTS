@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1032
+  totalFiles: 1033
   totalModules: 78
-  totalExports: 4990
+  totalExports: 4994
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7469,6 +7469,10 @@ modules:
           imports:
             - minimizeScalar
           reExport: true
+        - file: ./numeric/adaptive-quad.js
+          imports:
+            - quad
+          reExport: true
         - file: ./timeseries-extra.js
           imports:
             - movingAverage
@@ -7560,6 +7564,12 @@ modules:
           imports:
             - MinimizeScalarOptions
             - MinimizeScalarResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/adaptive-quad.js
+          imports:
+            - QuadOptions
+            - QuadResult
           reExport: true
           typeOnly: true
         - file: ./regression-extra.js
@@ -7670,6 +7680,7 @@ modules:
         - fsolve
         - root
         - minimizeScalar
+        - quad
         - movingAverage
         - ewma
         - detrend
@@ -7714,6 +7725,8 @@ modules:
         - FsolveOptions
         - MinimizeScalarOptions
         - MinimizeScalarResult
+        - QuadOptions
+        - QuadResult
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -7812,6 +7825,7 @@ modules:
         - fsolve
         - root
         - minimizeScalar
+        - quad
         - movingAverage
         - ewma
         - detrend
@@ -7856,6 +7870,8 @@ modules:
         - FsolveOptions
         - MinimizeScalarOptions
         - MinimizeScalarResult
+        - QuadOptions
+        - QuadResult
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -11419,6 +11435,19 @@ modules:
       constants:
         - createZeros
   functions/numeric:
+    functions/src/numeric/adaptive-quad.ts:
+      description: Adaptive Gauss-Kronrod (G7-K15) quadrature.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - quad
+      interfaces:
+        - QuadOptions
+        - QuadResult
+      functions:
+        - quad
     functions/src/numeric/fsolve.ts:
       description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
       externalDependencies: []
@@ -16460,6 +16489,9 @@ modules:
         - file: ../numeric/solveODE.js
           imports:
             - rosenbrockSolve
+        - file: ../numeric/adaptive-quad.js
+          imports:
+            - quad
       workspaceDependencies: []
       exports:
         - findRoot
@@ -31978,6 +32010,7 @@ dependencyGraph:
         - functions/src/matrix/zeros.ts
     - name: Functions/numeric
       files:
+        - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/fsolve.ts
         - functions/src/numeric/minimize-scalar.ts
         - functions/src/numeric/numeric-jacobian.ts
@@ -32813,18 +32846,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1032
+  totalTypeScriptFiles: 1033
   totalModules: 78
-  totalLinesOfCode: 172614
-  totalExports: 4990
+  totalLinesOfCode: 172735
+  totalExports: 4994
   totalClasses: 56
-  totalInterfaces: 417
-  totalFunctions: 1622
+  totalInterfaces: 419
+  totalFunctions: 1623
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1817
-  totalTypeOnlyImports: 527
+  totalReExports: 1820
+  totalTypeOnlyImports: 528
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

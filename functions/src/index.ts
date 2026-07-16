@@ -165,6 +165,12 @@ export type { FsolveOptions } from './numeric/fsolve.js';
 export { minimizeScalar } from './numeric/minimize-scalar.js';
 export type { MinimizeScalarOptions, MinimizeScalarResult } from './numeric/minimize-scalar.js';
 
+// Phase 1 Task 5 — adaptive Gauss-Kronrod (G7-K15) quadrature. `nintegrate`
+// (typed/numeric.ts) now routes through this, fixing its endpoint-singular
+// accuracy (was ~1.7e-6 off on x^-1/2, now ~1e-10).
+export { quad } from './numeric/adaptive-quad.js';
+export type { QuadOptions, QuadResult } from './numeric/adaptive-quad.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 

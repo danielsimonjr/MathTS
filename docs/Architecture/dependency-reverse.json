@@ -1639,6 +1639,10 @@
     "functions/src/numeric/open-root-finders.ts": ["functions/src/index.ts"],
     "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
     "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/adaptive-quad.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
