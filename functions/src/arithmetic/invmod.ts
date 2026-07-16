@@ -3,14 +3,9 @@ import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for invmod
-interface BigNumberConstructor {
-  (value: number): unknown;
-}
-
 interface InvmodDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
-  BigNumber: BigNumberConstructor;
   xgcd: TypedFunction;
   equal: TypedFunction;
   smaller: TypedFunction;
@@ -20,17 +15,7 @@ interface InvmodDependencies {
 }
 
 const name = 'invmod';
-const dependencies = [
-  'typed',
-  'config',
-  'BigNumber',
-  'xgcd',
-  'equal',
-  'smaller',
-  'mod',
-  'add',
-  'isInteger',
-];
+const dependencies = ['typed', 'config', 'xgcd', 'equal', 'smaller', 'mod', 'add', 'isInteger'];
 
 export const createInvmod = /* #__PURE__ */ factory(
   name,
@@ -38,7 +23,6 @@ export const createInvmod = /* #__PURE__ */ factory(
   ({
     typed,
     config: _config,
-    BigNumber,
     xgcd,
     equal,
     smaller,
@@ -82,9 +66,9 @@ export const createInvmod = /* #__PURE__ */ factory(
       const res = xgcd(a, b) as { valueOf(): unknown[] };
       const resVal = res.valueOf();
       const [gcd, invValue] = resVal;
-      if (!equal(gcd, BigNumber(1))) return NaN;
+      if (!equal(gcd, 1)) return NaN;
       let inv = mod(invValue, b);
-      if (smaller(inv, BigNumber(0))) inv = add(inv, b);
+      if (smaller(inv, 0)) inv = add(inv, b);
       return inv;
     }
   }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `invmod` threw on every call (`_BigNumber` invoked without `new`)
+
+`invmod` threw `_BigNumber cannot be invoked without 'new'` on every call (class constructor
+invoked without `new`); now uses numeric literals, restoring modular inverse for number and
+BigNumber inputs (pinned by `invmod(3,11)=4`, `invmod(15151,15122)=10429`).
+
 ### Added — stiff ODE solver `solveODE(..., { method: 'Rosenbrock' })` (functionality)
 
 `solveODE` had only explicit methods (RK23/RK45), which stall or blow up on stiff systems (chemical
