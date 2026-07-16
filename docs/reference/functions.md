@@ -738,19 +738,20 @@ quickSelect([3, 1, 4, 1, 5, 9, 2], 3); // 3 (4th smallest)
 
 ### Density / mass functions
 
-| Function                    | Description                                 | Accel    |
-| --------------------------- | ------------------------------------------- | -------- |
-| `normalPDF(x[, mu, sigma])` | Normal PDF                                  | parallel |
-| `normalCDF(x[, mu, sigma])` | Normal CDF                                  | parallel |
-| `exponentialPDF(x, lambda)` | Exponential PDF                             | parallel |
-| `exponentialCDF(x, lambda)` | Exponential CDF                             | parallel |
-| `poissonPMF(k, lambda)`     | Poisson PMF                                 | parallel |
-| `binomialPMF(k, n, p)`      | Binomial PMF                                | parallel |
-| `geometricPMF(k, p)`        | Geometric PMF                               | parallel |
-| `bernoulliPMF(k, p)`        | Bernoulli PMF                               | parallel |
-| `entropy(probs)`            | Shannon entropy (bits)                      | —        |
-| `jsDivergence(p, q)`        | Jensen–Shannon divergence                   | —        |
-| `kldivergence(p, q)`        | Kullback–Leibler divergence (factory layer) | —        |
+| Function                       | Description                                                                                                                                                                             | Accel    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `normalPDF(x[, mu, sigma])`    | Normal PDF                                                                                                                                                                              | parallel |
+| `normalCDF(x[, mu, sigma])`    | Normal CDF                                                                                                                                                                              | parallel |
+| `exponentialPDF(x, lambda)`    | Exponential PDF                                                                                                                                                                         | parallel |
+| `exponentialCDF(x, lambda)`    | Exponential CDF                                                                                                                                                                         | parallel |
+| `poissonPMF(k, lambda)`        | Poisson PMF                                                                                                                                                                             | parallel |
+| `binomialPMF(k, n, p)`         | Binomial PMF                                                                                                                                                                            | parallel |
+| `geometricPMF(k, p)`           | Geometric PMF                                                                                                                                                                           | parallel |
+| `bernoulliPMF(k, p)`           | Bernoulli PMF                                                                                                                                                                           | parallel |
+| `entropy(probs)`               | Shannon entropy (bits)                                                                                                                                                                  | —        |
+| `jsDivergence(p, q)`           | Jensen–Shannon divergence                                                                                                                                                               | —        |
+| `kldivergence(p, q)`           | Kullback–Leibler divergence (factory layer)                                                                                                                                             | —        |
+| `gaussianKDE(samples[, opts])` | 1-D Gaussian kernel density estimation; `opts.bandwidth` defaults to Silverman's rule of thumb; returns `{ evaluate, bandwidth }` — the library's first nonparametric density estimator | —        |
 
 ### Distribution objects
 
@@ -2393,7 +2394,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (902 exports).
+> `@danielsimonjr/mathts-functions` (903 exports).
 
 ### Functions by category
 
@@ -2413,7 +2414,7 @@ await terminatePool();
 
 **Statistics** (78): `acf`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `elasticNet`, `ewma`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `ols`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `ridge`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `variation`, `zscore`
 
-**Probability Distributions** (63): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
+**Probability Distributions** (64): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2PDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `weibullDist`
 
 **Linear Algebra** (75): `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 

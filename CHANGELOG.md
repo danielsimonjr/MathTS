@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `gaussianKDE` kernel density estimation (Phase 3 Task 5)
+
+Added `gaussianKDE(samples, { bandwidth? })` — 1-D Gaussian kernel density estimation with
+Silverman's rule-of-thumb default bandwidth (`h = 0.9 · min(σ, IQR/1.34) · n^(−1/5)`, falling back
+to `0.9·σ·n^(−1/5)` when the IQR is 0, and throwing when σ is also 0); the first nonparametric
+density estimator in the library. Returns `{ evaluate, bandwidth }`, where `evaluate(xs)` sums a
+standard-normal bump per sample, scaled by the bandwidth. Pinned: a symmetric sample's estimated
+density integrates to ~1 over a wide grid and peaks near the sample center, well above the tail.
+
 ### Added — `dbscan` clustering + `knnClassify`/`knnRegress` (Phase 3 Task 4)
 
 Added `dbscan(points, eps, minPts)` — density-based clustering (DBSCAN): a point is a core point

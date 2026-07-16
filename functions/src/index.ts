@@ -216,6 +216,11 @@ export { kmeans, spectralClustering } from './clustering-extra.js';
 // classifier/regressor (brute-force Euclidean neighbour search).
 export { dbscan, knnClassify, knnRegress } from './ml/dbscan-knn.js';
 
+// Phase 3 Task 5 — 1-D Gaussian kernel density estimation (first nonparametric
+// density estimator), with Silverman's rule-of-thumb default bandwidth.
+export { gaussianKDE } from './ml/kde.js';
+export type { GaussianKDEOptions, GaussianKDEResult } from './ml/kde.js';
+
 // Phase 2 Task 1 — BFGS quasi-Newton minimizer (inverse-Hessian update +
 // Armijo line search; optional analytic gradient or box-bounds projection).
 // The smooth-optimization workhorse complementing derivative-free `minimize`

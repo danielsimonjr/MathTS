@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1040,
+    "totalFiles": 1041,
     "totalModules": 79,
-    "totalExports": 5035
+    "totalExports": 5039
   },
   "entryPoints": [
     {
@@ -8087,6 +8087,11 @@
             "reExport": true
           },
           {
+            "file": "./ml/kde.js",
+            "imports": ["gaussianKDE"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/bfgs.js",
             "imports": ["bfgs"],
             "reExport": true
@@ -8214,6 +8219,12 @@
           {
             "file": "./optimization-extra.js",
             "imports": ["OptimizeResult", "LMResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ml/kde.js",
+            "imports": ["GaussianKDEOptions", "GaussianKDEResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8360,6 +8371,7 @@
           "dbscan",
           "knnClassify",
           "knnRegress",
+          "gaussianKDE",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -8412,6 +8424,8 @@
           "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
+          "GaussianKDEOptions",
+          "GaussianKDEResult",
           "BfgsOptions",
           "BfgsResult",
           "KMeansResult",
@@ -8535,6 +8549,7 @@
           "dbscan",
           "knnClassify",
           "knnRegress",
+          "gaussianKDE",
           "bfgs",
           "nnls",
           "lsqBounded",
@@ -8587,6 +8602,8 @@
           "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
+          "GaussianKDEOptions",
+          "GaussianKDEResult",
           "BfgsOptions",
           "BfgsResult",
           "KMeansResult",
@@ -12683,6 +12700,16 @@
         "workspaceDependencies": [],
         "exports": ["dbscan", "knnClassify", "knnRegress"],
         "functions": ["dbscan", "knnClassify", "knnRegress"]
+      },
+      "functions/src/ml/kde.ts": {
+        "description": "1-D Gaussian kernel density estimation (Wave — ML primitives, Phase 3 Task 5).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gaussianKDE"],
+        "interfaces": ["GaussianKDEOptions", "GaussianKDEResult"],
+        "functions": ["gaussianKDE"]
       },
       "functions/src/ml/logistic-regression.ts": {
         "description": "Binary logistic regression via IRLS (Wave — ML primitives, Phase 3 Task 3).",
@@ -34548,6 +34575,7 @@
         "name": "Functions/ml",
         "files": [
           "functions/src/ml/dbscan-knn.ts",
+          "functions/src/ml/kde.ts",
           "functions/src/ml/logistic-regression.ts",
           "functions/src/ml/ols.ts",
           "functions/src/ml/regularized-regression.ts"
@@ -35492,18 +35520,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1040,
+    "totalTypeScriptFiles": 1041,
     "totalModules": 79,
-    "totalLinesOfCode": 174392,
-    "totalExports": 5035,
+    "totalLinesOfCode": 174511,
+    "totalExports": 5039,
     "totalClasses": 56,
-    "totalInterfaces": 433,
-    "totalFunctions": 1637,
+    "totalInterfaces": 435,
+    "totalFunctions": 1638,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1849,
-    "totalTypeOnlyImports": 534,
+    "totalReExports": 1852,
+    "totalTypeOnlyImports": 535,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
