@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — real univariate symbolic rational cancellation for `cancel`
+
+`cancel(expr)` (`functions/src/typed/algebra.ts`) previously only handled numeric integer fractions
+(`a/b`, compound `(a/b)/(c/d)`) plus an identical-string short-circuit, returning symbolic input
+unchanged. It now performs real univariate integer-coefficient rational cancellation via polynomial
+GCD, matching `sympy.cancel`: `cancel('(x^2-1)/(x-1)')` → `1*x + 1` (numerator/denominator divided by
+`polynomialGCD(N, D)`); `cancel('(2*x^2-2)/(2*x-2)')` also cancels the shared numeric content down to
+`1*x + 1`; `cancel('(x^3-1)/(x^2-1)')` → `(1*x^2 + 1*x + 1)/(1*x + 1)` (degree reduces but a
+nontrivial denominator remains, so the result stays a fraction). Falls back unchanged to the
+pre-existing numeric-only paths for multivariate expressions, non-integer coefficients, and inputs
+whose numerator/denominator share no non-trivial polynomial factor — the existing numeric fraction
+and identical-string tests are unaffected. New test:
+`functions/tests/gap-cancel-symbolic-oracle.test.ts` (implementation-independent value-preservation
+oracle, sampled away from poles, plus the numeric regression cases).
+
 ### Fixed — real `expand`/`factor`/`together`/`apart` for univariate polynomials/rationals (Phase 8 Task 6, final task)
 
 `expand`/`factor`/`apart`/`together` (`functions/src/typed/algebra.ts`) were documented no-ops

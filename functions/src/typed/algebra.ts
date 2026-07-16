@@ -953,24 +953,87 @@ export function collect(expr: string, variable: string): string {
 }
 
 /**
- * Cancel common factors in a numeric rational expression.
+ * Cancel common factors in a rational expression.
  *
- * **Scope:** Currently handles numeric integer fractions `a/b` only,
- * including `(a/b) / (c/d)` and identical numerator/denominator
- * polynomial-string short-circuit (`(p) / (p) → 1`).
+ * **Univariate integer-coefficient rationals** (a single variable, e.g.
+ * `(x^2-1)/(x-1)`) are cancelled EXACTLY via polynomial GCD: the numerator
+ * and denominator are divided by `polynomialGCD(N, D)`, and any shared
+ * integer content between the resulting numerator/denominator is cancelled
+ * too (e.g. `(2*x^2-2)/(2*x-2) → x + 1`). When the GCD fully divides out the
+ * denominator, the result collapses to a bare polynomial (no `/`); when a
+ * nontrivial denominator remains, the result stays a (lower-degree)
+ * fraction: `(x^3-1)/(x^2-1) → (x^2+x+1)/(x+1)`. This matches `sympy.cancel`.
  *
- * **Not yet handled:** symbolic polynomial cancellation
- * (e.g., `(x^2-1)/(x-1) → x+1`) — for that, use the lower-level
- * `polynomialGCD` API on explicit coefficient arrays. A future
- * release will add full symbolic cancel via a polynomial string parser.
+ * **Falls back** to the legacy numeric-only handling below for: purely
+ * numeric fractions `a/b` (including compound `(a/b)/(c/d)`), the identical
+ * numerator/denominator polynomial-string short-circuit (`(p) / (p) → 1`),
+ * multivariate expressions, non-integer coefficients, and expressions whose
+ * numerator/denominator share no non-trivial polynomial factor (returned
+ * unchanged in that case).
  *
- * @param expr - Expression string (e.g., "6/4", "(2/3)/(4/9)")
+ * @param expr - Expression string (e.g., "6/4", "(2/3)/(4/9)", "(x^2-1)/(x-1)")
  * @returns Simplified expression
  */
 export function cancel(expr: string): string {
   // Trivial identical-string case: (p) / (p) -> 1 for any non-empty p
   const sameMatch = expr.match(/^\s*\(([^()]+)\)\s*\/\s*\(\s*\1\s*\)\s*$/);
   if (sameMatch && sameMatch[1].trim().length > 0) return '1';
+
+  // Univariate symbolic rational cancellation via polynomial GCD.
+  const univariateVars = variables(expr);
+  if (univariateVars.length === 1) {
+    try {
+      const v = univariateVars[0];
+      const cleaned = expr.replace(/\s+/g, '');
+      const topTerms = splitTopLevelSum(cleaned);
+      if (topTerms.length === 1) {
+        const { nums, dens } = splitProductChain(topTerms[0]);
+        if (dens.length > 0) {
+          const numStr = nums.length ? nums.join('*') : '1';
+          const denStr = dens.join('*');
+          const N = polyToDense(polyFromExpression(numStr, [v]));
+          const D = polyToDense(polyFromExpression(denStr, [v]));
+          if (N.every(isNearInt) && D.every(isNearInt)) {
+            const Nint = N.map((c) => Math.round(c));
+            const Dint = D.map((c) => Math.round(c));
+            const g = polynomialGCD(Nint, Dint);
+
+            if (degree(g) >= 1) {
+              let Nq = polynomialQuotient(Nint, g).map((c) => Math.round(c * 1e6) / 1e6);
+              let Dq = polynomialQuotient(Dint, g).map((c) => Math.round(c * 1e6) / 1e6);
+
+              // Cancel any integer content shared by both the resulting
+              // numerator and denominator, e.g. (2x^2-2)/(2x-2) -> x+1.
+              let contentGcd = 0;
+              for (const c of [...Nq, ...Dq]) contentGcd = gcdNum(contentGcd, Math.round(c));
+              if (contentGcd > 1) {
+                Nq = Nq.map((c) => c / contentGcd);
+                Dq = Dq.map((c) => c / contentGcd);
+              }
+
+              // Normalize sign so the denominator's leading coefficient is positive.
+              if (Dq[Dq.length - 1] < 0) {
+                Nq = Nq.map((c) => -c);
+                Dq = Dq.map((c) => -c);
+              }
+
+              if (degree(Dq) === 0) {
+                const c = Dq[0];
+                if (c !== 1) Nq = Nq.map((x) => x / c);
+                return idealPolyToString(denseToPoly(Nq), [v]);
+              }
+              return `(${idealPolyToString(denseToPoly(Nq), [v])})/(${idealPolyToString(denseToPoly(Dq), [v])})`;
+            }
+          }
+        }
+      }
+    } catch {
+      // Not a pure single-variable integer-coefficient rational, or the
+      // numerator/denominator share no non-trivial polynomial factor —
+      // fall through to the numeric-only paths below (or the unchanged
+      // return at the end).
+    }
+  }
 
   // Plain numeric fraction
   const fracMatch = expr.match(/^\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/);
