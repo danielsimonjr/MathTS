@@ -268,6 +268,21 @@ patch/minor releases per package.
 | symbolic `summation` with symbolic bound → 0               | Alg    | `summation('k','k',1,'n')`→0 (want `n(n+1)/2`)                               | closed-form (Faulhaber) path                                                  | M        |
 | CAS `expand`/`factor`/`apart`/`together`/symbolic-∫ no-ops | Alg    | return input unchanged, but docs show worked results                         | **reconcile docs to reality now** (honesty); implementation is Phase 8        | S (docs) |
 
+> **Live re-verification (2026-07-15) corrected three of the survey's P0 entries** before planning
+> (RFL Rule 4 — a `NaN`/error result is not proof of a bug):
+>
+> - **`betainc` is NOT broken.** Its signature is `(a, b, x)` (scipy order) and it is machine-precise
+>   (`betainc(2,3,0.5)=0.6875` = mpmath). The survey called `betainc(0.5,2,3)` with x=3 out of range.
+>   The real defect is a **doc error** — `functions.md` says `betainc(x, a, b)`. Downgraded to a doc fix.
+> - **`butter` and `firwin` are NOT bugs.** Both are documented lowpass/scalar-only (`butter(N,Wn)` has
+>   no `btype` param; `firwin(numtaps, cutoff)` takes a scalar cutoff). Highpass/bandpass are missing
+>   **features → Phase 6**, not correctness bugs. `windowFunction`'s silent-rectangular fallback is the
+>   one real signal P0 (fix: throw on unknown type; the missing windows are Phase 6).
+> - **`taylor` fix uses the in-package symbolic `derivative`, not `autograd`** — `functions` has no
+>   `autograd` dependency and adding one is ADR-level; exact derivatives are already available in-package.
+>
+> Detailed, oracle-pinned plan: [`docs/superpowers/plans/2026-07-15-phase0-correctness-fixes.md`](../superpowers/plans/2026-07-15-phase0-correctness-fixes.md) (9 tasks).
+
 ### Phase 1 — Foundational numeric primitives (unlock optimization + ODE + quadrature downstream)
 
 `jacobian` numeric F:ℝⁿ→ℝᵐ (D1, S) · open scalar root-finders newton/secant/halley (D3, S) · nonlinear
