@@ -1565,13 +1565,14 @@ Root-finding, optimization, linear systems, and differential equations.
 
 ### Differentiation
 
-| Function                     | Description                                                                                                       |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `gradient(y[, x])`           | Numeric gradient of sampled data (second-order central differences, one-sided at edges; matches `numpy.gradient`) |
-| `hessian(f, x[, h])`         | Numeric Hessian (second partials) of `f: ℝⁿ → ℝ` via central differences, symmetric by construction               |
-| `derivativeAt(f, x)`         | Exact scalar derivative of `f: ℝ → ℝ` at `x` via forward-mode autodiff (the `Dual` type; no finite differences)   |
-| `gradientAt(f, x)`           | Exact gradient of `f: ℝⁿ → ℝ` at `x` by `n` forward-mode passes                                                   |
-| `valueAndDerivativeAt(f, x)` | Value plus the exact forward-mode derivative of `f` at `x`; returns `{ value, deriv }`                            |
+| Function                         | Description                                                                                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gradient(y[, x])`               | Numeric gradient of sampled data (second-order central differences, one-sided at edges; matches `numpy.gradient`)                                                                |
+| `hessian(f, x[, h])`             | Numeric Hessian (second partials) of `f: ℝⁿ → ℝ` via central differences, symmetric by construction                                                                              |
+| `numericJacobian(f, x0[, opts])` | Numeric Jacobian of `f: ℝⁿ → ℝᵐ` (non-square OK) via central differences with a per-coordinate relative step; `jacobian(f, x0)` dispatches here when the first arg is a function |
+| `derivativeAt(f, x)`             | Exact scalar derivative of `f: ℝ → ℝ` at `x` via forward-mode autodiff (the `Dual` type; no finite differences)                                                                  |
+| `gradientAt(f, x)`               | Exact gradient of `f: ℝⁿ → ℝ` at `x` by `n` forward-mode passes                                                                                                                  |
+| `valueAndDerivativeAt(f, x)`     | Value plus the exact forward-mode derivative of `f` at `x`; returns `{ value, deriv }`                                                                                           |
 
 ### Details
 
@@ -2318,7 +2319,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (881 exports).
+> `@danielsimonjr/mathts-functions` (882 exports).
 
 ### Functions by category
 
@@ -2352,7 +2353,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (27): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `nullspace`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (28): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

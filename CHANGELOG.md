@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — numeric Jacobian: `numericJacobian(f, x0)` + polymorphic `jacobian` (Phase 1 Task 1)
+
+`jacobian` was symbolic-only (`jacobian(exprs, vars, scope)`) and threw `exprs.map is not a
+function` when passed a numeric function. Added `numericJacobian(f, x0[, opts])` —
+central-difference Jacobian of `f: ℝⁿ → ℝᵐ` (non-square OK; per-coordinate relative step
+`h = max(1, |x0[j]|) * cbrt(2.22e-16)`) — and made `jacobian` polymorphic: when the first
+argument is a function it dispatches to `numericJacobian`, leaving the symbolic
+`jacobian(exprs, vars, scope)` path unchanged. Pinned against analytic Jacobians (square and
+non-square). Foundation for numeric root-finding (`fsolve`, Phase 1 Task 3).
+
 ### Changed — corrected `betainc` documented argument order; annotated pass-through CAS/algebra transforms (docs honesty)
 
 `betainc`'s implementation was always correct (`betainc(a, b, x)` = regularized incomplete beta

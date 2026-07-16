@@ -1631,6 +1631,10 @@
     "functions/src/numeric-extra.ts": ["functions/src/index.ts"],
     "functions/src/hypothesis-extra.ts": ["functions/src/index.ts"],
     "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/numeric-jacobian.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],

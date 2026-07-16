@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1028,
+    "totalFiles": 1029,
     "totalModules": 78,
-    "totalExports": 4968
+    "totalExports": 4972
   },
   "entryPoints": [
     {
@@ -8017,6 +8017,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/numeric-jacobian.js",
+            "imports": ["numericJacobian"],
+            "reExport": true
+          },
+          {
             "file": "./timeseries-extra.js",
             "imports": ["movingAverage", "ewma", "detrend", "acf"],
             "reExport": true
@@ -8088,6 +8093,12 @@
               "FisherExactResult",
               "TukeyComparison"
             ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/numeric-jacobian.js",
+            "imports": ["VectorField", "NumericJacobianOptions"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8195,6 +8206,7 @@
           "qz",
           "hessian",
           "gradient",
+          "numericJacobian",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8231,6 +8243,8 @@
           "WilcoxonResult",
           "FisherExactResult",
           "TukeyComparison",
+          "VectorField",
+          "NumericJacobianOptions",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -8323,6 +8337,7 @@
           "qz",
           "hessian",
           "gradient",
+          "numericJacobian",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8359,6 +8374,8 @@
           "WilcoxonResult",
           "FisherExactResult",
           "TukeyComparison",
+          "VectorField",
+          "NumericJacobianOptions",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -12428,6 +12445,16 @@
       }
     },
     "functions/numeric": {
+      "functions/src/numeric/numeric-jacobian.ts": {
+        "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["numericJacobian"],
+        "interfaces": ["NumericJacobianOptions"],
+        "functions": ["numericJacobian"]
+      },
       "functions/src/numeric/solveODE.ts": {
         "description": "Butcher Tableau structure for Runge-Kutta methods",
         "externalDependencies": [],
@@ -16811,6 +16838,10 @@
           {
             "file": "../factories/index.js",
             "imports": ["polynomialRoot"]
+          },
+          {
+            "file": "../numeric/numeric-jacobian.js",
+            "imports": ["numericJacobian", "VectorField"]
           }
         ],
         "workspaceDependencies": [
@@ -16869,6 +16900,8 @@
           "partialDerivative",
           "directionalDerivative",
           "gradientSymbolic",
+          "jacobian",
+          "jacobian",
           "jacobian",
           "laplacian",
           "divergence",
@@ -34139,7 +34172,7 @@
       },
       {
         "name": "Functions/numeric",
-        "files": ["functions/src/numeric/solveODE.ts"]
+        "files": ["functions/src/numeric/numeric-jacobian.ts", "functions/src/numeric/solveODE.ts"]
       },
       {
         "name": "Functions/plain",
@@ -35067,18 +35100,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1028,
+    "totalTypeScriptFiles": 1029,
     "totalModules": 78,
-    "totalLinesOfCode": 172054,
-    "totalExports": 4968,
+    "totalLinesOfCode": 172137,
+    "totalExports": 4972,
     "totalClasses": 56,
-    "totalInterfaces": 410,
-    "totalFunctions": 1614,
+    "totalInterfaces": 411,
+    "totalFunctions": 1617,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1535,
-    "totalReExports": 1802,
-    "totalTypeOnlyImports": 523,
+    "totalReExports": 1805,
+    "totalTypeOnlyImports": 524,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

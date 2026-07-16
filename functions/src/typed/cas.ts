@@ -31,6 +31,7 @@ import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
 // cubic, real + complex) instead of duplicating the formulas here.
 import { polynomialRoot } from '../factories/index.js';
+import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 
 // =============================================================================
 // Type Aliases
@@ -511,19 +512,35 @@ export function gradientSymbolic(expr: string, vars: string[], scope: Record<str
 /**
  * Compute the Jacobian matrix of a vector-valued function.
  *
- * J[i][j] = partial derivative of exprs[i] with respect to vars[j].
+ * Polymorphic: symbolic when `exprs` is an array of expression strings
+ * (J[i][j] = partial derivative of exprs[i] with respect to vars[j]);
+ * numeric (central differences) when `exprs` is a plain function
+ * `f: number[] => number[]` — dispatches to `numericJacobian(f, x0)`.
  *
- * @param exprs - Array of expression strings (vector field components)
- * @param vars - Variable names
- * @param scope - Variable values at which to evaluate
+ * @param exprs - Array of expression strings (vector field components), OR a
+ *   numeric vector field `f: (x: number[]) => number[]`
+ * @param vars - Variable names (symbolic), OR the numeric evaluation point `x0`
+ * @param scope - Variable values at which to evaluate (symbolic path only)
  * @returns 2D array (matrix) of partial derivatives
  *
  * @example
  * jacobian(['x*y', 'x^2'], ['x', 'y'], { x: 2, y: 3 })
  * // => [[3, 2], [4, 0]]
+ * @example
+ * jacobian((v) => [v[0] * v[1], v[0] ** 2], [2, 3])
+ * // => [[3, 2], [4, 0]] (numeric, central differences)
  */
-export function jacobian(exprs: string[], vars: string[], scope: Record<string, f64>): f64[][] {
-  return exprs.map((expr) => vars.map((v) => partialDerivative(expr, v, scope)));
+export function jacobian(exprs: VectorField, vars: number[]): f64[][];
+export function jacobian(exprs: string[], vars: string[], scope: Record<string, f64>): f64[][];
+export function jacobian(
+  exprs: string[] | VectorField,
+  vars: string[] | number[],
+  scope?: Record<string, f64>
+): f64[][] {
+  if (typeof exprs === 'function') {
+    return numericJacobian(exprs, vars as number[]);
+  }
+  return exprs.map((expr) => (vars as string[]).map((v) => partialDerivative(expr, v, scope!)));
 }
 
 /**

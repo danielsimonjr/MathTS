@@ -144,6 +144,11 @@ export {
 // Gap-analysis Wave C — numeric Hessian (bridge C3); Wave D — numeric gradient.
 export { hessian, gradient } from './calculus-extra.js';
 
+// Numeric Jacobian (F: R^n -> R^m, central differences) — foundation for
+// fsolve (Phase 1 Task 3). Complements the symbolic `jacobian` (typed/cas.ts).
+export { numericJacobian } from './numeric/numeric-jacobian.js';
+export type { VectorField, NumericJacobianOptions } from './numeric/numeric-jacobian.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 
