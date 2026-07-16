@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `fitDistribution` MLE parameter fitting (Phase 4 Task 1)
+
+Added `fitDistribution(name, data)` — maximum-likelihood parameter fitting for `'normal'` |
+`'exponential'` | `'lognormal'` | `'poisson'` | `'gamma'`, returning `{ params, logLikelihood }`.
+Normal/exponential/poisson use closed-form MLEs (population std, `1/mean`, `mean`); lognormal fits a
+normal to `ln(data)` (throws if any value ≤ 0); gamma has no closed form for the shape parameter, so
+it solves the 1-D shape equation `ln(k) − ψ(k) = ln(x̄) − mean(ln x)` (ψ = `digamma`) via the secant
+method, starting from the Choi & Wette (1969) initial guess, then recovers `scale = x̄/k`. Verified
+vs `scipy.stats.gamma.fit(d, floc=0)` on a 10-point sample: shape/scale matched to ~1e-13
+(`6.42273918932...`, `0.29582393804...`).
+
 ### Added — `chi2Contingency` + `multipleTest` (Phase 3 Task 6)
 
 Added `chi2Contingency(table, opts?)` — chi-square test of independence on a contingency table:

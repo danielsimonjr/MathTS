@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1042, "e": 5046, "re": 1857 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1043, "e": 5050, "re": 1860 },
   "s": {
-    "loc": 174658,
+    "loc": 174832,
     "cls": 56,
-    "int": 437,
-    "fn": 1640,
+    "int": 438,
+    "fn": 1641,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 536
+    "toi": 537
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -825,9 +825,9 @@
       ]
     },
     "functions/stats": {
-      "f": 1,
-      "exp": ["chi2Contingency", "multipleTest"],
-      "int": ["Chi2ContingencyResult", "Chi2ContingencyOptions"]
+      "f": 2,
+      "exp": ["fitDistribution", "chi2Contingency", "multipleTest"],
+      "int": ["FitDistributionResult", "Chi2ContingencyResult", "Chi2ContingencyOptions"]
     },
     "functions/string": {
       "f": 5,
@@ -1649,10 +1649,10 @@
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "src/index.ts", "i": 56, "o": 0 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
-    { "p": "src/index.ts", "i": 54, "o": 0 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },

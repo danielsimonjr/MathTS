@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1042
+  totalFiles: 1043
   totalModules: 80
-  totalExports: 5046
+  totalExports: 5050
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7528,6 +7528,10 @@ modules:
             - chi2Contingency
             - multipleTest
           reExport: true
+        - file: ./stats/fit-distribution.js
+          imports:
+            - fitDistribution
+          reExport: true
         - file: ./numeric/bfgs.js
           imports:
             - bfgs
@@ -7660,6 +7664,12 @@ modules:
             - Chi2ContingencyOptions
             - Chi2ContingencyResult
             - MultipleTestMethod
+          reExport: true
+          typeOnly: true
+        - file: ./stats/fit-distribution.js
+          imports:
+            - DistributionName
+            - FitDistributionResult
           reExport: true
           typeOnly: true
         - file: ./numeric/bfgs.js
@@ -7806,6 +7816,7 @@ modules:
         - gaussianKDE
         - chi2Contingency
         - multipleTest
+        - fitDistribution
         - bfgs
         - nnls
         - lsqBounded
@@ -7863,6 +7874,8 @@ modules:
         - Chi2ContingencyOptions
         - Chi2ContingencyResult
         - MultipleTestMethod
+        - DistributionName
+        - FitDistributionResult
         - BfgsOptions
         - BfgsResult
         - KMeansResult
@@ -7988,6 +8001,7 @@ modules:
         - gaussianKDE
         - chi2Contingency
         - multipleTest
+        - fitDistribution
         - bfgs
         - nnls
         - lsqBounded
@@ -8045,6 +8059,8 @@ modules:
         - Chi2ContingencyOptions
         - Chi2ContingencyResult
         - MultipleTestMethod
+        - DistributionName
+        - FitDistributionResult
         - BfgsOptions
         - BfgsResult
         - KMeansResult
@@ -13700,6 +13716,29 @@ modules:
       constants:
         - createVariance
   functions/stats:
+    functions/src/stats/fit-distribution.ts:
+      description: Maximum-likelihood distribution fitting (Phase 4 Task 1).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/arithmetic.js
+          imports:
+            - mean
+            - std
+        - file: ../typed/special.js
+          imports:
+            - digamma
+            - lgamma
+        - file: ../numeric/open-root-finders.js
+          imports:
+            - secant
+      workspaceDependencies: []
+      exports:
+        - fitDistribution
+      interfaces:
+        - FitDistributionResult
+      functions:
+        - fitDistribution
     functions/src/stats/inference-extra.ts:
       description: Chi-square test of independence + multiple-testing correction (Phase 3 Task 6).
       externalDependencies: []
@@ -32435,6 +32474,7 @@ dependencyGraph:
         - functions/src/statistics/variance.ts
     - name: Functions/stats
       files:
+        - functions/src/stats/fit-distribution.ts
         - functions/src/stats/inference-extra.ts
     - name: Functions/string
       files:
@@ -33186,18 +33226,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1042
+  totalTypeScriptFiles: 1043
   totalModules: 80
-  totalLinesOfCode: 174658
-  totalExports: 5046
+  totalLinesOfCode: 174832
+  totalExports: 5050
   totalClasses: 56
-  totalInterfaces: 437
-  totalFunctions: 1640
+  totalInterfaces: 438
+  totalFunctions: 1641
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1857
-  totalTypeOnlyImports: 536
+  totalReExports: 1860
+  totalTypeOnlyImports: 537
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

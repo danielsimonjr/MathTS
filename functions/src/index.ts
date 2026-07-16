@@ -230,6 +230,11 @@ export type {
   MultipleTestMethod,
 } from './stats/inference-extra.js';
 
+// Phase 4 Task 1 — MLE distribution fitting (normal/exponential/lognormal/
+// poisson closed-form; gamma via the digamma shape equation + a root-finder).
+export { fitDistribution } from './stats/fit-distribution.js';
+export type { DistributionName, FitDistributionResult } from './stats/fit-distribution.js';
+
 // Phase 2 Task 1 — BFGS quasi-Newton minimizer (inverse-Hessian update +
 // Armijo line search; optional analytic gradient or box-bounds projection).
 // The smooth-optimization workhorse complementing derivative-free `minimize`
