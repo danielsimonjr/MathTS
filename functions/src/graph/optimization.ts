@@ -72,7 +72,7 @@ function _bfsResidual(residual: number[][], source: number, sink: number): numbe
  *
  * @example
  * const cap = [[0,3,2,0],[0,0,1,2],[0,0,0,3],[0,0,0,0]];
- * maxFlow(cap, 0, 3).maxFlow // => 4
+ * maxFlow(cap, 0, 3).maxFlow // => 5
  */
 export function maxFlow(capacity: number[][], source: number, sink: number): MaxFlowResult {
   const n = capacity.length;
@@ -136,7 +136,7 @@ export interface MinCutResult {
  *
  * @example
  * const cap = [[0,3,2,0],[0,0,1,2],[0,0,0,3],[0,0,0,0]];
- * minCut(cap, 0, 3) // => { value: 4, partition: [[0, ...], [...]] }
+ * minCut(cap, 0, 3) // => { value: 5, partition: [[0, ...], [...]] }
  */
 export function minCut(capacity: number[][], source: number, sink: number): MinCutResult {
   const n = capacity.length;
