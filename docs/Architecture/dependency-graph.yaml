@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1031
+  totalFiles: 1032
   totalModules: 78
-  totalExports: 4986
+  totalExports: 4990
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7465,6 +7465,10 @@ modules:
             - fsolve
             - root
           reExport: true
+        - file: ./numeric/minimize-scalar.js
+          imports:
+            - minimizeScalar
+          reExport: true
         - file: ./timeseries-extra.js
           imports:
             - movingAverage
@@ -7550,6 +7554,12 @@ modules:
         - file: ./numeric/fsolve.js
           imports:
             - FsolveOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/minimize-scalar.js
+          imports:
+            - MinimizeScalarOptions
+            - MinimizeScalarResult
           reExport: true
           typeOnly: true
         - file: ./regression-extra.js
@@ -7659,6 +7669,7 @@ modules:
         - halley
         - fsolve
         - root
+        - minimizeScalar
         - movingAverage
         - ewma
         - detrend
@@ -7701,6 +7712,8 @@ modules:
         - SecantOptions
         - HalleyOptions
         - FsolveOptions
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -7798,6 +7811,7 @@ modules:
         - halley
         - fsolve
         - root
+        - minimizeScalar
         - movingAverage
         - ewma
         - detrend
@@ -7840,6 +7854,8 @@ modules:
         - SecantOptions
         - HalleyOptions
         - FsolveOptions
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
         - LinregressResult
         - OptimizeResult
         - LMResult
@@ -11425,6 +11441,19 @@ modules:
         - fsolve
       constants:
         - root
+    functions/src/numeric/minimize-scalar.ts:
+      description: Scalar (1-D) function minimization via Brent's method.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - minimizeScalar
+      interfaces:
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
+      functions:
+        - minimizeScalar
     functions/src/numeric/numeric-jacobian.ts:
       description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central'
       externalDependencies: []
@@ -31950,6 +31979,7 @@ dependencyGraph:
     - name: Functions/numeric
       files:
         - functions/src/numeric/fsolve.ts
+        - functions/src/numeric/minimize-scalar.ts
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/solveODE.ts
@@ -32783,18 +32813,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1031
+  totalTypeScriptFiles: 1032
   totalModules: 78
-  totalLinesOfCode: 172451
-  totalExports: 4986
+  totalLinesOfCode: 172614
+  totalExports: 4990
   totalClasses: 56
-  totalInterfaces: 415
-  totalFunctions: 1621
+  totalInterfaces: 417
+  totalFunctions: 1622
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1814
-  totalTypeOnlyImports: 526
+  totalReExports: 1817
+  totalTypeOnlyImports: 527
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

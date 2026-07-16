@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1031,
+    "totalFiles": 1032,
     "totalModules": 78,
-    "totalExports": 4986
+    "totalExports": 4990
   },
   "entryPoints": [
     {
@@ -8032,6 +8032,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/minimize-scalar.js",
+            "imports": ["minimizeScalar"],
+            "reExport": true
+          },
+          {
             "file": "./timeseries-extra.js",
             "imports": ["movingAverage", "ewma", "detrend", "acf"],
             "reExport": true
@@ -8121,6 +8126,12 @@
           {
             "file": "./numeric/fsolve.js",
             "imports": ["FsolveOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./numeric/minimize-scalar.js",
+            "imports": ["MinimizeScalarOptions", "MinimizeScalarResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -8234,6 +8245,7 @@
           "halley",
           "fsolve",
           "root",
+          "minimizeScalar",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8276,6 +8288,8 @@
           "SecantOptions",
           "HalleyOptions",
           "FsolveOptions",
+          "MinimizeScalarOptions",
+          "MinimizeScalarResult",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -8374,6 +8388,7 @@
           "halley",
           "fsolve",
           "root",
+          "minimizeScalar",
           "movingAverage",
           "ewma",
           "detrend",
@@ -8416,6 +8431,8 @@
           "SecantOptions",
           "HalleyOptions",
           "FsolveOptions",
+          "MinimizeScalarOptions",
+          "MinimizeScalarResult",
           "LinregressResult",
           "OptimizeResult",
           "LMResult",
@@ -12504,6 +12521,16 @@
         "interfaces": ["FsolveOptions"],
         "functions": ["fsolve"],
         "constants": ["root"]
+      },
+      "functions/src/numeric/minimize-scalar.ts": {
+        "description": "Scalar (1-D) function minimization via Brent's method.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["minimizeScalar"],
+        "interfaces": ["MinimizeScalarOptions", "MinimizeScalarResult"],
+        "functions": ["minimizeScalar"]
       },
       "functions/src/numeric/numeric-jacobian.ts": {
         "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
@@ -34244,6 +34271,7 @@
         "name": "Functions/numeric",
         "files": [
           "functions/src/numeric/fsolve.ts",
+          "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/solveODE.ts"
@@ -35175,18 +35203,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1031,
+    "totalTypeScriptFiles": 1032,
     "totalModules": 78,
-    "totalLinesOfCode": 172451,
-    "totalExports": 4986,
+    "totalLinesOfCode": 172614,
+    "totalExports": 4990,
     "totalClasses": 56,
-    "totalInterfaces": 415,
-    "totalFunctions": 1621,
+    "totalInterfaces": 417,
+    "totalFunctions": 1622,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1536,
-    "totalReExports": 1814,
-    "totalTypeOnlyImports": 526,
+    "totalReExports": 1817,
+    "totalTypeOnlyImports": 527,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

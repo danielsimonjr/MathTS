@@ -1544,6 +1544,7 @@ Root-finding, optimization, linear systems, and differential equations.
 | `linsolve(A, b)`                    | Solve a linear system `Ax = b`                                          | —     |
 | `leastSquares(A, b)`                | Least-squares solution (overdetermined)                                 | WASM  |
 | `minimize(f, x0[, opts])`           | Local minimization                                                      | —     |
+| `minimizeScalar(f[, opts])`         | 1-D minimization via Brent's method (golden-section + parabolic interp) | —     |
 | `maximize(f, x0[, opts])`           | Local maximization                                                      | —     |
 | `globalMinimize(f, bounds[, opts])` | Global minimization                                                     | —     |
 | `linprog(c, A, b[, opts])`          | Linear programming                                                      | —     |
@@ -1564,6 +1565,7 @@ Root-finding, optimization, linear systems, and differential equations.
 
 | Function                                   | Description                                                                                                                                     |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`            |
 | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                       |
 | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }` |
 | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                     |
@@ -1600,6 +1602,11 @@ Root-finding, optimization, linear systems, and differential equations.
   singular Jacobian or non-convergence.
 - `minimize` / `maximize` find a **local** optimum near the starting point
   `x0`; `globalMinimize` searches a bounded region for a global optimum.
+- `minimizeScalar` is a 1-D-only minimizer — distinct from root-finding — for
+  `f: ℝ → ℝ` over a bounded interval (`opts.bracket`, default `[-10, 10]`);
+  Brent's method falls back to golden-section steps when the points aren't
+  distinct enough for a reliable parabolic fit, giving guaranteed convergence
+  with superlinear speed near a smooth minimum.
 - `linprog` and `quadprog` solve constrained linear and quadratic programs.
 - The ODE family ranges from fixed-step (`solveODE`) through adaptive
   (`odeAdaptiveStep`) to `stiffODESolver` for stiff systems where explicit
@@ -1627,6 +1634,7 @@ import {
   halley,
   fsolve,
   minimize,
+  minimizeScalar,
   leastSquares,
 } from '@danielsimonjr/mathts-functions';
 
@@ -1636,6 +1644,7 @@ secant((x) => x * x - 2, 1, 2); // ~1.4142135623730951
 halley((x) => x ** 3 - 2, 1); // ~1.2599210498948732
 fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]); // ~[1, 1]
 minimize((x) => (x - 3) ** 2, 0); // ~3.0
+minimizeScalar((x) => (x - 2) ** 2, { bracket: [-5, 5] }); // { x: ~2, fval: ~0 }
 leastSquares(
   [
     [1, 0],
@@ -2351,7 +2360,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (887 exports).
+> `@danielsimonjr/mathts-functions` (888 exports).
 
 ### Functions by category
 
@@ -2385,7 +2394,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (33): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (34): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

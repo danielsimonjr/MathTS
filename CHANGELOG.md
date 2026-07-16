@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — scalar minimizer: `minimizeScalar` (Phase 1 Task 4)
+
+No 1-D minimizer existed (only the vector Nelder–Mead `minimize` and root-finders). Added
+`minimizeScalar(f, { bracket, tol, maxIter })` — Brent's method (golden-section search combined
+with parabolic interpolation), returning `{ x, fval }`. Distinct from root-finding: minimizes
+`f(x)` rather than solving `f(x) = 0`. If `bracket` is omitted, defaults to `[-10, 10]`. Defaults
+`tol = 1e-8`, `maxIter = 100`. Pinned against closed-form minima: `(x-2)^2` → `x=2, f=0`;
+`x^4 - 3x^3 + 2` on `[0,3]` → `x=2.25`; `sin(x)` on `[0,2pi]` → `x=3pi/2, f=-1`.
+
 ### Added — nonlinear system solver: `fsolve` / `root` (Phase 1 Task 3)
 
 No solver existed for `F(x) = 0` where `F: ℝⁿ → ℝⁿ` (only scalar root-finders). Added

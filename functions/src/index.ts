@@ -159,6 +159,12 @@ export type { NewtonOptions, SecantOptions, HalleyOptions } from './numeric/open
 export { fsolve, root } from './numeric/fsolve.js';
 export type { FsolveOptions } from './numeric/fsolve.js';
 
+// Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
+// parabolic interpolation). Distinct from root-finding; complements the
+// vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.
+export { minimizeScalar } from './numeric/minimize-scalar.js';
+export type { MinimizeScalarOptions, MinimizeScalarResult } from './numeric/minimize-scalar.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 

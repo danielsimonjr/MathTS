@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1031, "e": 4986, "re": 1814 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1032, "e": 4990, "re": 1817 },
   "s": {
-    "loc": 172451,
+    "loc": 172614,
     "cls": 56,
-    "int": 415,
-    "fn": 1621,
+    "int": 417,
+    "fn": 1622,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 526
+    "toi": 527
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -661,10 +661,11 @@
       ]
     },
     "functions/numeric": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "root",
         "fsolve",
+        "minimizeScalar",
         "numericJacobian",
         "newton",
         "secant",
@@ -674,6 +675,8 @@
       ],
       "int": [
         "FsolveOptions",
+        "MinimizeScalarOptions",
+        "MinimizeScalarResult",
         "NumericJacobianOptions",
         "NewtonOptions",
         "SecantOptions",
