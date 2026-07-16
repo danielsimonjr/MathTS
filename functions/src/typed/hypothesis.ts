@@ -386,6 +386,18 @@ function _fPValue(f: f64, d1: f64, d2: f64): f64 {
   return 1 - _betainc((d1 * f) / (d1 * f + d2), d1 / 2, d2 / 2);
 }
 
+/**
+ * Binomial coefficient C(n, k), computed via the standard multiplicative
+ * iteration (exact for the small n used here — well within double precision).
+ */
+function _binomCoeff(n: number, k: number): f64 {
+  if (k < 0 || k > n) return 0;
+  const kk = Math.min(k, n - k);
+  let r = 1;
+  for (let i = 0; i < kk; i++) r = (r * (n - i)) / (i + 1);
+  return r;
+}
+
 // =============================================================================
 // studentTTest
 // =============================================================================
@@ -848,6 +860,66 @@ export async function kolmogorovSmirnovTest(
 }
 
 // =============================================================================
+// Mann-Whitney exact null distribution (Phase 4, Task 2b)
+// =============================================================================
+
+/**
+ * Frequency table of the exact (no-ties) Mann-Whitney U null distribution for
+ * group sizes `n1`, `n2`: `counts[u]` = number of distinct rank arrangements
+ * giving rank-sum-derived U = u, for u in [0, n1*n2].
+ *
+ * Recurrence (Mann & Whitney 1947): C(n1,n2)[u] = C(n1-1,n2)[u-n2] +
+ * C(n1,n2-1)[u], with C(a,0) = C(0,b) = the single-point mass at u=0. Built
+ * bottom-up over the (n1+1) x (n2+1) grid; total memory/work is bounded by
+ * `n1*n2` (this is only invoked when n1*n2 <= 400 — see `mannWhitneyTest`).
+ */
+function _mwUCounts(n1: number, n2: number): Float64Array {
+  const table: Float64Array[][] = [];
+  for (let i = 0; i <= n1; i++) {
+    const row: Float64Array[] = [];
+    for (let j = 0; j <= n2; j++) {
+      const maxU = i * j;
+      const arr = new Float64Array(maxU + 1);
+      if (i === 0 || j === 0) {
+        arr[0] = 1;
+      } else {
+        const prevI = table[i - 1][j];
+        const prevJ = row[j - 1];
+        for (let u = 0; u <= maxU; u++) {
+          let val = 0;
+          const uShift = u - j;
+          if (uShift >= 0 && uShift < prevI.length) val += prevI[uShift];
+          if (u < prevJ.length) val += prevJ[u];
+          arr[u] = val;
+        }
+      }
+      row.push(arr);
+    }
+    table.push(row);
+  }
+  return table[n1][n2];
+}
+
+/**
+ * Exact two-sided Mann-Whitney p-value for group sizes `n1`, `n2` and observed
+ * `U = min(U1, U2)` (no ties). Matches `scipy.stats.mannwhitneyu(...,
+ * method='exact')`.
+ *
+ * `U` is <= n1*n2/2 by construction (it is the min of the two complementary
+ * U statistics), so `P(U1 <= U) <= 0.5 <= P(U1 >= U)` by the symmetry of the
+ * null distribution about n1*n2/2 — the two-sided p is therefore
+ * `2 * P(U1 <= U)`, capped at 1.
+ */
+function _mwExactPValue(n1: number, n2: number, U: number): f64 {
+  const counts = _mwUCounts(n1, n2);
+  let total = 0;
+  for (let k = 0; k < counts.length; k++) total += counts[k];
+  let cumLe = 0;
+  for (let k = 0; k <= U; k++) cumLe += counts[k];
+  return Math.min(1, 2 * (cumLe / total));
+}
+
+// =============================================================================
 // mannWhitneyTest
 // =============================================================================
 
@@ -904,10 +976,12 @@ export async function mannWhitneyTest(
 
   // Assign ranks with tie handling
   const ranksArr = new Float64Array(nTotal);
+  let hasTies = false;
   let i = 0;
   while (i < nTotal) {
     let j = i;
     while (j < nTotal && combined[j].value === combined[i].value) j++;
+    if (j - i > 1) hasTies = true;
     const avgRank = (i + 1 + j) / 2;
     for (let k = i; k < j; k++) ranksArr[k] = avgRank;
     i = j;
@@ -933,13 +1007,20 @@ export async function mannWhitneyTest(
   const U2 = n1 * n2 - U1;
   const U = Math.min(U1, U2);
 
-  // Normal approximation for p-value
-  const mu = (n1 * n2) / 2;
-  const sigma = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
-  const z = sigma === 0 ? 0 : (U - mu) / sigma;
-  const pValue = 2 * _normalCDF(z); // two-tailed
+  // p-value: exact small-n Mann-Whitney U-distribution when n1*n2 <= 400 and
+  // there are no ties (matches scipy method='exact'); otherwise the normal
+  // approximation (unchanged — also scipy's fallback when ties are present).
+  let pValue: f64;
+  if (n1 * n2 <= 400 && !hasTies) {
+    pValue = _mwExactPValue(n1, n2, U);
+  } else {
+    const mu = (n1 * n2) / 2;
+    const sigma = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
+    const z = sigma === 0 ? 0 : (U - mu) / sigma;
+    pValue = Math.min(1, 2 * _normalCDF(z)); // two-tailed
+  }
 
-  const baseResult: MannWhitneyResult = { uStatistic: U, pValue: Math.min(1, pValue) };
+  const baseResult: MannWhitneyResult = { uStatistic: U, pValue };
 
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   const B = opts?.bootstrap ?? 0;
@@ -1411,21 +1492,73 @@ function _kstwobignSf(x: f64): f64 {
 }
 
 /**
+ * Exact two-sample KS p-value (Kim & Jennrich 1970 lattice-path method,
+ * matching `scipy.stats.ks_2samp(..., method='exact')`): count the paths from
+ * (0,0) to (n1,n2) — each step advancing one sample's empirical CDF by one
+ * observation — whose max deviation |i/n1 - j/n2| never reaches `D`. The
+ * p-value is `1 - (paths staying strictly inside the D-band) / C(n1+n2, n1)`.
+ * A small epsilon guards the floating-point boundary comparison so a path
+ * that reaches exactly `D` counts as "outside" (as extreme as observed).
+ */
+function _ks2ExactPValue(n1: number, n2: number, D: f64): f64 {
+  const eps = 1e-9;
+  const dp: Float64Array[] = Array.from({ length: n1 + 1 }, () => new Float64Array(n2 + 1));
+  dp[0][0] = 1;
+  for (let i = 0; i <= n1; i++) {
+    for (let j = 0; j <= n2; j++) {
+      if (i === 0 && j === 0) continue;
+      const dev = Math.abs(i / n1 - j / n2);
+      if (dev >= D - eps) continue; // leave at 0 — outside the band
+      let v = 0;
+      if (i > 0) v += dp[i - 1][j];
+      if (j > 0) v += dp[i][j - 1];
+      dp[i][j] = v;
+    }
+  }
+  const total = _binomCoeff(n1 + n2, n1);
+  const inside = dp[n1][n2];
+  return Math.max(0, Math.min(1, 1 - inside / total));
+}
+
+/** Options for {@link kolmogorovSmirnov2Test}. */
+export interface KS2Options {
+  /**
+   * `'asymp'` (default): large-sample `kstwobign` asymptotic p-value —
+   * unchanged from the original implementation, so omitting `opts` entirely
+   * preserves the exact prior behavior.
+   * `'exact'`: exact lattice-path p-value (Kim & Jennrich), matching
+   * `scipy.stats.ks_2samp(..., method='exact')`.
+   * `'auto'`: exact when n1*n2 <= 10000, else asymptotic (scipy's own
+   * threshold for switching to the asymptotic approximation).
+   */
+  method?: 'auto' | 'exact' | 'asymp';
+}
+
+/**
  * Two-sample Kolmogorov–Smirnov test: are two samples drawn from the same
  * continuous distribution? The statistic is the maximum gap between the two
- * empirical CDFs, D = maxₓ |F₁(x) − F₂(x)|; the p-value is the large-sample
- * asymptotic Q(√(n₁n₂/(n₁+n₂))·D) (the `kstwobign` survival function, matching
- * scipy's asymptotic method for large n). Distinct from the one-sample
- * {@link kolmogorovSmirnovTest}, which compares one sample to a CDF *function*.
+ * empirical CDFs, D = maxₓ |F₁(x) − F₂(x)|. By default the p-value is the
+ * large-sample asymptotic Q(√(n₁n₂/(n₁+n₂))·D) (the `kstwobign` survival
+ * function, matching scipy's asymptotic method) — this default is unchanged
+ * from before Phase 4. Pass `{ method: 'exact' }` to opt into the exact
+ * lattice-path p-value instead (`scipy.stats.ks_2samp(..., method='exact')`).
+ * Distinct from the one-sample {@link kolmogorovSmirnovTest}, which compares
+ * one sample to a CDF *function*.
  *
  * @param sample1 - first sample (non-empty)
  * @param sample2 - second sample (non-empty)
+ * @param opts    - `{ method: 'auto' | 'exact' | 'asymp' }` (default 'asymp')
  * @returns `{ statistic: D, pValue }`
  *
  * @example
- * kolmogorovSmirnov2Test([0.1, 0.4, 0.6], [0.3, 0.5, 0.9]) // { statistic, pValue }
+ * kolmogorovSmirnov2Test([0.1, 0.4, 0.6], [0.3, 0.5, 0.9]) // { statistic, pValue } (asymptotic)
+ * kolmogorovSmirnov2Test(a, b, { method: 'exact' }) // exact lattice-path p-value
  */
-export function kolmogorovSmirnov2Test(sample1: f64[], sample2: f64[]): KSTestResult {
+export function kolmogorovSmirnov2Test(
+  sample1: f64[],
+  sample2: f64[],
+  opts?: KS2Options
+): KSTestResult {
   const n1 = sample1.length;
   const n2 = sample2.length;
   if (n1 < 1 || n2 < 1) {
@@ -1446,6 +1579,13 @@ export function kolmogorovSmirnov2Test(sample1: f64[], sample2: f64[]): KSTestRe
     d = Math.max(d, Math.abs(i / n1 - j / n2));
   }
 
+  const method = opts?.method;
+  const useExact = method === 'exact' || (method === 'auto' && n1 * n2 <= 10000);
+  if (useExact) {
+    return { statistic: d, pValue: _ks2ExactPValue(n1, n2, d) };
+  }
+
+  // Default ('asymp', or opts omitted entirely) — unchanged prior behavior.
   const en = Math.sqrt((n1 * n2) / (n1 + n2));
   return { statistic: d, pValue: _kstwobignSf(en * d) };
 }

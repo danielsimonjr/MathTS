@@ -16293,6 +16293,7 @@ modules:
         - MWBootstrapResult
         - SWBootstrapResult
         - ChiSquareBootstrapResult
+        - KS2Options
         - VarianceTestResult
         - ProportionZResult
         - NormalityTestResult
@@ -33237,10 +33238,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1043
   totalModules: 80
-  totalLinesOfCode: 174852
+  totalLinesOfCode: 174992
   totalExports: 5053
   totalClasses: 56
-  totalInterfaces: 439
+  totalInterfaces: 440
   totalFunctions: 1642
   totalTypeGuards: 158
   totalEnums: 0

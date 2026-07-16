@@ -15,21 +15,27 @@ pre-existing `kendalltau` (already implementing this exact formula, algebraicall
 `z = 3τ√(n(n−1))/√(2(2n+5))`) and only renames `coefficient` → `tau` to match the `*Test`
 result-object naming convention used by `mannWhitneyTest`/`kolmogorovSmirnovTest`/etc.
 
-### Investigated (not applied) — exact small-n p-values for `mannWhitneyTest` / `kolmogorovSmirnov2Test`
+### Fixed — exact small-n Mann-Whitney p-value, now the default (Phase 4 Task 2b)
 
-Investigated adding an exact small-sample p-value path (U-distribution recurrence /
-KS lattice-path recurrence, exact when `n1·n2 ≤ 400`) to `mannWhitneyTest` and
-`kolmogorovSmirnov2Test`, per the scipy oracle (`mannwhitneyu(..., method='exact')`,
-`ks_2samp`). Not wired in: making the exact p the default for small n is a genuine regression
-against two pre-existing, *deliberately* pinned oracle tests —
-`functions/tests/gap-hypothesis-oracle.test.ts` pins the normal-approximation p for
-`mannWhitneyTest([1,2,3],[4,5,6])` into `(0.04, 0.055)` (scipy's exact p there is `0.1`, outside
-the bound), and `functions/tests/gap-stats-completeness.test.ts` pins the asymptotic
-`kstwobign` p for `kolmogorovSmirnov2Test` at `n=8,8`/`n=10,10` with an explicit comment
-choosing it deliberately over scipy's small-n exact (version-specific) p. Changing either
-default silently overturns a documented test design decision, so this was left for a human
-call rather than resolved unilaterally — see the session report for full detail and confirmed
-scipy values.
+`mannWhitneyTest` now returns the **exact** small-sample Mann-Whitney U-distribution
+two-sided p-value (the standard rank-sum null-distribution recurrence) whenever
+`n1·n2 ≤ 400` and no ties are present — matching `scipy.stats.mannwhitneyu(...,
+method='exact')` (pinned: `[1,2,3,4]` vs `[5,6,7,8]` → `p=0.02857142857142857`;
+`[1,2,3]` vs `[4,5,6]` → `p=0.1`). This was materially wrong before: the prior default
+(the normal approximation) put the second case's p in `(0.04, 0.055)`, ~2× off from the
+true exact value. Falls back to the normal approximation for `n1·n2 > 400` or when ties
+are present (matching scipy's own fallback). The one pinned oracle assertion this
+supersedes (`functions/tests/gap-hypothesis-oracle.test.ts`) is updated to the exact value.
+
+### Added — `kolmogorovSmirnov2Test` opt-in exact p-value (Phase 4 Task 2b)
+
+`kolmogorovSmirnov2Test` gains an optional third argument `{ method?: 'auto' | 'exact' |
+'asymp' }`. The default (`opts` omitted, or `'asymp'`) is byte-for-byte the prior
+asymptotic `kstwobign` behavior — the pre-existing, deliberately-pinned oracle test
+(`functions/tests/gap-stats-completeness.test.ts`) is untouched and stays green.
+`'exact'` computes the exact lattice-path p-value (Kim & Jennrich 1970), matching
+`scipy.stats.ks_2samp(..., method='exact')` (verified: n=5,5 → `p=0.873015873015873`;
+n=8,8 → `p=0.6601398601398599`). `'auto'` picks exact for `n1·n2 ≤ 10000`.
 
 ### Added — `fitDistribution` MLE parameter fitting (Phase 4 Task 1)
 

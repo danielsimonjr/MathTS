@@ -8045,7 +8045,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `VarianceTestResult`, `ProportionZResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
+- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `KS2Options`, `VarianceTestResult`, `ProportionZResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
 - Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`
 
 ---
@@ -15788,11 +15788,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1043   |
 | Total Modules           | 80     |
-| Total Lines of Code     | 174852 |
+| Total Lines of Code     | 174992 |
 | Total Exports           | 5053   |
 | Total Re-exports        | 1862   |
 | Total Classes           | 56     |
-| Total Interfaces        | 439    |
+| Total Interfaces        | 440    |
 | Total Functions         | 1642   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
