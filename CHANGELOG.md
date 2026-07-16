@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `stiffODESolver` diverged on stiff systems (fixed-point implicit Euler)
+
+`stiffODESolver` was fixed-step implicit Euler solved by fixed-point iteration, which cannot
+converge when `h·|∂f/∂y|` is large — exactly the stiff regime it targets: 71% error on
+`y'=-15y` (`5.23e-7` vs the exact `e⁻¹⁵=3.06e-7`), and `null` on the stiff (`-1000`) mode of
+`diag(-1,-1000)`. It now delegates to the proven L-stable Rosenbrock (ode23s) engine, which was
+extracted from `createSolveODE`'s factory closure to a shared module-level `rosenbrockSolve`
+(`functions/src/numeric/solveODE.ts`) so both `solveODE(..., {method:'Rosenbrock'})` and
+`stiffODESolver` run the same one engine. Pinned: `y'=-15y → e⁻¹⁵`; `diag(-1,-1000)` fast mode
+decays to `e⁻¹` with the stiff mode finite and ≈0.
+
 ### Fixed — `windowFunction` silently returned a rectangular window for unknown types
 
 `windowFunction(n, type)`'s `switch` `default` case was shared with `'rectangular'`/`'rect'` and

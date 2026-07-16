@@ -5453,6 +5453,7 @@ graph LR
 
 **Exports:**
 
+- Functions: `rosenbrockSolve`
 - Constants: `createSolveODE`
 
 ---
@@ -7956,6 +7957,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../numeric/solveODE.js` | `rosenbrockSolve` | Import |
 
 **Exports:**
 
@@ -15535,12 +15537,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1028   |
 | Total Modules           | 78     |
-| Total Lines of Code     | 172000 |
-| Total Exports           | 4967   |
+| Total Lines of Code     | 171999 |
+| Total Exports           | 4968   |
 | Total Re-exports        | 1802   |
 | Total Classes           | 56     |
 | Total Interfaces        | 410    |
-| Total Functions         | 1613   |
+| Total Functions         | 1614   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 523    |

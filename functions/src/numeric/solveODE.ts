@@ -65,6 +65,176 @@ type ForcingFunction = (
   y: MathNumericType | MathArray
 ) => MathNumericType | MathArray;
 
+/** Root-mean-square norm of a plain-number state vector, used for initial-step selection. */
+function _rmsNorm(v: number[]): number {
+  let s = 0;
+  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+  return Math.sqrt(s / v.length);
+}
+
+/**
+ * Solve the dense linear system `A·x = b` by Gaussian elimination with partial pivoting.
+ * `A` (n×n) and `b` (length n) are copied, not mutated. Used by the Rosenbrock stiff method,
+ * where the same iteration matrix W is solved against three right-hand sides per step.
+ */
+function _luSolve(A: number[][], b: number[]): number[] {
+  const n = b.length;
+  const M = A.map((r) => r.slice());
+  const x = b.slice();
+  for (let k = 0; k < n; k++) {
+    let piv = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(M[i][k]) > Math.abs(M[piv][k])) piv = i;
+    [M[k], M[piv]] = [M[piv], M[k]];
+    [x[k], x[piv]] = [x[piv], x[k]];
+    const akk = M[k][k];
+    for (let i = k + 1; i < n; i++) {
+      const factor = M[i][k] / akk;
+      for (let j = k; j < n; j++) M[i][j] -= factor * M[k][j];
+      x[i] -= factor * x[k];
+    }
+  }
+  for (let i = n - 1; i >= 0; i--) {
+    let s = x[i];
+    for (let j = i + 1; j < n; j++) s -= M[i][j] * x[j];
+    x[i] = s / M[i][i];
+  }
+  return x;
+}
+
+/**
+ * Evaluate the forcing function and coerce the result to a plain-number array. A scalar ODE's
+ * state is internally the wrapped `[v]`, but a scalar `f` returns a bare number (JS coerces
+ * `-[v]`→`-v`), so every stiff-solver evaluation normalises the shape.
+ */
+function _fArr(f: ForcingFunction, t: number, y: number[]): number[] {
+  const r = f(t, y);
+  return (Array.isArray(r) ? r : [r]) as number[];
+}
+
+/** Finite-difference Jacobian ∂fᵢ/∂yⱼ of the forcing function at (t, y), for the stiff method. */
+function _fdJacobian(f: ForcingFunction, t: number, y: number[], f0: number[]): number[][] {
+  const n = y.length;
+  const J: number[][] = Array.from({ length: n }, () => new Array<number>(n));
+  for (let j = 0; j < n; j++) {
+    const eps = Math.max(1e-8, 1e-7 * Math.abs(y[j]));
+    const yj = y.slice();
+    yj[j] += eps;
+    const fj = _fArr(f, t, yj);
+    for (let i = 0; i < n; i++) J[i][j] = (fj[i] - f0[i]) / eps;
+  }
+  return J;
+}
+
+/**
+ * Rosenbrock stiff ODE solver — the linearly-implicit ode23s method (Shampine & Reichelt),
+ * L-stable, with an embedded error estimate for adaptive stepping. Unlike the explicit RK23/RK45
+ * methods, it stays stable on stiff systems (chemical kinetics, circuits, control) where explicit
+ * methods need vanishingly small steps or blow up. One finite-difference Jacobian and one LU
+ * factorisation of `W = I − h·γ·J` per step, reused for its three stage solves. Plain-number
+ * state only (the Jacobian/linear solve are numeric).
+ *
+ * This form omits the `h·γ·∂f/∂t` term, so it is exact-2nd-order for **autonomous** systems
+ * `f(y)`; for time-dependent `f(t, y)` it drops to 1st order (the adaptive stepper still holds
+ * the result to `tol`, just with more steps). The default maxIter is 1e5 for this reason.
+ *
+ * Module-level (not factory-nested) so it can be called directly both by `createSolveODE`'s
+ * `Rosenbrock` method branch and by `stiffODESolver` (`functions/src/typed/numeric.ts`) — a
+ * single shared engine instead of two divergent implementations.
+ */
+export function rosenbrockSolve(
+  f: ForcingFunction,
+  tspan: unknown[],
+  y0raw: unknown[],
+  options: ODEOptions = {}
+): { t: number[]; y: number[][] } {
+  const t0 = tspan[0] as number;
+  const tf = tspan[1] as number;
+  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
+    throw new Error('The "Rosenbrock" stiff method requires numeric tspan');
+  }
+  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
+    throw new Error('The "Rosenbrock" stiff method requires plain-number state (y0)');
+  }
+  const y0 = y0raw as number[];
+  const n = y0.length;
+  const dir = tf >= t0 ? 1 : -1;
+  const gamma = 1 / (2 + Math.SQRT2);
+  const c32 = 6 + Math.SQRT2;
+  const rtol = options.tol ? (options.tol as number) : 1e-4;
+  const atol = rtol * 1e-3;
+  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const span = Math.abs(tf - t0);
+
+  let t = t0;
+  let y = y0.slice();
+  // Initial step: Hairer heuristic, or the user's firstStep.
+  let h: number;
+  if (options.firstStep) {
+    h = dir * Math.abs(options.firstStep as number);
+  } else {
+    const f0 = f(t, y) as number[];
+    const d0 = _rmsNorm(y);
+    const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
+    h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
+  }
+
+  const tOut: number[] = [t];
+  const yOut: number[][] = [y.slice()];
+  let iter = 0;
+  const identityMinus = (J: number[][], hg: number): number[][] =>
+    J.map((row, i) => row.map((v, j) => (i === j ? 1 : 0) - hg * v));
+
+  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
+    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
+    const F0 = _fArr(f, t, y);
+    const J = _fdJacobian(f, t, y, F0);
+    const W = identityMinus(J, h * gamma);
+
+    const k1 = _luSolve(W, F0);
+    const y1 = y.map((yi, i) => yi + 0.5 * h * k1[i]);
+    const F1 = _fArr(f, t + 0.5 * h, y1);
+    const dk = _luSolve(
+      W,
+      F1.map((v, i) => v - k1[i])
+    );
+    const k2 = k1.map((v, i) => v + dk[i]);
+    const yNew = y.map((yi, i) => yi + h * k2[i]);
+    const F2 = _fArr(f, t + h, yNew);
+    const k3 = _luSolve(
+      W,
+      F2.map((v, i) => v - c32 * (k2[i] - F1[i]) - 2 * (k1[i] - F0[i]))
+    );
+
+    // Embedded error estimate and its scaled RMS norm.
+    let errNorm = 0;
+    for (let i = 0; i < n; i++) {
+      const err = (h / 6) * (k1[i] - 2 * k2[i] + k3[i]);
+      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
+      errNorm += (err / sc) ** 2;
+    }
+    errNorm = Math.sqrt(errNorm / n);
+
+    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
+      t += h;
+      y = yNew;
+      tOut.push(t);
+      yOut.push(y.slice());
+    }
+    // Step-size control (order-2 method → exponent 1/3), clamped to avoid wild swings.
+    h *= Math.min(4, Math.max(0.25, 0.9 * Math.pow(errNorm || 1e-10, -1 / 3)));
+    // Honour the same minStep/maxStep bounds as the RK paths (magnitude, sign preserved).
+    const maxStepR = options.maxStep as number | undefined;
+    const minStepR = options.minStep as number | undefined;
+    if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
+    else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
+    iter++;
+  }
+  if (iter >= maxIter) {
+    throw new Error('Maximum number of iterations reached, try changing options');
+  }
+  return { t: tOut, y: yOut };
+}
+
 export const createSolveODE = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
@@ -153,171 +323,10 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return true;
     }
 
-    /** Root-mean-square norm of a plain-number state vector, used for initial-step selection. */
-    function _rmsNorm(v: number[]): number {
-      let s = 0;
-      for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-      return Math.sqrt(s / v.length);
-    }
-
-    /**
-     * Solve the dense linear system `A·x = b` by Gaussian elimination with partial pivoting.
-     * `A` (n×n) and `b` (length n) are copied, not mutated. Used by the Rosenbrock stiff method,
-     * where the same iteration matrix W is solved against three right-hand sides per step.
-     */
-    function _luSolve(A: number[][], b: number[]): number[] {
-      const n = b.length;
-      const M = A.map((r) => r.slice());
-      const x = b.slice();
-      for (let k = 0; k < n; k++) {
-        let piv = k;
-        for (let i = k + 1; i < n; i++) if (Math.abs(M[i][k]) > Math.abs(M[piv][k])) piv = i;
-        [M[k], M[piv]] = [M[piv], M[k]];
-        [x[k], x[piv]] = [x[piv], x[k]];
-        const akk = M[k][k];
-        for (let i = k + 1; i < n; i++) {
-          const factor = M[i][k] / akk;
-          for (let j = k; j < n; j++) M[i][j] -= factor * M[k][j];
-          x[i] -= factor * x[k];
-        }
-      }
-      for (let i = n - 1; i >= 0; i--) {
-        let s = x[i];
-        for (let j = i + 1; j < n; j++) s -= M[i][j] * x[j];
-        x[i] = s / M[i][i];
-      }
-      return x;
-    }
-
-    /**
-     * Evaluate the forcing function and coerce the result to a plain-number array. A scalar ODE's
-     * state is internally the wrapped `[v]`, but a scalar `f` returns a bare number (JS coerces
-     * `-[v]`→`-v`), so every stiff-solver evaluation normalises the shape.
-     */
-    function _fArr(f: ForcingFunction, t: number, y: number[]): number[] {
-      const r = f(t, y);
-      return (Array.isArray(r) ? r : [r]) as number[];
-    }
-
-    /** Finite-difference Jacobian ∂fᵢ/∂yⱼ of the forcing function at (t, y), for the stiff method. */
-    function _fdJacobian(f: ForcingFunction, t: number, y: number[], f0: number[]): number[][] {
-      const n = y.length;
-      const J: number[][] = Array.from({ length: n }, () => new Array<number>(n));
-      for (let j = 0; j < n; j++) {
-        const eps = Math.max(1e-8, 1e-7 * Math.abs(y[j]));
-        const yj = y.slice();
-        yj[j] += eps;
-        const fj = _fArr(f, t, yj);
-        for (let i = 0; i < n; i++) J[i][j] = (fj[i] - f0[i]) / eps;
-      }
-      return J;
-    }
-
-    /**
-     * Rosenbrock stiff ODE solver — the linearly-implicit ode23s method (Shampine & Reichelt),
-     * L-stable, with an embedded error estimate for adaptive stepping. Unlike the explicit RK23/RK45
-     * methods, it stays stable on stiff systems (chemical kinetics, circuits, control) where explicit
-     * methods need vanishingly small steps or blow up. One finite-difference Jacobian and one LU
-     * factorisation of `W = I − h·γ·J` per step, reused for its three stage solves. Plain-number
-     * state only (the Jacobian/linear solve are numeric).
-     *
-     * This form omits the `h·γ·∂f/∂t` term, so it is exact-2nd-order for **autonomous** systems
-     * `f(y)`; for time-dependent `f(t, y)` it drops to 1st order (the adaptive stepper still holds
-     * the result to `tol`, just with more steps). The default maxIter is 1e5 for this reason.
-     */
-    function _rosenbrock(
-      f: ForcingFunction,
-      tspan: unknown[],
-      y0raw: unknown[],
-      options: ODEOptions
-    ): ODESolution {
-      const t0 = tspan[0] as number;
-      const tf = tspan[1] as number;
-      if (!(typeof t0 === 'number' && typeof tf === 'number')) {
-        throw new Error('The "Rosenbrock" stiff method requires numeric tspan');
-      }
-      if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
-        throw new Error('The "Rosenbrock" stiff method requires plain-number state (y0)');
-      }
-      const y0 = y0raw as number[];
-      const n = y0.length;
-      const dir = tf >= t0 ? 1 : -1;
-      const gamma = 1 / (2 + Math.SQRT2);
-      const c32 = 6 + Math.SQRT2;
-      const rtol = options.tol ? (options.tol as number) : 1e-4;
-      const atol = rtol * 1e-3;
-      const maxIter = options.maxIter ? options.maxIter : 100_000;
-      const span = Math.abs(tf - t0);
-
-      let t = t0;
-      let y = y0.slice();
-      // Initial step: Hairer heuristic, or the user's firstStep.
-      let h: number;
-      if (options.firstStep) {
-        h = dir * Math.abs(options.firstStep as number);
-      } else {
-        const f0 = f(t, y) as number[];
-        const d0 = _rmsNorm(y);
-        const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
-        h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
-      }
-
-      const tOut: number[] = [t];
-      const yOut: number[][] = [y.slice()];
-      let iter = 0;
-      const identityMinus = (J: number[][], hg: number): number[][] =>
-        J.map((row, i) => row.map((v, j) => (i === j ? 1 : 0) - hg * v));
-
-      while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
-        if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
-        const F0 = _fArr(f, t, y);
-        const J = _fdJacobian(f, t, y, F0);
-        const W = identityMinus(J, h * gamma);
-
-        const k1 = _luSolve(W, F0);
-        const y1 = y.map((yi, i) => yi + 0.5 * h * k1[i]);
-        const F1 = _fArr(f, t + 0.5 * h, y1);
-        const dk = _luSolve(
-          W,
-          F1.map((v, i) => v - k1[i])
-        );
-        const k2 = k1.map((v, i) => v + dk[i]);
-        const yNew = y.map((yi, i) => yi + h * k2[i]);
-        const F2 = _fArr(f, t + h, yNew);
-        const k3 = _luSolve(
-          W,
-          F2.map((v, i) => v - c32 * (k2[i] - F1[i]) - 2 * (k1[i] - F0[i]))
-        );
-
-        // Embedded error estimate and its scaled RMS norm.
-        let errNorm = 0;
-        for (let i = 0; i < n; i++) {
-          const err = (h / 6) * (k1[i] - 2 * k2[i] + k3[i]);
-          const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
-          errNorm += (err / sc) ** 2;
-        }
-        errNorm = Math.sqrt(errNorm / n);
-
-        if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
-          t += h;
-          y = yNew;
-          tOut.push(t);
-          yOut.push(y.slice());
-        }
-        // Step-size control (order-2 method → exponent 1/3), clamped to avoid wild swings.
-        h *= Math.min(4, Math.max(0.25, 0.9 * Math.pow(errNorm || 1e-10, -1 / 3)));
-        // Honour the same minStep/maxStep bounds as the RK paths (magnitude, sign preserved).
-        const maxStepR = options.maxStep as number | undefined;
-        const minStepR = options.minStep as number | undefined;
-        if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
-        else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
-        iter++;
-      }
-      if (iter >= maxIter) {
-        throw new Error('Maximum number of iterations reached, try changing options');
-      }
-      return { t: tOut, y: yOut };
-    }
+    // _rmsNorm, _luSolve, _fArr, _fdJacobian, and the Rosenbrock engine itself now live at module
+    // scope as `rosenbrockSolve` (below) — they are pure numeric helpers with no factory-scope
+    // dependency, and `stiffODESolver` (functions/src/typed/numeric.ts) needs to call the same
+    // engine directly without depending on this factory instance.
 
     /**
      * WASM-accelerated Runge-Kutta inner loop for plain number vector ODEs.
@@ -775,10 +784,10 @@ export const createSolveODE = /* #__PURE__ */ factory(
       opt: ODEOptions
     ): ODESolution {
       const method = opt.method ? opt.method : 'RK45';
-      const methods: Record<string, typeof _rk23 | typeof _rk45 | typeof _rosenbrock> = {
+      const methods: Record<string, typeof _rk23 | typeof _rk45 | typeof rosenbrockSolve> = {
         RK23: _rk23,
         RK45: _rk45,
-        ROSENBROCK: _rosenbrock,
+        ROSENBROCK: rosenbrockSolve,
       };
       if (method.toUpperCase() in methods) {
         const methodOptions = { ...opt }; // clone the options object

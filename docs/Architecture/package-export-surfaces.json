@@ -2693,6 +2693,7 @@
       "rightLogShiftNumber",
       "risingFactorial",
       "romberg",
+      "rosenbrockSolve",
       "rotate",
       "rotateVector2D",
       "rotateVector3D",

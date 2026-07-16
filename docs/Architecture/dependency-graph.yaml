@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-16'
   totalFiles: 1028
   totalModules: 78
-  totalExports: 4967
+  totalExports: 4968
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -11373,6 +11373,9 @@ modules:
       workspaceDependencies: []
       exports:
         - createSolveODE
+        - rosenbrockSolve
+      functions:
+        - rosenbrockSolve
       constants:
         - createSolveODE
   functions/plain:
@@ -16310,6 +16313,9 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+        - file: ../numeric/solveODE.js
+          imports:
+            - rosenbrockSolve
       workspaceDependencies: []
       exports:
         - findRoot
@@ -32661,11 +32667,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1028
   totalModules: 78
-  totalLinesOfCode: 172000
-  totalExports: 4967
+  totalLinesOfCode: 171999
+  totalExports: 4968
   totalClasses: 56
   totalInterfaces: 410
-  totalFunctions: 1613
+  totalFunctions: 1614
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1535

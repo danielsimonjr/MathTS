@@ -1887,7 +1887,10 @@
     "functions/src/set/setPowerset.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyCore.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
-    "functions/src/numeric/solveODE.ts": ["functions/src/factories/index.ts"],
+    "functions/src/numeric/solveODE.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],

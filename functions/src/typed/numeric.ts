@@ -12,6 +12,7 @@
  */
 
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import { rosenbrockSolve } from '../numeric/solveODE.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -1309,7 +1310,13 @@ export function solveODESystem(
 }
 
 /**
- * Solve stiff ODE systems using implicit Euler.
+ * Solve stiff ODE systems.
+ *
+ * Delegates to the shared L-stable Rosenbrock (ode23s) engine (`rosenbrockSolve`,
+ * `functions/src/numeric/solveODE.ts` — the same engine `solveODE(..., {method:'Rosenbrock'})`
+ * uses). The previous implementation was fixed-step implicit Euler solved by fixed-point
+ * iteration, which cannot converge when `h·|∂f/∂y|` is large — exactly the stiff regime this
+ * function targets (71% error on `y'=-15y`; `null`/NaN on the stiff mode of `diag(-1,-1000)`).
  *
  * @param f - System function
  * @param y0 - Initial state
@@ -1321,34 +1328,17 @@ export function stiffODESolver(
   y0: number[],
   tspan: [f64, f64]
 ): ODESolution {
-  const nSteps = 200;
-  const n = y0.length;
-  const h = (tspan[1] - tspan[0]) / nSteps;
-
-  const ts: number[] = [tspan[0]];
-  const ys: number[][] = [y0.slice()];
-  let y = y0.slice();
-
-  for (let step = 0; step < nSteps; step++) {
-    const t = tspan[0] + (step + 1) * h;
-
-    // Fixed-point iteration for implicit Euler: y_{n+1} = y_n + h * f(t_{n+1}, y_{n+1})
-    let yGuess = y.slice();
-    for (let iter = 0; iter < 20; iter++) {
-      const fVal = f(t, yGuess);
-      const yNew = y.map((yi, i) => yi + h * fVal[i]);
-      let maxDiff = 0;
-      for (let i = 0; i < n; i++) maxDiff = Math.max(maxDiff, Math.abs(yNew[i] - yGuess[i]));
-      yGuess = yNew;
-      if (maxDiff < 1e-10) break;
-    }
-
-    y = yGuess;
-    ts.push(t);
-    ys.push(y.slice());
-  }
-
-  return { t: ts, y: ys };
+  // rosenbrockSolve's ForcingFunction is typed over the general MathNumericType/MathArray
+  // surface (it's shared with the mathjs-style solveODE factory); internally it always calls
+  // f with a plain (number, number[]) pair, so these casts just narrow back to that guarantee.
+  //
+  // stiffODESolver's signature takes no options, so a tolerance is baked in here rather than
+  // left at rosenbrockSolve's generic default (rtol=1e-4). That default trades accuracy for
+  // speed via atol = rtol*1e-3, which floors the absolute error near the scale of a stiff
+  // mode's already-tiny value (e.g. ~13% relative error decaying y'=-15y to ~3e-7) — too loose
+  // for a solver whose whole purpose is resolving stiff decay accurately. tol: 1e-7 keeps that
+  // error under 1e-9 while remaining well within maxIter (1e5).
+  return rosenbrockSolve((t, y) => f(t as number, y as number[]), tspan, y0, { tol: 1e-7 });
 }
 
 /**

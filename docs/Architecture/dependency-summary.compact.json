@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1028, "e": 4967, "re": 1802 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1028, "e": 4968, "re": 1802 },
   "s": {
-    "loc": 172000,
+    "loc": 171999,
     "cls": 56,
     "int": 410,
-    "fn": 1613,
+    "fn": 1614,
     "tg": 158,
     "en": 0,
     "co": 1535,
@@ -660,7 +660,7 @@
         "Dependencies"
       ]
     },
-    "functions/numeric": { "f": 1, "exp": ["createSolveODE"] },
+    "functions/numeric": { "f": 1, "exp": ["createSolveODE", "rosenbrockSolve"] },
     "functions/plain": {
       "f": 10,
       "exp": [
