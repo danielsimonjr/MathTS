@@ -52,8 +52,8 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 - **Tests import built `dist/`, not `src/`.** Rebuild the package (`npx turbo build --filter=…`) before
   running its `vitest`, or use `npm run test` (through turbo). A stale `dist/` = false pass/fail.
 - **New public exports must be added to the curated table in `docs/reference/functions.md`** — a
-  `docs-reference-completeness.test.ts` gate fails otherwise. Then regenerate: `npm run docs:functions`
-  - `npm run docs:deps`. Generated docs are generator-owned; never hand-edit.
+  `docs-reference-completeness.test.ts` gate fails otherwise. Then regenerate with `npm run docs:functions`
+  and `npm run docs:deps`. Generated docs are generator-owned; never hand-edit.
 - **The pre-commit hook is slow** (build:wasm + docs:deps + lint-staged/prettier). Allow ~540000ms on
   `git commit`. It also regenerates and folds `docs/Architecture/*` + `functions.md`-family files into
   the commit — expected, not scope creep.
@@ -74,11 +74,13 @@ logged in as `danielsimonjr`).
 
 ## Forked dependencies
 
-`typed-function` and `workerpool` are **already standalone forks** — `~/danie/github/{typed-function,
-workerpool}` + github.com/danielsimonjr/_, consumed by the `packages/_`wrappers via bare`github:`refs. Daniel granted (2026-07-16) standing authority to manage/publish them without per-change
-approval. Two publishes are pending his go (typed-function`5.0.0-alpha.3`; workerpool types-fix on an
-unmerged branch); first-party integration is unblocked but an ADR-level call. See `TODO.md` →
-"Forked dependency libs".
+`typed-function` and `workerpool` are **already standalone forks** — local at
+`~/danie/github/{typed-function,workerpool}`, remote at `github.com/danielsimonjr/{typed-function,
+workerpool}` — consumed by the wrapper packages under `packages/` via bare `github:` refs. Daniel
+granted (2026-07-16) standing authority to manage/publish them without per-change approval. Two
+publishes are pending his go (`typed-function@5.0.0-alpha.3`; `workerpool` types-fix on an unmerged
+branch); first-party integration is unblocked but an ADR-level call. See `TODO.md` → "Forked
+dependency libs".
 
 ## Where to look
 
