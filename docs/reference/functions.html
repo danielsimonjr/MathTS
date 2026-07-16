@@ -1621,9 +1621,12 @@
       for the `n ≲ 20` this targets) and solves it with `linsolve`. `care`/`dare`
       both converge quadratically without needing a stabilizing initial gain (the
       natural starting point is not always stabilizing — e.g. the classic
-      double-integrator `A = [[0,1],[0,0]]` is only marginally stable) or complex
-      eigenvectors (this codebase's `eig` only returns real eigenvector columns).
-      All three return the (numerically symmetrized) stabilizing solution.
+      double-integrator `A = [[0,1],[0,0]]` is only marginally stable), avoiding the
+      Hamiltonian pencil's complex eigenvectors entirely. (As of 2026-07, the matrix
+      package's `eig` DOES expose complex eigenvectors — see `EigResult.vectorsIm`
+      — but `care`/`dare` still use the matrix sign function rather than an
+      eigenvector basis.) All three return the (numerically symmetrized) stabilizing
+      solution.
 
       Pinned vs scipy: `care([[0,1],[0,0]], [[0],[1]], [[1,0],[0,1]], [[1]])` →
       `[[√3, 1], [1, √3]]` (matches `scipy.linalg.solve_continuous_are`);
@@ -2856,27 +2859,27 @@
 
       All return structured result objects.
 
-      | Function                                   | Returns                 | Description                                                                                                                                                                          |
-      | ------------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-      | `studentTTest(sample1[, sample2])`         | `TTestResult`           | One/two-sample t-test                                                                                                                                                                |
-      | `chiSquareTest(observed, expected)`        | `ChiSquareResult`       | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V |
-      | `anova(groups)`                            | `AnovaResult`           | One-way ANOVA                                                                                                                                                                        |
-      | `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`          | K-S test                                                                                                                                                                             |
-      | `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult`     | Mann–Whitney U test                                                                                                                                                                  |
-      | `shapiroWilkTest(sample)`                  | `ShapiroWilkResult`     | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                              |
-      | `principalComponentAnalysis(data[, k])`    | `PCAResult`             | PCA                                                                                                                                                                                  |
-      | `fTest(x, y)`                              | `FTestResult`           | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                               |
-      | `jarqueBera(x)`                            | `JarqueBeraResult`      | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                          |
-      | `kruskalWallis(...groups)`                 | `KruskalResult`         | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                          |
-      | `wilcoxon(x[, y])`                         | `WilcoxonResult`        | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`                                                                                |
-      | `fisherExact(table)`                       | `FisherExactResult`     | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                             |
-      | `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]`     | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                         |
-      | `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                     |
+      | Function                                   | Returns                 | Description                                                                                                                                                                                                    |
+      | ------------------------------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+      | `studentTTest(sample1[, sample2])`         | `TTestResult`           | One/two-sample t-test                                                                                                                                                                                          |
+      | `chiSquareTest(observed, expected)`        | `ChiSquareResult`       | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V                         |
+      | `anova(groups)`                            | `AnovaResult`           | One-way ANOVA                                                                                                                                                                                                  |
+      | `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`          | K-S test                                                                                                                                                                                                       |
+      | `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult`     | Mann–Whitney U test                                                                                                                                                                                            |
+      | `shapiroWilkTest(sample)`                  | `ShapiroWilkResult`     | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                                                        |
+      | `principalComponentAnalysis(data[, k])`    | `PCAResult`             | PCA                                                                                                                                                                                                            |
+      | `fTest(x, y)`                              | `FTestResult`           | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         |
+      | `jarqueBera(x)`                            | `JarqueBeraResult`      | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    |
+      | `kruskalWallis(...groups)`                 | `KruskalResult`         | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    |
+      | `wilcoxon(x[, y])`                         | `WilcoxonResult`        | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`                                                                                                          |
+      | `fisherExact(table)`                       | `FisherExactResult`     | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       |
+      | `tukeyHSD(groups[, alpha])`                | `TukeyComparison[]`     | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   |
+      | `chi2Contingency(table[, opts])`           | `Chi2ContingencyResult` | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               |
       | `multipleTest(pValues, method)`            | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`; equivalent alias of `multipleComparison` (same algorithm) |
-      | `multipleComparison(pValues[, method])`    | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)               |
-      | `kendallTauTest(x, y)`                     | `KendallTauTestResult`  | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names |
-      | `mcnemar(table[, opts])`                   | `McNemarResult`         | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                     |
-      | `cochranQ(data)`                           | `CochranQResult`        | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                       |
+      | `multipleComparison(pValues[, method])`    | `number[]`              | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)                                         |
+      | `kendallTauTest(x, y)`                     | `KendallTauTestResult`  | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names                           |
+      | `mcnemar(table[, opts])`                   | `McNemarResult`         | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                                               |
+      | `cochranQ(data)`                           | `CochranQResult`        | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                                                 |
 
       ### Details
 

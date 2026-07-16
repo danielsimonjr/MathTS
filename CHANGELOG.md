@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `eig` exposes complex eigenvectors via `vectorsIm`
+
+`matrix/src/operations/eig.ts`'s JAMA-derived `orthes`/`hqr2` solver already computes complex
+eigenvectors internally (EISPACK convention: real/imaginary parts share two adjacent columns of the
+real transform `V`), but the assembly loop dropped them, emitting an all-zero column for every
+complex-conjugate eigenvalue pair. `EigResult` gained a new additive field `vectorsIm: number[][]`
+(imaginary parts, same shape as `vectors`); for a complex-conjugate pair at indices `j`/`j+1`,
+`vectors[j]` holds the real part and `vectorsIm[j]`/`vectorsIm[j+1]` the `+`/`-` imaginary parts,
+unit-normalized by the complex 2-norm. `vectors[j]` (real eigenvalues unaffected) now carries the
+real part instead of an all-zero column for complex eigenvalues — strictly additive/more-informative,
+not a behavior change for any existing real-spectrum consumer. New
+`matrix/tests/eig-complex-eigenvectors-oracle.test.ts` pins the implementation-independent complex
+residual `‖A v − λ v‖ ≈ 0` (not component values, since eigenvectors are only defined up to a complex
+scalar) for `{i,−i}` and `{i,−i,3+i,3−i}` spectra, plus unit-norm/non-triviality and symmetric
+back-compat checks. Full `matrix`/`tensor`/`autograd`/`functions` suites re-verified green (no
+downstream consumer needed changes — `sqrtm`/`logm`/`matrixPower`/`jordanForm` all throw on complex
+eigenvalues before touching `.vectors`). Unblocks a clean `funm`/`care` off the eigenvector basis
+(not wired up in this change).
+
 ### Changed — unified duplicate `multipleComparison`/`multipleTest` implementation
 
 `multipleComparison` (`functions/src/typed/hypothesis.ts`) and `multipleTest`

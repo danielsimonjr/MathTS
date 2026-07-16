@@ -21,7 +21,7 @@ import { eig, eigvals, powerIteration, type EigResult, type EigOptions } from '.
 export async function eigWasm(matrix: number[][], options?: EigOptions): Promise<EigResult> {
   const n = matrix.length;
   if (n === 0) {
-    return { values: [], vectors: [], isSymmetric: true };
+    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
   }
   for (let i = 0; i < n; i++) {
     if (matrix[i].length !== n) {

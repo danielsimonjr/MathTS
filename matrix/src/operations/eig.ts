@@ -13,8 +13,24 @@ import { isSymmetric, eye } from './common.js';
 export interface EigResult {
   /** Eigenvalues (may be complex for non-symmetric matrices) */
   values: Array<{ re: number; im: number }>;
-  /** Eigenvectors as columns (each column is an eigenvector) */
+  /**
+   * Eigenvectors as columns (each column is an eigenvector). For a real
+   * eigenvalue this is the full (real) eigenvector, unit-normalised. For a
+   * complex-conjugate eigenvalue pair this holds the REAL PART of the
+   * corresponding complex eigenvector — see {@link vectorsIm} for the
+   * imaginary part.
+   */
   vectors: number[][];
+  /**
+   * Imaginary parts of the eigenvector columns (same shape as {@link vectors}).
+   * All-zero for real eigenvalues. For a complex-conjugate eigenvalue pair at
+   * indices `j`/`j+1`, the full complex eigenvectors are
+   * `vectors[j] + i*vectorsIm[j]` (for `values[j]`) and
+   * `vectors[j+1] - i*vectorsIm[j] === vectors[j+1] + i*vectorsIm[j+1]` (for
+   * the conjugate `values[j+1]`), each unit-normalised by the complex 2-norm
+   * `sqrt(sum(re_i^2 + im_i^2))`.
+   */
+  vectorsIm: number[][];
   /** Whether the matrix was symmetric */
   isSymmetric: boolean;
 }
@@ -126,13 +142,16 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
 /**
  * General real non-symmetric eigendecomposition (JAMA `orthes` + `hqr2`).
  *
- * Returns an {@link EigResult} matching the existing JS contract:
+ * Returns an {@link EigResult}:
  *   - `values[j]` = eigenvalue `j` ({ re, im }), real eigenvalues first within
  *     each Schur block, complex-conjugate pairs adjacent;
- *   - `vectors[j]` = eigenvector `j` as an array of `n` real components
- *     (unit-normalised). Complex-eigenvalue columns are returned as the zero
- *     vector — the real `number[][]` contract cannot represent complex
- *     eigenvectors (the WASM kernel and the old path do the same).
+ *   - `vectors[j]` / `vectorsIm[j]` = the real / imaginary parts of
+ *     eigenvector `j`, unit-normalised (by the real 2-norm for real
+ *     eigenvalues, by the complex 2-norm for complex-conjugate pairs). JAMA's
+ *     `hqr2` already computes complex eigenvectors internally (EISPACK
+ *     convention: the real and imaginary parts share two adjacent columns of
+ *     the real transform `V`); `vectorsIm` exposes them instead of dropping
+ *     them.
  *
  * The input `A` is not mutated.
  */
@@ -508,12 +527,14 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
   for (let j = 0; j < nn; j++) values.push({ re: d[j], im: e[j] });
 
   let vectors: number[][];
+  let vectorsIm: number[][];
   if (computeVectors) {
     vectors = [];
-    for (let j = 0; j < nn; j++) {
-      const vec = new Array<number>(nn).fill(0);
+    vectorsIm = [];
+    for (let j = 0; j < nn; ) {
       if (e[j] === 0.0) {
         // Real eigenvalue: emit the (real) eigenvector column, unit-normalised.
+        const vec = new Array<number>(nn).fill(0);
         let colNorm = 0.0;
         for (let i = 0; i < nn; i++) colNorm += V[i * nn + j] * V[i * nn + j];
         colNorm = Math.sqrt(colNorm);
@@ -522,15 +543,49 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
         } else {
           for (let i = 0; i < nn; i++) vec[i] = V[i * nn + j];
         }
+        vectors.push(vec);
+        vectorsIm.push(new Array<number>(nn).fill(0));
+        j++;
+      } else {
+        // Complex-conjugate pair at (j, j+1): hqr2 guarantees e[j] > 0 and
+        // e[j+1] === -e[j] < 0 here, with the real/imaginary parts of the
+        // eigenvector for values[j] = d[j] + i*e[j] stored in adjacent columns
+        // V[:,j] (real) and V[:,j+1] (imaginary). The conjugate eigenvector
+        // (for values[j+1] = d[j] - i*e[j]) shares the same real part with
+        // negated imaginary part. Unit-normalise by the complex 2-norm.
+        const vecRe = new Array<number>(nn).fill(0);
+        const vecIm = new Array<number>(nn).fill(0);
+        let colNorm = 0.0;
+        for (let i = 0; i < nn; i++) {
+          const re = V[i * nn + j];
+          const im = V[i * nn + (j + 1)];
+          colNorm += re * re + im * im;
+        }
+        colNorm = Math.sqrt(colNorm);
+        if (colNorm > 1e-300) {
+          for (let i = 0; i < nn; i++) {
+            vecRe[i] = V[i * nn + j] / colNorm;
+            vecIm[i] = V[i * nn + (j + 1)] / colNorm;
+          }
+        } else {
+          for (let i = 0; i < nn; i++) {
+            vecRe[i] = V[i * nn + j];
+            vecIm[i] = V[i * nn + (j + 1)];
+          }
+        }
+        vectors.push(vecRe);
+        vectorsIm.push(vecIm);
+        vectors.push(vecRe.slice());
+        vectorsIm.push(vecIm.map((x) => -x));
+        j += 2;
       }
-      // Complex eigenvalue: leave the zero vector (real contract cannot hold it).
-      vectors.push(vec);
     }
   } else {
     vectors = eye(nn);
+    vectorsIm = Array.from({ length: nn }, () => new Array<number>(nn).fill(0));
   }
 
-  return { values, vectors, isSymmetric: symmetric };
+  return { values, vectors, vectorsIm, isSymmetric: symmetric };
 }
 
 /**
@@ -560,7 +615,7 @@ export function eig(matrix: number[][] | Float64Array, options: EigOptions = {})
 
   const n = A.length;
   if (n === 0) {
-    return { values: [], vectors: [], isSymmetric: true };
+    return { values: [], vectors: [], vectorsIm: [], isSymmetric: true };
   }
 
   // Check dimensions
@@ -577,6 +632,7 @@ export function eig(matrix: number[][] | Float64Array, options: EigOptions = {})
     return {
       values: [{ re: A[0][0], im: 0 }],
       vectors: [[1]],
+      vectorsIm: [[0]],
       isSymmetric: symmetric,
     };
   }

@@ -96,9 +96,12 @@ or a documented scope limit worth revisiting.
 - [ ] **CAS breadth:** multivariate `expand`/`factor`; `cancel`/`rationalize`/`simplify` real transforms;
       repeated-root/irreducible `apart`; symbolic integration (by-parts/partial-frac/u-sub); `casExpand`/
       `casFactor` still pass-through.
-- [ ] **matrix `eig` complex eigenvectors:** returns only real eigenvector columns (zeroes complex-conjugate
-      pairs) — blocked the Hamiltonian-eigenvector `care` (worked around via matrix sign function) and would
-      simplify `funm`. Fix in the matrix package. M.
+- [x] ✅ **matrix `eig` complex eigenvectors — RESOLVED 2026-07-16.** `EigResult` gained an additive
+      `vectorsIm: number[][]` field; complex-conjugate pairs now emit `vectors[k] ± i·vectorsIm[k]`
+      (unit-normalized by the complex 2-norm) instead of an all-zero column, pinned against the
+      implementation-independent complex residual (`matrix/tests/eig-complex-eigenvectors-oracle.test.ts`).
+      `care`/`dare` still use the matrix sign function (not wired to the new field in this change) —
+      **remaining follow-up:** route `care`/`dare`/`funm` off the eigenvector basis now that it's available.
 - [ ] **Linalg extension:** rank-revealing QR (`qr` pivoting) + `rq`/`ql`/`lq`; `generalizedEig` QZ-hardening;
       sparse `svds`; preconditioners beyond Jacobi (ILU/IC); `condest`; `minres` optimal Givens form (O(k³) now).
 - [ ] **funm defective matrices:** Lagrange–Sylvester path throws on repeated/near-repeated eigenvalues of

@@ -1096,9 +1096,12 @@ regulator) and Kalman-filter design, complementing the existing continuous
 for the `n ≲ 20` this targets) and solves it with `linsolve`. `care`/`dare`
 both converge quadratically without needing a stabilizing initial gain (the
 natural starting point is not always stabilizing — e.g. the classic
-double-integrator `A = [[0,1],[0,0]]` is only marginally stable) or complex
-eigenvectors (this codebase's `eig` only returns real eigenvector columns).
-All three return the (numerically symmetrized) stabilizing solution.
+double-integrator `A = [[0,1],[0,0]]` is only marginally stable), avoiding the
+Hamiltonian pencil's complex eigenvectors entirely. (As of 2026-07, the matrix
+package's `eig` DOES expose complex eigenvectors — see `EigResult.vectorsIm`
+— but `care`/`dare` still use the matrix sign function rather than an
+eigenvector basis.) All three return the (numerically symmetrized) stabilizing
+solution.
 
 Pinned vs scipy: `care([[0,1],[0,0]], [[0],[1]], [[1,0],[0,1]], [[1]])` →
 `[[√3, 1], [1, √3]]` (matches `scipy.linalg.solve_continuous_are`);
