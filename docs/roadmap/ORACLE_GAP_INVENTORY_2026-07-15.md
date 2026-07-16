@@ -302,7 +302,12 @@ system solver `fsolve`/`root` (D2/O3, M) · scalar `minimize_scalar` Brent/golde
 Gauss–Kronrod `quad` + singular path fixing `nintegrate` (D4, M) · expose full `svd(U,S,V)` +`orth` on
 the `functions` surface (L4/L10, S). **Effort ≈ M total.**
 
-### Phase 2 — Optimization core
+### Phase 2 — Optimization core — ✅ RELEASED `functions@0.30.0` (2026-07-16)
+
+Shipped: `bfgs` (quasi-Newton + optional bounds), `nnls` + `lsqBounded`, `linprog` two-phase overload
+(equality/bounds/status; legacy signature preserved). Oracle-pinned vs scipy, tarball-verified.
+
+_(original scope below)_
 
 BFGS / L-BFGS-B quasi-Newton (O1, M) · bounded/robust LS + NNLS (O2/L5, M) · proper `linprog` two-phase
 simplex with equality/bounds/status, superseding the Phase-0 patch (O9, M/L). **≈ L.**

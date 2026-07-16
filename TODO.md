@@ -35,7 +35,10 @@ oracle-pinned, subagent-driven. Phase plan:
       `minimizeScalar` (Brent) · adaptive Gauss–Kronrod `quad` (+`nintegrate` singular fix ~1.7e-6→1e-10)
       · full `svd` + `orth` exposed. 6 tasks subagent-driven, oracle-pinned vs scipy/numpy, verified in
       the published tarball. (Note: matrix `svd` is synchronous, not async.)
-- [ ] **Phase 2 — Optimization core.** BFGS/L-BFGS-B · bounded LS + NNLS · proper `linprog` (two-phase).
+- [x] **Phase 2 — Optimization core — ✅ RELEASED `functions@0.30.0`** (2026-07-16). `bfgs` quasi-Newton
+      (optional box projection) · `nnls` + `lsqBounded` · `linprog` two-phase overload (equality/bounds/
+      status; legacy signature preserved). 3 tasks subagent-driven, oracle-pinned vs scipy, tarball-verified.
+      Follow-up: linprog free-variable (lower=null) bounds path untested.
 - [ ] **Phase 3 — Regression & ML.** multiple OLS + inference · ridge/lasso · logistic/GLM · DBSCAN+kNN
       · Gaussian KDE · χ² contingency · multiple-testing correction.
 - [ ] **Phase 4 — Statistics inference.** distribution MLE `.fit` · exact Mann–Whitney/KS p-values ·
