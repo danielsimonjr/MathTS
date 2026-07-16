@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.4.6
+
+### Patch Changes
+
+- Remove dead `statsVariance`/`statsStd` WASM `AsModule` type declarations
+
+  The internal `AsModule` interface in `matrix/src/backends/WasmLoader.ts` declared
+  `statsVariance`/`statsStd` kernel signatures whose JS call paths were retired 2026-07-15
+  (the corrected two-pass `variance`/`std` in core). No live caller referenced them. TS-only
+  cleanup: the `.wasm` binary and its SHA-384 manifest are unaffected, and the
+  general-library `array_variance`/`array_stddev` kernels are retained.
+
 ## 0.4.5
 
 ### Patch Changes

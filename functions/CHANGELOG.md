@@ -1,5 +1,29 @@
 # @danielsimonjr/mathts-functions
 
+## 0.37.0
+
+### Minor Changes
+
+- `cancel` now performs real univariate symbolic rational cancellation
+
+  `cancel(expr)` reduces univariate integer-coefficient rationals via polynomial GCD
+  (`(x^2-1)/(x-1)` → `x + 1`, `(2*x^2-2)/(2*x-2)` → `x + 1`, `(x^3-1)/(x^2-1)` →
+  `(x^2+x+1)/(x+1)`), matching `sympy.cancel`, including shared numeric-content
+  cancellation. Numeric-fraction, identical-string, multivariate and non-integer paths are
+  unchanged.
+
+  Also in this release: `multipleComparison` and `multipleTest` now share one
+  Bonferroni/Holm/Benjamini-Hochberg implementation (both public names and signatures
+  unchanged, results identical); cross-reference docs clarify that `chiSquareTest` and
+  `chi2Contingency` are complementary, not redundant. New implementation-independent
+  oracles pin `csd`/`coherence` invariants and `linprog`'s free-variable (`lower=null`)
+  bounds path (both were already correct — regression guards).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.4.6
+
 ## 0.36.0
 
 ### Minor Changes
