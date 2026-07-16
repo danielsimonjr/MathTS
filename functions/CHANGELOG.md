@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.32.0
+
+### Minor Changes
+
+- Phase 4 statistics inference (oracle-gap roadmap): `fitDistribution` (MLE fits for normal/exponential/lognormal/poisson/gamma, gamma via the digamma shape equation); **exact small-n Mann–Whitney p-values by default** (was the normal approximation, materially wrong for small n — matches scipy `method='exact'`), a `kolmogorovSmirnov2Test` opt-in `method:'exact'|'asymp'|'auto'` (asymptotic default unchanged), and `kendallTauTest` (τ + p-value); time-series inference `pacf` (Levinson–Durbin), `ljungBox`, `durbinWatson`, `adfuller` (ADF unit-root, MacKinnon approximate p); noncentral distribution CDFs `noncentralChi2CDF`/`noncentralFCDF`/`noncentralTCDF`; circular statistics `circmean`/`circstd`/`circvar` + `vonMisesPDF`; and paired-categorical tests `mcnemar`/`cochranQ`. All oracle-pinned vs scipy/statsmodels.
+
 ## 0.31.0
 
 ### Minor Changes
