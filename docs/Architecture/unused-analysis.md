@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 240
+- **Potentially unused exports**: 243
   - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 240
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 243
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -241,6 +241,12 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/signal/fft-core-f64.ts`
 
 - `bitReverse` (function) — 1 in-file ref
+
+### `functions/src/signal-filter-extra.ts`
+
+- `zpkToTf` (function) — 1 in-file ref
+- `cAdd` (constant) — 5 in-file refs
+- `cSub` (constant) — 11 in-file refs
 
 ### `functions/src/type/bignumber/BigNumber.ts`
 

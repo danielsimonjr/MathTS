@@ -95,7 +95,9 @@ export function lfilterZi(b: Vec, a: Vec): number[] {
     // (I − Aᵀ) is singular ⇔ the denominator has a root at z = 1 (a pure integrator /
     // marginally-stable filter); the steady state is undefined. Fail with a clear message
     // instead of leaking inv's cryptic "determinant is zero".
-    throw new Error('lfilterZi: filter has a pole at z=1 (singular I − Aᵀ); steady-state zi is undefined');
+    throw new Error(
+      'lfilterZi: filter has a pole at z=1 (singular I − Aᵀ); steady-state zi is undefined'
+    );
   }
   const zi = Minv.map((row) => row.reduce((s, v, k) => s + v * B[k], 0));
   if (zi.some((v) => !Number.isFinite(v)))
@@ -124,22 +126,36 @@ export function filtfilt(b: Vec, a: Vec, x: Vec): number[] {
   const ext = [...left, ...xx, ...right];
   const zi = lfilterZi(bb, aa);
   // forward pass seeded with steady state for ext[0]
-  const fwd = lfilterState(bb, aa, ext, zi.map((v) => v * ext[0])).y;
+  const fwd = lfilterState(
+    bb,
+    aa,
+    ext,
+    zi.map((v) => v * ext[0])
+  ).y;
   // backward pass seeded with steady state for the (reversed) first sample
   const rev = fwd.slice().reverse();
-  const back = lfilterState(bb, aa, rev, zi.map((v) => v * rev[0])).y.reverse();
+  const back = lfilterState(
+    bb,
+    aa,
+    rev,
+    zi.map((v) => v * rev[0])
+  ).y.reverse();
   return back.slice(pad, pad + n);
 }
 
-// --- Butterworth IIR design (zpk → bilinear → transfer function) -----------------
+// --- IIR design shared plumbing (zpk analog prototype → frequency transform →
+// bilinear → transfer function). Reused by butter here and by cheby1/cheby2/ellip
+// in signal/iir-design.ts. ---------------------------------------------------
 
-const cAdd = (p: Complex, q: Complex): Complex => p.add(q);
-const cSub = (p: Complex, q: Complex): Complex => p.sub(q);
-const cMul = (p: Complex, q: Complex): Complex => p.multiply(q);
-const cDiv = (p: Complex, q: Complex): Complex => p.divide(q);
+export const cAdd = (p: Complex, q: Complex): Complex => p.add(q);
+export const cSub = (p: Complex, q: Complex): Complex => p.sub(q);
+export const cMul = (p: Complex, q: Complex): Complex => p.multiply(q);
+export const cDiv = (p: Complex, q: Complex): Complex => p.divide(q);
+/** Scale a Complex by a real number (`Complex.mul` only accepts `Scalar`, not `number`). */
+export const cScale = (p: Complex, s: number): Complex => cMul(p, new Complex(s, 0));
 
 /** Real polynomial coefficients (highest degree first) of ∏(x − rₖ). */
-function polyFromRoots(roots: Complex[]): number[] {
+export function polyFromRoots(roots: Complex[]): number[] {
   let c: Complex[] = [new Complex(1, 0)];
   for (const r of roots) {
     const next: Complex[] = Array.from({ length: c.length + 1 }, () => new Complex(0, 0));
@@ -152,37 +168,166 @@ function polyFromRoots(roots: Complex[]): number[] {
   return c.map((z) => z.re); // imaginary parts cancel for conjugate-symmetric root sets
 }
 
+/** Analog lowpass prototype: zeros, poles, gain (cutoff normalized to 1 rad/s). */
+export interface AnalogProto {
+  z: Complex[];
+  p: Complex[];
+  k: number;
+}
+
+export type FilterBtype = 'low' | 'high' | 'bandpass' | 'bandstop';
+
+function relativeDegree(z: Complex[], p: Complex[]): number {
+  const degree = p.length - z.length;
+  if (degree < 0) throw new Error('Improper transfer function: fewer poles than zeros');
+  return degree;
+}
+
+/** s → s/wo (scipy `lp2lp_zpk`). */
+function lp2lpZpk(z: Complex[], p: Complex[], k: number, wo: number): AnalogProto {
+  const degree = relativeDegree(z, p);
+  return {
+    z: z.map((zv) => cScale(zv, wo)),
+    p: p.map((pv) => cScale(pv, wo)),
+    k: k * Math.pow(wo, degree),
+  };
+}
+
+/** s → wo/s (scipy `lp2hp_zpk`). */
+function lp2hpZpk(z: Complex[], p: Complex[], k: number, wo: number): AnalogProto {
+  const degree = relativeDegree(z, p);
+  const woC = new Complex(wo, 0);
+  const zHp = z.map((zv) => cDiv(woC, zv));
+  for (let i = 0; i < degree; i++) zHp.push(new Complex(0, 0));
+  let prodZ = new Complex(1, 0);
+  for (const zv of z) prodZ = cMul(prodZ, zv.negate());
+  let prodP = new Complex(1, 0);
+  for (const pv of p) prodP = cMul(prodP, pv.negate());
+  return { z: zHp, p: p.map((pv) => cDiv(woC, pv)), k: k * cDiv(prodZ, prodP).re };
+}
+
+/** s → (s² + wo²)/(s·bw) (scipy `lp2bp_zpk`, "wideband" transform). */
+function lp2bpZpk(z: Complex[], p: Complex[], k: number, wo: number, bw: number): AnalogProto {
+  const degree = relativeDegree(z, p);
+  const wo2 = new Complex(wo * wo, 0);
+  const shift = (roots: Complex[]): Complex[] => {
+    const lp = roots.map((r) => cScale(r, bw / 2));
+    const plus = lp.map((r) => cAdd(r, cSub(cMul(r, r), wo2).sqrt()));
+    const minus = lp.map((r) => cSub(r, cSub(cMul(r, r), wo2).sqrt()));
+    return plus.concat(minus);
+  };
+  const zBp = shift(z);
+  for (let i = 0; i < degree; i++) zBp.push(new Complex(0, 0));
+  return { z: zBp, p: shift(p), k: k * Math.pow(bw, degree) };
+}
+
+/** s → (s·bw)/(s² + wo²) (scipy `lp2bs_zpk`, "wideband" transform). */
+function lp2bsZpk(z: Complex[], p: Complex[], k: number, wo: number, bw: number): AnalogProto {
+  const degree = relativeDegree(z, p);
+  const wo2 = new Complex(wo * wo, 0);
+  const bw2 = new Complex(bw / 2, 0);
+  const shift = (roots: Complex[]): Complex[] => {
+    const hp = roots.map((r) => cDiv(bw2, r));
+    const plus = hp.map((r) => cAdd(r, cSub(cMul(r, r), wo2).sqrt()));
+    const minus = hp.map((r) => cSub(r, cSub(cMul(r, r), wo2).sqrt()));
+    return plus.concat(minus);
+  };
+  const zBs = shift(z);
+  for (let i = 0; i < degree; i++) zBs.push(new Complex(0, wo));
+  for (let i = 0; i < degree; i++) zBs.push(new Complex(0, -wo));
+  let prodZ = new Complex(1, 0);
+  for (const zv of z) prodZ = cMul(prodZ, zv.negate());
+  let prodP = new Complex(1, 0);
+  for (const pv of p) prodP = cMul(prodP, pv.negate());
+  return { z: zBs, p: shift(p), k: k * cDiv(prodZ, prodP).re };
+}
+
+/** Tustin's bilinear transform of a zpk analog filter (scipy `bilinear_zpk`). */
+function bilinearZpk(z: Complex[], p: Complex[], k: number, fs: number): AnalogProto {
+  const degree = relativeDegree(z, p);
+  const fs2 = new Complex(2 * fs, 0);
+  const zZ = z.map((zv) => cDiv(cAdd(fs2, zv), cSub(fs2, zv)));
+  for (let i = 0; i < degree; i++) zZ.push(new Complex(-1, 0));
+  let prodZ = new Complex(1, 0);
+  for (const zv of z) prodZ = cMul(prodZ, cSub(fs2, zv));
+  let prodP = new Complex(1, 0);
+  for (const pv of p) prodP = cMul(prodP, cSub(fs2, pv));
+  return {
+    z: zZ,
+    p: p.map((pv) => cDiv(cAdd(fs2, pv), cSub(fs2, pv))),
+    k: k * cDiv(prodZ, prodP).re,
+  };
+}
+
+/** zpk → transfer-function coefficients (scipy `zpk2tf`). */
+export function zpkToTf(z: Complex[], p: Complex[], k: number): { b: number[]; a: number[] } {
+  return { b: polyFromRoots(z).map((v) => v * k), a: polyFromRoots(p) };
+}
+
+function validateWn(Wn: number | readonly number[], btype: FilterBtype): number[] {
+  const needsPair = btype === 'bandpass' || btype === 'bandstop';
+  const arr = Array.isArray(Wn) ? Wn.slice() : [Wn as number];
+  if (needsPair && arr.length !== 2)
+    throw new Error(`${btype} filter design requires Wn = [low, high]`);
+  if (!needsPair && arr.length !== 1)
+    throw new Error(`${btype} filter design requires a scalar Wn`);
+  for (const w of arr) {
+    if (!(w > 0 && w < 1)) throw new Error('Wn must satisfy 0 < Wn < 1 (normalized to Nyquist)');
+  }
+  if (needsPair && !(arr[0] < arr[1])) throw new Error('Wn[0] must be less than Wn[1]');
+  return arr;
+}
+
 /**
- * Butterworth IIR filter design — returns `{ b, a }` transfer-function coefficients.
- * `N` is the order, `Wn` the cutoff normalized to Nyquist (0..1). Lowpass only
- * (`btype='low'`, the common case). Matches `scipy.signal.butter(N, Wn)`.
+ * Digital IIR filter design pipeline shared by butter/cheby1/cheby2/ellip:
+ * pre-warp `Wn` → frequency-transform the analog lowpass prototype (`proto`,
+ * cutoff normalized to 1 rad/s) to the requested `btype` → bilinear transform →
+ * zpk2tf. Matches `scipy.signal.iirfilter`'s internal pipeline (fs = 2 convention).
  */
-export function butter(N: number, Wn: number): { b: number[]; a: number[] } {
-  if (!Number.isInteger(N) || N < 1) throw new Error('butter: order N must be a positive integer');
-  if (!(Wn > 0 && Wn < 1))
-    throw new Error('butter: Wn must satisfy 0 < Wn < 1 (normalized to Nyquist)');
-  // analog prototype poles (buttap): pₖ = −exp(jπ·mₖ/(2N)), mₖ = −N+1, −N+3, …, N−1
-  const ap: Complex[] = [];
+export function analogToDigital(
+  proto: AnalogProto,
+  Wn: number | readonly number[],
+  btype: FilterBtype
+): { b: number[]; a: number[] } {
+  const WnArr = validateWn(Wn, btype);
+  const fs = 2;
+  const warped = WnArr.map((w) => 2 * fs * Math.tan((Math.PI * w) / fs));
+  let { z, p, k } = proto;
+  if (btype === 'low') {
+    ({ z, p, k } = lp2lpZpk(z, p, k, warped[0]));
+  } else if (btype === 'high') {
+    ({ z, p, k } = lp2hpZpk(z, p, k, warped[0]));
+  } else {
+    const bw = warped[1] - warped[0];
+    const wo = Math.sqrt(warped[0] * warped[1]);
+    ({ z, p, k } = btype === 'bandpass' ? lp2bpZpk(z, p, k, wo, bw) : lp2bsZpk(z, p, k, wo, bw));
+  }
+  ({ z, p, k } = bilinearZpk(z, p, k, fs));
+  return zpkToTf(z, p, k);
+}
+
+/** Analog Butterworth prototype poles (scipy `buttap`): all-pole, no zeros. */
+function buttap(N: number): AnalogProto {
+  const p: Complex[] = [];
   for (let k = 0; k < N; k++) {
     const m = -N + 1 + 2 * k;
     const theta = (Math.PI * m) / (2 * N);
-    ap.push(new Complex(-Math.cos(theta), -Math.sin(theta)));
+    p.push(new Complex(-Math.cos(theta), -Math.sin(theta)));
   }
-  // lowpass warp (scipy fs = 2): warped = 2·fs·tan(π·Wn/fs) = 4·tan(π·Wn/2)
-  const fs = 2;
-  const warped = 2 * fs * Math.tan((Math.PI * Wn) / fs);
-  const pLp = ap.map((p) => cMul(p, new Complex(warped, 0))); // lp2lp poles
-  const kLp = Math.pow(warped, N); // analog gain (no zeros)
-  // bilinear transform (fs2 = 2·fs = 4): zd = (fs2 + s)/(fs2 − s)
-  const fs2 = new Complex(2 * fs, 0);
-  const pd = pLp.map((p) => cDiv(cAdd(fs2, p), cSub(fs2, p)));
-  const zd: Complex[] = Array.from({ length: N }, () => new Complex(-1, 0)); // zeros at Nyquist
-  // bilinear gain: k_d = k · Re(∏(fs2 − z) / ∏(fs2 − p)); zeros are at infinity → ∏ = 1
-  let denom = new Complex(1, 0);
-  for (const p of pLp) denom = cMul(denom, cSub(fs2, p));
-  const kd = kLp / denom.re;
-  // zpk → tf
-  const b = polyFromRoots(zd).map((v) => v * kd);
-  const a = polyFromRoots(pd);
-  return { b, a };
+  return { z: [], p, k: 1 };
+}
+
+/**
+ * Butterworth IIR filter design — returns `{ b, a }` transfer-function coefficients.
+ * `N` is the order, `Wn` the cutoff (scalar) or `[low, high]` band edges, normalized
+ * to Nyquist (0..1). `btype` defaults to `'low'` (matches the original 2-arg call
+ * unchanged). Matches `scipy.signal.butter(N, Wn, btype)`.
+ */
+export function butter(
+  N: number,
+  Wn: number | readonly number[],
+  btype: FilterBtype = 'low'
+): { b: number[]; a: number[] } {
+  if (!Number.isInteger(N) || N < 1) throw new Error('butter: order N must be a positive integer');
+  return analogToDigital(buttap(N), Wn, btype);
 }

@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Chebyshev/elliptic IIR design (Phase 6 Task 2)
+
+Added `functions/src/signal/iir-design.ts`, exported from `@danielsimonjr/mathts-functions`:
+
+- `cheby1(N, rp, Wn, btype?)` / `cheby2(N, rs, Wn, btype?)` — Chebyshev Type I (equiripple
+  passband) / Type II (equiripple stopband, monotone passband) IIR design, built on the
+  existing `butter` analog-prototype → frequency-transform → bilinear pipeline (now shared via
+  `signal-filter-extra.ts`'s `analogToDigital`).
+- `ellip(N, rp, rs, Wn, btype?)` — elliptic (Cauer) IIR design: a full port of scipy's
+  closed-form nome-based algorithm (Orfanidis, "Lecture Notes on Elliptic Filter Design") —
+  the degree equation and the elliptic root-finding are both solved analytically (theta-function
+  series / descending Landen transformation), no numerical optimizer — reusing the repo's
+  existing AGM-based `ellipticKScalar` and `jacobiSN`/`jacobiCN`/`jacobiDN` (Phase 5). This is
+  the exact algorithm, not an approximation.
+- `bilinear(b, a, fs)` — analog → digital bilinear (Tustin) transform of a transfer function.
+- `buttord(wp, ws, gpass, gstop)` — minimum Butterworth order + natural frequency (scalar
+  lowpass/highpass case) → `{ N, Wn }`.
+- `zpk2sos(z, p, k)` / `sosfilt(sos, x)` — group zeros/poles/gain into cascaded second-order
+  sections and apply them (direct-form-II transposed per biquad).
+
+### Changed — `butter` now honors `btype`
+
+`butter(N, Wn, btype?)` now accepts `'low' | 'high' | 'bandpass' | 'bandstop'` (`Wn` becomes
+`[low, high]` for the last two); the original 2-arg lowpass call is unchanged (`btype` defaults
+to `'low'`). Resolves the Phase-0 note that `butter` was lowpass-only. The zpk-domain
+lp2lp/lp2hp/lp2bp/lp2bs + bilinear + zpk2tf pipeline is now shared (`analogToDigital` in
+`signal-filter-extra.ts`) across `butter`/`cheby1`/`cheby2`/`ellip`.
+
+Every coefficient set (cheby1, cheby2, butter high/bandpass/bandstop, ellip, bilinear, buttord)
+verified against `scipy.signal` 1.17.1. Documented in `docs/reference/functions.md` under
+Signal Processing → "Digital filter design & application".
+
 ### Added — FFT helpers (Phase 6 Task 1)
 
 Added `functions/src/signal/fft-helpers.ts`, exported from `@danielsimonjr/mathts-functions`:

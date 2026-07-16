@@ -286,6 +286,10 @@ export { firwin, butter, lfilter, lfilterZi, filtfilt } from './signal-filter-ex
 // Phase 6 Task 1 — numpy.fft-style helpers (rfft/irfft, fftshift/ifftshift, fftfreq/rfftfreq, fftn).
 export { rfft, irfft, fftshift, ifftshift, fftfreq, rfftfreq, fftn } from './signal/fft-helpers.js';
 
+// Phase 6 Task 2 — Chebyshev/elliptic IIR design (extends the butter/lfilter pipeline
+// above with cheby1/cheby2/ellip prototypes, btype routing, and SOS cascades).
+export { cheby1, cheby2, ellip, sosfilt, zpk2sos, bilinear, buttord } from './signal/iir-design.js';
+
 // Gap-analysis Wave C — geodesy + quaternion rotation algebra (bridge C7).
 export {
   haversine,

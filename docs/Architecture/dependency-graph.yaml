@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1051
+  totalFiles: 1052
   totalModules: 81
-  totalExports: 5142
+  totalExports: 5164
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7586,6 +7586,16 @@ modules:
             - rfftfreq
             - fftn
           reExport: true
+        - file: ./signal/iir-design.js
+          imports:
+            - cheby1
+            - cheby2
+            - ellip
+            - sosfilt
+            - zpk2sos
+            - bilinear
+            - buttord
+          reExport: true
         - file: ./geometry-extra.js
           imports:
             - haversine
@@ -7936,6 +7946,13 @@ modules:
         - fftfreq
         - rfftfreq
         - fftn
+        - cheby1
+        - cheby2
+        - ellip
+        - sosfilt
+        - zpk2sos
+        - bilinear
+        - buttord
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8171,6 +8188,13 @@ modules:
         - fftfreq
         - rfftfreq
         - fftn
+        - cheby1
+        - cheby2
+        - ellip
+        - sosfilt
+        - zpk2sos
+        - bilinear
+        - buttord
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -8400,17 +8424,36 @@ modules:
           imports:
             - Complex
       exports:
+        - cAdd
+        - cSub
+        - cMul
+        - cDiv
+        - cScale
         - firwin
         - lfilter
         - lfilterZi
         - filtfilt
+        - polyFromRoots
+        - zpkToTf
+        - analogToDigital
         - butter
+      interfaces:
+        - AnalogProto
       functions:
         - firwin
         - lfilter
         - lfilterZi
         - filtfilt
+        - polyFromRoots
+        - zpkToTf
+        - analogToDigital
         - butter
+      constants:
+        - cAdd
+        - cSub
+        - cMul
+        - cDiv
+        - cScale
     functions/src/timeseries-extra.ts:
       description: Time-series basics (Wave D) — a near-absent domain in the gap analysis.
       externalDependencies: []
@@ -13518,6 +13561,52 @@ modules:
         - createFreqz
       constants:
         - createFreqz
+    functions/src/signal/iir-design.ts:
+      description: Chebyshev I/II and elliptic (Cauer) IIR filter design, plus the supporting
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../signal-filter-extra.js
+          imports:
+            - analogToDigital
+            - cDiv
+            - cMul
+            - cScale
+            - polyFromRoots
+            - AnalogProto
+            - FilterBtype
+        - file: ../signal-filter-extra.js
+          imports:
+            - lfilter
+        - file: ../wasm/special/scalars.js
+          imports:
+            - ellipticKScalar
+        - file: ../special/jacobi-elliptic.js
+          imports:
+            - jacobiCN
+            - jacobiDN
+            - jacobiSN
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - cheby1
+        - cheby2
+        - ellip
+        - bilinear
+        - buttord
+        - zpk2sos
+        - sosfilt
+      functions:
+        - cheby1
+        - cheby2
+        - ellip
+        - bilinear
+        - buttord
+        - zpk2sos
+        - sosfilt
     functions/src/signal/zpk2tf.ts:
       description: Transfer function representation [numerator, denominator]
       externalDependencies: []
@@ -32831,6 +32920,7 @@ dependencyGraph:
         - functions/src/signal/fft-core-f64.ts
         - functions/src/signal/fft-helpers.ts
         - functions/src/signal/freqz.ts
+        - functions/src/signal/iir-design.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
       files:
@@ -33611,19 +33701,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1051
+  totalTypeScriptFiles: 1052
   totalModules: 81
-  totalLinesOfCode: 176680
-  totalExports: 5142
+  totalLinesOfCode: 177293
+  totalExports: 5164
   totalClasses: 56
-  totalInterfaces: 447
-  totalFunctions: 1683
+  totalInterfaces: 448
+  totalFunctions: 1693
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1536
-  totalReExports: 1910
+  totalConstants: 1541
+  totalReExports: 1917
   totalTypeOnlyImports: 540
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 240
+  unusedExportsCount: 243
