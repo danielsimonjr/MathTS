@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `taylor`/`series`/`seriesCoefficient` produced garbage coefficients past ~order 3
+
+All three computed the k-th derivative via a recursive finite-difference `numericalDerivative`,
+whose error explodes with order — `taylor('sin(x)','x',0,7)`'s `x^7` coefficient came out as
+`17209` instead of `-1/5040` (off by ~10⁷×), corrupting every term past cubic. Replaced with exact
+Cauchy-integral coefficient extraction on a complex contour (`taylorCoefficients`, new private
+helper in `functions/src/typed/cas.ts`), reusing the expression evaluator's existing complex
+support (sin/cos/exp/log/sqrt/pow already have complex overloads) — machine-precise vs known
+Maclaurin series (sin/cos/exp verified to 1e-9 at multiple points). `casDerivative` (the in-package
+symbolic differentiator) was ruled out as the fix vehicle — it breaks on iteration past order 2 —
+and no dependency on `@danielsimonjr/mathts-autograd` was added. `series` is unaffected code-wise
+(it already delegated to `taylor`) and inherits the fix; `multivariateTaylor` is out of scope and
+unchanged.
+
 ### Fixed — `summation`/`symbolicProduct` silently returned `0`/`1` on symbolic bounds
 
 Both are finite counting loops (`for (let k=a; k<=b; k++)`); a non-numeric bound (e.g. `'n'`)

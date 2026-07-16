@@ -1933,7 +1933,7 @@
 
       integrate('x^2', 'x'); // 'x^3/3'
       limit('sin(x)/x', 'x', 0); // '1'
-      taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
+      taylor('exp(x)', 'x', 0, 4); // '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4' (exact coefficients, Cauchy integral)
       solve('x^2 - 4', 'x'); // [-2, 2]
       ```
 

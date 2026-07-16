@@ -169,6 +169,52 @@ function numericalDerivative(
 }
 
 /**
+ * Exact Taylor coefficients a_0..a_n of expr around x0 via the Cauchy
+ * integral on the circle |z - x0| = r, discretized at N roots of unity:
+ *
+ *   a_k = (1 / (N * r^k)) * sum_{j=0}^{N-1} Re[ f(z_j) * e^{-2*pi*i*j*k/N} ]
+ *   where z_j = x0 + r * e^{2*pi*i*j/N}
+ *
+ * Reuses the expression evaluator's complex-number support (sin/cos/exp/
+ * log/sqrt/pow all have complex overloads) instead of finite-difference
+ * derivatives, whose error explodes with order. a[k] IS the Taylor
+ * coefficient f^(k)(x0)/k! already — do not divide by k! again.
+ *
+ * r=0.5 is fixed: it keeps the contour clear of the nearest singularity for
+ * the entire/analytic functions this module targets (sin, cos, exp,
+ * polynomials); a fully adaptive radius is out of scope.
+ */
+function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const N = Math.max(1 << Math.ceil(Math.log2(2 * (n + 1))), 16); // >= 2(n+1), power of two
+  const r = 0.5; // contour radius
+  const fRe = new Array<f64>(N);
+  const fIm = new Array<f64>(N);
+  for (let j = 0; j < N; j++) {
+    const ang = (2 * Math.PI * j) / N;
+    const z = new Complex(x0 + r * Math.cos(ang), r * Math.sin(ang));
+    const val = evaluate(expr, { [varName]: z }) as Complex | f64;
+    if (typeof val === 'number') {
+      fRe[j] = val;
+      fIm[j] = 0;
+    } else {
+      fRe[j] = val.re;
+      fIm[j] = val.im;
+    }
+  }
+  const a: f64[] = new Array(n + 1);
+  for (let k = 0; k <= n; k++) {
+    let sRe = 0;
+    for (let j = 0; j < N; j++) {
+      const ang = (-2 * Math.PI * j * k) / N;
+      // Re[ (fRe + i fIm) * (cos ang + i sin ang) ]
+      sRe += fRe[j] * Math.cos(ang) - fIm[j] * Math.sin(ang);
+    }
+    a[k] = sRe / (N * Math.pow(r, k));
+  }
+  return a; // a[k] is already the Taylor coefficient f^(k)(x0)/k!
+}
+
+/**
  * Factorial function for internal use.
  */
 function factorial(n: number): f64 {
@@ -847,8 +893,9 @@ export function zTransform(expr: string, n: string, z: string): string {
 /**
  * Compute the Taylor series expansion of an expression around a point.
  *
- * Computes coefficients numerically using finite differences and returns
- * the polynomial approximation as a string.
+ * Coefficients are computed exactly via the Cauchy integral on a complex
+ * contour around x0 (see {@link taylorCoefficients}), not finite
+ * differences — machine-precise for analytic expressions.
  *
  * @param expr - Expression string
  * @param varName - Variable name
@@ -858,15 +905,10 @@ export function zTransform(expr: string, n: string, z: string): string {
  *
  * @example
  * taylor('sin(x)', 'x', 0, 5)  // => 'x - 0.1666666667*x^3 + 0.008333333333*x^5'
- * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + ...'
+ * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4'
  */
 export function taylor(expr: string, varName: string, x0: f64 = 0, n: number = 5): string {
-  const coeffs: f64[] = [];
-
-  for (let k = 0; k <= n; k++) {
-    const deriv = numericalDerivative(expr, varName, x0, k);
-    coeffs.push(deriv / factorial(k));
-  }
+  const coeffs = taylorCoefficients(expr, varName, x0, n);
 
   const terms = coeffs.map((c, k) => buildTerm(c, varName, x0, k)).filter(Boolean);
 
@@ -980,8 +1022,7 @@ export function series(expr: string, varName: string, x0: f64 = 0, n: number = 5
  * seriesCoefficient('sin(x)', 'x', 0, 1) // => 1
  */
 export function seriesCoefficient(expr: string, varName: string, x0: f64, k: number): f64 {
-  const deriv = numericalDerivative(expr, varName, x0, k);
-  return deriv / factorial(k);
+  return taylorCoefficients(expr, varName, x0, k)[k];
 }
 
 // =============================================================================
