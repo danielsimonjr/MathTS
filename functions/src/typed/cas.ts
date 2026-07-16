@@ -1236,15 +1236,17 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
 }
 
 /**
- * Compute a symbolic summation.
+ * Compute a finite numerical summation.
  *
- * For known closed forms (constant, linear, quadratic, cubic), returns
- * the exact result. Otherwise falls back to numerical summation.
+ * Evaluates expr at each integer k from a to b (inclusive) and accumulates
+ * the sum. Both bounds must be finite numbers; there is no symbolic or
+ * closed-form (e.g. Faulhaber) path — a non-numeric bound throws rather
+ * than silently returning 0.
  *
  * @param expr - Expression to sum (function of varName)
  * @param varName - Summation index variable
- * @param a - Lower bound (integer)
- * @param b - Upper bound (integer)
+ * @param a - Lower bound (finite integer)
+ * @param b - Upper bound (finite integer)
  * @returns Sum value
  *
  * @example
@@ -1253,6 +1255,11 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
  * summation('1', 'k', 1, 50)      // => 50
  */
 export function summation(expr: string, varName: string, a: number, b: number): f64 {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    throw new Error(
+      `summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
+    );
+  }
   // Direct numerical summation (always correct for finite sums)
   let sum: f64 = 0;
   for (let k = a; k <= b; k++) {
@@ -1277,6 +1284,11 @@ export function summation(expr: string, varName: string, a: number, b: number): 
  * symbolicProduct('2*k', 'k', 1, 4)  // => 384
  */
 export function symbolicProduct(expr: string, varName: string, a: number, b: number): f64 {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    throw new Error(
+      `symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
+    );
+  }
   let product: f64 = 1;
   for (let k = a; k <= b; k++) {
     product *= evalAt(expr, varName, k);

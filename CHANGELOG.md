@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — `summation`/`symbolicProduct` silently returned `0`/`1` on symbolic bounds
+
+Both are finite counting loops (`for (let k=a; k<=b; k++)`); a non-numeric bound (e.g. `'n'`)
+makes the loop condition (`k <= 'n'`) false immediately, so they silently returned the initial
+accumulator — `summation('k', 'k', 1, 'n')` returned `0`, and the analogous call to
+`symbolicProduct` returned `1` — instead of a wrong-answer error. Both now throw a clear error
+when either bound is not a finite number. The `summation` doc comment no longer claims a
+symbolic/closed-form (Faulhaber) fallback that never existed; closed-form summation is planned
+for a later phase.
+
 ### Fixed — `stiffODESolver` diverged on stiff systems (fixed-point implicit Euler)
 
 `stiffODESolver` was fixed-step implicit Euler solved by fixed-point iteration, which cannot
