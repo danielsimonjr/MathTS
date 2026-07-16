@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.36.0
+
+### Minor Changes
+
+- Phase 8 — graph, geometry, interpolation, intervals, and a real CAS engine (final oracle-gap roadmap phase): graph algorithms `bfs`/`dfs`/`floydWarshall`/`bellmanFord`/`closenessCentrality`/`harmonicCentrality`/`maxFlow`/`minCut`/`astar`/`hungarian`; geometry `quaternionSlerp`/`quaternionInverse`/`quaternionToEuler`/`boundingBox`/`procrustes`/`kdTreeKNN`/`kdTreeRadius` and multiset `setIsSuperset`/`setEqual`/`setDisjoint`; N-D `interpn` + a generalized `solveBVP` (beyond the previous 2-unknown limit); `interval`/`Interval` (outward-rounded interval arithmetic — the first verified-bounds numeric type); and a real univariate CAS engine — `expand`/`factor`/`apart`/`together` now perform actual polynomial/rational algebra (verified vs sympy), resolving the Phase-0 pass-through no-ops. All oracle-pinned vs scipy/networkx/sympy.
+
 ## 0.35.0
 
 ### Minor Changes
