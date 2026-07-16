@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1034
+  totalFiles: 1035
   totalModules: 78
-  totalExports: 5000
+  totalExports: 5004
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7499,6 +7499,10 @@ modules:
             - kmeans
             - spectralClustering
           reExport: true
+        - file: ./numeric/bfgs.js
+          imports:
+            - bfgs
+          reExport: true
         - file: ./cas-integration.js
           imports:
             - symbolicIntegral
@@ -7590,6 +7594,12 @@ modules:
           imports:
             - OptimizeResult
             - LMResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/bfgs.js
+          imports:
+            - BfgsOptions
+            - BfgsResult
           reExport: true
           typeOnly: true
         - file: ./clustering-extra.js
@@ -7711,6 +7721,7 @@ modules:
         - levenbergMarquardt
         - kmeans
         - spectralClustering
+        - bfgs
         - symbolicIntegral
         - firwin
         - butter
@@ -7753,6 +7764,8 @@ modules:
         - LinregressResult
         - OptimizeResult
         - LMResult
+        - BfgsOptions
+        - BfgsResult
         - KMeansResult
       reExported:
         - '* from ./typed/index.js'
@@ -7861,6 +7874,7 @@ modules:
         - levenbergMarquardt
         - kmeans
         - spectralClustering
+        - bfgs
         - symbolicIntegral
         - firwin
         - butter
@@ -7903,6 +7917,8 @@ modules:
         - LinregressResult
         - OptimizeResult
         - LMResult
+        - BfgsOptions
+        - BfgsResult
         - KMeansResult
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
@@ -11492,6 +11508,19 @@ modules:
         - QuadResult
       functions:
         - quad
+    functions/src/numeric/bfgs.ts:
+      description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - bfgs
+      interfaces:
+        - BfgsOptions
+        - BfgsResult
+      functions:
+        - bfgs
     functions/src/numeric/fsolve.ts:
       description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
       externalDependencies: []
@@ -32056,6 +32085,7 @@ dependencyGraph:
     - name: Functions/numeric
       files:
         - functions/src/numeric/adaptive-quad.ts
+        - functions/src/numeric/bfgs.ts
         - functions/src/numeric/fsolve.ts
         - functions/src/numeric/minimize-scalar.ts
         - functions/src/numeric/numeric-jacobian.ts
@@ -32891,18 +32921,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1034
+  totalTypeScriptFiles: 1035
   totalModules: 78
-  totalLinesOfCode: 172777
-  totalExports: 5000
+  totalLinesOfCode: 172980
+  totalExports: 5004
   totalClasses: 56
-  totalInterfaces: 420
-  totalFunctions: 1624
+  totalInterfaces: 422
+  totalFunctions: 1625
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1536
-  totalReExports: 1825
-  totalTypeOnlyImports: 529
+  totalReExports: 1828
+  totalTypeOnlyImports: 530
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

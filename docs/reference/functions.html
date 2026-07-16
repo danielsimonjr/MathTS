@@ -1388,31 +1388,31 @@
       Operates on `DenseMatrix` (and `SparseMatrix` where applicable). Heavy
       operations are eligible for WASM/GPU acceleration via the matrix package.
 
-      | Function                           | Description                             |
-      | ---------------------------------- | --------------------------------------- |
-      | `det(A)`                           | Determinant                             |
-      | `inv(A)`                           | Matrix inverse                          |
-      | `pinv(A)`                          | Moore–Penrose pseudoinverse             |
+      | Function                           | Description                                                             |
+      | ---------------------------------- | ----------------------------------------------------------------------- |
+      | `det(A)`                           | Determinant                                                             |
+      | `inv(A)`                           | Matrix inverse                                                          |
+      | `pinv(A)`                          | Moore–Penrose pseudoinverse                                             |
       | `svd(A)`                           | Full singular value decomposition — `{ U, S, V, rank }`, `S` descending |
-      | `transpose(A)`                     | Transpose                               |
-      | `ctranspose(A)`                    | Conjugate (Hermitian) transpose         |
-      | `eigs(A)`                          | Eigenvalues and eigenvectors            |
-      | `lup(A)`                           | LU decomposition with partial pivoting  |
-      | `qr(A)`                            | QR decomposition                        |
-      | `schur(A)`                         | Schur decomposition                     |
-      | `slu(A)`                           | Sparse LU decomposition                 |
-      | `lusolve(A, b)`                    | Solve `Ax = b` via LU                   |
-      | `lsolve(A, b)` / `lsolveAll(A, b)` | Forward substitution (lower-triangular) |
-      | `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)    |
-      | `sylvester(A, B, C)`               | Solve `AX + XB = C`                     |
-      | `lyap(A, Q)`                       | Solve the Lyapunov equation             |
-      | `expm(A)`                          | Matrix exponential                      |
-      | `sqrtm(A)`                         | Matrix square root                      |
-      | `trace(A)`                         | Trace (sum of the diagonal)             |
-      | `cross(a, b)`                      | Vector cross product                    |
-      | `kron(A, B)`                       | Kronecker product                       |
-      | `rotationMatrix(angle[, axis])`    | Rotation matrix                         |
-      | `rotate(v, angle[, axis])`         | Rotate a vector                         |
+      | `transpose(A)`                     | Transpose                                                               |
+      | `ctranspose(A)`                    | Conjugate (Hermitian) transpose                                         |
+      | `eigs(A)`                          | Eigenvalues and eigenvectors                                            |
+      | `lup(A)`                           | LU decomposition with partial pivoting                                  |
+      | `qr(A)`                            | QR decomposition                                                        |
+      | `schur(A)`                         | Schur decomposition                                                     |
+      | `slu(A)`                           | Sparse LU decomposition                                                 |
+      | `lusolve(A, b)`                    | Solve `Ax = b` via LU                                                   |
+      | `lsolve(A, b)` / `lsolveAll(A, b)` | Forward substitution (lower-triangular)                                 |
+      | `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)                                    |
+      | `sylvester(A, B, C)`               | Solve `AX + XB = C`                                                     |
+      | `lyap(A, Q)`                       | Solve the Lyapunov equation                                             |
+      | `expm(A)`                          | Matrix exponential                                                      |
+      | `sqrtm(A)`                         | Matrix square root                                                      |
+      | `trace(A)`                         | Trace (sum of the diagonal)                                             |
+      | `cross(a, b)`                      | Vector cross product                                                    |
+      | `kron(A, B)`                       | Kronecker product                                                       |
+      | `rotationMatrix(angle[, axis])`    | Rotation matrix                                                         |
+      | `rotate(v, angle[, axis])`         | Rotate a vector                                                         |
 
       ### Decompositions & analysis (typed `matrix-ops`)
 
@@ -2107,6 +2107,7 @@
       | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`            |
       | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                       |
       | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }` |
+      | `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }` |
       | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                     |
 
       ### Differentiation
@@ -2899,7 +2900,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (891 exports).
+      > `@danielsimonjr/mathts-functions` (892 exports).
 
       ### Functions by category
 
@@ -2933,7 +2934,7 @@
 
       **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-      **Numerical Methods** (34): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+      **Numerical Methods** (35): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
       **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1034, "e": 5000, "re": 1825 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1035, "e": 5004, "re": 1828 },
   "s": {
-    "loc": 172777,
+    "loc": 172980,
     "cls": 56,
-    "int": 420,
-    "fn": 1624,
+    "int": 422,
+    "fn": 1625,
     "tg": 158,
     "en": 0,
     "co": 1536,
-    "toi": 529
+    "toi": 530
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -661,9 +661,10 @@
       ]
     },
     "functions/numeric": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "quad",
+        "bfgs",
         "root",
         "fsolve",
         "minimizeScalar",
@@ -677,13 +678,14 @@
       "int": [
         "QuadOptions",
         "QuadResult",
+        "BfgsOptions",
+        "BfgsResult",
         "FsolveOptions",
         "MinimizeScalarOptions",
         "MinimizeScalarResult",
         "NumericJacobianOptions",
         "NewtonOptions",
-        "SecantOptions",
-        "HalleyOptions"
+        "SecantOptions"
       ]
     },
     "functions/plain": {
@@ -1621,8 +1623,8 @@
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 2, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
+    { "p": "src/index.ts", "i": 41, "o": 0 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "utils/is.ts", "i": 0, "o": 40 },
-    { "p": "src/index.ts", "i": 39, "o": 0 }
+    { "p": "utils/is.ts", "i": 0, "o": 40 }
   ]
 }

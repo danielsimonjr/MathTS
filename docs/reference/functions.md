@@ -1577,12 +1577,13 @@ Root-finding, optimization, linear systems, and differential equations.
 
 ### Optimization
 
-| Function                                   | Description                                                                                                                                     |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`            |
-| `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                       |
-| `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }` |
-| `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                     |
+| Function                                   | Description                                                                                                                                                                                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`                                                                                 |
+| `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                                                                                            |
+| `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }`                                                                      |
+| `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }` |
+| `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                                                                                          |
 
 ### Differentiation
 
@@ -2374,7 +2375,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (891 exports).
+> `@danielsimonjr/mathts-functions` (892 exports).
 
 ### Functions by category
 
@@ -2408,7 +2409,7 @@ await terminatePool();
 
 **Interpolation & Curve Fitting** (23): `bezierCurve`, `bspline`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (34): `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (35): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `leastSquares`, `levenbergMarquardt`, `linprog`, `linsolve`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (42): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `butter`, `chirpZTransform`, `convolve`, `correlate`, `crossCorrelation`, `dct`, `dst`, `dwt`, `fft`, `fft2d`, `filtfilt`, `firwin`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `ifft`, `invFourier`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `periodogram`, `resample`, `spectrogram`, `unwrapPhase`, `welchPSD`, `windowFunction`, `zpk2tf`
 

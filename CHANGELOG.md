@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — BFGS quasi-Newton minimizer (Phase 2 Task 1)
+
+Added `bfgs(f, x0, { grad?, bounds? })` — BFGS quasi-Newton minimization with the classic
+inverse-Hessian update (`H ← (I − ρ s yᵀ) H (I − ρ y sᵀ) + ρ s sᵀ`, skipped when `yᵀs ≤ 1e-12`) and
+Armijo backtracking line search (`c1 = 1e-4`, starting step `α = 1`). Uses `opts.grad` if supplied,
+else a local central-difference gradient; `opts.bounds` clips each accepted step into `[lo, hi]` per
+coordinate (a lightweight projected BFGS, not the full active-set L-BFGS-B). The smooth-optimization
+workhorse complementing derivative-free Nelder–Mead (`minimize`/`nelderMead`). Pinned: Rosenbrock
+`[-1.2,1] -> [1,1]` (f~0), quadratics to exact minima, and a bounded case clipping to the box edge.
+
 ### Added — full `svd` + `orth` on the functions surface (Phase 1 Task 6)
 
 The `matrix` package's full `svd(A) -> { U, S, V, rank }` was only reachable from `functions` through

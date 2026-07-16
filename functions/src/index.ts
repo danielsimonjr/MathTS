@@ -192,6 +192,13 @@ export type { OptimizeResult, LMResult } from './optimization-extra.js';
 
 // Gap-analysis Wave D — clustering (kmeans + spectral, reuse laplacianMatrix + eigs).
 export { kmeans, spectralClustering } from './clustering-extra.js';
+
+// Phase 2 Task 1 — BFGS quasi-Newton minimizer (inverse-Hessian update +
+// Armijo line search; optional analytic gradient or box-bounds projection).
+// The smooth-optimization workhorse complementing derivative-free `minimize`
+// / `nelderMead`.
+export { bfgs } from './numeric/bfgs.js';
+export type { BfgsOptions, BfgsResult } from './numeric/bfgs.js';
 export type { KMeansResult } from './clustering-extra.js';
 
 // Gap-analysis Wave D — symbolic indefinite integration (complements numeric integrate).
