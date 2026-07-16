@@ -205,6 +205,14 @@ export type {
 export { eigsh } from './numeric/eigsh.js';
 export type { EigshOperatorInput, EigshOptions, EigshResult } from './numeric/eigsh.js';
 
+// Phase 7 Task 3 — structured & indefinite direct solvers: O(n) tridiagonal
+// (thomasSolve), banded-aware Gaussian elimination (solveBanded), O(n^2)
+// Toeplitz via Levinson-Durbin (toeplitzSolve), and Bunch-Kaufman-pivoted
+// LDL^T for symmetric indefinite matrices (ldl) — for structure `lusolve`/
+// `cholesky` don't exploit.
+export { thomasSolve, solveBanded, toeplitzSolve, ldl } from './numeric/structured-solvers.js';
+export type { LDLResult } from './numeric/structured-solvers.js';
+
 // Phase 1 Task 4 — scalar minimizer (Brent's method: golden-section +
 // parabolic interpolation). Distinct from root-finding; complements the
 // vector Nelder–Mead `minimize` (typed/numeric.ts) for the 1-D case.

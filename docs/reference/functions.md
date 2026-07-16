@@ -1050,6 +1050,33 @@ eigsh(A, k, {
 Pinned: for `[[2, 1, 0], [1, 2, 1], [0, 1, 2]]`, the largest eigenvalue is
 `2 + √2 ≈ 3.41421356` and the smallest is `2 − √2 ≈ 0.58578644`.
 
+### Structured & Indefinite Solvers
+
+Phase 7 Task 3 — direct solvers that exploit matrix structure to beat the
+O(n³) cost of a general dense factorization (`lusolve`), or — for `ldl` — to
+factor matrices `cholesky` can't (symmetric but not positive-definite, e.g.
+KKT / saddle-point systems):
+
+| Function                         | Structure exploited                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| `thomasSolve(sub, diag, sup, d)` | Tridiagonal `Ax = d` — the Thomas algorithm, O(n)                                     |
+| `solveBanded(l, u, A, b)`        | Banded `Ax = b` (`l` lower / `u` upper diagonals) — band-limited Gaussian elimination |
+| `toeplitzSolve(c, r, b)`         | Toeplitz `Tx = b` (first column `c`, first row `r`) — Levinson–Durbin, O(n²)          |
+| `ldl(A)`                         | Symmetric indefinite `A` — Bunch–Kaufman-pivoted `LDLᵀ`                               |
+
+`thomasSolve` and `solveBanded` perform no pivoting (as is standard for these
+algorithms) — the matrix should be diagonally dominant or otherwise stable
+without it. `toeplitzSolve` requires `c[0] === r[0]` (the shared diagonal
+value). `ldl(A)` returns `{ L, D, perm }` with the reconstruction identity
+`L·D·Lᵀ = P·A·Pᵀ`, where `P` is the permutation with `(P·A·Pᵀ)[i][j] =
+A[perm[i]][perm[j]]`; `L` is unit lower-triangular and `D` is block-diagonal
+(1x1 or 2x2 blocks).
+
+Pinned vs scipy: `thomasSolve([-1, -1], [2, 2, 2], [-1, -1], [1, 0, 1])` →
+`[1, 1, 1]`; `toeplitzSolve([2, 1], [2, 1], [1, 2])` → `[0, 1]` (matches
+`scipy.linalg.solve_toeplitz`); `ldl([[1, 2, 3], [2, 1, 4], [3, 4, 1]])`
+reconstructs `A` per the identity above (matches `scipy.linalg.ldl`).
+
 ### WebGPU: the opt-in f32 tier
 
 The GPU tier is **OFF by default** and must be turned on explicitly:
@@ -2589,7 +2616,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (977 exports).
+> `@danielsimonjr/mathts-functions` (981 exports).
 
 ### Functions by category
 
@@ -2611,7 +2638,7 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (80): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `sqrtm`, `svd`, `sylvester`, `toeplitz`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (84): `bicgstab`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `det`, `disableGpu`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `slu`, `solveBanded`, `sqrtm`, `svd`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
 **Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 

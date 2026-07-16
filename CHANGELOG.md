@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Structured & indefinite solvers: thomasSolve/solveBanded/toeplitzSolve/ldl (Phase 7 Task 3)
+
+Added `functions/src/numeric/structured-solvers.ts`, exported from `@danielsimonjr/mathts-functions`:
+four direct solvers that exploit matrix structure to beat a general dense factorization
+(`lusolve`), or — for `ldl` — to factor matrices `cholesky` can't (symmetric but not
+positive-definite, e.g. KKT / saddle-point systems).
+
+- `thomasSolve(sub, diag, sup, d)` — the Thomas algorithm, O(n) tridiagonal solve.
+- `solveBanded(l, u, A, b)` — banded-aware Gaussian elimination touching only the O(n(l+u))
+  entries inside the band (`A` passed as a full dense matrix with `l` lower / `u` upper nonzero
+  diagonals). Like `thomasSolve`, no pivoting is performed.
+- `toeplitzSolve(c, r, b)` — O(n²) solve of a Toeplitz system via Levinson–Durbin, given only
+  the first column `c` and first row `r` (`c[0] === r[0]`). Order-recursively tracks the
+  solution together with two mutually-coupled predictor vectors (one for `T`, one for `Tᵀ`,
+  related via the persymmetry `J T J = Tᵀ` every Toeplitz matrix has) — the trick that makes a
+  general (non-symmetric) Toeplitz system solvable in O(n²) rather than O(n³).
+- `ldl(A)` — Bunch–Kaufman-pivoted `LDLᵀ` factorization of a symmetric (possibly indefinite)
+  matrix, with 1x1/2x2 diagonal blocks. Returns `{ L, D, perm }`; reconstruction identity
+  `L·D·Lᵀ = P·A·Pᵀ` where `(P·A·Pᵀ)[i][j] = A[perm[i]][perm[j]]`.
+
+Pinned vs scipy: `thomasSolve([-1,-1],[2,2,2],[-1,-1],[1,0,1])` → `[1,1,1]`;
+`toeplitzSolve([2,1],[2,1],[1,2])` → `[0,1]` (matches `scipy.linalg.solve_toeplitz`);
+`ldl([[1,2,3],[2,1,4],[3,4,1]])` reconstructs `A` per the identity above (matches
+`scipy.linalg.ldl`, including its exact pivot sequence for this matrix — verified by symbolic
+derivation and numeric cross-check against scipy/numpy).
+
+Documented in `docs/reference/functions.md` under Linear Algebra, new "Structured & Indefinite
+Solvers" subsection. `npm run docs:functions` / `npm run docs:deps` regenerated; docs-completeness
+gate green. `functions/tests/structured-solvers.test.ts` (4 tests: thomasSolve tridiagonal,
+toeplitzSolve vs scipy, solveBanded vs dense solve, ldl reconstruction identity). Full `functions`
+regression: 3687 passed, 94 skipped, 0 failed. `tsc --noEmit` and `eslint .` both 0 problems.
+
 ### Added — Iterative symmetric eigensolver: eigsh (Phase 7 Task 2)
 
 Added `functions/src/numeric/eigsh.ts`, exported from `@danielsimonjr/mathts-functions`:

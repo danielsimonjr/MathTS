@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1059, "e": 5245, "re": 1952 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1060, "e": 5254, "re": 1957 },
   "s": {
-    "loc": 179916,
+    "loc": 180272,
     "cls": 56,
-    "int": 460,
-    "fn": 1738,
+    "int": 461,
+    "fn": 1742,
     "tg": 159,
     "en": 0,
     "co": 1542,
-    "toi": 544
+    "toi": 545
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -700,7 +700,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 11,
+      "f": 12,
       "exp": [
         "quad",
         "bfgs",
@@ -720,7 +720,8 @@
         "secant",
         "halley",
         "createSolveODE",
-        "rosenbrockSolve"
+        "rosenbrockSolve",
+        "thomasSolve"
       ],
       "int": [
         "QuadOptions",
@@ -1741,7 +1742,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 77, "o": 0 },
+    { "p": "src/index.ts", "i": 79, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

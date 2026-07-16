@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-16",
-    "totalFiles": 1059,
+    "totalFiles": 1060,
     "totalModules": 81,
-    "totalExports": 5245
+    "totalExports": 5254
   },
   "entryPoints": [
     {
@@ -8066,6 +8066,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/structured-solvers.js",
+            "imports": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["minimizeScalar"],
             "reExport": true
@@ -8304,6 +8309,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/structured-solvers.js",
+            "imports": ["LDLResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./numeric/minimize-scalar.js",
             "imports": ["MinimizeScalarOptions", "MinimizeScalarResult"],
             "reExport": true,
@@ -8531,6 +8542,10 @@
           "gmres",
           "bicgstab",
           "eigsh",
+          "thomasSolve",
+          "solveBanded",
+          "toeplitzSolve",
+          "ldl",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8658,6 +8673,7 @@
           "EigshOperatorInput",
           "EigshOptions",
           "EigshResult",
+          "LDLResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -8809,6 +8825,10 @@
           "gmres",
           "bicgstab",
           "eigsh",
+          "thomasSolve",
+          "solveBanded",
+          "toeplitzSolve",
+          "ldl",
           "minimizeScalar",
           "quad",
           "movingAverage",
@@ -8936,6 +8956,7 @@
           "EigshOperatorInput",
           "EigshOptions",
           "EigshResult",
+          "LDLResult",
           "MinimizeScalarOptions",
           "MinimizeScalarResult",
           "QuadOptions",
@@ -13322,6 +13343,16 @@
         "exports": ["createSolveODE", "rosenbrockSolve"],
         "functions": ["rosenbrockSolve"],
         "constants": ["createSolveODE"]
+      },
+      "functions/src/numeric/structured-solvers.ts": {
+        "description": "Structured and indefinite direct linear solvers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"],
+        "interfaces": ["LDLResult"],
+        "functions": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"]
       }
     },
     "functions/plain": {
@@ -35382,7 +35413,8 @@
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
-          "functions/src/numeric/solveODE.ts"
+          "functions/src/numeric/solveODE.ts",
+          "functions/src/numeric/structured-solvers.ts"
         ]
       },
       {
@@ -36333,18 +36365,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1059,
+    "totalTypeScriptFiles": 1060,
     "totalModules": 81,
-    "totalLinesOfCode": 179916,
-    "totalExports": 5245,
+    "totalLinesOfCode": 180272,
+    "totalExports": 5254,
     "totalClasses": 56,
-    "totalInterfaces": 460,
-    "totalFunctions": 1738,
+    "totalInterfaces": 461,
+    "totalFunctions": 1742,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 1952,
-    "totalTypeOnlyImports": 544,
+    "totalReExports": 1957,
+    "totalTypeOnlyImports": 545,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
