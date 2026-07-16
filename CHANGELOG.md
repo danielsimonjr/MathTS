@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Geometry & sets: quaternion slerp/inverse/Euler, boundingBox, procrustes, kdTree kNN/radius, multiset ops (Phase 8 Task 3)
+
+Added `functions/src/geometry/geometry-extra.ts`, exported from `@danielsimonjr/mathts-functions`:
+quaternion `slerp`/inverse/Euler conversion, an axis-aligned `boundingBox`, orthogonal `procrustes`
+alignment (via `@danielsimonjr/mathts-matrix`'s `svd`), brute-force kd-tree `kNN`/radius queries, and
+multiset `setIsSuperset`/`setEqual`/`setDisjoint` (complementing the existing `setIsSubset`).
+
+- `quaternionInverse(q)` — multiplicative inverse `conj(q) / |q|²` (order `[w,x,y,z]`, matching the
+  repo-wide convention in the existing `geometry-extra.ts`).
+- `quaternionSlerp(q1, q2, t)` — spherical linear interpolation between unit quaternions; takes the
+  shortest arc (negates `q2` when the dot product is negative) and falls back to normalized lerp
+  when the inputs are nearly parallel.
+- `quaternionToEuler(q)` — ZYX intrinsic Euler angles `[roll, pitch, yaw]`; pinned against
+  `scipy.spatial.transform.Rotation.as_euler('xyz')` across 5 random rotations (exact match to
+  1e-8).
+- `boundingBox(points)` — per-dimension axis-aligned `{ min, max }`.
+- `procrustes(A, B)` — orthogonal Procrustes alignment mapping `B` onto `A`: center + unit-normalize
+  both, `M = A0ᵀB0 = UΣVᵀ`, `R = VUᵀ`, `scale = ΣΣᵢ`, `disparity = ‖A0 − scale·B0·R‖²`. Pinned
+  against `scipy.spatial.procrustes` disparity (exact-rotation and unrelated-point-set cases both
+  match to float precision).
+- `kdTreeKNN(points, query, k)` / `kdTreeRadius(points, query, r)` — brute-force Euclidean k-nearest
+  and radius queries (the existing `kdTree`/`kdTreeNearest` in `typed/geometry.ts` has no radius
+  method).
+- `setIsSuperset(a, b)` / `setEqual(a, b)` / `setDisjoint(a, b)` — multiset comparisons built on the
+  existing `setIsSubset`/`setMultiplicity`.
+
 ### Added — Graph optimization: maxFlow/minCut, astar, hungarian (Phase 8 Task 2)
 
 Added `functions/src/graph/optimization.ts`, exported from `@danielsimonjr/mathts-functions`:

@@ -386,6 +386,22 @@ export {
   quaternionRotate,
   quaternionToRotationMatrix,
 } from './geometry-extra.js';
+
+// Phase 8 Task 3 — quaternion slerp/inverse/Euler, boundingBox, procrustes,
+// kd-tree kNN/radius queries, and multiset setIsSuperset/setEqual/setDisjoint.
+export {
+  quaternionInverse,
+  quaternionSlerp,
+  quaternionToEuler,
+  boundingBox,
+  procrustes,
+  kdTreeKNN,
+  kdTreeRadius,
+  setIsSuperset,
+  setEqual,
+  setDisjoint,
+} from './geometry/geometry-extra.js';
+export type { ProcrustesResult } from './geometry/geometry-extra.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this

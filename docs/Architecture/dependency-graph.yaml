@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-16'
-  totalFiles: 1064
+  totalFiles: 1065
   totalModules: 82
-  totalExports: 5298
+  totalExports: 5319
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7666,6 +7666,19 @@ modules:
             - quaternionRotate
             - quaternionToRotationMatrix
           reExport: true
+        - file: ./geometry/geometry-extra.js
+          imports:
+            - quaternionInverse
+            - quaternionSlerp
+            - quaternionToEuler
+            - boundingBox
+            - procrustes
+            - kdTreeKNN
+            - kdTreeRadius
+            - setIsSuperset
+            - setEqual
+            - setDisjoint
+          reExport: true
         - file: ./stats/inference-extra2.js
           imports:
             - noncentralChi2CDF
@@ -7890,6 +7903,11 @@ modules:
             - CsdOptions
             - StftOptions
             - StftResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/geometry-extra.js
+          imports:
+            - ProcrustesResult
           reExport: true
           typeOnly: true
         - file: ./stats/inference-extra2.js
@@ -8124,6 +8142,16 @@ modules:
         - quaternionFromAxisAngle
         - quaternionRotate
         - quaternionToRotationMatrix
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -8223,6 +8251,7 @@ modules:
         - CsdOptions
         - StftOptions
         - StftResult
+        - ProcrustesResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -8432,6 +8461,16 @@ modules:
         - quaternionFromAxisAngle
         - quaternionRotate
         - quaternionToRotationMatrix
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -8531,6 +8570,7 @@ modules:
         - CsdOptions
         - StftOptions
         - StftResult
+        - ProcrustesResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -10771,6 +10811,47 @@ modules:
         - createDistance
       constants:
         - createDistance
+    functions/src/geometry/geometry-extra.ts:
+      description: 'Geometry & sets extras (Phase 8 Task 3): quaternion slerp/inverse/Euler,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../geometry-extra.js
+          imports:
+            - quaternionConjugate
+        - file: ../typed/set.js
+          imports:
+            - setIsSubset
+            - setMultiplicity
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+      exports:
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
+      interfaces:
+        - ProcrustesResult
+      functions:
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
     functions/src/geometry/intersect.ts:
       description: Calculates the point of intersection of two lines in two or three dimensions
       externalDependencies: []
@@ -33344,6 +33425,7 @@ dependencyGraph:
     - name: Functions/geometry
       files:
         - functions/src/geometry/distance.ts
+        - functions/src/geometry/geometry-extra.ts
         - functions/src/geometry/intersect.ts
     - name: Functions/gpu
       files:
@@ -34279,18 +34361,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1064
+  totalTypeScriptFiles: 1065
   totalModules: 82
-  totalLinesOfCode: 181620
-  totalExports: 5298
+  totalLinesOfCode: 181948
+  totalExports: 5319
   totalClasses: 56
-  totalInterfaces: 468
-  totalFunctions: 1760
+  totalInterfaces: 469
+  totalFunctions: 1770
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 1983
-  totalTypeOnlyImports: 548
+  totalReExports: 1994
+  totalTypeOnlyImports: 549
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

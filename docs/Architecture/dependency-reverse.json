@@ -1691,7 +1691,11 @@
     "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
     "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
     "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
-    "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/geometry-extra.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
     "functions/src/special/hypergeometric.ts": ["functions/src/index.ts"],
     "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
@@ -1980,6 +1984,10 @@
       "functions/src/factories/scope.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/typed/set.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/type/matrix/utils/matAlgo13xDD.ts": [
       "functions/src/logical/nullish.ts",
       "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
@@ -2153,7 +2161,6 @@
     "functions/src/typed/bitwise.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/logical.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/complex.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/set.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/fused.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/geometry.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],

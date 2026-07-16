@@ -2102,6 +2102,23 @@ Quaternions are `[w, x, y, z]` arrays (scalar-first).
 | `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for a rotation of `angle` radians about `axis` |
 | `quaternionRotate(q, v)`               | Rotate 3-vector `v` by unit quaternion `q`                     |
 | `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix for a unit quaternion                      |
+| `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                      |
+| `quaternionSlerp(q1, q2, t)`           | Spherical linear interpolation between two unit quaternions    |
+| `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians)      |
+
+### Bounding box & Procrustes alignment
+
+| Function              | Description                                                                             |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `boundingBox(points)` | Axis-aligned min/max per dimension: `{ min, max }`                                      |
+| `procrustes(A, B)`    | Orthogonal Procrustes alignment mapping `B` onto `A`; returns `{ R, scale, disparity }` |
+
+### kd-tree kNN / radius queries
+
+| Function                         | Description                                                      |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `kdTreeKNN(points, query, k)`    | Indices of the `k` nearest points to `query` (brute force)       |
+| `kdTreeRadius(points, query, r)` | Indices of all points within radius `r` of `query` (brute force) |
 
 ### 3D convex hull
 
@@ -2327,6 +2344,9 @@ studentTTest([2.1, 2.5, 2.3], [3.1, 3.5, 2.9]);
 | `setMultiplicity(e, a)`  | Count occurrences of element `e` in multiset `a`                  | Array | —     |
 | `setIsSubset(a, b)`      | True when every element of `a` (with multiplicity) appears in `b` | Array | —     |
 | `setSize(a[, unique])`   | Element count; pass `true` for distinct count                     | Array | —     |
+| `setIsSuperset(a, b)`    | True when every element of `b` (with multiplicity) appears in `a` | Array | —     |
+| `setEqual(a, b)`         | True when `a` and `b` are equal as multisets                      | Array | —     |
+| `setDisjoint(a, b)`      | True when `a` and `b` share no elements                           | Array | —     |
 
 ### Details
 
@@ -2692,7 +2712,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (999 exports).
+> `@danielsimonjr/mathts-functions` (1009 exports).
 
 ### Functions by category
 
@@ -2730,17 +2750,17 @@ await terminatePool();
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
-**Geometry** (42): `angle2D`, `angle3D`, `area`, `centroid`, `chebyshevDistance`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeNearest`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
+**Geometry** (50): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 
 **Graph Theory** (21): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
 **Hypothesis Tests** (31): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 
-**Set Operations** (10): `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
+**Set Operations** (13): `setCartesian`, `setDifference`, `setDisjoint`, `setDistinct`, `setEqual`, `setIntersect`, `setIsSubset`, `setIsSuperset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 
 **Units** (5): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`
 
-**Complex Number Utilities** (3): `arg`, `conj`, `im`
+**Complex Number Utilities** (2): `arg`, `im`
 
 **Type Conversion** (8): `bignumber`, `boolean`, `complex`, `fraction`, `matrix`, `numeric`, `parseNumberWithConfig`, `sparse`
 
