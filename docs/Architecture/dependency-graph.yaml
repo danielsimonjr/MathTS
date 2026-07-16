@@ -14679,7 +14679,7 @@ modules:
       constants:
         - createProd
     functions/src/statistics/quantileSeq.ts:
-      description: Compute the prob order quantile of a matrix or a list with values.
+      description: "Interpolation modes for the quantile, matching numpy's `method=`:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -34414,7 +34414,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1067
   totalModules: 82
-  totalLinesOfCode: 182802
+  totalLinesOfCode: 182862
   totalExports: 5326
   totalClasses: 57
   totalInterfaces: 469

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `quantileSeq` interpolation modes (lower/higher/nearest/midpoint)
+
+`functions/src/statistics/quantileSeq.ts` gains an optional trailing `mode` string that selects how
+the quantile interpolates between adjacent order statistics, matching numpy's `method=`: `'linear'`
+(the default — unchanged), `'lower'`, `'higher'`, `'nearest'` (ties round-half-to-even, matching
+numpy), and `'midpoint'`. The mode threads through the scalar-probability, probability-array, and
+evenly-spaced-`N` paths and works with the existing `sorted` flag. New typed signatures
+(`…, string` / `…, boolean, string`) are strictly additive; every existing call behaves identically.
+Oracle-pinned vs numpy on `[1..10]` at `q ∈ {0.25, 0.5, 0.75}` in new
+`functions/tests/gap-quantile-modes-oracle.test.ts` (`lower→[3,5,7]`, `higher→[4,6,8]`,
+`nearest→[3,5,8]`, `midpoint→[3.5,5.5,7.5]`, `linear→[3.25,5.5,7.75]`), including unsorted input, a
+`q`-array with a mode, and the round-half-to-even tie behavior. An unknown mode throws. Documented in
+`docs/reference/functions.md` (curated `quantileSeq` row).
+
 ### Fixed — `besselK` uniform machine precision (continued fraction)
 
 `functions/src/typed/special.ts`'s `besselKScalar` previously split K0/K1 into an ascending series

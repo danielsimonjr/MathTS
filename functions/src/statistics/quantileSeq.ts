@@ -32,6 +32,29 @@ interface QuantileSeqDependencies {
   mapSlices: TypedFunction;
 }
 
+/**
+ * Interpolation modes for the quantile, matching numpy's `method=`:
+ * `linear` (default), `lower`, `higher`, `nearest`, `midpoint`.
+ */
+type QuantileMode = 'linear' | 'lower' | 'higher' | 'nearest' | 'midpoint';
+const QUANTILE_MODES: readonly QuantileMode[] = [
+  'linear',
+  'lower',
+  'higher',
+  'nearest',
+  'midpoint',
+];
+
+function _assertMode(mode: string): QuantileMode {
+  if (!QUANTILE_MODES.includes(mode as QuantileMode)) {
+    throw new Error(
+      `Unknown quantile interpolation mode "${mode}". ` +
+        `Expected one of: ${QUANTILE_MODES.join(', ')}`
+    );
+  }
+  return mode as QuantileMode;
+}
+
 const name = 'quantileSeq';
 const dependencies = [
   'typed',
@@ -111,6 +134,12 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         prob: number | BigNumberType,
         dim: number
       ): unknown => _quantileSeqDim(data, prob, false, dim, _quantileSeqProbNumber),
+      // Third arg as a string selects the interpolation mode (linear default).
+      'Array | Matrix, number | BigNumber, string': (
+        data: unknown[] | MatrixType,
+        prob: number | BigNumberType,
+        mode: string
+      ): unknown => _quantileSeqProbNumber(data, prob, false, _assertMode(mode)),
       'Array | Matrix, number | BigNumber, boolean': _quantileSeqProbNumber,
       'Array | Matrix, number | BigNumber, boolean, number': (
         data: unknown[] | MatrixType,
@@ -118,6 +147,12 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         sorted: boolean,
         dim: number
       ): unknown => _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbNumber),
+      'Array | Matrix, number | BigNumber, boolean, string': (
+        data: unknown[] | MatrixType,
+        prob: number | BigNumberType,
+        sorted: boolean,
+        mode: string
+      ): unknown => _quantileSeqProbNumber(data, prob, sorted, _assertMode(mode)),
       'Array | Matrix, Array | Matrix': (
         data: unknown[] | MatrixType,
         p: unknown[] | MatrixType
@@ -127,6 +162,11 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         prob: unknown[] | MatrixType,
         dim: number
       ): unknown => _quantileSeqDim(data, prob, false, dim, _quantileSeqProbCollection),
+      'Array | Matrix, Array | Matrix, string': (
+        data: unknown[] | MatrixType,
+        p: unknown[] | MatrixType,
+        mode: string
+      ): unknown => _quantileSeqProbCollection(data, p, false, _assertMode(mode)),
       'Array | Matrix, Array | Matrix, boolean': _quantileSeqProbCollection,
       'Array | Matrix, Array | Matrix, boolean, number': (
         data: unknown[] | MatrixType,
@@ -134,6 +174,12 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         sorted: boolean,
         dim: number
       ): unknown => _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbCollection),
+      'Array | Matrix, Array | Matrix, boolean, string': (
+        data: unknown[] | MatrixType,
+        p: unknown[] | MatrixType,
+        sorted: boolean,
+        mode: string
+      ): unknown => _quantileSeqProbCollection(data, p, sorted, _assertMode(mode)),
     });
 
     function _quantileSeqDim<T>(
@@ -149,7 +195,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     function _quantileSeqProbNumber(
       data: unknown[] | MatrixType,
       probOrN: number | BigNumberType,
-      sorted: boolean
+      sorted: boolean,
+      mode: QuantileMode = 'linear'
     ): unknown {
       let probArr: unknown[];
       const dataArr = (data as MatrixType).valueOf() as unknown[];
@@ -159,8 +206,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       if (smallerEq(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], prob[,sorted])
         return isNumber(probOrN)
-          ? _quantileSeq(dataArr, probOrN, sorted)
-          : bignumber!(_quantileSeq(dataArr, probOrN, sorted));
+          ? _quantileSeq(dataArr, probOrN, sorted, mode)
+          : bignumber!(_quantileSeq(dataArr, probOrN, sorted, mode));
       }
       if (larger(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], N[,sorted])
@@ -181,7 +228,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
 
         for (let i = 0; smaller(i, probOrN); i++) {
           const prob = divide(i + 1, nPlusOne);
-          probArr.push(_quantileSeq(dataArr, prob, sorted));
+          probArr.push(_quantileSeq(dataArr, prob, sorted, mode));
         }
 
         return isNumber(probOrN) ? probArr : bignumber!(probArr);
@@ -203,14 +250,15 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     function _quantileSeqProbCollection(
       data: unknown[] | MatrixType,
       probOrN: unknown[] | MatrixType,
-      sorted: boolean
+      sorted: boolean,
+      mode: QuantileMode = 'linear'
     ): unknown {
       const dataArr = (data as MatrixType).valueOf() as unknown[];
       // quantileSeq([a, b, c, d, ...], [prob1, prob2, ...][,sorted])
       const probOrNArr = (probOrN as MatrixType).valueOf() as unknown[];
       const probArr: unknown[] = [];
       for (let i = 0; i < probOrNArr.length; ++i) {
-        probArr.push(_quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted));
+        probArr.push(_quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted, mode));
       }
       return probArr;
     }
@@ -227,7 +275,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     function _quantileSeq(
       array: unknown[],
       prob: number | BigNumberType,
-      sorted: boolean
+      sorted: boolean,
+      mode: QuantileMode = 'linear'
     ): unknown {
       const flat = flatten(array) as unknown[];
       const len = flat.length;
@@ -264,15 +313,36 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
           }
         }
       }
-      // Q(prob) = (1-f)*A[floor(index)] + f*A[floor(index)+1]
-      // If left/right are BigNumbers but fracPart is a number, convert to BigNumber
-      // to avoid floating-point precision errors
-      const fracPartConverted =
-        isBigNumber(left) && isNumber(fracPart) ? bignumber!(fracPart) : fracPart;
-      return add(
-        multiply(left, subtract(1, fracPartConverted)),
-        multiply(right, fracPartConverted)
-      );
+      // Non-linear interpolation modes select an endpoint (or their midpoint)
+      // rather than blending, matching numpy's `method=`.
+      switch (mode) {
+        case 'lower':
+          return left;
+        case 'higher':
+          return right;
+        case 'nearest': {
+          // Round the fractional index to the nearest integer; ties go to the
+          // even index (round-half-to-even), matching numpy.
+          const c = compare(fracPart, 0.5); // sign of fracPart - 0.5
+          if (c < 0) return left;
+          if (c > 0) return right;
+          return integerPart % 2 === 0 ? left : right;
+        }
+        case 'midpoint':
+          return divide(add(left, right), 2);
+        case 'linear':
+        default: {
+          // Q(prob) = (1-f)*A[floor(index)] + f*A[floor(index)+1]
+          // If left/right are BigNumbers but fracPart is a number, convert to BigNumber
+          // to avoid floating-point precision errors
+          const fracPartConverted =
+            isBigNumber(left) && isNumber(fracPart) ? bignumber!(fracPart) : fracPart;
+          return add(
+            multiply(left, subtract(1, fracPartConverted)),
+            multiply(right, fracPartConverted)
+          );
+        }
+      }
     }
   }
 );

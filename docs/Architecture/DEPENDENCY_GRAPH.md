@@ -6982,7 +6982,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/quantileSeq.ts` - Compute the prob order quantile of a matrix or a list with values.
+### `functions/src/statistics/quantileSeq.ts` - Interpolation modes for the quantile, matching numpy's `method=`:
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -16162,7 +16162,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1067   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 182802 |
+| Total Lines of Code     | 182862 |
 | Total Exports           | 5326   |
 | Total Re-exports        | 1998   |
 | Total Classes           | 57     |
