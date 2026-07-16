@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.31.0
+
+### Minor Changes
+
+- Phase 3 regression & ML breadth (oracle-gap roadmap): `ols` (multiple/multivariate linear regression with full inference — coefficients, stderr, t/p-values, R²/adjusted-R², F-statistic, residuals); `ridge`/`lasso`/`elasticNet` (regularized regression — closed-form L2, coordinate-descent L1 with exact sparsity, combined L1/L2); `logisticRegression` (binary logistic regression via IRLS with predict/predictProba — the first classifier/GLM); `dbscan` (density-based clustering) + `knnClassify`/`knnRegress` (k-nearest-neighbour classifier/regressor); `gaussianKDE` (1-D Gaussian kernel density estimation, Silverman bandwidth); and `chi2Contingency` (χ² test of independence with Yates correction + Cramér's V) + `multipleTest` (Bonferroni/Holm/Benjamini–Hochberg FDR correction). All oracle-pinned vs scikit-learn / scipy / statsmodels.
+
 ## 0.30.0
 
 ### Minor Changes
