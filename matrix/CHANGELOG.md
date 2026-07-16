@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.5.0
+
+### Minor Changes
+
+- `eig` now exposes complex eigenvectors via a new `vectorsIm` field
+
+  `EigResult` gains `vectorsIm: number[][]` (imaginary parts of the eigenvector
+  columns; all-zero for real eigenvalues). JAMA's `hqr2` already computed the
+  complex eigenvectors internally (EISPACK convention, stored across two adjacent
+  columns of the real transform `V`) but the previous `number[][]` contract dropped
+  them as zero columns. Complex-conjugate pairs are now emitted as
+  `vectors[k] ± i*vectorsIm[k]`, unit-normalized by the complex 2-norm, with the
+  residual `‖A·v − λ·v‖ ≈ 0` verified vs numpy for `{i,−i,3+i,3−i}`. Additive and
+  non-breaking: `.values` and `.vectors` are unchanged for real spectra (and
+  `.vectors` now carries the real part, previously zero, for complex eigenvalues).
+  This unblocks a clean `funm`/`care` off the eigenvector basis.
+
 ## 0.4.6
 
 ### Patch Changes

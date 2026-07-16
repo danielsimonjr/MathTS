@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-tensor",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Rank-N dense Tensor type for MathTS with Float64Array-backed storage",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.10.0",
-    "@danielsimonjr/mathts-matrix": "^0.4.5"
+    "@danielsimonjr/mathts-matrix": "^0.5.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
