@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.2.0
+
+### Minor Changes
+
+- First npm release — workbook release hold lifted
+
+  `@danielsimonjr/mathts-workbook` (headless `.mtsw` notebook runtime + `mtsw` CLI:
+  `run`/`validate`/`graph`/`export`) was held from npm since 2026-06-29 pending
+  release-readiness. The hold is now lifted: build and the full test suite are green, and
+  the package ships from the monorepo like the others. Publishing its debut.
+
 ## 0.1.8
 
 ### Patch Changes
@@ -42,7 +53,6 @@
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-
 
 ## 0.1.1
 
