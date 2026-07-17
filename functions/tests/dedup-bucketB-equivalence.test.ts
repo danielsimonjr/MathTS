@@ -182,7 +182,8 @@ describe('factory() — creation, metadata, and dispatch', () => {
 });
 
 // ---------------------------------------------------------------------------
-// sortFactories / create — KNOWN, PROVEN DIVERGENCE (do NOT redirect)
+// sortFactories / create — DIVERGENCE FOUND, THEN FIXED (Bucket B commit 2 adopts
+// core's throw-on-any-cycle version in both packages; see below)
 // ---------------------------------------------------------------------------
 
 const NAMES = ['A', 'B', 'C', 'D', 'E'];
@@ -220,21 +221,31 @@ describe('sortFactories — acyclic DAGs: expression / functions / core agree', 
   });
 });
 
-describe('sortFactories — CIRCULAR dependencies: PROVEN DIVERGENCE (reported, not redirected)', () => {
-  it('core throws on a direct 2-cycle; expression/functions silently do not', () => {
+describe('sortFactories — CIRCULAR dependencies: FIX ADOPTED (Bucket B, commit 2)', () => {
+  // Historical note: this block used to be titled "PROVEN DIVERGENCE (reported, not
+  // redirected)" — expression's and functions' `sortFactories` silently preserved
+  // input order on a cycle instead of throwing, unlike core's. Bucket B commit 2
+  // verified neither package's REAL factory-registration graph contains an actual
+  // cycle (both `sortFactories`/`create` are otherwise-unused mathjs legacy
+  // machinery — every real factory is wired by hand, not through a name-sorted DAG
+  // load) and adopted core's stricter, throw-on-any-cycle version in both packages.
+  // All three now agree: throw on both direct and indirect cycles.
+  it('core, expression, and functions all throw on a direct 2-cycle', () => {
     const build = (f: typeof coreFactory) => [
       f('A', ['B'], () => undefined),
       f('B', ['A'], () => undefined),
     ];
 
     expect(() => coreSortFactories(build(coreFactory) as never)).toThrow(/Circular dependency/);
-    expect(() =>
-      exprFactory.sortFactories(build(exprFactory.factory as never) as never)
-    ).not.toThrow();
-    expect(() => fnFactory.sortFactories(build(fnFactory.factory as never) as never)).not.toThrow();
+    expect(() => exprFactory.sortFactories(build(exprFactory.factory as never) as never)).toThrow(
+      /Circular dependency/
+    );
+    expect(() => fnFactory.sortFactories(build(fnFactory.factory as never) as never)).toThrow(
+      /Circular dependency/
+    );
   });
 
-  it('core throws on an indirect 3-cycle (A->B->C->A); expression/functions silently do not', () => {
+  it('core, expression, and functions all throw on an indirect 3-cycle (A->B->C->A)', () => {
     const build = (f: typeof coreFactory) => [
       f('A', ['B'], () => undefined),
       f('B', ['C'], () => undefined),
@@ -242,13 +253,15 @@ describe('sortFactories — CIRCULAR dependencies: PROVEN DIVERGENCE (reported, 
     ];
 
     expect(() => coreSortFactories(build(coreFactory) as never)).toThrow(/Circular dependency/);
-    expect(() =>
-      exprFactory.sortFactories(build(exprFactory.factory as never) as never)
-    ).not.toThrow();
-    expect(() => fnFactory.sortFactories(build(fnFactory.factory as never) as never)).not.toThrow();
+    expect(() => exprFactory.sortFactories(build(exprFactory.factory as never) as never)).toThrow(
+      /Circular dependency/
+    );
+    expect(() => fnFactory.sortFactories(build(fnFactory.factory as never) as never)).toThrow(
+      /Circular dependency/
+    );
   });
 
-  it('expression and functions agree with EACH OTHER on the cyclic case (both silent)', () => {
+  it('expression and functions agree with EACH OTHER on the cyclic case (both throw)', () => {
     const buildExpr = () => [
       exprFactory.factory('A', ['B'], () => undefined),
       exprFactory.factory('B', ['A'], () => undefined),
@@ -257,9 +270,8 @@ describe('sortFactories — CIRCULAR dependencies: PROVEN DIVERGENCE (reported, 
       fnFactory.factory('A', ['B'], () => undefined),
       fnFactory.factory('B', ['A'], () => undefined),
     ];
-    const exprSorted = exprFactory.sortFactories(buildExpr()).map((f) => (f as { fn: string }).fn);
-    const fnSorted = fnFactory.sortFactories(buildFn()).map((f) => (f as { fn: string }).fn);
-    expect(fnSorted).toEqual(exprSorted);
+    expect(() => exprFactory.sortFactories(buildExpr())).toThrow(/Circular dependency/);
+    expect(() => fnFactory.sortFactories(buildFn())).toThrow(/Circular dependency/);
   });
 });
 

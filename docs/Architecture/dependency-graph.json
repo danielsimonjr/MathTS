@@ -21509,7 +21509,9 @@
               "isFactory",
               "assertDependencies",
               "isOptionalDependency",
-              "stripOptionalNotation"
+              "stripOptionalNotation",
+              "sortFactories",
+              "create"
             ],
             "subpath": "internal"
           }
@@ -21519,12 +21521,12 @@
           "assertDependencies",
           "isOptionalDependency",
           "stripOptionalNotation",
-          "factory",
           "sortFactories",
-          "create"
+          "create",
+          "factory"
         ],
         "interfaces": ["FactoryFunction", "FactoryMeta"],
-        "functions": ["factory", "sortFactories", "create"]
+        "functions": ["factory"]
       },
       "functions/src/utils/hasNumericValue.ts": {
         "description": "Test whether a value is an numeric value.",
@@ -29342,7 +29344,9 @@
               "isFactory",
               "assertDependencies",
               "isOptionalDependency",
-              "stripOptionalNotation"
+              "stripOptionalNotation",
+              "sortFactories",
+              "create"
             ],
             "subpath": "internal"
           }
@@ -29352,12 +29356,12 @@
           "assertDependencies",
           "isOptionalDependency",
           "stripOptionalNotation",
-          "factory",
           "sortFactories",
-          "create"
+          "create",
+          "factory"
         ],
         "interfaces": ["FactoryFunction", "FactoryMeta"],
-        "functions": ["factory", "sortFactories", "create"]
+        "functions": ["factory"]
       },
       "expression/src/utils/is.ts": {
         "description": "Test whether a value is a collection: an Array or Matrix",
@@ -37707,11 +37711,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1086,
     "totalModules": 82,
-    "totalLinesOfCode": 184792,
+    "totalLinesOfCode": 184617,
     "totalExports": 5553,
     "totalClasses": 52,
     "totalInterfaces": 489,
-    "totalFunctions": 1759,
+    "totalFunctions": 1755,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,

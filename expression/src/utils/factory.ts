@@ -6,6 +6,8 @@ import {
   assertDependencies,
   isOptionalDependency,
   stripOptionalNotation,
+  sortFactories as coreSortFactories,
+  create as coreCreate,
 } from '@danielsimonjr/mathts-core/internal';
 
 /**
@@ -17,24 +19,30 @@ import {
  * harness — see `functions/tests/dedup-bucketB-equivalence.test.ts`) and are
  * re-exported from there.
  *
- * `factory`/`FactoryFunction`/`CreateFunction` and `sortFactories`/`create` are
- * DELIBERATELY KEPT LOCAL — NOT safe to redirect:
- *  - `factory()`'s generic `CreateFunction<TDeps extends Record<string, unknown>, ...>`
- *    constraint (core's copy) rejects real call sites across this package (and
- *    `functions`) whose destructured dependency objects are typed as plain
- *    interfaces without an index signature — confirmed empirically: redirecting
- *    it broke `tsc --noEmit` with dozens of TS2345 errors. This mirrors the
- *    `functions` package's pre-existing `@typescript-eslint/no-explicit-any`
- *    workaround comment on its own local `CreateFunction`, which independently
- *    documents the exact same constraint mismatch.
- *  - `sortFactories`/`create`: core's `sortFactories` throws on ANY circular
- *    dependency (direct or indirect; see `core/tests/factory-sort.test.ts`),
- *    whereas this copy only special-cases direct 2-cycles (silently preserving
- *    input order) and otherwise breaks longer cycles via a visited-set guard
- *    without throwing — a proven runtime behavioral divergence.
- * Both divergences are reported, not silently resolved — see the dedup
- * equivalence test's "PROVEN DIVERGENCE" block and the consolidation commit
- * message for the adjudication note.
+ * `factory`/`FactoryFunction`/`CreateFunction` remain DELIBERATELY KEPT LOCAL — NOT
+ * safe to redirect: `factory()`'s generic `CreateFunction<TDeps extends
+ * Record<string, unknown>, ...>` constraint (core's copy) rejects real call sites
+ * across this package (and `functions`) whose destructured dependency objects are
+ * typed as plain interfaces without an index signature — confirmed empirically:
+ * redirecting it broke `tsc --noEmit` with dozens of TS2345 errors. This mirrors the
+ * `functions` package's pre-existing `@typescript-eslint/no-explicit-any`
+ * workaround comment on its own local `CreateFunction`, which independently
+ * documents the exact same constraint mismatch.
+ *
+ * `sortFactories`/`create` are now ADOPTED from core (Bucket B, commit 2): they
+ * don't depend on `factory()`'s generic constraint (they only operate on already-
+ * constructed `FactoryFunction`/`LegacyFactory` values), so they aren't blocked by
+ * the divergence above. Core's `sortFactories` throws on ANY circular dependency —
+ * direct or indirect (see `core/tests/factory-sort.test.ts`) — which is a
+ * deliberate fix over this file's FORMER local copy, which only special-cased
+ * direct 2-cycles and otherwise silently broke longer cycles via a visited-set
+ * guard without throwing (see `functions/tests/dedup-bucketB-equivalence.test.ts`'s
+ * former "PROVEN DIVERGENCE" block, now updated to reflect the adoption). Verified
+ * this package's real `factory()` call sites are never fed through `sortFactories`/
+ * `create` in production (both are otherwise-unused mathjs legacy machinery here —
+ * every real node/parse factory is wired by hand with an explicit dependency
+ * object, e.g. `expression/tests/helpers/bootstrap.ts`), so there is no live
+ * dependency graph that could hit the stricter throw.
  */
 
 /**
@@ -127,111 +135,10 @@ export function factory<
   return assertAndCreate as FactoryFunction<TDeps, TResult>;
 }
 
-/**
- * Sort all factories such that when loading in order, the dependencies are resolved.
- *
- * @param factories Array of factory functions or legacy factories
- * @returns Returns a new array with the sorted factories
- */
-export function sortFactories(
-  factories: Array<FactoryFunction | LegacyFactory>
-): Array<FactoryFunction | LegacyFactory> {
-  const factoriesByName: Record<string, FactoryFunction | LegacyFactory> = {};
-
-  factories.forEach((factory) => {
-    const name = isFactory(factory) ? factory.fn : factory.name;
-    factoriesByName[name] = factory;
-  });
-
-  // Check if there's a circular dependency between two factories
-  function hasCircularDependency(
-    factory1: FactoryFunction | LegacyFactory,
-    factory2: FactoryFunction | LegacyFactory
-  ): boolean {
-    if (!isFactory(factory1) || !isFactory(factory2)) {
-      return false;
-    }
-
-    const name1 = factory1.fn;
-    const name2 = factory2.fn;
-
-    // Check if factory1 depends on factory2 AND factory2 depends on factory1
-    return factory1.dependencies.includes(name2) && factory2.dependencies.includes(name1);
-  }
-
-  function containsDependency(
-    factory: FactoryFunction | LegacyFactory,
-    dependency: FactoryFunction | LegacyFactory,
-    visited: Set<string> = new Set()
-  ): boolean {
-    if (isFactory(factory)) {
-      // Detect circular references by tracking visited factories
-      const factoryName = factory.fn;
-      if (visited.has(factoryName)) {
-        // Circular dependency detected - return false to avoid infinite recursion
-        return false;
-      }
-
-      const depName = isFactory(dependency) ? dependency.fn : dependency.name;
-
-      // If there's a circular dependency, don't reorder (preserve input order)
-      if (hasCircularDependency(factory, dependency)) {
-        return false;
-      }
-
-      if (factory.dependencies.includes(depName)) {
-        return true;
-      }
-
-      // Mark this factory as visited before recursing
-      visited.add(factoryName);
-
-      if (
-        factory.dependencies.some((d) => {
-          const depFactory = factoriesByName[d];
-          return depFactory && containsDependency(depFactory, dependency, visited);
-        })
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  const sorted: Array<FactoryFunction | LegacyFactory> = [];
-
-  function addFactory(factory: FactoryFunction | LegacyFactory): void {
-    let index = 0;
-    while (index < sorted.length && !containsDependency(sorted[index], factory)) {
-      index++;
-    }
-
-    sorted.splice(index, 0, factory);
-  }
-
-  // sort regular factory functions
-  factories.filter(isFactory).forEach(addFactory);
-
-  // sort legacy factory functions AFTER the regular factory functions
-  factories.filter((factory) => !isFactory(factory)).forEach(addFactory);
-
-  return sorted;
-}
-
-// TODO: comment or cleanup if unused in the end
-export function create(
-  factories: Array<FactoryFunction | LegacyFactory>,
-  scope: Record<string, unknown> = {}
-): Record<string, unknown> {
-  sortFactories(factories).forEach((factory) => {
-    if (isFactory(factory)) {
-      factory(scope);
-    }
-  });
-
-  return scope;
-}
-
+// `sortFactories`/`create` are adopted straight from `@danielsimonjr/mathts-core/internal`
+// (Bucket B, commit 2) — see this file's header comment. A pure re-export (not a
+// locally-typed wrapper): both operate only on already-constructed `FactoryFunction`/
+// `LegacyFactory` values, so core's signature is a clean drop-in.
 export { isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation };
+export { coreSortFactories as sortFactories, coreCreate as create };
 export type { LegacyFactory, DependencyName };

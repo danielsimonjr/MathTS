@@ -19974,22 +19974,22 @@ modules:
             - assertDependencies
             - isOptionalDependency
             - stripOptionalNotation
+            - sortFactories
+            - create
           subpath: internal
       exports:
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
-        - factory
         - sortFactories
         - create
+        - factory
       interfaces:
         - FactoryFunction
         - FactoryMeta
       functions:
         - factory
-        - sortFactories
-        - create
     functions/src/utils/hasNumericValue.ts:
       description: Test whether a value is an numeric value.
       externalDependencies: []
@@ -27555,22 +27555,22 @@ modules:
             - assertDependencies
             - isOptionalDependency
             - stripOptionalNotation
+            - sortFactories
+            - create
           subpath: internal
       exports:
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
-        - factory
         - sortFactories
         - create
+        - factory
       interfaces:
         - FactoryFunction
         - FactoryMeta
       functions:
         - factory
-        - sortFactories
-        - create
     expression/src/utils/is.ts:
       description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
@@ -35460,11 +35460,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 184792
+  totalLinesOfCode: 184617
   totalExports: 5553
   totalClasses: 52
   totalInterfaces: 489
-  totalFunctions: 1759
+  totalFunctions: 1755
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543

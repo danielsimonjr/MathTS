@@ -9216,7 +9216,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation` |
+| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -9227,7 +9227,7 @@ graph LR
 
 - Interfaces: `FactoryFunction`, `FactoryMeta`
 - Types: `CreateFunction`
-- Functions: `factory`, `sortFactories`, `create`
+- Functions: `factory`
 
 ---
 
@@ -13912,7 +13912,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation` |
+| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -13923,7 +13923,7 @@ graph LR
 
 - Interfaces: `FactoryFunction`, `FactoryMeta`
 - Types: `CreateFunction`
-- Functions: `factory`, `sortFactories`, `create`
+- Functions: `factory`
 
 ---
 
@@ -16485,12 +16485,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1086   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184792 |
+| Total Lines of Code     | 184617 |
 | Total Exports           | 5553   |
 | Total Re-exports        | 2215   |
 | Total Classes           | 52     |
 | Total Interfaces        | 489    |
-| Total Functions         | 1759   |
+| Total Functions         | 1755   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 563    |

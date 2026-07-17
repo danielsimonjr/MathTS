@@ -2,7 +2,7 @@
   "generated": "2026-07-17",
   "note": "This report groups names by OWN definition, not by call graph. It does NOT detect typed-dispatch polymorphism (a single public name registered with multiple typed overloads for different argument shapes) — a flagged name may be a genuine duplicate implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 254,
+    "runtimeDuplicates": 253,
     "typeDuplicates": 69
   },
   "runtime": [
@@ -39,38 +39,6 @@
           "file": "matrix/src/types/Matrix.ts",
           "package": "@danielsimonjr/mathts-matrix",
           "public": true
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "create",
-      "category": "function",
-      "definers": [
-        {
-          "file": "compat/src/index.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true
-        },
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/core/create.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
         }
       ],
       "canonicalHint": "AMBIGUOUS"
@@ -1027,6 +995,28 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "create",
+      "category": "function",
+      "definers": [
+        {
+          "file": "compat/src/index.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/core/create.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "divide",
       "category": "constant",
       "definers": [
@@ -1619,28 +1609,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "sortFactories",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "sqrt",

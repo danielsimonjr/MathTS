@@ -146,6 +146,58 @@ the heuristic) as duplicates; `MathjsError` was already unreferenced-in-package 
 slice-1 and never appeared in the detector's runtime-duplicate list even before this commit, so it
 doesn't move the count further — it's still consolidated for identity/DRY reasons.
 
+### Fixed — cross-package dedup, Bucket B commit 2: `sortFactories`/`create` — expression/functions adopt core's throw-on-cycle fix
+
+Slice 1 found and deliberately did NOT redirect `sortFactories`/`create`: core's `sortFactories`
+throws on ANY circular factory dependency (direct or indirect — `core/tests/factory-sort.test.ts`,
+commit `32fe7051`), while `expression`'s and `functions`' local copies only special-cased a direct
+2-cycle (silently preserving input order) and otherwise broke longer cycles via a visited-set guard
+WITHOUT throwing — a real, if latent, correctness bug in both packages (an indirect A→B→C→A cycle
+would silently produce a nonsensical load order instead of failing loudly).
+
+**Safety verified before adopting (Rule 4) — no real cycle in either package's live factory graph.**
+`sortFactories`/`create` are dead/unused machinery in BOTH packages today: neither is called from any
+production code path (only from their own module and unit tests) — every real factory in both
+packages is wired by hand with an explicit dependency object (`expression/tests/helpers/bootstrap.ts`
+manually calls `createAccessorNode({ subset, Node })` etc.; `functions/src/factories/index.ts` +
+`scope.ts` do the equivalent for the 251 activated mathjs factories), never through a name-sorted DAG
+load. A static extraction of every `factory(name, dependencies, ...)` registration in each package
+(regex over `const name =` / `const dependencies =` pairs, 46 in `expression`, 251 in `functions`) and
+a from-scratch cycle-detection pass found **zero cycles in `functions`**. `expression`'s naive
+whole-package extraction DID surface ~24 same-name self-loops (e.g. `and.transform.ts` intentionally
+registers itself as `fn: 'and'` with `dependencies: ['and']`, referring to the BASE `and` factory that
+lives in a different array entirely) — this is mathjs's known "transform factory shares its base
+function's public name" pattern, not a real defect: it only self-loops because the synthetic
+whole-package array never includes the base factory it's meant to resolve against (real bootstrap
+code never assembles a factories array this way). Confirmed no real invocation anywhere combines these
+name-colliding factories into one `sortFactories`/`create` call.
+
+**Implementation:** both packages' `sortFactories`/`create` are now pure re-exports of core's
+(`export { sortFactories as sortFactories, create as create } from
+'@danielsimonjr/mathts-core/internal'` — internal.ts's existing `export * from './factory.js'`
+already surfaced them, packages just didn't import them before). `factory()`/`FactoryFunction`/
+`CreateFunction` remain local per slice 1's separate, still-valid finding (core's `CreateFunction`
+generic constraint breaks real call sites) — only `sortFactories`/`create` moved, since they operate
+solely on already-constructed `FactoryFunction`/`LegacyFactory` values and don't touch that generic.
+
+**Tests added/updated:** `expression/tests/utils-factory.test.ts` and
+`utils-string-object-factory-extra.test.ts`'s direct-2-cycle tests flipped from `.not.toThrow()` to
+`.toThrow(/Circular dependency/)`; added an indirect 3-cycle throw test in both files. New
+`functions/tests/utils-factory.test.ts` (functions had no dedicated test file for this module before)
+covers the same direct/indirect-cycle-throws + non-cyclic-ordering-still-works cases.
+`functions/tests/dedup-bucketB-equivalence.test.ts`'s "PROVEN DIVERGENCE (reported, not redirected)"
+block is renamed "FIX ADOPTED" and its three tests flipped from asserting silent (non-throwing)
+agreement to asserting all three packages throw identically on both direct and indirect cycles.
+
+`docs/Architecture/duplicate-symbols.json` runtime-duplicate count: **254 → 253** (types: 69 →
+69, unchanged). `sortFactories` drops off the list entirely (was 3 definers: core + both packages'
+local copies — now 2 pure re-export forwards, 1 real definition). `create`'s count also drops (from 5
+definers to 3): the 2 remaining `create`-named definitions left in the list
+(`functions/src/core/create.ts`, `compat/src/index.ts`) are unrelated mathjs bootstrap functions, not
+this dedup's target. `npm run typecheck` 32/32, `eslint` clean (`src` + touched `tests`), full
+`core`/`expression`/`functions` test suites green (760 / 1979 / 4004 passing [+94 skipped] — +2 / +19
+over the previous commit from the new/updated cycle tests).
+
 ### Added — CDG duplicate-symbols detector (`docs/Architecture/duplicate-symbols.{md,json}`)
 
 `tools/create-dependency-graph/create-dependency-graph.ts` adds `detectDuplicateSymbols`: groups

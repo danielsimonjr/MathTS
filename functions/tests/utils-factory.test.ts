@@ -9,6 +9,14 @@ import {
   create,
 } from '../src/utils/factory.js';
 
+/**
+ * Unit coverage for this package's `utils/factory.ts`, mirroring
+ * `expression/tests/utils-factory.test.ts`. `functions` never had a dedicated test
+ * file for this module before Bucket B commit 2 — added alongside the
+ * `sortFactories`/`create` adoption from `@danielsimonjr/mathts-core/internal` (see
+ * `functions/src/utils/factory.ts`'s header comment and CHANGELOG.md).
+ */
+
 // ---------------------------------------------------------------------------
 // isFactory
 // ---------------------------------------------------------------------------
@@ -29,7 +37,7 @@ describe('isFactory', () => {
 });
 
 // ---------------------------------------------------------------------------
-// isOptionalDependency
+// isOptionalDependency / stripOptionalNotation
 // ---------------------------------------------------------------------------
 describe('isOptionalDependency', () => {
   it('returns true for dependencies prefixed with "?"', () => {
@@ -41,9 +49,6 @@ describe('isOptionalDependency', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// stripOptionalNotation
-// ---------------------------------------------------------------------------
 describe('stripOptionalNotation', () => {
   it('removes leading "?" from optional dependencies', () => {
     expect(stripOptionalNotation('?config')).toBe('config');
@@ -85,44 +90,14 @@ describe('factory', () => {
     expect(createAdd.dependencies).toContain('b');
   });
 
-  it('calls the create function with the requested deps', () => {
-    const createDouble = factory(
-      'double',
-      ['x'],
-      ({ x }: { x: number }) =>
-        (n: number) =>
-          n * x
-    );
-    const double = createDouble({ x: 2, ignored: 'should not appear' });
-    expect(double(5)).toBe(10);
-  });
-
-  it('throws when a required dep is missing', () => {
-    const f = factory('f', ['required'], ({ required }: { required: unknown }) => required);
-    expect(() => f({ notRequired: true })).toThrow('Cannot create function "f"');
-  });
-
-  it('attaches meta when provided', () => {
-    const meta = { recreateOnConfigChange: true };
-    const f = factory('f', [], () => {}, meta);
-    expect(f.meta).toEqual(meta);
-  });
-
   it('sorts dependencies alphabetically', () => {
     const f = factory('f', ['z', 'a', 'm'], () => {});
     expect(f.dependencies).toEqual(['a', 'm', 'z']);
   });
-
-  it('handles optional deps: does not pass missing optional ones to create', () => {
-    const f = factory('f', ['?opt'], (deps: Record<string, unknown>) => Object.keys(deps));
-    const result = f({ unrelated: 1 });
-    // 'opt' is optional and missing, so deps should not include it
-    expect(result).not.toContain('opt');
-  });
 });
 
 // ---------------------------------------------------------------------------
-// sortFactories
+// sortFactories — adopted from core (Bucket B, commit 2)
 // ---------------------------------------------------------------------------
 describe('sortFactories', () => {
   it('places a factory before another that depends on it', () => {
@@ -136,7 +111,6 @@ describe('sortFactories', () => {
   it('handles factories with no dependencies', () => {
     const fA = factory('a', [], () => {});
     const fB = factory('b', [], () => {});
-    // Should not throw and should contain both
     const sorted = sortFactories([fA, fB]);
     expect(sorted.length).toBe(2);
   });

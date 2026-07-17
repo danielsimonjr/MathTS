@@ -29,13 +29,22 @@ export { IndexError, createIndexError } from './error/IndexError.js';
 
 // mathjs-style factory helpers (name-sorted DAG loader), consolidated from the
 // duplicate copies formerly in expression/src/utils/factory.ts and
-// functions/src/utils/factory.ts. NOTE: `sortFactories`/`create` are deliberately
-// NOT re-exported here — this file's `sortFactories` throws on ANY circular
-// dependency (direct or indirect; see core/tests/factory-sort.test.ts), which is a
-// proven behavioral DIVERGENCE from the two packages' local copies (which only
-// special-case direct 2-cycles and otherwise silently break cycles without
-// throwing). Each package keeps its own `sortFactories`/`create` local pending
-// adjudication — see functions/tests/dedup-bucketB-equivalence.test.ts.
+// functions/src/utils/factory.ts. `isFactory`/`assertDependencies`/
+// `isOptionalDependency`/`stripOptionalNotation` were adopted in Bucket B slice 1;
+// `sortFactories`/`create` are now ALSO adopted (Bucket B, commit 2) — this file's
+// `sortFactories` throws on ANY circular dependency (direct or indirect; see
+// `core/tests/factory-sort.test.ts`), which was a proven behavioral fix over the two
+// packages' former local copies (which only special-cased direct 2-cycles and
+// otherwise silently broke longer cycles via a visited-set guard without throwing).
+// Verified neither package's real factory-registration graph contains an actual
+// cycle before adopting core's stricter version — see
+// `functions/tests/dedup-bucketB-equivalence.test.ts` and each package's
+// `tests/utils-factory.test.ts`.
+//
+// `factory()`/`FactoryFunction`/`CreateFunction` remain DELIBERATELY LOCAL to each
+// package — core's stricter `CreateFunction<TDeps extends Record<string, unknown>>`
+// constraint rejects real call sites (see slice 1's note); only `sortFactories`/
+// `create` (which don't depend on that generic) are shared here.
 export * from './factory.js';
 
 // Generic-value string formatting, consolidated from expression/src/utils/string.ts
