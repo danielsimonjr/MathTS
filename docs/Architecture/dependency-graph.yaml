@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-17'
   totalFiles: 1086
   totalModules: 82
-  totalExports: 5547
+  totalExports: 5553
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1102,6 +1102,19 @@ modules:
             - warnOnce
             - memoize
           reExport: true
+        - file: ./error/MathjsError.js
+          imports:
+            - MathjsError
+          reExport: true
+        - file: ./error/DimensionError.js
+          imports:
+            - DimensionError
+          reExport: true
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+            - createIndexError
+          reExport: true
         - file: ./string.js
           imports:
             - format
@@ -1198,6 +1211,10 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - MathjsError
+        - DimensionError
+        - IndexError
+        - createIndexError
         - formatGeneric
         - stringify
         - escape
@@ -1274,6 +1291,10 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - MathjsError
+        - DimensionError
+        - IndexError
+        - createIndexError
         - format
         - stringify
         - escape
@@ -1619,9 +1640,12 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - createIndexError
         - IndexError
       classes:
         - IndexError
+      functions:
+        - createIndexError
     core/src/error/MathjsError.ts:
       description: Custom error type for Mathjs errors
       externalDependencies: []
@@ -10040,21 +10064,34 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - DimensionError
+          subpath: internal
       exports:
         - DimensionError
-      classes:
+      reExported:
         - DimensionError
     functions/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
+      description: Custom error type for index out of range errors.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - IndexError
+            - createIndexError
+          subpath: internal
       exports:
         - IndexError
-      classes:
+        - createIndexError
+      reExported:
         - IndexError
+        - createIndexError
   functions/expression:
     functions/src/expression/operators.ts:
       description: Get the operator associated with a function name.
@@ -25730,17 +25767,22 @@ modules:
         - typeOfDocs
   expression/error:
     expression/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
+      description: Custom error type for index out of range errors.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - IndexError
+            - createIndexError
+          subpath: internal
       exports:
+        - IndexError
         - createIndexError
+      reExported:
         - IndexError
-      classes:
-        - IndexError
-      functions:
         - createIndexError
   expression/evaluator:
     expression/src/evaluator/evaluate.ts:
@@ -35418,15 +35460,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 184914
-  totalExports: 5547
-  totalClasses: 55
+  totalLinesOfCode: 184792
+  totalExports: 5553
+  totalClasses: 52
   totalInterfaces: 489
   totalFunctions: 1759
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2206
+  totalReExports: 2215
   totalTypeOnlyImports: 563
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

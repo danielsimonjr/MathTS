@@ -15,6 +15,18 @@ export * from './object.js';
 export { hasOwnProperty, endsWith, warnOnce, memoize } from './shared.js';
 export type { MemoizedFunction } from './shared.js';
 
+// Error classes (Bucket B, commit 1), consolidated from the 2-3 way duplicated
+// copies formerly in expression/src/error/{MathjsError,DimensionError,IndexError}.ts
+// and functions/src/error/{MathjsError,DimensionError,IndexError}.ts. Verified
+// behaviorally identical across all three prior copies (same constructor signature,
+// same message format, same custom fields); expression and functions now re-export
+// these as shims, so `instanceof DimensionError`/`instanceof IndexError` holds across
+// package boundaries. `createIndexError` is the back-compat factory form that
+// originated in functions' copy.
+export { MathjsError } from './error/MathjsError.js';
+export { DimensionError } from './error/DimensionError.js';
+export { IndexError, createIndexError } from './error/IndexError.js';
+
 // mathjs-style factory helpers (name-sorted DAG loader), consolidated from the
 // duplicate copies formerly in expression/src/utils/factory.ts and
 // functions/src/utils/factory.ts. NOTE: `sortFactories`/`create` are deliberately

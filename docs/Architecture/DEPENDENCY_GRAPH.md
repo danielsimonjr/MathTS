@@ -536,6 +536,9 @@ graph LR
 | `./object.js` | `*` | Re-export |
 | `./factory.js` | `*` | Re-export |
 | `./shared.js` | `hasOwnProperty, endsWith, warnOnce, memoize` | Re-export |
+| `./error/MathjsError.js` | `MathjsError` | Re-export |
+| `./error/DimensionError.js` | `DimensionError` | Re-export |
+| `./error/IndexError.js` | `IndexError, createIndexError` | Re-export |
 | `./string.js` | `format, stringify, escape, compareText, GeneralFormatOptions` | Re-export |
 | `./bignumber-formatter.js` | `format, toEngineering, toExponential, toFixed, BigNumberValue` | Re-export |
 | `./types/unit/index.js` | `createUnitClass, unitDependencies, Unit` | Re-export |
@@ -548,7 +551,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `NestedArray`, `IdentifiedValue`, `type * from ./types/unit/unit-types.js`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `NestedArray`, `IdentifiedValue`, `type * from ./types/unit/unit-types.js`
 
 ---
 
@@ -657,6 +660,7 @@ graph LR
 **Exports:**
 
 - Classes: `IndexError`
+- Functions: `createIndexError`
 
 ---
 
@@ -4412,17 +4416,27 @@ graph LR
 
 ### `functions/src/error/DimensionError.ts` - Create a range error with the message:
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `DimensionError` |
+
 **Exports:**
 
-- Classes: `DimensionError`
+- Re-exports: `DimensionError`
 
 ---
 
-### `functions/src/error/IndexError.ts` - Custom error type for index out of range errors
+### `functions/src/error/IndexError.ts` - Custom error type for index out of range errors.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `IndexError, createIndexError` |
 
 **Exports:**
 
-- Classes: `IndexError`
+- Re-exports: `IndexError`, `createIndexError`
 
 ---
 
@@ -12870,12 +12884,16 @@ graph LR
 
 ## Expression/error Dependencies
 
-### `expression/src/error/IndexError.ts` - Custom error type for index out of range errors
+### `expression/src/error/IndexError.ts` - Custom error type for index out of range errors.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `IndexError, createIndexError` |
 
 **Exports:**
 
-- Classes: `IndexError`
-- Functions: `createIndexError`
+- Re-exports: `IndexError`, `createIndexError`
 
 ---
 
@@ -15644,11 +15662,11 @@ graph LR
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
+| `core/src/internal`                                    | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 15 files   |
 | `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
-| `functions/src/bitwise/rightLogShift`                  | 13 files     | 1 file     |
 
 ---
 
@@ -16410,6 +16428,9 @@ graph TD
     N13 --> N31
     N14 --> N15
     N14 --> N12
+    N14 --> N19
+    N14 --> N17
+    N14 --> N18
     N14 --> N7
     N14 --> N35
     N14 --> N6
@@ -16452,9 +16473,6 @@ graph TD
     N45 --> N37
     N45 --> N46
     N45 --> N44
-    N45 --> N43
-    N45 --> N38
-    N45 --> N41
 ```
 
 ---
@@ -16467,10 +16485,10 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1086   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184914 |
-| Total Exports           | 5547   |
-| Total Re-exports        | 2206   |
-| Total Classes           | 55     |
+| Total Lines of Code     | 184792 |
+| Total Exports           | 5553   |
+| Total Re-exports        | 2215   |
+| Total Classes           | 52     |
 | Total Interfaces        | 489    |
 | Total Functions         | 1759   |
 | Total Type Guards       | 156    |

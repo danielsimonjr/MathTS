@@ -113,6 +113,39 @@ SparseMatrix-shaped mocks).
 clean on touched files, full `core`/`expression`/`functions` test suites green (760 / 1977 / 3985
 passing [+94 skipped], no regressions) plus the new slice-2 equivalence suite (43/43).
 
+### Changed — cross-package dedup, Bucket B commit 1: `MathjsError`/`DimensionError`/`IndexError` → core/internal
+
+The error-class follow-up flagged in slice 1 (`MathjsError` was found unreferenced-in-package once
+`assertDependencies` redirected, and is itself a 3-way duplicate) plus the internal-only mirror copies
+`core` picked up in slice 2 for `array.ts`/`collection.ts` to throw correctly-shaped errors
+(`core/src/error/{DimensionError,IndexError}.ts`) are now the single canonical classes for the whole
+monorepo, exported from `@danielsimonjr/mathts-core/internal`. `expression/src/error/{MathjsError,
+DimensionError,IndexError}.ts` and `functions/src/error/{MathjsError,DimensionError,IndexError}.ts`
+are now thin re-export shims — every original exported name is preserved, including functions'
+`createIndexError`/expression's `createIndexError` back-compat factory (both packages already had it;
+core's canonical `IndexError.ts` gained it too).
+
+Verified all three prior copies were behaviorally IDENTICAL before redirecting — same constructor
+signatures, same message formats, same `actual`/`expected`/`relation` (DimensionError) and `index`/
+`min`/`max` (IndexError) fields; the only differences were cosmetic (`captureStackTrace` destructured
+vs. cast-and-check style). No divergence to reconcile, unlike slice 1's `sortFactories` finding.
+
+**instanceof identity confirmed across package boundaries**: a `DimensionError`/`IndexError` thrown
+deep in `functions` (e.g. `matrix/concat.ts`, the `matAlgo*` matrix kernels) or `expression`
+(`transform/utils/errorTransform.ts`) is now `instanceof` the SAME class as core's, functions', and
+expression's — there is only one class definition left. Full `core`/`expression`/`functions` test
+suites re-verified green after the redirect (760 / 1977 / 3985 passing, no regressions), including the
+packages' own direct-import unit tests (`expression/tests/{DimensionError,IndexError,
+errorTransform}.test.ts`) which keep passing unchanged since they import from the same `../src/error/
+*.js` paths, now shims.
+
+`docs/Architecture/duplicate-symbols.json` runtime-duplicate count: **256 → 254** (types: 69 → 69,
+unchanged — these are runtime classes). Note the detector only ever flagged `IndexError` (3 definers)
+and `DimensionError` (2 definers — core + functions; expression's copy wasn't independently flagged by
+the heuristic) as duplicates; `MathjsError` was already unreferenced-in-package on both sides post
+slice-1 and never appeared in the detector's runtime-duplicate list even before this commit, so it
+doesn't move the count further — it's still consolidated for identity/DRY reasons.
+
 ### Added — CDG duplicate-symbols detector (`docs/Architecture/duplicate-symbols.{md,json}`)
 
 `tools/create-dependency-graph/create-dependency-graph.ts` adds `detectDuplicateSymbols`: groups

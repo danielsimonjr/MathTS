@@ -3,16 +3,13 @@
  *     'Dimension mismatch (<actual size> != <expected size>)'
  * Or with a custom message when called with a single string argument.
  *
- * NOT part of the Bucket-B dedup surface (yet) — `expression/src/error/DimensionError.ts`
- * and `functions/src/error/DimensionError.ts` remain the packages' own canonical
- * copies, used by ~20 other call sites beyond array (matrix algos, subset, resize,
- * concat, reshape, ...). This copy exists ONLY as a same-behavior internal
- * implementation detail so `core/src/array.ts` (the Bucket B slice 2 canonical) can
- * throw a correctly-shaped (`isDimensionError: true`) error without reaching back
- * into either package. Consumers only ever duck-type on `e.isDimensionError` or
- * `instanceof DimensionError` WITHIN THE SAME FILE (array.ts's own `reshape` catches
- * its own `_reshape`'s thrown `DimensionError` by reference to this same class), so
- * a distinct class identity here is safe.
+ * The single canonical `DimensionError` for the whole monorepo (Bucket B, commit 1),
+ * exposed via the `@danielsimonjr/mathts-core/internal` subpath. `expression/src/error/
+ * DimensionError.ts` and `functions/src/error/DimensionError.ts` are now thin
+ * re-export shims of this class — a `DimensionError` thrown in one package is
+ * `instanceof DimensionError` in any other, since there is only ever one class
+ * identity. `core/src/array.ts` (and the ~20 other call sites across matrix algos,
+ * subset, resize, concat, reshape, ...) all throw this same class.
  */
 export class DimensionError extends RangeError {
   actual?: number | number[];

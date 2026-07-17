@@ -53,8 +53,12 @@
       "core/src/types/unit/unit-types.ts"
     ],
     "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
-    "core/src/error/DimensionError.ts": ["core/src/array.ts"],
-    "core/src/error/IndexError.ts": ["core/src/array.ts", "core/src/collection.ts"],
+    "core/src/error/DimensionError.ts": ["core/src/array.ts", "core/src/internal.ts"],
+    "core/src/error/IndexError.ts": [
+      "core/src/array.ts",
+      "core/src/collection.ts",
+      "core/src/internal.ts"
+    ],
     "core/src/object.ts": [
       "core/src/array.ts",
       "core/src/factory.ts",
@@ -69,7 +73,7 @@
       "core/src/object.ts",
       "core/src/types/unit/Unit.ts"
     ],
-    "core/src/error/MathjsError.ts": ["core/src/factory.ts"],
+    "core/src/error/MathjsError.ts": ["core/src/factory.ts", "core/src/internal.ts"],
     "core/src/types/matrix/Range.ts": ["core/src/index.ts"],
     "core/src/types/dual.ts": ["core/src/index.ts", "core/src/typed/mathts-typed.ts"],
     "core/src/types/dual-rules.ts": ["core/src/index.ts", "core/src/types/dual.ts"],

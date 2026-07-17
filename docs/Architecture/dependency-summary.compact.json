@@ -1,8 +1,8 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1086, "e": 5547, "re": 2206 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1086, "e": 5553, "re": 2215 },
   "s": {
-    "loc": 184914,
-    "cls": 55,
+    "loc": 184792,
+    "cls": 52,
     "int": 489,
     "fn": 1759,
     "tg": 156,
@@ -133,7 +133,7 @@
     },
     "core/error": {
       "f": 3,
-      "exp": ["DimensionError", "IndexError", "MathjsError"],
+      "exp": ["DimensionError", "createIndexError", "IndexError", "MathjsError"],
       "cls": ["DimensionError", "IndexError", "MathjsError"]
     },
     "core/factory": {
@@ -583,8 +583,8 @@
     },
     "functions/error": {
       "f": 3,
-      "exp": ["ArgumentsError", "DimensionError", "IndexError"],
-      "cls": ["ArgumentsError", "DimensionError", "IndexError"]
+      "exp": ["ArgumentsError", "DimensionError", "IndexError", "createIndexError"],
+      "cls": ["ArgumentsError"]
     },
     "functions/expression": { "f": 1, "exp": ["properties", "getOperator"] },
     "functions/factories": {
@@ -1192,11 +1192,7 @@
         "booleanDocs"
       ]
     },
-    "expression/error": {
-      "f": 1,
-      "exp": ["createIndexError", "IndexError"],
-      "cls": ["IndexError"]
-    },
+    "expression/error": { "f": 1, "exp": ["IndexError", "createIndexError"] },
     "expression/evaluator": {
       "f": 2,
       "exp": ["createEvaluate", "compileExpression"],

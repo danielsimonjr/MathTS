@@ -1,15 +1,13 @@
 /**
  * Custom error type for index out of range errors.
  *
- * NOT part of the Bucket-B dedup surface (yet) — `expression/src/error/IndexError.ts`
- * and `functions/src/error/IndexError.ts` remain the packages' own canonical copies,
- * used by many other call sites beyond array/collection (concat, subset, cumsum,
- * mapSlices, ...). This copy exists ONLY as a same-behavior internal implementation
- * detail so `core/src/array.ts` / `core/src/collection.ts` (the Bucket B slice 2
- * canonical) can throw a correctly-shaped (`isIndexError: true`) error without
- * reaching back into either package. Consumers only ever duck-type on
- * `e.isIndexError`, never `instanceof IndexError`, so a distinct class identity
- * here is safe. See `functions/tests/dedup-bucketB-equivalence.test.ts`.
+ * The single canonical `IndexError` for the whole monorepo (Bucket B, commit 1),
+ * exposed via the `@danielsimonjr/mathts-core/internal` subpath. `expression/src/error/
+ * IndexError.ts` and `functions/src/error/IndexError.ts` are now thin re-export shims
+ * of this class — an `IndexError` thrown in one package is `instanceof IndexError`
+ * in any other, since there is only ever one class identity. `core/src/array.ts` /
+ * `core/src/collection.ts` (and the many other call sites across concat, subset,
+ * cumsum, mapSlices, ...) all throw this same class.
  *
  * @extends RangeError
  */
@@ -68,4 +66,10 @@ export class IndexError extends RangeError {
       ErrorWithCapture.captureStackTrace(this, IndexError);
     }
   }
+}
+
+// Back-compat factory form (originated in functions/src/error/IndexError.ts) —
+// allows constructing an IndexError without `new`.
+export function createIndexError(index: number, min?: number, max?: number): IndexError {
+  return new IndexError(index, min, max);
 }

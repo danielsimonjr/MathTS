@@ -2,7 +2,7 @@
   "generated": "2026-07-17",
   "note": "This report groups names by OWN definition, not by call graph. It does NOT detect typed-dispatch polymorphism (a single public name registered with multiple typed overloads for different argument shapes) — a flagged name may be a genuine duplicate implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 256,
+    "runtimeDuplicates": 254,
     "typeDuplicates": 69
   },
   "runtime": [
@@ -1135,28 +1135,6 @@
         }
       ],
       "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "IndexError",
-      "category": "class",
-      "definers": [
-        {
-          "file": "core/src/error/IndexError.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/error/IndexError.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/error/IndexError.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "isCollection",
@@ -2509,23 +2487,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "DimensionError",
-      "category": "class",
-      "definers": [
-        {
-          "file": "core/src/error/DimensionError.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "functions/src/error/DimensionError.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "discriminant",
