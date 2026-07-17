@@ -484,17 +484,18 @@ defects found + fixed:
       global 50,000 threshold applied — every transform above 50k silently took the four-step worker
       path. It does not pay: **n=2¹⁸, 156 ms via workers vs 77 ms on this thread** (2× slower) in
       Chrome; a wash in Node. The tuned decision was right and simply never read.
-- [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
-      **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
-      _(Highest-value robustness gap.)_
-- [ ] **`ipynb` export** — Jupyter-notebook export; sibling of the shipped
-      `mtsw export --format html|tex|json|pdf` (verified absent in `workbook/src`).
-- [ ] **SVG math typesetting** (vs MathML) · **interactive (JS) charts** ·
-      **multi-doc serve** · **mid-run event streaming** · **`--expect-hash` optimistic lock**.
-- [ ] **Electron GUI** — pure presentation over the CLI/serve contract
-      (`electron-vite-react`); on hold pending workbook release-readiness.
-- [ ] 🔒 **Workbook release-readiness** — `@danielsimonjr/mathts-workbook` stays
-      changeset-ignored / unpublished per the explicit 2026-06-29 hold.
+- [x] ✅ **Worker-thread run timeout — DONE 2026-07-17 (workbook@0.3.0).** `runWorkbookWithTimeout(source,
+    {timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
+      terminate it on budget overrun (`WorkbookTimeoutError`); default in-process path unchanged. Runaway
+      termination MEASURED (chained heavy compute killed at 500ms), not faked.
+- [x] ✅ **`ipynb` export — DONE 2026-07-17 (workbook@0.3.0).** `mtsw export --format ipynb` → nbformat v4
+      (markdown/code cells, execute_result/error/display_data outputs); sibling of html/tex/pdf.
+- [ ] **GUI epic (hold LIFTED 2026-07-17, workbook@0.2.0 debut published).** Remaining: **SVG math
+      typesetting** (vs MathML) · **interactive (JS) charts** · **multi-doc serve** · **mid-run event
+      streaming** · **`--expect-hash` optimistic lock** · **Electron GUI** (`electron-vite-react`, pure
+      presentation over the CLI/serve contract). Daniel approved lifting the hold + scoping the GUI (2026-07-17).
+- [x] ✅ **Workbook release-readiness — HOLD LIFTED 2026-07-17.** Daniel lifted the 2026-06-29 hold;
+      removed from changeset `ignore`; `@danielsimonjr/mathts-workbook@0.2.0` is its npm debut (now @0.3.0).
 
 ### Audit follow-ups (open subset of `BUG_AUDIT_2026-05-25.md`)
 
