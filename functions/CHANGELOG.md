@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.41.0
+
+### Minor Changes
+
+- Stiff-solver RODAS + statistics breadth
+
+  **ODE:** `solveODE` gains `method: 'RODAS'` (Hairer-Wanner 4th-order, 6-stage, L-stable
+  Rosenbrock) for tight tolerances where the 2nd-order ode23s takes too many steps (256 vs
+  1487 steps to reach 1e-8 on a stiff linear system), plus an optional analytic `jac`
+  Jacobian for the stiff methods. Verified vs the exact linear-stiff solution and scipy Radau
+  on the Robertson problem.
+
+  **Stats:** adds `glm` (generalized linear models via IRLS — Poisson log link, Gamma
+  log/inverse), `mvnPdf`/`mvnSample` (multivariate-normal density + Cholesky sampling), and
+  `tTestPower` (two-sample t-test power via the noncentral t). Oracle-pinned vs
+  statsmodels/scipy.
+
 ## 0.40.1
 
 ### Patch Changes
