@@ -400,6 +400,9 @@ export {
   quaternionInverse,
   quaternionSlerp,
   quaternionToEuler,
+  quaternionLog,
+  quaternionExp,
+  quaternionPow,
   boundingBox,
   procrustes,
   kdTreeKNN,
@@ -409,6 +412,14 @@ export {
   setDisjoint,
 } from './geometry/geometry-extra.js';
 export type { ProcrustesResult } from './geometry/geometry-extra.js';
+
+// Geometry breadth follow-up — 3-D ray/segment intersections.
+export {
+  rayTriangleIntersect,
+  rayPlaneIntersect,
+  segmentSegmentClosest,
+} from './geometry/intersect3d.js';
+export type { RayHit, SegmentClosestResult } from './geometry/intersect3d.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this

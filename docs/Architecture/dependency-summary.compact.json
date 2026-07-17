@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1069, "e": 5340, "re": 2003 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1070, "e": 5354, "re": 2011 },
   "s": {
-    "loc": 183802,
+    "loc": 184042,
     "cls": 57,
-    "int": 470,
-    "fn": 1780,
+    "int": 472,
+    "fn": 1786,
     "tg": 160,
     "en": 0,
     "co": 1543,
-    "toi": 550
+    "toi": 551
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -609,12 +609,15 @@
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
     },
     "functions/geometry": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "createDistance",
         "quaternionInverse",
         "quaternionSlerp",
         "quaternionToEuler",
+        "quaternionLog",
+        "quaternionExp",
+        "quaternionPow",
         "boundingBox",
         "procrustes",
         "kdTreeKNN",
@@ -622,9 +625,12 @@
         "setIsSuperset",
         "setEqual",
         "setDisjoint",
-        "createIntersect"
+        "createIntersect",
+        "rayTriangleIntersect",
+        "rayPlaneIntersect",
+        "segmentSegmentClosest"
       ],
-      "int": ["ProcrustesResult"]
+      "int": ["ProcrustesResult", "RayHit", "SegmentClosestResult"]
     },
     "functions/gpu": {
       "f": 2,
@@ -1788,7 +1794,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 92, "o": 0 },
+    { "p": "src/index.ts", "i": 94, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

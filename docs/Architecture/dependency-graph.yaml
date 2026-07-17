@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1069
+  totalFiles: 1070
   totalModules: 82
-  totalExports: 5340
+  totalExports: 5354
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7675,6 +7675,9 @@ modules:
             - quaternionInverse
             - quaternionSlerp
             - quaternionToEuler
+            - quaternionLog
+            - quaternionExp
+            - quaternionPow
             - boundingBox
             - procrustes
             - kdTreeKNN
@@ -7682,6 +7685,12 @@ modules:
             - setIsSuperset
             - setEqual
             - setDisjoint
+          reExport: true
+        - file: ./geometry/intersect3d.js
+          imports:
+            - rayTriangleIntersect
+            - rayPlaneIntersect
+            - segmentSegmentClosest
           reExport: true
         - file: ./stats/inference-extra2.js
           imports:
@@ -7932,6 +7941,12 @@ modules:
             - ProcrustesResult
           reExport: true
           typeOnly: true
+        - file: ./geometry/intersect3d.js
+          imports:
+            - RayHit
+            - SegmentClosestResult
+          reExport: true
+          typeOnly: true
         - file: ./stats/inference-extra2.js
           imports:
             - CircularOptions
@@ -8168,6 +8183,9 @@ modules:
         - quaternionInverse
         - quaternionSlerp
         - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -8175,6 +8193,9 @@ modules:
         - setIsSuperset
         - setEqual
         - setDisjoint
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -8283,6 +8304,8 @@ modules:
         - StftOptions
         - StftResult
         - ProcrustesResult
+        - RayHit
+        - SegmentClosestResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -8496,6 +8519,9 @@ modules:
         - quaternionInverse
         - quaternionSlerp
         - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -8503,6 +8529,9 @@ modules:
         - setIsSuperset
         - setEqual
         - setDisjoint
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -8611,6 +8640,8 @@ modules:
         - StftOptions
         - StftResult
         - ProcrustesResult
+        - RayHit
+        - SegmentClosestResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -10872,6 +10903,9 @@ modules:
         - quaternionInverse
         - quaternionSlerp
         - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -10885,6 +10919,9 @@ modules:
         - quaternionInverse
         - quaternionSlerp
         - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
         - boundingBox
         - procrustes
         - kdTreeKNN
@@ -10920,6 +10957,23 @@ modules:
         - createIntersect
       constants:
         - createIntersect
+    functions/src/geometry/intersect3d.ts:
+      description: '3-D ray/segment intersection tests (geometry breadth follow-up): ray↔triangle'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
+      interfaces:
+        - RayHit
+        - SegmentClosestResult
+      functions:
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
   functions/gpu:
     functions/src/gpu/elementwise-gpu.ts:
       description: WebGPU fused element-wise chain.
@@ -33537,6 +33591,7 @@ dependencyGraph:
         - functions/src/geometry/distance.ts
         - functions/src/geometry/geometry-extra.ts
         - functions/src/geometry/intersect.ts
+        - functions/src/geometry/intersect3d.ts
     - name: Functions/gpu
       files:
         - functions/src/gpu/elementwise-gpu.ts
@@ -34475,18 +34530,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1069
+  totalTypeScriptFiles: 1070
   totalModules: 82
-  totalLinesOfCode: 183802
-  totalExports: 5340
+  totalLinesOfCode: 184042
+  totalExports: 5354
   totalClasses: 57
-  totalInterfaces: 470
-  totalFunctions: 1780
+  totalInterfaces: 472
+  totalFunctions: 1786
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2003
-  totalTypeOnlyImports: 550
+  totalReExports: 2011
+  totalTypeOnlyImports: 551
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

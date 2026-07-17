@@ -2160,17 +2160,20 @@ Geometric operations on 2D/3D/nD coordinate arrays.
 
 Quaternions are `[w, x, y, z]` arrays (scalar-first).
 
-| Function                               | Description                                                    |
-| -------------------------------------- | -------------------------------------------------------------- |
-| `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                            |
-| `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                    |
-| `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude          |
-| `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for a rotation of `angle` radians about `axis` |
-| `quaternionRotate(q, v)`               | Rotate 3-vector `v` by unit quaternion `q`                     |
-| `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix for a unit quaternion                      |
-| `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                      |
-| `quaternionSlerp(q1, q2, t)`           | Spherical linear interpolation between two unit quaternions    |
-| `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians)      |
+| Function                               | Description                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| `quaternionMultiply(q1, q2)`           | Hamilton product of two quaternions                                     |
+| `quaternionConjugate(q)`               | Conjugate `[w, −x, −y, −z]`                                             |
+| `quaternionNormalize(q)`               | Unit-normalize a quaternion; throws on zero magnitude                   |
+| `quaternionFromAxisAngle(axis, angle)` | Unit quaternion for a rotation of `angle` radians about `axis`          |
+| `quaternionRotate(q, v)`               | Rotate 3-vector `v` by unit quaternion `q`                              |
+| `quaternionToRotationMatrix(q)`        | 3×3 rotation matrix for a unit quaternion                               |
+| `quaternionInverse(q)`                 | Multiplicative inverse `conj(q) / \|q\|²`                               |
+| `quaternionSlerp(q1, q2, t)`           | Spherical linear interpolation between two unit quaternions             |
+| `quaternionToEuler(q)`                 | ZYX intrinsic Euler angles `[roll, pitch, yaw]` (radians)               |
+| `quaternionLog(q)`                     | Logarithm `(0, θ·û)`; zero quaternion for the identity                  |
+| `quaternionExp(q)`                     | Exponential `eʷ·(cos\|v\|, sin\|v\|·v̂)`; inverse of `quaternionLog`     |
+| `quaternionPow(q, t)`                  | Power `exp(t·log(q))`; scales a unit quaternion's rotation angle by `t` |
 
 ### Bounding box & Procrustes alignment
 
@@ -2185,6 +2188,16 @@ Quaternions are `[w, x, y, z]` arrays (scalar-first).
 | -------------------------------- | ---------------------------------------------------------------- |
 | `kdTreeKNN(points, query, k)`    | Indices of the `k` nearest points to `query` (brute force)       |
 | `kdTreeRadius(points, query, r)` | Indices of all points within radius `r` of `query` (brute force) |
+
+### 3-D ray/segment intersections
+
+Points/vectors are 3-element `number[]`.
+
+| Function                                                  | Description                                                                                                             |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `rayTriangleIntersect(origin, dir, v0, v1, v2)`           | Möller–Trumbore ray↔triangle hit; returns `{ point, t }` or `null`                                                      |
+| `rayPlaneIntersect(origin, dir, planePoint, planeNormal)` | Ray↔plane hit; returns `{ point, t }` or `null` when the ray is parallel to the plane                                   |
+| `segmentSegmentClosest(p1, p2, q1, q2)`                   | Closest points between two 3-D segments; returns `{ point1, point2, distance }` (`distance` is `0` when they intersect) |
 
 ### 3D convex hull
 
@@ -2821,7 +2834,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1017 exports).
+> `@danielsimonjr/mathts-functions` (1023 exports).
 
 ### Functions by category
 
@@ -2859,7 +2872,7 @@ await terminatePool();
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
-**Geometry** (50): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
+**Geometry** (56): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `triangleArea`, `voronoiDiagram`
 
 **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 

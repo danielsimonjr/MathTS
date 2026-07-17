@@ -89,6 +89,65 @@ export function quaternionToEuler(q: Quat): [number, number, number] {
 }
 
 // =============================================================================
+// Quaternion exponential map: log / exp / pow
+// =============================================================================
+
+/** Below this vector-part magnitude, the axis is treated as undefined and the
+ * log's vector part is taken to be zero (the angle itself is ~0 or ~π, so
+ * `sin(angle) * axis` vanishes either way — this only avoids a 0/0 NaN). */
+const QUAT_VECTOR_EPS = 1e-15;
+
+/**
+ * Quaternion logarithm. For a unit quaternion `q = (w, v)`:
+ * `log(q) = (0, θ·û)` where `θ = atan2(|v|, w)` and `û = v/|v|`.
+ * The zero-vector-part (real/identity) case returns the zero quaternion
+ * rather than dividing by zero.
+ *
+ * @example
+ * quaternionLog([1, 0, 0, 0])  // [0, 0, 0, 0]
+ */
+export function quaternionLog(q: Quat): number[] {
+  const [w, x, y, z] = q as number[];
+  const vNorm = Math.sqrt(x * x + y * y + z * z);
+  if (vNorm < QUAT_VECTOR_EPS) return [0, 0, 0, 0];
+  const theta = Math.atan2(vNorm, w);
+  const s = theta / vNorm;
+  return [0, x * s, y * s, z * s];
+}
+
+/**
+ * Quaternion exponential. For `q = (w, v)`:
+ * `exp(q) = eʷ · (cos|v|, sin|v|·v/|v|)` (the pure-quaternion case `w = 0`
+ * reduces to `exp((0, u)) = (cos|u|, sin|u|·û)`, the standard exponential map
+ * used to invert {@link quaternionLog}).
+ *
+ * @example
+ * quaternionExp([0, 0, 0, 0])  // [1, 0, 0, 0]
+ */
+export function quaternionExp(q: Quat): number[] {
+  const [w, x, y, z] = q as number[];
+  const vNorm = Math.sqrt(x * x + y * y + z * z);
+  const ew = Math.exp(w);
+  if (vNorm < QUAT_VECTOR_EPS) return [ew, 0, 0, 0];
+  const s = (ew * Math.sin(vNorm)) / vNorm;
+  return [ew * Math.cos(vNorm), x * s, y * s, z * s];
+}
+
+/**
+ * Quaternion power: `pow(q, t) = exp(t · log(q))`. For a unit quaternion
+ * representing a rotation, this interpolates/extrapolates the rotation angle
+ * by factor `t` about the same axis (`t=1` returns `q`; `t=0` returns the
+ * identity `[1, 0, 0, 0]`; `t=2` doubles the rotation).
+ *
+ * @example
+ * quaternionPow([0.70710678, 0, 0, 0.70710678], 0.5)  // [0.92387953, 0, 0, 0.38268343]
+ */
+export function quaternionPow(q: Quat, t: number): number[] {
+  const logQ = quaternionLog(q);
+  return quaternionExp(logQ.map((v) => v * t));
+}
+
+// =============================================================================
 // Bounding box
 // =============================================================================
 

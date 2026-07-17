@@ -131,8 +131,14 @@ or a documented scope limit worth revisiting.
       `(n-1)(n-2)/2` instead of `(n-1)(n-2)`, making normalised undirected betweenness 2x too
       large — caught while oracle-pinning, fixed for both directed/undirected. **Remaining:**
       incidence matrix + adjacency spectrum (not requested this pass).
-- [ ] **Geometry breadth:** SphericalVoronoi, alpha-shapes, halfspace-intersection, 3-D ray/segment
-      intersections, quaternion exp/log/pow.
+- [x] ✅ **Geometry breadth (partial) — DONE 2026-07-16.** `quaternionExp`/`quaternionLog`/
+      `quaternionPow` (`functions/src/geometry/geometry-extra.ts`, scalar-first `[w,x,y,z]`) and
+      `rayTriangleIntersect`/`rayPlaneIntersect`/`segmentSegmentClosest`
+      (`functions/src/geometry/intersect3d.ts`) shipped, oracle-pinned vs scipy
+      `Rotation`/closed-form geometry (`functions/tests/gap-geometry-breadth-oracle.test.ts`, 15
+      tests). **Remaining:** `SphericalVoronoi`, alpha-shapes, halfspace-intersection — each needs
+      a Delaunay-triangulation/convex-hull/vertex-enumeration engine MathTS doesn't have yet; a
+      substantially larger follow-up, not attempted this pass.
 - [ ] **Numerics:** general PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem`
       error control; B-spline fitting; Monte-Carlo/QMC integration; DAE/DDE.
 - [ ] **Stats:** logistic/GLM breadth (Poisson/Gamma links); Gaussian-process regression; multivariate

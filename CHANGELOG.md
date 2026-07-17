@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — geometry breadth: quaternion exp/log/pow + 3-D ray/segment intersections
+
+Closes part of the "Geometry breadth" follow-up logged from the Phase 8 oracle-gap roadmap.
+Added `quaternionLog`/`quaternionExp`/`quaternionPow` to `functions/src/geometry/geometry-extra.ts`
+(scalar-first `[w,x,y,z]` convention, matching the existing `quaternionInverse`/`quaternionSlerp`):
+`log(q) = (0, θ·û)` with `θ = atan2(|v|, w)`; `exp(q) = eʷ·(cos|v|, sin|v|·v̂)`; `pow(q,t) =
+exp(t·log(q))`. Also added a new `functions/src/geometry/intersect3d.ts` with
+`rayTriangleIntersect` (Möller–Trumbore), `rayPlaneIntersect`, and `segmentSegmentClosest`
+(Ericson's `ClosestPtSegmentSegment`), all operating on plain 3-element `number[]` points/vectors
+matching `../typed/geometry.ts`'s convention.
+
+Oracle-pinned in `functions/tests/gap-geometry-breadth-oracle.test.ts` (15 tests): `quaternionPow`
+verified against `scipy.spatial.transform.Rotation`'s rotvec scaling (90°-about-z quaternion
+halved/doubled/held/zeroed to 45°/180°/90°/identity, tol 1e-8/1e-9); `quaternionExp`/`quaternionLog`
+round-trip to 1e-10 across five sampled unit quaternions plus the identity edge case;
+`rayTriangleIntersect`/`rayPlaneIntersect`/`segmentSegmentClosest` pinned against hand-derived
+closed-form hit points, misses, and a parallel-plane/parallel-ray null case. Documented in
+`docs/reference/functions.md` (3 new quaternion rows + a new "3-D ray/segment intersections"
+section); `SphericalVoronoi`, alpha-shapes, and halfspace-intersection remain — each needs a
+Delaunay-triangulation/convex-hull engine MathTS doesn't have yet, a separate follow-up.
+
 ### Added — graph breadth: coloring, maxClique, Louvain, Katz centrality, isomorphism
 
 Five new graph functions in `functions/src/graph/community-coloring.ts`, closing the "Graph
