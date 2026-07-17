@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-functions
 
+## 0.39.0
+
+### Minor Changes
+
+- `funm` handles defective matrices; wavelet families db/sym/coif
+
+  `funm(A, f)` no longer throws on defective / repeated-eigenvalue (non-diagonalizable)
+  matrices — it now uses confluent Hermite interpolation (Newton divided differences over
+  repeated eigenvalue nodes). Derivatives of `f` come from an optional additive `fDerivs`
+  argument (machine precision — wired for `cosm`/`sinm`) or an order-tuned finite-difference
+  fallback. Verified on Jordan blocks vs closed forms and scipy `expm`/`sqrtm`; the
+  distinct-eigenvalue path is unchanged.
+
+  `dwt`/`idwt`/`wavedec`/`waverec` now support the db1-4, sym2-4 and coif1-2 wavelet
+  families (previously Haar/db1 only), via a general orthogonal filter bank with a
+  periodization boundary. Filter coefficients and single-level transforms match PyWavelets
+  1.8.0 bit-for-bit; perfect reconstruction holds for every family. `cwt` is unchanged.
+
 ## 0.38.0
 
 ### Minor Changes
