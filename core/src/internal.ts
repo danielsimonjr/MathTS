@@ -59,3 +59,63 @@ export type * from './types/unit/unit-types.js';
 // retires its own copy (Unit-merge Phase 3). `CoreUnit` is the value export; the
 // `Unit` *type* continues to come from `is.js`.
 export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/unit/index.js';
+
+// Cold array/collection/map utilities (Bucket B slice 2), consolidated from the
+// duplicate copies formerly in expression/src/utils/{array,collection,map}.ts and
+// functions/src/utils/{array,collection,map}.ts. See each source file's header for
+// the divergences found and reconciled (map.ts's `[Symbol.iterator]` type-soundness
+// fix; array.ts's expression-only `initial`).
+//
+// Explicit named exports (no `export *`) because array.ts and collection.ts each
+// define their OWN `deepMap`/`deepForEach` (array-level vs. Matrix-or-array-aware
+// level — collection.ts's versions dispatch to array.ts's under the hood), and
+// array.ts's `clone`/`get` collide in name (but not in meaning) with `object.ts`'s
+// generic `clone`/`get` already exported above. Aliased below to keep every name
+// in this barrel unambiguous; collection.ts's `deepMap`/`deepForEach` keep the
+// plain names since they are the ones most call sites want (Matrix-aware).
+export type { NestedArray, IdentifiedValue } from './array.js';
+export {
+  arraySize,
+  validate,
+  validateIndexSourceSize,
+  validateIndex,
+  isEmptyIndex,
+  resize,
+  reshape,
+  processSizesWildcard,
+  squeeze,
+  unsqueeze,
+  flatten,
+  map,
+  forEach,
+  filter,
+  filterRegExp,
+  join,
+  identify,
+  generalize,
+  getArrayDataType,
+  last,
+  initial,
+  concat,
+  broadcastSizes,
+  checkBroadcastingRules,
+  broadcastTo,
+  broadcastArrays,
+  stretch,
+  get as getArrayElement,
+  deepMap as deepMapArray,
+  deepForEach as deepForEachArray,
+  clone as cloneArray,
+} from './array.js';
+
+export { containsCollections, deepMap, deepForEach, reduce, scatter } from './collection.js';
+
+export {
+  ObjectWrappingMap,
+  PartitionedMap,
+  createEmptyMap,
+  createMap,
+  toObject,
+  assign as assignMap,
+  isObjectWrappingMap,
+} from './map.js';

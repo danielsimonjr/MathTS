@@ -5,12 +5,12 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 6
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
-  - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 225
+  - **Test-only (exercised by a test, ships nothing)**: 6
+- **Potentially unused exports**: 213
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 224
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 212
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -33,9 +33,11 @@ Not reachable from any package entry point, but imported by a test — deliberat
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
 
-### `expression` (1)
+### `expression` (3)
 
+- `expression/src/error/DimensionError.ts`
 - `expression/src/utils/bignumber/formatter.ts`
+- `expression/src/utils/switch.ts`
 
 ### `functions` (1)
 
@@ -68,6 +70,11 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `core/src/config.ts`
 
 - `MathJsConfig` (type) — 1 in-file ref
+
+### `core/src/customs.ts`
+
+- `getSafeMethod` (function) — 1 in-file ref
+- `isSafeMethod` (function) — 2 in-file refs
 
 ### `core/src/typed/mathts-typed.ts`
 
@@ -342,22 +349,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `polyReduce` (function) — 3 in-file refs
 - `Term` (interface) — 2 in-file refs
 
-### `functions/src/utils/array.ts`
-
-- `validate` (function) — 7 in-file refs
-- `processSizesWildcard` (function) — 1 in-file ref
-- `unsqueeze` (function) — 3 in-file refs
-- `map` (function) — 5 in-file refs
-- `forEach` (function) — 5 in-file refs
-- `join` (function) — 2 in-file refs
-- `last` (function) — 5 in-file refs
-- `checkBroadcastingRules` (function) — 2 in-file refs
-- `broadcastArrays` (function) — 1 in-file ref
-- `stretch` (function) — 1 in-file ref
-- `clone` (function) — 1 in-file ref
-- `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 79 in-file refs
-
 ### `functions/src/utils/bignumber/bitwise.ts`
 
 - `bitwise` (function) — 4 in-file refs
@@ -368,9 +359,11 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `Complex` (interface) — 1 in-file ref
 - `Fraction` (interface) — 1 in-file ref
 - `Unit` (interface) — 2 in-file refs
+- `Matrix` (interface) — 5 in-file refs
 - `DenseMatrix` (interface) — 2 in-file refs
 - `SparseMatrix` (interface) — 1 in-file ref
 - `Range` (interface) — 1 in-file ref
+- `IndexDimension` (interface) — 1 in-file ref
 - `ResultSet` (interface) — 1 in-file ref
 - `Help` (interface) — 1 in-file ref
 - `Chain` (interface) — 1 in-file ref
@@ -392,12 +385,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `functions/src/utils/map.ts`
-
-- `assign` (function) — 1 in-file ref
-- `ObjectWrappingMap` (class) — 5 in-file refs
-- `PartitionedMap` (class) — 2 in-file refs
-
 ### `functions/src/wasm/integrity.ts`
 
 - `WasmManifest` (interface) — 4 in-file refs
@@ -415,20 +402,17 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `CompiledExpression` (interface) — 1 in-file ref
 
-### `expression/src/utils/array.ts`
-
-- `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 79 in-file refs
-
 ### `expression/src/utils/is.ts`
 
 - `BigNumber` (interface) — 2 in-file refs
 - `Complex` (interface) — 1 in-file ref
 - `Fraction` (interface) — 1 in-file ref
 - `Unit` (interface) — 2 in-file refs
+- `Matrix` (interface) — 5 in-file refs
 - `DenseMatrix` (interface) — 2 in-file refs
 - `SparseMatrix` (interface) — 1 in-file ref
 - `Range` (interface) — 1 in-file ref
+- `IndexDimension` (interface) — 1 in-file ref
 - `ResultSet` (interface) — 1 in-file ref
 - `Help` (interface) — 1 in-file ref
 - `Chain` (interface) — 1 in-file ref

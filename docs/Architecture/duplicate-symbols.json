@@ -2,8 +2,8 @@
   "generated": "2026-07-17",
   "note": "This report groups names by OWN definition, not by call graph. It does NOT detect typed-dispatch polymorphism (a single public name registered with multiple typed overloads for different argument shapes) — a flagged name may be a genuine duplicate implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 280,
-    "typeDuplicates": 70
+    "runtimeDuplicates": 256,
+    "typeDuplicates": 69
   },
   "runtime": [
     {
@@ -610,33 +610,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "clone",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "core/src/object.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS"
-    },
-    {
       "name": "complex",
       "category": "constant+function",
       "definers": [
@@ -662,60 +635,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "deepForEach",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "deepMap",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "DEFAULT_CONFIG",
@@ -961,33 +880,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "scatter",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "plot/src/marks2d.ts",
-          "package": "@danielsimonjr/mathts-plot",
-          "public": true
-        },
-        {
-          "file": "tensor/src/operations/scatter.ts",
-          "package": "@danielsimonjr/mathts-tensor",
-          "public": true
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS"
-    },
-    {
       "name": "subtract",
       "category": "constant+function",
       "definers": [
@@ -1091,26 +983,26 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "concat",
+      "name": "clone",
       "category": "constant+function",
       "definers": [
         {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/object.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
         },
         {
           "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
         }
       ],
-      "canonicalHint": "functions/src/factories/index.ts"
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "cond",
@@ -1133,28 +1025,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "createMap",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/matrix/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "divide",
@@ -1223,94 +1093,6 @@
       "canonicalHint": "core/src/factory.ts"
     },
     {
-      "name": "filter",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "flatten",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "forEach",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "get",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/object.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/object.ts"
-    },
-    {
       "name": "identity",
       "category": "constant+function",
       "definers": [
@@ -1353,6 +1135,28 @@
         }
       ],
       "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "IndexError",
+      "category": "class",
+      "definers": [
+        {
+          "file": "core/src/error/IndexError.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/error/IndexError.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/error/IndexError.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
     },
     {
       "name": "isCollection",
@@ -1619,28 +1423,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "map",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
       "name": "matrix",
       "category": "constant+function",
       "definers": [
@@ -1751,72 +1533,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "reduce",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/typed/algebra.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/typed/algebra.ts"
-    },
-    {
-      "name": "reshape",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "resize",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
       "name": "rfft",
       "category": "function",
       "definers": [
@@ -1855,6 +1571,28 @@
         {
           "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "scatter",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/collection.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "plot/src/marks2d.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        },
+        {
+          "file": "tensor/src/operations/scatter.ts",
+          "package": "@danielsimonjr/mathts-tensor",
           "public": true
         }
       ],
@@ -1993,28 +1731,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "squeeze",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
       "name": "trace",
       "category": "constant+function",
       "definers": [
@@ -2085,8 +1801,8 @@
       "category": "function",
       "definers": [
         {
-          "file": "expression/src/utils/switch.ts",
-          "package": "@danielsimonjr/mathts-expression",
+          "file": "core/src/switch.ts",
+          "package": "@danielsimonjr/mathts-core",
           "public": false
         },
         {
@@ -2183,23 +1899,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "arraySize",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "asin",
       "category": "constant+function",
       "definers": [
@@ -2232,23 +1931,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "assign",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "atan",
@@ -2370,57 +2052,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "broadcastArrays",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "broadcastSizes",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "broadcastTo",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "canUseSharedMemory",
       "category": "function",
       "definers": [
@@ -2540,23 +2171,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "checkBroadcastingRules",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "chineseRemainder",
       "category": "constant+function",
       "definers": [
@@ -2642,6 +2256,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "concat",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "conj",
       "category": "constant+function",
       "definers": [
@@ -2657,23 +2288,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "containsCollections",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/collection.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "convolve",
@@ -2761,21 +2375,21 @@
       "canonicalHint": "internal-only"
     },
     {
-      "name": "createEmptyMap",
-      "category": "function",
+      "name": "createMap",
+      "category": "constant+function",
       "definers": [
         {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
+          "file": "core/src/map.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
         },
         {
-          "file": "functions/src/utils/map.ts",
+          "file": "functions/src/matrix/map.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/map.ts"
     },
     {
       "name": "createTypedFunction",
@@ -2793,6 +2407,40 @@
         }
       ],
       "canonicalHint": "internal-only"
+    },
+    {
+      "name": "deepForEach",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/collection.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "deepMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/collection.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "defaultWasmLocation",
@@ -2867,8 +2515,8 @@
       "category": "class",
       "definers": [
         {
-          "file": "expression/src/error/DimensionError.ts",
-          "package": "@danielsimonjr/mathts-expression",
+          "file": "core/src/error/DimensionError.ts",
+          "package": "@danielsimonjr/mathts-core",
           "public": false
         },
         {
@@ -3152,21 +2800,21 @@
       "canonicalHint": "functions/src/signal/fft-helpers.ts"
     },
     {
-      "name": "filterRegExp",
-      "category": "function",
+      "name": "filter",
+      "category": "constant+function",
       "definers": [
         {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
         },
         {
-          "file": "functions/src/utils/array.ts",
+          "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false
+          "public": true
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "fix",
@@ -3186,6 +2834,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "flatten",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "floor",
       "category": "constant",
       "definers": [
@@ -3196,6 +2861,23 @@
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "forEach",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true
         }
@@ -3237,38 +2919,21 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "generalize",
+      "name": "get",
       "category": "function",
       "definers": [
         {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
         },
         {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
+          "file": "core/src/object.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
         }
       ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "getArrayDataType",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "getOperator",
@@ -3339,23 +3004,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "identify",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "ifftshift",
       "category": "function",
       "definers": [
@@ -3388,23 +3036,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "IndexError",
-      "category": "class",
-      "definers": [
-        {
-          "file": "expression/src/error/IndexError.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/error/IndexError.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "initializePool",
@@ -3553,23 +3184,6 @@
         },
         {
           "file": "functions/src/utils/is.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "isEmptyIndex",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": false
         }
@@ -3764,23 +3378,6 @@
       "canonicalHint": "internal-only"
     },
     {
-      "name": "isObjectWrappingMap",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "isOperatorNode",
       "category": "function",
       "definers": [
@@ -3951,23 +3548,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "join",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "laguerreL",
       "category": "constant+function",
       "definers": [
@@ -3983,23 +3563,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "last",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "lcm",
@@ -4206,6 +3769,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "map",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "matrixExpm",
       "category": "constant+function",
       "definers": [
@@ -4376,23 +3956,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "ObjectWrappingMap",
-      "category": "class",
-      "definers": [
-        {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "padeApproximant",
       "category": "function",
       "definers": [
@@ -4408,23 +3971,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "PartitionedMap",
-      "category": "class",
-      "definers": [
-        {
-          "file": "expression/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/map.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "partitions",
@@ -4665,23 +4211,6 @@
       "canonicalHint": "internal-only"
     },
     {
-      "name": "processSizesWildcard",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "properties",
       "category": "constant",
       "definers": [
@@ -4767,6 +4296,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "reduce",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/collection.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "resample",
       "category": "function",
       "definers": [
@@ -4784,6 +4330,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "reshape",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "residue",
       "category": "function",
       "definers": [
@@ -4794,6 +4357,23 @@
         },
         {
           "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "resize",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true
         }
@@ -5039,6 +4619,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "squeeze",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "std",
       "category": "constant+function",
       "definers": [
@@ -5054,23 +4651,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "stretch",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "subset",
@@ -5292,74 +4872,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "unsqueeze",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "validate",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "validateIndex",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "validateIndexSourceSize",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "variance",
@@ -5705,33 +5217,6 @@
       "canonicalHint": "core/src/is.ts"
     },
     {
-      "name": "NestedArray",
-      "category": "type",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/type/matrix/types.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "tensor/src/Tensor.ts",
-          "package": "@danielsimonjr/mathts-tensor",
-          "public": true
-        }
-      ],
-      "canonicalHint": "tensor/src/Tensor.ts"
-    },
-    {
       "name": "SparseMatrix",
       "category": "interface",
       "definers": [
@@ -5894,6 +5379,28 @@
         }
       ],
       "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "NestedArray",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/array.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "tensor/src/Tensor.ts",
+          "package": "@danielsimonjr/mathts-tensor",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "Range",
@@ -6295,23 +5802,6 @@
         },
         {
           "file": "functions/src/utils/is.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "IdentifiedValue",
-      "category": "interface",
-      "definers": [
-        {
-          "file": "expression/src/utils/array.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/array.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": false
         }

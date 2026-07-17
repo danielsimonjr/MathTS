@@ -57,6 +57,62 @@ B follow-up, deliberately not folded into this slice.
 `npm run typecheck` 32/32, `eslint` clean on touched files, full `core`/`expression`/`functions` test
 suites green (760 / 1977 / 3942 passing, no regressions) plus the new equivalence suite (18/18).
 
+### Changed — cross-package dedup, Bucket B slice 2: `array`/`collection`/`map` utils → core/internal
+
+The big cold-util cluster: `expression` and `functions` each carried a full duplicate copy of
+mathjs-derived `array.ts` (~1030 lines), `collection.ts` (~240 lines), and `map.ts` (~270 lines) —
+`deepMap`/`deepForEach`/`flatten`/`reshape`/`resize`/`squeeze`/`map`/`forEach`/`filter`/`reduce`/
+`concat`/`scatter`/`get`/`createMap`/`ObjectWrappingMap`/`PartitionedMap`, etc. Unlike slice 1, core
+had NONE of these — the canonical bodies were newly relocated into `core/src/{array,collection,map}.ts`
+and re-exported from `core/src/internal.ts` (aliased where needed: array.ts's `clone`/`get` collide
+with `object.ts`'s generic `clone`/`get`; array.ts's and collection.ts's own `deepMap`/`deepForEach`
+collide with each other). `IndexError`/`DimensionError` (thrown by array.ts/collection.ts) and the
+sandbox helpers `getSafeProperty`/`setSafeProperty`/`isSafeProperty` (needed by map.ts's
+`ObjectWrappingMap`) got internal-only, non-exported mirror copies in core (`core/src/error/
+IndexError.ts`, `core/src/error/DimensionError.ts`, `core/src/customs.ts`, `core/src/switch.ts` for
+collection's private `_switch`) — the packages' own copies of these remain untouched (they have many
+other call sites; a future dedup slice), and are NOT part of this slice's public surface. The security
+invariant is unaffected: `expression`'s real sandbox call sites (compiler, node accessors) still import
+`getSafeProperty`/`setSafeProperty`/`getSafeMethod` from `expression/src/utils/customs.ts` unchanged.
+
+Every shared function was proven equivalent via `core/tests/helpers/equivalence.ts`'s fast-check
+harness against a FROZEN pre-redirect snapshot of both packages' original bodies (`functions/tests/
+fixtures/dedup-bucketB-slice2/*-original.ts`, `git show`-captured before the redirect) — see the new
+`functions/tests/dedup-bucketB-slice2-equivalence.test.ts` (43 tests: property-based for the pure
+array/value functions, representative-example-based for the handful requiring Matrix/Index/
+SparseMatrix-shaped mocks).
+
+**Divergences found, reconciled, and reported (not silently merged):**
+- `[Symbol.iterator]` on `ObjectWrappingMap`/`PartitionedMap` — expression's copy assigned it
+  dynamically in the constructor via a type-erasing cast (`(this as unknown as {...})[Symbol.iterator]
+  = this.entries`), which worked at runtime but was a latent `implements Map<K, V>` type-soundness
+  bug: TS2420 ("incorrectly implements interface 'Map'... '[Symbol.iterator]' is missing") downstream
+  under `skipLibCheck: false`. functions's copy had ALREADY fixed this with a real, correctly-typed
+  method (`MapEntryIterator<K, V>` derived from the installed TS lib). core adopts functions's fix —
+  this redirect actively FIXES the latent bug in expression, it doesn't just relocate it.
+- `createEmptyMap`/`createMap` generic default — expression used `<K = string, V = unknown>`, functions
+  used `<K = unknown, V = unknown>`. Compile-time-only (erased at runtime, no behavioral difference);
+  reconciled to `K = string`, matching `ObjectWrappingMap`/`PartitionedMap`'s own `K = string` default
+  already shared by both packages, and the semantically sensible default for a variable-name-keyed
+  "scope" map. Verified the one real call site relying on inference (`functions/src/algebra/
+  simplify.ts`'s `Map<string, unknown> = createEmptyMap()` parameter default) is satisfied directly.
+- `initial()` (get-all-but-last-element) existed ONLY in expression's `array.ts` copy — and was dead
+  code even there (unused outside its own definition). Re-exported from expression's shim only;
+  functions never had it and doesn't get it in its own shim (back-compat, not an invented new surface).
+- `toObject()` (unwrap a `Map`/`ObjectWrappingMap` to a plain object) existed ONLY in expression's
+  `map.ts` copy, consumed by `expression/src/Parser.ts`. Re-exported from expression's shim only.
+- `collection.ts`'s two copies were already functionally IDENTICAL (comment-only diff + one redundant
+  cast) — straight consolidation, no reconciliation needed.
+- Found (not fixed, out of scope, noted in `core/src/map.ts`'s header): `entries()` on
+  `ObjectWrappingMap`/`PartitionedMap` returns a plain `{ next }` object via the shared `mapIterator`
+  helper that is a real `Iterator` but was never decorated with `[Symbol.iterator]`, so
+  `[...m.entries()]` throws — identically across all three copies (pre-existing, not a divergence).
+
+`docs/Architecture/duplicate-symbols.json` runtime-duplicate count: **280 → 256** (types: 70 → 69).
+`npm run typecheck` 32/32, `eslint`
+clean on touched files, full `core`/`expression`/`functions` test suites green (760 / 1977 / 3985
+passing [+94 skipped], no regressions) plus the new slice-2 equivalence suite (43/43).
+
 ### Added — CDG duplicate-symbols detector (`docs/Architecture/duplicate-symbols.{md,json}`)
 
 `tools/create-dependency-graph/create-dependency-graph.ts` adds `detectDuplicateSymbols`: groups

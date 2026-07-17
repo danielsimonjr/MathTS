@@ -135,6 +135,25 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           `expression`/`functions`' `error/MathjsError.ts` lost their only in-package caller and are
           now dead code (per `unused-analysis.md`) — itself a 3-way mathjs-derived duplicate, a natural
           next Bucket B slice.
+    - [x] ✅ **Slice 2 (array/collection/map) DONE 2026-07-17.** Unlike slice 1, core had NONE of
+          these — the ~1500-line combined `array.ts`/`collection.ts`/`map.ts` bodies were newly
+          relocated into `core/src/{array,collection,map}.ts` + `core/internal.ts` (aliased where
+          array.ts's `clone`/`get` collide with `object.ts`'s, and array.ts's/collection.ts's own
+          `deepMap`/`deepForEach` collide with each other). `IndexError`/`DimensionError`/
+          `getSafeProperty` family/`_switch` got internal-only non-exported mirror copies in core
+          (their real canonical homes — `error/IndexError.ts`, `error/DimensionError.ts`,
+          `utils/customs.ts`, `utils/switch.ts` — stay package-local, untouched, a future slice).
+          Proven equivalent via 43 new fast-check/example tests against a frozen pre-redirect
+          snapshot (`functions/tests/dedup-bucketB-slice2-equivalence.test.ts` +
+          `functions/tests/fixtures/dedup-bucketB-slice2/*-original.ts`). `duplicate-symbols.json`
+          runtime count 280→256 (types 70→69). **Divergences found + reconciled (reported):**
+          `ObjectWrappingMap`/`PartitionedMap`'s `[Symbol.iterator]` (functions had already fixed a
+          latent `implements Map<K,V>` type-soundness bug that expression's copy still had — core
+          adopts the fix); `createEmptyMap`/`createMap`'s generic default (`K=string` vs `K=unknown`,
+          compile-time-only, reconciled to `K=string`); `initial()` and `toObject()` were
+          expression-only (preserved in its shim only, not invented into functions'). `collection.ts`'s
+          two copies were already identical. Full `core`/`expression`/`functions` suites green, no
+          regressions; `npm run typecheck` still 32/32.
   - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
     functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
     scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the

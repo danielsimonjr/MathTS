@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1081
+  totalFiles: 1086
   totalModules: 82
-  totalExports: 5436
+  totalExports: 5547
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -342,6 +342,102 @@ modules:
         - isNumeric
         - number
   core:
+    core/src/array.ts:
+      description: 'Cold array utilities (mathjs-derived): size/validate/reshape/resize/squeeze,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./number.js
+          imports:
+            - isInteger
+        - file: ./is.js
+          imports:
+            - isNumber
+            - isBigNumber
+            - isArray
+            - isString
+            - Index
+            - Matrix
+            - IndexDimension
+        - file: ./string.js
+          imports:
+            - format
+        - file: ./error/DimensionError.js
+          imports:
+            - DimensionError
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./object.js
+          imports:
+            - deepStrictEqual
+      workspaceDependencies: []
+      exports:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+      interfaces:
+        - IdentifiedValue
+      functions:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
     core/src/bignumber-formatter.ts:
       description: BigNumber (decimal.js-shaped) formatting — canonical copy.
       externalDependencies: []
@@ -369,6 +465,39 @@ modules:
         - toEngineering
         - toExponential
         - toFixed
+    core/src/collection.ts:
+      description: 'Cold array/Matrix-aware collection utilities (mathjs-derived): `deepMap`/'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isCollection
+            - isMatrix
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./array.js
+          imports:
+            - arraySize
+            - deepMap
+            - deepForEach
+        - file: ./switch.js
+          imports:
+            - _switch
+      workspaceDependencies: []
+      exports:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
+      functions:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
     core/src/config.ts:
       description: Configuration interface for math.js
       externalDependencies: []
@@ -409,6 +538,27 @@ modules:
         - LN10
         - LOG2E
         - LOG10E
+    core/src/customs.ts:
+      description: NOT the security-invariant sandbox file. `expression/src/utils/customs.ts` and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./shared.js
+          imports:
+            - hasOwnProperty
+      workspaceDependencies: []
+      exports:
+        - getSafeProperty
+        - setSafeProperty
+        - isSafeProperty
+        - getSafeMethod
+        - isSafeMethod
+      functions:
+        - getSafeProperty
+        - setSafeProperty
+        - isSafeProperty
+        - getSafeMethod
+        - isSafeMethod
     core/src/factory.ts:
       description: Type for a factory function that creates instances
       externalDependencies: []
@@ -974,9 +1124,67 @@ modules:
             - unitDependencies
             - Unit
           reExport: true
+        - file: ./array.js
+          imports:
+            - arraySize
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - initial
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - get
+            - deepMap
+            - deepForEach
+            - clone
+          reExport: true
+        - file: ./collection.js
+          imports:
+            - containsCollections
+            - deepMap
+            - deepForEach
+            - reduce
+            - scatter
+          reExport: true
+        - file: ./map.js
+          imports:
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - toObject
+            - assign
+            - isObjectWrappingMap
+          reExport: true
         - file: ./shared.js
           imports:
             - MemoizedFunction
+          reExport: true
+          typeOnly: true
+        - file: ./array.js
+          imports:
+            - NestedArray
+            - IdentifiedValue
           reExport: true
           typeOnly: true
         - file: ./types/unit/unit-types.js
@@ -1003,12 +1211,60 @@ modules:
         - createUnitClass
         - unitDependencies
         - CoreUnit
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - containsCollections
+        - deepMap
+        - deepForEach
+        - reduce
+        - scatter
+        - ObjectWrappingMap
+        - PartitionedMap
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assignMap
+        - isObjectWrappingMap
         - format
         - toEngineering
         - toExponential
         - toFixed
         - Unit
+        - get
+        - clone
+        - assign
         - MemoizedFunction
+        - NestedArray
+        - IdentifiedValue
       reExported:
         - '* from ./is.js'
         - '* from ./number.js'
@@ -1030,7 +1286,50 @@ modules:
         - createUnitClass
         - unitDependencies
         - Unit
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+        - containsCollections
+        - reduce
+        - scatter
+        - ObjectWrappingMap
+        - PartitionedMap
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
         - MemoizedFunction
+        - NestedArray
+        - IdentifiedValue
         - type * from ./types/unit/unit-types.js
     core/src/is.ts:
       description: 'Structural view used by the duck-typing guards below: math.js types are'
@@ -1098,6 +1397,38 @@ modules:
         - typeOf
       constants:
         - isArray
+    core/src/map.ts:
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./customs.js
+          imports:
+            - getSafeProperty
+            - isSafeProperty
+            - setSafeProperty
+        - file: ./is.js
+          imports:
+            - isMap
+            - isObject
+      workspaceDependencies: []
+      exports:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
+        - ObjectWrappingMap
+        - PartitionedMap
+      classes:
+        - ObjectWrappingMap
+        - PartitionedMap
+      functions:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
     core/src/number.ts:
       description: Split value representation with sign, coefficients, and exponent
       externalDependencies: []
@@ -1260,7 +1591,37 @@ modules:
         - stringify
         - escape
         - compareText
+    core/src/switch.ts:
+      description: Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - _switch
+      functions:
+        - _switch
   core/error:
+    core/src/error/DimensionError.ts:
+      description: 'Create a range error with the message:'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - DimensionError
+      classes:
+        - DimensionError
+    core/src/error/IndexError.ts:
+      description: Custom error type for index out of range errors.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - IndexError
+      classes:
+        - IndexError
     core/src/error/MathjsError.ts:
       description: Custom error type for Mathjs errors
       externalDependencies: []
@@ -19306,35 +19667,51 @@ modules:
         - createToBest
   functions/utils:
     functions/src/utils/array.ts:
-      description: Calculate the size of a multi dimensional array.
+      description: Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./number.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isInteger
-        - file: ./is.js
+            - arraySize
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - getArrayElement
+            - deepMapArray
+            - deepForEachArray
+            - cloneArray
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isNumber
-            - isBigNumber
-            - isArray
-            - isString
-            - Index
-            - Matrix
-            - IndexDimension
-        - file: ./string.js
-          imports:
-            - format
-        - file: ../error/DimensionError.js
-          imports:
-            - DimensionError
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./object.js
-          imports:
-            - deepStrictEqual
-      workspaceDependencies: []
+            - NestedArray
+            - IdentifiedValue
+          subpath: internal
       exports:
         - arraySize
         - validate
@@ -19366,9 +19743,13 @@ modules:
         - deepMap
         - deepForEach
         - clone
-      interfaces:
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
         - IdentifiedValue
-      functions:
+      reExported:
         - arraySize
         - validate
         - validateIndexSourceSize
@@ -19395,10 +19776,12 @@ modules:
         - broadcastTo
         - broadcastArrays
         - stretch
-        - get
-        - deepMap
-        - deepForEach
-        - clone
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
+        - IdentifiedValue
     functions/src/utils/bigint.ts:
       description: Build a bigint logarithm function from a number logarithm,
       externalDependencies: []
@@ -19462,33 +19845,27 @@ modules:
       constants:
         - createClone
     functions/src/utils/collection.ts:
-      description: Test whether an array contains collections
+      description: Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isCollection
-            - isMatrix
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./array.js
-          imports:
-            - arraySize
-            - deepMap
+            - containsCollections
             - deepForEach
-        - file: ./switch.js
-          imports:
-            - _switch
-      workspaceDependencies: []
+            - deepMap
+            - reduce
+            - scatter
+          subpath: internal
       exports:
         - containsCollections
         - deepForEach
         - deepMap
         - reduce
         - scatter
-      functions:
+      reExported:
         - containsCollections
         - deepForEach
         - deepMap
@@ -19938,34 +20315,35 @@ modules:
       constants:
         - createIsZero
     functions/src/utils/map.ts:
-      description: A map facade on a bare object.
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./customs.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - getSafeProperty
-            - isSafeProperty
-            - setSafeProperty
-        - file: ./is.js
-          imports:
-            - isMap
-            - isObject
-      workspaceDependencies: []
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - assignMap
+            - isObjectWrappingMap
+          subpath: internal
       exports:
+        - ObjectWrappingMap
+        - PartitionedMap
         - createEmptyMap
         - createMap
         - assign
         - isObjectWrappingMap
+        - assignMap
+      reExported:
         - ObjectWrappingMap
         - PartitionedMap
-      classes:
-        - ObjectWrappingMap
-        - PartitionedMap
-      functions:
         - createEmptyMap
         - createMap
-        - assign
+        - assignMap
         - isObjectWrappingMap
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
@@ -25351,16 +25729,6 @@ modules:
       constants:
         - typeOfDocs
   expression/error:
-    expression/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - DimensionError
-      classes:
-        - DimensionError
     expression/src/error/IndexError.ts:
       description: Custom error type for index out of range errors
       externalDependencies: []
@@ -26966,35 +27334,52 @@ modules:
         - createVarianceTransform
   expression/utils:
     expression/src/utils/array.ts:
-      description: Calculate the size of a multi dimensional array.
+      description: Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./number.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isInteger
-        - file: ./is.js
+            - arraySize
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - initial
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - getArrayElement
+            - deepMapArray
+            - deepForEachArray
+            - cloneArray
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isNumber
-            - isBigNumber
-            - isArray
-            - isString
-            - Index
-            - Matrix
-            - IndexDimension
-        - file: ./string.js
-          imports:
-            - format
-        - file: ../error/DimensionError.js
-          imports:
-            - DimensionError
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./object.js
-          imports:
-            - deepStrictEqual
-      workspaceDependencies: []
+            - NestedArray
+            - IdentifiedValue
+          subpath: internal
       exports:
         - arraySize
         - validate
@@ -27027,9 +27412,13 @@ modules:
         - deepMap
         - deepForEach
         - clone
-      interfaces:
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
         - IdentifiedValue
-      functions:
+      reExported:
         - arraySize
         - validate
         - validateIndexSourceSize
@@ -27057,38 +27446,34 @@ modules:
         - broadcastTo
         - broadcastArrays
         - stretch
-        - get
-        - deepMap
-        - deepForEach
-        - clone
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
+        - IdentifiedValue
     expression/src/utils/collection.ts:
-      description: Test whether an array contains collections
+      description: Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isCollection
-            - isMatrix
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./array.js
-          imports:
-            - arraySize
-            - deepMap
+            - containsCollections
             - deepForEach
-        - file: ./switch.js
-          imports:
-            - _switch
-      workspaceDependencies: []
+            - deepMap
+            - reduce
+            - scatter
+          subpath: internal
       exports:
         - containsCollections
         - deepForEach
         - deepMap
         - reduce
         - scatter
-      functions:
+      reExported:
         - containsCollections
         - deepForEach
         - deepMap
@@ -27304,36 +27689,38 @@ modules:
         - latexFunctions
         - defaultTemplate
     expression/src/utils/map.ts:
-      description: A map facade on a bare object.
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./customs.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - getSafeProperty
-            - isSafeProperty
-            - setSafeProperty
-        - file: ./is.js
-          imports:
-            - isMap
-            - isObject
-      workspaceDependencies: []
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - toObject
+            - assignMap
+            - isObjectWrappingMap
+          subpath: internal
       exports:
+        - ObjectWrappingMap
+        - PartitionedMap
         - createEmptyMap
         - createMap
         - toObject
         - assign
         - isObjectWrappingMap
+        - assignMap
+      reExported:
         - ObjectWrappingMap
         - PartitionedMap
-      classes:
-        - ObjectWrappingMap
-        - PartitionedMap
-      functions:
         - createEmptyMap
         - createMap
         - toObject
-        - assign
+        - assignMap
         - isObjectWrappingMap
     expression/src/utils/mathml.ts:
       description: MathML rendering helpers — the MathML analog of `utils/latex.ts`. Shared by
@@ -27571,16 +27958,6 @@ modules:
         - stringify
         - escape
         - compareText
-    expression/src/utils/switch.ts:
-      description: Transpose a matrix
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - _switch
-      functions:
-        - _switch
   parser:
     parser/src/index.ts:
       description: Standalone expression parser for MathTS. This package re-exports the parser
@@ -33802,19 +34179,26 @@ dependencyGraph:
         - core/src/arithmetic/scalar.ts
     - name: Core
       files:
+        - core/src/array.ts
         - core/src/bignumber-formatter.ts
+        - core/src/collection.ts
         - core/src/config.ts
         - core/src/constants.ts
+        - core/src/customs.ts
         - core/src/factory.ts
         - core/src/index.ts
         - core/src/internal.ts
         - core/src/is.ts
+        - core/src/map.ts
         - core/src/number.ts
         - core/src/object.ts
         - core/src/shared.ts
         - core/src/string.ts
+        - core/src/switch.ts
     - name: Core/error
       files:
+        - core/src/error/DimensionError.ts
+        - core/src/error/IndexError.ts
         - core/src/error/MathjsError.ts
     - name: Core/factory
       files:
@@ -34793,7 +35177,6 @@ dependencyGraph:
         - expression/src/embeddedDocs/function/utils/typeOf.ts
     - name: Expression/error
       files:
-        - expression/src/error/DimensionError.ts
         - expression/src/error/IndexError.ts
     - name: Expression/evaluator
       files:
@@ -34879,7 +35262,6 @@ dependencyGraph:
         - expression/src/utils/print.ts
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
-        - expression/src/utils/switch.ts
     - name: Parser
       files:
         - parser/src/index.ts
@@ -35034,19 +35416,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1081
+  totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 185811
-  totalExports: 5436
-  totalClasses: 56
-  totalInterfaces: 490
-  totalFunctions: 1793
+  totalLinesOfCode: 184914
+  totalExports: 5547
+  totalClasses: 55
+  totalInterfaces: 489
+  totalFunctions: 1759
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2075
-  totalTypeOnlyImports: 562
+  totalReExports: 2206
+  totalTypeOnlyImports: 563
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 225
+  unusedExportsCount: 213

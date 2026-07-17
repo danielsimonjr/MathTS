@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1081, "e": 5436, "re": 2075 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1086, "e": 5547, "re": 2206 },
   "s": {
-    "loc": 185811,
-    "cls": 56,
-    "int": 490,
-    "fn": 1793,
+    "loc": 184914,
+    "cls": 55,
+    "int": 489,
+    "fn": 1759,
     "tg": 156,
     "en": 0,
     "co": 1543,
-    "toi": 562
+    "toi": 563
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -94,30 +94,32 @@
       ]
     },
     "core": {
-      "f": 11,
+      "f": 16,
       "exp": [
-        "format",
-        "toEngineering",
-        "toExponential",
-        "toFixed",
-        "DEFAULT_CONFIG",
-        "PI",
-        "E",
-        "TAU",
-        "PHI",
-        "SQRT2",
-        "SQRT1_2",
-        "LN2",
-        "LN10",
-        "LOG2E",
-        "LOG10E",
-        "factory",
-        "sortFactories",
-        "create",
-        "isFactory",
-        "assertDependencies"
+        "arraySize",
+        "validate",
+        "validateIndexSourceSize",
+        "validateIndex",
+        "isEmptyIndex",
+        "resize",
+        "reshape",
+        "processSizesWildcard",
+        "squeeze",
+        "unsqueeze",
+        "flatten",
+        "map",
+        "forEach",
+        "filter",
+        "filterRegExp",
+        "join",
+        "identify",
+        "generalize",
+        "getArrayDataType",
+        "last"
       ],
+      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
+        "IdentifiedValue",
         "BigNumberValue",
         "ConfigOptions",
         "FactoryFunction",
@@ -126,11 +128,14 @@
         "BigNumber",
         "Complex",
         "Fraction",
-        "Unit",
-        "Matrix"
+        "Unit"
       ]
     },
-    "core/error": { "f": 1, "exp": ["MathjsError"], "cls": ["MathjsError"] },
+    "core/error": {
+      "f": 3,
+      "exp": ["DimensionError", "IndexError", "MathjsError"],
+      "cls": ["DimensionError", "IndexError", "MathjsError"]
+    },
     "core/factory": {
       "f": 2,
       "exp": [
@@ -1117,9 +1122,7 @@
         "getArrayDataType",
         "last"
       ],
-      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
-        "IdentifiedValue",
         "EmitterMixin",
         "FactoryFunction",
         "FactoryMeta",
@@ -1128,7 +1131,8 @@
         "Fraction",
         "Unit",
         "Matrix",
-        "DenseMatrix"
+        "DenseMatrix",
+        "SparseMatrix"
       ]
     },
     "functions/wasm": {
@@ -1189,9 +1193,9 @@
       ]
     },
     "expression/error": {
-      "f": 2,
-      "exp": ["DimensionError", "createIndexError", "IndexError"],
-      "cls": ["DimensionError", "IndexError"]
+      "f": 1,
+      "exp": ["createIndexError", "IndexError"],
+      "cls": ["IndexError"]
     },
     "expression/evaluator": {
       "f": 2,
@@ -1265,7 +1269,7 @@
       ]
     },
     "expression/utils": {
-      "f": 14,
+      "f": 13,
       "exp": [
         "arraySize",
         "validate",
@@ -1288,9 +1292,7 @@
         "getArrayDataType",
         "last"
       ],
-      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
-        "IdentifiedValue",
         "FactoryFunction",
         "FactoryMeta",
         "BigNumber",
@@ -1299,7 +1301,8 @@
         "Unit",
         "Matrix",
         "DenseMatrix",
-        "SparseMatrix"
+        "SparseMatrix",
+        "Range"
       ]
     },
     "parser": {
@@ -1808,14 +1811,14 @@
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "src/index.ts", "i": 105, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
-    { "p": "utils/is.ts", "i": 0, "o": 59 },
+    { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
-    { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
+    { "p": "utils/array.ts", "i": 0, "o": 48 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 45 },
-    { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 }
+    { "p": "utils/number.ts", "i": 0, "o": 44 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 },
+    { "p": "utils/collection.ts", "i": 0, "o": 37 }
   ]
 }

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-17",
-    "totalFiles": 1081,
+    "totalFiles": 1086,
     "totalModules": 82,
-    "totalExports": 5436
+    "totalExports": 5547
   },
   "entryPoints": [
     {
@@ -391,6 +391,113 @@
       }
     },
     "core": {
+      "core/src/array.ts": {
+        "description": "Cold array utilities (mathjs-derived): size/validate/reshape/resize/squeeze,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./number.js",
+            "imports": ["isInteger"]
+          },
+          {
+            "file": "./is.js",
+            "imports": [
+              "isNumber",
+              "isBigNumber",
+              "isArray",
+              "isString",
+              "Index",
+              "Matrix",
+              "IndexDimension"
+            ]
+          },
+          {
+            "file": "./string.js",
+            "imports": ["format"]
+          },
+          {
+            "file": "./error/DimensionError.js",
+            "imports": ["DimensionError"]
+          },
+          {
+            "file": "./error/IndexError.js",
+            "imports": ["IndexError"]
+          },
+          {
+            "file": "./object.js",
+            "imports": ["deepStrictEqual"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "arraySize",
+          "validate",
+          "validateIndexSourceSize",
+          "validateIndex",
+          "isEmptyIndex",
+          "resize",
+          "reshape",
+          "processSizesWildcard",
+          "squeeze",
+          "unsqueeze",
+          "flatten",
+          "map",
+          "forEach",
+          "filter",
+          "filterRegExp",
+          "join",
+          "identify",
+          "generalize",
+          "getArrayDataType",
+          "last",
+          "initial",
+          "concat",
+          "broadcastSizes",
+          "checkBroadcastingRules",
+          "broadcastTo",
+          "broadcastArrays",
+          "stretch",
+          "get",
+          "deepMap",
+          "deepForEach",
+          "clone"
+        ],
+        "interfaces": ["IdentifiedValue"],
+        "functions": [
+          "arraySize",
+          "validate",
+          "validateIndexSourceSize",
+          "validateIndex",
+          "isEmptyIndex",
+          "resize",
+          "reshape",
+          "processSizesWildcard",
+          "squeeze",
+          "unsqueeze",
+          "flatten",
+          "map",
+          "forEach",
+          "filter",
+          "filterRegExp",
+          "join",
+          "identify",
+          "generalize",
+          "getArrayDataType",
+          "last",
+          "initial",
+          "concat",
+          "broadcastSizes",
+          "checkBroadcastingRules",
+          "broadcastTo",
+          "broadcastArrays",
+          "stretch",
+          "get",
+          "deepMap",
+          "deepForEach",
+          "clone"
+        ]
+      },
       "core/src/bignumber-formatter.ts": {
         "description": "BigNumber (decimal.js-shaped) formatting — canonical copy.",
         "externalDependencies": [],
@@ -410,6 +517,32 @@
         "interfaces": ["BigNumberValue"],
         "functions": ["format", "toEngineering", "toExponential", "toFixed"]
       },
+      "core/src/collection.ts": {
+        "description": "Cold array/Matrix-aware collection utilities (mathjs-derived): `deepMap`/",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./is.js",
+            "imports": ["isCollection", "isMatrix"]
+          },
+          {
+            "file": "./error/IndexError.js",
+            "imports": ["IndexError"]
+          },
+          {
+            "file": "./array.js",
+            "imports": ["arraySize", "deepMap", "deepForEach"]
+          },
+          {
+            "file": "./switch.js",
+            "imports": ["_switch"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
+        "functions": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+      },
       "core/src/config.ts": {
         "description": "Configuration interface for math.js",
         "externalDependencies": [],
@@ -428,6 +561,32 @@
         "workspaceDependencies": [],
         "exports": ["PI", "E", "TAU", "PHI", "SQRT2", "SQRT1_2", "LN2", "LN10", "LOG2E", "LOG10E"],
         "constants": ["PI", "E", "TAU", "PHI", "SQRT2", "SQRT1_2", "LN2", "LN10", "LOG2E", "LOG10E"]
+      },
+      "core/src/customs.ts": {
+        "description": "NOT the security-invariant sandbox file. `expression/src/utils/customs.ts` and",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./shared.js",
+            "imports": ["hasOwnProperty"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "getSafeProperty",
+          "setSafeProperty",
+          "isSafeProperty",
+          "getSafeMethod",
+          "isSafeMethod"
+        ],
+        "functions": [
+          "getSafeProperty",
+          "setSafeProperty",
+          "isSafeProperty",
+          "getSafeMethod",
+          "isSafeMethod"
+        ]
       },
       "core/src/factory.ts": {
         "description": "Type for a factory function that creates instances",
@@ -1021,8 +1180,69 @@
             "reExport": true
           },
           {
+            "file": "./array.js",
+            "imports": [
+              "arraySize",
+              "validate",
+              "validateIndexSourceSize",
+              "validateIndex",
+              "isEmptyIndex",
+              "resize",
+              "reshape",
+              "processSizesWildcard",
+              "squeeze",
+              "unsqueeze",
+              "flatten",
+              "map",
+              "forEach",
+              "filter",
+              "filterRegExp",
+              "join",
+              "identify",
+              "generalize",
+              "getArrayDataType",
+              "last",
+              "initial",
+              "concat",
+              "broadcastSizes",
+              "checkBroadcastingRules",
+              "broadcastTo",
+              "broadcastArrays",
+              "stretch",
+              "get",
+              "deepMap",
+              "deepForEach",
+              "clone"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./collection.js",
+            "imports": ["containsCollections", "deepMap", "deepForEach", "reduce", "scatter"],
+            "reExport": true
+          },
+          {
+            "file": "./map.js",
+            "imports": [
+              "ObjectWrappingMap",
+              "PartitionedMap",
+              "createEmptyMap",
+              "createMap",
+              "toObject",
+              "assign",
+              "isObjectWrappingMap"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./shared.js",
             "imports": ["MemoizedFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./array.js",
+            "imports": ["NestedArray", "IdentifiedValue"],
             "reExport": true,
             "typeOnly": true
           },
@@ -1052,12 +1272,60 @@
           "createUnitClass",
           "unitDependencies",
           "CoreUnit",
+          "arraySize",
+          "validate",
+          "validateIndexSourceSize",
+          "validateIndex",
+          "isEmptyIndex",
+          "resize",
+          "reshape",
+          "processSizesWildcard",
+          "squeeze",
+          "unsqueeze",
+          "flatten",
+          "map",
+          "forEach",
+          "filter",
+          "filterRegExp",
+          "join",
+          "identify",
+          "generalize",
+          "getArrayDataType",
+          "last",
+          "initial",
+          "concat",
+          "broadcastSizes",
+          "checkBroadcastingRules",
+          "broadcastTo",
+          "broadcastArrays",
+          "stretch",
+          "getArrayElement",
+          "deepMapArray",
+          "deepForEachArray",
+          "cloneArray",
+          "containsCollections",
+          "deepMap",
+          "deepForEach",
+          "reduce",
+          "scatter",
+          "ObjectWrappingMap",
+          "PartitionedMap",
+          "createEmptyMap",
+          "createMap",
+          "toObject",
+          "assignMap",
+          "isObjectWrappingMap",
           "format",
           "toEngineering",
           "toExponential",
           "toFixed",
           "Unit",
-          "MemoizedFunction"
+          "get",
+          "clone",
+          "assign",
+          "MemoizedFunction",
+          "NestedArray",
+          "IdentifiedValue"
         ],
         "reExported": [
           "* from ./is.js",
@@ -1080,7 +1348,50 @@
           "createUnitClass",
           "unitDependencies",
           "Unit",
+          "arraySize",
+          "validate",
+          "validateIndexSourceSize",
+          "validateIndex",
+          "isEmptyIndex",
+          "resize",
+          "reshape",
+          "processSizesWildcard",
+          "squeeze",
+          "unsqueeze",
+          "flatten",
+          "map",
+          "forEach",
+          "filter",
+          "filterRegExp",
+          "join",
+          "identify",
+          "generalize",
+          "getArrayDataType",
+          "last",
+          "initial",
+          "concat",
+          "broadcastSizes",
+          "checkBroadcastingRules",
+          "broadcastTo",
+          "broadcastArrays",
+          "stretch",
+          "get",
+          "deepMap",
+          "deepForEach",
+          "clone",
+          "containsCollections",
+          "reduce",
+          "scatter",
+          "ObjectWrappingMap",
+          "PartitionedMap",
+          "createEmptyMap",
+          "createMap",
+          "toObject",
+          "assign",
+          "isObjectWrappingMap",
           "MemoizedFunction",
+          "NestedArray",
+          "IdentifiedValue",
           "type * from ./types/unit/unit-types.js"
         ]
       },
@@ -1152,6 +1463,33 @@
           "typeOf"
         ],
         "constants": ["isArray"]
+      },
+      "core/src/map.ts": {
+        "description": "A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./customs.js",
+            "imports": ["getSafeProperty", "isSafeProperty", "setSafeProperty"]
+          },
+          {
+            "file": "./is.js",
+            "imports": ["isMap", "isObject"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "createEmptyMap",
+          "createMap",
+          "toObject",
+          "assign",
+          "isObjectWrappingMap",
+          "ObjectWrappingMap",
+          "PartitionedMap"
+        ],
+        "classes": ["ObjectWrappingMap", "PartitionedMap"],
+        "functions": ["createEmptyMap", "createMap", "toObject", "assign", "isObjectWrappingMap"]
       },
       "core/src/number.ts": {
         "description": "Split value representation with sign, coefficients, and exponent",
@@ -1310,9 +1648,36 @@
         "workspaceDependencies": [],
         "exports": ["format", "stringify", "escape", "compareText"],
         "functions": ["format", "stringify", "escape", "compareText"]
+      },
+      "core/src/switch.ts": {
+        "description": "Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["_switch"],
+        "functions": ["_switch"]
       }
     },
     "core/error": {
+      "core/src/error/DimensionError.ts": {
+        "description": "Create a range error with the message:",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["DimensionError"],
+        "classes": ["DimensionError"]
+      },
+      "core/src/error/IndexError.ts": {
+        "description": "Custom error type for index out of range errors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["IndexError"],
+        "classes": ["IndexError"]
+      },
       "core/src/error/MathjsError.ts": {
         "description": "Custom error type for Mathjs errors",
         "externalDependencies": [],
@@ -20828,44 +21193,55 @@
     },
     "functions/utils": {
       "functions/src/utils/array.ts": {
-        "description": "Calculate the size of a multi dimensional array.",
+        "description": "Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./number.js",
-            "imports": ["isInteger"]
-          },
-          {
-            "file": "./is.js",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
-              "isNumber",
-              "isBigNumber",
-              "isArray",
-              "isString",
-              "Index",
-              "Matrix",
-              "IndexDimension"
-            ]
+              "arraySize",
+              "validate",
+              "validateIndexSourceSize",
+              "validateIndex",
+              "isEmptyIndex",
+              "resize",
+              "reshape",
+              "processSizesWildcard",
+              "squeeze",
+              "unsqueeze",
+              "flatten",
+              "map",
+              "forEach",
+              "filter",
+              "filterRegExp",
+              "join",
+              "identify",
+              "generalize",
+              "getArrayDataType",
+              "last",
+              "concat",
+              "broadcastSizes",
+              "checkBroadcastingRules",
+              "broadcastTo",
+              "broadcastArrays",
+              "stretch",
+              "getArrayElement",
+              "deepMapArray",
+              "deepForEachArray",
+              "cloneArray"
+            ],
+            "subpath": "internal"
           },
           {
-            "file": "./string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../error/DimensionError.js",
-            "imports": ["DimensionError"]
-          },
-          {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
-            "file": "./object.js",
-            "imports": ["deepStrictEqual"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["NestedArray", "IdentifiedValue"],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "arraySize",
           "validate",
@@ -20896,10 +21272,15 @@
           "get",
           "deepMap",
           "deepForEach",
-          "clone"
+          "clone",
+          "getArrayElement",
+          "deepMapArray",
+          "deepForEachArray",
+          "cloneArray",
+          "NestedArray",
+          "IdentifiedValue"
         ],
-        "interfaces": ["IdentifiedValue"],
-        "functions": [
+        "reExported": [
           "arraySize",
           "validate",
           "validateIndexSourceSize",
@@ -20926,10 +21307,12 @@
           "broadcastTo",
           "broadcastArrays",
           "stretch",
-          "get",
-          "deepMap",
-          "deepForEach",
-          "clone"
+          "getArrayElement",
+          "deepMapArray",
+          "deepForEachArray",
+          "cloneArray",
+          "NestedArray",
+          "IdentifiedValue"
         ]
       },
       "functions/src/utils/bigint.ts": {
@@ -20999,30 +21382,20 @@
         "constants": ["createClone"]
       },
       "functions/src/utils/collection.ts": {
-        "description": "Test whether an array contains collections",
+        "description": "Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./is.js",
-            "imports": ["isCollection", "isMatrix"]
-          },
-          {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
-            "file": "./array.js",
-            "imports": ["arraySize", "deepMap", "deepForEach"]
-          },
-          {
-            "file": "./switch.js",
-            "imports": ["_switch"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
-        "functions": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+        "reExported": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
       },
       "functions/src/utils/complex.ts": {
         "description": "Test whether two complex values are equal provided a given relTol and absTol.",
@@ -21516,30 +21889,42 @@
         "constants": ["createIsZero"]
       },
       "functions/src/utils/map.ts": {
-        "description": "A map facade on a bare object.",
+        "description": "A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./customs.js",
-            "imports": ["getSafeProperty", "isSafeProperty", "setSafeProperty"]
-          },
-          {
-            "file": "./is.js",
-            "imports": ["isMap", "isObject"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": [
+              "ObjectWrappingMap",
+              "PartitionedMap",
+              "createEmptyMap",
+              "createMap",
+              "assignMap",
+              "isObjectWrappingMap"
+            ],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
+          "ObjectWrappingMap",
+          "PartitionedMap",
           "createEmptyMap",
           "createMap",
           "assign",
           "isObjectWrappingMap",
-          "ObjectWrappingMap",
-          "PartitionedMap"
+          "assignMap"
         ],
-        "classes": ["ObjectWrappingMap", "PartitionedMap"],
-        "functions": ["createEmptyMap", "createMap", "assign", "isObjectWrappingMap"]
+        "reExported": [
+          "ObjectWrappingMap",
+          "PartitionedMap",
+          "createEmptyMap",
+          "createMap",
+          "assignMap",
+          "isObjectWrappingMap"
+        ]
       },
       "functions/src/utils/node.ts": {
         "description": "Type definitions for Math.js AST nodes",
@@ -26942,15 +27327,6 @@
       }
     },
     "expression/error": {
-      "expression/src/error/DimensionError.ts": {
-        "description": "Create a range error with the message:",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["DimensionError"],
-        "classes": ["DimensionError"]
-      },
       "expression/src/error/IndexError.ts": {
         "description": "Custom error type for index out of range errors",
         "externalDependencies": [],
@@ -28741,44 +29117,56 @@
     },
     "expression/utils": {
       "expression/src/utils/array.ts": {
-        "description": "Calculate the size of a multi dimensional array.",
+        "description": "Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./number.js",
-            "imports": ["isInteger"]
-          },
-          {
-            "file": "./is.js",
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
-              "isNumber",
-              "isBigNumber",
-              "isArray",
-              "isString",
-              "Index",
-              "Matrix",
-              "IndexDimension"
-            ]
+              "arraySize",
+              "validate",
+              "validateIndexSourceSize",
+              "validateIndex",
+              "isEmptyIndex",
+              "resize",
+              "reshape",
+              "processSizesWildcard",
+              "squeeze",
+              "unsqueeze",
+              "flatten",
+              "map",
+              "forEach",
+              "filter",
+              "filterRegExp",
+              "join",
+              "identify",
+              "generalize",
+              "getArrayDataType",
+              "last",
+              "initial",
+              "concat",
+              "broadcastSizes",
+              "checkBroadcastingRules",
+              "broadcastTo",
+              "broadcastArrays",
+              "stretch",
+              "getArrayElement",
+              "deepMapArray",
+              "deepForEachArray",
+              "cloneArray"
+            ],
+            "subpath": "internal"
           },
           {
-            "file": "./string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../error/DimensionError.js",
-            "imports": ["DimensionError"]
-          },
-          {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
-            "file": "./object.js",
-            "imports": ["deepStrictEqual"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["NestedArray", "IdentifiedValue"],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
           "arraySize",
           "validate",
@@ -28810,10 +29198,15 @@
           "get",
           "deepMap",
           "deepForEach",
-          "clone"
+          "clone",
+          "getArrayElement",
+          "deepMapArray",
+          "deepForEachArray",
+          "cloneArray",
+          "NestedArray",
+          "IdentifiedValue"
         ],
-        "interfaces": ["IdentifiedValue"],
-        "functions": [
+        "reExported": [
           "arraySize",
           "validate",
           "validateIndexSourceSize",
@@ -28841,37 +29234,29 @@
           "broadcastTo",
           "broadcastArrays",
           "stretch",
-          "get",
-          "deepMap",
-          "deepForEach",
-          "clone"
+          "getArrayElement",
+          "deepMapArray",
+          "deepForEachArray",
+          "cloneArray",
+          "NestedArray",
+          "IdentifiedValue"
         ]
       },
       "expression/src/utils/collection.ts": {
-        "description": "Test whether an array contains collections",
+        "description": "Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./is.js",
-            "imports": ["isCollection", "isMatrix"]
-          },
-          {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
-            "file": "./array.js",
-            "imports": ["arraySize", "deepMap", "deepForEach"]
-          },
-          {
-            "file": "./switch.js",
-            "imports": ["_switch"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
-        "functions": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+        "reExported": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
       },
       "expression/src/utils/customs.ts": {
         "description": "Get a property of a plain object",
@@ -29094,31 +29479,45 @@
         "constants": ["latexSymbols", "latexOperators", "latexFunctions", "defaultTemplate"]
       },
       "expression/src/utils/map.ts": {
-        "description": "A map facade on a bare object.",
+        "description": "A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
+        "internalDependencies": [],
+        "workspaceDependencies": [
           {
-            "file": "./customs.js",
-            "imports": ["getSafeProperty", "isSafeProperty", "setSafeProperty"]
-          },
-          {
-            "file": "./is.js",
-            "imports": ["isMap", "isObject"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": [
+              "ObjectWrappingMap",
+              "PartitionedMap",
+              "createEmptyMap",
+              "createMap",
+              "toObject",
+              "assignMap",
+              "isObjectWrappingMap"
+            ],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
         "exports": [
+          "ObjectWrappingMap",
+          "PartitionedMap",
           "createEmptyMap",
           "createMap",
           "toObject",
           "assign",
           "isObjectWrappingMap",
-          "ObjectWrappingMap",
-          "PartitionedMap"
+          "assignMap"
         ],
-        "classes": ["ObjectWrappingMap", "PartitionedMap"],
-        "functions": ["createEmptyMap", "createMap", "toObject", "assign", "isObjectWrappingMap"]
+        "reExported": [
+          "ObjectWrappingMap",
+          "PartitionedMap",
+          "createEmptyMap",
+          "createMap",
+          "toObject",
+          "assignMap",
+          "isObjectWrappingMap"
+        ]
       },
       "expression/src/utils/mathml.ts": {
         "description": "MathML rendering helpers — the MathML analog of `utils/latex.ts`. Shared by",
@@ -29362,15 +29761,6 @@
         ],
         "exports": ["endsWith", "format", "stringify", "escape", "compareText", "formatGeneric"],
         "reExported": ["endsWith", "formatGeneric", "stringify", "escape", "compareText"]
-      },
-      "expression/src/utils/switch.ts": {
-        "description": "Transpose a matrix",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["_switch"],
-        "functions": ["_switch"]
       }
     },
     "parser": {
@@ -35854,22 +36244,31 @@
       {
         "name": "Core",
         "files": [
+          "core/src/array.ts",
           "core/src/bignumber-formatter.ts",
+          "core/src/collection.ts",
           "core/src/config.ts",
           "core/src/constants.ts",
+          "core/src/customs.ts",
           "core/src/factory.ts",
           "core/src/index.ts",
           "core/src/internal.ts",
           "core/src/is.ts",
+          "core/src/map.ts",
           "core/src/number.ts",
           "core/src/object.ts",
           "core/src/shared.ts",
-          "core/src/string.ts"
+          "core/src/string.ts",
+          "core/src/switch.ts"
         ]
       },
       {
         "name": "Core/error",
-        "files": ["core/src/error/MathjsError.ts"]
+        "files": [
+          "core/src/error/DimensionError.ts",
+          "core/src/error/IndexError.ts",
+          "core/src/error/MathjsError.ts"
+        ]
       },
       {
         "name": "Core/factory",
@@ -36968,7 +37367,7 @@
       },
       {
         "name": "Expression/error",
-        "files": ["expression/src/error/DimensionError.ts", "expression/src/error/IndexError.ts"]
+        "files": ["expression/src/error/IndexError.ts"]
       },
       {
         "name": "Expression/evaluator",
@@ -37064,8 +37463,7 @@
           "expression/src/utils/object.ts",
           "expression/src/utils/print.ts",
           "expression/src/utils/scope.ts",
-          "expression/src/utils/string.ts",
-          "expression/src/utils/switch.ts"
+          "expression/src/utils/string.ts"
         ]
       },
       {
@@ -37263,21 +37661,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1081,
+    "totalTypeScriptFiles": 1086,
     "totalModules": 82,
-    "totalLinesOfCode": 185811,
-    "totalExports": 5436,
-    "totalClasses": 56,
-    "totalInterfaces": 490,
-    "totalFunctions": 1793,
+    "totalLinesOfCode": 184914,
+    "totalExports": 5547,
+    "totalClasses": 55,
+    "totalInterfaces": 489,
+    "totalFunctions": 1759,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2075,
-    "totalTypeOnlyImports": 562,
+    "totalReExports": 2206,
+    "totalTypeOnlyImports": 563,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 225
+    "unusedExportsCount": 213
   }
 }
