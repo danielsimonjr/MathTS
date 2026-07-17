@@ -36,13 +36,6 @@ export function complex(re: number, im: number = 0): ComplexNumber {
 }
 
 /**
- * Complex conjugate
- */
-export function complexConj(a: ComplexNumber): ComplexNumber {
-  return { re: a.re, im: -a.im };
-}
-
-/**
  * Complex magnitude
  */
 export function complexAbs(a: ComplexNumber): number {

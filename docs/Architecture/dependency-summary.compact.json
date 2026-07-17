@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1083, "e": 5421, "re": 2056 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1083, "e": 5420, "re": 2056 },
   "s": {
-    "loc": 186350,
+    "loc": 186341,
     "cls": 58,
     "int": 491,
-    "fn": 1809,
+    "fn": 1808,
     "tg": 160,
     "en": 0,
     "co": 1543,
@@ -895,8 +895,8 @@
         "rfftfreq",
         "fftn",
         "complex",
-        "complexConj",
-        "complexAbs"
+        "complexAbs",
+        "complexArg"
       ],
       "int": [
         "ComplexNumber",

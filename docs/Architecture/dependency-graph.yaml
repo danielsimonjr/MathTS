@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-17'
   totalFiles: 1083
   totalModules: 82
-  totalExports: 5421
+  totalExports: 5420
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14473,7 +14473,6 @@ modules:
       workspaceDependencies: []
       exports:
         - complex
-        - complexConj
         - complexAbs
         - complexArg
         - fft
@@ -14492,7 +14491,6 @@ modules:
         - FFTResult
       functions:
         - complex
-        - complexConj
         - complexAbs
         - complexArg
         - fft
@@ -35007,11 +35005,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1083
   totalModules: 82
-  totalLinesOfCode: 186350
-  totalExports: 5421
+  totalLinesOfCode: 186341
+  totalExports: 5420
   totalClasses: 58
   totalInterfaces: 491
-  totalFunctions: 1809
+  totalFunctions: 1808
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
@@ -35020,4 +35018,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 249
+  unusedExportsCount: 248

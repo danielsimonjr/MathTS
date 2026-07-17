@@ -6769,7 +6769,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `ComplexNumber`, `FFTResult`
-- Functions: `complex`, `complexConj`, `complexAbs`, `complexArg`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `fftshift`, `ifftshift`
+- Functions: `complex`, `complexAbs`, `complexArg`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `fftshift`, `ifftshift`
 
 ---
 
@@ -16419,12 +16419,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1083   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 186350 |
-| Total Exports           | 5421   |
+| Total Lines of Code     | 186341 |
+| Total Exports           | 5420   |
 | Total Re-exports        | 2056   |
 | Total Classes           | 58     |
 | Total Interfaces        | 491    |
-| Total Functions         | 1809   |
+| Total Functions         | 1808   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 562    |
