@@ -1449,7 +1449,12 @@ export function invGaussDist(mu: number, lambda: number): Distribution {
   };
 }
 
-/** Lower-triangular Cholesky factor L (Σ = LLᵀ) of a symmetric positive-definite matrix. */
+/**
+ * Lower-triangular Cholesky factor L (Σ = LLᵀ) of a symmetric positive-definite
+ * matrix. Module-private: the public `cholesky` (`typed/matrix-ops.ts`) is a
+ * different, independently-checked implementation (adds an explicit symmetry
+ * check) — other consumers needing Σ = LLᵀ should import that one, not this.
+ */
 function _cholesky(m: number[][]): number[][] {
   const n = m.length;
   const L = Array.from({ length: n }, () => new Array<number>(n).fill(0));

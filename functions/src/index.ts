@@ -507,3 +507,20 @@ export {
   katzCentrality,
   isIsomorphic,
 } from './graph/community-coloring.js';
+
+// Stats-breadth chunk — generalized linear models (IRLS/Fisher scoring;
+// Poisson log link, Gamma log/inverse link) generalizing the existing
+// logistic-regression IRLS to the wider GLM family.
+export { glm } from './ml/glm.js';
+export type { GlmFamily, GlmLink, GlmOptions, GlmResult } from './ml/glm.js';
+
+// Stats-breadth chunk — multivariate-normal density (thin wrapper over the
+// existing `multivariateNormal` distribution object) + Cholesky-based
+// sampling, handling both the 1-D and general k-D cases.
+export { mvnPdf, mvnSample } from './stats/mvn.js';
+export type { MvnVector, MvnCov, MvnSampleOptions } from './stats/mvn.js';
+
+// Stats-breadth chunk — two-sample t-test power analysis via the existing
+// noncentral-t CDF, matching statsmodels' tt_ind_solve_power.
+export { tTestPower } from './stats/power-analysis.js';
+export type { TTestPowerAlternative, TTestPowerOptions } from './stats/power-analysis.js';

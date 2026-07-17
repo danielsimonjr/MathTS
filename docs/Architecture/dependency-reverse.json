@@ -1611,6 +1611,7 @@
       "functions/src/regression-extra.ts",
       "functions/src/stats/inference-extra.ts",
       "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/power-analysis.ts",
       "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
     ],
@@ -1622,6 +1623,7 @@
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
       "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
@@ -1714,7 +1716,10 @@
     ],
     "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
     "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
-    "functions/src/stats/inference-extra2.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra2.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/power-analysis.ts"
+    ],
     "functions/src/special/hypergeometric.ts": ["functions/src/index.ts"],
     "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
     "functions/src/special/jacobi-elliptic.ts": [
@@ -1726,6 +1731,9 @@
     "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
     "functions/src/graph/community-coloring.ts": ["functions/src/index.ts"],
+    "functions/src/ml/glm.ts": ["functions/src/index.ts"],
+    "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
+    "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [
@@ -1897,6 +1905,7 @@
     "functions/src/logical/xor.ts": ["functions/src/factories/index.ts"],
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
+      "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/relational/compare.ts": ["functions/src/factories/index.ts"],
@@ -2034,6 +2043,7 @@
       "functions/src/utils/map.ts"
     ],
     "functions/src/typed/numeric.ts": [
+      "functions/src/ml/glm.ts",
       "functions/src/ml/logistic-regression.ts",
       "functions/src/ml/regularized-regression.ts",
       "functions/src/numeric/control-equations.ts",
@@ -2062,7 +2072,8 @@
     "functions/src/probability/util/seededRNG.ts": [
       "functions/src/probability/pickRandom.ts",
       "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts"
+      "functions/src/probability/randomInt.ts",
+      "functions/src/stats/mvn.ts"
     ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",

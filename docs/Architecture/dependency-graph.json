@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-17",
-    "totalFiles": 1073,
+    "totalFiles": 1076,
     "totalModules": 82,
-    "totalExports": 5370
+    "totalExports": 5387
   },
   "entryPoints": [
     {
@@ -8399,6 +8399,21 @@
             "reExport": true
           },
           {
+            "file": "./ml/glm.js",
+            "imports": ["glm"],
+            "reExport": true
+          },
+          {
+            "file": "./stats/mvn.js",
+            "imports": ["mvnPdf", "mvnSample"],
+            "reExport": true
+          },
+          {
+            "file": "./stats/power-analysis.js",
+            "imports": ["tTestPower"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -8618,6 +8633,24 @@
           {
             "file": "./graph/optimization.js",
             "imports": ["MaxFlowResult", "MinCutResult", "AStarResult", "HungarianResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./ml/glm.js",
+            "imports": ["GlmFamily", "GlmLink", "GlmOptions", "GlmResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./stats/mvn.js",
+            "imports": ["MvnVector", "MvnCov", "MvnSampleOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./stats/power-analysis.js",
+            "imports": ["TTestPowerAlternative", "TTestPowerOptions"],
             "reExport": true,
             "typeOnly": true
           }
@@ -8885,6 +8918,10 @@
           "louvainCommunities",
           "katzCentrality",
           "isIsomorphic",
+          "glm",
+          "mvnPdf",
+          "mvnSample",
+          "tTestPower",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -8966,7 +9003,16 @@
           "MaxFlowResult",
           "MinCutResult",
           "AStarResult",
-          "HungarianResult"
+          "HungarianResult",
+          "GlmFamily",
+          "GlmLink",
+          "GlmOptions",
+          "GlmResult",
+          "MvnVector",
+          "MvnCov",
+          "MvnSampleOptions",
+          "TTestPowerAlternative",
+          "TTestPowerOptions"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -9222,6 +9268,10 @@
           "louvainCommunities",
           "katzCentrality",
           "isIsomorphic",
+          "glm",
+          "mvnPdf",
+          "mvnSample",
+          "tTestPower",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -9303,7 +9353,16 @@
           "MaxFlowResult",
           "MinCutResult",
           "AStarResult",
-          "HungarianResult"
+          "HungarianResult",
+          "GlmFamily",
+          "GlmLink",
+          "GlmOptions",
+          "GlmResult",
+          "MvnVector",
+          "MvnCov",
+          "MvnSampleOptions",
+          "TTestPowerAlternative",
+          "TTestPowerOptions"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -13540,6 +13599,21 @@
         "exports": ["dbscan", "knnClassify", "knnRegress"],
         "functions": ["dbscan", "knnClassify", "knnRegress"]
       },
+      "functions/src/ml/glm.ts": {
+        "description": "Generalized linear models via IRLS/Fisher scoring (Stats-breadth chunk).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/numeric.js",
+            "imports": ["linsolve"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["glm"],
+        "interfaces": ["GlmOptions", "GlmResult"],
+        "functions": ["glm"]
+      },
       "functions/src/ml/kde.ts": {
         "description": "1-D Gaussian kernel density estimation (Wave — ML primitives, Phase 3 Task 5).",
         "externalDependencies": [],
@@ -16236,6 +16310,48 @@
           "mcnemar",
           "cochranQ"
         ]
+      },
+      "functions/src/stats/mvn.ts": {
+        "description": "Multivariate-normal density (`mvnPdf`) and Cholesky-based sampling",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/dist-objects.js",
+            "imports": ["multivariateNormal"]
+          },
+          {
+            "file": "../typed/matrix-ops.js",
+            "imports": ["cholesky"]
+          },
+          {
+            "file": "../probability/util/seededRNG.js",
+            "imports": ["createRng"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["mvnPdf", "mvnSample"],
+        "interfaces": ["MvnSampleOptions"],
+        "functions": ["mvnPdf", "mvnSample"]
+      },
+      "functions/src/stats/power-analysis.ts": {
+        "description": "Two-sample t-test power analysis (Stats-breadth chunk).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../distribution-functions.js",
+            "imports": ["studentTQuantile"]
+          },
+          {
+            "file": "./inference-extra2.js",
+            "imports": ["noncentralTCDF"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["tTestPower"],
+        "interfaces": ["TTestPowerOptions"],
+        "functions": ["tTestPower"]
       },
       "functions/src/stats/timeseries.ts": {
         "description": "Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit",
@@ -35910,6 +36026,7 @@
         "name": "Functions/ml",
         "files": [
           "functions/src/ml/dbscan-knn.ts",
+          "functions/src/ml/glm.ts",
           "functions/src/ml/kde.ts",
           "functions/src/ml/logistic-regression.ts",
           "functions/src/ml/ols.ts",
@@ -36059,6 +36176,8 @@
           "functions/src/stats/fit-distribution.ts",
           "functions/src/stats/inference-extra.ts",
           "functions/src/stats/inference-extra2.ts",
+          "functions/src/stats/mvn.ts",
+          "functions/src/stats/power-analysis.ts",
           "functions/src/stats/timeseries.ts"
         ]
       },
@@ -36890,18 +37009,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1073,
+    "totalTypeScriptFiles": 1076,
     "totalModules": 82,
-    "totalLinesOfCode": 184721,
-    "totalExports": 5370,
+    "totalLinesOfCode": 185180,
+    "totalExports": 5387,
     "totalClasses": 57,
-    "totalInterfaces": 477,
-    "totalFunctions": 1792,
+    "totalInterfaces": 481,
+    "totalFunctions": 1796,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2021,
-    "totalTypeOnlyImports": 551,
+    "totalReExports": 2034,
+    "totalTypeOnlyImports": 554,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

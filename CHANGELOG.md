@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — stats breadth: GLM (Poisson/Gamma), multivariate-normal PDF/sampling, t-test power
+
+Three additive `@danielsimonjr/mathts-functions` statistics primitives:
+
+- **`glm(X, y, opts)`** (`functions/src/ml/glm.ts`) — generalized linear models via IRLS/Fisher
+  scoring, generalizing the existing `logisticRegression` IRLS (whose Newton step is only equivalent
+  to Fisher scoring because the logit link is canonical for Bernoulli) to `family: 'poisson'` (log
+  link) and `family: 'gamma'` (log or inverse/canonical link). Same `opts.intercept` convention as
+  `ols`. Mustart initialization matches R's `glm.fit`/statsmodels (`y + 0.1` for Poisson, `y` for
+  Gamma). Oracle-pinned against `statsmodels.GLM.fit`: Poisson coefficients match to 1e-4, Gamma
+  (both links) to 1e-4.
+- **`mvnPdf(x, mean, cov)`** / **`mvnSample(mean, cov, n, opts?)`** (`functions/src/stats/mvn.ts`) —
+  multivariate-normal density and Cholesky-based sampling (`x = mean + L·z`), handling both the 1-D
+  scalar case and the general k-D case. `mvnPdf` is a thin wrapper over the existing
+  `multivariateNormal` distribution object; `mvnSample` reuses that module's Cholesky factorization
+  (now exported as `cholesky` from `typed/dist-objects.ts`) and the package's existing seeded-RNG
+  infrastructure (`probability/util/seededRNG.ts`) for reproducible draws. `mvnPdf` pinned to `scipy
+  multivariate_normal.pdf` (1e-6); `mvnSample`'s empirical mean/covariance over 20000 seeded draws
+  matches the input parameters to ~0.1.
+- **`tTestPower(effectSize, nobs, alpha, opts?)`** (`functions/src/stats/power-analysis.ts`) —
+  two-sample t-test power via the existing `noncentralTCDF` (Phase 4) and `studentTQuantile`
+  building blocks; no distribution math duplicated. `opts.solveFor: 'nobs'` solves (by bisection) for
+  the per-group sample size needed to reach a target power. Matches
+  `statsmodels.stats.power.tt_ind_solve_power` to 1e-3 (power) / 1e-1 (nobs).
+
+Covered by `functions/tests/gap-stats-breadth-oracle.test.ts`. Follow-ups (Gaussian-process
+regression; Dirichlet/Wishart and other multivariate-distribution sampling) are larger, separate
+chunks — not part of this one.
+
 ### Added — stiff `solveODE`: 4th-order RODAS method + analytic Jacobian option
 
 `@danielsimonjr/mathts-functions` `solveODE` gains `method: 'RODAS'` — Hairer & Wanner's 4th-order,

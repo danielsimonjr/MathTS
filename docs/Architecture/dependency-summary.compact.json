@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1073, "e": 5370, "re": 2021 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1076, "e": 5387, "re": 2034 },
   "s": {
-    "loc": 184721,
+    "loc": 185180,
     "cls": 57,
-    "int": 477,
-    "fn": 1792,
+    "int": 481,
+    "fn": 1796,
     "tg": 160,
     "en": 0,
     "co": 1543,
-    "toi": 551
+    "toi": 554
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -711,11 +711,12 @@
       ]
     },
     "functions/ml": {
-      "f": 5,
+      "f": 6,
       "exp": [
         "dbscan",
         "knnClassify",
         "knnRegress",
+        "glm",
         "gaussianKDE",
         "logisticRegression",
         "ols",
@@ -724,6 +725,8 @@
         "elasticNet"
       ],
       "int": [
+        "GlmOptions",
+        "GlmResult",
         "GaussianKDEOptions",
         "GaussianKDEResult",
         "LogisticRegressionOptions",
@@ -731,8 +734,7 @@
         "OlsOptions",
         "OlsResult",
         "RidgeOptions",
-        "CoordinateDescentOptions",
-        "RegularizedRegressionResult"
+        "CoordinateDescentOptions"
       ]
     },
     "functions/numbertheory": {
@@ -945,7 +947,7 @@
       ]
     },
     "functions/stats": {
-      "f": 4,
+      "f": 6,
       "exp": [
         "fitDistribution",
         "chi2Contingency",
@@ -959,6 +961,9 @@
         "vonMisesPDF",
         "mcnemar",
         "cochranQ",
+        "mvnPdf",
+        "mvnSample",
+        "tTestPower",
         "pacf",
         "ljungBox",
         "durbinWatson",
@@ -972,8 +977,9 @@
         "McNemarOptions",
         "McNemarResult",
         "CochranQResult",
-        "LjungBoxResult",
-        "AdfullerResult"
+        "MvnSampleOptions",
+        "TTestPowerOptions",
+        "LjungBoxResult"
       ]
     },
     "functions/string": {
@@ -1794,7 +1800,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 94, "o": 0 },
+    { "p": "src/index.ts", "i": 100, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
