@@ -102,8 +102,11 @@ or a documented scope limit worth revisiting.
       implementation-independent complex residual (`matrix/tests/eig-complex-eigenvectors-oracle.test.ts`).
       `care`/`dare` still use the matrix sign function (not wired to the new field in this change) —
       **remaining follow-up:** route `care`/`dare`/`funm` off the eigenvector basis now that it's available.
-- [ ] **Linalg extension:** rank-revealing QR (`qr` pivoting) + `rq`/`ql`/`lq`; `generalizedEig` QZ-hardening;
-      sparse `svds`; preconditioners beyond Jacobi (ILU/IC); `condest`; `minres` optimal Givens form (O(k³) now).
+- [~] **Linalg extension:** ✅ **rank-revealing `qrPivoted` + `rq`/`ql`/`lq` + `condest` DONE 2026-07-16
+  (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
+  condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.
+  **Remaining:** `generalizedEig` QZ-hardening (Francis double-shift); sparse `svds` (Lanczos);
+  preconditioners beyond Jacobi (ILU/IC); `minres` optimal Givens (O(k³)→O(k²)).
 - [x] ✅ **funm defective matrices — DONE 2026-07-16 (functions@0.39.0).** Replaced the throw with
       **confluent Hermite interpolation** (Newton divided differences over repeated eigenvalue nodes;
       `f(J)=Σ f^(k)(λ)/k!·N^k`). Derivatives of `f` from an optional additive `fDerivs` arg (machine
