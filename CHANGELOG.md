@@ -28,6 +28,19 @@ per-category summary line plus the existing per-name detail (each definer annota
 own sub-tag/reason); the runtime **TRUE_DUPLICATE count dropped from 253 to 142**
 (17 DISPATCH_VARIANT, 7 ALIAS_DELEGATION, 87 ALLOWLISTED explain the rest).
 
+### Added — `check:duplicates` prevention gate (baseline-diff, not yet hook-wired)
+
+`npm run check:duplicates` (`tools/create-dependency-graph/check-duplicates.mjs`) regenerates
+the duplicate-symbol analysis and fails on any `TRUE_DUPLICATE` name beyond
+`docs/Architecture/duplicate-baseline.json` (the campaign's current, shrinking backlog — seeded
+at 142 runtime + 69 type = 211 accepted names via the new one-off
+`tools/create-dependency-graph/gen-duplicate-baseline.mjs` generator), naming the new
+duplicate's defining files and suggesting reuse of the canonical definer (or an
+`duplicate-allowlist.json` entry if it's legitimately independent). Verified to PASS on the
+current tree and FAIL when a synthetic same-name duplicate is injected. Not yet wired into the
+pre-commit hook — a deliberate follow-up so the full CDG re-scan doesn't slow down every commit
+during the in-flight consolidation campaign.
+
 ### Changed — cross-package dedup, Bucket B slice 1: `factory`/`string`/`bignumber-formatter` utils → core/internal
 
 `expression` and `functions` each carried duplicate mathjs-derived cold-utility copies (dead
