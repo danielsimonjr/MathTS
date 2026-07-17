@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-linalg",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Standalone linear-algebra decompositions for MathTS (eigen, SVD, QR, LU, Cholesky, Schur, matrix functions), re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.10.0",
-    "@danielsimonjr/mathts-matrix": "^0.5.0"
+    "@danielsimonjr/mathts-matrix": "^0.6.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",

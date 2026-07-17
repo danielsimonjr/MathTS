@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.6.0
+
+### Minor Changes
+
+- Rank-revealing pivoted QR, RQ/QL/LQ decompositions, and `condest`
+
+  Adds `qrPivoted` (Businger-Golub column-pivoted rank-revealing QR — returns `{Q, R, P,
+rank}` with `A[:,P]=Q·R` and `|diag(R)|` non-increasing), `rq`/`ql`/`lq` (the QR-family
+  variants via the standard flip/transpose reductions), and `condest` (Hager/Higham 1-norm
+  condition-number estimator using the existing LU factors, never forming `A⁻¹`). Verified by
+  orthogonality/triangularity/reconstruction/rank/cond oracles vs numpy/scipy. Also fixes a
+  degenerate-branch reflection in the shared `householder` helper (`beta=-2`→`2`) for the
+  length-1 sub-column case that `qrPivoted` exercises.
+
 ## 0.5.0
 
 ### Minor Changes

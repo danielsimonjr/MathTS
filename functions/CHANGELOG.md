@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-functions
 
+## 0.40.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.6.0
+
 ## 0.40.0
 
 ### Minor Changes
