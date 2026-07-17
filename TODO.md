@@ -150,10 +150,13 @@ or a documented scope limit worth revisiting.
       (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests). **Remaining:** general
       PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem` error
       control; DAE/DDE — each a substantially larger sub-project, not attempted this pass.
-- [ ] **Stats:** logistic/GLM breadth (Poisson/Gamma links); Gaussian-process regression; multivariate
-      distributions (Dirichlet/Wishart/MVN sampling); power analysis.
-- [ ] **Special-fns Phase-5 extension (niche):** polylog/Lerch Φ, Struve H/L, Kelvin ber/bei, Barnes-G,
-      Coulomb/Mathieu/parabolic-cylinder/spheroidal, Riemann–Siegel Z.
+- [~] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
+  (functions@0.41.0)** — statsmodels/scipy-pinned. **Remaining:** Gaussian-process regression;
+  multivariate distributions beyond MVN (Dirichlet/Wishart sampling).
+- [~] **Special-fns Phase-5 extension (niche):** ✅ **`polylog`, `struveH`/`struveL`, `kelvinBer`/
+  `kelvinBei`, `barnesG` DONE 2026-07-16 (functions@0.42.0)** — mpmath dps=25-pinned, machine
+  precision. **Remaining (deferred, highly specialized):** Lerch Φ, Coulomb/Mathieu/parabolic-
+  cylinder/spheroidal wave functions, Riemann–Siegel Z.
 - [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
   correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
   `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16
@@ -252,10 +255,10 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
       solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
       scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
       `functions/tests/solveode-jspath.test.ts`.
-- [ ] **[follow-up] Stiff solver niceties.** Higher-order stiff option (RODAS/BDF) for tight
-      tolerances (ode23s is 2nd-order → many steps at tol<1e-8); analytic-Jacobian option (avoid FD);
-      Robertson-problem test; reuse the matrix package's LU (currently an inline dense solve — fine
-      for small/moderate systems, O(n³)/step for large ones). Event detection (`events` option).
+- [~] **[follow-up] Stiff solver niceties.** ✅ **RODAS (4th-order L-stable Rosenbrock) + analytic-
+  Jacobian (`jac`) option + Robertson test DONE 2026-07-16 (functions@0.41.0)** — RODAS reaches
+  tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau. **Remaining:**
+  reuse the matrix package's LU (currently an inline dense solve); event detection (`events` option).
 
 ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 
