@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — CDG duplicate-symbols detector (`docs/Architecture/duplicate-symbols.{md,json}`)
+
+`tools/create-dependency-graph/create-dependency-graph.ts` adds `detectDuplicateSymbols`: groups
+every file's OWN-defined `functions`/`constants`/`classes` (runtime) and `interfaces`/`types`/`enums`
+(type) exports by name across the whole monorepo, keeping only names with >=2 independent defining
+files. A name landing in a file's `exports.reExported` (any `export { x } from './y'` /
+`export type { x } from './y'` / workspace-scoped equivalent) is a re-export FORWARD, not an
+independent body, and is excluded — this is the whole value of the detector, not a filter bolted on
+after. The public-surface check that resolves each definer's canonical-candidate hint is refactored
+out of `detectUnused` into a shared `computePublicSurface` (per-FILE, not per-package-name-union —
+needed to correctly disambiguate two same-package same-name definitions like `fftshift`, which is
+own-defined in both `functions/src/signal/fft.ts` and `functions/src/signal/fft-helpers.ts` but only
+the latter is named-re-exported by `functions/src/index.ts`). Emits
+`docs/Architecture/duplicate-symbols.json` + `.md` (runtime + type sections, sorted by definer count)
+via `npm run docs:deps` (new `docs:duplicates` alias); found 287 runtime + 71 type duplicate names on
+the current tree (the `is*` type-guard family, `format`/`create`/`transpose`/`abs`/`add` duplicated
+across typed/factory/compat/core layers, the `fft`/`fftshift`/`ifftshift` family) — the measurement
+that scopes the dedup campaign and seeds a future `check:duplicates` CI gate. Does NOT detect
+typed-dispatch polymorphism (out of scope — call-graph analysis); each entry records defining files +
+public flags for human triage instead.
+
 ### Added — kill-able worker-thread run timeout (`runWorkbookWithTimeout`, `mtsw run --timeout`)
 
 `WorkbookExecutor#runReport` had no time budget — a runaway cell (e.g. an unbounded numeric

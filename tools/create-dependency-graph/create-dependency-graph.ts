@@ -1572,6 +1572,72 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
   };
 }
 
+interface PublicSurface {
+  /** Files whose ENTIRE export list is public (reached by a wildcard `export *`
+   *  chain from a package root, or is itself a root). */
+  publicWildcardFiles: Set<string>;
+  /** `${path}::${name}` for individually named-re-exported public exports. */
+  publicNamed: Set<string>;
+  /** Public roots beyond each package's `src/index.ts`: `exports` subpath
+   *  entries, `bin` targets, and config-referenced bundle entries. */
+  extraEntryPaths: Set<string>;
+}
+
+/**
+ * Compute the package public-API surface: any export surfaced through a
+ * package `src/index.ts` (or an equally-public root — an `exports` subpath
+ * entry, a `bin` target, or a config-referenced bundle entry) — directly, or
+ * re-exported into one via `export … from` (transitively) — is the package's
+ * external surface. Shared by `detectUnused` (a public export isn't "unused")
+ * and `buildDuplicateEntries` (a public export is a real canonical-candidate
+ * signal; an internal one that merely shares a name elsewhere is not).
+ */
+function computePublicSurface(files: ParsedFile[]): PublicSurface {
+  const byPath = new Map(files.map((f) => [f.path, f] as const));
+  const publicWildcardFiles = new Set<string>();
+  const publicNamed = new Set<string>();
+
+  const markPublic = (file: ParsedFile, seen: Set<string>): void => {
+    if (seen.has(file.path)) return;
+    seen.add(file.path);
+    publicWildcardFiles.add(file.path); // the file's own exports are public
+    for (const dep of file.internalDependencies) {
+      if (!dep.reExport) continue;
+      const target = byPath.get(resolvePath(file.path, dep.file));
+      if (!target) continue;
+      if (dep.imports.includes('*')) {
+        markPublic(target, seen); // export * → every export of the source is public
+      } else {
+        for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
+      }
+    }
+  };
+
+  // Public roots: every package src/index.ts PLUS every package.json `exports`
+  // subpath entry (e.g. core's `./internal` → core/src/internal.ts). A subpath
+  // entry is exactly as public as the index — without seeding it, everything it
+  // re-exports (`export * from './number.js'`) is false-flagged as unused.
+  const extraEntryPaths = new Set<string>();
+  for (const ws of workspaceMap.values()) {
+    for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
+  }
+  // Config-referenced roots (bundler alias / entry targets, e.g. the browser
+  // shim aliased in by vitest.config.browser.ts) are entry points too — nothing
+  // imports them by design, so they must not be flagged as "unused files".
+  for (const entry of configReferencedEntries(ROOT_DIR)) extraEntryPaths.add(entry);
+  for (const file of files) {
+    if (
+      file.path === 'src/index.ts' ||
+      file.path.endsWith('/src/index.ts') ||
+      extraEntryPaths.has(file.path)
+    ) {
+      markPublic(file, new Set());
+    }
+  }
+
+  return { publicWildcardFiles, publicNamed, extraEntryPaths };
+}
+
 /**
  * Detect unused files and exports
  */
@@ -1637,47 +1703,9 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
   // directly, or re-exported into one via `export … from` (transitively) — is the
   // package's external surface, consumed by downstream packages / end users, not
   // internal files. Flagging it as "unused" is a false positive (the bulk of the
-  // list). Collect it and exclude it below.
-  const byPath = new Map(files.map((f) => [f.path, f] as const));
-  const publicWildcardFiles = new Set<string>(); // ALL exports public (reached by `export *`)
-  const publicNamed = new Set<string>(); // `${path}::${name}` for named public exports
-
-  const markPublic = (file: ParsedFile, seen: Set<string>): void => {
-    if (seen.has(file.path)) return;
-    seen.add(file.path);
-    publicWildcardFiles.add(file.path); // the file's own exports are public
-    for (const dep of file.internalDependencies) {
-      if (!dep.reExport) continue;
-      const target = byPath.get(resolvePath(file.path, dep.file));
-      if (!target) continue;
-      if (dep.imports.includes('*')) {
-        markPublic(target, seen); // export * → every export of the source is public
-      } else {
-        for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
-      }
-    }
-  };
-  // Public roots: every package src/index.ts PLUS every package.json `exports`
-  // subpath entry (e.g. core's `./internal` → core/src/internal.ts). A subpath
-  // entry is exactly as public as the index — without seeding it, everything it
-  // re-exports (`export * from './number.js'`) is false-flagged as unused.
-  const extraEntryPaths = new Set<string>();
-  for (const ws of workspaceMap.values()) {
-    for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
-  }
-  // Config-referenced roots (bundler alias / entry targets, e.g. the browser
-  // shim aliased in by vitest.config.browser.ts) are entry points too — nothing
-  // imports them by design, so they must not be flagged as "unused files".
-  for (const entry of configReferencedEntries(ROOT_DIR)) extraEntryPaths.add(entry);
-  for (const file of files) {
-    if (
-      file.path === 'src/index.ts' ||
-      file.path.endsWith('/src/index.ts') ||
-      extraEntryPaths.has(file.path)
-    ) {
-      markPublic(file, new Set());
-    }
-  }
+  // list). Collect it and exclude it below. (Also reused by the duplicate-symbol
+  // detector's per-file public flag — see `computePublicSurface`.)
+  const { publicWildcardFiles, publicNamed, extraEntryPaths } = computePublicSurface(files);
 
   // Find unused files (excluding entry point and index files which are re-export hubs)
   const unusedFiles: string[] = [];
@@ -3602,6 +3630,219 @@ function generateParallelPairingMarkdown(p: ParallelPairing): string {
 }
 
 /**
+ * Duplicate-symbol detection: the recurring MathTS "multiple implementations of
+ * one name across packages/files" problem — three `fft`s; `sum`/`distance`/
+ * `cumsum`/`variance` duplicated across the typed/factory/compat layers;
+ * `fftshift`/`ifftshift` defined independently in both
+ * `functions/src/signal/fft.ts` (generic `<T>`) and
+ * `functions/src/signal/fft-helpers.ts` (`number[]`). This is the measurement
+ * that scopes a consolidation campaign — later it can gate CI directly.
+ *
+ * A "definer" is a file that OWNS a symbol's implementation body — the name is
+ * in that file's own `functions`/`constants`/`classes` (runtime) or
+ * `interfaces`/`types`/`enums` (type) export list AND is NOT also in that
+ * file's `reExported` list. `reExported` already captures every re-export FORM
+ * the parser recognises for a named export — `export { x } from './y'`,
+ * `export type { x } from './y'`, and their workspace-scoped equivalents
+ * (`export { x } from '@scope/pkg'`) all push the exported name into
+ * `exports.reExported` regardless of destination (see `parseFile`). A name
+ * landing there is a FORWARD, not an independent body, so it is excluded here
+ * without needing to walk the barrel re-export map — that map resolves
+ * *relative-import chains* for reachability tracing, a different concern from
+ * "does this file's own export list represent a real definition."
+ *
+ * NOT detected here: typed-dispatch polymorphism, e.g. a single public name
+ * (`abs`) registered with multiple typed overloads for different argument
+ * shapes (`abs(number)` vs `abs(matrix)`) — that requires call-graph/signature
+ * analysis, out of scope. A flagged name may be a genuine duplicate OR a
+ * legitimate typed-dispatch/factory variant; a human triages using the
+ * recorded defining files + public flags (see `DUPLICATE_SYMBOLS_NOTE`).
+ */
+type RuntimeSymbolCategory = 'function' | 'constant' | 'class';
+type TypeSymbolCategory = 'interface' | 'type' | 'enum';
+type DupExportKey = 'functions' | 'constants' | 'classes' | 'interfaces' | 'types' | 'enums';
+
+interface DuplicateDefiner {
+  file: string;
+  package: string;
+  public: boolean;
+}
+
+interface DuplicateSymbolEntry {
+  name: string;
+  /** Distinct own-definition categories across definers, '+'-joined (e.g.
+   *  "function" or "constant+function" — the latter when e.g. one file
+   *  assigns `export const fft = createFft(...)` and another declares
+   *  `export function fft`, as with the real `fft` case). */
+  category: string;
+  definers: DuplicateDefiner[];
+  /** File path of the sole PUBLIC definer, `'AMBIGUOUS'` (>=2 public
+   *  definers), or `'internal-only'` (0 public definers). A hint, not a
+   *  verdict — a human still confirms before consolidating. */
+  canonicalHint: string;
+}
+
+interface DuplicateSymbolsReport {
+  generated: string;
+  note: string;
+  summary: { runtimeDuplicates: number; typeDuplicates: number };
+  runtime: DuplicateSymbolEntry[];
+  types: DuplicateSymbolEntry[];
+}
+
+const RUNTIME_DUP_CATEGORIES: Array<{ cat: RuntimeSymbolCategory; key: DupExportKey }> = [
+  { cat: 'function', key: 'functions' },
+  { cat: 'constant', key: 'constants' },
+  { cat: 'class', key: 'classes' },
+];
+
+const TYPE_DUP_CATEGORIES: Array<{ cat: TypeSymbolCategory; key: DupExportKey }> = [
+  { cat: 'interface', key: 'interfaces' },
+  { cat: 'type', key: 'types' },
+  { cat: 'enum', key: 'enums' },
+];
+
+const DUPLICATE_SYMBOLS_NOTE =
+  'This report groups names by OWN definition, not by call graph. It does NOT detect ' +
+  'typed-dispatch polymorphism (a single public name registered with multiple typed ' +
+  'overloads for different argument shapes) — a flagged name may be a genuine duplicate ' +
+  'implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using ' +
+  'the defining files + public flags before merging anything.';
+
+/**
+ * Collect every OWN definition of every symbol name across `files`, keyed by
+ * name. A definer is recorded only when the name is in the file's own export
+ * list for that category AND absent from `file.exports.reExported`.
+ */
+function collectOwnDefiners(
+  files: ParsedFile[],
+  categories: Array<{ cat: string; key: DupExportKey }>
+): Map<string, Array<{ file: ParsedFile; category: string }>> {
+  const byName = new Map<string, Array<{ file: ParsedFile; category: string }>>();
+  for (const file of files) {
+    const reExported = new Set(file.exports.reExported);
+    for (const { cat, key } of categories) {
+      for (const name of file.exports[key]) {
+        if (reExported.has(name)) continue; // forward, not an own body
+        // `exports.types` also contains every interface name (the parser
+        // pushes interfaces into both `interfaces` and `types`) — skip so an
+        // interface isn't double-counted as its own "type" duplicate too.
+        if (key === 'types' && file.exports.interfaces.includes(name)) continue;
+        if (!byName.has(name)) byName.set(name, []);
+        byName.get(name)!.push({ file, category: cat });
+      }
+    }
+  }
+  return byName;
+}
+
+/**
+ * Turn per-name definer lists into report entries, keeping only names with
+ * >=2 DISTINCT defining files (the candidate-duplicate threshold), resolving
+ * each definer's public-surface flag and a canonical-candidate hint.
+ *
+ * Public is resolved per FILE (not per package-name-union): a definer is
+ * public iff its own file is in `publicSurface.publicWildcardFiles` (reached
+ * by a wildcard `export *` chain from a package root) OR its specific name is
+ * in `publicSurface.publicNamed` (`${file}::${name}`, a NAMED re-export chain
+ * to a root). This is what correctly resolves cases like `fftshift`, which is
+ * OWN-defined in both `functions/src/signal/fft.ts` and
+ * `functions/src/signal/fft-helpers.ts` — only the latter is named-re-exported
+ * by `functions/src/index.ts`, so only it is flagged public; a coarser "is the
+ * NAME present anywhere in the package's export surface" check would wrongly
+ * call both public (package-export-surfaces.json is a flat per-package name
+ * set, not file-scoped) and report AMBIGUOUS instead of a clean canonical hint.
+ */
+function buildDuplicateEntries(
+  byName: Map<string, Array<{ file: ParsedFile; category: string }>>,
+  publicSurface: PublicSurface
+): DuplicateSymbolEntry[] {
+  const isFilePublic = (file: ParsedFile, name: string): boolean =>
+    publicSurface.publicWildcardFiles.has(file.path) ||
+    publicSurface.publicNamed.has(`${file.path}::${name}`);
+
+  const entries: DuplicateSymbolEntry[] = [];
+  for (const [name, defs] of byName) {
+    const byFile = new Map<string, { file: ParsedFile; category: string }>();
+    for (const d of defs) {
+      if (!byFile.has(d.file.path)) byFile.set(d.file.path, d);
+    }
+    if (byFile.size < 2) continue;
+
+    const categories = new Set<string>();
+    const definers: DuplicateDefiner[] = [];
+    for (const { file, category } of byFile.values()) {
+      categories.add(category);
+      definers.push({
+        file: file.path,
+        package: file.packageName ?? 'unknown',
+        public: isFilePublic(file, name),
+      });
+    }
+    definers.sort((a, b) => a.file.localeCompare(b.file));
+
+    const publicDefiners = definers.filter((d) => d.public);
+    const canonicalHint =
+      publicDefiners.length === 1
+        ? publicDefiners[0].file
+        : publicDefiners.length > 1
+          ? 'AMBIGUOUS'
+          : 'internal-only';
+
+    entries.push({ name, category: [...categories].sort().join('+'), definers, canonicalHint });
+  }
+  entries.sort((a, b) => b.definers.length - a.definers.length || a.name.localeCompare(b.name));
+  return entries;
+}
+
+function detectDuplicateSymbols(
+  files: ParsedFile[],
+  publicSurface: PublicSurface
+): { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] } {
+  return {
+    runtime: buildDuplicateEntries(
+      collectOwnDefiners(files, RUNTIME_DUP_CATEGORIES),
+      publicSurface
+    ),
+    types: buildDuplicateEntries(collectOwnDefiners(files, TYPE_DUP_CATEGORIES), publicSurface),
+  };
+}
+
+function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): string {
+  let md = '# Duplicate Symbols\n\n';
+  md += `**Generated**: ${report.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across `;
+  md += `the monorepo — the measurement that scopes the dedup campaign (three \`fft\`s; `;
+  md += `\`sum\`/\`distance\`/\`cumsum\`/\`variance\` across typed+factory+compat layers; `;
+  md += `\`fftshift\`/\`ifftshift\` defined independently in both \`fft.ts\` and \`fft-helpers.ts\`).\n\n`;
+  md += `> **Note:** ${report.note}\n\n`;
+  md += `| Section | Count |\n| --- | --: |\n`;
+  md += `| Runtime duplicates (function/constant/class) | ${report.summary.runtimeDuplicates} |\n`;
+  md += `| Type duplicates (interface/type/enum) | ${report.summary.typeDuplicates} |\n\n`;
+
+  const renderTable = (entries: DuplicateSymbolEntry[]): string => {
+    if (entries.length === 0) return '_None._\n\n';
+    let out = '| Name | Category | Defining files (package, public?) | Canonical hint |\n';
+    out += '| --- | --- | --- | --- |\n';
+    for (const e of entries) {
+      const files = e.definers
+        .map((d) => `\`${d.file}\` (${d.package}, ${d.public ? 'public' : 'internal'})`)
+        .join('<br>');
+      const hint = e.canonicalHint === 'AMBIGUOUS' ? '**AMBIGUOUS**' : `\`${e.canonicalHint}\``;
+      out += `| \`${e.name}\` | ${e.category} | ${files} | ${hint} |\n`;
+    }
+    out += '\n';
+    return out;
+  };
+
+  md += `## Runtime duplicates (priority)\n\n`;
+  md += renderTable(report.runtime);
+  md += `## Type duplicates (lower priority)\n\n`;
+  md += renderTable(report.types);
+  return md;
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
@@ -3824,6 +4065,36 @@ async function main(): Promise<void> {
     JSON.stringify({ generated: new Date().toISOString().split('T')[0], surfaces }, null, 2)
   );
   console.log('Written: docs/Architecture/package-export-surfaces.json');
+
+  // Duplicate-symbol detection — the measurement that scopes the "multiple
+  // implementations of one name across packages" dedup campaign (three `fft`s;
+  // `fftshift`/`ifftshift` defined independently in fft.ts and fft-helpers.ts).
+  // Own-definition dedup; re-export forwards excluded. Public/internal is
+  // resolved per FILE via the same public-surface walk `detectUnused` uses (NOT
+  // the flat package-export-surfaces.json above, which can't disambiguate two
+  // same-package same-name definitions). See detectDuplicateSymbols doc comment
+  // above for the full model.
+  const dup = detectDuplicateSymbols(activeParsedFiles, computePublicSurface(activeParsedFiles));
+  const duplicateReport: DuplicateSymbolsReport = {
+    generated: new Date().toISOString().split('T')[0],
+    note: DUPLICATE_SYMBOLS_NOTE,
+    summary: { runtimeDuplicates: dup.runtime.length, typeDuplicates: dup.types.length },
+    runtime: dup.runtime,
+    types: dup.types,
+  };
+  writeFileSync(
+    join(OUTPUT_DIR, 'duplicate-symbols.json'),
+    JSON.stringify(duplicateReport, null, 2)
+  );
+  writeFileSync(
+    join(OUTPUT_DIR, 'duplicate-symbols.md'),
+    generateDuplicateSymbolsMarkdown(duplicateReport)
+  );
+  console.log(
+    `Written: docs/Architecture/duplicate-symbols.md ` +
+      `(${duplicateReport.summary.runtimeDuplicates} runtime, ` +
+      `${duplicateReport.summary.typeDuplicates} type duplicates)`
+  );
 
   // Test coverage analysis (when --include-tests is specified)
   let testCoverage: TestCoverageAnalysis | null = null;

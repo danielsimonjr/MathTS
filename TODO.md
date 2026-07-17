@@ -93,9 +93,15 @@ the other packages import. Extends the standing "all libraries build on core" pr
 CDG tool did NOT create these — it accurately surfaces them; the duplication is in the code.
 
 - **FIND (reusable tooling, not one-off greps):**
-  1. Extend CDG/QDG to emit a **`duplicate-symbols` report** — group every export by NAME across all
-     files/packages, flag names defined in >1 file, tag public-vs-internal + owning package. Fast first pass
-     (catches fft/fftshift/sum/etc.). Data already in `package-export-surfaces.json` + the graph.
+  1. [x] ✅ **DONE 2026-07-17** — CDG emits `docs/Architecture/duplicate-symbols.{md,json}` via
+         `npm run docs:deps` (new `detectDuplicateSymbols`/`docs:duplicates` alias): groups every
+         OWN-defined export by NAME across all files/packages (excluding re-export forwards via
+         `exports.reExported`), tags public-vs-internal per FILE (new shared `computePublicSurface`,
+         extracted from `detectUnused` — needed per-file granularity, not the flat
+         `package-export-surfaces.json` union, to correctly resolve `fftshift`→`fft-helpers.ts` as
+         canonical instead of AMBIGUOUS) + a canonical-candidate hint. Found **287 runtime + 71 type**
+         duplicate names (the `is*` guard family, `format`/`create`/`transpose`/`abs`/`add`, the
+         `fft`/`fftshift`/`ifftshift` family confirmed) — the scoping measurement for steps 2-3 below.
   2. **Behavioral-equivalence probe** — deep-equal on a random-input battery (like the
      `multipleComparison==multipleTest` check) to separate TRUE duplicates from legitimately-different
      dispatch (`abs(number)` vs `abs(matrix)` are NOT duplicates).
@@ -519,7 +525,7 @@ defects found + fixed:
       path. It does not pay: **n=2¹⁸, 156 ms via workers vs 77 ms on this thread** (2× slower) in
       Chrome; a wash in Node. The tuned decision was right and simply never read.
 - [x] ✅ **Worker-thread run timeout — DONE 2026-07-17 (workbook@0.3.0).** `runWorkbookWithTimeout(source,
-  {timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
+{timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
       terminate it on budget overrun (`WorkbookTimeoutError`); default in-process path unchanged. Runaway
       termination MEASURED (chained heavy compute killed at 500ms), not faked.
 - [x] ✅ **`ipynb` export — DONE 2026-07-17 (workbook@0.3.0).** `mtsw export --format ipynb` → nbformat v4

@@ -1,0 +1,7033 @@
+{
+  "generated": "2026-07-17",
+  "note": "This report groups names by OWN definition, not by call graph. It does NOT detect typed-dispatch polymorphism (a single public name registered with multiple typed overloads for different argument shapes) — a flagged name may be a genuine duplicate implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using the defining files + public flags before merging anything.",
+  "summary": {
+    "runtimeDuplicates": 287,
+    "typeDuplicates": 71
+  },
+  "runtime": [
+    {
+      "name": "format",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/typed/string.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isMatrix",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/types/Matrix.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "create",
+      "category": "function",
+      "definers": [
+        {
+          "file": "compat/src/index.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/create.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "compat/src/index.ts"
+    },
+    {
+      "name": "isArray",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isBigInt",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isBigNumber",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/types/bignumber.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isBoolean",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isComplex",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/types/complex.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isDenseMatrix",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/types/DenseMatrix.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isFraction",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/types/fraction.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isFunction",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isNull",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isNumber",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isObject",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isSparseMatrix",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/types/SparseMatrix.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isString",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isUndefined",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "transpose",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/common.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "abs",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "add",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "clone",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/object.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "complex",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/types/complex.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "deepForEach",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "deepMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "DEFAULT_CONFIG",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/config.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/factory/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/config.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/config.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "fft",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/fft.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isUnit",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "max",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "mean",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "min",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "multiply",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "pow",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "scatter",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "plot/src/marks2d.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        },
+        {
+          "file": "tensor/src/operations/scatter.ts",
+          "package": "@danielsimonjr/mathts-tensor",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "subtract",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sum",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "typeOf",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "assertDependencies",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "bitXor",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/bignumber/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "compareText",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/typed/relational.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/typed/relational.ts"
+    },
+    {
+      "name": "concat",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "cond",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "createMap",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/matrix/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "divide",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "exp",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "factory",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "filter",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "flatten",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "forEach",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "get",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/object.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/object.ts"
+    },
+    {
+      "name": "identity",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ifft",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "isCollection",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "isDate",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "isFactory",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isIndex",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "isInteger",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "isOptionalDependency",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isRange",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "isRegExp",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "LN10",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "LN2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "log",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "LOG10E",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "LOG2E",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "map",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "MathjsError",
+      "category": "class",
+      "definers": [
+        {
+          "file": "core/src/error/MathjsError.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/error/MathjsError.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/error/MathjsError.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "matrix",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "norm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "norm2",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/numeric/stable.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ones",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "pinv",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/pinv.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "reduce",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/typed/algebra.ts"
+    },
+    {
+      "name": "reshape",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "resize",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "rfft",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/fft.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "round",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "shouldParallelize",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/strategies/chunk.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": false
+        },
+        {
+          "file": "parallel/src/strategies/threshold.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/typed/arithmetic.ts"
+    },
+    {
+      "name": "size",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sortFactories",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "sqrt",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "SQRT1_2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "SQRT2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "squeeze",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "stripOptionalNotation",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "toEngineering",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/number.ts"
+    },
+    {
+      "name": "toExponential",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/number.ts"
+    },
+    {
+      "name": "toFixed",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/bignumber/formatter.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/number.ts"
+    },
+    {
+      "name": "trace",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "VERSION",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/index.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "plot/src/index.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        },
+        {
+          "file": "workbook/src/contract.ts",
+          "package": "@danielsimonjr/mathts-workbook",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "zeros",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "_switch",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/switch.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/switch.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "acos",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "acosh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "addScalar",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "area",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/geometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "plot/src/marks2d.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "arg",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "arraySize",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "asin",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "asinh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "assign",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "atan",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "atan2",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "atanh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "bignumber",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "bitAnd",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "bitNot",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "bitOr",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "broadcastArrays",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "broadcastSizes",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "broadcastTo",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "canUseSharedMemory",
+      "category": "function",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "canUseWasm",
+      "category": "function",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "carmichaelLambda",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "cbrt",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ceil",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "characteristicPolynomial",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/linalg.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "chebyshevT",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "checkBroadcastingRules",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "chineseRemainder",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "cholesky",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/cholesky.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "column",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "Complex",
+      "category": "class",
+      "definers": [
+        {
+          "file": "assembly/src/types/complex.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "core/src/types/complex.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "conj",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "containsCollections",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/collection.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "convolve",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/signal.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/typed/signal.ts"
+    },
+    {
+      "name": "cos",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "cosh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "cosIntegral",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "createChain",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/chain.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/chain/function/chain.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "createEmptyMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "createTypedFunction",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/factory/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "defaultWasmLocation",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/wasm/resolve.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/resolve.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "derivative",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "autograd/src/grad.ts",
+          "package": "@danielsimonjr/mathts-autograd",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "det",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "diag",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "DimensionError",
+      "category": "class",
+      "definers": [
+        {
+          "file": "expression/src/error/DimensionError.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/error/DimensionError.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "discriminant",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "dispatch",
+      "category": "function",
+      "definers": [
+        {
+          "file": "parallel/src/strategies/threshold.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": false
+        },
+        {
+          "file": "workbook/src/cli.ts",
+          "package": "@danielsimonjr/mathts-workbook",
+          "public": true
+        }
+      ],
+      "canonicalHint": "workbook/src/cli.ts"
+    },
+    {
+      "name": "divideScalar",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "divisors",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "divisorSigma",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "dotMultiply",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "e",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/plain/number/constants.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "compat/src/shims.ts"
+    },
+    {
+      "name": "E",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "endsWith",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/shared.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/shared.ts"
+    },
+    {
+      "name": "equal",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "erfi",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "eulerPhi",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "expfit",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/curvefit.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "expIntegralEi",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "expm1",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "factorial",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/wasm/special/scalars.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts"
+    },
+    {
+      "name": "fftshift",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/signal/fft-helpers.ts"
+    },
+    {
+      "name": "filterRegExp",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "fix",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "floor",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "fraction",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "gcd",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "generalize",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "getArrayDataType",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "getOperator",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/operators.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true
+        },
+        {
+          "file": "functions/src/expression/operators.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "expression/src/operators.ts"
+    },
+    {
+      "name": "harmonicNumber",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "hermiteH",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "histogram",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/descriptive-stats.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "plot/src/histogram.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "identify",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ifftshift",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "functions/src/signal/fft-helpers.ts"
+    },
+    {
+      "name": "im",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "IndexError",
+      "category": "class",
+      "definers": [
+        {
+          "file": "expression/src/error/IndexError.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/error/IndexError.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "initializePool",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "integerDigits",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isAccessorNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isArrayNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isAssignmentNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isBlockNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isChain",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isConditionalNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isConstantNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isEmptyIndex",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isFloat32Array",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "isFloat64Array",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "isFunctionAssignmentNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isFunctionNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isHelp",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isIndexNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isInt32Array",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "isNaN",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isNumeric",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "isObjectNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isObjectWrappingMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isOperatorNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isParenthesisNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isPartitionedMap",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isRangeNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isRelationalNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isResultSet",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isSymbolNode",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "isUint32Array",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "jacobian",
+      "category": "function",
+      "definers": [
+        {
+          "file": "autograd/src/grad.ts",
+          "package": "@danielsimonjr/mathts-autograd",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/cas.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "jacobiSymbol",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "join",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "laguerreL",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "last",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "lcm",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "leftShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "legendreP",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "line",
+      "category": "function",
+      "definers": [
+        {
+          "file": "plot/src/marks2d.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": true
+        },
+        {
+          "file": "plot/src/svg.ts",
+          "package": "@danielsimonjr/mathts-plot",
+          "public": false
+        }
+      ],
+      "canonicalHint": "plot/src/marks2d.ts"
+    },
+    {
+      "name": "linprog",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/optimization.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "loadWasmManifest",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "log10",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "log1p",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "log2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "logfit",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/curvefit.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "logIntegral",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "lowRankApprox",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "matrixExpm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/expm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "matrixLogm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/logm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "matrixSqrtm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/sqrtm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "medfilt",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/signal.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/signal.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "moebiusMu",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "multiplyScalar",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "nearlyEqual",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/utils/bignumber/nearlyEqual.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/number.ts"
+    },
+    {
+      "name": "normFro",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "nullspace",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/optimization.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "number",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ObjectWrappingMap",
+      "category": "class",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "padeApproximant",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/approx.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "PartitionedMap",
+      "category": "class",
+      "definers": [
+        {
+          "file": "expression/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/map.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "partitions",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "phi",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/plain/number/constants.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "compat/src/shims.ts"
+    },
+    {
+      "name": "PHI",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "pi",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/plain/number/constants.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "compat/src/shims.ts"
+    },
+    {
+      "name": "PI",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "polyadd",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "polynomialGCD",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "polynomialLCM",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "polynomialQuotient",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "polynomialRemainder",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "powerfit",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/curvefit.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "powerSpectrum",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/fft.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "assembly/src/ops/fft.ts"
+    },
+    {
+      "name": "primeFactors",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/number-theory.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "printTemplate",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "expression/src/utils/print.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/print.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "processSizesWildcard",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "properties",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "expression/src/operators.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true
+        },
+        {
+          "file": "functions/src/expression/operators.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "expression/src/operators.ts"
+    },
+    {
+      "name": "qr",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/qr.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "quadprog",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/optimization.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "random",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/typed/probability.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "re",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "resample",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/signal.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/signal.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "residue",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/approx.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "resolvePackagedWasm",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/wasm/resolve.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/resolve.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "resultant",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/polynomial.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "rightArithShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "rightLogShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "row",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "rowReduce",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/linalg.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sha384OfBuffer",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "sign",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sin",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "singularValues",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sinh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sinIntegral",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/special.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "sparse",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "square",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "std",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "stretch",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "stringify",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/string.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "subset",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "subtractScalar",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/arithmetic/scalar.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "tan",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "tanh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "tau",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/plain/number/constants.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "compat/src/shims.ts"
+    },
+    {
+      "name": "terminatePool",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "to",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/unit.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "toBest",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/unit.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "topologicalSort",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/graph.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "workbook/src/graph.ts",
+          "package": "@danielsimonjr/mathts-workbook",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "unaryMinus",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "unsqueeze",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "validate",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "validateIndex",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "validateIndexSourceSize",
+      "category": "function",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "variance",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "verifyWasmIntegrity",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "wasmLoader",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "WasmLoader",
+      "category": "class",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "windowFunction",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/signal.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/signal.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    }
+  ],
+  "types": [
+    {
+      "name": "SparseMatrixData",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/algebra/sparse/csAmd.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csChol.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csCounts.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csLu.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csSpsolve.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csSqr.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csSymperm.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "BigNumber",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/matrix/utils/zerosAndOnes.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/bignumber/BigNumber.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "Complex",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/complex/Complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "DenseMatrix",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/solver/lsolveAll.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/solver/usolveAll.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "Matrix",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/matrix/sqrtm.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/matrix/utils/zerosAndOnes.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "FactoryFunction",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/factory/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "Fraction",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "IndexDimension",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/matrix/MatrixIndex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "NestedArray",
+      "category": "type",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "tensor/src/Tensor.ts",
+          "package": "@danielsimonjr/mathts-tensor",
+          "public": true
+        }
+      ],
+      "canonicalHint": "tensor/src/Tensor.ts"
+    },
+    {
+      "name": "SparseMatrix",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "Unit",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "Chain",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "compat/src/chain.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ConfigOptions",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/config.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/config.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/function/config.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "CreateFunction",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "DependencyName",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "FactoryMeta",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "Index",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "LegacyFactory",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "expression/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/factory.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "Range",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/is.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/is.ts"
+    },
+    {
+      "name": "SymbolicAnalysis",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/algebra/sparse/csChol.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csLu.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/algebra/sparse/csSqr.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "TypedFunction",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "expression/src/types.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true
+        },
+        {
+          "file": "functions/src/core/function/typed.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "expression/src/types.ts"
+    },
+    {
+      "name": "AccessorNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ArrayNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "AssignmentNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "BackendType",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/types/interfaces.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "matrix/src/backends/Backend.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "BigNumberConstructor",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/matrix/utils/zerosAndOnes.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/unit/unit-types.ts"
+    },
+    {
+      "name": "BlockNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "CholeskyResult",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        },
+        {
+          "file": "matrix/src/operations/cholesky.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "CompiledExpression",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/compiler/compile.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": true
+        },
+        {
+          "file": "expression/src/node/Node.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        }
+      ],
+      "canonicalHint": "expression/src/compiler/compile.ts"
+    },
+    {
+      "name": "ComplexConstructor",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/complex/Complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/unit/unit-types.ts"
+    },
+    {
+      "name": "ComplexValue",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/numeric/matrix-functions.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ConditionalNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ConstantNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ConversionDef",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "ExecOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "parallel/src/index.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ExecutionMode",
+      "category": "type",
+      "definers": [
+        {
+          "file": "parallel/src/strategies/threshold.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": false
+        },
+        {
+          "file": "workbook/src/types.ts",
+          "package": "@danielsimonjr/mathts-workbook",
+          "public": true
+        }
+      ],
+      "canonicalHint": "workbook/src/types.ts"
+    },
+    {
+      "name": "FFTResult",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/fft-wasm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "FunctionAssignmentNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "FunctionNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "Help",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "IdentifiedValue",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/array.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ImportOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/core/create.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/function/import.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "IndexNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "LoadingMetrics",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "MathJsConfig",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/config.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "functions/src/core/config.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "MathNode",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "expression/src/node/Node.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/arithmetic/utils/nodeOperations.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "MatrixBackend",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/interfaces.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "matrix/src/backends/Backend.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "MatrixConstructor",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/matrix/utils/zerosAndOnes.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "functions/src/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "MatrixDimensions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/interfaces.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "matrix/src/types/Matrix.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "Node",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ObjectNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "OperatorNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ParallelResult",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "parallel/src/ComputePool.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "ParenthesisNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "PartitionedMap",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "PoolOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "parallel/src/index.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "PoolStats",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true
+        },
+        {
+          "file": "parallel/src/index.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "RangeForEachCallback",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/types/matrix/Range.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/matrix/Range.ts"
+    },
+    {
+      "name": "RangeFormatOptions",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/matrix/Range.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/matrix/Range.ts"
+    },
+    {
+      "name": "RangeJSON",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/matrix/Range.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/matrix/Range.ts"
+    },
+    {
+      "name": "RangeMapCallback",
+      "category": "type",
+      "definers": [
+        {
+          "file": "core/src/types/matrix/Range.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/matrix/types.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/matrix/Range.ts"
+    },
+    {
+      "name": "RangeNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "RelationalNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "ResultSet",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "SymbolNode",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "expression/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-expression",
+          "public": false
+        },
+        {
+          "file": "functions/src/utils/is.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "TypeDef",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/typed/mathts-typed.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "TypeTest",
+      "category": "type",
+      "definers": [
+        {
+          "file": "functions/src/core/function/typed.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
+          "public": true
+        }
+      ],
+      "canonicalHint": "packages/typed-function/src/index.ts"
+    },
+    {
+      "name": "UnitDef",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/unit-definitions.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false
+        },
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "core/src/types/unit/unit-types.ts"
+    },
+    {
+      "name": "UnitInstance",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/type/unit/physicalConstants.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        }
+      ],
+      "canonicalHint": "core/src/types/unit/unit-types.ts"
+    },
+    {
+      "name": "WasmManifest",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/wasm/integrity.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    },
+    {
+      "name": "WasmModule",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false
+        }
+      ],
+      "canonicalHint": "internal-only"
+    }
+  ]
+}
