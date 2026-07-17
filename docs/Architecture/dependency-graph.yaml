@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1079
+  totalFiles: 1080
   totalModules: 82
-  totalExports: 5410
+  totalExports: 5411
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -29913,6 +29913,9 @@ modules:
         - file: ./pdf
           imports:
             - toPDF
+        - file: ./ipynb
+          imports:
+            - toIpynb
         - file: ./svg
           imports:
             - renderChart
@@ -30318,6 +30321,21 @@ modules:
       functions:
         - listFunctions
         - capabilitiesInfo
+    workbook/src/ipynb.ts:
+      description: Assemble a generic RenderDoc into a Jupyter notebook (nbformat v4) JSON
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./html.js
+          imports:
+            - RenderDoc
+            - RenderCell
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - toIpynb
+      functions:
+        - toIpynb
     workbook/src/markdown.ts:
       description: Minimal, dependency-free Markdown → HTML for rendered documents. A small
       externalDependencies: []
@@ -34791,6 +34809,7 @@ dependencyGraph:
         - workbook/src/html.ts
         - workbook/src/index.ts
         - workbook/src/introspect.ts
+        - workbook/src/ipynb.ts
         - workbook/src/markdown.ts
         - workbook/src/parser.ts
         - workbook/src/pdf.ts
@@ -34878,18 +34897,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1079
+  totalTypeScriptFiles: 1080
   totalModules: 82
-  totalLinesOfCode: 185932
-  totalExports: 5410
+  totalLinesOfCode: 186104
+  totalExports: 5411
   totalClasses: 57
   totalInterfaces: 485
-  totalFunctions: 1807
+  totalFunctions: 1808
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
   totalReExports: 2048
-  totalTypeOnlyImports: 556
+  totalTypeOnlyImports: 557
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

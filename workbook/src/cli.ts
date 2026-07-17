@@ -29,6 +29,7 @@ import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html';
 import { toTeX } from './tex';
 import { toPDF } from './pdf';
+import { toIpynb } from './ipynb';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
@@ -80,10 +81,12 @@ Usage:
   mtsw functions [--json]                    List functions/constants cells can call
   mtsw meta get <file> [--json]             Show workbook metadata
   mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
-  mtsw export <file> [--format html|tex|json] [--fragment] [-o out] [--no-run]
+  mtsw export <file> [--format html|tex|json|pdf|ipynb] [--fragment] [-o out] [--no-run]
                                             Render to a self-contained HTML or LaTeX
                                             document (MathML/TikZ equations + charts,
-                                            no external deps), or emit the executed
+                                            no external deps), a Jupyter notebook
+                                            (nbformat v4, default extension .ipynb), a
+                                            PDF (requires -o), or emit the executed
                                             run report as JSON. --fragment (tex only)
                                             omits the preamble for \\input; --no-run is
                                             incompatible with --format json.
@@ -692,14 +695,20 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
 
   const format = flagValue(args, '--format') ?? 'html';
-  if (format !== 'html' && format !== 'tex' && format !== 'json' && format !== 'pdf') {
-    return fail([`Unknown format '${format}' (supported: html, tex, json, pdf)`]);
+  if (
+    format !== 'html' &&
+    format !== 'tex' &&
+    format !== 'json' &&
+    format !== 'pdf' &&
+    format !== 'ipynb'
+  ) {
+    return fail([`Unknown format '${format}' (supported: html, tex, json, pdf, ipynb)`]);
   }
 
   const file = firstPositional(args);
   if (!file)
     return fail([
-      'Usage: mtsw export <file> [--format html|tex|json|pdf] [--fragment] [-o out] [--no-run]',
+      'Usage: mtsw export <file> [--format html|tex|json|pdf|ipynb] [--fragment] [-o out] [--no-run]',
     ]);
 
   const read = readFile(file);
@@ -782,7 +791,9 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
   const rendered =
     format === 'tex'
       ? toTeX(buildRenderDoc(workbook, byId, 'tikz'), { parse, fragment })
-      : toHTML(buildRenderDoc(workbook, byId), { parse });
+      : format === 'ipynb'
+        ? toIpynb(buildRenderDoc(workbook, byId))
+        : toHTML(buildRenderDoc(workbook, byId), { parse });
   const bytes = Buffer.byteLength(rendered, 'utf-8');
   const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
 

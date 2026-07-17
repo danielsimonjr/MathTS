@@ -177,7 +177,7 @@ The codebase is organized into the following modules:
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
-- **workbook**: 20 files
+- **workbook**: 21 files
 - **assembly/algebra**: 1 file
 - **assembly/bindings**: 2 files
 - **assembly**: 7 files
@@ -215,7 +215,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 20             | 1               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 21             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
@@ -14396,6 +14396,7 @@ graph LR
 | `./html` | `toHTML` | Import |
 | `./tex` | `toTeX` | Import |
 | `./pdf` | `toPDF` | Import |
+| `./ipynb` | `toIpynb` | Import |
 | `./svg` | `renderChart` | Import |
 | `./html` | `RenderDoc, RenderCell` | Import (type-only) |
 | `./yaml-safe` | `parseYamlHardened` | Import |
@@ -14558,6 +14559,19 @@ graph LR
 **Exports:**
 
 - Functions: `listFunctions`, `capabilitiesInfo`
+
+---
+
+### `workbook/src/ipynb.ts` - Assemble a generic RenderDoc into a Jupyter notebook (nbformat v4) JSON
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./html.js` | `RenderDoc, RenderCell` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `toIpynb`
 
 ---
 
@@ -15524,7 +15538,7 @@ graph LR
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
-| `workbook/src/cli`                                     | 17 files     | 0 files    |
+| `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
@@ -16185,7 +16199,7 @@ graph TD
         N418[graph]
         N419[html]
         N420[index]
-        N421[...10 more]
+        N421[...11 more]
     end
 
     subgraph Assembly/algebra
@@ -16347,17 +16361,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1079   |
+| Total TypeScript Files  | 1080   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 185932 |
-| Total Exports           | 5410   |
+| Total Lines of Code     | 186104 |
+| Total Exports           | 5411   |
 | Total Re-exports        | 2048   |
 | Total Classes           | 57     |
 | Total Interfaces        | 485    |
-| Total Functions         | 1807   |
+| Total Functions         | 1808   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
-| Type-only Imports       | 556    |
+| Type-only Imports       | 557    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

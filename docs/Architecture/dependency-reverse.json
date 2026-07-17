@@ -3632,9 +3632,15 @@
       "workbook/src/rpc.ts",
       "workbook/src/session.ts"
     ],
-    "workbook/src/html.ts": ["workbook/src/cli.ts", "workbook/src/pdf.ts", "workbook/src/tex.ts"],
+    "workbook/src/html.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/ipynb.ts",
+      "workbook/src/pdf.ts",
+      "workbook/src/tex.ts"
+    ],
     "workbook/src/tex.ts": ["workbook/src/cli.ts", "workbook/src/pdf.ts"],
     "workbook/src/pdf.ts": ["workbook/src/cli.ts"],
+    "workbook/src/ipynb.ts": ["workbook/src/cli.ts"],
     "workbook/src/svg.ts": ["workbook/src/cli.ts"],
     "workbook/src/yaml-safe.ts": [
       "workbook/src/cli.ts",

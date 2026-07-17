@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `mtsw export --format ipynb` (Jupyter notebook export)
+
+`workbook/src/ipynb.ts` adds `toIpynb(doc)`, a sibling of the existing `toHTML`/`toTeX`/`toPDF`
+exporters: renders the same `RenderDoc`/`RenderCell` model (built by the CLI's `buildRenderDoc`)
+to a structurally conformant **nbformat v4** JSON document. `markdown` cells map to notebook
+markdown cells; `code`/`equation`/`test`/`data`/`visualization` cells map to notebook code cells —
+a computed result becomes an `execute_result` output, an error an `error` output, and a chart a
+`display_data` output (inline SVG). Wired as `mtsw export --format ipynb` (alongside `html`/`tex`/
+`json`/`pdf`), sharing the same run-then-render pipeline (`--no-run`, `--json`, `-o`). Covered by
+`workbook/tests/gap-ipynb-export.test.ts` (structural conformance: JSON parses, nbformat v4
+top-level shape, valid `cell_type`s, code cells carry `outputs`/`execution_count`, round-trips
+through `JSON.parse(JSON.stringify(...))`) plus CLI export tests.
+
 ### Changed — reframe the mathjs-derived factory layer as owned first-party code
 
 Comment/doc-only cleanup, no behavior change. The former `.ts→.ts` mathjs sync is dead (see

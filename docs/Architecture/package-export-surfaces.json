@@ -4192,6 +4192,7 @@
       "toCSS",
       "toDOT",
       "toHTML",
+      "toIpynb",
       "toMermaid",
       "toPDF",
       "topologicalSort",
