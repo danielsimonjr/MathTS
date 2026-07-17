@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — graph breadth: coloring, maxClique, Louvain, Katz centrality, isomorphism
+
+Five new graph functions in `functions/src/graph/community-coloring.ts`, closing the "Graph
+breadth" follow-up logged from the Phase 8 oracle-gap roadmap: `graphColoring` (greedy
+Welsh-Powell proper vertex coloring, deterministic degree-descending/index-ascending tie-break),
+`maxClique` (exact maximum clique via Bron-Kerbosch with pivoting), `louvainCommunities`
+(Louvain modularity community detection — deterministic local-moving tie-break, no RNG),
+`katzCentrality(adj, alpha[, beta=1])` (solves `x=(I-alpha·Aᵀ)⁻¹(beta·1)` then L2-normalizes,
+matching `networkx.katz_centrality_numpy` exactly), and `isIsomorphic` (backtracking +
+degree-sequence-pruned graph isomorphism test). Also added a `normalized` option (American
+spelling) to the existing `betweennessCentrality` as an alias for `normalise`. Confirmed
+`adjacencyMatrix`'s `directed` option (already present, default `false`) already produces an
+asymmetric matrix for directed edge lists — no code change needed there, just test coverage;
+the TODO note claiming it "still symmetrizes" was stale.
+
+**Root-cause fix surfaced while oracle-pinning:** `betweennessCentrality`'s undirected
+normalization divided by `(n-1)(n-2)/2` instead of `(n-1)(n-2)`, making normalised undirected
+betweenness exactly 2x too large vs `networkx.betweenness_centrality(G, normalized=True)` — the
+raw Brandes accumulation already double-counts each undirected unordered pair (BFS from both
+`s` and `t`), so no extra `/2` belongs in the normalized divisor (matches networkx's `_rescale`
+for both directed and undirected). Fixed in `functions/src/typed/graph.ts`.
+
+Oracle-pinned vs networkx 3.6.1 in `functions/tests/gap-graph-breadth-oracle.test.ts` (18 tests):
+exact match for `katzCentrality` and the fixed `betweennessCentrality` (tol 1e-5/1e-6),
+exact boolean match for `isIsomorphic` (K3≅C3, P4≇star4, relabeled-G≅G, mismatched vertex
+counts), and property-based checks for the heuristic algorithms — `graphColoring` verified as a
+proper coloring using ≤3 colors on the test graph and exactly 3 on K3; `maxClique` verified as an
+actual clique of size 3 with a brute-force check that no size-4 clique exists; `louvainCommunities`
+verified as a valid partition reaching modularity ≥0.35 on Zachary's karate club graph (networkx
+Louvain reaches ~0.42; this implementation reaches ~0.445). Documented in
+`docs/reference/functions.md` (5 new curated rows + prose in the Graph Theory section).
+
 ### Added — `dwt`/`wavedec` support db1-4, sym2-4, coif1-2 wavelet families
 
 `functions/src/typed/signal.ts`'s `dwt` and `functions/src/signal/wavelets.ts`'s `idwt` previously

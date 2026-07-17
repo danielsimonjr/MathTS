@@ -2236,34 +2236,41 @@ convexHull([
 
 Algorithms over adjacency-matrix representations.
 
-| Function                             | Description                                                                   |
-| ------------------------------------ | ----------------------------------------------------------------------------- |
-| `adjacencyMatrix(edges, n)`          | Build adjacency matrix from an edge list                                      |
-| `shortestPath(adj, start, end)`      | Dijkstra shortest path (node sequence)                                        |
-| `graphDistance(adj, start, end)`     | Shortest-path length                                                          |
-| `minimumSpanningTree(adj)`           | MST (Prim) → edge list                                                        |
-| `connectedComponents(adj)`           | Connected components                                                          |
-| `stronglyConnectedComponents(adj)`   | SCCs (Kosaraju)                                                               |
-| `topologicalSort(adj)`               | Topological order (DAGs)                                                      |
-| `isConnected(adj)`                   | Connectivity test                                                             |
-| `pageRank(adj[, opts])`              | PageRank centrality (power iteration; `dampingFactor` default 0.85) — `async` |
-| `betweennessCentrality(adj[, opts])` | Brandes betweenness centrality — `async`                                      |
-| `eigenvectorCentrality(adj[, opts])` | Power-iteration eigenvector centrality — `async`                              |
-| `bfs(adj, start)`                    | Breadth-first traversal order (ascending-index neighbor visitation)           |
-| `dfs(adj, start)`                    | Depth-first traversal order (ascending-index neighbor visitation)             |
-| `floydWarshall(adj)`                 | All-pairs shortest-path distances (negative weights okay)                     |
-| `bellmanFord(adj, source)`           | Single-source shortest paths + negative-cycle detection                       |
-| `closenessCentrality(adj)`           | Distance-based closeness centrality (networkx convention)                     |
-| `harmonicCentrality(adj)`            | Distance-based harmonic centrality (networkx convention)                      |
-| `maxFlow(capacity, source, sink)`    | Maximum flow (Edmonds-Karp) → `{ maxFlow, flow }`                             |
-| `minCut(capacity, source, sink)`     | Minimum s-t cut via max-flow-min-cut → `{ value, partition: [S, T] }`         |
-| `astar(adj, start, goal, heuristic)` | A\* heuristic shortest path → `{ path, cost }` (reduces to Dijkstra at h=0)   |
-| `hungarian(cost)`                    | Kuhn-Munkres optimal assignment (minimize) → `{ assignment, cost }`           |
+| Function                                | Description                                                                                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `adjacencyMatrix(edges, n[, directed])` | Build adjacency matrix from an edge list (`directed=true` keeps `[u,v]` one-directional; default `false` symmetrizes) |
+| `shortestPath(adj, start, end)`         | Dijkstra shortest path (node sequence)                                                                                |
+| `graphDistance(adj, start, end)`        | Shortest-path length                                                                                                  |
+| `minimumSpanningTree(adj)`              | MST (Prim) → edge list                                                                                                |
+| `connectedComponents(adj)`              | Connected components                                                                                                  |
+| `stronglyConnectedComponents(adj)`      | SCCs (Kosaraju)                                                                                                       |
+| `topologicalSort(adj)`                  | Topological order (DAGs)                                                                                              |
+| `isConnected(adj)`                      | Connectivity test                                                                                                     |
+| `pageRank(adj[, opts])`                 | PageRank centrality (power iteration; `dampingFactor` default 0.85) — `async`                                         |
+| `betweennessCentrality(adj[, opts])`    | Brandes betweenness centrality — `async`                                                                              |
+| `eigenvectorCentrality(adj[, opts])`    | Power-iteration eigenvector centrality — `async`                                                                      |
+| `bfs(adj, start)`                       | Breadth-first traversal order (ascending-index neighbor visitation)                                                   |
+| `dfs(adj, start)`                       | Depth-first traversal order (ascending-index neighbor visitation)                                                     |
+| `floydWarshall(adj)`                    | All-pairs shortest-path distances (negative weights okay)                                                             |
+| `bellmanFord(adj, source)`              | Single-source shortest paths + negative-cycle detection                                                               |
+| `closenessCentrality(adj)`              | Distance-based closeness centrality (networkx convention)                                                             |
+| `harmonicCentrality(adj)`               | Distance-based harmonic centrality (networkx convention)                                                              |
+| `maxFlow(capacity, source, sink)`       | Maximum flow (Edmonds-Karp) → `{ maxFlow, flow }`                                                                     |
+| `minCut(capacity, source, sink)`        | Minimum s-t cut via max-flow-min-cut → `{ value, partition: [S, T] }`                                                 |
+| `astar(adj, start, goal, heuristic)`    | A\* heuristic shortest path → `{ path, cost }` (reduces to Dijkstra at h=0)                                           |
+| `hungarian(cost)`                       | Kuhn-Munkres optimal assignment (minimize) → `{ assignment, cost }`                                                   |
+| `graphColoring(adj)`                    | Greedy proper vertex coloring (Welsh-Powell heuristic) → color index per vertex                                       |
+| `maxClique(adj)`                        | Maximum clique via Bron-Kerbosch with pivoting → vertex set                                                           |
+| `louvainCommunities(adj)`               | Louvain modularity community detection → partition (array of vertex groups)                                           |
+| `katzCentrality(adj, alpha[, beta])`    | Katz centrality (L2-normalized) — `networkx.katz_centrality_numpy` convention                                         |
+| `isIsomorphic(graphA, graphB)`          | Graph isomorphism test (backtracking + degree-sequence pruning)                                                       |
 
 ### Details
 
 - Graphs are represented by an adjacency matrix; build one from an edge list
-  with `adjacencyMatrix(edges, n)`.
+  with `adjacencyMatrix(edges, n[, directed])`. `directed` (default `false`)
+  controls whether an edge `[u, v]` is written to both `adj[u][v]` and
+  `adj[v][u]` (undirected) or only `adj[u][v]` (directed, asymmetric matrix).
 - `shortestPath` uses Dijkstra's algorithm and returns the node sequence;
   `graphDistance` returns only the total path length.
 - `topologicalSort` is defined for directed acyclic graphs — a cycle makes a
@@ -2303,6 +2310,41 @@ Algorithms over adjacency-matrix representations.
   row/column potentials and shortest augmenting paths;
   `assignment[i]` is the column assigned to row `i`. Pinned against
   `scipy.optimize.linear_sum_assignment`.
+- `betweennessCentrality` accepts a `normalized` option (American spelling)
+  as an alias for the pre-existing `normalise`; when both are given,
+  `normalized` wins. Both default to `true`, dividing by `(n-1)(n-2)` —
+  the same divisor for directed AND undirected graphs, matching
+  `networkx.betweenness_centrality`'s default `endpoints=False` scaling
+  (the raw Brandes accumulation naturally double-counts each undirected
+  unordered pair `{s,t}` by running a source BFS from both `s` and `t`, so
+  no extra `/2` is needed). **Root-cause fix:** the undirected branch
+  previously divided by `(n-1)(n-2)/2` instead, making normalised
+  undirected betweenness exactly 2x too large — caught while oracle-pinning
+  against `nx.betweenness_centrality(G, normalized=True)`.
+- `graphColoring` assigns each vertex a color index via the Welsh-Powell
+  greedy heuristic (descending-degree order, ties broken by ascending
+  vertex index for determinism): always a _proper_ coloring (no edge
+  connects two same-colored vertices), but not guaranteed to use the
+  chromatic number of colors (graph coloring is NP-hard in general).
+- `maxClique` finds an exact maximum clique via Bron-Kerbosch with pivoting
+  — exponential worst-case, intended for small-to-moderate graphs.
+- `louvainCommunities` runs the Louvain modularity-maximization algorithm
+  (local-moving + aggregation phases) on a weighted undirected adjacency
+  matrix. Deterministic: nodes are visited in ascending index order each
+  pass, and a node only moves to a new community when the modularity gain
+  strictly exceeds its current community's gain by more than `1e-12` — no
+  random seed is used, so the same graph always yields the same partition.
+  Heuristic (not guaranteed globally optimal).
+- `katzCentrality(adj, alpha[, beta=1])` solves
+  `x = (I - alpha·Aᵀ)⁻¹ (beta·1)` directly (Gaussian elimination with
+  partial pivoting), then L2-normalizes by `sign(Σx)·‖x‖₂` — matching
+  `networkx.katz_centrality_numpy` exactly, including its "use `Aᵀ` so
+  directed graphs measure in-edges" default. `alpha` must be strictly
+  less than `1/λ_max(A)` or the linear system is singular (throws).
+- `isIsomorphic(graphA, graphB)` tests whether a vertex bijection exists
+  preserving all edges, via backtracking with a sorted (out-degree,
+  in-degree) quick-reject followed by incremental consistency checks.
+  Sound and complete (not a heuristic), but exponential worst-case.
 
 ### Background & History
 
@@ -2779,7 +2821,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1012 exports).
+> `@danielsimonjr/mathts-functions` (1017 exports).
 
 ### Functions by category
 
@@ -2819,7 +2861,7 @@ await terminatePool();
 
 **Geometry** (50): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionMultiply`, `quaternionNormalize`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `slerp`, `triangleArea`, `voronoiDiagram`
 
-**Graph Theory** (21): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
+**Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
 **Hypothesis Tests** (31): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `multipleComparison`, `multipleTest`, `permutationTest`, `principalComponentAnalysis`, `proportionZTest`, `shapiroWilkTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`
 

@@ -483,3 +483,16 @@ export type {
 // the first verified-bounds numeric type in the library (mpmath.iv / INTLAB
 // analogue).
 export { interval, Interval } from './numeric/interval.js';
+
+// Graph breadth (Phase 8 follow-up) — greedy proper vertex coloring
+// (Welsh-Powell), maximum clique (Bron-Kerbosch), Louvain modularity
+// community detection, Katz centrality (networkx-compatible), and a
+// backtracking graph-isomorphism test, complementing the existing
+// traversal/shortest-path/optimization graph functions.
+export {
+  graphColoring,
+  maxClique,
+  louvainCommunities,
+  katzCentrality,
+  isIsomorphic,
+} from './graph/community-coloring.js';

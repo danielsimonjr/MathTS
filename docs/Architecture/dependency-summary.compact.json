@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1068, "e": 5330, "re": 1998 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1069, "e": 5340, "re": 2003 },
   "s": {
-    "loc": 183272,
+    "loc": 183802,
     "cls": 57,
     "int": 470,
-    "fn": 1775,
-    "tg": 159,
+    "fn": 1780,
+    "tg": 160,
     "en": 0,
     "co": 1543,
     "toi": 550
@@ -641,8 +641,13 @@
       "int": ["GpuChainOptions", "GpuFftOptions", "GpuFftResult"]
     },
     "functions/graph": {
-      "f": 2,
+      "f": 3,
       "exp": [
+        "graphColoring",
+        "maxClique",
+        "louvainCommunities",
+        "katzCentrality",
+        "isIsomorphic",
         "maxFlow",
         "minCut",
         "astar",
@@ -1783,7 +1788,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 91, "o": 0 },
+    { "p": "src/index.ts", "i": 92, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

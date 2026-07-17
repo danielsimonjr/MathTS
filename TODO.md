@@ -120,9 +120,17 @@ or a documented scope limit worth revisiting.
   periodization filter bank pinned bit-for-bit against pywt 1.8.0 (`functions/tests/gap-wavelet-families-oracle.test.ts`,
   55 tests). **Remaining:** `remez` exact Parks–McClellan (currently Lawson IRLS); `buttord`
   bandpass/bandstop array form.
-- [ ] **Graph breadth:** coloring / clique-finding / Louvain community / Katz centrality / isomorphism /
-      incidence matrix + adjacency spectrum; directed-graph constructor (`adjacencyMatrix` still symmetrizes);
-      `betweennessCentrality` `normalized` option.
+- [x] ✅ **Graph breadth — DONE 2026-07-16.** `graphColoring` (Welsh-Powell), `maxClique`
+      (Bron-Kerbosch), `louvainCommunities` (deterministic Louvain), `katzCentrality`
+      (networkx-exact), `isIsomorphic` (backtracking), and `betweennessCentrality`'s `normalized`
+      option all shipped in `functions/src/graph/community-coloring.ts` +
+      `functions/src/typed/graph.ts`, oracle-pinned vs networkx 3.6.1
+      (`functions/tests/gap-graph-breadth-oracle.test.ts`). `adjacencyMatrix`'s `directed` option
+      was already implemented (this note was stale — verified with a test, no code change needed).
+      **Root-cause fix:** `betweennessCentrality`'s undirected normalization was dividing by
+      `(n-1)(n-2)/2` instead of `(n-1)(n-2)`, making normalised undirected betweenness 2x too
+      large — caught while oracle-pinning, fixed for both directed/undirected. **Remaining:**
+      incidence matrix + adjacency spectrum (not requested this pass).
 - [ ] **Geometry breadth:** SphericalVoronoi, alpha-shapes, halfspace-intersection, 3-D ray/segment
       intersections, quaternion exp/log/pow.
 - [ ] **Numerics:** general PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem`

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1068
+  totalFiles: 1069
   totalModules: 82
-  totalExports: 5330
+  totalExports: 5340
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7740,6 +7740,14 @@ modules:
             - interval
             - Interval
           reExport: true
+        - file: ./graph/community-coloring.js
+          imports:
+            - graphColoring
+            - maxClique
+            - louvainCommunities
+            - katzCentrality
+            - isIsomorphic
+          reExport: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -8200,6 +8208,11 @@ modules:
         - hungarian
         - interval
         - Interval
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -8523,6 +8536,11 @@ modules:
         - hungarian
         - interval
         - Interval
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -10963,6 +10981,24 @@ modules:
         - resetGpuFft
         - fftGpuDispatch
   functions/graph:
+    functions/src/graph/community-coloring.ts:
+      description: Graph Coloring, Cliques, Community Detection, Katz Centrality, Isomorphism
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
+      functions:
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
     functions/src/graph/optimization.ts:
       description: Graph Optimization — Max-Flow/Min-Cut, A* Search, Hungarian Assignment
       externalDependencies: []
@@ -33507,6 +33543,7 @@ dependencyGraph:
         - functions/src/gpu/fft-gpu.ts
     - name: Functions/graph
       files:
+        - functions/src/graph/community-coloring.ts
         - functions/src/graph/optimization.ts
         - functions/src/graph/traversal-centrality.ts
     - name: Functions/logical
@@ -34438,17 +34475,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1068
+  totalTypeScriptFiles: 1069
   totalModules: 82
-  totalLinesOfCode: 183272
-  totalExports: 5330
+  totalLinesOfCode: 183802
+  totalExports: 5340
   totalClasses: 57
   totalInterfaces: 470
-  totalFunctions: 1775
-  totalTypeGuards: 159
+  totalFunctions: 1780
+  totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 1998
+  totalReExports: 2003
   totalTypeOnlyImports: 550
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
