@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1083, "e": 5421, "re": 2056 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1081, "e": 5436, "re": 2075 },
   "s": {
-    "loc": 186348,
-    "cls": 58,
-    "int": 491,
-    "fn": 1809,
-    "tg": 160,
+    "loc": 185811,
+    "cls": 56,
+    "int": 490,
+    "fn": 1793,
+    "tg": 156,
     "en": 0,
     "co": 1543,
     "toi": 562
@@ -94,8 +94,12 @@
       ]
     },
     "core": {
-      "f": 9,
+      "f": 11,
       "exp": [
+        "format",
+        "toEngineering",
+        "toExponential",
+        "toFixed",
         "DEFAULT_CONFIG",
         "PI",
         "E",
@@ -111,13 +115,10 @@
         "sortFactories",
         "create",
         "isFactory",
-        "assertDependencies",
-        "isOptionalDependency",
-        "stripOptionalNotation",
-        "Complex",
-        "isComplex"
+        "assertDependencies"
       ],
       "int": [
+        "BigNumberValue",
         "ConfigOptions",
         "FactoryFunction",
         "LegacyFactory",
@@ -126,8 +127,7 @@
         "Complex",
         "Fraction",
         "Unit",
-        "Matrix",
-        "DenseMatrix"
+        "Matrix"
       ]
     },
     "core/error": { "f": 1, "exp": ["MathjsError"], "cls": ["MathjsError"] },
@@ -577,9 +577,9 @@
       "int": ["ConfigOptions", "MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
     },
     "functions/error": {
-      "f": 4,
-      "exp": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"],
-      "cls": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"]
+      "f": 3,
+      "exp": ["ArgumentsError", "DimensionError", "IndexError"],
+      "cls": ["ArgumentsError", "DimensionError", "IndexError"]
     },
     "functions/expression": { "f": 1, "exp": ["properties", "getOperator"] },
     "functions/factories": {
@@ -1094,7 +1094,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 35,
+      "f": 34,
       "exp": [
         "arraySize",
         "validate",
@@ -1122,13 +1122,13 @@
         "IdentifiedValue",
         "EmitterMixin",
         "FactoryFunction",
-        "LegacyFactory",
         "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
-        "Matrix"
+        "Matrix",
+        "DenseMatrix"
       ]
     },
     "functions/wasm": {
@@ -1189,9 +1189,9 @@
       ]
     },
     "expression/error": {
-      "f": 3,
-      "exp": ["DimensionError", "createIndexError", "IndexError", "MathjsError"],
-      "cls": ["DimensionError", "IndexError", "MathjsError"]
+      "f": 2,
+      "exp": ["DimensionError", "createIndexError", "IndexError"],
+      "cls": ["DimensionError", "IndexError"]
     },
     "expression/evaluator": {
       "f": 2,
@@ -1265,7 +1265,7 @@
       ]
     },
     "expression/utils": {
-      "f": 15,
+      "f": 14,
       "exp": [
         "arraySize",
         "validate",
@@ -1292,14 +1292,14 @@
       "int": [
         "IdentifiedValue",
         "FactoryFunction",
-        "LegacyFactory",
         "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
         "Matrix",
-        "DenseMatrix"
+        "DenseMatrix",
+        "SparseMatrix"
       ]
     },
     "parser": {
@@ -1803,19 +1803,19 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },
-    { "p": "utils/factory.ts", "i": 2, "o": 260 },
+    { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "src/index.ts", "i": 105, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
-    { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "utils/is.ts", "i": 0, "o": 59 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 53, "o": 2 },
     { "p": "utils/array.ts", "i": 6, "o": 49 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/factory.ts", "i": 2, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 47 },
+    { "p": "utils/factory.ts", "i": 1, "o": 46 },
+    { "p": "utils/number.ts", "i": 0, "o": 45 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "utils/is.ts", "i": 0, "o": 40 }
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 }
   ]
 }

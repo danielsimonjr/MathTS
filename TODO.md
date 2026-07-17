@@ -121,6 +121,20 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
     `formatter`/`factory` duplicated between `expression/utils` + `functions/utils` (dead-mathjs-sync residue).
     Non-breaking → consolidate to `core/internal` (extends [[project-all-libraries-build-on-core]]; number.ts/
     object.ts already done). Property-gated. **STARTED 2026-07-17.**
+    - [x] ✅ **Slice 1 (factory/string/bignumber-formatter) DONE 2026-07-17.** `isFactory`/
+          `assertDependencies`/`isOptionalDependency`/`stripOptionalNotation`, generic `format`/
+          `stringify`/`compareText`/`escape`, and BigNumber `format`/`toEngineering`/`toExponential`/
+          `toFixed` redirected to `core/internal`, proven equivalent via a new reusable fast-check
+          harness (`core/tests/helpers/equivalence.ts`). `duplicate-symbols.json` runtime count
+          287→280. **Two divergences found and deliberately NOT merged** (reported for adjudication,
+          not silently resolved): `factory()`'s `CreateFunction<TDeps, ...>` generic constraint (core's
+          `Record<string, unknown>` breaks `tsc` against real destructured-deps call sites; both
+          packages already carry an `any`-workaround for this) and `sortFactories`/`create`'s cyclic-
+          dependency handling (core throws on any cycle — an intentional later fix, commit `32fe7051`
+          — the package copies silently don't). **Side effect (flagged, not fixed):**
+          `expression`/`functions`' `error/MathjsError.ts` lost their only in-package caller and are
+          now dead code (per `unused-analysis.md`) — itself a 3-way mathjs-derived duplicate, a natural
+          next Bucket B slice.
   - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
     functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
     scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the

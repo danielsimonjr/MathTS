@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — cross-package dedup, Bucket B slice 1: `factory`/`string`/`bignumber-formatter` utils → core/internal
+
+`expression` and `functions` each carried duplicate mathjs-derived cold-utility copies (dead
+`.ts→.ts` sync residue) for `factory` helpers, generic-value string formatting, and BigNumber
+formatting. Consolidated the PROVEN-equivalent subset onto `@danielsimonjr/mathts-core/internal`
+(alongside the existing `number.ts`/`object.ts` canonicals), following the
+`project-all-libraries-build-on-core` principle. New `core/tests/helpers/equivalence.ts` —a reusable
+fast-check property harness (`assertEquivalent`: structural/numeric comparison + input-mutation
+detection via deep-freeze + snapshot diffing) — proved (or disproved) equivalence per function before
+any redirect; see `functions/tests/dedup-bucketB-equivalence.test.ts` (18 property/regression tests).
+
+**Consolidated** (redirected to core, re-exported under original names — zero API changes):
+`isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation` (+ `LegacyFactory`/
+`DependencyName` types); `format`/`stringify`/`compareText`/`escape` (generic-value string
+formatting, core exports as `formatGeneric` internally — `number.ts` already owns `format` for plain
+numbers in the same barrel); `format`/`toEngineering`/`toExponential`/`toFixed` (BigNumber/decimal.js
+formatting, core exports as `*BigNumber` internally, same collision-avoidance reason). `endsWith` in
+`expression`'s `utils/string.ts` was ALSO redirected — it was already identical to (and redundant
+with) `core/shared.ts`'s canonical `endsWith`.
+
+**NOT consolidated — two divergences found and reported, not silently resolved:**
+- `factory()`/`FactoryFunction`/`CreateFunction`: core's `CreateFunction<TDeps extends
+  Record<string, unknown>, TResult>` constraint is measurably INCOMPATIBLE with real call sites —
+  redirecting it broke `tsc --noEmit` (expression: dozens of TS2345 errors; functions has 259+
+  `factory()` call sites in the activated mathjs-factory layer and would fail the same way). Both
+  packages' local `CreateFunction` already carry an `any`-based workaround for exactly this
+  (pre-existing, documented eslint-disable comments) — core's stricter version cannot be swapped in
+  without a further type-level design change, which is out of this slice's scope. Kept fully local
+  in both packages, unchanged.
+- `sortFactories`/`create`: core's `sortFactories` THROWS on any circular dependency, direct or
+  indirect (`core/tests/factory-sort.test.ts` pins this intentionally — commit `32fe7051`,
+  "detect circular references in dependencies"). Both packages' local copies only special-case direct
+  2-cycles (silently preserving input order) and otherwise break longer cycles via a visited-set
+  guard WITHOUT throwing — proven via a dedicated property test
+  (`functions/tests/dedup-bucketB-equivalence.test.ts`, "PROVEN DIVERGENCE" block: a direct A↔B cycle
+  and an indirect A→B→C→A cycle both throw in core, don't throw in either package). `expression` and
+  `functions` agree with each other; core's behavior is a later, deliberate fix that never propagated.
+  Kept fully local in both packages pending adjudication.
+
+**Side effect found (not fixed — flagged for a future slice):** with `assertDependencies` redirected,
+`expression/src/error/MathjsError.ts` and `functions/src/error/MathjsError.ts` lost their only
+in-package caller and are now unreferenced dead code (confirmed independently by
+`docs/Architecture/unused-analysis.md`, which now lists both). `MathjsError` is itself a 3-way
+mathjs-derived duplicate (core/expression/functions all define an identical class) — a natural Bucket
+B follow-up, deliberately not folded into this slice.
+
+`docs/Architecture/duplicate-symbols.json` runtime-duplicate count: **287 → 280** (types: 71 → 70).
+`npm run typecheck` 32/32, `eslint` clean on touched files, full `core`/`expression`/`functions` test
+suites green (760 / 1977 / 3942 passing, no regressions) plus the new equivalence suite (18/18).
+
 ### Added — CDG duplicate-symbols detector (`docs/Architecture/duplicate-symbols.{md,json}`)
 
 `tools/create-dependency-graph/create-dependency-graph.ts` adds `detectDuplicateSymbols`: groups

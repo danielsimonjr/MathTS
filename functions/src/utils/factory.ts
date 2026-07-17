@@ -1,5 +1,43 @@
 import { pickShallow } from './object.js';
-import { MathjsError } from '../error/MathjsError.js';
+import {
+  type LegacyFactory,
+  type DependencyName,
+  isFactory,
+  assertDependencies,
+  isOptionalDependency,
+  stripOptionalNotation,
+} from '@danielsimonjr/mathts-core/internal';
+
+/**
+ * Some of this file's helpers are consolidated onto core (see the re-exports at
+ * the bottom): `isFactory`, `assertDependencies`, `isOptionalDependency`,
+ * `stripOptionalNotation`, and the plain-data types `LegacyFactory`/`FactoryMeta`/
+ * `DependencyName` are byte-for-byte equivalent to
+ * `@danielsimonjr/mathts-core/internal`'s copies (proven via a fast-check property
+ * harness — see `functions/tests/dedup-bucketB-equivalence.test.ts`) and are
+ * re-exported from there.
+ *
+ * `factory`/`FactoryFunction`/`CreateFunction` and `sortFactories`/`create` are
+ * DELIBERATELY KEPT LOCAL — NOT safe to redirect:
+ *  - `factory()`'s generic `CreateFunction<TDeps extends Record<string, unknown>, ...>`
+ *    constraint (core's copy) rejects real call sites across this package (259+
+ *    activated mathjs-factory call sites in `functions/src/{arithmetic,algebra,...}`)
+ *    whose destructured dependency objects are typed as plain interfaces without an
+ *    index signature — confirmed empirically: redirecting it broke `tsc --noEmit`
+ *    (the same failure mode reproduced first in `expression`, which has 46 call
+ *    sites). This is exactly the constraint mismatch this package's own pre-existing
+ *    `@typescript-eslint/no-explicit-any` comment on `CreateFunction`/`factory`
+ *    documents — this package already worked around it with `any`; core's copy
+ *    uses the stricter `Record<string, unknown>` and cannot be swapped in as-is.
+ *  - `sortFactories`/`create`: core's `sortFactories` throws on ANY circular
+ *    dependency (direct or indirect; see `core/tests/factory-sort.test.ts`),
+ *    whereas this copy only special-cases direct 2-cycles (silently preserving
+ *    input order) and otherwise breaks longer cycles via a visited-set guard
+ *    without throwing — a proven runtime behavioral divergence.
+ * Both divergences are reported, not silently resolved — see the dedup
+ * equivalence test's "PROVEN DIVERGENCE" block and the consolidation commit
+ * message for the adjudication note.
+ */
 
 /**
  * Type for a factory function that creates instances
@@ -9,18 +47,6 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
   isFactory: true;
   fn: string;
   dependencies: string[];
-  meta?: FactoryMeta;
-}
-
-/**
- * Type for legacy factory objects (old-style factories)
- */
-export interface LegacyFactory {
-  type?: string;
-  name: string;
-  factory: (...args: unknown[]) => unknown;
-  math?: boolean;
-  dependencies?: string[];
   meta?: FactoryMeta;
 }
 
@@ -41,11 +67,6 @@ export interface FactoryMeta {
    */
   [key: string]: unknown;
 }
-
-/**
- * Type for dependency names, which can be optional (prefixed with '?')
- */
-export type DependencyName = string;
 
 /**
  * Type for the create callback function
@@ -215,65 +236,5 @@ export function create(
   return scope;
 }
 
-/**
- * Test whether an object is a factory. This is the case when it has
- * properties name, dependencies, and a function create.
- * @param obj Any value to test
- * @returns true if obj is a factory function
- */
-export function isFactory(obj: unknown): obj is FactoryFunction {
-  return (
-    typeof obj === 'function' &&
-    typeof (obj as { fn?: unknown }).fn === 'string' &&
-    Array.isArray((obj as { dependencies?: unknown }).dependencies)
-  );
-}
-
-/**
- * Assert that all dependencies of a list with dependencies are available in the provided scope.
- *
- * Will throw an exception when there are dependencies missing.
- *
- * @param name         Name for the function to be created. Used to generate a useful error message
- * @param dependencies Array of dependency names
- * @param scope        Object containing the available dependencies
- * @throws Error if required dependencies are missing
- */
-export function assertDependencies(
-  name: string,
-  dependencies: DependencyName[],
-  scope: Record<string, unknown>
-): void {
-  const allDefined = dependencies
-    .filter((dependency) => !isOptionalDependency(dependency)) // filter optionals
-    .every((dependency) => scope[dependency] !== undefined);
-
-  if (!allDefined) {
-    const missingDependencies = dependencies.filter(
-      (dependency) => scope[dependency] === undefined
-    );
-
-    throw new MathjsError(
-      `Cannot create function "${name}", ` +
-        `some dependencies are missing: ${missingDependencies.map((d) => `"${d}"`).join(', ')}.`
-    );
-  }
-}
-
-/**
- * Check if a dependency is optional (starts with '?')
- * @param dependency The dependency name to check
- * @returns true if the dependency is optional
- */
-export function isOptionalDependency(dependency: DependencyName): boolean {
-  return Boolean(dependency && dependency[0] === '?');
-}
-
-/**
- * Remove the optional notation '?' from a dependency name
- * @param dependency The dependency name
- * @returns The dependency name without optional notation
- */
-export function stripOptionalNotation(dependency: DependencyName): string {
-  return dependency && dependency[0] === '?' ? dependency.slice(1) : dependency;
-}
+export { isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation };
+export type { LegacyFactory, DependencyName };

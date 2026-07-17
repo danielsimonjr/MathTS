@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1083
+  totalFiles: 1081
   totalModules: 82
-  totalExports: 5421
+  totalExports: 5436
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -342,6 +342,33 @@ modules:
         - isNumeric
         - number
   core:
+    core/src/bignumber-formatter.ts:
+      description: BigNumber (decimal.js-shaped) formatting — canonical copy.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isNumber
+        - file: ./number.js
+          imports:
+            - isInteger
+            - normalizeFormatOptions
+            - FormatOptions
+      workspaceDependencies: []
+      exports:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
+      interfaces:
+        - BigNumberValue
+      functions:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
     core/src/config.ts:
       description: Configuration interface for math.js
       externalDependencies: []
@@ -914,12 +941,32 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./factory.js
+          imports:
+            - '*'
+          reExport: true
         - file: ./shared.js
           imports:
             - hasOwnProperty
             - endsWith
             - warnOnce
             - memoize
+          reExport: true
+        - file: ./string.js
+          imports:
+            - format
+            - stringify
+            - escape
+            - compareText
+            - GeneralFormatOptions
+          reExport: true
+        - file: ./bignumber-formatter.js
+          imports:
+            - format
+            - toEngineering
+            - toExponential
+            - toFixed
+            - BigNumberValue
           reExport: true
         - file: ./types/unit/index.js
           imports:
@@ -943,19 +990,43 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - formatGeneric
+        - stringify
+        - escape
+        - compareText
+        - GeneralFormatOptions
+        - formatBigNumber
+        - toEngineeringBigNumber
+        - toExponentialBigNumber
+        - toFixedBigNumber
+        - BigNumberValue
         - createUnitClass
         - unitDependencies
         - CoreUnit
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
         - Unit
         - MemoizedFunction
       reExported:
         - '* from ./is.js'
         - '* from ./number.js'
         - '* from ./object.js'
+        - '* from ./factory.js'
         - hasOwnProperty
         - endsWith
         - warnOnce
         - memoize
+        - format
+        - stringify
+        - escape
+        - compareText
+        - GeneralFormatOptions
+        - toEngineering
+        - toExponential
+        - toFixed
+        - BigNumberValue
         - createUnitClass
         - unitDependencies
         - Unit
@@ -1161,6 +1232,34 @@ modules:
         - memoize
       constants:
         - warnOnce
+    core/src/string.ts:
+      description: Generic-value string formatting — canonical copy.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isString
+            - typeOf
+        - file: ./number.js
+          imports:
+            - format
+            - FormatOptions
+        - file: ./bignumber-formatter.js
+          imports:
+            - format
+      workspaceDependencies: []
+      exports:
+        - format
+        - stringify
+        - escape
+        - compareText
+      functions:
+        - format
+        - stringify
+        - escape
+        - compareText
   core/error:
     core/src/error/MathjsError.ts:
       description: Custom error type for Mathjs errors
@@ -9595,16 +9694,6 @@ modules:
         - IndexError
       classes:
         - IndexError
-    functions/src/error/MathjsError.ts:
-      description: Custom error type for Mathjs errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - MathjsError
-      classes:
-        - MathjsError
   functions/expression:
     functions/src/expression/operators.ts:
       description: Get the operator associated with a function name.
@@ -19342,31 +19431,6 @@ modules:
         - bitXor
         - leftShiftBigNumber
         - rightArithShiftBigNumber
-    functions/src/utils/bignumber/formatter.ts:
-      description: Structural contract for the BigNumber values handled by this formatter.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../is.js
-          imports:
-            - isBigNumber
-            - isNumber
-        - file: ../number.js
-          imports:
-            - isInteger
-            - normalizeFormatOptions
-            - FormatOptions
-      workspaceDependencies: []
-      exports:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
-      functions:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
     functions/src/utils/bignumber/nearlyEqual.ts:
       description: Compares two BigNumbers.
       externalDependencies: []
@@ -19479,37 +19543,39 @@ modules:
       functions:
         - mixin
     functions/src/utils/factory.ts:
-      description: Type for a factory function that creates instances
+      description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - pickShallow
-        - file: ../error/MathjsError.js
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - MathjsError
-      workspaceDependencies: []
+            - LegacyFactory
+            - DependencyName
+            - isFactory
+            - assertDependencies
+            - isOptionalDependency
+            - stripOptionalNotation
+          subpath: internal
       exports:
-        - factory
-        - sortFactories
-        - create
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
+        - factory
+        - sortFactories
+        - create
       interfaces:
         - FactoryFunction
-        - LegacyFactory
         - FactoryMeta
       functions:
         - factory
         - sortFactories
         - create
-        - isFactory
-        - assertDependencies
-        - isOptionalDependency
-        - stripOptionalNotation
     functions/src/utils/hasNumericValue.ts:
       description: Test whether a value is an numeric value.
       externalDependencies: []
@@ -20216,31 +20282,30 @@ modules:
       functions:
         - product
     functions/src/utils/string.ts:
-      description: Formatting options accepted by the generic `format` helper. Extends the
+      description: Generic-value string formatting (`format`, `stringify`, `compareText`).
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isBigNumber
-            - isString
-            - typeOf
-        - file: ./number.js
-          imports:
-            - format
-            - FormatOptions
-        - file: ./bignumber/formatter.js
-          imports:
-            - format
-      workspaceDependencies: []
+            - formatGeneric
+            - stringify
+            - compareText
+            - GeneralFormatOptions
+          subpath: internal
       exports:
         - format
         - stringify
         - compareText
-      functions:
-        - format
+        - GeneralFormatOptions
+        - formatGeneric
+      reExported:
+        - formatGeneric
         - stringify
         - compareText
+        - GeneralFormatOptions
     functions/src/utils/switch.ts:
       description: Transpose a matrix
       externalDependencies: []
@@ -25309,16 +25374,6 @@ modules:
         - IndexError
       functions:
         - createIndexError
-    expression/src/error/MathjsError.ts:
-      description: Custom error type for Mathjs errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - MathjsError
-      classes:
-        - MathjsError
   expression/evaluator:
     expression/src/evaluator/evaluate.ts:
       description: Expression evaluator for MathTS.
@@ -27006,31 +27061,6 @@ modules:
         - deepMap
         - deepForEach
         - clone
-    expression/src/utils/bignumber/formatter.ts:
-      description: Constructor of a Decimal-like BigNumber value. Only the `new (value)` shape
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../is.js
-          imports:
-            - isBigNumber
-            - isNumber
-        - file: ../number.js
-          imports:
-            - isInteger
-            - normalizeFormatOptions
-            - FormatOptions
-      workspaceDependencies: []
-      exports:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
-      functions:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
     expression/src/utils/collection.ts:
       description: Test whether an array contains collections
       externalDependencies: []
@@ -27081,37 +27111,39 @@ modules:
         - isSafeMethod
         - isPlainObject
     expression/src/utils/factory.ts:
-      description: Type for a factory function that creates instances
+      description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - pickShallow
-        - file: ../error/MathjsError.js
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - MathjsError
-      workspaceDependencies: []
+            - LegacyFactory
+            - DependencyName
+            - isFactory
+            - assertDependencies
+            - isOptionalDependency
+            - stripOptionalNotation
+          subpath: internal
       exports:
-        - factory
-        - sortFactories
-        - create
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
+        - factory
+        - sortFactories
+        - create
       interfaces:
         - FactoryFunction
-        - LegacyFactory
         - FactoryMeta
       functions:
         - factory
         - sortFactories
         - create
-        - isFactory
-        - assertDependencies
-        - isOptionalDependency
-        - stripOptionalNotation
     expression/src/utils/is.ts:
       description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
@@ -27512,31 +27544,30 @@ modules:
       functions:
         - createSubScope
     expression/src/utils/string.ts:
-      description: Check if a text ends with a certain string.
+      description: Generic-value string formatting (`format`, `stringify`, `compareText`, `escape`)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isBigNumber
-            - isString
-            - typeOf
-        - file: ./number.js
-          imports:
-            - format
-        - file: ./bignumber/formatter.js
-          imports:
-            - format
-      workspaceDependencies: []
+            - endsWith
+            - formatGeneric
+            - stringify
+            - escape
+            - compareText
+          subpath: internal
       exports:
         - endsWith
         - format
         - stringify
         - escape
         - compareText
-      functions:
+        - formatGeneric
+      reExported:
         - endsWith
-        - format
+        - formatGeneric
         - stringify
         - escape
         - compareText
@@ -33771,6 +33802,7 @@ dependencyGraph:
         - core/src/arithmetic/scalar.ts
     - name: Core
       files:
+        - core/src/bignumber-formatter.ts
         - core/src/config.ts
         - core/src/constants.ts
         - core/src/factory.ts
@@ -33780,6 +33812,7 @@ dependencyGraph:
         - core/src/number.ts
         - core/src/object.ts
         - core/src/shared.ts
+        - core/src/string.ts
     - name: Core/error
       files:
         - core/src/error/MathjsError.ts
@@ -34041,7 +34074,6 @@ dependencyGraph:
         - functions/src/error/ArgumentsError.ts
         - functions/src/error/DimensionError.ts
         - functions/src/error/IndexError.ts
-        - functions/src/error/MathjsError.ts
     - name: Functions/expression
       files:
         - functions/src/expression/operators.ts
@@ -34362,7 +34394,6 @@ dependencyGraph:
         - functions/src/utils/array.ts
         - functions/src/utils/bigint.ts
         - functions/src/utils/bignumber/bitwise.ts
-        - functions/src/utils/bignumber/formatter.ts
         - functions/src/utils/bignumber/nearlyEqual.ts
         - functions/src/utils/clone.ts
         - functions/src/utils/collection.ts
@@ -34764,7 +34795,6 @@ dependencyGraph:
       files:
         - expression/src/error/DimensionError.ts
         - expression/src/error/IndexError.ts
-        - expression/src/error/MathjsError.ts
     - name: Expression/evaluator
       files:
         - expression/src/evaluator/evaluate.ts
@@ -34837,7 +34867,6 @@ dependencyGraph:
     - name: Expression/utils
       files:
         - expression/src/utils/array.ts
-        - expression/src/utils/bignumber/formatter.ts
         - expression/src/utils/collection.ts
         - expression/src/utils/customs.ts
         - expression/src/utils/factory.ts
@@ -35005,19 +35034,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1083
+  totalTypeScriptFiles: 1081
   totalModules: 82
-  totalLinesOfCode: 186348
-  totalExports: 5421
-  totalClasses: 58
-  totalInterfaces: 491
-  totalFunctions: 1809
-  totalTypeGuards: 160
+  totalLinesOfCode: 185811
+  totalExports: 5436
+  totalClasses: 56
+  totalInterfaces: 490
+  totalFunctions: 1793
+  totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2056
+  totalReExports: 2075
   totalTypeOnlyImports: 562
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 249
+  unusedExportsCount: 225

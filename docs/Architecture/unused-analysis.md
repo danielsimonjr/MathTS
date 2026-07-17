@@ -5,12 +5,12 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 249
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 6
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
+  - **Test-only (exercised by a test, ships nothing)**: 4
+- **Potentially unused exports**: 225
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 248
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 224
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -19,13 +19,27 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-_None._
+### `expression` (1)
+
+- `expression/src/error/MathjsError.ts`
+
+### `functions` (1)
+
+- `functions/src/error/MathjsError.ts`
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 
 Not reachable from any package entry point, but imported by a test — deliberately
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
+
+### `expression` (1)
+
+- `expression/src/utils/bignumber/formatter.ts`
+
+### `functions` (1)
+
+- `functions/src/utils/bignumber/formatter.ts`
 
 ### `parallel` (2)
 
@@ -54,18 +68,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `core/src/config.ts`
 
 - `MathJsConfig` (type) — 1 in-file ref
-
-### `core/src/factory.ts`
-
-- `create` (function) — 7 in-file refs
-- `isFactory` (function) — 10 in-file refs
-- `assertDependencies` (function) — 1 in-file ref
-- `isOptionalDependency` (function) — 1 in-file ref
-- `stripOptionalNotation` (function) — 1 in-file ref
-- `LegacyFactory` (interface) — 9 in-file refs
-- `FactoryMeta` (interface) — 3 in-file refs
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
 
 ### `core/src/typed/mathts-typed.ts`
 
@@ -360,21 +362,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `bitwise` (function) — 4 in-file refs
 
-### `functions/src/utils/bignumber/formatter.ts`
-
-- `toEngineering` (function) — 1 in-file ref
-- `toExponential` (function) — 5 in-file refs
-- `toFixed` (function) — 5 in-file refs
-
-### `functions/src/utils/factory.ts`
-
-- `sortFactories` (function) — 1 in-file ref
-- `create` (function) — 7 in-file refs
-- `assertDependencies` (function) — 1 in-file ref
-- `isOptionalDependency` (function) — 1 in-file ref
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
-
 ### `functions/src/utils/is.ts`
 
 - `BigNumber` (interface) — 2 in-file refs
@@ -411,11 +398,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `ObjectWrappingMap` (class) — 5 in-file refs
 - `PartitionedMap` (class) — 2 in-file refs
 
-### `functions/src/utils/string.ts`
-
-- `stringify` (function) — 2 in-file refs
-- `GeneralFormatOptions` (type) — 1 in-file ref
-
 ### `functions/src/wasm/integrity.ts`
 
 - `WasmManifest` (interface) — 4 in-file refs
@@ -437,13 +419,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `IdentifiedValue` (interface) — 3 in-file refs
 - `NestedArray` (type) — 79 in-file refs
-
-### `expression/src/utils/factory.ts`
-
-- `FactoryFunction` (interface) — 13 in-file refs
-- `FactoryMeta` (interface) — 3 in-file refs
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
 
 ### `expression/src/utils/is.ts`
 

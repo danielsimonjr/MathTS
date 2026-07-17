@@ -8,7 +8,9 @@
     "core/src/config.ts": ["core/src/arithmetic/scalar.ts", "core/src/types/unit/dependencies.ts"],
     "core/src/number.ts": [
       "core/src/arithmetic/scalar.ts",
+      "core/src/bignumber-formatter.ts",
       "core/src/internal.ts",
+      "core/src/string.ts",
       "core/src/types/matrix/Range.ts",
       "core/src/types/unit/dependencies.ts"
     ],
@@ -34,6 +36,18 @@
       "core/src/typed/type-bridge.ts",
       "core/src/types/unit/dependencies.ts"
     ],
+    "core/src/is.ts": [
+      "core/src/bignumber-formatter.ts",
+      "core/src/internal.ts",
+      "core/src/number.ts",
+      "core/src/object.ts",
+      "core/src/string.ts",
+      "core/src/types/matrix/Range.ts",
+      "core/src/types/unit.ts",
+      "core/src/types/unit/Unit.ts",
+      "core/src/types/unit/dependencies.ts",
+      "core/src/types/unit/unit-types.ts"
+    ],
     "core/src/object.ts": [
       "core/src/factory.ts",
       "core/src/internal.ts",
@@ -57,21 +71,18 @@
       "core/src/types/complex.ts",
       "core/src/types/fraction.ts"
     ],
-    "core/src/is.ts": [
+    "core/src/factory.ts": [
       "core/src/internal.ts",
-      "core/src/number.ts",
-      "core/src/object.ts",
       "core/src/types/matrix/Range.ts",
-      "core/src/types/unit.ts",
-      "core/src/types/unit/Unit.ts",
-      "core/src/types/unit/dependencies.ts",
-      "core/src/types/unit/unit-types.ts"
+      "core/src/types/unit/Unit.ts"
     ],
     "core/src/shared.ts": [
       "core/src/internal.ts",
       "core/src/object.ts",
       "core/src/types/unit/Unit.ts"
     ],
+    "core/src/string.ts": ["core/src/internal.ts"],
+    "core/src/bignumber-formatter.ts": ["core/src/internal.ts", "core/src/string.ts"],
     "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
@@ -82,7 +93,6 @@
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
-    "core/src/factory.ts": ["core/src/types/matrix/Range.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/Unit.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/dependencies.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
@@ -869,11 +879,9 @@
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/typed/relational.ts",
       "functions/src/utils/array.ts",
-      "functions/src/utils/bignumber/formatter.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts",
-      "functions/src/utils/string.ts"
+      "functions/src/utils/isPositive.ts"
     ],
     "functions/src/algebra/sparse/csSqr.ts": [
       "functions/src/algebra/decomposition/slu.ts",
@@ -938,12 +946,10 @@
       "functions/src/type/matrix/function/index.ts",
       "functions/src/typed/string.ts",
       "functions/src/utils/array.ts",
-      "functions/src/utils/bignumber/formatter.ts",
       "functions/src/utils/collection.ts",
       "functions/src/utils/map.ts",
       "functions/src/utils/numeric.ts",
       "functions/src/utils/optimizeCallback.ts",
-      "functions/src/utils/string.ts",
       "functions/src/utils/typeOf.ts"
     ],
     "functions/src/utils/node.ts": [
@@ -2218,8 +2224,6 @@
     ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
-    "functions/src/error/MathjsError.ts": ["functions/src/utils/factory.ts"],
-    "functions/src/utils/bignumber/formatter.ts": ["functions/src/utils/string.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
       "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -3372,10 +3376,8 @@
       "expression/src/transform/utils/dimToZeroBase.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts",
       "expression/src/utils/array.ts",
-      "expression/src/utils/bignumber/formatter.ts",
       "expression/src/utils/collection.ts",
-      "expression/src/utils/map.ts",
-      "expression/src/utils/string.ts"
+      "expression/src/utils/map.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3453,12 +3455,7 @@
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
-    "expression/src/utils/number.ts": [
-      "expression/src/parse.ts",
-      "expression/src/utils/array.ts",
-      "expression/src/utils/bignumber/formatter.ts",
-      "expression/src/utils/string.ts"
-    ],
+    "expression/src/utils/number.ts": ["expression/src/parse.ts", "expression/src/utils/array.ts"],
     "expression/src/node/utils/access.ts": [
       "expression/src/node/AccessorNode.ts",
       "expression/src/node/AssignmentNode.ts"
@@ -3557,8 +3554,6 @@
     ],
     "expression/src/error/DimensionError.ts": ["expression/src/utils/array.ts"],
     "expression/src/utils/switch.ts": ["expression/src/utils/collection.ts"],
-    "expression/src/error/MathjsError.ts": ["expression/src/utils/factory.ts"],
-    "expression/src/utils/bignumber/formatter.ts": ["expression/src/utils/string.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",

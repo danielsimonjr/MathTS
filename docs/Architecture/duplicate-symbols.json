@@ -2,47 +2,10 @@
   "generated": "2026-07-17",
   "note": "This report groups names by OWN definition, not by call graph. It does NOT detect typed-dispatch polymorphism (a single public name registered with multiple typed overloads for different argument shapes) — a flagged name may be a genuine duplicate implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 287,
-    "typeDuplicates": 71
+    "runtimeDuplicates": 280,
+    "typeDuplicates": 70
   },
   "runtime": [
-    {
-      "name": "format",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/typed/string.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS"
-    },
     {
       "name": "isMatrix",
       "category": "constant+function",
@@ -92,7 +55,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "expression/src/utils/factory.ts",
@@ -110,7 +73,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "compat/src/index.ts"
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "isArray",
@@ -809,6 +772,33 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "format",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/bignumber-formatter.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/string.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/string.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "isUnit",
       "category": "constant+function",
       "definers": [
@@ -1079,28 +1069,6 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
-      "name": "assertDependencies",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "bitXor",
       "category": "constant+function",
       "definers": [
@@ -1121,28 +1089,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "compareText",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "expression/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/typed/relational.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true
-        },
-        {
-          "file": "functions/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "functions/src/typed/relational.ts"
     },
     {
       "name": "concat",
@@ -1261,7 +1207,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "expression/src/utils/factory.ts",
@@ -1274,7 +1220,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "filter",
@@ -1453,28 +1399,6 @@
       "canonicalHint": "core/src/is.ts"
     },
     {
-      "name": "isFactory",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "isIndex",
       "category": "function",
       "definers": [
@@ -1539,28 +1463,6 @@
         }
       ],
       "canonicalHint": "core/src/is.ts"
-    },
-    {
-      "name": "isOptionalDependency",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "isRange",
@@ -1737,28 +1639,6 @@
         }
       ],
       "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "MathjsError",
-      "category": "class",
-      "definers": [
-        {
-          "file": "core/src/error/MathjsError.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/error/MathjsError.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/error/MathjsError.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "matrix",
@@ -2031,7 +1911,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "expression/src/utils/factory.ts",
@@ -2044,7 +1924,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "sqrt",
@@ -2133,94 +2013,6 @@
         }
       ],
       "canonicalHint": "functions/src/factories/index.ts"
-    },
-    {
-      "name": "stripOptionalNotation",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "toEngineering",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/number.ts"
-    },
-    {
-      "name": "toExponential",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/number.ts"
-    },
-    {
-      "name": "toFixed",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/bignumber/formatter.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/number.ts"
     },
     {
       "name": "trace",
@@ -2816,6 +2608,23 @@
       "canonicalHint": "AMBIGUOUS"
     },
     {
+      "name": "compareText",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "core/src/string.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "functions/src/typed/relational.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
       "name": "Complex",
       "category": "class",
       "definers": [
@@ -3205,23 +3014,6 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS"
-    },
-    {
-      "name": "endsWith",
-      "category": "function",
-      "definers": [
-        {
-          "file": "core/src/shared.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true
-        },
-        {
-          "file": "expression/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        }
-      ],
-      "canonicalHint": "core/src/shared.ts"
     },
     {
       "name": "equal",
@@ -5281,23 +5073,6 @@
       "canonicalHint": "internal-only"
     },
     {
-      "name": "stringify",
-      "category": "function",
-      "definers": [
-        {
-          "file": "expression/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/string.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
-    },
-    {
       "name": "subset",
       "category": "constant",
       "definers": [
@@ -5428,6 +5203,57 @@
         {
           "file": "functions/src/typed/unit.ts",
           "package": "@danielsimonjr/mathts-functions",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "toEngineering",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/bignumber-formatter.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "toExponential",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/bignumber-formatter.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
+    },
+    {
+      "name": "toFixed",
+      "category": "function",
+      "definers": [
+        {
+          "file": "core/src/bignumber-formatter.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
           "public": true
         }
       ],
@@ -5804,7 +5630,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "core/src/factory/factory.ts",
@@ -5822,7 +5648,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "Fraction",
@@ -6010,7 +5836,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "expression/src/utils/factory.ts",
@@ -6023,29 +5849,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
-    },
-    {
-      "name": "DependencyName",
-      "category": "type",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "FactoryMeta",
@@ -6054,7 +5858,7 @@
         {
           "file": "core/src/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false
+          "public": true
         },
         {
           "file": "expression/src/utils/factory.ts",
@@ -6067,7 +5871,7 @@
           "public": false
         }
       ],
-      "canonicalHint": "internal-only"
+      "canonicalHint": "core/src/factory.ts"
     },
     {
       "name": "Index",
@@ -6090,28 +5894,6 @@
         }
       ],
       "canonicalHint": "core/src/is.ts"
-    },
-    {
-      "name": "LegacyFactory",
-      "category": "interface",
-      "definers": [
-        {
-          "file": "core/src/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false
-        },
-        {
-          "file": "expression/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-expression",
-          "public": false
-        },
-        {
-          "file": "functions/src/utils/factory.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false
-        }
-      ],
-      "canonicalHint": "internal-only"
     },
     {
       "name": "Range",
@@ -6263,6 +6045,23 @@
         }
       ],
       "canonicalHint": "core/src/types/unit/unit-types.ts"
+    },
+    {
+      "name": "BigNumberValue",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "core/src/bignumber-formatter.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        },
+        {
+          "file": "core/src/types/unit/unit-types.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS"
     },
     {
       "name": "BlockNode",
