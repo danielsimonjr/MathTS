@@ -8,8 +8,8 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 248
-  - **Unreferenced anywhere (deletion candidates)**: 0
+- **Potentially unused exports**: 249
+  - **Unreferenced anywhere (deletion candidates)**: 1
   - **Referenced in-module (type contracts / helpers backing live exports)**: 248
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -40,6 +40,10 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
+
+### `functions/src/signal/fft.ts`
+
+- `complexConj` (function)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 

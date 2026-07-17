@@ -1544,6 +1544,7 @@
       "complex",
       "complexAbs",
       "complexArg",
+      "complexConj",
       "complexCos",
       "complexEquals",
       "complexExpand",

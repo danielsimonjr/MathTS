@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed — dead `complexConj` export in `signal/fft.ts`
-
-`complexConj` (`functions/src/signal/fft.ts`) was the sole "unreferenced anywhere" deletion candidate
-in the dependency-graph unused-analysis: not re-exported from the package index (the public FFT
-helpers come from `signal/fft-helpers.ts`), absent from the built `dist` and the curated
-`functions.md`, and imported by no source file or test. Removed at root. Its siblings `complex`/
-`complexAbs` are retained (still used). Verified: functions typecheck + signal suites green, eslint
-clean; the graph's unreferenced-export deletion-candidate count drops to 0.
-
 ### Added — kill-able worker-thread run timeout (`runWorkbookWithTimeout`, `mtsw run --timeout`)
 
 `WorkbookExecutor#runReport` had no time budget — a runaway cell (e.g. an unbounded numeric
