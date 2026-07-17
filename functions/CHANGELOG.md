@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-functions
 
+## 0.42.0
+
+### Minor Changes
+
+- Niche special functions + numerics (B-spline, Monte-Carlo)
+
+  **Special functions:** adds `polylog` (|z|<1 series), `struveH`/`struveL`, `kelvinBer`/
+  `kelvinBei` (order 0), and `barnesG` (real) — series/recurrence implementations pinned to
+  mpmath dps=25 (machine precision).
+
+  **Numerics:** adds `bsplineFit`/`bsplineEval` (de Boor collocation — interpolation +
+  least-squares smoothing, scipy `tck` shape) and `monteCarloIntegrate` (uniform +
+  Halton/Sobol quasi-MC over an axis-aligned box, seeded/reproducible). Oracle-pinned vs
+  scipy and known integrals.
+
 ## 0.41.0
 
 ### Minor Changes
