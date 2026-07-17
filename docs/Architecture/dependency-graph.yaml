@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-16'
-  totalFiles: 1067
+  lastUpdated: '2026-07-17'
+  totalFiles: 1068
   totalModules: 82
-  totalExports: 5326
+  totalExports: 5330
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14275,6 +14275,25 @@ modules:
         - stft
         - istft
         - decimate
+    functions/src/signal/wavelet-filters.ts:
+      description: Orthogonal wavelet filter table + a general periodization-boundary filter
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - SUPPORTED_WAVELETS
+        - getWaveletFilters
+        - dwtPeriodization
+        - idwtPeriodization
+      interfaces:
+        - WaveletFilters
+      functions:
+        - getWaveletFilters
+        - dwtPeriodization
+        - idwtPeriodization
+      constants:
+        - SUPPORTED_WAVELETS
     functions/src/signal/wavelets.ts:
       description: Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
       externalDependencies: []
@@ -14283,6 +14302,9 @@ modules:
         - file: ../typed/signal.js
           imports:
             - dwt
+        - file: ./wavelet-filters.js
+          imports:
+            - idwtPeriodization
         - file: ./conv.js
           imports:
             - convDirect
@@ -18265,6 +18287,9 @@ modules:
             - welchPSDDispatch
             - welchPSDJS
             - WASM_SIGNAL_THRESHOLD
+        - file: ../signal/wavelet-filters.js
+          imports:
+            - dwtPeriodization
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -33631,6 +33656,7 @@ dependencyGraph:
         - functions/src/signal/freqz.ts
         - functions/src/signal/iir-design.ts
         - functions/src/signal/spectral-peaks.ts
+        - functions/src/signal/wavelet-filters.ts
         - functions/src/signal/wavelets.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
@@ -34412,19 +34438,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1067
+  totalTypeScriptFiles: 1068
   totalModules: 82
-  totalLinesOfCode: 183085
-  totalExports: 5326
+  totalLinesOfCode: 183272
+  totalExports: 5330
   totalClasses: 57
-  totalInterfaces: 469
-  totalFunctions: 1772
+  totalInterfaces: 470
+  totalFunctions: 1775
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1542
+  totalConstants: 1543
   totalReExports: 1998
   totalTypeOnlyImports: 550
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 245
+  unusedExportsCount: 246

@@ -109,9 +109,11 @@ or a documented scope limit worth revisiting.
 - [~] **Signal:** ✅ **`csd`/`coherence` hard-pinned 2026-07-16 (functions@0.37.0)** — implementation-independent
   invariants (coherence∈[0,1]; unity for a scaled/shifted noiseless copy; `csd(x,x)`=welchPSD via the
   one-sided doubling convention; polarization-identity Cauchy bound). Surfaced: public `csd` returns
-  **magnitude only** (no re/im) — a pre-existing API limit worth revisiting. **Remaining:** wavelet families
-  beyond Haar/db1 (db2+/sym/coif) for `dwt`/`idwt`/`wavedec`; `remez` exact Parks–McClellan (currently Lawson
-  IRLS); `buttord` bandpass/bandstop array form.
+  **magnitude only** (no re/im) — a pre-existing API limit worth revisiting. ✅ **wavelet families beyond
+  Haar/db1 shipped** — `dwt`/`idwt`/`wavedec`/`waverec` now support db1-4/sym2-4/coif1-2 via a general
+  periodization filter bank pinned bit-for-bit against pywt 1.8.0 (`functions/tests/gap-wavelet-families-oracle.test.ts`,
+  55 tests). **Remaining:** `remez` exact Parks–McClellan (currently Lawson IRLS); `buttord`
+  bandpass/bandstop array form.
 - [ ] **Graph breadth:** coloring / clique-finding / Louvain community / Katz centrality / isomorphism /
       incidence matrix + adjacency spectrum; directed-graph constructor (`adjacencyMatrix` still symmetrizes);
       `betweennessCentrality` `normalized` option.

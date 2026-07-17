@@ -29,6 +29,7 @@ import {
   welchPSDJS,
   WASM_SIGNAL_THRESHOLD,
 } from '../wasm/signal/wasm-bridge.js';
+import { dwtPeriodization } from '../signal/wavelet-filters.js';
 
 // =============================================================================
 // WASM dispatch threshold — signals shorter than this use pure-TS fallback
@@ -761,10 +762,17 @@ export function idst(X: number[]): number[] {
 // =============================================================================
 
 /**
- * Discrete wavelet transform using Haar wavelet.
+ * Single-level discrete wavelet transform (periodization boundary).
  *
- * @param x - Input signal (length must be power of 2)
- * @param wavelet - Wavelet name (currently only 'haar')
+ * Haar/db1 use a dedicated closed-form (and WASM-accelerated) 2-tap path.
+ * All other supported families (db2-4, sym2-4, coif1-2) route through the
+ * general orthogonal filter bank in `../signal/wavelet-filters.ts`, which is
+ * verified to reproduce this same Haar/db1 result bit-for-bit and to match
+ * `pywt.dwt(..., mode='periodization')` for every family.
+ *
+ * @param x - Input signal (length >= 2)
+ * @param wavelet - Wavelet name; see `SUPPORTED_WAVELETS` in
+ *   `../signal/wavelet-filters.ts` for the full list
  * @returns { approx: number[], detail: number[] }
  */
 export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; detail: number[] } {
@@ -808,7 +816,11 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
     }
     return { approx, detail };
   } else {
-    throw new Error(`dwt: unsupported wavelet "${wavelet}"`);
+    try {
+      return dwtPeriodization(x, wavelet);
+    } catch (err) {
+      throw new Error(`dwt: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 }
 

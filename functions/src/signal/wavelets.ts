@@ -2,45 +2,37 @@
  * Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
  * reconstruction), and the continuous wavelet transform (CWT).
  *
- * `idwt`/`wavedec`/`waverec` must invert the existing `dwt` (`../typed/signal.ts`)
- * exactly, so they match its Haar convention bit-for-bit: analysis filters
- * scaled by `s = 1/sqrt(2)`, `approx[i] = s*(x[2i]+x[2i+1])`,
- * `detail[i] = s*(x[2i]-x[2i+1])`. Haar's synthesis (reconstruction) filters
- * are the time-reverse of its analysis filters — for a symmetric 2-tap filter
- * that reversal is a no-op, so the closed-form inverse below is exact:
- * `x[2i] = s*(approx[i]+detail[i])`, `x[2i+1] = s*(approx[i]-detail[i])`.
+ * `idwt` inverts `dwt` (`../typed/signal.ts`) via the shared periodization
+ * filter bank in `./wavelet-filters.ts`, which supports the full family list
+ * (`SUPPORTED_WAVELETS`: haar, db1-4, sym2-4, coif1-2) and matches
+ * `pywt.idwt(..., mode='periodization')` bit-for-bit. For Haar/db1 this is
+ * verified equivalent to the earlier hardcoded closed-form 2-tap inverse
+ * (`x[2i] = s*(approx[i]+detail[i])`, `x[2i+1] = s*(approx[i]-detail[i])`,
+ * `s = 1/sqrt(2)`) — no behavior change for existing callers.
  *
  * @packageDocumentation
  */
 
 import { dwt } from '../typed/signal.js';
+import { idwtPeriodization } from './wavelet-filters.js';
 import { convDirect } from './conv.js';
 
 /**
- * Inverse single-level discrete wavelet transform. Upsamples `approx`/`detail`
- * and combines them with the Haar synthesis filters, exactly inverting `dwt`.
+ * Inverse single-level discrete wavelet transform (periodization boundary).
+ * Exactly inverts `dwt` for every wavelet in `SUPPORTED_WAVELETS`
+ * (`./wavelet-filters.ts`): haar, db1-4, sym2-4, coif1-2.
  *
  * @param approx - Approximation (low-pass) coefficients
  * @param detail - Detail (high-pass) coefficients, same length as `approx`
- * @param wavelet - Wavelet name (currently only 'haar'/'db1', matching `dwt`)
+ * @param wavelet - Wavelet name (default 'haar'); see `SUPPORTED_WAVELETS`
  * @returns Reconstructed signal, length `2 * approx.length`
  */
 export function idwt(approx: number[], detail: number[], wavelet: string = 'haar'): number[] {
-  if (wavelet !== 'haar' && wavelet !== 'db1') {
-    throw new Error(`idwt: unsupported wavelet "${wavelet}"`);
+  try {
+    return idwtPeriodization(approx, detail, wavelet);
+  } catch (err) {
+    throw new Error(`idwt: ${err instanceof Error ? err.message : String(err)}`);
   }
-  if (approx.length !== detail.length) {
-    throw new Error('idwt: approx and detail must have equal length');
-  }
-
-  const half = approx.length;
-  const s = 1 / Math.SQRT2;
-  const x = new Array<number>(half * 2);
-  for (let i = 0; i < half; i++) {
-    x[2 * i] = s * (approx[i] + detail[i]);
-    x[2 * i + 1] = s * (approx[i] - detail[i]);
-  }
-  return x;
 }
 
 /**
@@ -48,7 +40,8 @@ export function idwt(approx: number[], detail: number[], wavelet: string = 'haar
  * approximation coefficients.
  *
  * @param x - Input signal
- * @param wavelet - Wavelet name (passed through to `dwt`)
+ * @param wavelet - Wavelet name (passed through to `dwt`); see
+ *   `SUPPORTED_WAVELETS` in `./wavelet-filters.ts`
  * @param level - Number of decomposition levels (>= 1)
  * @returns `[cA_level, cD_level, cD_{level-1}, ..., cD_1]` (pywt order)
  */

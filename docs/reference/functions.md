@@ -1965,43 +1965,43 @@ parallelize the element-wise spectra; `parallelConv` / `parallelXCorr` /
 `fft2d` likewise dispatch their batches of independent FFTs. Small inputs fall
 back to the sequential radix-2 implementation on the calling thread.
 
-| Function                                        | Description                                                                                                                            | Accel          |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `parallelFFT(x)`                                | FFT → `Complex[]`                                                                                                                      | parallel       |
-| `parallelIFFT(X)`                               | Inverse FFT → `Float64Array`                                                                                                           | parallel       |
-| `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                 | parallel       |
-| `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                     | parallel       |
-| `parallelConv(a, b)`                            | Convolution                                                                                                                            | parallel       |
-| `parallelXCorr(a, b)`                           | Cross-correlation                                                                                                                      | parallel       |
-| `parallelAutoCorr(a)`                           | Auto-correlation                                                                                                                       | parallel       |
-| `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —              |
-| `fft2d(matrix)`                                 | 2D FFT                                                                                                                                 | parallel       |
-| `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —              |
-| `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                                                                                                    | WASM           |
-| `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                                                                                                      | WASM           |
-| `dwt(x[, wavelet])`                             | Discrete wavelet transform                                                                                                             | WASM           |
-| `idwt(cA, cD[, wavelet])`                       | Inverse discrete wavelet transform                                                                                                     | —              |
-| `wavedec(x[, wavelet, level])`                  | Multilevel discrete wavelet decomposition                                                                                              | —              |
-| `waverec(coeffs[, wavelet])`                    | Multilevel inverse discrete wavelet transform                                                                                          | —              |
-| `cwt(x, scales[, wavelet])`                     | Continuous wavelet transform (Ricker/Morlet)                                                                                           | —              |
-| `hilbertTransform(x)`                           | Hilbert transform                                                                                                                      | WASM           |
-| `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                                                                                                              | —              |
-| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                                                                                                               | —              |
-| `lowpassFilter(x, fc)`                          | Low-pass filter                                                                                                                        | WASM           |
-| `highpassFilter(x, fc)`                         | High-pass filter                                                                                                                       | WASM           |
-| `bandpassFilter(x, f1, f2)`                     | Band-pass filter                                                                                                                       | WASM           |
-| `medfilt(x[, window])`                          | Median filter                                                                                                                          | —              |
-| `windowFunction(n, type)`                       | Window functions (Hamming, Hann, …)                                                                                                    | —              |
-| `resample(x, ratio)`                            | Signal resampling                                                                                                                      | —              |
-| `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —              |
-| `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —              |
-| `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —              |
-| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel, WASM |
-| `periodogram(x)`                                | Power spectral density estimate                                                                                                        | WASM           |
-| `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —              |
-| `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —              |
-| `freqz(b, a)`                                   | Digital filter frequency response (factory layer)                                                                                      | —              |
-| `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)                                                                                     | —              |
+| Function                                        | Description                                                                                                                            | Accel           |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `parallelFFT(x)`                                | FFT → `Complex[]`                                                                                                                      | parallel        |
+| `parallelIFFT(X)`                               | Inverse FFT → `Float64Array`                                                                                                           | parallel        |
+| `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                 | parallel        |
+| `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                     | parallel        |
+| `parallelConv(a, b)`                            | Convolution                                                                                                                            | parallel        |
+| `parallelXCorr(a, b)`                           | Cross-correlation                                                                                                                      | parallel        |
+| `parallelAutoCorr(a)`                           | Auto-correlation                                                                                                                       | parallel        |
+| `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —               |
+| `fft2d(matrix)`                                 | 2D FFT                                                                                                                                 | parallel        |
+| `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —               |
+| `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                                                                                                    | WASM            |
+| `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                                                                                                      | WASM            |
+| `dwt(x[, wavelet])`                             | Discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)                                                                                 | WASM (haar/db1) |
+| `idwt(cA, cD[, wavelet])`                       | Inverse discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)                                                                         | —               |
+| `wavedec(x[, wavelet, level])`                  | Multilevel discrete wavelet decomposition (haar/db1-4/sym2-4/coif1-2)                                                                  | —               |
+| `waverec(coeffs[, wavelet])`                    | Multilevel inverse discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)                                                              | —               |
+| `cwt(x, scales[, wavelet])`                     | Continuous wavelet transform (Ricker/Morlet)                                                                                           | —               |
+| `hilbertTransform(x)`                           | Hilbert transform                                                                                                                      | WASM            |
+| `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                                                                                                              | —               |
+| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                                                                                                               | —               |
+| `lowpassFilter(x, fc)`                          | Low-pass filter                                                                                                                        | WASM            |
+| `highpassFilter(x, fc)`                         | High-pass filter                                                                                                                       | WASM            |
+| `bandpassFilter(x, f1, f2)`                     | Band-pass filter                                                                                                                       | WASM            |
+| `medfilt(x[, window])`                          | Median filter                                                                                                                          | —               |
+| `windowFunction(n, type)`                       | Window functions (Hamming, Hann, …)                                                                                                    | —               |
+| `resample(x, ratio)`                            | Signal resampling                                                                                                                      | —               |
+| `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —               |
+| `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —               |
+| `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —               |
+| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel, WASM  |
+| `periodogram(x)`                                | Power spectral density estimate                                                                                                        | WASM            |
+| `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —               |
+| `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —               |
+| `freqz(b, a)`                                   | Digital filter frequency response (factory layer)                                                                                      | —               |
+| `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)                                                                                     | —               |
 
 ### numpy.fft-style helpers (vs `numpy.fft`)
 
@@ -2079,12 +2079,18 @@ back to the sequential radix-2 implementation on the calling thread.
   power spectral density.
 - `unwrapPhase` removes the artificial 2π jumps that appear when phase is
   computed with `atan2`.
-- `idwt` inverts a single level of `dwt` exactly (Haar's synthesis filters are
-  the time-reverse of its analysis filters, a no-op for a symmetric 2-tap
-  filter); `wavedec`/`waverec` repeat `dwt`/`idwt` across levels
-  (`[cA_level, cD_level, …, cD_1]`, pywt order) for perfect reconstruction —
-  `waverec(wavedec(x, w, L), w) === x`. `cwt` convolves the signal with a
-  discretized, normalized Ricker (Mexican-hat) or Morlet wavelet at each scale.
+- `dwt`/`idwt`/`wavedec`/`waverec` support 9 orthogonal wavelet families —
+  `haar`, `db1`-`db4`, `sym2`-`sym4`, `coif1`-`coif2` — via a general filter
+  bank with **periodization** boundary handling, matching
+  `pywt.dwt(..., mode='periodization')` bit-for-bit (PyWavelets 1.8.0
+  oracle). `haar`/`db1` additionally get a dedicated WASM-accelerated 2-tap
+  fast path above an internal size threshold; the general path is otherwise
+  pure TypeScript. `idwt` inverts a single level of `dwt` exactly; `wavedec`/
+  `waverec` repeat `dwt`/`idwt` across levels (`[cA_level, cD_level, …,
+cD_1]`, pywt order) for perfect reconstruction —
+  `waverec(wavedec(x, w, L), w) === x` for every supported family. `cwt`
+  (unchanged) convolves the signal with a discretized, normalized Ricker
+  (Mexican-hat) or Morlet wavelet at each scale.
 
 ### Background & History
 

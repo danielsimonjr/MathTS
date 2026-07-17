@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16",
+  "generated": "2026-07-17",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
@@ -2080,6 +2080,10 @@
       "functions/src/signal/spectral-peaks.ts",
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/signal/wavelet-filters.ts": [
+      "functions/src/signal/wavelets.ts",
+      "functions/src/typed/signal.ts"
     ],
     "functions/src/utils/switch.ts": [
       "functions/src/statistics/cumsum.ts",

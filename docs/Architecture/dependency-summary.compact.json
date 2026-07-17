@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-16", "f": 1067, "e": 5326, "re": 1998 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1068, "e": 5330, "re": 1998 },
   "s": {
-    "loc": 183085,
+    "loc": 183272,
     "cls": 57,
-    "int": 469,
-    "fn": 1772,
+    "int": 470,
+    "fn": 1775,
     "tg": 159,
     "en": 0,
-    "co": 1542,
+    "co": 1543,
     "toi": 550
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -862,7 +862,7 @@
       ]
     },
     "functions/signal": {
-      "f": 10,
+      "f": 11,
       "exp": [
         "convDirect",
         "convFFT",
@@ -892,7 +892,8 @@
         "FindPeaksOptions",
         "CsdOptions",
         "StftOptions",
-        "StftResult"
+        "StftResult",
+        "WaveletFilters"
       ]
     },
     "functions/special": {

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `dwt`/`wavedec` support db1-4, sym2-4, coif1-2 wavelet families
+
+`functions/src/typed/signal.ts`'s `dwt` and `functions/src/signal/wavelets.ts`'s `idwt` previously
+implemented only the Haar/db1 2-tap wavelet (hardcoded closed-form; any other name threw). Both now
+route through a new general orthogonal filter bank with **periodization** boundary handling
+(`functions/src/signal/wavelet-filters.ts`), supporting 9 families: `haar`, `db1`-`db4`, `sym2`-`sym4`,
+`coif1`-`coif2`. Each family's decomposition low-pass filter (`dec_lo`) is pinned bit-for-bit against
+PyWavelets 1.8.0; the other three orthogonal filters (`dec_hi`/`rec_lo`/`rec_hi`) are derived by the
+standard QMF relations and verified against pywt to 1e-14. The periodization phase alignment was
+derived empirically against `pywt.dwt(..., mode='periodization')` / `pywt.idwt(...)` and verified
+bit-for-bit across multiple signal lengths and every filter. `haar`/`db1` keep their dedicated
+WASM-accelerated fast path (verified to reproduce the general filter bank's result exactly, so no
+behavior change for existing callers); the other 7 families run the new pure-TypeScript path.
+`wavedec`/`waverec` pass the wavelet name through unchanged and now support all 9 families with
+perfect reconstruction. `cwt` (ricker/morlet) is unchanged. Oracle-pinned in new
+`functions/tests/gap-wavelet-families-oracle.test.ts` (55 tests): all 4 filters for all 9 families vs
+pywt (1e-9), single-level `dwt` vs pywt periodization for db2/db3/db4/sym2/sym3/sym4/coif1/coif2
+(1e-8), perfect reconstruction `waverec(wavedec(x, w, L), w) ≈ x` for every family at levels 1 and 2
+(1e-10), vanishing-moment annihilation of sampled polynomials (dbN/symN kill degree < N, coifN kills
+degree < 2N) away from the periodization wrap boundary, and a Haar/db1 regression confirming the new
+code reproduces the old hardcoded closed-form results. Documented in `docs/reference/functions.md`
+(curated `dwt`/`idwt`/`wavedec`/`waverec` rows + prose).
+
 ### Added — `funm` supports defective / repeated-eigenvalue matrices
 
 `functions/src/numeric/matrix-functions.ts`'s `funm(A, f)` previously threw on defective /

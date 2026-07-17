@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16",
+  "generated": "2026-07-17",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2030,6 +2030,7 @@
       "DualFn",
       "durbinWatson",
       "dwt",
+      "dwtPeriodization",
       "e",
       "EARTH_RADIUS_KM",
       "efimovFactor",
@@ -2261,6 +2262,7 @@
       "getSafeMethod",
       "getSafeProperty",
       "getWasm",
+      "getWaveletFilters",
       "globalMinimize",
       "gmean",
       "gmres",
@@ -2323,6 +2325,7 @@
       "identity",
       "idst",
       "idwt",
+      "idwtPeriodization",
       "ifft",
       "ifft2",
       "ifftReal",
@@ -3028,6 +3031,7 @@
       "subtractScalar",
       "sum",
       "summation",
+      "SUPPORTED_WAVELETS",
       "svd",
       "SVDOptions",
       "SVDResult",

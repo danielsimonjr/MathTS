@@ -28,7 +28,7 @@ describe('wavelets', () => {
   });
 
   it('idwt rejects unsupported wavelet', () => {
-    expect(() => idwt([1, 2], [0, 0], 'db2')).toThrow();
+    expect(() => idwt([1, 2], [0, 0], 'db99')).toThrow();
   });
 
   it('cwt supports morlet wavelet', () => {
