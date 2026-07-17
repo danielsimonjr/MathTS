@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-17",
-    "totalFiles": 1070,
+    "totalFiles": 1073,
     "totalModules": 82,
-    "totalExports": 5354
+    "totalExports": 5369
   },
   "entryPoints": [
     {
@@ -3355,6 +3355,24 @@
           "applyHouseholderRight"
         ]
       },
+      "matrix/src/operations/condest.ts": {
+        "description": "Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./lu.js",
+            "imports": ["lu"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["condest"],
+        "functions": ["condest"]
+      },
       "matrix/src/operations/eig-wasm.ts": {
         "description": "`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API",
         "externalDependencies": [],
@@ -3477,6 +3495,21 @@
             "file": "./schur.js",
             "imports": ["matrixSchur", "SchurResult", "SchurOptions"],
             "reExport": true
+          },
+          {
+            "file": "./qr-pivoted.js",
+            "imports": ["qrPivoted", "QRPivotedResult", "QRPivotedOptions"],
+            "reExport": true
+          },
+          {
+            "file": "./qr-family.js",
+            "imports": ["lq", "rq", "ql", "LQResult", "RQResult", "QLResult"],
+            "reExport": true
+          },
+          {
+            "file": "./condest.js",
+            "imports": ["condest"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -3516,7 +3549,17 @@
           "SqrtmOptions",
           "matrixSchur",
           "SchurResult",
-          "SchurOptions"
+          "SchurOptions",
+          "qrPivoted",
+          "QRPivotedResult",
+          "QRPivotedOptions",
+          "lq",
+          "rq",
+          "ql",
+          "LQResult",
+          "RQResult",
+          "QLResult",
+          "condest"
         ],
         "reExported": [
           "eig",
@@ -3553,7 +3596,17 @@
           "SqrtmOptions",
           "matrixSchur",
           "SchurResult",
-          "SchurOptions"
+          "SchurOptions",
+          "qrPivoted",
+          "QRPivotedResult",
+          "QRPivotedOptions",
+          "lq",
+          "rq",
+          "ql",
+          "LQResult",
+          "RQResult",
+          "QLResult",
+          "condest"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -3616,6 +3669,44 @@
         "exports": ["pinv"],
         "interfaces": ["PinvOptions"],
         "functions": ["pinv"]
+      },
+      "matrix/src/operations/qr-family.ts": {
+        "description": "QR-family decompositions: LQ, RQ, QL",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./qr.js",
+            "imports": ["qr"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["lq", "rq", "ql"],
+        "interfaces": ["LQResult", "RQResult", "QLResult"],
+        "functions": ["lq", "rq", "ql"]
+      },
+      "matrix/src/operations/qr-pivoted.ts": {
+        "description": "Rank-Revealing Pivoted QR Decomposition (Businger-Golub column pivoting)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./common.js",
+            "imports": ["eye", "householder", "applyHouseholderLeft", "applyHouseholderRight"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["qrPivoted"],
+        "interfaces": ["QRPivotedResult", "QRPivotedOptions"],
+        "functions": ["qrPivoted"]
       },
       "matrix/src/operations/qr.ts": {
         "description": "QR Decomposition (DenseMatrix primitive)",
@@ -35484,6 +35575,7 @@
         "files": [
           "matrix/src/operations/cholesky.ts",
           "matrix/src/operations/common.ts",
+          "matrix/src/operations/condest.ts",
           "matrix/src/operations/eig-wasm.ts",
           "matrix/src/operations/eig.ts",
           "matrix/src/operations/expm.ts",
@@ -35491,6 +35583,8 @@
           "matrix/src/operations/logm.ts",
           "matrix/src/operations/lu.ts",
           "matrix/src/operations/pinv.ts",
+          "matrix/src/operations/qr-family.ts",
+          "matrix/src/operations/qr-pivoted.ts",
           "matrix/src/operations/qr.ts",
           "matrix/src/operations/schur.ts",
           "matrix/src/operations/sqrtm.ts",
@@ -36796,17 +36890,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1070,
+    "totalTypeScriptFiles": 1073,
     "totalModules": 82,
-    "totalLinesOfCode": 184042,
-    "totalExports": 5354,
+    "totalLinesOfCode": 184474,
+    "totalExports": 5369,
     "totalClasses": 57,
-    "totalInterfaces": 472,
-    "totalFunctions": 1786,
+    "totalInterfaces": 477,
+    "totalFunctions": 1791,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2011,
+    "totalReExports": 2021,
     "totalTypeOnlyImports": 551,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

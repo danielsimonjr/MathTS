@@ -116,7 +116,7 @@ The codebase is organized into the following modules:
 - **core/types**: 15 files
 - **matrix/backends**: 19 files
 - **matrix**: 4 files
-- **matrix/operations**: 14 files
+- **matrix/operations**: 17 files
 - **matrix/types**: 6 files
 - **tensor**: 4 files
 - **tensor/operations**: 17 files
@@ -199,7 +199,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 4              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 32             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 43             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 437            | 2               |
@@ -1303,6 +1303,20 @@ graph LR
 
 ---
 
+### `matrix/src/operations/condest.ts` - Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./lu.js` | `lu` | Import |
+
+**Exports:**
+
+- Functions: `condest`
+
+---
+
 ### `matrix/src/operations/eig-wasm.ts` - `eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API
 
 **Internal Dependencies:**
@@ -1362,10 +1376,13 @@ graph LR
 | `./logm.js` | `matrixLogm, LogmOptions` | Re-export |
 | `./sqrtm.js` | `matrixSqrtm, SqrtmOptions` | Re-export |
 | `./schur.js` | `matrixSchur, SchurResult, SchurOptions` | Re-export |
+| `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions` | Re-export |
+| `./qr-family.js` | `lq, rq, ql, LQResult, RQResult, QLResult` | Re-export |
+| `./condest.js` | `condest` | Re-export |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`
 
 ---
 
@@ -1412,6 +1429,36 @@ graph LR
 
 - Interfaces: `PinvOptions`
 - Functions: `pinv`
+
+---
+
+### `matrix/src/operations/qr-family.ts` - QR-family decompositions: LQ, RQ, QL
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./qr.js` | `qr` | Import |
+
+**Exports:**
+
+- Interfaces: `LQResult`, `RQResult`, `QLResult`
+- Functions: `lq`, `rq`, `ql`
+
+---
+
+### `matrix/src/operations/qr-pivoted.ts` - Rank-Revealing Pivoted QR Decomposition (Businger-Golub column pivoting)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./common.js` | `eye, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+
+**Exports:**
+
+- Interfaces: `QRPivotedResult`, `QRPivotedOptions`
+- Functions: `qrPivoted`
 
 ---
 
@@ -15366,8 +15413,8 @@ graph LR
 | `expression/src/index`                                 | 28 files     | 0 files    |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
+| `matrix/src/types/DenseMatrix`                         | 3 files      | 21 files   |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
-| `matrix/src/types/DenseMatrix`                         | 3 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
@@ -15377,13 +15424,13 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
 | `workbook/src/cli`                                     | 17 files     | 0 files    |
+| `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
-| `functions/src/bitwise/rightLogShift`                  | 13 files     | 1 file     |
 
 ---
 
@@ -15483,15 +15530,15 @@ graph TD
     subgraph Matrix/operations
         N48[cholesky]
         N49[common]
-        N50[eig-wasm]
-        N51[eig]
-        N52[expm]
-        N53[index]
-        N54[logm]
-        N55[lu]
-        N56[pinv]
-        N57[qr]
-        N58[...4 more]
+        N50[condest]
+        N51[eig-wasm]
+        N52[eig]
+        N53[expm]
+        N54[index]
+        N55[logm]
+        N56[lu]
+        N57[pinv]
+        N58[...7 more]
     end
 
     subgraph Matrix/types
@@ -16195,14 +16242,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1070   |
+| Total TypeScript Files  | 1073   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184042 |
-| Total Exports           | 5354   |
-| Total Re-exports        | 2011   |
+| Total Lines of Code     | 184474 |
+| Total Exports           | 5369   |
+| Total Re-exports        | 2021   |
 | Total Classes           | 57     |
-| Total Interfaces        | 472    |
-| Total Functions         | 1786   |
+| Total Interfaces        | 477    |
+| Total Functions         | 1791   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 551    |

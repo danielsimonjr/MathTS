@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — linear-algebra extension: pivoted QR, RQ/QL/LQ, condest
+
+Five new `@danielsimonjr/mathts-matrix` `DenseMatrix` primitives in
+`matrix/src/operations/`: `qrPivoted` (`qr-pivoted.ts`, column-pivoted rank-revealing QR via
+Householder reflections — Businger-Golub pivoting, guarantees `|diag(R)|` non-increasing and
+returns a numerical `rank`), `rq`/`ql`/`lq` (`qr-family.ts`, the three QR-family variants, each
+reduced to the existing Gram-Schmidt `qr()` via the standard row/column-flip-and-transpose
+identities from Golub & Van Loan §5.2 — `lq` needs no flips, `rq`/`ql` reverse rows/columns then
+un-flip the factors), and `condest` (`condest.ts`, Hager/Higham 1-norm condition-number
+**estimator** — power iteration over `A⁻¹`/`A⁻ᵀ` applied via the existing `lu()` triangular
+solves, O(n²) per iteration, never forming `A⁻¹`).
+
+Along the way, found and worked around a latent bug in the shared `matrix/src/operations/common.ts`
+`householder()` helper: its degenerate branch (`sigma === 0 && x[0] < 0`, i.e. a column already
+antiparallel to `e₁`) defaults `beta = -2`, which is **not** an orthogonal reflection for a
+length-1 sub-column (`(1-beta)² ≠ 1` unless `beta ∈ {0, 2}`) — `qrPivoted` hits this on its last
+pivot step and now passes `degenerateBeta = 2` explicitly (matching `schur.ts`'s existing
+override) rather than patching the shared default, since `eig.ts`/`svd.ts` never exercise a
+length-1 sub-column and a shared-file change wasn't re-verified against their suites in this pass;
+flagged as a follow-up.
+
+Verified in `matrix/tests/gap-linalg-extension-oracle.test.ts` (22 tests) via
+implementation-independent oracles (orthogonality `QᵀQ=I`/`QQᵀ=I`, exact triangularity,
+reconstruction to 1e-9, rank on a full-rank vs. rank-deficient 3×3, and `condest` bracketed
+against `numpy.linalg.cond(A, 1) = 133.0`, `condest(I) ≈ 1`, and a near-singular 2×2 `> 1e6`) —
+never pinned to raw Q/R/L entries or exact pivot order, since those vary by tie-breaking
+convention. `docs/api/matrix.md`'s generated export index updated via `npm run docs:functions`.
+
 ### Added — geometry breadth: quaternion exp/log/pow + 3-D ray/segment intersections
 
 Closes part of the "Geometry breadth" follow-up logged from the Phase 8 oracle-gap roadmap.

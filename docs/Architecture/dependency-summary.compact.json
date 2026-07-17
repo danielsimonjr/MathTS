@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1070, "e": 5354, "re": 2011 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1073, "e": 5369, "re": 2021 },
   "s": {
-    "loc": 184042,
+    "loc": 184474,
     "cls": 57,
-    "int": 472,
-    "fn": 1786,
+    "int": 477,
+    "fn": 1791,
     "tg": 160,
     "en": 0,
     "co": 1543,
@@ -308,7 +308,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 14,
+      "f": 17,
       "exp": [
         "cholesky",
         "eye",
@@ -324,12 +324,12 @@
         "householder",
         "applyHouseholderLeft",
         "applyHouseholderRight",
+        "condest",
         "eigWasm",
         "eigvalsWasm",
         "spectralRadiusWasm",
         "eig",
-        "eigvals",
-        "powerIteration"
+        "eigvals"
       ],
       "int": [
         "CholeskyResult",
@@ -339,9 +339,9 @@
         "LogmOptions",
         "LUResult",
         "PinvOptions",
-        "QRResult",
-        "QROptions",
-        "SchurResult"
+        "LQResult",
+        "RQResult",
+        "QLResult"
       ]
     },
     "matrix/types": {
