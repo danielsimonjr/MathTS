@@ -30,6 +30,7 @@ import { toHTML } from './html';
 import { toTeX } from './tex';
 import { toPDF } from './pdf';
 import { toIpynb } from './ipynb';
+import { runWorkbookWithTimeout } from './timeout-runner';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
@@ -53,11 +54,15 @@ const HELP = `
 mtsw - MathTS Workbook CLI
 
 Usage:
-  mtsw run <file> [-c <id>] [-v] [--json] [--write]
+  mtsw run <file> [-c <id>] [-v] [--json] [--write] [--timeout <ms>]
                                             Execute a workbook (or one cell + its
                                             deps with -c/--cell). -v: events,
                                             --json: machine output, --write: persist
-                                            outputs back to the file.
+                                            outputs back to the file. --timeout runs
+                                            the whole workbook in a worker thread and
+                                            kills it (WorkbookTimeoutError) if it
+                                            exceeds the budget — a runaway cell can't
+                                            hang the process. Incompatible with -c/-v.
   mtsw describe <file> [--json]             Structured document model (cells, graph)
   mtsw validate <file> [--json]             Validate structure (ids, deps, cycles)
   mtsw graph <file> [-f mermaid|dot]        Print the dependency graph
@@ -142,6 +147,7 @@ const VALUE_FLAGS = new Set([
   '--template',
   '-c',
   '--cell',
+  '--timeout',
   '--id',
   '--content',
   '--content-file',
@@ -315,14 +321,34 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
         };
   }
 
+  const timeoutStr = flagValue(args, '--timeout');
   const verbose = args.includes('-v') || args.includes('--verbose');
-  const executor = createExecutor(parsed.workbook!);
+  let report: RunResult;
   const events: string[] = [];
-  if (verbose) {
-    executor.on((event) => events.push(`[${event.type}] ${event.cellId ?? ''}`.trimEnd()));
+
+  if (timeoutStr !== undefined) {
+    const timeoutMs = Number(timeoutStr);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      return fail([`--timeout must be a positive number of milliseconds (got '${timeoutStr}')`]);
+    }
+    if (cellId !== undefined || verbose) {
+      return fail([
+        '--timeout does not support -c/--cell or -v/--verbose (it runs the whole workbook, in a worker, to completion or termination)',
+      ]);
+    }
+    try {
+      report = await runWorkbookWithTimeout(read.content!, { timeoutMs });
+    } catch (error) {
+      return fail([error instanceof Error ? error.message : String(error)], { cells: [] });
+    }
+  } else {
+    const executor = createExecutor(parsed.workbook!);
+    if (verbose) {
+      executor.on((event) => events.push(`[${event.type}] ${event.cellId ?? ''}`.trimEnd()));
+    }
+    report = await executor.runReport(cellId !== undefined ? { only: cellId } : {});
   }
 
-  const report = await executor.runReport(cellId !== undefined ? { only: cellId } : {});
   const problems = report.ok ? [] : failureList(report.cells);
   const humanFailures = report.ok ? '' : failureSummary(report.cells);
 

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — kill-able worker-thread run timeout (`runWorkbookWithTimeout`, `mtsw run --timeout`)
+
+`WorkbookExecutor#runReport` had no time budget — a runaway cell (e.g. an unbounded numeric
+computation) hung the process forever. `workbook/src/timeout-runner.ts` adds
+`runWorkbookWithTimeout(source, { timeoutMs })`: it runs the whole executor (parse + `runReport`)
+inside a `worker_threads` Worker (`workbook/src/run-worker.ts`, now a third tsup build entry
+alongside `index.ts`/`cli.ts`) and forcibly `terminate()`s it if it exceeds the budget, rejecting
+with a `WorkbookTimeoutError`. Termination kills the worker's V8 isolate outright, so it interrupts
+even a synchronous, CPU-bound runaway cell — something a same-thread `Promise.race`/`setTimeout`
+budget cannot do (a blocking loop never yields back to the event loop for the timer to fire). Cell
+outputs cross the worker boundary pre-formatted to strings (via the existing `formatResult`) since
+class instances (Complex, matrices, …) don't survive `postMessage`'s structured clone. Wired as
+`mtsw run --timeout <ms>` (routes through the worker; incompatible with `-c`/`-v`); the default
+in-process path is unchanged when no timeout is given. Verified in
+`workbook/tests/gap-worker-timeout.test.ts` (imports the **built** `dist/` — the worker's
+`new URL('./run-worker.js', import.meta.url)` only resolves off a real on-disk file, so this suite
+can't run against `src/` like its siblings) with a genuinely long CPU-bound cell (`isPrime` trial
+division to the largest prime below 2^53, chained ×10 — MathTS's expression sandbox has no loop or
+recursion constructs, so this is the sanctioned "very long computation" fallback for an
+un-expressible `while(true)`): confirms the run is killed within the budget (not merely outraced by
+a fast finish), the error message names the budget, and a normal fast run through the worker path
+matches the in-process `runReport` result.
+
 ### Added — `mtsw export --format ipynb` (Jupyter notebook export)
 
 `workbook/src/ipynb.ts` adds `toIpynb(doc)`, a sibling of the existing `toHTML`/`toTeX`/`toPDF`

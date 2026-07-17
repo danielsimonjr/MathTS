@@ -4179,7 +4179,11 @@
       "RunResult",
       "runServer",
       "RuntimeConfig",
+      "runWorkbookWithTimeout",
+      "RunWorkbookWithTimeoutOptions",
       "SCHEMA_VERSION",
+      "SerializedCellResult",
+      "SerializedRunResult",
       "serializeWorkbook",
       "serveCommand",
       "Session",
@@ -4203,6 +4207,8 @@
       "WorkbookEvent",
       "WorkbookExecutor",
       "WorkbookMetadata",
+      "WorkbookTimeoutError",
+      "WorkerMessage",
       "writeFileAtomic"
     ]
   }

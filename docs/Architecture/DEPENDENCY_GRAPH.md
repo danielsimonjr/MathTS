@@ -177,7 +177,7 @@ The codebase is organized into the following modules:
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
-- **workbook**: 21 files
+- **workbook**: 24 files
 - **assembly/algebra**: 1 file
 - **assembly/bindings**: 2 files
 - **assembly**: 7 files
@@ -215,7 +215,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 21             | 1               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 24             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
@@ -14397,6 +14397,7 @@ graph LR
 | `./tex` | `toTeX` | Import |
 | `./pdf` | `toPDF` | Import |
 | `./ipynb` | `toIpynb` | Import |
+| `./timeout-runner` | `runWorkbookWithTimeout` | Import |
 | `./svg` | `renderChart` | Import |
 | `./html` | `RenderDoc, RenderCell` | Import (type-only) |
 | `./yaml-safe` | `parseYamlHardened` | Import |
@@ -14534,12 +14535,14 @@ graph LR
 | `./contract` | `SCHEMA_VERSION, VERSION` | Re-export |
 | `./session` | `Session` | Re-export |
 | `./rpc` | `handleRequest` | Re-export |
+| `./timeout-runner` | `runWorkbookWithTimeout, WorkbookTimeoutError` | Re-export |
 | `./types` | `Workbook, Cell, CellType, ExecutionMode, WorkbookMetadata, RuntimeConfig, ParseResult, WorkbookEvent, CellResult, RunResult` | Re-export (type-only) |
 | `./edit` | `CellPosition, RemoveResult` | Re-export (type-only) |
+| `./timeout-runner` | `RunWorkbookWithTimeoutOptions, SerializedCellResult, SerializedRunResult` | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `detectCellType`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`, `getAncestors`, `toMermaid`, `WorkbookExecutor`, `createExecutor`, `formatResult`, `addCell`, `editCell`, `removeCell`, `moveCell`, `renameCell`, `setMetadata`, `SCHEMA_VERSION`, `VERSION`, `Session`, `handleRequest`, `Workbook`, `Cell`, `CellType`, `ExecutionMode`, `WorkbookMetadata`, `RuntimeConfig`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `CellPosition`, `RemoveResult`
+- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `detectCellType`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`, `getAncestors`, `toMermaid`, `WorkbookExecutor`, `createExecutor`, `formatResult`, `addCell`, `editCell`, `removeCell`, `moveCell`, `renameCell`, `setMetadata`, `SCHEMA_VERSION`, `VERSION`, `Session`, `handleRequest`, `runWorkbookWithTimeout`, `WorkbookTimeoutError`, `Workbook`, `Cell`, `CellType`, `ExecutionMode`, `WorkbookMetadata`, `RuntimeConfig`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `CellPosition`, `RemoveResult`, `RunWorkbookWithTimeoutOptions`, `SerializedCellResult`, `SerializedRunResult`
 
 ---
 
@@ -14642,6 +14645,23 @@ graph LR
 
 ---
 
+### `workbook/src/run-worker.ts` - `worker_threads` entry point for `runWorkbookWithTimeout` (see
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `worker_threads` | `parentPort, workerData` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./parser.js` | `parseWorkbook` | Import |
+| `./executor.js` | `createExecutor` | Import |
+| `./formatter.js` | `formatResult` | Import |
+| `./worker-protocol.js` | `RunWorkerData, WorkerMessage, SerializedCellResult` | Import (type-only) |
+
+---
+
 ### `workbook/src/session.ts` - In-memory editing/execution session for a single workbook — the stateful
 
 **Node.js Built-in Dependencies:**
@@ -14695,12 +14715,48 @@ graph LR
 
 ---
 
+### `workbook/src/timeout-runner.ts` - Kill-able worker-thread execution of a workbook with a hard wall-clock
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `worker_threads` | `Worker` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./worker-protocol.js` | `SerializedRunResult, WorkerMessage` | Import (type-only) |
+| `./worker-protocol.js` | `SerializedCellResult, SerializedRunResult, WorkerMessage` | Re-export (type-only) |
+
+**Exports:**
+
+- Classes: `WorkbookTimeoutError`
+- Interfaces: `RunWorkbookWithTimeoutOptions`
+- Functions: `runWorkbookWithTimeout`
+- Re-exports: `SerializedCellResult`, `SerializedRunResult`, `WorkerMessage`
+
+---
+
 ### `workbook/src/types.ts` - Workbook type definitions
 
 **Exports:**
 
 - Interfaces: `WorkbookMetadata`, `RuntimeConfig`, `Cell`, `Workbook`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `DependencyNode`, `DependencyGraph`
 - Types: `CellType`, `ExecutionMode`
+
+---
+
+### `workbook/src/worker-protocol.ts` - Shared message/result shapes between `timeout-runner.ts` (the coordinator,
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `CellResult` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `SerializedCellResult`, `SerializedRunResult`, `WorkerSuccessMessage`, `WorkerFailureMessage`, `RunWorkerData`
+- Types: `WorkerMessage`
 
 ---
 
@@ -15535,10 +15591,10 @@ graph LR
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
+| `workbook/src/cli`                                     | 19 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `functions/src/utils/string`                           | 3 files      | 15 files   |
-| `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
@@ -16199,7 +16255,7 @@ graph TD
         N418[graph]
         N419[html]
         N420[index]
-        N421[...11 more]
+        N421[...14 more]
     end
 
     subgraph Assembly/algebra
@@ -16361,17 +16417,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1080   |
+| Total TypeScript Files  | 1083   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 186104 |
-| Total Exports           | 5411   |
-| Total Re-exports        | 2048   |
-| Total Classes           | 57     |
-| Total Interfaces        | 485    |
-| Total Functions         | 1808   |
+| Total Lines of Code     | 186350 |
+| Total Exports           | 5421   |
+| Total Re-exports        | 2056   |
+| Total Classes           | 58     |
+| Total Interfaces        | 491    |
+| Total Functions         | 1809   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
-| Type-only Imports       | 557    |
+| Type-only Imports       | 562    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1080, "e": 5411, "re": 2048 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1083, "e": 5421, "re": 2056 },
   "s": {
-    "loc": 186104,
-    "cls": 57,
-    "int": 485,
-    "fn": 1808,
+    "loc": 186350,
+    "cls": 58,
+    "int": 491,
+    "fn": 1809,
     "tg": 160,
     "en": 0,
     "co": 1543,
-    "toi": 557
+    "toi": 562
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1604,7 +1604,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 21,
+      "f": 24,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1627,7 +1627,7 @@
         "COMMAND_NAMES",
         "describeData"
       ],
-      "cls": ["WorkbookExecutor", "Session"],
+      "cls": ["WorkbookExecutor", "Session", "WorkbookTimeoutError"],
       "int": [
         "CommandResult",
         "DescribeDoc",

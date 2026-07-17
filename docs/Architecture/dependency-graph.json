@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-17",
-    "totalFiles": 1080,
+    "totalFiles": 1083,
     "totalModules": 82,
-    "totalExports": 5411
+    "totalExports": 5421
   },
   "entryPoints": [
     {
@@ -31904,6 +31904,10 @@
             "imports": ["toIpynb"]
           },
           {
+            "file": "./timeout-runner",
+            "imports": ["runWorkbookWithTimeout"]
+          },
+          {
             "file": "./svg",
             "imports": ["renderChart"]
           },
@@ -32187,6 +32191,11 @@
             "reExport": true
           },
           {
+            "file": "./timeout-runner",
+            "imports": ["runWorkbookWithTimeout", "WorkbookTimeoutError"],
+            "reExport": true
+          },
+          {
             "file": "./types",
             "imports": [
               "Workbook",
@@ -32206,6 +32215,16 @@
           {
             "file": "./edit",
             "imports": ["CellPosition", "RemoveResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./timeout-runner",
+            "imports": [
+              "RunWorkbookWithTimeoutOptions",
+              "SerializedCellResult",
+              "SerializedRunResult"
+            ],
             "reExport": true,
             "typeOnly": true
           }
@@ -32235,6 +32254,8 @@
           "VERSION",
           "Session",
           "handleRequest",
+          "runWorkbookWithTimeout",
+          "WorkbookTimeoutError",
           "Workbook",
           "Cell",
           "CellType",
@@ -32246,7 +32267,10 @@
           "CellResult",
           "RunResult",
           "CellPosition",
-          "RemoveResult"
+          "RemoveResult",
+          "RunWorkbookWithTimeoutOptions",
+          "SerializedCellResult",
+          "SerializedRunResult"
         ],
         "reExported": [
           "parseWorkbook",
@@ -32272,6 +32296,8 @@
           "VERSION",
           "Session",
           "handleRequest",
+          "runWorkbookWithTimeout",
+          "WorkbookTimeoutError",
           "Workbook",
           "Cell",
           "CellType",
@@ -32283,7 +32309,10 @@
           "CellResult",
           "RunResult",
           "CellPosition",
-          "RemoveResult"
+          "RemoveResult",
+          "RunWorkbookWithTimeoutOptions",
+          "SerializedCellResult",
+          "SerializedRunResult"
         ]
       },
       "workbook/src/introspect.ts": {
@@ -32446,6 +32475,37 @@
         "interfaces": ["JsonRpcRequest", "JsonRpcResponse", "JsonRpcEvent", "HandleResult"],
         "functions": ["handleRequest"]
       },
+      "workbook/src/run-worker.ts": {
+        "description": "`worker_threads` entry point for `runWorkbookWithTimeout` (see",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "worker_threads",
+            "imports": ["parentPort", "workerData"]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./parser.js",
+            "imports": ["parseWorkbook"]
+          },
+          {
+            "file": "./executor.js",
+            "imports": ["createExecutor"]
+          },
+          {
+            "file": "./formatter.js",
+            "imports": ["formatResult"]
+          },
+          {
+            "file": "./worker-protocol.js",
+            "imports": ["RunWorkerData", "WorkerMessage", "SerializedCellResult"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
       "workbook/src/session.ts": {
         "description": "In-memory editing/execution session for a single workbook — the stateful",
         "externalDependencies": [],
@@ -32523,6 +32583,41 @@
         "interfaces": ["ToTexOptions"],
         "functions": ["toTeX"]
       },
+      "workbook/src/timeout-runner.ts": {
+        "description": "Kill-able worker-thread execution of a workbook with a hard wall-clock",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "worker_threads",
+            "imports": ["Worker"]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./worker-protocol.js",
+            "imports": ["SerializedRunResult", "WorkerMessage"],
+            "typeOnly": true
+          },
+          {
+            "file": "./worker-protocol.js",
+            "imports": ["SerializedCellResult", "SerializedRunResult", "WorkerMessage"],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "runWorkbookWithTimeout",
+          "WorkbookTimeoutError",
+          "SerializedCellResult",
+          "SerializedRunResult",
+          "WorkerMessage"
+        ],
+        "reExported": ["SerializedCellResult", "SerializedRunResult", "WorkerMessage"],
+        "classes": ["WorkbookTimeoutError"],
+        "interfaces": ["RunWorkbookWithTimeoutOptions"],
+        "functions": ["runWorkbookWithTimeout"]
+      },
       "workbook/src/types.ts": {
         "description": "Workbook type definitions",
         "externalDependencies": [],
@@ -32541,6 +32636,27 @@
           "RunResult",
           "DependencyNode",
           "DependencyGraph"
+        ]
+      },
+      "workbook/src/worker-protocol.ts": {
+        "description": "Shared message/result shapes between `timeout-runner.ts` (the coordinator,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types.js",
+            "imports": ["CellResult"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "SerializedCellResult",
+          "SerializedRunResult",
+          "WorkerSuccessMessage",
+          "WorkerFailureMessage",
+          "RunWorkerData"
         ]
       },
       "workbook/src/yaml-safe.ts": {
@@ -37028,10 +37144,13 @@
           "workbook/src/parser.ts",
           "workbook/src/pdf.ts",
           "workbook/src/rpc.ts",
+          "workbook/src/run-worker.ts",
           "workbook/src/session.ts",
           "workbook/src/svg.ts",
           "workbook/src/tex.ts",
+          "workbook/src/timeout-runner.ts",
           "workbook/src/types.ts",
+          "workbook/src/worker-protocol.ts",
           "workbook/src/yaml-safe.ts"
         ]
       },
@@ -37131,21 +37250,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1080,
+    "totalTypeScriptFiles": 1083,
     "totalModules": 82,
-    "totalLinesOfCode": 186104,
-    "totalExports": 5411,
-    "totalClasses": 57,
-    "totalInterfaces": 485,
-    "totalFunctions": 1808,
+    "totalLinesOfCode": 186350,
+    "totalExports": 5421,
+    "totalClasses": 58,
+    "totalInterfaces": 491,
+    "totalFunctions": 1809,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2048,
-    "totalTypeOnlyImports": 557,
+    "totalReExports": 2056,
+    "totalTypeOnlyImports": 562,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 247
+    "unusedExportsCount": 249
   }
 }

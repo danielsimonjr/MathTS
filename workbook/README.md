@@ -19,6 +19,7 @@ mtsw run example.mtsw
 mtsw run example.mtsw -v        # also print the execution event stream
 mtsw run example.mtsw --json    # machine-readable envelope on stdout
 mtsw run example.mtsw -c gauss  # run one cell + its transitive deps (stateless)
+mtsw run example.mtsw --timeout 5000   # run in a worker; killed (exit 1) if it exceeds 5s
 
 # Describe the structured document model (cells, outputs, dependency graph).
 mtsw describe example.mtsw --json
@@ -105,6 +106,18 @@ notebook markdown cells; every other cell type (`code`, `equation`, `test`, `dat
 and a chart becoming a `display_data` output (inline SVG). Shares the same
 run-then-render pipeline as `--format html`/`tex` (including `--no-run`, `--json`,
 `-o`).
+
+**`run --timeout <ms>` (kill-able worker-thread run).** By default, cell execution runs
+in-process with no time budget — a runaway cell (e.g. an unbounded computation) hangs
+the process. `--timeout` runs the whole workbook in a `worker_threads` Worker and
+forcibly terminates it if it exceeds the budget, exiting 1 with a clear
+`workbook execution exceeded <ms>ms and was terminated` message; termination kills the
+worker outright, so it interrupts even a synchronous, CPU-bound runaway. It always runs
+the entire workbook to completion-or-termination, so it's incompatible with `-c`/`-v`.
+The same primitive is available programmatically as `runWorkbookWithTimeout(source, {
+timeoutMs })` (throws `WorkbookTimeoutError` on timeout); cell outputs come back
+pre-formatted to strings (via `formatResult`), since engine class instances (Complex,
+matrices, …) don't survive the worker's `postMessage`.
 
 **`serve` (persistent session).** One long-lived process holds the workbook in memory with a per-cell result cache and a **stale set**: a `cell.*` edit marks that cell and its transitive dependents stale, and a `run` re-executes **only** the stale cells (reusing cached outputs for the rest) — the incremental latency win a GUI needs. Requests are processed strictly in order; `run` streams `cell/event` notifications (flushed before that run's response in v1, not mid-run). Edits stay in memory until `save`. Single-document per process; concurrent writers are last-write-wins.
 
