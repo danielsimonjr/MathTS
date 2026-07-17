@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1077, "e": 5399, "re": 2040 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1079, "e": 5410, "re": 2048 },
   "s": {
-    "loc": 185475,
+    "loc": 185932,
     "cls": 57,
-    "int": 481,
-    "fn": 1802,
+    "int": 485,
+    "fn": 1807,
     "tg": 160,
     "en": 0,
     "co": 1543,
-    "toi": 554
+    "toi": 556
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -752,10 +752,12 @@
       ]
     },
     "functions/numeric": {
-      "f": 16,
+      "f": 18,
       "exp": [
         "quad",
         "bfgs",
+        "bsplineFit",
+        "bsplineEval",
         "dlyap",
         "care",
         "dare",
@@ -771,9 +773,7 @@
         "gmres",
         "bicgstab",
         "funm",
-        "complexCos",
-        "complexSin",
-        "cosm"
+        "complexCos"
       ],
       "cls": ["Interval"],
       "int": [
@@ -781,12 +781,12 @@
         "QuadResult",
         "BfgsOptions",
         "BfgsResult",
+        "BSplineFitOptions",
+        "BSplineTuple",
         "EigshOptions",
         "EigshResult",
         "FsolveOptions",
-        "RootsLegendreResult",
-        "KrylovOptions",
-        "GmresOptions"
+        "RootsLegendreResult"
       ]
     },
     "functions/plain": {
@@ -1806,7 +1806,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 101, "o": 0 },
+    { "p": "src/index.ts", "i": 105, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

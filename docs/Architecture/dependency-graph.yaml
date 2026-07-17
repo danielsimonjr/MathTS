@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1077
+  totalFiles: 1079
   totalModules: 82
-  totalExports: 5399
+  totalExports: 5410
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7630,6 +7630,15 @@ modules:
           imports:
             - interpn
           reExport: true
+        - file: ./numeric/bspline.js
+          imports:
+            - bsplineFit
+            - bsplineEval
+          reExport: true
+        - file: ./numeric/monte-carlo.js
+          imports:
+            - monteCarloIntegrate
+          reExport: true
         - file: ./timeseries-extra.js
           imports:
             - movingAverage
@@ -7972,6 +7981,19 @@ modules:
             - NDArrayInput
           reExport: true
           typeOnly: true
+        - file: ./numeric/bspline.js
+          imports:
+            - BSplineFitOptions
+            - BSplineTuple
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/monte-carlo.js
+          imports:
+            - Bound
+            - MonteCarloOptions
+            - MonteCarloResult
+          reExport: true
+          typeOnly: true
         - file: ./stats/timeseries.js
           imports:
             - LjungBoxResult
@@ -8249,6 +8271,9 @@ modules:
         - minimizeScalar
         - quad
         - interpn
+        - bsplineFit
+        - bsplineEval
+        - monteCarloIntegrate
         - movingAverage
         - ewma
         - detrend
@@ -8426,6 +8451,11 @@ modules:
         - QuadOptions
         - QuadResult
         - NDArrayInput
+        - BSplineFitOptions
+        - BSplineTuple
+        - Bound
+        - MonteCarloOptions
+        - MonteCarloResult
         - LjungBoxResult
         - AdfullerResult
         - LinregressResult
@@ -8604,6 +8634,9 @@ modules:
         - minimizeScalar
         - quad
         - interpn
+        - bsplineFit
+        - bsplineEval
+        - monteCarloIntegrate
         - movingAverage
         - ewma
         - detrend
@@ -8781,6 +8814,11 @@ modules:
         - QuadOptions
         - QuadResult
         - NDArrayInput
+        - BSplineFitOptions
+        - BSplineTuple
+        - Bound
+        - MonteCarloOptions
+        - MonteCarloResult
         - LjungBoxResult
         - AdfullerResult
         - LinregressResult
@@ -12706,6 +12744,27 @@ modules:
         - BfgsResult
       functions:
         - bfgs
+    functions/src/numeric/bspline.ts:
+      description: B-spline curve **fitting** (`bsplineFit`) and **evaluation** (`bsplineEval`)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+            - leastSquares
+      workspaceDependencies: []
+      exports:
+        - bsplineFit
+        - bsplineEval
+      interfaces:
+        - BSplineFitOptions
+        - BSplineTuple
+      functions:
+        - bsplineFit
+        - bsplineEval
+        - bsplineEval
+        - bsplineEval
     functions/src/numeric/control-equations.ts:
       description: Control-theory matrix equations — `dlyap`/`care`/`dare`.
       externalDependencies: []
@@ -12851,6 +12910,22 @@ modules:
         - MinimizeScalarResult
       functions:
         - minimizeScalar
+    functions/src/numeric/monte-carlo.ts:
+      description: Monte-Carlo and quasi-Monte-Carlo (QMC) integration over an axis-aligned
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+      workspaceDependencies: []
+      exports:
+        - monteCarloIntegrate
+      interfaces:
+        - MonteCarloOptions
+        - MonteCarloResult
+      functions:
+        - monteCarloIntegrate
     functions/src/numeric/nnls.ts:
       description: 'Constrained least squares: `nnls` (Lawson–Hanson active-set non-negative'
       externalDependencies: []
@@ -33937,6 +34012,7 @@ dependencyGraph:
       files:
         - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/bfgs.ts
+        - functions/src/numeric/bspline.ts
         - functions/src/numeric/control-equations.ts
         - functions/src/numeric/eigsh.ts
         - functions/src/numeric/fsolve.ts
@@ -33946,6 +34022,7 @@ dependencyGraph:
         - functions/src/numeric/krylov.ts
         - functions/src/numeric/matrix-functions.ts
         - functions/src/numeric/minimize-scalar.ts
+        - functions/src/numeric/monte-carlo.ts
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
@@ -34801,18 +34878,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1077
+  totalTypeScriptFiles: 1079
   totalModules: 82
-  totalLinesOfCode: 185475
-  totalExports: 5399
+  totalLinesOfCode: 185932
+  totalExports: 5410
   totalClasses: 57
-  totalInterfaces: 481
-  totalFunctions: 1802
+  totalInterfaces: 485
+  totalFunctions: 1807
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2040
-  totalTypeOnlyImports: 554
+  totalReExports: 2048
+  totalTypeOnlyImports: 556
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

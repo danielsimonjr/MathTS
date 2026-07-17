@@ -142,8 +142,14 @@ or a documented scope limit worth revisiting.
       tests). **Remaining:** `SphericalVoronoi`, alpha-shapes, halfspace-intersection — each needs
       a Delaunay-triangulation/convex-hull/vertex-enumeration engine MathTS doesn't have yet; a
       substantially larger follow-up, not attempted this pass.
-- [ ] **Numerics:** general PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem`
-      error control; B-spline fitting; Monte-Carlo/QMC integration; DAE/DDE.
+- [x] ✅ **Numerics: B-spline fit/eval + Monte-Carlo/QMC integration — DONE 2026-07-17.**
+      `bsplineFit`/`bsplineEval` (de Boor collocation for `s=0` interpolation, least-squares
+      smoothing for `s>0`) and `monteCarloIntegrate` (uniform + Halton/Sobol quasi-MC over an
+      axis-aligned box), `functions/src/numeric/{bspline,monte-carlo}.ts`. Oracle-pinned vs scipy
+      `splrep`/`splev` + known integrals within a 4-sigma band
+      (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests). **Remaining:** general
+      PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem` error
+      control; DAE/DDE — each a substantially larger sub-project, not attempted this pass.
 - [ ] **Stats:** logistic/GLM breadth (Poisson/Gamma links); Gaussian-process regression; multivariate
       distributions (Dirichlet/Wishart/MVN sampling); power analysis.
 - [ ] **Special-fns Phase-5 extension (niche):** polylog/Lerch Φ, Struve H/L, Kelvin ber/bei, Barnes-G,

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — B-spline fit/eval, Monte-Carlo/QMC integration
+
+Two additive numeric routines (`functions/src/numeric/bspline.ts`, `functions/src/numeric/monte-carlo.ts`):
+
+- **`bsplineFit(x, y, opts?)`** / **`bsplineEval(spline, xnew)`** — fit a B-spline of degree `k`
+  (default cubic) to tabulated data, returned in scipy's `tck` tuple shape (`{t, c, k}`), and
+  evaluate it via de Boor's algorithm (Piegl & Tiller `FindSpan`/`BasisFuns`). `s=0` (default) is
+  the standard de Boor collocation construction — one basis function per data point, passing
+  through every point exactly; `s>0` (or an explicit `nknots`) is a least-squares smoothing spline
+  with fewer interior knots, solved via the existing `leastSquares` primitive. Distinct from the
+  existing `bspline(controlPoints, degree, t)` control-point curve evaluator, which fits no data.
+  Oracle-pinned: interpolation exactness (tol 1e-9), `sin` approximation at intermediate points
+  (tol 1e-3), and a cross-check against scipy `splrep`/`splev` (`splev(1.0)` ≈ 0.84144992, tol 1e-4
+  — knot conventions differ slightly between constructions, hence the looser tolerance).
+- **`monteCarloIntegrate(f, bounds, opts?)`** — Monte-Carlo / quasi-Monte-Carlo integration over an
+  axis-aligned box. `method: 'uniform'` (default) uses the package's existing seeded RNG
+  (`createRng`) and returns a genuine sample-variance `stderr`; `'halton'` is a dimension-general
+  low-discrepancy sequence; `'sobol'` is a genuine Antonov-Saleev (Gray-code) Sobol sequence
+  restricted to 1-2 dimensions — the only two whose direction numbers are fully forced by the
+  Sobol recurrence with no external Joe-Kuo lookup table (verified point-for-point against
+  `scipy.stats.qmc.Sobol(d=2, scramble=False)`). QMC methods report `stderr: 0` (documented: their
+  points aren't independent, so a variance-based CI isn't meaningful). Oracle-pinned: `∫_0^1 x² dx`
+  and the unit-disk-indicator integral both land within a 4-sigma band of their known values, and
+  Halton/Sobol both converge faster than uniform MC at matched `n`
+  (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests).
+
+Scope note: general PDE/method-of-lines (`solvePDE` remains 1-D-heat-only), BDF/Radau stiff solvers
+(RODAS already covers tight-tolerance stiffness), `solveODESystem` error control, and DAE/DDE
+support remain out of scope — a substantially larger sub-project each, deliberately deferred.
+
 ### Added — niche special functions: polylog, Struve H/L, Kelvin ber/bei, Barnes-G
 
 Six additive `@danielsimonjr/mathts-functions` special functions (`functions/src/special/niche.ts`),

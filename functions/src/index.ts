@@ -253,6 +253,21 @@ export type { QuadOptions, QuadResult } from './numeric/adaptive-quad.js';
 export { interpn } from './numeric/interpn.js';
 export type { NDArrayInput } from './numeric/interpn.js';
 
+// B-spline fitting (de Boor collocation for s=0 interpolation, least-squares
+// smoothing for s>0) + de Boor evaluation. Distinct from the existing
+// control-point `bspline(controlPoints, degree, t)` curve evaluator
+// (typed/numeric.ts) — this fits data (x, y), matching scipy's
+// `splrep`/`splev` tck-tuple convention.
+export { bsplineFit, bsplineEval } from './numeric/bspline.js';
+export type { BSplineFitOptions, BSplineTuple } from './numeric/bspline.js';
+
+// Monte-Carlo / quasi-Monte-Carlo integration over an axis-aligned box:
+// uniform (seeded RNG, variance-based stderr), Halton (dimension-general
+// low-discrepancy), Sobol (dimensions 1-2, forced direction numbers, no
+// external table — see monte-carlo.ts module doc).
+export { monteCarloIntegrate } from './numeric/monte-carlo.js';
+export type { Bound, MonteCarloOptions, MonteCarloResult } from './numeric/monte-carlo.js';
+
 // Gap-analysis Wave D — time-series basics (bridge signal ↔ statistics).
 export { movingAverage, ewma, detrend, acf } from './timeseries-extra.js';
 

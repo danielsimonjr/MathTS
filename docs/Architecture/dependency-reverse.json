@@ -1678,6 +1678,8 @@
       "functions/src/typed/numeric.ts"
     ],
     "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/bspline.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/monte-carlo.ts": ["functions/src/index.ts"],
     "functions/src/timeseries-extra.ts": [
       "functions/src/index.ts",
       "functions/src/stats/timeseries.ts"
@@ -2047,10 +2049,18 @@
       "functions/src/ml/glm.ts",
       "functions/src/ml/logistic-regression.ts",
       "functions/src/ml/regularized-regression.ts",
+      "functions/src/numeric/bspline.ts",
       "functions/src/numeric/control-equations.ts",
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/nnls.ts",
       "functions/src/typed/index.ts"
+    ],
+    "functions/src/probability/util/seededRNG.ts": [
+      "functions/src/numeric/monte-carlo.ts",
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/probability/random.ts",
+      "functions/src/probability/randomInt.ts",
+      "functions/src/stats/mvn.ts"
     ],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",
@@ -2070,12 +2080,6 @@
     "functions/src/plain/number/probability.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/probability/util/seededRNG.ts": [
-      "functions/src/probability/pickRandom.ts",
-      "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts",
-      "functions/src/stats/mvn.ts"
-    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"
