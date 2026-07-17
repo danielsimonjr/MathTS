@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-17'
-  totalFiles: 1076
+  totalFiles: 1077
   totalModules: 82
-  totalExports: 5387
+  totalExports: 5399
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7829,6 +7829,15 @@ modules:
           imports:
             - rootsLegendre
           reExport: true
+        - file: ./special/niche.js
+          imports:
+            - polylog
+            - struveH
+            - struveL
+            - kelvinBer
+            - kelvinBei
+            - barnesG
+          reExport: true
         - file: ./graph/traversal-centrality.js
           imports:
             - bfs
@@ -8352,6 +8361,12 @@ modules:
         - jacobiCN
         - jacobiDN
         - rootsLegendre
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
         - bfs
         - dfs
         - floydWarshall
@@ -8701,6 +8716,12 @@ modules:
         - jacobiCN
         - jacobiDN
         - rootsLegendre
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
         - bfs
         - dfs
         - floydWarshall
@@ -14663,6 +14684,29 @@ modules:
         - jacobiSN
         - jacobiCN
         - jacobiDN
+    functions/src/special/niche.ts:
+      description: 'Niche special functions: polylogarithm, Struve H/L, Kelvin ber/bei (order'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+      workspaceDependencies: []
+      exports:
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
+      functions:
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
     functions/src/special/polygamma-orthopoly.ts:
       description: Polygamma functions and classical orthogonal polynomials.
       externalDependencies: []
@@ -33980,6 +34024,7 @@ dependencyGraph:
         - functions/src/special/erf.ts
         - functions/src/special/hypergeometric.ts
         - functions/src/special/jacobi-elliptic.ts
+        - functions/src/special/niche.ts
         - functions/src/special/polygamma-orthopoly.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
@@ -34756,17 +34801,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1076
+  totalTypeScriptFiles: 1077
   totalModules: 82
-  totalLinesOfCode: 185180
-  totalExports: 5387
+  totalLinesOfCode: 185475
+  totalExports: 5399
   totalClasses: 57
   totalInterfaces: 481
-  totalFunctions: 1796
+  totalFunctions: 1802
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2034
+  totalReExports: 2040
   totalTypeOnlyImports: 554
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

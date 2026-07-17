@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — niche special functions: polylog, Struve H/L, Kelvin ber/bei, Barnes-G
+
+Six additive `@danielsimonjr/mathts-functions` special functions (`functions/src/special/niche.ts`),
+following the plain-exported-function pattern already used by `hypergeometric.ts` /
+`polygamma-orthopoly.ts` (no typed-function array/WASM dispatch overloads):
+
+- **`polylog(s, z)`** — polylogarithm `Li_s(z)` via its defining series (converges for `|z| < 1`);
+  analytic continuation to `|z| >= 1` is out of scope and throws.
+- **`struveH(v, z)`** / **`struveL(v, z)`** — Struve H and modified Struve L functions via their
+  power series (DLMF 11.2.1), evaluated by a term-recurrence ratio seeded from two `lgamma` calls
+  (avoids recomputing Gamma per order / overflow from large individual Gamma values).
+- **`kelvinBer(x)`** / **`kelvinBei(x)`** — Kelvin functions ber(x), bei(x) (order 0) via their
+  power series (DLMF 10.65.1).
+- **`barnesG(z)`** — Barnes G-function for real `z > 0`, via the functional equation
+  `G(z+1) = Γ(z)·G(z)` to shift `z` up until the DLMF 5.17.5 asymptotic expansion of `ln G`
+  converges to machine precision, then unwinding the shift.
+
+All six oracle-pinned against `mpmath` (dps=25): relative error < 1e-11 across every reference
+value, most well under 1e-12 (`functions/tests/gap-special-niche-oracle.test.ts`, 23 tests). Lerch
+Φ, Coulomb wave functions, Mathieu functions, parabolic-cylinder functions, spheroidal wave
+functions, and the Riemann-Siegel Z function remain — highly specialized, deliberately deferred to
+a future chunk.
+
 ### Added — stats breadth: GLM (Poisson/Gamma), multivariate-normal PDF/sampling, t-test power
 
 Three additive `@danielsimonjr/mathts-functions` statistics primitives:

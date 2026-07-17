@@ -1727,6 +1727,7 @@
       "functions/src/signal/iir-design.ts"
     ],
     "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
+    "functions/src/special/niche.ts": ["functions/src/index.ts"],
     "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
     "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
@@ -2098,6 +2099,7 @@
     ],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/signal/iir-design.ts",
+      "functions/src/special/niche.ts",
       "functions/src/stats/inference-extra2.ts",
       "functions/src/typed/special.ts",
       "functions/src/wasm/special/wasm-bridge.ts"

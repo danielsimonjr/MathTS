@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1076, "e": 5387, "re": 2034 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-17", "f": 1077, "e": 5399, "re": 2040 },
   "s": {
-    "loc": 185180,
+    "loc": 185475,
     "cls": 57,
     "int": 481,
-    "fn": 1796,
+    "fn": 1802,
     "tg": 160,
     "en": 0,
     "co": 1543,
@@ -910,7 +910,7 @@
       ]
     },
     "functions/special": {
-      "f": 5,
+      "f": 6,
       "exp": [
         "createErf",
         "pFq",
@@ -920,6 +920,12 @@
         "jacobiSN",
         "jacobiCN",
         "jacobiDN",
+        "polylog",
+        "struveH",
+        "struveL",
+        "kelvinBer",
+        "kelvinBei",
+        "barnesG",
         "polygamma",
         "trigamma",
         "jacobiP",
@@ -1800,7 +1806,7 @@
     { "p": "utils/factory.ts", "i": 2, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 100, "o": 0 },
+    { "p": "src/index.ts", "i": 101, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 61 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

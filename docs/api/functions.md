@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1027 exports).
+> `@danielsimonjr/mathts-functions` (1033 exports).
 
 ### Functions by category
 
@@ -453,7 +453,7 @@ ceil(2.1); // 3
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (53): `airyAi`, `airyBi`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `sinIntegral`, `trigamma`, `zeta`
+**Special Functions** (59): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `polylog`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 

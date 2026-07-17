@@ -464,6 +464,10 @@ export { jacobiSN, jacobiCN, jacobiDN } from './special/jacobi-elliptic.js';
 export { rootsLegendre } from './numeric/gauss-nodes.js';
 export type { RootsLegendreResult } from './numeric/gauss-nodes.js';
 
+// Niche special functions — polylogarithm (|z| < 1 series), Struve H/L,
+// Kelvin ber/bei (order 0), and the Barnes G-function (real z > 0).
+export { polylog, struveH, struveL, kelvinBer, kelvinBei, barnesG } from './special/niche.js';
+
 // Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
 // single-source Bellman-Ford (negative-weight/cycle-aware), and
 // closeness/harmonic centrality, complementing the existing Dijkstra
