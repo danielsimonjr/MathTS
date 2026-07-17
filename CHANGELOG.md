@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — CDG `duplicate-symbols` detector is now classification-aware (alias/dispatch/allowlist/true)
+
+The `duplicate-symbols` detector's name-grouping over-counted: it flagged legitimate
+typed-dispatch variants, const-alias delegations, deliberately-kept hot-path guards, and
+AssemblyScript/`VERSION`-string false positives alongside real merge targets, reporting a flat
+253 runtime "duplicates". `detectDuplicateSymbols` (`tools/create-dependency-graph/create-dependency-graph.ts`)
+now classifies every flagged name into one of four `DupEntryTag`s: **ALIAS_DELEGATION** (a
+definer whose body is `export const X = Y` where `Y` resolves to an imported symbol — e.g.
+`compat/src/shims.ts`'s `export const abs = _abs` — excluded as a forward, not an independent
+body; if <2 real bodies remain the whole name is dropped into this bucket); **DISPATCH_VARIANT**
+(>=2 `export const X = mathTyped('X', {...})` registrations of the same public name across
+packages — e.g. `abs`/`add` in `functions` vs `matrix` — distinct dispatch surfaces, Bucket C
+delegation candidates, not copy-paste duplicates); **ALLOWLISTED** (matches the new
+`tools/create-dependency-graph/duplicate-allowlist.json`, seeded with the hot-path `is*` guard
+family kept local per `project-all-libraries-build-on-core`, the AssemblyScript `assembly/src/**`
+mirror layer that can't import `core`, and the three per-package `VERSION` strings); and
+**TRUE_DUPLICATE** — the actionable remainder. `duplicate-symbols.{json,md}` now report a
+per-category summary line plus the existing per-name detail (each definer annotated with its
+own sub-tag/reason); the runtime **TRUE_DUPLICATE count dropped from 253 to 142**
+(17 DISPATCH_VARIANT, 7 ALIAS_DELEGATION, 87 ALLOWLISTED explain the rest).
+
 ### Changed — cross-package dedup, Bucket B slice 1: `factory`/`string`/`bignumber-formatter` utils → core/internal
 
 `expression` and `functions` each carried duplicate mathjs-derived cold-utility copies (dead

@@ -3662,10 +3662,33 @@ type RuntimeSymbolCategory = 'function' | 'constant' | 'class';
 type TypeSymbolCategory = 'interface' | 'type' | 'enum';
 type DupExportKey = 'functions' | 'constants' | 'classes' | 'interfaces' | 'types' | 'enums';
 
+/**
+ * Per-definer classification (see the big comment above `buildDuplicateEntries`
+ * for the full decision model):
+ * - `ALLOWLISTED` — matches `duplicate-allowlist.json` (human-curated: hot-path
+ *   `is*` guards, AssemblyScript mirrors, per-package `VERSION` strings).
+ * - `DISPATCH_VARIANT` — `export const X = mathTyped('X', {...})`, a public
+ *   typed-dispatch registration, not a copy-paste body.
+ * - `ALIAS_DELEGATION` — `export const X = Y` where `Y` is bound by an
+ *   `import` in the same file — a forward, not an independent body.
+ * - `PLAIN` — none of the above; a genuine own-defined body.
+ */
+type DupDefinerTag = 'ALLOWLISTED' | 'DISPATCH_VARIANT' | 'ALIAS_DELEGATION' | 'PLAIN';
+
+/**
+ * Entry-level (per-name) classification, derived from its definers'
+ * `DupDefinerTag`s — see `buildDuplicateEntries`.
+ */
+type DupEntryTag = 'TRUE_DUPLICATE' | 'DISPATCH_VARIANT' | 'ALIAS_DELEGATION' | 'ALLOWLISTED';
+
 interface DuplicateDefiner {
   file: string;
   package: string;
   public: boolean;
+  /** This definer's own classification (see `DupDefinerTag`). */
+  tag: DupDefinerTag;
+  /** Present when `tag === 'ALLOWLISTED'` — the matching allowlist entry's reason. */
+  reason?: string;
 }
 
 interface DuplicateSymbolEntry {
@@ -3680,12 +3703,22 @@ interface DuplicateSymbolEntry {
    *  definers), or `'internal-only'` (0 public definers). A hint, not a
    *  verdict — a human still confirms before consolidating. */
   canonicalHint: string;
+  /** Entry-level classification (see `DupEntryTag`). Only `TRUE_DUPLICATE`
+   *  is the actionable merge-target bucket. */
+  tag: DupEntryTag;
 }
 
 interface DuplicateSymbolsReport {
   generated: string;
   note: string;
-  summary: { runtimeDuplicates: number; typeDuplicates: number };
+  summary: {
+    /** Count of `TRUE_DUPLICATE`-tagged runtime entries — the actionable number. */
+    runtimeDuplicates: number;
+    /** Count of `TRUE_DUPLICATE`-tagged type entries. */
+    typeDuplicates: number;
+    runtimeByTag: Record<DupEntryTag, number>;
+    typeByTag: Record<DupEntryTag, number>;
+  };
   runtime: DuplicateSymbolEntry[];
   types: DuplicateSymbolEntry[];
 }
@@ -3703,11 +3736,182 @@ const TYPE_DUP_CATEGORIES: Array<{ cat: TypeSymbolCategory; key: DupExportKey }>
 ];
 
 const DUPLICATE_SYMBOLS_NOTE =
-  'This report groups names by OWN definition, not by call graph. It does NOT detect ' +
-  'typed-dispatch polymorphism (a single public name registered with multiple typed ' +
-  'overloads for different argument shapes) — a flagged name may be a genuine duplicate ' +
-  'implementation OR a legitimate typed-dispatch/factory variant. Triage each entry using ' +
-  'the defining files + public flags before merging anything.';
+  'This report groups names by OWN definition, not by call graph, then classifies each ' +
+  'flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), ' +
+  'DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct ' +
+  'dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ' +
+  'ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — ' +
+  'excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches ' +
+  'duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package ' +
+  'VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for ' +
+  'different argument shapes within one registration — a human still triages TRUE_DUPLICATE ' +
+  'entries using the defining files + public flags before merging anything.';
+
+interface DuplicateAllowlistEntry {
+  /** Symbol-name patterns. A trailing `*` is a prefix match; the literal `*` matches any name. */
+  names: string[];
+  /** File-path patterns, repo-relative. A trailing `/**` is a directory-prefix match; anything
+   *  else must match the file path exactly. */
+  filesGlob: string[];
+  reason: string;
+}
+
+let duplicateAllowlistCache: DuplicateAllowlistEntry[] | undefined;
+
+/**
+ * Load `tools/create-dependency-graph/duplicate-allowlist.json` — the
+ * human-curated set of legitimately-independent own-definitions (hot-path
+ * `is*` guards kept local per project-all-libraries-build-on-core,
+ * AssemblyScript mirrors that can't import core, per-package `VERSION`
+ * strings). Missing/unparseable file → empty allowlist (fail open to
+ * "nothing allowlisted", not a crash).
+ */
+function loadDuplicateAllowlist(): DuplicateAllowlistEntry[] {
+  if (duplicateAllowlistCache) return duplicateAllowlistCache;
+  const path = join(ROOT_DIR, 'tools', 'create-dependency-graph', 'duplicate-allowlist.json');
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf-8')) as {
+      entries?: DuplicateAllowlistEntry[];
+    };
+    duplicateAllowlistCache = parsed.entries ?? [];
+  } catch {
+    duplicateAllowlistCache = [];
+  }
+  return duplicateAllowlistCache;
+}
+
+/** `pattern` against `value`: literal `*` matches anything, a trailing `/**`
+ *  is a directory-prefix match, a trailing `*` is a plain prefix match,
+ *  otherwise exact string equality. */
+function globMatchSingle(pattern: string, value: string): boolean {
+  if (pattern === '*') return true;
+  if (pattern.endsWith('/**')) return value.startsWith(pattern.slice(0, -2)); // keep the trailing '/'
+  if (pattern.endsWith('*')) return value.startsWith(pattern.slice(0, -1));
+  return value === pattern;
+}
+
+function findAllowlistMatch(
+  allowlist: DuplicateAllowlistEntry[],
+  name: string,
+  filePath: string
+): DuplicateAllowlistEntry | undefined {
+  return allowlist.find(
+    (e) =>
+      e.names.some((n) => globMatchSingle(n, name)) &&
+      e.filesGlob.some((f) => globMatchSingle(f, filePath))
+  );
+}
+
+const rawFileContentCache = new Map<string, string>();
+
+/** Raw (unstripped) source of a repo-relative file path, cached. Used only by
+ *  the duplicate-classification regexes below — separate from `parseFile`'s
+ *  own comment-stripped `code` (not retained on `ParsedFile`). */
+function getRawFileContent(relPath: string): string {
+  const cached = rawFileContentCache.get(relPath);
+  if (cached !== undefined) return cached;
+  let content = '';
+  try {
+    content = readFileSync(join(ROOT_DIR, relPath), 'utf-8');
+  } catch {
+    content = '';
+  }
+  rawFileContentCache.set(relPath, content);
+  return content;
+}
+
+function stripCommentsForClassification(content: string): string {
+  return content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
+function escapeRegExpLiteral(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** `export const NAME = mathTyped('NAME', {...` (optional generic args) — a
+ *  typed-function dispatch registration: a distinct public dispatch surface,
+ *  not a copy-paste duplicate body. */
+function isDispatchVariantBody(code: string, name: string): boolean {
+  const re = new RegExp(
+    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*mathTyped\\s*(?:<[^>]*>)?\\s*\\(`
+  );
+  return re.test(code);
+}
+
+/** Every LOCAL binding name introduced by an `import` statement in `code`
+ *  (comment-stripped) — the alias after `as` for named imports, the
+ *  default-import binding, or the namespace-import binding. Deliberately
+ *  ignores WHERE the import resolves (relative vs workspace-scoped) — for
+ *  alias-delegation purposes we only need to know the RHS identifier is
+ *  imported, not same-file-local. */
+function collectImportedLocalNames(code: string): Set<string> {
+  const names = new Set<string>();
+  const importRegex =
+    /import\s+(?:type\s+)?(?:(?:\{([^}]+)\}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:\{([^}]+)\}|(\w+)))?)\s+from\s+['"][^'"]+['"]/g;
+  let m: RegExpExecArray | null;
+  while ((m = importRegex.exec(code)) !== null) {
+    const named = m[1] || m[4] || '';
+    const def = m[2] || m[5] || '';
+    const ns = m[3] || '';
+    if (named) {
+      for (const item of named.split(',')) {
+        const trimmed = item.trim().replace(/^type\s+/, '');
+        if (!trimmed) continue;
+        const parts = trimmed.split(/\s+as\s+/);
+        const local = parts[parts.length - 1].trim();
+        if (local) names.add(local);
+      }
+    }
+    if (def) names.add(def);
+    if (ns) names.add(ns);
+  }
+  return names;
+}
+
+/** `export const NAME = someIdentifier;` (optional type annotation) where the
+ *  RHS is a BARE identifier bound by an `import` elsewhere in the file — a
+ *  delegation/re-export, not an independent body (e.g. `compat/src/shims.ts`'s
+ *  `export const abs = _abs;`, `_abs` imported as `abs as _abs`). */
+function isAliasDelegationBody(
+  code: string,
+  name: string,
+  importedLocalNames: Set<string>
+): boolean {
+  const re = new RegExp(
+    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*([A-Za-z_$][\\w$]*)\\s*;`
+  );
+  const m = code.match(re);
+  return !!m && importedLocalNames.has(m[1]);
+}
+
+/**
+ * Classify a single definer. Allowlist wins first (explicit human curation);
+ * then, for `constant`-category definers only (the shape `export const X =
+ * ...` — the only shape ALIAS_DELEGATION/DISPATCH_VARIANT can apply to),
+ * check for a dispatch registration or an alias forward. Everything else is
+ * `PLAIN` — a genuine own-defined body.
+ */
+function classifyDefiner(
+  file: ParsedFile,
+  name: string,
+  category: string,
+  allowlist: DuplicateAllowlistEntry[]
+): { tag: DupDefinerTag; reason?: string } {
+  const allowMatch = findAllowlistMatch(allowlist, name, file.path);
+  if (allowMatch) return { tag: 'ALLOWLISTED', reason: allowMatch.reason };
+
+  if (category === 'constant') {
+    const raw = getRawFileContent(file.path);
+    if (raw) {
+      const code = stripCommentsForClassification(raw);
+      if (isDispatchVariantBody(code, name)) return { tag: 'DISPATCH_VARIANT' };
+      if (isAliasDelegationBody(code, name, collectImportedLocalNames(code))) {
+        return { tag: 'ALIAS_DELEGATION' };
+      }
+    }
+  }
+  return { tag: 'PLAIN' };
+}
 
 /**
  * Collect every OWN definition of every symbol name across `files`, keyed by
@@ -3753,9 +3957,68 @@ function collectOwnDefiners(
  * call both public (package-export-surfaces.json is a flat per-package name
  * set, not file-scoped) and report AMBIGUOUS instead of a clean canonical hint.
  */
+const DUP_ENTRY_TAG_SORT_ORDER: Record<DupEntryTag, number> = {
+  TRUE_DUPLICATE: 0,
+  DISPATCH_VARIANT: 1,
+  ALIAS_DELEGATION: 2,
+  ALLOWLISTED: 3,
+};
+
+function finalizeDuplicateEntry(
+  name: string,
+  categories: Set<string>,
+  definers: DuplicateDefiner[],
+  tag: DupEntryTag
+): DuplicateSymbolEntry {
+  const publicDefiners = definers.filter((d) => d.public);
+  const canonicalHint =
+    publicDefiners.length === 1
+      ? publicDefiners[0].file
+      : publicDefiners.length > 1
+        ? 'AMBIGUOUS'
+        : 'internal-only';
+  return { name, category: [...categories].sort().join('+'), definers, canonicalHint, tag };
+}
+
+/**
+ * Turn per-name definer lists into classified report entries, keeping only
+ * names with >=2 DISTINCT defining files (the candidate-duplicate threshold),
+ * resolving each definer's public-surface flag, a canonical-candidate hint,
+ * and — the classification-aware extension — an entry-level `DupEntryTag`:
+ *
+ * 1. Classify every definer (`classifyDefiner`): ALLOWLISTED > DISPATCH_VARIANT
+ *    / ALIAS_DELEGATION (constant-shape only) > PLAIN.
+ * 2. Exclude ALIAS_DELEGATION definers first — a const-alias forward is not an
+ *    independent body at all. If fewer than 2 non-alias definers remain, the
+ *    "duplication" was illusory (one real body, the rest just forwards to
+ *    it) — tag the whole entry ALIAS_DELEGATION (still reported, for
+ *    transparency, but excluded from the actionable count).
+ * 3. Of the non-alias definers, exclude ALLOWLISTED ones. If fewer than 2
+ *    remain, the duplication is fully explained by the allowlist (e.g. the
+ *    `is*` guard family, or an AssemblyScript mirror paired with exactly one
+ *    JS definer) — tag ALLOWLISTED.
+ * 4. Otherwise, if >=2 of the remaining definers are DISPATCH_VARIANT, the
+ *    name is a shared public dispatch surface across packages (e.g. `abs`/
+ *    `add` registered independently by `functions` and `matrix`) — a Bucket C
+ *    delegation candidate, not a blind merge target — tag DISPATCH_VARIANT.
+ * 5. Otherwise it's a real TRUE_DUPLICATE — the actionable merge target.
+ *
+ * Public is resolved per FILE (not per package-name-union): a definer is
+ * public iff its own file is in `publicSurface.publicWildcardFiles` (reached
+ * by a wildcard `export *` chain from a package root) OR its specific name is
+ * in `publicSurface.publicNamed` (`${file}::${name}`, a NAMED re-export chain
+ * to a root). This is what correctly resolves cases like `fftshift`, which is
+ * OWN-defined in both `functions/src/signal/fft.ts` and
+ * `functions/src/signal/fft-helpers.ts` — only the latter is named-re-exported
+ * by `functions/src/index.ts`, so only it is flagged public; a coarser "is the
+ * NAME present anywhere in the package's export surface" check would wrongly
+ * call both public (package-export-surfaces.json is a flat per-package name
+ * set, not file-scoped) and report AMBIGUOUS instead of a clean canonical hint.
+ */
 function buildDuplicateEntries(
   byName: Map<string, Array<{ file: ParsedFile; category: string }>>,
-  publicSurface: PublicSurface
+  publicSurface: PublicSurface,
+  allowlist: DuplicateAllowlistEntry[]
 ): DuplicateSymbolEntry[] {
   const isFilePublic = (file: ParsedFile, name: string): boolean =>
     publicSurface.publicWildcardFiles.has(file.path) ||
@@ -3773,38 +4036,69 @@ function buildDuplicateEntries(
     const definers: DuplicateDefiner[] = [];
     for (const { file, category } of byFile.values()) {
       categories.add(category);
+      const { tag, reason } = classifyDefiner(file, name, category, allowlist);
       definers.push({
         file: file.path,
         package: file.packageName ?? 'unknown',
         public: isFilePublic(file, name),
+        tag,
+        ...(reason ? { reason } : {}),
       });
     }
     definers.sort((a, b) => a.file.localeCompare(b.file));
 
-    const publicDefiners = definers.filter((d) => d.public);
-    const canonicalHint =
-      publicDefiners.length === 1
-        ? publicDefiners[0].file
-        : publicDefiners.length > 1
-          ? 'AMBIGUOUS'
-          : 'internal-only';
+    const nonAlias = definers.filter((d) => d.tag !== 'ALIAS_DELEGATION');
+    if (nonAlias.length < 2) {
+      entries.push(finalizeDuplicateEntry(name, categories, definers, 'ALIAS_DELEGATION'));
+      continue;
+    }
 
-    entries.push({ name, category: [...categories].sort().join('+'), definers, canonicalHint });
+    const nonAllowlisted = nonAlias.filter((d) => d.tag !== 'ALLOWLISTED');
+    let entryTag: DupEntryTag;
+    if (nonAllowlisted.length < 2) {
+      entryTag = 'ALLOWLISTED';
+    } else {
+      const dispatchCount = nonAllowlisted.filter((d) => d.tag === 'DISPATCH_VARIANT').length;
+      entryTag = dispatchCount >= 2 ? 'DISPATCH_VARIANT' : 'TRUE_DUPLICATE';
+    }
+    entries.push(finalizeDuplicateEntry(name, categories, definers, entryTag));
   }
-  entries.sort((a, b) => b.definers.length - a.definers.length || a.name.localeCompare(b.name));
+  entries.sort(
+    (a, b) =>
+      DUP_ENTRY_TAG_SORT_ORDER[a.tag] - DUP_ENTRY_TAG_SORT_ORDER[b.tag] ||
+      b.definers.length - a.definers.length ||
+      a.name.localeCompare(b.name)
+  );
   return entries;
+}
+
+function tallyByTag(entries: DuplicateSymbolEntry[]): Record<DupEntryTag, number> {
+  const tally: Record<DupEntryTag, number> = {
+    TRUE_DUPLICATE: 0,
+    DISPATCH_VARIANT: 0,
+    ALIAS_DELEGATION: 0,
+    ALLOWLISTED: 0,
+  };
+  for (const e of entries) tally[e.tag]++;
+  return tally;
 }
 
 function detectDuplicateSymbols(
   files: ParsedFile[],
   publicSurface: PublicSurface
 ): { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] } {
+  const allowlist = loadDuplicateAllowlist();
   return {
     runtime: buildDuplicateEntries(
       collectOwnDefiners(files, RUNTIME_DUP_CATEGORIES),
-      publicSurface
+      publicSurface,
+      allowlist
     ),
-    types: buildDuplicateEntries(collectOwnDefiners(files, TYPE_DUP_CATEGORIES), publicSurface),
+    types: buildDuplicateEntries(
+      collectOwnDefiners(files, TYPE_DUP_CATEGORIES),
+      publicSurface,
+      allowlist
+    ),
   };
 }
 
@@ -3812,21 +4106,38 @@ function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): strin
   let md = '# Duplicate Symbols\n\n';
   md += `**Generated**: ${report.generated} (by tools/create-dependency-graph)\n\n`;
   md += `Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across `;
-  md += `the monorepo — the measurement that scopes the dedup campaign (three \`fft\`s; `;
-  md += `\`sum\`/\`distance\`/\`cumsum\`/\`variance\` across typed+factory+compat layers; `;
-  md += `\`fftshift\`/\`ifftshift\` defined independently in both \`fft.ts\` and \`fft-helpers.ts\`).\n\n`;
+  md += `the monorepo, then CLASSIFIED (see \`DupEntryTag\`) so the actionable subset is clear: `;
+  md += `\`TRUE_DUPLICATE\` (real merge targets) vs \`DISPATCH_VARIANT\` (>=2 \`mathTyped(...)\` `;
+  md += `registrations of the same public name — distinct dispatch surfaces, Bucket C delegation `;
+  md += `candidates, not copy-paste bodies), \`ALIAS_DELEGATION\` (a \`const X = importedY\` `;
+  md += `forward, excluded once <2 real bodies remain), and \`ALLOWLISTED\` (matches `;
+  md += `\`duplicate-allowlist.json\`: hot-path \`is*\` guards, AssemblyScript mirrors, `;
+  md += `per-package \`VERSION\` strings).\n\n`;
   md += `> **Note:** ${report.note}\n\n`;
-  md += `| Section | Count |\n| --- | --: |\n`;
-  md += `| Runtime duplicates (function/constant/class) | ${report.summary.runtimeDuplicates} |\n`;
-  md += `| Type duplicates (interface/type/enum) | ${report.summary.typeDuplicates} |\n\n`;
+
+  const summaryTable = (byTag: Record<DupEntryTag, number>, total: number): string =>
+    `| Category | Count |\n| --- | --: |\n` +
+    `| **TRUE_DUPLICATE** (actionable) | ${byTag.TRUE_DUPLICATE} |\n` +
+    `| DISPATCH_VARIANT | ${byTag.DISPATCH_VARIANT} |\n` +
+    `| ALIAS_DELEGATION | ${byTag.ALIAS_DELEGATION} |\n` +
+    `| ALLOWLISTED | ${byTag.ALLOWLISTED} |\n` +
+    `| _Total flagged names_ | ${total} |\n\n`;
+
+  md += `## Summary — runtime (function/constant/class)\n\n`;
+  md += summaryTable(report.summary.runtimeByTag, report.runtime.length);
+  md += `## Summary — types (interface/type/enum)\n\n`;
+  md += summaryTable(report.summary.typeByTag, report.types.length);
 
   const renderTable = (entries: DuplicateSymbolEntry[]): string => {
     if (entries.length === 0) return '_None._\n\n';
-    let out = '| Name | Category | Defining files (package, public?) | Canonical hint |\n';
+    let out = '| Name | Category | Defining files (package, public?, sub-tag) | Canonical hint |\n';
     out += '| --- | --- | --- | --- |\n';
     for (const e of entries) {
       const files = e.definers
-        .map((d) => `\`${d.file}\` (${d.package}, ${d.public ? 'public' : 'internal'})`)
+        .map((d) => {
+          const reasonSuffix = d.reason ? `: ${d.reason}` : '';
+          return `\`${d.file}\` (${d.package}, ${d.public ? 'public' : 'internal'}, ${d.tag}${reasonSuffix})`;
+        })
         .join('<br>');
       const hint = e.canonicalHint === 'AMBIGUOUS' ? '**AMBIGUOUS**' : `\`${e.canonicalHint}\``;
       out += `| \`${e.name}\` | ${e.category} | ${files} | ${hint} |\n`;
@@ -3835,10 +4146,40 @@ function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): strin
     return out;
   };
 
-  md += `## Runtime duplicates (priority)\n\n`;
-  md += renderTable(report.runtime);
+  const renderTaggedSection = (
+    title: string,
+    entries: DuplicateSymbolEntry[],
+    tag: DupEntryTag
+  ): string => `### ${title}\n\n${renderTable(entries.filter((e) => e.tag === tag))}`;
+
+  md += `## Runtime duplicates\n\n`;
+  md += renderTaggedSection(
+    'TRUE_DUPLICATE — actionable merge targets',
+    report.runtime,
+    'TRUE_DUPLICATE'
+  );
+  md += renderTaggedSection(
+    'DISPATCH_VARIANT — distinct public typed-dispatch surfaces (Bucket C candidates)',
+    report.runtime,
+    'DISPATCH_VARIANT'
+  );
+  md += renderTaggedSection(
+    'ALIAS_DELEGATION — const-alias forwards (not independent bodies)',
+    report.runtime,
+    'ALIAS_DELEGATION'
+  );
+  md += renderTaggedSection(
+    'ALLOWLISTED — accepted layering (see duplicate-allowlist.json)',
+    report.runtime,
+    'ALLOWLISTED'
+  );
+
   md += `## Type duplicates (lower priority)\n\n`;
-  md += renderTable(report.types);
+  md += renderTaggedSection('TRUE_DUPLICATE', report.types, 'TRUE_DUPLICATE');
+  md += renderTaggedSection('DISPATCH_VARIANT', report.types, 'DISPATCH_VARIANT');
+  md += renderTaggedSection('ALIAS_DELEGATION', report.types, 'ALIAS_DELEGATION');
+  md += renderTaggedSection('ALLOWLISTED', report.types, 'ALLOWLISTED');
+
   return md;
 }
 
@@ -4075,10 +4416,17 @@ async function main(): Promise<void> {
   // same-package same-name definitions). See detectDuplicateSymbols doc comment
   // above for the full model.
   const dup = detectDuplicateSymbols(activeParsedFiles, computePublicSurface(activeParsedFiles));
+  const runtimeByTag = tallyByTag(dup.runtime);
+  const typeByTag = tallyByTag(dup.types);
   const duplicateReport: DuplicateSymbolsReport = {
     generated: new Date().toISOString().split('T')[0],
     note: DUPLICATE_SYMBOLS_NOTE,
-    summary: { runtimeDuplicates: dup.runtime.length, typeDuplicates: dup.types.length },
+    summary: {
+      runtimeDuplicates: runtimeByTag.TRUE_DUPLICATE,
+      typeDuplicates: typeByTag.TRUE_DUPLICATE,
+      runtimeByTag,
+      typeByTag,
+    },
     runtime: dup.runtime,
     types: dup.types,
   };
@@ -4092,8 +4440,10 @@ async function main(): Promise<void> {
   );
   console.log(
     `Written: docs/Architecture/duplicate-symbols.md ` +
-      `(${duplicateReport.summary.runtimeDuplicates} runtime, ` +
-      `${duplicateReport.summary.typeDuplicates} type duplicates)`
+      `(${duplicateReport.summary.runtimeDuplicates} runtime TRUE_DUPLICATE / ` +
+      `${dup.runtime.length} runtime flagged, ` +
+      `${duplicateReport.summary.typeDuplicates} type TRUE_DUPLICATE / ` +
+      `${dup.types.length} type flagged)`
   );
 
   // Test coverage analysis (when --include-tests is specified)

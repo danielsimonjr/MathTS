@@ -1,0 +1,25 @@
+{
+  "note": "Entries here are legitimately-independent own-definitions that detectDuplicateSymbols would otherwise flag as TRUE_DUPLICATE. Matched by (name, file) — `names` supports a trailing '*' wildcard or exact literal '*' for match-all; `filesGlob` supports a trailing '/**' prefix match or an exact repo-relative file path. A duplicate name is only fully explained away (tag ALLOWLISTED) when ALL of its non-alias-delegation, non-dispatch-variant definers match an entry here.",
+  "entries": [
+    {
+      "names": ["is*"],
+      "filesGlob": [
+        "core/src/is.ts",
+        "expression/src/utils/is.ts",
+        "functions/src/utils/is.ts",
+        "packages/typed-function/src/index.ts"
+      ],
+      "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
+    },
+    {
+      "names": ["*"],
+      "filesGlob": ["assembly/src/**"],
+      "reason": "AssemblyScript separate compilation target, cannot import core"
+    },
+    {
+      "names": ["VERSION"],
+      "filesGlob": ["core/src/index.ts", "plot/src/index.ts", "workbook/src/contract.ts"],
+      "reason": "package-specific version string"
+    }
+  ]
+}
