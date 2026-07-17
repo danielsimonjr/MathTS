@@ -150,16 +150,16 @@ export const subtractScalar = createSubtractScalar(
   factoryScope as Parameters<typeof createSubtractScalar>[0]
 );
 
-// bitwise (synced factory — superseded by typed/bitwise; kept internal for factoryScope wiring)
+// bitwise (activated factory — superseded by typed/bitwise; kept internal for factoryScope wiring)
 const bitNot = createBitNot(factoryScope as Parameters<typeof createBitNot>[0]);
 
-// complex (synced factories — superseded by typed/complex; kept internal for factoryScope wiring)
+// complex (activated factories — superseded by typed/complex; kept internal for factoryScope wiring)
 const arg = createArg(factoryScope as Parameters<typeof createArg>[0]);
 const conj = createConj(factoryScope as Parameters<typeof createConj>[0]);
 const im = createIm(factoryScope as Parameters<typeof createIm>[0]);
 const re = createRe(factoryScope as Parameters<typeof createRe>[0]);
 
-// logical (synced factory — superseded by typed/logical; kept internal for factoryScope wiring)
+// logical (activated factory — superseded by typed/logical; kept internal for factoryScope wiring)
 const not = createNot(factoryScope as Parameters<typeof createNot>[0]);
 
 // matrix
@@ -173,7 +173,7 @@ export const map = createMap(factoryScope as Parameters<typeof createMap>[0]);
 export const size = createSize(factoryScope as Parameters<typeof createSize>[0]);
 export const squeeze = createSqueeze(factoryScope as Parameters<typeof createSqueeze>[0]);
 
-// probability (synced factories — superseded by typed/probability; kept internal for factoryScope wiring)
+// probability (activated factories — superseded by typed/probability; kept internal for factoryScope wiring)
 const combinations = createCombinations(factoryScope as Parameters<typeof createCombinations>[0]);
 const combinationsWithRep = createCombinationsWithRep(
   factoryScope as Parameters<typeof createCombinationsWithRep>[0]
@@ -183,13 +183,13 @@ const lgamma = createLgamma(factoryScope as Parameters<typeof createLgamma>[0]);
 const pickRandom = createPickRandom(factoryScope as Parameters<typeof createPickRandom>[0]);
 const random = createRandom(factoryScope as Parameters<typeof createRandom>[0]);
 
-// relational (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+// relational (activated factory — superseded by typed/relational; kept internal for factoryScope wiring)
 const equalScalar = createEqualScalar(factoryScope as Parameters<typeof createEqualScalar>[0]);
 
 // special
 export const erf = createErf(factoryScope as Parameters<typeof createErf>[0]);
 
-// string (synced factories — superseded by typed/string; kept internal for factoryScope wiring)
+// string (activated factories — superseded by typed/string; kept internal for factoryScope wiring)
 const format = createFormat(factoryScope as Parameters<typeof createFormat>[0]);
 const print = createPrint(factoryScope as Parameters<typeof createPrint>[0]);
 
@@ -333,14 +333,14 @@ export const divideScalar = createDivideScalar(
   factoryScope as Parameters<typeof createDivideScalar>[0]
 );
 
-// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
 createRandomInt(factoryScope as Parameters<typeof createRandomInt>[0]);
 
 // statistics
 export const mode = createMode(factoryScope as Parameters<typeof createMode>[0]);
 export const prod = createProd(factoryScope as Parameters<typeof createProd>[0]);
 
-// string (synced factories — superseded by typed/string; kept internal for factoryScope wiring)
+// string (activated factories — superseded by typed/string; kept internal for factoryScope wiring)
 createBin(factoryScope as Parameters<typeof createBin>[0]);
 createHex(factoryScope as Parameters<typeof createHex>[0]);
 createOct(factoryScope as Parameters<typeof createOct>[0]);
@@ -573,7 +573,7 @@ factoryScope.log = factory_log;
 export const catalan = createCatalan(factoryScope as Parameters<typeof createCatalan>[0]);
 factoryScope.catalan = catalan;
 
-// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
 const bernoulli_factory = createBernoulli(factoryScope as Parameters<typeof createBernoulli>[0]);
 factoryScope.bernoulli = bernoulli_factory;
 
@@ -667,11 +667,11 @@ import { createTo } from '../unit/to.js';
 export const factory_compare = createCompare(factoryScope as Parameters<typeof createCompare>[0]);
 factoryScope.compare = factory_compare;
 
-// compareText (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+// compareText (activated factory — superseded by typed/relational; kept internal for factoryScope wiring)
 const compareText = createCompareText(factoryScope as Parameters<typeof createCompareText>[0]);
 factoryScope.compareText = compareText;
 
-// deepEqual (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+// deepEqual (activated factory — superseded by typed/relational; kept internal for factoryScope wiring)
 const deepEqual = createDeepEqual(factoryScope as Parameters<typeof createDeepEqual>[0]);
 factoryScope.deepEqual = deepEqual;
 
@@ -691,7 +691,7 @@ export const factory_smallerEq = createSmallerEq(
 );
 factoryScope.smallerEq = factory_smallerEq;
 
-// unequal (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+// unequal (activated factory — superseded by typed/relational; kept internal for factoryScope wiring)
 const unequal = createUnequal(factoryScope as Parameters<typeof createUnequal>[0]);
 factoryScope.unequal = unequal;
 
@@ -728,7 +728,7 @@ factoryScope.ceil = factory_ceil;
 export const factory_floor = createFloor(factoryScope as Parameters<typeof createFloor>[0]);
 factoryScope.floor = factory_floor;
 
-// bitwise (synced factories — superseded by typed/bitwise; kept internal for factoryScope wiring)
+// bitwise (activated factories — superseded by typed/bitwise; kept internal for factoryScope wiring)
 const bitAnd = createBitAnd(factoryScope as Parameters<typeof createBitAnd>[0]);
 factoryScope.bitAnd = bitAnd;
 
@@ -751,7 +751,7 @@ const rightLogShift = createRightLogShift(
 );
 factoryScope.rightLogShift = rightLogShift;
 
-// logical (synced factories — superseded by typed/logical; kept internal for factoryScope wiring)
+// logical (activated factories — superseded by typed/logical; kept internal for factoryScope wiring)
 const or = createOr(factoryScope as Parameters<typeof createOr>[0]);
 factoryScope.or = or;
 
@@ -816,7 +816,7 @@ import { createDistance } from '../geometry/distance.js';
 
 // --- Activate tier 6 ---
 
-// relational (synced factories — superseded by typed/relational; kept internal for factoryScope wiring)
+// relational (activated factories — superseded by typed/relational; kept internal for factoryScope wiring)
 const compareNatural = createCompareNatural(
   factoryScope as Parameters<typeof createCompareNatural>[0]
 );
@@ -835,7 +835,7 @@ factoryScope.fix = factory_fix;
 export const invmod = createInvmod(factoryScope as Parameters<typeof createInvmod>[0]);
 factoryScope.invmod = invmod;
 
-// logical (synced factories — superseded by typed/logical; kept internal for factoryScope wiring)
+// logical (activated factories — superseded by typed/logical; kept internal for factoryScope wiring)
 const and = createAnd(factoryScope as Parameters<typeof createAnd>[0]);
 factoryScope.and = and;
 
@@ -894,7 +894,7 @@ import { createSort } from '../matrix/sort.js';
 export const factorial = createFactorial(factoryScope as Parameters<typeof createFactorial>[0]);
 factoryScope.factorial = factorial;
 
-// setSize (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setSize (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setSize = createSetSize(factoryScope as Parameters<typeof createSetSize>[0]);
 factoryScope.setSize = setSize;
 
@@ -911,7 +911,7 @@ import { createPermutations } from '../probability/permutations.js';
 export const stirlingS2 = createStirlingS2(factoryScope as Parameters<typeof createStirlingS2>[0]);
 factoryScope.stirlingS2 = stirlingS2;
 
-// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
 const permutations_factory = createPermutations(
   factoryScope as Parameters<typeof createPermutations>[0]
 );
@@ -1267,7 +1267,7 @@ export const kldivergence = createKldivergence(
 );
 factoryScope.kldivergence = kldivergence;
 
-// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
 const multinomial_factory = createMultinomial(
   factoryScope as Parameters<typeof createMultinomial>[0]
 );
@@ -1276,35 +1276,35 @@ factoryScope.multinomial = multinomial_factory;
 export const freqz = createFreqz(factoryScope as Parameters<typeof createFreqz>[0]);
 factoryScope.freqz = freqz;
 
-// setCartesian (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setCartesian (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setCartesian = createSetCartesian(factoryScope as Parameters<typeof createSetCartesian>[0]);
 factoryScope.setCartesian = setCartesian;
 
-// setDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setDifference (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setDifference = createSetDifference(
   factoryScope as Parameters<typeof createSetDifference>[0]
 );
 factoryScope.setDifference = setDifference;
 
-// setDistinct (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setDistinct (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setDistinct = createSetDistinct(factoryScope as Parameters<typeof createSetDistinct>[0]);
 factoryScope.setDistinct = setDistinct;
 
-// setIntersect (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setIntersect (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setIntersect = createSetIntersect(factoryScope as Parameters<typeof createSetIntersect>[0]);
 factoryScope.setIntersect = setIntersect;
 
-// setIsSubset (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setIsSubset (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setIsSubset = createSetIsSubset(factoryScope as Parameters<typeof createSetIsSubset>[0]);
 factoryScope.setIsSubset = setIsSubset;
 
-// setMultiplicity (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setMultiplicity (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setMultiplicity = createSetMultiplicity(
   factoryScope as Parameters<typeof createSetMultiplicity>[0]
 );
 factoryScope.setMultiplicity = setMultiplicity;
 
-// setPowerset (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setPowerset (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setPowerset = createSetPowerset(factoryScope as Parameters<typeof createSetPowerset>[0]);
 factoryScope.setPowerset = setPowerset;
 
@@ -1364,7 +1364,7 @@ factoryScope.mad = mad;
 export const factory_std = createStd(factoryScope as Parameters<typeof createStd>[0]);
 factoryScope.std = factory_std;
 
-// setSymDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setSymDifference (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setSymDifference = createSetSymDifference(
   factoryScope as Parameters<typeof createSetSymDifference>[0]
 );
@@ -1394,7 +1394,7 @@ export const rationalize = createRationalize(
 );
 factoryScope.rationalize = rationalize;
 
-// setUnion (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+// setUnion (activated factory — superseded by typed/set; kept internal for factoryScope wiring)
 const setUnion = createSetUnion(factoryScope as Parameters<typeof createSetUnion>[0]);
 factoryScope.setUnion = setUnion;
 

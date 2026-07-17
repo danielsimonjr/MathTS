@@ -1110,9 +1110,13 @@ bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested globa
   **2** reconcile toBest/JSON → **3** rewire functions (`unit()`/`to`/`toBest`/operators; drop dual-branching) →
   **4** retire core Unit to an alias → **5** migrate ~130 tests + regression + changeset. Operator dual-flavor
   branching stays until Phase 3. Full step list: the plan doc.
-- ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
-  from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
-  (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
+- [x] ✅ **[strategic decision — RESOLVED 2026-07-17] own the synced-mathjs layer.** The `is/number/object`
+      drift came from the dead `.ts→.ts` sync leaving forks. Decision: the mathjs-derived `factories/`/`type/`
+      layers are OWNED first-party code — the sync model is dead, and CLAUDE.md already declares them
+      first-class active code (edit like any other source). Inline "synced" framing across
+      `functions/src/factories/`, `functions/src/typed/` reframed as "activated"/owned accordingly (~30
+      comments, comment-only, no behavior change). Future upstream ports go through `tools/mathjs-port/`
+      (a distinct workspace), not a re-sync.
 
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against

@@ -22,7 +22,7 @@ export * from './factories/index.js';
 export { config } from './config-api.js'; // GC12: runtime config accessor
 
 // Explicit re-export to resolve `to` / `toBest` ambiguity between the
-// synced-mathjs factory layer (factories/index.js) and the new typed Unit
+// activated mathjs-derived factory layer (factories/index.js) and the new typed Unit
 // implementation (typed/unit.js). The typed-dispatch version supersedes
 // the factory version for the public barrel, mirroring how `cond` is
 // resolved inside typed/index.js.

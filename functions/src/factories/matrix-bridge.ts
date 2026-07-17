@@ -2,7 +2,7 @@
  * Matrix Compatibility Bridge
  *
  * Wraps the native MathTS DenseMatrix (Float64Array-backed) with the interface
- * that synced mathjs factory functions expect:
+ * that the activated mathjs-derived factory functions expect:
  *   ._data, ._size, .storage(), .datatype(), .valueOf(), .size(),
  *   .get(), .set(), .map(), .forEach(), .clone(), .subset(), .create()
  *
@@ -425,7 +425,7 @@ export class MathJSDenseMatrix {
 
   // ---------------------------------------------------------------------------
   // Accelerated operations — routed through the native matrix BackendManager
-  // (JS / WASM / GPU selected by size). Additive: the synced factory
+  // (JS / WASM / GPU selected by size). Additive: the activated factory
   // `multiply`/`transpose` functions are unaffected.
   // ---------------------------------------------------------------------------
 

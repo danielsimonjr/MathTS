@@ -4,9 +4,9 @@
  * Polymorphic string-formatting operations using typed-function for runtime dispatch.
  * Supports `number`, `BigNumber`, and `string` types as appropriate for each op.
  *
- * These are clean implementations using mathTyped dispatch — the dormant synced
- * layer under functions/src/string/ is left untouched and used only as an
- * algorithm reference.
+ * These are clean implementations using mathTyped dispatch — the activated
+ * mathjs-derived layer under functions/src/string/ is left untouched here
+ * and used only as an algorithm reference.
  *
  * Semantics follow the mathjs convention:
  *   - bin/hex/oct: sign-magnitude representation for negative numbers (NOT two's-complement),

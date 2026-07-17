@@ -4,9 +4,9 @@
  * Polymorphic relational operations using typed-function for runtime dispatch.
  * Supports number, BigNumber, Fraction, Complex, bigint, boolean, string, and Array types.
  *
- * These are clean implementations using mathTyped dispatch — the dormant synced
- * layer under functions/src/relational/ is left untouched and used only as an
- * algorithm reference.
+ * These are clean implementations using mathTyped dispatch — the activated
+ * mathjs-derived layer under functions/src/relational/ is left untouched here
+ * and used only as an algorithm reference.
  *
  * Semantics follow the mathjs convention:
  *   - nearlyEqual tolerance uses DEFAULT_CONFIG.relTol / absTol.
@@ -31,13 +31,13 @@ import { nearlyEqual } from '../utils/number.js';
 
 /**
  * Relative tolerance for scalar comparisons.
- * Mirrors ConfigOptions.relTol from the mathjs-synced layer (1e-12 default).
+ * Mirrors ConfigOptions.relTol from the activated mathjs-derived layer (1e-12 default).
  */
 const REL_TOL = 1e-12;
 
 /**
  * Absolute tolerance for scalar comparisons.
- * Mirrors ConfigOptions.absTol from the mathjs-synced layer (1e-15 default).
+ * Mirrors ConfigOptions.absTol from the activated mathjs-derived layer (1e-15 default).
  */
 const ABS_TOL = 1e-15;
 
@@ -408,7 +408,7 @@ function _numericCompare(x: unknown, y: unknown): number {
 
 /**
  * Interface for the duck-typed Unit object used by compareUnits.
- * The full Unit class lives in the synced layer; we duck-type here.
+ * The full Unit class lives in the activated mathjs-derived layer; we duck-type here.
  */
 interface DuckUnit {
   /** Test whether this unit has the same dimensional base as another. */

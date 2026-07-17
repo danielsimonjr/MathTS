@@ -4625,7 +4625,7 @@ graph LR
 
 ---
 
-### `functions/src/factories/scope.ts` - Shared factory scope for activating synced mathjs factory functions.
+### `functions/src/factories/scope.ts` - Shared factory scope for activating owned mathjs-derived factory functions.
 
 **Workspace Dependencies:**
 | Package | Import |

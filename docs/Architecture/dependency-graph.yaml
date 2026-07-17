@@ -11043,7 +11043,7 @@ modules:
       functions:
         - createMatrixBridge
     functions/src/factories/scope.ts:
-      description: Shared factory scope for activating synced mathjs factory functions.
+      description: Shared factory scope for activating owned mathjs-derived factory functions.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:

@@ -1,5 +1,5 @@
 /**
- * Shared factory scope for activating synced mathjs factory functions.
+ * Shared factory scope for activating owned mathjs-derived factory functions.
  *
  * Provides all dependencies that leaf factories may request:
  * typed, config, Complex, BigNumber, Fraction, matrix bridge, and helper constructors.

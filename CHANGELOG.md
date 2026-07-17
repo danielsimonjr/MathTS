@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — reframe the mathjs-derived factory layer as owned first-party code
+
+Comment/doc-only cleanup, no behavior change. The former `.ts→.ts` mathjs sync is dead (see
+"Syncing from mathjs" in `CLAUDE.md`); `functions/src/factories/` and `functions/src/typed/` are
+first-class active code, wired into the live graph via `factories/index.ts`. The remaining inline
+comments still called this code a "synced factory"/"synced layer," misleadingly implying a
+read-only mirror. Reframed ~30 comments across `functions/src/factories/index.ts`,
+`matrix-bridge.ts`, `scope.ts`, `functions/src/typed/relational.ts`, `string.ts`, `bitwise.ts`,
+`probability.ts`, `typed-bridge.ts`, and the top-level `functions/src/index.ts` as
+"activated"/"owned" — preserving useful provenance ("mathjs-derived" as historical origin) while
+dropping the live-mirroring implication. Resolves the "own the synced-mathjs layer" strategic
+decision item in `TODO.md`.
+
 ### Added — B-spline fit/eval, Monte-Carlo/QMC integration
 
 Two additive numeric routines (`functions/src/numeric/bspline.ts`, `functions/src/numeric/monte-carlo.ts`):

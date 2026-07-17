@@ -8,7 +8,7 @@
  * - Use the `ComputePool` for ALL `Int32Array` transformations.
  * - Use native ops on scalar inputs (no worker dispatch overhead).
  *
- * BigNumber bitwise semantics: the mathjs-synced helpers in
+ * BigNumber bitwise semantics: the mathjs-derived helpers in
  * `functions/src/utils/bignumber/bitwise.ts` operate on the
  * `decimal.js`-internal coefficient layout (`x.d` / `x.e` / `x.s`),
  * which `@danielsimonjr/mathts-core`'s `BigNumber` does not expose.
