@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-functions
 
+## 0.40.0
+
+### Minor Changes
+
+- Graph and geometry breadth
+
+  **Graph:** adds `graphColoring` (greedy Welsh-Powell), `maxClique` (Bron-Kerbosch),
+  `louvainCommunities` (deterministic Louvain modularity), `katzCentrality`, and
+  `isIsomorphic`; `betweennessCentrality` gains a `normalized` option. Oracle-pinned vs
+  networkx 3.6.1. **Fix:** undirected `betweennessCentrality(normalized:true)` was 2× too
+  large (the rescale divisor was `(n-1)(n-2)/2`; networkx uses `(n-1)(n-2)` for both directed
+  and undirected since raw Brandes already double-counts undirected pairs) — now matches
+  networkx.
+
+  **Geometry:** adds `quaternionExp`/`quaternionLog`/`quaternionPow` (unit-quaternion
+  exponential map, scalar-first `[w,x,y,z]`) and `rayTriangleIntersect` (Möller-Trumbore) /
+  `rayPlaneIntersect` / `segmentSegmentClosest`. Oracle-pinned vs scipy `Rotation` and closed
+  forms. (SphericalVoronoi / alpha-shapes / halfspace-intersection remain — they need a
+  Delaunay/convex-hull engine.)
+
 ## 0.39.0
 
 ### Minor Changes
