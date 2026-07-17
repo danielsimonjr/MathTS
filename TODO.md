@@ -102,25 +102,50 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
          canonical instead of AMBIGUOUS) + a canonical-candidate hint. Found **287 runtime + 71 type**
          duplicate names (the `is*` guard family, `format`/`create`/`transpose`/`abs`/`add`, the
          `fft`/`fftshift`/`ifftshift` family confirmed) — the scoping measurement for steps 2-3 below.
-  2. **Behavioral-equivalence probe** — deep-equal on a random-input battery (like the
-     `multipleComparison==multipleTest` check) to separate TRUE duplicates from legitimately-different
-     dispatch (`abs(number)` vs `abs(matrix)` are NOT duplicates).
-  3. (optional) AST/body similarity for copy-paste under DIFFERENT names — `superpowers-lab:finding-duplicate-functions`.
-- **INTEGRATE (canonical-home decision rule):**
-  - Cold shared primitives/types → `core` / `core/internal` (existing pattern).
-  - Domain ops (fft, decompositions) → the OWNING accelerated package; delete/redirect the rest; re-export.
-  - ⚠️ **HOT-PATH guards (`is.ts`) STAY LOCAL** — cross-module re-export defeats V8 inlining (~40% regression,
-    proven; see [[project-all-libraries-build-on-core]]). If a hot fn must be shared, `noExternal`-bundle it
-    (single source, built bundle inlines) — do NOT naively re-export.
-  - **Back-compat:** re-export moved symbols from their old path so external imports don't break.
-  - **Gate each merge:** behavioral-equivalence verified AND pick the CORRECT impl — duplicates DIVERGE
-    (one often carries a bug fix the other lacks, e.g. the `sum`-accuracy fix applied to one layer first;
-    [[feedback-measure-the-symbol-consumers-import]]). Prefer WIRING over deleting a coherent helper
-    ([[feedback-dont-auto-delete-coherent-api]]).
-- **Open decisions (Daniel):** duplicate definition (name vs behavior vs body); canonical-home policy sign-off;
-  accept the hot-path-stays-local caveat; back-compat re-export strategy; sequencing vs the in-flight #27
-  fork-absorb (both touch core). **Approach:** build the finder report FIRST to scope the effort (likely a
-  phased subagent-driven campaign like the oracle-gap roadmap), then triage → consolidate → release.
+  2. **Gate 2 — deterministic near-duplicate clustering** (no LLM): load all function bodies into an RLM
+     Python REPL, normalize (strip idents/whitespace), cluster by token/AST-shingle + type-signature-enriched
+     fingerprint. **Add a deterministic clone detector** (jscpd / PMD-CPD for TS) — auditable, model-stable
+     (per Adam+Eve: embeddings drift across model versions → non-deterministic CI). Beware shared-import
+     over-clustering.
+  3. **Gate 3 — LLM judgment** (RLM + sonnet agents) over CLUSTERS ONLY → {true-dup | legit-variant | unrelated}
+     - canonical pick. **Auditable:** cache verdicts by content-hash of the normalized pair + COMMIT the cache
+       (fossilise; re-runs free & reproducible); log model/prompt/response; LLM = candidate ONLY (it hallucinates
+       legitimacy, e.g. "precision tweak, keep both"). Catches same-behavior-DIFFERENT-name that Gate 1 misses.
+  4. **Gate 4 — behavioral-equivalence PROOF** (the hard merge gate). ⚠️ **NOT naive deep-equal** (Adam+Eve:
+     dangerous for numerics). Use **property-based testing (`fast-check`, already a repo dev-dep)** with
+     domain-aware generators, **ULP/epsilon-tolerant** assertions (`0.1+0.2≠0.3`, NaN/±0/Inf/denormals),
+     explicit **mutation/side-effect** checks, and config/state coverage. Property tests are the SOLE arbiter;
+     an LLM "similar" is never a merge license ([[feedback-rules-for-life]] R4).
+- **TRIAGE of the 287 runtime dups (2026-07-17) → 4 buckets, sequenced B → A → C → D (Daniel):**
+  - **Bucket B — internal util dupes (SAFE FIRST, ~69):** `deepMap`/`deepForEach`/`clone`/`array`/`collection`/
+    `formatter`/`factory` duplicated between `expression/utils` + `functions/utils` (dead-mathjs-sync residue).
+    Non-breaking → consolidate to `core/internal` (extends [[project-all-libraries-build-on-core]]; number.ts/
+    object.ts already done). Property-gated. **STARTED 2026-07-17.**
+  - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
+    functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
+    scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the
+    keep-local ALLOWLIST for the prevention gate.
+  - **Bucket C — layer-generated public dupes (ADR, ~175 AMBIGUOUS):** `abs`/`add`/`transpose`/`max`/`format`
+    publicly defined in `functions/typed` + `compat/shims` + `matrix/typed-ops` + `core`. ROOT CAUSE = the
+    typed/factory/compat layering. Fix = **delegation policy** (each layer's public op DELEGATES to ONE canonical
+    core/functions impl, no re-implementation) + **deprecate the `factory` layer**. Breaking-change program,
+    staged, sequenced with paused #27 (both touch core). Daniel approved the direction 2026-07-17.
+  - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
+    canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
+- **INTEGRATE (canonical-home rule):** cold shared → `core`/`core/internal`; domain ops → owning accelerated
+  package (delete/redirect rest); **HOT-PATH guards STAY LOCAL, period** (no `noExternal` escape hatch — unproven
+  - hidden copies defeat central maintenance); back-compat re-export moved symbols; **profile-FIRST** before
+    moving any candidate (repo bench suite; before/after in PR — don't repeat the anecdotal 40% regression); pick
+    the CORRECT diverged impl ([[feedback-measure-the-symbol-consumers-import]]); prefer WIRING over deleting a
+    coherent helper ([[feedback-dont-auto-delete-coherent-api]]).
+- **PREVENT ("forever"):** `check:duplicates` gate on pre-commit + CI. **Signature/contract-aware** (flag multiple
+  independent bodies for the SAME type signature, not just same name — else the allowlist floods with legit
+  typed-dispatch overloads) + keep-local allowlist (Bucket A) + **body-similarity-to-canonical** detection
+  (catches rename-circumvention `sum`→`_sum`) + suggest-reuse guidance (not just block). New unauthorized
+  duplicate fails the build.
+- **Adversarially reviewed 2026-07-17** by Adam (Gemini-2.5-pro) + Eve (OpenAI-o3) — convergent: root-cause is
+  the layering (Bucket C), Gate-1 needs signature-awareness, Gate-4 needs property-based (not deep-equal),
+  hot-path needs profile-first, `noExternal` is NOT a proven fix. All folded in above.
 
 ### 📋 Pending / follow-ups (surfaced during the roadmap — genuine future work, not blockers)
 
