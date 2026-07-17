@@ -82,6 +82,40 @@ oracle-pinned, subagent-driven. Phase plan:
 > foundational primitives, optimization, regression/ML, statistics inference, special functions/number
 > theory, signal processing, advanced linalg, and graph/geometry/CAS/intervals.
 
+### 🔁 Cross-package function deduplication → unify on a single canonical source (NEW 2026-07-17, Daniel)
+
+Systematically find and consolidate duplicate implementations of the same function scattered across the
+~24 packages (the "multiple implementations of one name" trap), then unify each on ONE canonical source
+the other packages import. Extends the standing "all libraries build on core" principle
+([[project-all-libraries-build-on-core]]). Known duplicates already observed: **3 `fft`s**;
+`sum`/`distance`/`cumsum`/`variance` (typed + factory + compat layers); **`fftshift`/`ifftshift`**
+(`signal/fft.ts` generic `<T>` — dead — vs `fft-helpers.ts` public `number[]`, found 2026-07-17). The
+CDG tool did NOT create these — it accurately surfaces them; the duplication is in the code.
+
+- **FIND (reusable tooling, not one-off greps):**
+  1. Extend CDG/QDG to emit a **`duplicate-symbols` report** — group every export by NAME across all
+     files/packages, flag names defined in >1 file, tag public-vs-internal + owning package. Fast first pass
+     (catches fft/fftshift/sum/etc.). Data already in `package-export-surfaces.json` + the graph.
+  2. **Behavioral-equivalence probe** — deep-equal on a random-input battery (like the
+     `multipleComparison==multipleTest` check) to separate TRUE duplicates from legitimately-different
+     dispatch (`abs(number)` vs `abs(matrix)` are NOT duplicates).
+  3. (optional) AST/body similarity for copy-paste under DIFFERENT names — `superpowers-lab:finding-duplicate-functions`.
+- **INTEGRATE (canonical-home decision rule):**
+  - Cold shared primitives/types → `core` / `core/internal` (existing pattern).
+  - Domain ops (fft, decompositions) → the OWNING accelerated package; delete/redirect the rest; re-export.
+  - ⚠️ **HOT-PATH guards (`is.ts`) STAY LOCAL** — cross-module re-export defeats V8 inlining (~40% regression,
+    proven; see [[project-all-libraries-build-on-core]]). If a hot fn must be shared, `noExternal`-bundle it
+    (single source, built bundle inlines) — do NOT naively re-export.
+  - **Back-compat:** re-export moved symbols from their old path so external imports don't break.
+  - **Gate each merge:** behavioral-equivalence verified AND pick the CORRECT impl — duplicates DIVERGE
+    (one often carries a bug fix the other lacks, e.g. the `sum`-accuracy fix applied to one layer first;
+    [[feedback-measure-the-symbol-consumers-import]]). Prefer WIRING over deleting a coherent helper
+    ([[feedback-dont-auto-delete-coherent-api]]).
+- **Open decisions (Daniel):** duplicate definition (name vs behavior vs body); canonical-home policy sign-off;
+  accept the hot-path-stays-local caveat; back-compat re-export strategy; sequencing vs the in-flight #27
+  fork-absorb (both touch core). **Approach:** build the finder report FIRST to scope the effort (likely a
+  phased subagent-driven campaign like the oracle-gap roadmap), then triage → consolidate → release.
+
 ### 📋 Pending / follow-ups (surfaced during the roadmap — genuine future work, not blockers)
 
 Consolidated from the per-phase records above. None gate the released work; each is an additive improvement
@@ -485,7 +519,7 @@ defects found + fixed:
       path. It does not pay: **n=2¹⁸, 156 ms via workers vs 77 ms on this thread** (2× slower) in
       Chrome; a wash in Node. The tuned decision was right and simply never read.
 - [x] ✅ **Worker-thread run timeout — DONE 2026-07-17 (workbook@0.3.0).** `runWorkbookWithTimeout(source,
-    {timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
+  {timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
       terminate it on budget overrun (`WorkbookTimeoutError`); default in-process path unchanged. Runaway
       termination MEASURED (chained heavy compute killed at 500ms), not faked.
 - [x] ✅ **`ipynb` export — DONE 2026-07-17 (workbook@0.3.0).** `mtsw export --format ipynb` → nbformat v4
