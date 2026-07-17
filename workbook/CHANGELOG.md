@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.3.0
+
+### Minor Changes
+
+- ipynb export + kill-able worker-thread run timeout
+
+  `mtsw export --format ipynb` renders a workbook to a Jupyter notebook (nbformat v4): markdown
+  cells map to notebook markdown cells, code/equation/test/data/visualization cells to code cells with
+  `execute_result`/`error`/`display_data` outputs. Sibling of the existing html/tex/pdf exporters.
+
+  `runWorkbookWithTimeout(source, { timeoutMs })` (and `mtsw run --timeout <ms>`) runs the executor in a
+  `worker_threads` worker and terminates it if it exceeds the budget, so a runaway/very-long cell no
+  longer hangs the process — it rejects with `WorkbookTimeoutError`. The default in-process path is
+  unchanged.
+
 ## 0.2.0
 
 ### Minor Changes
