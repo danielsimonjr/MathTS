@@ -2432,7 +2432,12 @@
         `'infeasible'`, or `'unbounded'`.
       - The ODE family ranges from fixed-step (`solveODE`) through adaptive
         (`odeAdaptiveStep`) to `stiffODESolver` for stiff systems where explicit
-        methods would require impractically small steps.
+        methods would require impractically small steps. `solveODE`'s `method` option
+        selects `'RK23'`/`'RK45'` (explicit) or the L-stable Rosenbrock methods
+        `'Rosenbrock'` (2nd-order ode23s) and `'RODAS'` (Hairer & Wanner 4th-order,
+        6-stage — for tight tolerances where ode23s takes too many steps). The stiff
+        methods finite-difference the Jacobian unless an analytic one is passed via the
+        `jac: (t, y) => number[][]` option.
       - `cond(A)` reports how sensitive a linear solve is to perturbations — a large
         condition number warns that `linsolve` results may be unreliable.
 

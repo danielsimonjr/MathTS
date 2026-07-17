@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 246
+- **Potentially unused exports**: 247
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 245
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 246
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -204,6 +204,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `MatrixConstructor` (interface) — 1 in-file ref
 - `Matrix` (interface) — 17 in-file refs
 - `Config` (interface) — 1 in-file ref
+
+### `functions/src/numeric/solveODE.ts`
+
+- `rodasSolve` (function) — 2 in-file refs
 
 ### `functions/src/probability/random.ts`
 

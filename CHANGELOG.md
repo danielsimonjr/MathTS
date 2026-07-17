@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — stiff `solveODE`: 4th-order RODAS method + analytic Jacobian option
+
+`@danielsimonjr/mathts-functions` `solveODE` gains `method: 'RODAS'` — Hairer & Wanner's 4th-order,
+6-stage, L-stable, stiffly-accurate Rosenbrock method (`functions/src/numeric/solveODE.ts`,
+`rodasSolve`). It reuses the existing linearly-implicit structure (form `E = I/(γh) − J`, one LU
+factorisation per step solved against each stage), extended to six stages with 4th-order weights
+and an embedded 3rd-order error estimate (the last stage increment `k6`). Being 4th order it reaches
+tight tolerances in far fewer steps than the 2nd-order `Rosenbrock` (ode23s) — e.g. the linear stiff
+`y'=-1000y` to `y(0.01)` at `tol=1e-8` takes **256 steps vs 1487** (≈5.8× fewer). The published
+coefficient tableau is verified numerically (halving `h` drops the fixed-step error ≈16×, confirming
+4th order) and against scipy Radau on the Robertson problem. RODAS retains the `h·d_i·∂f/∂t` term so
+it stays 4th order on non-autonomous systems.
+
+New `jac?: (t, y) => number[][]` option on `ODEOptions`: when supplied, the stiff methods
+(`Rosenbrock` and `RODAS`) use this analytic Jacobian instead of the finite-difference one (faster,
+more accurate); its shape is validated (n×n) with a clear throw on mismatch. When omitted the
+finite-difference path is unchanged — fully backward compatible. RK23/RK45/Rosenbrock behaviour and
+the default `RK45` method are unchanged. Covered by `functions/tests/gap-stiff-rodas-oracle.test.ts`
+(linear-stiff exact, Robertson vs scipy with analytic jac, step-count improvement over ode23s,
+jac-vs-FD consistency, shape-mismatch throw). Follow-ups (event detection, reusing the matrix
+package's LU) remain separate.
+
 ### Added — linear-algebra extension: pivoted QR, RQ/QL/LQ, condest
 
 Five new `@danielsimonjr/mathts-matrix` `DenseMatrix` primitives in
