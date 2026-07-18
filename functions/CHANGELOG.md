@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-functions
 
+## 0.43.1
+
+### Patch Changes
+
+- Fix two BigNumber/Complex transcendental correctness bugs found by an mpmath/NumPy oracle audit, and consolidate the fftshift/ifftshift roll algorithm.
+
+  **core (correctness):**
+  - `BigNumber.divide` lost all precision when the divisor's coefficient had more digits than the (precision-scaled) dividend — the Newton-iteration step `2 / (g*g)` in `cbrt`/`sqrt` integer-divided to a quotient of `0`. As a result `cbrt(bignumber(2))` returned `4.6e-18` instead of `1.2599…`, and `asinh`/`acosh` on BigNumber degraded to ~11–16 digits. The dividend scale is now widened by `max(0, divisorDigits - dividendDigits)`; the result is **bit-identical** whenever `divisorDigits ≤ dividendDigits`, so no previously-correct division changes.
+  - `Complex.acosh` landed on the wrong Riemann sheet for `Re(z) < 0` (`acosh(-1+0.5i)` returned the negated value). It now uses the factored principal form `ln(z + √(z-1)·√(z+1))` (C99 Annex G / DLMF 4.37 / NumPy).
+
+  Every rich-type case of the 12 transcendental scalars (`sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p expm1 sign`) is now pinned to the mpmath/NumPy oracle by `functions/tests/gap-transcendental-richtype-oracle.test.ts`.
+
+  **functions:** the public `fftshift`/`ifftshift` (`number[]`) and the internal generic complex-FFT toolkit versions now share one `rollBy<T>` algorithm instead of duplicating the roll logic; behavior is unchanged.
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.12.0
+  - @danielsimonjr/mathts-expression@0.6.6
+  - @danielsimonjr/mathts-matrix@0.6.2
+  - @danielsimonjr/mathts-parallel@0.6.2
+
 ## 0.43.0
 
 ### Minor Changes
