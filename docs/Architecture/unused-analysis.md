@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
   - **Test-only (exercised by a test, ships nothing)**: 6
-- **Potentially unused exports**: 212
+- **Potentially unused exports**: 202
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 211
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 201
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -79,14 +79,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SignatureImpl` (type) — 7 in-file refs
 - `SignatureRecord` (type) — 3 in-file refs
 
-### `matrix/src/backends/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
-
 ### `matrix/src/backends/WasmLoader.ts`
 
 - `Allocation` (interface) — 10 in-file refs
-- `LoadingMetrics` (interface) — 2 in-file refs
 
 ### `matrix/src/config.ts`
 
@@ -162,7 +157,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/core/create.ts`
 
 - `create` (function) — 11 in-file refs
-- `ImportOptions` (interface) — 1 in-file ref
 - `FactoriesInput` (type) — 4 in-file refs
 
 ### `functions/src/core/function/config.ts`
@@ -177,7 +171,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/core/function/import.ts`
 
-- `ImportOptions` (interface) — 5 in-file refs
 - `path` (constant) — 3 in-file refs
 
 ### `functions/src/core/function/typed.ts`
@@ -317,13 +310,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `DenseMatrixInterface` (interface) — 5 in-file refs
 - `SparseMatrixInterface` (interface) — 3 in-file refs
 - `MatrixFormatOptions` (interface) — 1 in-file ref
-- `RangeJSON` (interface) — 1 in-file ref
-- `RangeFormatOptions` (interface) — 1 in-file ref
-- `NestedArray` (type) — 6 in-file refs
+- `NestedArray` (type) — 7 in-file refs
 - `MapCallback` (type) — 1 in-file ref
 - `ForEachCallback` (type) — 1 in-file ref
-- `RangeForEachCallback` (type) — 1 in-file ref
-- `RangeMapCallback` (type) — 1 in-file ref
 
 ### `functions/src/type/resultset/ResultSet.ts`
 
@@ -381,14 +370,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `functions/src/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
-
 ### `functions/src/wasm/WasmLoader.ts`
 
-- `WasmLoader` (class) — 7 in-file refs
-- `LoadingMetrics` (interface) — 2 in-file refs
+- `WasmLoader` (class) — 8 in-file refs
 
 ### `expression/src/evaluator/evaluate.ts`
 

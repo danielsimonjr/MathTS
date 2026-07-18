@@ -137,24 +137,8 @@ export type {
 // Re-exported Types
 // =============================================================================
 
-// Re-export workerpool types for advanced usage (locally defined to avoid type resolution issues)
-export interface PoolOptions {
-  minWorkers?: number | 'max';
-  maxWorkers?: number;
-  workerType?: 'auto' | 'web' | 'thread';
-  workerTerminateTimeout?: number;
-}
-
-export interface ExecOptions {
-  on?: (payload: unknown) => void;
-  transfer?: unknown[];
-  timeout?: number;
-}
-
-export interface PoolStats {
-  totalWorkers: number;
-  busyWorkers: number;
-  idleWorkers: number;
-  pendingTasks: number;
-  activeTasks: number;
-}
+// Re-export workerpool types for advanced usage. Consolidated onto
+// `@danielsimonjr/mathts-workerpool`'s byte-identical definitions (this
+// package already depends on workerpool) instead of the former local
+// redeclaration — see docs/Architecture/duplicate-symbols.json.
+export type { PoolOptions, ExecOptions, PoolStats } from '@danielsimonjr/mathts-workerpool';

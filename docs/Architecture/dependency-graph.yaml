@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-18'
-  totalFiles: 1086
+  totalFiles: 1087
   totalModules: 82
-  totalExports: 5558
+  totalExports: 5563
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1210,6 +1210,12 @@ modules:
             - IdentifiedValue
           reExport: true
           typeOnly: true
+        - file: ./types/wasm-loader.js
+          imports:
+            - LoadingMetrics
+            - WasmManifest
+          reExport: true
+          typeOnly: true
         - file: ./types/unit/unit-types.js
           imports:
             - '*'
@@ -1295,6 +1301,8 @@ modules:
         - MathJsConfig
         - NestedArray
         - IdentifiedValue
+        - LoadingMetrics
+        - WasmManifest
       reExported:
         - '* from ./is.js'
         - '* from ./number.js'
@@ -1367,6 +1375,8 @@ modules:
         - MathJsConfig
         - NestedArray
         - IdentifiedValue
+        - LoadingMetrics
+        - WasmManifest
         - type * from ./types/unit/unit-types.js
     core/src/is.ts:
       description: 'Structural view used by the duck-typing guards below: math.js types are'
@@ -2502,6 +2512,16 @@ modules:
         - UnitInstance
         - Dimensions
         - UnitDef
+    core/src/types/wasm-loader.ts:
+      description: Shared type-only shapes for the two independent WASM loader implementations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - LoadingMetrics
+        - WasmManifest
   matrix/backends:
     matrix/src/backends/Backend.ts:
       description: Matrix Backend Interface
@@ -3285,13 +3305,16 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - WasmManifest
+          subpath: internal
       exports:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
-      interfaces:
-        - WasmManifest
       functions:
         - sha384OfBuffer
         - loadWasmManifest
@@ -3358,7 +3381,12 @@ modules:
         - file: ./wasm/resolve.js
           imports: []
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - LoadingMetrics
+          subpath: internal
       exports:
         - wasmLoader
         - initWasm
@@ -3368,7 +3396,6 @@ modules:
       interfaces:
         - WasmModule
         - Allocation
-        - LoadingMetrics
       functions:
         - initWasm
       constants:
@@ -4322,11 +4349,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - MatrixDimensions
       exports:
         - isMatrix
       interfaces:
-        - MatrixDimensions
         - MatrixIndex
         - SliceSpec
         - MatrixEntry
@@ -4675,6 +4705,11 @@ modules:
           imports:
             - DenseMatrix
             - backendManager
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - NestedArray
+          subpath: internal
       exports:
         - Tensor
       classes:
@@ -9936,6 +9971,10 @@ modules:
         - file: ./function/import.js
           imports:
             - importFactory
+        - file: ./function/import.js
+          imports:
+            - ImportOptions
+          typeOnly: true
         - file: ./function/typed.js
           imports:
             - TypedFunction
@@ -9945,7 +9984,6 @@ modules:
         - create
       interfaces:
         - MathJsInstance
-        - ImportOptions
       functions:
         - create
     functions/src/core/function/config.ts:
@@ -13398,6 +13436,11 @@ modules:
           directory: matrix
           imports:
             - eig
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ComplexValue
+          subpath: internal
       exports:
         - funm
         - complexCos
@@ -13405,7 +13448,6 @@ modules:
         - cosm
         - sinm
       interfaces:
-        - ComplexValue
         - ComplexMatrix
       functions:
         - funm
@@ -16944,7 +16986,19 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - RangeForEachCallback
+            - RangeFormatOptions
+            - RangeJSON
+            - RangeMapCallback
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - NestedArray
+          subpath: internal
       exports: []
       interfaces:
         - BigNumberLike
@@ -16957,7 +17011,6 @@ modules:
         - SparseMatrixInterface
         - MatrixFormatOptions
         - ImmutableDenseMatrixJSON
-        - RangeJSON
         - IndexJSON
         - DenseMatrixConstructorData
         - SparseMatrixConstructorData
@@ -16965,7 +17018,6 @@ modules:
         - MatrixAlgorithmSuiteOptions
         - FibonacciHeapNode
         - FibonacciHeapInterface
-        - RangeFormatOptions
         - RangeInterface
     functions/src/type/matrix/utils/broadcast.ts:
       description: Broadcasts two matrices, and return both in an array
@@ -20006,6 +20058,7 @@ modules:
           imports:
             - LegacyFactory
             - DependencyName
+            - FactoryMeta
             - isFactory
             - assertDependencies
             - isOptionalDependency
@@ -20023,7 +20076,6 @@ modules:
         - factory
       interfaces:
         - FactoryFunction
-        - FactoryMeta
       functions:
         - factory
     functions/src/utils/hasNumericValue.ts:
@@ -20879,13 +20931,16 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - WasmManifest
+          subpath: internal
       exports:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
-      interfaces:
-        - WasmManifest
       functions:
         - sha384OfBuffer
         - loadWasmManifest
@@ -21244,7 +21299,12 @@ modules:
             - resolvePackagedWasm
             - defaultWasmLocation
             - resolveBrowserWasm
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - LoadingMetrics
+          subpath: internal
       exports:
         - wasmLoader
         - WasmLoader
@@ -21252,7 +21312,6 @@ modules:
         - WasmLoader
       interfaces:
         - WasmModule
-        - LoadingMetrics
       constants:
         - wasmLoader
   expression/compiler:
@@ -27587,6 +27646,7 @@ modules:
           imports:
             - LegacyFactory
             - DependencyName
+            - FactoryMeta
             - isFactory
             - assertDependencies
             - isOptionalDependency
@@ -27604,7 +27664,6 @@ modules:
         - factory
       interfaces:
         - FactoryFunction
-        - FactoryMeta
       functions:
         - factory
     expression/src/utils/is.ts:
@@ -29661,7 +29720,13 @@ modules:
             - DispatchResult
           reExport: true
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-workerpool'
+          directory: packages/workerpool
+          imports:
+            - PoolOptions
+            - ExecOptions
+            - PoolStats
       exports:
         - ComputePool
         - computePool
@@ -29746,6 +29811,9 @@ modules:
         - OperationCategory
         - ExecutionMode
         - DispatchResult
+        - PoolOptions
+        - ExecOptions
+        - PoolStats
       reExported:
         - ComputePool
         - computePool
@@ -29830,7 +29898,6 @@ modules:
         - OperationCategory
         - ExecutionMode
         - DispatchResult
-      interfaces:
         - PoolOptions
         - ExecOptions
         - PoolStats
@@ -34313,6 +34380,7 @@ dependencyGraph:
         - core/src/types/unit-definitions.ts
         - core/src/types/unit-prefixes.ts
         - core/src/types/unit.ts
+        - core/src/types/wasm-loader.ts
     - name: Matrix/backends
       files:
         - matrix/src/backends/Backend.ts
@@ -35500,19 +35568,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1086
+  totalTypeScriptFiles: 1087
   totalModules: 82
-  totalLinesOfCode: 184595
-  totalExports: 5558
+  totalLinesOfCode: 184580
+  totalExports: 5563
   totalClasses: 52
-  totalInterfaces: 488
+  totalInterfaces: 476
   totalFunctions: 1755
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 2221
-  totalTypeOnlyImports: 564
+  totalReExports: 2226
+  totalTypeOnlyImports: 566
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 212
+  unusedExportsCount: 202

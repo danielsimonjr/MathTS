@@ -12,6 +12,15 @@
       "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
     },
     {
+      "names": ["NestedArray"],
+      "filesGlob": [
+        "core/src/array.ts",
+        "functions/src/type/matrix/types.ts",
+        "tensor/src/Tensor.ts"
+      ],
+      "reason": "already consolidated in substance, not just name: both non-core copies are now generic-specialization aliases that delegate 100% of their body to core's canonical `NestedArray<T>` (functions/src/type/matrix/types.ts keeps its own default type param `T = MatrixValue`; tensor/src/Tensor.ts specializes `T = number`) — the static scanner still counts each `export type X = ...` as an own declaration since neither can use a bare `export type { NestedArray } from ...` re-export without losing the default/specialization. 2026-07 type-dedup pass."
+    },
+    {
       "names": ["*"],
       "filesGlob": ["assembly/src/**"],
       "reason": "AssemblyScript separate compilation target, cannot import core"
@@ -25,6 +34,224 @@
       "names": ["DEFAULT_CONFIG"],
       "filesGlob": ["core/src/config.ts", "core/src/factory/factory.ts", "matrix/src/config.ts"],
       "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
+    },
+    {
+      "names": [
+        "BigNumber",
+        "Complex",
+        "Fraction",
+        "Unit",
+        "Matrix",
+        "SparseMatrix",
+        "Range",
+        "IndexDimension",
+        "Index",
+        "DenseMatrix"
+      ],
+      "filesGlob": ["core/src/is.ts", "expression/src/utils/is.ts", "functions/src/utils/is.ts"],
+      "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["BigNumber", "Complex", "Fraction", "SparseMatrix", "Unit"],
+      "filesGlob": ["functions/src/types.ts"],
+      "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["BigNumber"],
+      "filesGlob": [
+        "functions/src/matrix/utils/zerosAndOnes.ts",
+        "functions/src/type/bignumber/BigNumber.ts"
+      ],
+      "reason": "additional minimal per-consumer structural views of BigNumber beyond the is.ts guard pair — zerosAndOnes.ts needs only what its zeros/ones construction path reads; type/bignumber/BigNumber.ts is the local mathjs-mirror BigNumber type. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["Complex"],
+      "filesGlob": ["functions/src/type/complex/Complex.ts"],
+      "reason": "the local mathjs-mirror Complex type, additional to the is.ts guard pair. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["Matrix"],
+      "filesGlob": ["functions/src/matrix/sqrtm.ts", "functions/src/matrix/utils/zerosAndOnes.ts"],
+      "reason": "additional minimal per-consumer structural views of Matrix beyond the is.ts guard pair — each file declares only the fields/methods it actually reads (sqrtm.ts's spectral helpers; zerosAndOnes.ts's construction path). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["DenseMatrix"],
+      "filesGlob": [
+        "functions/src/algebra/solver/lsolveAll.ts",
+        "functions/src/algebra/solver/usolveAll.ts"
+      ],
+      "reason": "additional minimal per-consumer structural views of DenseMatrix beyond the is.ts guard pair — each triangular-solver file declares only the concrete _data/_size/_datatype/valueOf() shape it operates on. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["IndexDimension"],
+      "filesGlob": ["functions/src/type/matrix/MatrixIndex.ts"],
+      "reason": "the local mathjs-mirror IndexDimension type used by MatrixIndex's own implementation, additional to the is.ts guard pair. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["Chain"],
+      "filesGlob": ["compat/src/chain.ts"],
+      "reason": "compat's Chain is the real chain-wrapper object contract (done/valueOf/toString/method-chaining proxy), genuinely different from the is.ts guard-adjacent Chain (a minimal {constructor.prototype.isChain} duck type) — additional to the is.ts guard pair in the AST-node group below. 2026-07 type-dedup pass."
+    },
+    {
+      "names": [
+        "Chain",
+        "Node",
+        "AccessorNode",
+        "ArrayNode",
+        "AssignmentNode",
+        "BlockNode",
+        "ConditionalNode",
+        "ConstantNode",
+        "FunctionAssignmentNode",
+        "FunctionNode",
+        "Help",
+        "IndexNode",
+        "ObjectNode",
+        "OperatorNode",
+        "ParenthesisNode",
+        "PartitionedMap",
+        "RangeNode",
+        "RelationalNode",
+        "ResultSet",
+        "SymbolNode"
+      ],
+      "filesGlob": ["expression/src/utils/is.ts", "functions/src/utils/is.ts"],
+      "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["FactoryFunction", "CreateFunction"],
+      "filesGlob": [
+        "core/src/factory.ts",
+        "core/src/factory/factory.ts",
+        "expression/src/utils/factory.ts",
+        "functions/src/utils/factory.ts"
+      ],
+      "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
+    },
+    {
+      "names": ["SymbolicAnalysis"],
+      "filesGlob": [
+        "functions/src/algebra/sparse/csChol.ts",
+        "functions/src/algebra/sparse/csLu.ts",
+        "functions/src/algebra/sparse/csSqr.ts"
+      ],
+      "reason": "three genuinely distinct per-algorithm symbolic-analysis result shapes (Cholesky: parent/cp/pinv; LU: q/lnz/unz; QR: q/parent/cp/pinv/leftmost/lnz/unz/m2) sharing a name coincidentally. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["TypedFunction"],
+      "filesGlob": [
+        "expression/src/types.ts",
+        "functions/src/core/function/typed.ts",
+        "functions/src/type/matrix/types.ts"
+      ],
+      "reason": "three genuinely distinct shapes: expression's is a minimal callable-with-signatures duck type, functions/core/function/typed.ts's is the full typed-function instance API (create/addTypes/referTo/find/resolve/...), functions/type/matrix/types.ts's is a narrow find-only view. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["BackendType", "MatrixBackend"],
+      "filesGlob": ["core/src/types/interfaces.ts", "matrix/src/backends/Backend.ts"],
+      "reason": "core's copies are part of a self-contained, never-consumed-outside-core speculative abstraction layer (only imported by core/src/index.ts + its own test); matrix's are the real backend contract (DenseMatrix-based, async initialize(), 4-way BackendType union including 'parallel' vs core's 3-way). Different shapes serving unrelated designs. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["BigNumberConstructor"],
+      "filesGlob": [
+        "core/src/types/unit/unit-types.ts",
+        "functions/src/matrix/utils/zerosAndOnes.ts"
+      ],
+      "reason": "core's is a minimal new-only constructor view for the Unit factory's angle math; functions' additionally has a callable (non-new) signature needed for its zeros/ones construction path. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["ComplexConstructor"],
+      "filesGlob": ["core/src/types/unit/unit-types.ts", "functions/src/type/complex/Complex.ts"],
+      "reason": "core's is a minimal {readonly I} view for the Unit factory; functions' is the full Complex constructor contract (new/callable/prototype/fromPolar/...). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["BigNumberValue"],
+      "filesGlob": ["core/src/bignumber-formatter.ts", "core/src/types/unit/unit-types.ts"],
+      "reason": "two distinct structural views within core itself: bignumber-formatter.ts's is a decimal.js-shaped formatting view (e/isFinite/isNaN/gt/...), unit-types.ts's is a minimal {div, times} view for the Unit factory's angle constants. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["UnitDef"],
+      "filesGlob": ["core/src/types/unit-definitions.ts", "core/src/types/unit/unit-types.ts"],
+      "reason": "two coexisting unit-table shapes within core: unit-definitions.ts's legacy multiplier/offset/dimensions/prefixable table vs unit/unit-types.ts's active mathjs-derived name/base/prefixes/value/offset/dimensions/reciprocal table for the merged Unit factory. 2026-07 type-dedup pass; possible follow-up to fully retire the legacy table is out of scope here."
+    },
+    {
+      "names": ["UnitInstance"],
+      "filesGlob": [
+        "core/src/types/unit/unit-types.ts",
+        "functions/src/type/unit/physicalConstants.ts"
+      ],
+      "reason": "core's is the full ~30-member Unit instance API; functions' is a deliberately narrow 1-field {fixPrefix} local view (only what physicalConstants.ts reads). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["CholeskyResult"],
+      "filesGlob": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/cholesky.ts"],
+      "reason": "functions' L is a plain number[][]; matrix's L is a DenseMatrix instance — different representations for different consumers. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["CompiledExpression"],
+      "filesGlob": ["expression/src/compiler/compile.ts", "expression/src/node/Node.ts"],
+      "reason": "near-miss, deliberately not merged: compile.ts's evaluate() accepts Record<string, unknown> | Scope, Node.ts's accepts only Record<string, unknown> — Node.ts is imported by compile.ts so redirecting the other way risks a circular import for a one-parameter-type difference. Flagged for a future follow-up rather than forced now. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["ConfigOptions"],
+      "filesGlob": ["core/src/config.ts", "functions/src/core/function/config.ts"],
+      "reason": "functions' copy is Partial<MathJsConfig> & {epsilon}, a legacy-compat partial wrapper for the config() function's overload — not a copy of core's full ConfigOptions (which functions/src/core/config.ts already re-exports as-is from @danielsimonjr/mathts-core/internal). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["ExecutionMode"],
+      "filesGlob": ["parallel/src/strategies/threshold.ts", "workbook/src/types.ts"],
+      "reason": "unrelated domains sharing a name: parallel dispatch mode ('parallel' | 'sequential') vs workbook cell-execution mode ('reactive' | 'sequential' | 'manual'). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["FFTResult"],
+      "filesGlob": ["functions/src/signal/fft.ts", "matrix/src/backends/wasm/fft-wasm.ts"],
+      "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["WasmModule"],
+      "filesGlob": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
+      "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions needs the full breadth including signal/geometry/special-function kernels; matrix only needs matrix-relevant exports) — a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) — core/internal is reachable from both packages without creating the functions<->matrix cycle."
+    },
+    {
+      "names": ["MatrixConstructor"],
+      "filesGlob": ["functions/src/matrix/utils/zerosAndOnes.ts", "functions/src/types.ts"],
+      "reason": "zerosAndOnes.ts's is a callable matrix-factory shape; types.ts's is a constructible-with-index-signature shape — different contracts. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["MathNode"],
+      "filesGlob": [
+        "expression/src/node/Node.ts",
+        "functions/src/arithmetic/utils/nodeOperations.ts"
+      ],
+      "reason": "expression's is the full AST Node class instance type; functions' is a minimal local {type, isNode, toString} view for one helper file. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["ParallelResult"],
+      "filesGlob": ["packages/workerpool/src/index.ts", "parallel/src/ComputePool.ts"],
+      "reason": "deliberate, already-documented divergence: parallel's public ParallelResult<T> drops workerpool's internal workersUsed field (see ComputePool.ts's toParallelResult() comment 'drops workersUsed'). 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["TypeTest"],
+      "filesGlob": ["functions/src/core/function/typed.ts", "packages/typed-function/src/index.ts"],
+      "reason": "functions' is a plain (value: unknown) => boolean; typed-function's is generic (x: unknown) => x is T (a type predicate) — different signatures. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["SparseMatrixData"],
+      "filesGlob": [
+        "functions/src/algebra/sparse/csAmd.ts",
+        "functions/src/algebra/sparse/csChol.ts",
+        "functions/src/algebra/sparse/csCounts.ts",
+        "functions/src/algebra/sparse/csLu.ts",
+        "functions/src/algebra/sparse/csSpsolve.ts",
+        "functions/src/algebra/sparse/csSqr.ts",
+        "functions/src/algebra/sparse/csSymperm.ts"
+      ],
+      "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
+    },
+    {
+      "names": ["TypeDef", "ConversionDef"],
+      "filesGlob": ["core/src/typed/mathts-typed.ts", "packages/typed-function/src/index.ts"],
+      "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
     }
   ]
 }

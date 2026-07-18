@@ -104,6 +104,7 @@
     "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
     "core/src/collection.ts": ["core/src/internal.ts"],
     "core/src/map.ts": ["core/src/internal.ts"],
+    "core/src/types/wasm-loader.ts": ["core/src/internal.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",

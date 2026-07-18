@@ -9,6 +9,27 @@
  * - We prefer explicit `any` annotations with JSDoc over implicit any
  */
 
+// `RangeForEachCallback`/`RangeMapCallback`/`RangeFormatOptions`/`RangeJSON` used to
+// be redeclared here, duplicating `core/src/types/matrix/Range.ts`'s canonical
+// versions (cross-package type-dedup pass, docs/Architecture/duplicate-symbols.json).
+// `RangeFormatOptions`/`RangeJSON` were byte-identical; `RangeForEachCallback`/
+// `RangeMapCallback` differed only in the `index` parameter's declared type
+// (`[number]` tuple here vs. core's `number[]`) — a `[number]` tuple is always
+// assignable to `number[]`, so every real call site (which always passes a
+// single-element array literal) keeps type-checking under core's wider type.
+// Re-exported from core instead (this package already depends on core).
+import type {
+  RangeForEachCallback,
+  RangeFormatOptions,
+  RangeJSON,
+  RangeMapCallback,
+} from '@danielsimonjr/mathts-core';
+export type { RangeForEachCallback, RangeFormatOptions, RangeJSON, RangeMapCallback };
+// `NestedArray` is a lower-level shared utility, so it comes from the `/internal`
+// subpath (see `@danielsimonjr/mathts-core/internal`'s header) rather than core's
+// public entry.
+import type { NestedArray as CoreNestedArray } from '@danielsimonjr/mathts-core/internal';
+
 // =============================================================================
 // External Type Imports (avoid circular dependencies)
 // =============================================================================
@@ -74,9 +95,12 @@ export type DataType = string | undefined;
 // =============================================================================
 
 /**
- * Recursive nested array type for matrix data
+ * Recursive nested array type for matrix data. Consolidated onto
+ * `@danielsimonjr/mathts-core`'s byte-identical generic definition (see
+ * docs/Architecture/duplicate-symbols.json); the default type param is kept
+ * local since core's version has none.
  */
-export type NestedArray<T = MatrixValue> = T | NestedArray<T>[];
+export type NestedArray<T = MatrixValue> = CoreNestedArray<T>;
 
 /**
  * Dense matrix internal data structure
@@ -356,16 +380,6 @@ export interface ImmutableDenseMatrixJSON<T = MatrixValue> {
 }
 
 /**
- * JSON representation of a Range
- */
-export interface RangeJSON {
-  mathjs: 'Range';
-  start: number;
-  end: number;
-  step: number;
-}
-
-/**
  * JSON representation of an Index
  */
 export interface IndexJSON {
@@ -495,33 +509,9 @@ export interface FibonacciHeapInterface<T = MatrixValue> {
 // =============================================================================
 // Range Types
 // =============================================================================
-
-/**
- * Callback for Range forEach operations.
- *
- * INTENTIONAL ANY: The range parameter uses 'any' because the Range class
- * passes 'this' which is the class instance. Using RangeInterface here would
- * create a circular reference since Range implements RangeInterface.
- */
-export type RangeForEachCallback = (value: number, index: [number], range: unknown) => void;
-
-/**
- * Callback for Range map operations.
- *
- * INTENTIONAL ANY: The range parameter uses 'any' because the Range class
- * passes 'this' which is the class instance. Using RangeInterface here would
- * create a circular reference since Range implements RangeInterface.
- */
-export type RangeMapCallback<T> = (value: number, index: [number], range: unknown) => T;
-
-/**
- * Format options for Range display
- */
-export interface RangeFormatOptions {
-  precision?: number;
-  notation?: 'fixed' | 'exponential' | 'engineering' | 'auto';
-  [key: string]: unknown;
-}
+//
+// RangeForEachCallback/RangeMapCallback/RangeFormatOptions/RangeJSON are
+// re-exported from core at the top of this file.
 
 /**
  * Range interface

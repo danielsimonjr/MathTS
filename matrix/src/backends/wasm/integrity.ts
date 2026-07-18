@@ -21,16 +21,18 @@
  * unsigned builds usable while making signed builds tamper-evident.
  *
  * Mirrors `functions/src/wasm/integrity.ts`. matrix can't import from
- * functions (functions depends on matrix, that would create a cycle),
- * so this is the duplicated copy.
+ * functions (functions depends on matrix, that would create a cycle), so the
+ * runtime SHA-384/manifest-loading logic stays duplicated here — but the
+ * `WasmManifest` *type* is consolidated onto
+ * `@danielsimonjr/mathts-core/internal`'s copy (both matrix and functions
+ * already depend on core, so this doesn't add a new edge or a cycle; see
+ * docs/Architecture/duplicate-symbols.json).
  */
 
-const ALGO = 'sha384';
+import type { WasmManifest } from '@danielsimonjr/mathts-core/internal';
+export type { WasmManifest };
 
-export interface WasmManifest {
-  /** Map of filename -> "sha384-<base64 digest>" */
-  [fileName: string]: string;
-}
+const ALGO = 'sha384';
 
 /**
  * Compute the SHA-384 digest of a buffer and return base64 encoding,

@@ -2,6 +2,7 @@ import { pickShallow } from './object.js';
 import {
   type LegacyFactory,
   type DependencyName,
+  type FactoryMeta,
   isFactory,
   assertDependencies,
   isOptionalDependency,
@@ -17,7 +18,10 @@ import {
  * `DependencyName` are byte-for-byte equivalent to
  * `@danielsimonjr/mathts-core/internal`'s copies (proven via a fast-check property
  * harness — see `functions/tests/dedup-bucketB-equivalence.test.ts`) and are
- * re-exported from there.
+ * re-exported from there. (`FactoryMeta` used to be re-declared locally here
+ * despite this comment already claiming it was consolidated — cross-package
+ * type-dedup pass, docs/Architecture/duplicate-symbols.json, fixed the
+ * comment to match reality.)
  *
  * `factory`/`FactoryFunction`/`CreateFunction` remain DELIBERATELY KEPT LOCAL — NOT
  * safe to redirect: `factory()`'s generic `CreateFunction<TDeps extends
@@ -54,24 +58,6 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
   fn: string;
   dependencies: string[];
   meta?: FactoryMeta;
-}
-
-/**
- * Meta information that can be attached to a factory
- */
-export interface FactoryMeta {
-  /**
-   * If true, the factory will be recreated when config changes
-   */
-  recreateOnConfigChange?: boolean;
-  /**
-   * If true, this is a lazy factory that should only be created when needed
-   */
-  lazy?: boolean;
-  /**
-   * Additional custom metadata
-   */
-  [key: string]: unknown;
 }
 
 /**
@@ -141,4 +127,4 @@ export function factory<
 // `LegacyFactory` values, so core's signature is a clean drop-in.
 export { isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation };
 export { coreSortFactories as sortFactories, coreCreate as create };
-export type { LegacyFactory, DependencyName };
+export type { LegacyFactory, DependencyName, FactoryMeta };

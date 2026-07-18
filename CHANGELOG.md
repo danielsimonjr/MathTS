@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dedup — cross-package TYPE declarations (core, expression, functions, matrix, parallel, tensor)
+
+Triage + consolidation pass over the `docs/Architecture/duplicate-symbols.json` **`types`**
+section (68 flagged `TRUE_DUPLICATE` type/interface names — distinct from the runtime-symbol dedup
+passes above/below). Every declaration was read and structurally compared before deciding
+consolidate vs. allowlist; the `is.ts`-guard-adjacent types found here follow the same
+already-established "hot-path, kept local" rule as the runtime `is*` guards.
+
+- **Consolidated onto a single canonical declaration + type-only re-export shims** (14 names,
+  verified byte-identical or safely reconcilable before merging):
+  - `FactoryMeta` (`expression`/`functions` → re-export from `@danielsimonjr/mathts-core/internal`;
+    the surrounding header comment already *claimed* this was consolidated but the interface was
+    still redeclared locally — fixed to match the claim).
+  - `RangeForEachCallback`/`RangeMapCallback`/`RangeFormatOptions`/`RangeJSON` (`functions` → core's
+    public `.` export). The callback pair differed only in `index: [number]` vs. core's
+    `index: number[]` — a tuple is always assignable to the wider array type, so every real call
+    site keeps type-checking under core's version.
+  - `NestedArray` (`functions`, `tensor` → thin wrappers over core's generic `NestedArray<T>`;
+    `functions` keeps its `T = MatrixValue` default via a local alias, `tensor` specializes to
+    `NestedArray<number>` since Tensor is Float64Array-backed).
+  - `MatrixDimensions` (`matrix` → re-export from core's public `.` export).
+  - `ComplexValue` (`functions/src/numeric/matrix-functions.ts` → re-export from
+    `@danielsimonjr/mathts-core/internal`; verified core's `ComplexValue` is the same minimal
+    `{re, im}` shape, not a richer class as first assumed).
+  - `ImportOptions` (`functions/src/core/create.ts` → import from the sibling
+    `function/import.ts`, which the file already imported `importFactory` from).
+  - `PoolOptions`/`ExecOptions`/`PoolStats` (`parallel/src/index.ts` → re-export from
+    `@danielsimonjr/mathts-workerpool`, replacing a local copy whose own comment said "locally
+    defined to avoid type resolution issues" — the re-export compiles cleanly).
+  - `LoadingMetrics`/`WasmManifest` (`functions`, `matrix` → new shared home
+    `core/src/types/wasm-loader.ts`, exported via `@danielsimonjr/mathts-core/internal`; both WASM
+    loaders bind the same `mathts-as.wasm` binary and had byte-identical perf-metrics/manifest
+    shapes despite the packages' documented functions↔matrix import-cycle constraint — core is
+    reachable from both without recreating that cycle. `WasmModule` itself stays local per package:
+    each declares a genuinely different subset of the AssemblyScript export surface.
+- **Allowlisted as genuinely distinct** (`tools/create-dependency-graph/duplicate-allowlist.json`,
+  ~40 names across ~20 entries): the AST-node/collection duck-type guards living beside the
+  hot-path `is*` functions in `expression/src/utils/is.ts` + `functions/src/utils/is.ts`
+  (`Node`/`AccessorNode`/…/`SymbolNode`/`PartitionedMap`/`ResultSet`/`Help`, plus
+  `BigNumber`/`Complex`/`Fraction`/`Unit`/`Matrix`/`DenseMatrix`/`SparseMatrix`/`Range`/
+  `IndexDimension`/`Index` and their additional per-consumer minimal-view copies in
+  `functions/src/{types.ts,type/**,matrix/**,algebra/solver/**}`); `FactoryFunction`/
+  `CreateFunction` (proven-incompatible generic constraints on `TDeps`, already documented in each
+  file, PLUS a third unrelated `FactoryFunction` shape living in `core/src/factory/factory.ts`);
+  `TypeDef`/`ConversionDef` (byte-identical shapes in `core/src/typed/mathts-typed.ts` and
+  `packages/typed-function`, but core has no dependency edge onto the workspace typed-function
+  package — it depends on the external `typed-function` github fork instead — so there is no valid
+  import path without adding an unrelated coupling); `BackendType`/`MatrixBackend`,
+  `BigNumberConstructor`, `ComplexConstructor`, `BigNumberValue`, `UnitDef`, `UnitInstance`,
+  `ConfigOptions`, `WasmModule`, `CholeskyResult`, `FFTResult`, `ExecutionMode`,
+  `MatrixConstructor`, `TypedFunction`, `TypeTest`, `SymbolicAnalysis`, `SparseMatrixData`,
+  `MathNode`, `ParallelResult` (each independently verified structurally different — see the
+  allowlist file for the exact shape comparison behind each verdict).
+- **One diverged-but-unmerged finding, reported rather than forced:** `CompiledExpression`
+  (`expression/src/compiler/compile.ts` vs. `expression/src/node/Node.ts`) — `compile.ts`'s
+  `evaluate()` genuinely accepts `Record<string, unknown> | Scope` at runtime (used when
+  `userScope` is a `Scope` map), while `Node.ts`'s declared type only allows
+  `Record<string, unknown>`. `compile.ts` already imports `Node.ts`'s `MathNode`, so merging onto
+  `Node.ts`'s (narrower) type would either need to widen `Node.ts` or silently narrow
+  `compile.ts`'s real accepted input — left as a flagged, allowlisted divergence for a follow-up
+  rather than forced in this type-only pass.
+
+Type `TRUE_DUPLICATE` count: **68 → 0** (0 type duplicates remain; `duplicate-baseline.json`
+regenerated down from 203 combined runtime+type entries to 135, all runtime). Runtime dedup is
+unaffected (135, unchanged). `npm run typecheck` clean (32/32 tasks), `eslint` clean on all touched
+packages (core/expression/functions/matrix/parallel/tensor), full `core`/`expression`/`functions`/
+`matrix`/`tensor`/`parallel`/`typed-function`/`workerpool` suites green (functions alone: 4048
+passed / 94 skipped, including `tests/is-guards-local.test.ts`), and `npm run check:duplicates`
+passes (135 current == 135 baselined, 0 new).
+
 ### Dedup — math constants + DEFAULT_CONFIG cluster (core, compat, functions)
 
 Cross-package dedup pass over the `docs/Architecture/duplicate-symbols.json` math-constant +

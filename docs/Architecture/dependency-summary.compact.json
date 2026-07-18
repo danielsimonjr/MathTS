@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1086, "e": 5558, "re": 2221 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1087, "e": 5563, "re": 2226 },
   "s": {
-    "loc": 184595,
+    "loc": 184580,
     "cls": 52,
-    "int": 488,
+    "int": 476,
     "fn": 1755,
     "tg": 156,
     "en": 0,
     "co": 1542,
-    "toi": 564
+    "toi": 566
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -193,7 +193,7 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",
@@ -372,7 +372,7 @@
         "isSparseMatrix"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
-      "int": ["MatrixDimensions", "MatrixIndex", "SliceSpec", "MatrixEntry"]
+      "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
     },
     "tensor": {
       "f": 4,
@@ -581,7 +581,7 @@
         "importFactory",
         "createTyped"
       ],
-      "int": ["MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
+      "int": ["MathJsInstance", "ConfigFunction", "ImportOptions", "TypedFunction"]
     },
     "functions/error": {
       "f": 3,
@@ -1127,14 +1127,14 @@
       "int": [
         "EmitterMixin",
         "FactoryFunction",
-        "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
         "Matrix",
         "DenseMatrix",
-        "SparseMatrix"
+        "SparseMatrix",
+        "Range"
       ]
     },
     "functions/wasm": {
@@ -1162,7 +1162,7 @@
         "loadWasmManifest"
       ],
       "cls": ["WasmLoader"],
-      "int": ["RawWasm", "WasmManifest", "WasmModule", "LoadingMetrics"]
+      "int": ["RawWasm", "WasmModule"]
     },
     "expression/compiler": {
       "f": 2,
@@ -1292,7 +1292,6 @@
       ],
       "int": [
         "FactoryFunction",
-        "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
@@ -1300,7 +1299,8 @@
         "Matrix",
         "DenseMatrix",
         "SparseMatrix",
-        "Range"
+        "Range",
+        "IndexDimension"
       ]
     },
     "parser": {
@@ -1544,7 +1544,7 @@
         "parallelSubtract"
       ],
       "cls": ["ComputePool"],
-      "int": ["ComputePoolConfig", "ParallelResult", "PoolOptions", "ExecOptions", "PoolStats"]
+      "int": ["ComputePoolConfig", "ParallelResult"]
     },
     "parallel/operations": {
       "f": 5,

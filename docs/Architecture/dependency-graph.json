@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-18",
-    "totalFiles": 1086,
+    "totalFiles": 1087,
     "totalModules": 82,
-    "totalExports": 5558
+    "totalExports": 5563
   },
   "entryPoints": [
     {
@@ -1273,6 +1273,12 @@
             "typeOnly": true
           },
           {
+            "file": "./types/wasm-loader.js",
+            "imports": ["LoadingMetrics", "WasmManifest"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./types/unit/unit-types.js",
             "imports": ["*"],
             "reExport": true,
@@ -1358,7 +1364,9 @@
           "ConfigOptions",
           "MathJsConfig",
           "NestedArray",
-          "IdentifiedValue"
+          "IdentifiedValue",
+          "LoadingMetrics",
+          "WasmManifest"
         ],
         "reExported": [
           "* from ./is.js",
@@ -1432,6 +1440,8 @@
           "MathJsConfig",
           "NestedArray",
           "IdentifiedValue",
+          "LoadingMetrics",
+          "WasmManifest",
           "type * from ./types/unit/unit-types.js"
         ]
       },
@@ -2581,6 +2591,15 @@
           "Dimensions",
           "UnitDef"
         ]
+      },
+      "core/src/types/wasm-loader.ts": {
+        "description": "Shared type-only shapes for the two independent WASM loader implementations",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": ["LoadingMetrics", "WasmManifest"]
       }
     },
     "matrix/backends": {
@@ -3415,9 +3434,15 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["WasmManifest"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"],
-        "interfaces": ["WasmManifest"],
         "functions": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"]
       },
       "matrix/src/backends/wasm/resolve.ts": {
@@ -3485,10 +3510,17 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["LoadingMetrics"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["wasmLoader", "initWasm", "WasmLoader"],
         "classes": ["WasmLoader"],
-        "interfaces": ["WasmModule", "Allocation", "LoadingMetrics"],
+        "interfaces": ["WasmModule", "Allocation"],
         "functions": ["initWasm"],
         "constants": ["wasmLoader"]
       }
@@ -4417,9 +4449,15 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["MatrixDimensions"]
+          }
+        ],
         "exports": ["isMatrix"],
-        "interfaces": ["MatrixDimensions", "MatrixIndex", "SliceSpec", "MatrixEntry"],
+        "interfaces": ["MatrixIndex", "SliceSpec", "MatrixEntry"],
         "functions": ["isMatrix"]
       },
       "matrix/src/types/SparseMatrix.ts": {
@@ -4790,6 +4828,12 @@
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["DenseMatrix", "backendManager"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["NestedArray"],
+            "subpath": "internal"
           }
         ],
         "exports": ["Tensor"],
@@ -10516,6 +10560,11 @@
             "imports": ["importFactory"]
           },
           {
+            "file": "./function/import.js",
+            "imports": ["ImportOptions"],
+            "typeOnly": true
+          },
+          {
             "file": "./function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -10523,7 +10572,7 @@
         ],
         "workspaceDependencies": [],
         "exports": ["create"],
-        "interfaces": ["MathJsInstance", "ImportOptions"],
+        "interfaces": ["MathJsInstance"],
         "functions": ["create"]
       },
       "functions/src/core/function/config.ts": {
@@ -14388,10 +14437,16 @@
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["eig"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["ComplexValue"],
+            "subpath": "internal"
           }
         ],
         "exports": ["funm", "complexCos", "complexSin", "cosm", "sinm"],
-        "interfaces": ["ComplexValue", "ComplexMatrix"],
+        "interfaces": ["ComplexMatrix"],
         "functions": ["funm", "complexCos", "complexSin", "cosm", "sinm"]
       },
       "functions/src/numeric/minimize-scalar.ts": {
@@ -18215,7 +18270,24 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": [
+              "RangeForEachCallback",
+              "RangeFormatOptions",
+              "RangeJSON",
+              "RangeMapCallback"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["NestedArray"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [],
         "interfaces": [
           "BigNumberLike",
@@ -18228,7 +18300,6 @@
           "SparseMatrixInterface",
           "MatrixFormatOptions",
           "ImmutableDenseMatrixJSON",
-          "RangeJSON",
           "IndexJSON",
           "DenseMatrixConstructorData",
           "SparseMatrixConstructorData",
@@ -18236,7 +18307,6 @@
           "MatrixAlgorithmSuiteOptions",
           "FibonacciHeapNode",
           "FibonacciHeapInterface",
-          "RangeFormatOptions",
           "RangeInterface"
         ]
       },
@@ -21540,6 +21610,7 @@
             "imports": [
               "LegacyFactory",
               "DependencyName",
+              "FactoryMeta",
               "isFactory",
               "assertDependencies",
               "isOptionalDependency",
@@ -21559,7 +21630,7 @@
           "create",
           "factory"
         ],
-        "interfaces": ["FactoryFunction", "FactoryMeta"],
+        "interfaces": ["FactoryFunction"],
         "functions": ["factory"]
       },
       "functions/src/utils/hasNumericValue.ts": {
@@ -22474,9 +22545,15 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["WasmManifest"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"],
-        "interfaces": ["WasmManifest"],
         "functions": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"]
       },
       "functions/src/wasm/interpolation/wasm-bridge.ts": {
@@ -22849,10 +22926,17 @@
             "imports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["LoadingMetrics"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["wasmLoader", "WasmLoader"],
         "classes": ["WasmLoader"],
-        "interfaces": ["WasmModule", "LoadingMetrics"],
+        "interfaces": ["WasmModule"],
         "constants": ["wasmLoader"]
       }
     },
@@ -29375,6 +29459,7 @@
             "imports": [
               "LegacyFactory",
               "DependencyName",
+              "FactoryMeta",
               "isFactory",
               "assertDependencies",
               "isOptionalDependency",
@@ -29394,7 +29479,7 @@
           "create",
           "factory"
         ],
-        "interfaces": ["FactoryFunction", "FactoryMeta"],
+        "interfaces": ["FactoryFunction"],
         "functions": ["factory"]
       },
       "expression/src/utils/is.ts": {
@@ -31599,7 +31684,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-workerpool",
+            "directory": "packages/workerpool",
+            "imports": ["PoolOptions", "ExecOptions", "PoolStats"]
+          }
+        ],
         "exports": [
           "ComputePool",
           "computePool",
@@ -31683,7 +31774,10 @@
           "ThresholdConfig",
           "OperationCategory",
           "ExecutionMode",
-          "DispatchResult"
+          "DispatchResult",
+          "PoolOptions",
+          "ExecOptions",
+          "PoolStats"
         ],
         "reExported": [
           "ComputePool",
@@ -31768,9 +31862,11 @@
           "ThresholdConfig",
           "OperationCategory",
           "ExecutionMode",
-          "DispatchResult"
-        ],
-        "interfaces": ["PoolOptions", "ExecOptions", "PoolStats"]
+          "DispatchResult",
+          "PoolOptions",
+          "ExecOptions",
+          "PoolStats"
+        ]
       },
       "parallel/src/matrix.worker.ts": {
         "description": "Matrix Worker for parallel computation",
@@ -36391,7 +36487,8 @@
           "core/src/types/unit/Unit.ts",
           "core/src/types/unit-definitions.ts",
           "core/src/types/unit-prefixes.ts",
-          "core/src/types/unit.ts"
+          "core/src/types/unit.ts",
+          "core/src/types/wasm-loader.ts"
         ]
       },
       {
@@ -37749,21 +37846,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1086,
+    "totalTypeScriptFiles": 1087,
     "totalModules": 82,
-    "totalLinesOfCode": 184595,
-    "totalExports": 5558,
+    "totalLinesOfCode": 184580,
+    "totalExports": 5563,
     "totalClasses": 52,
-    "totalInterfaces": 488,
+    "totalInterfaces": 476,
     "totalFunctions": 1755,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2221,
-    "totalTypeOnlyImports": 564,
+    "totalReExports": 2226,
+    "totalTypeOnlyImports": 566,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 212
+    "unusedExportsCount": 202
   }
 }

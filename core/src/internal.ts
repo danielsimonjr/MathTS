@@ -150,3 +150,10 @@ export {
   assign as assignMap,
   isObjectWrappingMap,
 } from './map.js';
+
+// Shared WASM-loader type shapes, consolidated from the byte-identical copies
+// formerly in functions/src/wasm/WasmLoader.ts + integrity.ts and
+// matrix/src/backends/WasmLoader.ts + wasm/integrity.ts (see
+// docs/Architecture/duplicate-symbols.json). `WasmModule` itself stays local to
+// each package — it genuinely differs (package-scoped ABI subsets).
+export type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';

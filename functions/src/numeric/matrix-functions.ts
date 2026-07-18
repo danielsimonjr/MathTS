@@ -46,12 +46,14 @@
  */
 
 import { eig } from '@danielsimonjr/mathts-matrix';
+/**
+ * A complex number as a plain `{re, im}` pair. Consolidated onto
+ * `@danielsimonjr/mathts-core/internal`'s byte-identical `ComplexValue` (see
+ * docs/Architecture/duplicate-symbols.json) rather than redeclared locally.
+ */
+import type { ComplexValue } from '@danielsimonjr/mathts-core/internal';
 
-/** A complex number as a plain `{re, im}` pair. */
-export interface ComplexValue {
-  re: number;
-  im: number;
-}
+export type { ComplexValue };
 
 /** A complex-valued dense matrix, stored as parallel real/imaginary 2-D arrays. */
 export interface ComplexMatrix {

@@ -21,12 +21,14 @@
  * unsigned builds usable while making signed builds tamper-evident.
  */
 
-const ALGO = 'sha384';
+// `WasmManifest` consolidated onto `@danielsimonjr/mathts-core/internal`'s
+// byte-identical definition, formerly duplicated with
+// `matrix/src/backends/wasm/integrity.ts` (see
+// docs/Architecture/duplicate-symbols.json).
+import type { WasmManifest } from '@danielsimonjr/mathts-core/internal';
+export type { WasmManifest };
 
-export interface WasmManifest {
-  /** Map of filename -> "sha384-<base64 digest>" */
-  [fileName: string]: string;
-}
+const ALGO = 'sha384';
 
 /**
  * Compute the SHA-384 digest of a buffer and return base64 encoding,

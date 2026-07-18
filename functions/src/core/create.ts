@@ -58,6 +58,7 @@ import type { ConfigOptions, MathJsConfig } from './config.js';
 export type { MathJsConfig };
 import { configFactory } from './function/config.js';
 import { importFactory } from './function/import.js';
+import type { ImportOptions } from './function/import.js';
 import type { TypedFunction } from './function/typed.js';
 
 /**
@@ -152,14 +153,10 @@ export type FactoriesInput =
   | FactoryFunction
   | LegacyFactory;
 
-/**
- * Options for the import function
- */
-export interface ImportOptions {
-  override?: boolean;
-  silent?: boolean;
-  wrap?: boolean;
-}
+// `ImportOptions` re-exported from `./function/import.js`, which had the
+// byte-identical, better-documented canonical copy (see
+// docs/Architecture/duplicate-symbols.json).
+export type { ImportOptions };
 
 /**
  * Type for lazy typed function
@@ -296,9 +293,7 @@ export function create(
    * @param factory The factory function or object
    * @returns The created instance
    */
-  function load(
-    factory: FactoryFunction | LegacyFactory | Record<string, unknown>
-  ): unknown {
+  function load(factory: FactoryFunction | LegacyFactory | Record<string, unknown>): unknown {
     if (isFactory(factory)) {
       return factory(math);
     }
@@ -382,9 +377,7 @@ export function create(
   // import the factory functions like createAdd as an array instead of object,
   // else they will get a different naming (`createAdd` instead of `add`).
   if (factories) {
-    math.import(
-      Object.values(deepFlatten(factories as Record<string, unknown>)) as FactoriesInput
-    );
+    math.import(Object.values(deepFlatten(factories as Record<string, unknown>)) as FactoriesInput);
   }
 
   math.ArgumentsError = ArgumentsError;

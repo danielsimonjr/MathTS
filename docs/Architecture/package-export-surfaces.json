@@ -655,6 +655,7 @@
       "lazy",
       "LN10",
       "LN2",
+      "LoadingMetrics",
       "log10",
       "LOG10E",
       "log1p",
@@ -757,7 +758,8 @@
       "validateIndex",
       "validateIndexSourceSize",
       "VERSION",
-      "warnOnce"
+      "warnOnce",
+      "WasmManifest"
     ],
     "evaluator": ["compile", "CompiledExpression", "compileExpression", "createEvaluate", "Scope"],
     "expression": [
@@ -3741,6 +3743,7 @@
       "dispatch",
       "DispatchResult",
       "ElementwiseOptions",
+      "ExecOptions",
       "ExecutionMode",
       "leftShift",
       "MapOptions",
@@ -3794,6 +3797,8 @@
       "parallelVariance",
       "partition2D",
       "partitionRange",
+      "PoolOptions",
+      "PoolStats",
       "ReduceOptions",
       "resolveOpThreshold",
       "rightArithShift",

@@ -183,6 +183,21 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           — confirms these are DISPATCH_VARIANT, not TRUE_DUPLICATE; the win is divergence-safety, not the count.
   - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
     canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
+  - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
+        to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
+        every name: 14 consolidated onto a single canonical + type-only re-export shim
+        (`FactoryMeta`; `Range{ForEachCallback,MapCallback,FormatOptions,JSON}`; `NestedArray`
+        in `functions`+`tensor`; `MatrixDimensions`; `ComplexValue`; `ImportOptions`;
+        `PoolOptions`/`ExecOptions`/`PoolStats`; `LoadingMetrics`/`WasmManifest` via a new
+        `core/src/types/wasm-loader.ts`), ~40+ names across ~20 allowlist entries confirmed
+        genuinely distinct (the AST-node/duck-type guards riding with the hot-path `is*` family —
+        same Bucket-A reasoning, extended to types — plus per-subsystem shapes like
+        `FactoryFunction`/`CreateFunction`, `TypeDef`/`ConversionDef`, `ConfigOptions`,
+        `WasmModule`, `CholeskyResult`, `FFTResult`, `SparseMatrixData`, …), and one diverged
+        finding reported rather than force-merged (`CompiledExpression`). Type `TRUE_DUPLICATE`
+        68 → 0; `duplicate-baseline.json` regenerated (203 → 135, all runtime now). `npm run
+typecheck` 32/32, eslint clean, full affected-package suites green, `check:duplicates`
+        passes. See CHANGELOG `[Unreleased]` for the per-name breakdown.
 - **INTEGRATE (canonical-home rule):** cold shared → `core`/`core/internal`; domain ops → owning accelerated
   package (delete/redirect rest); **HOT-PATH guards STAY LOCAL, period** (no `noExternal` escape hatch — unproven
   - hidden copies defeat central maintenance); back-compat re-export moved symbols; **profile-FIRST** before

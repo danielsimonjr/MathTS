@@ -17,6 +17,8 @@
 
 import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js';
 import { resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm } from './resolve.js';
+import type { LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
+export type { LoadingMetrics };
 
 export interface WasmModule {
   // Matrix operations
@@ -825,16 +827,10 @@ interface PoolEntry {
   inUse: boolean;
 }
 
-/**
- * Loading metrics for performance monitoring
- */
-export interface LoadingMetrics {
-  fileReadMs: number;
-  compileMs: number;
-  instantiateMs: number;
-  totalMs: number;
-  fromCache: boolean;
-}
+// `LoadingMetrics` consolidated onto `@danielsimonjr/mathts-core/internal`'s
+// byte-identical definition, formerly duplicated with
+// `matrix/src/backends/WasmLoader.ts` (see
+// docs/Architecture/duplicate-symbols.json).
 
 export class WasmLoader {
   private static instance: WasmLoader | null = null;

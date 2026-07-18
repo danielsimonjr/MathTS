@@ -113,7 +113,7 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core/numeric**: 1 file
 - **core/typed**: 3 files
-- **core/types**: 15 files
+- **core/types**: 16 files
 - **matrix/backends**: 19 files
 - **matrix**: 4 files
 - **matrix/operations**: 17 files
@@ -198,9 +198,9 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 4              | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 41             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 42             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
-| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 21             | 0               |
+| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 441            | 4               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 421            | 4               |
@@ -253,6 +253,7 @@ graph LR
     P3 --> P18
     P3 --> P2
     P4 --> P3
+    P4 --> P2
     P5 --> P4
     P5 --> P2
     P6 --> P3
@@ -549,11 +550,12 @@ graph LR
 | `./shared.js` | `MemoizedFunction` | Re-export (type-only) |
 | `./config.js` | `ConfigOptions, MathJsConfig` | Re-export (type-only) |
 | `./array.js` | `NestedArray, IdentifiedValue` | Re-export (type-only) |
+| `./types/wasm-loader.js` | `LoadingMetrics, WasmManifest` | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `*` | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `type * from ./types/unit/unit-types.js`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `type * from ./types/unit/unit-types.js`
 
 ---
 
@@ -1000,6 +1002,14 @@ graph LR
 
 ---
 
+### `core/src/types/wasm-loader.ts` - Shared type-only shapes for the two independent WASM loader implementations
+
+**Exports:**
+
+- Interfaces: `LoadingMetrics`, `WasmManifest`
+
+---
+
 <a id="matrix-backends-dependencies"></a>
 
 ## Matrix/backends Dependencies
@@ -1279,9 +1289,13 @@ graph LR
 
 ### `matrix/src/backends/wasm/integrity.ts` - WASM integrity verification - SHA-384 manifest check.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `WasmManifest` |
+
 **Exports:**
 
-- Interfaces: `WasmManifest`
 - Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
 
 ---
@@ -1317,6 +1331,11 @@ graph LR
 
 ### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -1326,7 +1345,7 @@ graph LR
 **Exports:**
 
 - Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `Allocation`, `LoadingMetrics`
+- Interfaces: `WasmModule`, `Allocation`
 - Functions: `initWasm`
 - Constants: `wasmLoader`
 
@@ -1731,9 +1750,14 @@ graph LR
 
 ### `matrix/src/types/Matrix.ts` - Matrix Base Class
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `MatrixDimensions` |
+
 **Exports:**
 
-- Interfaces: `MatrixDimensions`, `MatrixIndex`, `SliceSpec`, `MatrixEntry`
+- Interfaces: `MatrixIndex`, `SliceSpec`, `MatrixEntry`
 - Types: `MatrixType`
 - Functions: `isMatrix`
 
@@ -1837,6 +1861,7 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+| `@danielsimonjr/mathts-core` | `NestedArray` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4340,11 +4365,12 @@ graph LR
 | `./config.js` | `ConfigOptions, MathJsConfig` | Import (type-only) |
 | `./function/config.js` | `configFactory` | Import |
 | `./function/import.js` | `importFactory` | Import |
+| `./function/import.js` | `ImportOptions` | Import (type-only) |
 | `./function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 
-- Interfaces: `MathJsInstance`, `ImportOptions`
+- Interfaces: `MathJsInstance`
 - Types: `FactoriesInput`
 - Functions: `create`
 
@@ -5998,10 +6024,11 @@ graph LR
 | Package | Import |
 |---------|--------|
 | `@danielsimonjr/mathts-matrix` | `eig` |
+| `@danielsimonjr/mathts-core` | `ComplexValue` |
 
 **Exports:**
 
-- Interfaces: `ComplexValue`, `ComplexMatrix`
+- Interfaces: `ComplexMatrix`
 - Types: `ScalarComplexFunction`
 - Functions: `funm`, `complexCos`, `complexSin`, `cosm`, `sinm`
 
@@ -8158,10 +8185,16 @@ graph LR
 
 ### `functions/src/type/matrix/types.ts` - Type Philosophy:
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `RangeForEachCallback, RangeFormatOptions, RangeJSON, RangeMapCallback` |
+| `@danielsimonjr/mathts-core` | `NestedArray` |
+
 **Exports:**
 
-- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `ImmutableDenseMatrixJSON`, `RangeJSON`, `IndexJSON`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeFormatOptions`, `RangeInterface`
-- Types: `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`, `RangeForEachCallback`, `RangeMapCallback`
+- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `ImmutableDenseMatrixJSON`, `IndexJSON`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeInterface`
+- Types: `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`
 
 ---
 
@@ -9223,7 +9256,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
+| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, FactoryMeta, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -9232,7 +9265,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `FactoryFunction`, `FactoryMeta`
+- Interfaces: `FactoryFunction`
 - Types: `CreateFunction`
 - Functions: `factory`
 
@@ -9619,9 +9652,13 @@ graph LR
 
 ### `functions/src/wasm/integrity.ts` - WASM integrity verification — SHA-384 manifest check.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `WasmManifest` |
+
 **Exports:**
 
-- Interfaces: `WasmManifest`
 - Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
 
 ---
@@ -9718,6 +9755,11 @@ graph LR
 
 ### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -9727,7 +9769,7 @@ graph LR
 **Exports:**
 
 - Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `LoadingMetrics`
+- Interfaces: `WasmModule`
 - Constants: `wasmLoader`
 
 ---
@@ -13919,7 +13961,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
+| `@danielsimonjr/mathts-core` | `LegacyFactory, DependencyName, FactoryMeta, isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation, sortFactories, create` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -13928,7 +13970,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `FactoryFunction`, `FactoryMeta`
+- Interfaces: `FactoryFunction`
 - Types: `CreateFunction`
 - Functions: `factory`
 
@@ -14265,6 +14307,11 @@ graph LR
 
 ### `parallel/src/index.ts` - WebWorker parallelization for MathTS computations.
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-workerpool` | `PoolOptions, ExecOptions, PoolStats` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -14279,8 +14326,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `PoolOptions`, `ExecOptions`, `PoolStats`
-- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`
+- Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ComputePoolConfig`, `ParallelResult`, `OpName`, `OpThreshold`, `MatmulOptions`, `ElementwiseOptions`, `ReduceOptions`, `MapOptions`, `BitwiseBinaryOp`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`, `PoolOptions`, `ExecOptions`, `PoolStats`
 
 ---
 
@@ -15666,7 +15712,7 @@ graph LR
 | `workbook/src/cli`                                     | 19 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
-| `core/src/internal`                                    | 16 files     | 0 files    |
+| `core/src/internal`                                    | 17 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
@@ -15750,7 +15796,7 @@ graph TD
         N33[dependencies]
         N34[errors]
         N35[index]
-        N36[...5 more]
+        N36[...6 more]
     end
 
     subgraph Matrix/backends
@@ -16490,17 +16536,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1086   |
+| Total TypeScript Files  | 1087   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184595 |
-| Total Exports           | 5558   |
-| Total Re-exports        | 2221   |
+| Total Lines of Code     | 184580 |
+| Total Exports           | 5563   |
+| Total Re-exports        | 2226   |
 | Total Classes           | 52     |
-| Total Interfaces        | 488    |
+| Total Interfaces        | 476    |
 | Total Functions         | 1755   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 564    |
+| Type-only Imports       | 566    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
