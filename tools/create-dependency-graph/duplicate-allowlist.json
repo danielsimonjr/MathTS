@@ -305,6 +305,30 @@
       ],
       "filesGlob": ["core/src/number.ts"],
       "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+    },
+    {
+      "names": ["pinv", "lowRankApprox", "singularValues", "normFro", "cond"],
+      "filesGlob": ["matrix/src/operations/svd.ts", "matrix/src/operations/pinv.ts"],
+      "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
+    },
+    {
+      "names": ["matrixExpm", "matrixLogm", "matrixSqrtm"],
+      "filesGlob": [
+        "matrix/src/operations/expm.ts",
+        "matrix/src/operations/logm.ts",
+        "matrix/src/operations/sqrtm.ts"
+      ],
+      "reason": "dispatch-variant: functions/src/typed/matrix-ops.ts `mathTyped` wrappers route to these matrix-package DenseMatrix primitives (matrixExpm/matrixLogm/matrixSqrtm, imported and called directly, verified by call chain). Matrix owns the canonical body; the functions definer is auto-tagged DISPATCH_VARIANT. 2026-07 dedup campaign, matrix-domain routing slice."
+    },
+    {
+      "names": ["cholesky"],
+      "filesGlob": ["matrix/src/operations/cholesky.ts", "functions/src/typed/matrix-ops.ts"],
+      "reason": "matrix/src/operations/cholesky.ts is the canonical, oracle-pinned DenseMatrix Cholesky primitive. functions/src/typed/matrix-ops.ts's `number[][]` cholesky was an independent body; it now ROUTES to the matrix primitive (native-accel, project-two-decomposition-layers-prefer-matrix), keeping only a symmetry pre-check (the matrix primitive reads the lower triangle only, so it would silently accept asymmetric input this surface must reject) and converting DenseMatrix→number[][] for its contract. Pre-routing NumPy audit (np.linalg.cholesky over an SPD corpus) confirmed BOTH bodies were already correct to full double precision — no bug. Guarded by functions/tests/gap-matrix-domain-dedup-parity.test.ts (NumPy oracle + functions≡matrix parity). 2026-07 dedup campaign, matrix-domain routing slice."
+    },
+    {
+      "names": ["trace", "diag", "dotMultiply", "row", "column", "subset"],
+      "filesGlob": ["functions/src/factories/index.ts", "matrix/src/types/dense/reduction.ts"],
+      "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
     }
   ]
 }

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dedup — matrix-domain routing slice (`TRUE_DUPLICATE` 104 → 89)
+
+Classified all 16 matrix-domain symbols defined in both `functions` and `matrix` (by reading BOTH
+bodies) and resolved 15 (only `qr` remains, surfaced for a human keep-vs-route decision):
+
+- **Routed `functions` cholesky to the matrix DenseMatrix primitive** (native-accel,
+  `project-two-decomposition-layers-prefer-matrix`). `functions/src/typed/matrix-ops.ts`'s `number[][]`
+  Cholesky now delegates to `matrix`'s maintained primitive, keeping only a symmetry pre-check (the
+  primitive reads the lower triangle only) and a `DenseMatrix → number[][]` conversion. A pre-routing
+  NumPy audit (`np.linalg.cholesky`, SPD corpus) confirmed both bodies were already correct to full
+  double precision — **no behavior change, no bug**. Public signature/throws unchanged.
+- **Removed a dead, shadowed `cond`.** The power-iteration `cond` in `functions/src/typed/numeric.ts`
+  was unreachable via the public barrel (an `export *` collision with the SVD-based matrix-ops `cond`,
+  explicitly overridden) and had no internal caller. Deleted at root; the public `cond` (SVD-based,
+  delegates to the matrix primitive) is unchanged.
+- **Allowlisted the dispatch-variant matrix primitives** for `pinv`, `singularValues`, `normFro`,
+  `lowRankApprox`, `cond`, `matrixExpm`, `matrixLogm`, `matrixSqrtm` — the `functions` typed wrappers
+  already route to them (verified by call chain), so `matrix` owns the single canonical body.
+- **Allowlisted `trace`/`diag`/`dotMultiply`/`row`/`column`/`subset` as independent-by-design** — the
+  `functions` mathjs-factory bodies (mathjs `Matrix`/`number[][]` contract) vs the `matrix`
+  `DenseMatrix` typed-ops are different type surfaces across two packages, pinned together by a parity
+  guard rather than merged.
+
+New `functions/tests/gap-matrix-domain-dedup-parity.test.ts` (16 tests) pins cholesky + the six
+factory ops to the NumPy oracle AND to the matrix primitives (per `feedback-allowlist-needs-parity-guard`).
+Baseline re-seeded to 89; `check:duplicates:fast` passes, 0 cycles. `qr` (mathjs factory + WASM path vs
+DenseMatrix primitive) left on the backlog as a keep-vs-route ADR — see `docs/Architecture/duplicate-backlog.md` §1.
+
 ### Fixed — two BigNumber/Complex correctness bugs found by the transcendental dedup audit
 
 Oracle-auditing (mpmath / NumPy) the rich-type cases of the 12 transcendental scalars whose names

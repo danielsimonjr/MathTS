@@ -211,6 +211,21 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
         `functions/tests/gap-transcendental-richtype-oracle.test.ts` (parity, not bare allowlist).
         Baseline re-seeded 104; `check:duplicates:fast` passes; 0 cycles. **Warrants a `core` release**
         (public-API correctness). Remaining backlog: matrix-domain routing + HUMAN-DECISION clusters.
+  - [x] ✅ **Matrix-domain routing slice DONE 2026-07-18.** `TRUE_DUPLICATE` **104 → 89** (15 flipped;
+        only `qr` of the 16-name matrix-domain set remains). Classified each by reading BOTH bodies:
+        (a) **already dispatch-variants** (`pinv`/`singularValues`/`normFro`/`lowRankApprox`/`cond`/
+        `matrixExpm`/`matrixLogm`/`matrixSqrtm`) — `functions/typed/matrix-ops.ts` `mathTyped` wrappers
+        route to the matrix primitives (verified by call chain) → allowlisted the matrix `PLAIN` bodies;
+        (b) **`cholesky` routed** — `functions`' `number[][]` body now delegates to the matrix DenseMatrix
+        primitive (native-accel), symmetry pre-check kept; NumPy audit found **no bug** (both bodies were
+        already correct); (c) **dead `cond` removed** — the shadowed power-iteration `cond` in
+        `functions/typed/numeric.ts` (unreachable, no caller) deleted at root; **independent-by-design**
+        `trace`/`diag`/`dotMultiply`/`row`/`column`/`subset` (mathjs-factory vs DenseMatrix typed-op,
+        different contracts) allowlisted **with a parity guard**. New
+        `functions/tests/gap-matrix-domain-dedup-parity.test.ts` (16 tests, NumPy oracle + cross-package
+        parity). Baseline re-seeded 89; `check:duplicates:fast` passes; 0 cycles. **`qr` surfaced as a
+        keep-vs-route ADR** (mathjs factory + WASM path vs DenseMatrix primitive — routing would drop both)
+        → `docs/Architecture/duplicate-backlog.md` §1. No release warranted (no behavior change / no bug).
   - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
         to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
         every name: 14 consolidated onto a single canonical + type-only re-export shim
