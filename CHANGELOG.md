@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(tools): complete file census (FILE_INVENTORY) + self-check gate in CDG
+
+- Added a **complete file census** to `tools/create-dependency-graph` (`buildFileInventory`): every `.ts`
+  under each of the 24 workspace packages' `src/` AND `tests/` (excl `node_modules`/`dist`/`*.d.ts`) is now
+  enumerated with a disposition — `reachable`, `build-entry`, `test-only`, `orphan`, or `test`, computed from
+  the existing module-graph reachability/root data (no second graph). Emits `docs/Architecture/FILE_INVENTORY.md`
+  (summary + per-disposition + per-package counts, then an alphabetized `file | package | area | disposition`
+  table) and `file-inventory.json` (machine form). Wired into `npm run docs:deps` (+ prettier-formatted).
+  **Census: 1630 files** = 1091 `src/` (1055 reachable + 33 build-entry + 3 test-only + 0 orphan) + 539 `tests/`.
+- Added a **self-check gate** (`verifyFileCensus`): an INDEPENDENT disk walk (separate code path) compared to the
+  census, plus an orphan check. It HARD-FAILS `npm run docs:deps` (throws → non-zero exit; the top-level
+  `.catch` now `process.exit(1)`s) if any `.ts` is on disk but absent from the census, or if any `orphan` exists —
+  so a future root-detection/discovery gap is a loud build failure, never a silent drop. Proven: a temp
+  `parallel/src/__censusprobe.ts` fails the run naming the file; deleting it passes again.
+
+### fix(tools): CDG reads config-driven `tsup.config.ts` entries — repairs a build-root regression
+
+- CDG's build-root detection parsed only the package.json build/dev **script string** for `tsup src/*.ts` args.
+  When `plot`/`workbook` moved their multi-entry lists into `<pkg>/tsup.config.ts` (bare `tsup` script — a
+  side effect of the VERSION-derive change that made those configs read `package.json` at build time),
+  CDG could no longer see `plot/src/render-file.ts` and `workbook/src/run-worker.ts`, silently dropping them
+  from the module graph (**1088 → 1086**). Added `tsupConfigEntries`: when a `build`/`dev` script invokes `tsup`
+  with no explicit `src/*.ts` arg, also parse `tsup.config.ts`'s `entry:[…]` array and seed each as a build root.
+  Both files return to the graph (**module total 1086 → 1088**) and drop off the orphan/dormant lists in
+  `unused-analysis.md` (orphaned 1 → 0, dormant 5 → 3). Also deduped `entryPoints` (config-driven configs re-list
+  `index.ts`/`cli.ts`).
+
 ### fix(test): repair cov-numeric `cond` import broken by the dedup
 
 - The matrix-domain dedup slice (`a99029c2`) removed the shadowed power-iteration `cond` from

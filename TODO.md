@@ -11,6 +11,17 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
+- [x] **CDG complete file census + build-root regression fix (2026-07-18)** — `tools/create-dependency-graph`
+      now emits a **complete file inventory** (`docs/Architecture/FILE_INVENTORY.md` + `file-inventory.json`):
+      every `.ts` under each package's `src/`+`tests/` tagged `reachable`/`build-entry`/`test-only`/`orphan`/`test`
+      (census: **1630 files** = 1091 src + 539 tests). A built-in **self-check gate** (`verifyFileCensus`) does an
+      independent disk walk and hard-fails `npm run docs:deps` (non-zero exit) on any disk↔census mismatch or any
+      orphan — proven via a temp probe (FAIL-then-PASS). Fixed a **build-root regression**: config-driven
+      `tsup.config.ts` entries (`plot/src/render-file.ts`, `workbook/src/run-worker.ts`) were dropped from the
+      module graph (1088→1086) after those packages moved entries out of the build-script string; CDG now reads
+      `tsup.config.ts`'s `entry:[…]` (module total 1086→**1088**, orphaned 1→0). Gates: cycles 0, browser-safety
+      clean, `check:duplicates:fast` 0, eslint clean.
+
 ### 🗺️ Oracle Gap Roadmap (comprehensive functionality + accuracy sweep vs numpy/scipy/mpmath/MATLAB/Mathematica)
 
 Full inventory: [`docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md`](docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)
@@ -127,49 +138,46 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
   - **Bucket B — internal util dupes (SAFE FIRST, ~69):** `deepMap`/`deepForEach`/`clone`/`array`/`collection`/
     `formatter`/`factory` duplicated between `expression/utils` + `functions/utils` (dead-mathjs-sync residue).
     Non-breaking → consolidate to `core/internal` (extends [[project-all-libraries-build-on-core]]; number.ts/
-    object.ts already done). Property-gated. **STARTED 2026-07-17.**
-    - [x] ✅ **Slice 1 (factory/string/bignumber-formatter) DONE 2026-07-17.** `isFactory`/
-          `assertDependencies`/`isOptionalDependency`/`stripOptionalNotation`, generic `format`/
-          `stringify`/`compareText`/`escape`, and BigNumber `format`/`toEngineering`/`toExponential`/
-          `toFixed` redirected to `core/internal`, proven equivalent via a new reusable fast-check
-          harness (`core/tests/helpers/equivalence.ts`). `duplicate-symbols.json` runtime count
-          287→280. **Two divergences found and deliberately NOT merged** (reported for adjudication,
-          not silently resolved): `factory()`'s `CreateFunction<TDeps, ...>` generic constraint (core's
-          `Record<string, unknown>` breaks `tsc` against real destructured-deps call sites; both
-          packages already carry an `any`-workaround for this) and `sortFactories`/`create`'s cyclic-
-          dependency handling (core throws on any cycle — an intentional later fix, commit `32fe7051`
-          — the package copies silently don't). **Side effect (flagged, not fixed):**
-          `expression`/`functions`' `error/MathjsError.ts` lost their only in-package caller and are
-          now dead code (per `unused-analysis.md`) — itself a 3-way mathjs-derived duplicate, a natural
-          next Bucket B slice.
-    - [x] ✅ **Slice 2 (array/collection/map) DONE 2026-07-17.** Unlike slice 1, core had NONE of
-          these — the ~1500-line combined `array.ts`/`collection.ts`/`map.ts` bodies were newly
-          relocated into `core/src/{array,collection,map}.ts` + `core/internal.ts` (aliased where
-          array.ts's `clone`/`get` collide with `object.ts`'s, and array.ts's/collection.ts's own
-          `deepMap`/`deepForEach` collide with each other). `IndexError`/`DimensionError`/
-          `getSafeProperty` family/`_switch` got internal-only non-exported mirror copies in core
-          (their real canonical homes — `error/IndexError.ts`, `error/DimensionError.ts`,
-          `utils/customs.ts`, `utils/switch.ts` — stay package-local, untouched, a future slice).
-          Proven equivalent via 43 new fast-check/example tests against a frozen pre-redirect
-          snapshot (`functions/tests/dedup-bucketB-slice2-equivalence.test.ts` +
-          `functions/tests/fixtures/dedup-bucketB-slice2/*-original.ts`). `duplicate-symbols.json`
-          runtime count 280→256 (types 70→69). **Divergences found + reconciled (reported):**
-          `ObjectWrappingMap`/`PartitionedMap`'s `[Symbol.iterator]` (functions had already fixed a
-          latent `implements Map<K,V>` type-soundness bug that expression's copy still had — core
-          adopts the fix); `createEmptyMap`/`createMap`'s generic default (`K=string` vs `K=unknown`,
-          compile-time-only, reconciled to `K=string`); `initial()` and `toObject()` were
-          expression-only (preserved in its shim only, not invented into functions'). `collection.ts`'s
-          two copies were already identical. Full `core`/`expression`/`functions` suites green, no
-          regressions; `npm run typecheck` still 32/32.
-    - [x] ✅ **Slice 1/2 dead-ship leftover cleanup DONE 2026-07-18.** Retired the consolidation leftovers that
-          survived only via their own unit tests (no runtime consumer): `expression/src/utils/switch.ts` (copy of
-          core's `_switch`), `expression/src/utils/bignumber/formatter.ts` + `functions/src/utils/bignumber/
-    formatter.ts` (re-export shims of `core/src/bignumber-formatter.ts`). Coverage migrated (no loss) into
-          `core/tests/switch.test.ts` (8) + `core/tests/bignumber-formatter.test.ts` (28); redundant expression
-          formatter/switch tests deleted; the `bignumber/formatter` section of `dedup-bucketB-equivalence.test.ts`
-          retired (pinned deleted shims ≡ core). **`expression/src/error/DimensionError.ts` KEPT** — a live slice-2
-          fixture (`fixtures/dedup-bucketB-slice2/expression-array-original.ts`) still imports it. `unused-analysis.md`
-          test-only dormant 7 → 4. Gates: core/expression suites green (796 / 1943), typecheck + eslint + duplicates + cycles all clean.
+    object.ts already done). Property-gated. **STARTED 2026-07-17.** - [x] ✅ **Slice 1 (factory/string/bignumber-formatter) DONE 2026-07-17.** `isFactory`/
+    `assertDependencies`/`isOptionalDependency`/`stripOptionalNotation`, generic `format`/
+    `stringify`/`compareText`/`escape`, and BigNumber `format`/`toEngineering`/`toExponential`/
+    `toFixed` redirected to `core/internal`, proven equivalent via a new reusable fast-check
+    harness (`core/tests/helpers/equivalence.ts`). `duplicate-symbols.json` runtime count
+    287→280. **Two divergences found and deliberately NOT merged** (reported for adjudication,
+    not silently resolved): `factory()`'s `CreateFunction<TDeps, ...>` generic constraint (core's
+    `Record<string, unknown>` breaks `tsc` against real destructured-deps call sites; both
+    packages already carry an `any`-workaround for this) and `sortFactories`/`create`'s cyclic-
+    dependency handling (core throws on any cycle — an intentional later fix, commit `32fe7051`
+    — the package copies silently don't). **Side effect (flagged, not fixed):**
+    `expression`/`functions`' `error/MathjsError.ts` lost their only in-package caller and are
+    now dead code (per `unused-analysis.md`) — itself a 3-way mathjs-derived duplicate, a natural
+    next Bucket B slice. - [x] ✅ **Slice 2 (array/collection/map) DONE 2026-07-17.** Unlike slice 1, core had NONE of
+    these — the ~1500-line combined `array.ts`/`collection.ts`/`map.ts` bodies were newly
+    relocated into `core/src/{array,collection,map}.ts` + `core/internal.ts` (aliased where
+    array.ts's `clone`/`get` collide with `object.ts`'s, and array.ts's/collection.ts's own
+    `deepMap`/`deepForEach` collide with each other). `IndexError`/`DimensionError`/
+    `getSafeProperty` family/`_switch` got internal-only non-exported mirror copies in core
+    (their real canonical homes — `error/IndexError.ts`, `error/DimensionError.ts`,
+    `utils/customs.ts`, `utils/switch.ts` — stay package-local, untouched, a future slice).
+    Proven equivalent via 43 new fast-check/example tests against a frozen pre-redirect
+    snapshot (`functions/tests/dedup-bucketB-slice2-equivalence.test.ts` +
+    `functions/tests/fixtures/dedup-bucketB-slice2/*-original.ts`). `duplicate-symbols.json`
+    runtime count 280→256 (types 70→69). **Divergences found + reconciled (reported):**
+    `ObjectWrappingMap`/`PartitionedMap`'s `[Symbol.iterator]` (functions had already fixed a
+    latent `implements Map<K,V>` type-soundness bug that expression's copy still had — core
+    adopts the fix); `createEmptyMap`/`createMap`'s generic default (`K=string` vs `K=unknown`,
+    compile-time-only, reconciled to `K=string`); `initial()` and `toObject()` were
+    expression-only (preserved in its shim only, not invented into functions'). `collection.ts`'s
+    two copies were already identical. Full `core`/`expression`/`functions` suites green, no
+    regressions; `npm run typecheck` still 32/32. - [x] ✅ **Slice 1/2 dead-ship leftover cleanup DONE 2026-07-18.** Retired the consolidation leftovers that
+    survived only via their own unit tests (no runtime consumer): `expression/src/utils/switch.ts` (copy of
+    core's `_switch`), `expression/src/utils/bignumber/formatter.ts` + `functions/src/utils/bignumber/
+formatter.ts` (re-export shims of `core/src/bignumber-formatter.ts`). Coverage migrated (no loss) into
+    `core/tests/switch.test.ts` (8) + `core/tests/bignumber-formatter.test.ts` (28); redundant expression
+    formatter/switch tests deleted; the `bignumber/formatter` section of `dedup-bucketB-equivalence.test.ts`
+    retired (pinned deleted shims ≡ core). **`expression/src/error/DimensionError.ts` KEPT** — a live slice-2
+    fixture (`fixtures/dedup-bucketB-slice2/expression-array-original.ts`) still imports it. `unused-analysis.md`
+    test-only dormant 7 → 4. Gates: core/expression suites green (796 / 1943), typecheck + eslint + duplicates + cycles all clean.
   - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
     functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
     scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the
