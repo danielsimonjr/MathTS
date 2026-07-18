@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs: add COMPONENTS.md component reference
+
+- New `docs/Architecture/COMPONENTS.md` — a per-package component reference (purpose, key exported types,
+  dependencies) for all 24 workspace packages, modeled on the MemoryJS COMPONENTS.md style (layered overview
+  diagram, per-component API blocks, dependency tree). Linked from `docs/README.md`.
+
 ### docs: deduplication-campaign milestone sync
 
 - Marked the cross-package deduplication campaign **COMPLETE (`TRUE_DUPLICATE` 253 → 0)** across the repo docs:
