@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `vitest.config.ts` so source-importing tests resolve the global. `core/tests/version.test.ts` now pins `VERSION`
   to `package.json` instead of a literal (the literal was exactly what let it drift). VERSION can no longer drift.
 
+### docs: comprehensive API reference expansion
+
 - `docs/Architecture/API.md` expanded 456 → 1088 lines: verified method-level signatures for all 24 packages
   (numeric-type methods, class APIs, domain function maps, typed-dispatch mechanism), extracted from the built
   `.d.ts` files. Added full sections for `gpu` and `plot`, promoted `tensor`/`autograd` from stubs, and added a
