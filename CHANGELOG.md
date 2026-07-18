@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs: comprehensive API reference expansion
+
+- `docs/Architecture/API.md` expanded 456 → 1088 lines: verified method-level signatures for all 24 packages
+  (numeric-type methods, class APIs, domain function maps, typed-dispatch mechanism), extracted from the built
+  `.d.ts` files. Added full sections for `gpu` and `plot`, promoted `tensor`/`autograd` from stubs, and added a
+  focused-re-export-packages table. Header reworded as hand-maintained (was "Generated").
+- New per-package API references under `docs/api/`: `gpu.md`, `tensor.md`, `autograd.md`, `expression.md`,
+  `workbook.md`, `plot.md` (the six packages that lacked one); `docs/api/README.md` index updated to list all 11.
+  The generator-owned "Complete export index" appendix in the existing 5 files is untouched (`docs:functions:check`
+  passes).
+
 ### docs: add COMPONENTS.md component reference
 
 - New `docs/Architecture/COMPONENTS.md` — a per-package component reference (purpose, key exported types,
