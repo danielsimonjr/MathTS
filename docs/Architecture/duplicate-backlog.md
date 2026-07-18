@@ -21,7 +21,47 @@ slice doesn't re-litigate the classification.
 
 ---
 
-## 1. Matrix-domain routing (`functions` + `matrix`)
+## 1. Matrix-domain routing (`functions` + `matrix`) — **RESOLVED 2026-07-18 (except `qr`)**
+
+**Slice done (2026-07-18, matrix-domain routing slice, `TRUE_DUPLICATE` 104 → 89):** 15 of the 16
+matrix-domain names were classified (by reading BOTH bodies) and resolved. Only `qr` remains — surfaced
+as a keep-vs-route design call for Daniel (see below).
+
+- **(a) Already dispatch-variants — ALLOWLISTED the matrix primitive.** `pinv`, `singularValues`,
+  `normFro`, `lowRankApprox`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, and `cond`: the
+  `functions/src/typed/matrix-ops.ts` `mathTyped(...)` wrappers were verified (call chain read) to route
+  to the matrix-package primitives (`matrixCond`/`matrixPinv`/`matrixSingularValues`/… in
+  `matrix/src/operations/{svd,pinv,expm,logm,sqrtm}.ts`). Matrix owns the single canonical body → no
+  drift → allowlisted as `dispatch-variant`.
+- **(b) Genuine independent body, routed to the matrix primitive.** `cholesky`: the
+  `functions/src/typed/matrix-ops.ts` `number[][]` body now delegates to the matrix DenseMatrix
+  primitive (native-accel), keeping only a symmetry pre-check + DenseMatrix→`number[][]` conversion.
+  Pre-routing NumPy audit (`np.linalg.cholesky`, SPD corpus) confirmed BOTH bodies were already correct
+  to full double precision — **no bug found**. Guarded by
+  `functions/tests/gap-matrix-domain-dedup-parity.test.ts`.
+- **(c/intra-package) `cond` second definer removed.** The shadowed power-iteration `cond` in
+  `functions/src/typed/numeric.ts` was **dead** (unreachable via the public barrel — the `export *`
+  collision + explicit override made matrix-ops' `cond` win; no internal caller) and was deleted at
+  root. Public `cond` is unchanged (SVD-based matrix primitive).
+- **Independent-by-design — ALLOWLISTED with parity guard.** `trace`, `diag`, `dotMultiply`, `row`,
+  `column`, `subset`: `functions/` carries the mathjs-derived factory body (mathjs `Matrix`/`number[][]`
+  contract) while `matrix/src/typed-operations.ts` dispatches the same op over `DenseMatrix` (different
+  call contracts — e.g. `subset` takes a mathjs `index()` object vs matrix scalar `(row,col)`). The
+  matrix typed-op definer is auto-tagged `DISPATCH_VARIANT`; the functions factory bodies (+ the
+  `DenseMatrix.trace()` primitive in `matrix/src/types/dense/reduction.ts`) are allowlisted as
+  intentional reimplementations, **pinned together** by
+  `functions/tests/gap-matrix-domain-dedup-parity.test.ts` per [[feedback-allowlist-needs-parity-guard]].
+- **`convolve`, `ifft`** were NOT part of this slice — they are fft-domain (Bucket D §5), not matrix-domain.
+
+### `qr` — HUMAN-DECISION (surfaced 2026-07-18)
+
+`qr` has two genuinely independent bodies with **different contracts**: `functions/src/algebra/decomposition/qr.ts`
+(`createQr`, ~425 lines — mathjs factory over the mathjs `Matrix`/`SparseMatrix` bridge, **with a
+WASM fast path** `qr_wasm`) vs `matrix/src/operations/qr.ts` (DenseMatrix primitive). Routing the factory
+`qr` to the matrix layer (as `cholesky` was) would drop the mathjs Matrix contract AND the WASM path —
+a real keep-vs-route ADR call, not a mechanical dedup. **Left on the backlog; surfaced for Daniel.**
+
+### Original inventory (historical)
 
 Names: `qr`, `cholesky`, `cond`, `pinv`, `trace`, `diag`, `row`, `column`, `subset`, `dotMultiply`,
 `singularValues`, `normFro`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `lowRankApprox`, `convolve`, `ifft`.
@@ -112,4 +152,5 @@ un-paused.**
 
 ---
 
-_Last updated: 2026-07-18 (compat-parity / bitwise / fft slice; `TRUE_DUPLICATE` 135 → 116)._
+_Last updated: 2026-07-18 (matrix-domain routing slice; `TRUE_DUPLICATE` 104 → 89; only `qr` of the
+matrix-domain set remains, surfaced for a human keep-vs-route decision)._

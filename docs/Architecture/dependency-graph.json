@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-18",
     "totalFiles": 1087,
     "totalModules": 82,
-    "totalExports": 5564
+    "totalExports": 5562
   },
   "entryPoints": [
     {
@@ -20177,11 +20177,6 @@
             "reExport": true
           },
           {
-            "file": "./matrix-ops.js",
-            "imports": ["cond"],
-            "reExport": true
-          },
-          {
             "file": "../gpu/elementwise-gpu.js",
             "imports": [
               "elementwiseChainGpuDispatch",
@@ -20241,7 +20236,6 @@
           "typedSpecial",
           "typedDistributions",
           "typedAlgebra",
-          "cond",
           "enableGpu",
           "disableGpu",
           "isGpuEnabled",
@@ -20303,7 +20297,6 @@
           "typedSpecial",
           "typedDistributions",
           "typedAlgebra",
-          "cond",
           "enableGpu",
           "disableGpu",
           "isGpuEnabled",
@@ -20438,6 +20431,7 @@
             "imports": [
               "eig",
               "svd",
+              "cholesky",
               "cond",
               "norm2",
               "normFro",
@@ -20554,7 +20548,6 @@
           "solveBVP",
           "odeAdaptiveStep",
           "eventDetection",
-          "cond",
           "rank",
           "nullspace",
           "residue",
@@ -20597,7 +20590,6 @@
           "solveBVP",
           "odeAdaptiveStep",
           "eventDetection",
-          "cond",
           "rank",
           "nullspace",
           "residue",
@@ -37854,15 +37846,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1087,
     "totalModules": 82,
-    "totalLinesOfCode": 184613,
-    "totalExports": 5564,
+    "totalLinesOfCode": 184523,
+    "totalExports": 5562,
     "totalClasses": 52,
     "totalInterfaces": 476,
-    "totalFunctions": 1756,
+    "totalFunctions": 1755,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2226,
+    "totalReExports": 2225,
     "totalTypeOnlyImports": 566,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

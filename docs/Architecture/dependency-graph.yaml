@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-18'
   totalFiles: 1087
   totalModules: 82
-  totalExports: 5564
+  totalExports: 5562
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18708,10 +18708,6 @@ modules:
           imports:
             - typedAlgebra
           reExport: true
-        - file: ./matrix-ops.js
-          imports:
-            - cond
-          reExport: true
         - file: ../gpu/elementwise-gpu.js
           imports:
             - elementwiseChainGpuDispatch
@@ -18767,7 +18763,6 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
-        - cond
         - enableGpu
         - disableGpu
         - isGpuEnabled
@@ -18828,7 +18823,6 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
-        - cond
         - enableGpu
         - disableGpu
         - isGpuEnabled
@@ -18964,6 +18958,7 @@ modules:
           imports:
             - eig
             - svd
+            - cholesky
             - cond
             - norm2
             - normFro
@@ -19071,7 +19066,6 @@ modules:
         - solveBVP
         - odeAdaptiveStep
         - eventDetection
-        - cond
         - rank
         - nullspace
         - residue
@@ -19112,7 +19106,6 @@ modules:
         - solveBVP
         - odeAdaptiveStep
         - eventDetection
-        - cond
         - rank
         - nullspace
         - residue
@@ -35576,15 +35569,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1087
   totalModules: 82
-  totalLinesOfCode: 184613
-  totalExports: 5564
+  totalLinesOfCode: 184523
+  totalExports: 5562
   totalClasses: 52
   totalInterfaces: 476
-  totalFunctions: 1756
+  totalFunctions: 1755
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 2226
+  totalReExports: 2225
   totalTypeOnlyImports: 566
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

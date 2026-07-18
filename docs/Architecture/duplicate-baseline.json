@@ -82,11 +82,6 @@
       "parallel/src/ops/bitwise.ts"
     ],
     "clone": ["core/src/array.ts", "core/src/object.ts", "functions/src/factories/index.ts"],
-    "cond": [
-      "functions/src/typed/matrix-ops.ts",
-      "functions/src/typed/numeric.ts",
-      "matrix/src/operations/svd.ts"
-    ],
     "create": ["compat/src/index.ts", "core/src/factory.ts", "functions/src/core/create.ts"],
     "factory": [
       "core/src/factory.ts",
@@ -123,11 +118,6 @@
       "functions/src/factories/index.ts",
       "matrix/src/typed-operations.ts"
     ],
-    "pinv": [
-      "functions/src/typed/matrix-ops.ts",
-      "matrix/src/operations/pinv.ts",
-      "matrix/src/operations/svd.ts"
-    ],
     "rfft": [
       "assembly/src/ops/fft.ts",
       "functions/src/signal/fft-helpers.ts",
@@ -153,11 +143,6 @@
       "functions/src/factories/index.ts",
       "matrix/src/typed-operations.ts"
     ],
-    "trace": [
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts",
-      "matrix/src/types/dense/reduction.ts"
-    ],
     "zeros": [
       "compat/src/shims.ts",
       "functions/src/factories/index.ts",
@@ -175,8 +160,6 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/workerpool-browser-shim.ts"
     ],
-    "cholesky": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/cholesky.ts"],
-    "column": ["functions/src/factories/index.ts", "matrix/src/typed-operations.ts"],
     "compareText": ["core/src/string.ts", "functions/src/typed/relational.ts"],
     "concat": ["core/src/array.ts", "functions/src/factories/index.ts"],
     "convolve": ["functions/src/typed/signal.ts", "matrix/src/backends/wasm/fft-wasm.ts"],
@@ -187,10 +170,8 @@
     "deepMap": ["core/src/array.ts", "core/src/collection.ts"],
     "defaultWasmLocation": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
     "derivative": ["autograd/src/grad.ts", "functions/src/factories/index.ts"],
-    "diag": ["functions/src/factories/index.ts", "matrix/src/typed-operations.ts"],
     "dispatch": ["parallel/src/strategies/threshold.ts", "workbook/src/cli.ts"],
     "divideScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "dotMultiply": ["functions/src/factories/index.ts", "matrix/src/typed-operations.ts"],
     "e": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
     "equal": ["core/src/arithmetic/scalar.ts", "functions/src/typed/arithmetic.ts"],
     "factorial": ["functions/src/factories/index.ts", "functions/src/wasm/special/scalars.ts"],
@@ -210,14 +191,9 @@
       "functions/src/wasm/integrity.ts",
       "matrix/src/backends/wasm/integrity.ts"
     ],
-    "lowRankApprox": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/svd.ts"],
     "map": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "matrixExpm": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/expm.ts"],
-    "matrixLogm": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/logm.ts"],
-    "matrixSqrtm": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/sqrtm.ts"],
     "multiplyScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
     "nearlyEqual": ["core/src/number.ts", "functions/src/utils/bignumber/nearlyEqual.ts"],
-    "normFro": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/svd.ts"],
     "number": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
     "phi": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
     "pi": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
@@ -228,12 +204,9 @@
     "reshape": ["core/src/array.ts", "functions/src/factories/index.ts"],
     "resize": ["core/src/array.ts", "functions/src/factories/index.ts"],
     "resolvePackagedWasm": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
-    "row": ["functions/src/factories/index.ts", "matrix/src/typed-operations.ts"],
     "sha384OfBuffer": ["functions/src/wasm/integrity.ts", "matrix/src/backends/wasm/integrity.ts"],
-    "singularValues": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/svd.ts"],
     "sparse": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
     "squeeze": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "subset": ["functions/src/factories/index.ts", "matrix/src/typed-operations.ts"],
     "subtractScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
     "tau": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
     "terminatePool": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],

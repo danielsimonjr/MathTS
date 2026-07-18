@@ -30,7 +30,6 @@ import {
   stiffODESolver,
   odeAdaptiveStep,
   eventDetection,
-  cond,
   rank,
   nullspace,
   chebyshevApprox,
@@ -39,6 +38,11 @@ import {
   linprog,
   solvePDE,
 } from '../src/typed/numeric.js';
+// `cond` is the public SVD-based matrix-ops implementation. The former
+// power-iteration `cond` in numeric.ts was a shadowed dead body (unreachable via
+// the public barrel) removed in the dedup campaign; these assertions now guard
+// the real public `cond`.
+import { cond } from '../src/typed/matrix-ops.js';
 
 const EPSILON = 1e-6;
 

@@ -2,13 +2,13 @@
   "generated": "2026-07-18",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 104,
+    "runtimeDuplicates": 89,
     "typeDuplicates": 0,
     "runtimeByTag": {
-      "TRUE_DUPLICATE": 104,
+      "TRUE_DUPLICATE": 89,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 125
+      "ALLOWLISTED": 140
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -492,32 +492,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "cond",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "functions/src/typed/numeric.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/operations/svd.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "create",
       "category": "function",
       "definers": [
@@ -727,32 +701,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "pinv",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/pinv.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/operations/svd.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "rfft",
       "category": "function",
       "definers": [
@@ -878,32 +826,6 @@
           "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "trace",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/types/dense/reduction.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1050,46 +972,6 @@
           "package": "@danielsimonjr/mathts-workerpool",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "cholesky",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/operations/cholesky.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "column",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1296,26 +1178,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "diag",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "dispatch",
       "category": "function",
       "definers": [
@@ -1350,26 +1212,6 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "dotMultiply",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1696,26 +1538,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "lowRankApprox",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/svd.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "map",
       "category": "constant+function",
       "definers": [
@@ -1728,66 +1550,6 @@
         {
           "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "matrixExpm",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/expm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "matrixLogm",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/logm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "matrixSqrtm",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/sqrtm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "PLAIN"
         }
@@ -1833,26 +1595,6 @@
         }
       ],
       "canonicalHint": "core/src/number.ts",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "normFro",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/svd.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -2056,26 +1798,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "row",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "sha384OfBuffer",
       "category": "function",
       "definers": [
@@ -2093,26 +1815,6 @@
         }
       ],
       "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "singularValues",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/matrix-ops.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/operations/svd.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -2150,26 +1852,6 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "subset",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -3758,6 +3440,34 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "pinv",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/pinv.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "SQRT1_2",
       "category": "constant",
       "definers": [
@@ -3806,6 +3516,34 @@
           "package": "@danielsimonjr/mathts-core",
           "public": true,
           "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "trace",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/types/dense/reduction.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4177,6 +3915,49 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "cholesky",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "matrix/src/operations/cholesky.ts is the canonical, oracle-pinned DenseMatrix Cholesky primitive. functions/src/typed/matrix-ops.ts's `number[][]` cholesky was an independent body; it now ROUTES to the matrix primitive (native-accel, project-two-decomposition-layers-prefer-matrix), keeping only a symmetry pre-check (the matrix primitive reads the lower triangle only, so it would silently accept asymmetric input this surface must reject) and converting DenseMatrix→number[][] for its contract. Pre-routing NumPy audit (np.linalg.cholesky over an SPD corpus) confirmed BOTH bodies were already correct to full double precision — no bug. Guarded by functions/tests/gap-matrix-domain-dedup-parity.test.ts (NumPy oracle + functions≡matrix parity). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/operations/cholesky.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "matrix/src/operations/cholesky.ts is the canonical, oracle-pinned DenseMatrix Cholesky primitive. functions/src/typed/matrix-ops.ts's `number[][]` cholesky was an independent body; it now ROUTES to the matrix primitive (native-accel, project-two-decomposition-layers-prefer-matrix), keeping only a symmetry pre-check (the matrix primitive reads the lower triangle only, so it would silently accept asymmetric input this surface must reject) and converting DenseMatrix→number[][] for its contract. Pre-routing NumPy audit (np.linalg.cholesky over an SPD corpus) confirmed BOTH bodies were already correct to full double precision — no bug. Guarded by functions/tests/gap-matrix-domain-dedup-parity.test.ts (NumPy oracle + functions≡matrix parity). 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "column",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "Complex",
       "category": "class",
       "definers": [
@@ -4192,6 +3973,27 @@
           "package": "@danielsimonjr/mathts-core",
           "public": true,
           "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "cond",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4282,6 +4084,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "diag",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "discriminant",
       "category": "function",
       "definers": [
@@ -4337,6 +4160,27 @@
         {
           "file": "functions/src/typed/combinatorics.ts",
           "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "dotMultiply",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
         }
@@ -5352,6 +5196,90 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "lowRankApprox",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "matrixExpm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/expm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: functions/src/typed/matrix-ops.ts `mathTyped` wrappers route to these matrix-package DenseMatrix primitives (matrixExpm/matrixLogm/matrixSqrtm, imported and called directly, verified by call chain). Matrix owns the canonical body; the functions definer is auto-tagged DISPATCH_VARIANT. 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "matrixLogm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/logm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: functions/src/typed/matrix-ops.ts `mathTyped` wrappers route to these matrix-package DenseMatrix primitives (matrixExpm/matrixLogm/matrixSqrtm, imported and called directly, verified by call chain). Matrix owns the canonical body; the functions definer is auto-tagged DISPATCH_VARIANT. 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "matrixSqrtm",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/sqrtm.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: functions/src/typed/matrix-ops.ts `mathTyped` wrappers route to these matrix-package DenseMatrix primitives (matrixExpm/matrixLogm/matrixSqrtm, imported and called directly, verified by call chain). Matrix owns the canonical body; the functions definer is auto-tagged DISPATCH_VARIANT. 2026-07 dedup campaign, matrix-domain routing slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "medfilt",
       "category": "function",
       "definers": [
@@ -5388,6 +5316,27 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "normFro",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -5814,6 +5763,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "row",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "rowReduce",
       "category": "function",
       "definers": [
@@ -5850,6 +5820,27 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "singularValues",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/matrix-ops.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/operations/svd.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -5911,6 +5902,27 @@
         {
           "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "subset",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
         }
