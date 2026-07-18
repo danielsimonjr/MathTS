@@ -177,7 +177,7 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           of policy — so GUARD-BY-TEST only, no delegation (delegating would add a redundant cross-module call
           with zero divergence-safety gain). 24 new fast-check properties + edge corpus (±0/NaN/±Infinity/
           denormals/negative, incl. non-commutative subtract/divide order checks) added to
-          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (68 tests total, all green). Full functions
+          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (44 tests total, all green). Full functions
           suite green (4041 passed, 1 pre-existing unrelated timeout in gap-stats-breadth-oracle.test.ts confirmed
           via git-stash on baseline), typecheck 0, eslint 0. TRUE_DUPLICATE count unchanged (142 runtime/69 types)
           — confirms these are DISPATCH_VARIANT, not TRUE_DUPLICATE; the win is divergence-safety, not the count.

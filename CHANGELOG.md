@@ -30,7 +30,7 @@ to the same shared method (this slice) — the equivalence test is the safety ne
 ever stops being true. Hot `number`/`bigint` cases are untouched (still inline).
 
 Added 24 fast-check properties + an edge corpus (±0, NaN, ±Infinity, denormals, negative inputs) to
-`functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (68 tests total, all green), covering
+`functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (44 tests total, all green), covering
 same-type and cross-type (number+rich-type, both operand orders) cases for all five ops. Full
 `functions` suite green (4041 passed); the one failure seen in a full-suite run
 (`gap-stats-breadth-oracle.test.ts`'s `tTestPower` `solveFor: 'nobs'`, a 5000ms vitest timeout) is
