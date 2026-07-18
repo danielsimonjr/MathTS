@@ -193,18 +193,19 @@ describe('compat parity — matrix constructors vs oracle', () => {
       [1, 1, 1],
     ]);
   });
-  it('CONTRACT: compat zeros/ones single-arg is SQUARE (cols ?? rows) — NOT the mathjs size-n vector', () => {
-    // Documented divergence from mathjs (which returns [0,0,0] for zeros(3)):
-    // compat's matrix constructors are always 2-D, single arg ⇒ n×n square.
-    expect(toArr(cZeros(3))).toEqual([
+  it('mathjs parity: zeros(n)/ones(n) single-arg is a length-n VECTOR', () => {
+    // Oracle from the installed mathjs (verified): math.zeros(3).toArray() === [0,0,0]
+    // (size [3], a 1-D vector), math.ones(3).toArray() === [1,1,1]. compat's
+    // single-arg constructors must match this, NOT the former n×n square bug.
+    // (matrix's DenseMatrix is strictly 2-D, so the length-n vector is a number[].)
+    expect(toArr(cZeros(3))).toEqual([0, 0, 0]);
+    expect(toArr(cOnes(3))).toEqual([1, 1, 1]);
+    expect(toArr(cZeros(1))).toEqual([0]);
+    // Two-arg form is unchanged: a rows×cols DenseMatrix.
+    expect(toArr(cZeros(3, 3))).toEqual([
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
-    ]);
-    expect(toArr(cOnes(3))).toEqual([
-      [1, 1, 1],
-      [1, 1, 1],
-      [1, 1, 1],
     ]);
   });
   it('identity(n) is the n×n identity', () => {

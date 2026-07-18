@@ -453,17 +453,32 @@ export function identity(n: number): DenseMatrix {
 }
 
 /**
- * Zeros matrix (mathjs-compatible)
+ * Zeros (mathjs-compatible).
+ *
+ * Single-arg `zeros(n)` is a length-`n` **vector** matching mathjs
+ * (`math.zeros(3).toArray()` === `[0,0,0]`, size `[3]`); two-arg `zeros(r,c)` is
+ * an `r×c` DenseMatrix. (matrix's DenseMatrix is strictly 2-D, so the vector case
+ * returns a `number[]`.)
  */
-export function zeros(rows: number, cols?: number): DenseMatrix {
-  return DenseMatrix.zeros(rows, cols ?? rows);
+export function zeros(rows: number, cols?: number): DenseMatrix | number[] {
+  if (cols === undefined) {
+    return new Array<number>(rows).fill(0);
+  }
+  return DenseMatrix.zeros(rows, cols);
 }
 
 /**
- * Ones matrix (mathjs-compatible)
+ * Ones (mathjs-compatible).
+ *
+ * Single-arg `ones(n)` is a length-`n` **vector** matching mathjs
+ * (`math.ones(3).toArray()` === `[1,1,1]`); two-arg `ones(r,c)` is an `r×c`
+ * DenseMatrix.
  */
-export function ones(rows: number, cols?: number): DenseMatrix {
-  return DenseMatrix.ones(rows, cols ?? rows);
+export function ones(rows: number, cols?: number): DenseMatrix | number[] {
+  if (cols === undefined) {
+    return new Array<number>(rows).fill(1);
+  }
+  return DenseMatrix.ones(rows, cols);
 }
 
 /**
