@@ -228,6 +228,16 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   (`bridges/`, `elementwise/`, `special/`, `poly/`, `sort/`, `signal/`,
   `interpolation/`, `bitwise/`, …) plus `functions/src/wasm/WasmLoader.ts`,
   which loads the package-local `mathts-as.wasm` copy. Dispatch is AS → JS.
+- **`core/src/wasm-loader.ts`** (exported via `@danielsimonjr/mathts-core/internal`):
+  the **shared** SHA-384 integrity logic (`sha384OfBuffer` / `loadWasmManifest` /
+  `verifyWasmIntegrity`) and packaged-artifact resolution
+  (`resolvePackagedWasm` / `defaultWasmLocation`) are single-sourced here; each
+  package's `wasm/integrity.ts` + `wasm/resolve.ts` re-export it and inject their
+  own `import.meta.url`. Node `fs`/`crypto` stay behind lazy dynamic `import()`, so
+  this stays off core's browser-safe `.` entry. The two `WasmLoader` **classes**
+  above remain per-package — they wrap genuinely different AssemblyScript
+  allocation models (simple single-pointer vs the managed-runtime header+data
+  handle).
 
 (The earlier alternate native-WASM backend, its loader and bridge, and the
 WASM backend-selection env var were all removed — there is no longer a backend

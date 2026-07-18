@@ -1529,7 +1529,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2651,7 +2651,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2672,7 +2672,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2693,7 +2693,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4507,7 +4507,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -5474,7 +5474,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -5495,7 +5495,7 @@
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

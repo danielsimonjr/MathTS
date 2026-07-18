@@ -14,9 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/api/compat.md` — corrected the `zeros` / `ones` signatures to `(n) => number[]` (vector, mathjs parity)
   vs `(rows, cols) => Matrix`, matching the compat behavior fix below.
 - `CLAUDE.md` — documented the now-permanent `check:duplicates` pre-commit gate and CDG's duplicate-symbol
-  detection under Tools.
-- `tools/create-dependency-graph/duplicate-allowlist.json` — refreshed the compat `zeros`/`ones` allowlist reason
-  (was "n×n square — SURFACED"; now reflects the shipped mathjs-parity vector fix).
+  detection under Tools; updated the **WASM SHA-384 security invariant** to point at the new canonical
+  `core/src/wasm-loader.ts` (the hash logic moved there this milestone — was `functions/src/wasm/WasmLoader.ts`).
+- `docs/Architecture/ARCHITECTURE.md` — §6b (WASM Bridge Layer) now describes the shared `core/src/wasm-loader.ts`
+  (single-sourced SHA-384 integrity + artifact resolution, injected paths, browser-safe) alongside the
+  per-package `WasmLoader` classes.
+- `tools/create-dependency-graph/duplicate-allowlist.json` — refreshed the compat `zeros`/`ones` reason
+  (was "n×n square — SURFACED"; now the shipped mathjs-parity vector fix) and the `bitXor` reason (dropped the
+  stale "stays TRUE_DUPLICATE pending" note — all three definers are resolved); report regenerated.
 
 ### fix(compat): `zeros(n)` / `ones(n)` return a length-`n` vector (mathjs parity)
 
