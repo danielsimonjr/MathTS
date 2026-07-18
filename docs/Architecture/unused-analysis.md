@@ -5,11 +5,11 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 5
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
-  - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 204
-  - **Unreferenced anywhere (deletion candidates)**: 2
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
+  - **Test-only (exercised by a test, ships nothing)**: 3
+- **Potentially unused exports**: 203
+  - **Unreferenced anywhere (deletion candidates)**: 1
   - **Referenced in-module (type contracts / helpers backing live exports)**: 202
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -19,9 +19,7 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-### `workbook` (1)
-
-- `workbook/src/run-worker.ts`
+_None._
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 
@@ -38,10 +36,6 @@ directly. Not dead; not shipped. No action needed.
 - `parallel/src/ParallelMatrix.ts`
 - `parallel/src/WorkerPool.ts`
 
-### `plot` (1)
-
-- `plot/src/render-file.ts`
-
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
@@ -54,10 +48,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `functions/src/signal/fft.ts`
 
 - `complexConj` (function)
-
-### `workbook/src/worker-protocol.ts`
-
-- `RunWorkerData` (interface)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 

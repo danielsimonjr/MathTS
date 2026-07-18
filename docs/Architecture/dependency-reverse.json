@@ -3581,11 +3581,13 @@
       "workbook/src/edit.ts",
       "workbook/src/index.ts",
       "workbook/src/introspect.ts",
+      "workbook/src/run-worker.ts",
       "workbook/src/session.ts"
     ],
     "workbook/src/executor.ts": [
       "workbook/src/cli.ts",
       "workbook/src/index.ts",
+      "workbook/src/run-worker.ts",
       "workbook/src/session.ts"
     ],
     "workbook/src/graph.ts": [
@@ -3597,7 +3599,11 @@
       "workbook/src/parser.ts",
       "workbook/src/session.ts"
     ],
-    "workbook/src/formatter.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
+    "workbook/src/formatter.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/index.ts",
+      "workbook/src/run-worker.ts"
+    ],
     "workbook/src/contract.ts": [
       "workbook/src/cli.ts",
       "workbook/src/index.ts",
@@ -3640,7 +3646,10 @@
       "workbook/src/parser.ts"
     ],
     "workbook/src/markdown.ts": ["workbook/src/html.ts", "workbook/src/tex.ts"],
-    "workbook/src/worker-protocol.ts": ["workbook/src/timeout-runner.ts"],
+    "workbook/src/worker-protocol.ts": [
+      "workbook/src/run-worker.ts",
+      "workbook/src/timeout-runner.ts"
+    ],
     "assembly/src/bindings/wasm-loader.ts": ["assembly/src/bindings/index.ts"],
     "assembly/src/types/complex.ts": [
       "assembly/src/index.ts",

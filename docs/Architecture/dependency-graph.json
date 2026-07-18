@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-18",
-    "totalFiles": 1086,
+    "totalFiles": 1088,
     "totalModules": 82,
-    "totalExports": 5569
+    "totalExports": 5575
   },
   "entryPoints": [
     {
@@ -33146,6 +33146,37 @@
         "interfaces": ["JsonRpcRequest", "JsonRpcResponse", "JsonRpcEvent", "HandleResult"],
         "functions": ["handleRequest"]
       },
+      "workbook/src/run-worker.ts": {
+        "description": "`worker_threads` entry point for `runWorkbookWithTimeout` (see",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "worker_threads",
+            "imports": ["parentPort", "workerData"]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./parser.js",
+            "imports": ["parseWorkbook"]
+          },
+          {
+            "file": "./executor.js",
+            "imports": ["createExecutor"]
+          },
+          {
+            "file": "./formatter.js",
+            "imports": ["formatResult"]
+          },
+          {
+            "file": "./worker-protocol.js",
+            "imports": ["RunWorkerData", "WorkerMessage", "SerializedCellResult"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
       "workbook/src/session.ts": {
         "description": "In-memory editing/execution session for a single workbook — the stateful",
         "externalDependencies": [],
@@ -36241,6 +36272,41 @@
         "interfaces": ["Frame"],
         "functions": ["renderLayer"]
       },
+      "plot/src/render-file.ts": {
+        "description": "Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "child_process",
+            "imports": ["spawn"]
+          },
+          {
+            "module": "fs/promises",
+            "imports": ["writeFile", "rm", "rename", "mkdtemp", "readFile"]
+          },
+          {
+            "module": "path",
+            "imports": ["extname", "join"]
+          },
+          {
+            "module": "os",
+            "imports": ["tmpdir"]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "runTool",
+          "hasTool",
+          "renderToFile",
+          "latexArgs",
+          "latexToPdf",
+          "PlotRenderError"
+        ],
+        "classes": ["PlotRenderError"],
+        "interfaces": ["RenderOptions"],
+        "functions": ["runTool", "hasTool", "renderToFile", "latexArgs", "latexToPdf"]
+      },
       "plot/src/scale.ts": {
         "description": "scale module",
         "externalDependencies": [],
@@ -37760,6 +37826,7 @@
           "workbook/src/parser.ts",
           "workbook/src/pdf.ts",
           "workbook/src/rpc.ts",
+          "workbook/src/run-worker.ts",
           "workbook/src/session.ts",
           "workbook/src/svg.ts",
           "workbook/src/tex.ts",
@@ -37846,6 +37913,7 @@
           "plot/src/palette.ts",
           "plot/src/plot.ts",
           "plot/src/render-core.ts",
+          "plot/src/render-file.ts",
           "plot/src/scale.ts",
           "plot/src/scene.ts",
           "plot/src/svg.ts",
@@ -37864,21 +37932,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1086,
+    "totalTypeScriptFiles": 1088,
     "totalModules": 82,
-    "totalLinesOfCode": 184158,
-    "totalExports": 5569,
-    "totalClasses": 51,
-    "totalInterfaces": 475,
-    "totalFunctions": 1744,
+    "totalLinesOfCode": 184429,
+    "totalExports": 5575,
+    "totalClasses": 52,
+    "totalInterfaces": 476,
+    "totalFunctions": 1749,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
     "totalReExports": 2244,
-    "totalTypeOnlyImports": 566,
+    "totalTypeOnlyImports": 567,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 204
+    "unusedExportsCount": 203
   }
 }

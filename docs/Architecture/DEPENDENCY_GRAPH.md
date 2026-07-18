@@ -177,7 +177,7 @@ The codebase is organized into the following modules:
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
-- **workbook**: 23 files
+- **workbook**: 24 files
 - **assembly/algebra**: 1 file
 - **assembly/bindings**: 2 files
 - **assembly**: 7 files
@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 - **assembly/types**: 1 file
 - **compat**: 3 files
 - **gpu**: 8 files
-- **plot**: 17 files
+- **plot**: 18 files
 - **plot/three**: 3 files
 
 ---
@@ -215,11 +215,11 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-statistics` (`statistics/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 12             | 2               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 23             | 2               |
+| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 24             | 1               |
 | `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
-| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 20             | 1               |
+| `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 21             | 0               |
 
 ### Package Dependency Diagram
 
@@ -14794,6 +14794,23 @@ graph LR
 
 ---
 
+### `workbook/src/run-worker.ts` - `worker_threads` entry point for `runWorkbookWithTimeout` (see
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `worker_threads` | `parentPort, workerData` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./parser.js` | `parseWorkbook` | Import |
+| `./executor.js` | `createExecutor` | Import |
+| `./formatter.js` | `formatResult` | Import |
+| `./worker-protocol.js` | `RunWorkerData, WorkerMessage, SerializedCellResult` | Import (type-only) |
+
+---
+
 ### `workbook/src/session.ts` - In-memory editing/execution session for a single workbook — the stateful
 
 **Node.js Built-in Dependencies:**
@@ -15560,6 +15577,24 @@ graph LR
 
 - Interfaces: `Frame`
 - Functions: `renderLayer`
+
+---
+
+### `plot/src/render-file.ts` - Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `child_process` | `spawn` |
+| `fs/promises` | `writeFile, rm, rename, mkdtemp, readFile` |
+| `path` | `extname, join` |
+| `os` | `tmpdir` |
+
+**Exports:**
+
+- Classes: `PlotRenderError`
+- Interfaces: `RenderOptions`
+- Functions: `runTool`, `hasTool`, `renderToFile`, `latexArgs`, `latexToPdf`
 
 ---
 
@@ -16370,7 +16405,7 @@ graph TD
         N419[graph]
         N420[html]
         N421[index]
-        N422[...13 more]
+        N422[...14 more]
     end
 
     subgraph Assembly/algebra
@@ -16438,7 +16473,7 @@ graph TD
         N463[marks2d]
         N464[overlay]
         N465[palette]
-        N466[...7 more]
+        N466[...8 more]
     end
 
     subgraph Plot/three
@@ -16532,17 +16567,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1086   |
+| Total TypeScript Files  | 1088   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184158 |
-| Total Exports           | 5569   |
+| Total Lines of Code     | 184429 |
+| Total Exports           | 5575   |
 | Total Re-exports        | 2244   |
-| Total Classes           | 51     |
-| Total Interfaces        | 475    |
-| Total Functions         | 1744   |
+| Total Classes           | 52     |
+| Total Interfaces        | 476    |
+| Total Functions         | 1749   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 566    |
+| Type-only Imports       | 567    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
