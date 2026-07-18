@@ -20,6 +20,17 @@ import {
   pairwiseDot,
   sumSquaredDeviations,
 } from '@danielsimonjr/mathts-core';
+// Bucket-C "temperature split": rich-type (BigNumber/Fraction/Complex) POLICY cases
+// delegate to core's oracle-pinned scalar primitives instead of re-implementing the
+// policy here (where the copies had DIVERGED into three live bugs). Hot number/bigint
+// cases stay inline below. A BigNumber method call dwarfs this cross-module call, so
+// the delegation is perf-free (see the microbench in the dedup equivalence test).
+import {
+  pow as corePow,
+  round as coreRound,
+  fix as coreFix,
+  equal as coreEqual,
+} from '@danielsimonjr/mathts-core';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager, singularValues } from '@danielsimonjr/mathts-matrix';
@@ -522,13 +533,21 @@ export const sign = mathTyped('sign', {
  * Power function
  */
 export const pow = mathTyped('pow', {
+  // Hot cases stay inline.
   'number, number': (a: f64, b: f64): f64 => Math.pow(a, b),
   'bigint, bigint': (a: i64, b: i64): i64 => a ** b,
-  'Complex, number': (a: Complex, b: f64): Complex => a.pow(b),
-  'Complex, Complex': (a: Complex, b: Complex): Complex => a.pow(b),
-  'Fraction, number': (a: Fraction, b: f64): Fraction => a.pow(Math.floor(b)),
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.pow(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.pow(b.valueOf()),
+
+  // Rich-type policy cases DELEGATE to core's scalar `pow`, which correctly guards
+  // non-integer exponents of exact types (falling back to double-precision Math.pow,
+  // returning a plain number). The old inline copies were buggy:
+  //   pow(BigNumber(2), 0.5)  -> 1     (unguarded a.pow(0.5); core -> 1.4142…)
+  //   pow(Fraction(3), 2.9)   -> 27    (silently floored via a.pow(Math.floor(b)); core -> 24.19…)
+  'Complex, number': (a: Complex, b: f64): Complex => corePow(a, b) as Complex,
+  'Complex, Complex': (a: Complex, b: Complex): Complex => corePow(a, b) as Complex,
+  'Fraction, number': (a: Fraction, b: f64): Fraction | f64 => corePow(a, b) as Fraction | f64,
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber | f64 => corePow(a, b) as BigNumber | f64,
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber | f64 =>
+    corePow(a, b) as BigNumber | f64,
   // Dual numbers (forward-mode AD): constant or variable exponent.
   'Dual, number': (a: Dual, b: f64): Dual => a.powConst(b),
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.pow(b),
@@ -815,9 +834,12 @@ export const expm1 = mathTyped('expm1', {
  */
 export const round = mathTyped('round', {
   number: (a: f64): f64 => Math.round(a),
-  Fraction: (a: Fraction): Fraction => a.round(),
-  BigNumber: (a: BigNumber): BigNumber => a.round(),
-  Complex: (a: Complex): Complex => new Complex(Math.round(a.re), Math.round(a.im)),
+  // Rich-type policy cases DELEGATE to core's scalar `round`, which uses `halfCeil`
+  // for BigNumber so round(bignumber(-2.5)) = -2 (type-consistent with number/Fraction),
+  // not the -3 the old inline `a.round()` (half-away-from-zero) produced.
+  Fraction: (a: Fraction): Fraction => coreRound(a) as Fraction,
+  BigNumber: (a: BigNumber): BigNumber => coreRound(a) as BigNumber,
+  Complex: (a: Complex): Complex => coreRound(a) as Complex,
   'number, number': (a: f64, decimals: f64): f64 => {
     const factor = Math.pow(10, decimals);
     return Math.round(a * factor) / factor;
@@ -882,9 +904,11 @@ export const ceil = mathTyped('ceil', {
  */
 export const fix = mathTyped('fix', {
   number: (a: f64): f64 => Math.trunc(a),
-  Fraction: (a: Fraction): Fraction => a.trunc(),
-  BigNumber: (a: BigNumber): BigNumber => a.trunc(),
-  Complex: (a: Complex): Complex => new Complex(Math.trunc(a.re), Math.trunc(a.im)),
+  // Rich-type policy cases DELEGATE to core's scalar `fix` (truncate toward zero:
+  // floor for non-negative, ceil for negative). Removes the duplicated policy.
+  Fraction: (a: Fraction): Fraction => coreFix(a) as Fraction,
+  BigNumber: (a: BigNumber): BigNumber => coreFix(a) as BigNumber,
+  Complex: (a: Complex): Complex => coreFix(a) as Complex,
 
   // Parallel array fix (truncate toward zero, matching the 'number' overload)
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
@@ -1190,11 +1214,17 @@ export const tanh = mathTyped('tanh', {
 // match. Ordering across incompatible dimensions is an error; equality across
 // them is simply false.
 export const equal = mathTyped('equal', {
-  'number, number': (a: f64, b: f64): boolean => a === b,
+  // number,number DELEGATES to core's TOLERANCE-based equality (relTol/absTol via
+  // nearlyEqual) — mathjs parity. The old strict `a === b` made equal(0.1+0.2, 0.3)
+  // return false; core (and mathjs) return true. Floats are almost never bit-equal
+  // after arithmetic, so strict === is the wrong policy for a public math `equal`.
+  'number, number': (a: f64, b: f64): boolean => coreEqual(a, b),
+  // bigint stays inline (core also compares bigints with ===; tolerance is meaningless).
   'bigint, bigint': (a: i64, b: i64): boolean => a === b,
-  'Complex, Complex': (a: Complex, b: Complex): boolean => a.equals(b),
-  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.equals(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.equals(b),
+  // Rich-type cases delegate to core (exact equality for Fraction/BigNumber; Complex.equals).
+  'Complex, Complex': (a: Complex, b: Complex): boolean => coreEqual(a, b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => coreEqual(a, b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => coreEqual(a, b),
   'Unit, Unit': (a: Unit, b: Unit): boolean =>
     unitSameDimension(a, b) && asUnit(a).value === asUnit(b).value,
 });

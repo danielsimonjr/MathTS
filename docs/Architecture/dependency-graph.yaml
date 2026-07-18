@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-17'
+  lastUpdated: '2026-07-18'
   totalFiles: 1086
   totalModules: 82
   totalExports: 5553
@@ -17663,6 +17663,13 @@ modules:
             - norm2
             - pairwiseDot
             - sumSquaredDeviations
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pow
+            - round
+            - fix
+            - equal
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -35460,7 +35467,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 184617
+  totalLinesOfCode: 184647
   totalExports: 5553
   totalClasses: 52
   totalInterfaces: 489

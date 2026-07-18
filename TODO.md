@@ -163,6 +163,12 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
     typed/factory/compat layering. Fix = **delegation policy** (each layer's public op DELEGATES to ONE canonical
     core/functions impl, no re-implementation) + **deprecate the `factory` layer**. Breaking-change program,
     staged, sequenced with paused #27 (both touch core). Daniel approved the direction 2026-07-17.
+    - [x] **Arithmetic slice (temperature split) DONE 2026-07-17:** `pow`/`round`/`fix`/`equal` rich-type
+          (BigNumber/Fraction/Complex) + tolerance `equal(number,number)` cases now DELEGATE to core's scalar
+          primitive; hot `number`/`bigint` stay inline. Fixed 3 live public bugs at root (`pow(bn,0.5)→1`,
+          `round(bn -2.5)→-3`, `equal(0.1+0.2,0.3)→false`) + the Fraction floored-exponent bug. Equivalence guard
+          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (fast-check + edge corpus). Full functions
+          suite green (4024), typecheck 0, eslint 0. Microbench: hot path unchanged; +~0.13–0.41µs/call on rich types.
   - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
     canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
 - **INTEGRATE (canonical-home rule):** cold shared → `core`/`core/internal`; domain ops → owning accelerated

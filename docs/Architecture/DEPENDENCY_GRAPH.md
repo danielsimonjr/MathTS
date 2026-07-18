@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-17
+**Version**: 0.1.0 | **Last Updated**: 2026-07-18
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -8503,6 +8503,7 @@ graph LR
 |---------|--------|
 | `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber, Dual` |
 | `@danielsimonjr/mathts-core` | `pairwiseSum, neumaierSum, norm2, pairwiseDot, sumSquaredDeviations` |
+| `@danielsimonjr/mathts-core` | `pow, round, fix, equal` |
 | `@danielsimonjr/mathts-core` | `UnitInstance` |
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager, singularValues` |
 | `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
@@ -16485,7 +16486,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1086   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184617 |
+| Total Lines of Code     | 184647 |
 | Total Exports           | 5553   |
 | Total Re-exports        | 2215   |
 | Total Classes           | 52     |
@@ -16499,5 +16500,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-17
+_Last Updated_: 2026-07-18
 _Version_: 0.1.0

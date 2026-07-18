@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — three live `pow`/`round`/`equal` bugs on BigNumber/Fraction/float (functions)
+
+Three public-API correctness bugs, all from the typed dispatchers in
+`functions/src/typed/arithmetic.ts` re-implementing scalar policy that had DIVERGED from the
+correct, oracle-pinned version in `core/src/arithmetic/scalar.ts`:
+
+- **`pow(bignumber(2), 0.5)` returned `1`** (should be `1.4142…`). The `BigNumber` case called
+  `a.pow(b)` unguarded; a non-integer exponent of an exact decimal silently collapsed to 1. Core
+  guards non-integer exponents and falls back to double-precision `Math.pow`. `pow(fraction(3),
+  2.9)` had the same class of bug via `a.pow(Math.floor(b))` — it **silently floored the exponent**
+  (returned `27` instead of `24.19…`).
+- **`round(bignumber(-2.5))` returned `-3`** (should be `-2`). The `BigNumber` case used
+  `a.round()` (half-away-from-zero); core uses `x.round(0, 'halfCeil')` so BigNumber rounding is
+  type-consistent with `number`/`Fraction` (`round(-2.5) = -2` everywhere).
+- **`equal(0.1 + 0.2, 0.3)` returned `false`** (should be `true`). The `number,number` case used
+  strict `===`; mathjs parity (and core's `equal`) is **tolerance-based** via `nearlyEqual`
+  (`relTol`/`absTol`). Floats are almost never bit-equal after arithmetic, so strict `===` was the
+  wrong policy for a public math `equal`.
+
+Fixed at root via the **Bucket-C "temperature split"**: the rich-type / policy dispatch cases
+(`BigNumber`/`Fraction`/`Complex` for `pow`/`round`/`fix`/`equal`, plus the tolerance-based
+`number,number` `equal`) now **delegate to core's scalar primitive** instead of carrying a
+divergent copy, while the hot `number`/`bigint` arithmetic cases **stay inline** (delegating them
+would route the hottest path through core's polymorphic ladder → type-feedback pollution). All
+values cross-checked against numpy (`2**0.5`, `3**2.9`, `np.isclose(0.1+0.2, 0.3)`). A new
+equivalence guard (`functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts`) proves the
+typed dispatcher's rich-type output ≡ core's primitive over a fast-check generator + an explicit
+edge corpus, so the copies can never silently drift again. Microbench: the hot `number` path is
+unchanged (inline); the delegation adds only ~0.13–0.41 µs/call on the inherently-slow rich-type
+(BigNumber/Fraction) cases, negligible against those exact-arithmetic operations and justified by
+fixing three wrong answers.
+
 ### Changed — CDG `duplicate-symbols` detector is now classification-aware (alias/dispatch/allowlist/true)
 
 The `duplicate-symbols` detector's name-grouping over-counted: it flagged legitimate
