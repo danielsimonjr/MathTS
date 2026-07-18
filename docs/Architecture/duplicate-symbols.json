@@ -2,13 +2,13 @@
   "generated": "2026-07-18",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 116,
+    "runtimeDuplicates": 104,
     "typeDuplicates": 0,
     "runtimeByTag": {
-      "TRUE_DUPLICATE": 116,
+      "TRUE_DUPLICATE": 104,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 113
+      "ALLOWLISTED": 125
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -956,26 +956,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "acosh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "addScalar",
       "category": "constant+function",
       "definers": [
@@ -1010,46 +990,6 @@
           "package": "@danielsimonjr/mathts-plot",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "asinh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "atanh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1110,26 +1050,6 @@
           "package": "@danielsimonjr/mathts-workerpool",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "cbrt",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1233,26 +1153,6 @@
         }
       ],
       "canonicalHint": "functions/src/typed/signal.ts",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "cosh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -1501,26 +1401,6 @@
       "definers": [
         {
           "file": "core/src/arithmetic/scalar.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "expm1",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
           "package": "@danielsimonjr/mathts-core",
           "public": true,
           "tag": "PLAIN"
@@ -1813,66 +1693,6 @@
         }
       ],
       "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "log10",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "log1p",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "log2",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -2276,26 +2096,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "sign",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "singularValues",
       "category": "constant+function",
       "definers": [
@@ -2310,26 +2110,6 @@
           "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "sinh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2410,26 +2190,6 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "tanh",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/number.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4102,6 +3862,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "acosh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "arg",
       "category": "constant+function",
       "definers": [
@@ -4144,6 +3925,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "asinh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "atan",
       "category": "constant+function",
       "definers": [
@@ -4174,6 +3976,27 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "atanh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
         },
         {
           "file": "functions/src/typed/trigonometry.ts",
@@ -4261,6 +4084,27 @@
         },
         {
           "file": "functions/src/typed/combinatorics.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "cbrt",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -4366,6 +4210,27 @@
         },
         {
           "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "cosh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -4576,6 +4441,27 @@
         },
         {
           "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "expm1",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -5361,6 +5247,69 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "log10",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "log1p",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "log2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "logfit",
       "category": "function",
       "definers": [
@@ -5886,6 +5835,48 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "sign",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "sinh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "sinIntegral",
       "category": "constant+function",
       "definers": [
@@ -5916,6 +5907,27 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "tanh",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/number.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
         },
         {
           "file": "functions/src/typed/arithmetic.ts",
