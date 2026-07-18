@@ -200,6 +200,17 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
         `docs/Architecture/duplicate-backlog.md`** (matrix-domain routing — already-routed dispatch-variants
         vs genuine bodies like `cholesky`; transcendental temp-split; **HUMAN-DECISION**: WasmLoader SHA-384
         security ADR + workerpool `#27`-paused caps).
+  - [x] ✅ **Transcendental temperature-split slice DONE 2026-07-18.** `TRUE_DUPLICATE` **116 → 104**
+        (12 flipped: `sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p expm1 sign`). These are
+        name-collisions, not accidental dups: `functions` inlines `Math.*` in the `number` case (V8
+        hot-path guard, kept local); `core/src/number.ts` exports the scalar primitive for cold consumers.
+        Allowlisted the sole `PLAIN` core definer (functions side already `DISPATCH_VARIANT`). **Oracle
+        audit of every rich-type case (mpmath/NumPy) found + fixed 2 real public-API bugs at root in `core`:**
+        (1) `BigNumber.divide` large-divisor precision (catastrophic `cbrt(bignumber(2))→~0`; ~11-digit
+        `sqrt`/`asinh` loss); (2) `Complex.acosh` wrong branch for `Re(z)<0`. Guarded by new
+        `functions/tests/gap-transcendental-richtype-oracle.test.ts` (parity, not bare allowlist).
+        Baseline re-seeded 104; `check:duplicates:fast` passes; 0 cycles. **Warrants a `core` release**
+        (public-API correctness). Remaining backlog: matrix-domain routing + HUMAN-DECISION clusters.
   - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
         to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
         every name: 14 consolidated onto a single canonical + type-only re-export shim

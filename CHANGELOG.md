@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — two BigNumber/Complex correctness bugs found by the transcendental dedup audit
+
+Oracle-auditing (mpmath / NumPy) the rich-type cases of the 12 transcendental scalars whose names
+collide between `core` and `functions` (`sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p
+expm1 sign`) surfaced two real, public-API correctness bugs — both fixed at root in `core`:
+
+- **`BigNumber.divide` returned 0 / lost precision when the divisor coefficient had more digits than
+  the scaled dividend.** The naive `10^(precision+10)` dividend scaling is only sufficient when the
+  divisor has no more digits than the dividend; an un-rounded large product (e.g. `g*g` in Newton
+  iteration) as divisor collapsed the integer-division quotient toward — or all the way to — zero.
+  **Impact: catastrophic** — `cbrt(bignumber(2))` returned `~4.6e-18` instead of `1.2599…`, and
+  `sqrt`/`asinh(BigNumber)` degraded to ~11 significant digits. Fix widens the scale by the digit
+  deficit `max(0, bDigits - aDigits)`; when `bDigits ≤ aDigits` it is bit-identical to before, so no
+  previously-correct division changes. `cbrt`/`sqrt`/`asinh(BigNumber)` now reach full precision
+  (~50–63 digits, ln-dependent ones bounded by the ~50-digit LN2/LN10 constants); `asinh(BigNumber)`
+  is once again an odd function (negative-argument cancellation resolved).
+- **`Complex.acosh` returned the wrong branch (negative real part) for `Re(z) < 0`**, and the wrong
+  sign of π on the `z < -1` real-axis cut. The principal value (C99 Annex G / DLMF 4.37 / NumPy) has
+  `Re ≥ 0`. Fix uses the factored `ln(z + √(z-1)·√(z+1))` instead of `ln(z + √(z²-1))`, which selects
+  the correct Riemann sheet. E.g. `acosh(-1+0.5i)`: `(-0.733, -2.467)` → `(0.733, 2.467)`.
+
+New `functions/tests/gap-transcendental-richtype-oracle.test.ts` pins every BigNumber/Complex/Fraction
+rich-type case of all 12 against the mpmath/NumPy oracle (relative tolerance `1e-40`…`1e-50` for
+BigNumber, `1e-12` for Complex), plus IEEE-754 `sign` edges (`-0`, `NaN`) and regression guards for
+both core fixes. This is the parity guard justifying the dedup allowlist below.
+
+### Dedup — allowlist transcendental hot-path-inline collisions (`TRUE_DUPLICATE` 116 → 104)
+
+The 12 transcendental name-collisions are **not** accidental duplicates: `functions` inlines `Math.*`
+in the `number` case (V8 hot-path guard, kept local per `project-all-libraries-build-on-core`), while
+`core/src/number.ts` exports the scalar `number→number` primitive for cold consumers. The functions
+definer is already auto-tagged `DISPATCH_VARIANT` (a `mathTyped` registration); allowlisting the sole
+remaining `core/src/number.ts` `PLAIN` definer flips all 12 to `ALLOWLISTED`. Guarded by the oracle
+parity test above (not a bare allowlist). `duplicate-baseline.json` re-seeded to 104;
+`check:duplicates:fast` passes; 0 cycles.
+
 ### Dedup — compat-parity guard + bitwise/fft allowlisting (`TRUE_DUPLICATE` 135 → 116)
 
 Tail slice of the cross-package deduplication campaign. Two adversarial reviewers (Gemini + OpenAI)

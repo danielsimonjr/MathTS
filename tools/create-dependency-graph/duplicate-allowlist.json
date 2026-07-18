@@ -287,6 +287,24 @@
       "names": ["fftshift", "ifftshift"],
       "filesGlob": ["functions/src/signal/fft-helpers.ts"],
       "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) — fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
+    },
+    {
+      "names": [
+        "sinh",
+        "cosh",
+        "tanh",
+        "asinh",
+        "acosh",
+        "atanh",
+        "cbrt",
+        "log2",
+        "log10",
+        "log1p",
+        "expm1",
+        "sign"
+      ],
+      "filesGlob": ["core/src/number.ts"],
+      "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
     }
   ]
 }
