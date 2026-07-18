@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-18'
   totalFiles: 1087
   totalModules: 82
-  totalExports: 5562
+  totalExports: 5563
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1183,6 +1183,10 @@ modules:
             - reduce
             - scatter
           reExport: true
+        - file: ./switch.js
+          imports:
+            - _switch
+          reExport: true
         - file: ./map.js
           imports:
             - ObjectWrappingMap
@@ -1281,6 +1285,7 @@ modules:
         - deepForEach
         - reduce
         - scatter
+        - _switch
         - ObjectWrappingMap
         - PartitionedMap
         - createEmptyMap
@@ -1363,6 +1368,7 @@ modules:
         - containsCollections
         - reduce
         - scatter
+        - _switch
         - ObjectWrappingMap
         - PartitionedMap
         - createEmptyMap
@@ -20809,14 +20815,19 @@ modules:
         - compareText
         - GeneralFormatOptions
     functions/src/utils/switch.ts:
-      description: Transpose a matrix
+      description: Transpose a 2D array (private helper). Consolidated onto the canonical
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - _switch
+          subpath: internal
       exports:
         - _switch
-      functions:
+      reExported:
         - _switch
     functions/src/utils/typeOf.ts:
       description: Determine the type of an entity.
@@ -35569,15 +35580,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1087
   totalModules: 82
-  totalLinesOfCode: 184523
-  totalExports: 5562
+  totalLinesOfCode: 184512
+  totalExports: 5563
   totalClasses: 52
   totalInterfaces: 476
-  totalFunctions: 1755
+  totalFunctions: 1754
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 2225
+  totalReExports: 2227
   totalTypeOnlyImports: 566
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

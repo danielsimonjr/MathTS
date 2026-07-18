@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dedup — closing tail slice (`TRUE_DUPLICATE` 89 → 12 = the floor)
+
+Classified and dispositioned **every** remaining non-ADR cluster; the 12 that remain are exactly the
+three already-surfaced HUMAN-DECISION clusters (WasmLoader SHA-384 security ×7, workerpool caps / #27
+×4, `qr` keep-vs-route ×1) — the irreducible floor. No user-facing behavior change; no release warranted.
+
+- **Consolidated `_switch`** (the one genuine merge): `functions/src/utils/switch.ts`'s byte-equivalent
+  2-D transpose helper now re-exports the canonical `core/src/switch.ts` body via
+  `@danielsimonjr/mathts-core/internal` (functions → core, no cycle). `cumsum`'s call site casts to
+  `unknown[][]`; all cumsum coverage green.
+- **Allowlisted the rest as legitimate independence**, each with a documented reason and, where they are
+  independent reimplementations of the same semantics, a **parity guard**:
+  - factory-layer scalar/array ops (`addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/
+    `isNumeric`/`isInteger`/`factorial`/`concat`/`filter`/`flatten`/`forEach`/`map`/`reshape`/`resize`/
+    `squeeze`) — new guard `functions/tests/gap-factory-core-parity.test.ts` pins functions ≡ core ≡ oracle.
+  - compat homonyms (`zeros`/`ones`/`size`/`matrix`/`identity`/`transpose`/`bignumber`/`fraction`/`sparse`/
+    `complex`/`e`/`pi`/`phi`/`tau`) — `compat/tests/parity-oracle.test.ts` extended with oracle pins.
+  - hot-path type guards (`is*`/`typeOf`), distinct-by-domain homonyms (`scatter`/`area`/`histogram`/
+    `line`/`derivative`/`jacobian`/`topologicalSort`/`dispatch`/`get`/`clone`/`format`/`reduce`/`norm2`/
+    `round`/`fix`/`equal`/`compareText`/…), framework variants (`factory`/`create`/`createChain`/
+    `getOperator`/`properties`/`printTemplate`), unit ops (`to`/`toBest`), and `bitXor`'s BigNumber body.
+  - the coherent-but-unreferenced matrix WASM-FFT bridge (`fft`/`ifft`/`rfft`/`convolve`) kept as
+    accelerator scaffolding rather than deleted (`feedback-dont-auto-delete-coherent-api`).
+- **Surfaced (not changed):** `compat.zeros(n)`/`compat.ones(n)` return an **n×n square** matrix
+  (`cols ?? rows`), diverging from mathjs's size-`n` vector semantics (`functions.zeros(3)` is the correct
+  `[0,0,0]`). Pinned as compat's own contract in the parity test; a real fix would be an outward-facing
+  behavior change (confirm-first).
+- Baseline re-seeded to 12; `check:duplicates:fast` passes; 0 dependency cycles.
+
 ### Dedup — matrix-domain routing slice (`TRUE_DUPLICATE` 104 → 89)
 
 Classified all 16 matrix-domain symbols defined in both `functions` and `matrix` (by reading BOTH

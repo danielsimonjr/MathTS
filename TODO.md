@@ -226,6 +226,27 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
         parity). Baseline re-seeded 89; `check:duplicates:fast` passes; 0 cycles. **`qr` surfaced as a
         keep-vs-route ADR** (mathjs factory + WASM path vs DenseMatrix primitive — routing would drop both)
         → `docs/Architecture/duplicate-backlog.md` §1. No release warranted (no behavior change / no bug).
+  - [x] ✅ **Closing tail slice — DONE 2026-07-18. `TRUE_DUPLICATE` 89 → 12 = THE FLOOR.** Classified and
+        dispositioned every remaining non-ADR cluster; the 12 that remain are **exactly** the three surfaced
+        HUMAN-DECISION clusters (WasmLoader SHA-384 security ×7, workerpool caps / paused-#27 ×4, `qr` ×1) —
+        nothing else is actionable without a Daniel ADR. **Eliminated (1 genuine merge):** `_switch`
+        (`functions/src/utils/switch.ts` → re-export of canonical `core/src/switch.ts` via
+        `@danielsimonjr/mathts-core/internal`, no cycle; cumsum cast). **Allowlisted the rest** with reasons +
+        parity guards where reimplementation: factory-layer scalar/array ops (new
+        `functions/tests/gap-factory-core-parity.test.ts`, functions≡core≡oracle); compat homonyms
+        (`zeros`/`ones`/`size`/`matrix`/`identity`/`transpose`/`bignumber`/`fraction`/`sparse`/`complex`/
+        constants — `compat/tests/parity-oracle.test.ts` extended); hot-path `is*`/`typeOf`; distinct-by-domain
+        (`scatter`/`area`/`histogram`/`line`/`derivative`/`jacobian`/`topologicalSort`/`dispatch`/`get`/`clone`/
+        `format`/`reduce`/`norm2`/`round`/`fix`/`equal`/…); framework (`factory`/`create`/`createChain`/
+        `getOperator`/`properties`/`printTemplate`); `to`/`toBest`; `bitXor` BigNumber body; the coherent
+        matrix WASM-FFT bridge kept (not deleted). **RFL R4 runtime audit vs numpy/oracle found NO code bug**
+        (two false alarms: `functions.transpose` is the parallel `Float64Array` primitive — mis-call, not a
+        bug; `compat.zeros(n)`/`ones(n)` = n×n square is compat's intentional `cols??rows` contract —
+        **SURFACED** as a mathjs-divergence for Daniel, pinned in the parity test, not changed since it's
+        outward-facing). Baseline re-seeded 12; `check:duplicates:fast` passes; 0 cycles; core+functions tsc
+        clean; parity + cumsum suites green. **No release warranted.** The factory-layer-collapse ADR remains
+        Daniel's open call (allowlist-with-parity = interim divergence guard). See
+        `docs/Architecture/duplicate-backlog.md` §6.
   - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
         to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
         every name: 14 consolidated onto a single canonical + type-only re-export shim

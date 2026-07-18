@@ -70,7 +70,7 @@
       "core/src/types/unit/Unit.ts"
     ],
     "core/src/array.ts": ["core/src/collection.ts", "core/src/internal.ts"],
-    "core/src/switch.ts": ["core/src/collection.ts"],
+    "core/src/switch.ts": ["core/src/collection.ts", "core/src/internal.ts"],
     "core/src/shared.ts": [
       "core/src/customs.ts",
       "core/src/internal.ts",

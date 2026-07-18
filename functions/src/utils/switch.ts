@@ -1,21 +1,9 @@
 /**
- * Transpose a matrix
- * @param {Array} mat
- * @returns {Array} ret
+ * Transpose a 2D array (private helper). Consolidated onto the canonical
+ * `_switch` in `@danielsimonjr/mathts-core` (core/src/switch.ts) as part of the
+ * 2026-07 dedup campaign — this file is now a thin re-export so there is a
+ * single body (functions depends on core, so no cycle). The former local copy
+ * was byte-equivalent 2D-transpose logic.
  * @private
  */
-export function _switch(mat: unknown[]): unknown[] {
-  const rows = mat as unknown[][];
-  const I = rows.length;
-  const J = rows[0].length;
-  let i, j;
-  const ret: unknown[][] = [];
-  for (j = 0; j < J; j++) {
-    const tmp: unknown[] = [];
-    for (i = 0; i < I; i++) {
-      tmp.push(rows[i][j]);
-    }
-    ret.push(tmp);
-  }
-  return ret;
-}
+export { _switch } from '@danielsimonjr/mathts-core/internal';

@@ -152,5 +152,49 @@ un-paused.**
 
 ---
 
-_Last updated: 2026-07-18 (matrix-domain routing slice; `TRUE_DUPLICATE` 104 → 89; only `qr` of the
-matrix-domain set remains, surfaced for a human keep-vs-route decision)._
+## 6. Closing tail slice — **RESOLVED 2026-07-18 (`TRUE_DUPLICATE` 89 → 12, the floor)**
+
+The closing sweep classified and dispositioned every remaining non-ADR cluster. The 12 that remain
+are **exactly** the three surfaced HUMAN-DECISION clusters (§3 WasmLoader security = 7, §4 workerpool
+caps = 4, §1 `qr` = 1) — the irreducible floor. Dispositions:
+
+- **Eliminated (consolidated):** `_switch` — `functions/src/utils/switch.ts`'s byte-equivalent 2-D
+  transpose now re-exports the canonical `core/src/switch.ts` body via `@danielsimonjr/mathts-core/internal`
+  (functions→core, no cycle). One genuine merge; the rest are legitimate independence.
+- **Hot-path type guards → allowlisted** (is.ts policy): the class-adjacent / dispatch-adjacent
+  `isX`/`typeOf` PLAIN definers in `core/src/types/*.ts`, `core/src/typed/mathts-typed.ts`,
+  `matrix/src/types/*.ts`, `compat/src/shims.ts`.
+- **Distinct-by-domain (same name, different function) → allowlisted:** `scatter` (sparse/plot/tensor),
+  `area`/`histogram` (stats vs plot), `line` (svg vs mark), `derivative`/`jacobian` (autodiff vs CAS),
+  `topologicalSort`/`dispatch` (workbook vs functions/parallel), `get`/`clone`/`format`/`reduce`/`norm2`/
+  `createMap`/`createTypedFunction`/`nearlyEqual` (intra-package by-type/by-subsystem), the `factory`/
+  `create`/`createChain`/`getOperator`/`properties`/`printTemplate` framework variants, and the
+  `transpose` homonym (compat array-T vs functions parallel `Float64Array` primitive vs matrix DenseMatrix).
+- **Intentional reimplementation + PARITY GUARD → allowlisted** ([[feedback-allowlist-needs-parity-guard]]):
+  - factory-layer scalar/array ops (`addScalar`/`subtractScalar`/`multiplyScalar`/`divideScalar`/
+    `isNumeric`/`isInteger`/`factorial`/`concat`/`filter`/`flatten`/`forEach`/`map`/`reshape`/`resize`/
+    `squeeze`) — guarded functions≡core≡oracle by `functions/tests/gap-factory-core-parity.test.ts`.
+  - compat homonyms (`zeros`/`ones`/`size`/`matrix`/`identity`/`bignumber`/`fraction`/`sparse`/`complex`/
+    `e`/`pi`/`phi`/`tau`) — guarded by `compat/tests/parity-oracle.test.ts` (extended).
+- **Coherent-but-unreferenced accelerator → allowlisted, NOT deleted** ([[feedback-dont-auto-delete-coherent-api]]):
+  the matrix WASM-FFT bridge (`matrix/src/backends/wasm/fft-wasm.ts`: `fft`/`ifft`/`rfft`/`convolve`) — a
+  coherent split-`Float64Array` accelerator module, currently unreferenced from matrix's public surface but
+  kept as scaffolding rather than deleted to satisfy the metric.
+- **`bitXor`** cleared by allowlisting its functions-internal BigNumber body (`functions/src/utils/bignumber/bitwise.ts`) —
+  it was never an ADR, just the last BigNumber-bitwise sibling.
+
+### SURFACED for Daniel (not fixed — outward-facing / design)
+
+- **`compat.zeros(n)` / `compat.ones(n)` return an n×n SQUARE matrix** (`cols ?? rows` in
+  `compat/src/shims.ts`), diverging from mathjs's size-`n` **vector** semantics (`functions.zeros(3)` →
+  `[0,0,0]`, correct). This is compat's own always-2-D matrix-constructor contract, now **pinned** as such
+  in `compat/tests/parity-oracle.test.ts`. If strict mathjs parity is intended, this is a compat bug —
+  but changing it is an outward-facing behavior change (confirm-first), so it is surfaced, not changed.
+- **Factory-layer collapse ADR remains open** (Bucket-C root cause, Adam/Eve): allowlist-with-parity is the
+  interim divergence guard for the `functions/src/factories/index.ts` mathjs-plugin layer — it does NOT
+  resolve whether to eventually collapse factory/compat into the typed layer. That is still Daniel's call.
+
+---
+
+_Last updated: 2026-07-18 (closing tail slice; `TRUE_DUPLICATE` 89 → 12 = the irreducible floor:
+WasmLoader security ×7 + workerpool caps ×4 + `qr` ×1, all HUMAN-DECISION)._

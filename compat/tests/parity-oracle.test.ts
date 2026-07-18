@@ -46,6 +46,23 @@ import {
   arg as fArg,
 } from '@danielsimonjr/mathts-functions';
 import { Complex } from '@danielsimonjr/mathts-core';
+import {
+  zeros as cZeros,
+  ones as cOnes,
+  identity as cIdentity,
+  matrix as cMatrix,
+  size as cSize,
+  transpose as cTranspose,
+  bignumber as cBignumber,
+  fraction as cFraction,
+  sparse as cSparse,
+  complex as cComplex,
+  pi as cPi,
+  e as cE,
+  tau as cTau,
+  phi as cPhi,
+} from '../src/index.js';
+import { size as fSize } from '@danielsimonjr/mathts-functions';
 
 // numpy oracle values, generated with:
 //   np.var(d, ddof=1)  (unbiased / sample, mathjs + compat DEFAULT)
@@ -146,5 +163,132 @@ describe('compat parity — complex re/im/conj/arg vs functions', () => {
   it('arg matches atan2(im, re) and functions', () => {
     expect(cArg(z)).toBeCloseTo(Math.atan2(4, 3), 12); // numpy angle(3+4j)
     expect(cArg(z)).toBeCloseTo(fArg(z) as number, 12);
+  });
+});
+
+// --------------------------------------------------------------------------
+// Homonym constructors / constants — compat's self-contained mathjs-API shim
+// bodies (distinct from the functions factory twins; different return types:
+// compat matrix constructors return DenseMatrix, functions return arrays).
+// These are allowlisted as intentional independent bodies; this guard pins
+// each to an explicit oracle so a future edit can't silently break compat.
+// --------------------------------------------------------------------------
+const toArr = (m: { toArray?: () => unknown; valueOf?: () => unknown }): unknown =>
+  m.toArray ? m.toArray() : m.valueOf ? m.valueOf() : m;
+
+describe('compat parity — matrix constructors vs oracle', () => {
+  it('zeros(rows,cols) is a rows×cols zero matrix', () => {
+    expect(toArr(cZeros(2, 2))).toEqual([
+      [0, 0],
+      [0, 0],
+    ]);
+    expect(toArr(cZeros(2, 3))).toEqual([
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
+  });
+  it('ones(rows,cols) is a rows×cols ones matrix', () => {
+    expect(toArr(cOnes(2, 3))).toEqual([
+      [1, 1, 1],
+      [1, 1, 1],
+    ]);
+  });
+  it('CONTRACT: compat zeros/ones single-arg is SQUARE (cols ?? rows) — NOT the mathjs size-n vector', () => {
+    // Documented divergence from mathjs (which returns [0,0,0] for zeros(3)):
+    // compat's matrix constructors are always 2-D, single arg ⇒ n×n square.
+    expect(toArr(cZeros(3))).toEqual([
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
+    expect(toArr(cOnes(3))).toEqual([
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1],
+    ]);
+  });
+  it('identity(n) is the n×n identity', () => {
+    expect(toArr(cIdentity(3))).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+  it('matrix() wraps a 2-D array, transpose() flips it', () => {
+    expect(
+      toArr(
+        cMatrix([
+          [1, 2],
+          [3, 4],
+        ])
+      )
+    ).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(
+      cTranspose([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toEqual([
+      [1, 3],
+      [2, 4],
+    ]); // numpy .T oracle
+  });
+  it('size agrees with the functions twin and the oracle', () => {
+    expect(
+      cSize([
+        [1, 2, 3],
+        [4, 5, 6],
+      ])
+    ).toEqual([2, 3]);
+    expect(
+      cSize([
+        [1, 2, 3],
+        [4, 5, 6],
+      ])
+    ).toEqual(
+      (
+        fSize([
+          [1, 2, 3],
+          [4, 5, 6],
+        ]) as { valueOf: () => unknown }
+      ).valueOf()
+    );
+  });
+});
+
+describe('compat parity — numeric-type constructors vs oracle', () => {
+  it('bignumber parses to exact value', () => {
+    expect(cBignumber('1.5').toString()).toBe('1.5');
+  });
+  it('fraction reduces to 1/3', () => {
+    const f = cFraction(2, 6); // compat's own Fraction type (numerator/denominator)
+    expect(f.valueOf()).toBeCloseTo(1 / 3, 15); // 2/6 = 1/3
+    expect(f.toString()).toBe('1/3');
+  });
+  it('complex builds re/im', () => {
+    const z = cComplex(1, 2);
+    expect([z.re, z.im]).toEqual([1, 2]);
+  });
+  it('sparse preserves the dense values', () => {
+    const s = cSparse([
+      [1, 0],
+      [0, 2],
+    ]);
+    expect(s.toArray()).toEqual([
+      [1, 0],
+      [0, 2],
+    ]);
+  });
+});
+
+describe('compat parity — mathematical constants vs oracle', () => {
+  it('pi/e/tau/phi match their closed-form values', () => {
+    expect(cPi).toBe(Math.PI);
+    expect(cE).toBe(Math.E);
+    expect(cTau).toBeCloseTo(2 * Math.PI, 15);
+    expect(cPhi).toBeCloseTo((1 + Math.sqrt(5)) / 2, 15); // golden ratio 1.618033988749895
   });
 });

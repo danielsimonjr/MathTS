@@ -140,6 +140,7 @@ export {
 } from './array.js';
 
 export { containsCollections, deepMap, deepForEach, reduce, scatter } from './collection.js';
+export { _switch } from './switch.js';
 
 export {
   ObjectWrappingMap,

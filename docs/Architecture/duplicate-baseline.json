@@ -2,156 +2,6 @@
   "generated": "2026-07-18",
   "note": "The in-progress dedup campaign backlog: TRUE_DUPLICATE names accepted as of `generated`. `npm run check:duplicates` fails only on NEW TRUE_DUPLICATE names beyond this set — as names are consolidated, re-run this generator to shrink the baseline. Not auto-run; a human re-seeds it deliberately after reviewing what changed.",
   "runtime": {
-    "isMatrix": [
-      "compat/src/shims.ts",
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts",
-      "matrix/src/types/Matrix.ts"
-    ],
-    "isBigNumber": [
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/types/bignumber.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts"
-    ],
-    "isComplex": [
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/types/complex.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts"
-    ],
-    "isDenseMatrix": [
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts",
-      "matrix/src/types/DenseMatrix.ts"
-    ],
-    "isFraction": [
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/types/fraction.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts"
-    ],
-    "isSparseMatrix": [
-      "core/src/is.ts",
-      "core/src/typed/mathts-typed.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/utils/is.ts",
-      "matrix/src/types/SparseMatrix.ts"
-    ],
-    "transpose": [
-      "compat/src/shims.ts",
-      "functions/src/typed/arithmetic.ts",
-      "matrix/src/operations/common.ts",
-      "matrix/src/typed-operations.ts",
-      "matrix/src/types/dense/arithmetic.ts"
-    ],
-    "complex": [
-      "assembly/src/types/complex.ts",
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "functions/src/signal/fft.ts"
-    ],
-    "fft": [
-      "assembly/src/ops/fft.ts",
-      "functions/src/factories/index.ts",
-      "functions/src/signal/fft.ts",
-      "matrix/src/backends/wasm/fft-wasm.ts"
-    ],
-    "format": [
-      "core/src/bignumber-formatter.ts",
-      "core/src/number.ts",
-      "core/src/string.ts",
-      "functions/src/typed/string.ts"
-    ],
-    "typeOf": [
-      "core/src/is.ts",
-      "expression/src/utils/is.ts",
-      "functions/src/factories/index.ts",
-      "functions/src/utils/is.ts"
-    ],
-    "bitXor": [
-      "functions/src/typed/bitwise.ts",
-      "functions/src/utils/bignumber/bitwise.ts",
-      "parallel/src/ops/bitwise.ts"
-    ],
-    "clone": ["core/src/array.ts", "core/src/object.ts", "functions/src/factories/index.ts"],
-    "create": ["compat/src/index.ts", "core/src/factory.ts", "functions/src/core/create.ts"],
-    "factory": [
-      "core/src/factory.ts",
-      "expression/src/utils/factory.ts",
-      "functions/src/utils/factory.ts"
-    ],
-    "identity": [
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts"
-    ],
-    "ifft": [
-      "functions/src/factories/index.ts",
-      "functions/src/signal/fft.ts",
-      "matrix/src/backends/wasm/fft-wasm.ts"
-    ],
-    "isInteger": [
-      "core/src/number.ts",
-      "functions/src/factories/index.ts",
-      "packages/typed-function/src/index.ts"
-    ],
-    "matrix": [
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts"
-    ],
-    "norm2": [
-      "core/src/numeric/stable.ts",
-      "functions/src/typed/matrix-ops.ts",
-      "matrix/src/operations/svd.ts"
-    ],
-    "ones": [
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts"
-    ],
-    "rfft": [
-      "assembly/src/ops/fft.ts",
-      "functions/src/signal/fft-helpers.ts",
-      "matrix/src/backends/wasm/fft-wasm.ts"
-    ],
-    "round": [
-      "compat/src/shims.ts",
-      "core/src/arithmetic/scalar.ts",
-      "functions/src/typed/arithmetic.ts"
-    ],
-    "scatter": [
-      "core/src/collection.ts",
-      "plot/src/marks2d.ts",
-      "tensor/src/operations/scatter.ts"
-    ],
-    "shouldParallelize": [
-      "functions/src/typed/arithmetic.ts",
-      "parallel/src/strategies/chunk.ts",
-      "parallel/src/strategies/threshold.ts"
-    ],
-    "size": [
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts"
-    ],
-    "zeros": [
-      "compat/src/shims.ts",
-      "functions/src/factories/index.ts",
-      "matrix/src/typed-operations.ts"
-    ],
-    "_switch": ["core/src/switch.ts", "functions/src/utils/switch.ts"],
-    "addScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "area": ["functions/src/typed/geometry.ts", "plot/src/marks2d.ts"],
-    "bignumber": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
     "canUseSharedMemory": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/workerpool-browser-shim.ts"
@@ -160,62 +10,16 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/workerpool-browser-shim.ts"
     ],
-    "compareText": ["core/src/string.ts", "functions/src/typed/relational.ts"],
-    "concat": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "convolve": ["functions/src/typed/signal.ts", "matrix/src/backends/wasm/fft-wasm.ts"],
-    "createChain": ["compat/src/chain.ts", "functions/src/type/chain/function/chain.ts"],
-    "createMap": ["core/src/map.ts", "functions/src/matrix/map.ts"],
-    "createTypedFunction": ["core/src/factory/factory.ts", "core/src/typed/mathts-typed.ts"],
-    "deepForEach": ["core/src/array.ts", "core/src/collection.ts"],
-    "deepMap": ["core/src/array.ts", "core/src/collection.ts"],
     "defaultWasmLocation": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
-    "derivative": ["autograd/src/grad.ts", "functions/src/factories/index.ts"],
-    "dispatch": ["parallel/src/strategies/threshold.ts", "workbook/src/cli.ts"],
-    "divideScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "e": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
-    "equal": ["core/src/arithmetic/scalar.ts", "functions/src/typed/arithmetic.ts"],
-    "factorial": ["functions/src/factories/index.ts", "functions/src/wasm/special/scalars.ts"],
-    "filter": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "fix": ["core/src/arithmetic/scalar.ts", "functions/src/typed/arithmetic.ts"],
-    "flatten": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "forEach": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "fraction": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
-    "get": ["core/src/array.ts", "core/src/object.ts"],
-    "getOperator": ["expression/src/operators.ts", "functions/src/expression/operators.ts"],
-    "histogram": ["functions/src/descriptive-stats.ts", "plot/src/histogram.ts"],
     "initializePool": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
-    "isNumeric": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "jacobian": ["autograd/src/grad.ts", "functions/src/typed/cas.ts"],
-    "line": ["plot/src/marks2d.ts", "plot/src/svg.ts"],
     "loadWasmManifest": [
       "functions/src/wasm/integrity.ts",
       "matrix/src/backends/wasm/integrity.ts"
     ],
-    "map": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "multiplyScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "nearlyEqual": ["core/src/number.ts", "functions/src/utils/bignumber/nearlyEqual.ts"],
-    "number": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "phi": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
-    "pi": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
-    "printTemplate": ["expression/src/utils/print.ts", "functions/src/utils/print.ts"],
-    "properties": ["expression/src/operators.ts", "functions/src/expression/operators.ts"],
     "qr": ["functions/src/factories/index.ts", "matrix/src/operations/qr.ts"],
-    "reduce": ["core/src/collection.ts", "functions/src/typed/algebra.ts"],
-    "reshape": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "resize": ["core/src/array.ts", "functions/src/factories/index.ts"],
     "resolvePackagedWasm": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
     "sha384OfBuffer": ["functions/src/wasm/integrity.ts", "matrix/src/backends/wasm/integrity.ts"],
-    "sparse": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
-    "squeeze": ["core/src/array.ts", "functions/src/factories/index.ts"],
-    "subtractScalar": ["core/src/arithmetic/scalar.ts", "functions/src/factories/index.ts"],
-    "tau": ["compat/src/shims.ts", "functions/src/plain/number/constants.ts"],
     "terminatePool": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
-    "to": ["functions/src/factories/index.ts", "functions/src/typed/unit.ts"],
-    "toBest": ["functions/src/factories/index.ts", "functions/src/typed/unit.ts"],
-    "toEngineering": ["core/src/bignumber-formatter.ts", "core/src/number.ts"],
-    "toExponential": ["core/src/bignumber-formatter.ts", "core/src/number.ts"],
-    "toFixed": ["core/src/bignumber-formatter.ts", "core/src/number.ts"],
-    "topologicalSort": ["functions/src/typed/graph.ts", "workbook/src/graph.ts"],
     "verifyWasmIntegrity": [
       "functions/src/wasm/integrity.ts",
       "matrix/src/backends/wasm/integrity.ts"
