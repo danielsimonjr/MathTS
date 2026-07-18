@@ -2,16 +2,16 @@
   "generated": "2026-07-18",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 142,
-    "typeDuplicates": 69,
+    "runtimeDuplicates": 135,
+    "typeDuplicates": 68,
     "runtimeByTag": {
-      "TRUE_DUPLICATE": 142,
+      "TRUE_DUPLICATE": 135,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 87
+      "ALLOWLISTED": 94
     },
     "typeByTag": {
-      "TRUE_DUPLICATE": 69,
+      "TRUE_DUPLICATE": 68,
       "DISPATCH_VARIANT": 0,
       "ALIAS_DELEGATION": 0,
       "ALLOWLISTED": 0
@@ -342,38 +342,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "DEFAULT_CONFIG",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "core/src/config.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/factory/factory.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/core/config.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/config.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "fft",
       "category": "constant+function",
       "definers": [
@@ -680,114 +648,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "LN10",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "LN2",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "LOG10E",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "LOG2E",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "matrix",
       "category": "constant+function",
       "definers": [
@@ -1017,60 +877,6 @@
           "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "SQRT1_2",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "SQRT2",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "assembly/src/ops/scalar.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "core/src/constants.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4260,6 +4066,35 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "DEFAULT_CONFIG",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "core/src/config.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
+        },
+        {
+          "file": "core/src/factory/factory.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
+        },
+        {
+          "file": "matrix/src/config.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
+        }
+      ],
+      "canonicalHint": "core/src/config.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "isCollection",
       "category": "function",
       "definers": [
@@ -4431,6 +4266,168 @@
         }
       ],
       "canonicalHint": "core/src/is.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "LN10",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "LN2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "LOG10E",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "LOG2E",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "SQRT1_2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "SQRT2",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "assembly/src/ops/scalar.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALIAS_DELEGATION"
+        },
+        {
+          "file": "core/src/constants.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6349,32 +6346,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "ConfigOptions",
-      "category": "interface+type",
-      "definers": [
-        {
-          "file": "core/src/config.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/core/config.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/core/function/config.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "CreateFunction",
       "category": "type",
       "definers": [
@@ -6797,6 +6768,26 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
+      "name": "ConfigOptions",
+      "category": "interface+type",
+      "definers": [
+        {
+          "file": "core/src/config.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/core/function/config.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "core/src/config.ts",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
       "name": "ConstantNode",
       "category": "interface",
       "definers": [
@@ -7009,26 +7000,6 @@
         {
           "file": "matrix/src/backends/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "MathJsConfig",
-      "category": "type",
-      "definers": [
-        {
-          "file": "core/src/config.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/core/config.ts",
-          "package": "@danielsimonjr/mathts-functions",
           "public": false,
           "tag": "PLAIN"
         }

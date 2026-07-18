@@ -20,6 +20,11 @@
       "names": ["VERSION"],
       "filesGlob": ["core/src/index.ts", "plot/src/index.ts", "workbook/src/contract.ts"],
       "reason": "package-specific version string"
+    },
+    {
+      "names": ["DEFAULT_CONFIG"],
+      "filesGlob": ["core/src/config.ts", "core/src/factory/factory.ts", "matrix/src/config.ts"],
+      "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
     }
   ]
 }

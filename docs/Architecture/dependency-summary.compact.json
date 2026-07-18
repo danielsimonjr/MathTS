@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1086, "e": 5553, "re": 2215 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1086, "e": 5558, "re": 2221 },
   "s": {
-    "loc": 184647,
+    "loc": 184595,
     "cls": 52,
-    "int": 489,
+    "int": 488,
     "fn": 1755,
     "tg": 156,
     "en": 0,
-    "co": 1543,
-    "toi": 563
+    "co": 1542,
+    "toi": 564
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -571,6 +571,8 @@
       "f": 5,
       "exp": [
         "DEFAULT_CONFIG",
+        "ConfigOptions",
+        "MathJsConfig",
         "create",
         "MATRIX_OPTIONS",
         "NUMBER_OPTIONS",
@@ -579,7 +581,7 @@
         "importFactory",
         "createTyped"
       ],
-      "int": ["ConfigOptions", "MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
+      "int": ["MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
     },
     "functions/error": {
       "f": 3,

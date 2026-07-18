@@ -5,7 +5,11 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
-    "core/src/config.ts": ["core/src/arithmetic/scalar.ts", "core/src/types/unit/dependencies.ts"],
+    "core/src/config.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/internal.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
     "core/src/number.ts": [
       "core/src/arithmetic/scalar.ts",
       "core/src/array.ts",

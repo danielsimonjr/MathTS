@@ -536,6 +536,7 @@ graph LR
 | `./object.js` | `*` | Re-export |
 | `./factory.js` | `*` | Re-export |
 | `./shared.js` | `hasOwnProperty, endsWith, warnOnce, memoize` | Re-export |
+| `./config.js` | `DEFAULT_CONFIG` | Re-export |
 | `./error/MathjsError.js` | `MathjsError` | Re-export |
 | `./error/DimensionError.js` | `DimensionError` | Re-export |
 | `./error/IndexError.js` | `IndexError, createIndexError` | Re-export |
@@ -546,12 +547,13 @@ graph LR
 | `./collection.js` | `containsCollections, deepMap, deepForEach, reduce, scatter` | Re-export |
 | `./map.js` | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap` | Re-export |
 | `./shared.js` | `MemoizedFunction` | Re-export (type-only) |
+| `./config.js` | `ConfigOptions, MathJsConfig` | Re-export (type-only) |
 | `./array.js` | `NestedArray, IdentifiedValue` | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `*` | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `NestedArray`, `IdentifiedValue`, `type * from ./types/unit/unit-types.js`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `type * from ./types/unit/unit-types.js`
 
 ---
 
@@ -4303,11 +4305,15 @@ graph LR
 
 ### `functions/src/core/config.ts` - Configuration interface for math.js
 
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `DEFAULT_CONFIG` |
+| `@danielsimonjr/mathts-core` | `ConfigOptions, MathJsConfig` |
+
 **Exports:**
 
-- Interfaces: `ConfigOptions`
-- Types: `MathJsConfig`
-- Constants: `DEFAULT_CONFIG`
+- Re-exports: `DEFAULT_CONFIG`, `ConfigOptions`, `MathJsConfig`
 
 ---
 
@@ -15168,7 +15174,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber` |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2` |
 | `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
 | `@danielsimonjr/mathts-matrix` | `DenseMatrix, SparseMatrix, add, subtract, multiply` |
 
@@ -15660,10 +15666,10 @@ graph LR
 | `workbook/src/cli`                                     | 19 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `core/src/internal`                                    | 16 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
-| `core/src/internal`                                    | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 15 files   |
@@ -16429,6 +16435,7 @@ graph TD
     N13 --> N31
     N14 --> N15
     N14 --> N12
+    N14 --> N9
     N14 --> N19
     N14 --> N17
     N14 --> N18
@@ -16473,7 +16480,6 @@ graph TD
     N44 --> N43
     N45 --> N37
     N45 --> N46
-    N45 --> N44
 ```
 
 ---
@@ -16486,15 +16492,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1086   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184647 |
-| Total Exports           | 5553   |
-| Total Re-exports        | 2215   |
+| Total Lines of Code     | 184595 |
+| Total Exports           | 5558   |
+| Total Re-exports        | 2221   |
 | Total Classes           | 52     |
-| Total Interfaces        | 489    |
+| Total Interfaces        | 488    |
 | Total Functions         | 1755   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 563    |
+| Type-only Imports       | 564    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-17",
+  "generated": "2026-07-18",
   "note": "The in-progress dedup campaign backlog: TRUE_DUPLICATE names accepted as of `generated`. `npm run check:duplicates` fails only on NEW TRUE_DUPLICATE names beyond this set — as names are consolidated, re-run this generator to shrink the baseline. Not auto-run; a human re-seeds it deliberately after reviewing what changed.",
   "runtime": {
     "isMatrix": [
@@ -58,12 +58,6 @@
       "functions/src/factories/index.ts",
       "functions/src/signal/fft.ts"
     ],
-    "DEFAULT_CONFIG": [
-      "core/src/config.ts",
-      "core/src/factory/factory.ts",
-      "functions/src/core/config.ts",
-      "matrix/src/config.ts"
-    ],
     "fft": [
       "assembly/src/ops/fft.ts",
       "functions/src/factories/index.ts",
@@ -114,10 +108,6 @@
       "functions/src/factories/index.ts",
       "packages/typed-function/src/index.ts"
     ],
-    "LN10": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
-    "LN2": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
-    "LOG10E": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
-    "LOG2E": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
     "matrix": [
       "compat/src/shims.ts",
       "functions/src/factories/index.ts",
@@ -163,8 +153,6 @@
       "functions/src/factories/index.ts",
       "matrix/src/typed-operations.ts"
     ],
-    "SQRT1_2": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
-    "SQRT2": ["assembly/src/ops/scalar.ts", "compat/src/shims.ts", "core/src/constants.ts"],
     "trace": [
       "functions/src/factories/index.ts",
       "matrix/src/typed-operations.ts",
@@ -363,11 +351,6 @@
       "functions/src/utils/is.ts"
     ],
     "Chain": ["compat/src/chain.ts", "expression/src/utils/is.ts", "functions/src/utils/is.ts"],
-    "ConfigOptions": [
-      "core/src/config.ts",
-      "functions/src/core/config.ts",
-      "functions/src/core/function/config.ts"
-    ],
     "CreateFunction": [
       "core/src/factory.ts",
       "expression/src/utils/factory.ts",
@@ -416,6 +399,7 @@
       "functions/src/numeric/matrix-functions.ts"
     ],
     "ConditionalNode": ["expression/src/utils/is.ts", "functions/src/utils/is.ts"],
+    "ConfigOptions": ["core/src/config.ts", "functions/src/core/function/config.ts"],
     "ConstantNode": ["expression/src/utils/is.ts", "functions/src/utils/is.ts"],
     "ConversionDef": ["core/src/typed/mathts-typed.ts", "packages/typed-function/src/index.ts"],
     "ExecOptions": ["packages/workerpool/src/workerpool-browser-shim.ts", "parallel/src/index.ts"],
@@ -427,7 +411,6 @@
     "ImportOptions": ["functions/src/core/create.ts", "functions/src/core/function/import.ts"],
     "IndexNode": ["expression/src/utils/is.ts", "functions/src/utils/is.ts"],
     "LoadingMetrics": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
-    "MathJsConfig": ["core/src/config.ts", "functions/src/core/config.ts"],
     "MathNode": ["expression/src/node/Node.ts", "functions/src/arithmetic/utils/nodeOperations.ts"],
     "MatrixBackend": ["core/src/types/interfaces.ts", "matrix/src/backends/Backend.ts"],
     "MatrixConstructor": ["functions/src/matrix/utils/zerosAndOnes.ts", "functions/src/types.ts"],

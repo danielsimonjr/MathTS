@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
   - **Test-only (exercised by a test, ships nothing)**: 6
-- **Potentially unused exports**: 213
+- **Potentially unused exports**: 212
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 212
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 211
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -66,10 +66,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 Not imported cross-file, but referenced within their own module — they type or
 support exports that ARE used, so they cannot be deleted in isolation. Mostly
 interfaces typing live guards and per-package API completeness, not rot.
-
-### `core/src/config.ts`
-
-- `MathJsConfig` (type) — 1 in-file ref
 
 ### `core/src/customs.ts`
 

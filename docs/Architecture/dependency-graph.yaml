@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-18'
   totalFiles: 1086
   totalModules: 82
-  totalExports: 5553
+  totalExports: 5558
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1102,6 +1102,10 @@ modules:
             - warnOnce
             - memoize
           reExport: true
+        - file: ./config.js
+          imports:
+            - DEFAULT_CONFIG
+          reExport: true
         - file: ./error/MathjsError.js
           imports:
             - MathjsError
@@ -1194,6 +1198,12 @@ modules:
             - MemoizedFunction
           reExport: true
           typeOnly: true
+        - file: ./config.js
+          imports:
+            - ConfigOptions
+            - MathJsConfig
+          reExport: true
+          typeOnly: true
         - file: ./array.js
           imports:
             - NestedArray
@@ -1211,6 +1221,7 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - DEFAULT_CONFIG
         - MathjsError
         - DimensionError
         - IndexError
@@ -1280,6 +1291,8 @@ modules:
         - clone
         - assign
         - MemoizedFunction
+        - ConfigOptions
+        - MathJsConfig
         - NestedArray
         - IdentifiedValue
       reExported:
@@ -1291,6 +1304,7 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - DEFAULT_CONFIG
         - MathjsError
         - DimensionError
         - IndexError
@@ -1349,6 +1363,8 @@ modules:
         - assign
         - isObjectWrappingMap
         - MemoizedFunction
+        - ConfigOptions
+        - MathJsConfig
         - NestedArray
         - IdentifiedValue
         - type * from ./types/unit/unit-types.js
@@ -9806,13 +9822,26 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - DEFAULT_CONFIG
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ConfigOptions
+            - MathJsConfig
+          subpath: internal
       exports:
         - DEFAULT_CONFIG
-      interfaces:
         - ConfigOptions
-      constants:
+        - MathJsConfig
+      reExported:
         - DEFAULT_CONFIG
+        - ConfigOptions
+        - MathJsConfig
     functions/src/core/create.ts:
       description: Type for the mathjs instance
       externalDependencies:
@@ -33187,6 +33216,12 @@ modules:
             - isFraction
             - isBigNumber
             - isNumber
+            - LN2
+            - LN10
+            - LOG2E
+            - LOG10E
+            - SQRT2
+            - SQRT1_2
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -35467,17 +35502,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 184647
-  totalExports: 5553
+  totalLinesOfCode: 184595
+  totalExports: 5558
   totalClasses: 52
-  totalInterfaces: 489
+  totalInterfaces: 488
   totalFunctions: 1755
   totalTypeGuards: 156
   totalEnums: 0
-  totalConstants: 1543
-  totalReExports: 2215
-  totalTypeOnlyImports: 563
+  totalConstants: 1542
+  totalReExports: 2221
+  totalTypeOnlyImports: 564
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 213
+  unusedExportsCount: 212

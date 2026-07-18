@@ -15,6 +15,16 @@ export * from './object.js';
 export { hasOwnProperty, endsWith, warnOnce, memoize } from './shared.js';
 export type { MemoizedFunction } from './shared.js';
 
+// mathjs-compatible tolerance/matrix/number config (ConfigOptions/DEFAULT_CONFIG),
+// consolidated from the byte-identical copy formerly in
+// `functions/src/core/config.ts` (see the cross-package dedup pass,
+// docs/Architecture/duplicate-symbols.json). Distinct from — and NOT to be
+// confused with — the publicly-exported `MathTSConfig`/`DEFAULT_CONFIG` from
+// `./factory/factory.ts` (the factory-registry/backend-routing config); the two
+// serve different subsystems and are intentionally NOT merged.
+export type { ConfigOptions, MathJsConfig } from './config.js';
+export { DEFAULT_CONFIG } from './config.js';
+
 // Error classes (Bucket B, commit 1), consolidated from the 2-3 way duplicated
 // copies formerly in expression/src/error/{MathjsError,DimensionError,IndexError}.ts
 // and functions/src/error/{MathjsError,DimensionError,IndexError}.ts. Verified

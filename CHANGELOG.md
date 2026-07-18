@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dedup — math constants + DEFAULT_CONFIG cluster (core, compat, functions)
+
+Cross-package dedup pass over the `docs/Architecture/duplicate-symbols.json` math-constant +
+config cluster (starting point: 142 runtime `TRUE_DUPLICATE` names).
+
+- **Math constants** (`LN2`/`LN10`/`LOG2E`/`LOG10E`/`SQRT2`/`SQRT1_2`): `compat/src/shims.ts` was
+  redefining all six from `Math.*` directly instead of re-exporting `@danielsimonjr/mathts-core`'s
+  canonical `core/src/constants.ts` copies. Confirmed byte-identical values (both derive from the
+  same `Math.*` globals) before switching `compat` to import + re-export core's constants
+  (alias-delegation form, matching the file's existing `add`/`sub`/… delegation pattern). The
+  AssemblyScript mirror in `assembly/src/ops/scalar.ts` is untouched (separate compilation target,
+  already allowlisted). `E`/`PI`/`PHI`/`TAU` were not flagged — compat's `e`/`pi`/`phi`/`tau` are
+  lowercase mathjs-style names, not the same symbol as core's uppercase constants.
+- **`functions/src/core/config.ts`**: was a byte-for-byte copy of `core/src/config.ts`'s
+  `ConfigOptions`/`MathJsConfig`/`DEFAULT_CONFIG` (confirmed identical). Consolidated: added these
+  to `@danielsimonjr/mathts-core/internal` (new export, no existing collision) and turned
+  `functions/src/core/config.ts` into a thin re-export shim, so all ~50 existing
+  `../core/config.js` import sites across `functions/src/` keep working unchanged.
+- **`DEFAULT_CONFIG` verdict — package/module-specific, allowlisted (not consolidated).** After the
+  above fix, three distinct `DEFAULT_CONFIG` definitions remain, each a genuinely different shape
+  for a different subsystem: `core/src/config.ts`'s `ConfigOptions` (mathjs-style
+  relTol/absTol/matrix/number/predictable tolerance config, internal-only), `core/src/factory/
+  factory.ts`'s `MathTSConfig` (the public factory-registry/backend-routing config — precision/
+  preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and `matrix/src/config.ts`'s
+  `MatrixConfig` (backend enable/preference/threshold + adaptive-tuning + profiling, matrix-only
+  fields). Added all three to `tools/create-dependency-graph/duplicate-allowlist.json` with reason
+  "package/module-specific default config" and regenerated `docs/Architecture/duplicate-
+  baseline.json` accordingly.
+
+Runtime `TRUE_DUPLICATE` count: **142 → 135** (all 7 targeted names — the 6 constants +
+`DEFAULT_CONFIG` — now `ALLOWLISTED`). `npm run check:duplicates` passes (203 current == 203
+baselined, 0 new). Full `core`/`functions`/`matrix`/`compat` suites green (functions: 4048 passed /
+94 skipped), `npx tsc --noEmit` clean and `eslint` clean on all four touched packages.
+
 ### Guarded — remaining scalar arithmetic ops (Bucket C, slice 2) (functions)
 
 Extends the Bucket-C "temperature split" equivalence sweep (slice 1, below) to the rest of the
