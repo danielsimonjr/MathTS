@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.3.4
+
+### Patch Changes
+
+- Fix the exported `VERSION` constant, which had silently drifted from each package's published version.
+
+  `VERSION` was a hardcoded string literal that Changesets never bumped, so it drifted: core reported `0.1.0`
+  (was really 0.13.0), plot `0.2.0` (was 0.3.29), workbook `0.1.0` (was 0.3.3). Workbook's is user-facing —
+  `mtsw version` (and `capabilities`/`introspect`) printed the wrong number.
+
+  Root-cause fix (not a re-hardcode): `VERSION` is now injected at build time from each package's own
+  `package.json` via a per-package `tsup.config.ts` (esbuild `define`, read Node-side so `package.json` is
+  never bundled into `dist`). Tests import source, so the same define is mirrored into each `vitest.config.ts`;
+  `core/tests/version.test.ts` now pins `VERSION` to `package.json` rather than a literal. `VERSION` can no
+  longer drift from the published version.
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.1
+  - @danielsimonjr/mathts-plot@0.3.30
+
 ## 0.3.3
 
 ### Patch Changes
