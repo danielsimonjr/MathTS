@@ -1,5 +1,31 @@
 # @danielsimonjr/mathts-expression
 
+## 0.6.5
+
+### Patch Changes
+
+- Arithmetic correctness fixes (BigNumber/Fraction pow/round/equal) + cross-package util consolidation
+
+  **Correctness fixes** (`functions`): three live public-API bugs, fixed at root by delegating the
+  rich-type policy cases of the typed dispatchers to core's oracle-pinned scalar primitives:
+  - `pow(bignumber(2), 0.5)` returned `1` (silently) — now `1.4142…`; `pow(fraction(3), 2.9)` silently
+    floored the exponent to `27` — now `24.19…`.
+  - `round(bignumber(-2.5))` returned `-3` — now `-2` (core's type-consistent `halfCeil`).
+  - `equal(0.1+0.2, 0.3)` returned `false` (strict `===`) — now `true` (mathjs-parity tolerance via
+    `nearlyEqual`; `bigint` stays exact).
+    Hot `number`/`bigint` cases remain inline (unchanged, no perf impact). A new equivalence guard
+    (fast-check property: typed case ≡ core primitive, + edge corpus) prevents future drift.
+
+  **Consolidation** (`core`/`expression`/`functions`): duplicate mathjs-derived cold utilities
+  (factory/string/formatter/array/collection/map) and error classes (`MathjsError`/`DimensionError`/
+  `IndexError`) that `expression` and `functions` each carried are now unified on a single
+  `@danielsimonjr/mathts-core/internal` canonical, with per-package re-export shims (no public API
+  change). Two latent bugs fixed in passing (`ObjectWrappingMap[Symbol.iterator]` type-soundness;
+  `sortFactories` now throws on indirect dependency cycles).
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.11.0
+
 ## 0.6.4
 
 ### Patch Changes
