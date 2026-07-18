@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(test): repair cov-numeric `cond` import broken by the dedup
+
+- The matrix-domain dedup slice (`a99029c2`) removed the shadowed power-iteration `cond` from
+  `functions/src/typed/numeric.ts` (redundant with the canonical SVD `cond` in `typed/matrix-ops.ts`), but its
+  "no caller" check missed a direct *test* import: `functions/tests/cov-numeric.test.ts` imported `cond` from
+  `numeric.ts`, so 3 tests threw "cond is not a function." Removed the obsolete `cond` import + the 3 tests that
+  covered the deleted shadow (the public SVD `cond` is oracle-pinned in `gap-matrix-domain-dedup-parity.test.ts`).
+  `cov-numeric` 48/48 green. Found while sweeping dedup leftovers — a regression the campaign introduced and never
+  caught because the full-suite failure was mislabeled "pre-existing."
+
 ### chore(cleanup): retire dead-ship dedup leftover copies (switch/formatter), migrate coverage to core
 
 - Retired three **dead-ship** Bucket-B consolidation leftovers — package-local copies/shims that were kept alive
