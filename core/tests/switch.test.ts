@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { _switch } from '../src/utils/switch.js';
+import { _switch } from '../src/switch.js';
 
 // ---------------------------------------------------------------------------
-// _switch  (matrix transpose)
+// _switch  (matrix transpose) — canonical core copy.
+// Migrated from expression/tests/utils-switch.test.ts when the dead-ship
+// expression/src/utils/switch.ts local copy was retired (behavior-identical to
+// this canonical). See dedup cleanup CHANGELOG entry.
 // ---------------------------------------------------------------------------
 describe('_switch', () => {
   it('transposes a 2x3 matrix to 3x2', () => {

@@ -161,6 +161,15 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           expression-only (preserved in its shim only, not invented into functions'). `collection.ts`'s
           two copies were already identical. Full `core`/`expression`/`functions` suites green, no
           regressions; `npm run typecheck` still 32/32.
+    - [x] ✅ **Slice 1/2 dead-ship leftover cleanup DONE 2026-07-18.** Retired the consolidation leftovers that
+          survived only via their own unit tests (no runtime consumer): `expression/src/utils/switch.ts` (copy of
+          core's `_switch`), `expression/src/utils/bignumber/formatter.ts` + `functions/src/utils/bignumber/
+    formatter.ts` (re-export shims of `core/src/bignumber-formatter.ts`). Coverage migrated (no loss) into
+          `core/tests/switch.test.ts` (8) + `core/tests/bignumber-formatter.test.ts` (28); redundant expression
+          formatter/switch tests deleted; the `bignumber/formatter` section of `dedup-bucketB-equivalence.test.ts`
+          retired (pinned deleted shims ≡ core). **`expression/src/error/DimensionError.ts` KEPT** — a live slice-2
+          fixture (`fixtures/dedup-bucketB-slice2/expression-array-original.ts`) still imports it. `unused-analysis.md`
+          test-only dormant 7 → 4. Gates: core/expression suites green (796 / 1943), typecheck + eslint + duplicates + cycles all clean.
   - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
     functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
     scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the

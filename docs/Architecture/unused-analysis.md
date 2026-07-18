@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 5
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
-  - **Test-only (exercised by a test, ships nothing)**: 7
+  - **Test-only (exercised by a test, ships nothing)**: 4
 - **Potentially unused exports**: 204
   - **Unreferenced anywhere (deletion candidates)**: 2
   - **Referenced in-module (type contracts / helpers backing live exports)**: 202
@@ -29,15 +29,9 @@ Not reachable from any package entry point, but imported by a test — deliberat
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
 
-### `expression` (3)
+### `expression` (1)
 
 - `expression/src/error/DimensionError.ts`
-- `expression/src/utils/bignumber/formatter.ts`
-- `expression/src/utils/switch.ts`
-
-### `functions` (1)
-
-- `functions/src/utils/bignumber/formatter.ts`
 
 ### `parallel` (2)
 

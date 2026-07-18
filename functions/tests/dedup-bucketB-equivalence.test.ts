@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import Decimal from 'decimal.js';
 
 import { assertEquivalent } from '../../core/tests/helpers/equivalence.js';
 
@@ -10,8 +9,6 @@ import * as exprFactory from '../../expression/src/utils/factory.js';
 import * as fnFactory from '../src/utils/factory.js';
 import * as exprString from '../../expression/src/utils/string.js';
 import * as fnString from '../src/utils/string.js';
-import * as exprBigFmt from '../../expression/src/utils/bignumber/formatter.js';
-import * as fnBigFmt from '../src/utils/bignumber/formatter.js';
 
 import {
   factory as coreFactory,
@@ -24,22 +21,23 @@ import {
   stringify as coreStringify,
   compareText as coreCompareText,
   escape as coreEscape,
-  formatBigNumber as coreFormatBigNumber,
-  toFixedBigNumber as coreToFixedBigNumber,
-  toExponentialBigNumber as coreToExponentialBigNumber,
-  toEngineeringBigNumber as coreToEngineeringBigNumber,
 } from '@danielsimonjr/mathts-core/internal';
 
 /**
- * Bucket B, slice 1 — cross-package equivalence proof for `factory`/`string`/
- * `bignumber/formatter` before redirecting `expression`/`functions`'s duplicate
- * copies onto the `@danielsimonjr/mathts-core/internal` canonical.
+ * Bucket B, slice 1 — cross-package equivalence proof for `factory`/`string`
+ * before redirecting `expression`/`functions`'s duplicate copies onto the
+ * `@danielsimonjr/mathts-core/internal` canonical.
  *
  * Per Rule 4 ("never assume — verify with a second method") we do NOT assume the
- * three copies are identical just because they look similar; every function is
+ * copies are identical just because they look similar; every function is
  * proven equivalent (or shown to have DIVERGED) with `fast-check` before it is
  * redirected. See `core/tests/helpers/equivalence.ts` for the harness and
  * `CHANGELOG.md` / the commit message for the consolidation decision.
+ *
+ * NOTE: the `bignumber/formatter` section was retired once both packages' local
+ * copies became thin re-export shims of core and were deleted — pinning a shim
+ * against the core it re-exports is a museum piece. Core's formatter is now unit-
+ * covered directly by `core/tests/bignumber-formatter.test.ts`.
  */
 
 // ---------------------------------------------------------------------------
@@ -377,99 +375,6 @@ describe('string utils — escape (expression vs core only; functions never had 
         { name: 'core', fn: coreEscape },
       ],
       fc.tuple(fc.string())
-    );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// bignumber/formatter.ts
-// ---------------------------------------------------------------------------
-
-const decimalArb = fc
-  .double({ min: -1e8, max: 1e8, noNaN: true, noDefaultInfinity: true })
-  .map((n) => new Decimal(n));
-
-describe('bignumber formatter — toFixed / toExponential / toEngineering', () => {
-  it('toFixed agrees across expression / functions / core', () => {
-    assertEquivalent(
-      'toFixed',
-      [
-        { name: 'expression', fn: exprBigFmt.toFixed },
-        { name: 'functions', fn: fnBigFmt.toFixed },
-        { name: 'core', fn: coreToFixedBigNumber },
-      ],
-      fc.tuple(decimalArb, fc.option(fc.integer({ min: 0, max: 15 }), { nil: undefined })),
-      { checkMutation: false }
-    );
-  });
-
-  it('toExponential agrees across expression / functions / core', () => {
-    assertEquivalent(
-      'toExponential',
-      [
-        { name: 'expression', fn: exprBigFmt.toExponential },
-        { name: 'functions', fn: fnBigFmt.toExponential },
-        { name: 'core', fn: coreToExponentialBigNumber },
-      ],
-      fc.tuple(decimalArb, fc.option(fc.integer({ min: 1, max: 15 }), { nil: undefined })),
-      { checkMutation: false }
-    );
-  });
-
-  it('toEngineering agrees across expression / functions / core', () => {
-    assertEquivalent(
-      'toEngineering',
-      [
-        { name: 'expression', fn: exprBigFmt.toEngineering },
-        { name: 'functions', fn: fnBigFmt.toEngineering },
-        { name: 'core', fn: coreToEngineeringBigNumber },
-      ],
-      fc.tuple(decimalArb, fc.option(fc.integer({ min: 1, max: 15 }), { nil: undefined })),
-      { checkMutation: false }
-    );
-  });
-});
-
-describe('bignumber formatter — format()', () => {
-  it('agrees across expression / functions / core', () => {
-    const optionsArb = fc.oneof(
-      fc.constant(undefined),
-      fc.integer({ min: 0, max: 12 }),
-      fc.constantFrom(
-        { notation: 'fixed' as const },
-        { notation: 'exponential' as const },
-        { notation: 'engineering' as const },
-        { notation: 'auto' as const }
-      )
-    );
-    assertEquivalent(
-      'bignumber format',
-      [
-        { name: 'expression', fn: tryCall(exprBigFmt.format) },
-        { name: 'functions', fn: tryCall(fnBigFmt.format) },
-        { name: 'core', fn: tryCall(coreFormatBigNumber) },
-      ],
-      fc.tuple(decimalArb, optionsArb),
-      { checkMutation: false }
-    );
-  });
-
-  it('bin/oct/hex integer notations agree across expression / functions / core', () => {
-    const intDecimalArb = fc.integer({ min: -1000, max: 1000 }).map((n) => new Decimal(n));
-    const baseOptionsArb = fc.constantFrom(
-      { notation: 'bin' as const },
-      { notation: 'oct' as const },
-      { notation: 'hex' as const }
-    );
-    assertEquivalent(
-      'bignumber format (bin/oct/hex)',
-      [
-        { name: 'expression', fn: exprBigFmt.format },
-        { name: 'functions', fn: fnBigFmt.format },
-        { name: 'core', fn: coreFormatBigNumber },
-      ],
-      fc.tuple(intDecimalArb, baseOptionsArb),
-      { checkMutation: false }
     );
   });
 });

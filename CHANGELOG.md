@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(cleanup): retire dead-ship dedup leftover copies (switch/formatter), migrate coverage to core
+
+- Retired three **dead-ship** Bucket-B consolidation leftovers — package-local copies/shims that were kept alive
+  only by their own unit tests, with no runtime consumer (unreachable from any package `src/index.ts`, and every
+  live caller already imports the `@danielsimonjr/mathts-core` canonical):
+  - `expression/src/utils/switch.ts` (full local copy of `core/src/switch.ts`'s `_switch`).
+  - `expression/src/utils/bignumber/formatter.ts` and `functions/src/utils/bignumber/formatter.ts` (thin re-export
+    shims of `core/src/bignumber-formatter.ts` — museum pieces once redirected).
+- **No coverage lost.** Core had no dedicated unit test for `_switch` or the BigNumber formatter, so their tests
+  were migrated (retargeted at core's canonical imports) into new `core/tests/switch.test.ts` (8 cases) and
+  `core/tests/bignumber-formatter.test.ts` (28 cases, merged from `expression`'s two formatter test files).
+- Deleted the now-redundant package-local direct tests: `expression/tests/utils-switch.test.ts`,
+  `expression/tests/utils-bignumber-formatter.test.ts`, `expression/tests/utils-bignumber-formatter-extra.test.ts`.
+- Retired the `bignumber/formatter` section of `functions/tests/dedup-bucketB-equivalence.test.ts` (it pinned the
+  now-deleted shims ≡ core — a museum piece); the `factory`/`string` sections stay (they still protect the live
+  `factory.ts`/`string.ts` copies).
+- **KEPT (reported, not deleted): `expression/src/error/DimensionError.ts`** — although also a re-export shim of
+  core, it has a *live* consumer beyond its unit test: the frozen slice-2 snapshot
+  `functions/tests/fixtures/dedup-bucketB-slice2/expression-array-original.ts` imports it. Deleting it would break a
+  protected fixture, so it stays. `unused-analysis.md` test-only dormant count 7 → 4; orphaned unchanged at 1.
+
 ### chore(cleanup): delete dedup-orphaned MathjsError.ts copies
 
 - Removed `expression/src/error/MathjsError.ts` and `functions/src/error/MathjsError.ts` — dead orphans left by
