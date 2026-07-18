@@ -230,7 +230,7 @@ Three hard rules from the 2026-05-01 security release. Future edits must preserv
 
 - Files: `kebab-case.ts`, Classes: `PascalCase`, Functions/Variables: `camelCase`, Constants: `UPPER_SNAKE_CASE`
 - Commit messages: Conventional Commits (`feat(matrix):`, `fix(workbook):`, etc.)
-- Pre-commit hook (husky + lint-staged): auto-runs `eslint --fix` + `prettier --write` on staged files
+- Pre-commit hook (husky + lint-staged): auto-runs `eslint --fix` + `prettier --write` on staged files, then `check:duplicates:fast` (the cross-package duplicate-symbol gate — fails the commit on any NEW `TRUE_DUPLICATE` beyond `docs/Architecture/duplicate-baseline.json`; see Tools → CDG)
 
 ## Syncing from mathjs
 
@@ -254,7 +254,7 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 
 `tools/` contains standalone utility packages (not workspace members):
 
-- `create-dependency-graph/` (**CDG**) - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`). _**CDG** and the legacy nickname **DGT** are shorthand for this same tool — prefer CDG._
+- `create-dependency-graph/` (**CDG**) - generates package dependency graphs (reachable vs dormant analysis; `npm run docs:deps`). _**CDG** and the legacy nickname **DGT** are shorthand for this same tool — prefer CDG._ Also emits the classification-aware **cross-package duplicate-symbol** report (`docs/Architecture/duplicate-symbols.{json,md}`, `detectDuplicateSymbols`): every own-defined export grouped by name across packages, tagged `TRUE_DUPLICATE` / `DISPATCH_VARIANT` / `ALIAS_DELEGATION` / `ALLOWLISTED` (allowlist: `tools/create-dependency-graph/duplicate-allowlist.json`, each entry carries a reason; intentional reimplementations are pinned by a parity/oracle test — see `feedback-allowlist-needs-parity-guard`). The 2026-07 dedup campaign drove `TRUE_DUPLICATE` **253 → 0**; the `check:duplicates`(`:fast`) gate (baseline `docs/Architecture/duplicate-baseline.json`) keeps it there by failing commits that add new duplicates.
 - `roadmap-check/` - advisory feature-lifecycle consistency gate (`npm run docs:roadmap-check`): verifies ROADMAP "Recently Shipped" `pkg@version` claims against the live npm registry + flags unchecked TODO items whose referenced file already exists. See `docs/FEATURE_WORKFLOW.md`.
 - `query-dependency-graph/` (**QDG**) - query surface + derived reports over CDG's `dependency-graph.json` (no re-parse; the read-only consumer counterpart to `create-dependency-graph`). Emits `dependency-reverse.json` (reverse edges) + `node-safety.json` (node:-taint + browser-safety leaks) as part of `npm run docs:deps`. **Consult it before grepping for structure** (`npm run docs:graph -- <query>`):
   - `dependents <file>` — who imports this file (intra-package)

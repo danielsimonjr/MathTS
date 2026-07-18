@@ -513,7 +513,7 @@
     {
       "names": ["zeros", "ones", "size", "matrix", "identity", "bignumber", "fraction", "sparse"],
       "filesGlob": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
-      "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones are always 2-D (single arg ⇒ n×n square, a documented divergence from mathjs's size-n vector — SURFACED). Guarded by compat/tests/parity-oracle.test.ts (each pinned to an explicit oracle incl. the square-default contract). 2026-07 dedup campaign, closing tail slice."
+      "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
     },
     {
       "names": ["transpose"],

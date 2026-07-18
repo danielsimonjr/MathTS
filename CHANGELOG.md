@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs: deduplication-campaign milestone sync
+
+- Marked the cross-package deduplication campaign **COMPLETE (`TRUE_DUPLICATE` 253 → 0)** across the repo docs:
+  `TODO.md` (campaign banner), `docs/Architecture/duplicate-backlog.md` (header → historical disposition record).
+- `docs/api/compat.md` — corrected the `zeros` / `ones` signatures to `(n) => number[]` (vector, mathjs parity)
+  vs `(rows, cols) => Matrix`, matching the compat behavior fix below.
+- `CLAUDE.md` — documented the now-permanent `check:duplicates` pre-commit gate and CDG's duplicate-symbol
+  detection under Tools.
+- `tools/create-dependency-graph/duplicate-allowlist.json` — refreshed the compat `zeros`/`ones` allowlist reason
+  (was "n×n square — SURFACED"; now reflects the shipped mathjs-parity vector fix).
+
 ### fix(compat): `zeros(n)` / `ones(n)` return a length-`n` vector (mathjs parity)
 
 - **compat** — `zeros(n)` / `ones(n)` (single-arg) now return a length-`n` **vector** matching mathjs

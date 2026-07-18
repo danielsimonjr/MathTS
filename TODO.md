@@ -82,7 +82,14 @@ oracle-pinned, subagent-driven. Phase plan:
 > foundational primitives, optimization, regression/ML, statistics inference, special functions/number
 > theory, signal processing, advanced linalg, and graph/geometry/CAS/intervals.
 
-### 🔁 Cross-package function deduplication → unify on a single canonical source (NEW 2026-07-17, Daniel)
+### ✅ Cross-package function deduplication → unify on a single canonical source (COMPLETE 2026-07-18)
+
+> **✅ CAMPAIGN COMPLETE — `TRUE_DUPLICATE` 253 → 0.** Finder + `check:duplicates` gate live on pre-commit
+> (recurrence-proof); 7 real public-API correctness bugs found via oracle audits and fixed+released (4 arithmetic
+> → core@0.11.0; 2 transcendental BigNumber/Complex → core@0.12.0; compat `zeros`/`ones` mathjs-parity → compat@0.4.0);
+> WasmLoader SHA-384 logic single-sourced to `core/internal` (invariant preserved) → core@0.13.0. All 4 former
+> HUMAN-DECISION clusters decided + executed. Allowlist-with-parity-guard discipline ([[feedback-allowlist-needs-parity-guard]]).
+> Disposition record: `docs/Architecture/duplicate-backlog.md`. Slice-by-slice history retained below.
 
 Systematically find and consolidate duplicate implementations of the same function scattered across the
 ~24 packages (the "multiple implementations of one name" trap), then unify each on ONE canonical source
