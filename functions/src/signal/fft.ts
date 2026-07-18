@@ -352,22 +352,30 @@ export function ifft2(spectrum: ComplexNumber[][]): ComplexNumber[][] {
 }
 
 /**
+ * The single roll algorithm shared by every fftshift/ifftshift surface in the
+ * package (the generic `<T>` toolkit members below and the public `number[]`
+ * helpers in `./fft-helpers.ts` both route through this). Rotates `arr` left by
+ * `count`: the first `count` elements move to the end. numpy.fft uses
+ * `floor(n/2)` for fftshift and `ceil(n/2)` for ifftshift so the two are exact
+ * inverses on odd lengths.
+ */
+export function rollBy<T>(arr: T[], count: number): T[] {
+  return [...arr.slice(count), ...arr.slice(0, count)];
+}
+
+/**
  * Shift zero-frequency component to center of spectrum
  *
  * @param spectrum - FFT spectrum
  * @returns Shifted spectrum
  */
 export function fftshift<T>(spectrum: T[]): T[] {
-  const n = spectrum.length;
-  const half = Math.floor(n / 2);
-  return [...spectrum.slice(half), ...spectrum.slice(0, half)];
+  return rollBy(spectrum, Math.floor(spectrum.length / 2));
 }
 
 /**
  * Inverse of fftshift
  */
 export function ifftshift<T>(spectrum: T[]): T[] {
-  const n = spectrum.length;
-  const half = Math.ceil(n / 2);
-  return [...spectrum.slice(half), ...spectrum.slice(0, half)];
+  return rollBy(spectrum, Math.ceil(spectrum.length / 2));
 }

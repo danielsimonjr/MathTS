@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 2
   - **Test-only (exercised by a test, ships nothing)**: 6
-- **Potentially unused exports**: 202
+- **Potentially unused exports**: 203
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 201
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 202
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -249,6 +249,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/signal/fft.ts`
 
+- `rollBy` (function) — 2 in-file refs
 - `FFTResult` (interface) — 1 in-file ref
 
 ### `functions/src/signal/wavelet-filters.ts`

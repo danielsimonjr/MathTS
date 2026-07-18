@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-18'
   totalFiles: 1087
   totalModules: 82
-  totalExports: 5563
+  totalExports: 5564
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15003,6 +15003,10 @@ modules:
             - fft
             - ifft
             - complex
+        - file: ./fft.js
+          imports:
+            - fftshift
+            - ifftshift
       workspaceDependencies: []
       exports:
         - rfft
@@ -15043,6 +15047,7 @@ modules:
         - fftFrequencies
         - fft2
         - ifft2
+        - rollBy
         - fftshift
         - ifftshift
       interfaces:
@@ -15062,6 +15067,7 @@ modules:
         - fftFrequencies
         - fft2
         - ifft2
+        - rollBy
         - fftshift
         - ifftshift
     functions/src/signal/fir-smoothing.ts:
@@ -35570,11 +35576,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1087
   totalModules: 82
-  totalLinesOfCode: 184580
-  totalExports: 5563
+  totalLinesOfCode: 184591
+  totalExports: 5564
   totalClasses: 52
   totalInterfaces: 476
-  totalFunctions: 1755
+  totalFunctions: 1756
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
@@ -35583,4 +35589,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 202
+  unusedExportsCount: 203

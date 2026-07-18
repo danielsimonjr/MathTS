@@ -2110,6 +2110,7 @@
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
     "functions/src/signal/fft.ts": [
       "functions/src/signal/conv.ts",
+      "functions/src/signal/fft-helpers.ts",
       "functions/src/signal/spectral-peaks.ts"
     ],
     "functions/src/signal/conv.ts": [

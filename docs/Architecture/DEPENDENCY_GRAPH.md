@@ -6917,6 +6917,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../factories/index.js` | `fft, ifft, complex` | Import |
+| `./fft.js` | `fftshift, ifftshift` | Import |
 
 **Exports:**
 
@@ -6934,7 +6935,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `ComplexNumber`, `FFTResult`
-- Functions: `complex`, `complexConj`, `complexAbs`, `complexArg`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `fftshift`, `ifftshift`
+- Functions: `complex`, `complexConj`, `complexAbs`, `complexArg`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `rollBy`, `fftshift`, `ifftshift`
 
 ---
 
@@ -16538,12 +16539,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1087   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184580 |
-| Total Exports           | 5563   |
+| Total Lines of Code     | 184591 |
+| Total Exports           | 5564   |
 | Total Re-exports        | 2226   |
 | Total Classes           | 52     |
 | Total Interfaces        | 476    |
-| Total Functions         | 1755   |
+| Total Functions         | 1756   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 566    |

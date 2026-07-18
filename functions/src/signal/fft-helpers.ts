@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import { fft, ifft, complex } from '../factories/index.js';
+import { fftshift as fftshiftGeneric, ifftshift as ifftshiftGeneric } from './fft.js';
 
 /** Minimal complex shape used to normalize typed-function outputs (number or Complex). */
 interface ComplexLike {
@@ -75,20 +76,22 @@ export function irfft(spec: { re: number[]; im: number[] }, n: number): number[]
 
 /**
  * Shift the zero-frequency component to the center of the spectrum (roll by `floor(n/2)`).
+ *
+ * Thin `number[]` public surface over the package's single roll algorithm
+ * (`fftshift<T>` in `./fft.ts`) — same behavior, delegated to keep one
+ * implementation.
  */
 export function fftshift(x: number[]): number[] {
-  const n = x.length;
-  const half = Math.floor(n / 2);
-  return [...x.slice(half), ...x.slice(0, half)];
+  return fftshiftGeneric(x);
 }
 
 /**
  * Inverse of {@link fftshift} (roll by `ceil(n/2)`).
+ *
+ * Thin `number[]` public surface over `ifftshift<T>` in `./fft.ts`.
  */
 export function ifftshift(x: number[]): number[] {
-  const n = x.length;
-  const half = Math.ceil(n / 2);
-  return [...x.slice(half), ...x.slice(0, half)];
+  return ifftshiftGeneric(x);
 }
 
 /**
