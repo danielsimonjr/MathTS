@@ -25,6 +25,29 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       (`plot/src/render-file.ts`, `workbook/src/run-worker.ts`) were dropped from the module graph after those
       packages moved entries out of the build-script string; CDG now reads `tsup.config.ts`'s `entry:[…]` (module
       total 1086→**1088**, orphaned 1→0). Gates: cycles 0, browser-safety clean, `check:duplicates:fast` 0, eslint clean.
+- [x] **Post-dedup file hygiene + regression fix (2026-07-18)** — finished the dedup's file-level cleanup (the
+      symbol count was 0, but orphaned FILES remained; closes the Bucket-B "natural next slice" notes below):
+      **(a) orphans deleted** — `expression`/`functions` `error/MathjsError.ts` (canonical in `core`, reachable from
+      nothing). **(b) dead-ship leftovers retired** — `expression/src/utils/switch.ts` + the `expression`/`functions`
+      `utils/bignumber/formatter.ts` re-export shims (runtime already on `core`), with **36 tests migrated to
+      `core`** (`core/tests/{switch,bignumber-formatter}.test.ts`, 8+28 — no coverage lost) and the moot equivalence
+      guards retired; `expression/src/error/DimensionError.ts` **kept** (a frozen slice-2 fixture consumes it).
+      **(c) dedup-CAUSED regression fixed** — the matrix-domain slice deleted `cond` from `functions/src/typed/numeric.ts`
+      but `cov-numeric.test.ts` imported it by source path (the "no caller" check misses test imports); removed the 3
+      obsolete tests (public SVD `cond` is oracle-pinned in `gap-matrix-domain-dedup-parity.test.ts`). Lesson:
+      [[feedback-dont-auto-delete-coherent-api]] corollary — grep TESTS before deleting a "dead" symbol. Test-only
+      dormant 7→4; orphaned 0.
+- [x] **`VERSION` constant derived from `package.json` — RELEASED core@0.13.1/plot@0.3.30/workbook@0.3.4 (2026-07-18).**
+      The exported `VERSION` was a hardcoded literal Changesets never bumped, so it drifted (core `0.1.0`, plot `0.2.0`,
+      workbook `0.1.0`); `mtsw version` printed `0.1.0` not `0.3.3`. Root-caused (not re-hardcoded): injected at build
+      from each package's own `package.json` via a per-package `tsup.config.ts` `define` (mirrored into `vitest.config.ts`
+      since tests import source); the `core/tests/version.test.ts` literal that ENCODED the drift now pins `package.json`.
+      Verified built dist tracks the bump; can't drift again. (This is what surfaced the tsup.config build-root regression above.)
+- [x] **Docs expansion (2026-07-18)** — new `docs/Architecture/COMPONENTS.md` (per-package component reference, all 24
+      packages, MemoryJS style); `docs/Architecture/API.md` 456→**1088 lines** (verified method-level signatures for
+      every package, extracted from built `.d.ts`); **6 new `docs/api/`** references (gpu/tensor/autograd/expression/
+      workbook/plot) + README index; ARCHITECTURE.md §6b + CLAUDE.md WASM-security-invariant pointer synced to the
+      `core/src/wasm-loader.ts` consolidation. Generator-owned export-index untouched (`docs:functions:check` green).
 
 ### 🗺️ Oracle Gap Roadmap (comprehensive functionality + accuracy sweep vs numpy/scipy/mpmath/MATLAB/Mathematica)
 
