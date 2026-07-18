@@ -252,6 +252,41 @@
       "names": ["TypeDef", "ConversionDef"],
       "filesGlob": ["core/src/typed/mathts-typed.ts", "packages/typed-function/src/index.ts"],
       "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+    },
+    {
+      "names": [
+        "variance",
+        "std",
+        "det",
+        "conj",
+        "re",
+        "im",
+        "arg",
+        "acos",
+        "asin",
+        "atan",
+        "atan2"
+      ],
+      "filesGlob": ["compat/src/shims.ts"],
+      "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+    },
+    {
+      "names": [
+        "bitAnd",
+        "bitOr",
+        "bitNot",
+        "bitXor",
+        "leftShift",
+        "rightArithShift",
+        "rightLogShift"
+      ],
+      "filesGlob": ["parallel/src/ops/bitwise.ts"],
+      "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+    },
+    {
+      "names": ["fftshift", "ifftshift"],
+      "filesGlob": ["functions/src/signal/fft-helpers.ts"],
+      "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) — fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
     }
   ]
 }

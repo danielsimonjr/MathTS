@@ -2,13 +2,13 @@
   "generated": "2026-07-18",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 135,
+    "runtimeDuplicates": 116,
     "typeDuplicates": 0,
     "runtimeByTag": {
-      "TRUE_DUPLICATE": 135,
+      "TRUE_DUPLICATE": 116,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 94
+      "ALLOWLISTED": 113
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -458,7 +458,8 @@
           "file": "parallel/src/ops/bitwise.ts",
           "package": "@danielsimonjr/mathts-parallel",
           "public": true,
-          "tag": "PLAIN"
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -955,26 +956,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "acos",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "acosh",
       "category": "constant",
       "definers": [
@@ -1035,92 +1016,12 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "arg",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/complex.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "asin",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "asinh",
       "category": "constant",
       "definers": [
         {
           "file": "core/src/number.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "atan",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/trigonometry.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "atan2",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
           "public": true,
           "tag": "PLAIN"
         },
@@ -1167,66 +1068,6 @@
         {
           "file": "functions/src/factories/index.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "bitAnd",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "bitNot",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "bitOr",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "PLAIN"
         }
@@ -1369,26 +1210,6 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "conj",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/complex.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1575,26 +1396,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "det",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "diag",
       "category": "constant",
       "definers": [
@@ -1752,26 +1553,6 @@
         }
       ],
       "canonicalHint": "functions/src/factories/index.ts",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "fftshift",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/signal/fft-helpers.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/signal/fft.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "functions/src/signal/fft-helpers.ts",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -1935,46 +1716,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "ifftshift",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/signal/fft-helpers.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/signal/fft.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "functions/src/signal/fft-helpers.ts",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "im",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/complex.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "initializePool",
       "category": "function",
       "definers": [
@@ -2027,26 +1768,6 @@
         {
           "file": "functions/src/typed/cas.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "leftShift",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
           "public": true,
           "tag": "PLAIN"
         }
@@ -2435,26 +2156,6 @@
       "tag": "TRUE_DUPLICATE"
     },
     {
-      "name": "re",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/complex.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
       "name": "reduce",
       "category": "function",
       "definers": [
@@ -2532,46 +2233,6 @@
         }
       ],
       "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "rightArithShift",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "rightLogShift",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/typed/bitwise.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "parallel/src/ops/bitwise.ts",
-          "package": "@danielsimonjr/mathts-parallel",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
       "tag": "TRUE_DUPLICATE"
     },
     {
@@ -2709,26 +2370,6 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "std",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2949,26 +2590,6 @@
           "package": "@danielsimonjr/mathts-workbook",
           "public": true,
           "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "variance",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4460,6 +4081,174 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "acos",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "arg",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "asin",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "atan",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "atan2",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/trigonometry.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "bitAnd",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "bitNot",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "bitOr",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "carmichaelLambda",
       "category": "constant+function",
       "definers": [
@@ -4565,6 +4354,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "conj",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "cosIntegral",
       "category": "constant+function",
       "definers": [
@@ -4580,6 +4390,27 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "det",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4754,6 +4585,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "fftshift",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) — fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "functions/src/signal/fft-helpers.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "harmonicNumber",
       "category": "constant+function",
       "definers": [
@@ -4787,6 +4639,48 @@
         },
         {
           "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "ifftshift",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) — fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "functions/src/signal/fft-helpers.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "im",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
@@ -5404,6 +5298,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "leftShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "legendreP",
       "category": "constant+function",
       "definers": [
@@ -5824,6 +5739,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "re",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/complex.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "resample",
       "category": "function",
       "definers": [
@@ -5887,6 +5823,48 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "rightArithShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "rightLogShift",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/typed/bitwise.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "parallel/src/ops/bitwise.ts",
+          "package": "@danielsimonjr/mathts-parallel",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. NOTE: bitXor also has a third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op), so its entry stays TRUE_DUPLICATE pending that separate functions-internal reconciliation. 2026-07 dedup campaign."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "rowReduce",
       "category": "function",
       "definers": [
@@ -5920,6 +5898,48 @@
         },
         {
           "file": "functions/src/typed/special.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "std",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "variance",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
