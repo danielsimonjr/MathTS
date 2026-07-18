@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-18'
-  totalFiles: 1088
+  totalFiles: 1086
   totalModules: 82
-  totalExports: 5575
+  totalExports: 5569
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -77,7 +77,7 @@ entryPoints:
     description: / <reference types="@webgpu/types" />
   - file: plot/src/index.ts
     type: main
-    description: Entry Point
+    description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
 modules:
   packages/typed-function:
     packages/typed-function/src/index.ts:
@@ -31104,32 +31104,6 @@ modules:
         - HandleResult
       functions:
         - handleRequest
-    workbook/src/run-worker.ts:
-      description: '`worker_threads` entry point for `runWorkbookWithTimeout` (see'
-      externalDependencies: []
-      nodeDependencies:
-        - module: worker_threads
-          imports:
-            - parentPort
-            - workerData
-      internalDependencies:
-        - file: ./parser.js
-          imports:
-            - parseWorkbook
-        - file: ./executor.js
-          imports:
-            - createExecutor
-        - file: ./formatter.js
-          imports:
-            - formatResult
-        - file: ./worker-protocol.js
-          imports:
-            - RunWorkerData
-            - WorkerMessage
-            - SerializedCellResult
-          typeOnly: true
-      workspaceDependencies: []
-      exports: []
     workbook/src/session.ts:
       description: In-memory editing/execution session for a single workbook — the stateful
       externalDependencies: []
@@ -33940,7 +33914,7 @@ modules:
       functions:
         - histogram
     plot/src/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-plot (re-exports 21 symbols)
+      description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -34164,46 +34138,6 @@ modules:
         - Frame
       functions:
         - renderLayer
-    plot/src/render-file.ts:
-      description: 'Node-only render bridge: write plot output to PNG/PDF/SVG files by shelling'
-      externalDependencies: []
-      nodeDependencies:
-        - module: child_process
-          imports:
-            - spawn
-        - module: fs/promises
-          imports:
-            - writeFile
-            - rm
-            - rename
-            - mkdtemp
-            - readFile
-        - module: path
-          imports:
-            - extname
-            - join
-        - module: os
-          imports:
-            - tmpdir
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - runTool
-        - hasTool
-        - renderToFile
-        - latexArgs
-        - latexToPdf
-        - PlotRenderError
-      classes:
-        - PlotRenderError
-      interfaces:
-        - RenderOptions
-      functions:
-        - runTool
-        - hasTool
-        - renderToFile
-        - latexArgs
-        - latexToPdf
     plot/src/scale.ts:
       description: scale module
       externalDependencies: []
@@ -35556,7 +35490,6 @@ dependencyGraph:
         - workbook/src/parser.ts
         - workbook/src/pdf.ts
         - workbook/src/rpc.ts
-        - workbook/src/run-worker.ts
         - workbook/src/session.ts
         - workbook/src/svg.ts
         - workbook/src/tex.ts
@@ -35630,7 +35563,6 @@ dependencyGraph:
         - plot/src/palette.ts
         - plot/src/plot.ts
         - plot/src/render-core.ts
-        - plot/src/render-file.ts
         - plot/src/scale.ts
         - plot/src/scene.ts
         - plot/src/svg.ts
@@ -35642,19 +35574,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1088
+  totalTypeScriptFiles: 1086
   totalModules: 82
-  totalLinesOfCode: 184405
-  totalExports: 5575
-  totalClasses: 52
-  totalInterfaces: 476
-  totalFunctions: 1749
+  totalLinesOfCode: 184146
+  totalExports: 5569
+  totalClasses: 51
+  totalInterfaces: 475
+  totalFunctions: 1744
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
   totalReExports: 2244
-  totalTypeOnlyImports: 567
+  totalTypeOnlyImports: 566
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 203
+  unusedExportsCount: 204

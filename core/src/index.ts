@@ -188,7 +188,12 @@ export type {
 // Version
 // =============================================================================
 
-export const VERSION = '0.1.0';
+// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// package's package.json version, so VERSION can never drift from the published
+// version. `declare` keeps tsc/eslint happy; the annotation keeps the emitted
+// .d.ts a plain `string`.
+declare const __PKG_VERSION__: string;
+export const VERSION: string = __PKG_VERSION__;
 
 // Numerically stable reduction primitives (pairwise / Neumaier summation, scaled 2-norm).
 // `sum`, `mean`, `std` and `norm` are only as good as how they accumulate.

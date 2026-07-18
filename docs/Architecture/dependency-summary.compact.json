@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1088, "e": 5575, "re": 2244 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-18", "f": 1086, "e": 5569, "re": 2244 },
   "s": {
-    "loc": 184405,
-    "cls": 52,
-    "int": 476,
-    "fn": 1749,
+    "loc": 184146,
+    "cls": 51,
+    "int": 475,
+    "fn": 1744,
     "tg": 156,
     "en": 0,
     "co": 1542,
-    "toi": 567
+    "toi": 566
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1605,7 +1605,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 24,
+      "f": 23,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1773,7 +1773,7 @@
       ]
     },
     "plot": {
-      "f": 18,
+      "f": 17,
       "exp": [
         "coerce1d",
         "coerce1dPositional",
@@ -1793,8 +1793,7 @@
         "errorbar",
         "quiver"
       ],
-      "cls": ["PlotRenderError"],
-      "int": ["Frame", "RenderOptions", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
+      "int": ["Frame", "Scene", "Theme", "AxisSpec", "PlotOptions", "Layer2D"]
     },
     "plot/three": {
       "f": 3,

@@ -26,10 +26,8 @@
     "plot"
   ],
   "nodeTaintedFiles": [
-    "plot/src/render-file.ts",
     "workbook/src/cli.ts",
     "workbook/src/fs-atomic.ts",
-    "workbook/src/run-worker.ts",
     "workbook/src/session.ts",
     "workbook/src/timeout-runner.ts"
   ],

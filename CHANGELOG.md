@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### docs: comprehensive API reference expansion
+### fix(core,plot,workbook): derive VERSION from package.json (was drifted)
+
+- The exported `VERSION` constant in `core`, `plot`, and `workbook` was a hardcoded literal that Changesets never
+  bumped, so it had silently drifted from each package's real published version: **core `0.1.0` → 0.13.0**, **plot
+  `0.2.0` → 0.3.29**, **workbook `0.1.0` → 0.3.3**. Workbook's is user-facing — `mtsw version` printed the wrong
+  number (`mtsw version 0.1.0` instead of `0.3.3`), as did `capabilities`/`introspect`.
+- Root-cause fix (not a re-hardcode): `VERSION` is now injected at build time from each package's own
+  `package.json` via a new per-package `tsup.config.ts` (esbuild `define: { __PKG_VERSION__ }`, read Node-side so
+  `package.json` is never bundled into `dist`). The source declares `export const VERSION: string = __PKG_VERSION__`.
+  Build scripts changed to `tsup` (load the config). The same `define` is mirrored in each package's
+  `vitest.config.ts` so source-importing tests resolve the global. `core/tests/version.test.ts` now pins `VERSION`
+  to `package.json` instead of a literal (the literal was exactly what let it drift). VERSION can no longer drift.
 
 - `docs/Architecture/API.md` expanded 456 → 1088 lines: verified method-level signatures for all 24 packages
   (numeric-type methods, class APIs, domain function maps, typed-dispatch mechanism), extracted from the built
@@ -39,6 +50,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tools/create-dependency-graph/duplicate-allowlist.json` — refreshed the compat `zeros`/`ones` reason
   (was "n×n square — SURFACED"; now the shipped mathjs-parity vector fix) and the `bitXor` reason (dropped the
   stale "stays TRUE_DUPLICATE pending" note — all three definers are resolved); report regenerated.
+
+## [2026-07-18] — Cross-package deduplication campaign (`TRUE_DUPLICATE` 253 → 0)
+
+Released across `ad45a7c5` (core@0.12.0 · functions@0.43.1 + 14-pkg cascade) and `6d7a9df4`
+(compat@0.4.0 · core@0.13.0 · functions@0.43.2 · matrix@0.6.3 + cascade); earlier slices shipped in
+core@0.11.0 / functions@0.43.0. The classification-aware CDG finder + the `check:duplicates` pre-commit
+gate drove every cross-package duplicate to eliminated / allowlisted-with-reason / executed-keep-decision,
+and the oracle audits fixed 7 real public-API correctness bugs along the way. All entries below are
+released and live on npm.
 
 ### fix(compat): `zeros(n)` / `ones(n)` return a length-`n` vector (mathjs parity)
 
