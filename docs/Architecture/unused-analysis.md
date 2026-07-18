@@ -5,8 +5,8 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 10
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 3
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
   - **Test-only (exercised by a test, ships nothing)**: 7
 - **Potentially unused exports**: 204
   - **Unreferenced anywhere (deletion candidates)**: 2
@@ -18,14 +18,6 @@ Runtime source files reachable from NO root and NO test. Each is either dead cod
 to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
-
-### `expression` (1)
-
-- `expression/src/error/MathjsError.ts`
-
-### `functions` (1)
-
-- `functions/src/error/MathjsError.ts`
 
 ### `workbook` (1)
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(cleanup): delete dedup-orphaned MathjsError.ts copies
+
+- Removed `expression/src/error/MathjsError.ts` and `functions/src/error/MathjsError.ts` — dead orphans left by
+  the Bucket-B error consolidation (the canonical `MathjsError` lives in `@danielsimonjr/mathts-core`, re-exported
+  via `core/internal`; these package-local copies had no importer in src or tests and were reachable from nothing).
+  Confirmed by the regenerated `unused-analysis.md` (orphaned files 3 → 1; the remaining one,
+  `workbook/src/run-worker.ts`, is a `worker_threads` build entry the graph can't trace, not dead). No shipped
+  behavior change — the files were never reachable from any package entry, so they were never in any bundle.
+
 ### fix(core,plot,workbook): derive VERSION from package.json (was drifted)
 
 - The exported `VERSION` constant in `core`, `plot`, and `workbook` was a hardcoded literal that Changesets never
