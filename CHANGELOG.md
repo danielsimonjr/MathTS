@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dedup — compat-parity guard + bitwise/fft allowlisting (`TRUE_DUPLICATE` 135 → 116)
+
+Tail slice of the cross-package deduplication campaign. Two adversarial reviewers (Gemini + OpenAI)
+converged on the classification; this executes their endorsed conclusions.
+
+- **fftshift/ifftshift consolidated onto one roll algorithm** (real DRY elimination, wire-not-delete).
+  `functions/src/signal/fft.ts` now defines a single generic `rollBy<T>`; the generic `fftshift<T>`/
+  `ifftshift<T>` (complex-FFT toolkit) and the public `number[]` surfaces in
+  `functions/src/signal/fft-helpers.ts` (package `index.ts` exports) both delegate to it — one algorithm,
+  two thin typed surfaces, no behavior change. New `functions/tests/signal/fftshift-parity.test.ts`
+  asserts the two surfaces produce identical rolls on a shared even/odd/empty/single corpus + the numpy
+  floor/ceil convention.
+- **compat parity guards** (`compat/tests/parity-oracle.test.ts`). `compat/src/shims.ts` REIMPLEMENTS
+  several homonyms independently of the `functions`/`core` twins to pin mathjs semantics (`std`/`variance`
+  default 'unbiased'; self-contained `det`; `Math.*` trig wrappers; `Complex`-method `conj`/`re`/`im`/`arg`).
+  Rather than allowlist blindly ("a divergent compat impl is exactly how a past 10⁶× variance bug hid"),
+  each is now guarded by a test that anchors it to the **numpy oracle** AND cross-checks `compat.X ≡
+  functions.X`. **Finding: no divergence — compat, functions, and numpy agree to full double precision**
+  (variance `[1,2,3,4,5,8,13]` = 17.142857142857142; det `[[6,1,1],[4,-2,5],[2,8,7]]` = −306; etc.); the
+  compat bodies are independent implementations that converge, which the guard now protects.
+- **Allowlisted three verified-intentional categories** in
+  `tools/create-dependency-graph/duplicate-allowlist.json`, each with a concrete reason:
+  compat reimplementing homonyms (`variance`/`std`/`det`/`conj`/`re`/`im`/`arg`/`acos`/`asin`/`atan`/
+  `atan2`, guarded by the parity test); `functions`+`parallel` **bitwise** dispatch-variants
+  (`bitAnd`/`bitOr`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift` — verified by reading both:
+  `parallel` = chunked `Int32Array` worker kernel, `functions` = scalar/BigNumber `mathTyped` dispatch;
+  `bitXor` stays flagged pending its 3rd BigNumber definer); and `fftshift`/`ifftshift` (public wrapper
+  allowlisted so `fft.ts`'s generic is the single canonical body).
+- **Runtime `TRUE_DUPLICATE` 135 → 116** (19 flipped: 11 compat + 6 bitwise + 2 fft);
+  `duplicate-baseline.json` re-seeded to 116; `check:duplicates:fast` passes; 0 cycles.
+- **Honest remaining-work inventory:** new `docs/Architecture/duplicate-backlog.md` groups the 116 residual
+  eliminations (matrix-domain routing — with the already-routed dispatch-variants distinguished from the
+  genuine independent bodies like `cholesky`; transcendental temperature-split; and two **HUMAN-DECISION**
+  clusters: the WasmLoader SHA-384 security ADR and the workerpool `#27`-paused caps).
+
 ### Added — wire `check:duplicates` into the pre-commit hook (the "resolve forever" capstone)
 
 `npm run check:duplicates` (added earlier, see "`check:duplicates` prevention gate" below) is now

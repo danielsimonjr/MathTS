@@ -183,6 +183,23 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           — confirms these are DISPATCH_VARIANT, not TRUE_DUPLICATE; the win is divergence-safety, not the count.
   - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
     canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
+    - [x] ✅ **`fftshift`/`ifftshift` DONE 2026-07-18** (`a96f0ef4`). Consolidated onto ONE generic
+          `rollBy<T>` in `functions/src/signal/fft.ts` (wire-not-delete): the generic `<T>` toolkit member
+          and the public `number[]` surface (`fft-helpers.ts`) both delegate — one algorithm, two thin
+          typed surfaces, no behavior change. Parity test (`fftshift-parity.test.ts`) guards identical
+          rolls; the residual symbol-name flag is allowlisted as the toolkit-vs-public split.
+  - [x] ✅ **Compat-parity + bitwise slice DONE 2026-07-18** (`ec5c48ac`). `TRUE_DUPLICATE` **135 → 116**
+        (19 flipped: 11 compat + 6 bitwise + 2 fft). Adversarially-endorsed **allowlist-WITH-parity-guard**:
+        new `compat/tests/parity-oracle.test.ts` anchors compat `variance`/`std`/`det`/trig/`conj`/`re`/`im`/
+        `arg` to the **numpy oracle** AND cross-checks `compat.X ≡ functions.X`. **Finding: NO divergence/bug
+        — compat = functions = numpy to full double precision** (independent-but-convergent impls; guard
+        protects them). Allowlisted: compat reimplementing homonyms (guarded), `functions`+`parallel`
+        **bitwise** dispatch-variants (verified `parallel` = Int32Array worker kernel vs `functions` scalar
+        `mathTyped`; `bitXor` stays, 3rd BigNumber definer), and `fftshift`/`ifftshift`. Baseline re-seeded
+        116; `check:duplicates:fast` passes; 0 cycles. **Honest remaining inventory:
+        `docs/Architecture/duplicate-backlog.md`** (matrix-domain routing — already-routed dispatch-variants
+        vs genuine bodies like `cholesky`; transcendental temp-split; **HUMAN-DECISION**: WasmLoader SHA-384
+        security ADR + workerpool `#27`-paused caps).
   - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
         to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
         every name: 14 consolidated onto a single canonical + type-only re-export shim
