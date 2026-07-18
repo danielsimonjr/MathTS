@@ -247,6 +247,27 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
         clean; parity + cumsum suites green. **No release warranted.** The factory-layer-collapse ADR remains
         Daniel's open call (allowlist-with-parity = interim divergence guard). See
         `docs/Architecture/duplicate-backlog.md` §6.
+  - [x] ✅ **Floor-decisions slice — DONE 2026-07-18. `TRUE_DUPLICATE` 12 → 0 = ABSOLUTE ZERO.** Daniel took
+        the 4 surfaced HUMAN-DECISIONs; all executed. **D1 (compat bug FIX):** `compat.zeros(n)`/`ones(n)`
+        single-arg now return a length-`n` **vector** matching mathjs (`[0,0,0]`, verified vs installed
+        mathjs), was an n×n square — two-arg unchanged; `parity-oracle.test.ts` flipped from pinning-the-bug
+        to pinning-mathjs; **compat release warranted** (public change). **D2 (`qr` KEEP both):** mathjs
+        `createQr` factory (+ `qr_wasm`) vs matrix DenseMatrix primitive — routing drops both; allowlisted +
+        guarded by new `functions/tests/gap-qr-parity.test.ts` (functions≡matrix≡numpy on |diag R| + A=QR +
+        QᵀQ=I; no divergence). **D3 (WasmLoader consolidate shared, keep divergent):** byte-identical SHA-384
+        integrity + resolve logic (`sha384OfBuffer`/`loadWasmManifest`/`verifyWasmIntegrity`/
+        `resolvePackagedWasm`/`defaultWasmLocation`) moved to `core/src/wasm-loader.ts` (via `core/internal`,
+        both pkgs reach core, no cycle); integrity.ts/resolve.ts now re-export + inject own `import.meta.url`;
+        **SHA-384 verify-before-instantiate preserved byte-for-byte**; lazy `import()` keeps core `.` entry
+        browser-safe; `WasmLoader` class + singleton stay per-pkg (allowlist — different alloc models). **D4
+        (workerpool caps allowlist):** `canUseWasm`/`canUseSharedMemory` = intra-workerpool node/browser-shim
+        variant; `initializePool`/`terminatePool` = **distinct-by-target** (functions→`ComputePool`,
+        workerpool→`MathWorkerPool` — RFL R4: delegating would've init'd the WRONG pool, a regression).
+        **GATES all GREEN:** `check:duplicates:fast` PASS (0 current, baseline re-seeded EMPTY); 0 cycles;
+        `check:browser-safety` 23/23; core/functions/matrix/compat tsc clean; security 22 + qr 9 + compat 81 +
+        core 829 + WASM-integration 33 GREEN. **Releases:** compat (public); core+functions+matrix (internal
+        consolidation, no behavior change) — session lead bundles. See `docs/Architecture/duplicate-backlog.md`
+        §7. **Campaign at absolute zero TRUE_DUPLICATE.**
   - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
         to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
         every name: 14 consolidated onto a single canonical + type-only re-export shim

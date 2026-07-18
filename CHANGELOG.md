@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(compat): `zeros(n)` / `ones(n)` return a length-`n` vector (mathjs parity)
+
+- **compat** — `zeros(n)` / `ones(n)` (single-arg) now return a length-`n` **vector** matching mathjs
+  (`math.zeros(3)` → `[0,0,0]`, size `[3]`), instead of the former **n×n square** matrix (`cols ?? rows`).
+  Two-arg `zeros(r,c)` / `ones(r,c)` is unchanged (an r×c DenseMatrix). matrix's DenseMatrix is strictly
+  2-D, so the single-arg vector is returned as a `number[]`. This is a **public behavior change** for
+  compat's mathjs-compatibility surface → warrants a **compat release**. Guarded by
+  `compat/tests/parity-oracle.test.ts` (the test that previously pinned the square bug now asserts mathjs
+  parity). No other package/consumer relied on the square behavior (only the migration example, which uses
+  the 2-arg form).
+
+### Dedup — floor-decisions slice (`TRUE_DUPLICATE` 12 → 0)
+
+Daniel took the 4 remaining HUMAN-DECISION calls and they were executed here; **`TRUE_DUPLICATE` is now 0**
+(baseline re-seeded to empty). No runtime behavior change beyond the compat fix above; 0 cycles;
+`check:browser-safety` 23/23.
+
+- **WasmLoader security cluster (7 → 0)** — the byte-identical SHA-384 integrity logic
+  (`sha384OfBuffer`/`loadWasmManifest`/`verifyWasmIntegrity`) and packaged-artifact resolution
+  (`resolvePackagedWasm`/`defaultWasmLocation`) consolidated into **`core/src/wasm-loader.ts`**, exported
+  via `@danielsimonjr/mathts-core/internal` (reachable from both `functions` and `matrix` without a cycle).
+  Each package's `wasm/integrity.ts` + `wasm/resolve.ts` now re-export the shared logic and inject their own
+  `import.meta.url`. **SHA-384 verify-before-instantiate preserved byte-for-byte** (Security Invariant #1);
+  node `fs`/`crypto` stays behind lazy dynamic `import()` so core's `.` entry remains browser-safe. The
+  `WasmLoader` class + `wasmLoader` singleton stay per-package (allowlisted) — genuinely different
+  allocation models (simple single-pointer vs AS managed-runtime header+data handle). Guarded by both
+  packages' `tests/security/wasm-integrity.test.ts`.
+- **`qr` (1 → 0)** — KEPT both bodies (routing would drop the mathjs Matrix contract + `qr_wasm` fast path);
+  allowlisted as a distinct-contract dispatch-variant, guarded by new `functions/tests/gap-qr-parity.test.ts`
+  (functions ≡ matrix ≡ NumPy on |diag R| + A=Q·R + Qᵀ·Q=I; no divergence to full double precision).
+- **workerpool caps (4 → 0)** — `canUseWasm`/`canUseSharedMemory` allowlisted as an intra-workerpool
+  node/browser-shim dispatch-variant; `initializePool`/`terminatePool` allowlisted as distinct-by-target
+  (functions' wrap a `ComputePool` from `parallel`, workerpool's wrap a `MathWorkerPool` — verified: they
+  are different pool singletons, so the original "delegate" hypothesis would have been a regression).
+
 ### Dedup — closing tail slice (`TRUE_DUPLICATE` 89 → 12 = the floor)
 
 Classified and dispositioned **every** remaining non-ADR cluster; the 12 that remain are exactly the
