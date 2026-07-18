@@ -169,6 +169,18 @@ CDG tool did NOT create these — it accurately surfaces them; the duplication i
           `round(bn -2.5)→-3`, `equal(0.1+0.2,0.3)→false`) + the Fraction floored-exponent bug. Equivalence guard
           `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (fast-check + edge corpus). Full functions
           suite green (4024), typecheck 0, eslint 0. Microbench: hot path unchanged; +~0.13–0.41µs/call on rich types.
+    - [x] **Arithmetic slice 2 (systematic sweep) DONE 2026-07-18:** extended the equivalence guard to the
+          remaining core-backed scalar ops — `add`/`subtract`/`multiply`/`divide`/`abs` (the full inventory
+          appearing both as a core primitive and a typed dispatcher case, excluding slice 1's pow/round/fix/equal).
+          NO divergence found: unlike slice 1, every case in these five ops is a direct one-liner forward to the
+          SAME shared instance method (`a.add(b)`, `x.abs()`) in both files — not an independent reimplementation
+          of policy — so GUARD-BY-TEST only, no delegation (delegating would add a redundant cross-module call
+          with zero divergence-safety gain). 24 new fast-check properties + edge corpus (±0/NaN/±Infinity/
+          denormals/negative, incl. non-commutative subtract/divide order checks) added to
+          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (68 tests total, all green). Full functions
+          suite green (4041 passed, 1 pre-existing unrelated timeout in gap-stats-breadth-oracle.test.ts confirmed
+          via git-stash on baseline), typecheck 0, eslint 0. TRUE_DUPLICATE count unchanged (142 runtime/69 types)
+          — confirms these are DISPATCH_VARIANT, not TRUE_DUPLICATE; the win is divergence-safety, not the count.
   - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
     canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
 - **INTEGRATE (canonical-home rule):** cold shared → `core`/`core/internal`; domain ops → owning accelerated

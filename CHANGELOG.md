@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Guarded — remaining scalar arithmetic ops (Bucket C, slice 2) (functions)
+
+Extends the Bucket-C "temperature split" equivalence sweep (slice 1, below) to the rest of the
+inventory: every scalar op that exists BOTH as a plain primitive in `core/src/arithmetic/scalar.ts`
+AND as a `mathTyped` dispatcher case in `functions/src/typed/arithmetic.ts` — `add`/`subtract`/
+`multiply`/`divide`/`abs` (`pow`/`round`/`fix`/`equal` were slice 1).
+
+**No divergence found.** Unlike slice 1 — where the typed dispatcher's rich-type cases
+re-implemented DISTINCT policy that had silently drifted from core (three real bugs) — inspection
+and a fast-check equivalence sweep confirm every case in these five ops is a direct one-liner
+forward to the SAME shared instance method in both files (`a.add(b)`, `x.abs()`, same-type cases;
+order-preserving `asComplex`/`asFraction`/`asBigNumber` promotion for the cross-type number+Complex/
+Fraction/BigNumber cases — verified explicitly for the non-commutative `subtract`/`divide`, since
+getting promotion order wrong is exactly the class of bug slice 1 found in `pow`). There is only one
+implementation of the underlying policy being called from two sites, so **no delegation was made** —
+delegating would add a redundant cross-module call with zero divergence-safety benefit.
+
+**Rule applied:** DELEGATE to core when two call sites embody distinct branching/algorithm choices
+that can drift apart (slice 1's case); GUARD BY TEST ONLY when both call sites are a direct forward
+to the same shared method (this slice) — the equivalence test is the safety net that fires if that
+ever stops being true. Hot `number`/`bigint` cases are untouched (still inline).
+
+Added 24 fast-check properties + an edge corpus (±0, NaN, ±Infinity, denormals, negative inputs) to
+`functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (68 tests total, all green), covering
+same-type and cross-type (number+rich-type, both operand orders) cases for all five ops. Full
+`functions` suite green (4041 passed); the one failure seen in a full-suite run
+(`gap-stats-breadth-oracle.test.ts`'s `tTestPower` `solveFor: 'nobs'`, a 5000ms vitest timeout) is
+pre-existing and unrelated — reproduced identically on the clean `main` baseline via `git stash`, not
+touched here. `npm run docs:deps` TRUE_DUPLICATE count unchanged (142 runtime / 69 types) — confirms
+these are `DISPATCH_VARIANT`, not `TRUE_DUPLICATE`; the win is divergence-safety, not the count.
+
 ### Fixed — three live `pow`/`round`/`equal` bugs on BigNumber/Fraction/float (functions)
 
 Three public-API correctness bugs, all from the typed dispatchers in
