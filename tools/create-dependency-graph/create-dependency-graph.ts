@@ -150,6 +150,7 @@ interface CLIOptions {
   root: string;
   includeTests: boolean;
   all: boolean;
+  checkCensus: boolean;
 }
 
 // Constants - support CLI argument or current working directory for portability
@@ -159,6 +160,7 @@ function parseCliOptions(): CLIOptions {
     root: process.cwd(),
     includeTests: false,
     all: false,
+    checkCensus: false,
   };
 
   for (const arg of args) {
@@ -168,6 +170,8 @@ function parseCliOptions(): CLIOptions {
       options.includeTests = true;
     } else if (arg === '--all' || arg === '-a') {
       options.all = true;
+    } else if (arg === '--check-census') {
+      options.checkCensus = true;
     } else if (arg === '--help' || arg === '-h') {
       console.log(`
 Dependency Graph Generator
@@ -4232,20 +4236,43 @@ function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): strin
 
 // ── Complete file census ────────────────────────────────────────────────────
 //
-// A whole-tree inventory of EVERY `.ts` under each workspace package's `src/`
-// and `tests/` (excluding `node_modules`, `dist`, `*.d.ts`), each tagged with a
-// disposition computed from the SAME reachability/root/test data the rest of the
-// tool uses — no second graph. The point is completeness: nothing on disk may be
-// silently missing from the docs. Paired with an independent disk-walk self-check
-// (`verifyFileCensus`) that HARD-FAILS `npm run docs:deps` if the two disagree,
-// so a future root-detection/discovery gap is a loud error, not a silent drop.
+// A whole-repo inventory of EVERY tracked `.ts` file — not just package src/tests
+// but ALSO the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`,
+// `examples/`, and `docs/` reference sources — each tagged with a disposition. The
+// point is completeness: no `.ts` in the repo may be silently missing from the docs.
+//
+// Two DIFFERENT walks, on purpose (an earlier version had both share a per-package
+// blind spot, so the gate could not catch a scoping gap):
+//   - The CENSUS discovers via ENUMERATED roots (each workspace dir + the specific
+//     root dirs tests/tools/examples/docs + root-level config files) and classifies
+//     each file (`buildFileInventory`).
+//   - The GATE (`verifyFileCensus`) uses a MAXIMAL, location-agnostic walk from the
+//     repo root (`walkRepoTsFiles`) as the authoritative ground truth. Any `.ts` the
+//     maximal walk finds that the census does not account for — e.g. a `.ts` in a NEW
+//     top-level dir the census doesn't enumerate — HARD-FAILS the build. So the gate's
+//     ground truth is strictly broader than the census's discovery and cannot share
+//     its blind spot.
+//
+// Both walks exclude only `node_modules`, `dist`, `*.d.ts`, and dot-directories
+// (`.git`, `.remember`, `.changeset`, …; tooling/transients, not source). That set
+// equals the git-tracked `.ts` files, so there is provably no silent blind spot.
 
-type FileDisposition = 'reachable' | 'build-entry' | 'test-only' | 'orphan' | 'test';
+type FileDisposition =
+  | 'reachable'
+  | 'build-entry'
+  | 'test-only'
+  | 'orphan'
+  | 'test'
+  | 'tool'
+  | 'config'
+  | 'example';
+
+type FileArea = 'src' | 'tests' | 'tools' | 'config' | 'examples' | 'docs';
 
 interface FileInventoryRow {
   file: string;
   package: string;
-  area: 'src' | 'tests';
+  area: FileArea;
   disposition: FileDisposition;
   loc: number;
 }
@@ -4254,22 +4281,82 @@ interface FileInventory {
   generated: string;
   totalFiles: number;
   byDisposition: Record<string, number>;
+  byArea: Record<string, number>;
   byPackage: Record<string, number>;
   files: FileInventoryRow[];
 }
 
-/** Every `.ts` under `dir` except `.d.ts`, skipping node_modules/dist. Unlike
- *  `getAllSourceTsFiles` this INCLUDES test files — the census covers src AND
- *  tests. Returns absolute paths. */
-function walkCensusTsFiles(dir: string, files: string[] = []): string[] {
-  if (!existsSync(dir)) return files;
-  for (const entry of readdirSync(dir)) {
-    if (entry === 'node_modules' || entry === 'dist') continue;
-    const fullPath = join(dir, entry);
-    if (statSync(fullPath).isDirectory()) walkCensusTsFiles(fullPath, files);
-    else if (entry.endsWith('.ts') && !entry.endsWith('.d.ts')) files.push(fullPath);
+/** MAXIMAL repo walk — every `.ts` (except `.d.ts`) under `rootDir`, skipping
+ *  `node_modules`, `dist`, and any dot-directory (`.git`/`.remember`/`.changeset`
+ *  — tooling/transients, matching the git-tracked set). Repo-relative, sorted.
+ *  This is the GATE's authoritative ground truth; it walks from the repo root and
+ *  is location-agnostic, so a `.ts` in any NEW top-level dir is caught. */
+function walkRepoTsFiles(rootDir: string): string[] {
+  const out: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+        out.push(relative(rootDir, p).replace(/\\/g, '/'));
+      }
+    }
+  };
+  walk(rootDir);
+  return out.sort();
+}
+
+/** The CENSUS's file discovery: ENUMERATED source roots only — each workspace
+ *  package directory, the repo-root cross-package dirs (`tests`/`tools`/`examples`/
+ *  `docs`), and root-level `.ts` config files. Deliberately narrower than
+ *  `walkRepoTsFiles` (it never sees a brand-new top-level dir), so the maximal gate
+ *  can catch a scoping gap between them. Same exclusions (node_modules/dist/dot-dirs).
+ */
+function collectCensusFiles(rootDir: string, workspaces: Map<string, WorkspacePackage>): string[] {
+  const set = new Set<string>();
+  const walk = (dir: string): void => {
+    if (!existsSync(dir)) return;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+        set.add(relative(rootDir, p).replace(/\\/g, '/'));
+      }
+    }
+  };
+  for (const [, ws] of workspaces) walk(join(rootDir, ws.directory));
+  for (const d of ['tests', 'tools', 'examples', 'docs']) walk(join(rootDir, d));
+  // Root-level `.ts` files (vitest.config.ts, vitest.config.browser.ts, …).
+  for (const e of readdirSync(rootDir, { withFileTypes: true })) {
+    if (e.isFile() && e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+      set.add(e.name);
+    }
   }
-  return files;
+  return [...set];
+}
+
+/** Classify a repo-relative `.ts` path into an AREA purely by location/name —
+ *  independent of the module graph. Order matters: `tools/` and `*.config.ts` win
+ *  before the `tests/` and `src` checks. */
+function classifyArea(rel: string): FileArea {
+  if (/(^|\/)tools\//.test(rel)) return 'tools';
+  // `*.config.ts` and its variants (`vitest.config.browser.ts`, `*.config.bench.ts`).
+  if (/\.config(\.[\w-]+)?\.[cm]?ts$/.test(rel)) return 'config';
+  if (/\.(test|spec)\.ts$/.test(rel) || /(^|\/)tests\//.test(rel)) return 'tests';
+  if (/^examples\//.test(rel)) return 'examples';
+  if (/^docs\//.test(rel)) return 'docs';
+  return 'src';
+}
+
+/** The workspace package a file belongs to (nearest directory prefix), or
+ *  `(root)` for repo-root files (root tests/tools/examples/docs/config). */
+function packageOf(rel: string, workspaces: Map<string, WorkspacePackage>): string {
+  for (const [name, ws] of workspaces) {
+    if (rel.startsWith(ws.directory + '/')) return name;
+  }
+  return '(root)';
 }
 
 function countLoc(rootDir: string, relPath: string): number {
@@ -4281,11 +4368,13 @@ function countLoc(rootDir: string, relPath: string): number {
 }
 
 /**
- * Build the complete file inventory. Disposition precedence for a `src/`
- * non-test file: build-entry (a seeded root — index/subpath/bin/config/tsup/worker
- * entry) > reachable (in the module graph from a root) > test-only (reachable
- * only from a test) > orphan (reachable from nothing). Any file physically under
- * a package `tests/` dir, and any co-located `*.test.ts`/`*.spec.ts`, is `test`.
+ * Build the complete file inventory over the ENUMERATED census roots. Disposition:
+ * for a `src` file — build-entry (a seeded root: index/subpath/bin/config/tsup/worker
+ * entry) > reachable (in the module graph from a root) > test-only (reachable only
+ * from a test) > orphan (reachable from nothing). Non-`src` areas map straight to
+ * their kind: `tests → test`, `tools → tool`, `config → config`, `examples`/`docs`
+ * → `example`. Every tracked `.ts` therefore gets a visible disposition (inclusion
+ * over exclusion — there is no silent allowlist).
  */
 function buildFileInventory(
   rootDir: string,
@@ -4294,39 +4383,34 @@ function buildFileInventory(
   reachable: Set<string>,
   testReachable: Set<string>
 ): FileInventory {
-  const isTestFile = (p: string): boolean => /\.(test|spec)\.ts$/.test(p);
   const rows: FileInventoryRow[] = [];
-  for (const [name, ws] of workspaces) {
-    const dir = join(rootDir, ws.directory);
-    for (const abs of walkCensusTsFiles(join(dir, 'src'))) {
-      const rel = relative(rootDir, abs).replace(/\\/g, '/');
-      const disposition: FileDisposition = isTestFile(rel)
-        ? 'test'
-        : roots.has(rel)
-          ? 'build-entry'
-          : reachable.has(rel)
-            ? 'reachable'
-            : testReachable.has(rel)
-              ? 'test-only'
-              : 'orphan';
-      rows.push({
-        file: rel,
-        package: name,
-        area: 'src',
-        disposition,
-        loc: countLoc(rootDir, rel),
-      });
+  for (const rel of collectCensusFiles(rootDir, workspaces)) {
+    const area = classifyArea(rel);
+    let disposition: FileDisposition;
+    if (area === 'src') {
+      disposition = roots.has(rel)
+        ? 'build-entry'
+        : reachable.has(rel)
+          ? 'reachable'
+          : testReachable.has(rel)
+            ? 'test-only'
+            : 'orphan';
+    } else if (area === 'tests') {
+      disposition = 'test';
+    } else if (area === 'tools') {
+      disposition = 'tool';
+    } else if (area === 'config') {
+      disposition = 'config';
+    } else {
+      disposition = 'example'; // examples | docs
     }
-    for (const abs of walkCensusTsFiles(join(dir, 'tests'))) {
-      const rel = relative(rootDir, abs).replace(/\\/g, '/');
-      rows.push({
-        file: rel,
-        package: name,
-        area: 'tests',
-        disposition: 'test',
-        loc: countLoc(rootDir, rel),
-      });
-    }
+    rows.push({
+      file: rel,
+      package: packageOf(rel, workspaces),
+      area,
+      disposition,
+      loc: countLoc(rootDir, rel),
+    });
   }
   rows.sort((a, b) => a.file.localeCompare(b.file));
 
@@ -4336,10 +4420,15 @@ function buildFileInventory(
     'test-only': 0,
     orphan: 0,
     test: 0,
+    tool: 0,
+    config: 0,
+    example: 0,
   };
+  const byArea: Record<string, number> = {};
   const byPackage: Record<string, number> = {};
   for (const r of rows) {
     byDisposition[r.disposition] = (byDisposition[r.disposition] ?? 0) + 1;
+    byArea[r.area] = (byArea[r.area] ?? 0) + 1;
     byPackage[r.package] = (byPackage[r.package] ?? 0) + 1;
   }
 
@@ -4347,6 +4436,7 @@ function buildFileInventory(
     generated: new Date().toISOString().split('T')[0],
     totalFiles: rows.length,
     byDisposition,
+    byArea,
     byPackage,
     files: rows,
   };
@@ -4359,8 +4449,14 @@ const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
     'A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …).',
   ],
   ['test-only', 'A `src/` file not reachable from src roots but imported by a test.'],
-  ['orphan', 'A `src/` file reachable from nothing — a delete/wire candidate.'],
-  ['test', 'A file living under a package `tests/` dir (test source itself).'],
+  [
+    'orphan',
+    'A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).',
+  ],
+  ['test', 'A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).'],
+  ['tool', 'A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).'],
+  ['config', 'A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).'],
+  ['example', 'An `examples/` or `docs/` reference/illustration source.'],
 ];
 
 function generateFileInventoryMarkdown(inv: FileInventory): string {
@@ -4370,11 +4466,19 @@ function generateFileInventoryMarkdown(inv: FileInventory): string {
   lines.push(`**Generated**: ${inv.generated} (by tools/create-dependency-graph)`);
   lines.push('');
   lines.push(
-    "Every `.ts` file under each workspace package's `src/` and `tests/` " +
-      '(excluding `node_modules`, `dist`, `*.d.ts`), tagged with a disposition ' +
-      'computed from the module-graph reachability data — a completeness census so ' +
-      'no source file can be silently missing from the docs. A disk-walk self-check ' +
-      'hard-fails `npm run docs:deps` if this inventory and the filesystem disagree.'
+    'Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root ' +
+      'cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` ' +
+      'reference sources — tagged with a disposition. A completeness census: no `.ts` may be ' +
+      'silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, ' +
+      'location-agnostic repo walk (broader than this census’s enumerated discovery) and ' +
+      'HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.'
+  );
+  lines.push('');
+  lines.push(
+    '**Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient ' +
+      'declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The ' +
+      'walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every ' +
+      'tracked `.ts` appears below with an explicit disposition.'
   );
   lines.push('');
   lines.push(`**Total files**: ${inv.totalFiles}`);
@@ -4387,6 +4491,14 @@ function generateFileInventoryMarkdown(inv: FileInventory): string {
     lines.push(`| \`${disp}\` | ${inv.byDisposition[disp] ?? 0} | ${meaning} |`);
   }
   lines.push(`| **Total** | **${inv.totalFiles}** | |`);
+  lines.push('');
+  lines.push('## Per-area counts');
+  lines.push('');
+  lines.push('| Area | Files |');
+  lines.push('| --- | --: |');
+  for (const area of Object.keys(inv.byArea).sort()) {
+    lines.push(`| \`${area}\` | ${inv.byArea[area]} |`);
+  }
   lines.push('');
   lines.push('## Per-package counts');
   lines.push('');
@@ -4408,45 +4520,24 @@ function generateFileInventoryMarkdown(inv: FileInventory): string {
 }
 
 /**
- * Self-check gate. Two independent failure conditions, each of which HARD-FAILS
- * `npm run docs:deps` (throws → non-zero exit) so a discovery/root-detection gap
- * can never be a silent drop:
+ * Self-check gate. The ground truth is a MAXIMAL, location-agnostic repo walk
+ * (`walkRepoTsFiles`) — strictly broader than the census's enumerated discovery,
+ * so it CANNOT share the census's blind spot (the defect an earlier per-package
+ * version shipped). Three independent failure conditions, each HARD-FAILS the run
+ * (throws → non-zero exit):
  *
- *   1. **Set divergence** — an INDEPENDENT disk walk (deliberately a separate
- *      code path from `walkCensusTsFiles`, so a discovery bug there does not also
- *      corrupt the check) of every `.ts` under each package's `src/` + `tests/`,
- *      compared against the census file set. Any file on disk but absent from the
- *      census, or a census entry missing on disk, fails.
- *   2. **Orphans present** — any file the census tagged `orphan` (reachable from
- *      NO root and NO test). An orphan is almost always a build/worker/subpath
- *      root the tool failed to detect (exactly the render-file/run-worker
- *      regression this work fixed) — so a fresh orphan must stop the build and
- *      force a human to wire it or delete it, not sit quietly in a table. The
- *      inventory files are still written first, so the offending row is visible
- *      in FILE_INVENTORY.md before the throw.
+ *   1. **Unaccounted on disk** — a `.ts` the maximal walk finds that the census
+ *      does not list (e.g. a file in a NEW top-level dir the census doesn't
+ *      enumerate). This is the scoping-gap catcher.
+ *   2. **Stale in census** — a census entry with no file on disk.
+ *   3. **Orphans present** — any file the census tagged `orphan` (a `src/` file
+ *      reachable from no root and no test) — almost always a build/worker/subpath
+ *      root the tool failed to detect (the render-file/run-worker regression class),
+ *      so a fresh orphan must stop the build. The inventory is written before the
+ *      throw, so the offending row is visible in FILE_INVENTORY.md.
  */
-function verifyFileCensus(
-  rootDir: string,
-  workspaces: Map<string, WorkspacePackage>,
-  inventory: FileInventory
-): void {
-  const onDisk = new Set<string>();
-  const walk = (dir: string): void => {
-    if (!existsSync(dir)) return;
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
-      if (e.name === 'node_modules' || e.name === 'dist') continue;
-      const p = join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else if (e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
-        onDisk.add(relative(rootDir, p).replace(/\\/g, '/'));
-      }
-    }
-  };
-  for (const [, ws] of workspaces) {
-    walk(join(rootDir, ws.directory, 'src'));
-    walk(join(rootDir, ws.directory, 'tests'));
-  }
-
+function verifyFileCensus(rootDir: string, inventory: FileInventory): void {
+  const onDisk = new Set(walkRepoTsFiles(rootDir));
   const census = new Set(inventory.files.map((f) => f.file));
   const missingFromCensus = [...onDisk].filter((f) => !census.has(f)).sort();
   const missingFromDisk = [...census].filter((f) => !onDisk.has(f)).sort();
@@ -4458,15 +4549,15 @@ function verifyFileCensus(
   if (missingFromCensus.length > 0 || missingFromDisk.length > 0 || orphans.length > 0) {
     let msg = 'FILE CENSUS SELF-CHECK FAILED.\n';
     if (missingFromCensus.length > 0) {
-      msg += `  ${missingFromCensus.length} file(s) on disk but ABSENT from the census (root-detection/discovery gap):\n`;
+      msg += `  ${missingFromCensus.length} file(s) on disk but ABSENT from the census (scoping/discovery gap — teach the census to enumerate this location):\n`;
       msg += missingFromCensus.map((f) => `    + ${f}`).join('\n') + '\n';
     }
     if (missingFromDisk.length > 0) {
-      msg += `  ${missingFromDisk.length} file(s) in the census but MISSING on disk (stale entry):\n`;
+      msg += `  ${missingFromDisk.length} file(s) in the census but MISSING on disk (stale entry — regenerate with \`npm run docs:deps\`):\n`;
       msg += missingFromDisk.map((f) => `    - ${f}`).join('\n') + '\n';
     }
     if (orphans.length > 0) {
-      msg += `  ${orphans.length} ORPHAN file(s) — reachable from no root and no test. Each is a\n`;
+      msg += `  ${orphans.length} ORPHAN file(s) — a src file reachable from no root and no test. Each is a\n`;
       msg += `  build/worker/subpath root the tool did not detect (wire it / seed it — see\n`;
       msg += `  tools/create-dependency-graph tsup.config / exports / bin root handling), or dead\n`;
       msg += `  code to delete:\n`;
@@ -4475,8 +4566,26 @@ function verifyFileCensus(
     throw new Error(msg);
   }
   console.log(
-    `File census self-check passed: ${inventory.totalFiles} files match disk (independent walk), 0 orphans.`
+    `File census self-check passed: ${inventory.totalFiles} files == maximal repo walk (independent), 0 orphans.`
   );
+}
+
+/**
+ * `--check-census` (no-regen) entry: verify the ALREADY-GENERATED
+ * `file-inventory.json` against a fresh maximal repo walk WITHOUT re-running the
+ * graph scan (the standing gate, analogous to `check:duplicates:fast`). Throws
+ * (→ non-zero exit) if the committed census is stale vs the disk — this is what
+ * catches a `.ts` added anywhere in the repo after the last `docs:deps`.
+ */
+function runCensusCheckNoRegen(rootDir: string): void {
+  const invPath = join(rootDir, 'docs', 'Architecture', 'file-inventory.json');
+  if (!existsSync(invPath)) {
+    throw new Error(
+      `file-census check: ${invPath} not found — run \`npm run docs:deps\` first to generate it.`
+    );
+  }
+  const inventory = JSON.parse(readFileSync(invPath, 'utf-8')) as FileInventory;
+  verifyFileCensus(rootDir, inventory);
 }
 
 /**
@@ -4484,6 +4593,15 @@ function verifyFileCensus(
  */
 async function main(): Promise<void> {
   const cliOptions = parseCliOptions();
+
+  // Standing no-regen census gate: verify the committed file-inventory.json against
+  // a fresh MAXIMAL repo walk without re-running the (expensive) graph scan. Catches
+  // a `.ts` added anywhere in the repo since the last `docs:deps`. Throws → exit 1.
+  if (cliOptions.checkCensus) {
+    runCensusCheckNoRegen(ROOT_DIR);
+    console.log('file-census check passed (no-regen): committed inventory matches the repo.');
+    return;
+  }
 
   console.log('Scanning codebase for dependencies...');
   if (cliOptions.includeTests) {
@@ -4944,10 +5062,11 @@ async function main(): Promise<void> {
   writeFileSync(unusedReportPath, unusedReport);
   console.log(`\nWritten: ${unusedReportPath}`);
 
-  // Complete file census (every .ts under each package's src/ + tests/) with a
-  // disposition derived from the reachability data above, plus an independent
-  // disk-walk self-check that HARD-FAILS this run if anything on disk is missing
-  // from the census. Monorepo only (needs the workspace/reachability model).
+  // Complete file census (every tracked .ts in the repo — package src/tests, plus
+  // repo-root tests/tools/config/examples/docs) with a disposition, plus a MAXIMAL
+  // independent repo-walk self-check that HARD-FAILS this run if anything on disk is
+  // unaccounted or any orphan exists. Monorepo only (needs the workspace/reachability
+  // model).
   if (isMonorepo && reachableSet) {
     const inventory = buildFileInventory(
       ROOT_DIR,
@@ -4965,8 +5084,8 @@ async function main(): Promise<void> {
           .join(', ') +
         ')'
     );
-    // Fail loudly if the census and the filesystem disagree (throws → non-zero exit).
-    verifyFileCensus(ROOT_DIR, workspaceMap, inventory);
+    // Fail loudly if the census and the maximal repo walk disagree (throws → non-zero exit).
+    verifyFileCensus(ROOT_DIR, inventory);
   }
 
   // WASM accelerator <-> function pairing (generated artifact; replaces the

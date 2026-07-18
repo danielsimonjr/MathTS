@@ -7,20 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### feat(tools): complete file census (FILE_INVENTORY) + self-check gate in CDG
+### feat(tools): complete file census (FILE_INVENTORY) + maximal-walk self-check gate in CDG
 
-- Added a **complete file census** to `tools/create-dependency-graph` (`buildFileInventory`): every `.ts`
-  under each of the 24 workspace packages' `src/` AND `tests/` (excl `node_modules`/`dist`/`*.d.ts`) is now
-  enumerated with a disposition — `reachable`, `build-entry`, `test-only`, `orphan`, or `test`, computed from
-  the existing module-graph reachability/root data (no second graph). Emits `docs/Architecture/FILE_INVENTORY.md`
-  (summary + per-disposition + per-package counts, then an alphabetized `file | package | area | disposition`
-  table) and `file-inventory.json` (machine form). Wired into `npm run docs:deps` (+ prettier-formatted).
-  **Census: 1630 files** = 1091 `src/` (1055 reachable + 33 build-entry + 3 test-only + 0 orphan) + 539 `tests/`.
-- Added a **self-check gate** (`verifyFileCensus`): an INDEPENDENT disk walk (separate code path) compared to the
-  census, plus an orphan check. It HARD-FAILS `npm run docs:deps` (throws → non-zero exit; the top-level
-  `.catch` now `process.exit(1)`s) if any `.ts` is on disk but absent from the census, or if any `orphan` exists —
-  so a future root-detection/discovery gap is a loud build failure, never a silent drop. Proven: a temp
-  `parallel/src/__censusprobe.ts` fails the run naming the file; deleting it passes again.
+- Added a **complete file census** to `tools/create-dependency-graph` (`buildFileInventory`): EVERY tracked `.ts`
+  in the repo — package `src/` + `tests/`, PLUS the repo-ROOT cross-package `tests/`, `tools/`, build/test
+  `*.config.ts`, `examples/`, and `docs/` reference sources — enumerated with a disposition (`reachable`,
+  `build-entry`, `test-only`, `orphan`, `test`, `tool`, `config`, `example`); src dispositions come from the
+  existing module-graph reachability/root data (no second graph). Emits `docs/Architecture/FILE_INVENTORY.md`
+  (summary + per-disposition/per-area/per-package counts + alphabetized `file | package | area | disposition`
+  table) and `file-inventory.json`. Wired into `npm run docs:deps` (+ prettier-formatted). **Census: 1705 files**
+  (== the git-tracked `.ts` set; excludes only `node_modules`/`dist`/`*.d.ts`/dot-dirs) = 1091 `src` (1055
+  reachable + 33 build-entry + 3 test-only + 0 orphan) + 550 `test` + 25 `tool` + 29 `config` + 10 `example`.
+- Added a **self-check gate** (`verifyFileCensus`) whose ground truth is a MAXIMAL, location-agnostic repo walk
+  (`walkRepoTsFiles`) — deliberately BROADER than the census's enumerated discovery, so it catches a scoping gap
+  the census would miss (a `.ts` in a new/unenumerated top-level dir), plus any `orphan`. It HARD-FAILS
+  `npm run docs:deps` (throws → non-zero exit; top-level `.catch` now `process.exit(1)`s), and a standing no-regen
+  gate `npm run check:file-census` (`--check-census`, analogous to `check:duplicates:fast`) fails if a `.ts` was
+  added anywhere in the repo since the last `docs:deps`. Proven both classes: a temp `parallel/src/__censusprobe.ts`
+  (src) fails `docs:deps` naming it as an orphan; a temp `tests/integration/__probe.test.ts` (OUT of the old
+  per-package scope) fails `check:file-census` naming it as unaccounted-on-disk; both pass once deleted.
+- **Defect fixed (independent review):** the first cut scoped BOTH the census and its self-check walk per-package
+  `src/`+`tests/`, so the gate shared the census's blind spot and silently missed 11 repo-root cross-package
+  tests (`tests/integration/*`, `tests/wasm/*`, `tests/benchmark/*`) while the gate passed — a false
+  "avoid-missing-anything" guarantee. The gate now walks the whole repo maximally and the census enumerates all
+  source roots, so maximal-walk count == census totalFiles (1705) with zero unaccounted files.
 
 ### fix(tools): CDG reads config-driven `tsup.config.ts` entries — repairs a build-root regression
 

@@ -13,14 +13,18 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 
 - [x] **CDG complete file census + build-root regression fix (2026-07-18)** — `tools/create-dependency-graph`
       now emits a **complete file inventory** (`docs/Architecture/FILE_INVENTORY.md` + `file-inventory.json`):
-      every `.ts` under each package's `src/`+`tests/` tagged `reachable`/`build-entry`/`test-only`/`orphan`/`test`
-      (census: **1630 files** = 1091 src + 539 tests). A built-in **self-check gate** (`verifyFileCensus`) does an
-      independent disk walk and hard-fails `npm run docs:deps` (non-zero exit) on any disk↔census mismatch or any
-      orphan — proven via a temp probe (FAIL-then-PASS). Fixed a **build-root regression**: config-driven
-      `tsup.config.ts` entries (`plot/src/render-file.ts`, `workbook/src/run-worker.ts`) were dropped from the
-      module graph (1088→1086) after those packages moved entries out of the build-script string; CDG now reads
-      `tsup.config.ts`'s `entry:[…]` (module total 1086→**1088**, orphaned 1→0). Gates: cycles 0, browser-safety
-      clean, `check:duplicates:fast` 0, eslint clean.
+      EVERY tracked `.ts` in the repo — package `src/`+`tests/`, repo-root `tests/`, `tools/`, `*.config.ts`,
+      `examples/`, `docs/` — tagged `reachable`/`build-entry`/`test-only`/`orphan`/`test`/`tool`/`config`/`example`
+      (census: **1705 files** == git-tracked `.ts`; = 1091 src + 550 test + 25 tool + 29 config + 10 example). The
+      **self-check gate** (`verifyFileCensus`) uses a MAXIMAL location-agnostic repo walk as ground truth (broader
+      than the census's enumerated discovery) + a standing no-regen `npm run check:file-census`; hard-fails on any
+      unaccounted disk file or orphan. Proven both probe classes (in-scope src orphan → docs:deps FAIL; root-test
+      out-of-scope → check:file-census FAIL; both PASS once deleted). **Defect fixed on re-review:** first cut
+      scoped census AND gate per-package, so the gate shared the blind spot and missed 11 repo-root tests — now
+      maximal walk == census (1705). Also fixed a **build-root regression**: config-driven `tsup.config.ts` entries
+      (`plot/src/render-file.ts`, `workbook/src/run-worker.ts`) were dropped from the module graph after those
+      packages moved entries out of the build-script string; CDG now reads `tsup.config.ts`'s `entry:[…]` (module
+      total 1086→**1088**, orphaned 1→0). Gates: cycles 0, browser-safety clean, `check:duplicates:fast` 0, eslint clean.
 
 ### 🗺️ Oracle Gap Roadmap (comprehensive functionality + accuracy sweep vs numpy/scipy/mpmath/MATLAB/Mathematica)
 

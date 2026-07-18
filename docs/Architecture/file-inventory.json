@@ -1,38 +1,50 @@
 {
   "generated": "2026-07-18",
-  "totalFiles": 1630,
+  "totalFiles": 1705,
   "byDisposition": {
     "reachable": 1055,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 539
+    "test": 550,
+    "tool": 25,
+    "config": 29,
+    "example": 10
+  },
+  "byArea": {
+    "src": 1091,
+    "tests": 550,
+    "config": 29,
+    "docs": 5,
+    "examples": 5,
+    "tools": 25
   },
   "byPackage": {
-    "@danielsimonjr/mathts-arithmetic": 2,
+    "@danielsimonjr/mathts-arithmetic": 3,
     "@danielsimonjr/mathts-wasm": 27,
-    "@danielsimonjr/mathts-ast": 2,
-    "@danielsimonjr/mathts-autograd": 18,
-    "@danielsimonjr/mathts-compat": 13,
-    "@danielsimonjr/mathts-core": 77,
-    "@danielsimonjr/mathts-evaluator": 2,
-    "@danielsimonjr/mathts-expression": 488,
-    "@danielsimonjr/mathts-functions": 691,
-    "@danielsimonjr/mathts-gpu": 13,
-    "@danielsimonjr/mathts-linalg": 2,
-    "@danielsimonjr/mathts-matrix": 90,
-    "@danielsimonjr/mathts-numbers": 2,
-    "@danielsimonjr/mathts-typed-function": 3,
-    "@danielsimonjr/mathts-workerpool": 8,
-    "@danielsimonjr/mathts-parallel": 35,
-    "@danielsimonjr/mathts-parser": 2,
-    "@danielsimonjr/mathts-plot": 41,
-    "@danielsimonjr/mathts-signal": 2,
-    "@danielsimonjr/mathts-statistics": 2,
-    "@danielsimonjr/mathts-tensor": 50,
-    "@danielsimonjr/mathts-trigonometry": 2,
-    "@danielsimonjr/mathts-units": 2,
-    "@danielsimonjr/mathts-workbook": 56
+    "@danielsimonjr/mathts-ast": 3,
+    "@danielsimonjr/mathts-autograd": 19,
+    "@danielsimonjr/mathts-compat": 14,
+    "@danielsimonjr/mathts-core": 79,
+    "(root)": 49,
+    "@danielsimonjr/mathts-evaluator": 3,
+    "@danielsimonjr/mathts-expression": 489,
+    "@danielsimonjr/mathts-functions": 692,
+    "@danielsimonjr/mathts-gpu": 14,
+    "@danielsimonjr/mathts-linalg": 3,
+    "@danielsimonjr/mathts-matrix": 91,
+    "@danielsimonjr/mathts-numbers": 3,
+    "@danielsimonjr/mathts-typed-function": 4,
+    "@danielsimonjr/mathts-workerpool": 9,
+    "@danielsimonjr/mathts-parallel": 36,
+    "@danielsimonjr/mathts-parser": 3,
+    "@danielsimonjr/mathts-plot": 43,
+    "@danielsimonjr/mathts-signal": 3,
+    "@danielsimonjr/mathts-statistics": 3,
+    "@danielsimonjr/mathts-tensor": 51,
+    "@danielsimonjr/mathts-trigonometry": 3,
+    "@danielsimonjr/mathts-units": 3,
+    "@danielsimonjr/mathts-workbook": 58
   },
   "files": [
     {
@@ -48,6 +60,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "arithmetic/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-arithmetic",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "assembly/src/algebra/decomposition.ts",
@@ -253,6 +272,13 @@
       "loc": 42
     },
     {
+      "file": "ast/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-ast",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
       "file": "autograd/src/dual-tensor.ts",
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
@@ -379,6 +405,13 @@
       "loc": 773
     },
     {
+      "file": "autograd/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
       "file": "compat/src/chain.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
@@ -468,6 +501,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 40
+    },
+    {
+      "file": "compat/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "config",
+      "disposition": "config",
+      "loc": 24
     },
     {
       "file": "core/src/arithmetic/scalar.ts",
@@ -1009,6 +1049,55 @@
       "loc": 24
     },
     {
+      "file": "core/tsup.config.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "config",
+      "disposition": "config",
+      "loc": 18
+    },
+    {
+      "file": "core/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "config",
+      "disposition": "config",
+      "loc": 32
+    },
+    {
+      "file": "docs/Architecture/Workbook/cli.ts",
+      "package": "(root)",
+      "area": "docs",
+      "disposition": "example",
+      "loc": 677
+    },
+    {
+      "file": "docs/Architecture/Workbook/executor.ts",
+      "package": "(root)",
+      "area": "docs",
+      "disposition": "example",
+      "loc": 483
+    },
+    {
+      "file": "docs/Architecture/Workbook/graph.ts",
+      "package": "(root)",
+      "area": "docs",
+      "disposition": "example",
+      "loc": 344
+    },
+    {
+      "file": "docs/Architecture/Workbook/index.ts",
+      "package": "(root)",
+      "area": "docs",
+      "disposition": "example",
+      "loc": 447
+    },
+    {
+      "file": "docs/Architecture/Workbook/types.ts",
+      "package": "(root)",
+      "area": "docs",
+      "disposition": "example",
+      "loc": 246
+    },
+    {
       "file": "evaluator/src/index.ts",
       "package": "@danielsimonjr/mathts-evaluator",
       "area": "src",
@@ -1021,6 +1110,48 @@
       "area": "tests",
       "disposition": "test",
       "loc": 25
+    },
+    {
+      "file": "evaluator/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-evaluator",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
+      "file": "examples/basic-arithmetic.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 68
+    },
+    {
+      "file": "examples/basic-matrix.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 37
+    },
+    {
+      "file": "examples/mathjs-migration.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 121
+    },
+    {
+      "file": "examples/matrix-operations.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 139
+    },
+    {
+      "file": "examples/parallel-computing.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 123
     },
     {
       "file": "expression/src/compiler/compile.ts",
@@ -4437,6 +4568,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 181
+    },
+    {
+      "file": "expression/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "functions/src/algebra/decomposition/lup.ts",
@@ -9276,6 +9414,13 @@
       "loc": 81
     },
     {
+      "file": "functions/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "config",
+      "disposition": "config",
+      "loc": 24
+    },
+    {
       "file": "gpu/src/BufferPool.ts",
       "package": "@danielsimonjr/mathts-gpu",
       "area": "src",
@@ -9367,6 +9512,13 @@
       "loc": 31
     },
     {
+      "file": "gpu/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
       "file": "linalg/src/index.ts",
       "package": "@danielsimonjr/mathts-linalg",
       "area": "src",
@@ -9379,6 +9531,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 41
+    },
+    {
+      "file": "linalg/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-linalg",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "matrix/src/backends/Backend.ts",
@@ -10011,6 +10170,13 @@
       "loc": 402
     },
     {
+      "file": "matrix/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "config",
+      "disposition": "config",
+      "loc": 24
+    },
+    {
       "file": "numbers/src/index.ts",
       "package": "@danielsimonjr/mathts-numbers",
       "area": "src",
@@ -10023,6 +10189,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "numbers/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-numbers",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "packages/typed-function/src/index.ts",
@@ -10044,6 +10217,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 425
+    },
+    {
+      "file": "packages/typed-function/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-typed-function",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "packages/workerpool/src/fft-core.ts",
@@ -10100,6 +10280,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 122
+    },
+    {
+      "file": "packages/workerpool/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "parallel/src/ComputePool.ts",
@@ -10347,6 +10534,13 @@
       "loc": 106
     },
     {
+      "file": "parallel/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "config",
+      "disposition": "config",
+      "loc": 24
+    },
+    {
       "file": "parser/src/index.ts",
       "package": "@danielsimonjr/mathts-parser",
       "area": "src",
@@ -10359,6 +10553,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 72
+    },
+    {
+      "file": "parser/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-parser",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "plot/src/coerce.ts",
@@ -10648,6 +10849,20 @@
       "loc": 99
     },
     {
+      "file": "plot/tsup.config.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "config",
+      "disposition": "config",
+      "loc": 18
+    },
+    {
+      "file": "plot/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "config",
+      "disposition": "config",
+      "loc": 31
+    },
+    {
       "file": "signal/src/index.ts",
       "package": "@danielsimonjr/mathts-signal",
       "area": "src",
@@ -10662,6 +10877,13 @@
       "loc": 17
     },
     {
+      "file": "signal/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-signal",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
       "file": "statistics/src/index.ts",
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
@@ -10674,6 +10896,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 135
+    },
+    {
+      "file": "statistics/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-statistics",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
     },
     {
       "file": "tensor/src/contraction-sequence.ts",
@@ -11026,6 +11255,265 @@
       "loc": 283
     },
     {
+      "file": "tensor/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "config",
+      "disposition": "config",
+      "loc": 24
+    },
+    {
+      "file": "tests/benchmark/fft-factory-surface.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 60
+    },
+    {
+      "file": "tests/benchmark/fft-public-surface.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 66
+    },
+    {
+      "file": "tests/benchmark/parallel-report.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 55
+    },
+    {
+      "file": "tests/benchmark/performance.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 236
+    },
+    {
+      "file": "tests/benchmark/wasm-comparison.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 67
+    },
+    {
+      "file": "tests/integration/functions.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 470
+    },
+    {
+      "file": "tests/integration/instance.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 334
+    },
+    {
+      "file": "tests/wasm/parallel-processing.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 478
+    },
+    {
+      "file": "tests/wasm/typescript-integration.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 97
+    },
+    {
+      "file": "tests/wasm/wasm-artifact-check.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 54
+    },
+    {
+      "file": "tests/wasm/wasm-loader.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 259
+    },
+    {
+      "file": "tools/benchmark/gpu/bench-3way.entry.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 138
+    },
+    {
+      "file": "tools/benchmark/gpu/elementwise.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 230
+    },
+    {
+      "file": "tools/benchmark/gpu/matmul.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 203
+    },
+    {
+      "file": "tools/benchmark/parallel/eig-inner-probe.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 191
+    },
+    {
+      "file": "tools/benchmark/parallel/harness.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 338
+    },
+    {
+      "file": "tools/benchmark/parallel/hypothesis.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 218
+    },
+    {
+      "file": "tools/benchmark/parallel/integration.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 152
+    },
+    {
+      "file": "tools/benchmark/parallel/operations.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 498
+    },
+    {
+      "file": "tools/benchmark/parallel/regression-probe.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 259
+    },
+    {
+      "file": "tools/benchmark/parallel/report.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 70
+    },
+    {
+      "file": "tools/benchmark/parallel/run.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 118
+    },
+    {
+      "file": "tools/benchmark/tensor/contract-network.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 141
+    },
+    {
+      "file": "tools/benchmark/tensor/contract.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 103
+    },
+    {
+      "file": "tools/benchmark/tensor/decompositions.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 195
+    },
+    {
+      "file": "tools/benchmark/tensor/tensordot.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 116
+    },
+    {
+      "file": "tools/benchmark/wasm/elementwise.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 118
+    },
+    {
+      "file": "tools/benchmark/wasm/harness.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 284
+    },
+    {
+      "file": "tools/benchmark/wasm/matrix.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 87
+    },
+    {
+      "file": "tools/benchmark/wasm/run.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 44
+    },
+    {
+      "file": "tools/benchmark/wasm/sort.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 59
+    },
+    {
+      "file": "tools/benchmark/wasm/special.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 106
+    },
+    {
+      "file": "tools/benchmark/wasm/transcendental-dispatch.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 78
+    },
+    {
+      "file": "tools/chunking-for-files/chunking-for-files.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 1329
+    },
+    {
+      "file": "tools/compress-for-context/compress-for-context.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 1400
+    },
+    {
+      "file": "tools/create-dependency-graph/create-dependency-graph.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 5173
+    },
+    {
       "file": "trigonometry/src/index.ts",
       "package": "@danielsimonjr/mathts-trigonometry",
       "area": "src",
@@ -11040,6 +11528,13 @@
       "loc": 17
     },
     {
+      "file": "trigonometry/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-trigonometry",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
       "file": "units/src/index.ts",
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
@@ -11052,6 +11547,34 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "units/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-units",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
+      "file": "vitest.config.bench.ts",
+      "package": "(root)",
+      "area": "config",
+      "disposition": "config",
+      "loc": 35
+    },
+    {
+      "file": "vitest.config.browser.ts",
+      "package": "(root)",
+      "area": "config",
+      "disposition": "config",
+      "loc": 74
+    },
+    {
+      "file": "vitest.config.ts",
+      "package": "(root)",
+      "area": "config",
+      "disposition": "config",
+      "loc": 94
     },
     {
       "file": "workbook/src/cli.ts",
@@ -11444,6 +11967,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 93
+    },
+    {
+      "file": "workbook/tsup.config.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "config",
+      "disposition": "config",
+      "loc": 18
+    },
+    {
+      "file": "workbook/vitest.config.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "config",
+      "disposition": "config",
+      "loc": 32
     }
   ]
 }
