@@ -2,13 +2,13 @@
   "generated": "2026-07-18",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
-    "runtimeDuplicates": 12,
+    "runtimeDuplicates": 0,
     "typeDuplicates": 0,
     "runtimeByTag": {
-      "TRUE_DUPLICATE": 12,
+      "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 216
+      "ALLOWLISTED": 223
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -18,246 +18,6 @@
     }
   },
   "runtime": [
-    {
-      "name": "canUseSharedMemory",
-      "category": "function",
-      "definers": [
-        {
-          "file": "packages/workerpool/src/index.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "canUseWasm",
-      "category": "function",
-      "definers": [
-        {
-          "file": "packages/workerpool/src/index.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "defaultWasmLocation",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/wasm/resolve.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/resolve.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "initializePool",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "packages/workerpool/src/index.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "loadWasmManifest",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "qr",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/operations/qr.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "resolvePackagedWasm",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/wasm/resolve.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/resolve.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "sha384OfBuffer",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "terminatePool",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "packages/workerpool/src/index.ts",
-          "package": "@danielsimonjr/mathts-workerpool",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "verifyWasmIntegrity",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/integrity.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "wasmLoader",
-      "category": "constant",
-      "definers": [
-        {
-          "file": "functions/src/wasm/WasmLoader.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/WasmLoader.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
-    {
-      "name": "WasmLoader",
-      "category": "class",
-      "definers": [
-        {
-          "file": "functions/src/wasm/WasmLoader.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": false,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/WasmLoader.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "internal-only",
-      "tag": "TRUE_DUPLICATE"
-    },
     {
       "name": "abs",
       "category": "constant+function",
@@ -2940,6 +2700,50 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "canUseSharedMemory",
+      "category": "function",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "intra-workerpool node/browser-shim dispatch-variant: packages/workerpool/src/index.ts is the node build-target entry (dynamically imports `workerpool/wasm` for native sync detection, falls back to `typeof WebAssembly`/`SharedArrayBuffer` globals + crossOriginIsolated); workerpool-browser-shim.ts is the browser build-target entry with the same capability names but shim bodies. An intentional environment split (two build targets of ONE package), not a cross-package duplication. 2026-07 dedup campaign, floor-decisions slice."
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "intra-workerpool node/browser-shim dispatch-variant: packages/workerpool/src/index.ts is the node build-target entry (dynamically imports `workerpool/wasm` for native sync detection, falls back to `typeof WebAssembly`/`SharedArrayBuffer` globals + crossOriginIsolated); workerpool-browser-shim.ts is the browser build-target entry with the same capability names but shim bodies. An intentional environment split (two build targets of ONE package), not a cross-package duplication. 2026-07 dedup campaign, floor-decisions slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "canUseWasm",
+      "category": "function",
+      "definers": [
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "intra-workerpool node/browser-shim dispatch-variant: packages/workerpool/src/index.ts is the node build-target entry (dynamically imports `workerpool/wasm` for native sync detection, falls back to `typeof WebAssembly`/`SharedArrayBuffer` globals + crossOriginIsolated); workerpool-browser-shim.ts is the browser build-target entry with the same capability names but shim bodies. An intentional environment split (two build targets of ONE package), not a cross-package duplication. 2026-07 dedup campaign, floor-decisions slice."
+        },
+        {
+          "file": "packages/workerpool/src/workerpool-browser-shim.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "intra-workerpool node/browser-shim dispatch-variant: packages/workerpool/src/index.ts is the node build-target entry (dynamically imports `workerpool/wasm` for native sync detection, falls back to `typeof WebAssembly`/`SharedArrayBuffer` globals + crossOriginIsolated); workerpool-browser-shim.ts is the browser build-target entry with the same capability names but shim bodies. An intentional environment split (two build targets of ONE package), not a cross-package duplication. 2026-07 dedup campaign, floor-decisions slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "carmichaelLambda",
       "category": "constant+function",
       "definers": [
@@ -4007,6 +3811,28 @@
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "initializePool",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
+        },
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -5444,6 +5270,28 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "qr",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "distinct-contract dispatch-variant, KEEP both (routing would drop the WASM path + the mathjs Matrix contract): functions/src/algebra/decomposition/qr.ts (`createQr`, wired via functions/src/factories/index.ts) is the mathjs `Matrix`/`SparseMatrix` factory — Householder QR with a `qr_wasm` fast path (full Q m×m, R m×n), Array input ⇒ {Q:number[][],R:number[][]}; matrix/src/operations/qr.ts is the DenseMatrix primitive (Gram-Schmidt w/ re-orthogonalisation, reduced|full mode). Different call contracts, different algorithms, both needed. Guarded by functions/tests/gap-qr-parity.test.ts, which pins functions ≡ matrix ≡ NumPy on |diag R| (sign-invariant) + A=Q·R reconstruction + Qᵀ·Q=I — no divergence found (full double precision). 2026-07 dedup campaign, floor-decisions slice (Daniel keep-vs-route ADR = keep)."
+        },
+        {
+          "file": "matrix/src/operations/qr.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "distinct-contract dispatch-variant, KEEP both (routing would drop the WASM path + the mathjs Matrix contract): functions/src/algebra/decomposition/qr.ts (`createQr`, wired via functions/src/factories/index.ts) is the mathjs `Matrix`/`SparseMatrix` factory — Householder QR with a `qr_wasm` fast path (full Q m×m, R m×n), Array input ⇒ {Q:number[][],R:number[][]}; matrix/src/operations/qr.ts is the DenseMatrix primitive (Gram-Schmidt w/ re-orthogonalisation, reduced|full mode). Different call contracts, different algorithms, both needed. Guarded by functions/tests/gap-qr-parity.test.ts, which pins functions ≡ matrix ≡ NumPy on |diag R| (sign-invariant) + A=Q·R reconstruction + Qᵀ·Q=I — no divergence found (full double precision). 2026-07 dedup campaign, floor-decisions slice (Daniel keep-vs-route ADR = keep)."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "quadprog",
       "category": "function",
       "definers": [
@@ -5928,6 +5776,28 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "terminatePool",
+      "category": "function",
+      "definers": [
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
+        },
+        {
+          "file": "packages/workerpool/src/index.ts",
+          "package": "@danielsimonjr/mathts-workerpool",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "to",
       "category": "constant",
       "definers": [
@@ -6072,6 +5942,50 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "wasmLoader",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "WasmLoader",
+      "category": "class",
+      "definers": [
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+        },
+        {
+          "file": "matrix/src/backends/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+        }
+      ],
+      "canonicalHint": "internal-only",
       "tag": "ALLOWLISTED"
     },
     {

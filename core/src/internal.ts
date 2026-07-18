@@ -158,3 +158,23 @@ export {
 // docs/Architecture/duplicate-symbols.json). `WasmModule` itself stays local to
 // each package — it genuinely differs (package-scoped ABI subsets).
 export type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
+
+// Shared WASM-loader RUNTIME logic (SHA-384 integrity verification + packaged
+// artifact path resolution), consolidated from the byte-identical `integrity.ts`
+// and `resolve.ts` copies formerly duplicated in functions/src/wasm/ and
+// matrix/src/backends/wasm/ (see docs/Architecture/duplicate-symbols.json). Each
+// package now re-exports these and injects its own `import.meta.url` for path
+// resolution. The SHA-384 hash-and-compare-before-instantiate is preserved
+// byte-for-byte (CLAUDE.md Security Invariant #1); guarded by both packages'
+// tests/security/wasm-integrity.test.ts. The `WasmLoader` CLASS + `wasmLoader`
+// singleton stay LOCAL to each package — genuinely different allocation models
+// (functions: simple id=2 single-pointer; matrix: AS managed-runtime header+data
+// Allocation handle). Node fs/crypto access is via lazy dynamic import(), so this
+// stays off core's browser-facing `.` entry and adds no static node: taint.
+export {
+  sha384OfBuffer,
+  loadWasmManifest,
+  verifyWasmIntegrity,
+  resolvePackagedWasm,
+  defaultWasmLocation,
+} from './wasm-loader.js';

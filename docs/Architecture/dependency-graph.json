@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-18",
-    "totalFiles": 1087,
+    "totalFiles": 1088,
     "totalModules": 82,
-    "totalExports": 5563
+    "totalExports": 5575
   },
   "entryPoints": [
     {
@@ -1260,6 +1260,17 @@
             "reExport": true
           },
           {
+            "file": "./wasm-loader.js",
+            "imports": [
+              "sha384OfBuffer",
+              "loadWasmManifest",
+              "verifyWasmIntegrity",
+              "resolvePackagedWasm",
+              "defaultWasmLocation"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./shared.js",
             "imports": ["MemoizedFunction"],
             "reExport": true,
@@ -1358,6 +1369,11 @@
           "toObject",
           "assignMap",
           "isObjectWrappingMap",
+          "sha384OfBuffer",
+          "loadWasmManifest",
+          "verifyWasmIntegrity",
+          "resolvePackagedWasm",
+          "defaultWasmLocation",
           "format",
           "toEngineering",
           "toExponential",
@@ -1442,6 +1458,11 @@
           "toObject",
           "assign",
           "isObjectWrappingMap",
+          "sha384OfBuffer",
+          "loadWasmManifest",
+          "verifyWasmIntegrity",
+          "resolvePackagedWasm",
+          "defaultWasmLocation",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -1714,6 +1735,33 @@
         "workspaceDependencies": [],
         "exports": ["_switch"],
         "functions": ["_switch"]
+      },
+      "core/src/wasm-loader.ts": {
+        "description": "Shared WASM-loader runtime logic — SHA-384 integrity verification + packaged",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types/wasm-loader.js",
+            "imports": ["WasmManifest"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "sha384OfBuffer",
+          "loadWasmManifest",
+          "verifyWasmIntegrity",
+          "resolvePackagedWasm",
+          "defaultWasmLocation"
+        ],
+        "functions": [
+          "sha384OfBuffer",
+          "loadWasmManifest",
+          "verifyWasmIntegrity",
+          "resolvePackagedWasm",
+          "defaultWasmLocation"
+        ]
       }
     },
     "core/error": {
@@ -3445,21 +3493,33 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["WasmManifest"],
+            "imports": [
+              "sha384OfBuffer",
+              "loadWasmManifest",
+              "verifyWasmIntegrity",
+              "WasmManifest"
+            ],
             "subpath": "internal"
           }
         ],
-        "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"],
-        "functions": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"]
+        "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity", "WasmManifest"],
+        "reExported": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity", "WasmManifest"]
       },
       "matrix/src/backends/wasm/resolve.ts": {
-        "description": "Robustly locate a packaged `.wasm` artifact across both the monorepo-source",
+        "description": "Packaged `.wasm` artifact resolution.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["resolvePackagedWasm", "defaultWasmLocation"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["resolvePackagedWasm", "defaultWasmLocation"],
-        "functions": ["resolvePackagedWasm", "defaultWasmLocation"]
+        "reExported": ["resolvePackagedWasm", "defaultWasmLocation"]
       },
       "matrix/src/backends/WASMBackend.ts": {
         "description": "WASM Matrix Backend (AssemblyScript)",
@@ -22561,12 +22621,17 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["WasmManifest"],
+            "imports": [
+              "sha384OfBuffer",
+              "loadWasmManifest",
+              "verifyWasmIntegrity",
+              "WasmManifest"
+            ],
             "subpath": "internal"
           }
         ],
-        "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"],
-        "functions": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"]
+        "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity", "WasmManifest"],
+        "reExported": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity", "WasmManifest"]
       },
       "functions/src/wasm/interpolation/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for the tridiagonal-solve and divided-difference",
@@ -22641,13 +22706,21 @@
         "constants": ["WASM_POLY_THRESHOLD", "WASM_POLY_FIT_THRESHOLD"]
       },
       "functions/src/wasm/resolve.ts": {
-        "description": "Robustly locate a packaged `.wasm` artifact across both the monorepo-source",
+        "description": "Packaged `.wasm` artifact resolution.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["resolvePackagedWasm", "resolveBrowserWasm", "defaultWasmLocation"],
-        "functions": ["resolvePackagedWasm", "resolveBrowserWasm", "defaultWasmLocation"]
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["resolvePackagedWasm", "defaultWasmLocation"],
+            "subpath": "internal"
+          }
+        ],
+        "exports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"],
+        "reExported": ["resolvePackagedWasm", "defaultWasmLocation"],
+        "functions": ["resolveBrowserWasm"]
       },
       "functions/src/wasm/signal/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for spectral signal kernels — Slice 5.6.",
@@ -36455,7 +36528,8 @@
           "core/src/object.ts",
           "core/src/shared.ts",
           "core/src/string.ts",
-          "core/src/switch.ts"
+          "core/src/switch.ts",
+          "core/src/wasm-loader.ts"
         ]
       },
       {
@@ -37858,18 +37932,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1087,
+    "totalTypeScriptFiles": 1088,
     "totalModules": 82,
-    "totalLinesOfCode": 184512,
-    "totalExports": 5563,
+    "totalLinesOfCode": 184405,
+    "totalExports": 5575,
     "totalClasses": 52,
     "totalInterfaces": 476,
-    "totalFunctions": 1754,
+    "totalFunctions": 1749,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2227,
-    "totalTypeOnlyImports": 566,
+    "totalReExports": 2244,
+    "totalTypeOnlyImports": 567,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

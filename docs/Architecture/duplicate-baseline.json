@@ -1,31 +1,6 @@
 {
   "generated": "2026-07-18",
   "note": "The in-progress dedup campaign backlog: TRUE_DUPLICATE names accepted as of `generated`. `npm run check:duplicates` fails only on NEW TRUE_DUPLICATE names beyond this set — as names are consolidated, re-run this generator to shrink the baseline. Not auto-run; a human re-seeds it deliberately after reviewing what changed.",
-  "runtime": {
-    "canUseSharedMemory": [
-      "packages/workerpool/src/index.ts",
-      "packages/workerpool/src/workerpool-browser-shim.ts"
-    ],
-    "canUseWasm": [
-      "packages/workerpool/src/index.ts",
-      "packages/workerpool/src/workerpool-browser-shim.ts"
-    ],
-    "defaultWasmLocation": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
-    "initializePool": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
-    "loadWasmManifest": [
-      "functions/src/wasm/integrity.ts",
-      "matrix/src/backends/wasm/integrity.ts"
-    ],
-    "qr": ["functions/src/factories/index.ts", "matrix/src/operations/qr.ts"],
-    "resolvePackagedWasm": ["functions/src/wasm/resolve.ts", "matrix/src/backends/wasm/resolve.ts"],
-    "sha384OfBuffer": ["functions/src/wasm/integrity.ts", "matrix/src/backends/wasm/integrity.ts"],
-    "terminatePool": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
-    "verifyWasmIntegrity": [
-      "functions/src/wasm/integrity.ts",
-      "matrix/src/backends/wasm/integrity.ts"
-    ],
-    "wasmLoader": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
-    "WasmLoader": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"]
-  },
+  "runtime": {},
   "types": {}
 }

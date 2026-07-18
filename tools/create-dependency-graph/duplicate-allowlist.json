@@ -555,6 +555,30 @@
       "names": ["bitXor"],
       "filesGlob": ["functions/src/utils/bignumber/bitwise.ts"],
       "reason": "the BigNumber bit-xor op, the functions-internal sibling of the already-allowlisted bitAnd/bitOr/... BigNumber bitwise layer. With this, bitXor's remaining definers are functions/src/typed/bitwise.ts (auto-tagged DISPATCH_VARIANT) and parallel/src/ops/bitwise.ts (already allowlisted). 2026-07 dedup campaign, closing tail slice."
+    },
+
+    {
+      "names": ["qr"],
+      "filesGlob": ["functions/src/factories/index.ts", "matrix/src/operations/qr.ts"],
+      "reason": "distinct-contract dispatch-variant, KEEP both (routing would drop the WASM path + the mathjs Matrix contract): functions/src/algebra/decomposition/qr.ts (`createQr`, wired via functions/src/factories/index.ts) is the mathjs `Matrix`/`SparseMatrix` factory — Householder QR with a `qr_wasm` fast path (full Q m×m, R m×n), Array input ⇒ {Q:number[][],R:number[][]}; matrix/src/operations/qr.ts is the DenseMatrix primitive (Gram-Schmidt w/ re-orthogonalisation, reduced|full mode). Different call contracts, different algorithms, both needed. Guarded by functions/tests/gap-qr-parity.test.ts, which pins functions ≡ matrix ≡ NumPy on |diag R| (sign-invariant) + A=Q·R reconstruction + Qᵀ·Q=I — no divergence found (full double precision). 2026-07 dedup campaign, floor-decisions slice (Daniel keep-vs-route ADR = keep)."
+    },
+    {
+      "names": ["WasmLoader", "wasmLoader"],
+      "filesGlob": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
+      "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+    },
+    {
+      "names": ["canUseWasm", "canUseSharedMemory"],
+      "filesGlob": [
+        "packages/workerpool/src/index.ts",
+        "packages/workerpool/src/workerpool-browser-shim.ts"
+      ],
+      "reason": "intra-workerpool node/browser-shim dispatch-variant: packages/workerpool/src/index.ts is the node build-target entry (dynamically imports `workerpool/wasm` for native sync detection, falls back to `typeof WebAssembly`/`SharedArrayBuffer` globals + crossOriginIsolated); workerpool-browser-shim.ts is the browser build-target entry with the same capability names but shim bodies. An intentional environment split (two build targets of ONE package), not a cross-package duplication. 2026-07 dedup campaign, floor-decisions slice."
+    },
+    {
+      "names": ["initializePool", "terminatePool"],
+      "filesGlob": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
+      "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
     }
   ]
 }

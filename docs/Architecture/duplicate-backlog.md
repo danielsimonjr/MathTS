@@ -53,13 +53,16 @@ as a keep-vs-route design call for Daniel (see below).
   `functions/tests/gap-matrix-domain-dedup-parity.test.ts` per [[feedback-allowlist-needs-parity-guard]].
 - **`convolve`, `ifft`** were NOT part of this slice — they are fft-domain (Bucket D §5), not matrix-domain.
 
-### `qr` — HUMAN-DECISION (surfaced 2026-07-18)
+### `qr` — RESOLVED 2026-07-18 (Daniel ADR = KEEP both + parity guard)
 
 `qr` has two genuinely independent bodies with **different contracts**: `functions/src/algebra/decomposition/qr.ts`
 (`createQr`, ~425 lines — mathjs factory over the mathjs `Matrix`/`SparseMatrix` bridge, **with a
 WASM fast path** `qr_wasm`) vs `matrix/src/operations/qr.ts` (DenseMatrix primitive). Routing the factory
-`qr` to the matrix layer (as `cholesky` was) would drop the mathjs Matrix contract AND the WASM path —
-a real keep-vs-route ADR call, not a mechanical dedup. **Left on the backlog; surfaced for Daniel.**
+`qr` to the matrix layer (as `cholesky` was) would drop the mathjs Matrix contract AND the WASM path.
+**Decision (Daniel): KEEP both** — allowlisted as a distinct-contract dispatch-variant, guarded by
+`functions/tests/gap-qr-parity.test.ts` which pins `functions` qr ≡ `matrix` qr ≡ NumPy on |diag R|
+(sign-invariant) + A=Q·R reconstruction + Qᵀ·Q=I. **No divergence found** — the three agree to full
+double precision (|diag R| = [3.162…,0.632…], [2.236…,1.673…,1.069…], [14,175,35] for the corpus).
 
 ### Original inventory (historical)
 
@@ -108,31 +111,52 @@ delegate the `number` case to the core primitive. This is the same temperature-s
 rich-type `number` case to core (perf-free — the method-call cost on a boxed type dwarfs a cross-module
 call), edge-case-corpus + manifest-test guarded, per the ledger's Bucket-C policy. Backlog, not this slice.
 
-## 3. WasmLoader security cluster (`functions` + `matrix`) — **HUMAN-DECISION (ADR)**
+## 3. WasmLoader security cluster (`functions` + `matrix`) — **RESOLVED 2026-07-18 (consolidate shared, keep divergent)**
 
 Names: `WasmLoader`, `wasmLoader`, `loadWasmManifest`, `sha384OfBuffer`, `verifyWasmIntegrity`,
 `resolvePackagedWasm`, `defaultWasmLocation`.
 
 Each package resolves **its own** `mathts-as.wasm` path and enforces the **SHA-384 manifest verification**
 security invariant (CLAUDE.md "Security Invariants" #1) before compile/instantiate. `matrix` cannot import
-from `functions` (that would invert the dependency edge and create a cycle). The adversarial reviewers
-recommended a **shared `core` loader with injected path resolution** (both packages reach `core` without a
-cycle), but this touches a **security-critical** verification path — it is an **ADR-level call** (a wrong
-refactor here silently weakens integrity checking, exactly the class of change CLAUDE.md says must not
-regress). **Leave as `TRUE_DUPLICATE`; surfaced for a human ADR decision.** Do not fold into a routine
-dedup slice.
+from `functions` (that would invert the dependency edge and create a cycle); both depend on `core`.
 
-## 4. workerpool capability caps / fork-integration #27 — **HUMAN-DECISION**
+**Decision (Daniel ADR): consolidate the SHARED logic to a `core` subpath, keep the divergent loaders.**
+Verification showed the two `integrity.ts` files were **byte-identical** and `resolvePackagedWasm` /
+`defaultWasmLocation` in the two `resolve.ts` files were **byte-identical** — so the 5 security/resolution
+functions (`sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`,
+`defaultWasmLocation`) moved to **`core/src/wasm-loader.ts`**, exported via
+`@danielsimonjr/mathts-core/internal` (reachable from both packages, no cycle). Each package's
+`integrity.ts`/`resolve.ts` now re-exports the shared logic and injects its own `import.meta.url` for path
+resolution. The SHA-384 hash-and-compare-before-instantiate is preserved **byte-for-byte** (algorithm and
+fail-closed/soft-warn behavior unchanged); node `fs`/`crypto` access stays behind **lazy dynamic `import()`**
+so core's browser-facing `.` entry is unaffected (`check:browser-safety` PASSES — 23/23). The `WasmLoader`
+**class** + `wasmLoader` singleton stay **per-package** (allowlisted): they bind genuinely different
+allocation models (functions = simple single-pointer `__new(n,2)`; matrix = AS managed-runtime header+data
+`Allocation<T>` handle) and different `WasmModule` ABI subsets. Guarded by both packages'
+`tests/security/wasm-integrity.test.ts` (22 tests GREEN) + WASM-loading integration tests (33 GREEN).
+
+## 4. workerpool capability caps — **RESOLVED 2026-07-18 (allowlist; both are distinct, not consolidatable)**
 
 Names: `canUseWasm`, `canUseSharedMemory` (`packages/workerpool/src/index.ts` vs
 `…/workerpool-browser-shim.ts`), `initializePool`, `terminatePool` (`functions/src/typed/arithmetic.ts` vs
 `packages/workerpool/src/index.ts`).
 
-Both adversarial reviewers recommended merging the workerpool capability duplication now (~½ day), but this
-is entangled with **#27 (fork first-party integration)**, which Daniel **PAUSED**
-([[project-fork-first-party-integration]]). The `index.ts`-vs-`browser-shim.ts` pair is an intentional
-environment split (node vs browser build target). **Disposition: HUMAN-DECISION — do not touch until #27 is
-un-paused.**
+**Decision (Daniel): allowlist — this is a local dedup within existing structure, independent of #27.**
+
+- **`canUseWasm` / `canUseSharedMemory`** — an **intra-workerpool node/browser-shim dispatch-variant**:
+  `index.ts` is the node build-target entry (dynamic `workerpool/wasm` sync detection + global fallbacks);
+  `workerpool-browser-shim.ts` is the browser build-target entry with shim bodies. One package, two build
+  targets — intentional environment split. Allowlisted.
+- **`initializePool` / `terminatePool`** — **distinct-by-target, NOT a reimplementation** (RFL R4 catch):
+  the original dedup hypothesis ("functions delegates to workerpool's") does **not hold**. Verified —
+  `functions/src/typed/arithmetic.ts`'s versions are thin wrappers over the **`computePool`** singleton (a
+  `ComputePool` from `@danielsimonjr/mathts-parallel`, the pool functions' own parallel matmul/transpose/
+  matvec/outer actually use), while `packages/workerpool/src/index.ts`'s operate on the **`mathWorkerPool`**
+  singleton (a `MathWorkerPool`). `ComputePool` wraps its _own_ `MathWorkerPool` instance, distinct from
+  workerpool's module-global — so delegating functions→workerpool would initialise the **wrong** pool and
+  leave functions' `ComputePool` uninitialised (a real regression). Two thin wrappers over two different
+  pool singletons that coincidentally share a name → allowlisted as distinct-by-target (same disposition
+  class as the other lifecycle homonyms). Structure unchanged, so independent of #27.
 
 ## 5. Other residual clusters (smaller, mixed)
 
@@ -152,11 +176,26 @@ un-paused.**
 
 ---
 
-## 6. Closing tail slice — **RESOLVED 2026-07-18 (`TRUE_DUPLICATE` 89 → 12, the floor)**
+## 7. Floor-decisions slice — **RESOLVED 2026-07-18 (`TRUE_DUPLICATE` 12 → 0)**
 
-The closing sweep classified and dispositioned every remaining non-ADR cluster. The 12 that remain
-are **exactly** the three surfaced HUMAN-DECISION clusters (§3 WasmLoader security = 7, §4 workerpool
-caps = 4, §1 `qr` = 1) — the irreducible floor. Dispositions:
+Daniel took the 4 HUMAN-DECISION calls and they were executed (this slice): §1 `qr` (KEEP + parity guard),
+§3 WasmLoader security (consolidate shared logic to `core/src/wasm-loader.ts`, allowlist the divergent
+loaders), §4 workerpool caps (allowlist — node/browser-shim + distinct-by-target pool wrappers) plus
+DECISION 1 the `compat.zeros(n)/ones(n)` mathjs-parity bug (below). **`TRUE_DUPLICATE` is now 0** — the
+`check:duplicates` baseline was re-seeded to empty (`0 runtime, 0 type`). 0 cycles; browser-safety 23/23.
+
+- **`compat.zeros(n)/ones(n)` bug FIXED** (DECISION 1 — was SURFACED below, now resolved): single-arg
+  `zeros(n)`/`ones(n)` now return a length-`n` **vector** matching mathjs (`math.zeros(3).toArray()` ===
+  `[0,0,0]`, size `[3]`), instead of the former n×n square (`cols ?? rows`). Two-arg `zeros(r,c)`/`ones(r,c)`
+  keeps the r×c DenseMatrix. matrix's DenseMatrix is strictly 2-D, so the vector case returns a `number[]`.
+  Pinned in `compat/tests/parity-oracle.test.ts` (the test that formerly pinned the square bug now asserts
+  mathjs parity). Public behavior change → warrants a **compat release**.
+
+## 6. Closing tail slice — **RESOLVED 2026-07-18 (`TRUE_DUPLICATE` 89 → 12)**
+
+The closing sweep classified and dispositioned every remaining non-ADR cluster. The 12 that remained
+were **exactly** the three surfaced HUMAN-DECISION clusters (§3 WasmLoader security = 7, §4 workerpool
+caps = 4, §1 `qr` = 1) — since resolved in §7 above. Dispositions:
 
 - **Eliminated (consolidated):** `_switch` — `functions/src/utils/switch.ts`'s byte-equivalent 2-D
   transpose now re-exports the canonical `core/src/switch.ts` body via `@danielsimonjr/mathts-core/internal`
@@ -185,16 +224,14 @@ caps = 4, §1 `qr` = 1) — the irreducible floor. Dispositions:
 
 ### SURFACED for Daniel (not fixed — outward-facing / design)
 
-- **`compat.zeros(n)` / `compat.ones(n)` return an n×n SQUARE matrix** (`cols ?? rows` in
-  `compat/src/shims.ts`), diverging from mathjs's size-`n` **vector** semantics (`functions.zeros(3)` →
-  `[0,0,0]`, correct). This is compat's own always-2-D matrix-constructor contract, now **pinned** as such
-  in `compat/tests/parity-oracle.test.ts`. If strict mathjs parity is intended, this is a compat bug —
-  but changing it is an outward-facing behavior change (confirm-first), so it is surfaced, not changed.
+- **`compat.zeros(n)` / `compat.ones(n)`** — was SURFACED here (n×n square, mathjs-divergent); **FIXED
+  2026-07-18** (DECISION 1, see §7): single-arg now returns the mathjs size-`n` vector. No longer open.
 - **Factory-layer collapse ADR remains open** (Bucket-C root cause, Adam/Eve): allowlist-with-parity is the
   interim divergence guard for the `functions/src/factories/index.ts` mathjs-plugin layer — it does NOT
   resolve whether to eventually collapse factory/compat into the typed layer. That is still Daniel's call.
 
 ---
 
-_Last updated: 2026-07-18 (closing tail slice; `TRUE_DUPLICATE` 89 → 12 = the irreducible floor:
-WasmLoader security ×7 + workerpool caps ×4 + `qr` ×1, all HUMAN-DECISION)._
+_Last updated: 2026-07-18 (floor-decisions slice; `TRUE_DUPLICATE` 12 → 0. The 4 surfaced HUMAN-DECISIONs
+executed: `qr` KEEP+guard, WasmLoader shared-logic→core/internal, workerpool caps allowlist, compat
+zeros/ones mathjs-parity fix. Baseline re-seeded to empty. Campaign at absolute zero.)_

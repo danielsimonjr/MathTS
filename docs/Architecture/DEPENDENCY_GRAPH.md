@@ -108,7 +108,7 @@ The codebase is organized into the following modules:
 - **packages/typed-function**: 1 file
 - **packages/workerpool**: 4 files
 - **core/arithmetic**: 1 file
-- **core**: 16 files
+- **core**: 17 files
 - **core/error**: 3 files
 - **core/factory**: 2 files
 - **core/numeric**: 1 file
@@ -198,7 +198,7 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 4              | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 42             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 43             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
@@ -548,6 +548,7 @@ graph LR
 | `./collection.js` | `containsCollections, deepMap, deepForEach, reduce, scatter` | Re-export |
 | `./switch.js` | `_switch` | Re-export |
 | `./map.js` | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap` | Re-export |
+| `./wasm-loader.js` | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation` | Re-export |
 | `./shared.js` | `MemoizedFunction` | Re-export (type-only) |
 | `./config.js` | `ConfigOptions, MathJsConfig` | Re-export (type-only) |
 | `./array.js` | `NestedArray, IdentifiedValue` | Re-export (type-only) |
@@ -556,7 +557,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `type * from ./types/unit/unit-types.js`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `type * from ./types/unit/unit-types.js`
 
 ---
 
@@ -645,6 +646,19 @@ graph LR
 **Exports:**
 
 - Functions: `_switch`
+
+---
+
+### `core/src/wasm-loader.ts` - Shared WASM-loader runtime logic — SHA-384 integrity verification + packaged
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types/wasm-loader.js` | `WasmManifest` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`
 
 ---
 
@@ -1293,19 +1307,24 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `WasmManifest` |
+| `@danielsimonjr/mathts-core` | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, WasmManifest` |
 
 **Exports:**
 
-- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
+- Re-exports: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `WasmManifest`
 
 ---
 
-### `matrix/src/backends/wasm/resolve.ts` - Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+### `matrix/src/backends/wasm/resolve.ts` - Packaged `.wasm` artifact resolution.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `resolvePackagedWasm, defaultWasmLocation` |
 
 **Exports:**
 
-- Functions: `resolvePackagedWasm`, `defaultWasmLocation`
+- Re-exports: `resolvePackagedWasm`, `defaultWasmLocation`
 
 ---
 
@@ -9661,11 +9680,11 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-core` | `WasmManifest` |
+| `@danielsimonjr/mathts-core` | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, WasmManifest` |
 
 **Exports:**
 
-- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
+- Re-exports: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `WasmManifest`
 
 ---
 
@@ -9699,11 +9718,17 @@ graph LR
 
 ---
 
-### `functions/src/wasm/resolve.ts` - Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+### `functions/src/wasm/resolve.ts` - Packaged `.wasm` artifact resolution.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `resolvePackagedWasm, defaultWasmLocation` |
 
 **Exports:**
 
-- Functions: `resolvePackagedWasm`, `resolveBrowserWasm`, `defaultWasmLocation`
+- Functions: `resolveBrowserWasm`
+- Re-exports: `resolvePackagedWasm`, `defaultWasmLocation`
 
 ---
 
@@ -15713,10 +15738,10 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
+| `core/src/internal`                                    | 19 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `workbook/src/cli`                                     | 19 files     | 0 files    |
-| `core/src/internal`                                    | 18 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
@@ -15767,7 +15792,7 @@ graph TD
         N13[index]
         N14[internal]
         N15[is]
-        N16[...6 more]
+        N16[...7 more]
     end
 
     subgraph Core/error
@@ -16542,17 +16567,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1087   |
+| Total TypeScript Files  | 1088   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 184512 |
-| Total Exports           | 5563   |
-| Total Re-exports        | 2227   |
+| Total Lines of Code     | 184405 |
+| Total Exports           | 5575   |
+| Total Re-exports        | 2244   |
 | Total Classes           | 52     |
 | Total Interfaces        | 476    |
-| Total Functions         | 1754   |
+| Total Functions         | 1749   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
-| Type-only Imports       | 566    |
+| Type-only Imports       | 567    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
