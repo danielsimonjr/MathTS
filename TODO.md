@@ -204,11 +204,14 @@ typecheck` 32/32, eslint clean, full affected-package suites green, `check:dupli
     moving any candidate (repo bench suite; before/after in PR — don't repeat the anecdotal 40% regression); pick
     the CORRECT diverged impl ([[feedback-measure-the-symbol-consumers-import]]); prefer WIRING over deleting a
     coherent helper ([[feedback-dont-auto-delete-coherent-api]]).
-- **PREVENT ("forever"):** `check:duplicates` gate on pre-commit + CI. **Signature/contract-aware** (flag multiple
-  independent bodies for the SAME type signature, not just same name — else the allowlist floods with legit
-  typed-dispatch overloads) + keep-local allowlist (Bucket A) + **body-similarity-to-canonical** detection
-  (catches rename-circumvention `sum`→`_sum`) + suggest-reuse guidance (not just block). New unauthorized
-  duplicate fails the build.
+- **PREVENT ("forever"):** [x] ✅ **pre-commit DONE 2026-07-17** — `check:duplicates:fast`
+  (`--no-regen`, reads the `docs:deps`-refreshed report, adds <1s) wired into `.husky/pre-commit`;
+  verified FAIL on a synthetic injected duplicate (`__gateProbe`) + PASS on the clean tree. CI
+  wiring still open. **Signature/contract-aware** (flag multiple independent bodies for the SAME
+  type signature, not just same name — else the allowlist floods with legit typed-dispatch
+  overloads) + keep-local allowlist (Bucket A) + **body-similarity-to-canonical** detection
+  (catches rename-circumvention `sum`→`_sum`) + suggest-reuse guidance (not just block). New
+  unauthorized duplicate fails the build.
 - **Adversarially reviewed 2026-07-17** by Adam (Gemini-2.5-pro) + Eve (OpenAI-o3) — convergent: root-cause is
   the layering (Bucket C), Gate-1 needs signature-awareness, Gate-4 needs property-based (not deep-equal),
   hot-path needs profile-first, `noExternal` is NOT a proven fix. All folded in above.

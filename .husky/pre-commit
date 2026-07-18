@@ -30,4 +30,14 @@ if printf '%s\n' "$staged" | grep -qE '(^|/)src/|^assembly/'; then
   git add docs/api docs/reference
 fi
 
+# DUPGATE (check:duplicates:fast): prevention gate for the cross-package duplicate-symbols
+# campaign — fails the commit if it introduces a NEW TRUE_DUPLICATE beyond
+# docs/Architecture/duplicate-baseline.json (the campaign's shrinking, already-accepted backlog).
+# Runs on EVERY commit (not gated on the src/ check above) since it's just a JSON read + diff, not
+# a regen: `--no-regen` reads docs/Architecture/duplicate-symbols.json as-is, which the DGT step
+# above already refreshed when src/ changed (and is untouched, hence still correct, when it
+# didn't) — so this never triggers a second docs:deps/build:wasm run. Adds well under a second.
+echo "pre-commit: checking for new cross-package duplicate symbols (check:duplicates:fast)"
+npm run check:duplicates:fast
+
 npx lint-staged

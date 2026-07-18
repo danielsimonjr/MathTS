@@ -62,6 +62,7 @@
     "docs:graph:test": "node --test tools/query-dependency-graph/query-dependency-graph.test.mjs",
     "check:browser-safety": "node tools/query-dependency-graph/query-dependency-graph.mjs --check-browser-safety",
     "check:duplicates": "node tools/create-dependency-graph/check-duplicates.mjs",
+    "check:duplicates:fast": "node tools/create-dependency-graph/check-duplicates.mjs --no-regen",
     "docs:functions": "node tools/generate-functions-reference.mjs",
     "docs:roadmap-check": "node tools/roadmap-check/roadmap-check.mjs",
     "docs:roadmap-check:test": "node --test tools/roadmap-check/roadmap-check.test.mjs",

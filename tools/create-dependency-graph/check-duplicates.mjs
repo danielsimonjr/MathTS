@@ -1,22 +1,29 @@
 #!/usr/bin/env node
 // check:duplicates — prevention gate for the CDG duplicate-symbols campaign.
 //
-// Regenerates the duplicate-symbol analysis (via create-dependency-graph.ts,
-// the same generator `docs:deps` runs) and fails if any TRUE_DUPLICATE name
-// exists beyond docs/Architecture/duplicate-baseline.json — the campaign's
-// accepted, shrinking backlog. New unauthorized duplicates can't accumulate;
+// By default, regenerates the duplicate-symbol analysis (via
+// create-dependency-graph.ts, the same generator `docs:deps` runs) and fails
+// if any TRUE_DUPLICATE name exists beyond
+// docs/Architecture/duplicate-baseline.json — the campaign's accepted,
+// shrinking backlog. New unauthorized duplicates can't accumulate;
 // consolidating an existing one and re-running
 // `node tools/create-dependency-graph/gen-duplicate-baseline.mjs` shrinks the
 // baseline.
 //
-// NOT wired into the pre-commit hook yet (deliberate follow-up) — running
-// the full CDG scan on every commit would slow down the in-flight
-// consolidation campaign. Run manually or from CI.
+// Wired into the pre-commit hook via `--no-regen` (see `check:duplicates:fast`
+// in package.json / .husky/pre-commit): the hook's `precommit:refresh` step
+// already regenerates docs/Architecture/duplicate-symbols.json as a side
+// effect of `docs:deps` whenever a commit touches package `src/`, so this flag
+// skips the (redundant, ~9min-if-it-also-rebuilt-wasm) regen and just reads
+// that already-fresh report — the gate then adds only the JSON-diff cost
+// (well under a second). Run WITHOUT `--no-regen` manually or from CI when you
+// want a self-contained, always-fresh check.
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const ROOT_DIR = process.cwd();
+const SKIP_REGEN = process.argv.includes('--no-regen');
 
 // Fixed literal command — no user input is ever interpolated into it, so
 // there is no shell-injection surface here. `shell` is required regardless
@@ -53,13 +60,17 @@ function diffNewDuplicates(current, baseline) {
 }
 
 function main() {
-  console.log('check:duplicates — regenerating duplicate-symbol analysis...');
-  try {
-    regenerateDuplicateSymbols();
-  } catch (err) {
-    console.error('Failed to regenerate docs/Architecture/duplicate-symbols.json:');
-    console.error(err.message);
-    process.exit(1);
+  if (SKIP_REGEN) {
+    console.log('check:duplicates --no-regen — reading existing duplicate-symbol analysis...');
+  } else {
+    console.log('check:duplicates — regenerating duplicate-symbol analysis...');
+    try {
+      regenerateDuplicateSymbols();
+    } catch (err) {
+      console.error('Failed to regenerate docs/Architecture/duplicate-symbols.json:');
+      console.error(err.message);
+      process.exit(1);
+    }
   }
 
   const report = readJson('docs/Architecture/duplicate-symbols.json');

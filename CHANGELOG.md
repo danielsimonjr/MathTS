@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — wire `check:duplicates` into the pre-commit hook (the "resolve forever" capstone)
+
+`npm run check:duplicates` (added earlier, see "`check:duplicates` prevention gate" below) is now
+wired into `.husky/pre-commit`: every commit fails if it introduces a NEW cross-package
+`TRUE_DUPLICATE` beyond `docs/Architecture/duplicate-baseline.json` (the campaign's current 135
+runtime accepted names), naming the offending symbol, its defining files, and the remediation
+(consolidate onto the canonical, add to `duplicate-allowlist.json` if legitimately independent, or
+re-run `gen-duplicate-baseline.mjs` if it's an accepted new backlog item).
+
+- `tools/create-dependency-graph/check-duplicates.mjs` gained a `--no-regen` flag that skips the
+  full CDG re-scan and reads the already-written `docs/Architecture/duplicate-symbols.json`
+  as-is — new `check:duplicates:fast` npm script (`check:duplicates --no-regen`).
+- `.husky/pre-commit` runs `check:duplicates:fast` on every commit, placed after the existing
+  gated `docs:deps` regen step (which already refreshes `duplicate-symbols.json` whenever a
+  commit touches package `src/`) and before `lint-staged` — so the gate reads fresh data without
+  ever triggering a second `docs:deps`/`build:wasm` run. Cost: well under a second (measured
+  ~0.3-0.4s), vs. minutes for a full CDG re-scan.
+- Verified: a normal commit passes silently; injecting a synthetic duplicate
+  (`export function __gateProbe()` in `core/src/constants.ts` + `matrix/src/config.ts`) and
+  running the hook end-to-end (`sh -e .husky/pre-commit`, matching husky's actual invocation)
+  correctly aborted the commit at the `check:duplicates:fast` step (exit 1, before `lint-staged`
+  ever ran), naming `__gateProbe` and both files. The synthetic addition was then reverted.
+
 ### Dedup — cross-package TYPE declarations (core, expression, functions, matrix, parallel, tensor)
 
 Triage + consolidation pass over the `docs/Architecture/duplicate-symbols.json` **`types`**
