@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-functions
 
+## 0.56.0
+
+### Minor Changes
+
+- Special functions: Mathieu characteristic values and angular functions.
+
+  Four new exports for the Mathieu equation `y'' + (a − 2q·cos 2x)·y = 0`:
+  - **`mathieuA(n, q)` / `mathieuB(n, q)`** — the characteristic values `a_n(q)` / `b_n(q)`.
+  - **`mathieuCe(n, q, x)` / `mathieuSe(n, q, x)`** — the angular Mathieu functions (x in radians).
+
+  Computed via the symmetric-tridiagonal eigenproblem for the Fourier coefficients (one matrix per parity class,
+  DLMF §28.4, N=50), reusing the matrix package's symmetric `eig`; eigendecomposition cached per `(class, q)`.
+  DLMF/A&S normalization (`(1/π)∫₀^{2π} ce_n² = 1`, so `ce_0(x,0)=1/√2`, `ce_n(x,0)=cos nx`, `se_n(x,0)=sin nx`).
+  vs `scipy.special` (mpmath 1.3.0 omits the Mathieu family): `a_n`/`b_n` max relerr ~1.2e-14, `ce_n`/`se_n`
+  ~7e-15; the `q→0` limits and the Mathieu-ODE residual are also pinned.
+
 ## 0.55.0
 
 ### Minor Changes
