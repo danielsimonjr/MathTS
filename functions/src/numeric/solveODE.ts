@@ -37,6 +37,41 @@ interface ButcherTableau {
 }
 
 /**
+ * An event function `g(t, y)` whose zero crossings `solveODE` locates. May carry scipy-style
+ * `terminal`/`direction` attributes directly on the function object.
+ *
+ * - `terminal`: `true` (stop at the first crossing), a positive integer (stop after that many
+ *   crossings), or omitted/`false` (record every crossing, never stop).
+ * - `direction`: `+1` (trigger only on `−`→`+` crossings), `−1` (only `+`→`−`), or `0`/omitted
+ *   (either direction).
+ *
+ * The state `y` is passed in the same shape the forcing function receives it (a `number[]` — a
+ * length-1 array for a scalar ODE).
+ */
+interface EventFunction {
+  (t: number, y: number[]): number;
+  terminal?: boolean | number;
+  direction?: number;
+}
+
+/** Object form of an ODE event: the function plus its `terminal`/`direction` attributes. */
+interface EventSpec {
+  event: (t: number, y: number[]) => number;
+  terminal?: boolean | number;
+  direction?: number;
+}
+
+/** One event, or an array of events, accepted by the `events` option. */
+type ODEEvents = EventFunction | EventSpec | Array<EventFunction | EventSpec>;
+
+/** Internal normalised event: `terminal` as a crossing count (0 = never), `direction` as −1/0/+1. */
+interface NormalizedEvent {
+  g: (t: number, y: number[]) => number;
+  terminal: number;
+  direction: number;
+}
+
+/**
  * Options for ODE solver
  */
 interface ODEOptions {
@@ -54,6 +89,13 @@ interface ODEOptions {
    * (n = state dimension). Ignored by the explicit RK23/RK45 methods.
    */
   jac?: (t: number, y: number[]) => number[][];
+  /**
+   * Event detection (scipy `solve_ivp`-style). One event function `g(t, y)` or an array of them;
+   * `solveODE` locates each zero crossing between accepted steps and reports it in `tEvents`/
+   * `yEvents`. A `terminal` event stops the integration at its crossing; `direction` filters the
+   * crossing sign. Requires plain-number state (throws otherwise). See {@link EventFunction}.
+   */
+  events?: ODEEvents;
 }
 
 /**
@@ -62,6 +104,10 @@ interface ODEOptions {
 interface ODESolution<T = unknown> {
   t: T[];
   y: T[];
+  /** Event crossing times, one array per event function (present only when `events` was given). */
+  tEvents?: number[][];
+  /** Event states, one array per event function, aligned with `tEvents`. */
+  yEvents?: T[][];
 }
 
 /**
@@ -204,6 +250,225 @@ function _fdTimeDerivative(f: ForcingFunction, t: number, y: number[], f0: numbe
   const delt = Math.sqrt(Number.EPSILON * Math.max(1e-5, Math.abs(t)));
   const fp = _fArr(f, t + delt, y);
   return f0.map((v, i) => (fp[i] - v) / delt);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Event detection (scipy solve_ivp-style) — pure numeric helpers, plain-number state only.
+// ---------------------------------------------------------------------------------------------
+
+/** Normalise `terminal` (true → 1, positive int → that count, else 0 = non-terminal). */
+function _terminalCount(t: boolean | number | undefined): number {
+  if (t === true) return 1;
+  if (typeof t === 'number' && t > 0) return Math.floor(t);
+  return 0;
+}
+
+/** Normalise `direction` to −1, 0, or +1. */
+function _directionSign(d: number | undefined): number {
+  return typeof d === 'number' && d !== 0 ? Math.sign(d) : 0;
+}
+
+/** Normalise the `events` option (function/attributes or object form, single or array). */
+function _normalizeEvents(events: ODEEvents): NormalizedEvent[] {
+  const list = Array.isArray(events) ? events : [events];
+  return list.map((spec) => {
+    if (typeof spec === 'function') {
+      return {
+        g: spec,
+        terminal: _terminalCount(spec.terminal),
+        direction: _directionSign(spec.direction),
+      };
+    }
+    return {
+      g: spec.event,
+      terminal: _terminalCount(spec.terminal),
+      direction: _directionSign(spec.direction),
+    };
+  });
+}
+
+/**
+ * Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`, using the endpoint
+ * states `ya`, `yb` and endpoint derivatives `fa = f(ta, ya)`, `fb = f(tb, yb)`. C¹ and O(h⁴)
+ * accurate, so an event root located on it matches the true crossing to well under the solver `tol`.
+ */
+function _hermite(
+  ta: number,
+  tb: number,
+  ya: number[],
+  yb: number[],
+  fa: number[],
+  fb: number[],
+  t: number
+): number[] {
+  const h = tb - ta;
+  const theta = h === 0 ? 0 : (t - ta) / h;
+  const th2 = theta * theta;
+  const th3 = th2 * theta;
+  const h00 = 2 * th3 - 3 * th2 + 1;
+  const h10 = th3 - 2 * th2 + theta;
+  const h01 = -2 * th3 + 3 * th2;
+  const h11 = th3 - th2;
+  return ya.map((_, i) => h00 * ya[i] + h10 * h * fa[i] + h01 * yb[i] + h11 * h * fb[i]);
+}
+
+/**
+ * Locate the zero of `gEval` in `[ta, tb]` by bisection, given endpoint values `ga`, `gb` that
+ * straddle zero (or `gb === 0`). Works for forward (`ta < tb`) or backward (`ta > tb`) steps.
+ */
+function _bisectEventRoot(
+  gEval: (t: number) => number,
+  ta: number,
+  tb: number,
+  ga: number,
+  gb: number
+): number {
+  if (gb === 0) return tb;
+  if (ga === 0) return ta;
+  let a = ta;
+  let b = tb;
+  let gaCur = ga;
+  for (let iter = 0; iter < 100; iter++) {
+    const m = 0.5 * (a + b);
+    const gm = gEval(m);
+    if (gm === 0 || Math.abs(b - a) <= 1e-15 * Math.max(1, Math.abs(m))) return m;
+    if (gaCur < 0 === gm < 0) {
+      a = m;
+      gaCur = gm;
+    } else {
+      b = m;
+    }
+  }
+  return 0.5 * (a + b);
+}
+
+/** A located event crossing within one accepted step. */
+interface EventHit {
+  eventIndex: number;
+  tStar: number;
+  yStar: number[];
+}
+
+/**
+ * Scan the accepted-step trajectory for zero crossings of each event function, honouring
+ * `direction`. Crossings are located by cubic-Hermite interpolation + bisection. `terminal` events
+ * stop the scan at their required crossing count; the earliest such terminal crossing across all
+ * events is returned as `trunc` (with the step index it falls in) so the caller can truncate the
+ * returned solution there.
+ *
+ * @param dir +1 for forward integration (`tf ≥ t0`), −1 for backward — used to order within-step
+ *            crossings in integration order.
+ */
+function _detectEvents(
+  f: ForcingFunction,
+  tArr: number[],
+  yArr: number[][],
+  evs: NormalizedEvent[],
+  dir: number
+): {
+  tEvents: number[][];
+  yEvents: number[][];
+  trunc: { tStar: number; yStar: number[]; stepIndex: number } | null;
+} {
+  const nEv = evs.length;
+  const tEvents: number[][] = evs.map(() => []);
+  const yEvents: number[][][] = evs.map(() => []) as unknown as number[][][];
+  const remaining = evs.map((e) => e.terminal); // crossings left before a terminal event fires
+  let trunc: { tStar: number; yStar: number[]; stepIndex: number } | null = null;
+
+  let gPrev = evs.map((e) => e.g(tArr[0], yArr[0]));
+
+  for (let i = 0; i < tArr.length - 1 && trunc === null; i++) {
+    const ta = tArr[i];
+    const tb = tArr[i + 1];
+    const ya = yArr[i];
+    const yb = yArr[i + 1];
+    const gCurr = evs.map((e) => e.g(tb, yb));
+
+    // Endpoint derivatives for the Hermite interpolant — computed at most once per step, lazily.
+    let fa: number[] | null = null;
+    let fb: number[] | null = null;
+
+    const hits: EventHit[] = [];
+    for (let e = 0; e < nEv; e++) {
+      const ga = gPrev[e];
+      const gb = gCurr[e];
+      const up = ga < 0 && gb >= 0; // −→+ crossing (strict on ga avoids recounting a shared endpoint)
+      const down = ga > 0 && gb <= 0; // +→− crossing
+      if (!up && !down) continue;
+      const d = evs[e].direction;
+      if (d > 0 && !up) continue;
+      if (d < 0 && !down) continue;
+
+      let tStar: number;
+      let yStar: number[];
+      if (gb === 0) {
+        tStar = tb;
+        yStar = yb.slice();
+      } else {
+        if (fa === null) {
+          fa = _fArr(f, ta, ya);
+          fb = _fArr(f, tb, yb);
+        }
+        const interp = (t: number): number[] => _hermite(ta, tb, ya, yb, fa!, fb!, t);
+        tStar = _bisectEventRoot((t) => evs[e].g(t, interp(t)), ta, tb, ga, gb);
+        yStar = interp(tStar);
+      }
+      hits.push({ eventIndex: e, tStar, yStar });
+    }
+
+    // Order crossings within the step in integration order, then commit them.
+    hits.sort((p, q) => (dir >= 0 ? p.tStar - q.tStar : q.tStar - p.tStar));
+    for (const hit of hits) {
+      tEvents[hit.eventIndex].push(hit.tStar);
+      yEvents[hit.eventIndex].push(hit.yStar);
+      if (remaining[hit.eventIndex] > 0) {
+        remaining[hit.eventIndex] -= 1;
+        if (remaining[hit.eventIndex] === 0) {
+          trunc = { tStar: hit.tStar, yStar: hit.yStar, stepIndex: i };
+          break;
+        }
+      }
+    }
+    gPrev = gCurr;
+  }
+
+  return { tEvents, yEvents: yEvents as unknown as number[][], trunc };
+}
+
+/**
+ * Apply event detection to a computed numeric solution: attach `tEvents`/`yEvents` and, if a
+ * terminal event fired, truncate the trajectory at the crossing. Throws if the state is not plain
+ * numeric (events need `g(t, y)` numeric arithmetic). The state inside `solveODE` is always a
+ * `number[]` per step (a scalar ODE's state is the wrapped `[v]`).
+ */
+function _applyEvents(
+  f: ForcingFunction,
+  sol: { t: unknown[]; y: unknown[] },
+  events: ODEEvents,
+  dir: number
+): ODESolution {
+  const numeric =
+    sol.y.every((s) => Array.isArray(s) && (s as unknown[]).every((v) => typeof v === 'number')) &&
+    sol.t.every((v) => typeof v === 'number');
+  if (!numeric) {
+    throw new Error('solveODE: the "events" option requires plain-number state and time');
+  }
+  const tArr = sol.t as number[];
+  const yArr = sol.y as number[][];
+  const evs = _normalizeEvents(events);
+  const { tEvents, yEvents, trunc } = _detectEvents(f, tArr, yArr, evs, dir);
+
+  if (trunc) {
+    const keep = trunc.stepIndex + 1; // accepted points up to and including the step's start
+    return {
+      t: [...tArr.slice(0, keep), trunc.tStar],
+      y: [...yArr.slice(0, keep), trunc.yStar],
+      tEvents,
+      yEvents,
+    };
+  }
+  return { t: tArr, y: yArr, tEvents, yEvents };
 }
 
 /**
@@ -543,12 +808,22 @@ export const createSolveODE = /* #__PURE__ */ factory(
      *   - `maxDelta` (5): maximum ratio of change for the step (RK23/RK45 only)
      *   - `maxIter`: maximum number of iterations (1e4 for RK23/RK45; 1e5 for Rosenbrock, which is
      *     2nd order and so takes more steps at tight tolerances)
+     *   - `events`: event detection (scipy `solve_ivp`-style). One event function `g(t, y)` or an
+     *     array of them; the solver locates each zero crossing between accepted steps (cubic-Hermite
+     *     interpolation + bisection) and reports it in `tEvents`/`yEvents`. An event may carry (as
+     *     properties, or via the `{ event, terminal, direction }` object form): `terminal` — `true`
+     *     to stop at the first crossing, a positive integer to stop after that many, else record all;
+     *     `direction` — `+1` to trigger only on `−`→`+` crossings, `−1` only `+`→`−`, `0` either.
+     *     Requires plain-number state.
      *
      * The returned value is an object with `{t, y}` please note that even though `t` means time, it can represent any other independant variable like `x`:
      * - `t` an array of size `[n]`
      * - `y` the states array can be in two ways
      *   - **if `y0` is a scalar:** returns an array-like of size `[n]`
      *   - **if `y0` is a flat array-like of size [m]:** returns an array like of size `[n, m]`
+     * - when the `events` option is given, also `tEvents` and `yEvents`: arrays with one entry per
+     *   event function, holding the crossing times and states (states unwrapped to scalars when `y0`
+     *   is scalar). A `terminal` event truncates `t`/`y` at its crossing.
      *
      * Syntax:
      *
@@ -563,6 +838,8 @@ export const createSolveODE = /* #__PURE__ */ factory(
      *     math.solveODE(func, tspan, y0)
      *     math.solveODE(func, tspan, [1, 2])
      *     math.solveODE(func, tspan, y0, { method:"RK23", maxStep:0.1 })
+     *     // event detection: stop when the projectile height y[0] returns to 0
+     *     math.solveODE(f, [0, 10], [0, 20], { events: { event: (t, y) => y[0], terminal: true, direction: -1 } })
      *
      * See also:
      *
@@ -1059,7 +1336,19 @@ export const createSolveODE = /* #__PURE__ */ factory(
       if (method.toUpperCase() in methods) {
         const methodOptions = { ...opt }; // clone the options object
         delete methodOptions.method; // delete the method as it won't be needed
-        return methods[method.toUpperCase() as keyof typeof methods](f, tspan, y0, methodOptions);
+        const sol = methods[method.toUpperCase() as keyof typeof methods](
+          f,
+          tspan,
+          y0,
+          methodOptions
+        );
+        // Event detection runs as a post-pass over the accepted-step trajectory, so it is
+        // method-agnostic (explicit RK and stiff paths alike). Only engaged when requested.
+        if (opt.events !== undefined) {
+          const dir = (tspan[1] as number) >= (tspan[0] as number) ? 1 : -1;
+          return _applyEvents(f, sol as { t: unknown[]; y: unknown[] }, opt.events, dir);
+        }
+        return sol;
       } else {
         // throw an error indicating there is no such method
         const methodsWithQuotes = Object.keys(methods).map((x) => `"${x}"`);
@@ -1094,10 +1383,28 @@ export const createSolveODE = /* #__PURE__ */ factory(
       T: Matrix,
       y0: Matrix,
       options: ODEOptions
-    ): { t: Matrix; y: Matrix } {
-      // receives matrices and returns matrices
+    ): { t: Matrix; y: Matrix; tEvents?: number[][]; yEvents?: unknown[][] } {
+      // receives matrices and returns matrices; event lists (ragged, one per event fn) stay plain.
       const sol = _solveODE(f, T.toArray(), y0.toArray(), options);
-      return { t: matrix(sol.t), y: matrix(sol.y) };
+      const out: { t: Matrix; y: Matrix; tEvents?: number[][]; yEvents?: unknown[][] } = {
+        t: matrix(sol.t),
+        y: matrix(sol.y),
+      };
+      if (sol.tEvents) {
+        out.tEvents = sol.tEvents;
+        out.yEvents = sol.yEvents;
+      }
+      return out;
+    }
+
+    /** Unwrap a scalar-ODE solution (internal state `[v]` → `v`) for both `y` and `yEvents`. */
+    function _unwrapScalarSol(sol: ODESolution): ODESolution {
+      const out: ODESolution = { t: sol.t, y: sol.y.map((Y: unknown) => (Y as unknown[])[0]) };
+      if (sol.tEvents) {
+        out.tEvents = sol.tEvents;
+        out.yEvents = sol.yEvents?.map((list) => list.map((Y: unknown) => (Y as unknown[])[0]));
+      }
+      return out;
     }
 
     return typed('solveODE', {
@@ -1111,10 +1418,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         f: ForcingFunction,
         T: unknown[],
         y0: number | BigNumber | Unit
-      ) => {
-        const sol = _solveODE(f, T, [y0], {});
-        return { t: sol.t, y: sol.y.map((Y: unknown) => (Y as unknown[])[0]) };
-      },
+      ) => _unwrapScalarSol(_solveODE(f, T, [y0], {})),
       'function, Matrix, number | BigNumber | Unit': (
         f: ForcingFunction,
         T: Matrix,
@@ -1128,10 +1432,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         T: unknown[],
         y0: number | BigNumber | Unit,
         options: ODEOptions
-      ) => {
-        const sol = _solveODE(f, T, [y0], options);
-        return { t: sol.t, y: sol.y.map((Y: unknown) => (Y as unknown[])[0]) };
-      },
+      ) => _unwrapScalarSol(_solveODE(f, T, [y0], options)),
       'function, Matrix, number | BigNumber | Unit, Object': (
         f: ForcingFunction,
         T: Matrix,
@@ -1139,7 +1440,15 @@ export const createSolveODE = /* #__PURE__ */ factory(
         options: ODEOptions
       ) => {
         const sol = _solveODE(f, T.toArray(), [y0], options);
-        return { t: matrix(sol.t), y: matrix(sol.y.map((Y: unknown) => (Y as unknown[])[0])) };
+        const out: { t: Matrix; y: Matrix; tEvents?: number[][]; yEvents?: unknown[][] } = {
+          t: matrix(sol.t),
+          y: matrix(sol.y.map((Y: unknown) => (Y as unknown[])[0])),
+        };
+        if (sol.tEvents) {
+          out.tEvents = sol.tEvents;
+          out.yEvents = sol.yEvents?.map((list) => list.map((Y: unknown) => (Y as unknown[])[0]));
+        }
+        return out;
       },
     });
   }

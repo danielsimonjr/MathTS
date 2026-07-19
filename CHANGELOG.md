@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): `solveODE` event detection (`events` option) — scipy `solve_ivp` parity
+
+- `solveODE(f, tspan, y0, { events })` now locates zero crossings of event functions `g(t, y)`,
+  scipy-`solve_ivp`-style. `events` is one function or an array; each function may carry `terminal`
+  (`true` → stop at the first crossing, a positive integer → stop after that many, else record all)
+  and `direction` (`+1` → only `−`→`+` crossings, `−1` → only `+`→`−`, `0` → either) — as properties
+  on the function or via the `{ event, terminal, direction }` object form.
+- Crossings are located by cubic-Hermite dense interpolation of the accepted step + bisection, run
+  as a **method-agnostic post-pass** over the trajectory (explicit RK and stiff Rosenbrock/RODAS
+  alike). Results gain `tEvents`/`yEvents` — one list per event function of crossing times/states
+  (states unwrapped to scalars for a scalar `y0`); a `terminal` event truncates `t`/`y` at its
+  crossing. Requires plain-number state. Absent the `events` option the result shape is unchanged.
+- Pinned to `scipy.integrate.solve_ivp(..., events=)`: terminal projectile ground-hit to 4e-15,
+  direction-filtered harmonic up-crossings to ~3e-13, multi-event sin/cos crossings to ~4e-9, and
+  `terminal` counts (`functions/tests/solveode-events.test.ts`).
+
 ### feat(matrix): `luSolve` primitive + stiff-ODE per-step solve routed onto it
 
 - New `luSolve(fac, b)` in `@danielsimonjr/mathts-matrix` — solves `A·x = b` from a precomputed

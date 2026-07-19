@@ -542,9 +542,9 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
       solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
       scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
       `functions/tests/solveode-jspath.test.ts`.
-- [~] **[follow-up] Stiff solver niceties.** ✅ **RODAS (4th-order L-stable Rosenbrock) + analytic-
-  Jacobian (`jac`) option + Robertson test DONE 2026-07-16 (functions@0.41.0)** — RODAS reaches
-  tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau.
+- [x] ✅ **[follow-up] Stiff solver niceties — COMPLETE.** ✅ **RODAS (4th-order L-stable Rosenbrock) + analytic-
+      Jacobian (`jac`) option + Robertson test DONE 2026-07-16 (functions@0.41.0)** — RODAS reaches
+      tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau.
   - [x] ✅ **Reuse the matrix package's LU DONE 2026-07-18.** Added a `luSolve(fac, b)` primitive to
         `@danielsimonjr/mathts-matrix` (solve against an `lu()` factorisation, numpy-pinned). The stiff
         step now routes its per-step `(I−hγJ)k=b` solve through a **threshold hybrid** (`_factorSolver`):
@@ -554,7 +554,15 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
         by n=40). Small-path numerics bit-for-bit unchanged (verified on the full stiff corpus); large path
         pinned to the exact heat-equation mode. `matrix/tests/operations/lu-solve.test.ts`,
         `functions/tests/solveode-jspath.test.ts`.
-  - [ ] **event detection (`events` option).**
+  - [x] ✅ **Event detection (`events` option) DONE 2026-07-18.** scipy `solve_ivp`-style: one
+        `g(t, y)` event function or an array; zero crossings between accepted steps are located by
+        cubic-Hermite dense interpolation + bisection and returned in `tEvents`/`yEvents` (one list per
+        event fn). `terminal` (`true`/count) stops the integration at the crossing; `direction` (±1)
+        filters the crossing sign; attributes on the function or `{event, terminal, direction}` object
+        form. Method-agnostic (post-pass over the accepted trajectory — RK + stiff alike); plain-number
+        state. Pinned to scipy `solve_ivp(..., events=)`: projectile ground-hit to 4e-15, harmonic
+        up-crossings to ~3e-13, multi-event sin/cos to ~4e-9 (`functions/tests/solveode-events.test.ts`).
+        **Stiff-solver niceties follow-up now COMPLETE.**
 
 ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 

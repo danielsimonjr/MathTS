@@ -1941,7 +1941,12 @@ bounds })` runs a two-phase simplex (Phase 1 artificial variables find a
   `'Rosenbrock'` (2nd-order ode23s) and `'RODAS'` (Hairer & Wanner 4th-order,
   6-stage — for tight tolerances where ode23s takes too many steps). The stiff
   methods finite-difference the Jacobian unless an analytic one is passed via the
-  `jac: (t, y) => number[][]` option.
+  `jac: (t, y) => number[][]` option, and route their per-step dense linear solve
+  onto the `matrix` package's LU primitive for large systems (inline below n=8).
+  `solveODE` also supports scipy-`solve_ivp`-style **event detection** via the
+  `events` option (one `g(t, y)` function or an array; each zero crossing is
+  located and returned in `tEvents`/`yEvents`, with `terminal`/`direction`
+  attributes to stop the integration or filter the crossing sign).
 - `cond(A)` reports how sensitive a linear solve is to perturbations — a large
   condition number warns that `linsolve` results may be unreliable.
 

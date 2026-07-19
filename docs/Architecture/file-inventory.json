@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1704,
+  "totalFiles": 1705,
   "byDisposition": {
     "reachable": 1056,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 553,
+    "test": 554,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1092,
-    "tests": 553,
+    "tests": 554,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 695,
+    "@danielsimonjr/mathts-functions": 696,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -6001,7 +6001,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1147
+      "loc": 1456
     },
     {
       "file": "functions/src/numeric/structured-solvers.ts",
@@ -8977,6 +8977,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 66
+    },
+    {
+      "file": "functions/tests/solveode-events.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 120
     },
     {
       "file": "functions/tests/solveode-jspath.test.ts",
