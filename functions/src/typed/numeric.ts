@@ -1200,12 +1200,119 @@ export interface ODESolution {
 }
 
 /**
- * Solve a system of ODEs dy/dt = f(t, y) using RK45 (Dormand-Prince).
+ * Embedded Dormand-Prince RK45 tableau (the same 5(4) pair `solveODE`'s RK45 uses) for the
+ * adaptive path of `solveODESystem`. `b` is the 5th-order weight row (FSAL: equals the last stage
+ * row `a7`), `bhat` the embedded 4th-order weight row; their difference is the local error estimate.
+ */
+const _DP_C = [0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1, 1];
+const _DP_A: number[][] = [
+  [],
+  [1 / 5],
+  [3 / 40, 9 / 40],
+  [44 / 45, -56 / 15, 32 / 9],
+  [19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729],
+  [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656],
+  [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84],
+];
+const _DP_B = [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0];
+const _DP_BHAT = [5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187 / 2100, 1 / 40];
+
+/**
+ * Adaptive embedded RK45 (Dormand-Prince) integrator for a plain-number first-order system — the
+ * default (no explicit `dt`) path of `solveODESystem`. Keeps the scaled-RMS local error under the
+ * tolerance `atol + rtol·|y|` (rtol = `tol`, atol = `tol·1e-3`), adjusting the step per accepted
+ * step; the last output point lands exactly on `tf`. Non-stiff use only — stiff systems should use
+ * `stiffODESolver` or `solveODE(..., {method:'BDF'|'Radau'})`.
+ */
+function _adaptiveRK45System(
+  f: (t: f64, y: number[]) => number[],
+  y0: number[],
+  tspan: [f64, f64],
+  tol: f64,
+  maxSteps: i32
+): ODESolution {
+  const n = y0.length;
+  const [t0, tf] = tspan;
+  const dir = tf >= t0 ? 1 : -1;
+  const rtol = tol;
+  const atol = tol * 1e-3;
+
+  const ts: number[] = [t0];
+  const ys: number[][] = [y0.slice()];
+  let t = t0;
+  let y = y0.slice();
+
+  // Initial step: Hairer heuristic h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖ (same as solveODE's JS path).
+  const f0 = f(t, y);
+  const rms = (v: number[]): f64 => {
+    let s = 0;
+    for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+    return Math.sqrt(s / v.length);
+  };
+  const d0 = rms(y);
+  const d1 = rms(f0);
+  let h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), Math.abs(tf - t0));
+
+  let steps = 0;
+  while ((dir > 0 ? t < tf : t > tf) && steps < maxSteps) {
+    steps++;
+    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
+
+    const k: number[][] = [f(t, y)];
+    for (let s = 1; s < 7; s++) {
+      const ys_: number[] = y.slice();
+      for (let j = 0; j < s; j++) {
+        const aij = _DP_A[s][j];
+        if (aij === 0) continue;
+        for (let i = 0; i < n; i++) ys_[i] += h * aij * k[j][i];
+      }
+      k.push(f(t + _DP_C[s] * h, ys_));
+    }
+
+    const yNew = y.slice();
+    let errNorm = 0;
+    for (let i = 0; i < n; i++) {
+      let sum5 = 0;
+      let errI = 0;
+      for (let s = 0; s < 7; s++) {
+        sum5 += _DP_B[s] * k[s][i];
+        errI += (_DP_B[s] - _DP_BHAT[s]) * k[s][i];
+      }
+      yNew[i] = y[i] + h * sum5;
+      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
+      errNorm += ((h * errI) / sc) ** 2;
+    }
+    errNorm = Math.sqrt(errNorm / n);
+
+    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
+      t += h;
+      y = yNew;
+      ts.push(t);
+      ys.push(y.slice());
+    }
+    // Step-size control (order-5 embedded → exponent 1/5), clamped to avoid wild swings.
+    h *= Math.min(5, Math.max(0.2, 0.9 * Math.pow(errNorm || 1e-10, -1 / 5)));
+  }
+
+  if (steps >= maxSteps) {
+    throw new Error('Maximum number of steps reached in solveODESystem, try changing options');
+  }
+  return { t: ts, y: ys };
+}
+
+/**
+ * Solve a system of ODEs dy/dt = f(t, y).
+ *
+ * By default (no `dt`) it uses **adaptive** embedded RK45 (Dormand-Prince) with local-error control
+ * — the step size is chosen automatically to keep the scaled RMS error under `tol`. Passing an
+ * explicit `dt` selects the legacy **fixed-step** RK4 integrator instead (unchanged, for callers
+ * that want a prescribed step, e.g. the BVP shooting driver).
  *
  * @param f - System function (t, y) => dy/dt
  * @param y0 - Initial state vector
  * @param tspan - [t0, tf] time span
- * @param opts - Options (tol, maxIter for max steps)
+ * @param opts - Options: `tol` (adaptive local-error tolerance, default 1e-6), `maxSteps` (step
+ *   cap), `dt` (fixed step — selects the legacy fixed-step RK4 path)
  * @returns Solution { t, y }
  */
 export function solveODESystem(
@@ -1214,8 +1321,13 @@ export function solveODESystem(
   tspan: [f64, f64],
   opts?: { tol?: f64; maxSteps?: i32; dt?: f64 }
 ): ODESolution {
+  // Adaptive path when no explicit fixed step is requested (embedded RK45 error control).
+  if (opts?.dt === undefined) {
+    return _adaptiveRK45System(f, y0, tspan, opts?.tol ?? 1e-6, opts?.maxSteps ?? 100_000);
+  }
+
   const n = y0.length;
-  const dt = opts?.dt ?? (tspan[1] - tspan[0]) / 200;
+  const dt = opts.dt;
   const nSteps = Math.ceil((tspan[1] - tspan[0]) / dt);
   const h = (tspan[1] - tspan[0]) / nSteps;
 

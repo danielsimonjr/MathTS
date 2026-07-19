@@ -2497,15 +2497,21 @@
         constraints, per-variable `bounds` (default `[0, null]`), and reports
         `{ x, fun, success, status }` with `status` one of `'optimal'`,
         `'infeasible'`, or `'unbounded'`.
-      - The ODE family ranges from fixed-step (`solveODE`) through adaptive
-        (`odeAdaptiveStep`) to `stiffODESolver` for stiff systems where explicit
-        methods would require impractically small steps. `solveODE`'s `method` option
-        selects `'RK23'`/`'RK45'` (explicit) or the L-stable Rosenbrock methods
-        `'Rosenbrock'` (2nd-order ode23s) and `'RODAS'` (Hairer & Wanner 4th-order,
-        6-stage — for tight tolerances where ode23s takes too many steps). The stiff
-        methods finite-difference the Jacobian unless an analytic one is passed via the
-        `jac: (t, y) => number[][]` option, and route their per-step dense linear solve
-        onto the `matrix` package's LU primitive for large systems (inline below n=8).
+      - The ODE family ranges from adaptive explicit methods through the implicit
+        stiff solvers to `stiffODESolver` for stiff systems where explicit methods
+        would require impractically small steps. `solveODE`'s `method` option selects
+        `'RK23'`/`'RK45'` (explicit) or four L-stable implicit stiff methods:
+        `'Rosenbrock'` (2nd-order ode23s), `'RODAS'` (Hairer & Wanner 4th-order,
+        6-stage — for tight tolerances where ode23s takes too many steps),
+        `'BDF'` (variable-order 1–5 variable-step backward differentiation — scipy's
+        default general-purpose stiff workhorse), and `'Radau'` (3-stage, 5th-order
+        Radau IIA implicit Runge-Kutta — high-order accuracy on very stiff systems).
+        All four stiff methods finite-difference the Jacobian unless an analytic one is
+        passed via the `jac: (t, y) => number[][]` option, and route their per-step
+        dense linear solve onto the `matrix` package's LU primitive for large systems
+        (inline below n=8). `solveODESystem` integrates a first-order system with
+        **adaptive** embedded RK45 (Dormand-Prince) error control by default; passing an
+        explicit `dt` selects the legacy fixed-step RK4 instead.
         `solveODE` also supports scipy-`solve_ivp`-style **event detection** via the
         `events` option (one `g(t, y)` function or an array; each zero crossing is
         located and returned in `tEvents`/`yEvents`, with `terminal`/`direction`

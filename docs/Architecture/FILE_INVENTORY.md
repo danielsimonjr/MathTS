@@ -6,7 +6,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1725
+**Total files**: 1726
 
 ## Disposition counts
 
@@ -16,11 +16,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        3 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      564 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      565 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1725** |                                                                                                              |
+| **Total**     | **1726** |                                                                                                              |
 
 ## Per-area counts
 
@@ -29,7 +29,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1102 |
-| `tests`    |   564 |
+| `tests`    |   565 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -44,7 +44,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   489 |
-| `@danielsimonjr/mathts-functions`      |   716 |
+| `@danielsimonjr/mathts-functions`      |   717 |
 | `@danielsimonjr/mathts-gpu`            |    14 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    92 |
@@ -1268,6 +1268,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/gap-special-wave-oracle.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-stats-breadth-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-stats-completeness.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/gap-stiff-bdf-radau-oracle.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-stiff-rodas-oracle.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-sylvester-lyap-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-symbolic-integral.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |

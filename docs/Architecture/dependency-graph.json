@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-19",
     "totalFiles": 1099,
     "totalModules": 82,
-    "totalExports": 5629
+    "totalExports": 5631
   },
   "entryPoints": [
     {
@@ -14852,8 +14852,8 @@
             "imports": ["DenseMatrix", "lu", "luSolve"]
           }
         ],
-        "exports": ["createSolveODE", "rosenbrockSolve", "rodasSolve"],
-        "functions": ["rosenbrockSolve", "rodasSolve"],
+        "exports": ["createSolveODE", "rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
+        "functions": ["rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
         "constants": ["createSolveODE"]
       },
       "functions/src/numeric/structured-solvers.ts": {
@@ -38313,11 +38313,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1099,
     "totalModules": 82,
-    "totalLinesOfCode": 187315,
-    "totalExports": 5629,
+    "totalLinesOfCode": 188064,
+    "totalExports": 5631,
     "totalClasses": 52,
     "totalInterfaces": 487,
-    "totalFunctions": 1772,
+    "totalFunctions": 1774,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,
@@ -38326,6 +38326,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 202
+    "unusedExportsCount": 204
   }
 }

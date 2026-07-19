@@ -6219,7 +6219,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `rosenbrockSolve`, `rodasSolve`
+- Functions: `rosenbrockSolve`, `rodasSolve`, `bdfSolve`, `radauSolve`
 - Constants: `createSolveODE`
 
 ---
@@ -16753,12 +16753,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1099   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 187315 |
-| Total Exports           | 5629   |
+| Total Lines of Code     | 188064 |
+| Total Exports           | 5631   |
 | Total Re-exports        | 2276   |
 | Total Classes           | 52     |
 | Total Interfaces        | 487    |
-| Total Functions         | 1772   |
+| Total Functions         | 1774   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 576    |

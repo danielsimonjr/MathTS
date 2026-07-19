@@ -360,6 +360,34 @@ describe('solveODESystem', () => {
     expectClose(lastY[0], -1, 0.05);
     expectClose(lastY[1], 0, 0.1);
   });
+
+  it('adaptive (no dt) matches the exact harmonic oscillator to ~1e-6', () => {
+    // Without an explicit dt, solveODESystem uses embedded RK45 (Dormand-Prince) error control.
+    // Exact solution of y''=-y with y(0)=[1,0] is [cos t, -sin t] — an implementation-independent
+    // closed-form oracle; the last time point lands exactly on tf.
+    const sol = solveODESystem((_t, y) => [y[1], -y[0]], [1, 0], [0, 10], { tol: 1e-9 });
+    const lastY = sol.y[sol.y.length - 1];
+    expect(sol.t[sol.t.length - 1]).toBeCloseTo(10, 9);
+    expect(lastY[0]).toBeCloseTo(Math.cos(10), 6);
+    expect(lastY[1]).toBeCloseTo(-Math.sin(10), 6);
+  });
+
+  it('adaptive (no dt) matches scipy RK45 on the stiff-free Lotka-Volterra system (~1e-6)', () => {
+    const a = 1.5,
+      b = 1.0,
+      c = 3.0,
+      d = 1.0;
+    const f = (_t: number, y: number[]): number[] => [
+      a * y[0] - b * y[0] * y[1],
+      -c * y[1] + d * y[0] * y[1],
+    ];
+    // scipy solve_ivp(method='RK45', rtol=1e-10, atol=1e-12) at t=10:
+    const scipy = [0.28721296, 0.44977746];
+    const sol = solveODESystem(f, [10, 5], [0, 10], { tol: 1e-9 });
+    const lastY = sol.y[sol.y.length - 1];
+    expect(lastY[0]).toBeCloseTo(scipy[0], 5);
+    expect(lastY[1]).toBeCloseTo(scipy[1], 5);
+  });
 });
 
 describe('stiffODESolver', () => {

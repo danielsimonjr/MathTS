@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): stiff-ODE breadth — BDF + Radau IIA methods for `solveODE`, adaptive `solveODESystem`
+
+- **`solveODE(func, tspan, y0, { method: 'BDF' })`** — variable-order (1–5) variable-step backward
+  differentiation, scipy `solve_ivp`'s default stiff method (NDF-enhanced). Faithful port of
+  `scipy.integrate.BDF`: the difference-array representation `D`, quasi-constant step size
+  (`change_D`), and simplified-Newton on the implicit `(I − c·J)` system. The general-purpose stiff
+  workhorse, robust across a wide tolerance range.
+- **`solveODE(func, tspan, y0, { method: 'Radau' })`** — 3-stage, 5th-order, L-stable Radau IIA
+  implicit Runge-Kutta (scipy's `method='Radau'`). Real-arithmetic simplified-Newton on the full
+  3n×3n collocation system (the matrix package's dense LU is real; scipy's complex-eigenvalue
+  transform is an efficiency-only variant), with scipy's exact third-order embedded error estimate.
+  High-order accuracy on very stiff systems.
+- Both new methods live in `functions/src/numeric/solveODE.ts` (`bdfSolve`/`radauSolve`, module-level
+  like `rosenbrockSolve`/`rodasSolve`), finite-difference the Jacobian by default or use an analytic
+  one via `jac`, and reuse the matrix-package LU `_factorSolver`. Plain-number state only.
+  Oracle-pinned vs `scipy.integrate.solve_ivp` (1.17.1): Robertson kinetics t=40 — BDF Δ≤2.2e-8,
+  Radau Δ≤3e-10 (mass invariant `y1+y2+y3=1` exact); Van der Pol μ=1000 t=3000 — BDF Δ=9.5e-7,
+  Radau Δ=3.3e-9; linear stiff exact closed forms (`e^-10`, `e^-1`) to <1e-6.
+- **`solveODESystem`** gained an **adaptive** embedded RK45 (Dormand-Prince) default path with
+  local-error control (scaled-RMS error under `tol`); passing an explicit `dt` still selects the
+  legacy fixed-step RK4 (back-compat — the BVP shooting driver is unaffected). Pinned vs the exact
+  harmonic oscillator and scipy RK45 Lotka-Volterra (~1e-6).
+- Surfaced (scoped designs, not started): general 1-D parabolic PDE via method-of-lines onto the new
+  BDF (`solvePDE` is explicit-Euler heat-only — ADR-level to change its method); index-1 DAE via BDF;
+  DDE via continuous extension + history buffer. See `TODO.md`.
+
 ### feat(functions): computational-geometry engine — convex hull (2-D/3-D), Delaunay, Voronoi, spherical Voronoi, alpha shapes
 
 - **`convexHull(points)`** — public, structured 2-D/3-D convex hull returning

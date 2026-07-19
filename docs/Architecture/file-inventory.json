@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1725,
+  "totalFiles": 1726,
   "byDisposition": {
     "reachable": 1066,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 564,
+    "test": 565,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1102,
-    "tests": 564,
+    "tests": 565,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 716,
+    "@danielsimonjr/mathts-functions": 717,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1456
+      "loc": 2093
     },
     {
       "file": "functions/src/numeric/structured-solvers.ts",
@@ -7275,7 +7275,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2448
+      "loc": 2560
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -7863,7 +7863,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 161
+      "loc": 166
     },
     {
       "file": "functions/tests/cov-integration.test.ts",
@@ -8461,6 +8461,13 @@
       "loc": 451
     },
     {
+      "file": "functions/tests/gap-stiff-bdf-radau-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 128
+    },
+    {
       "file": "functions/tests/gap-stiff-rodas-oracle.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -8948,7 +8955,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 535
+      "loc": 563
     },
     {
       "file": "functions/tests/ols.test.ts",

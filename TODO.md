@@ -451,7 +451,7 @@ or a documented scope limit worth revisiting.
       consumers, all in `functions/src/geometry/`, oracle-pinned vs `scipy.spatial`
       (`functions/tests/geometry-{hull,delaunay,consumers}-oracle.test.ts`, 27 tests):
       **`convexHull`** (2-D monotone chain + 3-D QuickHull → structured `{vertices,simplices,area,
-  volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-circumcircle
+volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-circumcircle
       invariant + count vs scipy), **`voronoi`** (dual of Delaunay), **`sphericalVoronoi`** (via the
       3-D hull; areas sum to 4πr²), **`alphaShape`** (annulus recovers the hole). **Root-cause fix:**
       the broken `delaunay_wasm` kernel (bogus triangle count, buffer over-read) was disabled — JS
@@ -470,9 +470,35 @@ or a documented scope limit worth revisiting.
       smoothing for `s>0`) and `monteCarloIntegrate` (uniform + Halton/Sobol quasi-MC over an
       axis-aligned box), `functions/src/numeric/{bspline,monte-carlo}.ts`. Oracle-pinned vs scipy
       `splrep`/`splev` + known integrals within a 4-sigma band
-      (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests). **Remaining:** general
-      PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem` error
-      control; DAE/DDE — each a substantially larger sub-project, not attempted this pass.
+      (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests).
+- [x] ✅ **Stiff-ODE breadth: BDF + Radau + `solveODESystem` adaptive control — DONE 2026-07-19.**
+      `solveODE(..., {method:'BDF'})` = scipy's default variable-order (1–5) variable-step NDF-BDF
+      (faithful port: difference-array `D`, `change_D`, simplified-Newton on `(I−c·J)`);
+      `{method:'Radau'}` = 3-stage order-5 L-stable Radau IIA (real 3n×3n simplified-Newton on the
+      collocation system; scipy's exact embedded error estimate). Both in
+      `functions/src/numeric/solveODE.ts` (`bdfSolve`/`radauSolve`, module-level like Rosenbrock/RODAS),
+      finite-difference or analytic (`jac`) Jacobian, reuse the matrix-LU `_factorSolver`. Oracle-pinned
+      vs scipy `solve_ivp` (`gap-stiff-bdf-radau-oracle.test.ts`): Robertson t=40 BDF Δ≤2.2e-8 / Radau
+      Δ≤3e-10 (mass y1+y2+y3=1 exact); Van der Pol μ=1000 t=3000 BDF Δ=9.5e-7 / Radau Δ=3.3e-9; linear
+      stiff exact closed forms (e^-10, e^-1) to <1e-6. `solveODESystem` gained an **adaptive** embedded
+      RK45 (Dormand-Prince) default path (`_adaptiveRK45System`); explicit `dt` still selects the legacy
+      fixed-step RK4 (back-compat — BVP shooting driver unaffected). Pinned vs exact harmonic oscillator + scipy RK45 Lotka-Volterra (~1e-6).
+- [ ] **SURFACED sub-projects (scoped, NOT started this pass — each a distinct effort):**
+      **(1) General 1-D parabolic PDE via MOL.** `solvePDE` is explicit-Euler heat-only. Design:
+      generalize to `u_t = D(x)·u_xx + f(x,t,u)` by method-of-lines — second-difference the interior
+      nodes into a semi-discrete ODE system, integrate with the **new `bdfSolve`** (now unblocked;
+      implicit → no CFL cap). Blast radius: changes `solvePDE`'s method (explicit→implicit) and the
+      meaning of `nt`/`T` → **ADR-level** (a shipped function's numerics change); prefer a NEW
+      `solveParabolicPDE` entry over mutating `solvePDE`. Oracle: exact heat `e^(−Dπ²t)sin(πx)` +
+      Fisher-KPP / known reaction-diffusion fronts. 2-D/hyperbolic = further extensions.
+      **(2) DAE (index-1) via BDF.** Semi-explicit `M·y' = f(t,y)` / `0 = g(t,y)`. Design: BDF on the
+      differential block + Newton on the algebraic constraint (the `bdfSolve` Newton machinery extends
+      to a singular mass matrix). Oracle: scipy has no DAE, so pin vs Sundials IDA reference values or
+      exact constrained systems (pendulum-on-a-string index-1 reduction). Distinct sub-project.
+      **(3) DDE (delay ODEs).** `y'(t)=f(t,y(t),y(t−τ))`. Design: continuous extension (dense output)
+      of an RK/BDF method + a history buffer; Bellen–Zennaro method-of-steps. Oracle: exact solutions
+      of linear scalar DDEs (`y'=−y(t−τ)` characteristic roots) / Julia `DelayDiffEq` references.
+      Distinct sub-project.
 - [x] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
       (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
       (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)

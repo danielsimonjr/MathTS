@@ -75,7 +75,7 @@ interface NormalizedEvent {
  * Options for ODE solver
  */
 interface ODEOptions {
-  method?: 'RK23' | 'RK45' | 'Rosenbrock' | 'RODAS';
+  method?: 'RK23' | 'RK45' | 'Rosenbrock' | 'RODAS' | 'BDF' | 'Radau';
   tol?: number;
   firstStep?: number | Unit;
   minStep?: number | Unit;
@@ -755,6 +755,636 @@ export function rodasSolve(
   return { t: tOut, y: yOut };
 }
 
+// =================================================================================================
+// Shared numeric helpers for the higher-order implicit stiff methods (BDF, Radau)
+// =================================================================================================
+
+const _EPS = Number.EPSILON;
+
+/** scipy-style RMS norm `‖x‖₂ / √n` (used by BDF/Radau error control, matching `solve_ivp`). */
+function _rms(v: number[]): number {
+  let s = 0;
+  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+  return Math.sqrt(s / v.length);
+}
+
+/**
+ * Empirically-chosen initial step (Hairer & Wanner II.4, the exact routine scipy's `solve_ivp`
+ * uses via `select_initial_step`). `order` is the error-estimator order (1 for BDF, 3 for Radau).
+ * Costs one extra `f` evaluation. Returns a positive magnitude.
+ */
+function _selectInitialStep(
+  f: ForcingFunction,
+  t0: number,
+  y0: number[],
+  tf: number,
+  maxStep: number,
+  f0: number[],
+  dir: number,
+  order: number,
+  rtol: number,
+  atol: number
+): number {
+  const interval = Math.abs(tf - t0);
+  if (interval === 0) return 0;
+  const scale = y0.map((yi) => atol + Math.abs(yi) * rtol);
+  const d0 = _rms(y0.map((yi, i) => yi / scale[i]));
+  const d1 = _rms(f0.map((fi, i) => fi / scale[i]));
+  let h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
+  h0 = Math.min(h0, interval);
+  const y1 = y0.map((yi, i) => yi + h0 * dir * f0[i]);
+  const f1 = _fArr(f, t0 + h0 * dir, y1);
+  const d2 = _rms(f1.map((v, i) => (v - f0[i]) / scale[i])) / h0;
+  const h1 =
+    d1 <= 1e-15 && d2 <= 1e-15
+      ? Math.max(1e-6, h0 * 1e-3)
+      : Math.pow(0.01 / Math.max(d1, d2), 1 / (order + 1));
+  return Math.min(100 * h0, h1, interval, maxStep);
+}
+
+/** Newton tolerance shared by both implicit methods (scipy: `max(10ε/rtol, min(0.03, √rtol))`). */
+function _newtonTol(rtol: number): number {
+  return Math.max((10 * _EPS) / rtol, Math.min(0.03, Math.sqrt(rtol)));
+}
+
+/** Minimum step magnitude guard (scipy uses `10·ulp(t)`; this is the same order of magnitude). */
+function _minStep(t: number): number {
+  return 10 * _EPS * Math.max(1, Math.abs(t));
+}
+
+/** Dense (m×m)·(m×m) matrix product for the small BDF difference-array transforms. */
+function _matMul(A: number[][], B: number[][]): number[][] {
+  const m = A.length;
+  const p = B[0].length;
+  const q = B.length;
+  const out: number[][] = Array.from({ length: m }, () => new Array<number>(p).fill(0));
+  for (let i = 0; i < m; i++) {
+    for (let k = 0; k < q; k++) {
+      const aik = A[i][k];
+      if (aik === 0) continue;
+      for (let j = 0; j < p; j++) out[i][j] += aik * B[k][j];
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// BDF — variable-order (1–5) variable-step backward differentiation (scipy's default stiff method,
+// NDF-enhanced per Shampine & Reichelt "The MATLAB ODE Suite"). Faithful port of scipy's
+// `scipy.integrate.BDF`: the difference-array representation `D`, quasi-constant step size via
+// `change_D`, modified-formula coefficients `kappa`, and simplified-Newton on `(I − c·J)`.
+// ---------------------------------------------------------------------------------------------
+
+const BDF_MAX_ORDER = 5;
+const BDF_NEWTON_MAXITER = 4;
+const BDF_MIN_FACTOR = 0.2;
+const BDF_MAX_FACTOR = 10;
+
+const BDF_KAPPA = [0, -0.185, -1 / 9, -0.0823, -0.0415, 0];
+// gamma = [0, cumsum(1/1..1/5)]
+const BDF_GAMMA = (() => {
+  const g = [0];
+  let acc = 0;
+  for (let i = 1; i <= BDF_MAX_ORDER; i++) {
+    acc += 1 / i;
+    g.push(acc);
+  }
+  return g;
+})();
+const BDF_ALPHA = BDF_KAPPA.map((k, i) => (1 - k) * BDF_GAMMA[i]);
+// error_const = kappa*gamma + 1/arange(1, MAX_ORDER+2)  (length MAX_ORDER+1 = 6)
+const BDF_ERROR_CONST = BDF_KAPPA.map((k, i) => k * BDF_GAMMA[i] + 1 / (i + 1));
+
+/**
+ * `compute_R(order, factor)` from scipy — the (order+1)×(order+1) matrix (cumulative product down
+ * columns) used to rescale the difference array `D` when the step size changes.
+ */
+function _bdfComputeR(order: number, factor: number): number[][] {
+  const M: number[][] = Array.from({ length: order + 1 }, () =>
+    new Array<number>(order + 1).fill(0)
+  );
+  for (let j = 0; j <= order; j++) M[0][j] = 1;
+  for (let i = 1; i <= order; i++) {
+    for (let j = 1; j <= order; j++) M[i][j] = (i - 1 - factor * j) / i;
+  }
+  // cumulative product down each column
+  for (let j = 0; j <= order; j++) {
+    for (let i = 1; i <= order; i++) M[i][j] *= M[i - 1][j];
+  }
+  return M;
+}
+
+/** Rescale the difference array `D[0..order]` in place for a step-size change by `factor`. */
+function _bdfChangeD(D: number[][], order: number, factor: number): void {
+  const R = _bdfComputeR(order, factor);
+  const U = _bdfComputeR(order, 1);
+  const RU = _matMul(R, U); // (order+1)×(order+1)
+  // newTop[i] = Σ_j RU[j][i] · D[j]   (i.e. RUᵀ · D[:order+1])
+  const n = D[0].length;
+  const newTop: number[][] = Array.from({ length: order + 1 }, () => new Array<number>(n).fill(0));
+  for (let i = 0; i <= order; i++) {
+    for (let j = 0; j <= order; j++) {
+      const c = RU[j][i];
+      if (c === 0) continue;
+      const Dj = D[j];
+      const row = newTop[i];
+      for (let k = 0; k < n; k++) row[k] += c * Dj[k];
+    }
+  }
+  for (let i = 0; i <= order; i++) D[i] = newTop[i];
+}
+
+/**
+ * Solve the implicit BDF algebraic system by simplified Newton on `(I − c·J)`, given a pre-factored
+ * solver `solveW`. Faithful port of scipy's `solve_bdf_system` (rate-based convergence test).
+ */
+function _bdfNewton(
+  f: ForcingFunction,
+  tNew: number,
+  yPredict: number[],
+  c: number,
+  psi: number[],
+  solveW: (b: number[]) => number[],
+  scale: number[],
+  tol: number
+): { converged: boolean; nIter: number; y: number[]; d: number[] } {
+  const n = yPredict.length;
+  const d = new Array<number>(n).fill(0);
+  const y = yPredict.slice();
+  let dyNormOld: number | null = null;
+  let converged = false;
+  let k = 0;
+  for (; k < BDF_NEWTON_MAXITER; k++) {
+    const fv = _fArr(f, tNew, y);
+    if (!fv.every((v) => Number.isFinite(v))) break;
+    const rhs = fv.map((v, i) => c * v - psi[i] - d[i]);
+    const dy = solveW(rhs);
+    const dyNorm = _rms(dy.map((v, i) => v / scale[i]));
+    const rate = dyNormOld === null ? null : dyNorm / dyNormOld;
+    if (
+      rate !== null &&
+      (rate >= 1 || (Math.pow(rate, BDF_NEWTON_MAXITER - k) / (1 - rate)) * dyNorm > tol)
+    ) {
+      break;
+    }
+    for (let i = 0; i < n; i++) {
+      y[i] += dy[i];
+      d[i] += dy[i];
+    }
+    if (dyNorm === 0 || (rate !== null && (rate / (1 - rate)) * dyNorm < tol)) {
+      converged = true;
+      k++;
+      break;
+    }
+    dyNormOld = dyNorm;
+  }
+  return { converged, nIter: k, y, d };
+}
+
+/**
+ * BDF variable-order (1–5) variable-step stiff solver — scipy's default `method='BDF'`. Adaptive
+ * local-error control drives step size and order (1–5) automatically; Newton iteration on the
+ * implicit BDF formula reuses the shared Jacobian machinery and the `(I − c·J)` dense LU solve
+ * (`_factorSolver`) the Rosenbrock/RODAS paths use. Plain-number state only.
+ *
+ * Module-level for the same reason as `rosenbrockSolve`/`rodasSolve`: a pure-numeric engine with no
+ * factory-scope dependency, routed from `createSolveODE`'s `BDF` method branch.
+ */
+export function bdfSolve(
+  f: ForcingFunction,
+  tspan: unknown[],
+  y0raw: unknown[],
+  options: ODEOptions = {}
+): { t: number[]; y: number[][] } {
+  const t0 = tspan[0] as number;
+  const tf = tspan[1] as number;
+  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
+    throw new Error('The "BDF" stiff method requires numeric tspan');
+  }
+  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
+    throw new Error('The "BDF" stiff method requires plain-number state (y0)');
+  }
+  const y0 = y0raw as number[];
+  const n = y0.length;
+  const dir = tf >= t0 ? 1 : -1;
+  const rtol = options.tol ? (options.tol as number) : 1e-4;
+  const atol = rtol * 1e-3;
+  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const maxStep = (options.maxStep as number | undefined) ?? Infinity;
+  const newtonTol = _newtonTol(rtol);
+
+  let t = t0;
+  let y = y0.slice();
+  const f0 = _fArr(f, t, y);
+  let hAbs = options.firstStep
+    ? Math.abs(options.firstStep as number)
+    : _selectInitialStep(f, t0, y0, tf, maxStep, f0, dir, 1, rtol, atol);
+
+  // Difference array D (MAX_ORDER+3 rows × n); D[0]=y, D[1]=h·f (scaled first difference).
+  const D: number[][] = Array.from({ length: BDF_MAX_ORDER + 3 }, () =>
+    new Array<number>(n).fill(0)
+  );
+  D[0] = y.slice();
+  D[1] = f0.map((v) => v * hAbs * dir);
+
+  let order = 1;
+  let nEqualSteps = 0;
+
+  const tOut: number[] = [t];
+  const yOut: number[][] = [y.slice()];
+  let iter = 0;
+
+  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
+    iter++;
+    const minStep = _minStep(t);
+    if (hAbs > maxStep) {
+      _bdfChangeD(D, order, maxStep / hAbs);
+      hAbs = maxStep;
+      nEqualSteps = 0;
+    } else if (hAbs < minStep) {
+      _bdfChangeD(D, order, minStep / hAbs);
+      hAbs = minStep;
+      nEqualSteps = 0;
+    }
+
+    // Jacobian is recomputed at the start of each step (analytic `jac` or finite-difference),
+    // reused across the accept/reject retries below — simpler and more robust than scipy's lazy-J
+    // (which only refreshes on Newton failure); efficiency-only difference, same numerics.
+    const F0 = _fArr(f, t, y);
+    const J = _jacobianAt(f, t, y, F0, options);
+
+    let stepAccepted = false;
+    let yNew: number[] = y;
+    let dVec: number[] = new Array<number>(n).fill(0);
+    let errorNorm = 0;
+    let nIter = 1;
+    let scale: number[] = new Array<number>(n).fill(1);
+
+    while (!stepAccepted) {
+      if (hAbs < minStep) {
+        throw new Error('Required step size is less than spacing between numbers (BDF)');
+      }
+      let h = hAbs * dir;
+      let tNew = t + h;
+      if (dir * (tNew - tf) > 0) {
+        tNew = tf;
+        _bdfChangeD(D, order, Math.abs(tNew - t) / hAbs);
+        nEqualSteps = 0;
+      }
+      h = tNew - t;
+      hAbs = Math.abs(h);
+
+      const yPredict = new Array<number>(n).fill(0);
+      for (let j = 0; j <= order; j++) for (let k = 0; k < n; k++) yPredict[k] += D[j][k];
+
+      scale = yPredict.map((v) => atol + rtol * Math.abs(v));
+      const psi = new Array<number>(n).fill(0);
+      for (let k = 0; k < n; k++) {
+        let s = 0;
+        for (let j = 1; j <= order; j++) s += D[j][k] * BDF_GAMMA[j];
+        psi[k] = s / BDF_ALPHA[order];
+      }
+
+      const c = h / BDF_ALPHA[order];
+      // W = I − c·J, factored once and reused across Newton iterations.
+      const W = J.map((rowv, i) => rowv.map((v, j) => (i === j ? 1 : 0) - c * v));
+      const solveW = _factorSolver(W, n);
+      const res = _bdfNewton(f, tNew, yPredict, c, psi, solveW, scale, newtonTol);
+
+      if (!res.converged) {
+        hAbs *= 0.5;
+        _bdfChangeD(D, order, 0.5);
+        nEqualSteps = 0;
+        continue;
+      }
+      nIter = res.nIter;
+      yNew = res.y;
+      dVec = res.d;
+      const safety = (0.9 * (2 * BDF_NEWTON_MAXITER + 1)) / (2 * BDF_NEWTON_MAXITER + nIter);
+      scale = yNew.map((v) => atol + rtol * Math.abs(v));
+      errorNorm = _rms(dVec.map((v, i) => (BDF_ERROR_CONST[order] * v) / scale[i]));
+      if (errorNorm > 1) {
+        const factor = Math.max(BDF_MIN_FACTOR, safety * Math.pow(errorNorm, -1 / (order + 1)));
+        hAbs *= factor;
+        _bdfChangeD(D, order, factor);
+        nEqualSteps = 0;
+      } else {
+        stepAccepted = true;
+      }
+
+      // Advance time only on acceptance (uses the accepted h implicitly via tNew).
+      if (stepAccepted) {
+        t = tNew;
+        y = yNew;
+        tOut.push(t);
+        yOut.push(y.slice());
+      }
+    }
+
+    nEqualSteps++;
+    const safety = (0.9 * (2 * BDF_NEWTON_MAXITER + 1)) / (2 * BDF_NEWTON_MAXITER + nIter);
+
+    // Update the difference array: D^{order+2} = d − D^{order+1}; D^{order+1} = d; roll down.
+    for (let k = 0; k < n; k++) {
+      D[order + 2][k] = dVec[k] - D[order + 1][k];
+      D[order + 1][k] = dVec[k];
+    }
+    for (let i = order; i >= 0; i--) for (let k = 0; k < n; k++) D[i][k] += D[i + 1][k];
+
+    // Hold the order/step for order+1 equal steps before reconsidering (quasi-constant stepping).
+    if (nEqualSteps < order + 1) continue;
+
+    const errM =
+      order > 1
+        ? _rms(D[order].map((v, i) => (BDF_ERROR_CONST[order - 1] * v) / scale[i]))
+        : Infinity;
+    const errP =
+      order < BDF_MAX_ORDER
+        ? _rms(D[order + 2].map((v, i) => (BDF_ERROR_CONST[order + 1] * v) / scale[i]))
+        : Infinity;
+    const errNorms = [errM, errorNorm, errP];
+    const factors = errNorms.map((e, i) => Math.pow(e, -1 / (order + i)));
+    let best = 0;
+    for (let i = 1; i < 3; i++) if (factors[i] > factors[best]) best = i;
+    order += best - 1;
+
+    const factor = Math.min(BDF_MAX_FACTOR, safety * factors[best]);
+    hAbs *= factor;
+    _bdfChangeD(D, order, factor);
+    nEqualSteps = 0;
+  }
+
+  if (iter >= maxIter) {
+    throw new Error('Maximum number of iterations reached, try changing options');
+  }
+  return { t: tOut, y: yOut };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Radau IIA — 3-stage, order-5, L-stable implicit Runge-Kutta (scipy's `method='Radau'`). scipy
+// diagonalises the 3×3 tableau `A` into one real + one complex eigenvalue and solves an n×n real
+// and an n×n complex system per Newton step; we instead solve the full real 3n×3n collocation
+// system by simplified Newton (real arithmetic throughout — the matrix package's dense LU is real).
+// The error estimate reproduces scipy's exactly: `(MU_REAL/h·I − J)⁻¹ (f + Eᵀ·Z/h)`.
+// ---------------------------------------------------------------------------------------------
+
+const RADAU_NEWTON_MAXITER = 6;
+const RADAU_MIN_FACTOR = 0.2;
+const RADAU_MAX_FACTOR = 10;
+const _S6 = Math.sqrt(6);
+// Butcher tableau A (rows sum to C; last row is stiffly-accurate b), nodes C, error weights E.
+const RADAU_A = [
+  [(88 - 7 * _S6) / 360, (296 - 169 * _S6) / 1800, (-2 + 3 * _S6) / 225],
+  [(296 + 169 * _S6) / 1800, (88 + 7 * _S6) / 360, (-2 - 3 * _S6) / 225],
+  [(16 - _S6) / 36, (16 + _S6) / 36, 1 / 9],
+];
+const RADAU_C = [(4 - _S6) / 10, (4 + _S6) / 10, 1];
+const RADAU_E = [(-13 - 7 * _S6) / 3, (-13 + 7 * _S6) / 3, -1 / 3];
+const RADAU_MU_REAL = 3 + Math.pow(3, 2 / 3) - Math.pow(3, 1 / 3);
+
+/** Hairer & Wanner IV.8 step-size predictor (scipy's `predict_factor`). */
+function _radauPredictFactor(
+  hAbs: number,
+  hAbsOld: number | null,
+  errNorm: number,
+  errNormOld: number | null
+): number {
+  const mult =
+    errNormOld === null || hAbsOld === null || errNorm === 0
+      ? 1
+      : (hAbs / hAbsOld) * Math.pow(errNormOld / errNorm, 0.25);
+  return Math.min(1, mult) * Math.pow(errNorm, -0.25);
+}
+
+/**
+ * Simplified-Newton solve of the 3-stage Radau IIA collocation system for the stage increments
+ * `Z` (so `Y_i = y + Z_i`), with the Jacobian `J` frozen at `(t, y)`. The 3n×3n Newton matrix
+ * `Mᵢₖ = δᵢₖ I − h·Aᵢₖ·J` is factored once and reused across iterations.
+ */
+function _radauNewton(
+  f: ForcingFunction,
+  t: number,
+  y: number[],
+  h: number,
+  J: number[][],
+  scale: number[],
+  tol: number
+): { converged: boolean; nIter: number; Z: number[][]; rate: number } {
+  const n = y.length;
+  const Z = [
+    new Array<number>(n).fill(0),
+    new Array<number>(n).fill(0),
+    new Array<number>(n).fill(0),
+  ];
+  // Big[3n×3n]: block (i,k) = δᵢₖ·I − h·A[i][k]·J
+  const big: number[][] = Array.from({ length: 3 * n }, () => new Array<number>(3 * n).fill(0));
+  for (let i = 0; i < 3; i++) {
+    for (let k = 0; k < 3; k++) {
+      const a = h * RADAU_A[i][k];
+      for (let r = 0; r < n; r++) {
+        for (let col = 0; col < n; col++) {
+          big[i * n + r][k * n + col] = (i === k && r === col ? 1 : 0) - a * J[r][col];
+        }
+      }
+    }
+  }
+  const solveBig = _factorSolver(big, 3 * n);
+
+  let dWNormOld: number | null = null;
+  let rate = 0;
+  let converged = false;
+  let k = 0;
+  for (; k < RADAU_NEWTON_MAXITER; k++) {
+    const F = [
+      _fArr(
+        f,
+        t + RADAU_C[0] * h,
+        y.map((yi, r) => yi + Z[0][r])
+      ),
+      _fArr(
+        f,
+        t + RADAU_C[1] * h,
+        y.map((yi, r) => yi + Z[1][r])
+      ),
+      _fArr(
+        f,
+        t + RADAU_C[2] * h,
+        y.map((yi, r) => yi + Z[2][r])
+      ),
+    ];
+    if (!F.every((row) => row.every((v) => Number.isFinite(v)))) break;
+
+    // rhs = −G,  Gᵢ = Zᵢ − h·Σⱼ Aᵢⱼ·Fⱼ
+    const rhs = new Array<number>(3 * n).fill(0);
+    for (let i = 0; i < 3; i++) {
+      for (let r = 0; r < n; r++) {
+        let acc = Z[i][r];
+        for (let j = 0; j < 3; j++) acc -= h * RADAU_A[i][j] * F[j][r];
+        rhs[i * n + r] = -acc;
+      }
+    }
+    const dZ = solveBig(rhs);
+    let sq = 0;
+    for (let i = 0; i < 3; i++) for (let r = 0; r < n; r++) sq += (dZ[i * n + r] / scale[r]) ** 2;
+    const dWNorm = Math.sqrt(sq / (3 * n));
+    if (dWNormOld !== null) rate = dWNorm / dWNormOld;
+
+    if (
+      dWNormOld !== null &&
+      (rate >= 1 || (Math.pow(rate, RADAU_NEWTON_MAXITER - k) / (1 - rate)) * dWNorm > tol)
+    ) {
+      break;
+    }
+    for (let i = 0; i < 3; i++) for (let r = 0; r < n; r++) Z[i][r] += dZ[i * n + r];
+    if (dWNorm === 0 || (dWNormOld !== null && (rate / (1 - rate)) * dWNorm < tol)) {
+      converged = true;
+      k++;
+      break;
+    }
+    dWNormOld = dWNorm;
+  }
+  return { converged, nIter: k, Z, rate };
+}
+
+/**
+ * Radau IIA (order-5, L-stable) stiff solver — scipy's `method='Radau'`. Simplified-Newton on the
+ * real 3n×3n collocation system per step (Jacobian analytic via `options.jac` or finite-differenced,
+ * reused across the step's Newton iterations), third-order embedded error estimate for adaptive
+ * stepping. Plain-number state only.
+ *
+ * Module-level for the same reason as `rosenbrockSolve`/`rodasSolve`/`bdfSolve`.
+ */
+export function radauSolve(
+  f: ForcingFunction,
+  tspan: unknown[],
+  y0raw: unknown[],
+  options: ODEOptions = {}
+): { t: number[]; y: number[][] } {
+  const t0 = tspan[0] as number;
+  const tf = tspan[1] as number;
+  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
+    throw new Error('The "Radau" stiff method requires numeric tspan');
+  }
+  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
+    throw new Error('The "Radau" stiff method requires plain-number state (y0)');
+  }
+  const y0 = y0raw as number[];
+  const n = y0.length;
+  const dir = tf >= t0 ? 1 : -1;
+  const rtol = options.tol ? (options.tol as number) : 1e-4;
+  const atol = rtol * 1e-3;
+  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const maxStep = (options.maxStep as number | undefined) ?? Infinity;
+  const newtonTol = _newtonTol(rtol);
+
+  let t = t0;
+  let y = y0.slice();
+  let hAbs = options.firstStep
+    ? Math.abs(options.firstStep as number)
+    : _selectInitialStep(f, t0, y0, tf, maxStep, _fArr(f, t, y), dir, 3, rtol, atol);
+  let hAbsOld: number | null = null;
+  let errNormOld: number | null = null;
+
+  const tOut: number[] = [t];
+  const yOut: number[][] = [y.slice()];
+  let iter = 0;
+
+  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
+    iter++;
+    const minStep = _minStep(t);
+    let hEntry: number;
+    if (hAbs > maxStep) {
+      hEntry = maxStep;
+      hAbs = maxStep;
+      hAbsOld = null;
+      errNormOld = null;
+    } else if (hAbs < minStep) {
+      hEntry = minStep;
+      hAbs = minStep;
+      hAbsOld = null;
+      errNormOld = null;
+    } else {
+      hEntry = hAbs;
+    }
+
+    const f0 = _fArr(f, t, y);
+    const J = _jacobianAt(f, t, y, f0, options);
+
+    let stepAccepted = false;
+    let rejected = false;
+    let yNew: number[] = y;
+    let errNorm = 0;
+    let nIter = 1;
+    let tNew = t;
+
+    while (!stepAccepted) {
+      if (hAbs < minStep) {
+        throw new Error('Required step size is less than spacing between numbers (Radau)');
+      }
+      let h = hAbs * dir;
+      tNew = t + h;
+      if (dir * (tNew - tf) > 0) tNew = tf;
+      h = tNew - t;
+      hAbs = Math.abs(h);
+
+      const scale = y.map((yi) => atol + Math.abs(yi) * rtol);
+      const res = _radauNewton(f, t, y, h, J, scale, newtonTol);
+      if (!res.converged) {
+        hAbs *= 0.5;
+        continue;
+      }
+      nIter = res.nIter;
+      const Z = res.Z;
+      yNew = y.map((yi, r) => yi + Z[2][r]);
+      // error = (MU_REAL/h·I − J)⁻¹ (f0 + Eᵀ·Z / h)
+      const ze = new Array<number>(n).fill(0);
+      for (let r = 0; r < n; r++) {
+        ze[r] = f0[r] + (RADAU_E[0] * Z[0][r] + RADAU_E[1] * Z[1][r] + RADAU_E[2] * Z[2][r]) / h;
+      }
+      const Merr = J.map((rowv, i) => rowv.map((v, j) => (i === j ? RADAU_MU_REAL / h : 0) - v));
+      const solveErr = _factorSolver(Merr, n);
+      let error = solveErr(ze);
+      const escale = y.map((yi, r) => atol + Math.max(Math.abs(yi), Math.abs(yNew[r])) * rtol);
+      errNorm = _rms(error.map((v, r) => v / escale[r]));
+      const safety = (0.9 * (2 * RADAU_NEWTON_MAXITER + 1)) / (2 * RADAU_NEWTON_MAXITER + nIter);
+
+      if (rejected && errNorm > 1) {
+        const yErr = y.map((yi, r) => yi + error[r]);
+        const fErr = _fArr(f, t, yErr);
+        error = solveErr(fErr.map((v, r) => v + ze[r] - f0[r]));
+        errNorm = _rms(error.map((v, r) => v / escale[r]));
+      }
+
+      if (errNorm > 1) {
+        const factor = _radauPredictFactor(hAbs, hAbsOld, errNorm, errNormOld);
+        hAbs *= Math.max(RADAU_MIN_FACTOR, safety * factor);
+        rejected = true;
+      } else {
+        stepAccepted = true;
+      }
+    }
+
+    const safety = (0.9 * (2 * RADAU_NEWTON_MAXITER + 1)) / (2 * RADAU_NEWTON_MAXITER + nIter);
+    let factor = _radauPredictFactor(hAbs, hAbsOld, errNorm, errNormOld);
+    factor = Math.min(RADAU_MAX_FACTOR, safety * factor);
+    if (factor < 1.2) factor = 1;
+
+    hAbsOld = hEntry;
+    errNormOld = errNorm;
+
+    t = tNew;
+    y = yNew;
+    tOut.push(t);
+    yOut.push(y.slice());
+    hAbs *= factor;
+  }
+
+  if (iter >= maxIter) {
+    throw new Error('Maximum number of iterations reached, try changing options');
+  }
+  return { t: tOut, y: yOut };
+}
+
 export const createSolveODE = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
@@ -778,7 +1408,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     /**
      * Numerical Integration of Ordinary Differential Equations
      *
-     * Four adaptive-step methods are provided:
+     * Six adaptive-step methods are provided:
      * - "RK23": Bogacki–Shampine method (explicit)
      * - "RK45": Dormand-Prince method RK5(4)7M (explicit, default)
      * - "Rosenbrock": linearly-implicit ode23s (Shampine & Reichelt), 2nd order, L-stable — use for
@@ -787,9 +1417,16 @@ export const createSolveODE = /* #__PURE__ */ factory(
      * - "RODAS": Hairer & Wanner's 4th-order, 6-stage, L-stable Rosenbrock method — for STIFF
      *   systems at tight tolerances (rtol < 1e-6) where the 2nd-order ode23s takes too many steps.
      *   Plain-number state only.
+     * - "BDF": variable-order (1–5) variable-step backward differentiation (scipy's default stiff
+     *   method; NDF-enhanced) — the general-purpose workhorse for stiff systems, robust across a
+     *   wide tolerance range. Plain-number state only.
+     * - "Radau": 3-stage, 5th-order, L-stable Radau IIA implicit Runge-Kutta (scipy's `Radau`) —
+     *   high-order accuracy on very stiff systems; simplified-Newton on the collocation system.
+     *   Plain-number state only.
      *
-     * Both stiff methods form a finite-difference Jacobian each step unless an analytic Jacobian is
-     * supplied via the `jac` option, which they then use instead (faster and more accurate).
+     * All four stiff methods (Rosenbrock, RODAS, BDF, Radau) form a finite-difference Jacobian each
+     * step unless an analytic Jacobian is supplied via the `jac` option, which they then use
+     * instead (faster and more accurate).
      *
      * The arguments are expected as follows.
      *
@@ -797,9 +1434,9 @@ export const createSolveODE = /* #__PURE__ */ factory(
      * - `tspan` should be a vector of two numbers or units `[tStart, tEnd]`
      * - `y0` the initial state values, should be a scalar or a flat array
      * - `options` should be an object with the following information:
-     *   - `method` ('RK45'): ['RK23', 'RK45', 'Rosenbrock', 'RODAS']
+     *   - `method` ('RK45'): ['RK23', 'RK45', 'Rosenbrock', 'RODAS', 'BDF', 'Radau']
      *   - `jac`: analytic Jacobian `(t, y) => number[][]` for the stiff methods ('Rosenbrock',
-     *     'RODAS'); when omitted they finite-difference it (backward compatible)
+     *     'RODAS', 'BDF', 'Radau'); when omitted they finite-difference it (backward compatible)
      *   - `tol` (1e-3): Numeric tolerance of the method, the solver keeps the error estimates less than this value
      *   - `firstStep`: Initial step size
      *   - `minStep`: minimum step size of the method
@@ -1326,12 +1963,19 @@ export const createSolveODE = /* #__PURE__ */ factory(
       const method = opt.method ? opt.method : 'RK45';
       const methods: Record<
         string,
-        typeof _rk23 | typeof _rk45 | typeof rosenbrockSolve | typeof rodasSolve
+        | typeof _rk23
+        | typeof _rk45
+        | typeof rosenbrockSolve
+        | typeof rodasSolve
+        | typeof bdfSolve
+        | typeof radauSolve
       > = {
         RK23: _rk23,
         RK45: _rk45,
         ROSENBROCK: rosenbrockSolve,
         RODAS: rodasSolve,
+        BDF: bdfSolve,
+        RADAU: radauSolve,
       };
       if (method.toUpperCase() in methods) {
         const methodOptions = { ...opt }; // clone the options object
