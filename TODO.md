@@ -1307,16 +1307,16 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
 = x^2+2x+1`, `rationalize('x+x+x+y',{y:1}) = 3x+1` (docstring) now work; pinned in `gap-algebra-cas-oracle.test.ts`.
     **Follow-up (deeper root):** register a duck-typing `Map` type in core's `MATHTS_TYPES` so `ObjectWrappingMap` is
     recognized everywhere (removes the per-call-site coercion) — core-wide change, own item.
-- ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
-  MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
-  (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
-  `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
-  union first). Same class as the sqrt/square/norm/dot fix already landed.
-  **⚠ Re-triaged 2026-07-05:** `min`/`max`/`distance`/`parallelStat*` DONE (07-02/03 retune) and all 50 OpNames
-  now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
+- [x] ✅ **[MED — WS-2 unmeasured ops broader than min/max] extend the threshold retune — DONE 2026-07-05** (stale ⬜ marker corrected 2026-07-18; body already recorded completion). parallel-pairing showed
+      MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
+      (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
+      `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
+      union first). Same class as the sqrt/square/norm/dot fix already landed.
+      **⚠ Re-triaged 2026-07-05:** `min`/`max`/`distance`/`parallelStat*` DONE (07-02/03 retune) and all 50 OpNames
+      now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
 bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested global 50k. They DO have inline
-  fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
-  element-wise = the most memory-bound class there is). ✅ **DONE 2026-07-05:** all 7 added to `OpName`, benched (0.04–0.15×, worker loses 7–25× at every size), set `'never'`, call sites pass op names; worker-kernel tests preserved via per-op-map override. WS-2 fully closed — 57/57 OpNames explicit.
+      fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
+      element-wise = the most memory-bound class there is). ✅ **DONE 2026-07-05:** all 7 added to `OpName`, benched (0.04–0.15×, worker loses 7–25× at every size), set `'never'`, call sites pass op names; worker-kernel tests preserved via per-op-map override. WS-2 fully closed — 57/57 OpNames explicit.
 - ✅ **[LOW — DONE 2026-07-02] 2 type-only import cycles in matrix broken.** `DenseMatrix.ts ↔ dense/arithmetic.ts`
   and `DenseMatrix.ts ↔ dense/reduction.ts`: the helpers only need a read view of the matrix (`rows`/`cols`/`get`/
   `length`/`isSquare`), so their param type was changed from `DenseMatrix` to the `Matrix<number>` base interface
