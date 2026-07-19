@@ -1,12 +1,12 @@
 # Complete File Inventory
 
-**Generated**: 2026-07-18 (by tools/create-dependency-graph)
+**Generated**: 2026-07-19 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1705
+**Total files**: 1700
 
 ## Disposition counts
 
@@ -19,15 +19,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `test`        |      550 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
-| `example`     |       10 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1705** |                                                                                                              |
+| `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
+| **Total**     | **1700** |                                                                                                              |
 
 ## Per-area counts
 
 | Area       | Files |
 | ---------- | ----: |
 | `config`   |    29 |
-| `docs`     |     5 |
 | `examples` |     5 |
 | `src`      |  1091 |
 | `tests`    |   550 |
@@ -37,7 +36,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    49 |
+| `(root)`                               |    44 |
 | `@danielsimonjr/mathts-arithmetic`     |     3 |
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    19 |
@@ -212,11 +211,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/version.test.ts`                                                      | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tsup.config.ts`                                                             | @danielsimonjr/mathts-core           | config   | config      |
 | `core/vitest.config.ts`                                                           | @danielsimonjr/mathts-core           | config   | config      |
-| `docs/Architecture/Workbook/cli.ts`                                               | (root)                               | docs     | example     |
-| `docs/Architecture/Workbook/executor.ts`                                          | (root)                               | docs     | example     |
-| `docs/Architecture/Workbook/graph.ts`                                             | (root)                               | docs     | example     |
-| `docs/Architecture/Workbook/index.ts`                                             | (root)                               | docs     | example     |
-| `docs/Architecture/Workbook/types.ts`                                             | (root)                               | docs     | example     |
 | `evaluator/src/index.ts`                                                          | @danielsimonjr/mathts-evaluator      | src      | build-entry |
 | `evaluator/tests/evaluator.test.ts`                                               | @danielsimonjr/mathts-evaluator      | tests    | test        |
 | `evaluator/vitest.config.ts`                                                      | @danielsimonjr/mathts-evaluator      | config   | config      |

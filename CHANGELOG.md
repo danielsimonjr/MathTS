@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(tools): wire the file-census gate into pre-commit + regenerate on any `.ts` change
+
+- The file census (`file-inventory.json`) tracks EVERY tracked `.ts`, but `docs:deps` (which rebuilds it)
+  was gated on `src/`/`assembly/` changes only, and `check:file-census` was never wired into the hook — so a
+  `docs/`/`tests/`/`tools/` `.ts` add/delete left the census stale and the commit succeeded anyway (caught
+  when the Workbook-snapshot deletion above left the census at 1705 vs disk 1700). Fixed both: the pre-commit
+  hook now regenerates `docs:deps` on **any** `.ts` change (not just `src/`), and runs `check:file-census`
+  (maximal-walk self-check, <1s) on **every** commit as the loud backstop. A stale or incomplete census now
+  fails the commit.
+
 ### chore(cleanup): delete stale docs/Architecture/Workbook/*.ts snapshots
 
 - Removed 5 rotted snapshot files under `docs/Architecture/Workbook/` (`cli.ts`, `executor.ts`, `graph.ts`,

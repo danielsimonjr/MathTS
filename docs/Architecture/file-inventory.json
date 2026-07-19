@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-18",
-  "totalFiles": 1705,
+  "generated": "2026-07-19",
+  "totalFiles": 1700,
   "byDisposition": {
     "reachable": 1055,
     "build-entry": 33,
@@ -9,13 +9,12 @@
     "test": 550,
     "tool": 25,
     "config": 29,
-    "example": 10
+    "example": 5
   },
   "byArea": {
     "src": 1091,
     "tests": 550,
     "config": 29,
-    "docs": 5,
     "examples": 5,
     "tools": 25
   },
@@ -26,8 +25,8 @@
     "@danielsimonjr/mathts-autograd": 19,
     "@danielsimonjr/mathts-compat": 14,
     "@danielsimonjr/mathts-core": 79,
-    "(root)": 49,
     "@danielsimonjr/mathts-evaluator": 3,
+    "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
     "@danielsimonjr/mathts-functions": 692,
     "@danielsimonjr/mathts-gpu": 14,
@@ -1061,41 +1060,6 @@
       "area": "config",
       "disposition": "config",
       "loc": 32
-    },
-    {
-      "file": "docs/Architecture/Workbook/cli.ts",
-      "package": "(root)",
-      "area": "docs",
-      "disposition": "example",
-      "loc": 677
-    },
-    {
-      "file": "docs/Architecture/Workbook/executor.ts",
-      "package": "(root)",
-      "area": "docs",
-      "disposition": "example",
-      "loc": 483
-    },
-    {
-      "file": "docs/Architecture/Workbook/graph.ts",
-      "package": "(root)",
-      "area": "docs",
-      "disposition": "example",
-      "loc": 344
-    },
-    {
-      "file": "docs/Architecture/Workbook/index.ts",
-      "package": "(root)",
-      "area": "docs",
-      "disposition": "example",
-      "loc": 447
-    },
-    {
-      "file": "docs/Architecture/Workbook/types.ts",
-      "package": "(root)",
-      "area": "docs",
-      "disposition": "example",
-      "loc": 246
     },
     {
       "file": "evaluator/src/index.ts",
@@ -11511,7 +11475,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 5173
+      "loc": 5176
     },
     {
       "file": "trigonometry/src/index.ts",
