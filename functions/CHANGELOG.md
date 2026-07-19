@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-functions
 
+## 0.48.0
+
+### Minor Changes
+
+- CAS breadth: real `casExpand`/`casFactor`, multivariate `expand`/`factor`, partial-fraction + by-parts integration.
+
+  - **`casExpand` / `casFactor` are now real** (were crude string stubs: `casExpand('(x+1)^2')` gave
+    `'x*x + x*1 + 1*x + 1*1'` and left `(x+1)^3` unchanged; `casFactor` did integer-GCD only, leaving `x^2-1`
+    unfactored). Both now delegate to the real `expand`/`factor` engines. `casExpand('(x+1)^2') → '1 + 2*x + 1*x^2'`,
+    `casFactor('x^2-1') → '(x - 1)*(x + 1)'` (sympy-pinned).
+  - **Multivariate `expand`** (was univariate-gated). N-variable polynomials now expand exactly — `(x+y)^2`,
+    `(x+y)(x-y)`, `(x+y+z)^2`, … coefficient-equal to `sympy.expand`.
+  - **Multivariate `factor`** — the tractable subset (integer content + common-monomial extraction + monomial
+    difference-of-squares), sympy-pinned. Full factorization into irreducibles (Wang/Zassenhaus) is out of scope
+    and left partially-factored/unchanged — never a wrong answer.
+  - **`symbolicIntegral`** gains **partial-fraction** integration of rational functions (composes `apart` with
+    term-wise integration) and **tabular by-parts** for polynomial·{exp,sin,cos}. Verified by differentiate-back
+    (`d/dx(∫f) ≡ f`, sympy-checked, max residual ~3e-9). General u-substitution / a Risch integrator remain the
+    `integral(…)` marker (surfaced as future scope).
+
 ## 0.47.0
 
 ### Minor Changes
