@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): `buttord` — bandpass/bandstop array form
+
+- `buttord` now accepts `[low, high]` frequency pairs for `wp`/`ws` and returns the `[low, high]` natural
+  frequency array `Wn`, covering bandpass and bandstop specs in addition to the existing scalar
+  lowpass/highpass. Bandstop reproduces scipy's passband-edge order-minimization exactly — ports
+  `scipy.signal.band_stop_obj` plus `optimize.fminbound` (bounded Brent) into `iir-design.ts`.
+- Filter-type selection follows scipy (`_validate_wp_ws`): scalar `wp<ws` lowpass / `wp>ws` highpass;
+  array `wp[0]>ws[0]` bandpass / `wp[0]<ws[0]` bandstop. Order matches scipy **exactly**; `Wn` to ~1e-8
+  (`functions/tests/iir-design.test.ts`, bandpass + bandstop cases). Scalar behavior is unchanged.
+
 ### feat(functions): `remez` — exact Parks-McClellan replacing the Lawson-IRLS approximation
 
 - `remez` (optimal equiripple FIR design) now runs the **exact** Parks-McClellan / Remez exchange

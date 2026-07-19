@@ -8927,7 +8927,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 96
+      "loc": 105
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

@@ -108,4 +108,33 @@ describe('IIR filter design', () => {
     expect(N).toBe(11);
     expect(Wn).toBeCloseTo(0.2999444154, 8);
   });
+
+  // --- buttord bandpass/bandstop array form (scipy.signal.buttord, VERIFIED 1.17.1) ---
+  it('buttord([0.2,0.5],[0.1,0.6],3,40) bandpass matches scipy', () => {
+    const { N, Wn } = buttord([0.2, 0.5], [0.1, 0.6], 3, 40);
+    expect(N).toBe(9);
+    expect(Wn[0]).toBeCloseTo(0.19997484768392573, 8);
+    expect(Wn[1]).toBeCloseTo(0.5000427940030838, 8);
+  });
+
+  it('buttord([0.1,0.6],[0.2,0.5],3,40) bandstop matches scipy', () => {
+    const { N, Wn } = buttord([0.1, 0.6], [0.2, 0.5], 3, 40);
+    expect(N).toBe(9);
+    expect(Wn[0]).toBeCloseTo(0.1476089065056465, 8);
+    expect(Wn[1]).toBeCloseTo(0.5999425870178342, 8);
+  });
+
+  it('buttord([0.25,0.45],[0.15,0.55],1,50) bandpass matches scipy', () => {
+    const { N, Wn } = buttord([0.25, 0.45], [0.15, 0.55], 1, 50);
+    expect(N).toBe(10);
+    expect(Wn[0]).toBeCloseTo(0.24461350204589205, 8);
+    expect(Wn[1]).toBeCloseTo(0.4576022499103004, 8);
+  });
+
+  it('buttord([0.15,0.55],[0.25,0.45],1,50) bandstop matches scipy', () => {
+    const { N, Wn } = buttord([0.15, 0.55], [0.25, 0.45], 1, 50);
+    expect(N).toBe(10);
+    expect(Wn[0]).toBeCloseTo(0.19378217300045295, 8);
+    expect(Wn[1]).toBeCloseTo(0.5377135065354645, 8);
+  });
 });

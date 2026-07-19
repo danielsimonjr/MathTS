@@ -347,32 +347,224 @@ export function bilinear(bIn: Vec, aIn: Vec, fs: number): { b: number[]; a: numb
 // --- buttord(wp, ws, gpass, gstop): minimum Butterworth order ---------------
 
 /**
- * Minimum Butterworth filter order (and the corresponding `-3dB`-ish natural
- * frequency `Wn`) meeting a passband/stopband spec, for a digital lowpass
- * (`wp < ws`) or highpass (`wp > ws`) filter. `wp`/`ws` are normalized to
- * Nyquist (0..1); `gpass`/`gstop` are in dB. Matches
- * `scipy.signal.buttord(wp, ws, gpass, gstop)` (scalar/digital case only —
- * the bandpass/bandstop array form is not implemented).
+ * Band-stop order objective (`scipy.signal.band_stop_obj`, `type='butter'`):
+ * the non-integer Butterworth order when passband edge `ind` is moved to `wp`,
+ * with the other passband/stopband edges held fixed. Minimized over each
+ * passband edge to find the order-minimizing bandstop geometry.
+ */
+function bandStopObj(
+  wp: number,
+  ind: number,
+  passb: readonly [number, number],
+  stopb: readonly [number, number],
+  gpass: number,
+  gstop: number
+): number {
+  const passbC: [number, number] = [passb[0], passb[1]];
+  passbC[ind] = wp;
+  const nat0 = (stopb[0] * (passbC[0] - passbC[1])) / (stopb[0] * stopb[0] - passbC[0] * passbC[1]);
+  const nat1 = (stopb[1] * (passbC[0] - passbC[1])) / (stopb[1] * stopb[1] - passbC[0] * passbC[1]);
+  const nat = Math.min(Math.abs(nat0), Math.abs(nat1));
+  const GSTOP = Math.pow(10, 0.1 * Math.abs(gstop));
+  const GPASS = Math.pow(10, 0.1 * Math.abs(gpass));
+  return Math.log10((GSTOP - 1.0) / (GPASS - 1.0)) / (2 * Math.log10(nat));
+}
+
+/**
+ * Bounded scalar minimizer — a faithful port of scipy's
+ * `optimize.fminbound` / `_minimize_scalar_bounded` (Brent's method with
+ * golden-section fallback, `xatol = 1e-5`, `maxiter = 500`). Reproduced exactly
+ * so `buttord`'s bandstop passband-edge optimization matches scipy bit-for-bit.
+ */
+function fminbound(f: (x: number) => number, x1: number, x2: number): number {
+  const xatol = 1e-5;
+  const maxfun = 500;
+  const sqrtEps = Math.sqrt(2.2e-16);
+  const goldenMean = 0.5 * (3.0 - Math.sqrt(5.0));
+  const sign = (v: number): number => (v > 0 ? 1 : v < 0 ? -1 : 0);
+
+  let a = x1;
+  let b = x2;
+  let fulc = a + goldenMean * (b - a);
+  let nfc = fulc;
+  let xf = fulc;
+  let rat = 0.0;
+  let e = 0.0;
+  let x = xf;
+  let fx = f(x);
+  let num = 1;
+  let fu = Infinity;
+
+  let ffulc = fx;
+  let fnfc = fx;
+  let xm = 0.5 * (a + b);
+  let tol1 = sqrtEps * Math.abs(xf) + xatol / 3.0;
+  let tol2 = 2.0 * tol1;
+
+  while (Math.abs(xf - xm) > tol2 - 0.5 * (b - a)) {
+    let golden = true;
+    if (Math.abs(e) > tol1) {
+      golden = false;
+      let r = (xf - nfc) * (fx - ffulc);
+      let q = (xf - fulc) * (fx - fnfc);
+      let p = (xf - fulc) * q - (xf - nfc) * r;
+      q = 2.0 * (q - r);
+      if (q > 0.0) p = -p;
+      q = Math.abs(q);
+      r = e;
+      e = rat;
+      if (Math.abs(p) < Math.abs(0.5 * q * r) && p > q * (a - xf) && p < q * (b - xf)) {
+        rat = p / q;
+        x = xf + rat;
+        if (x - a < tol2 || b - x < tol2) {
+          const si = sign(xm - xf) + (xm - xf === 0 ? 1 : 0);
+          rat = tol1 * si;
+        }
+      } else {
+        golden = true;
+      }
+    }
+    if (golden) {
+      e = xf >= xm ? a - xf : b - xf;
+      rat = goldenMean * e;
+    }
+    const si = sign(rat) + (rat === 0 ? 1 : 0);
+    x = xf + si * Math.max(Math.abs(rat), tol1);
+    fu = f(x);
+    num += 1;
+
+    if (fu <= fx) {
+      if (x >= xf) a = xf;
+      else b = xf;
+      fulc = nfc;
+      ffulc = fnfc;
+      nfc = xf;
+      fnfc = fx;
+      xf = x;
+      fx = fu;
+    } else {
+      if (x < xf) a = x;
+      else b = x;
+      if (fu <= fnfc || nfc === xf) {
+        fulc = nfc;
+        ffulc = fnfc;
+        nfc = x;
+        fnfc = fu;
+      } else if (fu <= ffulc || fulc === xf || fulc === nfc) {
+        fulc = x;
+        ffulc = fu;
+      }
+    }
+    xm = 0.5 * (a + b);
+    tol1 = sqrtEps * Math.abs(xf) + xatol / 3.0;
+    tol2 = 2.0 * tol1;
+    if (num >= maxfun) break;
+  }
+  return xf;
+}
+
+/**
+ * Minimum Butterworth filter order and the corresponding natural frequency
+ * `Wn` (the "3 dB" frequency) meeting a passband/stopband spec, for a digital
+ * lowpass, highpass, bandpass, or bandstop filter. Frequencies are normalized
+ * to Nyquist (`0..1`); `gpass`/`gstop` are in dB. For lowpass/highpass, `wp`
+ * and `ws` are scalars and `Wn` is a scalar; for bandpass/bandstop, `wp` and
+ * `ws` are `[low, high]` pairs and `Wn` is the `[low, high]` natural-frequency
+ * array. Matches `scipy.signal.buttord(wp, ws, gpass, gstop)`.
+ *
+ * Filter type follows scipy: scalar `wp < ws` → lowpass, `wp > ws` → highpass;
+ * array with `wp[0] > ws[0]` (passband inside stopband) → bandpass, `wp[0] <
+ * ws[0]` (stopband inside passband) → bandstop.
  */
 export function buttord(
   wp: number,
   ws: number,
   gpass: number,
   gstop: number
-): { N: number; Wn: number } {
-  if (!(wp > 0 && wp < 1)) throw new Error('buttord: wp must satisfy 0 < wp < 1');
-  if (!(ws > 0 && ws < 1)) throw new Error('buttord: ws must satisfy 0 < ws < 1');
-  if (wp === ws) throw new Error('buttord: wp and ws must differ');
-  const isLow = wp < ws;
-  const passb = Math.tan((Math.PI * wp) / 2);
-  const stopb = Math.tan((Math.PI * ws) / 2);
-  const nat = isLow ? stopb / passb : passb / stopb;
+): { N: number; Wn: number };
+export function buttord(
+  wp: readonly [number, number],
+  ws: readonly [number, number],
+  gpass: number,
+  gstop: number
+): { N: number; Wn: [number, number] };
+export function buttord(
+  wp: number | readonly [number, number],
+  ws: number | readonly [number, number],
+  gpass: number,
+  gstop: number
+): { N: number; Wn: number | [number, number] } {
+  const wpArr = typeof wp === 'number' ? [wp] : [wp[0], wp[1]];
+  const wsArr = typeof ws === 'number' ? [ws] : [ws[0], ws[1]];
+  if (wpArr.length !== wsArr.length)
+    throw new Error('buttord: wp and ws must both be scalars or both be [low, high] pairs');
+  for (const v of [...wpArr, ...wsArr])
+    if (!(v > 0 && v < 1)) throw new Error('buttord: all edge frequencies must satisfy 0 < f < 1');
+
+  // filter_type: 1 low, 2 high, 3 stop, 4 pass (scipy _validate_wp_ws)
+  let filterType = 2 * (wpArr.length - 1) + 1;
+  if (wpArr[0] >= wsArr[0]) filterType += 1;
+
+  // Pre-warp to analog frequencies.
+  const passb = wpArr.map((f) => Math.tan((Math.PI * f) / 2));
+  const stopb = wsArr.map((f) => Math.tan((Math.PI * f) / 2));
+
   const GSTOP = Math.pow(10, 0.1 * Math.abs(gstop));
   const GPASS = Math.pow(10, 0.1 * Math.abs(gpass));
-  const N = Math.ceil(Math.log10((GSTOP - 1) / (GPASS - 1)) / (2 * Math.log10(nat)));
-  const W0 = Math.pow(GPASS - 1, -1 / (2 * N));
-  const WN = isLow ? W0 * passb : passb / W0;
-  return { N, Wn: (Math.atan(WN) * 2) / Math.PI };
+
+  let nat: number;
+  if (filterType === 1) {
+    nat = stopb[0] / passb[0];
+  } else if (filterType === 2) {
+    nat = passb[0] / stopb[0];
+  } else if (filterType === 3) {
+    // Bandstop: optimize each passband edge to minimize the order.
+    const sb: [number, number] = [stopb[0], stopb[1]];
+    const pb0: [number, number] = [passb[0], passb[1]];
+    const wp0 = fminbound(
+      (v) => bandStopObj(v, 0, pb0, sb, gpass, gstop),
+      passb[0],
+      stopb[0] - 1e-12
+    );
+    const wp1 = fminbound(
+      (v) => bandStopObj(v, 1, pb0, sb, gpass, gstop),
+      stopb[1] + 1e-12,
+      passb[1]
+    );
+    passb[0] = wp0;
+    passb[1] = wp1;
+    const nat0 = (stopb[0] * (passb[0] - passb[1])) / (stopb[0] * stopb[0] - passb[0] * passb[1]);
+    const nat1 = (stopb[1] * (passb[0] - passb[1])) / (stopb[1] * stopb[1] - passb[0] * passb[1]);
+    nat = Math.min(Math.abs(nat0), Math.abs(nat1));
+  } else {
+    // Bandpass.
+    const nat0 = (stopb[0] * stopb[0] - passb[0] * passb[1]) / (stopb[0] * (passb[0] - passb[1]));
+    const nat1 = (stopb[1] * stopb[1] - passb[0] * passb[1]) / (stopb[1] * (passb[0] - passb[1]));
+    nat = Math.min(Math.abs(nat0), Math.abs(nat1));
+  }
+
+  const N = Math.ceil(Math.log10((GSTOP - 1.0) / (GPASS - 1.0)) / (2 * Math.log10(nat)));
+  const W0 = Math.pow(GPASS - 1.0, -1.0 / (2.0 * N));
+
+  const toDigital = (WN: number): number => (Math.atan(WN) * 2.0) / Math.PI;
+
+  if (filterType === 1) return { N, Wn: toDigital(W0 * passb[0]) };
+  if (filterType === 2) return { N, Wn: toDigital(passb[0] / W0) };
+  if (filterType === 3) {
+    const discr = Math.sqrt(Math.pow(passb[1] - passb[0], 2) + 4 * W0 * W0 * passb[0] * passb[1]);
+    const wn0 = (passb[1] - passb[0] + discr) / (2 * W0);
+    const wn1 = (passb[1] - passb[0] - discr) / (2 * W0);
+    const sorted = [Math.abs(wn0), Math.abs(wn1)].sort((x, y) => x - y);
+    return { N, Wn: [toDigital(sorted[0]), toDigital(sorted[1])] };
+  }
+  // Bandpass.
+  const w0s = [-W0, W0].map(
+    (s) =>
+      -s * ((passb[1] - passb[0]) / 2.0) +
+      Math.sqrt(((s * s) / 4.0) * Math.pow(passb[1] - passb[0], 2) + passb[0] * passb[1])
+  );
+  const sorted = w0s.map(Math.abs).sort((x, y) => x - y);
+  return { N, Wn: [toDigital(sorted[0]), toDigital(sorted[1])] };
 }
 
 // --- zpk2sos / sosfilt -------------------------------------------------------
