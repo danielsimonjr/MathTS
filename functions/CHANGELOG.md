@@ -1,5 +1,32 @@
 # @danielsimonjr/mathts-functions
 
+## 0.45.0
+
+### Minor Changes
+
+- Stiff-ODE follow-ups: matrix `luSolve` + `solveODE` event detection.
+
+  **matrix — new `luSolve(fac, b)` export.** Solves `A·x = b` from an `lu()` factorization (the package had `lu()`
+  but no solve step — a real gap). numpy-pinned.
+
+  **functions — `solveODE` linear solve routed onto the matrix LU (threshold hybrid, neutral).** The
+  Rosenbrock/RODAS stiff step re-factorized the iteration matrix per RHS with inline elimination; it now factors
+  once via matrix `lu()`+`luSolve` for `n ≥ 8` and keeps the inline path for the tiny `n = 1–3` matrices real
+  stiff systems use (measured 1.8–8× faster there — `DenseMatrix` allocation overhead dwarfs the trivial work
+  until `n ≈ 8`, the same crossover the det/inv fast-paths use). Existing stiff behavior is **bit-for-bit
+  unchanged** on the small path; the `n ≥ 8` path is oracle-pinned.
+
+  **functions — `solveODE` event detection (`events` option).** scipy `solve_ivp`-style: `events` is a function
+  or array of `g(t, y)` whose zero-crossings are located (cubic-Hermite dense interpolation + bisection), with
+  `terminal` (stop at the crossing) and `direction` (±1 sign filter) as function properties or `{event, terminal,
+direction}` objects. Returns `tEvents`/`yEvents`; a terminal event truncates the output. Absent the option the
+  result shape is unchanged. Event times match `scipy.integrate.solve_ivp(..., events=)` to ~1e-8 or better.
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.7.0
+
 ## 0.44.0
 
 ### Minor Changes
