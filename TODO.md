@@ -481,7 +481,14 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
       of the dual points** `aᵢ/(bᵢ − aᵢ·x₀)` (scipy's `HalfspaceIntersection` route — the dual
       hull's facets map back to polytope vertices). The 3-D hull engine here already supports the
       dual-hull route for bounded 3-D polytopes; a full n-D version needs an n-D hull / LP feasibility
-      step. Not shipped this pass. - **Perfectly-cocircular Delaunay degeneracy** — Bowyer–Watson (like Qhull without joggle)
+      step. ✅ **SHIPPED 2026-07-19** — `halfspaceIntersection(halfspaces, interiorPoint)` in
+      `functions/src/geometry/halfspace-intersection.ts` via the **dual-hull route** (scipy's
+      convention `[a…, b]` ⇒ `a·x + b ≤ 0`), returning `{vertices, incidences}`. Boundedness is
+      decided by the dual-space **origin lying strictly inside the dual hull**; unbounded input
+      throws (mirroring scipy's `QhullError`). **2-D and 3-D only** — n-D still needs an n-D hull or
+      the double-description method, and throws a clear error rather than half-shipping. Oracle-pinned
+      vs `scipy.spatial.HalfspaceIntersection` (`functions/tests/geometry-halfspace-oracle.test.ts`,
+      14 tests; hexagon vertex set verified byte-identical to scipy). - **Perfectly-cocircular Delaunay degeneracy** — Bowyer–Watson (like Qhull without joggle)
       mis-triangulates exact concentric rings; needs a joggle or symbolic perturbation. Documented. - **`delaunay_wasm` kernel** — fix or replace the AssemblyScript kernel, then re-enable dispatch.
 - [x] ✅ **Numerics: B-spline fit/eval + Monte-Carlo/QMC integration — DONE 2026-07-17.**
       `bsplineFit`/`bsplineEval` (de Boor collocation for `s=0` interpolation, least-squares

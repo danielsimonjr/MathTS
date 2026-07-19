@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1734,
+  "totalFiles": 1736,
   "byDisposition": {
-    "reachable": 1070,
+    "reachable": 1071,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 569,
+    "test": 570,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1106,
-    "tests": 569,
+    "src": 1107,
+    "tests": 570,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 725,
+    "@danielsimonjr/mathts-functions": 727,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5402,6 +5402,13 @@
       "loc": 371
     },
     {
+      "file": "functions/src/geometry/halfspace-intersection.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 362
+    },
+    {
       "file": "functions/src/geometry/hull.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -5497,7 +5504,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 596
+      "loc": 598
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -8641,6 +8648,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 422
+    },
+    {
+      "file": "functions/tests/geometry-halfspace-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 434
     },
     {
       "file": "functions/tests/geometry-hull-oracle.test.ts",

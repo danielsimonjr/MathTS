@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1103
+  totalFiles: 1104
   totalModules: 82
-  totalExports: 5666
+  totalExports: 5669
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8432,6 +8432,10 @@ modules:
           imports:
             - sphericalVoronoi
           reExport: true
+        - file: ./geometry/halfspace-intersection.js
+          imports:
+            - halfspaceIntersection
+          reExport: true
         - file: ./stats/inference-extra2.js
           imports:
             - noncentralChi2CDF
@@ -8786,6 +8790,11 @@ modules:
             - SphericalVoronoiResult
           reExport: true
           typeOnly: true
+        - file: ./geometry/halfspace-intersection.js
+          imports:
+            - HalfspaceIntersectionResult
+          reExport: true
+          typeOnly: true
         - file: ./stats/inference-extra2.js
           imports:
             - CircularOptions
@@ -9085,6 +9094,7 @@ modules:
         - voronoi
         - alphaShape
         - sphericalVoronoi
+        - halfspaceIntersection
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -9234,6 +9244,7 @@ modules:
         - VoronoiResult
         - AlphaShapeResult
         - SphericalVoronoiResult
+        - HalfspaceIntersectionResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -9486,6 +9497,7 @@ modules:
         - voronoi
         - alphaShape
         - sphericalVoronoi
+        - halfspaceIntersection
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -9635,6 +9647,7 @@ modules:
         - VoronoiResult
         - AlphaShapeResult
         - SphericalVoronoiResult
+        - HalfspaceIntersectionResult
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -11987,6 +12000,21 @@ modules:
         - setIsSuperset
         - setEqual
         - setDisjoint
+    functions/src/geometry/halfspace-intersection.ts:
+      description: Halfspace intersection / vertex enumeration (2-D & 3-D) — completes the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./hull.js
+          imports:
+            - convexHull
+      workspaceDependencies: []
+      exports:
+        - halfspaceIntersection
+      interfaces:
+        - HalfspaceIntersectionResult
+      functions:
+        - halfspaceIntersection
     functions/src/geometry/hull.ts:
       description: Convex hull — the foundation of the computational-geometry engine.
       externalDependencies: []
@@ -35250,6 +35278,7 @@ dependencyGraph:
         - functions/src/geometry/delaunay.ts
         - functions/src/geometry/distance.ts
         - functions/src/geometry/geometry-extra.ts
+        - functions/src/geometry/halfspace-intersection.ts
         - functions/src/geometry/hull.ts
         - functions/src/geometry/intersect.ts
         - functions/src/geometry/intersect3d.ts
@@ -36208,18 +36237,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1103
+  totalTypeScriptFiles: 1104
   totalModules: 82
-  totalLinesOfCode: 189633
-  totalExports: 5666
+  totalLinesOfCode: 189997
+  totalExports: 5669
   totalClasses: 52
-  totalInterfaces: 496
-  totalFunctions: 1784
+  totalInterfaces: 497
+  totalFunctions: 1785
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2301
-  totalTypeOnlyImports: 577
+  totalReExports: 2303
+  totalTypeOnlyImports: 578
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

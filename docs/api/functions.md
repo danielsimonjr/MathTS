@@ -320,7 +320,7 @@ poissonPMF(3, 2); // P(X=3) where lambda=2
 | `dot3D`                 | `(a, b) => number`             | 3D dot product           |
 | `triangleArea`          | `(p1, p2, p3) => number`       | Triangle area            |
 | `polygonArea`           | `(pts) => number`              | Polygon area (shoelace)  |
-| `convexHull`            | `(pts) => number[][]`          | Convex hull              |
+| `convexHull`            | `(pts) => ConvexHullResult`    | Convex hull (2-D/3-D)    |
 | `pointInPolygon`        | `(pt, poly) => boolean`        | Point-in-polygon test    |
 | `rotateVector2D`        | `(v, angle) => number[]`       | Rotate 2D vector         |
 | `rotateVector3D`        | `(v, axis, angle) => number[]` | Rotate 3D vector         |
@@ -335,6 +335,47 @@ import { distance2D, convexHull, triangleArea } from '@danielsimonjr/mathts-func
 
 distance2D([0, 0], [3, 4]); // 5
 triangleArea([0, 0], [4, 0], [0, 3]); // 6
+```
+
+### Computational geometry structures
+
+Structured results pinned against the corresponding `scipy.spatial` routines.
+
+| Function                | Signature                                                    | Description                             |
+| ----------------------- | ------------------------------------------------------------ | --------------------------------------- |
+| `convexHull`            | `(pts) => ConvexHullResult`                                  | Hull vertices/simplices + area & volume |
+| `delaunay`              | `(pts) => DelaunayResult`                                    | Delaunay triangulation (2-D/3-D)        |
+| `voronoi`               | `(pts) => VoronoiResult`                                     | Voronoi diagram (hull dual)             |
+| `sphericalVoronoi`      | `(pts, radius?, center?) => SphericalVoronoiResult`          | Voronoi on a sphere                     |
+| `alphaShape`            | `(pts, alpha) => AlphaShapeResult`                           | α-shape (concave hull)                  |
+| `halfspaceIntersection` | `(halfspaces, interiorPoint) => HalfspaceIntersectionResult` | Vertex enumeration of `A·x + b ≤ 0`     |
+
+`halfspaceIntersection` uses SciPy's convention: each halfspace is a row
+`[a_1, …, a_d, b]` denoting `a·x + b ≤ 0` (to express `a·x ≤ c`, pass `[a…, −c]`).
+It requires a **strictly interior** point and a **bounded** polytope, and is
+implemented for 2-D and 3-D.
+
+```typescript
+import { convexHull, halfspaceIntersection } from '@danielsimonjr/mathts-functions';
+
+convexHull([
+  [0, 0],
+  [1, 0],
+  [1, 1],
+  [0, 1],
+  [0.5, 0.5],
+]).vertices; // [0, 1, 2, 3] — the interior point is excluded
+
+// Unit square [0,1]² recovered from its four edge halfspaces.
+halfspaceIntersection(
+  [
+    [-1, 0, 0],
+    [1, 0, -1],
+    [0, -1, 0],
+    [0, 1, -1],
+  ],
+  [0.5, 0.5]
+).vertices; // the four corners, counter-clockwise
 ```
 
 ---
@@ -439,7 +480,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1063 exports).
+> `@danielsimonjr/mathts-functions` (1064 exports).
 
 ### Functions by category
 
@@ -497,7 +538,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (9): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
+**Other exports (uncategorized)** (10): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `wishartSample`
 
 ### Constants & values (64)
 

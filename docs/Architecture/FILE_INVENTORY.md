@@ -6,21 +6,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1734
+**Total files**: 1736
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
-| `reachable`   |     1070 | A `src/` file in the module graph, reachable from a root.                                                    |
+| `reachable`   |     1071 | A `src/` file in the module graph, reachable from a root.                                                    |
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        3 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      569 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      570 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1734** |                                                                                                              |
+| **Total**     | **1736** |                                                                                                              |
 
 ## Per-area counts
 
@@ -28,8 +28,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1106 |
-| `tests`    |   569 |
+| `src`      |  1107 |
+| `tests`    |   570 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -44,7 +44,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   489 |
-| `@danielsimonjr/mathts-functions`      |   725 |
+| `@danielsimonjr/mathts-functions`      |   727 |
 | `@danielsimonjr/mathts-gpu`            |    14 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    92 |
@@ -831,6 +831,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/geometry/delaunay.ts`                                              | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/geometry/distance.ts`                                              | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/geometry/geometry-extra.ts`                                        | @danielsimonjr/mathts-functions      | src      | reachable   |
+| `functions/src/geometry/halfspace-intersection.ts`                                | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/geometry/hull.ts`                                                  | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/geometry/intersect.ts`                                             | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/geometry/intersect3d.ts`                                           | @danielsimonjr/mathts-functions      | src      | reachable   |
@@ -1294,6 +1295,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/geometry-consumers-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-delaunay-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-extended.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/geometry-halfspace-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-hull-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-sets.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |

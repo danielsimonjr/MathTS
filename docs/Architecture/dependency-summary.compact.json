@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1103, "e": 5666, "re": 2301 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1104, "e": 5669, "re": 2303 },
   "s": {
-    "loc": 189633,
+    "loc": 189997,
     "cls": 52,
-    "int": 496,
-    "fn": 1784,
+    "int": 497,
+    "fn": 1785,
     "tg": 156,
     "en": 0,
     "co": 1543,
-    "toi": 577
+    "toi": 578
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -616,7 +616,7 @@
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
     },
     "functions/geometry": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "alphaShape",
         "delaunay",
@@ -634,15 +634,16 @@
         "setIsSuperset",
         "setEqual",
         "setDisjoint",
+        "halfspaceIntersection",
         "convexHull",
         "createIntersect",
-        "rayTriangleIntersect",
-        "rayPlaneIntersect"
+        "rayTriangleIntersect"
       ],
       "int": [
         "AlphaShapeResult",
         "DelaunayResult",
         "ProcrustesResult",
+        "HalfspaceIntersectionResult",
         "ConvexHullResult",
         "RayHit",
         "SegmentClosestResult",
@@ -1823,7 +1824,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 125, "o": 0 },
+    { "p": "src/index.ts", "i": 127, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

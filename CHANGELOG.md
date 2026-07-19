@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): halfspace intersection — vertex enumeration of a bounded polytope
+
+- **`halfspaceIntersection(halfspaces, interiorPoint)`** — given halfspaces `A·x + b ≤ 0` and a
+  strictly **interior** point, returns the `vertices` of the bounded polytope plus `incidences`
+  (which halfspaces are tight at each vertex). Completes the computational-geometry engine: the
+  V-representation ⇢ H-representation direction was the one piece the hull/Delaunay/Voronoi sweep
+  left unshipped.
+- **Convention** matches `scipy.spatial.HalfspaceIntersection`: each row is `[a_1, …, a_d, b]`
+  denoting `a·x + b ≤ 0` (SciPy's stacked `[A | b]`). To express `a·x ≤ c`, pass `[a…, −c]`.
+- **Method — the dual-hull route.** With a strictly interior `x₀`, each halfspace maps to a dual
+  point `yᵢ = aᵢ / −(aᵢ·x₀ + bᵢ)`. The convex hull of `{yᵢ}` is the polar dual, so **each dual-hull
+  facet corresponds to a primal vertex** — recovered by solving the `d × d` system `aᵢ·x = −bᵢ` over
+  the `d` halfspaces spanning that facet. Redundant halfspaces map to interior dual points and
+  contribute no vertex, exactly as SciPy discards them. Reuses the maintained `convexHull`
+  (monotone-chain / QuickHull) — no new hull engine.
+- **Boundedness** is decided structurally: the polytope is bounded **iff** the dual-space origin lies
+  strictly inside `conv{yᵢ}` (equivalently, the normals `aᵢ` positively span `ℝᵈ`). Unbounded input
+  throws, mirroring SciPy's `QhullError`; 2-D vertices are returned counter-clockwise.
+- **Scope: 2-D and 3-D.** `d > 3` throws a clear error naming what the general case needs (an n-D
+  hull or the double-description method) rather than half-shipping a wrong answer.
+- **All tolerances are relative, and the dual cloud is normalised to unit scale.** A halfspace row
+  `[a, b]` may be multiplied by any positive constant without changing the inequality, and polytope
+  coordinates carry units — so every threshold is applied to a scale-free quantity: the facet
+  singularity test compares against the **Hadamard bound** (product of row norms); the boundedness
+  test divides each facet's cross/dot product by its edge length / normal magnitude, making it a true
+  **geometric distance** (a merely *thin* facet — a legitimate near-degenerate vertex — no longer
+  reads as "unbounded"); tightness and vertex dedup are scaled to the term and coordinate
+  magnitudes. Code review caught the absolute-epsilon versions of all five: rows scaled by `1e-8`
+  silently returned an **empty** vertex list, a 3-D cube of side 2000 threw a false `unbounded`, and
+  side `1e6` collapsed the dual points enough to break the hull step itself. Pinned by regression
+  tests across coordinate scales `1e-4 … 1e6` and row scales `1e-8 … 1e8`.
+- Oracle-pinned against `scipy.spatial.HalfspaceIntersection`
+  (`functions/tests/geometry-halfspace-oracle.test.ts`, 14 tests) — vertex sets matched
+  order-independently, plus the implementation-independent invariant that every returned vertex
+  satisfies all halfspaces and is tight on at least `d` of them. The regular-hexagon vertex set was
+  verified **byte-identical** to scipy's.
+
+### docs(functions): curated computational-geometry reference
+
+- Added a **Computational geometry structures** table to `docs/api/functions.md` covering
+  `convexHull` / `delaunay` / `voronoi` / `sphericalVoronoi` / `alphaShape` / `halfspaceIntersection`
+  — these had only ever appeared in the generated index, never in a curated user-facing section.
+- **Fixed a wrong signature**: `convexHull` was documented as `(pts) => number[][]`; it actually
+  returns a structured `ConvexHullResult` (`{vertices, simplices, area, volume}`).
+
 ### feat(functions): Mathieu functions — characteristic values + angular functions
 
 - **`mathieuA(n, q)` / `mathieuB(n, q)`** — the characteristic values `a_n(q)` (even, `ce_n`) and

@@ -456,6 +456,8 @@ export { alphaShape } from './geometry/alpha-shape.js';
 export type { AlphaShapeResult } from './geometry/alpha-shape.js';
 export { sphericalVoronoi } from './geometry/spherical-voronoi.js';
 export type { SphericalVoronoiResult } from './geometry/spherical-voronoi.js';
+export { halfspaceIntersection } from './geometry/halfspace-intersection.js';
+export type { HalfspaceIntersectionResult } from './geometry/halfspace-intersection.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
