@@ -1761,6 +1761,7 @@
     "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
+    "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
@@ -1934,6 +1935,7 @@
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
       "functions/src/stats/gaussian-process.ts",
+      "functions/src/stats/multivariate-sampling.ts",
       "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
@@ -2083,6 +2085,7 @@
       "functions/src/probability/pickRandom.ts",
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts",
+      "functions/src/stats/multivariate-sampling.ts",
       "functions/src/stats/mvn.ts"
     ],
     "functions/src/utils/product.ts": [
@@ -2100,7 +2103,10 @@
     "functions/src/plain/number/constants.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/logical.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/probability.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/probability.ts": [
+      "functions/src/plain/number/index.ts",
+      "functions/src/stats/multivariate-sampling.ts"
+    ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/probability/util/randomMatrix.ts": [
@@ -2152,6 +2158,10 @@
       "functions/src/statistics/prod.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts"
+    ],
+    "functions/src/probability/util/gammaSample.ts": [
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/typed/dist-objects.ts"
     ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",

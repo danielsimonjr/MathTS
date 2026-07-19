@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1091
+  totalFiles: 1093
   totalModules: 82
-  totalExports: 5595
+  totalExports: 5604
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8497,6 +8497,12 @@ modules:
             - gaussianProcessRegression
             - gpRegression
           reExport: true
+        - file: ./stats/multivariate-sampling.js
+          imports:
+            - dirichletSample
+            - dirichletPdf
+            - wishartSample
+          reExport: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -8764,6 +8770,11 @@ modules:
             - GPOptions
             - GPPrediction
             - GPModel
+          reExport: true
+          typeOnly: true
+        - file: ./stats/multivariate-sampling.js
+          imports:
+            - SampleSeedOptions
           reExport: true
           typeOnly: true
       workspaceDependencies:
@@ -9045,6 +9056,9 @@ modules:
         - tTestPower
         - gaussianProcessRegression
         - gpRegression
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -9148,6 +9162,7 @@ modules:
         - GPOptions
         - GPPrediction
         - GPModel
+        - SampleSeedOptions
       reExported:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
@@ -9420,6 +9435,9 @@ modules:
         - tTestPower
         - gaussianProcessRegression
         - gpRegression
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -9523,6 +9541,7 @@ modules:
         - GPOptions
         - GPPrediction
         - GPModel
+        - SampleSeedOptions
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -14358,6 +14377,18 @@ modules:
         - createRandomInt
       constants:
         - createRandomInt
+    functions/src/probability/util/gammaSample.ts:
+      description: Shared RNG-driven Gamma / standard-normal variate generators.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - normalSampleRng
+        - gammaSampleRng
+      functions:
+        - normalSampleRng
+        - gammaSampleRng
     functions/src/probability/util/randomMatrix.ts:
       description: This is a util function for generating a random matrix recursively.
       externalDependencies: []
@@ -16035,6 +16066,35 @@ modules:
         - vonMisesPDF
         - mcnemar
         - cochranQ
+    functions/src/stats/multivariate-sampling.ts:
+      description: 'Multivariate sampling beyond MVN: Dirichlet (`dirichletSample` /'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/matrix-ops.js
+          imports:
+            - cholesky
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+        - file: ../probability/util/gammaSample.js
+          imports:
+            - gammaSampleRng
+            - normalSampleRng
+        - file: ../plain/number/probability.js
+          imports:
+            - lgammaNumber
+      workspaceDependencies: []
+      exports:
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
+      interfaces:
+        - SampleSeedOptions
+      functions:
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
     functions/src/stats/mvn.ts:
       description: Multivariate-normal density (`mvnPdf`) and Cholesky-based sampling
       externalDependencies: []
@@ -18303,6 +18363,10 @@ modules:
         - file: ./special.js
           imports:
             - erfcScalar
+        - file: ../probability/util/gammaSample.js
+          imports:
+            - gammaSampleRng
+            - normalSampleRng
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -34942,6 +35006,7 @@ dependencyGraph:
         - functions/src/probability/pickRandom.ts
         - functions/src/probability/random.ts
         - functions/src/probability/randomInt.ts
+        - functions/src/probability/util/gammaSample.ts
         - functions/src/probability/util/randomMatrix.ts
         - functions/src/probability/util/seededRNG.ts
     - name: Functions/relational
@@ -35015,6 +35080,7 @@ dependencyGraph:
         - functions/src/stats/gaussian-process.ts
         - functions/src/stats/inference-extra.ts
         - functions/src/stats/inference-extra2.ts
+        - functions/src/stats/multivariate-sampling.ts
         - functions/src/stats/mvn.ts
         - functions/src/stats/power-analysis.ts
         - functions/src/stats/timeseries.ts
@@ -35767,18 +35833,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1091
+  totalTypeScriptFiles: 1093
   totalModules: 82
-  totalLinesOfCode: 186071
-  totalExports: 5595
+  totalLinesOfCode: 186288
+  totalExports: 5604
   totalClasses: 52
-  totalInterfaces: 481
-  totalFunctions: 1757
+  totalInterfaces: 482
+  totalFunctions: 1762
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2257
-  totalTypeOnlyImports: 570
+  totalReExports: 2261
+  totalTypeOnlyImports: 571
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

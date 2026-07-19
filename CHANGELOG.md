@@ -24,6 +24,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   limits also pinned: a noiseless GP interpolates the training targets (mean → y, variance → 0), and
   far from the data the posterior returns to the prior (mean → 0, variance → σ_f²).
 
+### feat(functions): Dirichlet + Wishart sampling (`dirichletSample` / `dirichletPdf` / `wishartSample`)
+
+- New multivariate sampling beyond MVN. **Dirichlet** draws use the Gamma-normalization method
+  (`gᵢ ~ Gamma(αᵢ,1)`, `xᵢ = gᵢ/Σⱼgⱼ`); **Wishart** draws use the Bartlett decomposition
+  (`W = (L·A)(L·A)ᵀ`, `L = chol(scale)`, lower-triangular `A` with `√χ²(df−i)` diagonal + N(0,1)
+  below). Both accept a `seed` for reproducible draws via the package's seeded RNG (matching
+  `mvnSample`). `dirichletPdf(x, α)` provides the closed-form density via `lgammaNumber`.
+- The Marsaglia & Tsang gamma sampler is now shared (`functions/src/probability/util/gammaSample.ts`,
+  `gammaSampleRng`/`normalSampleRng`); the distribution objects (`typed/dist-objects.ts`) were
+  refactored to delegate to it, removing the two pre-existing in-file copies (no behavior change —
+  235 distribution tests still green).
+- Oracle-pinned (`functions/tests/multivariate-sampling-oracle.test.ts`, 9 tests): `dirichletPdf`
+  matches `scipy.stats.dirichlet.pdf` on fixed simplex points to ~1e-12. Being random, the samplers
+  are pinned by implementation-independent invariants + seeded determinism: Dirichlet draws lie on
+  the simplex with sample mean → αᵢ/Σα (within ~1 SE over 200k draws) and sample covariance → the
+  Dirichlet closed-form covariance; Wishart draws are SPD with sample mean → df·scale (within ~2 SE)
+  and E[tr(W)] → df·tr(scale).
+
 ### fix(functions): `qz` QZ-hardening — route the Schur step to the Francis double-shift `matrixSchur`
 
 - `qz(A, B)` (generalized/QZ Schur of the pencil `(A, B)`) built its Schur factor with a homegrown

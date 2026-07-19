@@ -451,11 +451,13 @@ or a documented scope limit worth revisiting.
       (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests). **Remaining:** general
       PDE/MOL (`solvePDE` is 1-D-heat-only); BDF/Radau higher-order stiff; `solveODESystem` error
       control; DAE/DDE — each a substantially larger sub-project, not attempted this pass.
-- [~] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
-  (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
-  (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)
-  DONE 2026-07-18** — sklearn-pinned to machine precision (max |Δ| mean 5.6e-16, std 1.9e-15).
-  **Remaining:** multivariate distributions beyond MVN (Dirichlet/Wishart sampling).
+- [x] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
+      (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
+      (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)
+      DONE 2026-07-18** — sklearn-pinned to machine precision (max |Δ| mean 5.6e-16, std 1.9e-15). ✅
+      **Dirichlet + Wishart sampling (`dirichletSample`/`dirichletPdf`/`wishartSample`) DONE 2026-07-18**
+      — `dirichletPdf` scipy-pinned (~1e-12); samplers moment-convergence-pinned (Dirichlet mean within
+      ~1 SE, Wishart mean within ~2 SE over 200k draws).
 - [~] **Special-fns Phase-5 extension (niche):** ✅ **`polylog`, `struveH`/`struveL`, `kelvinBer`/
   `kelvinBei`, `barnesG` DONE 2026-07-16 (functions@0.42.0)** — mpmath dps=25-pinned, machine
   precision. **Remaining (deferred, highly specialized):** Lerch Φ, Coulomb/Mathieu/parabolic-

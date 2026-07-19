@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1091, "e": 5595, "re": 2257 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1093, "e": 5604, "re": 2261 },
   "s": {
-    "loc": 186071,
+    "loc": 186288,
     "cls": 52,
-    "int": 481,
-    "fn": 1757,
+    "int": 482,
+    "fn": 1762,
     "tg": 156,
     "en": 0,
     "co": 1543,
-    "toi": 570
+    "toi": 571
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -822,7 +822,7 @@
       ]
     },
     "functions/probability": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "createBernoulli",
         "createCombinations",
@@ -837,6 +837,8 @@
         "createRandom",
         "createRandomNumber",
         "createRandomInt",
+        "normalSampleRng",
+        "gammaSampleRng",
         "randomMatrix",
         "createRng"
       ]
@@ -960,7 +962,7 @@
       ]
     },
     "functions/stats": {
-      "f": 7,
+      "f": 8,
       "exp": [
         "fitDistribution",
         "gpRegression",
@@ -976,12 +978,12 @@
         "vonMisesPDF",
         "mcnemar",
         "cochranQ",
+        "dirichletSample",
+        "dirichletPdf",
+        "wishartSample",
         "mvnPdf",
         "mvnSample",
-        "tTestPower",
-        "pacf",
-        "ljungBox",
-        "durbinWatson"
+        "tTestPower"
       ],
       "int": [
         "FitDistributionResult",
@@ -1808,7 +1810,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 110, "o": 0 },
+    { "p": "src/index.ts", "i": 112, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

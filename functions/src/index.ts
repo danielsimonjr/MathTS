@@ -555,3 +555,8 @@ export type { TTestPowerAlternative, TTestPowerOptions } from './stats/power-ana
 // kernels; posterior mean + variance), oracle-pinned against sklearn.
 export { gaussianProcessRegression, gpRegression } from './stats/gaussian-process.js';
 export type { GPKernel, GPOptions, GPPrediction, GPModel } from './stats/gaussian-process.js';
+
+// Stats-breadth chunk — Dirichlet + Wishart sampling and Dirichlet density,
+// beyond MVN (Gamma-normalization / Bartlett decomposition).
+export { dirichletSample, dirichletPdf, wishartSample } from './stats/multivariate-sampling.js';
+export type { SampleSeedOptions } from './stats/multivariate-sampling.js';
