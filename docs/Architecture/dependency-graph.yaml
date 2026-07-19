@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1102
+  totalFiles: 1103
   totalModules: 82
-  totalExports: 5658
+  totalExports: 5666
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8487,6 +8487,13 @@ modules:
             - coulombG
             - coulombFG
           reExport: true
+        - file: ./special/mathieu.js
+          imports:
+            - mathieuA
+            - mathieuB
+            - mathieuCe
+            - mathieuSe
+          reExport: true
         - file: ./graph/traversal-centrality.js
           imports:
             - bfs
@@ -9112,6 +9119,10 @@ modules:
         - coulombF
         - coulombG
         - coulombFG
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
         - bfs
         - dfs
         - floydWarshall
@@ -9509,6 +9520,10 @@ modules:
         - coulombF
         - coulombG
         - coulombFG
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
         - bfs
         - dfs
         - floydWarshall
@@ -15744,6 +15759,26 @@ modules:
         - jacobiSN
         - jacobiCN
         - jacobiDN
+    functions/src/special/mathieu.ts:
+      description: 'Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+      exports:
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
+      functions:
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
     functions/src/special/niche.ts:
       description: 'Niche special functions: polylogarithm, Struve H/L, Kelvin ber/bei (order'
       externalDependencies: []
@@ -35393,6 +35428,7 @@ dependencyGraph:
         - functions/src/special/erf.ts
         - functions/src/special/hypergeometric.ts
         - functions/src/special/jacobi-elliptic.ts
+        - functions/src/special/mathieu.ts
         - functions/src/special/niche.ts
         - functions/src/special/polygamma-orthopoly.ts
         - functions/src/special/wave-functions.ts
@@ -36172,17 +36208,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1102
+  totalTypeScriptFiles: 1103
   totalModules: 82
-  totalLinesOfCode: 189393
-  totalExports: 5658
+  totalLinesOfCode: 189633
+  totalExports: 5666
   totalClasses: 52
   totalInterfaces: 496
-  totalFunctions: 1780
+  totalFunctions: 1784
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2297
+  totalReExports: 2301
   totalTypeOnlyImports: 577
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

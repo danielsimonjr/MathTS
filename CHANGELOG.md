@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): Mathieu functions — characteristic values + angular functions
+
+- **`mathieuA(n, q)` / `mathieuB(n, q)`** — the characteristic values `a_n(q)` (even, `ce_n`) and
+  `b_n(q)` (odd, `se_n`, `n ≥ 1`) of the Mathieu equation `y'' + (a − 2q·cos 2x)·y = 0`, i.e. the
+  values of `a` admitting a `2π`-periodic solution. **`mathieuCe(n, q, x)` / `mathieuSe(n, q, x)`** —
+  the angular Mathieu functions `ce_n(x, q)` / `se_n(x, q)` (`x` in radians), summed from their
+  Fourier coefficients.
+- **Method — the symmetric tridiagonal eigenvalue problem.** Expanding the periodic solutions in a
+  Fourier series yields a three-term recurrence among the coefficients — a symmetric tridiagonal
+  eigenproblem in each of the four parity classes (`ce_{2m}`, `ce_{2m+1}`, `se_{2m+1}`, `se_{2m+2}`;
+  DLMF §28.4). Eigenvalues (ascending) are the characteristic values; eigenvectors are the Fourier
+  coefficients. Truncated at N=50 (coefficients decay super-exponentially) and solved by **reusing
+  the maintained symmetric eigensolver in `@danielsimonjr/mathts-matrix` (`eig`)** — no new
+  eigensolver.
+- **Normalization / sign** — standard DLMF / Abramowitz & Stegun convention (identical to `mpmath`/
+  `scipy`): `(1/π)∫₀^{2π} ce_n² = 1` (so `ce_0(x,0) = 1/√2`, `ce_n(x,0) = cos nx`, `se_n(x,0) =
+  sin nx` for `n ≥ 1`), global sign fixed so the dominant Fourier coefficient is positive.
+- **Oracle-pinned** against `scipy.special` (the installed `mpmath` 1.3.0 does not ship the Mathieu
+  family; scipy uses the identical DLMF normalization, verified `mathieu_cem(0,0,0)=1/√2`):
+  `a_n`/`b_n` relative error ≤ 1.2e-14, `ce_n`/`se_n` absolute error ≤ 7.8e-15 over `n ∈ 0..6`,
+  `q ∈ {0.5, 1, 2, 5, 10}`; the `q → 0` limits `a_n, b_n → n²` and `ce_n → cos nx`, `se_n → sin nx`;
+  and an implementation-independent ODE-residual check (`f'' + (a − 2q·cos 2x)·f ≈ 0`, residual
+  ≤ 2e-7, finite-difference-limited). `functions/tests/gap-special-mathieu-oracle.test.ts`.
+
 ### feat(functions): constant-delay DDE solver `solveDDE` (method of steps + continuous extension)
 
 - **`solveDDE(f, tspan, history, delays, options?)`** — solves the constant-delay **delay

@@ -495,6 +495,8 @@ leftShift(1, 4); // 16
 | `coulombF(L, eta, rho)`                     | Regular Coulomb wave function `F_L(η, ρ)` (ascending power series)                      | —                      |
 | `coulombG(L, eta, rho)`                     | Irregular Coulomb wave function `G_L(η, ρ)` (Steed continued fractions)                 | —                      |
 | `coulombFG(L, eta, rho)`                    | `{F, Fp, G, Gp}` bundle — both Coulomb functions + derivatives (Wronskian `F′G−FG′=1`)  | —                      |
+| `mathieuA(n, q)` `mathieuB(n, q)`           | Mathieu characteristic values `a_n(q)` (even `ce_n`) / `b_n(q)` (odd `se_n`, `n ≥ 1`)   | —                      |
+| `mathieuCe(n, q, x)` `mathieuSe(n, q, x)`   | Angular Mathieu functions `ce_n(x, q)` / `se_n(x, q)` (`x` in radians; `se_n`, `n ≥ 1`) | —                      |
 
 ### Details
 
@@ -2944,7 +2946,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1059 exports).
+> `@danielsimonjr/mathts-functions` (1063 exports).
 
 ### Functions by category
 
@@ -2958,7 +2960,7 @@ await terminatePool();
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (66): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `coulombF`, `coulombFG`, `coulombG`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `logIntegral`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
+**Special Functions** (70): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `coulombF`, `coulombFG`, `coulombG`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `logIntegral`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 

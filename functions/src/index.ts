@@ -518,6 +518,11 @@ export {
 } from './special/wave-functions.js';
 export type { CoulombFG } from './special/wave-functions.js';
 
+// Mathieu functions — characteristic values a_n(q)/b_n(q) and the 2π-periodic
+// angular functions ce_n(x,q)/se_n(x,q), via the symmetric-tridiagonal
+// eigenvalue problem for the Fourier coefficients (reuses matrix `eig`).
+export { mathieuA, mathieuB, mathieuCe, mathieuSe } from './special/mathieu.js';
+
 // Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
 // single-source Bellman-Ford (negative-weight/cycle-aware), and
 // closeness/harmonic centrality, complementing the existing Dijkstra

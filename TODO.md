@@ -549,15 +549,17 @@ dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = furthe
   residual ≤6.7e-16, and ≤6.9e-13 rel err at/above the turning point `ρ_tp = η+√(η²+L(L+1))`.
   **Validated domain excludes** the deep-sub-turning-point corner (large +η, ρ≪ρ_tp, e.g. η=5, ρ≤1)
   where CF2 degrades — documented in the docstring (Steed-method limit in the forbidden region).
-  **Surfaced (scoped designs, not shipped):**
-  - **Mathieu (`ce_n`/`se_n`, characteristic values `a_n(q)`/`b_n(q)`):** the eigenvalue problem is
-    the tractable entry — `a_n`/`b_n` are eigenvalues of the symmetric tridiagonal recurrence
-    matrices for the Fourier coefficients (even/odd, cos/sin parity → 4 matrices); truncate at
-    N ≈ max(2n, ceil(|q|)) + 20 and take the sorted eigenvalue (reuse a Jacobi/QL tridiagonal
-    eigensolver — matrix package has one, but importing it into functions/special crosses a package
-    boundary, so a small local symmetric-tridiagonal QL is cleaner). The **functions** `ce_n(q,x)`,
-    `se_n(q,x)` then follow from the eigenvector's Fourier coefficients. Oracle `mpmath.mathieu_a`/
-    `mathieu_b`/`mathieu_cem`/`mathieu_sem`. Bounded but multi-part — its own task.
+  **Surfaced (scoped designs):**
+  - [x] **Mathieu (`ce_n`/`se_n`, characteristic values `a_n(q)`/`b_n(q)`) — ✅ DONE 2026-07-19.**
+        `functions/src/special/mathieu.ts`: symmetric tridiagonal eigenproblem for the Fourier
+        coefficients (4 parity classes; N=50 truncation), **reusing matrix `eig`** (functions already
+        depends on matrix — schur/geometry-extra import it, so the package boundary is already crossed;
+        the design note's "local QL" caveat was moot). `mathieuA`/`mathieuB` (char values), `mathieuCe`/
+        `mathieuSe` (angular fns via the eigenvector's Fourier coeffs), DLMF/A&S normalization
+        (`(1/π)∫ce²=1`, dominant coeff positive). **Installed mpmath 1.3.0 lacks the Mathieu family** →
+        oracle is `scipy.special` (identical DLMF convention; `cem(0,0,0)=1/√2` verified). Pinned:
+        a_n/b_n relerr ≤1.2e-14, ce/se abserr ≤7.8e-15 (n≤6, q∈{0.5,1,2,5,10}), q→0 limit exact,
+        ODE residual ≤2e-7 (finite-difference-limited). `gap-special-mathieu-oracle.test.ts` (252 asserts).
   - **Spheroidal wave functions:** genuinely hard (angular `S_mn` + radial via a five-term
     recurrence eigenvalue problem, prolate/oblate). No clean tractable subset; defer with the design
     note that the characteristic values `λ_mn(c)` are again a (pentadiagonal-reduced-to-tridiagonal)

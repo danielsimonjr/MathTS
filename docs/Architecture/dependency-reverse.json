@@ -1776,6 +1776,7 @@
     "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
     "functions/src/special/niche.ts": ["functions/src/index.ts"],
     "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
+    "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
     "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
     "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
