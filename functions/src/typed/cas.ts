@@ -26,6 +26,9 @@ import {
   buchberger,
   polyToString as idealPolyToString,
 } from './polynomial-ideal.js';
+// Real polynomial/rational CAS engines — casExpand/casFactor delegate to these
+// (they were formerly crude string-manipulation stubs).
+import { expand as algebraExpand, factor as algebraFactor } from './algebra.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
@@ -2583,100 +2586,6 @@ function _combineLikeTerms(expr: string): string {
 }
 
 /**
- * Self-contained expand kernel.
- *
- * Distributes products over sums: `(a+b)*(c+d)` → `a*c + a*d + b*c + b*d`.
- * Also expands `(expr)^2` → `(expr)*(expr)`.
- *
- * @internal
- */
-function _casExpandOne(expr: string): string {
-  let result = expr;
-
-  // Handle (expr)^2 → (expr)*(expr)
-  result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
-
-  // Distribute (a+b)*(c+d)
-  const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
-  let match: RegExpExecArray | null;
-  let safetyCount = 0;
-  while ((match = mulPattern.exec(result)) !== null && safetyCount++ < 20) {
-    const leftTerms = match[1].split(/\s*\+\s*/);
-    const rightTerms = match[2].split(/\s*\+\s*/);
-    const products: string[] = [];
-    for (const l of leftTerms) {
-      for (const rv of rightTerms) {
-        products.push(l.trim() + '*' + rv.trim());
-      }
-    }
-    result =
-      result.slice(0, match.index) +
-      products.join(' + ') +
-      result.slice(match.index + match[0].length);
-    mulPattern.lastIndex = 0;
-  }
-
-  return result;
-}
-
-/**
- * Self-contained factor kernel.
- *
- * Factors out the integer GCD from a sum of integer-coefficient terms.
- * Returns the original expression unchanged when no common factor is found.
- *
- * @internal
- */
-function _casFactorOne(expr: string): string {
-  function _gcd(a: number, b: number): number {
-    a = Math.abs(a);
-    b = Math.abs(b);
-    while (b !== 0) {
-      const tmp = b;
-      b = a % b;
-      a = tmp;
-    }
-    return a;
-  }
-
-  const normalized = expr.replace(/\s*-\s*/g, ' + -');
-  const terms = normalized.split(/\s*\+\s*/).filter((t) => t.trim() !== '');
-  if (terms.length < 2) return expr;
-
-  const coeffs: number[] = [];
-  const varParts: string[] = [];
-
-  for (const term of terms) {
-    const numMatch = term.match(/^(-?\d+)\s*\*?\s*(.*)$/);
-    if (numMatch) {
-      coeffs.push(parseInt(numMatch[1], 10));
-      varParts.push(numMatch[2] || '1');
-    } else {
-      return expr;
-    }
-  }
-
-  let g = Math.abs(coeffs[0]);
-  for (let i = 1; i < coeffs.length; i++) {
-    g = _gcd(g, Math.abs(coeffs[i]));
-  }
-
-  if (g <= 1) return expr;
-
-  const inner = coeffs
-    .map((c, i) => {
-      const reduced = c / g;
-      if (varParts[i] === '1') return String(reduced);
-      if (reduced === 1) return varParts[i];
-      if (reduced === -1) return '-' + varParts[i];
-      return reduced + '*' + varParts[i];
-    })
-    .join(' + ');
-
-  return g + '*(' + inner + ')';
-}
-
-/**
  * Self-contained derivative kernel.
  *
  * Computes a symbolic derivative using power rule, trig, exp, and log patterns.
@@ -3104,29 +3013,33 @@ export function casDerivative(
 }
 
 /**
- * Expand a single expression by distributing products over sums
- * (CAS batch-capable variant).
+ * Expand an expression, distributing products over sums and collecting like
+ * terms (CAS batch-capable variant).
  *
- * Named `casExpand` to avoid ambiguity with the `expand` function in
- * `algebra.ts`.  Both perform algebraic expansion; this one additionally
- * supports a batch-array overload with worker fan-out for large inputs.
+ * Delegates to the real polynomial engine {@link algebraExpand} (`expand` from
+ * `algebra.ts`): polynomials in one OR MORE variables are expanded EXACTLY
+ * (`'(x+1)^2'` → `'1*x^2 + 2*x + 1'`, `'(x+y)^2'` → `'1*y^2 + 2*x*y + 1*x^2'`).
+ * Non-polynomial pieces fall back to that engine's regex distributor.
+ *
+ * (Formerly a crude string stub that emitted uncollected products like
+ * `'x*x + x*1 + 1*x + 1*1'`; now wired to the maintained engine.)
  *
  * @param expr - Expression string or parsed MathNode
  * @returns Expanded expression string
  *
  * @example
- * casExpand('(x+1)^2')    // => 'x*x + x*1 + 1*x + 1*1'
- * casExpand('(a+b)*(a-b)') // distributes fully
+ * casExpand('(x+1)^2')     // => '1*x^2 + 2*x + 1'
+ * casExpand('(x+y)*(x-y)') // => '-1*y^2 + 1*x^2'
  */
 export function casExpand(expr: string | MathNode): string;
 /**
- * Expand an array of expressions (batch overload with worker fan-out).
+ * Expand an array of expressions (batch overload).
  *
- * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
- * synchronously in-process.  Longer arrays are dispatched to the worker pool.
- *
- * **String round-trip:** batch inputs are serialised to their source string
- * before dispatch.
+ * Each element is expanded via the real engine {@link algebraExpand}. Kept
+ * async (resolves to `string[]`) for API compatibility; because the engine
+ * relies on the polynomial parser it runs in-process rather than fanning out
+ * to workers (a worker cannot import it), so batch results are always
+ * identical to the per-element single-expression call.
  *
  * @param exprs - Array of expression strings (or MathNodes)
  * @returns Promise resolving to an array of expanded expression strings
@@ -3139,70 +3052,38 @@ export function casExpand(
   input: string | MathNode | Array<string | MathNode>
 ): string | Promise<string[]> {
   if (!Array.isArray(input)) {
-    return _casExpandOne(_nodeToStr(input));
+    return algebraExpand(_nodeToStr(input));
   }
-
-  const strs = input.map(_nodeToStr);
-
-  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
-    return Promise.resolve(strs.map(_casExpandOne));
-  }
-
-  return computePool
-    .map<string, string>(strs, (exprStr) => {
-      // --- self-contained expand kernel ---
-      let result = exprStr;
-      result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
-      const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
-      let match: RegExpExecArray | null;
-      let safetyCount = 0;
-      while ((match = mulPattern.exec(result)) !== null && safetyCount++ < 20) {
-        const leftTerms = (match[1] as string).split(/\s*\+\s*/);
-        const rightTerms = (match[2] as string).split(/\s*\+\s*/);
-        const products: string[] = [];
-        for (const l of leftTerms) {
-          for (const rv of rightTerms) {
-            products.push((l as string).trim() + '*' + (rv as string).trim());
-          }
-        }
-        result =
-          result.slice(0, (match as RegExpExecArray).index) +
-          products.join(' + ') +
-          result.slice((match as RegExpExecArray).index + (match as RegExpExecArray)[0].length);
-        mulPattern.lastIndex = 0;
-      }
-      return result;
-    })
-    .then((r) => r.result);
+  return Promise.resolve(input.map((e) => algebraExpand(_nodeToStr(e))));
 }
 
 /**
- * Factor a single expression by extracting the integer GCD from all terms
- * (CAS batch-capable variant).
+ * Factor an expression (CAS batch-capable variant).
  *
- * Named `casFactor` to avoid ambiguity with the `factor` function in
- * `algebra.ts`.  Both factor expressions; this one additionally supports a
- * batch-array overload with worker fan-out for large inputs.
+ * Delegates to the real factoring engine {@link algebraFactor} (`factor` from
+ * `algebra.ts`): univariate polynomials are factored over ℚ via the
+ * rational-root theorem (`'x^2 - 1'` → `'(x - 1)*(x + 1)'`), multivariate
+ * polynomials get integer-content / common-monomial / difference-of-squares
+ * extraction (`'x^2*y + x*y^2'` → `'x*y*(x + y)'`), and anything else falls
+ * back to integer-GCD extraction (`'2*x + 4*y'` → `'2*(x + 2*y)'`).
  *
- * Returns the original expression unchanged when no common integer factor
- * greater than 1 is found, or when terms do not follow the `c*var` pattern.
+ * (Formerly a crude integer-GCD-only stub; now wired to the maintained engine.)
  *
  * @param expr - Expression string or parsed MathNode
  * @returns Factored expression string
  *
  * @example
  * casFactor('2*x + 4*y')  // => '2*(x + 2*y)'
- * casFactor('x^2 - 1')    // => 'x^2 - 1'  (no integer GCD > 1)
+ * casFactor('x^2 - 1')    // => '(x - 1)*(x + 1)'
  */
 export function casFactor(expr: string | MathNode): string;
 /**
- * Factor an array of expressions (batch overload with worker fan-out).
+ * Factor an array of expressions (batch overload).
  *
- * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
- * synchronously in-process.  Longer arrays are dispatched to the worker pool.
- *
- * **String round-trip:** batch inputs are serialised to their source string
- * before dispatch.
+ * Each element is factored via the real engine {@link algebraFactor}. Kept
+ * async (resolves to `string[]`) for API compatibility; runs in-process (the
+ * engine cannot be serialised to a worker), so batch results are always
+ * identical to the per-element single-expression call.
  *
  * @param exprs - Array of expression strings (or MathNodes)
  * @returns Promise resolving to an array of factored expression strings
@@ -3215,53 +3096,7 @@ export function casFactor(
   input: string | MathNode | Array<string | MathNode>
 ): string | Promise<string[]> {
   if (!Array.isArray(input)) {
-    return _casFactorOne(_nodeToStr(input));
+    return algebraFactor(_nodeToStr(input));
   }
-
-  const strs = input.map(_nodeToStr);
-
-  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
-    return Promise.resolve(strs.map(_casFactorOne));
-  }
-
-  return computePool
-    .map<string, string>(strs, (exprStr) => {
-      // --- self-contained factor kernel ---
-      function _gcdW(a: number, b: number): number {
-        a = Math.abs(a);
-        b = Math.abs(b);
-        while (b !== 0) {
-          const tmp = b;
-          b = a % b;
-          a = tmp;
-        }
-        return a;
-      }
-      const normalized = exprStr.replace(/\s*-\s*/g, ' + -');
-      const terms = normalized.split(/\s*\+\s*/).filter((t: string) => t.trim() !== '');
-      if (terms.length < 2) return exprStr;
-      const coeffs: number[] = [];
-      const varParts: string[] = [];
-      for (const term of terms) {
-        const numMatch = (term as string).match(/^(-?\d+)\s*\*?\s*(.*)$/);
-        if (numMatch) {
-          coeffs.push(parseInt(numMatch[1], 10));
-          varParts.push(numMatch[2] || '1');
-        } else return exprStr;
-      }
-      let g = Math.abs(coeffs[0]);
-      for (let i = 1; i < coeffs.length; i++) g = _gcdW(g, Math.abs(coeffs[i]));
-      if (g <= 1) return exprStr;
-      const inner = coeffs
-        .map((c: number, i: number) => {
-          const reduced = c / g;
-          if (varParts[i] === '1') return String(reduced);
-          if (reduced === 1) return varParts[i];
-          if (reduced === -1) return '-' + varParts[i];
-          return reduced + '*' + varParts[i];
-        })
-        .join(' + ');
-      return g + '*(' + inner + ')';
-    })
-    .then((r) => r.result);
+  return Promise.resolve(input.map((e) => algebraFactor(_nodeToStr(e))));
 }

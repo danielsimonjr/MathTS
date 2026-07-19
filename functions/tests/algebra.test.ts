@@ -295,9 +295,14 @@ describe('expand', () => {
     expect(result).toContain('b*d');
   });
 
-  it('should expand (x)^2 into (x)*(x)', () => {
+  it('should expand (a+b)^2 exactly, collecting like terms', () => {
+    // Multivariate polynomial expansion now routes through the exact engine:
+    // (a+b)^2 = a^2 + 2*a*b + b^2 (not the old uncollected 'a*a + …').
     const result = expand('(a+b)^2');
-    expect(result).toContain('a*a');
+    expect(result).toContain('a^2');
+    expect(result).toContain('b^2');
+    expect(result).toContain('2*a*b');
+    expect(result).not.toContain('a*a');
   });
 });
 

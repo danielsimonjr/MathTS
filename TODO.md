@@ -363,9 +363,15 @@ or a documented scope limit worth revisiting.
       identities — a mathjs default, not a no-op). Only `cancel` was genuinely pass-through for symbolic
       input, so it was **wired to the real engine** (univariate polynomial-GCD cancellation, matching
       `sympy.cancel`) rather than annotated. `docs/reference/functions.md` `cancel` row updated.
-- [ ] **CAS breadth:** multivariate `expand`/`factor`; `cancel`/`rationalize`/`simplify` real transforms;
-      repeated-root/irreducible `apart`; symbolic integration (by-parts/partial-frac/u-sub); `casExpand`/
-      `casFactor` still pass-through.
+- [~] **CAS breadth** — largely DONE 2026-07-18 (sympy-oracle-pinned): multivariate `expand` ✅ (exact,
+  collects like terms, N variables); multivariate `factor` ✅ **tractable subset** (integer-content +
+  common-monomial + monomial difference-of-squares); `casExpand`/`casFactor` ✅ **wired to the real
+  `expand`/`factor` engines** (were crude string stubs); `cancel`/`rationalize`/`simplify` real
+  transforms ✅ (prior work); symbolic integration ✅ **partial-fraction** (composes `apart`) **+
+  tabular by-parts** for polynomial·{exp,sin,cos} (differentiate-back verified). **SURFACED / still
+  out of scope** (need real algorithms, not half-shipping): full multivariate `factor` into
+  irreducibles (Wang/Zassenhaus/EEZ); repeated-root/irreducible-quadratic `apart`; general
+  u-substitution / a Risch-style integrator; integration of products of two transcendental factors.
 - [x] ✅ **matrix `eig` complex eigenvectors — RESOLVED 2026-07-16.** `EigResult` gained an additive
       `vectorsIm: number[][]` field; complex-conjugate pairs now emit `vectors[k] ± i·vectorsIm[k]`
       (unit-normalized by the complex 2-norm) instead of an all-zero column, pinned against the

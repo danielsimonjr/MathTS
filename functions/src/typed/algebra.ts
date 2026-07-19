@@ -20,6 +20,7 @@ import {
 import {
   polyFromExpression,
   buchberger,
+  normalize as normalizePoly,
   polyToString as idealPolyToString,
   type Poly,
 } from './polynomial-ideal.js';
@@ -740,12 +741,16 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
 /**
  * Expand an expression string by distributing multiplication over addition.
  *
- * **Univariate polynomials** (a single variable, integer/no non-integer
- * powers, no function calls) are expanded EXACTLY via `polyFromExpression` +
- * `polyToString`: `expand('(x+1)^3')` → `'1*x^3 + 3*x^2 + 3*x + 1'`.
+ * **Polynomials in one OR MORE variables** (integer/non-negative-integer
+ * powers, no function calls, division only by numeric constants) are expanded
+ * EXACTLY via `polyFromExpression` + `polyToString`, collecting like terms:
+ * `expand('(x+1)^3')` → `'1*x^3 + 3*x^2 + 3*x + 1'`;
+ * `expand('(x+y)^2')` → `'1*y^2 + 2*x*y + 1*x^2'`;
+ * `expand('(x+y)*(x-y)')` → `'-1*y^2 + 1*x^2'` (the `x*y` terms cancel).
  *
- * Everything else (multiple variables, non-polynomial pieces) falls back to
- * the original regex-based distributor below.
+ * Everything else (function calls like `sin`, non-integer exponents, division
+ * by a variable) falls back to the original regex-based distributor below,
+ * which does NOT collect like terms.
  *
  * @param expr - Expression string
  * @returns Expanded expression string
@@ -754,15 +759,16 @@ function splitProductChain(term: string): { nums: string[]; dens: string[] } {
  * ```typescript
  * expand('(a+b)*(c+d)'); // 'a*c + a*d + b*c + b*d'
  * expand('(x+1)^3');     // '1*x^3 + 3*x^2 + 3*x + 1'
+ * expand('(x+y)^2');     // '1*y^2 + 2*x*y + 1*x^2'
  * ```
  */
 export function expand(expr: string): string {
-  const univariateVars = variables(expr);
-  if (univariateVars.length === 1) {
+  const vars = variables(expr);
+  if (vars.length >= 1) {
     try {
-      return idealPolyToString(polyFromExpression(expr, univariateVars), univariateVars);
+      return idealPolyToString(polyFromExpression(expr, vars), vars);
     } catch {
-      // Not a pure single-variable polynomial (function call, non-integer
+      // Not a pure polynomial in these variables (function call, non-integer
       // exponent, division by a non-constant, ...) — fall back below.
     }
   }
@@ -805,6 +811,100 @@ export function expand(expr: string): string {
   return result;
 }
 
+/** Build a monomial string from an exponent vector: `[2,1]` over `['x','y']` → `'x^2*y'`. */
+function monomialString(powers: number[], vars: string[]): string {
+  return powers
+    .map((e, i) => (e === 0 ? '' : e === 1 ? vars[i] : `${vars[i]}^${e}`))
+    .filter(Boolean)
+    .join('*');
+}
+
+/** Integer square root if `n` is a perfect square, else null. */
+function perfectIntSqrt(n: number): number | null {
+  if (n < 0) return null;
+  const r = Math.round(Math.sqrt(n));
+  return r * r === n ? r : null;
+}
+
+/**
+ * Recognize a MONOMIAL difference of squares `c1·M1 − c2·M2` (both coefficients
+ * perfect squares, both monomials all-even-exponent) and return the two factor
+ * strings `(A − B)` and `(A + B)` with `A² = c1·M1`, `B² = c2·M2`; null when the
+ * pattern doesn't hold. Handles e.g. `x²−y²`, `4x²−9y²`, `x⁴−y²`.
+ */
+function tryMonomialDiffOfSquares(poly: Poly, vars: string[]): [string, string] | null {
+  if (poly.length !== 2) return null;
+  const [t1, t2] = poly;
+  if (Math.sign(t1.coeff) === Math.sign(t2.coeff)) return null;
+  const pos = t1.coeff > 0 ? t1 : t2;
+  const neg = t1.coeff > 0 ? t2 : t1;
+  const cp = perfectIntSqrt(Math.round(pos.coeff));
+  const cn = perfectIntSqrt(Math.round(-neg.coeff));
+  if (cp === null || cn === null) return null;
+  if (!pos.powers.every((e) => e % 2 === 0) || !neg.powers.every((e) => e % 2 === 0)) return null;
+  const half = (t: { powers: number[] }): number[] => t.powers.map((e) => e / 2);
+  const term = (c: number, powers: number[]): string => {
+    const mon = monomialString(powers, vars);
+    if (!mon) return String(c);
+    return c === 1 ? mon : `${c}*${mon}`;
+  };
+  const A = term(cp, half(pos));
+  const B = term(cn, half(neg));
+  return [`(${A} - ${B})`, `(${A} + ${B})`];
+}
+
+/**
+ * Factor a MULTIVARIATE polynomial over the tractable subset: pull out the
+ * integer content and the common monomial factor, then recognize a monomial
+ * difference of squares in the cofactor (`x²·y + x·y² → x*y*(x + y)`,
+ * `4x²−9y² → (2*x − 3*y)*(2*x + 3*y)`). Returns null when nothing beyond
+ * integer content alone is found, so the caller falls back to the legacy
+ * integer-GCD path (which keeps the `2*x+4*y → 2*(x+2*y)` string contract).
+ *
+ * Full multivariate factorization into irreducible factors (needing a real
+ * algorithm — Wang/Zassenhaus/EEZ) is OUT OF SCOPE — see the `factor` docstring.
+ */
+function factorMultivariate(expr: string, vars: string[]): string | null {
+  let poly: Poly;
+  try {
+    poly = polyFromExpression(expr, vars);
+  } catch {
+    return null;
+  }
+  if (poly.length < 2 || !poly.every((t) => isNearInt(t.coeff))) return null;
+
+  // Integer content (GCD of all coefficients).
+  let content = 0;
+  for (const t of poly) content = gcdNum(content, Math.abs(Math.round(t.coeff)));
+  if (content === 0) return null;
+
+  // Common monomial factor: min exponent of each variable across all terms.
+  const nVars = vars.length;
+  const monPow = new Array<number>(nVars).fill(Infinity);
+  for (const t of poly)
+    for (let i = 0; i < nVars; i++) monPow[i] = Math.min(monPow[i], t.powers[i]);
+  const hasMonomial = monPow.some((e) => e > 0);
+
+  // Cofactor = poly / (content · monomial).
+  const cofactor: Poly = normalizePoly(
+    poly.map((t) => ({
+      coeff: Math.round(t.coeff) / content,
+      powers: t.powers.map((e, i) => e - monPow[i]),
+    }))
+  );
+  const dsq = tryMonomialDiffOfSquares(cofactor, vars);
+
+  // Nothing beyond integer content — defer to the legacy path.
+  if (!hasMonomial && !dsq) return null;
+
+  const parts: string[] = [];
+  if (content > 1) parts.push(String(content));
+  if (hasMonomial) parts.push(monomialString(monPow, vars));
+  if (dsq) parts.push(dsq[0], dsq[1]);
+  else parts.push(`(${idealPolyToString(cofactor, vars)})`);
+  return parts.join('*');
+}
+
 /**
  * Factor an expression string.
  *
@@ -815,7 +915,14 @@ export function expand(expr: string): string {
  * out exactly, and any irreducible remainder is left as-is:
  * `factor('x^2-1')` → `'(x - 1)*(x + 1)'`.
  *
- * Everything else (multiple variables, no rational root) falls back to the
+ * **Multivariate polynomials** get the tractable subset (see
+ * {@link factorMultivariate}): integer-content + common-monomial extraction
+ * and monomial difference-of-squares — `x^2*y + x*y^2 → 'x*y*(x + y)'`,
+ * `4*x^2 - 9*y^2 → '(2*x - 3*y)*(2*x + 3*y)'`. Full multivariate factorization
+ * into irreducible factors (Wang/Zassenhaus/EEZ) is OUT OF SCOPE and returns
+ * the partially-factored or unchanged expression rather than a wrong answer.
+ *
+ * Everything else (no rational root, no common factor) falls back to the
  * original common-integer-factor extraction below.
  *
  * @param expr - Expression string
@@ -823,6 +930,10 @@ export function expand(expr: string): string {
  */
 export function factor(expr: string): string {
   const univariateVars = variables(expr);
+  if (univariateVars.length >= 2) {
+    const mv = factorMultivariate(expr, univariateVars);
+    if (mv !== null) return mv;
+  }
   if (univariateVars.length === 1) {
     try {
       const v = univariateVars[0];

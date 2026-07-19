@@ -22,7 +22,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parse } from '../src/factories/evaluate.js';
+import { parse, evaluate } from '../src/factories/evaluate.js';
 import {
   casSimplify,
   casDerivative,
@@ -112,20 +112,21 @@ describe('Slice 5.14 — CAS batch worker fan-out', () => {
     expect(results[2]).toBe('exp(x)');
   });
 
-  // 5. casExpand — small batch returns expanded forms
-  it('casExpand: small batch distributes products over sums', async () => {
+  // 5. casExpand — small batch returns expanded forms (real engine: collects
+  // like terms; (x+1)^2 → x^2 + 2x + 1, not the old uncollected 'x*x + …').
+  it('casExpand: small batch expands and collects like terms', async () => {
     const exprs = ['(x+1)^2', '(a+b)*(c+d)'];
     expect(exprs.length).toBeLessThan(CAS_BATCH_THRESHOLD);
 
     const results = await casExpand(exprs);
     expect(results).toHaveLength(2);
 
-    // (x+1)^2 → (x+1)*(x+1) → x*x + x*1 + 1*x + 1*1
+    // (x+1)^2 → 1*x^2 + 2*x + 1 (like terms collected — no bare 'x*x')
     const r0 = results[0];
-    expect(r0).toContain('x*x');
-    expect(r0).toContain('1*1');
+    expect(r0).toContain('2*x');
+    expect(r0).not.toContain('x*x');
 
-    // (a+b)*(c+d) → a*c + a*d + b*c + b*d
+    // (a+b)*(c+d) → each cross term present
     const r1 = results[1];
     expect(r1).toContain('a*c');
     expect(r1).toContain('a*d');
@@ -180,15 +181,19 @@ describe('Slice 5.14 — CAS batch worker fan-out', () => {
     expect(results[1]).toContain('d/dx');
   });
 
-  // 8b. actual error: non-string, non-MathNode throws on conversion
-  it('casFactor: invalid expression string is passed through unchanged', async () => {
-    // factor returns the input when it cannot factor (not an error)
+  // 8b. casFactor now performs real univariate factorization over the rationals.
+  it('casFactor: univariate polynomials are factored (real engine)', async () => {
     const exprs = ['x^2 - 1', 'x^3 - 8'];
     const results = await casFactor(exprs);
     expect(results).toHaveLength(2);
-    // No common integer GCD > 1 for these forms — returned unchanged
-    expect(results[0]).toBe('x^2 - 1');
-    expect(results[1]).toBe('x^3 - 8');
+    // x^2 - 1 = (x-1)(x+1); x^3 - 8 = (x-2)(x^2+2x+4) — both are real factorizations.
+    expect(results[0]).not.toBe('x^2 - 1');
+    expect(results[1]).not.toBe('x^3 - 8');
+    // Verify by numeric equality to the original polynomial.
+    for (const x of [-2, 0.5, 3]) {
+      expect(evaluate(results[0], { x }) as number).toBeCloseTo(x * x - 1, 8);
+      expect(evaluate(results[1], { x }) as number).toBeCloseTo(x ** 3 - 8, 8);
+    }
   });
 
   // 9. casSimplify single-expr: numeric evaluation

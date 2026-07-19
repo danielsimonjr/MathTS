@@ -41,11 +41,48 @@ describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
     for (const x of [0.5, 1.5, 3]) expect(dF(F, x)).toBeCloseTo(Math.log(x), 4);
   });
 
+  // Extension 1: partial-fraction integration of rational functions.
+  describe('partial-fraction integration (d/dx ∫f = f)', () => {
+    const cases: Array<[string, (x: number) => number]> = [
+      ['1/(x^2 - 1)', (x) => 1 / (x * x - 1)],
+      ['(x + 3)/(x^2 - x - 2)', (x) => (x + 3) / (x * x - x - 2)],
+      ['(3*x + 5)/((x - 1)*(x + 2))', (x) => (3 * x + 5) / ((x - 1) * (x + 2))],
+      ['1/(x^2 - 4)', (x) => 1 / (x * x - 4)],
+      ['x^3/(x^2 - 1)', (x) => (x * x * x) / (x * x - 1)], // improper → poly + logs
+    ];
+    for (const [f, fn] of cases) {
+      it(`∫(${f})`, () => {
+        const F = symbolicIntegral(f, 'x');
+        expect(F.startsWith('integral(')).toBe(false);
+        for (const x of [0.3, 2.7, 3.4]) expect(dF(F, x)).toBeCloseTo(fn(x), 4);
+      });
+    }
+  });
+
+  // Extension 2: tabular integration by parts for polynomial·{exp,sin,cos}.
+  describe('integration by parts (d/dx ∫f = f)', () => {
+    const cases: Array<[string, (x: number) => number]> = [
+      ['x * exp(x)', (x) => x * Math.exp(x)],
+      ['x * sin(x)', (x) => x * Math.sin(x)],
+      ['x^2 * exp(x)', (x) => x * x * Math.exp(x)],
+      ['x * cos(2*x)', (x) => x * Math.cos(2 * x)],
+      ['x^2 * sin(3*x)', (x) => x * x * Math.sin(3 * x)],
+      ['x^3 * exp(x)', (x) => x * x * x * Math.exp(x)],
+    ];
+    for (const [f, fn] of cases) {
+      it(`∫(${f})`, () => {
+        const F = symbolicIntegral(f, 'x');
+        expect(F.startsWith('integral(')).toBe(false);
+        for (const x of [0.4, 1.1, 1.9]) expect(dF(F, x)).toBeCloseTo(fn(x), 4);
+      });
+    }
+  });
+
   it('returns an unevaluated marker for out-of-scope integrands', () => {
-    // product of two x-dependent factors (needs integration by parts)
-    expect(symbolicIntegral('x * sin(x)')).toBe('integral(x * sin(x), x)');
-    // non-linear inner argument
+    // non-linear inner argument (needs a general u-substitution / Risch)
     expect(symbolicIntegral('sin(x^2)')).toBe('integral(sin(x^2), x)');
+    // rational with an irreducible-quadratic denominator (apart cannot split)
+    expect(symbolicIntegral('1/(x^2 + 1)')).toBe('integral(1/(x^2 + 1), x)');
   });
 
   it('handles a custom integration variable', () => {

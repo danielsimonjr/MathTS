@@ -3829,6 +3829,8 @@ graph LR
 |------|---------|------|
 | `./factories/evaluate.js` | `parse` | Import |
 | `./factories/evaluate.js` | `evaluate` | Import |
+| `./typed/algebra.js` | `apart, variables` | Import |
+| `./typed/polynomial-ideal.js` | `polyFromExpression` | Import |
 
 **Exports:**
 
@@ -8624,7 +8626,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
-| `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString, Poly` | Import |
+| `./polynomial-ideal.js` | `polyFromExpression, buchberger, normalize, polyToString, Poly` | Import |
 
 **Exports:**
 
@@ -8691,6 +8693,7 @@ graph LR
 |------|---------|------|
 | `../factories/evaluate.js` | `parse, evaluate` | Import |
 | `./polynomial-ideal.js` | `polyFromExpression, buchberger, polyToString` | Import |
+| `./algebra.js` | `expand, factor` | Import |
 | `../factories/index.js` | `polynomialRoot` | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField` | Import |
 
@@ -16649,7 +16652,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1093   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 186288 |
+| Total Lines of Code     | 186425 |
 | Total Exports           | 5604   |
 | Total Re-exports        | 2261   |
 | Total Classes           | 52     |

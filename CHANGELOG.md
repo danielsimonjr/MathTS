@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): CAS breadth — multivariate `expand`/`factor`, wired `casExpand`/`casFactor`, partial-fraction + by-parts integration
+
+- **`casExpand`/`casFactor` are no longer pass-through stubs.** They were crude string
+  manipulators (`casExpand('(x+1)^2')` → `'x*x + x*1 + 1*x + 1*1'`; `casFactor` did integer-GCD
+  only, leaving `x^2-1` unchanged). Both now **delegate to the real `expand`/`factor` engines**
+  (`typed/algebra.ts`): `casExpand('(x+1)^2')` → `'1*x^2 + 2*x + 1'`, `casFactor('x^2-1')` →
+  `'(x - 1)*(x + 1)'`. The batch-array overload keeps its `Promise<string[]>` signature but runs
+  in-process (the polynomial engine can't be serialised to a worker), so batch results are always
+  identical to the per-element single call. The dead worker-fanout kernels were removed.
+- **`expand` now handles MULTIVARIATE polynomials exactly**, collecting like terms via the exact
+  `polyFromExpression`/`polyToString` engine: `(x+y)^2` → `1*y^2 + 2*x*y + 1*x^2`,
+  `(x+y)*(x-y)` → `-1*y^2 + 1*x^2` (the `x*y` terms cancel), `(x+y+z)^2` exact. Non-polynomial
+  pieces (function calls, non-integer exponents) still fall back to the regex distributor.
+- **`factor` gains a multivariate tractable subset**: integer-content + common-monomial extraction
+  and monomial difference-of-squares — `x^2*y + x*y^2` → `x*y*(1*y + 1*x)`,
+  `4*x^2 - 9*y^2` → `(2*x - 3*y)*(2*x + 3*y)`, `3*x^3*y - 3*x*y^3` → `3*x*y*(x - y)*(x + y)`.
+  Full multivariate factorization into irreducibles (Wang/Zassenhaus/EEZ) is documented OUT OF SCOPE
+  and returns the partially-factored or unchanged expression rather than a wrong answer.
+- **`symbolicIntegral` gains two extension methods** (`cas-integration.ts`): **partial-fraction
+  integration** of single-variable rational functions (composes the CAS `apart` decomposition with
+  term-wise `A/(x−r)` → `A·ln|x−r|` integration — `1/(x^2-1)`, `(x+3)/(x^2-x-2)`, improper
+  `x^3/(x^2-1)`) and **tabular integration by parts** for polynomial·{`exp`,`sin`,`cos`}
+  (`∫ x·eˣ = (x−1)·eˣ`, `∫ x·sin x = sin x − x·cos x`, `∫ x²·e^x`, `∫ x³·e^x`, `∫ x²·sin(3x)`).
+  General u-substitution / a full Risch integrator, non-linear inner arguments, and
+  irreducible-quadratic denominators remain out of scope (return the `integral(…)` marker).
+- Oracle-pinned against **sympy** (`sympy.expand`/`sympy.factor` for the algebra transforms;
+  differentiate-back `d/dx(∫f) ≡ f` for every integral, verified with sympy/numpy — max residual
+  ~3e-9): `functions/tests/cas-multivariate.test.ts` (new, 22 tests), plus new partial-fraction and
+  by-parts case tables in `functions/tests/gap-symbolic-integral.test.ts`. Existing CAS
+  characterization tests updated from the old crude behavior to the new real behavior (pinned by
+  implementation-independent numeric evaluation). Full functions suite: 4285 passing.
+
 ### feat(functions): Gaussian-process regression (`gaussianProcessRegression` / `gpRegression`)
 
 - New stats-breadth public API: fit a zero-mean GP to training `(X, y)` under i.i.d. Gaussian noise

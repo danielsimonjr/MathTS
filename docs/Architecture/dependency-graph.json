@@ -8255,6 +8255,14 @@
           {
             "file": "./factories/evaluate.js",
             "imports": ["evaluate"]
+          },
+          {
+            "file": "./typed/algebra.js",
+            "imports": ["apart", "variables"]
+          },
+          {
+            "file": "./typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression"]
           }
         ],
         "workspaceDependencies": [],
@@ -19260,7 +19268,7 @@
           },
           {
             "file": "./polynomial-ideal.js",
-            "imports": ["polyFromExpression", "buchberger", "polyToString", "Poly"]
+            "imports": ["polyFromExpression", "buchberger", "normalize", "polyToString", "Poly"]
           }
         ],
         "workspaceDependencies": [],
@@ -19567,6 +19575,10 @@
           {
             "file": "./polynomial-ideal.js",
             "imports": ["polyFromExpression", "buchberger", "polyToString"]
+          },
+          {
+            "file": "./algebra.js",
+            "imports": ["expand", "factor"]
           },
           {
             "file": "../factories/index.js",
@@ -38112,7 +38124,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1093,
     "totalModules": 82,
-    "totalLinesOfCode": 186288,
+    "totalLinesOfCode": 186425,
     "totalExports": 5604,
     "totalClasses": 52,
     "totalInterfaces": 482,
@@ -38125,6 +38137,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 203
+    "unusedExportsCount": 202
   }
 }

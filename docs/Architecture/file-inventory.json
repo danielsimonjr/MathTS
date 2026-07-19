@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1714,
+  "totalFiles": 1715,
   "byDisposition": {
     "reachable": 1060,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 559,
+    "test": 560,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1096,
-    "tests": 559,
+    "tests": 560,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 705,
+    "@danielsimonjr/mathts-functions": 706,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5189,7 +5189,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 188
+      "loc": 380
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -7107,7 +7107,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1643
+      "loc": 1753
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7128,7 +7128,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 3268
+      "loc": 3103
     },
     {
       "file": "functions/src/typed/combinatorics.ts",
@@ -7681,7 +7681,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 587
+      "loc": 592
     },
     {
       "file": "functions/tests/arithmetic-extended.test.ts",
@@ -7740,11 +7740,18 @@
       "loc": 30
     },
     {
+      "file": "functions/tests/cas-multivariate.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 75
+    },
+    {
       "file": "functions/tests/cas-passthrough-documented.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 46
+      "loc": 50
     },
     {
       "file": "functions/tests/cas.test.ts",
@@ -7800,7 +7807,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 619
+      "loc": 627
     },
     {
       "file": "functions/tests/cov-dist-objects.test.ts",
@@ -8423,7 +8430,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 58
+      "loc": 95
     },
     {
       "file": "functions/tests/gap-transcendental-richtype-oracle.test.ts",
@@ -9221,7 +9228,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 243
+      "loc": 248
     },
     {
       "file": "functions/tests/typed-cas-fit-wasm.test.ts",
