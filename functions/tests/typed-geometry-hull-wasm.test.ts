@@ -1,7 +1,7 @@
 /**
- * Tests for WASM-sort-accelerated convexHull (Andrew's monotone chain) — Slice 5.7d.
+ * Tests for WASM-sort-accelerated convexHull2D (Andrew's monotone chain) — Slice 5.7d.
  *
- * The sort step in convexHull uses WASM argsort above WASM_SORT_THRESHOLD.
+ * The sort step in convexHull2D uses WASM argsort above WASM_SORT_THRESHOLD.
  * These tests verify:
  *   - Known small hull inputs produce correct CCW hull vertices.
  *   - Large random point clouds produce valid hulls (all interior points strictly
@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { convexHull } from '../src/typed/geometry.js';
+import { convexHull2D } from '../src/typed/geometry.js';
 import { WASM_SORT_THRESHOLD } from '../src/wasm/sort/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ function makeRandomPoints(count: number, seed = 0): number[][] {
 // 1. Known small inputs (below threshold)
 // ---------------------------------------------------------------------------
 
-describe('convexHull — small known inputs (JS path)', () => {
+describe('convexHull2D — small known inputs (JS path)', () => {
   it('square with one interior point → 4 hull vertices', () => {
     const points = [
       [0, 0],
@@ -79,7 +79,7 @@ describe('convexHull — small known inputs (JS path)', () => {
       [0, 1],
       [0.5, 0.5],
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     expect(hull.length).toBe(4);
     expect(isConvexCCW(hull)).toBe(true);
   });
@@ -91,13 +91,13 @@ describe('convexHull — small known inputs (JS path)', () => {
       [1, 2],
       [1, 0.5], // interior
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     expect(hull.length).toBe(3);
     expect(isConvexCCW(hull)).toBe(true);
   });
 
   it('collinear points → 2 hull vertices (only endpoints)', () => {
-    const hull = convexHull([
+    const hull = convexHull2D([
       [0, 0],
       [1, 0],
       [2, 0],
@@ -113,7 +113,7 @@ describe('convexHull — small known inputs (JS path)', () => {
     }
     // Add centre point
     pts.push([0, 0]);
-    const hull = convexHull(pts);
+    const hull = convexHull2D(pts);
     expect(hull.length).toBe(6);
     expect(isConvexCCW(hull)).toBe(true);
     // Centre should be inside.
@@ -129,7 +129,7 @@ describe('convexHull — small known inputs (JS path)', () => {
       [1, 1],
       [2, 1],
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     for (const v of hull) {
       const found = points.some((p) => p[0] === v[0] && p[1] === v[1]);
       expect(found).toBe(true);
@@ -141,12 +141,12 @@ describe('convexHull — small known inputs (JS path)', () => {
 // 2. Medium cloud — verify hull contains all points (above threshold)
 // ---------------------------------------------------------------------------
 
-describe('convexHull — above threshold path', () => {
+describe('convexHull2D — above threshold path', () => {
   it('all points lie inside the hull for a large random cloud', () => {
     // Build a cloud with many points above the sort threshold.
     const n = WASM_SORT_THRESHOLD + 200;
     const pts = makeRandomPoints(n, 42);
-    const hull = convexHull(pts);
+    const hull = convexHull2D(pts);
 
     // Hull must be convex and CCW.
     expect(isConvexCCW(hull)).toBe(true);
@@ -165,7 +165,7 @@ describe('convexHull — above threshold path', () => {
     const pts = makeRandomPoints(n, 99);
 
     // JS path
-    const hullJS = convexHull(pts);
+    const hullJS = convexHull2D(pts);
 
     // WASM path: temporarily duplicate to a larger set (above threshold).
     // We can't easily force one path or the other from outside, so we verify
@@ -174,7 +174,7 @@ describe('convexHull — above threshold path', () => {
 
     // Duplicate points to push above threshold (same geometry, just repeated).
     const ptsLarge = [...pts, ...makeRandomPoints(n + 20, 99)];
-    const hullWasm = convexHull(ptsLarge);
+    const hullWasm = convexHull2D(ptsLarge);
 
     // Both hulls should have the same size (same point set within unit square).
     // The extra random points will have their own hull — not the same, but valid.

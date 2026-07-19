@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1717,
+  "totalFiles": 1725,
   "byDisposition": {
-    "reachable": 1061,
+    "reachable": 1066,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 561,
+    "test": 564,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1097,
-    "tests": 561,
+    "src": 1102,
+    "tests": 564,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 708,
+    "@danielsimonjr/mathts-functions": 716,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5374,6 +5374,20 @@
       "loc": 112
     },
     {
+      "file": "functions/src/geometry/alpha-shape.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 82
+    },
+    {
+      "file": "functions/src/geometry/delaunay.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 45
+    },
+    {
       "file": "functions/src/geometry/distance.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -5388,6 +5402,13 @@
       "loc": 371
     },
     {
+      "file": "functions/src/geometry/hull.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 164
+    },
+    {
       "file": "functions/src/geometry/intersect.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -5400,6 +5421,20 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 174
+    },
+    {
+      "file": "functions/src/geometry/spherical-voronoi.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 155
+    },
+    {
+      "file": "functions/src/geometry/voronoi.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 74
     },
     {
       "file": "functions/src/gpu/elementwise-gpu.ts",
@@ -5462,7 +5497,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 574
+      "loc": 588
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6498,7 +6533,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 362
+      "loc": 364
     },
     {
       "file": "functions/src/special/zeta.ts",
@@ -7177,7 +7212,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1272
+      "loc": 1249
     },
     {
       "file": "functions/src/typed/gpu.ts",
@@ -8531,11 +8566,32 @@
       "loc": 69
     },
     {
+      "file": "functions/tests/geometry-consumers-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 245
+    },
+    {
+      "file": "functions/tests/geometry-delaunay-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 112
+    },
+    {
       "file": "functions/tests/geometry-extended.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 422
+    },
+    {
+      "file": "functions/tests/geometry-hull-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 187
     },
     {
       "file": "functions/tests/geometry-sets.test.ts",

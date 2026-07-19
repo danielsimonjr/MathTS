@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): computational-geometry engine — convex hull (2-D/3-D), Delaunay, Voronoi, spherical Voronoi, alpha shapes
+
+- **`convexHull(points)`** — public, structured 2-D/3-D convex hull returning
+  `{ vertices, simplices, area, volume }` (fields mirror `scipy.spatial.ConvexHull`:
+  2-D `area` = perimeter, `volume` = enclosed area; 3-D `area` = surface area, `volume` = volume).
+  2-D via Andrew's monotone chain (hull-vertex indices in CCW order); 3-D reuses the QuickHull
+  kernel. Pinned vs `scipy.spatial.ConvexHull`: 2-D random-30 vertex set + area/perimeter to **1e-10**;
+  3-D random-40 vertex set (20 verts) + volume/surface-area to **1e-8**; unit cube (vol 1, area 6)
+  and tetrahedron exact.
+- **`delaunay(points)`** — 2-D Delaunay triangulation → `{ simplices }`. Pinned by
+  implementation-independent invariants (every input point is a vertex; triangles partition the hull
+  to **1e-10**; the **empty-circumcircle** property holds for every triangle) plus a triangle-count
+  cross-check vs `scipy.spatial.Delaunay` (31 on the general-position set).
+- **`voronoi(points)`** — 2-D Voronoi diagram (dual of Delaunay) → `{ vertices, simplices, regions }`.
+  Pinned by invariants: one Voronoi vertex per Delaunay triangle (= its circumcenter, equidistant to
+  its 3 generators to **1e-9**), and the dual empty-circumcircle (a vertex's generators are its
+  nearest generators).
+- **`sphericalVoronoi(points[, radius, center])`** — Voronoi diagram of points on a sphere via the
+  3-D hull → `{ vertices, regions, areas }`. Pinned vs `scipy.spatial.SphericalVoronoi`: vertex count
+  `= 2N − 4` (46 for N=25), vertices on the sphere, geodesic cell **areas sum to `4πr²`** to **1e-8**
+  (and `4πr²` under a radius change), spherical empty-cap property.
+- **`alphaShape(points, alpha)`** — 2-D alpha shape → `{ triangles, edges }` (Delaunay triangles with
+  circumradius `≤ 1/alpha`; boundary = edges in exactly one kept triangle). Pinned on a general-position
+  annulus: the right `alpha` recovers the hole (exactly **two** boundary loops, all boundary vertices
+  degree 2).
+- All five are pure `number[][]`-in / structured-out functions in `functions/src/geometry/`
+  (`hull.ts`, `delaunay.ts`, `voronoi.ts`, `spherical-voronoi.ts`, `alpha-shape.ts`), exported from
+  `functions/src/index.ts` and documented in the curated Geometry table of `docs/reference/functions.md`.
+  Oracle tests in `functions/tests/geometry-{hull,delaunay,consumers}-oracle.test.ts` (27 tests).
+- **Bug fixed at root (preexisting):** the `delaunay_wasm` acceleration kernel returned a bogus
+  triangle count (1363 vs 197 true triangles for a 119-point set), reading past its output buffer and
+  yielding garbage — never correctness-tested. Its dispatch in `delaunayTriangulation` is now
+  **disabled** (always uses the correct JS Bowyer–Watson path); the internal test-only 2-D
+  coordinate hull was renamed `convexHull` → `convexHull2D` to free the public name.
+- **Surfaced, not shipped:** (1) **halfspace-intersection / vertex-enumeration** — needs a
+  double-description or LP-based vertex enumeration engine (design in `TODO.md`); (2) the Bowyer–Watson
+  Delaunay does not resolve **perfectly cocircular** inputs (a joggle/symbolic-perturbation problem,
+  as in Qhull) — documented as a known limitation; (3) fixing/replacing the `delaunay_wasm` kernel.
+
 ### feat(functions): advanced niche special functions — Riemann–Siegel Z, Lerch Φ, parabolic-cylinder D_ν, Coulomb F_L
 
 - **`siegelZ(t)` / `riemannSiegelZ(t)`** — the Riemann–Siegel Z-function

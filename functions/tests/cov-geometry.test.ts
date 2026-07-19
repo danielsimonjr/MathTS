@@ -26,24 +26,24 @@ import {
   area,
   centroid,
   coordinateTransform,
-  convexHull,
+  convexHull2D,
   convexHull3D,
   type Shape,
 } from '../src/typed/geometry.js';
 
-describe('convexHull — large input uses the argsort dispatch (>= WASM_SORT_THRESHOLD)', () => {
+describe('convexHull2D — large input uses the argsort dispatch (>= WASM_SORT_THRESHOLD)', () => {
   it('hull of a dense disc with >= 16384 points is the bounding square corners', () => {
     // WASM_SORT_THRESHOLD is 16384; argsortF64Dispatch falls back to pure-JS
     // argsort here (no WASM), exercising the large-n sort branch and the
-    // stable secondary-key tie-break loop in convexHull.
+    // stable secondary-key tie-break loop in convexHull2D.
     const N = 16400;
     const pts: number[][] = [];
     // A grid clustered inside [0,10]^2 with the 4 explicit corners present.
     for (let i = 0; i < N - 4; i++) {
-      pts.push([(i % 127) / 13, Math.floor(i / 127) % 100 / 13]);
+      pts.push([(i % 127) / 13, (Math.floor(i / 127) % 100) / 13]);
     }
     pts.push([0, 0], [10, 0], [10, 10], [0, 10]);
-    const hull = convexHull(pts);
+    const hull = convexHull2D(pts);
     // The four extreme corners must be hull vertices.
     const has = (x: number, y: number) => hull.some((p) => p[0] === x && p[1] === y);
     expect(has(0, 0)).toBe(true);
@@ -95,7 +95,12 @@ describe('centroid — degenerate n<=2 average path', () => {
   });
 
   it('returns the midpoint for a two-vertex polygon', () => {
-    expect(centroid([[0, 0], [4, 6]])).toEqual([2, 3]);
+    expect(
+      centroid([
+        [0, 0],
+        [4, 6],
+      ])
+    ).toEqual([2, 3]);
   });
 
   it('throws for an empty polygon', () => {

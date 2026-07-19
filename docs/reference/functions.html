@@ -2730,7 +2730,7 @@
       | `polygonPerimeter(vertices)`                                  | Polygon perimeter                         | —        |
       | `area(shape)`                                                 | Area of a shape                           | —        |
       | `centroid(polygon)`                                           | Centroid of a polygon                     | —        |
-      | `convexHull(points)`                                          | Convex hull (Graham scan)                 | —        |
+      | `convexHull(points)`                                          | Convex hull, 2-D/3-D, structured result   | —        |
       | `pointInPolygon(point, polygon)`                              | Ray-casting containment test              | —        |
       | `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation                           | —        |
       | `reflectVector(v, normal)`                                    | Reflection across a plane                 | —        |
@@ -2807,14 +2807,36 @@
       | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
       | `convexHull3D(points)` | 3D convex hull via QuickHull; returns CCW-oriented triangular faces as vertex-index triples; throws on fewer than 4 non-coplanar points | WASM  |
 
+      ### Computational-geometry engine (scipy-pinned)
+
+      The public geometry engine returns **structured** results whose fields mirror
+      `scipy.spatial`, and is oracle-pinned against SciPy (hull vertex set +
+      area/volume; Delaunay empty-circumcircle; spherical-Voronoi areas summing to
+      `4πr²`).
+
+      | Function                                     | Description                                                                                                                                                                                              |
+      | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+      | `convexHull(points)`                         | 2-D or 3-D convex hull → `{ vertices, simplices, area, volume }`. `vertices` are hull-point indices (CCW in 2-D); `area`/`volume` follow SciPy (2-D: perimeter/enclosed area; 3-D: surface area/volume). |
+      | `delaunay(points)`                           | 2-D Delaunay triangulation → `{ simplices }` (triangles as index triples); no point lies inside any triangle's circumcircle.                                                                             |
+      | `voronoi(points)`                            | 2-D Voronoi diagram (dual of Delaunay) → `{ vertices, simplices, regions }`; `vertices` are the Delaunay circumcenters, `regions[i]` the Voronoi vertices bounding generator `i`'s cell.                 |
+      | `alphaShape(points, alpha)`                  | 2-D alpha shape → `{ triangles, edges }`; keeps Delaunay triangles with circumradius `≤ 1/alpha` and returns the boundary edges. Recovers concavities/holes (e.g. an annulus).                           |
+      | `sphericalVoronoi(points[, radius, center])` | Voronoi diagram of points on a sphere (via the 3-D hull) → `{ vertices, regions, areas }`; `areas` are geodesic cell areas summing to `4πr²`.                                                            |
+
       ### Details
 
       - Points and vectors are plain coordinate arrays; most functions have explicit
         2D, 3D, and nD variants.
       - `polygonArea` uses the shoelace formula and returns a signed area whose sign
         encodes vertex orientation (counter-clockwise positive).
-      - `convexHull` is computed by Graham scan; `delaunayTriangulation` and
-        `voronoiDiagram` are geometric duals of one another.
+      - The public `convexHull` uses Andrew's monotone chain (2-D) / QuickHull (3-D);
+        `delaunay` and `voronoi` are geometric duals of one another. The internal
+        coordinate-returning 2-D hull is `convexHull2D`.
+      - **Known limitations.** `delaunay` (and the `voronoi`/`alphaShape` built on it)
+        uses Bowyer–Watson, which — like Qhull without joggle — does not resolve
+        **perfectly cocircular** inputs (e.g. exact concentric rings); use points in
+        general position. The `delaunay_wasm` acceleration kernel is currently
+        **disabled** (it returned a bogus triangle count and read past its output
+        buffer); the correct JS path is always used pending a kernel fix.
       - Build a `kdTree` once and reuse it for many `kdTreeNearest` queries — far
         faster than repeated linear `nearestNeighbor` scans.
       - The distance family covers the L1 (`manhattanDistance`), L2 (`distance*`),
@@ -3436,7 +3458,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1049 exports).
+      > `@danielsimonjr/mathts-functions` (1054 exports).
 
       ### Functions by category
 
@@ -3474,7 +3496,7 @@
 
       **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
-      **Geometry** (56): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `triangleArea`, `voronoiDiagram`
+      **Geometry** (60): `alphaShape`, `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunay`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `sphericalVoronoi`, `triangleArea`, `voronoi`, `voronoiDiagram`
 
       **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
@@ -3494,7 +3516,7 @@
 
       **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-      **Other exports (uncategorized)** (8): `complexCos`, `complexSin`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
+      **Other exports (uncategorized)** (9): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
 
       ### Constants & values (64)
 

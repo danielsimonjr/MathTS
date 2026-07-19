@@ -439,7 +439,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1049 exports).
+> `@danielsimonjr/mathts-functions` (1054 exports).
 
 ### Functions by category
 
@@ -477,7 +477,7 @@ ceil(2.1); // 3
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
-**Geometry** (56): `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `triangleArea`, `voronoiDiagram`
+**Geometry** (60): `alphaShape`, `angle2D`, `angle3D`, `area`, `boundingBox`, `centroid`, `chebyshevDistance`, `conj`, `convexHull`, `convexHull3D`, `coordinateTransform`, `cross3D`, `delaunay`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `haversine`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `minkowskiDistance`, `nearestNeighbor`, `pointInPolygon`, `polygonArea`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `sphericalVoronoi`, `triangleArea`, `voronoi`, `voronoiDiagram`
 
 **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
 
@@ -497,7 +497,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (8): `complexCos`, `complexSin`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
+**Other exports (uncategorized)** (9): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
 
 ### Constants & values (64)
 

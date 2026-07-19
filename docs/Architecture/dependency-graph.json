@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-19",
-    "totalFiles": 1094,
+    "totalFiles": 1099,
     "totalModules": 82,
-    "totalExports": 5614
+    "totalExports": 5629
   },
   "entryPoints": [
     {
@@ -8953,6 +8953,31 @@
             "reExport": true
           },
           {
+            "file": "./geometry/hull.js",
+            "imports": ["convexHull"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry/delaunay.js",
+            "imports": ["delaunay"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry/voronoi.js",
+            "imports": ["voronoi"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry/alpha-shape.js",
+            "imports": ["alphaShape"],
+            "reExport": true
+          },
+          {
+            "file": "./geometry/spherical-voronoi.js",
+            "imports": ["sphericalVoronoi"],
+            "reExport": true
+          },
+          {
             "file": "./stats/inference-extra2.js",
             "imports": [
               "noncentralChi2CDF",
@@ -9279,6 +9304,36 @@
             "typeOnly": true
           },
           {
+            "file": "./geometry/hull.js",
+            "imports": ["ConvexHullResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./geometry/delaunay.js",
+            "imports": ["DelaunayResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./geometry/voronoi.js",
+            "imports": ["VoronoiResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./geometry/alpha-shape.js",
+            "imports": ["AlphaShapeResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./geometry/spherical-voronoi.js",
+            "imports": ["SphericalVoronoiResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./stats/inference-extra2.js",
             "imports": ["CircularOptions", "McNemarOptions", "McNemarResult", "CochranQResult"],
             "reExport": true,
@@ -9564,6 +9619,11 @@
           "rayTriangleIntersect",
           "rayPlaneIntersect",
           "segmentSegmentClosest",
+          "convexHull",
+          "delaunay",
+          "voronoi",
+          "alphaShape",
+          "sphericalVoronoi",
           "noncentralChi2CDF",
           "noncentralFCDF",
           "noncentralTCDF",
@@ -9702,6 +9762,11 @@
           "ProcrustesResult",
           "RayHit",
           "SegmentClosestResult",
+          "ConvexHullResult",
+          "DelaunayResult",
+          "VoronoiResult",
+          "AlphaShapeResult",
+          "SphericalVoronoiResult",
           "CircularOptions",
           "McNemarOptions",
           "McNemarResult",
@@ -9949,6 +10014,11 @@
           "rayTriangleIntersect",
           "rayPlaneIntersect",
           "segmentSegmentClosest",
+          "convexHull",
+          "delaunay",
+          "voronoi",
+          "alphaShape",
+          "sphericalVoronoi",
           "noncentralChi2CDF",
           "noncentralFCDF",
           "noncentralTCDF",
@@ -10087,6 +10157,11 @@
           "ProcrustesResult",
           "RayHit",
           "SegmentClosestResult",
+          "ConvexHullResult",
+          "DelaunayResult",
+          "VoronoiResult",
+          "AlphaShapeResult",
+          "SphericalVoronoiResult",
           "CircularOptions",
           "McNemarOptions",
           "McNemarResult",
@@ -12621,6 +12696,36 @@
       }
     },
     "functions/geometry": {
+      "functions/src/geometry/alpha-shape.ts": {
+        "description": "Alpha shape (2-D) — a consumer of the Delaunay triangulation.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./delaunay.js",
+            "imports": ["delaunay"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["alphaShape"],
+        "interfaces": ["AlphaShapeResult"],
+        "functions": ["alphaShape"]
+      },
+      "functions/src/geometry/delaunay.ts": {
+        "description": "Delaunay triangulation (2-D) — part of the computational-geometry engine.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/geometry.js",
+            "imports": ["delaunayTriangulation"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["delaunay"],
+        "interfaces": ["DelaunayResult"],
+        "functions": ["delaunay"]
+      },
       "functions/src/geometry/distance.ts": {
         "description": "Calculates:",
         "externalDependencies": [],
@@ -12712,6 +12817,21 @@
           "setDisjoint"
         ]
       },
+      "functions/src/geometry/hull.ts": {
+        "description": "Convex hull — the foundation of the computational-geometry engine.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/geometry.js",
+            "imports": ["convexHull3D"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["convexHull"],
+        "interfaces": ["ConvexHullResult"],
+        "functions": ["convexHull"]
+      },
       "functions/src/geometry/intersect.ts": {
         "description": "Calculates the point of intersection of two lines in two or three dimensions",
         "externalDependencies": [],
@@ -12754,6 +12874,36 @@
         "exports": ["rayTriangleIntersect", "rayPlaneIntersect", "segmentSegmentClosest"],
         "interfaces": ["RayHit", "SegmentClosestResult"],
         "functions": ["rayTriangleIntersect", "rayPlaneIntersect", "segmentSegmentClosest"]
+      },
+      "functions/src/geometry/spherical-voronoi.ts": {
+        "description": "Spherical Voronoi diagram — a consumer of the 3-D convex hull.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/geometry.js",
+            "imports": ["convexHull3D"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["sphericalVoronoi"],
+        "interfaces": ["SphericalVoronoiResult"],
+        "functions": ["sphericalVoronoi"]
+      },
+      "functions/src/geometry/voronoi.ts": {
+        "description": "Voronoi diagram (2-D) — a consumer of the Delaunay triangulation.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./delaunay.js",
+            "imports": ["delaunay"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["voronoi"],
+        "interfaces": ["VoronoiResult"],
+        "functions": ["voronoi"]
       }
     },
     "functions/gpu": {
@@ -19977,7 +20127,7 @@
           "dot3D",
           "triangleArea",
           "polygonArea",
-          "convexHull",
+          "convexHull2D",
           "pointInPolygon",
           "rotateVector2D",
           "rotateVector3D",
@@ -20012,7 +20162,7 @@
           "dot3D",
           "triangleArea",
           "polygonArea",
-          "convexHull",
+          "convexHull2D",
           "pointInPolygon",
           "rotateVector2D",
           "rotateVector3D",
@@ -37085,10 +37235,15 @@
       {
         "name": "Functions/geometry",
         "files": [
+          "functions/src/geometry/alpha-shape.ts",
+          "functions/src/geometry/delaunay.ts",
           "functions/src/geometry/distance.ts",
           "functions/src/geometry/geometry-extra.ts",
+          "functions/src/geometry/hull.ts",
           "functions/src/geometry/intersect.ts",
-          "functions/src/geometry/intersect3d.ts"
+          "functions/src/geometry/intersect3d.ts",
+          "functions/src/geometry/spherical-voronoi.ts",
+          "functions/src/geometry/voronoi.ts"
         ]
       },
       {
@@ -38156,18 +38311,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1094,
+    "totalTypeScriptFiles": 1099,
     "totalModules": 82,
-    "totalLinesOfCode": 186802,
-    "totalExports": 5614,
+    "totalLinesOfCode": 187315,
+    "totalExports": 5629,
     "totalClasses": 52,
-    "totalInterfaces": 482,
-    "totalFunctions": 1767,
+    "totalInterfaces": 487,
+    "totalFunctions": 1772,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2266,
-    "totalTypeOnlyImports": 571,
+    "totalReExports": 2276,
+    "totalTypeOnlyImports": 576,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

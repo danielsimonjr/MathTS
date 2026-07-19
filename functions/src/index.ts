@@ -442,6 +442,20 @@ export {
   segmentSegmentClosest,
 } from './geometry/intersect3d.js';
 export type { RayHit, SegmentClosestResult } from './geometry/intersect3d.js';
+
+// Computational-geometry engine — convex hull (2-D/3-D), Delaunay, and the
+// hull-based consumers (Voronoi, spherical Voronoi, alpha shapes). Pinned
+// against scipy.spatial.
+export { convexHull } from './geometry/hull.js';
+export type { ConvexHullResult } from './geometry/hull.js';
+export { delaunay } from './geometry/delaunay.js';
+export type { DelaunayResult } from './geometry/delaunay.js';
+export { voronoi } from './geometry/voronoi.js';
+export type { VoronoiResult } from './geometry/voronoi.js';
+export { alphaShape } from './geometry/alpha-shape.js';
+export type { AlphaShapeResult } from './geometry/alpha-shape.js';
+export { sphericalVoronoi } from './geometry/spherical-voronoi.js';
+export type { SphericalVoronoiResult } from './geometry/spherical-voronoi.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this

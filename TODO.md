@@ -446,9 +446,25 @@ or a documented scope limit worth revisiting.
       `rayTriangleIntersect`/`rayPlaneIntersect`/`segmentSegmentClosest`
       (`functions/src/geometry/intersect3d.ts`) shipped, oracle-pinned vs scipy
       `Rotation`/closed-form geometry (`functions/tests/gap-geometry-breadth-oracle.test.ts`, 15
-      tests). **Remaining:** `SphericalVoronoi`, alpha-shapes, halfspace-intersection — each needs
-      a Delaunay-triangulation/convex-hull/vertex-enumeration engine MathTS doesn't have yet; a
-      substantially larger follow-up, not attempted this pass.
+      tests).
+- [x] ✅ **Computational-geometry engine — DONE 2026-07-19.** Built the foundation + tractable
+      consumers, all in `functions/src/geometry/`, oracle-pinned vs `scipy.spatial`
+      (`functions/tests/geometry-{hull,delaunay,consumers}-oracle.test.ts`, 27 tests):
+      **`convexHull`** (2-D monotone chain + 3-D QuickHull → structured `{vertices,simplices,area,
+  volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-circumcircle
+      invariant + count vs scipy), **`voronoi`** (dual of Delaunay), **`sphericalVoronoi`** (via the
+      3-D hull; areas sum to 4πr²), **`alphaShape`** (annulus recovers the hole). **Root-cause fix:**
+      the broken `delaunay_wasm` kernel (bogus triangle count, buffer over-read) was disabled — JS
+      Bowyer–Watson is always used; the internal test-only 2-D coord hull became `convexHull2D`.
+      **Remaining / surfaced (follow-ups):** - **halfspace-intersection / vertex-enumeration** — the one genuinely hard piece: convert a
+      set of half-spaces `A x ≤ b` to the vertices of the bounded polytope. Needs either the
+      **double-description method** (Motzkin; incrementally intersect half-spaces, maintaining the
+      V-representation) or, given an interior point `x₀`, the standard reduction to a **convex hull
+      of the dual points** `aᵢ/(bᵢ − aᵢ·x₀)` (scipy's `HalfspaceIntersection` route — the dual
+      hull's facets map back to polytope vertices). The 3-D hull engine here already supports the
+      dual-hull route for bounded 3-D polytopes; a full n-D version needs an n-D hull / LP feasibility
+      step. Not shipped this pass. - **Perfectly-cocircular Delaunay degeneracy** — Bowyer–Watson (like Qhull without joggle)
+      mis-triangulates exact concentric rings; needs a joggle or symbolic perturbation. Documented. - **`delaunay_wasm` kernel** — fix or replace the AssemblyScript kernel, then re-enable dispatch.
 - [x] ✅ **Numerics: B-spline fit/eval + Monte-Carlo/QMC integration — DONE 2026-07-17.**
       `bsplineFit`/`bsplineEval` (de Boor collocation for `s=0` interpolation, least-squares
       smoothing for `s>0`) and `monteCarloIntegrate` (uniform + Halton/Sobol quasi-MC over an
