@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(functions): `qz` QZ-hardening — route the Schur step to the Francis double-shift `matrixSchur`
+
+- `qz(A, B)` (generalized/QZ Schur of the pencil `(A, B)`) built its Schur factor with a homegrown
+  **single-shift** QR iteration that ran on the *full* `B⁻¹A` (no Hessenberg reduction). It stalled and
+  **threw** "realSchur: QR iteration failed to converge to (quasi-)triangular form" on non-symmetric
+  pencils with an all-real spectrum — e.g. `A=[[1,2,0],[0,3,1],[1,0,4]]`, `B=diag(2,1,3)`. Root-caused
+  and fixed by delegating the Schur step to the matrix package's hardened `matrixSchur` (Householder →
+  upper Hessenberg → **Francis double-shift** implicit QR with exceptional-shift stall breaking) — the
+  maintained, oracle-pinned matrix-layer primitive (the native-accel "prefer the matrix decomposition"
+  pattern). The dead single-shift QR + its `identityArr` helper were removed.
+- Verified (`functions/tests/qz-hardening.test.ts`): `qz` no longer throws on that pencil and satisfies
+  the decomposition contract (`A = Q·AA·Zᵀ`, `B = Q·BB·Zᵀ` to 9 digits; orthogonal `Q`/`Z`;
+  quasi-triangular `AA`/upper-triangular `BB`; generalized eigenvalues `diag AA / diag BB` = scipy's
+  `[0.758963, 1, 3.07437]`). `generalizedEig` (which already routed through the hardened `eig`) is now
+  locked to `scipy.linalg.eig(A, B)` across real, complex-pair (`±i`) and clustered (`[2, 2, 2.0001]`)
+  spectra, with the implementation-independent `det(A − λB) ≈ 0` oracle.
+- Scoped follow-up (not blocking): `generalizedEig` still forms `B⁻¹A`, which is adequate for a
+  nonsingular `B` (scipy-matched) but breaks down for a *singular / near-singular* `B`. Extracting the
+  pencil eigenvalues directly from the `qz` factors (`diag AA / diag BB`, with 2×2-block handling for
+  complex pairs) is the future enhancement for that regime.
+
 ### feat(functions): ILU(0) / IC(0) preconditioners for the Krylov solvers
 
 - The `cg`/`gmres`/`bicgstab`/`minres` solvers now accept `preconditioner: 'ilu'` (ILU(0) — incomplete

@@ -10066,7 +10066,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "lu"]
+            "imports": ["DenseMatrix", "lu", "matrixSchur"]
           }
         ],
         "exports": [
@@ -38011,7 +38011,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1090,
     "totalModules": 82,
-    "totalLinesOfCode": 185876,
+    "totalLinesOfCode": 185829,
     "totalExports": 5587,
     "totalClasses": 52,
     "totalInterfaces": 478,

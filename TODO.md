@@ -381,8 +381,15 @@ or a documented scope limit worth revisiting.
 - [~] **Linalg extension:** ✅ **rank-revealing `qrPivoted` + `rq`/`ql`/`lq` + `condest` DONE 2026-07-16
   (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
   condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.
-  **Remaining:** `generalizedEig` QZ-hardening (Francis double-shift); ~~sparse `svds` (Lanczos)~~;
-  ~~preconditioners beyond Jacobi (ILU/IC)~~; ~~`minres` optimal Givens (O(k³)→O(k²))~~.
+  **Remaining:** ~~`generalizedEig`/`qz` QZ-hardening (Francis double-shift)~~; ~~sparse `svds` (Lanczos)~~;
+  ~~preconditioners beyond Jacobi (ILU/IC)~~; ~~`minres` optimal Givens (O(k³)→O(k²))~~ — ALL DONE 2026-07-18.
+  - [x] ✅ **QZ-hardening — DONE 2026-07-18.** Root cause was `qz`'s homegrown single-shift `realSchur`
+        (no Hessenberg) _throwing_ on the all-real non-symmetric pencil `A=[[1,2,0],[0,3,1],[1,0,4]]`,
+        `B=diag(2,1,3)`. Routed the Schur step to the hardened `matrixSchur` (Hessenberg + Francis
+        double-shift + exceptional shift). `generalizedEig` already scipy-matched (real/complex/clustered),
+        now oracle-locked. `functions/src/linalg-extra.ts`. **Scoped follow-up:** `generalizedEig` still
+        forms `B⁻¹A` (fine for nonsingular `B`); direct eigenvalue extraction from the `qz` factors for
+        _singular/near-singular_ `B` is a future enhancement.
   - [x] ✅ **ILU(0)/IC(0) preconditioners — DONE 2026-07-18.** `cg`/`gmres`/`bicgstab`/`minres` accept
         `preconditioner: 'ilu'|'ic'`; `incompleteLU`/`incompleteCholesky` exported. Factor-on-pattern +
         iteration-reduction oracles (IC-CG 12 vs 22; ILU-BiCGSTAB 7 vs 15). `functions/src/numeric/krylov.ts`.

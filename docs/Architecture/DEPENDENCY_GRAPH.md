@@ -4090,7 +4090,7 @@ graph LR
 **Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, matrixSchur` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -16601,7 +16601,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1090   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 185876 |
+| Total Lines of Code     | 185829 |
 | Total Exports           | 5587   |
 | Total Re-exports        | 2251   |
 | Total Classes           | 52     |

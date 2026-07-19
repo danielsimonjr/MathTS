@@ -1563,11 +1563,11 @@
       dense matrix (they read `A`'s entries) and throw a clear error if requested
       with a matvec-only `A`:
 
-      | Option     | `M⁻¹`                                                    | Applicability                          |
-      | ---------- | -------------------------------------------------------- | -------------------------------------- |
-      | `'jacobi'` | `diag(1/Aᵢᵢ)`                                            | any nonzero-diagonal `A`               |
-      | `'ilu'`    | ILU(0) — incomplete LU, zero fill on `A`'s pattern       | general (nonsymmetric) `A`             |
-      | `'ic'`     | IC(0) — incomplete Cholesky, zero fill on `A`'s pattern  | symmetric positive-definite `A`        |
+      | Option     | `M⁻¹`                                                   | Applicability                   |
+      | ---------- | ------------------------------------------------------- | ------------------------------- |
+      | `'jacobi'` | `diag(1/Aᵢᵢ)`                                           | any nonzero-diagonal `A`        |
+      | `'ilu'`    | ILU(0) — incomplete LU, zero fill on `A`'s pattern      | general (nonsymmetric) `A`      |
+      | `'ic'`     | IC(0) — incomplete Cholesky, zero fill on `A`'s pattern | symmetric positive-definite `A` |
 
       Pass a custom `(r) => M⁻¹r` function to precondition a matvec operator. On an
       ill-conditioned sparse SPD system (e.g. the 2D Poisson matrix) IC(0)/ILU(0)

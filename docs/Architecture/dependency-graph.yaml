@@ -9517,6 +9517,7 @@ modules:
           imports:
             - DenseMatrix
             - lu
+            - matrixSchur
       exports:
         - generalizedEig
         - tril
@@ -35722,7 +35723,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1090
   totalModules: 82
-  totalLinesOfCode: 185876
+  totalLinesOfCode: 185829
   totalExports: 5587
   totalClasses: 52
   totalInterfaces: 478

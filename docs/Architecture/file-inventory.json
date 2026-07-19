@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1708,
+  "totalFiles": 1709,
   "byDisposition": {
     "reachable": 1057,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 556,
+    "test": 557,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1093,
-    "tests": 556,
+    "tests": 557,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 699,
+    "@danielsimonjr/mathts-functions": 700,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5469,7 +5469,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 251
+      "loc": 204
     },
     {
       "file": "functions/src/linalg-svd-extra.ts",
@@ -8928,6 +8928,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 317
+    },
+    {
+      "file": "functions/tests/qz-hardening.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 164
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",
