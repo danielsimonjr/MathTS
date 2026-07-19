@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-functions
 
+## 0.55.0
+
+### Minor Changes
+
+- Numerics: `solveDDE` — constant-delay differential equation solver.
+
+  New `solveDDE(f, tspan, history, delays, options?)` solves `y'(t) = f(t, y(t), [y(t−τ₁), …])` with a history
+  function `φ(t)`, multiple positive constant delays, and vector state, by the method of steps: adaptive BS23
+  (Bogacki–Shampine 3(2), the `dde23` pair) with a C¹ cubic-Hermite continuous extension as the history
+  interpolant. The step is capped at `min(τ)` so every delayed argument lies in already-computed history (fully
+  explicit), and the integrator lands exactly on each `t0 + m·τ` breakpoint so no dense-output interval straddles
+  a derivative jump (the initial discontinuity smooths one order per breakpoint). Returns `{ t, y[t], yInterp }`
+  (dense-output evaluator). Verified (scipy has no DDE — implementation-independent oracles): method-of-steps
+  exact solution of `y'=−y(t−1)` over 3 delay intervals to machine precision (~5e-16); characteristic-root decay
+  and period exact-matched; τ→large ODE-degeneration cross-check vs `solveODESystem` Δ 2.4e-10.
+
 ## 0.54.0
 
 ### Minor Changes
