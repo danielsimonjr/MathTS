@@ -796,11 +796,10 @@ defects found + fixed:
       graph**, not a workspace, absent from every tsconfig/turbo/script, and self-referential only.
       The now-dead `src/**` eslint ignore was removed with it. Also deleted the stray
       `docs/Architecture/Workbook/index 2.ts` (unreferenced snapshot).
-      ⚠️ **Surfaced, NOT deleted:** the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`,
-      `executor.ts`, `graph.ts`, `index.ts`) are stale snapshots of `workbook/src/` that have
-      already rotted — `index.ts` (446 lines) actually contains the **YAML parser**, not an index.
-      They are unreferenced and unbuilt. Left in place because they are docs content, not mine to
-      remove unilaterally; recommend deleting them.
+      ✅ **DELETED 2026-07-18** — the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`, `executor.ts`,
+      `graph.ts`, `index.ts` [the 446-line stale YAML parser], `types.ts`) were rotted snapshots of
+      `workbook/src/`, referenced by nothing but the file-census inventory (`example` disposition),
+      unreferenced + unbuilt. Removed with Daniel's "no limits" authorization; census 1705→1700, gate green.
 
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
 > below): `eigs`/SVD acceleration · `polyFit`/`leastSquares`.

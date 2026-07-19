@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(cleanup): delete stale docs/Architecture/Workbook/*.ts snapshots
+
+- Removed 5 rotted snapshot files under `docs/Architecture/Workbook/` (`cli.ts`, `executor.ts`, `graph.ts`,
+  `index.ts` — a 446-line stale copy of the YAML parser, not an index — and `types.ts`). They were stale
+  copies of `workbook/src/`, referenced by nothing (only listed in the file-census inventory), unbuilt, and
+  had already drifted from the real source. File census 1705 → 1700; self-check gate green.
+
 ### feat(tools): complete file census (FILE_INVENTORY) + maximal-walk self-check gate in CDG
 
 - Added a **complete file census** to `tools/create-dependency-graph` (`buildFileInventory`): EVERY tracked `.ts`
