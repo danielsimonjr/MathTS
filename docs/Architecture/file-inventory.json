@@ -5910,7 +5910,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 349
+      "loc": 361
     },
     {
       "file": "functions/src/numeric/eigsh.ts",
@@ -7737,7 +7737,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 115
+      "loc": 264
     },
     {
       "file": "functions/tests/conversions-parser.test.ts",
@@ -8199,7 +8199,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 278
+      "loc": 294
     },
     {
       "file": "functions/tests/gap-geometry-breadth-oracle.test.ts",

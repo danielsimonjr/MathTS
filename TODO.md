@@ -370,8 +370,14 @@ or a documented scope limit worth revisiting.
       `vectorsIm: number[][]` field; complex-conjugate pairs now emit `vectors[k] ± i·vectorsIm[k]`
       (unit-normalized by the complex 2-norm) instead of an all-zero column, pinned against the
       implementation-independent complex residual (`matrix/tests/eig-complex-eigenvectors-oracle.test.ts`).
-      `care`/`dare` still use the matrix sign function (not wired to the new field in this change) —
-      **remaining follow-up:** route `care`/`dare`/`funm` off the eigenvector basis now that it's available.
+      ✅ **routing follow-up RESOLVED 2026-07-18 (measured, declined on merit).** Prototyped the
+      Hamiltonian-eigenvector `care` (`X=U₂U₁⁻¹` over the stable subspace, now enabled by `vectorsIm`)
+      and measured it vs the retained sign-function path on a complex-Hamiltonian + ill-conditioned
+      corpus: the eigenvector path is **strictly less accurate on every case** (Riccati residual gap
+      widens on ill-conditioned Hamiltonians — near-uncontrollable 3.3e-10 vs 2.3e-13; chain5×5 7.1e-13
+      vs 3.7e-14). Kept sign-function `care` / SDA `dare` (self-contained, more robust); corrected the
+      stale docstring; +3 oracle+residual-pinned complex-spectrum tests. `funm`/`cosm`/`sinm` already
+      use eigen*values* (Lagrange-Sylvester / confluent Hermite), never eigenvectors — nothing to route.
 - [~] **Linalg extension:** ✅ **rank-revealing `qrPivoted` + `rq`/`ql`/`lq` + `condest` DONE 2026-07-16
   (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
   condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.

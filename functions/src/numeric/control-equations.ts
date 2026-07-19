@@ -11,15 +11,27 @@
  *   - {@link care} — continuous algebraic Riccati equation
  *     `AᵀX + XA − X B R⁻¹ Bᵀ X + Q = 0`, solved via the **matrix sign
  *     function** applied to the Hamiltonian `H = [[A, −BR⁻¹Bᵀ], [−Q, −Aᵀ]]`.
- *     This avoids both complex eigenvectors (this codebase's `eig` only
- *     returns real eigenvector columns — see `matrix-functions.ts` — so a
- *     Hamiltonian-eigenvector approach isn't usable here) and the need for a
- *     stabilizing initial gain that a Kleinman/Newton iteration would
- *     require (the natural starting point `X₀ = 0` is not stabilizing for
- *     e.g. the classic double-integrator `A = [[0,1],[0,0]]`, which is only
+ *     This needs no stabilizing initial gain that a Kleinman/Newton iteration
+ *     would require (the natural starting point `X₀ = 0` is not stabilizing
+ *     for e.g. the classic double-integrator `A = [[0,1],[0,0]]`, which is only
  *     marginally stable). The sign-function Newton iteration converges
  *     unconditionally (given the standard stabilizability/detectability
  *     assumptions) directly from `H` itself.
+ *
+ *     The classical alternative is the **Hamiltonian-eigenvector** construction
+ *     (eigendecompose `H`, take the stable invariant subspace `U=[U₁;U₂]`,
+ *     `X = U₂U₁⁻¹`). Since `matrix`'s `eig` gained complex eigenvectors
+ *     (`vectorsIm`, 2026-07-16) that path IS now implementable — but it was
+ *     prototyped and **measured against the sign function** (2026-07-18) and
+ *     found strictly **less** accurate on every corpus case, with the gap
+ *     widening on ill-conditioned Hamiltonians (near-uncontrollable /
+ *     lightly-damped: Riccati residual ~1e-10..1e-13 for the eigenvector path
+ *     vs ~1e-13..1e-14 for the sign function). Eigenvector-basis subspace
+ *     extraction is the numerically inferior classical method (ill-conditioned
+ *     eigenvectors near defectiveness), which is why LAPACK/scipy use ordered
+ *     Schur, not eigenvectors. The self-contained sign-function method is
+ *     therefore retained. (`funm`/`cosm`/`sinm` likewise use eigen*values*,
+ *     not eigenvectors — see `matrix-functions.ts`.)
  *   - {@link dare} — discrete algebraic Riccati equation
  *     `AᵀXA − X − AᵀXB(R + BᵀXB)⁻¹BᵀXA + Q = 0`, solved via the
  *     **structure-preserving doubling algorithm** (SDA), the discrete-time

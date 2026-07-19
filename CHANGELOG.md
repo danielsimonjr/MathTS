@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(functions): resolve the care/dare eigenvector-routing TODO — measured, sign-function/SDA retained
+
+- Follow-up to matrix `eig` gaining complex eigenvectors (`vectorsIm`, 2026-07-16), which unblocked the
+  classical **Hamiltonian-eigenvector** construction for `care` (`X = U₂U₁⁻¹` over the stable invariant
+  subspace). Prototyped that path and **measured it against the retained matrix-sign-function `care`**
+  (RFL R4 — measure before deciding) on a corpus including complex-Hamiltonian-eigenvalue cases
+  (double-integrator −0.87±0.5i, oscillator −0.68±0.98i, 3×3 companion −0.48±0.58i) and ill-conditioned
+  ones (near-uncontrollable, lightly-damped chain).
+- **Result: the eigenvector path is strictly LESS accurate on every case, never better.** Both are
+  machine-precision on well-conditioned inputs, but the Riccati residual gap widens on ill-conditioned
+  Hamiltonians — near-uncontrollable **3.3e-10** (eig) vs **2.3e-13** (sign); chain5×5 **7.1e-13** vs
+  **3.7e-14**. Eigenvector-basis subspace extraction is the numerically inferior classical method (why
+  LAPACK/scipy use ordered Schur, not eigenvectors). Per the task's own rule ("keep/improve accuracy;
+  if equal prefer the codebase pattern"), the self-contained **sign-function `care` / SDA `dare` are
+  retained** — routing to eigenvectors would be a robustness regression for no gain.
+- Corrected the now-**stale** `control-equations.ts` docstring (it claimed `eig` "only returns real
+  eigenvector columns … so a Hamiltonian-eigenvector approach isn't usable here" — false since
+  `vectorsIm`) to state the accurate, measured reason the sign function is kept.
+- **+3 oracle+residual-pinned tests** (`control-equations.test.ts`, 6 total) locking in the retained
+  solvers on complex-spectrum cases: `care` oscillator (−0.68±0.98i) & 3×3 companion (−0.48±0.58i),
+  `dare` rotation (open-loop 0.9±0.3i) — each pinned to `scipy.linalg.solve_{continuous,discrete}_are`
+  (relerr ≤1e-15) AND the implementation-independent Riccati residual (<1e-10) + symmetry.
+
 ### test(functions): lock in `funm`/`cosm`/`sinm` on complex-spectrum defective matrices
 
 - Closed the last untested `funm` coverage gap (functions@0.39.0 follow-up): the **complex-spectrum
