@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-19",
-    "totalFiles": 1090,
+    "totalFiles": 1091,
     "totalModules": 82,
-    "totalExports": 5587
+    "totalExports": 5595
   },
   "entryPoints": [
     {
@@ -9033,6 +9033,11 @@
             "reExport": true
           },
           {
+            "file": "./stats/gaussian-process.js",
+            "imports": ["gaussianProcessRegression", "gpRegression"],
+            "reExport": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -9294,6 +9299,12 @@
           {
             "file": "./stats/power-analysis.js",
             "imports": ["TTestPowerAlternative", "TTestPowerOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./stats/gaussian-process.js",
+            "imports": ["GPKernel", "GPOptions", "GPPrediction", "GPModel"],
             "reExport": true,
             "typeOnly": true
           }
@@ -9577,6 +9588,8 @@
           "mvnPdf",
           "mvnSample",
           "tTestPower",
+          "gaussianProcessRegression",
+          "gpRegression",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -9675,7 +9688,11 @@
           "MvnCov",
           "MvnSampleOptions",
           "TTestPowerAlternative",
-          "TTestPowerOptions"
+          "TTestPowerOptions",
+          "GPKernel",
+          "GPOptions",
+          "GPPrediction",
+          "GPModel"
         ],
         "reExported": [
           "* from ./typed/index.js",
@@ -9947,6 +9964,8 @@
           "mvnPdf",
           "mvnSample",
           "tTestPower",
+          "gaussianProcessRegression",
+          "gpRegression",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -10045,7 +10064,11 @@
           "MvnCov",
           "MvnSampleOptions",
           "TTestPowerAlternative",
-          "TTestPowerOptions"
+          "TTestPowerOptions",
+          "GPKernel",
+          "GPOptions",
+          "GPPrediction",
+          "GPModel"
         ]
       },
       "functions/src/linalg-extra.ts": {
@@ -17057,6 +17080,22 @@
         "exports": ["fitDistribution"],
         "interfaces": ["FitDistributionResult"],
         "functions": ["fitDistribution"]
+      },
+      "functions/src/stats/gaussian-process.ts": {
+        "description": "Gaussian-process regression (`gaussianProcessRegression` / `gpRegression`)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/matrix-ops.js",
+            "imports": ["cholesky"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["gpRegression", "gaussianProcessRegression"],
+        "interfaces": ["GPOptions", "GPPrediction", "GPModel"],
+        "functions": ["gaussianProcessRegression"],
+        "constants": ["gpRegression"]
       },
       "functions/src/stats/inference-extra.ts": {
         "description": "Chi-square test of independence + multiple-testing correction (Phase 3 Task 6).",
@@ -37177,6 +37216,7 @@
         "name": "Functions/stats",
         "files": [
           "functions/src/stats/fit-distribution.ts",
+          "functions/src/stats/gaussian-process.ts",
           "functions/src/stats/inference-extra.ts",
           "functions/src/stats/inference-extra2.ts",
           "functions/src/stats/mvn.ts",
@@ -38009,18 +38049,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1090,
+    "totalTypeScriptFiles": 1091,
     "totalModules": 82,
-    "totalLinesOfCode": 185829,
-    "totalExports": 5587,
+    "totalLinesOfCode": 186071,
+    "totalExports": 5595,
     "totalClasses": 52,
-    "totalInterfaces": 478,
-    "totalFunctions": 1756,
+    "totalInterfaces": 481,
+    "totalFunctions": 1757,
     "totalTypeGuards": 156,
     "totalEnums": 0,
-    "totalConstants": 1542,
-    "totalReExports": 2251,
-    "totalTypeOnlyImports": 569,
+    "totalConstants": 1543,
+    "totalReExports": 2257,
+    "totalTypeOnlyImports": 570,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

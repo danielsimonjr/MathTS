@@ -1760,6 +1760,7 @@
     "functions/src/ml/glm.ts": ["functions/src/index.ts"],
     "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
+    "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
@@ -1932,6 +1933,7 @@
     "functions/src/logical/xor.ts": ["functions/src/factories/index.ts"],
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
+      "functions/src/stats/gaussian-process.ts",
       "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],

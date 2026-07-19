@@ -2907,7 +2907,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1039 exports).
+> `@danielsimonjr/mathts-functions` (1044 exports).
 
 ### Functions by category
 
@@ -2965,7 +2965,7 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (3): `complexCos`, `complexSin`, `isGpuChainSupported`
+**Other exports (uncategorized)** (8): `complexCos`, `complexSin`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `isGpuChainSupported`, `wishartSample`
 
 ### Constants & values (64)
 

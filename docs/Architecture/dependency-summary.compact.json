@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1090, "e": 5587, "re": 2251 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1091, "e": 5595, "re": 2257 },
   "s": {
-    "loc": 185829,
+    "loc": 186071,
     "cls": 52,
-    "int": 478,
-    "fn": 1756,
+    "int": 481,
+    "fn": 1757,
     "tg": 156,
     "en": 0,
-    "co": 1542,
-    "toi": 569
+    "co": 1543,
+    "toi": 570
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -960,9 +960,11 @@
       ]
     },
     "functions/stats": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "fitDistribution",
+        "gpRegression",
+        "gaussianProcessRegression",
         "chi2Contingency",
         "multipleTest",
         "noncentralChi2CDF",
@@ -979,20 +981,19 @@
         "tTestPower",
         "pacf",
         "ljungBox",
-        "durbinWatson",
-        "adfuller"
+        "durbinWatson"
       ],
       "int": [
         "FitDistributionResult",
+        "GPOptions",
+        "GPPrediction",
+        "GPModel",
         "Chi2ContingencyResult",
         "Chi2ContingencyOptions",
         "CircularOptions",
         "McNemarOptions",
         "McNemarResult",
-        "CochranQResult",
-        "MvnSampleOptions",
-        "TTestPowerOptions",
-        "LjungBoxResult"
+        "CochranQResult"
       ]
     },
     "functions/string": {
@@ -1807,7 +1808,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 108, "o": 0 },
+    { "p": "src/index.ts", "i": 110, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

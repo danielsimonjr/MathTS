@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): Gaussian-process regression (`gaussianProcessRegression` / `gpRegression`)
+
+- New stats-breadth public API: fit a zero-mean GP to training `(X, y)` under i.i.d. Gaussian noise
+  `α`, and predict the **posterior mean AND variance** (the GP's key output) at test points. Kernels:
+  **RBF/squared-exponential** plus **Matérn 3/2** and **Matérn 5/2**, each with `lengthScale` (ℓ) and
+  `signalVariance` (σ_f²) hyperparameters. Standard Rasmussen & Williams Alg. 2.1: `K = k(X,X)+αI`,
+  `L = chol(K)`, `ᾱ = Lᵀ\(L\y)`, `mean = k(X*,X)·ᾱ`, `var = k(X*,X*) − vᵀv` with `v = L\k(X,X*)`; also
+  exposes the marginal log-likelihood `log p(y|X)`. The Cholesky routes to the maintained,
+  oracle-pinned matrix-package primitive (native-accel "prefer the matrix decomposition" pattern);
+  triangular solves are local forward/back substitution.
+- Oracle-pinned (`functions/tests/gp-regression-oracle.test.ts`, 15 tests) against
+  `sklearn.gaussian_process.GaussianProcessRegressor` with the matching `ConstantKernel(σ_f²)·RBF(ℓ)`
+  / `·Matern(ℓ, ν)` kernel and `alpha=α` (`optimizer=None`, `normalize_y=False`): posterior mean and
+  std match to **machine precision** (max |Δ| mean 5.6e-16, std 1.9e-15). Implementation-independent
+  limits also pinned: a noiseless GP interpolates the training targets (mean → y, variance → 0), and
+  far from the data the posterior returns to the prior (mean → 0, variance → σ_f²).
+
 ### fix(functions): `qz` QZ-hardening — route the Schur step to the Francis double-shift `matrixSchur`
 
 - `qz(A, B)` (generalized/QZ Schur of the pencil `(A, B)`) built its Schur factor with a homegrown

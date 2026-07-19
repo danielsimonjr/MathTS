@@ -550,3 +550,8 @@ export type { MvnVector, MvnCov, MvnSampleOptions } from './stats/mvn.js';
 // noncentral-t CDF, matching statsmodels' tt_ind_solve_power.
 export { tTestPower } from './stats/power-analysis.js';
 export type { TTestPowerAlternative, TTestPowerOptions } from './stats/power-analysis.js';
+
+// Stats-breadth chunk — Gaussian-process regression (RBF / Matérn 3/2 & 5/2
+// kernels; posterior mean + variance), oracle-pinned against sklearn.
+export { gaussianProcessRegression, gpRegression } from './stats/gaussian-process.js';
+export type { GPKernel, GPOptions, GPPrediction, GPModel } from './stats/gaussian-process.js';
