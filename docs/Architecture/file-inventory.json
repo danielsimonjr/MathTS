@@ -8199,7 +8199,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 176
+      "loc": 278
     },
     {
       "file": "functions/tests/gap-geometry-breadth-oracle.test.ts",

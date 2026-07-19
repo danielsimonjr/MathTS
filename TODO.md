@@ -382,9 +382,11 @@ or a documented scope limit worth revisiting.
       `f(J)=Σ f^(k)(λ)/k!·N^k`). Derivatives of `f` from an optional additive `fDerivs` arg (machine
       precision — wired for `cosm`/`sinm`) or an order-tuned finite-difference fallback (~3–5e-11).
       Verified on Jordan blocks vs closed forms + scipy `expm`/`sqrtm` (scipy's OWN `funm` is wrong here
-      — Rule-4). Distinct path bit-for-bit unchanged. **Remaining:** complex-spectrum _defective_ case
-      works for analytic `f` (real-dir FD = complex derivative) but is untested; multiplicity>5 needs
-      `fDerivs`. (This is the Schur-Parlett follow-up; confluent Hermite is the equivalent for this scope.)
+      — Rule-4). Distinct path bit-for-bit unchanged. ✅ **complex-spectrum _defective_ coverage DONE
+      2026-07-18** — +8 oracle-pinned tests (4×4 real-Jordan `[[C,I],[0,C]]` + 6×6 mult-3) vs
+      scipy `{expm,cosm,sinm}`; the real-dir FD path measured at 6.6e-11 (4×4) / 1.1e-8 (6×6), analytic
+      ~2e-16; **no bug** — impl was already correct. **Remaining:** multiplicity>5 still needs `fDerivs`.
+      (This is the Schur-Parlett follow-up; confluent Hermite is the equivalent for this scope.)
 - [~] **Signal:** ✅ **`csd`/`coherence` hard-pinned 2026-07-16 (functions@0.37.0)** — implementation-independent
   invariants (coherence∈[0,1]; unity for a scaled/shifted noiseless copy; `csd(x,x)`=welchPSD via the
   one-sided doubling convention; polarization-identity Cauchy bound). Surfaced: public `csd` returns

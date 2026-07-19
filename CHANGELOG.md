@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### test(functions): lock in `funm`/`cosm`/`sinm` on complex-spectrum defective matrices
+
+- Closed the last untested `funm` coverage gap (functions@0.39.0 follow-up): the **complex-spectrum
+  defective** case — a repeated complex-conjugate eigenvalue pair with geometric multiplicity < algebraic,
+  where the confluent Hermite branch evaluates `f` (and its derivatives) at **complex** eigenvalue nodes.
+  The minimal such matrix is 4×4 (a 2×2 real-Jordan block `[[C,I],[0,C]]`, `C=[[a,b],[-b,a]]`); also
+  pinned a 6×6 multiplicity-3 block to exercise the 2nd-derivative confluent path.
+- **Measured, not assumed (RFL R4):** the previously-untested real-direction finite-difference derivative
+  path was verified against `scipy.linalg.{expm,cosm,sinm}` and is well within its documented ~1e-6 budget —
+  `funm(·, exp)` numeric FD: maxErr **6.6e-11** (4×4) / **1.1e-8** (6×6); analytic-derivative `cosm`/`sinm`
+  and `funm(·, exp, expDerivs)`: **~2e-16** (machine precision). Imag parts of `f(real matrix)` cancel to
+  <1e-8 as required. **No bug found** — coverage-lock only; the impl was already correct on this case.
+- +8 oracle-pinned tests in `functions/tests/gap-funm-defective-oracle.test.ts` (15 total in the file).
+
 ### docs(test): correct fft-wasm-mock header + resolve the WASM-FFT-retire decision (KEEP)
 
 - Re-verified the "retire the dead WASM FFT kernel" TODO before acting: the premise was half-wrong. The AS
