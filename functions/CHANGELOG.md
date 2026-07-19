@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-functions
 
+## 0.53.0
+
+### Minor Changes
+
+- Numerics: `solveParabolicPDE` — general 1-D parabolic PDE via method-of-lines.
+
+  New `solveParabolicPDE` solves `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` on `[x0,x1]×[0,T]` by method-of-lines:
+  central 2nd/1st differences on a uniform `nx`-grid → a stiff ODE system integrated by the shipped **BDF**
+  solver (implicit, no CFL cap). Dirichlet (`u=g(t)`) and Neumann (`u_x=g(t)`, 2nd-order ghost-node) boundary
+  conditions; `D`/`c` accept constants or `x`-functions. Returns `{ x, t, u[t][x] }` (optional `times`
+  interpolation). Verified: exact heat `e^{−π²t}sin(πx)` relerr 1.27e-4 at nx=81 with **O(h²) convergence rate
+  2.000**; manufactured reaction-diffusion 1.2e-4; scipy `solve_ivp('BDF')` cross-check on the same
+  semi-discretization ≤1e-12. The heat-only `solvePDE` is unchanged (this is an additive new entry).
+
 ## 0.52.0
 
 ### Minor Changes
