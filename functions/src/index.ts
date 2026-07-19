@@ -372,6 +372,7 @@ export {
   deconvolve,
 } from './signal/fir-smoothing.js';
 export type { DeconvolveResult } from './signal/fir-smoothing.js';
+export type { RemezType } from './signal/remez-exchange.js';
 
 // Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
 // reconstruction), and the continuous wavelet transform (cwt, Ricker/Morlet).

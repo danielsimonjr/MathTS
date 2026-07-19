@@ -2976,6 +2976,8 @@
       "RegularizedRegressionResult",
       "RelationalNode",
       "remez",
+      "remezExchange",
+      "RemezType",
       "replacer",
       "resample",
       "resetAiryWasm",

@@ -1759,6 +1759,10 @@
     "functions/src/ml/glm.ts": ["functions/src/index.ts"],
     "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
+    "functions/src/signal/remez-exchange.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts"
+    ],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/error/ArgumentsError.ts": [

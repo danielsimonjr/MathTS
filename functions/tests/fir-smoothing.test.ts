@@ -42,11 +42,13 @@ describe('FIR + smoothing', () => {
     expect(Math.abs(amplitudeResponse(h, 0.7))).toBeLessThan(0.2);
   });
 
-  it('remez designs a symmetric lowpass with passband ~1 and stopband ~0 (approximate equiripple)', () => {
-    const h = remez(25, [0, 0.2, 0.3, 1], [1, 1, 0, 0]);
+  it('remez designs a symmetric lowpass, exact equiripple (scipy convention: 0.5 = Nyquist, per-band desired)', () => {
+    // Amplitude response uses w in [0,1] = fraction of Nyquist; remez bands use
+    // [0,0.5] = fraction of fs. Passband [0,0.2fs]=[0,0.4Nyq], stop [0.3fs,0.5fs]=[0.6Nyq,1Nyq].
+    const h = remez(25, [0, 0.2, 0.3, 0.5], [1, 0]);
     expect(h).toHaveLength(25);
     h.forEach((v, i) => expect(v).toBeCloseTo(h[24 - i], 10)); // symmetric taps
-    expect(Math.abs(amplitudeResponse(h, 0.05) - 1)).toBeLessThan(0.25);
-    expect(Math.abs(amplitudeResponse(h, 0.7))).toBeLessThan(0.25);
+    expect(Math.abs(amplitudeResponse(h, 0.2) - 1)).toBeLessThan(0.02); // deep in passband
+    expect(Math.abs(amplitudeResponse(h, 0.8))).toBeLessThan(0.02); // deep in stopband
   });
 });

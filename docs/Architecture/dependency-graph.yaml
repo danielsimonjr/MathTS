@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1088
+  totalFiles: 1089
   totalModules: 82
-  totalExports: 5575
+  totalExports: 5577
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8665,6 +8665,11 @@ modules:
             - DeconvolveResult
           reExport: true
           typeOnly: true
+        - file: ./signal/remez-exchange.js
+          imports:
+            - RemezType
+          reExport: true
+          typeOnly: true
         - file: ./signal/spectral-peaks.js
           imports:
             - FindPeaksOptions
@@ -9075,6 +9080,7 @@ modules:
         - LsqBoundedOptions
         - LsqBoundedResult
         - DeconvolveResult
+        - RemezType
         - FindPeaksOptions
         - CsdOptions
         - StftOptions
@@ -9438,6 +9444,7 @@ modules:
         - LsqBoundedOptions
         - LsqBoundedResult
         - DeconvolveResult
+        - RemezType
         - FindPeaksOptions
         - CsdOptions
         - StftOptions
@@ -15138,6 +15145,10 @@ modules:
         - file: ./conv.js
           imports:
             - convDirect
+        - file: ./remez-exchange.js
+          imports:
+            - remezExchange
+            - RemezType
       workspaceDependencies: []
       exports:
         - firwinBandpass
@@ -15220,8 +15231,20 @@ modules:
         - ellip
         - bilinear
         - buttord
+        - buttord
+        - buttord
         - zpk2sos
         - sosfilt
+    functions/src/signal/remez-exchange.ts:
+      description: Exact Parks-McClellan (Remez exchange) optimal equiripple FIR design.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - remezExchange
+      functions:
+        - remezExchange
     functions/src/signal/spectral-peaks.ts:
       description: Peak detection/width analysis, cross-spectral density + coherence, short-time
       externalDependencies: []
@@ -34857,6 +34880,7 @@ dependencyGraph:
         - functions/src/signal/fir-smoothing.ts
         - functions/src/signal/freqz.ts
         - functions/src/signal/iir-design.ts
+        - functions/src/signal/remez-exchange.ts
         - functions/src/signal/spectral-peaks.ts
         - functions/src/signal/wavelet-filters.ts
         - functions/src/signal/wavelets.ts
@@ -35642,18 +35666,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1088
+  totalTypeScriptFiles: 1089
   totalModules: 82
-  totalLinesOfCode: 184445
-  totalExports: 5575
+  totalLinesOfCode: 185274
+  totalExports: 5577
   totalClasses: 52
   totalInterfaces: 476
-  totalFunctions: 1749
+  totalFunctions: 1752
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 2244
-  totalTypeOnlyImports: 567
+  totalReExports: 2245
+  totalTypeOnlyImports: 568
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

@@ -399,8 +399,12 @@ or a documented scope limit worth revisiting.
   **magnitude only** (no re/im) — a pre-existing API limit worth revisiting. ✅ **wavelet families beyond
   Haar/db1 shipped** — `dwt`/`idwt`/`wavedec`/`waverec` now support db1-4/sym2-4/coif1-2 via a general
   periodization filter bank pinned bit-for-bit against pywt 1.8.0 (`functions/tests/gap-wavelet-families-oracle.test.ts`,
-  55 tests). **Remaining:** `remez` exact Parks–McClellan (currently Lawson IRLS); `buttord`
-  bandpass/bandstop array form.
+  55 tests). ✅ **`remez` exact Parks–McClellan — DONE 2026-07-18** (functions): faithful port of the
+  McClellan-Parks-Rabiner program (scipy's `_sigtoolsmodule.cc` `pre_remez`+`remez`) replacing the
+  Lawson-IRLS approximation, in `functions/src/signal/remez-exchange.ts`; scipy convention (0.5=Nyquist,
+  per-band desired/weight, `type` bandpass/differentiator/hilbert); taps match `scipy.signal.remez` to
+  machine precision (~1e-16) for Type I/II/III/IV (`functions/tests/remez-pm.test.ts`). **Remaining:**
+  `buttord` bandpass/bandstop array form.
 - [x] ✅ **Graph breadth — DONE 2026-07-16.** `graphColoring` (Welsh-Powell), `maxClique`
       (Bron-Kerbosch), `louvainCommunities` (deterministic Louvain), `katzCentrality`
       (networkx-exact), `isIsomorphic` (backtracking), and `betweennessCentrality`'s `normalized`

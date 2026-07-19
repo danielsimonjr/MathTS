@@ -1,12 +1,13 @@
 /**
  * Phase 6 Task 3 — FIR bandpass design, least-squares/equiripple FIR design,
  * Savitzky-Golay smoothing, the Wiener adaptive filter, and polynomial
- * (FIR) deconvolution. Matches `scipy.signal` where an exact closed-form
- * exists (`savgol`, `deconvolve`, `firwinBandpass`); `remez` is a documented
- * approximation (see its docstring).
+ * (FIR) deconvolution. Matches `scipy.signal` for `savgol`, `deconvolve`,
+ * `firwinBandpass`, `firls`, and `remez` (the last is now the exact
+ * Parks-McClellan / Remez exchange — see `./remez-exchange.ts`).
  */
 import { sinc } from '../signal-filter-extra.js';
 import { convDirect } from './conv.js';
+import { remezExchange, type RemezType } from './remez-exchange.js';
 
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
@@ -311,12 +312,6 @@ function solveWeightedBasis(
   return solveLinearSystem(A, b);
 }
 
-function evalBasis(basis: FirBasis, coeffs: readonly number[], w: number): number {
-  let s = 0;
-  for (let k = 0; k < basis.nBasis; k++) s += coeffs[k] * basis.phi(k, w);
-  return s;
-}
-
 /**
  * Least-squares linear-phase FIR design (`scipy.signal.firls`): `bands` is a
  * flat list of `[lo, hi]` band-edge pairs (normalized to Nyquist, 1 = Nyquist)
@@ -344,34 +339,23 @@ export function firls(
 }
 
 /**
- * Parks-McClellan-style equiripple FIR design. **This is NOT the exact
- * Remez-exchange algorithm** — it is Lawson's algorithm, an iteratively
- * reweighted least squares (IRLS) scheme that approximates the minimax
- * (Chebyshev) solution by repeatedly re-solving the `firls` normal equations
- * with per-sample weights pushed up wherever the previous iteration's error
- * was largest, converging toward (but not guaranteed to reach) a true
- * equiripple response. Documented as approximate per the Task 3 spec.
+ * Optimal equiripple FIR design (`scipy.signal.remez`) via the exact
+ * Parks-McClellan / Remez exchange algorithm (delegates to `remezExchange`).
+ *
+ * **Convention note:** unlike `firls` above (which follows `scipy.signal.firls`
+ * with `1 = Nyquist` and one `desired` value per band *edge*), `remez` follows
+ * `scipy.signal.remez` exactly: band edges are normalized to `[0, 0.5]`
+ * (`fs = 1`, `0.5 = Nyquist`), and `desired`/`weight` carry one value per band
+ * (length `bands.length / 2`). `type` is `'bandpass'` (symmetric, the default),
+ * `'differentiator'`, or `'hilbert'` (antisymmetric). Coefficients match
+ * `scipy.signal.remez` to machine precision.
  */
 export function remez(
   numtaps: number,
   bands: readonly number[],
-  desired: readonly number[]
+  desired: readonly number[],
+  weight?: readonly number[],
+  type: RemezType = 'bandpass'
 ): number[] {
-  validateBandsDesired(numtaps, bands, desired);
-  const basis = makeBasis(numtaps);
-  const pts = sampleBands(bands, desired);
-  let weights = pts.map(() => 1);
-  let coeffs = solveWeightedBasis(basis, pts, weights);
-
-  const ITERATIONS = 15;
-  for (let iter = 1; iter < ITERATIONS; iter++) {
-    const errs = pts.map((pt) => Math.abs(evalBasis(basis, coeffs, pt.w) - pt.D));
-    const maxErr = Math.max(...errs, 1e-12);
-    const reweighted = weights.map((wgt, i) => wgt * Math.pow(errs[i] / maxErr + 1e-6, 0.5));
-    const meanW = reweighted.reduce((a, b) => a + b, 0) / reweighted.length;
-    weights = reweighted.map((wgt) => wgt / meanW);
-    coeffs = solveWeightedBasis(basis, pts, weights);
-  }
-
-  return coeffsToTaps(numtaps, basis, coeffs);
+  return remezExchange(numtaps, bands, desired, weight, type);
 }

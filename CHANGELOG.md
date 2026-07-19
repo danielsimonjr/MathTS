@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): `remez` — exact Parks-McClellan replacing the Lawson-IRLS approximation
+
+- `remez` (optimal equiripple FIR design) now runs the **exact** Parks-McClellan / Remez exchange
+  algorithm — a faithful TypeScript port of the McClellan-Parks-Rabiner program that `scipy.signal.remez`
+  wraps (scipy's `_sigtoolsmodule.cc`: `pre_remez` + `remez`), in `functions/src/signal/remez-exchange.ts`.
+  It replaces the previous Lawson-IRLS approximation (documented as approximate).
+- **API now matches `scipy.signal.remez` exactly** (a convention change from the old signature): band
+  edges are normalized to `[0, 0.5]` (`fs = 1`, `0.5 = Nyquist`); `desired` and the new optional `weight`
+  carry **one value per band** (`bands.length / 2`), not per edge; the new optional `type` is `'bandpass'`
+  (default, symmetric), `'differentiator'`, or `'hilbert'` (antisymmetric). Note this differs from `firls`,
+  which keeps scipy's `firls` convention (`1 = Nyquist`, per-edge desired) — mirroring scipy's own
+  inconsistency between the two.
+- Taps match `scipy.signal.remez` to **machine precision (~1e-16)** for all four linear-phase families
+  (Type I/II symmetric; Type III/IV antisymmetric), pinned in `functions/tests/remez-pm.test.ts`
+  (lowpass, highpass, bandpass, weighted multiband, Type II even, hilbert, differentiator).
+
 ### fix(functions): resolve the care/dare eigenvector-routing TODO — measured, sign-function/SDA retained
 
 - Follow-up to matrix `eig` gaining complex eigenvectors (`vectorsIm`, 2026-07-16), which unblocked the

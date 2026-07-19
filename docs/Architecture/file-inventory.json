@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1701,
+  "totalFiles": 1703,
   "byDisposition": {
-    "reachable": 1055,
+    "reachable": 1056,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 551,
+    "test": 552,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1091,
-    "tests": 551,
+    "src": 1092,
+    "tests": 552,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 693,
+    "@danielsimonjr/mathts-functions": 695,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 91,
@@ -5462,7 +5462,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 546
+      "loc": 547
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6393,7 +6393,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 378
+      "loc": 362
     },
     {
       "file": "functions/src/signal/freqz.ts",
@@ -6407,7 +6407,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 476
+      "loc": 661
+    },
+    {
+      "file": "functions/src/signal/remez-exchange.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 659
     },
     {
       "file": "functions/src/signal/spectral-peaks.ts",
@@ -7737,7 +7744,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 264
+      "loc": 258
     },
     {
       "file": "functions/tests/conversions-parser.test.ts",
@@ -8017,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 53
+      "loc": 55
     },
     {
       "file": "functions/tests/fit-distribution.test.ts",
@@ -8612,7 +8619,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 112
+      "loc": 141
     },
     {
       "file": "functions/tests/inference-extra.test.ts",
@@ -8914,6 +8921,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 27
+    },
+    {
+      "file": "functions/tests/remez-pm.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 96
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",
