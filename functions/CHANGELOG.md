@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-functions
 
+## 0.54.0
+
+### Minor Changes
+
+- Numerics: `solveDAE` — semi-explicit index-1 differential-algebraic equation solver.
+
+  New `solveDAE(f, g, tspan, y0, z0?, options?)` solves `y' = f(t,y,z)`, `0 = g(t,y,z)` (index-1 ⟺ `∂g/∂z`
+  nonsingular) via variable-order (1–2) variable-step BDF: each step solves the coupled nonlinear system (the
+  BDF equation for `y` and `g=0`) by Newton on the block Jacobian, LU-solved through the matrix primitive.
+  Consistent `z0` is Newton-refined onto `g(t0,y0,z0)=0` (or solved from scratch when omitted). A higher-index
+  input (singular `∂g/∂z`) is detected at initialization and throws, rather than silently integrating to
+  garbage. Verified (scipy has no DAE solver — implementation-independent oracles): manufactured/closed-form
+  max abs error 2.35e-7; the **constraint residual `|g|` stays ≤8.9e-16** across the trajectory (the defining
+  DAE invariant — the algebraic block is solved exactly each step); reduce-to-ODE cross-check vs RK4 2.1e-7.
+
 ## 0.53.0
 
 ### Minor Changes

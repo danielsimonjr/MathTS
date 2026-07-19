@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-statistics",
-  "version": "0.3.37",
+  "version": "0.3.38",
   "description": "Statistics & probability for MathTS — descriptive stats, distributions, hypothesis tests, and combinatorics, every function externally oracle-pinned (SciPy/NumPy/closed-form)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "^0.53.0",
+    "@danielsimonjr/mathts-functions": "^0.54.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
