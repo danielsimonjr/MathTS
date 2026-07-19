@@ -506,14 +506,17 @@ export { polylog, struveH, struveL, kelvinBer, kelvinBei, barnesG } from './spec
 
 // Advanced niche special functions — the Riemann–Siegel Z-function, the Lerch
 // transcendent Φ(z,s,a) (|z| < 1 series), the parabolic-cylinder function
-// D_ν(x), and the regular Coulomb wave function F_L(η,ρ).
+// D_ν(x), and the regular/irregular Coulomb wave functions F_L/G_L(η,ρ).
 export {
   siegelZ,
   riemannSiegelZ,
   lerchPhi,
   parabolicCylinderD,
   coulombF,
+  coulombG,
+  coulombFG,
 } from './special/wave-functions.js';
+export type { CoulombFG } from './special/wave-functions.js';
 
 // Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
 // single-source Bellman-Ford (negative-weight/cycle-aware), and

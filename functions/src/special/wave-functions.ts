@@ -44,6 +44,19 @@ function cInv(a: Cx): Cx {
   return { re: a.re / d, im: -a.im / d };
 }
 
+function cAdd(a: Cx, b: Cx): Cx {
+  return { re: a.re + b.re, im: a.im + b.im };
+}
+
+function cDiv(a: Cx, b: Cx): Cx {
+  return cMul(a, cInv(b));
+}
+
+/** Complex modulus |a|. */
+function cAbs(a: Cx): f64 {
+  return Math.hypot(a.re, a.im);
+}
+
 /** Complex natural logarithm (principal branch). */
 function cLog(a: Cx): Cx {
   return { re: 0.5 * Math.log(a.re * a.re + a.im * a.im), im: Math.atan2(a.im, a.re) };
@@ -317,9 +330,8 @@ function coulombC(L: f64, eta: f64): f64 {
  *
  * The series is entire in ρ, so this converges for all ρ ≥ 0 (accuracy is best
  * for small-to-moderate ρ before large-argument cancellation sets in). The
- * *irregular* companion G_L is intentionally not implemented here — it requires
- * a numerically-delicate asymptotic/continued-fraction treatment (see the
- * module test and CHANGELOG for the surfaced design).
+ * *irregular* companion G_L is provided by {@link coulombG} / {@link coulombFG}
+ * via Steed's continued-fraction method.
  *
  * Verified against `mpmath.coulombf` (dps=30) to relative error < 1e-6 (in
  * practice < 1e-9 away from zeros) for L ∈ {0,1,2,3}, |η| ≤ 5, ρ ≤ 10.
@@ -360,4 +372,174 @@ export function coulombF(L: f64, eta: f64, rho: f64): f64 {
     if (k > 2 && term !== 0 && Math.abs(term) < Math.abs(sum) * RELTOL) break;
   }
   return coulombC(L, eta) * Math.pow(rho, L + 1) * sum;
+}
+
+// =============================================================================
+// Irregular Coulomb wave function G_L(eta, rho) — Steed's method
+// =============================================================================
+
+/** Hard cap on continued-fraction iterations (Lentz). */
+const CF_MAX_ITERS = 200000;
+/** Relative convergence tolerance for the Lentz continued fractions. */
+const CF_TOL = 1e-15;
+/**
+ * Modified-Lentz floor (Numerical Recipes' FPMIN). Must stay well above √MIN so
+ * that the hand-rolled complex reciprocal `re² + im²` does not underflow to 0
+ * (which would divide by zero); 1e-30 squared is 1e-60, safely representable.
+ */
+const CF_TINY = 1e-30;
+
+/**
+ * CF1 (DLMF 33.8.1): the continued fraction for u = F'_L/F_L,
+ *   u = S_{L+1} − R²_{L+1}/(T_{L+1} − R²_{L+2}/(T_{L+2} − ⋯)),
+ * with S_ℓ = ℓ/ρ + η/ℓ, R²_ℓ = 1 + η²/ℓ², T_ℓ = S_ℓ + S_{ℓ+1} (DLMF 33.4).
+ * Converges for all finite ρ > 0. Evaluated by the modified Lentz algorithm.
+ */
+function coulombCF1(L: f64, eta: f64, rho: f64): f64 {
+  const S = (l: number): number => l / rho + eta / l;
+  const R2 = (l: number): number => 1 + (eta * eta) / (l * l);
+  const T = (l: number): number => S(l) + S(l + 1);
+
+  const b0 = S(L + 1);
+  let f = b0 !== 0 ? b0 : CF_TINY;
+  let C = f;
+  let D = 0;
+  for (let n = 1; n <= CF_MAX_ITERS; n++) {
+    const an = -R2(L + n);
+    const bn = T(L + n);
+    D = bn + an * D;
+    if (Math.abs(D) < CF_TINY) D = CF_TINY;
+    C = bn + an / C;
+    if (Math.abs(C) < CF_TINY) C = CF_TINY;
+    D = 1 / D;
+    const delta = C * D;
+    f *= delta;
+    if (Math.abs(delta - 1) < CF_TOL) break;
+  }
+  return f;
+}
+
+/**
+ * CF2 (DLMF 33.8.2–33.8.3): the complex continued fraction for the logarithmic
+ * derivative of the outgoing Coulomb function H⁺ = G + iF,
+ *   p + iq = (H⁺)'/H⁺ = c + (i/ρ) · ab/(d₁ + (a+1)(b+1)/(d₂ + ⋯)),
+ * with a = 1 + L + iη, b = −L + iη, c = i(1 − η/ρ), dₖ = 2(ρ − η + k·i).
+ * Converges for ρ above the turning point; slow/imprecise far below it.
+ * Evaluated by the complex modified Lentz algorithm.
+ */
+function coulombCF2(L: f64, eta: f64, rho: f64): Cx {
+  const a: Cx = { re: 1 + L, im: eta };
+  const b: Cx = { re: -L, im: eta };
+  const c: Cx = { re: 0, im: 1 - eta / rho };
+
+  let f: Cx = { re: CF_TINY, im: 0 };
+  let C: Cx = f;
+  let D: Cx = { re: 0, im: 0 };
+  for (let n = 1; n <= CF_MAX_ITERS; n++) {
+    // aₙ = (a + n−1)(b + n−1), dₙ = 2(ρ − η + n·i)
+    const an = cMul({ re: a.re + (n - 1), im: a.im }, { re: b.re + (n - 1), im: b.im });
+    const dn: Cx = { re: 2 * (rho - eta), im: 2 * n };
+    D = cAdd(dn, cMul(an, D));
+    if (cAbs(D) < CF_TINY) D = { re: CF_TINY, im: 0 };
+    C = cAdd(dn, cDiv(an, C));
+    if (cAbs(C) < CF_TINY) C = { re: CF_TINY, im: 0 };
+    D = cInv(D);
+    const delta = cMul(C, D);
+    f = cMul(f, delta);
+    if (cAbs({ re: delta.re - 1, im: delta.im }) < CF_TOL) break;
+  }
+  // p + iq = c + (i/ρ) · f
+  const iOverRho: Cx = { re: 0, im: 1 / rho };
+  return cAdd(c, cMul(iOverRho, f));
+}
+
+/** The four Coulomb radial functions at a point: F, F′, G, G′. */
+export interface CoulombFG {
+  /** Regular function F_L(η, ρ). */
+  F: f64;
+  /** Derivative F′_L(η, ρ) = dF/dρ. */
+  Fp: f64;
+  /** Irregular function G_L(η, ρ). */
+  G: f64;
+  /** Derivative G′_L(η, ρ) = dG/dρ. */
+  Gp: f64;
+}
+
+/**
+ * Core of Steed's method: recover {F, F′, G, G′} from CF1 (u = F′/F), CF2
+ * (p + iq), and the Wronskian F′G − FG′ = 1 (DLMF 33.8.4–33.8.5):
+ *   F  = ± ((u−p)²/q + q)^{−1/2},   F′ = u·F,
+ *   G  = (u−p)·F/q,                 G′ = (u·p − p² − q²)·F/q.
+ * The sign of F is taken from the ascending-series {@link coulombF} (reliable
+ * across the whole domain — only the sign is needed, not the magnitude).
+ */
+function coulombSteed(L: f64, eta: f64, rho: f64): CoulombFG {
+  if (rho <= 0) {
+    throw new Error('coulombG: rho must be > 0 (G is singular at the origin)');
+  }
+  if (L < 0) {
+    throw new Error('coulombG: L must be >= 0');
+  }
+
+  const sign = coulombF(L, eta, rho) >= 0 ? 1 : -1;
+  const u = coulombCF1(L, eta, rho);
+  const { re: p, im: q } = coulombCF2(L, eta, rho);
+
+  const F = sign / Math.sqrt(((u - p) * (u - p)) / q + q);
+  const Fp = u * F;
+  const G = ((u - p) * F) / q;
+  const Gp = ((u * p - p * p - q * q) * F) / q;
+  return { F, Fp, G, Gp };
+}
+
+/**
+ * Irregular Coulomb wave function G_L(η, ρ), the second (non-oscillatory-at-
+ * origin) solution of the Coulomb radial equation, computed by Steed's
+ * continued-fraction method (Barnett 1982): CF1 for F′/F (DLMF 33.8.1), CF2 for
+ * (G′+iF′)/(G+iF) (DLMF 33.8.2), then Steed recovery via the Wronskian
+ * F′G − FG′ = 1 (DLMF 33.8.4–33.8.5). The sign of the regular solution is taken
+ * from {@link coulombF}.
+ *
+ * Special case: G_0(0, ρ) = cos ρ.
+ *
+ * **Validated domain** (vs `mpmath.coulombg`, dps=30): for the turning point
+ * ρ_tp = η + √(η² + L(L+1)), accuracy is ~1e-12 at and above ρ_tp and stays
+ * below 1e-6 down to ρ ≈ 0.15·ρ_tp. CF2 degrades *far* below the turning point:
+ * for large positive η with ρ ≪ ρ_tp (e.g. η = 5, ρ ≤ 1) the relative error
+ * grows (up to ~1e-1 at L = 3, η = 5, ρ = 0.5). This is the well-known limit of
+ * Steed's method deep in the classically-forbidden region; such points are
+ * outside the validated domain. Verified to relative error < 1e-6 (in practice
+ * ≤ 3e-10) for L ∈ {0,1,2,3}, |η| ≤ 5, ρ ∈ {0.5,…,20} excluding that corner.
+ *
+ * @param L - Orbital angular momentum (real, `L >= 0`)
+ * @param eta - Sommerfeld parameter (real)
+ * @param rho - Radial variable (real, `rho > 0`)
+ * @returns G_L(η, ρ)
+ * @throws {Error} If `rho <= 0` or `L < 0`
+ *
+ * @example
+ * coulombG(0, 0, 1) // ~0.5403023059 (= cos 1)
+ */
+export function coulombG(L: f64, eta: f64, rho: f64): f64 {
+  return coulombSteed(L, eta, rho).G;
+}
+
+/**
+ * Both Coulomb wave functions and their derivatives at a point, returned
+ * together: `{ F, Fp, G, Gp }` = {F_L, F′_L, G_L, G′_L}(η, ρ). Computed by
+ * Steed's method in a single pass (see {@link coulombG}); the four values
+ * satisfy the Wronskian F′G − FG′ = 1 to machine precision by construction.
+ * The same validated domain as {@link coulombG} applies.
+ *
+ * @param L - Orbital angular momentum (real, `L >= 0`)
+ * @param eta - Sommerfeld parameter (real)
+ * @param rho - Radial variable (real, `rho > 0`)
+ * @returns `{ F, Fp, G, Gp }`
+ * @throws {Error} If `rho <= 0` or `L < 0`
+ *
+ * @example
+ * coulombFG(0, 0, 1) // { F: sin 1, Fp: cos 1, G: cos 1, Gp: -sin 1 }
+ */
+export function coulombFG(L: f64, eta: f64, rho: f64): CoulombFG {
+  return coulombSteed(L, eta, rho);
 }

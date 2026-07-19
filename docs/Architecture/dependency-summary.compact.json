@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1099, "e": 5631, "re": 2276 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1099, "e": 5636, "re": 2279 },
   "s": {
-    "loc": 188071,
+    "loc": 188256,
     "cls": 52,
-    "int": 487,
-    "fn": 1774,
+    "int": 488,
+    "fn": 1776,
     "tg": 156,
     "en": 0,
     "co": 1543,
-    "toi": 576
+    "toi": 577
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -952,7 +952,8 @@
         "gegenbauerC",
         "siegelZ",
         "riemannSiegelZ"
-      ]
+      ],
+      "int": ["CoulombFG"]
     },
     "functions/statistics": {
       "f": 14,
@@ -1822,7 +1823,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 123, "o": 0 },
+    { "p": "src/index.ts", "i": 124, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

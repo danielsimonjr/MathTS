@@ -528,14 +528,14 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
   `kelvinBei`, `barnesG` DONE 2026-07-16 (functions@0.42.0)** — mpmath dps=25-pinned, machine
   precision. ✅ **`siegelZ`/`riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF` DONE
   2026-07-19** (`functions/src/special/wave-functions.ts`, 45-test mpmath dps=30 oracle) — max rel
-  err siegelZ 4.3e-15 / lerchPhi 1.0e-14 / pcfd 6.4e-15 / coulombF 3.6e-13. **Surfaced (scoped
-  designs, not shipped):**
-  - **`coulombG` (irregular Coulomb wave):** the series path used by `coulombF` does not apply — G
-    needs (a) the asymptotic expansion in the amplitude/phase functions for ρ above the turning
-    point (`ρ > η + √(η²+L(L+1))`), and/or (b) a continued-fraction for the log-derivative
-    `f = F'/F` combined with the CF for `p + iq` (Barnett's method) to get G and G' from F, F'.
-    Oracle `mpmath.coulombg`; blast radius one new function + helpers in the same file, no public
-    surface change elsewhere. Tractable but a distinct numerical effort — schedule as its own task.
+  err siegelZ 4.3e-15 / lerchPhi 1.0e-14 / pcfd 6.4e-15 / coulombF 3.6e-13.
+  ✅ **`coulombG` (+ `coulombFG` bundle) DONE 2026-07-19** — Barnett/Steed continued fractions
+  (DLMF §33.8: CF1 for `F'/F`, complex CF2 for `p+iq`, Steed recovery via Wronskian `F'G−FG'=1`);
+  reuses `coulombF` for the regular-solution sign. mpmath dps=30 corpus (192 pts): Wronskian
+  residual ≤6.7e-16, and ≤6.9e-13 rel err at/above the turning point `ρ_tp = η+√(η²+L(L+1))`.
+  **Validated domain excludes** the deep-sub-turning-point corner (large +η, ρ≪ρ_tp, e.g. η=5, ρ≤1)
+  where CF2 degrades — documented in the docstring (Steed-method limit in the forbidden region).
+  **Surfaced (scoped designs, not shipped):**
   - **Mathieu (`ce_n`/`se_n`, characteristic values `a_n(q)`/`b_n(q)`):** the eigenvalue problem is
     the tractable entry — `a_n`/`b_n` are eigenvalues of the symmetric tridiagonal recurrence
     matrices for the Fourier coefficients (even/odd, cos/sin parity → 4 matrices); truncate at

@@ -5497,7 +5497,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 588
+      "loc": 591
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6533,7 +6533,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 364
+      "loc": 546
     },
     {
       "file": "functions/src/special/zeta.ts",
@@ -8444,7 +8444,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 160
+      "loc": 252
     },
     {
       "file": "functions/tests/gap-stats-breadth-oracle.test.ts",

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-19'
   totalFiles: 1099
   totalModules: 82
-  totalExports: 5631
+  totalExports: 5636
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8484,6 +8484,8 @@ modules:
             - lerchPhi
             - parabolicCylinderD
             - coulombF
+            - coulombG
+            - coulombFG
           reExport: true
         - file: ./graph/traversal-centrality.js
           imports:
@@ -8788,6 +8790,11 @@ modules:
         - file: ./numeric/gauss-nodes.js
           imports:
             - RootsLegendreResult
+          reExport: true
+          typeOnly: true
+        - file: ./special/wave-functions.js
+          imports:
+            - CoulombFG
           reExport: true
           typeOnly: true
         - file: ./graph/traversal-centrality.js
@@ -9103,6 +9110,8 @@ modules:
         - lerchPhi
         - parabolicCylinderD
         - coulombF
+        - coulombG
+        - coulombFG
         - bfs
         - dfs
         - floydWarshall
@@ -9219,6 +9228,7 @@ modules:
         - McNemarResult
         - CochranQResult
         - RootsLegendreResult
+        - CoulombFG
         - BellmanFordResult
         - MaxFlowResult
         - MinCutResult
@@ -9497,6 +9507,8 @@ modules:
         - lerchPhi
         - parabolicCylinderD
         - coulombF
+        - coulombG
+        - coulombFG
         - bfs
         - dfs
         - floydWarshall
@@ -9613,6 +9625,7 @@ modules:
         - McNemarResult
         - CochranQResult
         - RootsLegendreResult
+        - CoulombFG
         - BellmanFordResult
         - MaxFlowResult
         - MinCutResult
@@ -15742,12 +15755,18 @@ modules:
         - lerchPhi
         - parabolicCylinderD
         - coulombF
+        - coulombG
+        - coulombFG
+      interfaces:
+        - CoulombFG
       functions:
         - siegelZ
         - riemannSiegelZ
         - lerchPhi
         - parabolicCylinderD
         - coulombF
+        - coulombG
+        - coulombFG
     functions/src/special/zeta.ts:
       description: Compute the Riemann Zeta function of a value using an infinite series for
       externalDependencies: []
@@ -36039,16 +36058,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1099
   totalModules: 82
-  totalLinesOfCode: 188071
-  totalExports: 5631
+  totalLinesOfCode: 188256
+  totalExports: 5636
   totalClasses: 52
-  totalInterfaces: 487
-  totalFunctions: 1774
+  totalInterfaces: 488
+  totalFunctions: 1776
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2276
-  totalTypeOnlyImports: 576
+  totalReExports: 2279
+  totalTypeOnlyImports: 577
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

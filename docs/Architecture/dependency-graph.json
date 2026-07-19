@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-19",
     "totalFiles": 1099,
     "totalModules": 82,
-    "totalExports": 5631
+    "totalExports": 5636
   },
   "entryPoints": [
     {
@@ -9019,7 +9019,15 @@
           },
           {
             "file": "./special/wave-functions.js",
-            "imports": ["siegelZ", "riemannSiegelZ", "lerchPhi", "parabolicCylinderD", "coulombF"],
+            "imports": [
+              "siegelZ",
+              "riemannSiegelZ",
+              "lerchPhi",
+              "parabolicCylinderD",
+              "coulombF",
+              "coulombG",
+              "coulombFG"
+            ],
             "reExport": true
           },
           {
@@ -9346,6 +9354,12 @@
             "typeOnly": true
           },
           {
+            "file": "./special/wave-functions.js",
+            "imports": ["CoulombFG"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./graph/traversal-centrality.js",
             "imports": ["BellmanFordResult"],
             "reExport": true,
@@ -9656,6 +9670,8 @@
           "lerchPhi",
           "parabolicCylinderD",
           "coulombF",
+          "coulombG",
+          "coulombFG",
           "bfs",
           "dfs",
           "floydWarshall",
@@ -9772,6 +9788,7 @@
           "McNemarResult",
           "CochranQResult",
           "RootsLegendreResult",
+          "CoulombFG",
           "BellmanFordResult",
           "MaxFlowResult",
           "MinCutResult",
@@ -10051,6 +10068,8 @@
           "lerchPhi",
           "parabolicCylinderD",
           "coulombF",
+          "coulombG",
+          "coulombFG",
           "bfs",
           "dfs",
           "floydWarshall",
@@ -10167,6 +10186,7 @@
           "McNemarResult",
           "CochranQResult",
           "RootsLegendreResult",
+          "CoulombFG",
           "BellmanFordResult",
           "MaxFlowResult",
           "MinCutResult",
@@ -16796,8 +16816,25 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["siegelZ", "riemannSiegelZ", "lerchPhi", "parabolicCylinderD", "coulombF"],
-        "functions": ["siegelZ", "riemannSiegelZ", "lerchPhi", "parabolicCylinderD", "coulombF"]
+        "exports": [
+          "siegelZ",
+          "riemannSiegelZ",
+          "lerchPhi",
+          "parabolicCylinderD",
+          "coulombF",
+          "coulombG",
+          "coulombFG"
+        ],
+        "interfaces": ["CoulombFG"],
+        "functions": [
+          "siegelZ",
+          "riemannSiegelZ",
+          "lerchPhi",
+          "parabolicCylinderD",
+          "coulombF",
+          "coulombG",
+          "coulombFG"
+        ]
       },
       "functions/src/special/zeta.ts": {
         "description": "Compute the Riemann Zeta function of a value using an infinite series for",
@@ -38313,16 +38350,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1099,
     "totalModules": 82,
-    "totalLinesOfCode": 188071,
-    "totalExports": 5631,
+    "totalLinesOfCode": 188256,
+    "totalExports": 5636,
     "totalClasses": 52,
-    "totalInterfaces": 487,
-    "totalFunctions": 1774,
+    "totalInterfaces": 488,
+    "totalFunctions": 1776,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2276,
-    "totalTypeOnlyImports": 576,
+    "totalReExports": 2279,
+    "totalTypeOnlyImports": 577,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

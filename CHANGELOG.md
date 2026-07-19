@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): irregular Coulomb wave function `coulombG` (+ `coulombFG` bundle)
+
+- **`coulombG(L, eta, rho)`** — the irregular Coulomb wave function `G_L(η, ρ)`, the second solution
+  of the Coulomb radial equation, completing the `coulombF` (regular) sibling. Implemented by
+  **Steed's continued-fraction method** (Barnett 1982 / DLMF §33.8): CF1 for `u = F′_L/F_L`
+  (DLMF 33.8.1, real modified-Lentz), CF2 for `(G′+iF′)/(G+iF) = p+iq` (DLMF 33.8.2, complex
+  modified-Lentz), then Steed recovery of `{F, F′, G, G′}` via the Wronskian `F′G − FG′ = 1`
+  (DLMF 33.8.4–5). The sign of the regular solution is taken from the existing `coulombF` series.
+- **`coulombFG(L, eta, rho)`** — returns the whole bundle `{ F, Fp, G, Gp }` in one pass (the four
+  values satisfy `F′G − FG′ = 1` to machine precision by construction).
+- Both live in `functions/src/special/wave-functions.ts`. Oracle-pinned vs `mpmath.coulombg`
+  (dps=30): over a 192-point corpus (L ∈ {0,1,2,3}, η ∈ {−5,…,5}, ρ ∈ {0.5,…,20}) the Wronskian
+  residual is **≤ 6.7e-16** and, at/above the turning point `ρ_tp = η + √(η²+L(L+1))`, the relative
+  error is **≤ 6.9e-13**. Accuracy holds below 1e-6 down to ρ ≈ 0.15·ρ_tp; **validated domain**
+  excludes the deep-sub-turning-point corner (large positive η with ρ ≪ ρ_tp, e.g. η = 5, ρ ≤ 1),
+  where CF2 degrades — the well-known limit of Steed's method deep in the classically-forbidden
+  region (documented in the `coulombG` docstring). Special value `G_0(0, ρ) = cos ρ` at machine
+  precision. `G` is singular at `ρ = 0`, so `coulombG`/`coulombFG` throw for `ρ ≤ 0`.
+
 ### feat(functions): stiff-ODE breadth — BDF + Radau IIA methods for `solveODE`, adaptive `solveODESystem`
 
 - **`solveODE(func, tspan, y0, { method: 'BDF' })`** — variable-order (1–5) variable-step backward

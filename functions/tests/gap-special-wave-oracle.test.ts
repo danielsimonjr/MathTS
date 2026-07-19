@@ -7,6 +7,8 @@ import {
   lerchPhi,
   parabolicCylinderD,
   coulombF,
+  coulombG,
+  coulombFG,
   polylog,
 } from '../dist/index.js';
 
@@ -154,6 +156,114 @@ describe('gap: advanced special functions oracle (siegelZ, lerchPhi, pcfd, coulo
       expect(coulombF(0, 1, 0)).toBe(0);
       expect(() => coulombF(0, 1, -1)).toThrow();
       expect(() => coulombF(-1, 1, 1)).toThrow();
+    });
+  });
+
+  describe('coulombG(L, eta, rho) — irregular Coulomb wave function', () => {
+    // mpmath.coulombg(L, eta, rho) at dps=30, within the validated domain
+    // (the prototype achieves max relerr 3.0e-10 here). The deep-sub-turning-
+    // point corner (eta=+5, rho<=1) is intentionally excluded — see the module
+    // docstring's "Validated domain" note. Turning point rho_tp = eta +
+    // sqrt(eta^2 + L(L+1)); above it, accuracy is ~1e-12.
+    const cases: Array<[number, number, number, number]> = [
+      [0, 0.0, 1.0, 0.5403023058681397174],
+      [0, 1.0, 2.0, 1.2757787847682765892],
+      [1, 0.5, 3.0, 0.51048479519450264344],
+      [0, -1.0, 5.0, 0.13959252776182731837],
+      [2, 1.0, 4.0, 1.0878725947264430947],
+      [1, 2.0, 2.0, 5.0697860051748305015],
+      [0, 0.5, 10.0, -0.41435106939020949432],
+      [3, 0.5, 6.0, -0.20469265386509986971],
+      [0, 5.0, 2.0, 869.69011404568501453],
+      [1, -2.0, 8.0, 0.074848731250989494215],
+      [2, -5.0, 20.0, -0.20249216737758908989],
+      [3, 5.0, 5.0, 52.053863367045054249],
+      [0, -5.0, 0.5, -0.37117109873324840776],
+      [2, 2.0, 1.0, 66.49640933288923121],
+      [3, -1.0, 10.0, 0.20906305496648189069],
+      [1, 5.0, 10.0, 1.7087195200549296957],
+      [0, 2.0, 20.0, 1.0133243842736106738],
+      [3, 0.0, 5.0, 0.077214549564971021933],
+    ];
+    for (const [L, eta, rho, expected] of cases) {
+      it(`matches mpmath.coulombg(${L}, ${eta}, ${rho})`, () => {
+        expect(relerr(coulombG(L, eta, rho) as number, expected)).toBeLessThan(1e-6);
+      });
+    }
+
+    it('special case: G_0(0, rho) = cos(rho)', () => {
+      for (const rho of [0.5, 1.0, 2.5, 5.0, 10.0, 20.0]) {
+        expect(relerr(coulombG(0, 0, rho) as number, Math.cos(rho))).toBeLessThan(1e-11);
+      }
+    });
+
+    it('throws for rho <= 0 (G is singular at the origin) or L < 0', () => {
+      expect(() => coulombG(0, 1, 0)).toThrow();
+      expect(() => coulombG(0, 1, -1)).toThrow();
+      expect(() => coulombG(-1, 1, 1)).toThrow();
+    });
+  });
+
+  describe('coulombFG(L, eta, rho) — {F, F′, G, G′} bundle + Wronskian', () => {
+    // (L, eta, rho, F, F', G, G') from mpmath (dps=30); coulombf/coulombg and
+    // numerical derivatives. The Wronskian F′G − FG′ = 1 is the implementation-
+    // independent invariant.
+    const cases: Array<[number, number, number, number, number, number, number]> = [
+      [
+        0, 0.0, 1.0, 0.84147098480789650665, 0.5403023058681397174, 0.5403023058681397174,
+        -0.84147098480789650665,
+      ],
+      [
+        0, 1.0, 2.0, 0.66178161383268129825, 0.48155745570994920276, 1.2757787847682765892,
+        -0.58272881309718474336,
+      ],
+      [
+        1, 0.5, 3.0, 1.0610932285426884082, 0.28210448030197968775, 0.51048479519450264344,
+        -0.80670569665703536417,
+      ],
+      [
+        0, -1.0, 5.0, 0.90941019611717468875, 0.17756961358270570346, 0.13959252776182731837,
+        -1.0723572409349213838,
+      ],
+      [
+        2, 1.0, 4.0, 0.86886725076727654993, 0.42697960762876238878, 1.0878725947264430947,
+        -0.61632037101263917547,
+      ],
+      [
+        1, 2.0, 2.0, 0.081169844041273191505, 0.12006773254416149324, 5.0697860051748305015,
+        -4.8205376577485665894,
+      ],
+    ];
+    for (const [L, eta, rho, F, Fp, G, Gp] of cases) {
+      it(`components + Wronskian at (${L}, ${eta}, ${rho})`, () => {
+        const r = coulombFG(L, eta, rho) as { F: number; Fp: number; G: number; Gp: number };
+        expect(relerr(r.F, F)).toBeLessThan(1e-6);
+        expect(relerr(r.Fp, Fp)).toBeLessThan(1e-6);
+        expect(relerr(r.G, G)).toBeLessThan(1e-6);
+        expect(relerr(r.Gp, Gp)).toBeLessThan(1e-6);
+        // Implementation-independent identity F′G − FG′ = 1.
+        expect(Math.abs(r.Fp * r.G - r.F * r.Gp - 1)).toBeLessThan(1e-10);
+      });
+    }
+
+    it('Wronskian F′G − FG′ = 1 holds across a wide corpus (< 1e-10)', () => {
+      const grid: Array<[number, number, number]> = [];
+      for (const L of [0, 1, 2, 3]) {
+        for (const eta of [-5, -2, -1, 0, 0.5, 1, 2, 5]) {
+          for (const rho of [0.5, 1, 2, 5, 10, 20]) {
+            grid.push([L, eta, rho]);
+          }
+        }
+      }
+      for (const [L, eta, rho] of grid) {
+        const r = coulombFG(L, eta, rho) as { F: number; Fp: number; G: number; Gp: number };
+        expect(Math.abs(r.Fp * r.G - r.F * r.Gp - 1)).toBeLessThan(1e-10);
+      }
+    });
+
+    it('G component of coulombFG equals coulombG', () => {
+      const r = coulombFG(1, 0.5, 3.0) as { G: number };
+      expect(r.G).toBe(coulombG(1, 0.5, 3.0) as number);
     });
   });
 });
