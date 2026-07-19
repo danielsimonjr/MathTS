@@ -1,5 +1,27 @@
 # @danielsimonjr/mathts-functions
 
+## 0.46.0
+
+### Minor Changes
+
+- Advanced linear algebra: sparse `svds`, ILU/IC preconditioners, O(k²) `minres`, and a `qz` throw fixed.
+
+  - **`svds(A, k)` — sparse/partial SVD** (new). Top-`k` singular triplets via Lanczos (`eigsh` on the smaller
+    normal operator `AᵀA`/`AAᵀ`, never formed), for large/sparse `A` where a full SVD is wasteful. Returns
+    **descending** singular values (opposite scipy's ascending — documented). Matches `scipy.sparse.linalg.svds`
+    to 7–8 digits; Eckart–Young rank-k truncation error pinned.
+  - **ILU(0) / IC(0) preconditioners** (new). `cg`/`gmres`/`bicgstab`/`minres` now accept
+    `preconditioner: 'ilu' | 'ic'` (plus exported `incompleteLU`/`incompleteCholesky`). Measured iteration
+    reductions on an ill-conditioned 2D-Poisson SPD system: IC(0)-CG 12 vs 22 iters, ILU(0)-BiCGSTAB 7 vs 15 —
+    same solution.
+  - **`minres` — O(k³) → O(k·n)**. Replaced the grow-and-re-solve tridiagonal least-squares with the classic
+    Paige–Saunders short recurrence (Lanczos + incremental Givens QR + 3-term `w`-recurrence): one matvec per
+    iteration, O(1) other work. Solutions unchanged (pinned vs `scipy.sparse.linalg.minres`).
+  - **`qz` no longer throws on all-real non-symmetric pencils.** Its homegrown single-shift `realSchur` failed to
+    converge (e.g. `A=[[1,2,0],[0,3,1],[1,0,4]]`, `B=diag(2,1,3)`); the Schur step now routes to the matrix
+    package's hardened `matrixSchur` (Hessenberg → Francis double-shift → exceptional-shift stall breaking).
+    `generalizedEig` was already scipy-correct (routes through the hardened `eig`) — verified, unchanged.
+
 ## 0.45.0
 
 ### Minor Changes
