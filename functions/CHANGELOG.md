@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-functions
 
+## 0.47.0
+
+### Minor Changes
+
+- Stats breadth: Gaussian-process regression + Dirichlet/Wishart sampling.
+
+  - **`gaussianProcessRegression` / `gpRegression`** (new). GP regression with RBF/squared-exponential and Matérn
+    3/2 & 5/2 kernels (`lengthScale`, `signalVariance`, `noise`); `.predict(Xstar)` returns posterior `{mean,
+variance, std}`, plus `logMarginalLikelihood`. Cholesky routes to the matrix-package primitive. Matches
+    `sklearn.gaussian_process.GaussianProcessRegressor` to machine precision (Δmean ~5e-16, Δstd ~2e-15).
+  - **`dirichletSample` / `dirichletPdf` / `wishartSample`** (new). Dirichlet via Gamma-normalization, Wishart via
+    Bartlett decomposition, seeded to match `mvnSample`. `dirichletPdf` matches `scipy.stats.dirichlet.pdf` to
+    ~1e-12; sample moments converge to the theoretical mean/covariance (`E[W]=df·scale`) within a couple of SE.
+    (The Marsaglia–Tsang gamma sampler was extracted to a shared util, removing two pre-existing in-file copies.)
+
 ## 0.46.0
 
 ### Minor Changes
