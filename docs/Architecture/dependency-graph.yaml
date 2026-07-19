@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1100
+  totalFiles: 1101
   totalModules: 82
-  totalExports: 5644
+  totalExports: 5652
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -13850,6 +13850,23 @@ modules:
         - newton
         - secant
         - halley
+    functions/src/numeric/solveDAE.ts:
+      description: Semi-explicit index-1 differential-algebraic equation (DAE) solver via BDF.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./solveODE.js
+          imports:
+            - _factorSolver
+      workspaceDependencies: []
+      exports:
+        - solveDAE
+      interfaces:
+        - DAEJacobianBlocks
+        - SolveDAEOptions
+        - DAESolution
+      functions:
+        - solveDAE
     functions/src/numeric/solveODE.ts:
       description: Butcher Tableau structure for Runge-Kutta methods
       externalDependencies: []
@@ -13883,11 +13900,13 @@ modules:
             - luSolve
       exports:
         - createSolveODE
+        - _factorSolver
         - rosenbrockSolve
         - rodasSolve
         - bdfSolve
         - radauSolve
       functions:
+        - _factorSolver
         - rosenbrockSolve
         - rodasSolve
         - bdfSolve
@@ -19526,6 +19545,15 @@ modules:
             - BoundaryDatum
             - ParabolicSource
           reExport: true
+        - file: ../numeric/solveDAE.js
+          imports:
+            - solveDAE
+            - SolveDAEOptions
+            - DAESolution
+            - DAEDifferential
+            - DAEConstraint
+            - DAEJacobianBlocks
+          reExport: true
       workspaceDependencies: []
       exports:
         - solveParabolicPDE
@@ -19535,6 +19563,12 @@ modules:
         - SpaceCoefficient
         - BoundaryDatum
         - ParabolicSource
+        - solveDAE
+        - SolveDAEOptions
+        - DAESolution
+        - DAEDifferential
+        - DAEConstraint
+        - DAEJacobianBlocks
         - findRoot
         - linsolve
         - minimize
@@ -19576,6 +19610,12 @@ modules:
         - SpaceCoefficient
         - BoundaryDatum
         - ParabolicSource
+        - solveDAE
+        - SolveDAEOptions
+        - DAESolution
+        - DAEDifferential
+        - DAEConstraint
+        - DAEJacobianBlocks
       interfaces:
         - FindRootOptions
         - MinimizeOptions
@@ -35241,6 +35281,7 @@ dependencyGraph:
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
+        - functions/src/numeric/solveDAE.ts
         - functions/src/numeric/solveODE.ts
         - functions/src/numeric/solveParabolicPDE.ts
         - functions/src/numeric/structured-solvers.ts
@@ -36099,17 +36140,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1100
+  totalTypeScriptFiles: 1101
   totalModules: 82
-  totalLinesOfCode: 188508
-  totalExports: 5644
+  totalLinesOfCode: 189053
+  totalExports: 5652
   totalClasses: 52
-  totalInterfaces: 491
-  totalFunctions: 1777
+  totalInterfaces: 494
+  totalFunctions: 1779
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2286
+  totalReExports: 2292
   totalTypeOnlyImports: 577
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

@@ -1350,6 +1350,7 @@
       "zpk2tfDocs"
     ],
     "functions": [
+      "_factorSolver",
       "_lgamma",
       "_switch",
       "abs",
@@ -2062,6 +2063,10 @@
       "curl",
       "curvefit",
       "cwt",
+      "DAEConstraint",
+      "DAEDifferential",
+      "DAEJacobianBlocks",
+      "DAESolution",
       "dagostinoTest",
       "dare",
       "dbscan",
@@ -3140,6 +3145,8 @@
       "solve",
       "solveBanded",
       "solveBVP",
+      "solveDAE",
+      "SolveDAEOptions",
       "solveODE",
       "solveODESystem",
       "solveParabolicPDE",

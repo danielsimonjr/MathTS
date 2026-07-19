@@ -180,7 +180,7 @@ const LU_ROUTE_THRESHOLD = 8;
  * test and rejects the step (h is then reduced); the matrix `lu()` throws "singular" instead, so
  * we catch it and return a NaN vector to preserve that step-rejection behaviour.
  */
-function _factorSolver(A: number[][], n: number): (b: number[]) => number[] {
+export function _factorSolver(A: number[][], n: number): (b: number[]) => number[] {
   if (n < LU_ROUTE_THRESHOLD) {
     return (b: number[]) => _inlineLuSolve(A, b);
   }

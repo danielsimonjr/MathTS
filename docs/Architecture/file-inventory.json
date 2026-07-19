@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1728,
+  "totalFiles": 1730,
   "byDisposition": {
-    "reachable": 1067,
+    "reachable": 1068,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 566,
+    "test": 567,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1103,
-    "tests": 566,
+    "src": 1104,
+    "tests": 567,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 719,
+    "@danielsimonjr/mathts-functions": 721,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -6032,6 +6032,13 @@
       "loc": 191
     },
     {
+      "file": "functions/src/numeric/solveDAE.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 540
+    },
+    {
       "file": "functions/src/numeric/solveODE.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6043,7 +6050,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 240
+      "loc": 235
     },
     {
       "file": "functions/src/numeric/structured-solvers.ts",
@@ -7282,7 +7289,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2572
+      "loc": 2582
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -7927,6 +7934,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 183
+    },
+    {
+      "file": "functions/tests/dae.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 215
     },
     {
       "file": "functions/tests/dbscan-knn.test.ts",

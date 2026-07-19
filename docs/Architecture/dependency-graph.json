@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-19",
-    "totalFiles": 1100,
+    "totalFiles": 1101,
     "totalModules": 82,
-    "totalExports": 5644
+    "totalExports": 5652
   },
   "entryPoints": [
     {
@@ -14842,6 +14842,21 @@
         "interfaces": ["NewtonOptions", "SecantOptions", "HalleyOptions"],
         "functions": ["newton", "secant", "halley"]
       },
+      "functions/src/numeric/solveDAE.ts": {
+        "description": "Semi-explicit index-1 differential-algebraic equation (DAE) solver via BDF.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./solveODE.js",
+            "imports": ["_factorSolver"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["solveDAE"],
+        "interfaces": ["DAEJacobianBlocks", "SolveDAEOptions", "DAESolution"],
+        "functions": ["solveDAE"]
+      },
       "functions/src/numeric/solveODE.ts": {
         "description": "Butcher Tableau structure for Runge-Kutta methods",
         "externalDependencies": [],
@@ -14872,8 +14887,15 @@
             "imports": ["DenseMatrix", "lu", "luSolve"]
           }
         ],
-        "exports": ["createSolveODE", "rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
-        "functions": ["rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
+        "exports": [
+          "createSolveODE",
+          "_factorSolver",
+          "rosenbrockSolve",
+          "rodasSolve",
+          "bdfSolve",
+          "radauSolve"
+        ],
+        "functions": ["_factorSolver", "rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
         "constants": ["createSolveODE"]
       },
       "functions/src/numeric/solveParabolicPDE.ts": {
@@ -21019,6 +21041,18 @@
               "ParabolicSource"
             ],
             "reExport": true
+          },
+          {
+            "file": "../numeric/solveDAE.js",
+            "imports": [
+              "solveDAE",
+              "SolveDAEOptions",
+              "DAESolution",
+              "DAEDifferential",
+              "DAEConstraint",
+              "DAEJacobianBlocks"
+            ],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -21030,6 +21064,12 @@
           "SpaceCoefficient",
           "BoundaryDatum",
           "ParabolicSource",
+          "solveDAE",
+          "SolveDAEOptions",
+          "DAESolution",
+          "DAEDifferential",
+          "DAEConstraint",
+          "DAEJacobianBlocks",
           "findRoot",
           "linsolve",
           "minimize",
@@ -21071,7 +21111,13 @@
           "ParabolicBC",
           "SpaceCoefficient",
           "BoundaryDatum",
-          "ParabolicSource"
+          "ParabolicSource",
+          "solveDAE",
+          "SolveDAEOptions",
+          "DAESolution",
+          "DAEDifferential",
+          "DAEConstraint",
+          "DAEJacobianBlocks"
         ],
         "interfaces": [
           "FindRootOptions",
@@ -37433,6 +37479,7 @@
           "functions/src/numeric/nnls.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
+          "functions/src/numeric/solveDAE.ts",
           "functions/src/numeric/solveODE.ts",
           "functions/src/numeric/solveParabolicPDE.ts",
           "functions/src/numeric/structured-solvers.ts",
@@ -38393,17 +38440,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1100,
+    "totalTypeScriptFiles": 1101,
     "totalModules": 82,
-    "totalLinesOfCode": 188508,
-    "totalExports": 5644,
+    "totalLinesOfCode": 189053,
+    "totalExports": 5652,
     "totalClasses": 52,
-    "totalInterfaces": 491,
-    "totalFunctions": 1777,
+    "totalInterfaces": 494,
+    "totalFunctions": 1779,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2286,
+    "totalReExports": 2292,
     "totalTypeOnlyImports": 577,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

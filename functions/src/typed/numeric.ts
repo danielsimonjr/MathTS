@@ -27,6 +27,16 @@ export {
   type ParabolicSource,
 } from '../numeric/solveParabolicPDE.js';
 
+// Semi-explicit index-1 DAE solver (BDF + coupled Newton on the algebraic constraint).
+export {
+  solveDAE,
+  type SolveDAEOptions,
+  type DAESolution,
+  type DAEDifferential,
+  type DAEConstraint,
+  type DAEJacobianBlocks,
+} from '../numeric/solveDAE.js';
+
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
 // =============================================================================

@@ -2040,6 +2040,7 @@
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
     "functions/src/numeric/solveODE.ts": [
       "functions/src/factories/index.ts",
+      "functions/src/numeric/solveDAE.ts",
       "functions/src/numeric/solveParabolicPDE.ts",
       "functions/src/typed/numeric.ts"
     ],
@@ -2274,6 +2275,7 @@
     ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
     "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",

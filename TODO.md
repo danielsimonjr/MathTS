@@ -501,7 +501,7 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
       stiff exact closed forms (e^-10, e^-1) to <1e-6. `solveODESystem` gained an **adaptive** embedded
       RK45 (Dormand-Prince) default path (`_adaptiveRK45System`); explicit `dt` still selects the legacy
       fixed-step RK4 (back-compat — BVP shooting driver unaffected). Pinned vs exact harmonic oscillator + scipy RK45 Lotka-Volterra (~1e-6).
-- [~] **SURFACED sub-projects (scoped — part 1 of 3 DONE this pass; DAE/DDE remain):**
+- [~] **SURFACED sub-projects (scoped — parts 1 & 2 of 3 DONE; DDE remains):**
   **(1) General 1-D parabolic PDE via MOL. ✅ DONE 2026-07-19 (`solveParabolicPDE`).** Solves
   `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` by method-of-lines (uniform grid, central 2nd/1st
   differences → stiff ODE system) integrated with the **new `bdfSolve`** (implicit → no CFL cap).
@@ -510,10 +510,15 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
   unchanged (its numerics are ADR-level). Oracle-pinned: exact heat relerr 1.27e-4 @ nx=81, O(h²)
   rate **2.000**; manufactured 1.19e-4; Neumann 1.27e-4; scipy `solve_ivp(BDF)` MOL cross-check
   ≤1.0e-12. 2-D/hyperbolic = further extensions.
-  **(2) DAE (index-1) via BDF.** Semi-explicit `M·y' = f(t,y)` / `0 = g(t,y)`. Design: BDF on the
-  differential block + Newton on the algebraic constraint (the `bdfSolve` Newton machinery extends
-  to a singular mass matrix). Oracle: scipy has no DAE, so pin vs Sundials IDA reference values or
-  exact constrained systems (pendulum-on-a-string index-1 reduction). Distinct sub-project.
+  **(2) DAE (index-1) via BDF. ✅ DONE 2026-07-19 (`solveDAE`).** Semi-explicit `y'=f(t,y,z)` /
+  `0=g(t,y,z)` (index-1 ⟺ `∂g/∂z` nonsingular). Variable-step, variable-order (1–2) BDF on the
+  differential block + **coupled** Newton solving the BDF equation AND the algebraic constraint
+  together each step (block Jacobian FD or analytic; LU via the shared `_factorSolver`); consistent
+  `z0` auto-solve; higher-index detected as singular `∂g/∂z`. Returns `{t, y[t], z[t]}`. Added as a
+  NEW public entry (`functions/src/numeric/solveDAE.ts`). Oracle-pinned (scipy has no DAE):
+  manufactured/closed-form max abs err 2.35e-7 @ tol1e-9; **constraint residual ≤8.9e-16 over the
+  whole trajectory**; reduce-to-ODE cross-check Δ2.13e-7; RC-circuit + vector (non-identity ∂g/∂z)
+  cases. `functions/tests/dae.test.ts` (11 cases). Higher-index/2-D = further extensions.
   **(3) DDE (delay ODEs).** `y'(t)=f(t,y(t),y(t−τ))`. Design: continuous extension (dense output)
   of an RK/BDF method + a history buffer; Bellen–Zennaro method-of-steps. Oracle: exact solutions
   of linear scalar DDEs (`y'=−y(t−τ)` characteristic roots) / Julia `DelayDiffEq` references.

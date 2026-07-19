@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): semi-explicit index-1 DAE solver `solveDAE` (BDF + coupled Newton)
+
+- **`solveDAE(f, g, tspan, y0, z0?, options?)`** — solves the semi-explicit **index-1**
+  differential-algebraic system `y' = f(t, y, z)` (differential `y`), `0 = g(t, y, z)` (algebraic
+  `z`) on `t ∈ [t0, T]`. "Index-1" means `∂g/∂z` is nonsingular. Method: a **variable-step,
+  variable-order (1–2) BDF** discretisation of `y'` (variable-step coefficients from the
+  Lagrange-basis derivative, so BDF1/BDF2 work on the non-uniform adaptive grid); each step solves
+  the **combined** nonlinear system — the BDF equation for `y` AND `g(t_{n+1}, y_{n+1}, z_{n+1}) = 0`
+  — for `(y_{n+1}, z_{n+1})` by **Newton**, with the block iteration matrix
+  `[[c₀I − ∂f/∂y, −∂f/∂z], [∂g/∂y, ∂g/∂z]]` (finite-differenced by default, or built from analytic
+  blocks via `options.jacobian`) LU-solved through the shared matrix-package factorisation
+  (`_factorSolver`, reused from `solveODE.ts`). Adaptive step size via a predictor/corrector local
+  error estimate. The initial `z0` is treated as a **guess** and Newton-refined onto the constraint
+  manifold `g(t0, y0, z0) = 0` (or solved from scratch when omitted). A **higher-index** input is
+  detected as a singular `∂g/∂z` and reported (it is not silently integrated to garbage). Returns
+  `{ t, y[t], z[t] }` (`y`/`z` unwrapped to scalars when the initial value was scalar). Plain-number
+  state only. Lives in `functions/src/numeric/solveDAE.ts`.
+- **Oracle-pinned** (scipy has no DAE solver, so every oracle is implementation-independent).
+  Manufactured coupled DAE `y' = z − 2y`, `0 = z − (t+y)` (reduces to `y' = t − y`,
+  `y = t − 1 + 2e^{−t}`): over `t ∈ [0,3]` at `tol=1e-9`, max abs error **2.35e-7** (both `y` and
+  `z`). **Constraint residual `|g(t,y,z)|` ≤ 8.9e-16 at every output step** (machine zero — the
+  defining DAE invariant; the algebraic block is solved exactly each step). Reduce-to-ODE
+  cross-check vs an independent RK4 integration of `y' = t − y`: Δ **2.13e-7**. Classic **RC-circuit**
+  index-1 DAE (`C·V' = i`, `i·R = Vs − V` → `V = 1 − e^{−t}`, `i = e^{−t}`), a **vector** system with
+  non-identity `∂g/∂z = diag(2,1)`, consistent-`z0` auto-solve, inconsistent-`z0` refinement,
+  analytic-vs-FD Jacobian agreement, and higher-index (singular `∂g/∂z`) detection all pinned. Tests
+  in `functions/tests/dae.test.ts` (11 cases).
+- Part 2 of the surfaced PDE/DAE/DDE sub-projects (part 1 was `solveParabolicPDE`; DDE remains).
+
 ### feat(functions): general 1-D parabolic PDE solver `solveParabolicPDE` (method-of-lines + BDF)
 
 - **`solveParabolicPDE({ diffusion, advection?, source?, x0, x1, T, nx, u0, bcLeft, bcRight, tol?, maxStep?, times? })`**
