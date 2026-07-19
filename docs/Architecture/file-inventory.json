@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1700,
+  "totalFiles": 1701,
   "byDisposition": {
     "reachable": 1055,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 550,
+    "test": 551,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1091,
-    "tests": 550,
+    "tests": 551,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 692,
+    "@danielsimonjr/mathts-functions": 693,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 91,
@@ -7065,7 +7065,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 313
+      "loc": 317
     },
     {
       "file": "functions/src/typed/algebra.ts",
@@ -8872,6 +8872,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 117
+    },
+    {
+      "file": "functions/tests/physical-constants-codata2022.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
     },
     {
       "file": "functions/tests/physical-constants.test.ts",

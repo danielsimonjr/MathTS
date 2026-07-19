@@ -25,7 +25,7 @@ describe('physical constants', () => {
   it('matches known SI values for unit constants', () => {
     const c = (u: unknown) => (u as { toNumeric(): number }).toNumeric();
     expect(c(planckConstant)).toBeCloseTo(6.62607015e-34, 44);
-    expect(c(electronMass)).toBeCloseTo(9.1093837015e-31, 41);
+    expect(c(electronMass)).toBeCloseTo(9.1093837139e-31, 41); // CODATA-2022
     expect(c(boltzmann)).toBeCloseTo(1.380649e-23, 29);
     // avogadro ~6.022e23 — compare on a relative basis
     expect(c(avogadro) / 6.02214076e23).toBeCloseTo(1, 6);
@@ -33,8 +33,8 @@ describe('physical constants', () => {
   });
 
   it('exposes dimensionless constants as plain numbers', () => {
-    expect(fineStructure).toBeCloseTo(0.0072973525693, 13);
+    expect(fineStructure).toBeCloseTo(0.0072973525643, 13); // CODATA-2022
     expect(efimovFactor).toBeCloseTo(22.7, 6);
-    expect(weakMixingAngle).toBeCloseTo(0.2229, 6);
+    expect(weakMixingAngle).toBeCloseTo(0.22305, 6); // CODATA-2022
   });
 });

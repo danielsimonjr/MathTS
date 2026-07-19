@@ -430,7 +430,10 @@ or a documented scope limit worth revisiting.
 - [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
   correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
   `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16
-  (functions@0.37.0). **Remaining:** `constants` are CODATA-2018 (one cycle behind scipy 2022).
+  (functions@0.37.0). ✅ **`constants` updated CODATA-2018 → CODATA-2022** (2026-07-18): 27 measured
+  constants (masses/α/permittivities/Planck-units/etc.) oracle-pinned to `scipy.constants`; the 5
+  SI-fixed constants (c/h/e/k/N_A) and constants derived purely from them left untouched; standing
+  oracle guard added (`functions/tests/physical-constants-codata2022.test.ts`).
 
 ### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
 

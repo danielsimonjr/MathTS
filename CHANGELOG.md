@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(core): update physical constants CODATA-2018 → CODATA-2022 (oracle-pinned to scipy.constants)
+
+- MathTS's physical `constants` (`functions/src/type/unit/physicalConstants.ts`) were CODATA-2018, one
+  cycle behind `scipy.constants` (CODATA-2022). Updated the **27 measured constants that genuinely
+  shifted** to their CODATA-2022 values, copied verbatim from `scipy.constants`:
+  `electronMass` 9.1093837015e-31 → 9.1093837139e-31, `protonMass` 1.67262192369e-27 → 1.67262192595e-27,
+  `neutronMass` 1.6749271613e-27 → 1.67492750056e-27, `deuteronMass` 3.3435830926e-27 → 3.3435837768e-27,
+  `atomicMass` 1.66053906660e-27 → 1.66053906892e-27, `fineStructure` 7.2973525693e-3 → 7.2973525643e-3,
+  `rydberg` 10973731.568160 → 10973731.568157, `bohrRadius` 5.29177210903e-11 → 5.29177210544e-11,
+  `bohrMagneton` 9.2740100783e-24 → 9.2740100657e-24, `nuclearMagneton` 5.0507837461e-27 → 5.0507837393e-27,
+  `hartreeEnergy` 4.3597447222071e-18 → 4.359744722206e-18, `classicalElectronRadius` 2.8179403262e-15 →
+  2.8179403205e-15, `thomsonCrossSection` 6.6524587321e-29 → 6.6524587051e-29, `quantumOfCirculation`
+  3.6369475516e-4 → 3.6369475467e-4, `magneticConstant` 1.25663706212e-6 → 1.25663706127e-6,
+  `electricConstant` 8.8541878128e-12 → 8.8541878188e-12, `vacuumImpedance` 376.730313667 → 376.730313412,
+  `coulomb`/`coulombConstant` 8.987551792261171e9 → 8.987551786170797e9, `planckCharge` 1.87554603778e-18 →
+  1.8755460384151476e-18, `sackurTetrode` -1.16487052358 → -1.16487052149, `weakMixingAngle` 0.2229 →
+  0.22305, `molarMass` 0.99999999965e-3 → 1.00000000105e-3, `molarMassC12` 11.9999999958e-3 →
+  12.0000000126e-3, `planckMass` 2.176435e-8 → 2.176434e-8, `planckTime` 5.391245e-44 → 5.391247e-44,
+  `planckTemperature` 1.416785e32 → 1.416784e32. Also refined `wienDisplacement` and `stefanBoltzmann`
+  literals to scipy's fuller precision (both SI-exact — value physically unchanged between cycles).
+- The **5 SI-fixed constants** (`speedOfLight`, `planckConstant`, `elementaryCharge`, `boltzmann`,
+  `avogadro`) and every constant derived purely from them (`faraday`, `gasConstant`, `klitzing`,
+  `josephson`, `conductanceQuantum`, `magneticFluxQuantum`, `molarPlanckConstant`, `firstRadiation`,
+  `secondRadiation`, `loschmidt`, `molarVolume`, `reducedPlanckConstant`, …) were left **untouched** —
+  identical in CODATA-2018 and 2022. `gravitationConstant` and `fermiCoupling` also unchanged in 2022.
+- Added a standing oracle guard `functions/tests/physical-constants-codata2022.test.ts` that pins every
+  exported physical constant to its `scipy.constants` CODATA-2022 value (relative tolerance 1e-13), so
+  they can no longer silently drift a CODATA cycle behind. Updated the 3 stale expectations in
+  `functions/tests/physical-constants.test.ts` to CODATA-2022.
+
 ### fix(tools): wire the file-census gate into pre-commit + regenerate on any `.ts` change
 
 - The file census (`file-inventory.json`) tracks EVERY tracked `.ts`, but `docs:deps` (which rebuilds it)
