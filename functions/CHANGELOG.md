@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-functions
 
+## 0.52.0
+
+### Minor Changes
+
+- Special functions: irregular Coulomb wave function `coulombG` (+ `coulombFG` bundle).
+
+  `coulombG(L, eta, rho)` — the irregular Coulomb wave function, via the Barnett/Steed method (DLMF §33.8:
+  CF1 for `F'/F`, complex CF2 for `(G'+iF')/(G+iF)`, Steed recovery through the Wronskian `F'G−FG'=1`), with the
+  CF2 coefficients evaluated at the target `L` (no recurrence). `coulombFG(L, eta, rho)` returns `{F, Fp, G, Gp}`
+  in one pass. vs `mpmath.coulombg`: max G relerr **6.9e-13** at/above the turning point (`G₀(0,ρ)=cos ρ` to
+  machine precision); Wronskian residual **≤6.7e-16** across the corpus. Validated for `ρ ≳ 0.15·ρ_tp`; the
+  deep-sub-turning-point corner (large positive η, ρ≪ρ_tp) is the known Steed-method limit and is documented as
+  excluded rather than returning a silently-wrong value. `ρ≤0` throws.
+
 ## 0.51.0
 
 ### Minor Changes
