@@ -382,7 +382,10 @@ or a documented scope limit worth revisiting.
   (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
   condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.
   **Remaining:** `generalizedEig` QZ-hardening (Francis double-shift); ~~sparse `svds` (Lanczos)~~;
-  preconditioners beyond Jacobi (ILU/IC); ~~`minres` optimal Givens (O(k³)→O(k²))~~.
+  ~~preconditioners beyond Jacobi (ILU/IC)~~; ~~`minres` optimal Givens (O(k³)→O(k²))~~.
+  - [x] ✅ **ILU(0)/IC(0) preconditioners — DONE 2026-07-18.** `cg`/`gmres`/`bicgstab`/`minres` accept
+        `preconditioner: 'ilu'|'ic'`; `incompleteLU`/`incompleteCholesky` exported. Factor-on-pattern +
+        iteration-reduction oracles (IC-CG 12 vs 22; ILU-BiCGSTAB 7 vs 15). `functions/src/numeric/krylov.ts`.
   - [x] ✅ **`minres` O(k³)→O(k·n) — DONE 2026-07-18.** Rewrote to Paige–Saunders short recurrence
         (Lanczos + incremental Givens QR + 3-term `w`-recurrence); no growing least-squares. One matvec
         per iteration (structural test), scipy-pinned solution/residual. `functions/src/numeric/krylov.ts`.

@@ -189,7 +189,7 @@ export type { FsolveOptions } from './numeric/fsolve.js';
 // symmetric systems, gmres/bicgstab for general nonsymmetric ones) for the
 // large sparse systems a dense factorization can't handle. Each accepts a
 // dense matrix or a matvec callback plus an optional Jacobi preconditioner.
-export { cg, minres, gmres, bicgstab } from './numeric/krylov.js';
+export { cg, minres, gmres, bicgstab, incompleteLU, incompleteCholesky } from './numeric/krylov.js';
 export type {
   LinearOperatorInput,
   Preconditioner,

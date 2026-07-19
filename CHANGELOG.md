@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): ILU(0) / IC(0) preconditioners for the Krylov solvers
+
+- The `cg`/`gmres`/`bicgstab`/`minres` solvers now accept `preconditioner: 'ilu'` (ILU(0) — incomplete
+  LU with zero fill on `A`'s sparsity pattern, for general `A`) and `'ic'` (IC(0) — incomplete
+  Cholesky, for SPD `A`), alongside the existing `'jacobi'` and custom-callback options. Like
+  `'jacobi'`, both read `A`'s entries and so require a dense matrix (they throw a clear error for a
+  matvec-only operator).
+- The factorizations are also exported directly: `incompleteLU(A) → { L, U }` and
+  `incompleteCholesky(A) → { L }`, each reproducing `A` on its sparsity pattern (dropping fill outside
+  it). `incompleteCholesky` throws on a non-positive pivot (SPD precondition failed).
+- Verified (`functions/tests/krylov-preconditioners.test.ts`): factor correctness `(L·U)ᵢⱼ = Aᵢⱼ` /
+  `(L·Lᵀ)ᵢⱼ = Aᵢⱼ` on the pattern (2D Poisson, which has fill-in) and exactly for a tridiagonal (no
+  fill); on the ill-conditioned Poisson SPD system IC(0)-CG converges in 12 iterations vs 22
+  unpreconditioned/Jacobi, and ILU(0)-BiCGSTAB in 7 vs 15 — same solution (residual pinned < 1e-7).
+
 ### feat(functions): `svds` — sparse / partial SVD (top-`k` singular triplets via Lanczos)
 
 - New `svds(A, k)` returns the `k` **largest** singular values and their left/right singular vectors

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-19",
     "totalFiles": 1090,
     "totalModules": 82,
-    "totalExports": 5583
+    "totalExports": 5587
   },
   "entryPoints": [
     {
@@ -8747,7 +8747,7 @@
           },
           {
             "file": "./numeric/krylov.js",
-            "imports": ["cg", "minres", "gmres", "bicgstab"],
+            "imports": ["cg", "minres", "gmres", "bicgstab", "incompleteLU", "incompleteCholesky"],
             "reExport": true
           },
           {
@@ -9416,6 +9416,8 @@
           "minres",
           "gmres",
           "bicgstab",
+          "incompleteLU",
+          "incompleteCholesky",
           "eigsh",
           "svds",
           "thomasSolve",
@@ -9784,6 +9786,8 @@
           "minres",
           "gmres",
           "bicgstab",
+          "incompleteLU",
+          "incompleteCholesky",
           "eigsh",
           "svds",
           "thomasSolve",
@@ -14517,9 +14521,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["cg", "minres", "gmres", "bicgstab"],
+        "exports": ["incompleteLU", "incompleteCholesky", "cg", "minres", "gmres", "bicgstab"],
         "interfaces": ["KrylovOptions", "GmresOptions", "KrylovResult"],
-        "functions": ["cg", "minres", "gmres", "bicgstab"]
+        "functions": ["incompleteLU", "incompleteCholesky", "cg", "minres", "gmres", "bicgstab"]
       },
       "functions/src/numeric/matrix-functions.ts": {
         "description": "Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.",
@@ -38007,15 +38011,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1090,
     "totalModules": 82,
-    "totalLinesOfCode": 185741,
-    "totalExports": 5583,
+    "totalLinesOfCode": 185876,
+    "totalExports": 5587,
     "totalClasses": 52,
     "totalInterfaces": 478,
-    "totalFunctions": 1754,
+    "totalFunctions": 1756,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2249,
+    "totalReExports": 2251,
     "totalTypeOnlyImports": 569,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

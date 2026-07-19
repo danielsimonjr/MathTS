@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1707,
+  "totalFiles": 1708,
   "byDisposition": {
     "reachable": 1057,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 555,
+    "test": 556,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1093,
-    "tests": 555,
+    "tests": 556,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 698,
+    "@danielsimonjr/mathts-functions": 699,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5952,7 +5952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 469
+      "loc": 602
     },
     {
       "file": "functions/src/numeric/matrix-functions.ts",
@@ -6015,7 +6015,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 127
+      "loc": 129
     },
     {
       "file": "functions/src/optimization-extra.ts",
@@ -8713,6 +8713,13 @@
       "loc": 22
     },
     {
+      "file": "functions/tests/krylov-preconditioners.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 130
+    },
+    {
       "file": "functions/tests/krylov.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9102,7 +9109,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 114
+      "loc": 122
     },
     {
       "file": "functions/tests/taylor-exact.test.ts",

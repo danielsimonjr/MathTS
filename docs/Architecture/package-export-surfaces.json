@@ -2434,6 +2434,8 @@
       "implicitDiff",
       "importFactory",
       "improveErrorMessage",
+      "incompleteCholesky",
+      "incompleteLU",
       "index",
       "IndexError",
       "indexFn",

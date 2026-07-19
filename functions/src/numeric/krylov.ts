@@ -17,8 +17,15 @@
 /** A linear operator: either a dense matrix or a matvec callback `x -> A x`. */
 export type LinearOperatorInput = number[][] | ((x: number[]) => number[]);
 
-/** Preconditioner: `'jacobi'` (diagonal, dense-matrix only) or a custom `M⁻¹` callback. */
-export type Preconditioner = 'jacobi' | ((r: number[]) => number[]);
+/**
+ * Preconditioner. The three built-ins require a dense matrix (they read `A`'s
+ * entries): `'jacobi'` (diagonal `M⁻¹ = diag(1/Aᵢᵢ)`), `'ilu'` (ILU(0) —
+ * incomplete LU with zero fill on `A`'s sparsity pattern, for general `A`),
+ * `'ic'` (IC(0) — incomplete Cholesky, for symmetric positive-definite `A`).
+ * Or pass a custom `M⁻¹` callback (the only option that works with a
+ * matvec-only operator).
+ */
+export type Preconditioner = 'jacobi' | 'ilu' | 'ic' | ((r: number[]) => number[]);
 
 /** Common options accepted by every solver in this module. */
 export interface KrylovOptions {
@@ -110,12 +117,18 @@ function resolvePreconditioner(
 ): (r: number[]) => number[] {
   if (preconditioner === undefined) return (r: number[]) => r.slice();
   if (typeof preconditioner === 'function') return preconditioner;
-  // 'jacobi'
   if (!isDenseMatrix(a)) {
     throw new Error(
-      "krylov: 'jacobi' preconditioner requires a dense matrix (need the diagonal) — pass a custom preconditioner function when using a matvec operator"
+      `krylov: '${preconditioner}' preconditioner requires a dense matrix (it reads A's entries) — pass a custom preconditioner function when using a matvec operator`
     );
   }
+  if (preconditioner === 'jacobi') return makeJacobi(a);
+  if (preconditioner === 'ilu') return makeILU0(a);
+  return makeIC0(a); // 'ic'
+}
+
+/** Jacobi (diagonal) preconditioner `M⁻¹ = diag(1/Aᵢᵢ)`. */
+function makeJacobi(a: number[][]): (r: number[]) => number[] {
   const n = a.length;
   const invDiag = new Array<number>(n);
   for (let i = 0; i < n; i++) {
@@ -128,6 +141,126 @@ function resolvePreconditioner(
     invDiag[i] = 1 / d;
   }
   return (r: number[]) => r.map((v, i) => v * invDiag[i]);
+}
+
+/** `true` where `A` is nonzero, always including the diagonal — the pattern ILU(0)/IC(0) preserve. */
+function sparsityPattern(a: number[][]): boolean[][] {
+  return a.map((row, i) => row.map((v, j) => v !== 0 || i === j));
+}
+
+/**
+ * ILU(0) — incomplete LU factorization with zero fill. Returns unit-lower `L`
+ * and upper `U` (dense, with zeros outside `A`'s sparsity pattern) such that
+ * `(L·U)ᵢⱼ = Aᵢⱼ` on that pattern, dropping any fill that would arise outside
+ * it. The classic preconditioner for iterative solvers on general sparse `A`.
+ *
+ * @example
+ * incompleteLU([[4,1,0],[1,4,1],[0,1,4]]) // tridiagonal → exact LU (no fill)
+ */
+export function incompleteLU(a: readonly number[][]): { L: number[][]; U: number[][] } {
+  const n = a.length;
+  const pattern = sparsityPattern(a as number[][]);
+  const LU = (a as number[][]).map((row) => row.slice());
+  for (let i = 0; i < n; i++) {
+    for (let k = 0; k < i; k++) {
+      if (!pattern[i][k]) continue;
+      if (Math.abs(LU[k][k]) < 1e-300) {
+        throw new Error(`incompleteLU: ILU(0) zero pivot at U[${k}][${k}] — matrix needs pivoting`);
+      }
+      const lik = LU[i][k] / LU[k][k];
+      LU[i][k] = lik;
+      for (let j = k + 1; j < n; j++) {
+        if (!pattern[i][j]) continue;
+        LU[i][j] -= lik * LU[k][j];
+      }
+    }
+    if (Math.abs(LU[i][i]) < 1e-300) {
+      throw new Error(`incompleteLU: ILU(0) zero pivot at U[${i}][${i}] — matrix needs pivoting`);
+    }
+  }
+  const L: number[][] = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (j < i ? LU[i][j] : j === i ? 1 : 0))
+  );
+  const U: number[][] = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (j >= i ? LU[i][j] : 0))
+  );
+  return { L, U };
+}
+
+/**
+ * IC(0) — incomplete Cholesky factorization with zero fill, for symmetric
+ * positive-definite `A`. Returns lower-triangular `L` on `A`'s sparsity pattern
+ * with `(L·Lᵀ)ᵢⱼ = Aᵢⱼ` there. Throws on a non-positive pivot (the `A`-is-SPD
+ * precondition failed).
+ *
+ * @example
+ * incompleteCholesky([[4,1,0],[1,4,1],[0,1,4]]) // tridiagonal → exact Cholesky
+ */
+export function incompleteCholesky(a: readonly number[][]): { L: number[][] } {
+  const n = a.length;
+  const src = a as number[][];
+  const pattern = sparsityPattern(src);
+  const L: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      if (!pattern[i][j]) continue;
+      let sum = src[i][j];
+      for (let k = 0; k < j; k++) sum -= L[i][k] * L[j][k];
+      if (i === j) {
+        if (sum <= 0) {
+          throw new Error(
+            `incompleteCholesky: IC(0) requires a symmetric positive-definite matrix (non-positive pivot ${sum} at ${i}) — use ILU(0) for indefinite/nonsymmetric A`
+          );
+        }
+        L[i][i] = Math.sqrt(sum);
+      } else {
+        L[i][j] = sum / L[j][j];
+      }
+    }
+  }
+  return { L };
+}
+
+/** ILU(0) preconditioner apply `M⁻¹r = U⁻¹(L⁻¹r)` (unit-lower `L`, upper `U`). */
+function makeILU0(a: number[][]): (r: number[]) => number[] {
+  const { L, U } = incompleteLU(a);
+  const n = a.length;
+  return (r: number[]) => {
+    const y = new Array<number>(n).fill(0);
+    for (let i = 0; i < n; i++) {
+      let s = r[i];
+      for (let j = 0; j < i; j++) s -= L[i][j] * y[j];
+      y[i] = s; // L has unit diagonal
+    }
+    const x = new Array<number>(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+      let s = y[i];
+      for (let j = i + 1; j < n; j++) s -= U[i][j] * x[j];
+      x[i] = s / U[i][i];
+    }
+    return x;
+  };
+}
+
+/** IC(0) preconditioner apply `M⁻¹r = L⁻ᵀ(L⁻¹r)` (lower `L`, `M = L·Lᵀ`). */
+function makeIC0(a: number[][]): (r: number[]) => number[] {
+  const { L } = incompleteCholesky(a);
+  const n = a.length;
+  return (r: number[]) => {
+    const y = new Array<number>(n).fill(0);
+    for (let i = 0; i < n; i++) {
+      let s = r[i];
+      for (let j = 0; j < i; j++) s -= L[i][j] * y[j];
+      y[i] = s / L[i][i];
+    }
+    const x = new Array<number>(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+      let s = y[i];
+      for (let j = i + 1; j < n; j++) s -= L[j][i] * x[j];
+      x[i] = s / L[i][i];
+    }
+    return x;
+  };
 }
 
 function defaultMaxIter(n: number): number {

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-19'
   totalFiles: 1090
   totalModules: 82
-  totalExports: 5583
+  totalExports: 5587
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8189,6 +8189,8 @@ modules:
             - minres
             - gmres
             - bicgstab
+            - incompleteLU
+            - incompleteCholesky
           reExport: true
         - file: ./numeric/eigsh.js
           imports:
@@ -8867,6 +8869,8 @@ modules:
         - minres
         - gmres
         - bicgstab
+        - incompleteLU
+        - incompleteCholesky
         - eigsh
         - svds
         - thomasSolve
@@ -9234,6 +9238,8 @@ modules:
         - minres
         - gmres
         - bicgstab
+        - incompleteLU
+        - incompleteCholesky
         - eigsh
         - svds
         - thomasSolve
@@ -13498,6 +13504,8 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - incompleteLU
+        - incompleteCholesky
         - cg
         - minres
         - gmres
@@ -13507,6 +13515,8 @@ modules:
         - GmresOptions
         - KrylovResult
       functions:
+        - incompleteLU
+        - incompleteCholesky
         - cg
         - minres
         - gmres
@@ -35712,15 +35722,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1090
   totalModules: 82
-  totalLinesOfCode: 185741
-  totalExports: 5583
+  totalLinesOfCode: 185876
+  totalExports: 5587
   totalClasses: 52
   totalInterfaces: 478
-  totalFunctions: 1754
+  totalFunctions: 1756
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1542
-  totalReExports: 2249
+  totalReExports: 2251
   totalTypeOnlyImports: 569
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

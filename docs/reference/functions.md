@@ -1026,7 +1026,7 @@ solver(A, b, {
   x0, // initial guess (default: zero vector)
   tol, // relative-residual tolerance, default 1e-10
   maxIter, // default min(10 * n, 1000)
-  preconditioner, // 'jacobi' or a custom (r) => M⁻¹r callback
+  preconditioner, // 'jacobi' | 'ilu' | 'ic' | a custom (r) => M⁻¹r callback
 });
 // => { x, iterations, converged, residual }
 ```
@@ -1034,10 +1034,22 @@ solver(A, b, {
 Convergence is measured as the relative residual `‖b − A x‖₂ / ‖b‖₂ < tol`.
 `gmres` additionally accepts `restart` (default 30).
 
-The `'jacobi'` preconditioner (`M⁻¹ = diag(1/A_ii)`) requires a dense matrix
-— the diagonal isn't observable through a matvec callback alone — and throws
-a clear error if requested with a matvec-only `A`. Pass a custom
-`(r) => M⁻¹r` function to precondition a matvec operator.
+**Preconditioners.** Three built-ins accelerate convergence; all require a
+dense matrix (they read `A`'s entries) and throw a clear error if requested
+with a matvec-only `A`:
+
+| Option     | `M⁻¹`                                                   | Applicability                   |
+| ---------- | ------------------------------------------------------- | ------------------------------- |
+| `'jacobi'` | `diag(1/Aᵢᵢ)`                                           | any nonzero-diagonal `A`        |
+| `'ilu'`    | ILU(0) — incomplete LU, zero fill on `A`'s pattern      | general (nonsymmetric) `A`      |
+| `'ic'`     | IC(0) — incomplete Cholesky, zero fill on `A`'s pattern | symmetric positive-definite `A` |
+
+Pass a custom `(r) => M⁻¹r` function to precondition a matvec operator. On an
+ill-conditioned sparse SPD system (e.g. the 2D Poisson matrix) IC(0)/ILU(0)
+converge in markedly fewer iterations than unpreconditioned or Jacobi (which
+is a no-op on a constant-diagonal matrix). The factorizations are also exposed
+directly: `incompleteLU(A) → { L, U }` and `incompleteCholesky(A) → { L }`,
+each reproducing `A` on its sparsity pattern.
 
 Pinned: `cg([[4, 1], [1, 3]], [1, 2])` → `x = [1/11, 7/11]`.
 
@@ -2895,7 +2907,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1037 exports).
+> `@danielsimonjr/mathts-functions` (1039 exports).
 
 ### Functions by category
 
@@ -2917,9 +2929,9 @@ await terminatePool();
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 
-**Linear Algebra** (92): `bicgstab`, `care`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `dare`, `det`, `disableGpu`, `dlyap`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `linsolve`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `svds`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+**Linear Algebra** (95): `bicgstab`, `care`, `cg`, `characteristicPolynomial`, `cholesky`, `circulant`, `companion`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `dare`, `det`, `diag`, `disableGpu`, `dlyap`, `eigs`, `eigsh`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hessenbergForm`, `incompleteCholesky`, `incompleteLU`, `inv`, `isGpuEnabled`, `jordanForm`, `kron`, `laplacianMatrix`, `ldl`, `linsolve`, `logdet`, `lowRankApprox`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pinv`, `polarDecomposition`, `qr`, `qz`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `schur`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `svd`, `svds`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
 
-**Matrix Construction & Manipulation** (29): `apply`, `column`, `concat`, `count`, `diag`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
+**Matrix Construction & Manipulation** (28): `apply`, `column`, `concat`, `count`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
 
 **Algebra** (45): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
 
