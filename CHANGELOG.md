@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### perf(functions): `minres` short-recurrence rewrite — O(k³) → O(k·n)
+
+- `minres` (Krylov solver for symmetric indefinite `A`) was reformulated from the "re-solve the
+  growing `(k+1)×k` tridiagonal least-squares each iteration" form (O(k³) per step) to the classic
+  **Paige–Saunders short recurrence** (Lanczos tridiagonalization + incrementally updated
+  Givens-rotation QR, advancing the solution through a running 3-term `w`-recurrence). Each iteration
+  now does a fixed number of length-`n` vector ops and O(1) scalar work — one matvec per step, no
+  growing matrix ever formed — so the whole solve is **O(k·n)** for `k` iterations. The unused dense
+  `solveLeastSquaresQR` helper was removed.
+- Behaviour preserved: pinned to `scipy.sparse.linalg.minres` on the 4×4 indefinite pencil (solution
+  to 9 digits) and a 30×30 indefinite system (relres < 1e-10). A structural test asserts exactly one
+  matvec per iteration (`calls == iterations + 2`), confirming the O(1)/iteration cost
+  (`functions/tests/krylov.test.ts`). With a preconditioner the loop gates on the `M⁻¹`-norm relative
+  residual (what MINRES minimizes); the reported `residual`/`converged` remain the true Euclidean
+  residual.
+
 ### feat(functions): `solveODE` event detection (`events` option) — scipy `solve_ivp` parity
 
 - `solveODE(f, tspan, y0, { events })` now locates zero crossings of event functions `g(t, y)`,

@@ -119,4 +119,62 @@ describe('Krylov solvers', () => {
       expect(sum).toBeCloseTo(rhs[i], 5);
     }
   });
+
+  // ── Paige–Saunders short-recurrence MINRES (O(k³)→O(k·n)) ──
+  it('minres matches scipy.sparse.linalg.minres on the 4x4 indefinite pencil', () => {
+    // Oracle: scipy.sparse.linalg.minres(M, rhs, rtol=1e-12) — relres 8.3e-16.
+    const M = [
+      [2, 1, 0, 0],
+      [1, -3, 1, 0],
+      [0, 1, 4, 1],
+      [0, 0, 1, -2],
+    ];
+    const rhs = [1, -1, 2, 0];
+    const scipyX = [0.238805970149254, 0.522388059701493, 0.328358208955224, 0.164179104477612];
+    const r = minres(M, rhs, { tol: 1e-12 });
+    for (let i = 0; i < 4; i++) expect(r.x[i]).toBeCloseTo(scipyX[i], 9);
+    expect(r.residual).toBeLessThan(1e-10);
+  });
+
+  it('minres solves a 30x30 indefinite system to scipy accuracy (relres < 1e-10)', () => {
+    // Diagonally scaled indefinite tridiagonal; scipy relres 8.2e-14.
+    const n = 30;
+    const M: number[][] = Array.from({ length: n }, (_r, i) =>
+      Array.from({ length: n }, (_c, j) => {
+        let v = i === j ? i + 1 : Math.abs(i - j) === 1 ? 0.5 : 0;
+        if (i >= 15 && j >= 15) v = -v;
+        return v;
+      })
+    );
+    const rhs = Array.from({ length: n }, (_v, i) => i + 1);
+    const r = minres(M, rhs, { tol: 1e-12, maxIter: 2000 });
+    expect(r.residual).toBeLessThan(1e-10);
+    for (let i = 0; i < n; i++) {
+      let sum = 0;
+      for (let j = 0; j < n; j++) sum += M[i][j] * r.x[j];
+      expect(sum).toBeCloseTo(rhs[i], 6);
+    }
+  });
+
+  it('minres uses a short recurrence: exactly one matvec per iteration (O(1)/iter, no growing solve)', () => {
+    // Structural proof of the O(k·n) rewrite: the former impl re-solved a
+    // growing (k+1)×k least-squares each step. The short-recurrence form does a
+    // fixed amount of work per iteration — the only per-iteration matvec is the
+    // Lanczos step, so total calls == iterations + O(1) (initial r0 + final residual).
+    const M = [
+      [2, 1, 0, 0],
+      [1, -3, 1, 0],
+      [0, 1, 4, 1],
+      [0, 0, 1, -2],
+    ];
+    const rhs = [1, -1, 2, 0];
+    let calls = 0;
+    const matvec = (v: number[]): number[] => {
+      calls++;
+      return M.map((row) => row.reduce((s, e, j) => s + e * v[j], 0));
+    };
+    const r = minres(matvec, rhs, { tol: 1e-12 });
+    // One matvec per iteration + initial r0 + final true-residual check.
+    expect(calls).toBe(r.iterations + 2);
+  });
 });

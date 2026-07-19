@@ -5952,7 +5952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 522
+      "loc": 469
     },
     {
       "file": "functions/src/numeric/matrix-functions.ts",
@@ -8710,7 +8710,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 123
+      "loc": 183
     },
     {
       "file": "functions/tests/lambertw-branch.test.ts",

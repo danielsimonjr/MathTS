@@ -198,13 +198,19 @@ export function cg(a: LinearOperatorInput, b: number[], opts?: KrylovOptions): K
 /**
  * MINRES — for symmetric (possibly indefinite) `A`.
  *
- * Builds the preconditioned Lanczos tridiagonalization of `A` and, at each
- * step, solves the growing `(k+1) x k` tridiagonal least-squares problem
- * `min ||beta1 e1 - T_k y||` via a small dense Householder QR. This is the
- * textbook MINRES minimization restated directly (rather than the
- * incrementally-updated Givens-rotation form), which keeps it simple to
- * verify against a closed-form oracle at the cost of some redundant work
- * per iteration — acceptable since `maxIter` is bounded by `min(10n, 1000)`.
+ * The Paige–Saunders short-recurrence MINRES (Paige & Saunders 1975): a
+ * preconditioned Lanczos tridiagonalization coupled with an incrementally
+ * updated Givens-rotation QR of the tridiagonal. Each iteration does a fixed
+ * number of length-`n` vector operations (one matvec + a handful of `axpy`s)
+ * and **O(1)** scalar work — no growing least-squares is ever formed or
+ * solved. The solution is advanced through a running 3-term `w`-recurrence, so
+ * the whole solve is **O(k·n)** for `k` iterations rather than the O(k³) of the
+ * former "re-solve the growing `(k+1)×k` tridiagonal each step" formulation.
+ *
+ * With a preconditioner `M`, the loop converges the `M⁻¹`-norm relative
+ * residual `‖r_k‖_{M⁻¹} / ‖r_0‖_{M⁻¹}` (the estimate MINRES minimizes); for
+ * `M = I` this equals `‖b − A x‖₂ / ‖b‖₂`. The reported `residual`/`converged`
+ * are always computed from the true Euclidean residual (one final matvec).
  *
  * @example
  * minres([[0, 1], [1, 0]], [1, 2]) // => { x: [2, 1], converged: true, ... }
@@ -217,131 +223,72 @@ export function minres(a: LinearOperatorInput, b: number[], opts?: KrylovOptions
   const maxIter = opts?.maxIter ?? defaultMaxIter(n);
   const bNorm = norm2(b);
 
-  const x0 = opts?.x0 ? opts.x0.slice() : zeros(n);
-  const r0 = subtract(b, matvec(x0));
+  const x = opts?.x0 ? opts.x0.slice() : zeros(n);
 
-  let residual = relativeResidualNorm(norm2(r0), bNorm);
-  if (residual < tol) {
-    return { x: x0, iterations: 0, converged: true, residual };
+  // r1 = b - A x, y = M^-1 r1, beta1 = <r1, M^-1 r1>^(1/2)
+  let r1 = subtract(b, matvec(x));
+  let y = applyM(r1);
+  const beta1 = Math.sqrt(Math.max(0, dot(r1, y)));
+
+  const residual0 = relativeResidualNorm(norm2(r1), bNorm);
+  if (residual0 < tol || beta1 < 1e-300) {
+    return { x, iterations: 0, converged: residual0 < tol, residual: residual0 };
   }
 
-  const z0 = applyM(r0);
-  const beta1 = Math.sqrt(dot(r0, z0));
-  if (beta1 < 1e-300) {
-    return { x: x0, iterations: 0, converged: residual < tol, residual };
-  }
+  // Paige-Saunders scalar recurrences (Lanczos + Givens on the tridiagonal).
+  let oldb = 0;
+  let beta = beta1;
+  let dbar = 0;
+  let epsln = 0;
+  let phibar = beta1;
+  let cs = -1;
+  let sn = 0;
+  let w = zeros(n);
+  let w2 = zeros(n);
+  let r2 = r1.slice();
 
-  // V[k] = k-th Lanczos vector, Z[k] = M^-1 V[k] (both 1-indexed; index 0 is
-  // an unused zero-padding entry so V[k]/Z[k] line up with the math below).
-  const V: number[][] = [zeros(n), scale(1 / beta1, r0)];
-  const Z: number[][] = [zeros(n), scale(1 / beta1, z0)];
-  const alphas: number[] = [];
-  const betas: number[] = [beta1]; // betas[k-1] = beta_k (the sub/super-diagonal entry feeding into step k)
-
-  let bestX = x0.slice();
-  let bestResidual = residual;
   let iterations = 0;
+  for (let iter = 1; iter <= maxIter; iter++) {
+    iterations = iter;
 
-  for (let k = 1; k <= maxIter; k++) {
-    iterations = k;
-    const vK = V[k];
-    const zK = Z[k];
-    const vKm1 = V[k - 1];
-    const betaK = betas[k - 1];
+    // Next Lanczos vector v = y / beta, then y = A v - (beta/oldb) r1 - (alfa/beta) r2.
+    const v = scale(1 / beta, y);
+    y = matvec(v);
+    if (iter >= 2) y = axpy(-beta / oldb, r1, y);
+    const alfa = dot(v, y);
+    y = axpy(-alfa / beta, r2, y);
+    r1 = r2;
+    r2 = y;
+    y = applyM(r2);
+    oldb = beta;
+    beta = Math.sqrt(Math.max(0, dot(r2, y)));
 
-    let p = matvec(zK);
-    p = subtract(p, scale(betaK, vKm1));
-    const alphaK = dot(p, zK);
-    alphas.push(alphaK);
-    p = subtract(p, scale(alphaK, vK));
+    // Apply the previous Givens rotation Q_{k-1} to the new tridiagonal column.
+    const oldeps = epsln;
+    const delta = cs * dbar + sn * alfa;
+    const gbar = sn * dbar - cs * alfa;
+    epsln = sn * beta;
+    dbar = -cs * beta;
 
-    const zRaw = applyM(p);
-    const betaNext = Math.sqrt(Math.max(0, dot(p, zRaw)));
+    // Compute the next Givens rotation Q_k that eliminates beta.
+    const gamma = Math.max(Math.sqrt(gbar * gbar + beta * beta), 1e-300);
+    cs = gbar / gamma;
+    sn = beta / gamma;
+    const phi = cs * phibar;
+    phibar = sn * phibar;
 
-    // Tridiagonal T_k is (k+1) x k: diag = alphas, off-diag = betas[1..k-1],
-    // plus the trailing betaNext row.
-    const T: number[][] = Array.from({ length: k + 1 }, () => new Array<number>(k).fill(0));
-    for (let i = 0; i < k; i++) {
-      T[i][i] = alphas[i];
-      if (i + 1 < k) {
-        T[i + 1][i] = betas[i + 1];
-        T[i][i + 1] = betas[i + 1];
-      }
-    }
-    T[k][k - 1] = betaNext;
+    // Advance the solution via the 3-term w-recurrence: w = (v - oldeps w1 - delta w2)/gamma.
+    const w1 = w2;
+    w2 = w;
+    w = scale(1 / gamma, subtract(subtract(v, scale(oldeps, w1)), scale(delta, w2)));
+    for (let i = 0; i < n; i++) x[i] += phi * w[i];
 
-    const rhs = new Array<number>(k + 1).fill(0);
-    rhs[0] = beta1;
-
-    const y = solveLeastSquaresQR(T, rhs);
-
-    let xCandidate = x0.slice();
-    for (let i = 0; i < k; i++) {
-      xCandidate = axpy(y[i], Z[i + 1], xCandidate);
-    }
-
-    residual = relativeResidual(matvec, xCandidate, b, bNorm);
-    if (residual < bestResidual) {
-      bestResidual = residual;
-      bestX = xCandidate;
-    }
-
-    if (residual < tol) {
-      return { x: xCandidate, iterations: k, converged: true, residual };
-    }
-
-    if (betaNext < 1e-300) break;
-
-    betas.push(betaNext);
-    V.push(scale(1 / betaNext, p));
-    Z.push(scale(1 / betaNext, zRaw));
+    // phibar = ‖r_k‖_{M⁻¹}; gate on the relative preconditioned residual.
+    if (phibar / beta1 < tol || beta < 1e-300) break;
   }
 
-  return { x: bestX, iterations, converged: bestResidual < tol, residual: bestResidual };
-}
-
-/** Solve a small dense least-squares problem `min ||rhs - T y||` via Householder QR. */
-function solveLeastSquaresQR(T: number[][], rhs: number[]): number[] {
-  const m = T.length;
-  const n = T[0]?.length ?? 0;
-  const R: number[][] = T.map((row) => row.slice());
-  const c = rhs.slice();
-
-  for (let k = 0; k < n; k++) {
-    let normX = 0;
-    for (let i = k; i < m; i++) normX += R[i][k] * R[i][k];
-    normX = Math.sqrt(normX);
-    if (normX < 1e-300) continue;
-
-    const alpha = R[k][k] >= 0 ? -normX : normX;
-    const v = new Array<number>(m).fill(0);
-    v[k] = R[k][k] - alpha;
-    for (let i = k + 1; i < m; i++) v[i] = R[i][k];
-
-    let vNormSq = 0;
-    for (let i = k; i < m; i++) vNormSq += v[i] * v[i];
-    if (vNormSq < 1e-300) continue;
-
-    for (let j = k; j < n; j++) {
-      let dotVR = 0;
-      for (let i = k; i < m; i++) dotVR += v[i] * R[i][j];
-      const factor = (2 * dotVR) / vNormSq;
-      for (let i = k; i < m; i++) R[i][j] -= factor * v[i];
-    }
-
-    let dotVC = 0;
-    for (let i = k; i < m; i++) dotVC += v[i] * c[i];
-    const factorC = (2 * dotVC) / vNormSq;
-    for (let i = k; i < m; i++) c[i] -= factorC * v[i];
-  }
-
-  const y = new Array<number>(n).fill(0);
-  for (let i = n - 1; i >= 0; i--) {
-    let sum = c[i];
-    for (let j = i + 1; j < n; j++) sum -= R[i][j] * y[j];
-    y[i] = Math.abs(R[i][i]) > 1e-300 ? sum / R[i][i] : 0;
-  }
-  return y;
+  const residual = relativeResidual(matvec, x, b, bNorm);
+  return { x, iterations, converged: residual < tol, residual };
 }
 
 /**
