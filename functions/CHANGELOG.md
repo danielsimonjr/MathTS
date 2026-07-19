@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-functions
 
+## 0.49.0
+
+### Minor Changes
+
+- Special functions: Riemann–Siegel Z, Lerch transcendent, parabolic-cylinder, and regular Coulomb wave.
+
+  Five new mpmath-pinned (dps=30) special-function exports:
+  - **`siegelZ(t)` / `riemannSiegelZ(t)`** — the real Riemann–Siegel Z-function on the critical line
+    (`Z(t)=e^{iθ(t)}ζ(½+it)`), with exact θ via complex log-gamma. Max rel err 4.3e-15; abs ~2e-15 near the first
+    zeros (t≈14.13/21.02/25.01).
+  - **`lerchPhi(z, s, a)`** — Lerch transcendent `Σ zᵏ/(a+k)ˢ` for `|z|<1, a>0` (max rel err 1e-14; cross-checks
+    `Liₛ(z)=z·Φ(z,s,1)`).
+  - **`parabolicCylinderD(nu, x)`** — parabolic-cylinder `D_ν(x)` via the Whittaker `₁F₁` form (6.4e-15).
+  - **`coulombF(L, eta, rho)`** — regular Coulomb wave via DLMF 33.6 ascending series (3.6e-13). Fixed a
+    convergence-test bug that truncated `F₀(0,ρ)=sin ρ` on the exactly-zero terms η=0 produces.
+
+  Irregular `coulombG`, Mathieu (`ce_n`/`se_n`, char. values), and spheroidal wave functions remain future scope
+  (continued-fraction / eigenvalue-recurrence algorithms) with scoped designs recorded.
+
 ## 0.48.0
 
 ### Minor Changes
