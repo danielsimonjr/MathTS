@@ -466,8 +466,29 @@ or a documented scope limit worth revisiting.
       ~1 SE, Wishart mean within ~2 SE over 200k draws).
 - [~] **Special-fns Phase-5 extension (niche):** ✅ **`polylog`, `struveH`/`struveL`, `kelvinBer`/
   `kelvinBei`, `barnesG` DONE 2026-07-16 (functions@0.42.0)** — mpmath dps=25-pinned, machine
-  precision. **Remaining (deferred, highly specialized):** Lerch Φ, Coulomb/Mathieu/parabolic-
-  cylinder/spheroidal wave functions, Riemann–Siegel Z.
+  precision. ✅ **`siegelZ`/`riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF` DONE
+  2026-07-19** (`functions/src/special/wave-functions.ts`, 45-test mpmath dps=30 oracle) — max rel
+  err siegelZ 4.3e-15 / lerchPhi 1.0e-14 / pcfd 6.4e-15 / coulombF 3.6e-13. **Surfaced (scoped
+  designs, not shipped):**
+  - **`coulombG` (irregular Coulomb wave):** the series path used by `coulombF` does not apply — G
+    needs (a) the asymptotic expansion in the amplitude/phase functions for ρ above the turning
+    point (`ρ > η + √(η²+L(L+1))`), and/or (b) a continued-fraction for the log-derivative
+    `f = F'/F` combined with the CF for `p + iq` (Barnett's method) to get G and G' from F, F'.
+    Oracle `mpmath.coulombg`; blast radius one new function + helpers in the same file, no public
+    surface change elsewhere. Tractable but a distinct numerical effort — schedule as its own task.
+  - **Mathieu (`ce_n`/`se_n`, characteristic values `a_n(q)`/`b_n(q)`):** the eigenvalue problem is
+    the tractable entry — `a_n`/`b_n` are eigenvalues of the symmetric tridiagonal recurrence
+    matrices for the Fourier coefficients (even/odd, cos/sin parity → 4 matrices); truncate at
+    N ≈ max(2n, ceil(|q|)) + 20 and take the sorted eigenvalue (reuse a Jacobi/QL tridiagonal
+    eigensolver — matrix package has one, but importing it into functions/special crosses a package
+    boundary, so a small local symmetric-tridiagonal QL is cleaner). The **functions** `ce_n(q,x)`,
+    `se_n(q,x)` then follow from the eigenvector's Fourier coefficients. Oracle `mpmath.mathieu_a`/
+    `mathieu_b`/`mathieu_cem`/`mathieu_sem`. Bounded but multi-part — its own task.
+  - **Spheroidal wave functions:** genuinely hard (angular `S_mn` + radial via a five-term
+    recurrence eigenvalue problem, prolate/oblate). No clean tractable subset; defer with the design
+    note that the characteristic values `λ_mn(c)` are again a (pentadiagonal-reduced-to-tridiagonal)
+    eigenvalue problem, oracle would be a from-scratch Bouwkamp/continued-fraction reference (mpmath
+    has no direct spheroidal). Lowest priority.
 - [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
   correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
   `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16

@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1715,
+  "totalFiles": 1717,
   "byDisposition": {
-    "reachable": 1060,
+    "reachable": 1061,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 560,
+    "test": 561,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1096,
-    "tests": 560,
+    "src": 1097,
+    "tests": 561,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 706,
+    "@danielsimonjr/mathts-functions": 708,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5189,7 +5189,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 380
+      "loc": 383
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -5462,7 +5462,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 563
+      "loc": 574
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6494,6 +6494,13 @@
       "loc": 171
     },
     {
+      "file": "functions/src/special/wave-functions.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 362
+    },
+    {
       "file": "functions/src/special/zeta.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7107,7 +7114,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1753
+      "loc": 1754
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7807,7 +7814,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 627
+      "loc": 640
     },
     {
       "file": "functions/tests/cov-dist-objects.test.ts",
@@ -8396,6 +8403,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 164
+    },
+    {
+      "file": "functions/tests/gap-special-wave-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 160
     },
     {
       "file": "functions/tests/gap-stats-breadth-oracle.test.ts",

@@ -963,57 +963,61 @@
 
       ## Special Functions
 
-      | Function                                    | Description                                                                   | Accel                  |
-      | ------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------- |
-      | `erfc(x)`                                   | Complementary error function `1 - erf(x)`                                     | parallel               |
-      | `erf(x)`                                    | Error function (factory layer)                                                | —                      |
-      | `erfi(x)`                                   | Imaginary error function                                                      | parallel               |
-      | `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                              | parallel               |
-      | `betainc(a, b, x)`                          | Incomplete beta function                                                      | parallel               |
-      | `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)`                                  | parallel               |
-      | `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)`                                  | parallel               |
-      | `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                                                        | parallel               |
-      | `gamma(x)`                                  | Gamma function (factory layer)                                                | —                      |
-      | `lgamma(x)`                                 | Log-gamma (factory layer)                                                     | —                      |
-      | `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                                                             | parallel + WASM (≥1 K) |
-      | `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                  | parallel + WASM (≥1 K) |
-      | `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                                                     | parallel               |
-      | `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind                                     | parallel + WASM (≥1 K) |
-      | `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                                                   | parallel               |
-      | `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                                                             | parallel               |
-      | `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                                                       | parallel               |
-      | `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                                                  | parallel               |
-      | `logIntegral(x)`                            | Logarithmic integral `li(x)`                                                  | parallel               |
-      | `lambertW(x[, branch])`                     | Lambert W function                                                            | parallel               |
-      | `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)                                             | parallel               |
-      | `hermiteH(n, x)`                            | Hermite polynomial                                                            | parallel               |
-      | `laguerreL(n, x)`                           | Laguerre polynomial                                                           | parallel               |
-      | `legendreP(n, x)`                           | Legendre polynomial                                                           | parallel               |
-      | `zeta(s)`                                   | Riemann zeta function (factory layer)                                         | —                      |
-      | `carlsonRC(x, y)`                           | Carlson degenerate symmetric elliptic integral R_C(x, y)                      | WASM (≥1 K)            |
-      | `carlsonRF(x, y, z)`                        | Carlson symmetric elliptic integral of the first kind R_F                     | WASM (≥1 K)            |
-      | `carlsonRD(x, y, z)`                        | Carlson symmetric elliptic integral of the second kind R_D                    | WASM (≥1 K)            |
-      | `carlsonRJ(x, y, z, p)`                     | Carlson symmetric elliptic integral of the third kind R_J                     | WASM (≥1 K)            |
-      | `ellipticF(phi, m)`                         | Incomplete elliptic integral of the first kind `F(φ, m)` (parameter `m = k²`) | WASM (≥1 K)            |
-      | `ellipticEIncomplete(phi, m)`               | Incomplete elliptic integral of the second kind `E(φ, m)`                     | WASM (≥1 K)            |
-      | `ellipticPi(n, phi, m)`                     | Incomplete elliptic integral of the third kind `Π(n, φ, m)`                   | WASM (≥1 K)            |
-      | `erfcScalar(x)`                             | Scalar complementary error function `1 − erf(x)`                              | —                      |
-      | `hyp0f1(b, z)`                              | Confluent hypergeometric limit function `0F1(; b; z)`                         | —                      |
-      | `hyp1f1(a, b, z)`                           | Kummer's confluent hypergeometric function `1F1(a; b; z)` (Kummer's M)        | —                      |
-      | `hyp2f1(a, b, c, z)`                        | Gauss's hypergeometric function `2F1(a, b; c; z)` (requires `\|z\| < 1`)      | —                      |
-      | `pFq(a[], b[], z)`                          | Generic generalized hypergeometric function `pFq(a; b; z)`                    | —                      |
-      | `polygamma(n, x)`                           | Polygamma function `ψ^(n)(x)`, the n-th derivative of digamma                 | —                      |
-      | `trigamma(x)`                               | Trigamma function `ψ'(x)` (= `polygamma(1, x)`)                               | —                      |
-      | `jacobiP(n, alpha, beta, x)`                | Jacobi polynomial `P_n^(alpha,beta)(x)`                                       | —                      |
-      | `gegenbauerC(n, alpha, x)`                  | Gegenbauer (ultraspherical) polynomial `C_n^(alpha)(x)`                       | —                      |
-      | `jacobiSN(u, m)`                            | Jacobi elliptic function `sn(u, m)` (parameter `m = k²`)                      | —                      |
-      | `jacobiCN(u, m)`                            | Jacobi elliptic function `cn(u, m)` (parameter `m = k²`)                      | —                      |
-      | `jacobiDN(u, m)`                            | Jacobi elliptic function `dn(u, m)` (parameter `m = k²`)                      | —                      |
-      | `polylog(s, z)`                             | Polylogarithm `Li_s(z)` (series, requires `\|z\| < 1`)                        | —                      |
-      | `struveH(v, z)`                             | Struve function `H_v(z)` (power series, `z >= 0`)                             | —                      |
-      | `struveL(v, z)`                             | Modified Struve function `L_v(z)` (power series, `z >= 0`)                    | —                      |
-      | `kelvinBer(x)` `kelvinBei(x)`               | Kelvin functions `ber(x)`, `bei(x)` (order 0)                                 | —                      |
-      | `barnesG(z)`                                | Barnes G-function (real `z > 0`)                                              | —                      |
+      | Function                                    | Description                                                                             | Accel                  |
+      | ------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------- |
+      | `erfc(x)`                                   | Complementary error function `1 - erf(x)`                                               | parallel               |
+      | `erf(x)`                                    | Error function (factory layer)                                                          | —                      |
+      | `erfi(x)`                                   | Imaginary error function                                                                | parallel               |
+      | `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`                                                        | parallel               |
+      | `betainc(a, b, x)`                          | Incomplete beta function                                                                | parallel               |
+      | `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)`                                            | parallel               |
+      | `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)`                                            | parallel               |
+      | `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                                                                  | parallel               |
+      | `gamma(x)`                                  | Gamma function (factory layer)                                                          | —                      |
+      | `lgamma(x)`                                 | Log-gamma (factory layer)                                                               | —                      |
+      | `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                                                                       | parallel + WASM (≥1 K) |
+      | `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                            | parallel + WASM (≥1 K) |
+      | `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                                                               | parallel               |
+      | `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind                                               | parallel + WASM (≥1 K) |
+      | `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                                                             | parallel               |
+      | `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                                                                       | parallel               |
+      | `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                                                                 | parallel               |
+      | `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                                                            | parallel               |
+      | `logIntegral(x)`                            | Logarithmic integral `li(x)`                                                            | parallel               |
+      | `lambertW(x[, branch])`                     | Lambert W function                                                                      | parallel               |
+      | `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)                                                       | parallel               |
+      | `hermiteH(n, x)`                            | Hermite polynomial                                                                      | parallel               |
+      | `laguerreL(n, x)`                           | Laguerre polynomial                                                                     | parallel               |
+      | `legendreP(n, x)`                           | Legendre polynomial                                                                     | parallel               |
+      | `zeta(s)`                                   | Riemann zeta function (factory layer)                                                   | —                      |
+      | `carlsonRC(x, y)`                           | Carlson degenerate symmetric elliptic integral R_C(x, y)                                | WASM (≥1 K)            |
+      | `carlsonRF(x, y, z)`                        | Carlson symmetric elliptic integral of the first kind R_F                               | WASM (≥1 K)            |
+      | `carlsonRD(x, y, z)`                        | Carlson symmetric elliptic integral of the second kind R_D                              | WASM (≥1 K)            |
+      | `carlsonRJ(x, y, z, p)`                     | Carlson symmetric elliptic integral of the third kind R_J                               | WASM (≥1 K)            |
+      | `ellipticF(phi, m)`                         | Incomplete elliptic integral of the first kind `F(φ, m)` (parameter `m = k²`)           | WASM (≥1 K)            |
+      | `ellipticEIncomplete(phi, m)`               | Incomplete elliptic integral of the second kind `E(φ, m)`                               | WASM (≥1 K)            |
+      | `ellipticPi(n, phi, m)`                     | Incomplete elliptic integral of the third kind `Π(n, φ, m)`                             | WASM (≥1 K)            |
+      | `erfcScalar(x)`                             | Scalar complementary error function `1 − erf(x)`                                        | —                      |
+      | `hyp0f1(b, z)`                              | Confluent hypergeometric limit function `0F1(; b; z)`                                   | —                      |
+      | `hyp1f1(a, b, z)`                           | Kummer's confluent hypergeometric function `1F1(a; b; z)` (Kummer's M)                  | —                      |
+      | `hyp2f1(a, b, c, z)`                        | Gauss's hypergeometric function `2F1(a, b; c; z)` (requires `\|z\| < 1`)                | —                      |
+      | `pFq(a[], b[], z)`                          | Generic generalized hypergeometric function `pFq(a; b; z)`                              | —                      |
+      | `polygamma(n, x)`                           | Polygamma function `ψ^(n)(x)`, the n-th derivative of digamma                           | —                      |
+      | `trigamma(x)`                               | Trigamma function `ψ'(x)` (= `polygamma(1, x)`)                                         | —                      |
+      | `jacobiP(n, alpha, beta, x)`                | Jacobi polynomial `P_n^(alpha,beta)(x)`                                                 | —                      |
+      | `gegenbauerC(n, alpha, x)`                  | Gegenbauer (ultraspherical) polynomial `C_n^(alpha)(x)`                                 | —                      |
+      | `jacobiSN(u, m)`                            | Jacobi elliptic function `sn(u, m)` (parameter `m = k²`)                                | —                      |
+      | `jacobiCN(u, m)`                            | Jacobi elliptic function `cn(u, m)` (parameter `m = k²`)                                | —                      |
+      | `jacobiDN(u, m)`                            | Jacobi elliptic function `dn(u, m)` (parameter `m = k²`)                                | —                      |
+      | `polylog(s, z)`                             | Polylogarithm `Li_s(z)` (series, requires `\|z\| < 1`)                                  | —                      |
+      | `struveH(v, z)`                             | Struve function `H_v(z)` (power series, `z >= 0`)                                       | —                      |
+      | `struveL(v, z)`                             | Modified Struve function `L_v(z)` (power series, `z >= 0`)                              | —                      |
+      | `kelvinBer(x)` `kelvinBei(x)`               | Kelvin functions `ber(x)`, `bei(x)` (order 0)                                           | —                      |
+      | `barnesG(z)`                                | Barnes G-function (real `z > 0`)                                                        | —                      |
+      | `siegelZ(t)` `riemannSiegelZ(t)`            | Riemann–Siegel Z-function `Z(t) = e^{iθ(t)} ζ(1/2 + it)` (real on the critical line)    | —                      |
+      | `lerchPhi(z, s, a)`                         | Lerch transcendent `Φ(z, s, a) = Σ z^k/(a+k)^s` (series, requires `\|z\| < 1`, `a > 0`) | —                      |
+      | `parabolicCylinderD(nu, x)`                 | Parabolic-cylinder function `D_ν(x)` (Whittaker form via `₁F₁`)                         | —                      |
+      | `coulombF(L, eta, rho)`                     | Regular Coulomb wave function `F_L(η, ρ)` (ascending power series)                      | —                      |
 
       ### Details
 
@@ -3432,7 +3436,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1044 exports).
+      > `@danielsimonjr/mathts-functions` (1049 exports).
 
       ### Functions by category
 
@@ -3446,7 +3450,7 @@
 
       **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-      **Special Functions** (59): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lgamma`, `logIntegral`, `pFq`, `polygamma`, `polylog`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
+      **Special Functions** (64): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `coulombF`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `logIntegral`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
 
       **Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 

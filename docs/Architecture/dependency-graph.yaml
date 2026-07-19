@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1093
+  totalFiles: 1094
   totalModules: 82
-  totalExports: 5604
+  totalExports: 5614
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8457,6 +8457,14 @@ modules:
             - kelvinBei
             - barnesG
           reExport: true
+        - file: ./special/wave-functions.js
+          imports:
+            - siegelZ
+            - riemannSiegelZ
+            - lerchPhi
+            - parabolicCylinderD
+            - coulombF
+          reExport: true
         - file: ./graph/traversal-centrality.js
           imports:
             - bfs
@@ -9040,6 +9048,11 @@ modules:
         - kelvinBer
         - kelvinBei
         - barnesG
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
         - bfs
         - dfs
         - floydWarshall
@@ -9419,6 +9432,11 @@ modules:
         - kelvinBer
         - kelvinBei
         - barnesG
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
         - bfs
         - dfs
         - floydWarshall
@@ -15562,6 +15580,30 @@ modules:
         - trigamma
         - jacobiP
         - gegenbauerC
+    functions/src/special/wave-functions.ts:
+      description: 'Advanced niche special functions: the Riemann–Siegel Z-function, the Lerch'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+        - file: ./hypergeometric.js
+          imports:
+            - hyp1f1
+      workspaceDependencies: []
+      exports:
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
+      functions:
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
     functions/src/special/zeta.ts:
       description: Compute the Riemann Zeta function of a value using an infinite series for
       externalDependencies: []
@@ -35069,6 +35111,7 @@ dependencyGraph:
         - functions/src/special/jacobi-elliptic.ts
         - functions/src/special/niche.ts
         - functions/src/special/polygamma-orthopoly.ts
+        - functions/src/special/wave-functions.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
       files:
@@ -35845,17 +35888,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1093
+  totalTypeScriptFiles: 1094
   totalModules: 82
-  totalLinesOfCode: 186425
-  totalExports: 5604
+  totalLinesOfCode: 186802
+  totalExports: 5614
   totalClasses: 52
   totalInterfaces: 482
-  totalFunctions: 1762
+  totalFunctions: 1767
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2261
+  totalReExports: 2266
   totalTypeOnlyImports: 571
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

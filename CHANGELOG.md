@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): advanced niche special functions — Riemann–Siegel Z, Lerch Φ, parabolic-cylinder D_ν, Coulomb F_L
+
+- **`siegelZ(t)` / `riemannSiegelZ(t)`** — the Riemann–Siegel Z-function
+  `Z(t) = e^{iθ(t)} ζ(1/2 + it)`, real-valued on the critical line (its real zeros are the
+  imaginary parts of the non-trivial ζ zeros). Computed by evaluating ζ(1/2 + it) via a
+  self-contained Borwein-accelerated series in explicit complex arithmetic (the same algorithm the
+  factory `zeta` uses, specialized to `Re(s) = 1/2` so it needs no Complex constructor) and the
+  theta function **exactly** through a complex Lanczos log-gamma — the exact-θ path stays accurate at
+  the small `t` of the first few zeros, where the classical Riemann–Siegel asymptotic series does
+  not. Even in `t`; `Z(0) = ζ(1/2)`. Pinned vs `mpmath.siegelz` (dps=30): max rel err **4.3e-15**
+  for O(1) values, abs err **2.0e-15** near the first zeros (t ≈ 14.13, 21.02, 25.01), |t| ≤ 40.
+- **`lerchPhi(z, s, a)`** — the Lerch transcendent `Φ(z, s, a) = Σ_{k≥0} z^k/(a+k)^s` by its
+  defining series (converges for `|z| < 1`, `a > 0`; `|z| ≥ 1` throws, analytic continuation out of
+  scope). Cross-checked by the polylog relation `Li_s(z) = z·Φ(z, s, 1)`. Pinned vs
+  `mpmath.lerchphi`: max rel err **1.0e-14**.
+- **`parabolicCylinderD(nu, x)`** — the parabolic-cylinder function `D_ν(x)` (Whittaker form) via the
+  even/odd confluent-hypergeometric representation (reusing `hyp1f1`), valid for any real ν and
+  moderate `|x|`. Pinned vs `mpmath.pcfd`: max rel err **6.4e-15**.
+- **`coulombF(L, eta, rho)`** — the regular Coulomb wave function `F_L(η, ρ)` via its ascending power
+  series (DLMF 33.6) with the exact normalization constant `C_L(η)` from the complex log-gamma.
+  Special case `F_0(0, ρ) = sin ρ` (a zero-term early-break bug that truncated the η = 0 case was
+  caught and fixed). Pinned vs `mpmath.coulombf`: max rel err **3.6e-13** (L ∈ {0..3}, |η| ≤ 5,
+  ρ ≤ 10).
+- All four are pure real-valued `number`-in/`number`-out functions in
+  `functions/src/special/wave-functions.ts`, following the `niche.ts`/`hypergeometric.ts` pattern;
+  oracle-pinned in `functions/tests/gap-special-wave-oracle.test.ts` (45 tests). Documented in the
+  curated Special Functions table of `docs/reference/functions.md`.
+- **Surfaced, not shipped (documented as out of scope):** the *irregular* Coulomb wave `coulombG`
+  (needs a numerically-delicate asymptotic/continued-fraction treatment, not the simple series);
+  and the **Mathieu** (`ce_n`/`se_n`, characteristic values `a_n`/`b_n`) and **spheroidal** wave
+  functions (eigenvalue continued-fraction / infinite-recurrence problems). See `TODO.md` for the
+  scoped designs.
+
 ### feat(functions): CAS breadth — multivariate `expand`/`factor`, wired `casExpand`/`casFactor`, partial-fraction + by-parts integration
 
 - **`casExpand`/`casFactor` are no longer pass-through stubs.** They were crude string

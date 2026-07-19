@@ -490,6 +490,17 @@ export type { RootsLegendreResult } from './numeric/gauss-nodes.js';
 // Kelvin ber/bei (order 0), and the Barnes G-function (real z > 0).
 export { polylog, struveH, struveL, kelvinBer, kelvinBei, barnesG } from './special/niche.js';
 
+// Advanced niche special functions — the Riemann–Siegel Z-function, the Lerch
+// transcendent Φ(z,s,a) (|z| < 1 series), the parabolic-cylinder function
+// D_ν(x), and the regular Coulomb wave function F_L(η,ρ).
+export {
+  siegelZ,
+  riemannSiegelZ,
+  lerchPhi,
+  parabolicCylinderD,
+  coulombF,
+} from './special/wave-functions.js';
+
 // Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
 // single-source Bellman-Ford (negative-weight/cycle-aware), and
 // closeness/harmonic centrality, complementing the existing Dijkstra
