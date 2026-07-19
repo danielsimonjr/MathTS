@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-functions
 
+## 0.43.3
+
+### Patch Changes
+
+- Update the physical constants to CODATA-2022 (were CODATA-2018, one cycle behind scipy).
+
+  27 measured constants shifted to their CODATA-2022 values, oracle-pinned to `scipy.constants` (e.g.
+  `electronMass` 9.1093837015e-31 → 9.1093837139e-31, `fineStructure` 7.2973525693e-3 → 7.2973525643e-3,
+  `weakMixingAngle` 0.2229 → 0.22305, plus proton/neutron/atomic masses, Bohr radius/magneton, Rydberg,
+  fine-structure-derived quantities, and the Planck units). The five constants fixed exactly by the 2019 SI
+  redefinition (`speedOfLight`, `planckConstant`, `elementaryCharge`, `boltzmann`, `avogadro`) and everything
+  derived purely from them are unchanged, as is `gravitationConstant`. A new standing oracle test
+  (`functions/tests/physical-constants-codata2022.test.ts`) pins every physical constant to scipy so they can't
+  silently drift a CODATA cycle behind again.
+
 ## 0.43.2
 
 ### Patch Changes
