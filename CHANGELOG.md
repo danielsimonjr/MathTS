@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(test): correct fft-wasm-mock header + resolve the WASM-FFT-retire decision (KEEP)
+
+- Re-verified the "retire the dead WASM FFT kernel" TODO before acting: the premise was half-wrong. The AS
+  binary **does** export `fft`/`rfft`/`powerSpectrum`, a matrix wrapper (`backends/wasm/fft-wasm.ts`) consumes
+  them, and a **live passing 24-test suite** (`matrix/tests/wasm/fft-wasm.test.ts`) exercises the real kernel as
+  the `__new`-allocator regression guard. Decision: **KEEP** — a functional, correctness-tested internal
+  accelerator whose 6× slowness never bites (nothing in `src` routes to it); retiring a tested coherent
+  subsystem is a destructive ADR, not an auto-purge. Fixed the doc-drift the audit surfaced:
+  `fft-wasm-mock.test.ts`'s header wrongly claimed the AS artifact "does not export fft/rfft/powerSpectrum".
+
 ### fix(core): update physical constants CODATA-2018 → CODATA-2022 (oracle-pinned to scipy.constants)
 
 - MathTS's physical `constants` (`functions/src/type/unit/physicalConstants.ts`) were CODATA-2018, one
