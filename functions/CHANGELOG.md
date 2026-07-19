@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.57.0
+
+### Minor Changes
+
+- feat: `halfspaceIntersection` — vertex enumeration of a bounded polytope (2-D/3-D)
+
+  Given halfspaces `A·x + b ≤ 0` (SciPy's convention) and a strictly interior point, returns the
+  polytope's `vertices` plus `incidences` (which halfspaces are tight at each vertex), via the
+  dual-hull route — the convex hull of the dual points `aᵢ/−(aᵢ·x₀+bᵢ)`, whose facets map back to
+  primal vertices. Boundedness is decided structurally (the dual origin must lie strictly inside the
+  dual hull); unbounded input throws, mirroring SciPy's `QhullError`. `d > 3` throws a clear error
+  naming what the general case requires rather than returning a wrong answer.
+
+  All tolerances are relative and the dual cloud is normalised to unit scale, so results are invariant
+  to rescaling halfspace rows or changing coordinate units. Oracle-pinned against
+  `scipy.spatial.HalfspaceIntersection` (21 tests).
+
 ## 0.56.0
 
 ### Minor Changes
