@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-19",
     "totalFiles": 1089,
     "totalModules": 82,
-    "totalExports": 5577
+    "totalExports": 5579
   },
   "entryPoints": [
     {
@@ -4053,7 +4053,7 @@
           },
           {
             "file": "./lu.js",
-            "imports": ["lu", "LUResult"],
+            "imports": ["lu", "luSolve", "LUResult"],
             "reExport": true
           },
           {
@@ -4123,6 +4123,7 @@
           "QRResult",
           "QROptions",
           "lu",
+          "luSolve",
           "LUResult",
           "cholesky",
           "CholeskyResult",
@@ -4170,6 +4171,7 @@
           "QRResult",
           "QROptions",
           "lu",
+          "luSolve",
           "LUResult",
           "cholesky",
           "CholeskyResult",
@@ -4232,9 +4234,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["lu"],
+        "exports": ["lu", "luSolve"],
         "interfaces": ["LUResult"],
-        "functions": ["lu"]
+        "functions": ["lu", "luSolve"]
       },
       "matrix/src/operations/pinv.ts": {
         "description": "Moore-Penrose Pseudoinverse (DenseMatrix primitive)",
@@ -14607,7 +14609,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "lu", "luSolve"]
+          }
+        ],
         "exports": ["createSolveODE", "rosenbrockSolve", "rodasSolve"],
         "functions": ["rosenbrockSolve", "rodasSolve"],
         "constants": ["createSolveODE"]
@@ -37966,15 +37974,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1089,
     "totalModules": 82,
-    "totalLinesOfCode": 185274,
-    "totalExports": 5577,
+    "totalLinesOfCode": 185352,
+    "totalExports": 5579,
     "totalClasses": 52,
     "totalInterfaces": 476,
-    "totalFunctions": 1752,
+    "totalFunctions": 1753,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2245,
+    "totalReExports": 2246,
     "totalTypeOnlyImports": 568,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

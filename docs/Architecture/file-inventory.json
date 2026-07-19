@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1703,
+  "totalFiles": 1704,
   "byDisposition": {
     "reachable": 1056,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 552,
+    "test": 553,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1092,
-    "tests": 552,
+    "tests": 553,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 695,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 91,
+    "@danielsimonjr/mathts-matrix": 92,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 9,
@@ -6001,7 +6001,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1121
+      "loc": 1147
     },
     {
       "file": "functions/src/numeric/structured-solvers.ts",
@@ -6407,7 +6407,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 661
+      "loc": 668
     },
     {
       "file": "functions/src/signal/remez-exchange.ts",
@@ -8983,7 +8983,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 123
+      "loc": 160
     },
     {
       "file": "functions/tests/sort-as-wasm.test.ts",
@@ -9732,7 +9732,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "reachable",
-      "loc": 108
+      "loc": 153
     },
     {
       "file": "matrix/src/operations/pinv.ts",
@@ -10013,6 +10013,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 101
+    },
+    {
+      "file": "matrix/tests/operations/lu-solve.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 116
     },
     {
       "file": "matrix/tests/operations/lu.test.ts",

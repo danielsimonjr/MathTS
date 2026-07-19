@@ -1541,7 +1541,7 @@ graph LR
 | `./svd-wasm.js` | `svdWasm` | Re-export |
 | `./pinv.js` | `pinv, PinvOptions` | Re-export |
 | `./qr.js` | `qr, QRResult, QROptions` | Re-export |
-| `./lu.js` | `lu, LUResult` | Re-export |
+| `./lu.js` | `lu, luSolve, LUResult` | Re-export |
 | `./cholesky.js` | `cholesky, CholeskyResult` | Re-export |
 | `./expm.js` | `matrixExpm, ExpmOptions` | Re-export |
 | `./logm.js` | `matrixLogm, LogmOptions` | Re-export |
@@ -1553,7 +1553,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`
 
 ---
 
@@ -1584,7 +1584,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `LUResult`
-- Functions: `lu`
+- Functions: `lu`, `luSolve`
 
 ---
 
@@ -6114,6 +6114,11 @@ graph LR
 ---
 
 ### `functions/src/numeric/solveODE.ts` - Butcher Tableau structure for Runge-Kutta methods
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, luSolve` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -16580,12 +16585,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1089   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 185274 |
-| Total Exports           | 5577   |
-| Total Re-exports        | 2245   |
+| Total Lines of Code     | 185352 |
+| Total Exports           | 5579   |
+| Total Re-exports        | 2246   |
 | Total Classes           | 52     |
 | Total Interfaces        | 476    |
-| Total Functions         | 1752   |
+| Total Functions         | 1753   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 568    |

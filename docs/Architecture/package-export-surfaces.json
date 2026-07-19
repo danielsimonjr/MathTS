@@ -3485,6 +3485,7 @@
       "LQResult",
       "lu",
       "LUResult",
+      "luSolve",
       "magnitudeSpectrum",
       "matAdd",
       "matMul",

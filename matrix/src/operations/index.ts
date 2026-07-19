@@ -34,7 +34,7 @@ export { pinv as matrixPinv, type PinvOptions } from './pinv.js';
 export { qr, type QRResult, type QROptions } from './qr.js';
 
 // LU decomposition (DenseMatrix primitive — Doolittle with partial pivoting)
-export { lu, type LUResult } from './lu.js';
+export { lu, luSolve, type LUResult } from './lu.js';
 
 // Cholesky decomposition (DenseMatrix primitive — right-looking algorithm)
 export { cholesky, type CholeskyResult } from './cholesky.js';

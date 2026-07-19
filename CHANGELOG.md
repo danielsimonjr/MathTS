@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(matrix): `luSolve` primitive + stiff-ODE per-step solve routed onto it
+
+- New `luSolve(fac, b)` in `@danielsimonjr/mathts-matrix` — solves `A·x = b` from a precomputed
+  `lu()` factorisation (`P·A = L·U`: permute `b`, forward-solve unit-lower `L`, back-solve `U`).
+  O(n²) per RHS, so factor once and solve many. Pinned to `numpy.linalg.solve`
+  (`matrix/tests/operations/lu-solve.test.ts`).
+- `solveODE`'s stiff methods (`Rosenbrock`/ode23s and `RODAS`) previously hand-rolled a dense
+  Gaussian-elimination solve of the iteration matrix, **re-factorising on every one of the 3–6 RHS
+  a step solves**. They now factor once per step and route via a **threshold hybrid** (`_factorSolver`):
+  inline elimination below n=8, the matrix `lu()`+`luSolve` primitive at n≥8. The threshold is
+  measured — for the tiny iteration matrices real stiff systems use (n=1–3 across the whole test
+  corpus) inline is 1.8×–8× faster (the `DenseMatrix`/`lu()` allocation overhead dwarfs the trivial
+  O(n³) work); factor-once via the matrix primitive only overtakes it at n≈8 (up to 4× faster by
+  n=40), the same crossover the `matrix/native-accel.ts` `det`/`inv` fast-paths use.
+- **Behaviour is unchanged on the small path** (identical inline code — verified bit-for-bit on the
+  full stiff corpus: linear stiff, Van der Pol μ=1000, Robertson) and correct on the large path
+  (n=12 heat-equation MOL system pinned to the exact decaying mode: RODAS to 1e-8, Rosenbrock to
+  ~5e-7). `functions/tests/solveode-jspath.test.ts`.
+
 ### feat(functions): `buttord` — bandpass/bandstop array form
 
 - `buttord` now accepts `[low, high]` frequency pairs for `wp`/`ws` and returns the `[low, high]` natural

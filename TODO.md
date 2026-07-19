@@ -544,8 +544,17 @@ consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-f
       `functions/tests/solveode-jspath.test.ts`.
 - [~] **[follow-up] Stiff solver niceties.** ✅ **RODAS (4th-order L-stable Rosenbrock) + analytic-
   Jacobian (`jac`) option + Robertson test DONE 2026-07-16 (functions@0.41.0)** — RODAS reaches
-  tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau. **Remaining:**
-  reuse the matrix package's LU (currently an inline dense solve); event detection (`events` option).
+  tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau.
+  - [x] ✅ **Reuse the matrix package's LU DONE 2026-07-18.** Added a `luSolve(fac, b)` primitive to
+        `@danielsimonjr/mathts-matrix` (solve against an `lu()` factorisation, numpy-pinned). The stiff
+        step now routes its per-step `(I−hγJ)k=b` solve through a **threshold hybrid** (`_factorSolver`):
+        inline elimination for n<8 (measured 1.8×–8× faster on the tiny n=1–3 iteration matrices the stiff
+        solvers actually use — matrix `DenseMatrix`/`lu()` alloc overhead dwarfs the O(n³) work), matrix
+        `lu()`+`luSolve` factor-once for n≥8 (crossover matches `native-accel` threshold; up to 4× faster
+        by n=40). Small-path numerics bit-for-bit unchanged (verified on the full stiff corpus); large path
+        pinned to the exact heat-equation mode. `matrix/tests/operations/lu-solve.test.ts`,
+        `functions/tests/solveode-jspath.test.ts`.
+  - [ ] **event detection (`events` option).**
 
 ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 
