@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-functions
 
+## 0.44.0
+
+### Minor Changes
+
+- Signal: exact Parks–McClellan `remez` (**breaking convention change**) + `buttord` bandpass/bandstop.
+
+  **`remez` — exact Parks–McClellan (BREAKING convention change).** The optimal equiripple FIR designer now
+  uses the exact Parks–McClellan / Remez exchange algorithm (a faithful port of the McClellan–Parks–Rabiner
+  program `scipy.signal.remez` wraps) instead of the previous Lawson-IRLS approximation. Taps now match
+  `scipy.signal.remez` to machine precision (~1e-16) across Type I/II/III/IV, lowpass/highpass/bandpass/
+  multiband/weighted/Hilbert/differentiator. **To match scipy exactly the calling convention changed** and this
+  is breaking for existing callers: band edges are now normalized to `[0, 0.5]` (fs=1, 0.5=Nyquist), and
+  `desired`/the new optional `weight` take **one value per band** (`bands.length/2`), not per edge; an optional
+  `type` (`'bandpass'` default / `'differentiator'` / `'hilbert'`) was added. (This mirrors scipy's own
+  inconsistency between `remez` and `firls` — `firls` keeps its `1=Nyquist`, per-edge convention.) Callers using
+  the old convention must update their band/desired arrays.
+
+  **`buttord` — bandpass/bandstop array form (additive).** `wp`/`ws` now accept `[low, high]` pairs (bandpass /
+  bandstop), returning a 2-element `Wn`; scalar lowpass/highpass is unchanged. Order matches
+  `scipy.signal.buttord` exactly and `Wn` to ~1e-8 (via scipy's exact bandstop passband-edge optimizer).
+
 ## 0.43.3
 
 ### Patch Changes
