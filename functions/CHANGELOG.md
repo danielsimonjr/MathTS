@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-functions
 
+## 0.51.0
+
+### Minor Changes
+
+- Stiff ODEs: BDF and Radau IIA solvers + adaptive `solveODESystem`.
+
+  - **`solveODE(..., { method: 'BDF' })`** — variable-order (1–5) variable-step NDF-BDF (scipy's default stiff
+    method), simplified-Newton on `(I − c·J)` reusing the matrix-LU path. vs `scipy.integrate.solve_ivp('BDF')`:
+    Robertson t=40 Δ≤2.2e-8 (mass invariant exact), Van der Pol μ=1000 Δ=9.5e-7; exact linear-stiff relerr 1.1e-6
+    at `tol=1e-8`.
+  - **`solveODE(..., { method: 'Radau' })`** — 3-stage order-5 L-stable Radau IIA (real-arithmetic
+    simplified-Newton on the collocation system + scipy's embedded error estimate). vs
+    `scipy.integrate.solve_ivp('Radau')`: Robertson Δ≤3e-10, Van der Pol μ=1000 Δ=3.3e-9; linear-stiff relerr
+    ~1.6e-10.
+  - **`solveODESystem` — adaptive by default.** Was fixed-step RK4; now an embedded RK45 (Dormand–Prince) with
+    scaled-RMS error control. Passing an explicit `dt` still selects the legacy fixed-step path (back-compat).
+
+  General method-of-lines PDE (beyond the heat-only `solvePDE`), index-1 DAE, and DDE remain future scope with
+  recorded designs (rewriting `solvePDE`'s numerics is deliberately left for a sign-off, not auto-changed).
+
 ## 0.50.0
 
 ### Minor Changes
