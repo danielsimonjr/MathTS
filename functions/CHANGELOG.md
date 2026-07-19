@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-functions
 
+## 0.50.0
+
+### Minor Changes
+
+- Computational-geometry engine: convex hull, Delaunay, Voronoi, spherical Voronoi, alpha shapes.
+
+  Five new scipy.spatial-pinned geometry functions built on a new hull/Delaunay foundation:
+  - **`convexHull`** — 2-D monotone-chain + 3-D QuickHull → `{vertices, simplices, area, volume}` (scipy `.area`/
+    `.volume` convention). Vertex sets exact; area/volume to 1e-8–1e-10 vs `scipy.spatial.ConvexHull`.
+  - **`delaunay`** (2-D) — triangle count matches `scipy.spatial.Delaunay`; empty-circumcircle property holds ∀
+    triangle; triangles partition the hull to 1e-10.
+  - **`voronoi`** (2-D) — the Delaunay dual (circumcenter vertices, equidistant to generators to 1e-9).
+  - **`sphericalVoronoi`** — via the 3-D hull; vertex count `2N−4`, geodesic areas sum to `4πr²` to 1e-8 vs
+    `scipy.spatial.SphericalVoronoi`.
+  - **`alphaShape`** (2-D) — Delaunay circumradius filter; recovers holes (annulus → 2 boundary loops).
+
+  Also **fixed a real bug**: the `delaunay_wasm` kernel read past its output buffer (returned 1363 triangles vs 197) — its dispatch is disabled; the JS Bowyer–Watson path is always used. Halfspace-intersection / n-D vertex
+  enumeration remain future scope (double-description / dual-hull design recorded).
+
 ## 0.49.0
 
 ### Minor Changes
