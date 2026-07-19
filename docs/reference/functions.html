@@ -2396,7 +2396,8 @@
       | `solveODE(f, tspan, y0[, opts])`                 | ODE solver (factory layer)                                                                                                                                  | —     |
       | `solveODESystem(fs, tspan, y0)`                  | System of ODEs                                                                                                                                              | WASM  |
       | `solveBVP(f, bc, mesh[, y0Guess])`               | Boundary value problem solver for a general first-order system `y' = f(t,y)` via single shooting; `y0Guess` (default `[0, 0]`) sets the state dimension `n` | —     |
-      | `solvePDE(...)`                                  | PDE solver                                                                                                                                                  | —     |
+      | `solvePDE(...)`                                  | 1-D heat-equation PDE solver (explicit Euler, fixed step; legacy)                                                                                            | —     |
+      | `solveParabolicPDE({ diffusion, advection?, source?, x0, x1, T, nx, u0, bcLeft, bcRight, ... })` | General 1-D parabolic PDE `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` via method-of-lines onto the BDF stiff solver; Dirichlet/Neumann BCs; returns `{ x, t, u[t][x] }` (O(h²) in space) | —     |
       | `stiffODESolver(...)`                            | Stiff-ODE solver                                                                                                                                            | —     |
       | `odeAdaptiveStep(...)`                           | Adaptive-step ODE integration                                                                                                                               | —     |
       | `eventDetection(...)`                            | ODE event detection                                                                                                                                         | —     |
@@ -3466,7 +3467,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1056 exports).
+      > `@danielsimonjr/mathts-functions` (1057 exports).
 
       ### Functions by category
 
@@ -3500,7 +3501,7 @@
 
       **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-      **Numerical Methods** (37): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+      **Numerical Methods** (38): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveODE`, `solveODESystem`, `solveParabolicPDE`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
       **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 

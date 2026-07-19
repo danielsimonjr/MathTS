@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1726,
+  "totalFiles": 1728,
   "byDisposition": {
-    "reachable": 1066,
+    "reachable": 1067,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 565,
+    "test": 566,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1102,
-    "tests": 565,
+    "src": 1103,
+    "tests": 566,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 717,
+    "@danielsimonjr/mathts-functions": 719,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -6039,6 +6039,13 @@
       "loc": 2100
     },
     {
+      "file": "functions/src/numeric/solveParabolicPDE.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 240
+    },
+    {
       "file": "functions/src/numeric/structured-solvers.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7275,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2560
+      "loc": 2572
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -8444,7 +8451,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 252
+      "loc": 270
     },
     {
       "file": "functions/tests/gap-stats-breadth-oracle.test.ts",
@@ -8970,6 +8977,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/parabolic-pde.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 205
     },
     {
       "file": "functions/tests/parallel-arithmetic-unary.test.ts",

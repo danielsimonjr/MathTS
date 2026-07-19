@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 3
-- **Potentially unused exports**: 204
+- **Potentially unused exports**: 203
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 203
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 202
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -194,7 +194,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/numeric/solveODE.ts`
 
 - `rodasSolve` (function) — 4 in-file refs
-- `bdfSolve` (function) — 3 in-file refs
 - `radauSolve` (function) — 2 in-file refs
 
 ### `functions/src/probability/random.ts`

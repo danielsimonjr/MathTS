@@ -501,22 +501,23 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
       stiff exact closed forms (e^-10, e^-1) to <1e-6. `solveODESystem` gained an **adaptive** embedded
       RK45 (Dormand-Prince) default path (`_adaptiveRK45System`); explicit `dt` still selects the legacy
       fixed-step RK4 (back-compat — BVP shooting driver unaffected). Pinned vs exact harmonic oscillator + scipy RK45 Lotka-Volterra (~1e-6).
-- [ ] **SURFACED sub-projects (scoped, NOT started this pass — each a distinct effort):**
-      **(1) General 1-D parabolic PDE via MOL.** `solvePDE` is explicit-Euler heat-only. Design:
-      generalize to `u_t = D(x)·u_xx + f(x,t,u)` by method-of-lines — second-difference the interior
-      nodes into a semi-discrete ODE system, integrate with the **new `bdfSolve`** (now unblocked;
-      implicit → no CFL cap). Blast radius: changes `solvePDE`'s method (explicit→implicit) and the
-      meaning of `nt`/`T` → **ADR-level** (a shipped function's numerics change); prefer a NEW
-      `solveParabolicPDE` entry over mutating `solvePDE`. Oracle: exact heat `e^(−Dπ²t)sin(πx)` +
-      Fisher-KPP / known reaction-diffusion fronts. 2-D/hyperbolic = further extensions.
-      **(2) DAE (index-1) via BDF.** Semi-explicit `M·y' = f(t,y)` / `0 = g(t,y)`. Design: BDF on the
-      differential block + Newton on the algebraic constraint (the `bdfSolve` Newton machinery extends
-      to a singular mass matrix). Oracle: scipy has no DAE, so pin vs Sundials IDA reference values or
-      exact constrained systems (pendulum-on-a-string index-1 reduction). Distinct sub-project.
-      **(3) DDE (delay ODEs).** `y'(t)=f(t,y(t),y(t−τ))`. Design: continuous extension (dense output)
-      of an RK/BDF method + a history buffer; Bellen–Zennaro method-of-steps. Oracle: exact solutions
-      of linear scalar DDEs (`y'=−y(t−τ)` characteristic roots) / Julia `DelayDiffEq` references.
-      Distinct sub-project.
+- [~] **SURFACED sub-projects (scoped — part 1 of 3 DONE this pass; DAE/DDE remain):**
+  **(1) General 1-D parabolic PDE via MOL. ✅ DONE 2026-07-19 (`solveParabolicPDE`).** Solves
+  `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` by method-of-lines (uniform grid, central 2nd/1st
+  differences → stiff ODE system) integrated with the **new `bdfSolve`** (implicit → no CFL cap).
+  Dirichlet + Neumann (ghost-node, O(h²)) BCs; returns `{x, t, u[t][x]}`. Added as a NEW public
+  entry (`functions/src/numeric/solveParabolicPDE.ts`); legacy explicit-Euler `solvePDE` left
+  unchanged (its numerics are ADR-level). Oracle-pinned: exact heat relerr 1.27e-4 @ nx=81, O(h²)
+  rate **2.000**; manufactured 1.19e-4; Neumann 1.27e-4; scipy `solve_ivp(BDF)` MOL cross-check
+  ≤1.0e-12. 2-D/hyperbolic = further extensions.
+  **(2) DAE (index-1) via BDF.** Semi-explicit `M·y' = f(t,y)` / `0 = g(t,y)`. Design: BDF on the
+  differential block + Newton on the algebraic constraint (the `bdfSolve` Newton machinery extends
+  to a singular mass matrix). Oracle: scipy has no DAE, so pin vs Sundials IDA reference values or
+  exact constrained systems (pendulum-on-a-string index-1 reduction). Distinct sub-project.
+  **(3) DDE (delay ODEs).** `y'(t)=f(t,y(t),y(t−τ))`. Design: continuous extension (dense output)
+  of an RK/BDF method + a history buffer; Bellen–Zennaro method-of-steps. Oracle: exact solutions
+  of linear scalar DDEs (`y'=−y(t−τ)` characteristic roots) / Julia `DelayDiffEq` references.
+  Distinct sub-project.
 - [x] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
       (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
       (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)

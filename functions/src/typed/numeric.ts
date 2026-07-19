@@ -15,6 +15,18 @@ import { wasmLoader } from '../wasm/WasmLoader.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
 
+// General 1-D parabolic PDE via method-of-lines onto the BDF stiff solver (new
+// public entry, distinct from the legacy explicit-Euler heat-only `solvePDE`).
+export {
+  solveParabolicPDE,
+  type SolveParabolicPDEOptions,
+  type ParabolicPDESolution,
+  type ParabolicBC,
+  type SpaceCoefficient,
+  type BoundaryDatum,
+  type ParabolicSource,
+} from '../numeric/solveParabolicPDE.js';
+
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
 // =============================================================================

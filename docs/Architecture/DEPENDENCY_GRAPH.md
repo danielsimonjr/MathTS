@@ -138,7 +138,7 @@ The codebase is organized into the following modules:
 - **functions/matrix**: 45 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 1 file
-- **functions/numeric**: 19 files
+- **functions/numeric**: 20 files
 - **functions/plain**: 10 files
 - **functions/probability**: 15 files
 - **functions/relational**: 13 files
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 452            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 453            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 421            | 1               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -6225,6 +6225,21 @@ graph LR
 
 ---
 
+### `functions/src/numeric/solveParabolicPDE.ts` - General 1-D parabolic PDE solver via the method of lines (MOL).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./solveODE.js` | `bdfSolve` | Import |
+
+**Exports:**
+
+- Interfaces: `ParabolicBC`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`
+- Types: `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`
+- Functions: `solveParabolicPDE`
+
+---
+
 ### `functions/src/numeric/structured-solvers.ts` - Structured and indefinite direct linear solvers.
 
 **Exports:**
@@ -9087,11 +9102,13 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../numeric/solveODE.js` | `rosenbrockSolve` | Import |
 | `../numeric/adaptive-quad.js` | `quad` | Import |
+| `../numeric/solveParabolicPDE.js` | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
 
 **Exports:**
 
 - Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `LinprogOptions`, `LinprogResult`
 - Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `linprog`, `linprog`, `solvePDE`
+- Re-exports: `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`
 
 ---
 
@@ -16243,7 +16260,7 @@ graph TD
         N196[interpn]
         N197[interval]
         N198[krylov]
-        N199[...9 more]
+        N199[...10 more]
     end
 
     subgraph Functions/plain
@@ -16753,14 +16770,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1099   |
+| Total TypeScript Files  | 1100   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 188256 |
-| Total Exports           | 5636   |
-| Total Re-exports        | 2279   |
+| Total Lines of Code     | 188508 |
+| Total Exports           | 5644   |
+| Total Re-exports        | 2286   |
 | Total Classes           | 52     |
-| Total Interfaces        | 488    |
-| Total Functions         | 1776   |
+| Total Interfaces        | 491    |
+| Total Functions         | 1777   |
 | Total Type Guards       | 156    |
 | Total Enums             | 0      |
 | Type-only Imports       | 577    |

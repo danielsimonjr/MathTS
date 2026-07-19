@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): general 1-D parabolic PDE solver `solveParabolicPDE` (method-of-lines + BDF)
+
+- **`solveParabolicPDE({ diffusion, advection?, source?, x0, x1, T, nx, u0, bcLeft, bcRight, tol?, maxStep?, times? })`**
+  — solves the general 1-D parabolic PDE `u_t = D(x)·u_xx + c(x)·u_x + f(x, t, u)` on `x ∈ [x0, x1]`,
+  `t ∈ [0, T]` by the **method of lines**: a uniform `nx`-point grid with the second-order central
+  second/first differences semi-discretises the PDE into a **stiff** ODE system in the nodal values,
+  integrated with the variable-order **BDF** stiff solver (`bdfSolve`) — implicit, so no explicit-Euler
+  CFL step cap. Supports **Dirichlet** (`u = g(t)`) and **Neumann** (`u_x = g(t)`, second-order
+  ghost-node closure) boundary conditions at each end; `D`/`c` may be constants or functions of `x`,
+  `g` constant or a function of `t`. Returns `{ x, t, u[t][x] }` (full grid including boundary nodes);
+  optional `times` interpolates the solution onto explicit output times. Lives in
+  `functions/src/numeric/solveParabolicPDE.ts`.
+- **Oracle-pinned.** Exact heat `u_t = u_xx`, `u(x,0)=sin(πx)`, Dirichlet 0 → `u = e^{−π²t}sin(πx)`:
+  max relerr **1.27e-4** at `nx=81`, with **exactly O(h²)** spatial convergence (measured rate **2.000**
+  across two grid halvings, 21→41→81→161). Manufactured reaction-diffusion (`u=e^{−t}sin(πx)`, derived
+  source): relerr **1.19e-4**. Neumann insulated ends (`u=e^{−π²t}cos(πx)`): relerr **1.27e-4**.
+  Cross-checked vs `scipy.integrate.solve_ivp(method='BDF')` on the identical MOL semi-discretisation
+  (advection-diffusion): agreement to **≤ 1.0e-12** — confirming the MOL + BDF pipeline is wired
+  correctly. Tests in `functions/tests/parabolic-pde.test.ts`.
+- The legacy explicit-Euler heat-only **`solvePDE` is unchanged** (a shipped function's numerics are
+  ADR-level); `solveParabolicPDE` is a distinct, additive public entry point.
+
 ### feat(functions): irregular Coulomb wave function `coulombG` (+ `coulombFG` bundle)
 
 - **`coulombG(L, eta, rho)`** — the irregular Coulomb wave function `G_L(η, ρ)`, the second solution

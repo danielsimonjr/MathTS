@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1099
+  totalFiles: 1100
   totalModules: 82
-  totalExports: 5636
+  totalExports: 5644
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -13894,6 +13894,23 @@ modules:
         - radauSolve
       constants:
         - createSolveODE
+    functions/src/numeric/solveParabolicPDE.ts:
+      description: General 1-D parabolic PDE solver via the method of lines (MOL).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./solveODE.js
+          imports:
+            - bdfSolve
+      workspaceDependencies: []
+      exports:
+        - solveParabolicPDE
+      interfaces:
+        - ParabolicBC
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+      functions:
+        - solveParabolicPDE
     functions/src/numeric/structured-solvers.ts:
       description: Structured and indefinite direct linear solvers.
       externalDependencies: []
@@ -19499,8 +19516,25 @@ modules:
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
+        - file: ../numeric/solveParabolicPDE.js
+          imports:
+            - solveParabolicPDE
+            - SolveParabolicPDEOptions
+            - ParabolicPDESolution
+            - ParabolicBC
+            - SpaceCoefficient
+            - BoundaryDatum
+            - ParabolicSource
+          reExport: true
       workspaceDependencies: []
       exports:
+        - solveParabolicPDE
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+        - ParabolicBC
+        - SpaceCoefficient
+        - BoundaryDatum
+        - ParabolicSource
         - findRoot
         - linsolve
         - minimize
@@ -19534,6 +19568,14 @@ modules:
         - quadprog
         - linprog
         - solvePDE
+      reExported:
+        - solveParabolicPDE
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+        - ParabolicBC
+        - SpaceCoefficient
+        - BoundaryDatum
+        - ParabolicSource
       interfaces:
         - FindRootOptions
         - MinimizeOptions
@@ -35200,6 +35242,7 @@ dependencyGraph:
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/solveODE.ts
+        - functions/src/numeric/solveParabolicPDE.ts
         - functions/src/numeric/structured-solvers.ts
         - functions/src/numeric/svds.ts
     - name: Functions/plain
@@ -36056,19 +36099,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1099
+  totalTypeScriptFiles: 1100
   totalModules: 82
-  totalLinesOfCode: 188256
-  totalExports: 5636
+  totalLinesOfCode: 188508
+  totalExports: 5644
   totalClasses: 52
-  totalInterfaces: 488
-  totalFunctions: 1776
+  totalInterfaces: 491
+  totalFunctions: 1777
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2279
+  totalReExports: 2286
   totalTypeOnlyImports: 577
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 204
+  unusedExportsCount: 203
