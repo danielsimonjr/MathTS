@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-19",
-    "totalFiles": 1089,
+    "totalFiles": 1090,
     "totalModules": 82,
-    "totalExports": 5579
+    "totalExports": 5583
   },
   "entryPoints": [
     {
@@ -8756,6 +8756,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric/svds.js",
+            "imports": ["svds"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/structured-solvers.js",
             "imports": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"],
             "reExport": true
@@ -9101,6 +9106,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/svds.js",
+            "imports": ["SvdsOptions", "SvdsResult"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./numeric/structured-solvers.js",
             "imports": ["LDLResult"],
             "reExport": true,
@@ -9406,6 +9417,7 @@
           "gmres",
           "bicgstab",
           "eigsh",
+          "svds",
           "thomasSolve",
           "solveBanded",
           "toeplitzSolve",
@@ -9592,6 +9604,8 @@
           "EigshOperatorInput",
           "EigshOptions",
           "EigshResult",
+          "SvdsOptions",
+          "SvdsResult",
           "LDLResult",
           "ComplexValue",
           "ComplexMatrix",
@@ -9771,6 +9785,7 @@
           "gmres",
           "bicgstab",
           "eigsh",
+          "svds",
           "thomasSolve",
           "solveBanded",
           "toeplitzSolve",
@@ -9957,6 +9972,8 @@
           "EigshOperatorInput",
           "EigshOptions",
           "EigshResult",
+          "SvdsOptions",
+          "SvdsResult",
           "LDLResult",
           "ComplexValue",
           "ComplexMatrix",
@@ -14629,6 +14646,21 @@
         "exports": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"],
         "interfaces": ["LDLResult"],
         "functions": ["thomasSolve", "solveBanded", "toeplitzSolve", "ldl"]
+      },
+      "functions/src/numeric/svds.ts": {
+        "description": "Sparse / partial SVD — the top-`k` singular triplets via Lanczos.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./eigsh.js",
+            "imports": ["eigsh"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["svds"],
+        "interfaces": ["SvdsOptions", "SvdsResult"],
+        "functions": ["svds"]
       }
     },
     "functions/plain": {
@@ -37019,7 +37051,8 @@
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/solveODE.ts",
-          "functions/src/numeric/structured-solvers.ts"
+          "functions/src/numeric/structured-solvers.ts",
+          "functions/src/numeric/svds.ts"
         ]
       },
       {
@@ -37972,18 +38005,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1089,
+    "totalTypeScriptFiles": 1090,
     "totalModules": 82,
-    "totalLinesOfCode": 185608,
-    "totalExports": 5579,
+    "totalLinesOfCode": 185741,
+    "totalExports": 5583,
     "totalClasses": 52,
-    "totalInterfaces": 476,
-    "totalFunctions": 1753,
+    "totalInterfaces": 478,
+    "totalFunctions": 1754,
     "totalTypeGuards": 156,
     "totalEnums": 0,
     "totalConstants": 1542,
-    "totalReExports": 2246,
-    "totalTypeOnlyImports": 568,
+    "totalReExports": 2249,
+    "totalTypeOnlyImports": 569,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

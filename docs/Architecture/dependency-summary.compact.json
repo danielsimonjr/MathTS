@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1089, "e": 5579, "re": 2246 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-19", "f": 1090, "e": 5583, "re": 2249 },
   "s": {
-    "loc": 185608,
+    "loc": 185741,
     "cls": 52,
-    "int": 476,
-    "fn": 1753,
+    "int": 478,
+    "fn": 1754,
     "tg": 156,
     "en": 0,
     "co": 1542,
-    "toi": 568
+    "toi": 569
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -759,7 +759,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 18,
+      "f": 19,
       "exp": [
         "quad",
         "bfgs",
@@ -1807,7 +1807,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 106, "o": 0 },
+    { "p": "src/index.ts", "i": 108, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

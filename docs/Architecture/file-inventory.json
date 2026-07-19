@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1705,
+  "totalFiles": 1707,
   "byDisposition": {
-    "reachable": 1056,
+    "reachable": 1057,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 554,
+    "test": 555,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1092,
-    "tests": 554,
+    "src": 1093,
+    "tests": 555,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 696,
+    "@danielsimonjr/mathts-functions": 698,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5462,7 +5462,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 547
+      "loc": 553
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6009,6 +6009,13 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 347
+    },
+    {
+      "file": "functions/src/numeric/svds.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 127
     },
     {
       "file": "functions/src/optimization-extra.ts",
@@ -8710,7 +8717,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 183
+      "loc": 181
     },
     {
       "file": "functions/tests/lambertw-branch.test.ts",
@@ -9089,6 +9096,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 47
+    },
+    {
+      "file": "functions/tests/svds.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 114
     },
     {
       "file": "functions/tests/taylor-exact.test.ts",

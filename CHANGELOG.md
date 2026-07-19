@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): `svds` — sparse / partial SVD (top-`k` singular triplets via Lanczos)
+
+- New `svds(A, k)` returns the `k` **largest** singular values and their left/right singular vectors
+  of a dense `m × n` matrix, for large/sparse problems where the full `svd` (which factors the whole
+  matrix) is wasteful. Runs the Lanczos iteration (via `eigsh`) on the smaller normal operator —
+  `AᵀA` (`n×n`) when `m ≥ n`, else `A Aᵀ` (`m×m`) — never forming that product (each matvec is a
+  matvec by `A` then by `Aᵀ`); singular values are `√λ` of the Ritz eigenvalues, complementary
+  vectors from `A vⱼ = σⱼ uⱼ` / `Aᵀ uⱼ = σⱼ vⱼ`. Result `{ U (m×k), s (descending), V (n×k) }`, vectors
+  as columns.
+- Singular values are returned **descending** (matching this library's `svd`), the opposite of
+  `scipy.sparse.linalg.svds` (ascending) — documented. Pinned to `numpy.linalg.svd`/scipy `svds`: top-k
+  values to 7–8 digits, the SVD defining relation `A vⱼ = σⱼ uⱼ` (implementation-independent) to < 1e-6,
+  orthonormal `U`/`V` columns, and the Eckart–Young rank-`k` truncation error `‖A − UΣVᵀ‖_F =
+  √(Σ_{i>k} σᵢ²)`; covers both the tall (`AᵀA`) and wide (`AAᵀ`) paths (`functions/tests/svds.test.ts`).
+
 ### perf(functions): `minres` short-recurrence rewrite — O(k³) → O(k·n)
 
 - `minres` (Krylov solver for symmetric indefinite `A`) was reformulated from the "re-solve the

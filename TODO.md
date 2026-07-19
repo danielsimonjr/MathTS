@@ -381,11 +381,15 @@ or a documented scope limit worth revisiting.
 - [~] **Linalg extension:** ✅ **rank-revealing `qrPivoted` + `rq`/`ql`/`lq` + `condest` DONE 2026-07-16
   (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
   condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.
-  **Remaining:** `generalizedEig` QZ-hardening (Francis double-shift); sparse `svds` (Lanczos);
+  **Remaining:** `generalizedEig` QZ-hardening (Francis double-shift); ~~sparse `svds` (Lanczos)~~;
   preconditioners beyond Jacobi (ILU/IC); ~~`minres` optimal Givens (O(k³)→O(k²))~~.
   - [x] ✅ **`minres` O(k³)→O(k·n) — DONE 2026-07-18.** Rewrote to Paige–Saunders short recurrence
         (Lanczos + incremental Givens QR + 3-term `w`-recurrence); no growing least-squares. One matvec
         per iteration (structural test), scipy-pinned solution/residual. `functions/src/numeric/krylov.ts`.
+  - [x] ✅ **sparse `svds` (Lanczos) — DONE 2026-07-18 (functions@unreleased).** `svds(A, k)` top-k
+        singular triplets via `eigsh` Lanczos on the smaller normal operator (AᵀA / AAᵀ, never formed);
+        descending (opposite of scipy). scipy/numpy-pinned + defining-relation + Eckart–Young oracles.
+        `functions/src/numeric/svds.ts`.
 - [x] ✅ **funm defective matrices — DONE 2026-07-16 (functions@0.39.0).** Replaced the throw with
       **confluent Hermite interpolation** (Newton divided differences over repeated eigenvalue nodes;
       `f(J)=Σ f^(k)(λ)/k!·N^k`). Derivatives of `f` from an optional additive `fDerivs` arg (machine

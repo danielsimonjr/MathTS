@@ -205,6 +205,12 @@ export type {
 export { eigsh } from './numeric/eigsh.js';
 export type { EigshOperatorInput, EigshOptions, EigshResult } from './numeric/eigsh.js';
 
+// Sparse / partial SVD — the top-k singular triplets via Lanczos on the
+// smaller normal operator (AᵀA / AAᵀ), for large/sparse A where a full `svd`
+// is wasteful. Singular values returned descending (opposite of scipy svds).
+export { svds } from './numeric/svds.js';
+export type { SvdsOptions, SvdsResult } from './numeric/svds.js';
+
 // Phase 7 Task 3 — structured & indefinite direct solvers: O(n) tridiagonal
 // (thomasSolve), banded-aware Gaussian elimination (solveBanded), O(n^2)
 // Toeplitz via Levinson-Durbin (toeplitzSolve), and Bunch-Kaufman-pivoted
