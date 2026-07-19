@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-19",
-  "totalFiles": 1730,
+  "totalFiles": 1732,
   "byDisposition": {
-    "reachable": 1068,
+    "reachable": 1069,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 567,
+    "test": 568,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1104,
-    "tests": 567,
+    "src": 1105,
+    "tests": 568,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 721,
+    "@danielsimonjr/mathts-functions": 723,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -6039,6 +6039,13 @@
       "loc": 540
     },
     {
+      "file": "functions/src/numeric/solveDDE.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 331
+    },
+    {
       "file": "functions/src/numeric/solveODE.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7289,7 +7296,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2582
+      "loc": 2591
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -7948,6 +7955,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 50
+    },
+    {
+      "file": "functions/tests/dde.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 219
     },
     {
       "file": "functions/tests/dedup-bucketB-equivalence.test.ts",

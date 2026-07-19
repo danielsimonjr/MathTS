@@ -501,28 +501,36 @@ volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-
       stiff exact closed forms (e^-10, e^-1) to <1e-6. `solveODESystem` gained an **adaptive** embedded
       RK45 (Dormand-Prince) default path (`_adaptiveRK45System`); explicit `dt` still selects the legacy
       fixed-step RK4 (back-compat — BVP shooting driver unaffected). Pinned vs exact harmonic oscillator + scipy RK45 Lotka-Volterra (~1e-6).
-- [~] **SURFACED sub-projects (scoped — parts 1 & 2 of 3 DONE; DDE remains):**
-  **(1) General 1-D parabolic PDE via MOL. ✅ DONE 2026-07-19 (`solveParabolicPDE`).** Solves
-  `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` by method-of-lines (uniform grid, central 2nd/1st
-  differences → stiff ODE system) integrated with the **new `bdfSolve`** (implicit → no CFL cap).
-  Dirichlet + Neumann (ghost-node, O(h²)) BCs; returns `{x, t, u[t][x]}`. Added as a NEW public
-  entry (`functions/src/numeric/solveParabolicPDE.ts`); legacy explicit-Euler `solvePDE` left
-  unchanged (its numerics are ADR-level). Oracle-pinned: exact heat relerr 1.27e-4 @ nx=81, O(h²)
-  rate **2.000**; manufactured 1.19e-4; Neumann 1.27e-4; scipy `solve_ivp(BDF)` MOL cross-check
-  ≤1.0e-12. 2-D/hyperbolic = further extensions.
-  **(2) DAE (index-1) via BDF. ✅ DONE 2026-07-19 (`solveDAE`).** Semi-explicit `y'=f(t,y,z)` /
-  `0=g(t,y,z)` (index-1 ⟺ `∂g/∂z` nonsingular). Variable-step, variable-order (1–2) BDF on the
-  differential block + **coupled** Newton solving the BDF equation AND the algebraic constraint
-  together each step (block Jacobian FD or analytic; LU via the shared `_factorSolver`); consistent
-  `z0` auto-solve; higher-index detected as singular `∂g/∂z`. Returns `{t, y[t], z[t]}`. Added as a
-  NEW public entry (`functions/src/numeric/solveDAE.ts`). Oracle-pinned (scipy has no DAE):
-  manufactured/closed-form max abs err 2.35e-7 @ tol1e-9; **constraint residual ≤8.9e-16 over the
-  whole trajectory**; reduce-to-ODE cross-check Δ2.13e-7; RC-circuit + vector (non-identity ∂g/∂z)
-  cases. `functions/tests/dae.test.ts` (11 cases). Higher-index/2-D = further extensions.
-  **(3) DDE (delay ODEs).** `y'(t)=f(t,y(t),y(t−τ))`. Design: continuous extension (dense output)
-  of an RK/BDF method + a history buffer; Bellen–Zennaro method-of-steps. Oracle: exact solutions
-  of linear scalar DDEs (`y'=−y(t−τ)` characteristic roots) / Julia `DelayDiffEq` references.
-  Distinct sub-project.
+- [x] **SURFACED sub-projects (scoped — all 3 of 3 DONE: PDE, DAE, DDE):**
+      **(1) General 1-D parabolic PDE via MOL. ✅ DONE 2026-07-19 (`solveParabolicPDE`).** Solves
+      `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` by method-of-lines (uniform grid, central 2nd/1st
+      differences → stiff ODE system) integrated with the **new `bdfSolve`** (implicit → no CFL cap).
+      Dirichlet + Neumann (ghost-node, O(h²)) BCs; returns `{x, t, u[t][x]}`. Added as a NEW public
+      entry (`functions/src/numeric/solveParabolicPDE.ts`); legacy explicit-Euler `solvePDE` left
+      unchanged (its numerics are ADR-level). Oracle-pinned: exact heat relerr 1.27e-4 @ nx=81, O(h²)
+      rate **2.000**; manufactured 1.19e-4; Neumann 1.27e-4; scipy `solve_ivp(BDF)` MOL cross-check
+      ≤1.0e-12. 2-D/hyperbolic = further extensions.
+      **(2) DAE (index-1) via BDF. ✅ DONE 2026-07-19 (`solveDAE`).** Semi-explicit `y'=f(t,y,z)` /
+      `0=g(t,y,z)` (index-1 ⟺ `∂g/∂z` nonsingular). Variable-step, variable-order (1–2) BDF on the
+      differential block + **coupled** Newton solving the BDF equation AND the algebraic constraint
+      together each step (block Jacobian FD or analytic; LU via the shared `_factorSolver`); consistent
+      `z0` auto-solve; higher-index detected as singular `∂g/∂z`. Returns `{t, y[t], z[t]}`. Added as a
+      NEW public entry (`functions/src/numeric/solveDAE.ts`). Oracle-pinned (scipy has no DAE):
+      manufactured/closed-form max abs err 2.35e-7 @ tol1e-9; **constraint residual ≤8.9e-16 over the
+      whole trajectory**; reduce-to-ODE cross-check Δ2.13e-7; RC-circuit + vector (non-identity ∂g/∂z)
+      cases. `functions/tests/dae.test.ts` (11 cases). Higher-index/2-D = further extensions.
+      **(3) DDE (delay ODEs). ✅ DONE 2026-07-19 (`solveDDE`).** Constant-delay `y'(t)=f(t,y(t),
+[y(t−τ₁),…])` via the **method of steps**: adaptive **BS23** (Bogacki–Shampine, the `dde23` pair)
+  - **cubic-Hermite continuous extension** (dense output) as the history interpolant; step **capped
+    at min(τ)** so delayed args always lie in computed history (fully explicit); **lands exactly on
+    `t0+kτ` breakpoints** so no interval straddles a derivative jump. Multiple delays + vector state;
+    history function-or-constant. Returns `{t, y[t], yInterp}`. NEW public entry
+    (`functions/src/numeric/solveDDE.ts`, re-exported via `typed/numeric.ts`). Oracle-pinned (scipy
+    has no DDE; all implementation-independent): method-of-steps EXACT piecewise polys of `y'=−y(t−1)`
+    over 3 intervals **maxAbs 4.996e-16** (machine precision); characteristic roots `s=a·e^{−sτ}` —
+    real-root decay **−0.357403** and complex-root period **4.698**/decay **−0.31818**; ODE-degeneration
+    vs `solveODESystem` **Δ2.4e-10**; breakpoint-landing + C⁰ continuity + y″-jump. `functions/tests/
+dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = further extensions.
 - [x] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
       (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
       (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)

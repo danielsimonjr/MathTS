@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): constant-delay DDE solver `solveDDE` (method of steps + continuous extension)
+
+- **`solveDDE(f, tspan, history, delays, options?)`** — solves the constant-delay **delay
+  differential equation** `y'(t) = f(t, y(t), [y(t−τ₁), y(t−τ₂), …])` on `t ∈ [t0, T]` with a
+  **history function** `φ(t)` giving `y(t)` for `t ≤ t0` (initial state `y(t0) = φ(t0)`) and one or
+  more positive constant delays `τ_k`. Method: the standard **method of steps** — the adaptive
+  **BS23** (Bogacki–Shampine 3(2)) embedded RK pair (the pair MATLAB `dde23` uses) with a
+  **cubic-Hermite continuous extension** (C¹, O(h⁴) dense output built from the stored per-step
+  `(t, y, y')`) as the history interpolant. Each delayed argument `y(t − τ_k)` is read from `φ` when
+  `t − τ_k ≤ t0`, else from the dense output of the already-computed solution.
+- **Step cap (the standard MOS constraint):** each step is capped at `h ≤ min(τ)`, which guarantees
+  every delayed argument lies in already-accepted history — the method stays fully **explicit** (no
+  implicit self-coupling). Adaptive local-error control still chooses `h` freely within that cap.
+- **Discontinuity propagation:** `y'` generically jumps at `t0` (the history need not satisfy the
+  DDE) and that low-order discontinuity propagates to `t0 + τ_k, t0 + 2τ_k, …`, smoothing one order
+  at each. The integrator **lands exactly on each `t0 + m·τ_k` breakpoint** (steps are trimmed never
+  to cross one), so no dense-output interval straddles a derivative jump.
+- Supports **multiple constant delays** and **vector state**; `history` may be a function or a
+  constant. Returns `{ t, y[t], yInterp }` where `yInterp` is the dense-output evaluator over
+  `[t0, T]`; `y` is unwrapped to `number[]` for a scalar DDE, else `number[][]`. Plain-number state
+  only. Lives in `functions/src/numeric/solveDDE.ts`; re-exported from `functions/src/typed/numeric.ts`.
+- **Oracle-pinned (scipy has no DDE; Julia `DelayDiffEq` / MATLAB `dde23` are references), all
+  implementation-independent** — `functions/tests/dde.test.ts` (14 cases): method-of-steps EXACT
+  piecewise-polynomial solutions of `y'=−y(t−1)` over 3 delay intervals (max abs err **4.996e-16**,
+  machine precision — cubic Hermite reproduces the piecewise polynomials exactly); growing
+  `y'=y(t−1)` and two-delay `y'=−y(t−1)−y(t−2)` closed forms (~1e-7); linear-DDE **characteristic
+  roots** of `s = a·e^{−sτ}` — real dominant root decay rate of `y'=−0.25 y(t−1)` matched to
+  **−0.357403** and the complex principal-root period **4.698** / decay **−0.31818** of `y'=−y(t−1)`
+  extracted from the dense output; breakpoint landing + C⁰ continuity + the `y″` jump at `t=1`;
+  ODE-degeneration (τ=100 never bites → reduces to a plain ODE, cross-checked vs `solveODESystem`,
+  Δ **2.4e-10**); callable-history and vector cases; input validation. All exact-form derivations
+  independently verified (fine fixed-step MOS reference + scipy root solves).
+- Part 3 (final) of the surfaced PDE/DAE/DDE ODE-family sub-projects — the trio is now complete
+  (part 1 `solveParabolicPDE`, part 2 `solveDAE`).
+
 ### feat(functions): semi-explicit index-1 DAE solver `solveDAE` (BDF + coupled Newton)
 
 - **`solveDAE(f, g, tspan, y0, z0?, options?)`** — solves the semi-explicit **index-1**

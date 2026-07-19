@@ -6,21 +6,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1730
+**Total files**: 1732
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
-| `reachable`   |     1068 | A `src/` file in the module graph, reachable from a root.                                                    |
+| `reachable`   |     1069 | A `src/` file in the module graph, reachable from a root.                                                    |
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        3 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      567 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      568 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1730** |                                                                                                              |
+| **Total**     | **1732** |                                                                                                              |
 
 ## Per-area counts
 
@@ -28,8 +28,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1104 |
-| `tests`    |   567 |
+| `src`      |  1105 |
+| `tests`    |   568 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -44,7 +44,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   489 |
-| `@danielsimonjr/mathts-functions`      |   721 |
+| `@danielsimonjr/mathts-functions`      |   723 |
 | `@danielsimonjr/mathts-gpu`            |    14 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    92 |
@@ -922,6 +922,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/numeric/numeric-jacobian.ts`                                       | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/numeric/open-root-finders.ts`                                      | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/numeric/solveDAE.ts`                                               | @danielsimonjr/mathts-functions      | src      | reachable   |
+| `functions/src/numeric/solveDDE.ts`                                               | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/numeric/solveODE.ts`                                               | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/numeric/solveParabolicPDE.ts`                                      | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/numeric/structured-solvers.ts`                                     | @danielsimonjr/mathts-functions      | src      | reachable   |
@@ -1195,6 +1196,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/cov-trigonometry.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dae.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dbscan-knn.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dde.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dedup-bucketB-equivalence.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dedup-bucketB-slice2-equivalence.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts`                    | @danielsimonjr/mathts-functions      | tests    | test        |

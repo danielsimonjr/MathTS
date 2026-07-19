@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-19'
-  totalFiles: 1101
+  totalFiles: 1102
   totalModules: 82
-  totalExports: 5652
+  totalExports: 5658
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -13867,6 +13867,19 @@ modules:
         - DAESolution
       functions:
         - solveDAE
+    functions/src/numeric/solveDDE.ts:
+      description: Constant-delay delay differential equation (DDE) solver via the method of steps.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - solveDDE
+      interfaces:
+        - SolveDDEOptions
+        - DDESolution
+      functions:
+        - solveDDE
     functions/src/numeric/solveODE.ts:
       description: Butcher Tableau structure for Runge-Kutta methods
       externalDependencies: []
@@ -19554,6 +19567,14 @@ modules:
             - DAEConstraint
             - DAEJacobianBlocks
           reExport: true
+        - file: ../numeric/solveDDE.js
+          imports:
+            - solveDDE
+            - SolveDDEOptions
+            - DDESolution
+            - DDEForcing
+            - DDEHistory
+          reExport: true
       workspaceDependencies: []
       exports:
         - solveParabolicPDE
@@ -19569,6 +19590,11 @@ modules:
         - DAEDifferential
         - DAEConstraint
         - DAEJacobianBlocks
+        - solveDDE
+        - SolveDDEOptions
+        - DDESolution
+        - DDEForcing
+        - DDEHistory
         - findRoot
         - linsolve
         - minimize
@@ -19616,6 +19642,11 @@ modules:
         - DAEDifferential
         - DAEConstraint
         - DAEJacobianBlocks
+        - solveDDE
+        - SolveDDEOptions
+        - DDESolution
+        - DDEForcing
+        - DDEHistory
       interfaces:
         - FindRootOptions
         - MinimizeOptions
@@ -35282,6 +35313,7 @@ dependencyGraph:
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/solveDAE.ts
+        - functions/src/numeric/solveDDE.ts
         - functions/src/numeric/solveODE.ts
         - functions/src/numeric/solveParabolicPDE.ts
         - functions/src/numeric/structured-solvers.ts
@@ -36140,17 +36172,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1101
+  totalTypeScriptFiles: 1102
   totalModules: 82
-  totalLinesOfCode: 189053
-  totalExports: 5652
+  totalLinesOfCode: 189393
+  totalExports: 5658
   totalClasses: 52
-  totalInterfaces: 494
-  totalFunctions: 1779
+  totalInterfaces: 496
+  totalFunctions: 1780
   totalTypeGuards: 156
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2292
+  totalReExports: 2297
   totalTypeOnlyImports: 577
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

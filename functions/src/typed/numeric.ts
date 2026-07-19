@@ -37,6 +37,15 @@ export {
   type DAEJacobianBlocks,
 } from '../numeric/solveDAE.js';
 
+// Constant-delay DDE solver (method of steps: adaptive BS23 + cubic-Hermite continuous extension).
+export {
+  solveDDE,
+  type SolveDDEOptions,
+  type DDESolution,
+  type DDEForcing,
+  type DDEHistory,
+} from '../numeric/solveDDE.js';
+
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
 // =============================================================================
