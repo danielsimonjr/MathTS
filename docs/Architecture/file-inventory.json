@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2093
+      "loc": 2100
     },
     {
       "file": "functions/src/numeric/structured-solvers.ts",

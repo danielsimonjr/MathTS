@@ -11,6 +11,24 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
+> ## 🎉 BACKLOG BURN-DOWN SWEEP — 2026-07-18/19 (13 items, 9 releases, all oracle-pinned)
+>
+> Quick-win + medium + large-tractable tiers all driven to released. **Releases:** functions@0.43.3
+> (CODATA-2022 constants) → 0.44.0 (exact Parks–McClellan `remez` [breaking convention] + `buttord`
+> bandpass) → matrix@0.7.0 + functions@0.45.0 (`luSolve` + `solveODE` events) → 0.46.0 (sparse `svds`,
+> ILU/IC preconditioners, O(k²) `minres`, `qz` throw fixed) → 0.47.0 (GP regression + Dirichlet/Wishart) →
+> 0.48.0 (CAS: real `casExpand`/`casFactor`, multivariate `expand`/`factor`, partial-frac + by-parts
+> integration) → 0.49.0 (special fns: Riemann–Siegel Z, Lerch Φ, parabolic-cylinder, Coulomb F) → 0.50.0
+> (computational-geometry engine: hull/Delaunay/Voronoi/sphericalVoronoi/alphaShape) → 0.51.0 (BDF + Radau
+> stiff solvers + adaptive `solveODESystem`). Plus infra: census-gate wiring fix, orphan/dead-copy cleanup.
+> **Verify-before-building paid off** — WASM-FFT kept-on-merit (tested, not dead), care/dare eigenvector
+> routing measured _worse_ (declined), qz's real bug was a throw (not eigen-routing), WS-2 already done.
+> **Surfaced for future** (scoped designs recorded): full multivariate factorization (Wang/Zassenhaus),
+> Risch integration, coulombG/Mathieu/spheroidal, halfspace/n-D vertex enumeration, general PDE-MOL/DAE/DDE.
+> **⑭ GUI epic remains — DESIGN-GATED** (Daniel's call): backend contract (`--expect-hash`, event streaming,
+> multi-doc serve, SVG typesetting) is tractable-autonomous; the UI layer (interactive charts framework +
+> Electron shell) needs a brainstorming/design pass before build.
+
 - [x] **CDG complete file census + build-root regression fix (2026-07-18)** — `tools/create-dependency-graph`
       now emits a **complete file inventory** (`docs/Architecture/FILE_INVENTORY.md` + `file-inventory.json`):
       EVERY tracked `.ts` in the repo — package `src/`+`tests/`, repo-root `tests/`, `tools/`, `*.config.ts`,
