@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-19",
+  "generated": "2026-07-20",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",

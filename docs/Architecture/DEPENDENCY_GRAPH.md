@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-19
+**Version**: 0.1.0 | **Last Updated**: 2026-07-20
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 457            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 457            | 3               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 421            | 1               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -16831,7 +16831,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1104   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 189997 |
+| Total Lines of Code     | 189998 |
 | Total Exports           | 5669   |
 | Total Re-exports        | 2303   |
 | Total Classes           | 52     |
@@ -16845,5 +16845,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-19
+_Last Updated_: 2026-07-20
 _Version_: 0.1.0

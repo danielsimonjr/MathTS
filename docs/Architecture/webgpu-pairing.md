@@ -1,6 +1,6 @@
 # WebGPU Accelerator ↔ Function Pairing
 
-**Generated**: 2026-07-19 (by tools/create-dependency-graph)
+**Generated**: 2026-07-20 (by tools/create-dependency-graph)
 
 The GPU analog of `wasm-pairing.md`. Which functions route to a **WebGPU** path — detected via a `*GpuDispatch` bridge (mirroring the `*Dispatch` WASM convention) or a direct GPU backend/device reference (`GPUBackend` / `gpuMatrixBackend` / `getGpuDevice`).
 
