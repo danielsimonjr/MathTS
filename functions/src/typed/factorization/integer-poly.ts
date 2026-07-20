@@ -155,3 +155,172 @@ export function primitivePart(p: IntPoly): IntPoly {
   }
   return lc(reduced) < 0n ? neg(reduced) : reduced;
 }
+
+/**
+ * Exact polynomial quotient `a / b` over ℤ: performs schoolbook long division
+ * and returns the quotient only if the remainder is exactly zero AND every
+ * intermediate coefficient division was integral (no rounding). Returns
+ * `null` whenever `b` does not divide `a` exactly over ℤ. This is the
+ * recombination correctness test used by subset factor-recombination —
+ * it must never silently round.
+ */
+export function exactDivide(a: IntPoly, b: IntPoly): IntPoly | null {
+  const tb = trim(b);
+  if (tb.length === 0) {
+    return null; // division by zero polynomial
+  }
+  let rem = trim(a);
+  if (rem.length === 0) {
+    return [];
+  }
+  const db = tb.length - 1;
+  const lb = tb[db];
+  const dq = rem.length - 1 - db;
+  if (dq < 0) {
+    return null; // deg(a) < deg(b): only exact if a is zero, handled above
+  }
+  const q: bigint[] = new Array<bigint>(dq + 1).fill(0n);
+  while (!isZero(rem) && degree(rem) >= db) {
+    const dr = degree(rem);
+    const lrRaw = rem[dr];
+    if (lrRaw % lb !== 0n) {
+      return null; // leading-coefficient division is not integral
+    }
+    const coeff = lrRaw / lb;
+    const shift = dr - db;
+    q[shift] = coeff;
+    // rem -= coeff * x^shift * b
+    for (let i = 0; i <= db; i += 1) {
+      rem[shift + i] -= coeff * tb[i];
+    }
+    rem = trim(rem);
+  }
+  if (!isZero(rem)) {
+    return null; // nonzero remainder
+  }
+  return trim(q);
+}
+
+/** Formal derivative `p'` over ℤ: coefficient i*p[i] at index i-1. */
+export function derivative(p: IntPoly): IntPoly {
+  const t = trim(p);
+  if (t.length <= 1) {
+    return [];
+  }
+  const out: bigint[] = new Array<bigint>(t.length - 1);
+  for (let i = 1; i < t.length; i += 1) {
+    out[i - 1] = t[i] * BigInt(i);
+  }
+  return trim(out);
+}
+
+/**
+ * Pseudo-remainder of `a` by `b` over ℤ (both nonzero, deg(a) >= deg(b)):
+ * returns `r` such that `lc(b)^(deg(a)-deg(b)+1) * a = q*b + r` with
+ * `deg(r) < deg(b)`, staying entirely in ℤ (no rational arithmetic).
+ */
+function pseudoRemainder(a: IntPoly, b: IntPoly): IntPoly {
+  const db = degree(b);
+  const lb = lc(b);
+  let rem = trim(a);
+  while (!isZero(rem) && degree(rem) >= db) {
+    const dr = degree(rem);
+    const lr = rem[dr];
+    const shift = dr - db;
+    // rem = lb*rem - lr*x^shift*b
+    const scaled: bigint[] = rem.map((c) => c * lb);
+    for (let i = 0; i <= db; i += 1) {
+      scaled[shift + i] -= lr * b[i];
+    }
+    rem = trim(scaled);
+  }
+  return rem;
+}
+
+/**
+ * Gcd of two polynomials over ℤ via the Euclidean pseudo-remainder sequence
+ * (stays in ℤ throughout via pseudo-division), returned as a primitive
+ * polynomial with positive leading coefficient. `gcd(0, b) = primitivePart(b)`
+ * and symmetrically for `gcd(a, 0)`; `gcd(0,0) = []`.
+ */
+export function polyGcdZ(a: IntPoly, b: IntPoly): IntPoly {
+  let x = primitivePart(a);
+  let y = primitivePart(b);
+  if (isZero(x)) {
+    return y;
+  }
+  if (isZero(y)) {
+    return x;
+  }
+  if (degree(x) < degree(y)) {
+    [x, y] = [y, x];
+  }
+  while (!isZero(y)) {
+    const r = pseudoRemainder(x, y);
+    x = y;
+    y = primitivePart(r);
+  }
+  return x;
+}
+
+/** Integer square root of a non-negative bigint via Newton's method. */
+function isqrt(n: bigint): bigint {
+  if (n < 0n) {
+    throw new RangeError('isqrt: negative input');
+  }
+  if (n < 2n) {
+    return n;
+  }
+  let x0 = n;
+  let x1 = (x0 + 1n) / 2n;
+  while (x1 < x0) {
+    x0 = x1;
+    x1 = (x0 + n / x0) / 2n;
+  }
+  return x0;
+}
+
+/**
+ * Landau–Mignotte coefficient bound: any integer factor of `p` has all
+ * coefficients bounded in absolute value by this quantity. Uses the
+ * generous form `ceil(sqrt(deg+1) * 2^deg * |lc(p)|)`, computed entirely
+ * with bigint integer arithmetic (integer sqrt rounded UP so the bound
+ * stays safe/over-estimating). Always positive.
+ */
+export function landauMignotte(p: IntPoly): bigint {
+  const t = trim(p);
+  const d = t.length - 1;
+  if (d < 0) {
+    return 1n; // zero polynomial: no factors to bound; return a safe positive value
+  }
+  const n = BigInt(d + 1);
+  const lcAbs = t[d] < 0n ? -t[d] : t[d];
+  const powerOfTwo = 1n << BigInt(d);
+  // ceil(sqrt(n)): integer sqrt rounded up (isqrt already floors, so bump
+  // by one unless n is a perfect square).
+  const sq = isqrt(n);
+  const sqrtCeil = sq * sq === n ? sq : sq + 1n;
+  const bound = sqrtCeil * powerOfTwo * (lcAbs === 0n ? 1n : lcAbs);
+  return bound > 0n ? bound : 1n;
+}
+
+/**
+ * Reduces every coefficient of `p` into the symmetric residue range
+ * `(-m/2, m/2]` modulo `m`. `m` must be a positive modulus. Coefficient
+ * count is preserved (no trailing-zero trim) — a coefficient that reduces
+ * to 0 mod `m` stays as an explicit 0 at its original index.
+ */
+export function modSymmetric(p: IntPoly, m: bigint): IntPoly {
+  const half = m / 2n;
+  return p.map((c) => {
+    let r = c % m;
+    if (r < 0n) {
+      r += m;
+    }
+    // r is now in [0, m). Map into (-m/2, m/2].
+    if (r > half) {
+      r -= m;
+    }
+    return r;
+  });
+}
