@@ -5,12 +5,12 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 8
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 8
-- **Potentially unused exports**: 203
+  - **Test-only (exercised by a test, ships nothing)**: 3
+- **Potentially unused exports**: 208
   - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 202
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 207
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -30,14 +30,6 @@ directly. Not dead; not shipped. No action needed.
 ### `expression` (1)
 
 - `expression/src/error/DimensionError.ts`
-
-### `functions` (5)
-
-- `functions/src/typed/factorization/finite-field.ts`
-- `functions/src/typed/factorization/hensel.ts`
-- `functions/src/typed/factorization/integer-poly.ts`
-- `functions/src/typed/factorization/square-free.ts`
-- `functions/src/typed/factorization/zassenhaus.ts`
 
 ### `parallel` (2)
 
@@ -321,6 +313,23 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/type/unit/physicalConstants.ts`
 
 - `UnitInstance` (interface) — 2 in-file refs
+
+### `functions/src/typed/factorization/finite-field.ts`
+
+- `distinctDegreeFactor` (function) — 1 in-file ref
+- `equalDegreeFactor` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/integer-poly.ts`
+
+- `neg` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/square-free.ts`
+
+- `SquareFreeFactor` (interface) — 2 in-file refs
+
+### `functions/src/typed/factorization/zassenhaus.ts`
+
+- `Factorization` (type) — 1 in-file ref
 
 ### `functions/src/typed/polynomial-ideal.ts`
 

@@ -8,7 +8,7 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 223
+      "ALLOWLISTED": 226
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -18,6 +18,44 @@
     }
   },
   "runtime": [
+    {
+      "name": "add",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        },
+        {
+          "file": "matrix/src/types/dense/arithmetic.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "DISPATCH_VARIANT"
+    },
     {
       "name": "abs",
       "category": "constant+function",
@@ -45,38 +83,6 @@
           "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "DISPATCH_VARIANT"
-    },
-    {
-      "name": "add",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "functions/src/typed/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
-        },
-        {
-          "file": "matrix/src/types/dense/arithmetic.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
-          "tag": "PLAIN"
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -1618,6 +1624,34 @@
         }
       ],
       "canonicalHint": "core/src/config.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "derivative",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "autograd/src/grad.ts",
+          "package": "@danielsimonjr/mathts-autograd",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "same name, different function: autograd/src/grad.ts's derivative/jacobian are numeric autodiff (fn, x0 → number / number[][]); functions' twins are the symbolic-CAS derivative (functions/src/factories/index.ts) and the numeric vector-field jacobian (functions/src/typed/cas.ts), left canonical. Distinct-by-domain (autodiff vs CAS). 2026-07 dedup campaign, closing tail slice."
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3165,24 +3199,24 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "derivative",
-      "category": "constant+function",
+      "name": "degree",
+      "category": "function",
       "definers": [
         {
-          "file": "autograd/src/grad.ts",
-          "package": "@danielsimonjr/mathts-autograd",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "same name, different function: autograd/src/grad.ts's derivative/jacobian are numeric autodiff (fn, x0 → number / number[][]); functions' twins are the symbolic-CAS derivative (functions/src/factories/index.ts) and the numeric vector-field jacobian (functions/src/typed/cas.ts), left canonical. Distinct-by-domain (autodiff vs CAS). 2026-07 dedup campaign, closing tail slice."
-        },
-        {
-          "file": "functions/src/factories/index.ts",
+          "file": "functions/src/typed/algebra.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
         }
       ],
-      "canonicalHint": "AMBIGUOUS",
+      "canonicalHint": "functions/src/typed/algebra.ts",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3456,6 +3490,27 @@
         }
       ],
       "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "evaluate",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/evaluate.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+        }
+      ],
+      "canonicalHint": "functions/src/factories/evaluate.ts",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4427,6 +4482,27 @@
         }
       ],
       "canonicalHint": "packages/typed-function/src/index.ts",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "isZero",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "functions/src/typed/factorization/integer-poly.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": false,
+          "tag": "ALLOWLISTED",
+          "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+        }
+      ],
+      "canonicalHint": "functions/src/factories/index.ts",
       "tag": "ALLOWLISTED"
     },
     {

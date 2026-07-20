@@ -1601,7 +1601,8 @@
     "functions/src/typed/polynomial-ideal.ts": [
       "functions/src/cas-integration.ts",
       "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts"
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts"
     ],
     "functions/src/factories/index.ts": [
       "functions/src/clustering-extra.ts",
@@ -2236,6 +2237,7 @@
       "functions/src/typed/algebra.ts",
       "functions/src/typed/interpolation.ts"
     ],
+    "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",
@@ -2250,6 +2252,26 @@
     "functions/src/typed/parallel-map.ts": [
       "functions/src/typed/distributions.ts",
       "functions/src/typed/special.ts"
+    ],
+    "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/typed/factorization/finite-field.ts",
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/square-free.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/finite-field.ts": [
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/zassenhaus.ts": [
+      "functions/src/typed/factorization/index.ts"
+    ],
+    "functions/src/typed/factorization/hensel.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/square-free.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
     ],
     "functions/src/gpu/elementwise-gpu.ts": [
       "functions/src/typed/fused.ts",

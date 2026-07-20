@@ -24,6 +24,7 @@ import {
   polyToString as idealPolyToString,
   type Poly,
 } from './polynomial-ideal.js';
+import { factorPolynomialUnivariate, cleanUnivariatePoly } from './factorization/index.js';
 
 // =============================================================================
 // Type Aliases
@@ -909,11 +910,14 @@ function factorMultivariate(expr: string, vars: string[]): string | null {
  * Factor an expression string.
  *
  * **Univariate polynomials** (a single variable, integer coefficients,
- * degree ≥ 2) are factored over ℚ via the rational-root theorem: candidate
- * roots ±(divisors of the constant term)/(divisors of the leading
- * coefficient) are tested, each confirmed root's linear factor is divided
- * out exactly, and any irreducible remainder is left as-is:
- * `factor('x^2-1')` → `'(x - 1)*(x + 1)'`.
+ * degree ≥ 2) are factored **completely over ℤ/ℚ** into irreducible factors
+ * with multiplicity. Rational linear roots are extracted first (rational-root
+ * theorem); any higher-degree remainder — and any polynomial with no rational
+ * root — is routed through the Zassenhaus engine
+ * ({@link factorPolynomialUnivariate}): `factor('x^2-1')` → `'(x - 1)*(x + 1)'`,
+ * `factor('x^4-1')` → `'(x - 1)*(x + 1)*(x^2 + 1)'`,
+ * `factor('x^4+3*x^2+2')` → `'(x^2 + 1)*(x^2 + 2)'`. Polynomials irreducible
+ * over ℚ (`x^4 + 1`, `x^2 + x + 1`) are returned unchanged.
  *
  * **Multivariate polynomials** get the tractable subset (see
  * {@link factorMultivariate}): integer-content + common-monomial extraction
@@ -943,13 +947,26 @@ export function factor(expr: string): string {
         const { roots, remainder } = findRationalLinearFactors(intDense);
         if (roots.length > 0) {
           const factors = roots.map((r) => formatLinearFactor(r, v));
-          if (degree(remainder) >= 1) {
+          if (degree(remainder) >= 2) {
+            // Route the higher-degree remainder through the univariate ℤ
+            // factorization engine; if it factors further, splice those
+            // irreducibles in, otherwise render the (irreducible) remainder.
+            const remExpr = cleanUnivariatePoly(remainder, v);
+            const routed = factorPolynomialUnivariate(remExpr, v);
+            factors.push(routed ?? `(${remExpr})`);
+          } else if (degree(remainder) >= 1) {
             factors.push(`(${idealPolyToString(denseToPoly(remainder), [v])})`);
           } else if (remainder[0] !== 1) {
             factors.unshift(String(remainder[0]));
           }
           return factors.join('*');
         }
+        // No rational root remained: attempt a full higher-degree
+        // factorization over ℤ/ℚ (e.g. x^4 + 3x^2 + 2 → (x^2+1)(x^2+2)).
+        // The engine returns null for Q-irreducible inputs, so those fall
+        // through to the legacy content-extraction path unchanged.
+        const routed = factorPolynomialUnivariate(expr, v);
+        if (routed !== null) return routed;
       }
     } catch {
       // Not a pure single-variable integer polynomial, or no rational root

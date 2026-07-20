@@ -579,6 +579,11 @@
       "names": ["initializePool", "terminatePool"],
       "filesGlob": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
       "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
+    },
+    {
+      "names": ["degree", "derivative", "evaluate", "isZero"],
+      "filesGlob": ["functions/src/typed/factorization/integer-poly.ts"],
+      "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
     }
   ]
 }

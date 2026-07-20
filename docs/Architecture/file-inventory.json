@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-20",
-  "totalFiles": 1748,
+  "totalFiles": 1750,
   "byDisposition": {
-    "reachable": 1071,
+    "reachable": 1077,
     "build-entry": 33,
-    "test-only": 8,
+    "test-only": 3,
     "orphan": 0,
-    "test": 577,
+    "test": 578,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1112,
-    "tests": 577,
+    "src": 1113,
+    "tests": 578,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 739,
+    "@danielsimonjr/mathts-functions": 741,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -7184,7 +7184,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1754
+      "loc": 1771
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7239,35 +7239,42 @@
       "file": "functions/src/typed/factorization/finite-field.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 331
     },
     {
       "file": "functions/src/typed/factorization/hensel.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 197
+    },
+    {
+      "file": "functions/src/typed/factorization/index.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 129
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 327
     },
     {
       "file": "functions/src/typed/factorization/square-free.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 82
     },
     {
       "file": "functions/src/typed/factorization/zassenhaus.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 298
     },
     {
@@ -8165,6 +8172,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/factorization/factor-univariate-integration.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 38
     },
     {
       "file": "functions/tests/factorization/finite-field.test.ts",

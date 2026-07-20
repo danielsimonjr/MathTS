@@ -150,7 +150,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 31 files
+- **functions/typed**: 37 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 12 files
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 457            | 7               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 463            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 421            | 1               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -8794,6 +8794,7 @@ graph LR
 |------|---------|------|
 | `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
 | `./polynomial-ideal.js` | `polyFromExpression, buchberger, normalize, polyToString, Poly` | Import |
+| `./factorization/index.js` | `factorPolynomialUnivariate, cleanUnivariatePoly` | Import |
 
 **Exports:**
 
@@ -8934,6 +8935,90 @@ graph LR
 **Exports:**
 
 - Constants: `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `typedDistributions`
+
+---
+
+### `functions/src/typed/factorization/finite-field.ts` - Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integer-poly.js` | `trim, degree, lc, isZero, IntPoly` | Import |
+| `./integer-poly.js` | `IntPoly` | Re-export (type-only) |
+
+**Exports:**
+
+- Functions: `reduceModP`, `addP`, `subP`, `mulP`, `invModP`, `makeMonicP`, `divmodP`, `gcdP`, `powModPolyP`, `distinctDegreeFactor`, `equalDegreeFactor`, `factorModP`
+- Re-exports: `IntPoly`
+
+---
+
+### `functions/src/typed/factorization/hensel.ts` - Multifactor Hensel lifting for the univariate factorization engine
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integer-poly.js` | `add, sub, mul, scalarMul, isZero, lc, modSymmetric, IntPoly` | Import |
+| `./finite-field.js` | `reduceModP, addP, mulP, subP, divmodP, invModP` | Import |
+
+**Exports:**
+
+- Functions: `henselLift`
+
+---
+
+### `functions/src/typed/factorization/index.ts` - Public entry point of the univariate factorization engine: parse an
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../polynomial-ideal.js` | `polyFromExpression, Poly` | Import |
+| `./integer-poly.js` | `degree, IntPoly` | Import |
+| `./zassenhaus.js` | `factorUnivariateZ` | Import |
+
+**Exports:**
+
+- Functions: `cleanUnivariatePoly`, `factorPolynomialUnivariate`
+
+---
+
+### `functions/src/typed/factorization/integer-poly.ts` - Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.
+
+**Exports:**
+
+- Types: `IntPoly`
+- Functions: `trim`, `degree`, `lc`, `isZero`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+
+---
+
+### `functions/src/typed/factorization/square-free.ts` - Yun's square-free decomposition over ℤ.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integer-poly.js` | `degree, derivative, exactDivide, polyGcdZ, primitivePart, sub, IntPoly` | Import |
+
+**Exports:**
+
+- Interfaces: `SquareFreeFactor`
+- Functions: `squareFreeDecompose`
+
+---
+
+### `functions/src/typed/factorization/zassenhaus.ts` - Univariate polynomial factorization over ℤ — the top-level Zassenhaus
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integer-poly.js` | `trim, degree, lc, isZero, mul, scalarMul, primitivePart, content, derivative, exactDivide, landauMignotte, modSymmetric, IntPoly` | Import |
+| `./finite-field.js` | `reduceModP, makeMonicP, gcdP, factorModP` | Import |
+| `./hensel.js` | `henselLift` | Import |
+| `./square-free.js` | `squareFreeDecompose` | Import |
+
+**Exports:**
+
+- Types: `Factorization`
+- Functions: `factorUnivariateZ`
 
 ---
 
@@ -16470,9 +16555,9 @@ graph TD
         N313[complex]
         N314[dist-objects]
         N315[distributions]
-        N316[fused]
-        N317[geometry]
-        N318[...21 more]
+        N316[finite-field]
+        N317[hensel]
+        N318[...27 more]
     end
 
     subgraph Functions/unit
@@ -16829,17 +16914,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1104   |
+| Total TypeScript Files  | 1110   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 189998 |
-| Total Exports           | 5669   |
-| Total Re-exports        | 2303   |
+| Total Lines of Code     | 191379 |
+| Total Exports           | 5706   |
+| Total Re-exports        | 2304   |
 | Total Classes           | 52     |
-| Total Interfaces        | 497    |
-| Total Functions         | 1785   |
-| Total Type Guards       | 156    |
+| Total Interfaces        | 498    |
+| Total Functions         | 1821   |
+| Total Type Guards       | 157    |
 | Total Enums             | 0      |
-| Type-only Imports       | 578    |
+| Type-only Imports       | 579    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-20'
-  totalFiles: 1104
+  totalFiles: 1110
   totalModules: 82
-  totalExports: 5669
+  totalExports: 5706
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18207,6 +18207,10 @@ modules:
             - normalize
             - polyToString
             - Poly
+        - file: ./factorization/index.js
+          imports:
+            - factorPolynomialUnivariate
+            - cleanUnivariatePoly
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -18803,6 +18807,208 @@ modules:
         - studentTPDF
         - noncentralChi2PDF
         - typedDistributions
+    functions/src/typed/factorization/finite-field.ts:
+      description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - degree
+            - lc
+            - isZero
+            - IntPoly
+        - file: ./integer-poly.js
+          imports:
+            - IntPoly
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - reduceModP
+        - addP
+        - subP
+        - mulP
+        - invModP
+        - makeMonicP
+        - divmodP
+        - gcdP
+        - powModPolyP
+        - distinctDegreeFactor
+        - equalDegreeFactor
+        - factorModP
+        - IntPoly
+      reExported:
+        - IntPoly
+      functions:
+        - reduceModP
+        - addP
+        - subP
+        - mulP
+        - invModP
+        - makeMonicP
+        - divmodP
+        - gcdP
+        - powModPolyP
+        - distinctDegreeFactor
+        - equalDegreeFactor
+        - factorModP
+    functions/src/typed/factorization/hensel.ts:
+      description: Multifactor Hensel lifting for the univariate factorization engine
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - add
+            - sub
+            - mul
+            - scalarMul
+            - isZero
+            - lc
+            - modSymmetric
+            - IntPoly
+        - file: ./finite-field.js
+          imports:
+            - reduceModP
+            - addP
+            - mulP
+            - subP
+            - divmodP
+            - invModP
+      workspaceDependencies: []
+      exports:
+        - henselLift
+      functions:
+        - henselLift
+    functions/src/typed/factorization/index.ts:
+      description: 'Public entry point of the univariate factorization engine: parse an'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - Poly
+        - file: ./integer-poly.js
+          imports:
+            - degree
+            - IntPoly
+        - file: ./zassenhaus.js
+          imports:
+            - factorUnivariateZ
+      workspaceDependencies: []
+      exports:
+        - cleanUnivariatePoly
+        - factorPolynomialUnivariate
+      functions:
+        - cleanUnivariatePoly
+        - factorPolynomialUnivariate
+    functions/src/typed/factorization/integer-poly.ts:
+      description: Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - trim
+        - degree
+        - lc
+        - isZero
+        - add
+        - sub
+        - neg
+        - mul
+        - scalarMul
+        - equals
+        - evaluate
+        - bigintGcd
+        - content
+        - primitivePart
+        - exactDivide
+        - derivative
+        - polyGcdZ
+        - landauMignotte
+        - modSymmetric
+      functions:
+        - trim
+        - degree
+        - lc
+        - isZero
+        - add
+        - sub
+        - neg
+        - mul
+        - scalarMul
+        - equals
+        - evaluate
+        - bigintGcd
+        - content
+        - primitivePart
+        - exactDivide
+        - derivative
+        - polyGcdZ
+        - landauMignotte
+        - modSymmetric
+    functions/src/typed/factorization/square-free.ts:
+      description: Yun's square-free decomposition over ℤ.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - degree
+            - derivative
+            - exactDivide
+            - polyGcdZ
+            - primitivePart
+            - sub
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - squareFreeDecompose
+      interfaces:
+        - SquareFreeFactor
+      functions:
+        - squareFreeDecompose
+    functions/src/typed/factorization/zassenhaus.ts:
+      description: Univariate polynomial factorization over ℤ — the top-level Zassenhaus
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - degree
+            - lc
+            - isZero
+            - mul
+            - scalarMul
+            - primitivePart
+            - content
+            - derivative
+            - exactDivide
+            - landauMignotte
+            - modSymmetric
+            - IntPoly
+        - file: ./finite-field.js
+          imports:
+            - reduceModP
+            - makeMonicP
+            - gcdP
+            - factorModP
+        - file: ./hensel.js
+          imports:
+            - henselLift
+        - file: ./square-free.js
+          imports:
+            - squareFreeDecompose
+      workspaceDependencies: []
+      exports:
+        - factorUnivariateZ
+      functions:
+        - factorUnivariateZ
     functions/src/typed/fused.ts:
       description: Op-fusion public API (Tier 3 of the WASM pairing gap plan).
       externalDependencies: []
@@ -35567,6 +35773,12 @@ dependencyGraph:
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
+        - functions/src/typed/factorization/finite-field.ts
+        - functions/src/typed/factorization/hensel.ts
+        - functions/src/typed/factorization/index.ts
+        - functions/src/typed/factorization/integer-poly.ts
+        - functions/src/typed/factorization/square-free.ts
+        - functions/src/typed/factorization/zassenhaus.ts
         - functions/src/typed/fused.ts
         - functions/src/typed/geometry.ts
         - functions/src/typed/gpu.ts
@@ -36237,19 +36449,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1104
+  totalTypeScriptFiles: 1110
   totalModules: 82
-  totalLinesOfCode: 189998
-  totalExports: 5669
+  totalLinesOfCode: 191379
+  totalExports: 5706
   totalClasses: 52
-  totalInterfaces: 497
-  totalFunctions: 1785
-  totalTypeGuards: 156
+  totalInterfaces: 498
+  totalFunctions: 1821
+  totalTypeGuards: 157
   totalEnums: 0
   totalConstants: 1543
-  totalReExports: 2303
-  totalTypeOnlyImports: 578
+  totalReExports: 2304
+  totalTypeOnlyImports: 579
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 203
+  unusedExportsCount: 208
