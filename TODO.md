@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-16 (oracle-gap roadmap Phases 0–8 complete; pending follow-ups consolidated)
+Updated: 2026-07-19 (A-list burn-down #1–#6 released, functions@0.52.0 → 0.57.0; #7–#9 remain)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -28,6 +28,39 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 > **⑭ GUI epic remains — DESIGN-GATED** (Daniel's call): backend contract (`--expect-hash`, event streaming,
 > multi-doc serve, SVG typesetting) is tractable-autonomous; the UI layer (interactive charts framework +
 > Electron shell) needs a brainstorming/design pass before build.
+>
+> ## 🎉 A-LIST BURN-DOWN — 2026-07-19 (#1–#6 released, functions@0.52.0 → 0.57.0)
+>
+> The "surfaced for future" items above were then executed in ranked order. **Releases:** functions@0.52.0
+> (irregular Coulomb wave `coulombG`/`coulombFG`) → 0.53.0 (`solveParabolicPDE`, MOL + BDF) → 0.54.0
+> (`solveDAE`, index-1 via BDF + coupled Newton) → 0.55.0 (`solveDDE`, method of steps + BS23) → 0.56.0
+> (Mathieu `mathieuA/B/Ce/Se` via symmetric tridiagonal eigenproblem) → 0.57.0 (`halfspaceIntersection`,
+> polytope vertex enumeration via the dual-hull route). All oracle-pinned (scipy / mpmath / closed forms).
+>
+> **#6's review caught two Critical scale-invariance bugs before ship** — absolute epsilons on
+> scale-dependent geometric quantities; row-scaling by `1e-8` (a semantic no-op) silently returned an
+> EMPTY vertex list, and a side-2000 cube threw false `unbounded`. All 14 original fixtures used O(1)
+> coordinates and were structurally blind to both. Fixed at root (normalise the cloud, divide by facet
+> extent, Hadamard bound, relative dedup) + 7 cross-scale regression tests. See memory
+> `feedback-relative-epsilons-for-scale-dependent-quantities`.
+>
+> **A-list remainder — the three genuinely large efforts:**
+>
+> - ⬜ **#7 full multivariate factorization (Wang/Zassenhaus/EEZ)** — L. Next up. Hensel lifting,
+>   leading-coefficient distribution, true-factor recombination. Oracle: sympy. **Spec before code** —
+>   starting from the middle of Wang's algorithm is the known failure mode.
+> - ⬜ **#8 Risch integration** — L, hardest. Differential-field tower, Liouville's theorem.
+> - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
+>   or a self-built continued-fraction reference).
+>
+> **Release-record note (verified 2026-07-19):** this repo publishes via Changesets to npm and does **not**
+> carry git tags for these releases — `git ls-remote --tags` shows nothing newer than `mathts-tensor-v0.1.0`
+> / `security-2026-05-01`. **npm is the release record**, not `git describe`. Backfilling tags across the
+> sweep is an open option, not a done thing.
+>
+> **Blocked on Daniel (not on the agent):** fork publishes (typed-function alpha.3 / workerpool 10.2.1) ·
+> #27 fork first-party integration · NPM_TOKEN/OIDC · wiring `docs:functions:check` into CI ·
+> the factory-layer-collapse ADR.
 
 - [x] **CDG complete file census + build-root regression fix (2026-07-18)** — `tools/create-dependency-graph`
       now emits a **complete file inventory** (`docs/Architecture/FILE_INVENTORY.md` + `file-inventory.json`):
