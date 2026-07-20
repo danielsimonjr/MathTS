@@ -6,7 +6,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1746
+**Total files**: 1748
 
 ## Disposition counts
 
@@ -14,13 +14,13 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
 | `reachable`   |     1071 | A `src/` file in the module graph, reachable from a root.                                                    |
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
-| `test-only`   |        7 | A `src/` file not reachable from src roots but imported by a test.                                           |
+| `test-only`   |        8 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      576 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      577 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1746** |                                                                                                              |
+| **Total**     | **1748** |                                                                                                              |
 
 ## Per-area counts
 
@@ -28,8 +28,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1111 |
-| `tests`    |   576 |
+| `src`      |  1112 |
+| `tests`    |   577 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -44,7 +44,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   489 |
-| `@danielsimonjr/mathts-functions`      |   737 |
+| `@danielsimonjr/mathts-functions`      |   739 |
 | `@danielsimonjr/mathts-gpu`            |    14 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    92 |
@@ -1097,6 +1097,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/factorization/hensel.ts`                                     | @danielsimonjr/mathts-functions      | src      | test-only   |
 | `functions/src/typed/factorization/integer-poly.ts`                               | @danielsimonjr/mathts-functions      | src      | test-only   |
 | `functions/src/typed/factorization/square-free.ts`                                | @danielsimonjr/mathts-functions      | src      | test-only   |
+| `functions/src/typed/factorization/zassenhaus.ts`                                 | @danielsimonjr/mathts-functions      | src      | test-only   |
 | `functions/src/typed/fused.ts`                                                    | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/geometry.ts`                                                 | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/gpu.ts`                                                      | @danielsimonjr/mathts-functions      | src      | reachable   |
@@ -1230,6 +1231,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/factorization/integer-poly-div.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/integer-poly.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/square-free.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/factorization/zassenhaus.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factory-scope.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fft-factory-correctness.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fft-helpers.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |

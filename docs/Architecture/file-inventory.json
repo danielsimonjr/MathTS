@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-20",
-  "totalFiles": 1746,
+  "totalFiles": 1748,
   "byDisposition": {
     "reachable": 1071,
     "build-entry": 33,
-    "test-only": 7,
+    "test-only": 8,
     "orphan": 0,
-    "test": 576,
+    "test": 577,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1111,
-    "tests": 576,
+    "src": 1112,
+    "tests": 577,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 737,
+    "@danielsimonjr/mathts-functions": 739,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -7264,6 +7264,13 @@
       "loc": 82
     },
     {
+      "file": "functions/src/typed/factorization/zassenhaus.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 298
+    },
+    {
       "file": "functions/src/typed/fused.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -8193,6 +8200,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "functions/tests/factorization/zassenhaus.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 93
     },
     {
       "file": "functions/tests/factory-scope.test.ts",
