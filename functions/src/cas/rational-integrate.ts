@@ -18,6 +18,7 @@ import { polyFromExpression, type Poly } from '../typed/polynomial-ideal.js';
 import {
   trim as trimIntPoly,
   bigintGcd,
+  mul as mulIntPoly,
   type IntPoly,
 } from '../typed/factorization/integer-poly.js';
 import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
@@ -316,4 +317,164 @@ export function factorDenominator(denom: IntPoly): DenFactor[] | null {
     }
   }
   return out;
+}
+
+/**
+ * A single partial-fraction term `numer(x) / factor(x)^power`. `numer` is a
+ * `Rat[]` of fixed length `deg(factor)` (index = degree, ascending — the same
+ * convention as `IntPoly`): length 1 (a constant) over a linear factor,
+ * length 2 (`[E, D]` meaning `D*x + E`) over a quadratic factor.
+ */
+export interface PFTerm {
+  factor: IntPoly;
+  power: number;
+  numer: Rat[];
+}
+
+/** Column vector of `coeff(x^shift * poly, x^row)` for `row` in `[0, size)`. */
+function shiftedColumn(poly: IntPoly, shift: number, size: number): Rat[] {
+  const col: Rat[] = new Array<Rat>(size).fill(RAT_ZERO);
+  for (let i = 0; i < poly.length; i += 1) {
+    const row = i + shift;
+    if (row < size) {
+      col[row] = ratFromBigint(poly[i]);
+    }
+  }
+  return col;
+}
+
+/**
+ * Solves the square linear system `matrix * x = rhs` exactly over ℚ via
+ * Gauss–Jordan elimination with `Rat` arithmetic throughout (row-swap
+ * partial pivoting on "any nonzero entry" — exact arithmetic needs no
+ * numerical-stability pivot choice). Throws if the system is singular; the
+ * partial-fraction system built by `partialFractions` is square and
+ * non-singular by construction for a proper `remainder/denom`.
+ */
+function solveLinearSystemRat(matrix: readonly Rat[][], rhs: readonly Rat[]): Rat[] {
+  const n = rhs.length;
+  const rows: Rat[][] = matrix.map((row, r) => [...row, rhs[r]]);
+  for (let col = 0; col < n; col += 1) {
+    let pivotRow = -1;
+    for (let r = col; r < n; r += 1) {
+      if (rows[r][col].num !== 0n) {
+        pivotRow = r;
+        break;
+      }
+    }
+    if (pivotRow === -1) {
+      throw new Error('partialFractions: singular partial-fraction linear system');
+    }
+    if (pivotRow !== col) {
+      const tmp = rows[col];
+      rows[col] = rows[pivotRow];
+      rows[pivotRow] = tmp;
+    }
+    const pivotVal = rows[col][col];
+    rows[col] = rows[col].map((v) => ratDiv(v, pivotVal));
+    for (let r = 0; r < n; r += 1) {
+      if (r === col) {
+        continue;
+      }
+      const factor = rows[r][col];
+      if (factor.num === 0n) {
+        continue;
+      }
+      const pivotRowVals = rows[col];
+      rows[r] = rows[r].map((v, c) => ratSub(v, ratMul(factor, pivotRowVals[c])));
+    }
+  }
+  return rows.map((row) => row[n]);
+}
+
+/**
+ * Exact-ℚ partial-fraction decomposition of `remainder(x) / ∏ factorᵢ(x)^multᵢ`
+ * (`deg(remainder) < deg(∏ factorᵢ^multᵢ)`, as produced by `polynomialPart`)
+ * into the standard form: for each irreducible factor `qᵢ` with multiplicity
+ * `mᵢ`, terms `A_{i,k}(x) / qᵢ(x)^k` for `k = 1..mᵢ`, `deg A_{i,k} < deg qᵢ`.
+ *
+ * Solved by clearing denominators: multiplying the ansatz by the full
+ * denominator `D = ∏ factorⱼ^multⱼ` turns each unknown numerator coefficient
+ * into a linear unknown whose column is the polynomial
+ * `x^j · qᵢ(x)^{mᵢ−k} · ∏_{j≠i} factorⱼ(x)^multⱼ` (a plain integer polynomial
+ * product — no division is ever needed, since `mᵢ−k ≥ 0`). Equating
+ * coefficients of `remainder(x)` on both sides gives a square (`deg D` ×
+ * `deg D`) rational linear system, solved exactly via `solveLinearSystemRat`.
+ */
+export function partialFractions(remainder: IntPoly, factors: DenFactor[]): PFTerm[] {
+  const trimmedRemainder = trimIntPoly(remainder);
+
+  // factorPowers[fi][p] = factors[fi].poly ^ p, for p = 0..factors[fi].mult.
+  const factorPowers: IntPoly[][] = factors.map((f) => {
+    const powers: IntPoly[] = [[1n]];
+    let acc: IntPoly = [1n];
+    for (let p = 1; p <= f.mult; p += 1) {
+      acc = mulIntPoly(acc, f.poly);
+      powers.push(acc);
+    }
+    return powers;
+  });
+
+  // othersProduct[fi] = the product of every OTHER factor raised to its full
+  // multiplicity: ∏_{j≠fi} factorⱼ^multⱼ.
+  const othersProduct: IntPoly[] = factors.map((_f, fi) => {
+    let acc: IntPoly = [1n];
+    for (let fj = 0; fj < factors.length; fj += 1) {
+      if (fj === fi) {
+        continue;
+      }
+      acc = mulIntPoly(acc, factorPowers[fj][factors[fj].mult]);
+    }
+    return acc;
+  });
+
+  const degOf = (fi: number): number => trimIntPoly(factors[fi].poly).length - 1;
+
+  interface UnknownRef {
+    fi: number;
+    k: number;
+    j: number;
+  }
+  const unknowns: UnknownRef[] = [];
+  for (let fi = 0; fi < factors.length; fi += 1) {
+    const di = degOf(fi);
+    for (let k = 1; k <= factors[fi].mult; k += 1) {
+      for (let j = 0; j < di; j += 1) {
+        unknowns.push({ fi, k, j });
+      }
+    }
+  }
+  const n = unknowns.length;
+
+  const columns: Rat[][] = unknowns.map(({ fi, k, j }) => {
+    const remainingPower = factors[fi].mult - k;
+    const coPoly = mulIntPoly(othersProduct[fi], factorPowers[fi][remainingPower]);
+    return shiftedColumn(coPoly, j, n);
+  });
+
+  const rows: Rat[][] = [];
+  for (let r = 0; r < n; r += 1) {
+    rows.push(columns.map((col) => col[r]));
+  }
+
+  const rhs: Rat[] = new Array<Rat>(n)
+    .fill(RAT_ZERO)
+    .map((_, idx) => ratFromBigint(idx < trimmedRemainder.length ? trimmedRemainder[idx] : 0n));
+
+  const solution = n === 0 ? [] : solveLinearSystemRat(rows, rhs);
+
+  const terms: PFTerm[] = [];
+  let idx = 0;
+  for (let fi = 0; fi < factors.length; fi += 1) {
+    const di = degOf(fi);
+    for (let k = 1; k <= factors[fi].mult; k += 1) {
+      const numer: Rat[] = [];
+      for (let j = 0; j < di; j += 1) {
+        numer.push(solution[idx]);
+        idx += 1;
+      }
+      terms.push({ factor: factors[fi].poly, power: k, numer });
+    }
+  }
+  return terms;
 }
