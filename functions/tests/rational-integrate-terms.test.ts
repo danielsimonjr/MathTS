@@ -28,21 +28,23 @@ describe('rational-integrate: per-factor integration (differentiation-verified)'
     expect(integrateRationalFunction('1/(x^3-2)', 'x')).toBeNull();
   });
 
-  // Regression (final-review Critical): a degree-2 factor irreducible over ℚ can
-  // still have a POSITIVE discriminant (real irrational roots, e.g. x^2-2). Those
-  // need a real log/atanh, NOT arctan — decline rather than emit a wrong answer.
-  const positiveDiscDeclines = [
-    '1/(x^2-2)',
-    '1/(x^2-3)',
-    'x/(x^2-5)',
-    '1/(x^2+x-1)',
-    '1/(2*x^2-3)',
-  ];
-  for (const inp of positiveDiscDeclines) {
-    it(`declines positive-discriminant quadratic denominator ${inp}`, () => {
-      expect(integrateRationalFunction(inp, 'x')).toBeNull();
+  // Layer 2 (quadratic surds): a degree-2 factor irreducible over ℚ with a
+  // POSITIVE discriminant (real irrational roots, e.g. x^2-2) integrates to a
+  // pair of real logs with quadratic-surd coefficients — no longer declined.
+  // (Full pos-disc coverage lives in rational-integrate-posdisc.test.ts.)
+  const positiveDiscCases = ['1/(x^2-2)', '1/(x^2-3)', 'x/(x^2-5)', '1/(x^2+x-1)', '1/(2*x^2-3)'];
+  for (const inp of positiveDiscCases) {
+    it(`positive-discriminant quadratic: d/dx integ(${inp}) == ${inp}`, () => {
+      const F = integrateRationalFunction(inp, 'x');
+      expect(F).not.toBeNull();
+      for (const x of [0.3, 0.9, 3.1, -0.7]) expect(dF(F!, x)).toBeCloseTo(f(inp, x), 5);
     });
   }
+
+  // Boundary: a REPEATED positive-discriminant quadratic is Layer 3 — still declined.
+  it('declines a repeated positive-discriminant quadratic denominator', () => {
+    expect(integrateRationalFunction('1/(x^2-2)^2', 'x')).toBeNull();
+  });
 
   // Regression: denominators with integer content > 1 must be scaled correctly
   // (the primitive-factor product drops the leading constant). Before the fix

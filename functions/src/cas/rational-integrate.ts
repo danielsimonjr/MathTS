@@ -373,30 +373,38 @@ export function integratePolynomial(p: IntPoly, v: string): string {
 }
 
 /**
- * An irreducible factor of a rational function's denominator, classified by
- * degree for Layer 1 closed-form integration: degree 1 ("linear") integrates
- * to a `log`, degree 2 ("quadratic") to a `log` + `atan` pair. Degree ≥ 3
- * irreducible factors are outside Layer 1's scope (see `factorDenominator`).
+ * An irreducible factor of a rational function's denominator, classified for
+ * closed-form integration:
+ *   - `'linear'` (degree 1) → a `log`;
+ *   - `'quadratic-neg'` (degree 2, discriminant `b²−4ac < 0`, complex roots) →
+ *     a `log` + `atan` pair (Layer 1);
+ *   - `'quadratic-pos'` (degree 2, discriminant `> 0`, real irrational roots,
+ *     multiplicity 1) → a pair of real `log`s with quadratic-surd coefficients
+ *     (Layer 2, see the quadratic-surd design doc).
+ * Degree-≥3 irreducible factors, and repeated positive-discriminant quadratics,
+ * are out of scope (see `factorDenominator`, which returns `null` for them).
  */
 export interface DenFactor {
   poly: IntPoly;
   mult: number;
-  kind: 'linear' | 'quadratic';
+  kind: 'linear' | 'quadratic-neg' | 'quadratic-pos';
 }
 
 /**
  * Factors `denom` completely over ℤ/ℚ via the #7 factorization engine
  * (`factorUnivariateZ`) and classifies each irreducible factor by degree.
  *
- * A degree-1 factor is `'linear'`; a degree-2 factor is `'quadratic'` — and,
- * having survived complete factorization over ℚ, necessarily irreducible
- * (any rational root would already have split it into two linear factors,
- * i.e. it has negative discriminant).
+ * A degree-1 factor is `'linear'`. A degree-2 factor, having survived complete
+ * factorization over ℚ, is irreducible over ℚ — but that does NOT fix its
+ * discriminant sign: `disc = b²−4ac < 0` (complex roots, e.g. x²+1) is
+ * `'quadratic-neg'` (Layer 1 arctan path); `disc > 0` (real irrational roots,
+ * a non-square disc, e.g. x²−2) with **multiplicity 1** is `'quadratic-pos'`
+ * (Layer 2 quadratic-surd path).
  *
- * Returns `null` when any irreducible factor has degree ≥ 3: Layer 1 only
- * handles linear + irreducible-quadratic denominators, so a higher-degree
- * irreducible factor is out of scope and the caller falls back to the
- * `integral(...)` marker (Layer 2/Rothstein–Trager territory).
+ * Returns `null` when a factor is out of scope: any irreducible factor of
+ * degree ≥ 3, or a **repeated** positive-discriminant quadratic (`disc > 0`,
+ * `mult > 1`) — the reduction formula for repeated real-root quadratics is
+ * Layer 3. The caller then falls back to the `integral(...)` marker.
  */
 export function factorDenominator(denom: IntPoly): DenFactor[] | null {
   const { factors } = factorUnivariateZ(trimIntPoly(denom));
@@ -406,19 +414,19 @@ export function factorDenominator(denom: IntPoly): DenFactor[] | null {
     if (deg === 1) {
       out.push({ poly, mult, kind: 'linear' });
     } else if (deg === 2) {
-      // Irreducible over ℚ does NOT imply a negative discriminant: a degree-2
-      // factor with a POSITIVE non-square discriminant (real irrational roots,
-      // e.g. x²−2) also survives ℚ-factorization. Those integrate to a real
-      // log/atanh (real partial fractions with irrational roots), which the
-      // closed-form quadratic path — arctan via √(4c−b²) — cannot express
-      // (it would take √ of a negative). Decline them to the marker (Layer 2),
-      // rather than emit a wrong answer. Only disc < 0 → the arctan case.
       const q = trimIntPoly(poly);
       const disc = q[1] * q[1] - 4n * q[2] * q[0];
-      if (disc >= 0n) {
+      if (disc < 0n) {
+        // Complex roots → the arctan closed form (Layer 1), any multiplicity.
+        out.push({ poly, mult, kind: 'quadratic-neg' });
+      } else if (mult === 1) {
+        // Real irrational roots (disc > 0, non-square) → real logs with
+        // quadratic-surd coefficients (Layer 2). Only power 1 is in scope.
+        out.push({ poly, mult, kind: 'quadratic-pos' });
+      } else {
+        // Repeated positive-discriminant quadratic → Layer 3, decline.
         return null;
       }
-      out.push({ poly, mult, kind: 'quadratic' });
     } else {
       return null;
     }
@@ -763,13 +771,66 @@ function integrateQuadraticTerm(factor: IntPoly, k: number, numer: Rat[], v: str
 }
 
 /**
+ * Closed-form integral of `(D·x + E) / (a·x² + b·x + c)` for a POSITIVE-
+ * discriminant irreducible quadratic factor (`factor = [c, b, a]`, power 1,
+ * `R = b²−4ac > 0` a non-square integer). The factor splits over the quadratic
+ * surd `√R` into `a·(x − r₁)(x − r₂)` with real irrational roots
+ * `r₁,₂ = (−b ± √R)/(2a)`, and real partial fractions give
+ *   `(Dx+E)/(a(x−r₁)(x−r₂)) = A/(x−r₁) + B/(x−r₂)`,
+ *   `A = (D·r₁+E)/(a·(r₁−r₂))`,  `B = (D·r₂+E)/(a·(r₂−r₁))`,
+ * where `a·(r₁−r₂) = √R` and `a·(r₂−r₁) = −√R` exactly. The integral is
+ * `A·log|x−r₁| + B·log|x−r₂|`, rendered with `log(abs(...))` (the log arguments
+ * are real and can be negative). All arithmetic is exact `Surd` over `√R`;
+ * correctness is verified by differentiation (the string form is not
+ * contractual).
+ */
+function integrateQuadraticPosTerm(factor: IntPoly, numer: Rat[], v: string): string {
+  const c = factor[0];
+  const b = factor[1];
+  const a = factor[2];
+  const R = b * b - 4n * a * c; // discInt > 0, non-square (guaranteed by factorDenominator)
+  const D = numer[1] ?? RAT_ZERO;
+  const E = numer[0] ?? RAT_ZERO;
+
+  const twoA = ratFromBigint(2n * a);
+  const negBOver2A = ratDiv(ratFromBigint(-b), twoA); // −b/(2a)
+  const inv2A = ratDiv(ratFromBigint(1n), twoA); // 1/(2a)
+  const r1: Surd = { a: negBOver2A, b: inv2A }; // (−b + √R)/(2a)
+  const r2: Surd = { a: negBOver2A, b: ratNeg(inv2A) }; // (−b − √R)/(2a)
+
+  // a·(r₁−r₂) = √R, a·(r₂−r₁) = −√R (the leading `a` cancels the 1/a in rᵢ).
+  const sqrtR: Surd = { a: RAT_ZERO, b: ratFromBigint(1n) };
+  const Dsurd = surdFromRat(D);
+  const Esurd = surdFromRat(E);
+  const numA = surdAdd(surdMul(Dsurd, r1, R), Esurd); // D·r₁ + E
+  const numB = surdAdd(surdMul(Dsurd, r2, R), Esurd); // D·r₂ + E
+  const A = surdDiv(numA, sqrtR, R);
+  const B = surdDiv(numB, surdNeg(sqrtR), R);
+
+  const parts: string[] = [];
+  const emit = (coeff: Surd, root: Surd): void => {
+    if (coeff.a.num === 0n && coeff.b.num === 0n) {
+      return;
+    }
+    parts.push(`(${surdRender(coeff, R)})*log(abs(${v} - (${surdRender(root, R)})))`);
+  };
+  emit(A, r1);
+  emit(B, r2);
+  return joinTerms(parts);
+}
+
+/**
  * Integrates a single partial-fraction term in closed form. Dispatches on the
- * degree of `term.factor`: degree 1 → `log` (+ rational part for a repeated
- * factor); degree 2 (irreducible, disc < 0) → `log`/rational part + `atan`.
+ * degree of `term.factor` and, for a quadratic, on its discriminant sign:
+ *   - degree 1 → `log` (+ rational part for a repeated factor);
+ *   - degree 2, `disc < 0` (complex roots) → `log`/rational part + `atan`;
+ *   - degree 2, `disc > 0` (real irrational roots, power 1) → a pair of real
+ *     `log`s with quadratic-surd coefficients (Layer 2).
  * The produced string is evaluable by the expression engine (`log`, `atan`,
  * `sqrt`, `abs`, `^`, `*`); its exact form is not contractual — correctness is
- * verified by differentiation. Throws on any other factor degree (unreachable
- * for a `factorDenominator`-classified factor).
+ * verified by differentiation. Throws on any other factor degree, or on a
+ * positive-discriminant quadratic with power > 1 (both unreachable for a
+ * `factorDenominator`-classified factor).
  */
 export function integratePFTerm(term: PFTerm, v: string): string {
   const factor = trimIntPoly(term.factor);
@@ -778,7 +839,14 @@ export function integratePFTerm(term: PFTerm, v: string): string {
     return integrateLinearTerm(factor, term.power, term.numer, v);
   }
   if (deg === 2) {
-    return integrateQuadraticTerm(factor, term.power, term.numer, v);
+    const disc = factor[1] * factor[1] - 4n * factor[2] * factor[0];
+    if (disc < 0n) {
+      return integrateQuadraticTerm(factor, term.power, term.numer, v);
+    }
+    if (term.power !== 1) {
+      throw new Error('integratePFTerm: repeated positive-discriminant quadratic is out of scope');
+    }
+    return integrateQuadraticPosTerm(factor, term.numer, v);
   }
   throw new Error(`integratePFTerm: unsupported factor degree ${deg}`);
 }
