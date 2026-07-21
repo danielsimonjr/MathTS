@@ -80,6 +80,100 @@ export function ratFromBigint(n: bigint): Rat {
 const RAT_ZERO: Rat = { num: 0n, den: 1n };
 
 /**
+ * A quadratic surd `a + b·√Δ` for a fixed positive non-square radicand `Δ`
+ * (Δ > 0, non-square — a perfect-square Δ never occurs here since it would
+ * already have split into rational linear factors). `Δ` is NOT stored on the
+ * `Surd` itself: surds produced within one computation share a single `Δ`,
+ * and every op that needs it (`surdMul`, `surdDiv`, `surdRender`) takes it as
+ * an explicit parameter. `surdAdd`/`surdSub`/`surdNeg`/`surdFromRat` are
+ * Δ-independent (componentwise on `a`/`b`), so they don't take it.
+ *
+ * See docs/superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md
+ * (Architecture §1).
+ */
+export interface Surd {
+  a: Rat;
+  b: Rat;
+}
+
+/** Lifts a rational number to a surd with zero `√Δ` component. */
+export function surdFromRat(r: Rat): Surd {
+  return { a: r, b: RAT_ZERO };
+}
+
+/** Negates a surd componentwise. */
+export function surdNeg(s: Surd): Surd {
+  return { a: ratNeg(s.a), b: ratNeg(s.b) };
+}
+
+/** Componentwise surd addition (Δ-independent). */
+export function surdAdd(x: Surd, y: Surd): Surd {
+  return { a: ratAdd(x.a, y.a), b: ratAdd(x.b, y.b) };
+}
+
+/** Componentwise surd subtraction (Δ-independent). */
+export function surdSub(x: Surd, y: Surd): Surd {
+  return { a: ratSub(x.a, y.a), b: ratSub(x.b, y.b) };
+}
+
+/**
+ * Surd multiplication: `(a+b√Δ)(c+d√Δ) = (ac+bdΔ) + (ad+bc)√Δ`, using exact
+ * `Rat` arithmetic throughout (`Δ` lifted to a `Rat` via `ratFromBigint`).
+ */
+export function surdMul(x: Surd, y: Surd, delta: bigint): Surd {
+  const d = ratFromBigint(delta);
+  return {
+    a: ratAdd(ratMul(x.a, y.a), ratMul(ratMul(x.b, y.b), d)),
+    b: ratAdd(ratMul(x.a, y.b), ratMul(x.b, y.a)),
+  };
+}
+
+/**
+ * Surd division, rationalized by the conjugate: `(a+b√Δ)/(c+d√Δ) =
+ * (a+b√Δ)(c−d√Δ) / (c²−d²Δ)`, where `c²−d²Δ` is a plain rational scalar.
+ * Throws when `y` is zero (both components zero).
+ */
+export function surdDiv(x: Surd, y: Surd, delta: bigint): Surd {
+  if (y.a.num === 0n && y.b.num === 0n) {
+    throw new Error('surdDiv: division by zero surd');
+  }
+  const d = ratFromBigint(delta);
+  const scale = ratSub(ratMul(y.a, y.a), ratMul(ratMul(y.b, y.b), d));
+  const conj: Surd = { a: y.a, b: ratNeg(y.b) };
+  const numer = surdMul(x, conj, delta);
+  return { a: ratDiv(numer.a, scale), b: ratDiv(numer.b, scale) };
+}
+
+/**
+ * Renders a surd as a readable, evaluable string `a + b*sqrt(Δ)`: a zero `a`
+ * or zero `b` component is omitted, `b = 1`/`b = -1` render as bare
+ * `sqrt(Δ)`/`- sqrt(Δ)`, and integer `Rat`s print without a `/1`. Exact
+ * format is non-contractual (correctness is verified by differentiation
+ * elsewhere); this only needs to stay evaluable and readable.
+ */
+export function surdRender(s: Surd, delta: bigint): string {
+  const parts: string[] = [];
+  if (s.a.num !== 0n) {
+    parts.push(ratToStr(s.a));
+  }
+  if (s.b.num !== 0n) {
+    const neg = s.b.num < 0n;
+    const absB = neg ? ratNeg(s.b) : s.b;
+    const sqrtPart = `sqrt(${delta})`;
+    const term = absB.num === absB.den ? sqrtPart : `${ratToStr(absB)}*${sqrtPart}`;
+    if (parts.length === 0) {
+      parts.push(neg ? `- ${term}` : term);
+    } else {
+      parts.push(neg ? `- ${term}` : `+ ${term}`);
+    }
+  }
+  if (parts.length === 0) {
+    return '0';
+  }
+  return parts.join(' ');
+}
+
+/**
  * Splits `expr` at the first top-level (paren-depth 0) `/`, yielding
  * numerator/denominator substrings. When no top-level `/` is present, `expr`
  * is a bare polynomial: numerator = `expr`, denominator = `'1'`.

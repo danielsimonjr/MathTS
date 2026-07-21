@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-07-21'
   totalFiles: 1114
   totalModules: 83
-  totalExports: 5746
+  totalExports: 5753
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9956,6 +9956,13 @@ modules:
         - ratMul
         - ratDiv
         - ratFromBigint
+        - surdFromRat
+        - surdNeg
+        - surdAdd
+        - surdSub
+        - surdMul
+        - surdDiv
+        - surdRender
         - parseRationalFunction
         - polynomialPart
         - integratePolynomial
@@ -9966,6 +9973,7 @@ modules:
       interfaces:
         - Rat
         - RatFunc
+        - Surd
         - DenFactor
         - PFTerm
       functions:
@@ -9974,6 +9982,13 @@ modules:
         - ratMul
         - ratDiv
         - ratFromBigint
+        - surdFromRat
+        - surdNeg
+        - surdAdd
+        - surdSub
+        - surdMul
+        - surdDiv
+        - surdRender
         - parseRationalFunction
         - polynomialPart
         - integratePolynomial
@@ -36645,11 +36660,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1114
   totalModules: 83
-  totalLinesOfCode: 193046
-  totalExports: 5746
+  totalLinesOfCode: 193140
+  totalExports: 5753
   totalClasses: 52
-  totalInterfaces: 503
-  totalFunctions: 1861
+  totalInterfaces: 504
+  totalFunctions: 1868
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1543
@@ -36658,4 +36673,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 224
+  unusedExportsCount: 227

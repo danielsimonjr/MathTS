@@ -4253,8 +4253,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `Rat`, `RatFunc`, `DenFactor`, `PFTerm`
-- Functions: `ratAdd`, `ratSub`, `ratMul`, `ratDiv`, `ratFromBigint`, `parseRationalFunction`, `polynomialPart`, `integratePolynomial`, `factorDenominator`, `partialFractions`, `integratePFTerm`, `integrateRationalFunction`
+- Interfaces: `Rat`, `RatFunc`, `Surd`, `DenFactor`, `PFTerm`
+- Functions: `ratAdd`, `ratSub`, `ratMul`, `ratDiv`, `ratFromBigint`, `surdFromRat`, `surdNeg`, `surdAdd`, `surdSub`, `surdMul`, `surdDiv`, `surdRender`, `parseRationalFunction`, `polynomialPart`, `integratePolynomial`, `factorDenominator`, `partialFractions`, `integratePFTerm`, `integrateRationalFunction`
 
 ---
 
@@ -16991,12 +16991,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1114   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 193046 |
-| Total Exports           | 5746   |
+| Total Lines of Code     | 193140 |
+| Total Exports           | 5753   |
 | Total Re-exports        | 2304   |
 | Total Classes           | 52     |
-| Total Interfaces        | 503    |
-| Total Functions         | 1861   |
+| Total Interfaces        | 504    |
+| Total Functions         | 1868   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 579    |

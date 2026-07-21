@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-21", "f": 1114, "e": 5746, "re": 2304 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-21", "f": 1114, "e": 5753, "re": 2304 },
   "s": {
-    "loc": 193046,
+    "loc": 193140,
     "cls": 52,
-    "int": 503,
-    "fn": 1861,
+    "int": 504,
+    "fn": 1868,
     "tg": 158,
     "en": 0,
     "co": 1543,
@@ -570,6 +570,13 @@
         "ratMul",
         "ratDiv",
         "ratFromBigint",
+        "surdFromRat",
+        "surdNeg",
+        "surdAdd",
+        "surdSub",
+        "surdMul",
+        "surdDiv",
+        "surdRender",
         "parseRationalFunction",
         "polynomialPart",
         "integratePolynomial",
@@ -578,7 +585,7 @@
         "integratePFTerm",
         "integrateRationalFunction"
       ],
-      "int": ["Rat", "RatFunc", "DenFactor", "PFTerm"]
+      "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
     "functions/combinatorics": {
       "f": 4,

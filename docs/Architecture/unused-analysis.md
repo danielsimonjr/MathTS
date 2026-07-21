@@ -8,9 +8,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 3
-- **Potentially unused exports**: 224
-  - **Unreferenced anywhere (deletion candidates)**: 5
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 219
+- **Potentially unused exports**: 227
+  - **Unreferenced anywhere (deletion candidates)**: 4
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 223
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -44,10 +44,6 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
-
-### `functions/src/cas/rational-integrate.ts`
-
-- `ratAdd` (function)
 
 ### `functions/src/signal/fft.ts`
 
@@ -154,12 +150,16 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/cas/rational-integrate.ts`
 
-- `ratSub` (function) — 5 in-file refs
-- `ratMul` (function) — 13 in-file refs
-- `ratDiv` (function) — 15 in-file refs
-- `ratFromBigint` (function) — 25 in-file refs
+- `ratAdd` (function) — 4 in-file refs
+- `ratSub` (function) — 8 in-file refs
+- `ratMul` (function) — 21 in-file refs
+- `ratDiv` (function) — 17 in-file refs
+- `ratFromBigint` (function) — 28 in-file refs
+- `surdNeg` (function) — 1 in-file ref
+- `surdSub` (function) — 1 in-file ref
+- `surdRender` (function) — 1 in-file ref
 - `integratePFTerm` (function) — 2 in-file refs
-- `Rat` (interface) — 58 in-file refs
+- `Rat` (interface) — 64 in-file refs
 - `RatFunc` (interface) — 2 in-file refs
 - `DenFactor` (interface) — 3 in-file refs
 - `PFTerm` (interface) — 3 in-file refs

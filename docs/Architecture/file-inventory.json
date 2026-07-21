@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-21",
-  "totalFiles": 1766,
+  "totalFiles": 1767,
   "byDisposition": {
     "reachable": 1081,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 590,
+    "test": 591,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1117,
-    "tests": 590,
+    "tests": 591,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 757,
+    "@danielsimonjr/mathts-functions": 758,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5196,7 +5196,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 753
+      "loc": 847
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -9326,7 +9326,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 53
+      "loc": 59
     },
     {
       "file": "functions/tests/rational-integrate.test.ts",
@@ -9334,6 +9334,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 29
+    },
+    {
+      "file": "functions/tests/rational-surd.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 36
     },
     {
       "file": "functions/tests/regularized-regression.test.ts",
