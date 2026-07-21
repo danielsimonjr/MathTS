@@ -7268,7 +7268,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 327
+      "loc": 337
     },
     {
       "file": "functions/src/typed/factorization/kronecker-factor.ts",
@@ -8297,7 +8297,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 93
+      "loc": 112
     },
     {
       "file": "functions/tests/factory-scope.test.ts",

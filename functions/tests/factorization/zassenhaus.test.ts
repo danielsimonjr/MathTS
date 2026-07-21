@@ -89,4 +89,23 @@ describe('factorUnivariateZ (Zassenhaus)', () => {
       ],
     });
   });
+
+  // Regression (L2 final-review catch): the Landau–Mignotte bound must use the
+  // full coefficient 2-norm, not just |lc|. A polynomial with a large constant
+  // term relative to its leading coefficient (x²−10000: lc=1, roots ±100) was
+  // wrongly reported irreducible because the lift target p^k was under-bounded.
+  const largeCoeffDegrees = (f: ReturnType<typeof factorUnivariateZ>): number[] =>
+    f.factors.map((e) => e.poly.length - 1).sort();
+  it('x^2 - 10000 = (x-100)(x+100) (large rational roots)', () => {
+    expect(largeCoeffDegrees(factorUnivariateZ(P(-10000, 0, 1)))).toEqual([1, 1]);
+  });
+  it('x^2 - 1000000 = (x-1000)(x+1000)', () => {
+    expect(largeCoeffDegrees(factorUnivariateZ(P(-1000000, 0, 1)))).toEqual([1, 1]);
+  });
+  it('x^2 - 9999 stays irreducible (9999 is not a perfect square)', () => {
+    expect(largeCoeffDegrees(factorUnivariateZ(P(-9999, 0, 1)))).toEqual([2]);
+  });
+  it('(x-123)(x+456) = x^2 + 333x - 56088 factors into linears', () => {
+    expect(largeCoeffDegrees(factorUnivariateZ(P(-56088, 333, 1)))).toEqual([1, 1]);
+  });
 });

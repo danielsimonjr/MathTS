@@ -294,13 +294,23 @@ export function landauMignotte(p: IntPoly): bigint {
     return 1n; // zero polynomial: no factors to bound; return a safe positive value
   }
   const n = BigInt(d + 1);
-  const lcAbs = t[d] < 0n ? -t[d] : t[d];
   const powerOfTwo = 1n << BigInt(d);
-  // ceil(sqrt(n)): integer sqrt rounded up (isqrt already floors, so bump
-  // by one unless n is a perfect square).
+  // Mignotte's factor bound is 2^deg · ‖f‖₂, where ‖f‖₂ is the EUCLIDEAN norm
+  // of ALL coefficients — NOT just |lc|. Using |lc| alone (as an earlier
+  // version did) under-bounds any polynomial whose interior/constant
+  // coefficients dwarf its leading one (e.g. x²−10000: lc=1 but the factors
+  // x±100 have coefficient 100 ≫ the |lc|-only bound of ~8), so the Hensel
+  // lift target p^k came out too small and recombination wrongly reported the
+  // polynomial irreducible. Use the full coefficient 2-norm (ceil), and keep
+  // the extra ceil(√(deg+1)) as a safe margin.
+  let normSq = 0n;
+  for (const c of t) {
+    normSq += c * c;
+  }
+  const norm2Ceil = isqrt(normSq) + 1n; // ceil of ‖f‖₂
   const sq = isqrt(n);
   const sqrtCeil = sq * sq === n ? sq : sq + 1n;
-  const bound = sqrtCeil * powerOfTwo * (lcAbs === 0n ? 1n : lcAbs);
+  const bound = sqrtCeil * powerOfTwo * norm2Ceil;
   return bound > 0n ? bound : 1n;
 }
 
