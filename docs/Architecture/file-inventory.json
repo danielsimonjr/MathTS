@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-21",
-  "totalFiles": 1756,
+  "totalFiles": 1758,
   "byDisposition": {
     "reachable": 1077,
     "build-entry": 33,
-    "test-only": 5,
+    "test-only": 6,
     "orphan": 0,
-    "test": 582,
+    "test": 583,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1115,
-    "tests": 582,
+    "src": 1116,
+    "tests": 583,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 747,
+    "@danielsimonjr/mathts-functions": 749,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -7264,6 +7264,13 @@
       "loc": 327
     },
     {
+      "file": "functions/src/typed/factorization/kronecker-factor.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 290
+    },
+    {
       "file": "functions/src/typed/factorization/kronecker.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -8221,6 +8228,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 48
+    },
+    {
+      "file": "functions/tests/factorization/kronecker-factor.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 92
     },
     {
       "file": "functions/tests/factorization/kronecker.test.ts",

@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 5
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 6
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 5
+  - **Test-only (exercised by a test, ships nothing)**: 6
 - **Potentially unused exports**: 208
   - **Unreferenced anywhere (deletion candidates)**: 1
   - **Referenced in-module (type contracts / helpers backing live exports)**: 207
@@ -31,8 +31,9 @@ directly. Not dead; not shipped. No action needed.
 
 - `expression/src/error/DimensionError.ts`
 
-### `functions` (2)
+### `functions` (3)
 
+- `functions/src/typed/factorization/kronecker-factor.ts`
 - `functions/src/typed/factorization/kronecker.ts`
 - `functions/src/typed/factorization/multi-poly.ts`
 
