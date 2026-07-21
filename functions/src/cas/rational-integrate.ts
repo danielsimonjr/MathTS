@@ -20,6 +20,7 @@ import {
   bigintGcd,
   type IntPoly,
 } from '../typed/factorization/integer-poly.js';
+import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
 
 /** Exact rational number, always normalized to lowest terms with a positive denominator. */
 export interface Rat {
@@ -273,4 +274,46 @@ export function integratePolynomial(p: IntPoly, v: string): string {
     return '0';
   }
   return terms.join(' + ').replace(/\+ -/g, '- ');
+}
+
+/**
+ * An irreducible factor of a rational function's denominator, classified by
+ * degree for Layer 1 closed-form integration: degree 1 ("linear") integrates
+ * to a `log`, degree 2 ("quadratic") to a `log` + `atan` pair. Degree ≥ 3
+ * irreducible factors are outside Layer 1's scope (see `factorDenominator`).
+ */
+export interface DenFactor {
+  poly: IntPoly;
+  mult: number;
+  kind: 'linear' | 'quadratic';
+}
+
+/**
+ * Factors `denom` completely over ℤ/ℚ via the #7 factorization engine
+ * (`factorUnivariateZ`) and classifies each irreducible factor by degree.
+ *
+ * A degree-1 factor is `'linear'`; a degree-2 factor is `'quadratic'` — and,
+ * having survived complete factorization over ℚ, necessarily irreducible
+ * (any rational root would already have split it into two linear factors,
+ * i.e. it has negative discriminant).
+ *
+ * Returns `null` when any irreducible factor has degree ≥ 3: Layer 1 only
+ * handles linear + irreducible-quadratic denominators, so a higher-degree
+ * irreducible factor is out of scope and the caller falls back to the
+ * `integral(...)` marker (Layer 2/Rothstein–Trager territory).
+ */
+export function factorDenominator(denom: IntPoly): DenFactor[] | null {
+  const { factors } = factorUnivariateZ(trimIntPoly(denom));
+  const out: DenFactor[] = [];
+  for (const { poly, mult } of factors) {
+    const deg = trimIntPoly(poly).length - 1;
+    if (deg === 1) {
+      out.push({ poly, mult, kind: 'linear' });
+    } else if (deg === 2) {
+      out.push({ poly, mult, kind: 'quadratic' });
+    } else {
+      return null;
+    }
+  }
+  return out;
 }
