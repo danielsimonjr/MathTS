@@ -14,7 +14,7 @@
  */
 
 import { bigintGcd } from './integer-poly.js';
-import { polyFromExpression, polyToString, type Poly } from '../polynomial-ideal.js';
+import { polyFromExpression, type Poly } from '../polynomial-ideal.js';
 
 /** Sparse multivariate polynomial over ℤ. */
 export interface MultiPoly {
@@ -300,28 +300,45 @@ export function multiExactDivide(a: MultiPoly, b: MultiPoly): MultiPoly | null {
  * non-constant divisor, etc.).
  */
 export function fromAlgebraExpr(expr: string, vars: string[]): MultiPoly | null {
-  let parsed: Poly;
   try {
-    parsed = polyFromExpression(expr, vars);
+    const parsed: Poly = polyFromExpression(expr, vars);
+    const entries: Array<[number[], bigint]> = [];
+    for (const term of parsed) {
+      // Integer-literal boundary inherited from polyFromExpression's float-based
+      // parser: integer coefficients within 2^53 are exact; astronomically large
+      // literals are outside this parser's supported domain.
+      if (!Number.isInteger(term.coeff)) {
+        return null;
+      }
+      entries.push([term.powers, BigInt(term.coeff)]);
+    }
+    return fromTerms(vars, entries);
   } catch {
+    // Any parse/build failure (unknown symbol, non-integer exponent, non-constant
+    // divisor, or a fromTerms exponent-length mismatch) declines rather than throws.
     return null;
   }
-  const entries: Array<[number[], bigint]> = [];
-  for (const term of parsed) {
-    if (!Number.isInteger(term.coeff)) {
-      return null;
-    }
-    entries.push([term.powers, BigInt(term.coeff)]);
-  }
-  return fromTerms(vars, entries);
 }
 
 /**
- * Renders `p` back to an expression string using the SAME
- * `polynomial-ideal.polyToString` renderer the existing multivariate
- * `factor()` path uses, so output matches its formatting style exactly.
+ * Renders `p` back to an expression string in the SAME format as
+ * `polynomial-ideal.polyToString` (term order, `*`/`^` spacing, `+ -`
+ * collapsing, `1*x` unit-coefficient style) — but rendered directly from
+ * `bigint` coefficients so values above 2^53 stay exact. Routing through
+ * `polyToString` would require `Number(v)`, which silently rounds.
  */
 export function toAlgebraString(p: MultiPoly): string {
-  const poly: Poly = [...p.terms].map(([k, v]) => ({ coeff: Number(v), powers: unkey(k) }));
-  return polyToString(poly, p.vars);
+  if (p.terms.size === 0) return '0';
+  const fmt = (c: bigint): string => c.toString();
+  const terms = [...p.terms]
+    .map(([k, v]) => ({ exps: unkey(k), coeff: v }))
+    .reverse()
+    .map(({ exps, coeff }) => {
+      const varPart = exps
+        .map((e, i) => (e === 0 ? '' : e === 1 ? p.vars[i] : `${p.vars[i]}^${e}`))
+        .filter(Boolean)
+        .join('*');
+      return varPart ? `${fmt(coeff)}*${varPart}` : fmt(coeff);
+    });
+  return terms.join(' + ').replace(/\+ -/g, '- ');
 }

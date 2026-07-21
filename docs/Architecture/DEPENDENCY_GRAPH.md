@@ -9030,7 +9030,7 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./integer-poly.js` | `bigintGcd` | Import |
-| `../polynomial-ideal.js` | `polyFromExpression, polyToString, Poly` | Import |
+| `../polynomial-ideal.js` | `polyFromExpression, Poly` | Import |
 
 **Exports:**
 
@@ -16964,7 +16964,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1113   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 192263 |
+| Total Lines of Code     | 192280 |
 | Total Exports           | 5734   |
 | Total Re-exports        | 2304   |
 | Total Classes           | 52     |

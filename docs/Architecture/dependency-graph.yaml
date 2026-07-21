@@ -19036,7 +19036,6 @@ modules:
         - file: ../polynomial-ideal.js
           imports:
             - polyFromExpression
-            - polyToString
             - Poly
       workspaceDependencies: []
       exports:
@@ -36588,7 +36587,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1113
   totalModules: 82
-  totalLinesOfCode: 192263
+  totalLinesOfCode: 192280
   totalExports: 5734
   totalClasses: 52
   totalInterfaces: 499
