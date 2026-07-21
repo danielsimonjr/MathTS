@@ -1602,7 +1602,8 @@
       "functions/src/cas-integration.ts",
       "functions/src/typed/algebra.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/factorization/index.ts"
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
     ],
     "functions/src/factories/index.ts": [
       "functions/src/clustering-extra.ts",
@@ -2257,6 +2258,9 @@
       "functions/src/typed/factorization/finite-field.ts",
       "functions/src/typed/factorization/hensel.ts",
       "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
       "functions/src/typed/factorization/square-free.ts",
       "functions/src/typed/factorization/zassenhaus.ts"
     ],
@@ -2265,7 +2269,19 @@
       "functions/src/typed/factorization/zassenhaus.ts"
     ],
     "functions/src/typed/factorization/zassenhaus.ts": [
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts"
+    ],
+    "functions/src/typed/factorization/multi-poly.ts": [
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts"
+    ],
+    "functions/src/typed/factorization/kronecker-factor.ts": [
       "functions/src/typed/factorization/index.ts"
+    ],
+    "functions/src/typed/factorization/kronecker.ts": [
+      "functions/src/typed/factorization/kronecker-factor.ts"
     ],
     "functions/src/typed/factorization/hensel.ts": [
       "functions/src/typed/factorization/zassenhaus.ts"

@@ -150,7 +150,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 37 files
+- **functions/typed**: 40 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 12 files
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 463            | 5               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 466            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 421            | 1               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -8794,7 +8794,7 @@ graph LR
 |------|---------|------|
 | `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
 | `./polynomial-ideal.js` | `polyFromExpression, buchberger, normalize, polyToString, Poly` | Import |
-| `./factorization/index.js` | `factorPolynomialUnivariate, cleanUnivariatePoly` | Import |
+| `./factorization/index.js` | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString` | Import |
 
 **Exports:**
 
@@ -8975,10 +8975,12 @@ graph LR
 | `../polynomial-ideal.js` | `polyFromExpression, Poly` | Import |
 | `./integer-poly.js` | `degree, IntPoly` | Import |
 | `./zassenhaus.js` | `factorUnivariateZ` | Import |
+| `./multi-poly.js` | `fromAlgebraExpr, toAlgebraString` | Import |
+| `./kronecker-factor.js` | `factorMultivariateKronecker, MultiFactorization` | Import |
 
 **Exports:**
 
-- Functions: `cleanUnivariatePoly`, `renderFactor`, `factorPolynomialUnivariate`
+- Functions: `cleanUnivariatePoly`, `renderFactor`, `factorPolynomialUnivariate`, `factorMultivariateString`
 
 ---
 
@@ -8988,6 +8990,52 @@ graph LR
 
 - Types: `IntPoly`
 - Functions: `trim`, `degree`, `lc`, `isZero`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+
+---
+
+### `functions/src/typed/factorization/kronecker-factor.ts` - Multivariate factorization over ℤ via Kronecker substitution (Layer 2 v1).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./multi-poly.js` | `degreeIn, totalDegree, isZero, equals, integerContentMP, primitivePartMP, leadingTerm, canonicalCompare, multiExactDivide, MultiPoly` | Import |
+| `./kronecker.js` | `substitutionBases, substitute, substitutedDegree, backSubstitute` | Import |
+| `./zassenhaus.js` | `factorUnivariateZ` | Import |
+| `./integer-poly.js` | `mul, IntPoly` | Import |
+
+**Exports:**
+
+- Types: `MultiFactorization`
+- Functions: `factorMultivariateKronecker`
+
+---
+
+### `functions/src/typed/factorization/kronecker.ts` - Kronecker substitution: reduces a multivariate integer polynomial to a
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./multi-poly.js` | `degreeIn, fromTerms, unkey, MultiPoly` | Import |
+| `./integer-poly.js` | `trim, IntPoly` | Import |
+
+**Exports:**
+
+- Functions: `substitutionBases`, `substitutedDegree`, `substitute`, `backSubstitute`
+
+---
+
+### `functions/src/typed/factorization/multi-poly.ts` - Sparse multivariate polynomial arithmetic over ℤ, backed by a
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integer-poly.js` | `bigintGcd` | Import |
+| `../polynomial-ideal.js` | `polyFromExpression, polyToString, Poly` | Import |
+
+**Exports:**
+
+- Interfaces: `MultiPoly`
+- Functions: `key`, `unkey`, `zeroPoly`, `constPoly`, `fromTerms`, `degreeIn`, `totalDegree`, `isZero`, `equals`, `addMP`, `subMP`, `mulMP`, `scalarMulMP`, `negMP`, `canonicalCompare`, `leadingTerm`, `integerContentMP`, `primitivePartMP`, `multiExactDivide`, `fromAlgebraExpr`, `toAlgebraString`
 
 ---
 
@@ -16557,7 +16605,7 @@ graph TD
         N315[distributions]
         N316[finite-field]
         N317[hensel]
-        N318[...27 more]
+        N318[...30 more]
     end
 
     subgraph Functions/unit
@@ -16914,15 +16962,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1110   |
+| Total TypeScript Files  | 1113   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 191419 |
-| Total Exports           | 5707   |
+| Total Lines of Code     | 192266 |
+| Total Exports           | 5734   |
 | Total Re-exports        | 2304   |
 | Total Classes           | 52     |
-| Total Interfaces        | 498    |
-| Total Functions         | 1822   |
-| Total Type Guards       | 157    |
+| Total Interfaces        | 499    |
+| Total Functions         | 1849   |
+| Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 579    |
 | Runtime Circular Deps   | 0      |

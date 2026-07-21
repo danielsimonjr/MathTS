@@ -24,7 +24,11 @@ import {
   polyToString as idealPolyToString,
   type Poly,
 } from './polynomial-ideal.js';
-import { factorPolynomialUnivariate, cleanUnivariatePoly } from './factorization/index.js';
+import {
+  factorPolynomialUnivariate,
+  cleanUnivariatePoly,
+  factorMultivariateString,
+} from './factorization/index.js';
 
 // =============================================================================
 // Type Aliases
@@ -855,17 +859,21 @@ function tryMonomialDiffOfSquares(poly: Poly, vars: string[]): [string, string] 
 }
 
 /**
- * Factor a MULTIVARIATE polynomial over the tractable subset: pull out the
- * integer content and the common monomial factor, then recognize a monomial
- * difference of squares in the cofactor (`x²·y + x·y² → x*y*(x + y)`,
- * `4x²−9y² → (2*x − 3*y)*(2*x + 3*y)`). Returns null when nothing beyond
- * integer content alone is found, so the caller falls back to the legacy
- * integer-GCD path (which keeps the `2*x+4*y → 2*(x+2*y)` string contract).
+ * Fast path for MULTIVARIATE factorization: pull out the integer content and
+ * the common monomial factor, then recognize a monomial difference of squares
+ * in the cofactor (`x²·y + x·y² → x*y*(x + y)`, `4x²−9y² → (2*x − 3*y)*(2*x + 3*y)`).
+ * Returns null when nothing beyond integer content alone is found, so the caller
+ * falls back to the complete Kronecker engine or the legacy integer-GCD path.
  *
- * Full multivariate factorization into irreducible factors (needing a real
- * algorithm — Wang/Zassenhaus/EEZ) is OUT OF SCOPE — see the `factor` docstring.
+ * Returns `{ text, count }` on success: `text` is the rendered factorization and
+ * `count` is the number of irreducible POLYNOMIAL factors it expresses (integer
+ * content is not counted) — one per unit of the common monomial's exponents,
+ * plus two for a difference-of-squares split or one for the raw (possibly
+ * reducible) cofactor. `factor()` compares `count` against the complete Kronecker
+ * factor count to decide whether this fast path left a reducible cofactor whole
+ * (and should be superseded by the full factorization).
  */
-function factorMultivariate(expr: string, vars: string[]): string | null {
+function factorMultivariate(expr: string, vars: string[]): { text: string; count: number } | null {
   let poly: Poly;
   try {
     poly = polyFromExpression(expr, vars);
@@ -903,7 +911,10 @@ function factorMultivariate(expr: string, vars: string[]): string | null {
   if (hasMonomial) parts.push(monomialString(monPow, vars));
   if (dsq) parts.push(dsq[0], dsq[1]);
   else parts.push(`(${idealPolyToString(cofactor, vars)})`);
-  return parts.join('*');
+
+  const monomialFactors = monPow.reduce((acc, e) => acc + e, 0);
+  const count = monomialFactors + (dsq ? 2 : 1);
+  return { text: parts.join('*'), count };
 }
 
 /**
@@ -919,12 +930,20 @@ function factorMultivariate(expr: string, vars: string[]): string | null {
  * `factor('x^4+3*x^2+2')` → `'(x^2 + 1)*(x^2 + 2)'`. Polynomials irreducible
  * over ℚ (`x^4 + 1`, `x^2 + x + 1`) are returned unchanged.
  *
- * **Multivariate polynomials** get the tractable subset (see
- * {@link factorMultivariate}): integer-content + common-monomial extraction
- * and monomial difference-of-squares — `x^2*y + x*y^2 → 'x*y*(x + y)'`,
- * `4*x^2 - 9*y^2 → '(2*x - 3*y)*(2*x + 3*y)'`. Full multivariate factorization
- * into irreducible factors (Wang/Zassenhaus/EEZ) is OUT OF SCOPE and returns
- * the partially-factored or unchanged expression rather than a wrong answer.
+ * **Multivariate polynomials** (`n ≥ 2` variables, integer coefficients) are
+ * factored **completely over ℤ/ℚ** into irreducible factors. A fast path (see
+ * {@link factorMultivariate}) handles the common cases byte-for-byte — integer
+ * content, common-monomial extraction, monomial difference-of-squares
+ * (`x^2*y + x*y^2 → 'x*y*(1*y + 1*x)'`, `4*x^2 - 9*y^2 → '(2*x - 3*y)*(2*x + 3*y)'`).
+ * Anything the fast path leaves whole or only partially factored is routed
+ * through the Kronecker-substitution engine ({@link factorMultivariateString}),
+ * which reduces to the univariate ℤ engine and recombines by exact division
+ * (`x^2 + 3*x*y + 4*x + 2*y^2 + 5*y + 3 → (1*x + 1*y + 1)*(1*x + 2*y + 3)`). The
+ * engine declines (and the caller keeps the fast-path/legacy output) beyond a
+ * substituted-degree cap; irreducible multivariate polynomials (`x^2 + y^2`) are
+ * returned unchanged. Wang/EEZ is a future performance upgrade, not a
+ * capability gap. Because the engine confirms every factor by division, it never
+ * emits a wrong factorization.
  *
  * Everything else (no rational root, no common factor) falls back to the
  * original common-integer-factor extraction below.
@@ -936,7 +955,22 @@ export function factor(expr: string): string {
   const univariateVars = variables(expr);
   if (univariateVars.length >= 2) {
     const mv = factorMultivariate(expr, univariateVars);
-    if (mv !== null) return mv;
+    if (mv === null) {
+      // Fast path found nothing beyond integer content. Try the complete
+      // Kronecker multivariate engine; use its factorization when it yields a
+      // genuine (multi-factor or content) result, else fall through to the
+      // legacy integer-GCD path below.
+      const kron = factorMultivariateString(expr, univariateVars);
+      if (kron !== null) return kron;
+    } else {
+      // Fast path produced a (possibly partial) factorization. If the complete
+      // Kronecker engine refines it into STRICTLY more irreducible factors —
+      // i.e. the fast path left a reducible cofactor whole — prefer that;
+      // otherwise keep the fast path's exact byte output.
+      const refined = factorMultivariateString(expr, univariateVars, mv.count + 1);
+      if (refined !== null) return refined;
+      return mv.text;
+    }
   }
   if (univariateVars.length === 1) {
     try {

@@ -5,12 +5,12 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 6
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 6
-- **Potentially unused exports**: 208
-  - **Unreferenced anywhere (deletion candidates)**: 1
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 207
+  - **Test-only (exercised by a test, ships nothing)**: 3
+- **Potentially unused exports**: 214
+  - **Unreferenced anywhere (deletion candidates)**: 4
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 210
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -31,12 +31,6 @@ directly. Not dead; not shipped. No action needed.
 
 - `expression/src/error/DimensionError.ts`
 
-### `functions` (3)
-
-- `functions/src/typed/factorization/kronecker-factor.ts`
-- `functions/src/typed/factorization/kronecker.ts`
-- `functions/src/typed/factorization/multi-poly.ts`
-
 ### `parallel` (2)
 
 - `parallel/src/ParallelMatrix.ts`
@@ -54,6 +48,12 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `functions/src/signal/fft.ts`
 
 - `complexConj` (function)
+
+### `functions/src/typed/factorization/multi-poly.ts`
+
+- `zeroPoly` (function)
+- `constPoly` (function)
+- `scalarMulMP` (function)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -328,6 +328,12 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `functions/src/typed/factorization/integer-poly.ts`
 
 - `neg` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/multi-poly.ts`
+
+- `key` (function) — 7 in-file refs
+- `subMP` (function) — 1 in-file ref
+- `negMP` (function) — 2 in-file refs
 
 ### `functions/src/typed/factorization/square-free.ts`
 

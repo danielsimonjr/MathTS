@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-21",
-  "totalFiles": 1758,
+  "totalFiles": 1759,
   "byDisposition": {
-    "reachable": 1077,
+    "reachable": 1080,
     "build-entry": 33,
-    "test-only": 6,
+    "test-only": 3,
     "orphan": 0,
-    "test": 583,
+    "test": 584,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1116,
-    "tests": 583,
+    "tests": 584,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 749,
+    "@danielsimonjr/mathts-functions": 750,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -7184,7 +7184,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1775
+      "loc": 1812
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7254,7 +7254,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 165
+      "loc": 222
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -7267,21 +7267,21 @@
       "file": "functions/src/typed/factorization/kronecker-factor.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 290
     },
     {
       "file": "functions/src/typed/factorization/kronecker.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 135
     },
     {
       "file": "functions/src/typed/factorization/multi-poly.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 328
     },
     {
@@ -8193,6 +8193,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/factorization/factor-multivariate-integration.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "functions/tests/factorization/factor-univariate-integration.test.ts",

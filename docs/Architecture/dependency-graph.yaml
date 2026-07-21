@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-07-21'
-  totalFiles: 1110
+  totalFiles: 1113
   totalModules: 82
-  totalExports: 5707
+  totalExports: 5734
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18211,6 +18211,7 @@ modules:
           imports:
             - factorPolynomialUnivariate
             - cleanUnivariatePoly
+            - factorMultivariateString
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -18898,15 +18899,25 @@ modules:
         - file: ./zassenhaus.js
           imports:
             - factorUnivariateZ
+        - file: ./multi-poly.js
+          imports:
+            - fromAlgebraExpr
+            - toAlgebraString
+        - file: ./kronecker-factor.js
+          imports:
+            - factorMultivariateKronecker
+            - MultiFactorization
       workspaceDependencies: []
       exports:
         - cleanUnivariatePoly
         - renderFactor
         - factorPolynomialUnivariate
+        - factorMultivariateString
       functions:
         - cleanUnivariatePoly
         - renderFactor
         - factorPolynomialUnivariate
+        - factorMultivariateString
     functions/src/typed/factorization/integer-poly.ts:
       description: Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.
       externalDependencies: []
@@ -18953,6 +18964,127 @@ modules:
         - polyGcdZ
         - landauMignotte
         - modSymmetric
+    functions/src/typed/factorization/kronecker-factor.ts:
+      description: Multivariate factorization over ℤ via Kronecker substitution (Layer 2 v1).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./multi-poly.js
+          imports:
+            - degreeIn
+            - totalDegree
+            - isZero
+            - equals
+            - integerContentMP
+            - primitivePartMP
+            - leadingTerm
+            - canonicalCompare
+            - multiExactDivide
+            - MultiPoly
+        - file: ./kronecker.js
+          imports:
+            - substitutionBases
+            - substitute
+            - substitutedDegree
+            - backSubstitute
+        - file: ./zassenhaus.js
+          imports:
+            - factorUnivariateZ
+        - file: ./integer-poly.js
+          imports:
+            - mul
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - factorMultivariateKronecker
+      functions:
+        - factorMultivariateKronecker
+    functions/src/typed/factorization/kronecker.ts:
+      description: 'Kronecker substitution: reduces a multivariate integer polynomial to a'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./multi-poly.js
+          imports:
+            - degreeIn
+            - fromTerms
+            - unkey
+            - MultiPoly
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - substitutionBases
+        - substitutedDegree
+        - substitute
+        - backSubstitute
+      functions:
+        - substitutionBases
+        - substitutedDegree
+        - substitute
+        - backSubstitute
+    functions/src/typed/factorization/multi-poly.ts:
+      description: Sparse multivariate polynomial arithmetic over ℤ, backed by a
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - bigintGcd
+        - file: ../polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - polyToString
+            - Poly
+      workspaceDependencies: []
+      exports:
+        - key
+        - unkey
+        - zeroPoly
+        - constPoly
+        - fromTerms
+        - degreeIn
+        - totalDegree
+        - isZero
+        - equals
+        - addMP
+        - subMP
+        - mulMP
+        - scalarMulMP
+        - negMP
+        - canonicalCompare
+        - leadingTerm
+        - integerContentMP
+        - primitivePartMP
+        - multiExactDivide
+        - fromAlgebraExpr
+        - toAlgebraString
+      interfaces:
+        - MultiPoly
+      functions:
+        - key
+        - unkey
+        - zeroPoly
+        - constPoly
+        - fromTerms
+        - degreeIn
+        - totalDegree
+        - isZero
+        - equals
+        - addMP
+        - subMP
+        - mulMP
+        - scalarMulMP
+        - negMP
+        - canonicalCompare
+        - leadingTerm
+        - integerContentMP
+        - primitivePartMP
+        - multiExactDivide
+        - fromAlgebraExpr
+        - toAlgebraString
     functions/src/typed/factorization/square-free.ts:
       description: Yun's square-free decomposition over ℤ.
       externalDependencies: []
@@ -35779,6 +35911,9 @@ dependencyGraph:
         - functions/src/typed/factorization/hensel.ts
         - functions/src/typed/factorization/index.ts
         - functions/src/typed/factorization/integer-poly.ts
+        - functions/src/typed/factorization/kronecker-factor.ts
+        - functions/src/typed/factorization/kronecker.ts
+        - functions/src/typed/factorization/multi-poly.ts
         - functions/src/typed/factorization/square-free.ts
         - functions/src/typed/factorization/zassenhaus.ts
         - functions/src/typed/fused.ts
@@ -36451,14 +36586,14 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1110
+  totalTypeScriptFiles: 1113
   totalModules: 82
-  totalLinesOfCode: 191419
-  totalExports: 5707
+  totalLinesOfCode: 192266
+  totalExports: 5734
   totalClasses: 52
-  totalInterfaces: 498
-  totalFunctions: 1822
-  totalTypeGuards: 157
+  totalInterfaces: 499
+  totalFunctions: 1849
+  totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1543
   totalReExports: 2304
@@ -36466,4 +36601,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 208
+  unusedExportsCount: 214

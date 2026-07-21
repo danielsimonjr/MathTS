@@ -16,6 +16,8 @@
 import { polyFromExpression, type Poly } from '../polynomial-ideal.js';
 import { degree, type IntPoly } from './integer-poly.js';
 import { factorUnivariateZ } from './zassenhaus.js';
+import { fromAlgebraExpr, toAlgebraString } from './multi-poly.js';
+import { factorMultivariateKronecker, type MultiFactorization } from './kronecker-factor.js';
 
 /** Absolute tolerance for treating a parsed float coefficient as an integer. */
 const INT_TOLERANCE = 1e-7;
@@ -161,4 +163,59 @@ export function factorPolynomialUnivariate(expr: string, v: string): string | nu
     for (let i = 0; i < mult; i += 1) parts.push(term);
   }
   return parts.join('*');
+}
+
+/**
+ * Render a complete multivariate factorization `constant · ∏ factorsᵢ^multᵢ`
+ * (from {@link factorMultivariateKronecker}) as a `*`-joined string matching the
+ * existing multivariate `factor()` style: a leading integer constant when it is
+ * not 1, each polynomial factor rendered via `toAlgebraString` and wrapped in
+ * parentheses, with `^mult` appended for a repeated factor (`mult > 1`).
+ */
+function renderMultiFactorization(fact: MultiFactorization): string {
+  const parts: string[] = [];
+  if (fact.constant !== 1n) parts.push(String(fact.constant));
+  for (const { poly, mult } of fact.factors) {
+    const term = `(${toAlgebraString(poly)})`;
+    parts.push(mult > 1 ? `${term}^${mult}` : term);
+  }
+  return parts.join('*');
+}
+
+/**
+ * Factor a MULTIVARIATE (`n ≥ 2` variable) integer polynomial given as an
+ * expression string, completely over ℤ/ℚ via the Kronecker-substitution engine
+ * ({@link factorMultivariateKronecker}), rendered to a string matching
+ * `factor()`'s multivariate conventions.
+ *
+ * Returns `null` when the input is not an integer multivariate polynomial in
+ * `vars` (parse failure, non-integer coefficients, single variable, constant,
+ * or the degree cap is exceeded — the engine declines) OR when the
+ * factorization is not worth substituting for the caller's current output.
+ *
+ * The "worth it" threshold is `minFactors` (default 2): a result is returned
+ * only when it has at least `minFactors` irreducible POLYNOMIAL factors.
+ *   - Default (the caller's fast path already declined): require ≥ 2 factors —
+ *     a genuine multi-factor factorization. A single polynomial factor (an
+ *     irreducible, or a bare integer-content extraction like `2·(3x + 2y)`) is
+ *     declined so the caller's legacy content-extraction path keeps its exact
+ *     byte output; the Kronecker rendering's monomial order differs and must not
+ *     override that contract.
+ *   - Provided (the caller's fast path produced a partial factorization with
+ *     `minFactors − 1` irreducible factors): return a result ONLY if it has at
+ *     least `minFactors` factors, i.e. the engine strictly refined a reducible
+ *     cofactor the fast path left whole.
+ */
+export function factorMultivariateString(
+  expr: string,
+  vars: string[],
+  minFactors = 2
+): string | null {
+  const p = fromAlgebraExpr(expr, vars);
+  if (p === null) return null;
+  const fact = factorMultivariateKronecker(p);
+  if (fact === null) return null;
+  const count = fact.factors.reduce((acc, f) => acc + f.mult, 0);
+  if (count < minFactors) return null;
+  return renderMultiFactorization(fact);
 }

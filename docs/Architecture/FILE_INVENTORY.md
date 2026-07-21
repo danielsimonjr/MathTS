@@ -6,21 +6,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1758
+**Total files**: 1759
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
-| `reachable`   |     1077 | A `src/` file in the module graph, reachable from a root.                                                    |
+| `reachable`   |     1080 | A `src/` file in the module graph, reachable from a root.                                                    |
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
-| `test-only`   |        6 | A `src/` file not reachable from src roots but imported by a test.                                           |
+| `test-only`   |        3 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      583 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      584 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1758** |                                                                                                              |
+| **Total**     | **1759** |                                                                                                              |
 
 ## Per-area counts
 
@@ -29,7 +29,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1116 |
-| `tests`    |   583 |
+| `tests`    |   584 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -44,7 +44,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   489 |
-| `@danielsimonjr/mathts-functions`      |   749 |
+| `@danielsimonjr/mathts-functions`      |   750 |
 | `@danielsimonjr/mathts-gpu`            |    14 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    92 |
@@ -1097,9 +1097,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/factorization/hensel.ts`                                     | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/factorization/index.ts`                                      | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/factorization/integer-poly.ts`                               | @danielsimonjr/mathts-functions      | src      | reachable   |
-| `functions/src/typed/factorization/kronecker-factor.ts`                           | @danielsimonjr/mathts-functions      | src      | test-only   |
-| `functions/src/typed/factorization/kronecker.ts`                                  | @danielsimonjr/mathts-functions      | src      | test-only   |
-| `functions/src/typed/factorization/multi-poly.ts`                                 | @danielsimonjr/mathts-functions      | src      | test-only   |
+| `functions/src/typed/factorization/kronecker-factor.ts`                           | @danielsimonjr/mathts-functions      | src      | reachable   |
+| `functions/src/typed/factorization/kronecker.ts`                                  | @danielsimonjr/mathts-functions      | src      | reachable   |
+| `functions/src/typed/factorization/multi-poly.ts`                                 | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/factorization/square-free.ts`                                | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/factorization/zassenhaus.ts`                                 | @danielsimonjr/mathts-functions      | src      | reachable   |
 | `functions/src/typed/fused.ts`                                                    | @danielsimonjr/mathts-functions      | src      | reachable   |
@@ -1230,6 +1230,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/factories-tier2.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factories-tier4.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/factor-mod-p.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/factorization/factor-multivariate-integration.test.ts`           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/factor-univariate-integration.test.ts`             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/finite-field.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factorization/hensel.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
