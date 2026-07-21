@@ -28,6 +28,22 @@ describe('rational-integrate: per-factor integration (differentiation-verified)'
     expect(integrateRationalFunction('1/(x^3-2)', 'x')).toBeNull();
   });
 
+  // Regression (final-review Critical): a degree-2 factor irreducible over ℚ can
+  // still have a POSITIVE discriminant (real irrational roots, e.g. x^2-2). Those
+  // need a real log/atanh, NOT arctan — decline rather than emit a wrong answer.
+  const positiveDiscDeclines = [
+    '1/(x^2-2)',
+    '1/(x^2-3)',
+    'x/(x^2-5)',
+    '1/(x^2+x-1)',
+    '1/(2*x^2-3)',
+  ];
+  for (const inp of positiveDiscDeclines) {
+    it(`declines positive-discriminant quadratic denominator ${inp}`, () => {
+      expect(integrateRationalFunction(inp, 'x')).toBeNull();
+    });
+  }
+
   // Regression: denominators with integer content > 1 must be scaled correctly
   // (the primitive-factor product drops the leading constant). Before the fix
   // these integrated to `content ×` the correct answer.

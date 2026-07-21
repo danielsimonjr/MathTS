@@ -312,6 +312,18 @@ export function factorDenominator(denom: IntPoly): DenFactor[] | null {
     if (deg === 1) {
       out.push({ poly, mult, kind: 'linear' });
     } else if (deg === 2) {
+      // Irreducible over ℚ does NOT imply a negative discriminant: a degree-2
+      // factor with a POSITIVE non-square discriminant (real irrational roots,
+      // e.g. x²−2) also survives ℚ-factorization. Those integrate to a real
+      // log/atanh (real partial fractions with irrational roots), which the
+      // closed-form quadratic path — arctan via √(4c−b²) — cannot express
+      // (it would take √ of a negative). Decline them to the marker (Layer 2),
+      // rather than emit a wrong answer. Only disc < 0 → the arctan case.
+      const q = trimIntPoly(poly);
+      const disc = q[1] * q[1] - 4n * q[2] * q[0];
+      if (disc >= 0n) {
+        return null;
+      }
       out.push({ poly, mult, kind: 'quadratic' });
     } else {
       return null;
