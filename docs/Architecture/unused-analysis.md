@@ -5,9 +5,9 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 3
+  - **Test-only (exercised by a test, ships nothing)**: 4
 - **Potentially unused exports**: 214
   - **Unreferenced anywhere (deletion candidates)**: 4
   - **Referenced in-module (type contracts / helpers backing live exports)**: 210
@@ -30,6 +30,10 @@ directly. Not dead; not shipped. No action needed.
 ### `expression` (1)
 
 - `expression/src/error/DimensionError.ts`
+
+### `functions` (1)
+
+- `functions/src/cas/rational-integrate.ts`
 
 ### `parallel` (2)
 
