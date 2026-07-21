@@ -584,6 +584,16 @@
       "names": ["degree", "derivative", "evaluate", "isZero"],
       "filesGlob": ["functions/src/typed/factorization/integer-poly.ts"],
       "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+    },
+    {
+      "names": ["isZero", "equals"],
+      "filesGlob": ["functions/src/typed/factorization/multi-poly.ts"],
+      "reason": "self-contained multivariate factorization engine (sparse bigint MultiPoly) primitives, surfaced as TRUE_DUPLICATE only once factor() wired the Kronecker Layer-2 engine into the live graph (2026-07-20): isZero(p: MultiPoly) tests the empty term-map (vs functions/src/factories/index.ts's numeric isZero [left canonical] and the Layer-1 integer-poly.ts IntPoly isZero [separately allowlisted]); equals(a,b: MultiPoly) is structural term-map equality (vs functions/src/typed/factorization/integer-poly.ts's IntPoly equals [left canonical]). The engine is bigint-only and operates on a distinct type (MultiPoly), so it cannot delegate to the number/IntPoly-typed homonyms — a genuinely independent body, not a copy to consolidate. Engine correctness is sympy-oracle-pinned (functions/tests/factorization/*). 2026-07 factorization Layer-2 slice."
+    },
+    {
+      "names": ["substitute"],
+      "filesGlob": ["functions/src/typed/factorization/kronecker.ts"],
+      "reason": "same name, different function (distinct-by-domain): functions/src/typed/factorization/kronecker.ts's substitute(p: MultiPoly, bases): IntPoly performs Kronecker substitution xₖ↦x^{bₖ}, collapsing a multivariate bigint poly to its univariate image; functions/src/typed/algebra.ts's substitute (left canonical) is the CAS string/AST variable substitution. Surfaced as TRUE_DUPLICATE only once factor() wired the Layer-2 engine into the live graph (2026-07-20). 2026-07 factorization Layer-2 slice."
     }
   ]
 }
