@@ -1,19 +1,19 @@
 {
-  "generated": "2026-07-20",
-  "totalFiles": 1750,
+  "generated": "2026-07-21",
+  "totalFiles": 1751,
   "byDisposition": {
     "reachable": 1077,
     "build-entry": 33,
     "test-only": 3,
     "orphan": 0,
-    "test": 578,
+    "test": 579,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1113,
-    "tests": 578,
+    "tests": 579,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 741,
+    "@danielsimonjr/mathts-functions": 742,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -7184,7 +7184,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1771
+      "loc": 1775
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7254,7 +7254,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 129
+      "loc": 165
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -8207,6 +8207,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 48
+    },
+    {
+      "file": "functions/tests/factorization/render-bigint.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 22
     },
     {
       "file": "functions/tests/factorization/square-free.test.ts",

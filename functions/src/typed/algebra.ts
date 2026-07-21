@@ -968,9 +968,13 @@ export function factor(expr: string): string {
         const routed = factorPolynomialUnivariate(expr, v);
         if (routed !== null) return routed;
       }
-    } catch {
+    } catch (err) {
       // Not a pure single-variable integer polynomial, or no rational root
-      // exists — fall back to the legacy GCD-based factoring below.
+      // exists — fall back to the legacy GCD-based factoring below. Warn
+      // first so a real engine regression doesn't hide silently behind the
+      // (never-wrong) fallback.
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('factor: univariate engine path failed, falling back: ' + message);
     }
   }
 

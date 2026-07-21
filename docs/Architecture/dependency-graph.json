@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-20",
+    "lastUpdated": "2026-07-21",
     "totalFiles": 1110,
     "totalModules": 82,
-    "totalExports": 5706
+    "totalExports": 5707
   },
   "entryPoints": [
     {
@@ -20303,8 +20303,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["cleanUnivariatePoly", "factorPolynomialUnivariate"],
-        "functions": ["cleanUnivariatePoly", "factorPolynomialUnivariate"]
+        "exports": ["cleanUnivariatePoly", "renderFactor", "factorPolynomialUnivariate"],
+        "functions": ["cleanUnivariatePoly", "renderFactor", "factorPolynomialUnivariate"]
       },
       "functions/src/typed/factorization/integer-poly.ts": {
         "description": "Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.",
@@ -38738,11 +38738,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1110,
     "totalModules": 82,
-    "totalLinesOfCode": 191379,
-    "totalExports": 5706,
+    "totalLinesOfCode": 191419,
+    "totalExports": 5707,
     "totalClasses": 52,
     "totalInterfaces": 498,
-    "totalFunctions": 1821,
+    "totalFunctions": 1822,
     "totalTypeGuards": 157,
     "totalEnums": 0,
     "totalConstants": 1543,

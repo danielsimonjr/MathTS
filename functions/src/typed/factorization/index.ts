@@ -78,10 +78,46 @@ function renderLinearFactor(poly: IntPoly, v: string): string {
   return b < 0n ? `(${base} - ${-b})` : `(${base} + ${b})`;
 }
 
-/** Render one irreducible factor: linears via {@link renderLinearFactor}, higher via clean form wrapped in parentheses. */
-function renderFactor(poly: IntPoly, v: string): string {
+/**
+ * Render a dense `bigint`-coefficient univariate polynomial (ascending,
+ * index = power) the same format as {@link cleanUnivariatePoly}, but staying
+ * entirely in `bigint` arithmetic — coefficients produced by the Zassenhaus
+ * engine can exceed 2^53 (via Hensel lifting to p^k), and routing them
+ * through `Number()` silently rounds. No trailing/leading zero trimming is
+ * performed here since `poly` (a factor from `factorUnivariateZ`) is already
+ * trimmed by construction.
+ */
+function renderIntPoly(coeffs: IntPoly, v: string): string {
+  const parts: string[] = [];
+  for (let i = coeffs.length - 1; i >= 0; i -= 1) {
+    const c = coeffs[i];
+    if (c === 0n) continue;
+    const abs = c < 0n ? -c : c;
+    let term: string;
+    if (i === 0) {
+      term = abs.toString();
+    } else {
+      const varPart = i === 1 ? v : `${v}^${i}`;
+      term = abs === 1n ? varPart : `${abs}*${varPart}`;
+    }
+    if (parts.length === 0) {
+      parts.push(c < 0n ? `-${term}` : term);
+    } else {
+      parts.push(c < 0n ? '-' : '+', term);
+    }
+  }
+  return parts.length === 0 ? '0' : parts.join(' ');
+}
+
+/**
+ * Render one irreducible factor: linears via {@link renderLinearFactor},
+ * higher via {@link renderIntPoly} (bigint-native — see its doc comment for
+ * why this must not go through `Number()`) wrapped in parentheses. Exported
+ * for direct unit testing of the bigint-fidelity path.
+ */
+export function renderFactor(poly: IntPoly, v: string): string {
   if (degree(poly) === 1) return renderLinearFactor(poly, v);
-  return `(${cleanUnivariatePoly(poly.map(Number), v)})`;
+  return `(${renderIntPoly(poly, v)})`;
 }
 
 /**

@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-07-20
+**Version**: 0.1.0 | **Last Updated**: 2026-07-21
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -8978,7 +8978,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `cleanUnivariatePoly`, `factorPolynomialUnivariate`
+- Functions: `cleanUnivariatePoly`, `renderFactor`, `factorPolynomialUnivariate`
 
 ---
 
@@ -16916,12 +16916,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1110   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 191379 |
-| Total Exports           | 5706   |
+| Total Lines of Code     | 191419 |
+| Total Exports           | 5707   |
 | Total Re-exports        | 2304   |
 | Total Classes           | 52     |
 | Total Interfaces        | 498    |
-| Total Functions         | 1821   |
+| Total Functions         | 1822   |
 | Total Type Guards       | 157    |
 | Total Enums             | 0      |
 | Type-only Imports       | 579    |
@@ -16930,5 +16930,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-07-20
+_Last Updated_: 2026-07-21
 _Version_: 0.1.0
