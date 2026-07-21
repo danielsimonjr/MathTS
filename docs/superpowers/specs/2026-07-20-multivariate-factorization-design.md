@@ -118,7 +118,55 @@ _FACTORS` (24), abandon full recombination and return the input as a single
 
 Output: sorted list of `[irreducible, multiplicity]` plus the integer constant.
 
-## 5. Layer 2 algorithm (multivariate) — Wang / EEZ
+## 5. Layer 2 algorithm (multivariate)
+
+> **ADR (2026-07-20): Layer 2 v1 uses Kronecker substitution, not Wang/EEZ.**
+> The original design below specified Wang/EEZ. For the first correct, shippable
+> Layer 2 we instead reduce multivariate factorization to the **already-shipped
+> Layer 1 univariate engine** via **Kronecker substitution** — the same
+> "correct-tractable-now, faster-algorithm-later" trade Layer 1 made with
+> Zassenhaus-vs-van-Hoeij. Rationale: Wang/EEZ's multivariate Hensel lifting and
+> leading-coefficient distribution are the highest-bug-risk code in CAS and
+> require multivariate GCD + square-free machinery underneath; Kronecker needs
+> none of that and reuses `factorUnivariateZ` directly. **Wang/EEZ (§5b) is the
+> documented performance follow-up** for inputs where Kronecker's degree blowup
+> (`∏(degᵢ+1)`) is prohibitive.
+>
+> ### 5a. Kronecker substitution (Layer 2 v1 — what ships)
+>
+> Input: integer poly `f` in variables `x₁..xₙ`, `n ≥ 2`.
+>
+> 1. **Integer content.** Pull the integer content (gcd of all bigint
+>    coefficients) and sign; work on the primitive part `g`. (No multivariate
+>    GCD needed — recombination + trial division recovers all structure.)
+> 2. **Substitution base.** Let `dᵢ = deg_{xᵢ}(g)`. Choose bases
+>    `b₁ = 1, bₖ = ∏_{i<k}(dᵢ+1)` so the map `xₖ ↦ x^{bₖ}` (with `x = x₁`) is
+>    injective on the monomials of `g` and of every possible factor
+>    (`deg_{xᵢ}(factor) ≤ dᵢ`). The substituted univariate degree is
+>    `D = Σ dᵢ·bᵢ = ∏(dᵢ+1) − 1`.
+> 3. **Degree cap.** If `D > KRONECKER_MAX_DEGREE` (e.g. 2000), skip — return
+>    `g` via the existing multivariate fast-paths and `log()` the cap (no silent
+>    wrong answer, no hang). This is the Kronecker analogue of Layer 1's
+>    factor-count cap.
+> 4. **Substitute & factor.** `F(x) = g(x, x^{b₂}, …, x^{bₙ})`; factor `F` with
+>    `factorUnivariateZ` (Layer 1) into irreducibles over ℤ.
+> 5. **Recombination.** Each true irreducible factor of `g` maps to a subset of
+>    `F`'s irreducible factors. Enumerate subsets (increasing size); for each,
+>    back-substitute the product (read univariate exponents in mixed-radix
+>    `(d₁+1, d₂+1, …)` to recover the multivariate monomials — reject any subset
+>    whose back-substitution has a per-variable degree `> dᵢ`, i.e. an invalid
+>    "carry"), and test **multivariate exact division** into the current
+>    cofactor. A subset that divides is a true irreducible factor; divide it out
+>    (repeatedly, capturing multiplicity) and continue. The leftover cofactor
+>    (if non-constant) is the final factor. Same cap on subset count as Layer 1.
+> 6. **Output & render** factors with positive leading term, canonical order,
+>    matching the existing multivariate `idealPolyToString` conventions.
+>
+> Correctness: division is the arbiter, so no false factor can be emitted; every
+> true factor is some subset, so completeness holds up to the cap. Oracle:
+> sympy `factor_list` on multivariate inputs.
+>
+> ### 5b. Wang / EEZ (future performance upgrade — NOT in v1)
 
 Input: primitive multivariate integer poly `f` in variables `x₁..xₙ`, `n ≥ 2`.
 
