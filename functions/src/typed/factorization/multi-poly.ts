@@ -14,6 +14,7 @@
  */
 
 import { bigintGcd } from './integer-poly.js';
+import { polyFromExpression, polyToString, type Poly } from '../polynomial-ideal.js';
 
 /** Sparse multivariate polynomial over ℤ. */
 export interface MultiPoly {
@@ -244,4 +245,83 @@ export function primitivePartMP(p: MultiPoly): MultiPoly {
     return negMP(divided);
   }
   return divided;
+}
+
+/**
+ * Multivariate polynomial long division: returns the quotient `a / b` iff
+ * `b` divides `a` **exactly** over ℤ, else `null`.
+ *
+ * Repeatedly takes the `canonicalCompare`-leading term of the current
+ * remainder and attempts to cancel it against `b`'s leading term: the
+ * exponent vector must dominate `b`'s leading exponents component-wise, and
+ * the coefficient must divide `b`'s leading coefficient exactly in ℤ (bigint
+ * `%` gives an exact `0` remainder regardless of operand signs). Any failure
+ * of either condition means the division is not exact — this function is the
+ * recombination correctness arbiter and must never round or approximate.
+ */
+export function multiExactDivide(a: MultiPoly, b: MultiPoly): MultiPoly | null {
+  const bLead = leadingTerm(b);
+  if (bLead === null) {
+    // Division by the zero polynomial is undefined.
+    return null;
+  }
+  const n = a.vars.length;
+  let remainder = a;
+  const quotientEntries: Array<[number[], bigint]> = [];
+  while (!isZero(remainder)) {
+    const rLead = leadingTerm(remainder);
+    if (rLead === null) {
+      break;
+    }
+    const qExps = new Array<number>(n);
+    for (let i = 0; i < n; i += 1) {
+      const diff = rLead.exps[i] - bLead.exps[i];
+      if (diff < 0) {
+        return null;
+      }
+      qExps[i] = diff;
+    }
+    if (rLead.coeff % bLead.coeff !== 0n) {
+      return null;
+    }
+    const qCoeff = rLead.coeff / bLead.coeff;
+    quotientEntries.push([qExps, qCoeff]);
+    const qTerm = fromTerms(a.vars, [[qExps, qCoeff]]);
+    remainder = subMP(remainder, mulMP(qTerm, b));
+  }
+  return fromTerms(a.vars, quotientEntries);
+}
+
+/**
+ * Parses `expr` over `vars` via algebra's exact `polyFromExpression`, then
+ * lifts it to a bigint-backed {@link MultiPoly} — but only if EVERY
+ * coefficient is an exact integer. Returns `null` on any non-integer
+ * coefficient or if parsing throws (unknown symbol, non-integer exponent,
+ * non-constant divisor, etc.).
+ */
+export function fromAlgebraExpr(expr: string, vars: string[]): MultiPoly | null {
+  let parsed: Poly;
+  try {
+    parsed = polyFromExpression(expr, vars);
+  } catch {
+    return null;
+  }
+  const entries: Array<[number[], bigint]> = [];
+  for (const term of parsed) {
+    if (!Number.isInteger(term.coeff)) {
+      return null;
+    }
+    entries.push([term.powers, BigInt(term.coeff)]);
+  }
+  return fromTerms(vars, entries);
+}
+
+/**
+ * Renders `p` back to an expression string using the SAME
+ * `polynomial-ideal.polyToString` renderer the existing multivariate
+ * `factor()` path uses, so output matches its formatting style exactly.
+ */
+export function toAlgebraString(p: MultiPoly): string {
+  const poly: Poly = [...p.terms].map(([k, v]) => ({ coeff: Number(v), powers: unkey(k) }));
+  return polyToString(poly, p.vars);
 }
