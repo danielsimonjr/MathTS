@@ -19,6 +19,7 @@ import {
   trim as trimIntPoly,
   bigintGcd,
   mul as mulIntPoly,
+  exactDivide as exactDivideIntPoly,
   type IntPoly,
 } from '../typed/factorization/integer-poly.js';
 import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
@@ -477,4 +478,263 @@ export function partialFractions(remainder: IntPoly, factors: DenFactor[]): PFTe
     }
   }
   return terms;
+}
+
+/** Negates a `Rat` (result stays normalized: the denominator is untouched). */
+function ratNeg(r: Rat): Rat {
+  return { num: -r.num, den: r.den };
+}
+
+/** Renders a reduced `Rat` as a bare expression string, e.g. `3`, `-3/2`. */
+function ratToStr(r: Rat): string {
+  return r.den === 1n ? `${r.num}` : `${r.num}/${r.den}`;
+}
+
+/**
+ * Renders `coeff * rest` in a readable, evaluable form: `1` drops the factor,
+ * `-1` becomes a leading minus, otherwise `n/d*rest` (integer denominators are
+ * omitted). `rest` must be a fully-parenthesized sub-expression so operator
+ * precedence is preserved (e.g. `rest = '(2*x)/(x^2 + (1))^(1)'`).
+ */
+function renderCoeffTimes(r: Rat, rest: string): string {
+  const neg = r.num < 0n;
+  const absNum = neg ? -r.num : r.num;
+  const sign = neg ? '-' : '';
+  if (absNum === r.den) {
+    return `${sign}${rest}`;
+  }
+  const denPart = r.den === 1n ? '' : `/${r.den}`;
+  return `${sign}${absNum}${denPart}*${rest}`;
+}
+
+/** Renders `x - a` (`a` a `Rat` root), simplifying the sign: `x - 1`, `x + 2`, `x`. */
+function renderXMinus(a: Rat, v: string): string {
+  if (a.num === 0n) {
+    return v;
+  }
+  if (a.num > 0n) {
+    return `${v} - ${ratToStr(a)}`;
+  }
+  return `${v} + ${ratToStr(ratNeg(a))}`;
+}
+
+/** Monic quadratic core `x^2 + (b)*x + (c)` (`b`/`c` `Rat`; the `x` term is dropped when `b = 0`). */
+function renderQuadraticCore(b: Rat, c: Rat, v: string): string {
+  let s = `${v}^2`;
+  if (b.num !== 0n) {
+    s += ` + (${ratToStr(b)})*${v}`;
+  }
+  s += ` + (${ratToStr(c)})`;
+  return s;
+}
+
+/** `2*x + (b)` (the constant is dropped when `b = 0`). */
+function renderTwoXPlusB(b: Rat, v: string): string {
+  let s = `2*${v}`;
+  if (b.num !== 0n) {
+    s += ` + (${ratToStr(b)})`;
+  }
+  return s;
+}
+
+/** Joins already-signed antiderivative terms with ` + `, collapsing ` + -` to ` - `. */
+function joinTerms(parts: string[]): string {
+  if (parts.length === 0) {
+    return '0';
+  }
+  return parts.join(' + ').replace(/\+ -/g, '- ');
+}
+
+/**
+ * Closed-form integral of `A / (x - a)^k` where the (possibly non-monic)
+ * linear factor is `factor = [p0, p1]` (`p1*x + p0`) and `numer = [A0]`.
+ * Normalizes to monic by absorbing `p1^k`: root `a = -p0/p1`, `A = A0/p1^k`.
+ *   - `k = 1`: `A·log|x - a|`.
+ *   - `k > 1`: `-A/((k-1)) · (x - a)^{-(k-1)}`.
+ */
+function integrateLinearTerm(factor: IntPoly, k: number, numer: Rat[], v: string): string {
+  const p0 = factor[0];
+  const p1 = factor[1];
+  const a = ratNeg(ratDiv(ratFromBigint(p0), ratFromBigint(p1)));
+  const A = ratDiv(numer[0], ratFromBigint(p1 ** BigInt(k)));
+  if (A.num === 0n) {
+    return '0';
+  }
+  const xMinus = renderXMinus(a, v);
+  if (k === 1) {
+    return renderCoeffTimes(A, `log(abs(${xMinus}))`);
+  }
+  const coeff = ratNeg(ratDiv(A, ratFromBigint(BigInt(k - 1))));
+  return renderCoeffTimes(coeff, `(${xMinus})^(${-(k - 1)})`);
+}
+
+/** Rational-part + `atan`-multiplier decomposition of `∫ dx/(x^2+bx+c)^k`. */
+interface InverseQuadraticPower {
+  /** `Σ coeff · (2x+b)/(x^2+bx+c)^power` — the rational part. */
+  terms: Array<{ coeff: Rat; power: number }>;
+  /** Coefficient multiplying `I_1 = (2/√(4c-b²))·atan((2x+b)/√(4c-b²))`. */
+  atanCoeff: Rat;
+}
+
+/**
+ * Applies the standard reduction formula for `I_k = ∫ dx/(x^2+bx+c)^k`
+ * (disc `b²-4c < 0`, so `D2 = 4c-b² > 0`), exactly over ℚ, down to `I_1`:
+ *
+ *   I_k = (2x+b)/((k-1)·D2·q^{k-1}) + (2(2k-3)/((k-1)·D2))·I_{k-1}.
+ *
+ * Returns the accumulated rational-part coefficients plus the scalar
+ * multiplying `I_1` (which the caller renders as the `atan` term).
+ */
+function integrateInverseQuadraticPower(k: number, b: Rat, c: Rat): InverseQuadraticPower {
+  if (k === 1) {
+    return { terms: [], atanCoeff: ratFromBigint(1n) };
+  }
+  const prev = integrateInverseQuadraticPower(k - 1, b, c);
+  const d2 = ratSub(ratMul(ratFromBigint(4n), c), ratMul(b, b));
+  const denomFactor = ratMul(ratFromBigint(BigInt(k - 1)), d2);
+  const newTermCoeff = ratDiv(ratFromBigint(1n), denomFactor);
+  const propagate = ratDiv(ratFromBigint(BigInt(2 * (2 * k - 3))), denomFactor);
+  const terms = prev.terms.map((t) => ({ coeff: ratMul(t.coeff, propagate), power: t.power }));
+  terms.push({ coeff: newTermCoeff, power: k - 1 });
+  return { terms, atanCoeff: ratMul(prev.atanCoeff, propagate) };
+}
+
+/**
+ * Closed-form integral of `(D·x + E) / (x^2+bx+c)^k` for an irreducible
+ * quadratic factor (`disc < 0`). The (possibly non-monic) factor
+ * `factor = [q0, q1, q2]` is normalized to monic by absorbing `q2^k`
+ * (`b = q1/q2`, `c = q0/q2`, `D = D0/q2^k`, `E = E0/q2^k`). Splitting
+ * `Dx+E = (D/2)(2x+b) + (E - Db/2)`:
+ *   - the `(D/2)(2x+b)` part integrates by `u = x^2+bx+c` → `(D/2)·log(q)`
+ *     (`k=1`) or `-(D/2)/(k-1)·q^{-(k-1)}` (`k>1`);
+ *   - the constant part `K = E - Db/2` uses `K·I_k` (reduction formula),
+ *     yielding rational `(2x+b)/q^j` terms plus the `atan` term.
+ */
+function integrateQuadraticTerm(factor: IntPoly, k: number, numer: Rat[], v: string): string {
+  const q0 = factor[0];
+  const q1 = factor[1];
+  const q2 = factor[2];
+  const b = ratDiv(ratFromBigint(q1), ratFromBigint(q2));
+  const c = ratDiv(ratFromBigint(q0), ratFromBigint(q2));
+  const leadPow = ratFromBigint(q2 ** BigInt(k));
+  const D = ratDiv(numer[1], leadPow);
+  const E = ratDiv(numer[0], leadPow);
+  const d2 = ratSub(ratMul(ratFromBigint(4n), c), ratMul(b, b));
+  const K = ratSub(E, ratMul(D, ratDiv(b, ratFromBigint(2n))));
+  const qCore = renderQuadraticCore(b, c, v);
+  const twoXb = renderTwoXPlusB(b, v);
+  const parts: string[] = [];
+
+  // Part 1: the (D/2)(2x+b) piece — a pure rational/log part via u = q.
+  if (D.num !== 0n) {
+    const half = ratDiv(D, ratFromBigint(2n));
+    if (k === 1) {
+      parts.push(renderCoeffTimes(half, `log(${qCore})`));
+    } else {
+      const coeff = ratNeg(ratDiv(half, ratFromBigint(BigInt(k - 1))));
+      parts.push(renderCoeffTimes(coeff, `(${qCore})^(${-(k - 1)})`));
+    }
+  }
+
+  // Part 2: the constant part K = E - Db/2, integrated via K·I_k.
+  if (K.num !== 0n) {
+    const ik = integrateInverseQuadraticPower(k, b, c);
+    for (const t of ik.terms) {
+      const coeff = ratMul(K, t.coeff);
+      if (coeff.num === 0n) {
+        continue;
+      }
+      parts.push(renderCoeffTimes(coeff, `(${twoXb})/(${qCore})^(${t.power})`));
+    }
+    const atanCoeff = ratMul(ratMul(K, ik.atanCoeff), ratFromBigint(2n));
+    if (atanCoeff.num !== 0n) {
+      const d2s = ratToStr(d2);
+      parts.push(renderCoeffTimes(atanCoeff, `atan((${twoXb})/sqrt(${d2s}))/sqrt(${d2s})`));
+    }
+  }
+
+  return joinTerms(parts);
+}
+
+/**
+ * Integrates a single partial-fraction term in closed form. Dispatches on the
+ * degree of `term.factor`: degree 1 → `log` (+ rational part for a repeated
+ * factor); degree 2 (irreducible, disc < 0) → `log`/rational part + `atan`.
+ * The produced string is evaluable by the expression engine (`log`, `atan`,
+ * `sqrt`, `abs`, `^`, `*`); its exact form is not contractual — correctness is
+ * verified by differentiation. Throws on any other factor degree (unreachable
+ * for a `factorDenominator`-classified factor).
+ */
+export function integratePFTerm(term: PFTerm, v: string): string {
+  const factor = trimIntPoly(term.factor);
+  const deg = factor.length - 1;
+  if (deg === 1) {
+    return integrateLinearTerm(factor, term.power, term.numer, v);
+  }
+  if (deg === 2) {
+    return integrateQuadraticTerm(factor, term.power, term.numer, v);
+  }
+  throw new Error(`integratePFTerm: unsupported factor degree ${deg}`);
+}
+
+/**
+ * Full Layer-1 rational-function integration pipeline. Parses `expr` into an
+ * exact integer rational function, splits off and integrates the polynomial
+ * part, factors the denominator into linear + irreducible-quadratic factors,
+ * decomposes into exact-ℚ partial fractions, and integrates each term in
+ * closed form (rational part + `log` + `atan`).
+ *
+ * Returns `null` when `expr` is not a rational function of `v`
+ * (`parseRationalFunction` declines), when the denominator has a degree-≥3
+ * irreducible factor (`factorDenominator` declines — Layer 2 territory), or
+ * when any internal step throws (e.g. a non-integer polynomial-part division),
+ * so callers get a clean decline rather than an exception.
+ */
+export function integrateRationalFunction(expr: string, v: string): string | null {
+  try {
+    const rf = parseRationalFunction(expr, v);
+    if (rf === null) {
+      return null;
+    }
+    const factors = factorDenominator(rf.denom);
+    if (factors === null) {
+      return null;
+    }
+    const { quotient, remainder } = polynomialPart(rf);
+    const terms = partialFractions(remainder, factors);
+
+    // `factorDenominator` (via `factorUnivariateZ`) returns the PRIMITIVE
+    // irreducible factors, dropping the integer leading constant, so
+    // `∏ factorᵢ^{multᵢ}` may differ from the true `denom` by a bigint scale
+    // (e.g. `2*x^2+2 = 2·(x^2+1)`). The partial fractions above are therefore a
+    // decomposition of `remainder / (denom/scale)`; divide every term's
+    // numerator by `scale` to recover `remainder / denom`. Without this,
+    // content-> 1 denominators integrate to `scale ×` the correct answer.
+    let prod: IntPoly = [1n];
+    for (const { poly, mult } of factors) {
+      for (let k = 0; k < mult; k += 1) prod = mulIntPoly(prod, poly);
+    }
+    const scalePoly = exactDivideIntPoly(rf.denom, prod);
+    if (scalePoly !== null && scalePoly.length === 1 && scalePoly[0] !== 1n) {
+      const scale = ratFromBigint(scalePoly[0]);
+      for (const term of terms) {
+        term.numer = term.numer.map((c) => ratDiv(c, scale));
+      }
+    }
+
+    const parts: string[] = [];
+    const polyPart = integratePolynomial(quotient, v);
+    if (polyPart !== '0') {
+      parts.push(polyPart);
+    }
+    for (const term of terms) {
+      const s = integratePFTerm(term, v);
+      if (s !== '0') {
+        parts.push(s);
+      }
+    }
+    return joinTerms(parts);
+  } catch {
+    return null;
+  }
 }
