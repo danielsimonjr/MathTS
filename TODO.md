@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-19 (A-list burn-down #1–#6 released, functions@0.52.0 → 0.57.0; #7–#9 remain)
+Updated: 2026-07-20 (#7 Layer 1 — univariate factorization over ℤ/ℚ — shipped functions@0.58.0; #7 Layer 2 next, #8–#9 remain)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -46,9 +46,15 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >
 > **A-list remainder — the three genuinely large efforts:**
 >
-> - ⬜ **#7 full multivariate factorization (Wang/Zassenhaus/EEZ)** — L. Next up. Hensel lifting,
->   leading-coefficient distribution, true-factor recombination. Oracle: sympy. **Spec before code** —
->   starting from the middle of Wang's algorithm is the known failure mode.
+> - 🔵 **#7 full multivariate factorization (Wang/Zassenhaus/EEZ)** — L, IN PROGRESS. **Layer 1
+>   (univariate factorization over ℤ/ℚ, Zassenhaus) SHIPPED — functions@0.58.0** (2026-07-20): bigint
+>   engine `functions/src/typed/factorization/` (Yun square-free → Cantor–Zassenhaus mod p → Hensel lift
+>   → recombination + leading-coeff method for non-monic; 24-factor cap), routed into `factor`/`casFactor`,
+>   sympy-oracle-pinned, 346-test regression preserved, adversarial whole-branch review passed. Spec:
+>   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plan:
+>   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md`. **Layer 2 (Wang/EEZ
+>   multivariate on top of Layer 1) is NEXT** — separate plan + release; leading-coefficient distribution,
+>   evaluation-point search, multivariate Hensel lifting, recombination. Oracle: sympy.
 > - ⬜ **#8 Risch integration** — L, hardest. Differential-field tower, Liouville's theorem.
 > - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
 >   or a self-built continued-fraction reference).

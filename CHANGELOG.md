@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): complete univariate polynomial factorization over ℤ/ℚ (Zassenhaus)
+
+- **`factor(expr)` / `casFactor(expr)`** now factor any single-variable integer polynomial
+  **completely into irreducible factors over ℤ/ℚ**, replacing the previous rational-linear-root-only
+  path. New capability: `factor('x^4-1')` → `'(x - 1)*(x + 1)*(x^2 + 1)'`, `factor('x^4+3*x^2+2')`
+  → `'(x^2 + 1)*(x^2 + 2)'`, repeated factors and irreducible higher-degree factors are captured, and
+  polynomials irreducible over ℚ (`x^4 + 1`, `x^2 + x + 1`) are returned unchanged — matching sympy.
+- **Engine — the Zassenhaus algorithm** (`functions/src/typed/factorization/`, `bigint`-only):
+  integer content + **Yun square-free decomposition** → factor **mod a good prime** (distinct-degree +
+  deterministic **Cantor–Zassenhaus** equal-degree, no `Math.random`) → **Hensel lift** to `pᵏ >
+  2·Landau–Mignotte` via a multifactor factor tree → **subset recombination** by exact division over
+  ℤ. Non-monic inputs use the **leading-coefficient method** (`4*x^2-9` → `(2*x-3)*(2*x+3)`).
+- **bigint throughout** by necessity: `pᵏ` exceeds 2⁵³ during Hensel lifting for moderate degrees, so
+  float64 would silently corrupt the lift. Coefficients are exact at every step.
+- **Cap:** recombination is bounded at 24 modular factors (Zassenhaus is worst-case exponential in the
+  factor count); beyond it the square-free level is returned whole and a notice is logged — never a
+  silently dropped factor. van Hoeij/LLL recombination is a documented future upgrade.
+- **Routing:** `algebra.ts`'s `factor` keeps its cheap fast-paths (content, monomial, rational-linear)
+  and routes only the residual higher-degree work into the engine, so all previously-correct outputs
+  stay byte-identical (346-test algebra/cas regression suite unchanged). A rational-root-plus-irreducible
+  remainder now renders without redundant unit coefficients (`(x^2 + x + 1)`, not `(1*x^2 + 1*x + 1)`).
+- **Multivariate** factorization (Wang/EEZ) is unchanged — the follow-up Layer 2 effort.
+- Oracle-pinned against **sympy `factor_list`** (v1.14.0) throughout: cyclotomics, Swinnerton-Dyer-style
+  recombination stress, repeated factors, non-monic multi-factor inputs, irreducible polynomials.
+
 ### feat(functions): halfspace intersection — vertex enumeration of a bounded polytope
 
 - **`halfspaceIntersection(halfspaces, interiorPoint)`** — given halfspaces `A·x + b ≤ 0` and a

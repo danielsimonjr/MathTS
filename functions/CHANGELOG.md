@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-functions
 
+## 0.58.0
+
+### Minor Changes
+
+- feat: complete univariate polynomial factorization over ℤ/ℚ (Zassenhaus)
+
+  `factor`/`casFactor` now factor any single-variable integer polynomial completely into irreducible
+  factors over ℤ/ℚ (was rational-linear-roots only): `x^4-1` → `(x-1)(x+1)(x^2+1)`, `x^4+3x^2+2` →
+  `(x^2+1)(x^2+2)`, non-monic `4x^2-9` → `(2x-3)(2x+3)`, with ℚ-irreducibles (`x^4+1`) returned
+  unchanged. New bigint engine (`functions/src/typed/factorization/`): Yun square-free → factor mod p
+  (distinct-degree + deterministic Cantor–Zassenhaus) → Hensel lift to `p^k` → subset recombination,
+  with the leading-coefficient method for non-monic inputs and a 24-factor recombination cap.
+  Oracle-pinned against sympy `factor_list`. Multivariate factorization (Wang/EEZ) is the follow-up.
+  Existing behavior preserved (346-test algebra/cas regression unchanged).
+
 ## 0.57.0
 
 ### Minor Changes
