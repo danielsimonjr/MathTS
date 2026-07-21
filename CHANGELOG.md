@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): complete multivariate polynomial factorization over ℤ/ℚ (Kronecker) — completes #7
+
+- **`factor(expr)` / `casFactor(expr)`** now factor **multivariate** integer polynomials completely
+  into irreducible factors over ℤ/ℚ, not just the previous content/monomial/difference-of-squares
+  subset: `x^2 - y^2` → `(x-y)*(x+y)`, `(x+y+1)(x+2y+3)` expanded → its two linear factors,
+  `(x+y)^2*(x+2y)` with multiplicity, three-variable products, non-primitive inputs
+  (`2*x^2*y-2*y` → `2 * y*(x-1)*(x+1)`). Irreducible multivariate polynomials (`x^2 + y^2`) are
+  returned unchanged. Together with the univariate Zassenhaus engine, this **completes A-list #7 —
+  polynomial factorization over ℤ/ℚ, univariate and multivariate**.
+- **Method — Kronecker substitution** (ADR: chosen over Wang/EEZ for v1). Each variable `xₖ` is mapped
+  to `x^{bₖ}` with `bₖ = ∏_{i<k}(degᵢ+1)`, reducing the multivariate polynomial to a **univariate**
+  image factored by the shipped Layer-1 `factorUnivariateZ`; true factors are recovered by
+  **recombination** — enumerate subsets of the univariate factors, back-substitute (mixed-radix, with
+  an invalid-carry reject), and keep a candidate **iff it exactly divides** over ℤ (`multiExactDivide`
+  is the sole arbiter, so no unverified factor is ever emitted). Multiplicity is captured by repeated
+  division. This reuses Layer 1 rather than adding the multivariate-Hensel / leading-coefficient
+  machinery Wang/EEZ needs — correct and self-contained; Wang/EEZ is the documented future
+  performance upgrade.
+- **`bigint` throughout** the new engine (`functions/src/typed/factorization/{multi-poly,kronecker,kronecker-factor}.ts`);
+  a `MultiPoly` sparse-distributed representation with exact multivariate division.
+- **Caps:** a substituted-degree cap (2000) and a 24-factor recombination cap; beyond either, `factor`
+  returns via the existing fast path and logs — never a wrong answer or a hang.
+- **Routing:** `factor()`'s ≥2-variable branch keeps the content/monomial/difference-of-squares fast
+  path **byte-identical**, and supersedes it with the complete Kronecker factorization only when the
+  latter yields strictly more irreducible factors (a reducible cofactor left whole). 346-test
+  algebra/cas regression unchanged.
+- Oracle-pinned against **sympy `factor_list`** (unit tests + a 320-case randomized adversarial review
+  with exact bigint reconstruction: 0 soundness failures, 0 reducible-emitted-whole, 0 missed
+  multiplicity).
+
 ### feat(functions): complete univariate polynomial factorization over ℤ/ℚ (Zassenhaus)
 
 - **`factor(expr)` / `casFactor(expr)`** now factor any single-variable integer polynomial

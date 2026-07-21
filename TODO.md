@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-20 (#7 Layer 1 — univariate factorization over ℤ/ℚ — shipped functions@0.58.0; #7 Layer 2 next, #8–#9 remain)
+Updated: 2026-07-20 (#7 COMPLETE — univariate@0.58.0 + multivariate Kronecker@0.59.0; #8 Risch next, #9 spheroidal remain)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -44,18 +44,20 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 > extent, Hadamard bound, relative dedup) + 7 cross-scale regression tests. See memory
 > `feedback-relative-epsilons-for-scale-dependent-quantities`.
 >
-> **A-list remainder — the three genuinely large efforts:**
+> **A-list remainder — the two genuinely large efforts left:**
 >
-> - 🔵 **#7 full multivariate factorization (Wang/Zassenhaus/EEZ)** — L, IN PROGRESS. **Layer 1
->   (univariate factorization over ℤ/ℚ, Zassenhaus) SHIPPED — functions@0.58.0** (2026-07-20): bigint
->   engine `functions/src/typed/factorization/` (Yun square-free → Cantor–Zassenhaus mod p → Hensel lift
->   → recombination + leading-coeff method for non-monic; 24-factor cap), routed into `factor`/`casFactor`,
->   sympy-oracle-pinned, 346-test regression preserved, adversarial whole-branch review passed. Spec:
->   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plan:
->   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md`. **Layer 2 (Wang/EEZ
->   multivariate on top of Layer 1) is NEXT** — separate plan + release; leading-coefficient distribution,
->   evaluation-point search, multivariate Hensel lifting, recombination. Oracle: sympy.
-> - ⬜ **#8 Risch integration** — L, hardest. Differential-field tower, Liouville's theorem.
+> - ✅ **#7 polynomial factorization over ℤ/ℚ — COMPLETE (both layers).** **Layer 1** (univariate,
+>   Zassenhaus) shipped **functions@0.58.0**; **Layer 2** (multivariate, **Kronecker substitution**)
+>   shipped **functions@0.59.0** (2026-07-20). `factor`/`casFactor` now factor any integer polynomial —
+>   uni- or multivariate — completely into irreducibles over ℤ/ℚ. bigint engine
+>   `functions/src/typed/factorization/`; sympy-oracle-pinned (Layer 2: 320-case adversarial review, 0
+>   soundness failures); 346-test regression preserved on both. ADR: Kronecker chosen over Wang/EEZ for
+>   v1 (reuses Layer 1, no multivariate-Hensel risk); **Wang/EEZ is the documented future performance
+>   upgrade** for very-high-degree many-variable inputs (§5b of the spec). Spec:
+>   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plans:
+>   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md` +
+>   `…-layer2-multivariate-kronecker.md`.
+> - ⬜ **#8 Risch integration** — L, hardest. Differential-field tower, Liouville's theorem. **NEXT.**
 > - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
 >   or a self-built continued-fraction reference).
 >

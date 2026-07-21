@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.59.0
+
+### Minor Changes
+
+- feat: complete multivariate polynomial factorization over ℤ/ℚ (Kronecker) — completes #7
+
+  `factor`/`casFactor` now factor multivariate integer polynomials completely into irreducible factors
+  over ℤ/ℚ (was content/monomial/difference-of-squares only): `x^2-y^2` → `(x-y)(x+y)`,
+  `(x+y+1)(x+2y+3)` → its linear factors, `(x+y)^2(x+2y)` with multiplicity, 3-variable products,
+  non-primitive inputs, with ℚ-irreducibles unchanged. Method: Kronecker substitution reduces to the
+  shipped univariate Zassenhaus engine; recombination keeps a candidate iff it exactly divides
+  (multiExactDivide arbiter), so no unverified factor is emitted. bigint MultiPoly engine; substituted-
+  degree + factor-count caps degrade gracefully. Existing fast-path outputs preserved byte-identical
+  (346-test regression unchanged). Oracle-pinned to sympy factor_list (320-case adversarial review, 0
+  soundness failures). Together with Layer 1 (univariate) this completes A-list #7. Wang/EEZ remains the
+  documented future performance upgrade.
+
 ## 0.58.0
 
 ### Minor Changes
