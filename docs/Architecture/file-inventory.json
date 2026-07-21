@@ -7184,7 +7184,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1812
+      "loc": 1809
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
