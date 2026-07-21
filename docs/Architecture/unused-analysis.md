@@ -8,8 +8,8 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 3
-- **Potentially unused exports**: 227
-  - **Unreferenced anywhere (deletion candidates)**: 4
+- **Potentially unused exports**: 224
+  - **Unreferenced anywhere (deletion candidates)**: 1
   - **Referenced in-module (type contracts / helpers backing live exports)**: 223
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -48,12 +48,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `functions/src/signal/fft.ts`
 
 - `complexConj` (function)
-
-### `functions/src/typed/factorization/multi-poly.ts`
-
-- `zeroPoly` (function)
-- `constPoly` (function)
-- `scalarMulMP` (function)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -347,7 +341,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/typed/factorization/multi-poly.ts`
 
-- `key` (function) — 7 in-file refs
+- `key` (function) — 6 in-file refs
 - `subMP` (function) — 1 in-file ref
 - `negMP` (function) — 2 in-file refs
 

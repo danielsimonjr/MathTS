@@ -37,20 +37,6 @@ export function unkey(k: string): number[] {
   return k.split(',').map((s) => Number(s));
 }
 
-/** The zero polynomial over `vars`. */
-export function zeroPoly(vars: string[]): MultiPoly {
-  return { vars: vars.slice(), terms: new Map() };
-}
-
-/** The constant polynomial `c` over `vars` (zero exponents throughout). */
-export function constPoly(vars: string[], c: bigint): MultiPoly {
-  const terms = new Map<string, bigint>();
-  if (c !== 0n) {
-    terms.set(key(new Array<number>(vars.length).fill(0)), c);
-  }
-  return { vars: vars.slice(), terms };
-}
-
 /**
  * Builds a `MultiPoly` over `vars` from `(exponents, coefficient)` entries.
  * Entries sharing an exponent vector are summed; zero coefficients (after
@@ -158,17 +144,6 @@ export function mulMP(a: MultiPoly, b: MultiPoly): MultiPoly {
     }
   }
   return { vars: a.vars.slice(), terms };
-}
-
-/** `p * k` for a scalar `k: bigint`. */
-export function scalarMulMP(p: MultiPoly, k: bigint): MultiPoly {
-  const terms = new Map<string, bigint>();
-  if (k !== 0n) {
-    for (const [tk, tv] of p.terms) {
-      terms.set(tk, tv * k);
-    }
-  }
-  return { vars: p.vars.slice(), terms };
 }
 
 /** `-p`. */

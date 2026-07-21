@@ -9058,7 +9058,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `MultiPoly`
-- Functions: `key`, `unkey`, `zeroPoly`, `constPoly`, `fromTerms`, `degreeIn`, `totalDegree`, `isZero`, `equals`, `addMP`, `subMP`, `mulMP`, `scalarMulMP`, `negMP`, `canonicalCompare`, `leadingTerm`, `integerContentMP`, `primitivePartMP`, `multiExactDivide`, `fromAlgebraExpr`, `toAlgebraString`
+- Functions: `key`, `unkey`, `fromTerms`, `degreeIn`, `totalDegree`, `isZero`, `equals`, `addMP`, `subMP`, `mulMP`, `negMP`, `canonicalCompare`, `leadingTerm`, `integerContentMP`, `primitivePartMP`, `multiExactDivide`, `fromAlgebraExpr`, `toAlgebraString`
 
 ---
 
@@ -16991,12 +16991,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1114   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 193218 |
-| Total Exports           | 5753   |
+| Total Lines of Code     | 193193 |
+| Total Exports           | 5750   |
 | Total Re-exports        | 2304   |
 | Total Classes           | 52     |
 | Total Interfaces        | 504    |
-| Total Functions         | 1868   |
+| Total Functions         | 1865   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 579    |

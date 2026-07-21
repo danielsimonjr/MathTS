@@ -7289,7 +7289,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 345
+      "loc": 320
     },
     {
       "file": "functions/src/typed/factorization/square-free.ts",

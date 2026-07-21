@@ -5,7 +5,7 @@
     "lastUpdated": "2026-07-21",
     "totalFiles": 1114,
     "totalModules": 83,
-    "totalExports": 5753
+    "totalExports": 5750
   },
   "entryPoints": [
     {
@@ -20519,8 +20519,6 @@
         "exports": [
           "key",
           "unkey",
-          "zeroPoly",
-          "constPoly",
           "fromTerms",
           "degreeIn",
           "totalDegree",
@@ -20529,7 +20527,6 @@
           "addMP",
           "subMP",
           "mulMP",
-          "scalarMulMP",
           "negMP",
           "canonicalCompare",
           "leadingTerm",
@@ -20543,8 +20540,6 @@
         "functions": [
           "key",
           "unkey",
-          "zeroPoly",
-          "constPoly",
           "fromTerms",
           "degreeIn",
           "totalDegree",
@@ -20553,7 +20548,6 @@
           "addMP",
           "subMP",
           "mulMP",
-          "scalarMulMP",
           "negMP",
           "canonicalCompare",
           "leadingTerm",
@@ -38954,11 +38948,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1114,
     "totalModules": 83,
-    "totalLinesOfCode": 193218,
-    "totalExports": 5753,
+    "totalLinesOfCode": 193193,
+    "totalExports": 5750,
     "totalClasses": 52,
     "totalInterfaces": 504,
-    "totalFunctions": 1868,
+    "totalFunctions": 1865,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1543,
@@ -38967,6 +38961,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 227
+    "unusedExportsCount": 224
   }
 }
