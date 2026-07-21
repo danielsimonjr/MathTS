@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): complete rational-function integration (Risch Layer 1)
+
+- **`symbolicIntegral` / `integrate`** now integrate any rational function `p(x)/q(x)` over ℚ whose
+  denominator factors into linear + irreducible-quadratic factors, in closed form: `1/(x^2+1)` →
+  `atan(x)`, `(3x+2)/(x^2+1)` → `(3/2)·log(x^2+1) + 2·atan(x)`, `1/((x-1)^2(x+2))` (repeated linear),
+  `x^3/(x^2+1)` (improper → polynomial part + log), content>1 denominators (`1/(2x^2+2)`). Previously
+  these returned an unevaluated `integral(...)` marker.
+- **Method (the rational-function case of Risch):** parse → polynomial-part division → factor the
+  denominator via the #7 engine (`factorUnivariateZ`) → exact-ℚ partial fractions (Gauss–Jordan over
+  bigint rationals) → per-factor closed form (log for linear, `arctan`+`log` via completing the square
+  for irreducible quadratics, reduction formula for repeated quadratics). Exact rational arithmetic
+  throughout; surds appear only in the final `sqrt(...)` rendering.
+- **Honestly bounded (ADR):** denominators with a **degree-≥3 irreducible factor** or a
+  **positive-discriminant quadratic** (real irrational roots → real `log`/`atanh`, e.g. `1/(x^2-2)`)
+  still return the marker — those need the Rothstein–Trager / transcendental Risch layers (documented
+  follow-ups). A final adversarial review caught and fixed a Critical case here: irreducible-over-ℚ
+  does **not** imply negative discriminant, so a discriminant guard was added rather than emit a wrong
+  `arctan` answer.
+- **Verified by differentiation** (the implementation-independent oracle: `d/dx F == f`) plus sympy
+  form-comparison; existing `symbolicIntegral` behavior preserved (345-test regression), one gap test
+  upgraded from a stale marker assertion to differentiation-verified integration.
+
 ### feat(functions): complete multivariate polynomial factorization over ℤ/ℚ (Kronecker) — completes #7
 
 - **`factor(expr)` / `casFactor(expr)`** now factor **multivariate** integer polynomials completely

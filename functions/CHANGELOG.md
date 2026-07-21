@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-functions
 
+## 0.60.0
+
+### Minor Changes
+
+- feat: complete rational-function integration (Risch Layer 1)
+
+  `symbolicIntegral`/`integrate` now integrate any rational function p(x)/q(x) over ℚ whose
+  denominator factors into linear + irreducible-quadratic factors, in closed form (rational part +
+  log + arctan): 1/(x^2+1) → atan(x), (3x+2)/(x^2+1) → (3/2)log(x^2+1)+2·atan(x), repeated factors,
+  improper inputs, content>1 denominators. Previously these returned an unevaluated marker. Method:
+  parse → polynomial-part division → factor the denominator via the #7 engine → exact-ℚ partial
+  fractions → per-factor closed form (completing the square for quadratics, reduction formula for
+  repeated quadratics). Exact rational arithmetic; differentiation-verified. Honestly bounded:
+  degree-≥3 irreducible and positive-discriminant quadratic denominators (real log/atanh) still return
+  the marker — Rothstein–Trager / transcendental Risch are documented follow-ups. Existing behavior
+  preserved (345-test regression); a final adversarial review caught+fixed a Critical discriminant
+  bug before ship.
+
 ## 0.59.0
 
 ### Minor Changes
