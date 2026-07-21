@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-07-21",
-    "totalFiles": 1113,
-    "totalModules": 82,
-    "totalExports": 5734
+    "totalFiles": 1114,
+    "totalModules": 83,
+    "totalExports": 5746
   },
   "entryPoints": [
     {
@@ -8263,6 +8263,10 @@
           {
             "file": "./typed/polynomial-ideal.js",
             "imports": ["polyFromExpression"]
+          },
+          {
+            "file": "./cas/rational-integrate.js",
+            "imports": ["integrateRationalFunction"]
           }
         ],
         "workspaceDependencies": [],
@@ -10497,6 +10501,57 @@
           "MathArray"
         ],
         "interfaces": ["SparseMatrix", "Unit", "MatrixConstructor"]
+      }
+    },
+    "functions/cas": {
+      "functions/src/cas/rational-integrate.ts": {
+        "description": "Layer 1 rational-function symbolic integration — Task 1: parse a",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/polynomial-ideal.js",
+            "imports": ["polyFromExpression", "Poly"]
+          },
+          {
+            "file": "../typed/factorization/integer-poly.js",
+            "imports": ["trim", "bigintGcd", "mul", "exactDivide", "IntPoly"]
+          },
+          {
+            "file": "../typed/factorization/zassenhaus.js",
+            "imports": ["factorUnivariateZ"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "ratAdd",
+          "ratSub",
+          "ratMul",
+          "ratDiv",
+          "ratFromBigint",
+          "parseRationalFunction",
+          "polynomialPart",
+          "integratePolynomial",
+          "factorDenominator",
+          "partialFractions",
+          "integratePFTerm",
+          "integrateRationalFunction"
+        ],
+        "interfaces": ["Rat", "RatFunc", "DenFactor", "PFTerm"],
+        "functions": [
+          "ratAdd",
+          "ratSub",
+          "ratMul",
+          "ratDiv",
+          "ratFromBigint",
+          "parseRationalFunction",
+          "polynomialPart",
+          "integratePolynomial",
+          "factorDenominator",
+          "partialFractions",
+          "integratePFTerm",
+          "integrateRationalFunction"
+        ]
       }
     },
     "functions/combinatorics": {
@@ -37738,6 +37793,10 @@
         ]
       },
       {
+        "name": "Functions/cas",
+        "files": ["functions/src/cas/rational-integrate.ts"]
+      },
+      {
         "name": "Functions/combinatorics",
         "files": [
           "functions/src/combinatorics/bellNumbers.ts",
@@ -38879,13 +38938,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1113,
-    "totalModules": 82,
-    "totalLinesOfCode": 192280,
-    "totalExports": 5734,
+    "totalTypeScriptFiles": 1114,
+    "totalModules": 83,
+    "totalLinesOfCode": 193034,
+    "totalExports": 5746,
     "totalClasses": 52,
-    "totalInterfaces": 499,
-    "totalFunctions": 1849,
+    "totalInterfaces": 503,
+    "totalFunctions": 1861,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1543,
@@ -38894,6 +38953,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 214
+    "unusedExportsCount": 224
   }
 }

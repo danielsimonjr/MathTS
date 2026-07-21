@@ -78,11 +78,30 @@ describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
     }
   });
 
+  // Extension 3: full rational-function integration (Risch Layer 1) — denominators
+  // with irreducible-quadratic / repeated factors that `apart` cannot split now
+  // integrate to rational part + log + arctan. Verified by d/dx ∫f = f.
+  describe('rational-function integration — irreducible-quadratic / repeated (d/dx ∫f = f)', () => {
+    const cases: Array<[string, (x: number) => number]> = [
+      ['1/(x^2 + 1)', (x) => 1 / (x * x + 1)],
+      ['(3*x + 2)/(x^2 + 1)', (x) => (3 * x + 2) / (x * x + 1)],
+      ['1/((x - 1)^2*(x + 2))', (x) => 1 / ((x - 1) * (x - 1) * (x + 2))],
+      ['1/(x^2 + x + 1)', (x) => 1 / (x * x + x + 1)],
+    ];
+    for (const [f, fn] of cases) {
+      it(`∫(${f})`, () => {
+        const F = symbolicIntegral(f, 'x');
+        expect(F.startsWith('integral(')).toBe(false);
+        for (const x of [0.3, 2.7, 3.4]) expect(dF(F, x)).toBeCloseTo(fn(x), 4);
+      });
+    }
+  });
+
   it('returns an unevaluated marker for out-of-scope integrands', () => {
     // non-linear inner argument (needs a general u-substitution / Risch)
     expect(symbolicIntegral('sin(x^2)')).toBe('integral(sin(x^2), x)');
-    // rational with an irreducible-quadratic denominator (apart cannot split)
-    expect(symbolicIntegral('1/(x^2 + 1)')).toBe('integral(1/(x^2 + 1), x)');
+    // rational with a degree-≥3 irreducible denominator (Risch Layer 2 territory)
+    expect(symbolicIntegral('1/(x^3 - 2)')).toBe('integral(1/(x^3 - 2), x)');
   });
 
   it('handles a custom integration variable', () => {

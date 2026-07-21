@@ -5,31 +5,38 @@
  * (arguments `a·x+b`). Reuses the CAS `parse` for the AST and `evaluate` for the
  * linearity test. Complements the numerical `integrate`.
  *
- * Two extension methods run as fallbacks when the direct recursion can't handle
- * the integrand (see {@link symbolicIntegral}):
+ * Three extension methods run as fallbacks when the direct recursion can't
+ * handle the integrand (see {@link symbolicIntegral}):
  *  - **Partial-fraction integration** of a single-variable rational function
  *    `P(x)/Q(x)`: composes the CAS `apart` decomposition with term-wise
  *    integration (each `A/(x−r)` → `A·ln|x−r|`). Handles distinct-rational-root
- *    denominators; repeated/irreducible-quadratic denominators are `apart`'s
- *    limit and fall through to the marker.
+ *    denominators.
  *  - **Integration by parts** (tabular) for `p(x)·g(a·x+b)` where `p` is a
  *    polynomial and `g ∈ {exp, sin, cos}`: `∫ x·eˣ = (x−1)·eˣ`,
  *    `∫ x·sin x = sin x − x·cos x`, etc.
+ *  - **Full rational-function integration** (Risch Layer 1,
+ *    {@link integrateRationalFunction}) for any `P(x)/Q(x)` over ℚ whose
+ *    denominator factors into linear + irreducible-quadratic factors —
+ *    including **repeated** and **irreducible-quadratic** denominators the
+ *    `apart` path can't split — producing the rational part + `log` + `arctan`.
+ *    A degree-≥3 irreducible denominator is out of scope (returns the marker).
  *
  * NOTE: the package's CAS `simplify`/`derivative` throw on non-integer coefficients
  * (a separate bug — they BigInt-convert constants), so this builds clean output
  * directly and does not route results through `simplify`.
  *
  * OUT OF SCOPE (returns an unevaluated `integral(expr, v)` marker rather than a
- * wrong answer): general u-substitution / a full Risch-style integrator,
- * non-linear inner arguments (`sin(x^2)`), products of two transcendental
- * factors (`sin(x)·cos(x)` beyond a trig identity), rational integrands whose
- * denominator has repeated or irreducible-quadratic factors, and `tan`/`sec`/….
+ * wrong answer): general u-substitution / a full transcendental Risch-style
+ * integrator, non-linear inner arguments (`sin(x^2)`), products of two
+ * transcendental factors (`sin(x)·cos(x)` beyond a trig identity), rational
+ * integrands whose denominator has a degree-≥3 irreducible factor (Risch
+ * Layer 2 / Rothstein–Trager territory), and `tan`/`sec`/….
  */
 import { parse as _parseRaw } from './factories/evaluate.js';
 import { evaluate as _evaluateRaw } from './factories/evaluate.js';
 import { apart, variables } from './typed/algebra.js';
 import { polyFromExpression } from './typed/polynomial-ideal.js';
+import { integrateRationalFunction } from './cas/rational-integrate.js';
 
 interface Node {
   type: string;
@@ -360,12 +367,17 @@ function tryByParts(expr: string, x: string): string | null {
  * integrand is outside the supported subset, returns `integral(expr, variable)`.
  *
  * The direct recursion is tried first; on failure, partial-fraction integration
- * (for rational integrands) and tabular integration by parts (for
- * polynomial·{exp,sin,cos}) are attempted before giving up with the marker.
+ * (for distinct-rational-root integrands), tabular integration by parts (for
+ * polynomial·{exp,sin,cos}), and full rational-function integration (Risch
+ * Layer 1) are attempted before giving up with the marker. Rational functions
+ * with irreducible-quadratic and repeated factors are now integrated (rational
+ * part + `log` + `arctan`); degree-≥3 irreducible denominators and transcendental
+ * Risch remain out of scope (marker).
  *
  * @example symbolicIntegral('x^3')          // 'x^4 / 4'
  * @example symbolicIntegral('cos(3*x + 1)') // 'sin(3 * x + 1) / 3'
  * @example symbolicIntegral('1/(x^2 - 1)')  // partial fractions → sum of logs
+ * @example symbolicIntegral('1/(x^2 + 1)')  // Risch Layer 1 → 'atan(...)'
  * @example symbolicIntegral('x * sin(x)')   // by parts → 'sin(x) - x*cos(x)'
  */
 export function symbolicIntegral(expr: string, variable = 'x'): string {
@@ -376,6 +388,7 @@ export function symbolicIntegral(expr: string, variable = 'x'): string {
     return (
       tryPartialFractions(expr, variable) ??
       tryByParts(expr, variable) ??
+      integrateRationalFunction(expr, variable) ??
       `integral(${expr}, ${variable})`
     );
   }

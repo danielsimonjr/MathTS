@@ -1,19 +1,19 @@
 {
   "generated": "2026-07-21",
-  "totalFiles": 1765,
+  "totalFiles": 1766,
   "byDisposition": {
-    "reachable": 1080,
+    "reachable": 1081,
     "build-entry": 33,
-    "test-only": 4,
+    "test-only": 3,
     "orphan": 0,
-    "test": 589,
+    "test": 590,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1117,
-    "tests": 589,
+    "tests": 590,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 489,
-    "@danielsimonjr/mathts-functions": 756,
+    "@danielsimonjr/mathts-functions": 757,
     "@danielsimonjr/mathts-gpu": 14,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 92,
@@ -5189,13 +5189,13 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 383
+      "loc": 396
     },
     {
       "file": "functions/src/cas/rational-integrate.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 741
     },
     {
@@ -8717,7 +8717,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 95
+      "loc": 114
     },
     {
       "file": "functions/tests/gap-transcendental-richtype-oracle.test.ts",
@@ -9313,6 +9313,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 22
+    },
+    {
+      "file": "functions/tests/rational-integrate-integration.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 19
     },
     {
       "file": "functions/tests/rational-integrate-terms.test.ts",
