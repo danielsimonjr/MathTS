@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-20 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch L1 @0.60.0 + L2 pos-disc-quadratic @0.61.0 [+ Critical #7 landauMignotte fix]; #8 L3 Rothstein-Trager next; #9 spheroidal remains)
+Updated: 2026-07-21 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch L1 @0.60.0 + L2 pos-disc-quadratic @0.61.0 [+ Critical #7 landauMignotte fix]; #8 L3 Rothstein-Trager next; #9 spheroidal remains. Post-milestone CDG/QDG pass clean: 1768 files/0 orphans, 0 dups, 0 cycles, 0 node-safety leaks, browser-safe clean)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
