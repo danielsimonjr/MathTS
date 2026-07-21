@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### feat(functions): positive-discriminant quadratic integration (Risch Layer 2)
+
+- **`symbolicIntegral` / `integrate`** now integrate rational functions whose denominator has a
+  **positive-discriminant irreducible quadratic** factor (irrational real roots, e.g. `1/(x^2-2)` →
+  `√2/4·log|x-√2| − √2/4·log|x+√2|`), which Layer 1 declined. Covers non-monic (`1/(2x^2-3)`), shifted
+  (`1/(x^2+x-1)`), non-trivial numerators, and denominators mixing negative- and positive-discriminant
+  quadratics.
+- **Method:** a small exact **quadratic-surd** type (`a + b√Δ`, one radicand per factor) factors the
+  quadratic over ℝ and emits `A·log|x-r₁| + B·log|x-r₂|` with `rᵢ = (−b±√Δ)/(2a)`. Reuses Layer 1's
+  parse / partial-fraction machinery; only a surd type + one `integratePFTerm` branch were added.
+  Differentiation-verified. **Repeated** positive-discriminant quadratics and degree-≥3 irreducible
+  denominators still return the marker (general Rothstein–Trager / transcendental Risch — future
+  layers, which need algebraic-number-field arithmetic).
+
+### fix(functions): Landau–Mignotte bound — use the coefficient 2-norm, not the leading coefficient
+
+- **Critical correctness fix to the polynomial factorizer** (`factorUnivariateZ`, shipped in 0.58.0):
+  the Landau–Mignotte factor-coefficient bound used only `|lc|` instead of the polynomial's Euclidean
+  coefficient norm, so a polynomial whose interior/constant coefficients dwarf its leading one was
+  **wrongly reported irreducible** — `factorUnivariateZ(x^2-10000)` returned it whole (lc=1, but the
+  true factors `x±100` have coefficient 100, far above the ~8 bound), because the Hensel lift target
+  `p^k` came out too small and recombination missed the factors. Now uses `2^deg·‖f‖₂`.
+- **Impact:** corrects univariate factorization, the multivariate Kronecker path, and rational-function
+  integration for any large-coefficient input. Was masked in the public `factor()` by its rational-root
+  fast path, but live for `casFactor` and direct engine consumers. Found by the Risch Layer 2
+  adversarial review; regression: `x^2-10000`/`x^2-10^6` split, `x^2-9999` stays irreducible.
+
 ### feat(functions): complete rational-function integration (Risch Layer 1)
 
 - **`symbolicIntegral` / `integrate`** now integrate any rational function `p(x)/q(x)` over ℚ whose

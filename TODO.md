@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-20 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch Layer 1 — rational-function integration — shipped @0.60.0, Layer 2 next; #9 spheroidal remains)
+Updated: 2026-07-20 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch L1 @0.60.0 + L2 pos-disc-quadratic @0.61.0 [+ Critical #7 landauMignotte fix]; #8 L3 Rothstein-Trager next; #9 spheroidal remains)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -57,15 +57,17 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plans:
 >   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md` +
 >   `…-layer2-multivariate-kronecker.md`.
-> - 🔵 **#8 Risch integration** — L, IN PROGRESS (staged like #7). **Layer 1 (complete rational-function
->   integration over ℚ — Hermite/partial-fractions + log/arctan via the #7 factorization engine) SHIPPED
->   functions@0.60.0** (2026-07-20): `symbolicIntegral` integrates any `p(x)/q(x)` with linear +
->   irreducible-quadratic denominators, differentiation-verified, 345-test regression preserved,
->   adversarial review caught+fixed a Critical (positive-discriminant quadratic). Spec:
->   `docs/superpowers/specs/2026-07-20-risch-integration-design.md`; plan:
->   `…/plans/2026-07-20-risch-layer1-rational-integration.md`. **Layer 2 (Rothstein–Trager — deg-≥3
->   irreducible + positive-disc quadratic denominators → real log/atanh) is NEXT**; Layer 3 =
->   transcendental Risch (exp/log tower). Oracle: sympy `integrate`, verified by differentiation.
+> - 🔵 **#8 Risch integration** — L, IN PROGRESS (staged like #7). **Layer 1 (rational functions,
+>   linear + irreducible-quadratic denoms → log/arctan) SHIPPED functions@0.60.0; Layer 2
+>   (positive-discriminant quadratics → real log via quadratic surds) SHIPPED functions@0.61.0**
+>   (2026-07-20). Engine `functions/src/cas/rational-integrate.ts`, differentiation-verified,
+>   regression preserved. The 0.61.0 review also caught+fixed a **Critical shipped-#7 bug**
+>   (`landauMignotte` used `|lc|` not the coefficient 2-norm → `factorUnivariateZ(x²-10000)` false-
+>   irreducible). **Layer 3 (general Rothstein–Trager — deg-≥3 irreducible + repeated pos-disc denoms,
+>   log-coeffs are arbitrary algebraic numbers → needs a number-field impl) is NEXT** (ADR-flagged as an
+>   infrastructure subsystem); then transcendental exp/log Risch. Specs:
+>   `…/specs/2026-07-20-risch-integration-design.md` + `2026-07-21-risch-layer2-quadratic-surd-design.md`.
+>   Oracle: sympy `integrate`, verified by differentiation.
 > - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
 >   or a self-built continued-fraction reference).
 >

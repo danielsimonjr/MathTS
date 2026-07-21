@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-functions
 
+## 0.61.0
+
+### Minor Changes
+
+- feat: positive-discriminant quadratic integration (Risch Layer 2) + Critical Landau–Mignotte fix
+
+  `symbolicIntegral`/`integrate` now integrate rational functions whose denominator has a
+  positive-discriminant irreducible quadratic factor (real irrational roots, e.g. 1/(x^2-2) →
+  √2/4·log|x-√2| − √2/4·log|x+√2|), via an exact quadratic-surd type. Covers non-monic, shifted, and
+  mixed neg/pos-disc denominators; differentiation-verified. Repeated pos-disc and degree-≥3 irreducible
+  denominators still return the marker (general Rothstein–Trager / transcendental Risch are future
+  layers).
+
+  Also fixes a Critical false-irreducible bug in the polynomial factorizer (factorUnivariateZ, shipped
+  0.58.0): the Landau–Mignotte bound used |lc| instead of the coefficient 2-norm, so polynomials with a
+  large constant term relative to the leading coefficient (x^2-10000) were wrongly reported irreducible.
+  Now uses 2^deg·‖f‖₂. Corrects univariate + multivariate factorization and rational integration; found
+  by the Layer 2 adversarial review.
+
 ## 0.60.0
 
 ### Minor Changes
