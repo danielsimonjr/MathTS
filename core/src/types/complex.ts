@@ -545,11 +545,19 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Inverse hyperbolic cosine: acosh(z) = ln(z + √(z² - 1))
+   * Inverse hyperbolic cosine: acosh(z) = ln(z + √(z-1)·√(z+1))
+   *
+   * The principal value has non-negative real part (C99 Annex G / DLMF 4.37 /
+   * NumPy convention). Using the factored `√(z-1)·√(z+1)` rather than `√(z²-1)`
+   * selects the correct Riemann sheet for Re(z) < 0 and on the real-axis branch
+   * cuts (z < 1), where `√(z²-1)` lands on the wrong branch — the previous form
+   * returned a negative real part (e.g. acosh(-1+0.5i)) and the wrong sign of π
+   * on z < -1.
    */
   acosh(): Complex {
     const one = new Complex(1, 0);
-    return this.add(this.multiply(this).subtract(one).sqrt()).log();
+    const s = this.subtract(one).sqrt().multiply(this.add(one).sqrt());
+    return this.add(s).log();
   }
 
   /**

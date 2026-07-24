@@ -1,5 +1,100 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.7.0
+
+### Minor Changes
+
+- Stiff-ODE follow-ups: matrix `luSolve` + `solveODE` event detection.
+
+  **matrix — new `luSolve(fac, b)` export.** Solves `A·x = b` from an `lu()` factorization (the package had `lu()`
+  but no solve step — a real gap). numpy-pinned.
+
+  **functions — `solveODE` linear solve routed onto the matrix LU (threshold hybrid, neutral).** The
+  Rosenbrock/RODAS stiff step re-factorized the iteration matrix per RHS with inline elimination; it now factors
+  once via matrix `lu()`+`luSolve` for `n ≥ 8` and keeps the inline path for the tiny `n = 1–3` matrices real
+  stiff systems use (measured 1.8–8× faster there — `DenseMatrix` allocation overhead dwarfs the trivial work
+  until `n ≈ 8`, the same crossover the det/inv fast-paths use). Existing stiff behavior is **bit-for-bit
+  unchanged** on the small path; the `n ≥ 8` path is oracle-pinned.
+
+  **functions — `solveODE` event detection (`events` option).** scipy `solve_ivp`-style: `events` is a function
+  or array of `g(t, y)` whose zero-crossings are located (cubic-Hermite dense interpolation + bisection), with
+  `terminal` (stop at the crossing) and `direction` (±1 sign filter) as function properties or `{event, terminal,
+direction}` objects. Returns `tEvents`/`yEvents`; a terminal event truncates the output. Absent the option the
+  result shape is unchanged. Event times match `scipy.integrate.solve_ivp(..., events=)` to ~1e-8 or better.
+
+## 0.6.3
+
+### Patch Changes
+
+- Resolve the deduplication campaign's final decisions: a compat compatibility correction and an internal WasmLoader consolidation.
+
+  **compat (behavior change):** `zeros(n)` and `ones(n)` with a single argument now return a length-`n` **vector** (`[0,0,0]` / `[1,1,1]`), matching mathjs, instead of an `n×n` square matrix. Two-argument `zeros(r, c)` / `ones(r, c)` continue to return an `r×c` matrix. compat's purpose is mathjs compatibility, and the previous square result diverged from mathjs (`math.zeros(3)` is a size-`[3]` vector) — this was a bug. Anyone relying on `zeros(n)` returning a square must now pass `zeros(n, n)`.
+
+  **core / functions / matrix (internal, no runtime behavior change):** the shared WASM-loader logic — the SHA-384 integrity verification (`sha384OfBuffer` / `verifyWasmIntegrity` / `loadWasmManifest`) and packaged-binary resolution (`resolvePackagedWasm` / `defaultWasmLocation`) — was byte-identical in `functions` and `matrix` and is now single-sourced in `@danielsimonjr/mathts-core/internal` (`core/src/wasm-loader.ts`), with each package injecting its own binary/manifest path. The SHA-384 verify-before-instantiate security invariant is preserved byte-for-byte (Node `crypto.createHash('sha384')` / browser `crypto.subtle.digest('SHA-384')`, mismatch throws), node built-ins stay behind lazy dynamic `import()`, and core's browser-safe `.` entry is unaffected. The per-package `WasmLoader` class stays local (distinct AS allocation models).
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.0
+  - @danielsimonjr/mathts-parallel@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.12.0
+  - @danielsimonjr/mathts-parallel@0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.11.0
+  - @danielsimonjr/mathts-parallel@0.6.1
+
+## 0.6.0
+
+### Minor Changes
+
+- Rank-revealing pivoted QR, RQ/QL/LQ decompositions, and `condest`
+
+  Adds `qrPivoted` (Businger-Golub column-pivoted rank-revealing QR — returns `{Q, R, P,
+rank}` with `A[:,P]=Q·R` and `|diag(R)|` non-increasing), `rq`/`ql`/`lq` (the QR-family
+  variants via the standard flip/transpose reductions), and `condest` (Hager/Higham 1-norm
+  condition-number estimator using the existing LU factors, never forming `A⁻¹`). Verified by
+  orthogonality/triangularity/reconstruction/rank/cond oracles vs numpy/scipy. Also fixes a
+  degenerate-branch reflection in the shared `householder` helper (`beta=-2`→`2`) for the
+  length-1 sub-column case that `qrPivoted` exercises.
+
+## 0.5.0
+
+### Minor Changes
+
+- `eig` now exposes complex eigenvectors via a new `vectorsIm` field
+
+  `EigResult` gains `vectorsIm: number[][]` (imaginary parts of the eigenvector
+  columns; all-zero for real eigenvalues). JAMA's `hqr2` already computed the
+  complex eigenvectors internally (EISPACK convention, stored across two adjacent
+  columns of the real transform `V`) but the previous `number[][]` contract dropped
+  them as zero columns. Complex-conjugate pairs are now emitted as
+  `vectors[k] ± i*vectorsIm[k]`, unit-normalized by the complex 2-norm, with the
+  residual `‖A·v − λ·v‖ ≈ 0` verified vs numpy for `{i,−i,3+i,3−i}`. Additive and
+  non-breaking: `.values` and `.vectors` are unchanged for real spectra (and
+  `.vectors` now carries the real part, previously zero, for complex eigenvalues).
+  This unblocks a clean `funm`/`care` off the eigenvector basis.
+
+## 0.4.6
+
+### Patch Changes
+
+- Remove dead `statsVariance`/`statsStd` WASM `AsModule` type declarations
+
+  The internal `AsModule` interface in `matrix/src/backends/WasmLoader.ts` declared
+  `statsVariance`/`statsStd` kernel signatures whose JS call paths were retired 2026-07-15
+  (the corrected two-pass `variance`/`std` in core). No live caller referenced them. TS-only
+  cleanup: the `.wasm` binary and its SHA-384 manifest are unaffected, and the
+  general-library `array_variance`/`array_stddev` kernels are retained.
+
 ## 0.4.5
 
 ### Patch Changes

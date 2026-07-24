@@ -1,5 +1,68 @@
 # @danielsimonjr/mathts-core
 
+## 0.13.1
+
+### Patch Changes
+
+- Fix the exported `VERSION` constant, which had silently drifted from each package's published version.
+
+  `VERSION` was a hardcoded string literal that Changesets never bumped, so it drifted: core reported `0.1.0`
+  (was really 0.13.0), plot `0.2.0` (was 0.3.29), workbook `0.1.0` (was 0.3.3). Workbook's is user-facing —
+  `mtsw version` (and `capabilities`/`introspect`) printed the wrong number.
+
+  Root-cause fix (not a re-hardcode): `VERSION` is now injected at build time from each package's own
+  `package.json` via a per-package `tsup.config.ts` (esbuild `define`, read Node-side so `package.json` is
+  never bundled into `dist`). Tests import source, so the same define is mirrored into each `vitest.config.ts`;
+  `core/tests/version.test.ts` now pins `VERSION` to `package.json` rather than a literal. `VERSION` can no
+  longer drift from the published version.
+
+## 0.13.0
+
+### Minor Changes
+
+- Resolve the deduplication campaign's final decisions: a compat compatibility correction and an internal WasmLoader consolidation.
+
+  **compat (behavior change):** `zeros(n)` and `ones(n)` with a single argument now return a length-`n` **vector** (`[0,0,0]` / `[1,1,1]`), matching mathjs, instead of an `n×n` square matrix. Two-argument `zeros(r, c)` / `ones(r, c)` continue to return an `r×c` matrix. compat's purpose is mathjs compatibility, and the previous square result diverged from mathjs (`math.zeros(3)` is a size-`[3]` vector) — this was a bug. Anyone relying on `zeros(n)` returning a square must now pass `zeros(n, n)`.
+
+  **core / functions / matrix (internal, no runtime behavior change):** the shared WASM-loader logic — the SHA-384 integrity verification (`sha384OfBuffer` / `verifyWasmIntegrity` / `loadWasmManifest`) and packaged-binary resolution (`resolvePackagedWasm` / `defaultWasmLocation`) — was byte-identical in `functions` and `matrix` and is now single-sourced in `@danielsimonjr/mathts-core/internal` (`core/src/wasm-loader.ts`), with each package injecting its own binary/manifest path. The SHA-384 verify-before-instantiate security invariant is preserved byte-for-byte (Node `crypto.createHash('sha384')` / browser `crypto.subtle.digest('SHA-384')`, mismatch throws), node built-ins stay behind lazy dynamic `import()`, and core's browser-safe `.` entry is unaffected. The per-package `WasmLoader` class stays local (distinct AS allocation models).
+
+## 0.12.0
+
+### Minor Changes
+
+- Fix two BigNumber/Complex transcendental correctness bugs found by an mpmath/NumPy oracle audit, and consolidate the fftshift/ifftshift roll algorithm.
+
+  **core (correctness):**
+  - `BigNumber.divide` lost all precision when the divisor's coefficient had more digits than the (precision-scaled) dividend — the Newton-iteration step `2 / (g*g)` in `cbrt`/`sqrt` integer-divided to a quotient of `0`. As a result `cbrt(bignumber(2))` returned `4.6e-18` instead of `1.2599…`, and `asinh`/`acosh` on BigNumber degraded to ~11–16 digits. The dividend scale is now widened by `max(0, divisorDigits - dividendDigits)`; the result is **bit-identical** whenever `divisorDigits ≤ dividendDigits`, so no previously-correct division changes.
+  - `Complex.acosh` landed on the wrong Riemann sheet for `Re(z) < 0` (`acosh(-1+0.5i)` returned the negated value). It now uses the factored principal form `ln(z + √(z-1)·√(z+1))` (C99 Annex G / DLMF 4.37 / NumPy).
+
+  Every rich-type case of the 12 transcendental scalars (`sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p expm1 sign`) is now pinned to the mpmath/NumPy oracle by `functions/tests/gap-transcendental-richtype-oracle.test.ts`.
+
+  **functions:** the public `fftshift`/`ifftshift` (`number[]`) and the internal generic complex-FFT toolkit versions now share one `rollBy<T>` algorithm instead of duplicating the roll logic; behavior is unchanged.
+
+## 0.11.0
+
+### Minor Changes
+
+- Arithmetic correctness fixes (BigNumber/Fraction pow/round/equal) + cross-package util consolidation
+
+  **Correctness fixes** (`functions`): three live public-API bugs, fixed at root by delegating the
+  rich-type policy cases of the typed dispatchers to core's oracle-pinned scalar primitives:
+  - `pow(bignumber(2), 0.5)` returned `1` (silently) — now `1.4142…`; `pow(fraction(3), 2.9)` silently
+    floored the exponent to `27` — now `24.19…`.
+  - `round(bignumber(-2.5))` returned `-3` — now `-2` (core's type-consistent `halfCeil`).
+  - `equal(0.1+0.2, 0.3)` returned `false` (strict `===`) — now `true` (mathjs-parity tolerance via
+    `nearlyEqual`; `bigint` stays exact).
+    Hot `number`/`bigint` cases remain inline (unchanged, no perf impact). A new equivalence guard
+    (fast-check property: typed case ≡ core primitive, + edge corpus) prevents future drift.
+
+  **Consolidation** (`core`/`expression`/`functions`): duplicate mathjs-derived cold utilities
+  (factory/string/formatter/array/collection/map) and error classes (`MathjsError`/`DimensionError`/
+  `IndexError`) that `expression` and `functions` each carried are now unified on a single
+  `@danielsimonjr/mathts-core/internal` canonical, with per-package re-export shims (no public API
+  change). Two latent bugs fixed in passing (`ObjectWrappingMap[Symbol.iterator]` type-soundness;
+  `sortFactories` now throws on indirect dependency cycles).
+
 ## 0.10.0
 
 ### Minor Changes

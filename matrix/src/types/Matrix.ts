@@ -8,12 +8,11 @@
  */
 
 /**
- * Matrix dimension type
+ * Matrix dimension type, consolidated from `@danielsimonjr/mathts-core`'s
+ * byte-identical copy (see docs/Architecture/duplicate-symbols.json).
  */
-export interface MatrixDimensions {
-  rows: number;
-  cols: number;
-}
+import type { MatrixDimensions } from '@danielsimonjr/mathts-core';
+export type { MatrixDimensions };
 
 /**
  * Matrix index for element access

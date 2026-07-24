@@ -46,3 +46,11 @@ export { SCHEMA_VERSION, VERSION } from './contract';
 // Serve session + JSON-RPC router
 export { Session } from './session';
 export { handleRequest } from './rpc';
+
+// Kill-able worker-thread execution with a hard timeout
+export { runWorkbookWithTimeout, WorkbookTimeoutError } from './timeout-runner';
+export type {
+  RunWorkbookWithTimeoutOptions,
+  SerializedCellResult,
+  SerializedRunResult,
+} from './timeout-runner';

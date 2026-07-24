@@ -17,6 +17,12 @@ import {
   isFraction,
   isBigNumber,
   isNumber,
+  LN2 as CORE_LN2,
+  LN10 as CORE_LN10,
+  LOG2E as CORE_LOG2E,
+  LOG10E as CORE_LOG10E,
+  SQRT2 as CORE_SQRT2,
+  SQRT1_2 as CORE_SQRT1_2,
 } from '@danielsimonjr/mathts-core';
 
 import {
@@ -166,14 +172,13 @@ const isMatrixLike = (x: unknown): x is MatrixLike =>
 const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
   x instanceof DenseMatrix ? x : DenseMatrix.fromArray(x as number[][]);
 
-const unwrap = (r: unknown): unknown =>
-  r instanceof DenseMatrix ? r.toArray() : r;
+const unwrap = (r: unknown): unknown => (r instanceof DenseMatrix ? r.toArray() : r);
 
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
   a: unknown,
-  b: unknown,
+  b: unknown
 ): unknown => {
   if (isMatrixLike(a) || isMatrixLike(b)) {
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
@@ -187,30 +192,29 @@ const applyArithmetic = (
 // arguments: add(x, y, z, …) === add(add(x, y), z), …. A 2-arg-only wrapper
 // silently dropped the 3rd+ operand (add(1,2,3) returned 3), which also broke
 // internal callers like polynomialRoot's cubic branch. Fold over every arg.
-const makeArithmetic = (
-  scalarFn: (a: unknown, b: unknown) => unknown,
-  matrixFn: (a: unknown, b: unknown) => unknown,
-) => (...args: unknown[]): unknown => {
-  if (args.length === 0) {
-    throw new TypeError('Too few arguments (expected at least 1)');
-  }
-  if (args.length === 1) {
-    return args[0];
-  }
-  return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
-};
+const makeArithmetic =
+  (scalarFn: (a: unknown, b: unknown) => unknown, matrixFn: (a: unknown, b: unknown) => unknown) =>
+  (...args: unknown[]): unknown => {
+    if (args.length === 0) {
+      throw new TypeError('Too few arguments (expected at least 1)');
+    }
+    if (args.length === 1) {
+      return args[0];
+    }
+    return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
+  };
 
 export const add = makeArithmetic(
   _add as (a: unknown, b: unknown) => unknown,
-  _matAdd as (a: unknown, b: unknown) => unknown,
+  _matAdd as (a: unknown, b: unknown) => unknown
 ) as typeof _add;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
-  _matSubtract as (a: unknown, b: unknown) => unknown,
+  _matSubtract as (a: unknown, b: unknown) => unknown
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
   _multiply as (a: unknown, b: unknown) => unknown,
-  _matMultiply as (a: unknown, b: unknown) => unknown,
+  _matMultiply as (a: unknown, b: unknown) => unknown
 ) as typeof _multiply;
 export const divide = _divide;
 export const pow = _pow;
@@ -259,8 +263,8 @@ export const mean = _mean;
 type Normalization = 'unbiased' | 'uncorrected' | 'biased';
 
 function toNumericArray(data: unknown): number[] {
-  if (data instanceof DenseMatrix) return (data.toArray().flat(Infinity) as number[]);
-  if (Array.isArray(data)) return ((data as unknown[]).flat(Infinity) as number[]);
+  if (data instanceof DenseMatrix) return data.toArray().flat(Infinity) as number[];
+  if (Array.isArray(data)) return (data as unknown[]).flat(Infinity) as number[];
   return [data as number];
 }
 
@@ -449,17 +453,32 @@ export function identity(n: number): DenseMatrix {
 }
 
 /**
- * Zeros matrix (mathjs-compatible)
+ * Zeros (mathjs-compatible).
+ *
+ * Single-arg `zeros(n)` is a length-`n` **vector** matching mathjs
+ * (`math.zeros(3).toArray()` === `[0,0,0]`, size `[3]`); two-arg `zeros(r,c)` is
+ * an `r×c` DenseMatrix. (matrix's DenseMatrix is strictly 2-D, so the vector case
+ * returns a `number[]`.)
  */
-export function zeros(rows: number, cols?: number): DenseMatrix {
-  return DenseMatrix.zeros(rows, cols ?? rows);
+export function zeros(rows: number, cols?: number): DenseMatrix | number[] {
+  if (cols === undefined) {
+    return new Array<number>(rows).fill(0);
+  }
+  return DenseMatrix.zeros(rows, cols);
 }
 
 /**
- * Ones matrix (mathjs-compatible)
+ * Ones (mathjs-compatible).
+ *
+ * Single-arg `ones(n)` is a length-`n` **vector** matching mathjs
+ * (`math.ones(3).toArray()` === `[1,1,1]`); two-arg `ones(r,c)` is an `r×c`
+ * DenseMatrix.
  */
-export function ones(rows: number, cols?: number): DenseMatrix {
-  return DenseMatrix.ones(rows, cols ?? rows);
+export function ones(rows: number, cols?: number): DenseMatrix | number[] {
+  if (cols === undefined) {
+    return new Array<number>(rows).fill(1);
+  }
+  return DenseMatrix.ones(rows, cols);
 }
 
 /**
@@ -505,12 +524,12 @@ export const pi = Math.PI;
 export const e = Math.E;
 export const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
 export const tau = 2 * Math.PI;
-export const LN2 = Math.LN2;
-export const LN10 = Math.LN10;
-export const LOG2E = Math.LOG2E;
-export const LOG10E = Math.LOG10E;
-export const SQRT2 = Math.SQRT2;
-export const SQRT1_2 = Math.SQRT1_2;
+export const LN2 = CORE_LN2;
+export const LN10 = CORE_LN10;
+export const LOG2E = CORE_LOG2E;
+export const LOG10E = CORE_LOG10E;
+export const SQRT2 = CORE_SQRT2;
+export const SQRT1_2 = CORE_SQRT1_2;
 export const Infinity_ = Infinity;
 export const NaN_ = NaN;
 

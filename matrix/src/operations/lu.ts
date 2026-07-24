@@ -105,3 +105,48 @@ export function lu(A: DenseMatrix): LUResult {
     P: perm,
   };
 }
+
+/**
+ * Solve the dense linear system `A · x = b` using a precomputed LU factorisation
+ * (from {@link lu}), where `P · A = L · U`.
+ *
+ * Applies the row permutation to `b` (`(P·b)[i] = b[P[i]]`), forward-substitutes
+ * the unit-lower-triangular `L`, then back-substitutes the upper-triangular `U`.
+ * Each call is O(n²), so factor **once** with `lu()` and call `luSolve` repeatedly
+ * to solve many right-hand sides against the same matrix — the pattern the stiff
+ * Rosenbrock/RODAS ODE steps use (the iteration matrix is solved against 3–6
+ * successive RHS per step).
+ *
+ * @param fac An `LUResult` produced by {@link lu}.
+ * @param b   Right-hand side vector of length `n` (`number[]` or `Float64Array`).
+ * @returns   The solution vector `x` as a `number[]` of length `n`.
+ * @throws {Error} if `b.length` does not equal the factor dimension `n`.
+ */
+export function luSolve(fac: LUResult, b: ArrayLike<number>): number[] {
+  const n = fac.P.length;
+  if (b.length !== n) {
+    throw new Error(
+      `luSolve: right-hand side length ${b.length} does not match factor dimension ${n}`
+    );
+  }
+  const L = fac.L.toFloat64Array();
+  const U = fac.U.toFloat64Array();
+  const P = fac.P;
+
+  // Forward substitution: L·y = P·b (L is unit lower-triangular, so no diagonal division).
+  const y = new Array<number>(n);
+  for (let i = 0; i < n; i++) {
+    let s = b[P[i]];
+    for (let k = 0; k < i; k++) s -= L[i * n + k] * y[k];
+    y[i] = s;
+  }
+
+  // Back substitution: U·x = y.
+  const x = new Array<number>(n);
+  for (let i = n - 1; i >= 0; i--) {
+    let s = y[i];
+    for (let k = i + 1; k < n; k++) s -= U[i * n + k] * x[k];
+    x[i] = s / U[i * n + i];
+  }
+  return x;
+}

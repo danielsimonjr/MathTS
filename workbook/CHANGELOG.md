@@ -1,5 +1,225 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.3.22
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.61.0
+  - @danielsimonjr/mathts-plot@0.3.48
+
+## 0.3.21
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.60.0
+  - @danielsimonjr/mathts-plot@0.3.47
+
+## 0.3.20
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.59.0
+  - @danielsimonjr/mathts-plot@0.3.46
+
+## 0.3.19
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.58.0
+  - @danielsimonjr/mathts-plot@0.3.45
+
+## 0.3.18
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.57.0
+  - @danielsimonjr/mathts-plot@0.3.44
+
+## 0.3.17
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.56.0
+  - @danielsimonjr/mathts-plot@0.3.43
+
+## 0.3.16
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.55.0
+  - @danielsimonjr/mathts-plot@0.3.42
+
+## 0.3.15
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.54.0
+  - @danielsimonjr/mathts-plot@0.3.41
+
+## 0.3.14
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.53.0
+  - @danielsimonjr/mathts-plot@0.3.40
+
+## 0.3.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.52.0
+  - @danielsimonjr/mathts-plot@0.3.39
+
+## 0.3.12
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.51.0
+  - @danielsimonjr/mathts-plot@0.3.38
+
+## 0.3.11
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.50.0
+  - @danielsimonjr/mathts-plot@0.3.37
+
+## 0.3.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.49.0
+  - @danielsimonjr/mathts-plot@0.3.36
+
+## 0.3.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.48.0
+  - @danielsimonjr/mathts-plot@0.3.35
+
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.47.0
+  - @danielsimonjr/mathts-plot@0.3.34
+
+## 0.3.7
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.46.0
+  - @danielsimonjr/mathts-plot@0.3.33
+
+## 0.3.6
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.45.0
+  - @danielsimonjr/mathts-plot@0.3.32
+
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.44.0
+  - @danielsimonjr/mathts-plot@0.3.31
+
+## 0.3.4
+
+### Patch Changes
+
+- Fix the exported `VERSION` constant, which had silently drifted from each package's published version.
+
+  `VERSION` was a hardcoded string literal that Changesets never bumped, so it drifted: core reported `0.1.0`
+  (was really 0.13.0), plot `0.2.0` (was 0.3.29), workbook `0.1.0` (was 0.3.3). Workbook's is user-facing —
+  `mtsw version` (and `capabilities`/`introspect`) printed the wrong number.
+
+  Root-cause fix (not a re-hardcode): `VERSION` is now injected at build time from each package's own
+  `package.json` via a per-package `tsup.config.ts` (esbuild `define`, read Node-side so `package.json` is
+  never bundled into `dist`). Tests import source, so the same define is mirrored into each `vitest.config.ts`;
+  `core/tests/version.test.ts` now pins `VERSION` to `package.json` rather than a literal. `VERSION` can no
+  longer drift from the published version.
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.1
+  - @danielsimonjr/mathts-plot@0.3.30
+
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.0
+  - @danielsimonjr/mathts-functions@0.43.2
+  - @danielsimonjr/mathts-expression@0.6.7
+  - @danielsimonjr/mathts-plot@0.3.29
+
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.12.0
+  - @danielsimonjr/mathts-functions@0.43.1
+  - @danielsimonjr/mathts-expression@0.6.6
+  - @danielsimonjr/mathts-plot@0.3.28
+
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-functions@0.43.0
+  - @danielsimonjr/mathts-core@0.11.0
+  - @danielsimonjr/mathts-expression@0.6.5
+  - @danielsimonjr/mathts-plot@0.3.27
+
+## 0.3.0
+
+### Minor Changes
+
+- ipynb export + kill-able worker-thread run timeout
+
+  `mtsw export --format ipynb` renders a workbook to a Jupyter notebook (nbformat v4): markdown
+  cells map to notebook markdown cells, code/equation/test/data/visualization cells to code cells with
+  `execute_result`/`error`/`display_data` outputs. Sibling of the existing html/tex/pdf exporters.
+
+  `runWorkbookWithTimeout(source, { timeoutMs })` (and `mtsw run --timeout <ms>`) runs the executor in a
+  `worker_threads` worker and terminates it if it exceeds the budget, so a runaway/very-long cell no
+  longer hangs the process — it rejects with `WorkbookTimeoutError`. The default in-process path is
+  unchanged.
+
+## 0.2.0
+
+### Minor Changes
+
+- First npm release — workbook release hold lifted
+
+  `@danielsimonjr/mathts-workbook` (headless `.mtsw` notebook runtime + `mtsw` CLI:
+  `run`/`validate`/`graph`/`export`) was held from npm since 2026-06-29 pending
+  release-readiness. The hold is now lifted: build and the full test suite are green, and
+  the package ships from the monorepo like the others. Publishing its debut.
+
 ## 0.1.8
 
 ### Patch Changes
@@ -42,7 +262,6 @@
 
 - Pin internal `@danielsimonjr/mathts-*` dependencies to exact versions instead of `*`, so a matched package set always installs together.
 - Rebuilt against `@danielsimonjr/mathts-core@0.1.3`, which restores the missing `Unit` export.
-
 
 ## 0.1.1
 

@@ -1,5 +1,8 @@
 /** @danielsimonjr/mathts-plot — headless SVG 2D/3D plotting for MathTS. */
-export const VERSION = '0.2.0';
+// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// package's package.json version, so VERSION can never drift.
+declare const __PKG_VERSION__: string;
+export const VERSION: string = __PKG_VERSION__;
 
 export type { Data, PlotOptions, AxisSpec, Layer2D } from './types.js';
 export { plot, toTikZ } from './plot.js';

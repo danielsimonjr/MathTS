@@ -24,7 +24,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { computePool } from '@danielsimonjr/mathts-parallel';
-import { parse } from '../src/factories/evaluate.js';
+import { parse, evaluate } from '../src/factories/evaluate.js';
 import {
   integrate,
   limit,
@@ -288,7 +288,9 @@ describe('minimalPolynomial', () => {
     const phi = (1 + Math.sqrt(5)) / 2;
     const poly = minimalPolynomial(String(phi), 'x');
     expect(poly).not.toBeNull();
-    const val = (parse(poly as string) as { evaluate(scope: object): unknown }).evaluate({ x: phi });
+    const val = (parse(poly as string) as { evaluate(scope: object): unknown }).evaluate({
+      x: phi,
+    });
     expect(Math.abs(val as number)).toBeLessThan(1e-6);
   });
 
@@ -333,13 +335,17 @@ describe('toRadicals', () => {
 
   it('cubic with rational roots (synthetic-division short-circuit)', () => {
     // (x-1)(x-2)(x-3) = x^3 - 6x^2 + 11x - 6
-    const roots = toRadicals('x^3 - 6*x^2 + 11*x - 6').map(Number).sort((a, b) => a - b);
+    const roots = toRadicals('x^3 - 6*x^2 + 11*x - 6')
+      .map(Number)
+      .sort((a, b) => a - b);
     expect(roots).toEqual([1, 2, 3]);
   });
 
   it('cubic with three distinct real roots (trigonometric/depressed path)', () => {
     // x^3 - 7x + 6 = (x-1)(x-2)(x+3)
-    const roots = toRadicals('x^3 - 7*x + 6').map(Number).sort((a, b) => a - b);
+    const roots = toRadicals('x^3 - 7*x + 6')
+      .map(Number)
+      .sort((a, b) => a - b);
     expect(roots).toEqual([-3, 1, 2]);
   });
 
@@ -352,13 +358,17 @@ describe('toRadicals', () => {
 
   it('quartic with four real roots', () => {
     // x^4 - 5x^2 + 4 = (x^2-1)(x^2-4) -> {-2,-1,1,2}
-    const roots = toRadicals('x^4 - 5*x^2 + 4').map(Number).sort((a, b) => a - b);
+    const roots = toRadicals('x^4 - 5*x^2 + 4')
+      .map(Number)
+      .sort((a, b) => a - b);
     expect(roots).toEqual([-2, -1, 1, 2]);
   });
 
   it('quintic falls back to numerical roots', () => {
     // x^5 - x = x(x-1)(x+1)(x^2+1) -> real roots {-1,0,1}
-    const roots = toRadicals('x^5 - x').map(Number).sort((a, b) => a - b);
+    const roots = toRadicals('x^5 - x')
+      .map(Number)
+      .sort((a, b) => a - b);
     expect(roots).toEqual([-1, 0, 1]);
   });
 });
@@ -395,7 +405,9 @@ describe('implicitDiff', () => {
 
   it('throws when dF/dy is zero', () => {
     // At (5, 0) on x^2 + y^2 - 25, dF/dy = 2y = 0 -> theorem fails.
-    expect(() => implicitDiff('x^2 + y^2 - 25', 'x', 'y', { x: 5, y: 0 })).toThrow(/dF\/dy is zero/);
+    expect(() => implicitDiff('x^2 + y^2 - 25', 'x', 'y', { x: 5, y: 0 })).toThrow(
+      /dF\/dy is zero/
+    );
   });
 });
 
@@ -491,14 +503,21 @@ describe('CAS batch single-expression paths', () => {
     expect(casDerivative('tan(x)', 'x')).toBe('d/dx(tan(x))');
   });
 
-  it('casExpand single', () => {
-    expect(casExpand('(x+1)*(x+2)')).toBe('x*x + x*2 + 1*x + 1*2');
-    expect(casExpand('(x+1)^2')).toBe('x*x + x*1 + 1*x + 1*1');
+  it('casExpand single (real engine — collects like terms)', () => {
+    // (x+1)*(x+2) = x^2 + 3x + 2; (x+1)^2 = x^2 + 2x + 1.
+    for (const x of [-2, 0.5, 3]) {
+      expect(evaluate(casExpand('(x+1)*(x+2)'), { x }) as number).toBeCloseTo((x + 1) * (x + 2), 8);
+      expect(evaluate(casExpand('(x+1)^2'), { x }) as number).toBeCloseTo((x + 1) ** 2, 8);
+    }
+    expect(casExpand('(x+1)^2')).not.toContain('x*x');
   });
 
-  it('casFactor single', () => {
-    expect(casFactor('2*x + 4*y')).toBe('2*(x + 2*y)');
-    expect(casFactor('x^2 - 1')).toBe('x^2 - 1'); // no integer GCD > 1
+  it('casFactor single (real engine)', () => {
+    expect(casFactor('2*x + 4*y')).toBe('2*(x + 2*y)'); // integer-GCD path
+    // x^2 - 1 now factors into (x-1)(x+1) via the rational-root engine.
+    const f = casFactor('x^2 - 1');
+    expect(f).not.toBe('x^2 - 1');
+    for (const x of [-2, 0.5, 3]) expect(evaluate(f, { x }) as number).toBeCloseTo(x * x - 1, 8);
     expect(casFactor('x')).toBe('x'); // single term, unchanged
   });
 });
@@ -519,9 +538,10 @@ describe('CAS batch below-threshold loop', () => {
     expect(r).toEqual(['2*x^1', 'cos(x)', 'exp(x)']);
   });
 
-  it('casExpand small batch', async () => {
+  it('casExpand small batch (real engine)', async () => {
     const r = await casExpand(['(x+1)^2']);
-    expect(r[0]).toBe('x*x + x*1 + 1*x + 1*1');
+    for (const x of [-2, 0.5, 3])
+      expect(evaluate(r[0], { x }) as number).toBeCloseTo((x + 1) ** 2, 8);
   });
 
   it('casFactor small batch', async () => {
@@ -610,9 +630,10 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casFactor worker batch leaves non-factorable terms unchanged', async () => {
+  it('casFactor worker batch factors univariate polynomials consistently', async () => {
     const exprs = Array.from({ length: 18 }, () => 'x^2 - 1');
     const results = await casFactor(exprs);
-    for (const r of results) expect(r).toBe('x^2 - 1');
+    // Real factorization now applies; every result matches the single call.
+    for (const r of results) expect(r).toBe(casFactor('x^2 - 1'));
   });
 });

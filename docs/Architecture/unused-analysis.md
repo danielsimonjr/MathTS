@@ -1,16 +1,16 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-15
+**Generated**: 2026-07-21
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 4
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 4
-- **Potentially unused exports**: 240
-  - **Unreferenced anywhere (deletion candidates)**: 0
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 240
+  - **Test-only (exercised by a test, ships nothing)**: 3
+- **Potentially unused exports**: 224
+  - **Unreferenced anywhere (deletion candidates)**: 1
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 223
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -27,10 +27,9 @@ Not reachable from any package entry point, but imported by a test — deliberat
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
 
-### `functions` (2)
+### `expression` (1)
 
-- `functions/src/signal/conv.ts`
-- `functions/src/signal/fft.ts`
+- `expression/src/error/DimensionError.ts`
 
 ### `parallel` (2)
 
@@ -46,27 +45,20 @@ These files are not imported by any other file in the codebase:
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
 
+### `functions/src/signal/fft.ts`
+
+- `complexConj` (function)
+
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
 Not imported cross-file, but referenced within their own module — they type or
 support exports that ARE used, so they cannot be deleted in isolation. Mostly
 interfaces typing live guards and per-package API completeness, not rot.
 
-### `core/src/config.ts`
+### `core/src/customs.ts`
 
-- `MathJsConfig` (type) — 1 in-file ref
-
-### `core/src/factory.ts`
-
-- `create` (function) — 7 in-file refs
-- `isFactory` (function) — 10 in-file refs
-- `assertDependencies` (function) — 1 in-file ref
-- `isOptionalDependency` (function) — 1 in-file ref
-- `stripOptionalNotation` (function) — 1 in-file ref
-- `LegacyFactory` (interface) — 9 in-file refs
-- `FactoryMeta` (interface) — 3 in-file refs
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
+- `getSafeMethod` (function) — 1 in-file ref
+- `isSafeMethod` (function) — 2 in-file refs
 
 ### `core/src/typed/mathts-typed.ts`
 
@@ -75,14 +67,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SignatureImpl` (type) — 7 in-file refs
 - `SignatureRecord` (type) — 3 in-file refs
 
-### `matrix/src/backends/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
-
 ### `matrix/src/backends/WasmLoader.ts`
 
 - `Allocation` (interface) — 10 in-file refs
-- `LoadingMetrics` (interface) — 2 in-file refs
 
 ### `matrix/src/config.ts`
 
@@ -155,10 +142,25 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `name` (constant) — 5 in-file refs
 - `dependencies` (constant) — 1 in-file ref
 
+### `functions/src/cas/rational-integrate.ts`
+
+- `ratAdd` (function) — 4 in-file refs
+- `ratSub` (function) — 8 in-file refs
+- `ratMul` (function) — 21 in-file refs
+- `ratDiv` (function) — 19 in-file refs
+- `ratFromBigint` (function) — 32 in-file refs
+- `surdNeg` (function) — 2 in-file refs
+- `surdSub` (function) — 1 in-file ref
+- `surdRender` (function) — 3 in-file refs
+- `integratePFTerm` (function) — 3 in-file refs
+- `Rat` (interface) — 65 in-file refs
+- `RatFunc` (interface) — 2 in-file refs
+- `DenFactor` (interface) — 3 in-file refs
+- `PFTerm` (interface) — 3 in-file refs
+
 ### `functions/src/core/create.ts`
 
 - `create` (function) — 11 in-file refs
-- `ImportOptions` (interface) — 1 in-file ref
 - `FactoriesInput` (type) — 4 in-file refs
 
 ### `functions/src/core/function/config.ts`
@@ -173,7 +175,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/core/function/import.ts`
 
-- `ImportOptions` (interface) — 5 in-file refs
 - `path` (constant) — 3 in-file refs
 
 ### `functions/src/core/function/typed.ts`
@@ -205,6 +206,11 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `MatrixConstructor` (interface) — 1 in-file ref
 - `Matrix` (interface) — 17 in-file refs
 - `Config` (interface) — 1 in-file ref
+
+### `functions/src/numeric/solveODE.ts`
+
+- `rodasSolve` (function) — 4 in-file refs
+- `radauSolve` (function) — 2 in-file refs
 
 ### `functions/src/probability/random.ts`
 
@@ -238,9 +244,28 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `createUnequalNumber` (constant) — 1 in-file ref
 
+### `functions/src/signal/conv.ts`
+
+- `ConvMode` (type) — 8 in-file refs
+
 ### `functions/src/signal/fft-core-f64.ts`
 
 - `bitReverse` (function) — 1 in-file ref
+
+### `functions/src/signal/fft.ts`
+
+- `rollBy` (function) — 2 in-file refs
+- `FFTResult` (interface) — 1 in-file ref
+
+### `functions/src/signal/wavelet-filters.ts`
+
+- `WaveletFilters` (interface) — 1 in-file ref
+
+### `functions/src/signal-filter-extra.ts`
+
+- `zpkToTf` (function) — 1 in-file ref
+- `cAdd` (constant) — 5 in-file refs
+- `cSub` (constant) — 11 in-file refs
 
 ### `functions/src/type/bignumber/BigNumber.ts`
 
@@ -291,13 +316,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `DenseMatrixInterface` (interface) — 5 in-file refs
 - `SparseMatrixInterface` (interface) — 3 in-file refs
 - `MatrixFormatOptions` (interface) — 1 in-file ref
-- `RangeJSON` (interface) — 1 in-file ref
-- `RangeFormatOptions` (interface) — 1 in-file ref
-- `NestedArray` (type) — 6 in-file refs
+- `NestedArray` (type) — 7 in-file refs
 - `MapCallback` (type) — 1 in-file ref
 - `ForEachCallback` (type) — 1 in-file ref
-- `RangeForEachCallback` (type) — 1 in-file ref
-- `RangeMapCallback` (type) — 1 in-file ref
 
 ### `functions/src/type/resultset/ResultSet.ts`
 
@@ -309,51 +330,41 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `UnitInstance` (interface) — 2 in-file refs
 
+### `functions/src/typed/factorization/finite-field.ts`
+
+- `distinctDegreeFactor` (function) — 1 in-file ref
+- `equalDegreeFactor` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/integer-poly.ts`
+
+- `neg` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/multi-poly.ts`
+
+- `key` (function) — 6 in-file refs
+- `subMP` (function) — 1 in-file ref
+- `negMP` (function) — 2 in-file refs
+
+### `functions/src/typed/factorization/square-free.ts`
+
+- `SquareFreeFactor` (interface) — 2 in-file refs
+
+### `functions/src/typed/factorization/zassenhaus.ts`
+
+- `Factorization` (type) — 1 in-file ref
+
 ### `functions/src/typed/polynomial-ideal.ts`
 
-- `normalize` (function) — 8 in-file refs
 - `polyAdd` (function) — 2 in-file refs
 - `polyNeg` (function) — 2 in-file refs
 - `polySub` (function) — 3 in-file refs
 - `polyMul` (function) — 5 in-file refs
 - `polyReduce` (function) — 3 in-file refs
 - `Term` (interface) — 2 in-file refs
-- `Poly` (type) — 42 in-file refs
-
-### `functions/src/utils/array.ts`
-
-- `validate` (function) — 7 in-file refs
-- `processSizesWildcard` (function) — 1 in-file ref
-- `unsqueeze` (function) — 3 in-file refs
-- `map` (function) — 5 in-file refs
-- `forEach` (function) — 5 in-file refs
-- `join` (function) — 2 in-file refs
-- `last` (function) — 5 in-file refs
-- `checkBroadcastingRules` (function) — 2 in-file refs
-- `broadcastArrays` (function) — 1 in-file ref
-- `stretch` (function) — 1 in-file ref
-- `clone` (function) — 1 in-file ref
-- `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 79 in-file refs
 
 ### `functions/src/utils/bignumber/bitwise.ts`
 
 - `bitwise` (function) — 4 in-file refs
-
-### `functions/src/utils/bignumber/formatter.ts`
-
-- `toEngineering` (function) — 1 in-file ref
-- `toExponential` (function) — 5 in-file refs
-- `toFixed` (function) — 5 in-file refs
-
-### `functions/src/utils/factory.ts`
-
-- `sortFactories` (function) — 1 in-file ref
-- `create` (function) — 7 in-file refs
-- `assertDependencies` (function) — 1 in-file ref
-- `isOptionalDependency` (function) — 1 in-file ref
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
 
 ### `functions/src/utils/is.ts`
 
@@ -361,9 +372,11 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `Complex` (interface) — 1 in-file ref
 - `Fraction` (interface) — 1 in-file ref
 - `Unit` (interface) — 2 in-file refs
+- `Matrix` (interface) — 5 in-file refs
 - `DenseMatrix` (interface) — 2 in-file refs
 - `SparseMatrix` (interface) — 1 in-file ref
 - `Range` (interface) — 1 in-file ref
+- `IndexDimension` (interface) — 1 in-file ref
 - `ResultSet` (interface) — 1 in-file ref
 - `Help` (interface) — 1 in-file ref
 - `Chain` (interface) — 1 in-file ref
@@ -385,25 +398,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `functions/src/utils/map.ts`
-
-- `assign` (function) — 1 in-file ref
-- `ObjectWrappingMap` (class) — 5 in-file refs
-- `PartitionedMap` (class) — 2 in-file refs
-
-### `functions/src/utils/string.ts`
-
-- `stringify` (function) — 2 in-file refs
-- `GeneralFormatOptions` (type) — 1 in-file ref
-
-### `functions/src/wasm/integrity.ts`
-
-- `WasmManifest` (interface) — 4 in-file refs
-
 ### `functions/src/wasm/WasmLoader.ts`
 
-- `WasmLoader` (class) — 7 in-file refs
-- `LoadingMetrics` (interface) — 2 in-file refs
+- `WasmLoader` (class) — 8 in-file refs
 
 ### `expression/src/evaluator/evaluate.ts`
 
@@ -413,27 +410,17 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `CompiledExpression` (interface) — 1 in-file ref
 
-### `expression/src/utils/array.ts`
-
-- `IdentifiedValue` (interface) — 3 in-file refs
-- `NestedArray` (type) — 79 in-file refs
-
-### `expression/src/utils/factory.ts`
-
-- `FactoryFunction` (interface) — 13 in-file refs
-- `FactoryMeta` (interface) — 3 in-file refs
-- `DependencyName` (type) — 4 in-file refs
-- `CreateFunction` (type) — 1 in-file ref
-
 ### `expression/src/utils/is.ts`
 
 - `BigNumber` (interface) — 2 in-file refs
 - `Complex` (interface) — 1 in-file ref
 - `Fraction` (interface) — 1 in-file ref
 - `Unit` (interface) — 2 in-file refs
+- `Matrix` (interface) — 5 in-file refs
 - `DenseMatrix` (interface) — 2 in-file refs
 - `SparseMatrix` (interface) — 1 in-file ref
 - `Range` (interface) — 1 in-file ref
+- `IndexDimension` (interface) — 1 in-file ref
 - `ResultSet` (interface) — 1 in-file ref
 - `Help` (interface) — 1 in-file ref
 - `Chain` (interface) — 1 in-file ref
@@ -492,6 +479,11 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `workbook/src/tex.ts`
 
 - `ToTexOptions` (interface) — 1 in-file ref
+
+### `workbook/src/worker-protocol.ts`
+
+- `WorkerSuccessMessage` (interface) — 1 in-file ref
+- `WorkerFailureMessage` (interface) — 1 in-file ref
 
 ### `plot/src/svg.ts`
 

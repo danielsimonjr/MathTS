@@ -19,6 +19,7 @@ mtsw run example.mtsw
 mtsw run example.mtsw -v        # also print the execution event stream
 mtsw run example.mtsw --json    # machine-readable envelope on stdout
 mtsw run example.mtsw -c gauss  # run one cell + its transitive deps (stateless)
+mtsw run example.mtsw --timeout 5000   # run in a worker; killed (exit 1) if it exceeds 5s
 
 # Describe the structured document model (cells, outputs, dependency graph).
 mtsw describe example.mtsw --json
@@ -73,6 +74,9 @@ mtsw export example.mtsw -o example.html     # one offline file; stdout if no -o
 mtsw export example.mtsw --no-run            # render cached outputs without executing
 mtsw export example.mtsw --json              # envelope: { data: { path, bytes } }
 
+# Other export formats: --format tex|pdf|json|ipynb (html is the default).
+mtsw export example.mtsw --format ipynb -o example.ipynb   # Jupyter notebook (nbformat v4)
+
 # Persistent session for a GUI/tooling: JSON-RPC 2.0 over stdio (NDJSON).
 mtsw serve
 #   -> {"jsonrpc":"2.0","id":1,"method":"open","params":{"path":"example.mtsw"}}
@@ -94,9 +98,30 @@ dependencies**. Equation cells contain MathTS expression syntax (e.g.
 outputs); a whole-run failure such as a dependency cycle fails loudly rather than
 emitting a misleading document.
 
+**`export --format ipynb` (Jupyter notebook).** Renders the same run report to a
+structurally conformant **nbformat v4** JSON document: `markdown` cells map to
+notebook markdown cells; every other cell type (`code`, `equation`, `test`, `data`,
+`visualization`) maps to a notebook code cell, with a computed result becoming an
+`execute_result` output (`data['text/plain']`), an error becoming an `error` output,
+and a chart becoming a `display_data` output (inline SVG). Shares the same
+run-then-render pipeline as `--format html`/`tex` (including `--no-run`, `--json`,
+`-o`).
+
+**`run --timeout <ms>` (kill-able worker-thread run).** By default, cell execution runs
+in-process with no time budget — a runaway cell (e.g. an unbounded computation) hangs
+the process. `--timeout` runs the whole workbook in a `worker_threads` Worker and
+forcibly terminates it if it exceeds the budget, exiting 1 with a clear
+`workbook execution exceeded <ms>ms and was terminated` message; termination kills the
+worker outright, so it interrupts even a synchronous, CPU-bound runaway. It always runs
+the entire workbook to completion-or-termination, so it's incompatible with `-c`/`-v`.
+The same primitive is available programmatically as `runWorkbookWithTimeout(source, {
+timeoutMs })` (throws `WorkbookTimeoutError` on timeout); cell outputs come back
+pre-formatted to strings (via `formatResult`), since engine class instances (Complex,
+matrices, …) don't survive the worker's `postMessage`.
+
 **`serve` (persistent session).** One long-lived process holds the workbook in memory with a per-cell result cache and a **stale set**: a `cell.*` edit marks that cell and its transitive dependents stale, and a `run` re-executes **only** the stale cells (reusing cached outputs for the rest) — the incremental latency win a GUI needs. Requests are processed strictly in order; `run` streams `cell/event` notifications (flushed before that run's response in v1, not mid-run). Edits stay in memory until `save`. Single-document per process; concurrent writers are last-write-wins.
 
-**Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell *content*, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins (an optimistic-lock guard arrives with the `serve` session).
+**Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell _content_, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins (an optimistic-lock guard arrives with the `serve` session).
 
 Diagnostics and errors are written to stderr; results (including `--json`) go to stdout, so the exit code can be used in scripts independently of the output.
 
@@ -199,13 +224,13 @@ A `test` cell's expression must evaluate to a **boolean**: `true` passes, `false
 
 ## Cell types (v1)
 
-| Type       | Status | Description                                                  |
-| ---------- | ------ | ------------------------------------------------------------ |
-| `markdown` | ✅     | Documentation (passed through verbatim)                      |
-| `code`     | ✅     | MathTS expression script; last value is the result          |
-| `data`     | ✅     | Structured YAML, parsed (hardened) into a value             |
-| `test`     | ✅     | Boolean assertion (`true` = pass)                            |
-| `tensor` / `equation` / `visualization` / `export` | ⏳ | Reserved; not executed in v1 (reported as unsupported) |
+| Type                                               | Status | Description                                            |
+| -------------------------------------------------- | ------ | ------------------------------------------------------ |
+| `markdown`                                         | ✅     | Documentation (passed through verbatim)                |
+| `code`                                             | ✅     | MathTS expression script; last value is the result     |
+| `data`                                             | ✅     | Structured YAML, parsed (hardened) into a value        |
+| `test`                                             | ✅     | Boolean assertion (`true` = pass)                      |
+| `tensor` / `equation` / `visualization` / `export` | ⏳     | Reserved; not executed in v1 (reported as unsupported) |
 
 ## Execution modes
 

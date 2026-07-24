@@ -29,6 +29,8 @@ import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { toHTML } from './html';
 import { toTeX } from './tex';
 import { toPDF } from './pdf';
+import { toIpynb } from './ipynb';
+import { runWorkbookWithTimeout } from './timeout-runner';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlHardened } from './yaml-safe';
@@ -52,11 +54,15 @@ const HELP = `
 mtsw - MathTS Workbook CLI
 
 Usage:
-  mtsw run <file> [-c <id>] [-v] [--json] [--write]
+  mtsw run <file> [-c <id>] [-v] [--json] [--write] [--timeout <ms>]
                                             Execute a workbook (or one cell + its
                                             deps with -c/--cell). -v: events,
                                             --json: machine output, --write: persist
-                                            outputs back to the file.
+                                            outputs back to the file. --timeout runs
+                                            the whole workbook in a worker thread and
+                                            kills it (WorkbookTimeoutError) if it
+                                            exceeds the budget — a runaway cell can't
+                                            hang the process. Incompatible with -c/-v.
   mtsw describe <file> [--json]             Structured document model (cells, graph)
   mtsw validate <file> [--json]             Validate structure (ids, deps, cycles)
   mtsw graph <file> [-f mermaid|dot]        Print the dependency graph
@@ -80,10 +86,12 @@ Usage:
   mtsw functions [--json]                    List functions/constants cells can call
   mtsw meta get <file> [--json]             Show workbook metadata
   mtsw meta set <file> [--title s] [--author s] [--description s] [--tags a,b]
-  mtsw export <file> [--format html|tex|json] [--fragment] [-o out] [--no-run]
+  mtsw export <file> [--format html|tex|json|pdf|ipynb] [--fragment] [-o out] [--no-run]
                                             Render to a self-contained HTML or LaTeX
                                             document (MathML/TikZ equations + charts,
-                                            no external deps), or emit the executed
+                                            no external deps), a Jupyter notebook
+                                            (nbformat v4, default extension .ipynb), a
+                                            PDF (requires -o), or emit the executed
                                             run report as JSON. --fragment (tex only)
                                             omits the preamble for \\input; --no-run is
                                             incompatible with --format json.
@@ -139,6 +147,7 @@ const VALUE_FLAGS = new Set([
   '--template',
   '-c',
   '--cell',
+  '--timeout',
   '--id',
   '--content',
   '--content-file',
@@ -312,14 +321,34 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
         };
   }
 
+  const timeoutStr = flagValue(args, '--timeout');
   const verbose = args.includes('-v') || args.includes('--verbose');
-  const executor = createExecutor(parsed.workbook!);
+  let report: RunResult;
   const events: string[] = [];
-  if (verbose) {
-    executor.on((event) => events.push(`[${event.type}] ${event.cellId ?? ''}`.trimEnd()));
+
+  if (timeoutStr !== undefined) {
+    const timeoutMs = Number(timeoutStr);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      return fail([`--timeout must be a positive number of milliseconds (got '${timeoutStr}')`]);
+    }
+    if (cellId !== undefined || verbose) {
+      return fail([
+        '--timeout does not support -c/--cell or -v/--verbose (it runs the whole workbook, in a worker, to completion or termination)',
+      ]);
+    }
+    try {
+      report = await runWorkbookWithTimeout(read.content!, { timeoutMs });
+    } catch (error) {
+      return fail([error instanceof Error ? error.message : String(error)], { cells: [] });
+    }
+  } else {
+    const executor = createExecutor(parsed.workbook!);
+    if (verbose) {
+      executor.on((event) => events.push(`[${event.type}] ${event.cellId ?? ''}`.trimEnd()));
+    }
+    report = await executor.runReport(cellId !== undefined ? { only: cellId } : {});
   }
 
-  const report = await executor.runReport(cellId !== undefined ? { only: cellId } : {});
   const problems = report.ok ? [] : failureList(report.cells);
   const humanFailures = report.ok ? '' : failureSummary(report.cells);
 
@@ -692,14 +721,20 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
       : { stdout: '', stderr: problems.join('\n'), exitCode: 1 };
 
   const format = flagValue(args, '--format') ?? 'html';
-  if (format !== 'html' && format !== 'tex' && format !== 'json' && format !== 'pdf') {
-    return fail([`Unknown format '${format}' (supported: html, tex, json, pdf)`]);
+  if (
+    format !== 'html' &&
+    format !== 'tex' &&
+    format !== 'json' &&
+    format !== 'pdf' &&
+    format !== 'ipynb'
+  ) {
+    return fail([`Unknown format '${format}' (supported: html, tex, json, pdf, ipynb)`]);
   }
 
   const file = firstPositional(args);
   if (!file)
     return fail([
-      'Usage: mtsw export <file> [--format html|tex|json|pdf] [--fragment] [-o out] [--no-run]',
+      'Usage: mtsw export <file> [--format html|tex|json|pdf|ipynb] [--fragment] [-o out] [--no-run]',
     ]);
 
   const read = readFile(file);
@@ -782,7 +817,9 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
   const rendered =
     format === 'tex'
       ? toTeX(buildRenderDoc(workbook, byId, 'tikz'), { parse, fragment })
-      : toHTML(buildRenderDoc(workbook, byId), { parse });
+      : format === 'ipynb'
+        ? toIpynb(buildRenderDoc(workbook, byId))
+        : toHTML(buildRenderDoc(workbook, byId), { parse });
   const bytes = Buffer.byteLength(rendered, 'utf-8');
   const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
 

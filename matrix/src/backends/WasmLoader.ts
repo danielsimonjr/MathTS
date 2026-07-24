@@ -26,6 +26,9 @@
  * the data region.
  */
 
+import type { LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
+export type { LoadingMetrics };
+
 export interface WasmModule {
   // Matrix operations
   multiplyDense: (
@@ -375,8 +378,6 @@ export interface WasmModule {
   // Statistics operations
   statsMean: (aPtr: number, n: number) => number;
   statsMedian: (aPtr: number, n: number) => number;
-  statsVariance: (aPtr: number, n: number, ddof: number) => number;
-  statsStd: (aPtr: number, n: number, ddof: number) => number;
   statsSum: (aPtr: number, n: number) => number;
   statsProd: (aPtr: number, n: number) => number;
   statsMin: (aPtr: number, n: number) => number;
@@ -549,16 +550,10 @@ interface PoolEntry {
   inUse: boolean;
 }
 
-/**
- * Loading metrics for performance monitoring
- */
-export interface LoadingMetrics {
-  fileReadMs: number;
-  compileMs: number;
-  instantiateMs: number;
-  totalMs: number;
-  fromCache: boolean;
-}
+// `LoadingMetrics` consolidated onto `@danielsimonjr/mathts-core/internal`'s
+// byte-identical definition, formerly duplicated with
+// `functions/src/wasm/WasmLoader.ts` (see
+// docs/Architecture/duplicate-symbols.json).
 
 export class WasmLoader {
   private static instance: WasmLoader | null = null;

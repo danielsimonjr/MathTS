@@ -9,10 +9,26 @@
 export const SCHEMA_VERSION = { major: 1, minor: 0 } as const;
 
 /** Package/engine version reported by `--version`, `capabilities`, and serve. */
-export const VERSION = '0.1.0';
+// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// package's package.json version, so VERSION can never drift (and `mtsw
+// version` always reports the real published version).
+declare const __PKG_VERSION__: string;
+export const VERSION: string = __PKG_VERSION__;
 
 /** Canonical dispatchable command list (advertised by `capabilities`; a test guards drift). */
 export const COMMAND_NAMES = [
-  'run', 'describe', 'validate', 'graph', 'strip', 'new',
-  'capabilities', 'templates', 'cell', 'serve', 'functions', 'meta', 'import', 'export',
+  'run',
+  'describe',
+  'validate',
+  'graph',
+  'strip',
+  'new',
+  'capabilities',
+  'templates',
+  'cell',
+  'serve',
+  'functions',
+  'meta',
+  'import',
+  'export',
 ] as const;

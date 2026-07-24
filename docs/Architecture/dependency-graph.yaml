@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-07-15'
-  totalFiles: 1028
-  totalModules: 78
-  totalExports: 4967
+  lastUpdated: '2026-07-21'
+  totalFiles: 1114
+  totalModules: 83
+  totalExports: 5750
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -77,7 +77,7 @@ entryPoints:
     description: / <reference types="@webgpu/types" />
   - file: plot/src/index.ts
     type: main
-    description: Entry Point
+    description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
 modules:
   packages/typed-function:
     packages/typed-function/src/index.ts:
@@ -342,6 +342,162 @@ modules:
         - isNumeric
         - number
   core:
+    core/src/array.ts:
+      description: 'Cold array utilities (mathjs-derived): size/validate/reshape/resize/squeeze,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./number.js
+          imports:
+            - isInteger
+        - file: ./is.js
+          imports:
+            - isNumber
+            - isBigNumber
+            - isArray
+            - isString
+            - Index
+            - Matrix
+            - IndexDimension
+        - file: ./string.js
+          imports:
+            - format
+        - file: ./error/DimensionError.js
+          imports:
+            - DimensionError
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./object.js
+          imports:
+            - deepStrictEqual
+      workspaceDependencies: []
+      exports:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+      interfaces:
+        - IdentifiedValue
+      functions:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+    core/src/bignumber-formatter.ts:
+      description: BigNumber (decimal.js-shaped) formatting — canonical copy.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isNumber
+        - file: ./number.js
+          imports:
+            - isInteger
+            - normalizeFormatOptions
+            - FormatOptions
+      workspaceDependencies: []
+      exports:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
+      interfaces:
+        - BigNumberValue
+      functions:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
+    core/src/collection.ts:
+      description: 'Cold array/Matrix-aware collection utilities (mathjs-derived): `deepMap`/'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isCollection
+            - isMatrix
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./array.js
+          imports:
+            - arraySize
+            - deepMap
+            - deepForEach
+        - file: ./switch.js
+          imports:
+            - _switch
+      workspaceDependencies: []
+      exports:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
+      functions:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
     core/src/config.ts:
       description: Configuration interface for math.js
       externalDependencies: []
@@ -382,6 +538,27 @@ modules:
         - LN10
         - LOG2E
         - LOG10E
+    core/src/customs.ts:
+      description: NOT the security-invariant sandbox file. `expression/src/utils/customs.ts` and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./shared.js
+          imports:
+            - hasOwnProperty
+      workspaceDependencies: []
+      exports:
+        - getSafeProperty
+        - setSafeProperty
+        - isSafeProperty
+        - getSafeMethod
+        - isSafeMethod
+      functions:
+        - getSafeProperty
+        - setSafeProperty
+        - isSafeProperty
+        - getSafeMethod
+        - isSafeMethod
     core/src/factory.ts:
       description: Type for a factory function that creates instances
       externalDependencies: []
@@ -914,6 +1091,10 @@ modules:
           imports:
             - '*'
           reExport: true
+        - file: ./factory.js
+          imports:
+            - '*'
+          reExport: true
         - file: ./shared.js
           imports:
             - hasOwnProperty
@@ -921,15 +1102,130 @@ modules:
             - warnOnce
             - memoize
           reExport: true
+        - file: ./config.js
+          imports:
+            - DEFAULT_CONFIG
+          reExport: true
+        - file: ./error/MathjsError.js
+          imports:
+            - MathjsError
+          reExport: true
+        - file: ./error/DimensionError.js
+          imports:
+            - DimensionError
+          reExport: true
+        - file: ./error/IndexError.js
+          imports:
+            - IndexError
+            - createIndexError
+          reExport: true
+        - file: ./string.js
+          imports:
+            - format
+            - stringify
+            - escape
+            - compareText
+            - GeneralFormatOptions
+          reExport: true
+        - file: ./bignumber-formatter.js
+          imports:
+            - format
+            - toEngineering
+            - toExponential
+            - toFixed
+            - BigNumberValue
+          reExport: true
         - file: ./types/unit/index.js
           imports:
             - createUnitClass
             - unitDependencies
             - Unit
           reExport: true
+        - file: ./array.js
+          imports:
+            - arraySize
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - initial
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - get
+            - deepMap
+            - deepForEach
+            - clone
+          reExport: true
+        - file: ./collection.js
+          imports:
+            - containsCollections
+            - deepMap
+            - deepForEach
+            - reduce
+            - scatter
+          reExport: true
+        - file: ./switch.js
+          imports:
+            - _switch
+          reExport: true
+        - file: ./map.js
+          imports:
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - toObject
+            - assign
+            - isObjectWrappingMap
+          reExport: true
+        - file: ./wasm-loader.js
+          imports:
+            - sha384OfBuffer
+            - loadWasmManifest
+            - verifyWasmIntegrity
+            - resolvePackagedWasm
+            - defaultWasmLocation
+          reExport: true
         - file: ./shared.js
           imports:
             - MemoizedFunction
+          reExport: true
+          typeOnly: true
+        - file: ./config.js
+          imports:
+            - ConfigOptions
+            - MathJsConfig
+          reExport: true
+          typeOnly: true
+        - file: ./array.js
+          imports:
+            - NestedArray
+            - IdentifiedValue
+          reExport: true
+          typeOnly: true
+        - file: ./types/wasm-loader.js
+          imports:
+            - LoadingMetrics
+            - WasmManifest
           reExport: true
           typeOnly: true
         - file: ./types/unit/unit-types.js
@@ -943,23 +1239,168 @@ modules:
         - endsWith
         - warnOnce
         - memoize
+        - DEFAULT_CONFIG
+        - MathjsError
+        - DimensionError
+        - IndexError
+        - createIndexError
+        - formatGeneric
+        - stringify
+        - escape
+        - compareText
+        - GeneralFormatOptions
+        - formatBigNumber
+        - toEngineeringBigNumber
+        - toExponentialBigNumber
+        - toFixedBigNumber
+        - BigNumberValue
         - createUnitClass
         - unitDependencies
         - CoreUnit
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - containsCollections
+        - deepMap
+        - deepForEach
+        - reduce
+        - scatter
+        - _switch
+        - ObjectWrappingMap
+        - PartitionedMap
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assignMap
+        - isObjectWrappingMap
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+        - resolvePackagedWasm
+        - defaultWasmLocation
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
         - Unit
+        - get
+        - clone
+        - assign
         - MemoizedFunction
+        - ConfigOptions
+        - MathJsConfig
+        - NestedArray
+        - IdentifiedValue
+        - LoadingMetrics
+        - WasmManifest
       reExported:
         - '* from ./is.js'
         - '* from ./number.js'
         - '* from ./object.js'
+        - '* from ./factory.js'
         - hasOwnProperty
         - endsWith
         - warnOnce
         - memoize
+        - DEFAULT_CONFIG
+        - MathjsError
+        - DimensionError
+        - IndexError
+        - createIndexError
+        - format
+        - stringify
+        - escape
+        - compareText
+        - GeneralFormatOptions
+        - toEngineering
+        - toExponential
+        - toFixed
+        - BigNumberValue
         - createUnitClass
         - unitDependencies
         - Unit
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+        - containsCollections
+        - reduce
+        - scatter
+        - _switch
+        - ObjectWrappingMap
+        - PartitionedMap
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+        - resolvePackagedWasm
+        - defaultWasmLocation
         - MemoizedFunction
+        - ConfigOptions
+        - MathJsConfig
+        - NestedArray
+        - IdentifiedValue
+        - LoadingMetrics
+        - WasmManifest
         - type * from ./types/unit/unit-types.js
     core/src/is.ts:
       description: 'Structural view used by the duck-typing guards below: math.js types are'
@@ -1027,6 +1468,38 @@ modules:
         - typeOf
       constants:
         - isArray
+    core/src/map.ts:
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./customs.js
+          imports:
+            - getSafeProperty
+            - isSafeProperty
+            - setSafeProperty
+        - file: ./is.js
+          imports:
+            - isMap
+            - isObject
+      workspaceDependencies: []
+      exports:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
+        - ObjectWrappingMap
+        - PartitionedMap
+      classes:
+        - ObjectWrappingMap
+        - PartitionedMap
+      functions:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - isObjectWrappingMap
     core/src/number.ts:
       description: Split value representation with sign, coefficients, and exponent
       externalDependencies: []
@@ -1161,7 +1634,90 @@ modules:
         - memoize
       constants:
         - warnOnce
+    core/src/string.ts:
+      description: Generic-value string formatting — canonical copy.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isString
+            - typeOf
+        - file: ./number.js
+          imports:
+            - format
+            - FormatOptions
+        - file: ./bignumber-formatter.js
+          imports:
+            - format
+      workspaceDependencies: []
+      exports:
+        - format
+        - stringify
+        - escape
+        - compareText
+      functions:
+        - format
+        - stringify
+        - escape
+        - compareText
+    core/src/switch.ts:
+      description: Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - _switch
+      functions:
+        - _switch
+    core/src/wasm-loader.ts:
+      description: Shared WASM-loader runtime logic — SHA-384 integrity verification + packaged
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types/wasm-loader.js
+          imports:
+            - WasmManifest
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+        - resolvePackagedWasm
+        - defaultWasmLocation
+      functions:
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
+        - resolvePackagedWasm
+        - defaultWasmLocation
   core/error:
+    core/src/error/DimensionError.ts:
+      description: 'Create a range error with the message:'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - DimensionError
+      classes:
+        - DimensionError
+    core/src/error/IndexError.ts:
+      description: Custom error type for index out of range errors.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - createIndexError
+        - IndexError
+      classes:
+        - IndexError
+      functions:
+        - createIndexError
     core/src/error/MathjsError.ts:
       description: Custom error type for Mathjs errors
       externalDependencies: []
@@ -2002,6 +2558,16 @@ modules:
         - UnitInstance
         - Dimensions
         - UnitDef
+    core/src/types/wasm-loader.ts:
+      description: Shared type-only shapes for the two independent WASM loader implementations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - LoadingMetrics
+        - WasmManifest
   matrix/backends:
     matrix/src/backends/Backend.ts:
       description: Matrix Backend Interface
@@ -2785,27 +3351,41 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - sha384OfBuffer
+            - loadWasmManifest
+            - verifyWasmIntegrity
+            - WasmManifest
+          subpath: internal
       exports:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
-      interfaces:
         - WasmManifest
-      functions:
+      reExported:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
+        - WasmManifest
     matrix/src/backends/wasm/resolve.ts:
-      description: Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+      description: Packaged `.wasm` artifact resolution.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - resolvePackagedWasm
+            - defaultWasmLocation
+          subpath: internal
       exports:
         - resolvePackagedWasm
         - defaultWasmLocation
-      functions:
+      reExported:
         - resolvePackagedWasm
         - defaultWasmLocation
     matrix/src/backends/WASMBackend.ts:
@@ -2858,7 +3438,12 @@ modules:
         - file: ./wasm/resolve.js
           imports: []
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - LoadingMetrics
+          subpath: internal
       exports:
         - wasmLoader
         - initWasm
@@ -2868,7 +3453,6 @@ modules:
       interfaces:
         - WasmModule
         - Allocation
-        - LoadingMetrics
       functions:
         - initWasm
       constants:
@@ -3195,6 +3779,22 @@ modules:
         - householder
         - applyHouseholderLeft
         - applyHouseholderRight
+    matrix/src/operations/condest.ts:
+      description: Condition-number ESTIMATE (Hager/Higham 1-norm power-iteration estimator)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./lu.js
+          imports:
+            - lu
+      workspaceDependencies: []
+      exports:
+        - condest
+      functions:
+        - condest
     matrix/src/operations/eig-wasm.ts:
       description: '`eigWasm` / `eigvalsWasm` / `spectralRadiusWasm` — thin wrappers kept for API'
       externalDependencies: []
@@ -3309,6 +3909,7 @@ modules:
         - file: ./lu.js
           imports:
             - lu
+            - luSolve
             - LUResult
           reExport: true
         - file: ./cholesky.js
@@ -3337,6 +3938,25 @@ modules:
             - SchurResult
             - SchurOptions
           reExport: true
+        - file: ./qr-pivoted.js
+          imports:
+            - qrPivoted
+            - QRPivotedResult
+            - QRPivotedOptions
+          reExport: true
+        - file: ./qr-family.js
+          imports:
+            - lq
+            - rq
+            - ql
+            - LQResult
+            - RQResult
+            - QLResult
+          reExport: true
+        - file: ./condest.js
+          imports:
+            - condest
+          reExport: true
       workspaceDependencies: []
       exports:
         - eig
@@ -3363,6 +3983,7 @@ modules:
         - QRResult
         - QROptions
         - lu
+        - luSolve
         - LUResult
         - cholesky
         - CholeskyResult
@@ -3375,6 +3996,16 @@ modules:
         - matrixSchur
         - SchurResult
         - SchurOptions
+        - qrPivoted
+        - QRPivotedResult
+        - QRPivotedOptions
+        - lq
+        - rq
+        - ql
+        - LQResult
+        - RQResult
+        - QLResult
+        - condest
       reExported:
         - eig
         - eigvals
@@ -3399,6 +4030,7 @@ modules:
         - QRResult
         - QROptions
         - lu
+        - luSolve
         - LUResult
         - cholesky
         - CholeskyResult
@@ -3411,6 +4043,16 @@ modules:
         - matrixSchur
         - SchurResult
         - SchurOptions
+        - qrPivoted
+        - QRPivotedResult
+        - QRPivotedOptions
+        - lq
+        - rq
+        - ql
+        - LQResult
+        - RQResult
+        - QLResult
+        - condest
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -3451,10 +4093,12 @@ modules:
       workspaceDependencies: []
       exports:
         - lu
+        - luSolve
       interfaces:
         - LUResult
       functions:
         - lu
+        - luSolve
     matrix/src/operations/pinv.ts:
       description: Moore-Penrose Pseudoinverse (DenseMatrix primitive)
       externalDependencies: []
@@ -3473,6 +4117,52 @@ modules:
         - PinvOptions
       functions:
         - pinv
+    matrix/src/operations/qr-family.ts:
+      description: 'QR-family decompositions: LQ, RQ, QL'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./qr.js
+          imports:
+            - qr
+      workspaceDependencies: []
+      exports:
+        - lq
+        - rq
+        - ql
+      interfaces:
+        - LQResult
+        - RQResult
+        - QLResult
+      functions:
+        - lq
+        - rq
+        - ql
+    matrix/src/operations/qr-pivoted.ts:
+      description: Rank-Revealing Pivoted QR Decomposition (Businger-Golub column pivoting)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./common.js
+          imports:
+            - eye
+            - householder
+            - applyHouseholderLeft
+            - applyHouseholderRight
+      workspaceDependencies: []
+      exports:
+        - qrPivoted
+      interfaces:
+        - QRPivotedResult
+        - QRPivotedOptions
+      functions:
+        - qrPivoted
     matrix/src/operations/qr.ts:
       description: QR Decomposition (DenseMatrix primitive)
       externalDependencies: []
@@ -3721,11 +4411,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - MatrixDimensions
       exports:
         - isMatrix
       interfaces:
-        - MatrixDimensions
         - MatrixIndex
         - SliceSpec
         - MatrixEntry
@@ -4074,6 +4767,11 @@ modules:
           imports:
             - DenseMatrix
             - backendManager
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - NestedArray
+          subpath: internal
       exports:
         - Tensor
       classes:
@@ -7031,6 +7729,16 @@ modules:
         - file: ./factories/evaluate.js
           imports:
             - evaluate
+        - file: ./typed/algebra.js
+          imports:
+            - apart
+            - variables
+        - file: ./typed/polynomial-ideal.js
+          imports:
+            - polyFromExpression
+        - file: ./cas/rational-integrate.js
+          imports:
+            - integrateRationalFunction
       workspaceDependencies: []
       exports:
         - symbolicIntegral
@@ -7111,6 +7819,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7119,6 +7828,7 @@ modules:
       interfaces:
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
       functions:
@@ -7139,6 +7849,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7356,6 +8067,18 @@ modules:
           imports:
             - help
           reExport: true
+        - file: ./numbertheory/extra.js
+          imports:
+            - continuedFraction
+            - eulerNumbers
+            - stirlingS1
+            - discreteLog
+            - primitiveRoot
+            - multiplicativeOrder
+            - kroneckerSymbol
+            - permutationsGen
+            - combinationsGen
+          reExport: true
         - file: ./grad-forward.js
           imports:
             - derivativeAt
@@ -7381,6 +8104,7 @@ modules:
             - pearsonr
             - spearmanr
             - kendalltau
+            - kendallTauTest
             - ptp
             - variation
             - trimmedMean
@@ -7450,6 +8174,84 @@ modules:
             - hessian
             - gradient
           reExport: true
+        - file: ./linalg-svd-extra.js
+          imports:
+            - orth
+          reExport: true
+        - file: ./numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
+          reExport: true
+        - file: ./numeric/open-root-finders.js
+          imports:
+            - newton
+            - secant
+            - halley
+          reExport: true
+        - file: ./numeric/fsolve.js
+          imports:
+            - fsolve
+            - root
+          reExport: true
+        - file: ./numeric/krylov.js
+          imports:
+            - cg
+            - minres
+            - gmres
+            - bicgstab
+            - incompleteLU
+            - incompleteCholesky
+          reExport: true
+        - file: ./numeric/eigsh.js
+          imports:
+            - eigsh
+          reExport: true
+        - file: ./numeric/svds.js
+          imports:
+            - svds
+          reExport: true
+        - file: ./numeric/structured-solvers.js
+          imports:
+            - thomasSolve
+            - solveBanded
+            - toeplitzSolve
+            - ldl
+          reExport: true
+        - file: ./numeric/matrix-functions.js
+          imports:
+            - funm
+            - cosm
+            - sinm
+            - complexCos
+            - complexSin
+          reExport: true
+        - file: ./numeric/control-equations.js
+          imports:
+            - dlyap
+            - care
+            - dare
+          reExport: true
+        - file: ./numeric/minimize-scalar.js
+          imports:
+            - minimizeScalar
+          reExport: true
+        - file: ./numeric/adaptive-quad.js
+          imports:
+            - quad
+          reExport: true
+        - file: ./numeric/interpn.js
+          imports:
+            - interpn
+          reExport: true
+        - file: ./numeric/bspline.js
+          imports:
+            - bsplineFit
+            - bsplineEval
+          reExport: true
+        - file: ./numeric/monte-carlo.js
+          imports:
+            - monteCarloIntegrate
+          reExport: true
         - file: ./timeseries-extra.js
           imports:
             - movingAverage
@@ -7457,9 +8259,30 @@ modules:
             - detrend
             - acf
           reExport: true
+        - file: ./stats/timeseries.js
+          imports:
+            - pacf
+            - ljungBox
+            - durbinWatson
+            - adfuller
+          reExport: true
         - file: ./regression-extra.js
           imports:
             - linearRegression
+          reExport: true
+        - file: ./ml/ols.js
+          imports:
+            - ols
+          reExport: true
+        - file: ./ml/regularized-regression.js
+          imports:
+            - ridge
+            - lasso
+            - elasticNet
+          reExport: true
+        - file: ./ml/logistic-regression.js
+          imports:
+            - logisticRegression
           reExport: true
         - file: ./optimization-extra.js
           imports:
@@ -7471,6 +8294,34 @@ modules:
           imports:
             - kmeans
             - spectralClustering
+          reExport: true
+        - file: ./ml/dbscan-knn.js
+          imports:
+            - dbscan
+            - knnClassify
+            - knnRegress
+          reExport: true
+        - file: ./ml/kde.js
+          imports:
+            - gaussianKDE
+          reExport: true
+        - file: ./stats/inference-extra.js
+          imports:
+            - chi2Contingency
+            - multipleTest
+          reExport: true
+        - file: ./stats/fit-distribution.js
+          imports:
+            - fitDistribution
+          reExport: true
+        - file: ./numeric/bfgs.js
+          imports:
+            - bfgs
+          reExport: true
+        - file: ./numeric/nnls.js
+          imports:
+            - nnls
+            - lsqBounded
           reExport: true
         - file: ./cas-integration.js
           imports:
@@ -7484,6 +8335,52 @@ modules:
             - lfilterZi
             - filtfilt
           reExport: true
+        - file: ./signal/fft-helpers.js
+          imports:
+            - rfft
+            - irfft
+            - fftshift
+            - ifftshift
+            - fftfreq
+            - rfftfreq
+            - fftn
+          reExport: true
+        - file: ./signal/iir-design.js
+          imports:
+            - cheby1
+            - cheby2
+            - ellip
+            - sosfilt
+            - zpk2sos
+            - bilinear
+            - buttord
+          reExport: true
+        - file: ./signal/fir-smoothing.js
+          imports:
+            - firwinBandpass
+            - firls
+            - remez
+            - savgol
+            - wiener
+            - deconvolve
+          reExport: true
+        - file: ./signal/wavelets.js
+          imports:
+            - idwt
+            - wavedec
+            - waverec
+            - cwt
+          reExport: true
+        - file: ./signal/spectral-peaks.js
+          imports:
+            - findPeaks
+            - peakWidths
+            - csd
+            - coherence
+            - stft
+            - istft
+            - decimate
+          reExport: true
         - file: ./geometry-extra.js
           imports:
             - haversine
@@ -7496,6 +8393,167 @@ modules:
             - quaternionRotate
             - quaternionToRotationMatrix
           reExport: true
+        - file: ./geometry/geometry-extra.js
+          imports:
+            - quaternionInverse
+            - quaternionSlerp
+            - quaternionToEuler
+            - quaternionLog
+            - quaternionExp
+            - quaternionPow
+            - boundingBox
+            - procrustes
+            - kdTreeKNN
+            - kdTreeRadius
+            - setIsSuperset
+            - setEqual
+            - setDisjoint
+          reExport: true
+        - file: ./geometry/intersect3d.js
+          imports:
+            - rayTriangleIntersect
+            - rayPlaneIntersect
+            - segmentSegmentClosest
+          reExport: true
+        - file: ./geometry/hull.js
+          imports:
+            - convexHull
+          reExport: true
+        - file: ./geometry/delaunay.js
+          imports:
+            - delaunay
+          reExport: true
+        - file: ./geometry/voronoi.js
+          imports:
+            - voronoi
+          reExport: true
+        - file: ./geometry/alpha-shape.js
+          imports:
+            - alphaShape
+          reExport: true
+        - file: ./geometry/spherical-voronoi.js
+          imports:
+            - sphericalVoronoi
+          reExport: true
+        - file: ./geometry/halfspace-intersection.js
+          imports:
+            - halfspaceIntersection
+          reExport: true
+        - file: ./stats/inference-extra2.js
+          imports:
+            - noncentralChi2CDF
+            - noncentralFCDF
+            - noncentralTCDF
+            - circmean
+            - circstd
+            - circvar
+            - vonMisesPDF
+            - mcnemar
+            - cochranQ
+          reExport: true
+        - file: ./special/hypergeometric.js
+          imports:
+            - hyp0f1
+            - hyp1f1
+            - hyp2f1
+            - pFq
+          reExport: true
+        - file: ./special/polygamma-orthopoly.js
+          imports:
+            - polygamma
+            - trigamma
+            - jacobiP
+            - gegenbauerC
+          reExport: true
+        - file: ./special/jacobi-elliptic.js
+          imports:
+            - jacobiSN
+            - jacobiCN
+            - jacobiDN
+          reExport: true
+        - file: ./numeric/gauss-nodes.js
+          imports:
+            - rootsLegendre
+          reExport: true
+        - file: ./special/niche.js
+          imports:
+            - polylog
+            - struveH
+            - struveL
+            - kelvinBer
+            - kelvinBei
+            - barnesG
+          reExport: true
+        - file: ./special/wave-functions.js
+          imports:
+            - siegelZ
+            - riemannSiegelZ
+            - lerchPhi
+            - parabolicCylinderD
+            - coulombF
+            - coulombG
+            - coulombFG
+          reExport: true
+        - file: ./special/mathieu.js
+          imports:
+            - mathieuA
+            - mathieuB
+            - mathieuCe
+            - mathieuSe
+          reExport: true
+        - file: ./graph/traversal-centrality.js
+          imports:
+            - bfs
+            - dfs
+            - floydWarshall
+            - bellmanFord
+            - closenessCentrality
+            - harmonicCentrality
+          reExport: true
+        - file: ./graph/optimization.js
+          imports:
+            - maxFlow
+            - minCut
+            - astar
+            - hungarian
+          reExport: true
+        - file: ./numeric/interval.js
+          imports:
+            - interval
+            - Interval
+          reExport: true
+        - file: ./graph/community-coloring.js
+          imports:
+            - graphColoring
+            - maxClique
+            - louvainCommunities
+            - katzCentrality
+            - isIsomorphic
+          reExport: true
+        - file: ./ml/glm.js
+          imports:
+            - glm
+          reExport: true
+        - file: ./stats/mvn.js
+          imports:
+            - mvnPdf
+            - mvnSample
+          reExport: true
+        - file: ./stats/power-analysis.js
+          imports:
+            - tTestPower
+          reExport: true
+        - file: ./stats/gaussian-process.js
+          imports:
+            - gaussianProcessRegression
+            - gpRegression
+          reExport: true
+        - file: ./stats/multivariate-sampling.js
+          imports:
+            - dirichletSample
+            - dirichletPdf
+            - wishartSample
+          reExport: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -7505,6 +8563,7 @@ modules:
           imports:
             - LinRegressResult
             - CorrelationTestResult
+            - KendallTauTestResult
             - DescribeResult
             - HistogramResult
           reExport: true
@@ -7519,9 +8578,121 @@ modules:
             - TukeyComparison
           reExport: true
           typeOnly: true
+        - file: ./linalg-svd-extra.js
+          imports:
+            - OrthOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/numeric-jacobian.js
+          imports:
+            - VectorField
+            - NumericJacobianOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/open-root-finders.js
+          imports:
+            - NewtonOptions
+            - SecantOptions
+            - HalleyOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/fsolve.js
+          imports:
+            - FsolveOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/krylov.js
+          imports:
+            - LinearOperatorInput
+            - Preconditioner
+            - KrylovOptions
+            - GmresOptions
+            - KrylovResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/eigsh.js
+          imports:
+            - EigshOperatorInput
+            - EigshOptions
+            - EigshResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/svds.js
+          imports:
+            - SvdsOptions
+            - SvdsResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/structured-solvers.js
+          imports:
+            - LDLResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/matrix-functions.js
+          imports:
+            - ComplexValue
+            - ComplexMatrix
+            - ScalarComplexFunction
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/minimize-scalar.js
+          imports:
+            - MinimizeScalarOptions
+            - MinimizeScalarResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/adaptive-quad.js
+          imports:
+            - QuadOptions
+            - QuadResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/interpn.js
+          imports:
+            - NDArrayInput
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/bspline.js
+          imports:
+            - BSplineFitOptions
+            - BSplineTuple
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/monte-carlo.js
+          imports:
+            - Bound
+            - MonteCarloOptions
+            - MonteCarloResult
+          reExport: true
+          typeOnly: true
+        - file: ./stats/timeseries.js
+          imports:
+            - LjungBoxResult
+            - AdfullerResult
+          reExport: true
+          typeOnly: true
         - file: ./regression-extra.js
           imports:
             - LinregressResult
+          reExport: true
+          typeOnly: true
+        - file: ./ml/ols.js
+          imports:
+            - OlsOptions
+            - OlsResult
+          reExport: true
+          typeOnly: true
+        - file: ./ml/regularized-regression.js
+          imports:
+            - RidgeOptions
+            - CoordinateDescentOptions
+            - RegularizedRegressionResult
+          reExport: true
+          typeOnly: true
+        - file: ./ml/logistic-regression.js
+          imports:
+            - LogisticRegressionOptions
+            - LogisticRegressionResult
           reExport: true
           typeOnly: true
         - file: ./optimization-extra.js
@@ -7530,12 +8701,178 @@ modules:
             - LMResult
           reExport: true
           typeOnly: true
+        - file: ./ml/kde.js
+          imports:
+            - GaussianKDEOptions
+            - GaussianKDEResult
+          reExport: true
+          typeOnly: true
+        - file: ./stats/inference-extra.js
+          imports:
+            - Chi2ContingencyOptions
+            - Chi2ContingencyResult
+            - MultipleTestMethod
+          reExport: true
+          typeOnly: true
+        - file: ./stats/fit-distribution.js
+          imports:
+            - DistributionName
+            - FitDistributionResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/bfgs.js
+          imports:
+            - BfgsOptions
+            - BfgsResult
+          reExport: true
+          typeOnly: true
         - file: ./clustering-extra.js
           imports:
             - KMeansResult
           reExport: true
           typeOnly: true
-      workspaceDependencies: []
+        - file: ./numeric/nnls.js
+          imports:
+            - NnlsOptions
+            - NnlsResult
+            - LsqBoundedOptions
+            - LsqBoundedResult
+          reExport: true
+          typeOnly: true
+        - file: ./signal/fir-smoothing.js
+          imports:
+            - DeconvolveResult
+          reExport: true
+          typeOnly: true
+        - file: ./signal/remez-exchange.js
+          imports:
+            - RemezType
+          reExport: true
+          typeOnly: true
+        - file: ./signal/spectral-peaks.js
+          imports:
+            - FindPeaksOptions
+            - CsdOptions
+            - StftOptions
+            - StftResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/geometry-extra.js
+          imports:
+            - ProcrustesResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/intersect3d.js
+          imports:
+            - RayHit
+            - SegmentClosestResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/hull.js
+          imports:
+            - ConvexHullResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/delaunay.js
+          imports:
+            - DelaunayResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/voronoi.js
+          imports:
+            - VoronoiResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/alpha-shape.js
+          imports:
+            - AlphaShapeResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/spherical-voronoi.js
+          imports:
+            - SphericalVoronoiResult
+          reExport: true
+          typeOnly: true
+        - file: ./geometry/halfspace-intersection.js
+          imports:
+            - HalfspaceIntersectionResult
+          reExport: true
+          typeOnly: true
+        - file: ./stats/inference-extra2.js
+          imports:
+            - CircularOptions
+            - McNemarOptions
+            - McNemarResult
+            - CochranQResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/gauss-nodes.js
+          imports:
+            - RootsLegendreResult
+          reExport: true
+          typeOnly: true
+        - file: ./special/wave-functions.js
+          imports:
+            - CoulombFG
+          reExport: true
+          typeOnly: true
+        - file: ./graph/traversal-centrality.js
+          imports:
+            - BellmanFordResult
+          reExport: true
+          typeOnly: true
+        - file: ./graph/optimization.js
+          imports:
+            - MaxFlowResult
+            - MinCutResult
+            - AStarResult
+            - HungarianResult
+          reExport: true
+          typeOnly: true
+        - file: ./ml/glm.js
+          imports:
+            - GlmFamily
+            - GlmLink
+            - GlmOptions
+            - GlmResult
+          reExport: true
+          typeOnly: true
+        - file: ./stats/mvn.js
+          imports:
+            - MvnVector
+            - MvnCov
+            - MvnSampleOptions
+          reExport: true
+          typeOnly: true
+        - file: ./stats/power-analysis.js
+          imports:
+            - TTestPowerAlternative
+            - TTestPowerOptions
+          reExport: true
+          typeOnly: true
+        - file: ./stats/gaussian-process.js
+          imports:
+            - GPKernel
+            - GPOptions
+            - GPPrediction
+            - GPModel
+          reExport: true
+          typeOnly: true
+        - file: ./stats/multivariate-sampling.js
+          imports:
+            - SampleSeedOptions
+          reExport: true
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - SVDResult
+            - SVDOptions
       exports:
         - config
         - to
@@ -7547,6 +8884,15 @@ modules:
         - reviver
         - replacer
         - help
+        - continuedFraction
+        - eulerNumbers
+        - stirlingS1
+        - discreteLog
+        - primitiveRoot
+        - multiplicativeOrder
+        - kroneckerSymbol
+        - permutationsGen
+        - combinationsGen
         - derivativeAt
         - valueAndDerivativeAt
         - gradientAt
@@ -7567,6 +8913,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7620,22 +8967,106 @@ modules:
         - qz
         - hessian
         - gradient
+        - svd
+        - orth
+        - numericJacobian
+        - newton
+        - secant
+        - halley
+        - fsolve
+        - root
+        - cg
+        - minres
+        - gmres
+        - bicgstab
+        - incompleteLU
+        - incompleteCholesky
+        - eigsh
+        - svds
+        - thomasSolve
+        - solveBanded
+        - toeplitzSolve
+        - ldl
+        - funm
+        - cosm
+        - sinm
+        - complexCos
+        - complexSin
+        - dlyap
+        - care
+        - dare
+        - minimizeScalar
+        - quad
+        - interpn
+        - bsplineFit
+        - bsplineEval
+        - monteCarloIntegrate
         - movingAverage
         - ewma
         - detrend
         - acf
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
         - linearRegression
+        - ols
+        - ridge
+        - lasso
+        - elasticNet
+        - logisticRegression
         - nelderMead
         - gradientDescent
         - levenbergMarquardt
         - kmeans
         - spectralClustering
+        - dbscan
+        - knnClassify
+        - knnRegress
+        - gaussianKDE
+        - chi2Contingency
+        - multipleTest
+        - fitDistribution
+        - bfgs
+        - nnls
+        - lsqBounded
         - symbolicIntegral
         - firwin
         - butter
         - lfilter
         - lfilterZi
         - filtfilt
+        - rfft
+        - irfft
+        - fftshift
+        - ifftshift
+        - fftfreq
+        - rfftfreq
+        - fftn
+        - cheby1
+        - cheby2
+        - ellip
+        - sosfilt
+        - zpk2sos
+        - bilinear
+        - buttord
+        - firwinBandpass
+        - firls
+        - remez
+        - savgol
+        - wiener
+        - deconvolve
+        - idwt
+        - wavedec
+        - waverec
+        - cwt
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -7645,9 +9076,96 @@ modules:
         - quaternionFromAxisAngle
         - quaternionRotate
         - quaternionToRotationMatrix
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
+        - convexHull
+        - delaunay
+        - voronoi
+        - alphaShape
+        - sphericalVoronoi
+        - halfspaceIntersection
+        - noncentralChi2CDF
+        - noncentralFCDF
+        - noncentralTCDF
+        - circmean
+        - circstd
+        - circvar
+        - vonMisesPDF
+        - mcnemar
+        - cochranQ
+        - hyp0f1
+        - hyp1f1
+        - hyp2f1
+        - pFq
+        - polygamma
+        - trigamma
+        - jacobiP
+        - gegenbauerC
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+        - rootsLegendre
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
+        - coulombG
+        - coulombFG
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
+        - bfs
+        - dfs
+        - floydWarshall
+        - bellmanFord
+        - closenessCentrality
+        - harmonicCentrality
+        - maxFlow
+        - minCut
+        - astar
+        - hungarian
+        - interval
+        - Interval
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
+        - glm
+        - mvnPdf
+        - mvnSample
+        - tTestPower
+        - gaussianProcessRegression
+        - gpRegression
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
         - FTestResult
@@ -7656,10 +9174,105 @@ modules:
         - WilcoxonResult
         - FisherExactResult
         - TukeyComparison
+        - SVDResult
+        - SVDOptions
+        - OrthOptions
+        - VectorField
+        - NumericJacobianOptions
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
+        - FsolveOptions
+        - LinearOperatorInput
+        - Preconditioner
+        - KrylovOptions
+        - GmresOptions
+        - KrylovResult
+        - EigshOperatorInput
+        - EigshOptions
+        - EigshResult
+        - SvdsOptions
+        - SvdsResult
+        - LDLResult
+        - ComplexValue
+        - ComplexMatrix
+        - ScalarComplexFunction
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
+        - QuadOptions
+        - QuadResult
+        - NDArrayInput
+        - BSplineFitOptions
+        - BSplineTuple
+        - Bound
+        - MonteCarloOptions
+        - MonteCarloResult
+        - LjungBoxResult
+        - AdfullerResult
         - LinregressResult
+        - OlsOptions
+        - OlsResult
+        - RidgeOptions
+        - CoordinateDescentOptions
+        - RegularizedRegressionResult
+        - LogisticRegressionOptions
+        - LogisticRegressionResult
         - OptimizeResult
         - LMResult
+        - GaussianKDEOptions
+        - GaussianKDEResult
+        - Chi2ContingencyOptions
+        - Chi2ContingencyResult
+        - MultipleTestMethod
+        - DistributionName
+        - FitDistributionResult
+        - BfgsOptions
+        - BfgsResult
         - KMeansResult
+        - NnlsOptions
+        - NnlsResult
+        - LsqBoundedOptions
+        - LsqBoundedResult
+        - DeconvolveResult
+        - RemezType
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
+        - ProcrustesResult
+        - RayHit
+        - SegmentClosestResult
+        - ConvexHullResult
+        - DelaunayResult
+        - VoronoiResult
+        - AlphaShapeResult
+        - SphericalVoronoiResult
+        - HalfspaceIntersectionResult
+        - CircularOptions
+        - McNemarOptions
+        - McNemarResult
+        - CochranQResult
+        - RootsLegendreResult
+        - CoulombFG
+        - BellmanFordResult
+        - MaxFlowResult
+        - MinCutResult
+        - AStarResult
+        - HungarianResult
+        - GlmFamily
+        - GlmLink
+        - GlmOptions
+        - GlmResult
+        - MvnVector
+        - MvnCov
+        - MvnSampleOptions
+        - TTestPowerAlternative
+        - TTestPowerOptions
+        - GPKernel
+        - GPOptions
+        - GPPrediction
+        - GPModel
+        - SampleSeedOptions
       reExported:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
@@ -7674,6 +9287,15 @@ modules:
         - reviver
         - replacer
         - help
+        - continuedFraction
+        - eulerNumbers
+        - stirlingS1
+        - discreteLog
+        - primitiveRoot
+        - multiplicativeOrder
+        - kroneckerSymbol
+        - permutationsGen
+        - combinationsGen
         - derivativeAt
         - valueAndDerivativeAt
         - gradientAt
@@ -7694,6 +9316,7 @@ modules:
         - pearsonr
         - spearmanr
         - kendalltau
+        - kendallTauTest
         - ptp
         - variation
         - trimmedMean
@@ -7747,22 +9370,106 @@ modules:
         - qz
         - hessian
         - gradient
+        - svd
+        - orth
+        - numericJacobian
+        - newton
+        - secant
+        - halley
+        - fsolve
+        - root
+        - cg
+        - minres
+        - gmres
+        - bicgstab
+        - incompleteLU
+        - incompleteCholesky
+        - eigsh
+        - svds
+        - thomasSolve
+        - solveBanded
+        - toeplitzSolve
+        - ldl
+        - funm
+        - cosm
+        - sinm
+        - complexCos
+        - complexSin
+        - dlyap
+        - care
+        - dare
+        - minimizeScalar
+        - quad
+        - interpn
+        - bsplineFit
+        - bsplineEval
+        - monteCarloIntegrate
         - movingAverage
         - ewma
         - detrend
         - acf
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
         - linearRegression
+        - ols
+        - ridge
+        - lasso
+        - elasticNet
+        - logisticRegression
         - nelderMead
         - gradientDescent
         - levenbergMarquardt
         - kmeans
         - spectralClustering
+        - dbscan
+        - knnClassify
+        - knnRegress
+        - gaussianKDE
+        - chi2Contingency
+        - multipleTest
+        - fitDistribution
+        - bfgs
+        - nnls
+        - lsqBounded
         - symbolicIntegral
         - firwin
         - butter
         - lfilter
         - lfilterZi
         - filtfilt
+        - rfft
+        - irfft
+        - fftshift
+        - ifftshift
+        - fftfreq
+        - rfftfreq
+        - fftn
+        - cheby1
+        - cheby2
+        - ellip
+        - sosfilt
+        - zpk2sos
+        - bilinear
+        - buttord
+        - firwinBandpass
+        - firls
+        - remez
+        - savgol
+        - wiener
+        - deconvolve
+        - idwt
+        - wavedec
+        - waverec
+        - cwt
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
         - haversine
         - EARTH_RADIUS_KM
         - slerp
@@ -7772,9 +9479,96 @@ modules:
         - quaternionFromAxisAngle
         - quaternionRotate
         - quaternionToRotationMatrix
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
+        - convexHull
+        - delaunay
+        - voronoi
+        - alphaShape
+        - sphericalVoronoi
+        - halfspaceIntersection
+        - noncentralChi2CDF
+        - noncentralFCDF
+        - noncentralTCDF
+        - circmean
+        - circstd
+        - circvar
+        - vonMisesPDF
+        - mcnemar
+        - cochranQ
+        - hyp0f1
+        - hyp1f1
+        - hyp2f1
+        - pFq
+        - polygamma
+        - trigamma
+        - jacobiP
+        - gegenbauerC
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+        - rootsLegendre
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
+        - coulombG
+        - coulombFG
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
+        - bfs
+        - dfs
+        - floydWarshall
+        - bellmanFord
+        - closenessCentrality
+        - harmonicCentrality
+        - maxFlow
+        - minCut
+        - astar
+        - hungarian
+        - interval
+        - Interval
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
+        - glm
+        - mvnPdf
+        - mvnSample
+        - tTestPower
+        - gaussianProcessRegression
+        - gpRegression
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
+        - KendallTauTestResult
         - DescribeResult
         - HistogramResult
         - FTestResult
@@ -7783,10 +9577,105 @@ modules:
         - WilcoxonResult
         - FisherExactResult
         - TukeyComparison
+        - SVDResult
+        - SVDOptions
+        - OrthOptions
+        - VectorField
+        - NumericJacobianOptions
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
+        - FsolveOptions
+        - LinearOperatorInput
+        - Preconditioner
+        - KrylovOptions
+        - GmresOptions
+        - KrylovResult
+        - EigshOperatorInput
+        - EigshOptions
+        - EigshResult
+        - SvdsOptions
+        - SvdsResult
+        - LDLResult
+        - ComplexValue
+        - ComplexMatrix
+        - ScalarComplexFunction
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
+        - QuadOptions
+        - QuadResult
+        - NDArrayInput
+        - BSplineFitOptions
+        - BSplineTuple
+        - Bound
+        - MonteCarloOptions
+        - MonteCarloResult
+        - LjungBoxResult
+        - AdfullerResult
         - LinregressResult
+        - OlsOptions
+        - OlsResult
+        - RidgeOptions
+        - CoordinateDescentOptions
+        - RegularizedRegressionResult
+        - LogisticRegressionOptions
+        - LogisticRegressionResult
         - OptimizeResult
         - LMResult
+        - GaussianKDEOptions
+        - GaussianKDEResult
+        - Chi2ContingencyOptions
+        - Chi2ContingencyResult
+        - MultipleTestMethod
+        - DistributionName
+        - FitDistributionResult
+        - BfgsOptions
+        - BfgsResult
         - KMeansResult
+        - NnlsOptions
+        - NnlsResult
+        - LsqBoundedOptions
+        - LsqBoundedResult
+        - DeconvolveResult
+        - RemezType
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
+        - ProcrustesResult
+        - RayHit
+        - SegmentClosestResult
+        - ConvexHullResult
+        - DelaunayResult
+        - VoronoiResult
+        - AlphaShapeResult
+        - SphericalVoronoiResult
+        - HalfspaceIntersectionResult
+        - CircularOptions
+        - McNemarOptions
+        - McNemarResult
+        - CochranQResult
+        - RootsLegendreResult
+        - CoulombFG
+        - BellmanFordResult
+        - MaxFlowResult
+        - MinCutResult
+        - AStarResult
+        - HungarianResult
+        - GlmFamily
+        - GlmLink
+        - GlmOptions
+        - GlmResult
+        - MvnVector
+        - MvnCov
+        - MvnSampleOptions
+        - TTestPowerAlternative
+        - TTestPowerOptions
+        - GPKernel
+        - GPOptions
+        - GPPrediction
+        - GPModel
+        - SampleSeedOptions
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -7806,6 +9695,7 @@ modules:
           imports:
             - DenseMatrix
             - lu
+            - matrixSchur
       exports:
         - generalizedEig
         - tril
@@ -7828,6 +9718,22 @@ modules:
         - laplacianMatrix
         - logdet
         - qz
+    functions/src/linalg-svd-extra.ts:
+      description: '`orth` — orthonormal basis for the column space of a matrix.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+      exports:
+        - orth
+      interfaces:
+        - OrthOptions
+      functions:
+        - orth
     functions/src/numeric-extra.ts:
       description: Elementwise / cumulative / log-domain primitives (Wave A of the gap analysis).
       externalDependencies: []
@@ -7914,17 +9820,38 @@ modules:
           imports:
             - Complex
       exports:
+        - sinc
+        - cAdd
+        - cSub
+        - cMul
+        - cDiv
+        - cScale
         - firwin
         - lfilter
         - lfilterZi
         - filtfilt
+        - polyFromRoots
+        - zpkToTf
+        - analogToDigital
         - butter
+      interfaces:
+        - AnalogProto
       functions:
         - firwin
         - lfilter
         - lfilterZi
         - filtfilt
+        - polyFromRoots
+        - zpkToTf
+        - analogToDigital
         - butter
+      constants:
+        - sinc
+        - cAdd
+        - cSub
+        - cMul
+        - cDiv
+        - cScale
     functions/src/timeseries-extra.ts:
       description: Time-series basics (Wave D) — a near-absent domain in the gap analysis.
       externalDependencies: []
@@ -8002,6 +9929,73 @@ modules:
         - SparseMatrix
         - Unit
         - MatrixConstructor
+  functions/cas:
+    functions/src/cas/rational-integrate.ts:
+      description: 'Layer 1 rational-function symbolic integration — Task 1: parse a'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - Poly
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - trim
+            - bigintGcd
+            - mul
+            - exactDivide
+            - IntPoly
+        - file: ../typed/factorization/zassenhaus.js
+          imports:
+            - factorUnivariateZ
+      workspaceDependencies: []
+      exports:
+        - ratAdd
+        - ratSub
+        - ratMul
+        - ratDiv
+        - ratFromBigint
+        - surdFromRat
+        - surdNeg
+        - surdAdd
+        - surdSub
+        - surdMul
+        - surdDiv
+        - surdRender
+        - parseRationalFunction
+        - polynomialPart
+        - integratePolynomial
+        - factorDenominator
+        - partialFractions
+        - integratePFTerm
+        - integrateRationalFunction
+      interfaces:
+        - Rat
+        - RatFunc
+        - Surd
+        - DenFactor
+        - PFTerm
+      functions:
+        - ratAdd
+        - ratSub
+        - ratMul
+        - ratDiv
+        - ratFromBigint
+        - surdFromRat
+        - surdNeg
+        - surdAdd
+        - surdSub
+        - surdMul
+        - surdDiv
+        - surdRender
+        - parseRationalFunction
+        - polynomialPart
+        - integratePolynomial
+        - factorDenominator
+        - partialFractions
+        - integratePFTerm
+        - integrateRationalFunction
   functions/combinatorics:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
@@ -8200,13 +10194,26 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - DEFAULT_CONFIG
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ConfigOptions
+            - MathJsConfig
+          subpath: internal
       exports:
         - DEFAULT_CONFIG
-      interfaces:
         - ConfigOptions
-      constants:
+        - MathJsConfig
+      reExported:
         - DEFAULT_CONFIG
+        - ConfigOptions
+        - MathJsConfig
     functions/src/core/create.ts:
       description: Type for the mathjs instance
       externalDependencies:
@@ -8301,6 +10308,10 @@ modules:
         - file: ./function/import.js
           imports:
             - importFactory
+        - file: ./function/import.js
+          imports:
+            - ImportOptions
+          typeOnly: true
         - file: ./function/typed.js
           imports:
             - TypedFunction
@@ -8310,7 +10321,6 @@ modules:
         - create
       interfaces:
         - MathJsInstance
-        - ImportOptions
       functions:
         - create
     functions/src/core/function/config.ts:
@@ -8458,31 +10468,34 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - DimensionError
+          subpath: internal
       exports:
         - DimensionError
-      classes:
+      reExported:
         - DimensionError
     functions/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
+      description: Custom error type for index out of range errors.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - IndexError
+            - createIndexError
+          subpath: internal
       exports:
         - IndexError
-      classes:
+        - createIndexError
+      reExported:
         - IndexError
-    functions/src/error/MathjsError.ts:
-      description: Custom error type for Mathjs errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - MathjsError
-      classes:
-        - MathjsError
+        - createIndexError
   functions/expression:
     functions/src/expression/operators.ts:
       description: Get the operator associated with a function name.
@@ -9921,7 +11934,7 @@ modules:
       functions:
         - createMatrixBridge
     functions/src/factories/scope.ts:
-      description: Shared factory scope for activating synced mathjs factory functions.
+      description: Shared factory scope for activating owned mathjs-derived factory functions.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9949,6 +11962,36 @@ modules:
       constants:
         - factoryScope
   functions/geometry:
+    functions/src/geometry/alpha-shape.ts:
+      description: Alpha shape (2-D) — a consumer of the Delaunay triangulation.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./delaunay.js
+          imports:
+            - delaunay
+      workspaceDependencies: []
+      exports:
+        - alphaShape
+      interfaces:
+        - AlphaShapeResult
+      functions:
+        - alphaShape
+    functions/src/geometry/delaunay.ts:
+      description: Delaunay triangulation (2-D) — part of the computational-geometry engine.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/geometry.js
+          imports:
+            - delaunayTriangulation
+      workspaceDependencies: []
+      exports:
+        - delaunay
+      interfaces:
+        - DelaunayResult
+      functions:
+        - delaunay
     functions/src/geometry/distance.ts:
       description: 'Calculates:'
       externalDependencies: []
@@ -9980,6 +12023,83 @@ modules:
         - createDistance
       constants:
         - createDistance
+    functions/src/geometry/geometry-extra.ts:
+      description: 'Geometry & sets extras (Phase 8 Task 3): quaternion slerp/inverse/Euler,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../geometry-extra.js
+          imports:
+            - quaternionConjugate
+        - file: ../typed/set.js
+          imports:
+            - setIsSubset
+            - setMultiplicity
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - svd
+      exports:
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
+      interfaces:
+        - ProcrustesResult
+      functions:
+        - quaternionInverse
+        - quaternionSlerp
+        - quaternionToEuler
+        - quaternionLog
+        - quaternionExp
+        - quaternionPow
+        - boundingBox
+        - procrustes
+        - kdTreeKNN
+        - kdTreeRadius
+        - setIsSuperset
+        - setEqual
+        - setDisjoint
+    functions/src/geometry/halfspace-intersection.ts:
+      description: Halfspace intersection / vertex enumeration (2-D & 3-D) — completes the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./hull.js
+          imports:
+            - convexHull
+      workspaceDependencies: []
+      exports:
+        - halfspaceIntersection
+      interfaces:
+        - HalfspaceIntersectionResult
+      functions:
+        - halfspaceIntersection
+    functions/src/geometry/hull.ts:
+      description: Convex hull — the foundation of the computational-geometry engine.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/geometry.js
+          imports:
+            - convexHull3D
+      workspaceDependencies: []
+      exports:
+        - convexHull
+      interfaces:
+        - ConvexHullResult
+      functions:
+        - convexHull
     functions/src/geometry/intersect.ts:
       description: Calculates the point of intersection of two lines in two or three dimensions
       externalDependencies: []
@@ -10008,6 +12128,53 @@ modules:
         - createIntersect
       constants:
         - createIntersect
+    functions/src/geometry/intersect3d.ts:
+      description: '3-D ray/segment intersection tests (geometry breadth follow-up): ray↔triangle'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
+      interfaces:
+        - RayHit
+        - SegmentClosestResult
+      functions:
+        - rayTriangleIntersect
+        - rayPlaneIntersect
+        - segmentSegmentClosest
+    functions/src/geometry/spherical-voronoi.ts:
+      description: Spherical Voronoi diagram — a consumer of the 3-D convex hull.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/geometry.js
+          imports:
+            - convexHull3D
+      workspaceDependencies: []
+      exports:
+        - sphericalVoronoi
+      interfaces:
+        - SphericalVoronoiResult
+      functions:
+        - sphericalVoronoi
+    functions/src/geometry/voronoi.ts:
+      description: Voronoi diagram (2-D) — a consumer of the Delaunay triangulation.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./delaunay.js
+          imports:
+            - delaunay
+      workspaceDependencies: []
+      exports:
+        - voronoi
+      interfaces:
+        - VoronoiResult
+      functions:
+        - voronoi
   functions/gpu:
     functions/src/gpu/elementwise-gpu.ts:
       description: WebGPU fused element-wise chain.
@@ -10068,6 +12235,68 @@ modules:
       functions:
         - resetGpuFft
         - fftGpuDispatch
+  functions/graph:
+    functions/src/graph/community-coloring.ts:
+      description: Graph Coloring, Cliques, Community Detection, Katz Centrality, Isomorphism
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
+      functions:
+        - graphColoring
+        - maxClique
+        - louvainCommunities
+        - katzCentrality
+        - isIsomorphic
+    functions/src/graph/optimization.ts:
+      description: Graph Optimization — Max-Flow/Min-Cut, A* Search, Hungarian Assignment
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - maxFlow
+        - minCut
+        - astar
+        - hungarian
+      interfaces:
+        - MaxFlowResult
+        - MinCutResult
+        - AStarResult
+        - HungarianResult
+      functions:
+        - maxFlow
+        - minCut
+        - astar
+        - hungarian
+    functions/src/graph/traversal-centrality.ts:
+      description: Graph Traversal, All-Pairs Shortest Paths, and Distance-Based Centrality
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - bfs
+        - dfs
+        - floydWarshall
+        - bellmanFord
+        - closenessCentrality
+        - harmonicCentrality
+      interfaces:
+        - BellmanFordResult
+      functions:
+        - bfs
+        - dfs
+        - floydWarshall
+        - bellmanFord
+        - closenessCentrality
+        - harmonicCentrality
   functions/logical:
     functions/src/logical/and.ts:
       description: Logical `and`. Test whether two values are both defined with a nonzero/nonempty value.
@@ -11345,7 +13574,425 @@ modules:
         - createZeros
       constants:
         - createZeros
+  functions/ml:
+    functions/src/ml/dbscan-knn.ts:
+      description: Density-based clustering (DBSCAN) + k-nearest-neighbour classifier/regressor
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - dbscan
+        - knnClassify
+        - knnRegress
+      functions:
+        - dbscan
+        - knnClassify
+        - knnRegress
+    functions/src/ml/glm.ts:
+      description: Generalized linear models via IRLS/Fisher scoring (Stats-breadth chunk).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+      workspaceDependencies: []
+      exports:
+        - glm
+      interfaces:
+        - GlmOptions
+        - GlmResult
+      functions:
+        - glm
+    functions/src/ml/kde.ts:
+      description: 1-D Gaussian kernel density estimation (Wave — ML primitives, Phase 3 Task 5).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - gaussianKDE
+      interfaces:
+        - GaussianKDEOptions
+        - GaussianKDEResult
+      functions:
+        - gaussianKDE
+    functions/src/ml/logistic-regression.ts:
+      description: Binary logistic regression via IRLS (Wave — ML primitives, Phase 3 Task 3).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+      workspaceDependencies: []
+      exports:
+        - logisticRegression
+      interfaces:
+        - LogisticRegressionOptions
+        - LogisticRegressionResult
+      functions:
+        - logisticRegression
+    functions/src/ml/ols.ts:
+      description: Ordinary least-squares regression for a general design matrix (Wave — ML primitives).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - studentTCDF
+      workspaceDependencies: []
+      exports:
+        - ols
+      interfaces:
+        - OlsOptions
+        - OlsResult
+      functions:
+        - ols
+    functions/src/ml/regularized-regression.ts:
+      description: Regularized linear regression — ridge (L2), lasso (L1), and elastic net (L1+L2).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+      workspaceDependencies: []
+      exports:
+        - ridge
+        - lasso
+        - elasticNet
+      interfaces:
+        - RidgeOptions
+        - CoordinateDescentOptions
+        - RegularizedRegressionResult
+      functions:
+        - ridge
+        - lasso
+        - elasticNet
+  functions/numbertheory:
+    functions/src/numbertheory/extra.ts:
+      description: Number-theory fills — closes gaps left by the existing combinatorics/number-theory
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - continuedFraction
+        - eulerNumbers
+        - stirlingS1
+        - discreteLog
+        - primitiveRoot
+        - multiplicativeOrder
+        - kroneckerSymbol
+        - combinationsGen
+        - permutationsGen
+      functions:
+        - continuedFraction
+        - eulerNumbers
+        - stirlingS1
+        - discreteLog
+        - primitiveRoot
+        - multiplicativeOrder
+        - kroneckerSymbol
+        - combinationsGen
+        - permutationsGen
   functions/numeric:
+    functions/src/numeric/adaptive-quad.ts:
+      description: Adaptive Gauss-Kronrod (G7-K15) quadrature.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - quad
+      interfaces:
+        - QuadOptions
+        - QuadResult
+      functions:
+        - quad
+    functions/src/numeric/bfgs.ts:
+      description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - bfgs
+      interfaces:
+        - BfgsOptions
+        - BfgsResult
+      functions:
+        - bfgs
+    functions/src/numeric/bspline.ts:
+      description: B-spline curve **fitting** (`bsplineFit`) and **evaluation** (`bsplineEval`)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+            - leastSquares
+      workspaceDependencies: []
+      exports:
+        - bsplineFit
+        - bsplineEval
+      interfaces:
+        - BSplineFitOptions
+        - BSplineTuple
+      functions:
+        - bsplineFit
+        - bsplineEval
+        - bsplineEval
+        - bsplineEval
+    functions/src/numeric/control-equations.ts:
+      description: Control-theory matrix equations — `dlyap`/`care`/`dare`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+      workspaceDependencies: []
+      exports:
+        - dlyap
+        - care
+        - dare
+      functions:
+        - dlyap
+        - care
+        - dare
+    functions/src/numeric/eigsh.ts:
+      description: Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - eigsh
+      interfaces:
+        - EigshOptions
+        - EigshResult
+      functions:
+        - eigsh
+    functions/src/numeric/fsolve.ts:
+      description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./numeric-jacobian.js
+          imports:
+            - numericJacobian
+            - VectorField
+        - file: ../typed/numeric.js
+          imports:
+            - linsolve
+      workspaceDependencies: []
+      exports:
+        - root
+        - fsolve
+      interfaces:
+        - FsolveOptions
+      functions:
+        - fsolve
+      constants:
+        - root
+    functions/src/numeric/gauss-nodes.ts:
+      description: Gauss-Legendre quadrature nodes and weights.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rootsLegendre
+      interfaces:
+        - RootsLegendreResult
+      functions:
+        - rootsLegendre
+    functions/src/numeric/interpn.ts:
+      description: Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - interpn
+      functions:
+        - interpn
+    functions/src/numeric/interval.ts:
+      description: Interval arithmetic with outward rounding.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - interval
+        - Interval
+      classes:
+        - Interval
+      functions:
+        - interval
+    functions/src/numeric/krylov.ts:
+      description: Iterative Krylov-subspace linear solvers.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - incompleteLU
+        - incompleteCholesky
+        - cg
+        - minres
+        - gmres
+        - bicgstab
+      interfaces:
+        - KrylovOptions
+        - GmresOptions
+        - KrylovResult
+      functions:
+        - incompleteLU
+        - incompleteCholesky
+        - cg
+        - minres
+        - gmres
+        - bicgstab
+    functions/src/numeric/matrix-functions.ts:
+      description: Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - ComplexValue
+          subpath: internal
+      exports:
+        - funm
+        - complexCos
+        - complexSin
+        - cosm
+        - sinm
+      interfaces:
+        - ComplexMatrix
+      functions:
+        - funm
+        - complexCos
+        - complexSin
+        - cosm
+        - sinm
+    functions/src/numeric/minimize-scalar.ts:
+      description: Scalar (1-D) function minimization via Brent's method.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - minimizeScalar
+      interfaces:
+        - MinimizeScalarOptions
+        - MinimizeScalarResult
+      functions:
+        - minimizeScalar
+    functions/src/numeric/monte-carlo.ts:
+      description: Monte-Carlo and quasi-Monte-Carlo (QMC) integration over an axis-aligned
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+      workspaceDependencies: []
+      exports:
+        - monteCarloIntegrate
+      interfaces:
+        - MonteCarloOptions
+        - MonteCarloResult
+      functions:
+        - monteCarloIntegrate
+    functions/src/numeric/nnls.ts:
+      description: 'Constrained least squares: `nnls` (Lawson–Hanson active-set non-negative'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/numeric.js
+          imports:
+            - leastSquares
+      workspaceDependencies: []
+      exports:
+        - nnls
+        - lsqBounded
+      interfaces:
+        - NnlsOptions
+        - NnlsResult
+      functions:
+        - nnls
+        - lsqBounded
+    functions/src/numeric/numeric-jacobian.ts:
+      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - numericJacobian
+      interfaces:
+        - NumericJacobianOptions
+      functions:
+        - numericJacobian
+    functions/src/numeric/open-root-finders.ts:
+      description: Open (non-bracketing) scalar root-finders.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - newton
+        - secant
+        - halley
+      interfaces:
+        - NewtonOptions
+        - SecantOptions
+        - HalleyOptions
+      functions:
+        - newton
+        - secant
+        - halley
+    functions/src/numeric/solveDAE.ts:
+      description: Semi-explicit index-1 differential-algebraic equation (DAE) solver via BDF.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./solveODE.js
+          imports:
+            - _factorSolver
+      workspaceDependencies: []
+      exports:
+        - solveDAE
+      interfaces:
+        - DAEJacobianBlocks
+        - SolveDAEOptions
+        - DAESolution
+      functions:
+        - solveDAE
+    functions/src/numeric/solveDDE.ts:
+      description: Constant-delay delay differential equation (DDE) solver via the method of steps.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - solveDDE
+      interfaces:
+        - SolveDDEOptions
+        - DDESolution
+      functions:
+        - solveDDE
     functions/src/numeric/solveODE.ts:
       description: Butcher Tableau structure for Runge-Kutta methods
       externalDependencies: []
@@ -11370,11 +14017,79 @@ modules:
             - Unit
             - BigNumber
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - DenseMatrix
+            - lu
+            - luSolve
       exports:
         - createSolveODE
+        - _factorSolver
+        - rosenbrockSolve
+        - rodasSolve
+        - bdfSolve
+        - radauSolve
+      functions:
+        - _factorSolver
+        - rosenbrockSolve
+        - rodasSolve
+        - bdfSolve
+        - radauSolve
       constants:
         - createSolveODE
+    functions/src/numeric/solveParabolicPDE.ts:
+      description: General 1-D parabolic PDE solver via the method of lines (MOL).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./solveODE.js
+          imports:
+            - bdfSolve
+      workspaceDependencies: []
+      exports:
+        - solveParabolicPDE
+      interfaces:
+        - ParabolicBC
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+      functions:
+        - solveParabolicPDE
+    functions/src/numeric/structured-solvers.ts:
+      description: Structured and indefinite direct linear solvers.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - thomasSolve
+        - solveBanded
+        - toeplitzSolve
+        - ldl
+      interfaces:
+        - LDLResult
+      functions:
+        - thomasSolve
+        - solveBanded
+        - toeplitzSolve
+        - ldl
+    functions/src/numeric/svds.ts:
+      description: Sparse / partial SVD — the top-`k` singular triplets via Lanczos.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./eigsh.js
+          imports:
+            - eigsh
+      workspaceDependencies: []
+      exports:
+        - svds
+      interfaces:
+        - SvdsOptions
+        - SvdsResult
+      functions:
+        - svds
   functions/plain:
     functions/src/plain/number/arithmetic.ts:
       description: Calculate gcd for numbers
@@ -12006,6 +14721,18 @@ modules:
         - createRandomInt
       constants:
         - createRandomInt
+    functions/src/probability/util/gammaSample.ts:
+      description: Shared RNG-driven Gamma / standard-normal variate generators.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - normalSampleRng
+        - gammaSampleRng
+      functions:
+        - normalSampleRng
+        - gammaSampleRng
     functions/src/probability/util/randomMatrix.ts:
       description: This is a util function for generating a random matrix recursively.
       externalDependencies: []
@@ -12740,6 +15467,38 @@ modules:
       constants:
         - createSetUnion
   functions/signal:
+    functions/src/signal/conv.ts:
+      description: Convolution Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft.js
+          imports:
+            - fft
+            - ifft
+            - fft2
+            - ifft2
+            - complex
+            - ComplexNumber
+      workspaceDependencies: []
+      exports:
+        - convDirect
+        - convFFT
+        - conv
+        - xcorr
+        - autocorr
+        - conv2Direct
+        - conv2FFT
+        - conv2
+      functions:
+        - convDirect
+        - convFFT
+        - conv
+        - xcorr
+        - autocorr
+        - conv2Direct
+        - conv2FFT
+        - conv2
     functions/src/signal/fft-core-f64.ts:
       description: The ONE radix-2 Cooley-Tukey core for this package, on flat Float64Arrays.
       externalDependencies: []
@@ -12752,6 +15511,115 @@ modules:
       functions:
         - bitReverse
         - fftCoreFloat64
+    functions/src/signal/fft-helpers.ts:
+      description: numpy.fft-style helpers built on top of the package's own exported `fft`/`ifft`
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/index.js
+          imports:
+            - fft
+            - ifft
+            - complex
+        - file: ./fft.js
+          imports:
+            - fftshift
+            - ifftshift
+      workspaceDependencies: []
+      exports:
+        - rfft
+        - irfft
+        - fftshift
+        - ifftshift
+        - fftfreq
+        - rfftfreq
+        - fftn
+      functions:
+        - rfft
+        - irfft
+        - fftshift
+        - ifftshift
+        - fftfreq
+        - rfftfreq
+        - fftn
+    functions/src/signal/fft.ts:
+      description: Fast Fourier Transform (FFT)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft-core-f64.js
+          imports:
+            - fftCoreFloat64
+      workspaceDependencies: []
+      exports:
+        - complex
+        - complexConj
+        - complexAbs
+        - complexArg
+        - fft
+        - ifft
+        - ifftReal
+        - fftMagnitude
+        - fftPower
+        - fftPhase
+        - fftFrequencies
+        - fft2
+        - ifft2
+        - rollBy
+        - fftshift
+        - ifftshift
+      interfaces:
+        - ComplexNumber
+        - FFTResult
+      functions:
+        - complex
+        - complexConj
+        - complexAbs
+        - complexArg
+        - fft
+        - ifft
+        - ifftReal
+        - fftMagnitude
+        - fftPower
+        - fftPhase
+        - fftFrequencies
+        - fft2
+        - ifft2
+        - rollBy
+        - fftshift
+        - ifftshift
+    functions/src/signal/fir-smoothing.ts:
+      description: Phase 6 Task 3 — FIR bandpass design, least-squares/equiripple FIR design,
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../signal-filter-extra.js
+          imports:
+            - sinc
+        - file: ./conv.js
+          imports:
+            - convDirect
+        - file: ./remez-exchange.js
+          imports:
+            - remezExchange
+            - RemezType
+      workspaceDependencies: []
+      exports:
+        - firwinBandpass
+        - savgol
+        - deconvolve
+        - wiener
+        - firls
+        - remez
+      interfaces:
+        - DeconvolveResult
+      functions:
+        - firwinBandpass
+        - savgol
+        - deconvolve
+        - wiener
+        - firls
+        - remez
     functions/src/signal/freqz.ts:
       description: Frequency response result
       externalDependencies: []
@@ -12773,6 +15641,147 @@ modules:
         - createFreqz
       constants:
         - createFreqz
+    functions/src/signal/iir-design.ts:
+      description: Chebyshev I/II and elliptic (Cauer) IIR filter design, plus the supporting
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../signal-filter-extra.js
+          imports:
+            - analogToDigital
+            - cDiv
+            - cMul
+            - cScale
+            - polyFromRoots
+            - AnalogProto
+            - FilterBtype
+        - file: ../signal-filter-extra.js
+          imports:
+            - lfilter
+        - file: ../wasm/special/scalars.js
+          imports:
+            - ellipticKScalar
+        - file: ../special/jacobi-elliptic.js
+          imports:
+            - jacobiCN
+            - jacobiDN
+            - jacobiSN
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - cheby1
+        - cheby2
+        - ellip
+        - bilinear
+        - buttord
+        - zpk2sos
+        - sosfilt
+      functions:
+        - cheby1
+        - cheby2
+        - ellip
+        - bilinear
+        - buttord
+        - buttord
+        - buttord
+        - zpk2sos
+        - sosfilt
+    functions/src/signal/remez-exchange.ts:
+      description: Exact Parks-McClellan (Remez exchange) optimal equiripple FIR design.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - remezExchange
+      functions:
+        - remezExchange
+    functions/src/signal/spectral-peaks.ts:
+      description: Peak detection/width analysis, cross-spectral density + coherence, short-time
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./fft.js
+          imports:
+            - fft
+            - ifftReal
+            - ComplexNumber
+        - file: ../typed/signal.js
+          imports:
+            - windowFunction
+        - file: ../signal-filter-extra.js
+          imports:
+            - butter
+            - filtfilt
+      workspaceDependencies: []
+      exports:
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
+      interfaces:
+        - FindPeaksOptions
+        - CsdOptions
+        - StftOptions
+        - StftResult
+      functions:
+        - findPeaks
+        - peakWidths
+        - csd
+        - coherence
+        - stft
+        - istft
+        - decimate
+    functions/src/signal/wavelet-filters.ts:
+      description: Orthogonal wavelet filter table + a general periodization-boundary filter
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - SUPPORTED_WAVELETS
+        - getWaveletFilters
+        - dwtPeriodization
+        - idwtPeriodization
+      interfaces:
+        - WaveletFilters
+      functions:
+        - getWaveletFilters
+        - dwtPeriodization
+        - idwtPeriodization
+      constants:
+        - SUPPORTED_WAVELETS
+    functions/src/signal/wavelets.ts:
+      description: Phase 6 Task 4 — inverse DWT, multilevel wavedec/waverec (perfect
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/signal.js
+          imports:
+            - dwt
+        - file: ./wavelet-filters.js
+          imports:
+            - idwtPeriodization
+        - file: ./conv.js
+          imports:
+            - convDirect
+      workspaceDependencies: []
+      exports:
+        - idwt
+        - wavedec
+        - waverec
+        - cwt
+      functions:
+        - idwt
+        - wavedec
+        - waverec
+        - cwt
     functions/src/signal/zpk2tf.ts:
       description: Transfer function representation [numerator, denominator]
       externalDependencies: []
@@ -12818,6 +15827,128 @@ modules:
         - createErf
       constants:
         - createErf
+    functions/src/special/hypergeometric.ts:
+      description: Hypergeometric functions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - pFq
+        - hyp0f1
+        - hyp1f1
+        - hyp2f1
+      functions:
+        - pFq
+        - hyp0f1
+        - hyp1f1
+        - hyp2f1
+    functions/src/special/jacobi-elliptic.ts:
+      description: Jacobi elliptic functions sn, cn, dn.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+      functions:
+        - jacobiSN
+        - jacobiCN
+        - jacobiDN
+    functions/src/special/mathieu.ts:
+      description: 'Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+      exports:
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
+      functions:
+        - mathieuA
+        - mathieuB
+        - mathieuCe
+        - mathieuSe
+    functions/src/special/niche.ts:
+      description: 'Niche special functions: polylogarithm, Struve H/L, Kelvin ber/bei (order'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+      workspaceDependencies: []
+      exports:
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
+      functions:
+        - polylog
+        - struveH
+        - struveL
+        - kelvinBer
+        - kelvinBei
+        - barnesG
+    functions/src/special/polygamma-orthopoly.ts:
+      description: Polygamma functions and classical orthogonal polynomials.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/special.js
+          imports:
+            - digamma
+      workspaceDependencies: []
+      exports:
+        - polygamma
+        - trigamma
+        - jacobiP
+        - gegenbauerC
+      functions:
+        - polygamma
+        - trigamma
+        - jacobiP
+        - gegenbauerC
+    functions/src/special/wave-functions.ts:
+      description: 'Advanced niche special functions: the Riemann–Siegel Z-function, the Lerch'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+        - file: ./hypergeometric.js
+          imports:
+            - hyp1f1
+      workspaceDependencies: []
+      exports:
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
+        - coulombG
+        - coulombFG
+      interfaces:
+        - CoulombFG
+      functions:
+        - siegelZ
+        - riemannSiegelZ
+        - lerchPhi
+        - parabolicCylinderD
+        - coulombF
+        - coulombG
+        - coulombFG
     functions/src/special/zeta.ts:
       description: Compute the Riemann Zeta function of a value using an infinite series for
       externalDependencies: []
@@ -13106,7 +16237,7 @@ modules:
       constants:
         - createProd
     functions/src/statistics/quantileSeq.ts:
-      description: Compute the prob order quantile of a matrix or a list with values.
+      description: "Interpolation modes for the quantile, matching numpy's `method=`:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13225,6 +16356,208 @@ modules:
         - createVariance
       constants:
         - createVariance
+  functions/stats:
+    functions/src/stats/fit-distribution.ts:
+      description: Maximum-likelihood distribution fitting (Phase 4 Task 1).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/arithmetic.js
+          imports:
+            - mean
+            - std
+        - file: ../typed/special.js
+          imports:
+            - digamma
+            - lgamma
+        - file: ../numeric/open-root-finders.js
+          imports:
+            - secant
+      workspaceDependencies: []
+      exports:
+        - fitDistribution
+      interfaces:
+        - FitDistributionResult
+      functions:
+        - fitDistribution
+    functions/src/stats/gaussian-process.ts:
+      description: Gaussian-process regression (`gaussianProcessRegression` / `gpRegression`)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/matrix-ops.js
+          imports:
+            - cholesky
+      workspaceDependencies: []
+      exports:
+        - gpRegression
+        - gaussianProcessRegression
+      interfaces:
+        - GPOptions
+        - GPPrediction
+        - GPModel
+      functions:
+        - gaussianProcessRegression
+      constants:
+        - gpRegression
+    functions/src/stats/inference-extra.ts:
+      description: Chi-square test of independence + multiple-testing correction (Phase 3 Task 6).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - chiSquaredCDF
+      workspaceDependencies: []
+      exports:
+        - chi2Contingency
+        - multipleTest
+      interfaces:
+        - Chi2ContingencyResult
+        - Chi2ContingencyOptions
+      functions:
+        - chi2Contingency
+        - multipleTest
+    functions/src/stats/inference-extra2.ts:
+      description: Noncentral distribution CDFs, circular statistics, and paired-categorical
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - chiSquaredCDF
+            - fCDF
+        - file: ../typed/dist-objects.js
+          imports:
+            - chiSquaredDist
+            - normalDist
+        - file: ../wasm/special/scalars.js
+          imports:
+            - besselIScalar
+      workspaceDependencies: []
+      exports:
+        - noncentralChi2CDF
+        - noncentralFCDF
+        - noncentralTCDF
+        - circmean
+        - circvar
+        - circstd
+        - vonMisesPDF
+        - mcnemar
+        - cochranQ
+      interfaces:
+        - CircularOptions
+        - McNemarOptions
+        - McNemarResult
+        - CochranQResult
+      functions:
+        - noncentralChi2CDF
+        - noncentralFCDF
+        - noncentralTCDF
+        - circmean
+        - circvar
+        - circstd
+        - vonMisesPDF
+        - mcnemar
+        - cochranQ
+    functions/src/stats/multivariate-sampling.ts:
+      description: 'Multivariate sampling beyond MVN: Dirichlet (`dirichletSample` /'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/matrix-ops.js
+          imports:
+            - cholesky
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+        - file: ../probability/util/gammaSample.js
+          imports:
+            - gammaSampleRng
+            - normalSampleRng
+        - file: ../plain/number/probability.js
+          imports:
+            - lgammaNumber
+      workspaceDependencies: []
+      exports:
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
+      interfaces:
+        - SampleSeedOptions
+      functions:
+        - dirichletSample
+        - dirichletPdf
+        - wishartSample
+    functions/src/stats/mvn.ts:
+      description: Multivariate-normal density (`mvnPdf`) and Cholesky-based sampling
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/dist-objects.js
+          imports:
+            - multivariateNormal
+        - file: ../typed/matrix-ops.js
+          imports:
+            - cholesky
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+      workspaceDependencies: []
+      exports:
+        - mvnPdf
+        - mvnSample
+      interfaces:
+        - MvnSampleOptions
+      functions:
+        - mvnPdf
+        - mvnSample
+    functions/src/stats/power-analysis.ts:
+      description: Two-sample t-test power analysis (Stats-breadth chunk).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - studentTQuantile
+        - file: ./inference-extra2.js
+          imports:
+            - noncentralTCDF
+      workspaceDependencies: []
+      exports:
+        - tTestPower
+      interfaces:
+        - TTestPowerOptions
+      functions:
+        - tTestPower
+    functions/src/stats/timeseries.ts:
+      description: Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../timeseries-extra.js
+          imports:
+            - acf
+        - file: ../distribution-functions.js
+          imports:
+            - chiSquaredCDF
+        - file: ../ml/ols.js
+          imports:
+            - ols
+      workspaceDependencies: []
+      exports:
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
+      interfaces:
+        - LjungBoxResult
+        - AdfullerResult
+      functions:
+        - pacf
+        - ljungBox
+        - durbinWatson
+        - adfuller
   functions/string:
     functions/src/string/bin.ts:
       description: Format a number as binary.
@@ -14292,7 +17625,19 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - RangeForEachCallback
+            - RangeFormatOptions
+            - RangeJSON
+            - RangeMapCallback
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - NestedArray
+          subpath: internal
       exports: []
       interfaces:
         - BigNumberLike
@@ -14305,7 +17650,6 @@ modules:
         - SparseMatrixInterface
         - MatrixFormatOptions
         - ImmutableDenseMatrixJSON
-        - RangeJSON
         - IndexJSON
         - DenseMatrixConstructorData
         - SparseMatrixConstructorData
@@ -14313,7 +17657,6 @@ modules:
         - MatrixAlgorithmSuiteOptions
         - FibonacciHeapNode
         - FibonacciHeapInterface
-        - RangeFormatOptions
         - RangeInterface
     functions/src/type/matrix/utils/broadcast.ts:
       description: Broadcasts two matrices, and return both in an array
@@ -14931,7 +18274,14 @@ modules:
           imports:
             - polyFromExpression
             - buchberger
+            - normalize
             - polyToString
+            - Poly
+        - file: ./factorization/index.js
+          imports:
+            - factorPolynomialUnivariate
+            - cleanUnivariatePoly
+            - factorMultivariateString
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -15039,6 +18389,13 @@ modules:
             - norm2
             - pairwiseDot
             - sumSquaredDeviations
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pow
+            - round
+            - fix
+            - equal
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -15219,9 +18576,17 @@ modules:
             - polyFromExpression
             - buchberger
             - polyToString
+        - file: ./algebra.js
+          imports:
+            - expand
+            - factor
         - file: ../factories/index.js
           imports:
             - polynomialRoot
+        - file: ../numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
+            - VectorField
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -15274,6 +18639,8 @@ modules:
         - partialDerivative
         - directionalDerivative
         - gradientSymbolic
+        - jacobian
+        - jacobian
         - jacobian
         - laplacian
         - divergence
@@ -15400,6 +18767,10 @@ modules:
         - file: ./special.js
           imports:
             - erfcScalar
+        - file: ../probability/util/gammaSample.js
+          imports:
+            - gammaSampleRng
+            - normalSampleRng
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -15507,6 +18878,334 @@ modules:
         - studentTPDF
         - noncentralChi2PDF
         - typedDistributions
+    functions/src/typed/factorization/finite-field.ts:
+      description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - degree
+            - lc
+            - isZero
+            - IntPoly
+        - file: ./integer-poly.js
+          imports:
+            - IntPoly
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - reduceModP
+        - addP
+        - subP
+        - mulP
+        - invModP
+        - makeMonicP
+        - divmodP
+        - gcdP
+        - powModPolyP
+        - distinctDegreeFactor
+        - equalDegreeFactor
+        - factorModP
+        - IntPoly
+      reExported:
+        - IntPoly
+      functions:
+        - reduceModP
+        - addP
+        - subP
+        - mulP
+        - invModP
+        - makeMonicP
+        - divmodP
+        - gcdP
+        - powModPolyP
+        - distinctDegreeFactor
+        - equalDegreeFactor
+        - factorModP
+    functions/src/typed/factorization/hensel.ts:
+      description: Multifactor Hensel lifting for the univariate factorization engine
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - add
+            - sub
+            - mul
+            - scalarMul
+            - isZero
+            - lc
+            - modSymmetric
+            - IntPoly
+        - file: ./finite-field.js
+          imports:
+            - reduceModP
+            - addP
+            - mulP
+            - subP
+            - divmodP
+            - invModP
+      workspaceDependencies: []
+      exports:
+        - henselLift
+      functions:
+        - henselLift
+    functions/src/typed/factorization/index.ts:
+      description: 'Public entry point of the univariate factorization engine: parse an'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - Poly
+        - file: ./integer-poly.js
+          imports:
+            - degree
+            - IntPoly
+        - file: ./zassenhaus.js
+          imports:
+            - factorUnivariateZ
+        - file: ./multi-poly.js
+          imports:
+            - fromAlgebraExpr
+            - toAlgebraString
+        - file: ./kronecker-factor.js
+          imports:
+            - factorMultivariateKronecker
+            - MultiFactorization
+      workspaceDependencies: []
+      exports:
+        - cleanUnivariatePoly
+        - renderFactor
+        - factorPolynomialUnivariate
+        - factorMultivariateString
+      functions:
+        - cleanUnivariatePoly
+        - renderFactor
+        - factorPolynomialUnivariate
+        - factorMultivariateString
+    functions/src/typed/factorization/integer-poly.ts:
+      description: Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - trim
+        - degree
+        - lc
+        - isZero
+        - add
+        - sub
+        - neg
+        - mul
+        - scalarMul
+        - equals
+        - evaluate
+        - bigintGcd
+        - content
+        - primitivePart
+        - exactDivide
+        - derivative
+        - polyGcdZ
+        - landauMignotte
+        - modSymmetric
+      functions:
+        - trim
+        - degree
+        - lc
+        - isZero
+        - add
+        - sub
+        - neg
+        - mul
+        - scalarMul
+        - equals
+        - evaluate
+        - bigintGcd
+        - content
+        - primitivePart
+        - exactDivide
+        - derivative
+        - polyGcdZ
+        - landauMignotte
+        - modSymmetric
+    functions/src/typed/factorization/kronecker-factor.ts:
+      description: Multivariate factorization over ℤ via Kronecker substitution (Layer 2 v1).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./multi-poly.js
+          imports:
+            - degreeIn
+            - totalDegree
+            - isZero
+            - equals
+            - integerContentMP
+            - primitivePartMP
+            - leadingTerm
+            - canonicalCompare
+            - multiExactDivide
+            - MultiPoly
+        - file: ./kronecker.js
+          imports:
+            - substitutionBases
+            - substitute
+            - substitutedDegree
+            - backSubstitute
+        - file: ./zassenhaus.js
+          imports:
+            - factorUnivariateZ
+        - file: ./integer-poly.js
+          imports:
+            - mul
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - factorMultivariateKronecker
+      functions:
+        - factorMultivariateKronecker
+    functions/src/typed/factorization/kronecker.ts:
+      description: 'Kronecker substitution: reduces a multivariate integer polynomial to a'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./multi-poly.js
+          imports:
+            - degreeIn
+            - fromTerms
+            - unkey
+            - MultiPoly
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - substitutionBases
+        - substitutedDegree
+        - substitute
+        - backSubstitute
+      functions:
+        - substitutionBases
+        - substitutedDegree
+        - substitute
+        - backSubstitute
+    functions/src/typed/factorization/multi-poly.ts:
+      description: Sparse multivariate polynomial arithmetic over ℤ, backed by a
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - bigintGcd
+        - file: ../polynomial-ideal.js
+          imports:
+            - polyFromExpression
+            - Poly
+      workspaceDependencies: []
+      exports:
+        - key
+        - unkey
+        - fromTerms
+        - degreeIn
+        - totalDegree
+        - isZero
+        - equals
+        - addMP
+        - subMP
+        - mulMP
+        - negMP
+        - canonicalCompare
+        - leadingTerm
+        - integerContentMP
+        - primitivePartMP
+        - multiExactDivide
+        - fromAlgebraExpr
+        - toAlgebraString
+      interfaces:
+        - MultiPoly
+      functions:
+        - key
+        - unkey
+        - fromTerms
+        - degreeIn
+        - totalDegree
+        - isZero
+        - equals
+        - addMP
+        - subMP
+        - mulMP
+        - negMP
+        - canonicalCompare
+        - leadingTerm
+        - integerContentMP
+        - primitivePartMP
+        - multiExactDivide
+        - fromAlgebraExpr
+        - toAlgebraString
+    functions/src/typed/factorization/square-free.ts:
+      description: Yun's square-free decomposition over ℤ.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - degree
+            - derivative
+            - exactDivide
+            - polyGcdZ
+            - primitivePart
+            - sub
+            - IntPoly
+      workspaceDependencies: []
+      exports:
+        - squareFreeDecompose
+      interfaces:
+        - SquareFreeFactor
+      functions:
+        - squareFreeDecompose
+    functions/src/typed/factorization/zassenhaus.ts:
+      description: Univariate polynomial factorization over ℤ — the top-level Zassenhaus
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integer-poly.js
+          imports:
+            - trim
+            - degree
+            - lc
+            - isZero
+            - mul
+            - scalarMul
+            - primitivePart
+            - content
+            - derivative
+            - exactDivide
+            - landauMignotte
+            - modSymmetric
+            - IntPoly
+        - file: ./finite-field.js
+          imports:
+            - reduceModP
+            - makeMonicP
+            - gcdP
+            - factorModP
+        - file: ./hensel.js
+          imports:
+            - henselLift
+        - file: ./square-free.js
+          imports:
+            - squareFreeDecompose
+      workspaceDependencies: []
+      exports:
+        - factorUnivariateZ
+      functions:
+        - factorUnivariateZ
     functions/src/typed/fused.ts:
       description: Op-fusion public API (Tier 3 of the WASM pairing gap plan).
       externalDependencies: []
@@ -15558,7 +19257,7 @@ modules:
         - dot3D
         - triangleArea
         - polygonArea
-        - convexHull
+        - convexHull2D
         - pointInPolygon
         - rotateVector2D
         - rotateVector3D
@@ -15593,7 +19292,7 @@ modules:
         - dot3D
         - triangleArea
         - polygonArea
-        - convexHull
+        - convexHull2D
         - pointInPolygon
         - rotateVector2D
         - rotateVector3D
@@ -15703,6 +19402,9 @@ modules:
           imports:
             - studentTQuantile
             - normalQuantile
+        - file: ../stats/inference-extra.js
+          imports:
+            - multipleTest
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -15746,6 +19448,7 @@ modules:
         - MWBootstrapResult
         - SWBootstrapResult
         - ChiSquareBootstrapResult
+        - KS2Options
         - VarianceTestResult
         - ProportionZResult
         - NormalityTestResult
@@ -15980,10 +19683,6 @@ modules:
           imports:
             - typedAlgebra
           reExport: true
-        - file: ./matrix-ops.js
-          imports:
-            - cond
-          reExport: true
         - file: ../gpu/elementwise-gpu.js
           imports:
             - elementwiseChainGpuDispatch
@@ -16039,7 +19738,6 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
-        - cond
         - enableGpu
         - disableGpu
         - isGpuEnabled
@@ -16100,7 +19798,6 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
-        - cond
         - enableGpu
         - disableGpu
         - isGpuEnabled
@@ -16236,6 +19933,7 @@ modules:
           imports:
             - eig
             - svd
+            - cholesky
             - cond
             - norm2
             - normFro
@@ -16310,8 +20008,59 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+        - file: ../numeric/solveODE.js
+          imports:
+            - rosenbrockSolve
+        - file: ../numeric/adaptive-quad.js
+          imports:
+            - quad
+        - file: ../numeric/solveParabolicPDE.js
+          imports:
+            - solveParabolicPDE
+            - SolveParabolicPDEOptions
+            - ParabolicPDESolution
+            - ParabolicBC
+            - SpaceCoefficient
+            - BoundaryDatum
+            - ParabolicSource
+          reExport: true
+        - file: ../numeric/solveDAE.js
+          imports:
+            - solveDAE
+            - SolveDAEOptions
+            - DAESolution
+            - DAEDifferential
+            - DAEConstraint
+            - DAEJacobianBlocks
+          reExport: true
+        - file: ../numeric/solveDDE.js
+          imports:
+            - solveDDE
+            - SolveDDEOptions
+            - DDESolution
+            - DDEForcing
+            - DDEHistory
+          reExport: true
       workspaceDependencies: []
       exports:
+        - solveParabolicPDE
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+        - ParabolicBC
+        - SpaceCoefficient
+        - BoundaryDatum
+        - ParabolicSource
+        - solveDAE
+        - SolveDAEOptions
+        - DAESolution
+        - DAEDifferential
+        - DAEConstraint
+        - DAEJacobianBlocks
+        - solveDDE
+        - SolveDDEOptions
+        - DDESolution
+        - DDEForcing
+        - DDEHistory
         - findRoot
         - linsolve
         - minimize
@@ -16337,7 +20086,6 @@ modules:
         - solveBVP
         - odeAdaptiveStep
         - eventDetection
-        - cond
         - rank
         - nullspace
         - residue
@@ -16346,10 +20094,31 @@ modules:
         - quadprog
         - linprog
         - solvePDE
+      reExported:
+        - solveParabolicPDE
+        - SolveParabolicPDEOptions
+        - ParabolicPDESolution
+        - ParabolicBC
+        - SpaceCoefficient
+        - BoundaryDatum
+        - ParabolicSource
+        - solveDAE
+        - SolveDAEOptions
+        - DAESolution
+        - DAEDifferential
+        - DAEConstraint
+        - DAEJacobianBlocks
+        - solveDDE
+        - SolveDDEOptions
+        - DDESolution
+        - DDEForcing
+        - DDEHistory
       interfaces:
         - FindRootOptions
         - MinimizeOptions
         - ODESolution
+        - LinprogOptions
+        - LinprogResult
       functions:
         - findRoot
         - linsolve
@@ -16376,13 +20145,14 @@ modules:
         - solveBVP
         - odeAdaptiveStep
         - eventDetection
-        - cond
         - rank
         - nullspace
         - residue
         - chebyshevApprox
         - padeApproximant
         - quadprog
+        - linprog
+        - linprog
         - linprog
         - solvePDE
     functions/src/typed/parallel-map.ts:
@@ -16559,6 +20329,9 @@ modules:
             - welchPSDDispatch
             - welchPSDJS
             - WASM_SIGNAL_THRESHOLD
+        - file: ../signal/wavelet-filters.js
+          imports:
+            - dwtPeriodization
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -17057,35 +20830,51 @@ modules:
         - createToBest
   functions/utils:
     functions/src/utils/array.ts:
-      description: Calculate the size of a multi dimensional array.
+      description: Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./number.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isInteger
-        - file: ./is.js
+            - arraySize
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - getArrayElement
+            - deepMapArray
+            - deepForEachArray
+            - cloneArray
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isNumber
-            - isBigNumber
-            - isArray
-            - isString
-            - Index
-            - Matrix
-            - IndexDimension
-        - file: ./string.js
-          imports:
-            - format
-        - file: ../error/DimensionError.js
-          imports:
-            - DimensionError
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./object.js
-          imports:
-            - deepStrictEqual
-      workspaceDependencies: []
+            - NestedArray
+            - IdentifiedValue
+          subpath: internal
       exports:
         - arraySize
         - validate
@@ -17117,9 +20906,13 @@ modules:
         - deepMap
         - deepForEach
         - clone
-      interfaces:
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
         - IdentifiedValue
-      functions:
+      reExported:
         - arraySize
         - validate
         - validateIndexSourceSize
@@ -17146,10 +20939,12 @@ modules:
         - broadcastTo
         - broadcastArrays
         - stretch
-        - get
-        - deepMap
-        - deepForEach
-        - clone
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
+        - IdentifiedValue
     functions/src/utils/bigint.ts:
       description: Build a bigint logarithm function from a number logarithm,
       externalDependencies: []
@@ -17182,31 +20977,6 @@ modules:
         - bitXor
         - leftShiftBigNumber
         - rightArithShiftBigNumber
-    functions/src/utils/bignumber/formatter.ts:
-      description: Structural contract for the BigNumber values handled by this formatter.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../is.js
-          imports:
-            - isBigNumber
-            - isNumber
-        - file: ../number.js
-          imports:
-            - isInteger
-            - normalizeFormatOptions
-            - FormatOptions
-      workspaceDependencies: []
-      exports:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
-      functions:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
     functions/src/utils/bignumber/nearlyEqual.ts:
       description: Compares two BigNumbers.
       externalDependencies: []
@@ -17238,33 +21008,27 @@ modules:
       constants:
         - createClone
     functions/src/utils/collection.ts:
-      description: Test whether an array contains collections
+      description: Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - isCollection
-            - isMatrix
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./array.js
-          imports:
-            - arraySize
-            - deepMap
+            - containsCollections
             - deepForEach
-        - file: ./switch.js
-          imports:
-            - _switch
-      workspaceDependencies: []
+            - deepMap
+            - reduce
+            - scatter
+          subpath: internal
       exports:
         - containsCollections
         - deepForEach
         - deepMap
         - reduce
         - scatter
-      functions:
+      reExported:
         - containsCollections
         - deepForEach
         - deepMap
@@ -17319,37 +21083,39 @@ modules:
       functions:
         - mixin
     functions/src/utils/factory.ts:
-      description: Type for a factory function that creates instances
+      description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - pickShallow
-        - file: ../error/MathjsError.js
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - MathjsError
-      workspaceDependencies: []
+            - LegacyFactory
+            - DependencyName
+            - FactoryMeta
+            - isFactory
+            - assertDependencies
+            - isOptionalDependency
+            - stripOptionalNotation
+            - sortFactories
+            - create
+          subpath: internal
       exports:
-        - factory
-        - sortFactories
-        - create
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
+        - sortFactories
+        - create
+        - factory
       interfaces:
         - FactoryFunction
-        - LegacyFactory
-        - FactoryMeta
       functions:
         - factory
-        - sortFactories
-        - create
-        - isFactory
-        - assertDependencies
-        - isOptionalDependency
-        - stripOptionalNotation
     functions/src/utils/hasNumericValue.ts:
       description: Test whether a value is an numeric value.
       externalDependencies: []
@@ -17712,34 +21478,35 @@ modules:
       constants:
         - createIsZero
     functions/src/utils/map.ts:
-      description: A map facade on a bare object.
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./customs.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - getSafeProperty
-            - isSafeProperty
-            - setSafeProperty
-        - file: ./is.js
-          imports:
-            - isMap
-            - isObject
-      workspaceDependencies: []
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - assignMap
+            - isObjectWrappingMap
+          subpath: internal
       exports:
+        - ObjectWrappingMap
+        - PartitionedMap
         - createEmptyMap
         - createMap
         - assign
         - isObjectWrappingMap
+        - assignMap
+      reExported:
         - ObjectWrappingMap
         - PartitionedMap
-      classes:
-        - ObjectWrappingMap
-        - PartitionedMap
-      functions:
         - createEmptyMap
         - createMap
-        - assign
+        - assignMap
         - isObjectWrappingMap
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
@@ -18056,40 +21823,44 @@ modules:
       functions:
         - product
     functions/src/utils/string.ts:
-      description: Formatting options accepted by the generic `format` helper. Extends the
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
-          imports:
-            - isBigNumber
-            - isString
-            - typeOf
-        - file: ./number.js
-          imports:
-            - format
-            - FormatOptions
-        - file: ./bignumber/formatter.js
-          imports:
-            - format
-      workspaceDependencies: []
-      exports:
-        - format
-        - stringify
-        - compareText
-      functions:
-        - format
-        - stringify
-        - compareText
-    functions/src/utils/switch.ts:
-      description: Transpose a matrix
+      description: Generic-value string formatting (`format`, `stringify`, `compareText`).
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - formatGeneric
+            - stringify
+            - compareText
+            - GeneralFormatOptions
+          subpath: internal
+      exports:
+        - format
+        - stringify
+        - compareText
+        - GeneralFormatOptions
+        - formatGeneric
+      reExported:
+        - formatGeneric
+        - stringify
+        - compareText
+        - GeneralFormatOptions
+    functions/src/utils/switch.ts:
+      description: Transpose a 2D array (private helper). Consolidated onto the canonical
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - _switch
+          subpath: internal
       exports:
         - _switch
-      functions:
+      reExported:
         - _switch
     functions/src/utils/typeOf.ts:
       description: Determine the type of an entity.
@@ -18203,17 +21974,25 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - sha384OfBuffer
+            - loadWasmManifest
+            - verifyWasmIntegrity
+            - WasmManifest
+          subpath: internal
       exports:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
-      interfaces:
         - WasmManifest
-      functions:
+      reExported:
         - sha384OfBuffer
         - loadWasmManifest
         - verifyWasmIntegrity
+        - WasmManifest
     functions/src/wasm/interpolation/wasm-bridge.ts:
       description: WASM dispatch bridge for the tridiagonal-solve and divided-difference
       externalDependencies: []
@@ -18287,19 +22066,26 @@ modules:
         - WASM_POLY_THRESHOLD
         - WASM_POLY_FIT_THRESHOLD
     functions/src/wasm/resolve.ts:
-      description: Robustly locate a packaged `.wasm` artifact across both the monorepo-source
+      description: Packaged `.wasm` artifact resolution.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - resolvePackagedWasm
+            - defaultWasmLocation
+          subpath: internal
       exports:
         - resolvePackagedWasm
+        - defaultWasmLocation
         - resolveBrowserWasm
+      reExported:
+        - resolvePackagedWasm
         - defaultWasmLocation
       functions:
-        - resolvePackagedWasm
         - resolveBrowserWasm
-        - defaultWasmLocation
     functions/src/wasm/signal/wasm-bridge.ts:
       description: WASM dispatch bridge for spectral signal kernels — Slice 5.6.
       externalDependencies: []
@@ -18568,7 +22354,12 @@ modules:
             - resolvePackagedWasm
             - defaultWasmLocation
             - resolveBrowserWasm
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - LoadingMetrics
+          subpath: internal
       exports:
         - wasmLoader
         - WasmLoader
@@ -18576,7 +22367,6 @@ modules:
         - WasmLoader
       interfaces:
         - WasmModule
-        - LoadingMetrics
       constants:
         - wasmLoader
   expression/compiler:
@@ -23126,39 +26916,24 @@ modules:
       constants:
         - typeOfDocs
   expression/error:
-    expression/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - DimensionError
-      classes:
-        - DimensionError
     expression/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
+      description: Custom error type for index out of range errors.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - IndexError
+            - createIndexError
+          subpath: internal
       exports:
-        - createIndexError
         - IndexError
-      classes:
-        - IndexError
-      functions:
         - createIndexError
-    expression/src/error/MathjsError.ts:
-      description: Custom error type for Mathjs errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies: []
-      exports:
-        - MathjsError
-      classes:
-        - MathjsError
+      reExported:
+        - IndexError
+        - createIndexError
   expression/evaluator:
     expression/src/evaluator/evaluate.ts:
       description: Expression evaluator for MathTS.
@@ -24751,154 +28526,146 @@ modules:
         - createVarianceTransform
   expression/utils:
     expression/src/utils/array.ts:
-      description: Calculate the size of a multi dimensional array.
+      description: Cold array utilities (size/validate/reshape/resize/squeeze/broadcast/deepMap/
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./number.js
-          imports:
-            - isInteger
-        - file: ./is.js
-          imports:
-            - isNumber
-            - isBigNumber
-            - isArray
-            - isString
-            - Index
-            - Matrix
-            - IndexDimension
-        - file: ./string.js
-          imports:
-            - format
-        - file: ../error/DimensionError.js
-          imports:
-            - DimensionError
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./object.js
-          imports:
-            - deepStrictEqual
-      workspaceDependencies: []
-      exports:
-        - arraySize
-        - validate
-        - validateIndexSourceSize
-        - validateIndex
-        - isEmptyIndex
-        - resize
-        - reshape
-        - processSizesWildcard
-        - squeeze
-        - unsqueeze
-        - flatten
-        - map
-        - forEach
-        - filter
-        - filterRegExp
-        - join
-        - identify
-        - generalize
-        - getArrayDataType
-        - last
-        - initial
-        - concat
-        - broadcastSizes
-        - checkBroadcastingRules
-        - broadcastTo
-        - broadcastArrays
-        - stretch
-        - get
-        - deepMap
-        - deepForEach
-        - clone
-      interfaces:
-        - IdentifiedValue
-      functions:
-        - arraySize
-        - validate
-        - validateIndexSourceSize
-        - validateIndex
-        - isEmptyIndex
-        - resize
-        - reshape
-        - processSizesWildcard
-        - squeeze
-        - unsqueeze
-        - flatten
-        - map
-        - forEach
-        - filter
-        - filterRegExp
-        - join
-        - identify
-        - generalize
-        - getArrayDataType
-        - last
-        - initial
-        - concat
-        - broadcastSizes
-        - checkBroadcastingRules
-        - broadcastTo
-        - broadcastArrays
-        - stretch
-        - get
-        - deepMap
-        - deepForEach
-        - clone
-    expression/src/utils/bignumber/formatter.ts:
-      description: Constructor of a Decimal-like BigNumber value. Only the `new (value)` shape
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../is.js
-          imports:
-            - isBigNumber
-            - isNumber
-        - file: ../number.js
-          imports:
-            - isInteger
-            - normalizeFormatOptions
-            - FormatOptions
-      workspaceDependencies: []
-      exports:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
-      functions:
-        - format
-        - toEngineering
-        - toExponential
-        - toFixed
-    expression/src/utils/collection.ts:
-      description: Test whether an array contains collections
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
-          imports:
-            - isCollection
-            - isMatrix
-        - file: ../error/IndexError.js
-          imports:
-            - IndexError
-        - file: ./array.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
             - arraySize
-            - deepMap
-            - deepForEach
-        - file: ./switch.js
+            - validate
+            - validateIndexSourceSize
+            - validateIndex
+            - isEmptyIndex
+            - resize
+            - reshape
+            - processSizesWildcard
+            - squeeze
+            - unsqueeze
+            - flatten
+            - map
+            - forEach
+            - filter
+            - filterRegExp
+            - join
+            - identify
+            - generalize
+            - getArrayDataType
+            - last
+            - initial
+            - concat
+            - broadcastSizes
+            - checkBroadcastingRules
+            - broadcastTo
+            - broadcastArrays
+            - stretch
+            - getArrayElement
+            - deepMapArray
+            - deepForEachArray
+            - cloneArray
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - _switch
-      workspaceDependencies: []
+            - NestedArray
+            - IdentifiedValue
+          subpath: internal
+      exports:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
+        - IdentifiedValue
+      reExported:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - getArrayElement
+        - deepMapArray
+        - deepForEachArray
+        - cloneArray
+        - NestedArray
+        - IdentifiedValue
+    expression/src/utils/collection.ts:
+      description: Cold array/Matrix-aware collection utilities (`deepMap`/`deepForEach` with
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - containsCollections
+            - deepForEach
+            - deepMap
+            - reduce
+            - scatter
+          subpath: internal
       exports:
         - containsCollections
         - deepForEach
         - deepMap
         - reduce
         - scatter
-      functions:
+      reExported:
         - containsCollections
         - deepForEach
         - deepMap
@@ -24921,37 +28688,39 @@ modules:
         - isSafeMethod
         - isPlainObject
     expression/src/utils/factory.ts:
-      description: Type for a factory function that creates instances
+      description: Some of this file's helpers are consolidated onto core (see the re-exports at
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./object.js
           imports:
             - pickShallow
-        - file: ../error/MathjsError.js
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - MathjsError
-      workspaceDependencies: []
+            - LegacyFactory
+            - DependencyName
+            - FactoryMeta
+            - isFactory
+            - assertDependencies
+            - isOptionalDependency
+            - stripOptionalNotation
+            - sortFactories
+            - create
+          subpath: internal
       exports:
-        - factory
-        - sortFactories
-        - create
         - isFactory
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
+        - sortFactories
+        - create
+        - factory
       interfaces:
         - FactoryFunction
-        - LegacyFactory
-        - FactoryMeta
       functions:
         - factory
-        - sortFactories
-        - create
-        - isFactory
-        - assertDependencies
-        - isOptionalDependency
-        - stripOptionalNotation
     expression/src/utils/is.ts:
       description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
@@ -25112,36 +28881,38 @@ modules:
         - latexFunctions
         - defaultTemplate
     expression/src/utils/map.ts:
-      description: A map facade on a bare object.
+      description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ./customs.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
           imports:
-            - getSafeProperty
-            - isSafeProperty
-            - setSafeProperty
-        - file: ./is.js
-          imports:
-            - isMap
-            - isObject
-      workspaceDependencies: []
+            - ObjectWrappingMap
+            - PartitionedMap
+            - createEmptyMap
+            - createMap
+            - toObject
+            - assignMap
+            - isObjectWrappingMap
+          subpath: internal
       exports:
+        - ObjectWrappingMap
+        - PartitionedMap
         - createEmptyMap
         - createMap
         - toObject
         - assign
         - isObjectWrappingMap
+        - assignMap
+      reExported:
         - ObjectWrappingMap
         - PartitionedMap
-      classes:
-        - ObjectWrappingMap
-        - PartitionedMap
-      functions:
         - createEmptyMap
         - createMap
         - toObject
-        - assign
+        - assignMap
         - isObjectWrappingMap
     expression/src/utils/mathml.ts:
       description: MathML rendering helpers — the MathML analog of `utils/latex.ts`. Shared by
@@ -25352,44 +29123,33 @@ modules:
       functions:
         - createSubScope
     expression/src/utils/string.ts:
-      description: Check if a text ends with a certain string.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./is.js
-          imports:
-            - isBigNumber
-            - isString
-            - typeOf
-        - file: ./number.js
-          imports:
-            - format
-        - file: ./bignumber/formatter.js
-          imports:
-            - format
-      workspaceDependencies: []
-      exports:
-        - endsWith
-        - format
-        - stringify
-        - escape
-        - compareText
-      functions:
-        - endsWith
-        - format
-        - stringify
-        - escape
-        - compareText
-    expression/src/utils/switch.ts:
-      description: Transpose a matrix
+      description: Generic-value string formatting (`format`, `stringify`, `compareText`, `escape`)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - endsWith
+            - formatGeneric
+            - stringify
+            - escape
+            - compareText
+          subpath: internal
       exports:
-        - _switch
-      functions:
-        - _switch
+        - endsWith
+        - format
+        - stringify
+        - escape
+        - compareText
+        - formatGeneric
+      reExported:
+        - endsWith
+        - formatGeneric
+        - stringify
+        - escape
+        - compareText
   parser:
     parser/src/index.ts:
       description: Standalone expression parser for MathTS. This package re-exports the parser
@@ -27015,7 +30775,13 @@ modules:
             - DispatchResult
           reExport: true
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-workerpool'
+          directory: packages/workerpool
+          imports:
+            - PoolOptions
+            - ExecOptions
+            - PoolStats
       exports:
         - ComputePool
         - computePool
@@ -27100,6 +30866,9 @@ modules:
         - OperationCategory
         - ExecutionMode
         - DispatchResult
+        - PoolOptions
+        - ExecOptions
+        - PoolStats
       reExported:
         - ComputePool
         - computePool
@@ -27184,7 +30953,6 @@ modules:
         - OperationCategory
         - ExecutionMode
         - DispatchResult
-      interfaces:
         - PoolOptions
         - ExecOptions
         - PoolStats
@@ -27753,6 +31521,12 @@ modules:
         - file: ./pdf
           imports:
             - toPDF
+        - file: ./ipynb
+          imports:
+            - toIpynb
+        - file: ./timeout-runner
+          imports:
+            - runWorkbookWithTimeout
         - file: ./svg
           imports:
             - renderChart
@@ -28041,6 +31815,11 @@ modules:
           imports:
             - handleRequest
           reExport: true
+        - file: ./timeout-runner
+          imports:
+            - runWorkbookWithTimeout
+            - WorkbookTimeoutError
+          reExport: true
         - file: ./types
           imports:
             - Workbook
@@ -28059,6 +31838,13 @@ modules:
           imports:
             - CellPosition
             - RemoveResult
+          reExport: true
+          typeOnly: true
+        - file: ./timeout-runner
+          imports:
+            - RunWorkbookWithTimeoutOptions
+            - SerializedCellResult
+            - SerializedRunResult
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -28086,6 +31872,8 @@ modules:
         - VERSION
         - Session
         - handleRequest
+        - runWorkbookWithTimeout
+        - WorkbookTimeoutError
         - Workbook
         - Cell
         - CellType
@@ -28098,6 +31886,9 @@ modules:
         - RunResult
         - CellPosition
         - RemoveResult
+        - RunWorkbookWithTimeoutOptions
+        - SerializedCellResult
+        - SerializedRunResult
       reExported:
         - parseWorkbook
         - serializeWorkbook
@@ -28122,6 +31913,8 @@ modules:
         - VERSION
         - Session
         - handleRequest
+        - runWorkbookWithTimeout
+        - WorkbookTimeoutError
         - Workbook
         - Cell
         - CellType
@@ -28134,6 +31927,9 @@ modules:
         - RunResult
         - CellPosition
         - RemoveResult
+        - RunWorkbookWithTimeoutOptions
+        - SerializedCellResult
+        - SerializedRunResult
     workbook/src/introspect.ts:
       description: Engine introspection shared by the CLI (`capabilities`, `functions`) and the
       externalDependencies: []
@@ -28158,6 +31954,21 @@ modules:
       functions:
         - listFunctions
         - capabilitiesInfo
+    workbook/src/ipynb.ts:
+      description: Assemble a generic RenderDoc into a Jupyter notebook (nbformat v4) JSON
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./html.js
+          imports:
+            - RenderDoc
+            - RenderCell
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - toIpynb
+      functions:
+        - toIpynb
     workbook/src/markdown.ts:
       description: Minimal, dependency-free Markdown → HTML for rendered documents. A small
       externalDependencies: []
@@ -28275,6 +32086,32 @@ modules:
         - HandleResult
       functions:
         - handleRequest
+    workbook/src/run-worker.ts:
+      description: '`worker_threads` entry point for `runWorkbookWithTimeout` (see'
+      externalDependencies: []
+      nodeDependencies:
+        - module: worker_threads
+          imports:
+            - parentPort
+            - workerData
+      internalDependencies:
+        - file: ./parser.js
+          imports:
+            - parseWorkbook
+        - file: ./executor.js
+          imports:
+            - createExecutor
+        - file: ./formatter.js
+          imports:
+            - formatResult
+        - file: ./worker-protocol.js
+          imports:
+            - RunWorkerData
+            - WorkerMessage
+            - SerializedCellResult
+          typeOnly: true
+      workspaceDependencies: []
+      exports: []
     workbook/src/session.ts:
       description: In-memory editing/execution session for a single workbook — the stateful
       externalDependencies: []
@@ -28355,6 +32192,43 @@ modules:
         - ToTexOptions
       functions:
         - toTeX
+    workbook/src/timeout-runner.ts:
+      description: Kill-able worker-thread execution of a workbook with a hard wall-clock
+      externalDependencies: []
+      nodeDependencies:
+        - module: worker_threads
+          imports:
+            - Worker
+      internalDependencies:
+        - file: ./worker-protocol.js
+          imports:
+            - SerializedRunResult
+            - WorkerMessage
+          typeOnly: true
+        - file: ./worker-protocol.js
+          imports:
+            - SerializedCellResult
+            - SerializedRunResult
+            - WorkerMessage
+          reExport: true
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - runWorkbookWithTimeout
+        - WorkbookTimeoutError
+        - SerializedCellResult
+        - SerializedRunResult
+        - WorkerMessage
+      reExported:
+        - SerializedCellResult
+        - SerializedRunResult
+        - WorkerMessage
+      classes:
+        - WorkbookTimeoutError
+      interfaces:
+        - RunWorkbookWithTimeoutOptions
+      functions:
+        - runWorkbookWithTimeout
     workbook/src/types.ts:
       description: Workbook type definitions
       externalDependencies: []
@@ -28373,6 +32247,23 @@ modules:
         - RunResult
         - DependencyNode
         - DependencyGraph
+    workbook/src/worker-protocol.ts:
+      description: Shared message/result shapes between `timeout-runner.ts` (the coordinator,
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - CellResult
+          typeOnly: true
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - SerializedCellResult
+        - SerializedRunResult
+        - WorkerSuccessMessage
+        - WorkerFailureMessage
+        - RunWorkerData
     workbook/src/yaml-safe.ts:
       description: Hardened YAML parsing shared by the workbook parser (document load) and the
       externalDependencies:
@@ -30447,6 +34338,12 @@ modules:
             - isFraction
             - isBigNumber
             - isNumber
+            - LN2
+            - LN10
+            - LOG2E
+            - LOG10E
+            - SQRT2
+            - SQRT1_2
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
@@ -31025,7 +34922,7 @@ modules:
       functions:
         - histogram
     plot/src/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-plot (re-exports 21 symbols)
+      description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -31488,17 +35385,27 @@ dependencyGraph:
         - core/src/arithmetic/scalar.ts
     - name: Core
       files:
+        - core/src/array.ts
+        - core/src/bignumber-formatter.ts
+        - core/src/collection.ts
         - core/src/config.ts
         - core/src/constants.ts
+        - core/src/customs.ts
         - core/src/factory.ts
         - core/src/index.ts
         - core/src/internal.ts
         - core/src/is.ts
+        - core/src/map.ts
         - core/src/number.ts
         - core/src/object.ts
         - core/src/shared.ts
+        - core/src/string.ts
+        - core/src/switch.ts
+        - core/src/wasm-loader.ts
     - name: Core/error
       files:
+        - core/src/error/DimensionError.ts
+        - core/src/error/IndexError.ts
         - core/src/error/MathjsError.ts
     - name: Core/factory
       files:
@@ -31529,6 +35436,7 @@ dependencyGraph:
         - core/src/types/unit-definitions.ts
         - core/src/types/unit-prefixes.ts
         - core/src/types/unit.ts
+        - core/src/types/wasm-loader.ts
     - name: Matrix/backends
       files:
         - matrix/src/backends/Backend.ts
@@ -31560,6 +35468,7 @@ dependencyGraph:
       files:
         - matrix/src/operations/cholesky.ts
         - matrix/src/operations/common.ts
+        - matrix/src/operations/condest.ts
         - matrix/src/operations/eig-wasm.ts
         - matrix/src/operations/eig.ts
         - matrix/src/operations/expm.ts
@@ -31567,6 +35476,8 @@ dependencyGraph:
         - matrix/src/operations/logm.ts
         - matrix/src/operations/lu.ts
         - matrix/src/operations/pinv.ts
+        - matrix/src/operations/qr-family.ts
+        - matrix/src/operations/qr-pivoted.ts
         - matrix/src/operations/qr.ts
         - matrix/src/operations/schur.ts
         - matrix/src/operations/sqrtm.ts
@@ -31724,12 +35635,16 @@ dependencyGraph:
         - functions/src/hypothesis-extra.ts
         - functions/src/index.ts
         - functions/src/linalg-extra.ts
+        - functions/src/linalg-svd-extra.ts
         - functions/src/numeric-extra.ts
         - functions/src/optimization-extra.ts
         - functions/src/regression-extra.ts
         - functions/src/signal-filter-extra.ts
         - functions/src/timeseries-extra.ts
         - functions/src/types.ts
+    - name: Functions/cas
+      files:
+        - functions/src/cas/rational-integrate.ts
     - name: Functions/combinatorics
       files:
         - functions/src/combinatorics/bellNumbers.ts
@@ -31754,7 +35669,6 @@ dependencyGraph:
         - functions/src/error/ArgumentsError.ts
         - functions/src/error/DimensionError.ts
         - functions/src/error/IndexError.ts
-        - functions/src/error/MathjsError.ts
     - name: Functions/expression
       files:
         - functions/src/expression/operators.ts
@@ -31766,12 +35680,25 @@ dependencyGraph:
         - functions/src/factories/scope.ts
     - name: Functions/geometry
       files:
+        - functions/src/geometry/alpha-shape.ts
+        - functions/src/geometry/delaunay.ts
         - functions/src/geometry/distance.ts
+        - functions/src/geometry/geometry-extra.ts
+        - functions/src/geometry/halfspace-intersection.ts
+        - functions/src/geometry/hull.ts
         - functions/src/geometry/intersect.ts
+        - functions/src/geometry/intersect3d.ts
+        - functions/src/geometry/spherical-voronoi.ts
+        - functions/src/geometry/voronoi.ts
     - name: Functions/gpu
       files:
         - functions/src/gpu/elementwise-gpu.ts
         - functions/src/gpu/fft-gpu.ts
+    - name: Functions/graph
+      files:
+        - functions/src/graph/community-coloring.ts
+        - functions/src/graph/optimization.ts
+        - functions/src/graph/traversal-centrality.ts
     - name: Functions/logical
       files:
         - functions/src/logical/and.ts
@@ -31826,9 +35753,41 @@ dependencyGraph:
         - functions/src/matrix/transpose.ts
         - functions/src/matrix/utils/zerosAndOnes.ts
         - functions/src/matrix/zeros.ts
+    - name: Functions/ml
+      files:
+        - functions/src/ml/dbscan-knn.ts
+        - functions/src/ml/glm.ts
+        - functions/src/ml/kde.ts
+        - functions/src/ml/logistic-regression.ts
+        - functions/src/ml/ols.ts
+        - functions/src/ml/regularized-regression.ts
+    - name: Functions/numbertheory
+      files:
+        - functions/src/numbertheory/extra.ts
     - name: Functions/numeric
       files:
+        - functions/src/numeric/adaptive-quad.ts
+        - functions/src/numeric/bfgs.ts
+        - functions/src/numeric/bspline.ts
+        - functions/src/numeric/control-equations.ts
+        - functions/src/numeric/eigsh.ts
+        - functions/src/numeric/fsolve.ts
+        - functions/src/numeric/gauss-nodes.ts
+        - functions/src/numeric/interpn.ts
+        - functions/src/numeric/interval.ts
+        - functions/src/numeric/krylov.ts
+        - functions/src/numeric/matrix-functions.ts
+        - functions/src/numeric/minimize-scalar.ts
+        - functions/src/numeric/monte-carlo.ts
+        - functions/src/numeric/nnls.ts
+        - functions/src/numeric/numeric-jacobian.ts
+        - functions/src/numeric/open-root-finders.ts
+        - functions/src/numeric/solveDAE.ts
+        - functions/src/numeric/solveDDE.ts
         - functions/src/numeric/solveODE.ts
+        - functions/src/numeric/solveParabolicPDE.ts
+        - functions/src/numeric/structured-solvers.ts
+        - functions/src/numeric/svds.ts
     - name: Functions/plain
       files:
         - functions/src/plain/number/arithmetic.ts
@@ -31855,6 +35814,7 @@ dependencyGraph:
         - functions/src/probability/pickRandom.ts
         - functions/src/probability/random.ts
         - functions/src/probability/randomInt.ts
+        - functions/src/probability/util/gammaSample.ts
         - functions/src/probability/util/randomMatrix.ts
         - functions/src/probability/util/seededRNG.ts
     - name: Functions/relational
@@ -31886,12 +35846,27 @@ dependencyGraph:
         - functions/src/set/setUnion.ts
     - name: Functions/signal
       files:
+        - functions/src/signal/conv.ts
         - functions/src/signal/fft-core-f64.ts
+        - functions/src/signal/fft-helpers.ts
+        - functions/src/signal/fft.ts
+        - functions/src/signal/fir-smoothing.ts
         - functions/src/signal/freqz.ts
+        - functions/src/signal/iir-design.ts
+        - functions/src/signal/remez-exchange.ts
+        - functions/src/signal/spectral-peaks.ts
+        - functions/src/signal/wavelet-filters.ts
+        - functions/src/signal/wavelets.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
       files:
         - functions/src/special/erf.ts
+        - functions/src/special/hypergeometric.ts
+        - functions/src/special/jacobi-elliptic.ts
+        - functions/src/special/mathieu.ts
+        - functions/src/special/niche.ts
+        - functions/src/special/polygamma-orthopoly.ts
+        - functions/src/special/wave-functions.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
       files:
@@ -31909,6 +35884,16 @@ dependencyGraph:
         - functions/src/statistics/sum.ts
         - functions/src/statistics/utils/improveErrorMessage.ts
         - functions/src/statistics/variance.ts
+    - name: Functions/stats
+      files:
+        - functions/src/stats/fit-distribution.ts
+        - functions/src/stats/gaussian-process.ts
+        - functions/src/stats/inference-extra.ts
+        - functions/src/stats/inference-extra2.ts
+        - functions/src/stats/multivariate-sampling.ts
+        - functions/src/stats/mvn.ts
+        - functions/src/stats/power-analysis.ts
+        - functions/src/stats/timeseries.ts
     - name: Functions/string
       files:
         - functions/src/string/bin.ts
@@ -31988,6 +35973,15 @@ dependencyGraph:
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
+        - functions/src/typed/factorization/finite-field.ts
+        - functions/src/typed/factorization/hensel.ts
+        - functions/src/typed/factorization/index.ts
+        - functions/src/typed/factorization/integer-poly.ts
+        - functions/src/typed/factorization/kronecker-factor.ts
+        - functions/src/typed/factorization/kronecker.ts
+        - functions/src/typed/factorization/multi-poly.ts
+        - functions/src/typed/factorization/square-free.ts
+        - functions/src/typed/factorization/zassenhaus.ts
         - functions/src/typed/fused.ts
         - functions/src/typed/geometry.ts
         - functions/src/typed/gpu.ts
@@ -32020,7 +36014,6 @@ dependencyGraph:
         - functions/src/utils/array.ts
         - functions/src/utils/bigint.ts
         - functions/src/utils/bignumber/bitwise.ts
-        - functions/src/utils/bignumber/formatter.ts
         - functions/src/utils/bignumber/nearlyEqual.ts
         - functions/src/utils/clone.ts
         - functions/src/utils/collection.ts
@@ -32420,9 +36413,7 @@ dependencyGraph:
         - expression/src/embeddedDocs/function/utils/typeOf.ts
     - name: Expression/error
       files:
-        - expression/src/error/DimensionError.ts
         - expression/src/error/IndexError.ts
-        - expression/src/error/MathjsError.ts
     - name: Expression/evaluator
       files:
         - expression/src/evaluator/evaluate.ts
@@ -32495,7 +36486,6 @@ dependencyGraph:
     - name: Expression/utils
       files:
         - expression/src/utils/array.ts
-        - expression/src/utils/bignumber/formatter.ts
         - expression/src/utils/collection.ts
         - expression/src/utils/customs.ts
         - expression/src/utils/factory.ts
@@ -32508,7 +36498,6 @@ dependencyGraph:
         - expression/src/utils/print.ts
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
-        - expression/src/utils/switch.ts
     - name: Parser
       files:
         - parser/src/index.ts
@@ -32572,14 +36561,18 @@ dependencyGraph:
         - workbook/src/html.ts
         - workbook/src/index.ts
         - workbook/src/introspect.ts
+        - workbook/src/ipynb.ts
         - workbook/src/markdown.ts
         - workbook/src/parser.ts
         - workbook/src/pdf.ts
         - workbook/src/rpc.ts
+        - workbook/src/run-worker.ts
         - workbook/src/session.ts
         - workbook/src/svg.ts
         - workbook/src/tex.ts
+        - workbook/src/timeout-runner.ts
         - workbook/src/types.ts
+        - workbook/src/worker-protocol.ts
         - workbook/src/yaml-safe.ts
     - name: Assembly/algebra
       files:
@@ -32659,19 +36652,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1028
-  totalModules: 78
-  totalLinesOfCode: 171986
-  totalExports: 4967
-  totalClasses: 56
-  totalInterfaces: 410
-  totalFunctions: 1613
+  totalTypeScriptFiles: 1114
+  totalModules: 83
+  totalLinesOfCode: 193193
+  totalExports: 5750
+  totalClasses: 52
+  totalInterfaces: 504
+  totalFunctions: 1865
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1535
-  totalReExports: 1802
-  totalTypeOnlyImports: 523
+  totalConstants: 1543
+  totalReExports: 2304
+  totalTypeOnlyImports: 579
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 240
+  unusedExportsCount: 224

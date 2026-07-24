@@ -34,7 +34,7 @@ export { pinv as matrixPinv, type PinvOptions } from './pinv.js';
 export { qr, type QRResult, type QROptions } from './qr.js';
 
 // LU decomposition (DenseMatrix primitive — Doolittle with partial pivoting)
-export { lu, type LUResult } from './lu.js';
+export { lu, luSolve, type LUResult } from './lu.js';
 
 // Cholesky decomposition (DenseMatrix primitive — right-looking algorithm)
 export { cholesky, type CholeskyResult } from './cholesky.js';
@@ -50,3 +50,12 @@ export { matrixSqrtm, type SqrtmOptions } from './sqrtm.js';
 
 // Schur decomposition primitive (Slice 6.1)
 export { matrixSchur, type SchurResult, type SchurOptions } from './schur.js';
+
+// Rank-revealing column-pivoted QR (DenseMatrix primitive — Businger-Golub pivoting)
+export { qrPivoted, type QRPivotedResult, type QRPivotedOptions } from './qr-pivoted.js';
+
+// QR-family decompositions (DenseMatrix primitives — reductions to qr())
+export { lq, rq, ql, type LQResult, type RQResult, type QLResult } from './qr-family.js';
+
+// Condition-number estimate (DenseMatrix primitive — Hager/Higham 1-norm power iteration)
+export { condest } from './condest.js';

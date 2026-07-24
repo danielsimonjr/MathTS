@@ -4,13 +4,19 @@ Complete API documentation for all MathTS packages.
 
 ## Packages
 
-| Package                           | Description                                | Documentation                   |
-| --------------------------------- | ------------------------------------------ | ------------------------------- |
-| `@danielsimonjr/mathts-core`      | Core types: Complex, Fraction, BigNumber   | [API Reference](./core.md)      |
-| `@danielsimonjr/mathts-functions` | Mathematical functions with typed dispatch | [API Reference](./functions.md) |
-| `@danielsimonjr/mathts-matrix`    | Dense and sparse matrices                  | [API Reference](./matrix.md)    |
-| `@danielsimonjr/mathts-parallel`  | Parallel execution via ComputePool         | [API Reference](./parallel.md)  |
-| `@danielsimonjr/mathts-compat`    | mathjs compatibility layer                 | [API Reference](./compat.md)    |
+| Package                            | Description                                         | Documentation                    |
+| ---------------------------------- | --------------------------------------------------- | -------------------------------- |
+| `@danielsimonjr/mathts-core`       | Core types: Complex, Fraction, BigNumber            | [API Reference](./core.md)       |
+| `@danielsimonjr/mathts-functions`  | Mathematical functions with typed dispatch          | [API Reference](./functions.md)  |
+| `@danielsimonjr/mathts-matrix`     | Dense and sparse matrices                           | [API Reference](./matrix.md)     |
+| `@danielsimonjr/mathts-gpu`        | Shared WebGPU foundation (no domain kernels)        | [API Reference](./gpu.md)        |
+| `@danielsimonjr/mathts-tensor`     | Rank-N dense tensors with einsum/contraction        | [API Reference](./tensor.md)     |
+| `@danielsimonjr/mathts-autograd`   | Forward- and reverse-mode automatic differentiation | [API Reference](./autograd.md)   |
+| `@danielsimonjr/mathts-parallel`   | Parallel execution via ComputePool                  | [API Reference](./parallel.md)   |
+| `@danielsimonjr/mathts-expression` | Expression parser, AST, compile/evaluate            | [API Reference](./expression.md) |
+| `@danielsimonjr/mathts-workbook`   | `.mtsw` reactive notebook runtime + `mtsw` CLI      | [API Reference](./workbook.md)   |
+| `@danielsimonjr/mathts-plot`       | Headless SVG/TikZ 2D/3D plotting                    | [API Reference](./plot.md)       |
+| `@danielsimonjr/mathts-compat`     | mathjs compatibility layer                          | [API Reference](./compat.md)     |
 
 ## Quick Reference
 

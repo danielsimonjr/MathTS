@@ -1,14 +1,21 @@
 {
-  "generated": "2026-07-15",
+  "generated": "2026-07-21",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
-    "core/src/config.ts": ["core/src/arithmetic/scalar.ts", "core/src/types/unit/dependencies.ts"],
-    "core/src/number.ts": [
+    "core/src/config.ts": [
       "core/src/arithmetic/scalar.ts",
       "core/src/internal.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
+    "core/src/number.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/array.ts",
+      "core/src/bignumber-formatter.ts",
+      "core/src/internal.ts",
+      "core/src/string.ts",
       "core/src/types/matrix/Range.ts",
       "core/src/types/unit/dependencies.ts"
     ],
@@ -34,12 +41,43 @@
       "core/src/typed/type-bridge.ts",
       "core/src/types/unit/dependencies.ts"
     ],
+    "core/src/is.ts": [
+      "core/src/array.ts",
+      "core/src/bignumber-formatter.ts",
+      "core/src/collection.ts",
+      "core/src/internal.ts",
+      "core/src/map.ts",
+      "core/src/number.ts",
+      "core/src/object.ts",
+      "core/src/string.ts",
+      "core/src/types/matrix/Range.ts",
+      "core/src/types/unit.ts",
+      "core/src/types/unit/Unit.ts",
+      "core/src/types/unit/dependencies.ts",
+      "core/src/types/unit/unit-types.ts"
+    ],
+    "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
+    "core/src/error/DimensionError.ts": ["core/src/array.ts", "core/src/internal.ts"],
+    "core/src/error/IndexError.ts": [
+      "core/src/array.ts",
+      "core/src/collection.ts",
+      "core/src/internal.ts"
+    ],
     "core/src/object.ts": [
+      "core/src/array.ts",
       "core/src/factory.ts",
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts"
     ],
-    "core/src/error/MathjsError.ts": ["core/src/factory.ts"],
+    "core/src/array.ts": ["core/src/collection.ts", "core/src/internal.ts"],
+    "core/src/switch.ts": ["core/src/collection.ts", "core/src/internal.ts"],
+    "core/src/shared.ts": [
+      "core/src/customs.ts",
+      "core/src/internal.ts",
+      "core/src/object.ts",
+      "core/src/types/unit/Unit.ts"
+    ],
+    "core/src/error/MathjsError.ts": ["core/src/factory.ts", "core/src/internal.ts"],
     "core/src/types/matrix/Range.ts": ["core/src/index.ts"],
     "core/src/types/dual.ts": ["core/src/index.ts", "core/src/typed/mathts-typed.ts"],
     "core/src/types/dual-rules.ts": ["core/src/index.ts", "core/src/types/dual.ts"],
@@ -57,32 +95,27 @@
       "core/src/types/complex.ts",
       "core/src/types/fraction.ts"
     ],
-    "core/src/is.ts": [
+    "core/src/factory.ts": [
       "core/src/internal.ts",
-      "core/src/number.ts",
-      "core/src/object.ts",
       "core/src/types/matrix/Range.ts",
-      "core/src/types/unit.ts",
-      "core/src/types/unit/Unit.ts",
-      "core/src/types/unit/dependencies.ts",
-      "core/src/types/unit/unit-types.ts"
-    ],
-    "core/src/shared.ts": [
-      "core/src/internal.ts",
-      "core/src/object.ts",
       "core/src/types/unit/Unit.ts"
     ],
+    "core/src/bignumber-formatter.ts": ["core/src/internal.ts", "core/src/string.ts"],
     "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
+    "core/src/collection.ts": ["core/src/internal.ts"],
+    "core/src/map.ts": ["core/src/internal.ts"],
+    "core/src/wasm-loader.ts": ["core/src/internal.ts"],
+    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",
       "core/src/types/unit/dependencies.ts",
       "core/src/types/unit/index.ts"
     ],
+    "core/src/customs.ts": ["core/src/map.ts"],
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
-    "core/src/factory.ts": ["core/src/types/matrix/Range.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/Unit.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/dependencies.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
@@ -94,10 +127,13 @@
       "matrix/src/backends/ParallelBackend.ts",
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/operations/cholesky.ts",
+      "matrix/src/operations/condest.ts",
       "matrix/src/operations/expm.ts",
       "matrix/src/operations/logm.ts",
       "matrix/src/operations/lu.ts",
       "matrix/src/operations/pinv.ts",
+      "matrix/src/operations/qr-family.ts",
+      "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/qr.ts",
       "matrix/src/operations/schur.ts",
       "matrix/src/operations/sqrtm.ts",
@@ -166,6 +202,10 @@
     "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
     "matrix/src/typed-operations.ts": ["matrix/src/index.ts"],
     "matrix/src/parallel-matrix.ts": ["matrix/src/index.ts"],
+    "matrix/src/operations/lu.ts": [
+      "matrix/src/operations/condest.ts",
+      "matrix/src/operations/index.ts"
+    ],
     "matrix/src/operations/eig.ts": [
       "matrix/src/operations/eig-wasm.ts",
       "matrix/src/operations/index.ts",
@@ -176,6 +216,7 @@
       "matrix/src/operations/eig.ts",
       "matrix/src/operations/expm.ts",
       "matrix/src/operations/logm.ts",
+      "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/schur.ts",
       "matrix/src/operations/sqrtm.ts",
       "matrix/src/operations/svd.ts"
@@ -188,8 +229,10 @@
     "matrix/src/operations/eig-wasm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/svd-wasm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/pinv.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/qr.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/lu.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/qr.ts": [
+      "matrix/src/operations/index.ts",
+      "matrix/src/operations/qr-family.ts"
+    ],
     "matrix/src/operations/cholesky.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/expm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/logm.ts": ["matrix/src/operations/index.ts"],
@@ -199,6 +242,9 @@
       "matrix/src/operations/logm.ts",
       "matrix/src/operations/sqrtm.ts"
     ],
+    "matrix/src/operations/qr-pivoted.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/qr-family.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/condest.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/types/Matrix.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/SparseMatrix.ts",
@@ -303,7 +349,6 @@
       "functions/src/type/matrix/utils/broadcast.ts",
       "functions/src/type/matrix/utils/matAlgo14xDs.ts",
       "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts",
-      "functions/src/utils/array.ts",
       "functions/src/utils/clone.ts",
       "functions/src/utils/customs.ts",
       "functions/src/utils/factory.ts"
@@ -855,12 +900,9 @@
       "functions/src/trigonometry/tanh.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/typed/relational.ts",
-      "functions/src/utils/array.ts",
-      "functions/src/utils/bignumber/formatter.ts",
       "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts",
-      "functions/src/utils/string.ts"
+      "functions/src/utils/isPositive.ts"
     ],
     "functions/src/algebra/sparse/csSqr.ts": [
       "functions/src/algebra/decomposition/slu.ts",
@@ -924,13 +966,8 @@
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/type/matrix/function/index.ts",
       "functions/src/typed/string.ts",
-      "functions/src/utils/array.ts",
-      "functions/src/utils/bignumber/formatter.ts",
-      "functions/src/utils/collection.ts",
-      "functions/src/utils/map.ts",
       "functions/src/utils/numeric.ts",
       "functions/src/utils/optimizeCallback.ts",
-      "functions/src/utils/string.ts",
       "functions/src/utils/typeOf.ts"
     ],
     "functions/src/utils/node.ts": [
@@ -1076,7 +1113,6 @@
       "functions/src/statistics/mode.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/type/matrix/utils/broadcast.ts",
-      "functions/src/utils/collection.ts",
       "functions/src/utils/optimizeCallback.ts"
     ],
     "functions/src/utils/string.ts": [
@@ -1093,8 +1129,7 @@
       "functions/src/string/format.ts",
       "functions/src/string/print.ts",
       "functions/src/type/chain/Chain.ts",
-      "functions/src/typed/string.ts",
-      "functions/src/utils/array.ts"
+      "functions/src/typed/string.ts"
     ],
     "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
     "functions/src/algebra/sparse/csFlip.ts": [
@@ -1558,6 +1593,20 @@
       "functions/src/index.ts",
       "functions/src/typed/cas.ts"
     ],
+    "functions/src/typed/algebra.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/polynomial-ideal.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
+    ],
+    "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
     "functions/src/factories/index.ts": [
       "functions/src/clustering-extra.ts",
       "functions/src/descriptive-stats.ts",
@@ -1566,6 +1615,7 @@
       "functions/src/linalg-extra.ts",
       "functions/src/optimization-extra.ts",
       "functions/src/signal-filter-extra.ts",
+      "functions/src/signal/fft-helpers.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/linalg-extra.ts": [
@@ -1585,6 +1635,7 @@
       "functions/src/linalg-extra.ts",
       "functions/src/numeric-extra.ts",
       "functions/src/regression-extra.ts",
+      "functions/src/stats/fit-distribution.ts",
       "functions/src/timeseries-extra.ts",
       "functions/src/typed/index.ts"
     ],
@@ -1592,7 +1643,12 @@
       "functions/src/descriptive-stats.ts",
       "functions/src/hypothesis-extra.ts",
       "functions/src/index.ts",
+      "functions/src/ml/ols.ts",
       "functions/src/regression-extra.ts",
+      "functions/src/stats/inference-extra.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/power-analysis.ts",
+      "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
     ],
     "functions/src/typed/distributions.ts": [
@@ -1602,6 +1658,8 @@
     ],
     "functions/src/typed/dist-objects.ts": [
       "functions/src/distribution-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
@@ -1614,6 +1672,8 @@
     ],
     "functions/src/typed/special.ts": [
       "functions/src/hypothesis-extra.ts",
+      "functions/src/special/polygamma-orthopoly.ts",
+      "functions/src/stats/fit-distribution.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/fused.ts",
       "functions/src/typed/hypothesis.ts",
@@ -1627,19 +1687,135 @@
     "functions/src/config-api.ts": ["functions/src/index.ts"],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
     "functions/src/grad-forward.ts": ["functions/src/index.ts"],
     "functions/src/numeric-extra.ts": ["functions/src/index.ts"],
     "functions/src/hypothesis-extra.ts": ["functions/src/index.ts"],
     "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
-    "functions/src/timeseries-extra.ts": ["functions/src/index.ts"],
+    "functions/src/linalg-svd-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/numeric-jacobian.ts": [
+      "functions/src/index.ts",
+      "functions/src/numeric/fsolve.ts",
+      "functions/src/typed/cas.ts"
+    ],
+    "functions/src/numeric/open-root-finders.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/fit-distribution.ts"
+    ],
+    "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/krylov.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/eigsh.ts": ["functions/src/index.ts", "functions/src/numeric/svds.ts"],
+    "functions/src/numeric/svds.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/structured-solvers.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/matrix-functions.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/control-equations.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/adaptive-quad.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/bspline.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/monte-carlo.ts": ["functions/src/index.ts"],
+    "functions/src/timeseries-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/timeseries.ts"
+    ],
+    "functions/src/stats/timeseries.ts": ["functions/src/index.ts"],
     "functions/src/regression-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
+    "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
+    "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
     "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
+    "functions/src/ml/kde.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/hypothesis.ts"
+    ],
+    "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
-    "functions/src/signal-filter-extra.ts": ["functions/src/index.ts"],
-    "functions/src/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/signal-filter-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/iir-design.ts",
+      "functions/src/signal/spectral-peaks.ts"
+    ],
+    "functions/src/signal/fft-helpers.ts": ["functions/src/index.ts"],
+    "functions/src/signal/iir-design.ts": ["functions/src/index.ts"],
+    "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
+    "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
+    "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
+    "functions/src/geometry-extra.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/hull.ts": [
+      "functions/src/geometry/halfspace-intersection.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/delaunay.ts": [
+      "functions/src/geometry/alpha-shape.ts",
+      "functions/src/geometry/voronoi.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/voronoi.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/alpha-shape.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/spherical-voronoi.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/halfspace-intersection.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra2.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/power-analysis.ts"
+    ],
+    "functions/src/special/hypergeometric.ts": [
+      "functions/src/index.ts",
+      "functions/src/special/wave-functions.ts"
+    ],
+    "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
+    "functions/src/special/jacobi-elliptic.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/iir-design.ts"
+    ],
+    "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
+    "functions/src/special/niche.ts": ["functions/src/index.ts"],
+    "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
+    "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
+    "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
+    "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
+    "functions/src/graph/community-coloring.ts": ["functions/src/index.ts"],
+    "functions/src/ml/glm.ts": ["functions/src/index.ts"],
+    "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
+    "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
+    "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
+    "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/signal/remez-exchange.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts"
+    ],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
+    "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/factorization/finite-field.ts",
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
+      "functions/src/typed/factorization/square-free.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/zassenhaus.ts": [
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts"
+    ],
     "functions/src/error/ArgumentsError.ts": [
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts"
@@ -1659,16 +1835,13 @@
       "functions/src/type/matrix/utils/matAlgo07xSSf.ts",
       "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts",
       "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts",
-      "functions/src/type/matrix/utils/matAlgo13xDD.ts",
-      "functions/src/utils/array.ts"
+      "functions/src/type/matrix/utils/matAlgo13xDD.ts"
     ],
     "functions/src/error/IndexError.ts": [
       "functions/src/core/create.ts",
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/mapSlices.ts",
-      "functions/src/statistics/cumsum.ts",
-      "functions/src/utils/array.ts",
-      "functions/src/utils/collection.ts"
+      "functions/src/statistics/cumsum.ts"
     ],
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
@@ -1809,6 +1982,9 @@
     "functions/src/logical/xor.ts": ["functions/src/factories/index.ts"],
     "functions/src/typed/matrix-ops.ts": [
       "functions/src/factories/index.ts",
+      "functions/src/stats/gaussian-process.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/relational/compare.ts": ["functions/src/factories/index.ts"],
@@ -1887,7 +2063,12 @@
     "functions/src/set/setPowerset.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyCore.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
-    "functions/src/numeric/solveODE.ts": ["functions/src/factories/index.ts"],
+    "functions/src/numeric/solveODE.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/numeric/solveDAE.ts",
+      "functions/src/numeric/solveParabolicPDE.ts",
+      "functions/src/typed/numeric.ts"
+    ],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
@@ -1913,6 +2094,16 @@
       "functions/src/factories/scope.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/typed/geometry.ts": [
+      "functions/src/geometry/delaunay.ts",
+      "functions/src/geometry/hull.ts",
+      "functions/src/geometry/spherical-voronoi.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/set.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/type/matrix/utils/matAlgo13xDD.ts": [
       "functions/src/logical/nullish.ts",
       "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
@@ -1922,6 +2113,7 @@
     "functions/src/signal/fft-core-f64.ts": [
       "functions/src/matrix/fft.ts",
       "functions/src/matrix/ifft.ts",
+      "functions/src/signal/fft.ts",
       "functions/src/typed/signal.ts"
     ],
     "functions/src/utils/optimizeCallback.ts": [
@@ -1933,9 +2125,24 @@
       "functions/src/matrix/ones.ts",
       "functions/src/matrix/zeros.ts"
     ],
-    "functions/src/utils/customs.ts": [
-      "functions/src/matrix/subset.ts",
-      "functions/src/utils/map.ts"
+    "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
+    "functions/src/typed/numeric.ts": [
+      "functions/src/ml/glm.ts",
+      "functions/src/ml/logistic-regression.ts",
+      "functions/src/ml/regularized-regression.ts",
+      "functions/src/numeric/bspline.ts",
+      "functions/src/numeric/control-equations.ts",
+      "functions/src/numeric/fsolve.ts",
+      "functions/src/numeric/nnls.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/probability/util/seededRNG.ts": [
+      "functions/src/numeric/monte-carlo.ts",
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/probability/random.ts",
+      "functions/src/probability/randomInt.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts"
     ],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",
@@ -1952,14 +2159,12 @@
     "functions/src/plain/number/constants.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/logical.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/probability.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/probability.ts": [
+      "functions/src/plain/number/index.ts",
+      "functions/src/stats/multivariate-sampling.ts"
+    ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/probability/util/seededRNG.ts": [
-      "functions/src/probability/pickRandom.ts",
-      "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts"
-    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"
@@ -1973,10 +2178,33 @@
       "functions/src/relational/smallerEq.ts"
     ],
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
-    "functions/src/utils/switch.ts": [
-      "functions/src/statistics/cumsum.ts",
-      "functions/src/utils/collection.ts"
+    "functions/src/signal/fft.ts": [
+      "functions/src/signal/conv.ts",
+      "functions/src/signal/fft-helpers.ts",
+      "functions/src/signal/spectral-peaks.ts"
     ],
+    "functions/src/signal/conv.ts": [
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/wavelets.ts"
+    ],
+    "functions/src/wasm/special/scalars.ts": [
+      "functions/src/signal/iir-design.ts",
+      "functions/src/special/niche.ts",
+      "functions/src/special/wave-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/typed/signal.ts": [
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/signal/wavelets.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/signal/wavelet-filters.ts": [
+      "functions/src/signal/wavelets.ts",
+      "functions/src/typed/signal.ts"
+    ],
+    "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
       "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/mad.ts",
@@ -1987,6 +2215,10 @@
       "functions/src/statistics/prod.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts"
+    ],
+    "functions/src/probability/util/gammaSample.ts": [
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/typed/dist-objects.ts"
     ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
@@ -2024,10 +2256,7 @@
       "functions/src/typed/algebra.ts",
       "functions/src/typed/interpolation.ts"
     ],
-    "functions/src/typed/polynomial-ideal.ts": [
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts"
-    ],
+    "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",
@@ -2043,6 +2272,27 @@
       "functions/src/typed/distributions.ts",
       "functions/src/typed/special.ts"
     ],
+    "functions/src/typed/factorization/finite-field.ts": [
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/multi-poly.ts": [
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts"
+    ],
+    "functions/src/typed/factorization/kronecker-factor.ts": [
+      "functions/src/typed/factorization/index.ts"
+    ],
+    "functions/src/typed/factorization/kronecker.ts": [
+      "functions/src/typed/factorization/kronecker-factor.ts"
+    ],
+    "functions/src/typed/factorization/hensel.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/square-free.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
     "functions/src/gpu/elementwise-gpu.ts": [
       "functions/src/typed/fused.ts",
       "functions/src/typed/index.ts"
@@ -2053,18 +2303,13 @@
       "functions/src/typed/statistics.ts"
     ],
     "functions/src/typed/statistics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/signal.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/combinatorics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/algebra.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/bitwise.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/logical.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/complex.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/set.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/fused.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/geometry.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/interpolation.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/numeric.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/graph.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/hypothesis.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],
@@ -2076,13 +2321,10 @@
       "functions/src/typed/signal.ts"
     ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
+    "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
-    "functions/src/wasm/special/scalars.ts": [
-      "functions/src/typed/special.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
-    "functions/src/error/MathjsError.ts": ["functions/src/utils/factory.ts"],
-    "functions/src/utils/bignumber/formatter.ts": ["functions/src/utils/string.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
       "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -2112,8 +2354,7 @@
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts",
-      "expression/src/utils/map.ts"
+      "expression/src/node/utils/assign.ts"
     ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
@@ -3233,12 +3474,7 @@
       "expression/src/transform/row.transform.ts",
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/transform/utils/dimToZeroBase.ts",
-      "expression/src/transform/utils/lastDimToZeroBase.ts",
-      "expression/src/utils/array.ts",
-      "expression/src/utils/bignumber/formatter.ts",
-      "expression/src/utils/collection.ts",
-      "expression/src/utils/map.ts",
-      "expression/src/utils/string.ts"
+      "expression/src/transform/utils/lastDimToZeroBase.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3247,7 +3483,6 @@
       "expression/src/node/ObjectNode.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
-      "expression/src/utils/array.ts",
       "expression/src/utils/customs.ts",
       "expression/src/utils/factory.ts",
       "expression/src/utils/latex.ts"
@@ -3261,8 +3496,7 @@
       "expression/src/node/ObjectNode.ts",
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts",
-      "expression/src/utils/array.ts"
+      "expression/src/node/SymbolNode.ts"
     ],
     "expression/src/types.ts": [
       "expression/src/index.ts",
@@ -3316,12 +3550,7 @@
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
-    "expression/src/utils/number.ts": [
-      "expression/src/parse.ts",
-      "expression/src/utils/array.ts",
-      "expression/src/utils/bignumber/formatter.ts",
-      "expression/src/utils/string.ts"
-    ],
+    "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/node/utils/access.ts": [
       "expression/src/node/AccessorNode.ts",
       "expression/src/node/AssignmentNode.ts"
@@ -3331,8 +3560,7 @@
       "expression/src/node/BlockNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
       "expression/src/node/IndexNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/utils/collection.ts"
+      "expression/src/node/OperatorNode.ts"
     ],
     "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
     "expression/src/utils/latex.ts": [
@@ -3410,18 +3638,10 @@
     "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
-    "expression/src/error/IndexError.ts": [
-      "expression/src/transform/utils/errorTransform.ts",
-      "expression/src/utils/array.ts",
-      "expression/src/utils/collection.ts"
-    ],
+    "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "expression/src/transform/utils/dimToZeroBase.ts": [
       "expression/src/transform/utils/lastDimToZeroBase.ts"
     ],
-    "expression/src/error/DimensionError.ts": ["expression/src/utils/array.ts"],
-    "expression/src/utils/switch.ts": ["expression/src/utils/collection.ts"],
-    "expression/src/error/MathjsError.ts": ["expression/src/utils/factory.ts"],
-    "expression/src/utils/bignumber/formatter.ts": ["expression/src/utils/string.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",
@@ -3454,11 +3674,13 @@
       "workbook/src/edit.ts",
       "workbook/src/index.ts",
       "workbook/src/introspect.ts",
+      "workbook/src/run-worker.ts",
       "workbook/src/session.ts"
     ],
     "workbook/src/executor.ts": [
       "workbook/src/cli.ts",
       "workbook/src/index.ts",
+      "workbook/src/run-worker.ts",
       "workbook/src/session.ts"
     ],
     "workbook/src/graph.ts": [
@@ -3470,7 +3692,11 @@
       "workbook/src/parser.ts",
       "workbook/src/session.ts"
     ],
-    "workbook/src/formatter.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
+    "workbook/src/formatter.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/index.ts",
+      "workbook/src/run-worker.ts"
+    ],
     "workbook/src/contract.ts": [
       "workbook/src/cli.ts",
       "workbook/src/index.ts",
@@ -3493,11 +3719,19 @@
       "workbook/src/index.ts",
       "workbook/src/parser.ts",
       "workbook/src/rpc.ts",
-      "workbook/src/session.ts"
+      "workbook/src/session.ts",
+      "workbook/src/worker-protocol.ts"
     ],
-    "workbook/src/html.ts": ["workbook/src/cli.ts", "workbook/src/pdf.ts", "workbook/src/tex.ts"],
+    "workbook/src/html.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/ipynb.ts",
+      "workbook/src/pdf.ts",
+      "workbook/src/tex.ts"
+    ],
     "workbook/src/tex.ts": ["workbook/src/cli.ts", "workbook/src/pdf.ts"],
     "workbook/src/pdf.ts": ["workbook/src/cli.ts"],
+    "workbook/src/ipynb.ts": ["workbook/src/cli.ts"],
+    "workbook/src/timeout-runner.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
     "workbook/src/svg.ts": ["workbook/src/cli.ts"],
     "workbook/src/yaml-safe.ts": [
       "workbook/src/cli.ts",
@@ -3505,6 +3739,10 @@
       "workbook/src/parser.ts"
     ],
     "workbook/src/markdown.ts": ["workbook/src/html.ts", "workbook/src/tex.ts"],
+    "workbook/src/worker-protocol.ts": [
+      "workbook/src/run-worker.ts",
+      "workbook/src/timeout-runner.ts"
+    ],
     "assembly/src/bindings/wasm-loader.ts": ["assembly/src/bindings/index.ts"],
     "assembly/src/types/complex.ts": [
       "assembly/src/index.ts",

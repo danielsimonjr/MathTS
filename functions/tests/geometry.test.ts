@@ -13,7 +13,7 @@ import {
   dot3D,
   triangleArea,
   polygonArea,
-  convexHull,
+  convexHull2D,
   pointInPolygon,
   rotateVector2D,
   rotateVector3D,
@@ -172,7 +172,7 @@ describe('polygonArea', () => {
 // Spatial Queries
 // =============================================================================
 
-describe('convexHull', () => {
+describe('convexHull2D', () => {
   it('should compute hull of square with interior point', () => {
     const points = [
       [0, 0],
@@ -181,7 +181,7 @@ describe('convexHull', () => {
       [0, 1],
       [0.5, 0.5],
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     expect(hull.length).toBe(4);
   });
 
@@ -191,12 +191,12 @@ describe('convexHull', () => {
       [1, 0],
       [2, 0],
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     expect(hull.length).toBe(2); // only endpoints
   });
 
   it('should handle single point', () => {
-    const hull = convexHull([[1, 2]]);
+    const hull = convexHull2D([[1, 2]]);
     expect(hull.length).toBe(1);
   });
 
@@ -206,7 +206,7 @@ describe('convexHull', () => {
       [1, 0],
       [0, 1],
     ];
-    const hull = convexHull(points);
+    const hull = convexHull2D(points);
     expect(hull.length).toBe(3);
   });
 });

@@ -26,9 +26,10 @@ import {
  * Covers `studentTTest`, `anova`, `chiSquareTest`, and `mannWhitneyTest`. For the
  * latter two, the *statistic* is deterministic and exactly hand-derivable, so it is
  * pinned directly; the χ² goodness-of-fit p-value is the exact χ²₂ survival
- * `exp(−x/2)`, and the Mann-Whitney p-value (a deterministic normal approximation
- * at the default settings) is bracketed by the Φ(1.96)=0.975 fact. `kolmogorovSmirnovTest`
- * / `shapiroWilkTest` / `principalComponentAnalysis` remain — tracked WS-1 P2 work.
+ * `exp(−x/2)`, and (as of Phase 4 Task 2b) the Mann-Whitney default p-value is the
+ * exact small-n U-distribution value, pinned to `scipy.stats.mannwhitneyu(...,
+ * method='exact')`. `kolmogorovSmirnovTest` / `shapiroWilkTest` /
+ * `principalComponentAnalysis` remain — tracked WS-1 P2 work.
  */
 
 /** Relative closeness (absolute for values ≤ 1). */
@@ -93,11 +94,8 @@ describe('mannWhitneyTest — external oracle (exact U statistic)', () => {
     // Ranks 1,2,3 vs 4,5,6 ⇒ R₁=6, U₁ = 6 − n₁(n₁+1)/2 = 0, U = min(U₁, n₁n₂−U₁) = 0.
     const r = await mannWhitneyTest([1, 2, 3], [4, 5, 6]);
     expectClose(r.uStatistic, 0, 1e-9);
-    // Default p is the deterministic normal approximation 2·Φ((U−μ)/σ) with
-    // μ=4.5, σ=√5.25 ⇒ z≈−1.964; since Φ(1.96)=0.975, the two-tailed p sits just
-    // under 0.05.  Bracket it (externally grounded, robust to the approximation).
-    expect(r.pValue).toBeGreaterThan(0.04);
-    expect(r.pValue).toBeLessThan(0.055);
+    // exact small-n Mann-Whitney p (scipy method='exact'); was the normal-approximation value before Phase 4
+    expect(r.pValue).toBeCloseTo(0.1, 4);
   });
 });
 

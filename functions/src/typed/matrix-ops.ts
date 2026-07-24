@@ -15,6 +15,7 @@
 import {
   eig,
   svd,
+  cholesky as matrixCholesky,
   cond as matrixCond,
   norm2 as matrixNorm2,
   normFro as matrixNormFro,
@@ -316,7 +317,8 @@ export function cholesky(A: number[][]): CholeskyResult {
   const n = assertSquare(A, 'cholesky');
   const tol = 1e-10;
 
-  // Check symmetry
+  // Check symmetry (preserved contract — the DenseMatrix primitive reads only the
+  // lower triangle, so it would silently accept an asymmetric input this surface rejects).
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       if (Math.abs(A[i][j] - A[j][i]) > tol) {
@@ -325,28 +327,13 @@ export function cholesky(A: number[][]): CholeskyResult {
     }
   }
 
-  const L: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j <= i; j++) {
-      let sum = 0;
-      for (let k = 0; k < j; k++) {
-        sum += L[i][k] * L[j][k];
-      }
-
-      if (i === j) {
-        const diag = A[i][i] - sum;
-        if (diag <= 0) {
-          throw new Error('cholesky: matrix is not positive definite');
-        }
-        L[i][j] = Math.sqrt(diag);
-      } else {
-        L[i][j] = (A[i][j] - sum) / L[j][j];
-      }
-    }
-  }
-
-  return { L };
+  // Route the factorization to the maintained, oracle-pinned matrix-package
+  // DenseMatrix primitive (native-accel pattern; see
+  // project-two-decomposition-layers-prefer-matrix). It throws
+  // 'cholesky: matrix is not positive definite' on a non-SPD pivot, matching the
+  // former in-place body. Convert back to number[][] for this surface's contract.
+  const { L } = matrixCholesky(DenseMatrix.fromArray(A));
+  return { L: L.toArray() };
 }
 
 // =============================================================================

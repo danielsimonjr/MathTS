@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-10
+Updated: 2026-07-21 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch L1 @0.60.0 + L2 pos-disc-quadratic @0.61.0 [+ Critical #7 landauMignotte fix]; #8 L3 Rothstein-Trager next; #9 spheroidal remains. Post-milestone CDG/QDG pass clean: 1768 files/0 orphans, 0 dups, 0 cycles, 0 node-safety leaks, browser-safe clean)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -10,6 +10,639 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
+
+> ## 🎉 BACKLOG BURN-DOWN SWEEP — 2026-07-18/19 (13 items, 9 releases, all oracle-pinned)
+>
+> Quick-win + medium + large-tractable tiers all driven to released. **Releases:** functions@0.43.3
+> (CODATA-2022 constants) → 0.44.0 (exact Parks–McClellan `remez` [breaking convention] + `buttord`
+> bandpass) → matrix@0.7.0 + functions@0.45.0 (`luSolve` + `solveODE` events) → 0.46.0 (sparse `svds`,
+> ILU/IC preconditioners, O(k²) `minres`, `qz` throw fixed) → 0.47.0 (GP regression + Dirichlet/Wishart) →
+> 0.48.0 (CAS: real `casExpand`/`casFactor`, multivariate `expand`/`factor`, partial-frac + by-parts
+> integration) → 0.49.0 (special fns: Riemann–Siegel Z, Lerch Φ, parabolic-cylinder, Coulomb F) → 0.50.0
+> (computational-geometry engine: hull/Delaunay/Voronoi/sphericalVoronoi/alphaShape) → 0.51.0 (BDF + Radau
+> stiff solvers + adaptive `solveODESystem`). Plus infra: census-gate wiring fix, orphan/dead-copy cleanup.
+> **Verify-before-building paid off** — WASM-FFT kept-on-merit (tested, not dead), care/dare eigenvector
+> routing measured _worse_ (declined), qz's real bug was a throw (not eigen-routing), WS-2 already done.
+> **Surfaced for future** (scoped designs recorded): full multivariate factorization (Wang/Zassenhaus),
+> Risch integration, coulombG/Mathieu/spheroidal, halfspace/n-D vertex enumeration, general PDE-MOL/DAE/DDE.
+> **⑭ GUI epic remains — DESIGN-GATED** (Daniel's call): backend contract (`--expect-hash`, event streaming,
+> multi-doc serve, SVG typesetting) is tractable-autonomous; the UI layer (interactive charts framework +
+> Electron shell) needs a brainstorming/design pass before build.
+>
+> ## 🎉 A-LIST BURN-DOWN — 2026-07-19 (#1–#6 released, functions@0.52.0 → 0.57.0)
+>
+> The "surfaced for future" items above were then executed in ranked order. **Releases:** functions@0.52.0
+> (irregular Coulomb wave `coulombG`/`coulombFG`) → 0.53.0 (`solveParabolicPDE`, MOL + BDF) → 0.54.0
+> (`solveDAE`, index-1 via BDF + coupled Newton) → 0.55.0 (`solveDDE`, method of steps + BS23) → 0.56.0
+> (Mathieu `mathieuA/B/Ce/Se` via symmetric tridiagonal eigenproblem) → 0.57.0 (`halfspaceIntersection`,
+> polytope vertex enumeration via the dual-hull route). All oracle-pinned (scipy / mpmath / closed forms).
+>
+> **#6's review caught two Critical scale-invariance bugs before ship** — absolute epsilons on
+> scale-dependent geometric quantities; row-scaling by `1e-8` (a semantic no-op) silently returned an
+> EMPTY vertex list, and a side-2000 cube threw false `unbounded`. All 14 original fixtures used O(1)
+> coordinates and were structurally blind to both. Fixed at root (normalise the cloud, divide by facet
+> extent, Hadamard bound, relative dedup) + 7 cross-scale regression tests. See memory
+> `feedback-relative-epsilons-for-scale-dependent-quantities`.
+>
+> **A-list remainder — the two genuinely large efforts left:**
+>
+> - ✅ **#7 polynomial factorization over ℤ/ℚ — COMPLETE (both layers).** **Layer 1** (univariate,
+>   Zassenhaus) shipped **functions@0.58.0**; **Layer 2** (multivariate, **Kronecker substitution**)
+>   shipped **functions@0.59.0** (2026-07-20). `factor`/`casFactor` now factor any integer polynomial —
+>   uni- or multivariate — completely into irreducibles over ℤ/ℚ. bigint engine
+>   `functions/src/typed/factorization/`; sympy-oracle-pinned (Layer 2: 320-case adversarial review, 0
+>   soundness failures); 346-test regression preserved on both. ADR: Kronecker chosen over Wang/EEZ for
+>   v1 (reuses Layer 1, no multivariate-Hensel risk); **Wang/EEZ is the documented future performance
+>   upgrade** for very-high-degree many-variable inputs (§5b of the spec). Spec:
+>   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plans:
+>   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md` +
+>   `…-layer2-multivariate-kronecker.md`.
+> - 🔵 **#8 Risch integration** — L, IN PROGRESS (staged like #7). **Layer 1 (rational functions,
+>   linear + irreducible-quadratic denoms → log/arctan) SHIPPED functions@0.60.0; Layer 2
+>   (positive-discriminant quadratics → real log via quadratic surds) SHIPPED functions@0.61.0**
+>   (2026-07-20). Engine `functions/src/cas/rational-integrate.ts`, differentiation-verified,
+>   regression preserved. The 0.61.0 review also caught+fixed a **Critical shipped-#7 bug**
+>   (`landauMignotte` used `|lc|` not the coefficient 2-norm → `factorUnivariateZ(x²-10000)` false-
+>   irreducible). **Layer 3 (general Rothstein–Trager — deg-≥3 irreducible + repeated pos-disc denoms,
+>   log-coeffs are arbitrary algebraic numbers → needs a number-field impl) is NEXT** (ADR-flagged as an
+>   infrastructure subsystem); then transcendental exp/log Risch. Specs:
+>   `…/specs/2026-07-20-risch-integration-design.md` + `2026-07-21-risch-layer2-quadratic-surd-design.md`.
+>   Oracle: sympy `integrate`, verified by differentiation.
+> - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
+>   or a self-built continued-fraction reference).
+>
+> **Release-record note (verified 2026-07-19):** this repo publishes via Changesets to npm and does **not**
+> carry git tags for these releases — `git ls-remote --tags` shows nothing newer than `mathts-tensor-v0.1.0`
+> / `security-2026-05-01`. **npm is the release record**, not `git describe`. Backfilling tags across the
+> sweep is an open option, not a done thing.
+>
+> **Blocked on Daniel (not on the agent):** fork publishes (typed-function alpha.3 / workerpool 10.2.1) ·
+> #27 fork first-party integration · NPM_TOKEN/OIDC · wiring `docs:functions:check` into CI ·
+> the factory-layer-collapse ADR.
+
+- [x] **CDG complete file census + build-root regression fix (2026-07-18)** — `tools/create-dependency-graph`
+      now emits a **complete file inventory** (`docs/Architecture/FILE_INVENTORY.md` + `file-inventory.json`):
+      EVERY tracked `.ts` in the repo — package `src/`+`tests/`, repo-root `tests/`, `tools/`, `*.config.ts`,
+      `examples/`, `docs/` — tagged `reachable`/`build-entry`/`test-only`/`orphan`/`test`/`tool`/`config`/`example`
+      (census: **1705 files** == git-tracked `.ts`; = 1091 src + 550 test + 25 tool + 29 config + 10 example). The
+      **self-check gate** (`verifyFileCensus`) uses a MAXIMAL location-agnostic repo walk as ground truth (broader
+      than the census's enumerated discovery) + a standing no-regen `npm run check:file-census`; hard-fails on any
+      unaccounted disk file or orphan. Proven both probe classes (in-scope src orphan → docs:deps FAIL; root-test
+      out-of-scope → check:file-census FAIL; both PASS once deleted). **Defect fixed on re-review:** first cut
+      scoped census AND gate per-package, so the gate shared the blind spot and missed 11 repo-root tests — now
+      maximal walk == census (1705). Also fixed a **build-root regression**: config-driven `tsup.config.ts` entries
+      (`plot/src/render-file.ts`, `workbook/src/run-worker.ts`) were dropped from the module graph after those
+      packages moved entries out of the build-script string; CDG now reads `tsup.config.ts`'s `entry:[…]` (module
+      total 1086→**1088**, orphaned 1→0). Gates: cycles 0, browser-safety clean, `check:duplicates:fast` 0, eslint clean.
+- [x] **Post-dedup file hygiene + regression fix (2026-07-18)** — finished the dedup's file-level cleanup (the
+      symbol count was 0, but orphaned FILES remained; closes the Bucket-B "natural next slice" notes below):
+      **(a) orphans deleted** — `expression`/`functions` `error/MathjsError.ts` (canonical in `core`, reachable from
+      nothing). **(b) dead-ship leftovers retired** — `expression/src/utils/switch.ts` + the `expression`/`functions`
+      `utils/bignumber/formatter.ts` re-export shims (runtime already on `core`), with **36 tests migrated to
+      `core`** (`core/tests/{switch,bignumber-formatter}.test.ts`, 8+28 — no coverage lost) and the moot equivalence
+      guards retired; `expression/src/error/DimensionError.ts` **kept** (a frozen slice-2 fixture consumes it).
+      **(c) dedup-CAUSED regression fixed** — the matrix-domain slice deleted `cond` from `functions/src/typed/numeric.ts`
+      but `cov-numeric.test.ts` imported it by source path (the "no caller" check misses test imports); removed the 3
+      obsolete tests (public SVD `cond` is oracle-pinned in `gap-matrix-domain-dedup-parity.test.ts`). Lesson:
+      [[feedback-dont-auto-delete-coherent-api]] corollary — grep TESTS before deleting a "dead" symbol. Test-only
+      dormant 7→4; orphaned 0.
+- [x] **`VERSION` constant derived from `package.json` — RELEASED core@0.13.1/plot@0.3.30/workbook@0.3.4 (2026-07-18).**
+      The exported `VERSION` was a hardcoded literal Changesets never bumped, so it drifted (core `0.1.0`, plot `0.2.0`,
+      workbook `0.1.0`); `mtsw version` printed `0.1.0` not `0.3.3`. Root-caused (not re-hardcoded): injected at build
+      from each package's own `package.json` via a per-package `tsup.config.ts` `define` (mirrored into `vitest.config.ts`
+      since tests import source); the `core/tests/version.test.ts` literal that ENCODED the drift now pins `package.json`.
+      Verified built dist tracks the bump; can't drift again. (This is what surfaced the tsup.config build-root regression above.)
+- [x] **Docs expansion (2026-07-18)** — new `docs/Architecture/COMPONENTS.md` (per-package component reference, all 24
+      packages, MemoryJS style); `docs/Architecture/API.md` 456→**1088 lines** (verified method-level signatures for
+      every package, extracted from built `.d.ts`); **6 new `docs/api/`** references (gpu/tensor/autograd/expression/
+      workbook/plot) + README index; ARCHITECTURE.md §6b + CLAUDE.md WASM-security-invariant pointer synced to the
+      `core/src/wasm-loader.ts` consolidation. Generator-owned export-index untouched (`docs:functions:check` green).
+
+### 🗺️ Oracle Gap Roadmap (comprehensive functionality + accuracy sweep vs numpy/scipy/mpmath/MATLAB/Mathematica)
+
+Full inventory: [`docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md`](docs/roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)
+(7 parallel domain surveys, all gaps probed against live oracles). Executed autonomously per-phase,
+oracle-pinned, subagent-driven. Phase plan:
+
+- [x] **Phase 0 — Correctness & honesty — ✅ RELEASED `functions@0.28.0`** (2026-07-15; +patch cascade
+      compat/statistics/plot/signal/arithmetic/trigonometry). 9 tasks, subagent-driven, oracle-pinned,
+      verified in the published tarball from a clean install: `invmod` throw → fixed · `lambertW` W₋₁
+      branch implemented (Halley) · `windowFunction` throws on unknown type (was silent rectangular) ·
+      `stiffODESolver` → shared `rosenbrockSolve` engine (was 71% err / null on stiff mode) ·
+      `summation`/`symbolicProduct` throw on symbolic bound (was silent 0/1) · `taylor`/`series`/
+      `seriesCoefficient` exact via Cauchy integral (was garbage past order 3) · `linprog` feasible
+      optima (was infeasible on degenerate cases) · `betainc` doc arg-order `(a,b,x)` corrected (impl
+      was always right — survey mis-probe) · CAS `factor`/`expand`/`apart`/`together`/`casFactor`/
+      `casExpand` annotated as pass-through. **Survey re-verification demoted `butter`/`firwin` to
+      Phase 6 features (documented lowpass/scalar-only, not bugs).**
+- [x] ✅ **Phase 0 follow-up (doc honesty) — RESOLVED 2026-07-16 (functions@0.37.0).** Verified on dist:
+      only `cancel` was pass-through (now wired to real univariate poly-GCD cancellation); `rationalize`/
+      `simplify` were already real (the stale claim is corrected). See the Pending/follow-ups entry below.
+- [x] **Phase 1 — Foundational primitives — ✅ RELEASED `functions@0.29.0`** (2026-07-15). `numericJacobian` + polymorphic `jacobian` · `newton`/`secant`/`halley` · `fsolve`/`root` (damped Newton) ·
+      `minimizeScalar` (Brent) · adaptive Gauss–Kronrod `quad` (+`nintegrate` singular fix ~1.7e-6→1e-10)
+      · full `svd` + `orth` exposed. 6 tasks subagent-driven, oracle-pinned vs scipy/numpy, verified in
+      the published tarball. (Note: matrix `svd` is synchronous, not async.)
+- [x] **Phase 2 — Optimization core — ✅ RELEASED `functions@0.30.0`** (2026-07-16). `bfgs` quasi-Newton
+      (optional box projection) · `nnls` + `lsqBounded` · `linprog` two-phase overload (equality/bounds/
+      status; legacy signature preserved). 3 tasks subagent-driven, oracle-pinned vs scipy, tarball-verified.
+      Follow-up: linprog free-variable (lower=null) bounds path untested.
+- [x] **Phase 3 — Regression & ML — ✅ RELEASED `functions@0.31.0`** (2026-07-16). `ols` (multiple
+      regression + inference) · `ridge`/`lasso`/`elasticNet` · `logisticRegression` (IRLS) · `dbscan` +
+      `knnClassify`/`knnRegress` · `gaussianKDE` · `chi2Contingency` + `multipleTest`. 6 tasks,
+      oracle-pinned vs sklearn/scipy/statsmodels, tarball-verified. Follow-up: `chiSquareTest`/
+      `multipleComparison` in hypothesis.ts partially overlap the new ones — consolidation decision TBD.
+- [x] **Phase 4 — Statistics inference — ✅ RELEASED `functions@0.32.0`** (2026-07-16). `fitDistribution`
+      (MLE) · exact Mann–Whitney p (default) + KS exact opt-in + `kendallTauTest` · `pacf`/`ljungBox`/
+      `durbinWatson`/`adfuller` · noncentral χ²/F/t CDFs · circular stats (`circmean`/`circstd`/`circvar`/
+      `vonMisesPDF`) · `mcnemar`/`cochranQ`. Oracle-pinned vs scipy/statsmodels, tarball-verified.
+- [x] **Phase 5 — Special functions & number theory — ✅ RELEASED `functions@0.33.0`** (2026-07-16).
+      `hyp0f1`/`hyp1f1`/`hyp2f1`/`pFq` · `polygamma`/`trigamma` · `jacobiP`/`gegenbauerC` · Jacobi elliptic
+      `jacobiSN`/`CN`/`DN` · `rootsLegendre` · number theory (`continuedFraction`/`eulerNumbers`/
+      `stirlingS1`/`discreteLog`/`primitiveRoot`/`multiplicativeOrder`/`kroneckerSymbol`/`permutationsGen`/
+      `combinationsGen`). Oracle-pinned vs mpmath/scipy/sympy, tarball-verified. Niche extras (polylog/
+      Lerch/Struve/Kelvin/Barnes-G/Coulomb/Mathieu/Riemann–Siegel) DEFERRED to a Phase-5 extension.
+- [x] **Phase 6 — Signal breadth — ✅ RELEASED `functions@0.34.0`** (2026-07-16). FFT helpers (rfft/
+      irfft/fftshift/fftfreq/fftn) · IIR design (cheby1/cheby2/ellip[exact] + `butter` btype + sosfilt/
+      zpk2sos/bilinear/buttord) · FIR+smoothing (firwinBandpass/firls/remez/savgol/wiener/deconvolve) ·
+      wavelets (idwt/wavedec/waverec/cwt) · spectral+peaks (csd/coherence/findPeaks/peakWidths/stft/istft/
+      decimate). **Resolves the Phase-0 butter/firwin lowpass-only note.** Oracle-pinned vs scipy.signal,
+      tarball-verified. Follow-ups: csd/coherence not hard-pinned; wavelets Haar/db1 only; remez approximate.
+- [x] **Phase 7 — Advanced linalg — ✅ RELEASED `functions@0.35.0`** (2026-07-16). Krylov `cg`/`gmres`/
+      `bicgstab`/`minres` (+Jacobi precond, dense-or-matvec) · `eigsh` (Lanczos) · structured solvers
+      `thomasSolve`/`solveBanded`/`toeplitzSolve`/`ldl` · complex matrix fns `funm`/`cosm`/`sinm` · control
+      eqns `dlyap`/`care`/`dare` (sign-fn / SDA). Oracle-pinned vs scipy, tarball-verified. Follow-ups:
+      matrix `eig` returns only real eigenvector cols (zeroes complex pairs — blocked Hamiltonian care);
+      rank-revealing QR + rq/ql/lq deferred; funm defective-matrix unsupported; minres O(k³).
+- [x] **Phase 8 — Graph/geometry/CAS/intervals — ✅ RELEASED `functions@0.36.0`** (2026-07-16). Graph
+      (`bfs`/`dfs`/`floydWarshall`/`bellmanFord`/closeness/harmonic/`maxFlow`/`minCut`/`astar`/`hungarian`)
+      · geometry (`quaternionSlerp`/`quaternionInverse`/`quaternionToEuler`/`boundingBox`/`procrustes`/
+      `kdTreeKNN`/`kdTreeRadius`) + multiset set ops · N-D `interpn` + general `solveBVP` · `interval`/
+      `Interval` · **real CAS** `expand`/`factor`/`apart`/`together` (resolves Phase-0 no-ops). Oracle-pinned
+      vs scipy/networkx/sympy, tarball-verified.
+      Deferred (logged): graph coloring/clique/Louvain/Katz; SphericalVoronoi/alpha-shapes; general PDE/MOL;
+      multivariate CAS + symbolic integration; Phase-5-ext niche special fns; matrix `eig` complex-eigenvector fix.
+
+> ## 🎉 ORACLE-GAP ROADMAP COMPLETE (Phases 0–8) — `functions@0.28.0 → 0.36.0`, 2026-07-15/16
+>
+> All 8 phases planned, executed subagent-driven, oracle-pinned vs numpy/scipy/mpmath/sklearn/statsmodels/
+> networkx/sympy, and verified in the published npm tarball. ~44 tasks across correctness fixes,
+> foundational primitives, optimization, regression/ML, statistics inference, special functions/number
+> theory, signal processing, advanced linalg, and graph/geometry/CAS/intervals.
+
+### ✅ Cross-package function deduplication → unify on a single canonical source (COMPLETE 2026-07-18)
+
+> **✅ CAMPAIGN COMPLETE — `TRUE_DUPLICATE` 253 → 0.** Finder + `check:duplicates` gate live on pre-commit
+> (recurrence-proof); 7 real public-API correctness bugs found via oracle audits and fixed+released (4 arithmetic
+> → core@0.11.0; 2 transcendental BigNumber/Complex → core@0.12.0; compat `zeros`/`ones` mathjs-parity → compat@0.4.0);
+> WasmLoader SHA-384 logic single-sourced to `core/internal` (invariant preserved) → core@0.13.0. All 4 former
+> HUMAN-DECISION clusters decided + executed. Allowlist-with-parity-guard discipline ([[feedback-allowlist-needs-parity-guard]]).
+> Disposition record: `docs/Architecture/duplicate-backlog.md`. Slice-by-slice history retained below.
+
+Systematically find and consolidate duplicate implementations of the same function scattered across the
+~24 packages (the "multiple implementations of one name" trap), then unify each on ONE canonical source
+the other packages import. Extends the standing "all libraries build on core" principle
+([[project-all-libraries-build-on-core]]). Known duplicates already observed: **3 `fft`s**;
+`sum`/`distance`/`cumsum`/`variance` (typed + factory + compat layers); **`fftshift`/`ifftshift`**
+(`signal/fft.ts` generic `<T>` — dead — vs `fft-helpers.ts` public `number[]`, found 2026-07-17). The
+CDG tool did NOT create these — it accurately surfaces them; the duplication is in the code.
+
+- **FIND (reusable tooling, not one-off greps):**
+  1. [x] ✅ **DONE 2026-07-17** — CDG emits `docs/Architecture/duplicate-symbols.{md,json}` via
+         `npm run docs:deps` (new `detectDuplicateSymbols`/`docs:duplicates` alias): groups every
+         OWN-defined export by NAME across all files/packages (excluding re-export forwards via
+         `exports.reExported`), tags public-vs-internal per FILE (new shared `computePublicSurface`,
+         extracted from `detectUnused` — needed per-file granularity, not the flat
+         `package-export-surfaces.json` union, to correctly resolve `fftshift`→`fft-helpers.ts` as
+         canonical instead of AMBIGUOUS) + a canonical-candidate hint. Found **287 runtime + 71 type**
+         duplicate names (the `is*` guard family, `format`/`create`/`transpose`/`abs`/`add`, the
+         `fft`/`fftshift`/`ifftshift` family confirmed) — the scoping measurement for steps 2-3 below.
+  2. **Gate 2 — deterministic near-duplicate clustering** (no LLM): load all function bodies into an RLM
+     Python REPL, normalize (strip idents/whitespace), cluster by token/AST-shingle + type-signature-enriched
+     fingerprint. **Add a deterministic clone detector** (jscpd / PMD-CPD for TS) — auditable, model-stable
+     (per Adam+Eve: embeddings drift across model versions → non-deterministic CI). Beware shared-import
+     over-clustering.
+  3. **Gate 3 — LLM judgment** (RLM + sonnet agents) over CLUSTERS ONLY → {true-dup | legit-variant | unrelated}
+     - canonical pick. **Auditable:** cache verdicts by content-hash of the normalized pair + COMMIT the cache
+       (fossilise; re-runs free & reproducible); log model/prompt/response; LLM = candidate ONLY (it hallucinates
+       legitimacy, e.g. "precision tweak, keep both"). Catches same-behavior-DIFFERENT-name that Gate 1 misses.
+  4. **Gate 4 — behavioral-equivalence PROOF** (the hard merge gate). ⚠️ **NOT naive deep-equal** (Adam+Eve:
+     dangerous for numerics). Use **property-based testing (`fast-check`, already a repo dev-dep)** with
+     domain-aware generators, **ULP/epsilon-tolerant** assertions (`0.1+0.2≠0.3`, NaN/±0/Inf/denormals),
+     explicit **mutation/side-effect** checks, and config/state coverage. Property tests are the SOLE arbiter;
+     an LLM "similar" is never a merge license ([[feedback-rules-for-life]] R4).
+- **TRIAGE of the 287 runtime dups (2026-07-17) → 4 buckets, sequenced B → A → C → D (Daniel):**
+  - **Bucket B — internal util dupes (SAFE FIRST, ~69):** `deepMap`/`deepForEach`/`clone`/`array`/`collection`/
+    `formatter`/`factory` duplicated between `expression/utils` + `functions/utils` (dead-mathjs-sync residue).
+    Non-breaking → consolidate to `core/internal` (extends [[project-all-libraries-build-on-core]]; number.ts/
+    object.ts already done). Property-gated. **STARTED 2026-07-17.** - [x] ✅ **Slice 1 (factory/string/bignumber-formatter) DONE 2026-07-17.** `isFactory`/
+    `assertDependencies`/`isOptionalDependency`/`stripOptionalNotation`, generic `format`/
+    `stringify`/`compareText`/`escape`, and BigNumber `format`/`toEngineering`/`toExponential`/
+    `toFixed` redirected to `core/internal`, proven equivalent via a new reusable fast-check
+    harness (`core/tests/helpers/equivalence.ts`). `duplicate-symbols.json` runtime count
+    287→280. **Two divergences found and deliberately NOT merged** (reported for adjudication,
+    not silently resolved): `factory()`'s `CreateFunction<TDeps, ...>` generic constraint (core's
+    `Record<string, unknown>` breaks `tsc` against real destructured-deps call sites; both
+    packages already carry an `any`-workaround for this) and `sortFactories`/`create`'s cyclic-
+    dependency handling (core throws on any cycle — an intentional later fix, commit `32fe7051`
+    — the package copies silently don't). **Side effect (flagged, not fixed):**
+    `expression`/`functions`' `error/MathjsError.ts` lost their only in-package caller and are
+    now dead code (per `unused-analysis.md`) — itself a 3-way mathjs-derived duplicate, a natural
+    next Bucket B slice. - [x] ✅ **Slice 2 (array/collection/map) DONE 2026-07-17.** Unlike slice 1, core had NONE of
+    these — the ~1500-line combined `array.ts`/`collection.ts`/`map.ts` bodies were newly
+    relocated into `core/src/{array,collection,map}.ts` + `core/internal.ts` (aliased where
+    array.ts's `clone`/`get` collide with `object.ts`'s, and array.ts's/collection.ts's own
+    `deepMap`/`deepForEach` collide with each other). `IndexError`/`DimensionError`/
+    `getSafeProperty` family/`_switch` got internal-only non-exported mirror copies in core
+    (their real canonical homes — `error/IndexError.ts`, `error/DimensionError.ts`,
+    `utils/customs.ts`, `utils/switch.ts` — stay package-local, untouched, a future slice).
+    Proven equivalent via 43 new fast-check/example tests against a frozen pre-redirect
+    snapshot (`functions/tests/dedup-bucketB-slice2-equivalence.test.ts` +
+    `functions/tests/fixtures/dedup-bucketB-slice2/*-original.ts`). `duplicate-symbols.json`
+    runtime count 280→256 (types 70→69). **Divergences found + reconciled (reported):**
+    `ObjectWrappingMap`/`PartitionedMap`'s `[Symbol.iterator]` (functions had already fixed a
+    latent `implements Map<K,V>` type-soundness bug that expression's copy still had — core
+    adopts the fix); `createEmptyMap`/`createMap`'s generic default (`K=string` vs `K=unknown`,
+    compile-time-only, reconciled to `K=string`); `initial()` and `toObject()` were
+    expression-only (preserved in its shim only, not invented into functions'). `collection.ts`'s
+    two copies were already identical. Full `core`/`expression`/`functions` suites green, no
+    regressions; `npm run typecheck` still 32/32. - [x] ✅ **Slice 1/2 dead-ship leftover cleanup DONE 2026-07-18.** Retired the consolidation leftovers that
+    survived only via their own unit tests (no runtime consumer): `expression/src/utils/switch.ts` (copy of
+    core's `_switch`), `expression/src/utils/bignumber/formatter.ts` + `functions/src/utils/bignumber/
+formatter.ts` (re-export shims of `core/src/bignumber-formatter.ts`). Coverage migrated (no loss) into
+    `core/tests/switch.test.ts` (8) + `core/tests/bignumber-formatter.test.ts` (28); redundant expression
+    formatter/switch tests deleted; the `bignumber/formatter` section of `dedup-bucketB-equivalence.test.ts`
+    retired (pinned deleted shims ≡ core). **`expression/src/error/DimensionError.ts` KEPT** — a live slice-2
+    fixture (`fixtures/dedup-bucketB-slice2/expression-array-original.ts`) still imports it. `unused-analysis.md`
+    test-only dormant 7 → 4. Gates: core/expression suites green (796 / 1943), typecheck + eslint + duplicates + cycles all clean.
+  - **Bucket A — hot-path guards (KEEP-LOCAL, ~53):** `isNumber`/`isComplex`/`isMatrix`… across core/expression/
+    functions/typed-function. DO NOT merge (V8 inlining; `noExternal` does NOT fix it — Rollup keeps module
+    scope so V8 still won't inline `import{}` across sub-module boundary, per Adam+Eve). Action = formalize the
+    keep-local ALLOWLIST for the prevention gate.
+  - **Bucket C — layer-generated public dupes (ADR, ~175 AMBIGUOUS):** `abs`/`add`/`transpose`/`max`/`format`
+    publicly defined in `functions/typed` + `compat/shims` + `matrix/typed-ops` + `core`. ROOT CAUSE = the
+    typed/factory/compat layering. Fix = **delegation policy** (each layer's public op DELEGATES to ONE canonical
+    core/functions impl, no re-implementation) + **deprecate the `factory` layer**. Breaking-change program,
+    staged, sequenced with paused #27 (both touch core). Daniel approved the direction 2026-07-17.
+    - [x] **Arithmetic slice (temperature split) DONE 2026-07-17:** `pow`/`round`/`fix`/`equal` rich-type
+          (BigNumber/Fraction/Complex) + tolerance `equal(number,number)` cases now DELEGATE to core's scalar
+          primitive; hot `number`/`bigint` stay inline. Fixed 3 live public bugs at root (`pow(bn,0.5)→1`,
+          `round(bn -2.5)→-3`, `equal(0.1+0.2,0.3)→false`) + the Fraction floored-exponent bug. Equivalence guard
+          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (fast-check + edge corpus). Full functions
+          suite green (4024), typecheck 0, eslint 0. Microbench: hot path unchanged; +~0.13–0.41µs/call on rich types.
+    - [x] **Arithmetic slice 2 (systematic sweep) DONE 2026-07-18:** extended the equivalence guard to the
+          remaining core-backed scalar ops — `add`/`subtract`/`multiply`/`divide`/`abs` (the full inventory
+          appearing both as a core primitive and a typed dispatcher case, excluding slice 1's pow/round/fix/equal).
+          NO divergence found: unlike slice 1, every case in these five ops is a direct one-liner forward to the
+          SAME shared instance method (`a.add(b)`, `x.abs()`) in both files — not an independent reimplementation
+          of policy — so GUARD-BY-TEST only, no delegation (delegating would add a redundant cross-module call
+          with zero divergence-safety gain). 24 new fast-check properties + edge corpus (±0/NaN/±Infinity/
+          denormals/negative, incl. non-commutative subtract/divide order checks) added to
+          `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts` (44 tests total, all green). Full functions
+          suite green (4041 passed, 1 pre-existing unrelated timeout in gap-stats-breadth-oracle.test.ts confirmed
+          via git-stash on baseline), typecheck 0, eslint 0. TRUE_DUPLICATE count unchanged (142 runtime/69 types)
+          — confirms these are DISPATCH_VARIANT, not TRUE_DUPLICATE; the win is divergence-safety, not the count.
+  - **Bucket D — domain dupes:** `fft`/`fftshift`/`ifft` (functions vs matrix-wasm vs assembly). Case-by-case:
+    canonical + redirect + retire dead (e.g. the unreachable matrix WASM-FFT).
+    - [x] ✅ **`fftshift`/`ifftshift` DONE 2026-07-18** (`a96f0ef4`). Consolidated onto ONE generic
+          `rollBy<T>` in `functions/src/signal/fft.ts` (wire-not-delete): the generic `<T>` toolkit member
+          and the public `number[]` surface (`fft-helpers.ts`) both delegate — one algorithm, two thin
+          typed surfaces, no behavior change. Parity test (`fftshift-parity.test.ts`) guards identical
+          rolls; the residual symbol-name flag is allowlisted as the toolkit-vs-public split.
+  - [x] ✅ **Compat-parity + bitwise slice DONE 2026-07-18** (`ec5c48ac`). `TRUE_DUPLICATE` **135 → 116**
+        (19 flipped: 11 compat + 6 bitwise + 2 fft). Adversarially-endorsed **allowlist-WITH-parity-guard**:
+        new `compat/tests/parity-oracle.test.ts` anchors compat `variance`/`std`/`det`/trig/`conj`/`re`/`im`/
+        `arg` to the **numpy oracle** AND cross-checks `compat.X ≡ functions.X`. **Finding: NO divergence/bug
+        — compat = functions = numpy to full double precision** (independent-but-convergent impls; guard
+        protects them). Allowlisted: compat reimplementing homonyms (guarded), `functions`+`parallel`
+        **bitwise** dispatch-variants (verified `parallel` = Int32Array worker kernel vs `functions` scalar
+        `mathTyped`; `bitXor` stays, 3rd BigNumber definer), and `fftshift`/`ifftshift`. Baseline re-seeded
+        116; `check:duplicates:fast` passes; 0 cycles. **Honest remaining inventory:
+        `docs/Architecture/duplicate-backlog.md`** (matrix-domain routing — already-routed dispatch-variants
+        vs genuine bodies like `cholesky`; transcendental temp-split; **HUMAN-DECISION**: WasmLoader SHA-384
+        security ADR + workerpool `#27`-paused caps).
+  - [x] ✅ **Transcendental temperature-split slice DONE 2026-07-18.** `TRUE_DUPLICATE` **116 → 104**
+        (12 flipped: `sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p expm1 sign`). These are
+        name-collisions, not accidental dups: `functions` inlines `Math.*` in the `number` case (V8
+        hot-path guard, kept local); `core/src/number.ts` exports the scalar primitive for cold consumers.
+        Allowlisted the sole `PLAIN` core definer (functions side already `DISPATCH_VARIANT`). **Oracle
+        audit of every rich-type case (mpmath/NumPy) found + fixed 2 real public-API bugs at root in `core`:**
+        (1) `BigNumber.divide` large-divisor precision (catastrophic `cbrt(bignumber(2))→~0`; ~11-digit
+        `sqrt`/`asinh` loss); (2) `Complex.acosh` wrong branch for `Re(z)<0`. Guarded by new
+        `functions/tests/gap-transcendental-richtype-oracle.test.ts` (parity, not bare allowlist).
+        Baseline re-seeded 104; `check:duplicates:fast` passes; 0 cycles. **Warrants a `core` release**
+        (public-API correctness). Remaining backlog: matrix-domain routing + HUMAN-DECISION clusters.
+  - [x] ✅ **Matrix-domain routing slice DONE 2026-07-18.** `TRUE_DUPLICATE` **104 → 89** (15 flipped;
+        only `qr` of the 16-name matrix-domain set remains). Classified each by reading BOTH bodies:
+        (a) **already dispatch-variants** (`pinv`/`singularValues`/`normFro`/`lowRankApprox`/`cond`/
+        `matrixExpm`/`matrixLogm`/`matrixSqrtm`) — `functions/typed/matrix-ops.ts` `mathTyped` wrappers
+        route to the matrix primitives (verified by call chain) → allowlisted the matrix `PLAIN` bodies;
+        (b) **`cholesky` routed** — `functions`' `number[][]` body now delegates to the matrix DenseMatrix
+        primitive (native-accel), symmetry pre-check kept; NumPy audit found **no bug** (both bodies were
+        already correct); (c) **dead `cond` removed** — the shadowed power-iteration `cond` in
+        `functions/typed/numeric.ts` (unreachable, no caller) deleted at root; **independent-by-design**
+        `trace`/`diag`/`dotMultiply`/`row`/`column`/`subset` (mathjs-factory vs DenseMatrix typed-op,
+        different contracts) allowlisted **with a parity guard**. New
+        `functions/tests/gap-matrix-domain-dedup-parity.test.ts` (16 tests, NumPy oracle + cross-package
+        parity). Baseline re-seeded 89; `check:duplicates:fast` passes; 0 cycles. **`qr` surfaced as a
+        keep-vs-route ADR** (mathjs factory + WASM path vs DenseMatrix primitive — routing would drop both)
+        → `docs/Architecture/duplicate-backlog.md` §1. No release warranted (no behavior change / no bug).
+  - [x] ✅ **Closing tail slice — DONE 2026-07-18. `TRUE_DUPLICATE` 89 → 12 = THE FLOOR.** Classified and
+        dispositioned every remaining non-ADR cluster; the 12 that remain are **exactly** the three surfaced
+        HUMAN-DECISION clusters (WasmLoader SHA-384 security ×7, workerpool caps / paused-#27 ×4, `qr` ×1) —
+        nothing else is actionable without a Daniel ADR. **Eliminated (1 genuine merge):** `_switch`
+        (`functions/src/utils/switch.ts` → re-export of canonical `core/src/switch.ts` via
+        `@danielsimonjr/mathts-core/internal`, no cycle; cumsum cast). **Allowlisted the rest** with reasons +
+        parity guards where reimplementation: factory-layer scalar/array ops (new
+        `functions/tests/gap-factory-core-parity.test.ts`, functions≡core≡oracle); compat homonyms
+        (`zeros`/`ones`/`size`/`matrix`/`identity`/`transpose`/`bignumber`/`fraction`/`sparse`/`complex`/
+        constants — `compat/tests/parity-oracle.test.ts` extended); hot-path `is*`/`typeOf`; distinct-by-domain
+        (`scatter`/`area`/`histogram`/`line`/`derivative`/`jacobian`/`topologicalSort`/`dispatch`/`get`/`clone`/
+        `format`/`reduce`/`norm2`/`round`/`fix`/`equal`/…); framework (`factory`/`create`/`createChain`/
+        `getOperator`/`properties`/`printTemplate`); `to`/`toBest`; `bitXor` BigNumber body; the coherent
+        matrix WASM-FFT bridge kept (not deleted). **RFL R4 runtime audit vs numpy/oracle found NO code bug**
+        (two false alarms: `functions.transpose` is the parallel `Float64Array` primitive — mis-call, not a
+        bug; `compat.zeros(n)`/`ones(n)` = n×n square is compat's intentional `cols??rows` contract —
+        **SURFACED** as a mathjs-divergence for Daniel, pinned in the parity test, not changed since it's
+        outward-facing). Baseline re-seeded 12; `check:duplicates:fast` passes; 0 cycles; core+functions tsc
+        clean; parity + cumsum suites green. **No release warranted.** The factory-layer-collapse ADR remains
+        Daniel's open call (allowlist-with-parity = interim divergence guard). See
+        `docs/Architecture/duplicate-backlog.md` §6.
+  - [x] ✅ **Floor-decisions slice — DONE 2026-07-18. `TRUE_DUPLICATE` 12 → 0 = ABSOLUTE ZERO.** Daniel took
+        the 4 surfaced HUMAN-DECISIONs; all executed. **D1 (compat bug FIX):** `compat.zeros(n)`/`ones(n)`
+        single-arg now return a length-`n` **vector** matching mathjs (`[0,0,0]`, verified vs installed
+        mathjs), was an n×n square — two-arg unchanged; `parity-oracle.test.ts` flipped from pinning-the-bug
+        to pinning-mathjs; **compat release warranted** (public change). **D2 (`qr` KEEP both):** mathjs
+        `createQr` factory (+ `qr_wasm`) vs matrix DenseMatrix primitive — routing drops both; allowlisted +
+        guarded by new `functions/tests/gap-qr-parity.test.ts` (functions≡matrix≡numpy on |diag R| + A=QR +
+        QᵀQ=I; no divergence). **D3 (WasmLoader consolidate shared, keep divergent):** byte-identical SHA-384
+        integrity + resolve logic (`sha384OfBuffer`/`loadWasmManifest`/`verifyWasmIntegrity`/
+        `resolvePackagedWasm`/`defaultWasmLocation`) moved to `core/src/wasm-loader.ts` (via `core/internal`,
+        both pkgs reach core, no cycle); integrity.ts/resolve.ts now re-export + inject own `import.meta.url`;
+        **SHA-384 verify-before-instantiate preserved byte-for-byte**; lazy `import()` keeps core `.` entry
+        browser-safe; `WasmLoader` class + singleton stay per-pkg (allowlist — different alloc models). **D4
+        (workerpool caps allowlist):** `canUseWasm`/`canUseSharedMemory` = intra-workerpool node/browser-shim
+        variant; `initializePool`/`terminatePool` = **distinct-by-target** (functions→`ComputePool`,
+        workerpool→`MathWorkerPool` — RFL R4: delegating would've init'd the WRONG pool, a regression).
+        **GATES all GREEN:** `check:duplicates:fast` PASS (0 current, baseline re-seeded EMPTY); 0 cycles;
+        `check:browser-safety` 23/23; core/functions/matrix/compat tsc clean; security 22 + qr 9 + compat 81 +
+        core 829 + WASM-integration 33 GREEN. **Releases:** compat (public); core+functions+matrix (internal
+        consolidation, no behavior change) — session lead bundles. See `docs/Architecture/duplicate-backlog.md`
+        §7. **Campaign at absolute zero TRUE_DUPLICATE.**
+  - [x] ✅ **`types` section — DONE 2026-07-17/18.** Same campaign, the TYPE-declaration counterpart
+        to the runtime buckets above (68 flagged `TRUE_DUPLICATE` type/interface names). Triaged
+        every name: 14 consolidated onto a single canonical + type-only re-export shim
+        (`FactoryMeta`; `Range{ForEachCallback,MapCallback,FormatOptions,JSON}`; `NestedArray`
+        in `functions`+`tensor`; `MatrixDimensions`; `ComplexValue`; `ImportOptions`;
+        `PoolOptions`/`ExecOptions`/`PoolStats`; `LoadingMetrics`/`WasmManifest` via a new
+        `core/src/types/wasm-loader.ts`), ~40+ names across ~20 allowlist entries confirmed
+        genuinely distinct (the AST-node/duck-type guards riding with the hot-path `is*` family —
+        same Bucket-A reasoning, extended to types — plus per-subsystem shapes like
+        `FactoryFunction`/`CreateFunction`, `TypeDef`/`ConversionDef`, `ConfigOptions`,
+        `WasmModule`, `CholeskyResult`, `FFTResult`, `SparseMatrixData`, …), and one diverged
+        finding reported rather than force-merged (`CompiledExpression`). Type `TRUE_DUPLICATE`
+        68 → 0; `duplicate-baseline.json` regenerated (203 → 135, all runtime now). `npm run
+typecheck` 32/32, eslint clean, full affected-package suites green, `check:duplicates`
+        passes. See CHANGELOG `[Unreleased]` for the per-name breakdown.
+- **INTEGRATE (canonical-home rule):** cold shared → `core`/`core/internal`; domain ops → owning accelerated
+  package (delete/redirect rest); **HOT-PATH guards STAY LOCAL, period** (no `noExternal` escape hatch — unproven
+  - hidden copies defeat central maintenance); back-compat re-export moved symbols; **profile-FIRST** before
+    moving any candidate (repo bench suite; before/after in PR — don't repeat the anecdotal 40% regression); pick
+    the CORRECT diverged impl ([[feedback-measure-the-symbol-consumers-import]]); prefer WIRING over deleting a
+    coherent helper ([[feedback-dont-auto-delete-coherent-api]]).
+- **PREVENT ("forever"):** [x] ✅ **pre-commit DONE 2026-07-17** — `check:duplicates:fast`
+  (`--no-regen`, reads the `docs:deps`-refreshed report, adds <1s) wired into `.husky/pre-commit`;
+  verified FAIL on a synthetic injected duplicate (`__gateProbe`) + PASS on the clean tree. CI
+  wiring still open. **Signature/contract-aware** (flag multiple independent bodies for the SAME
+  type signature, not just same name — else the allowlist floods with legit typed-dispatch
+  overloads) + keep-local allowlist (Bucket A) + **body-similarity-to-canonical** detection
+  (catches rename-circumvention `sum`→`_sum`) + suggest-reuse guidance (not just block). New
+  unauthorized duplicate fails the build.
+- **Adversarially reviewed 2026-07-17** by Adam (Gemini-2.5-pro) + Eve (OpenAI-o3) — convergent: root-cause is
+  the layering (Bucket C), Gate-1 needs signature-awareness, Gate-4 needs property-based (not deep-equal),
+  hot-path needs profile-first, `noExternal` is NOT a proven fix. All folded in above.
+
+### 📋 Pending / follow-ups (surfaced during the roadmap — genuine future work, not blockers)
+
+Consolidated from the per-phase records above. None gate the released work; each is an additive improvement
+or a documented scope limit worth revisiting.
+
+- [x] ✅ **Doc honesty (Phase 0) — RESOLVED 2026-07-16 (functions@0.37.0).** Rule-4 re-probe of the built
+      `dist` found the "pass-through" claim was **stale**: `rationalize` already returns a real transformed
+      Node (`(x+1)^2`→`x^2+2x+1`) and `simplify` already reduces (`2x+3x`→`5x`; it just doesn't apply trig
+      identities — a mathjs default, not a no-op). Only `cancel` was genuinely pass-through for symbolic
+      input, so it was **wired to the real engine** (univariate polynomial-GCD cancellation, matching
+      `sympy.cancel`) rather than annotated. `docs/reference/functions.md` `cancel` row updated.
+- [~] **CAS breadth** — largely DONE 2026-07-18 (sympy-oracle-pinned): multivariate `expand` ✅ (exact,
+  collects like terms, N variables); multivariate `factor` ✅ **tractable subset** (integer-content +
+  common-monomial + monomial difference-of-squares); `casExpand`/`casFactor` ✅ **wired to the real
+  `expand`/`factor` engines** (were crude string stubs); `cancel`/`rationalize`/`simplify` real
+  transforms ✅ (prior work); symbolic integration ✅ **partial-fraction** (composes `apart`) **+
+  tabular by-parts** for polynomial·{exp,sin,cos} (differentiate-back verified). **SURFACED / still
+  out of scope** (need real algorithms, not half-shipping): full multivariate `factor` into
+  irreducibles (Wang/Zassenhaus/EEZ); repeated-root/irreducible-quadratic `apart`; general
+  u-substitution / a Risch-style integrator; integration of products of two transcendental factors.
+- [x] ✅ **matrix `eig` complex eigenvectors — RESOLVED 2026-07-16.** `EigResult` gained an additive
+      `vectorsIm: number[][]` field; complex-conjugate pairs now emit `vectors[k] ± i·vectorsIm[k]`
+      (unit-normalized by the complex 2-norm) instead of an all-zero column, pinned against the
+      implementation-independent complex residual (`matrix/tests/eig-complex-eigenvectors-oracle.test.ts`).
+      ✅ **routing follow-up RESOLVED 2026-07-18 (measured, declined on merit).** Prototyped the
+      Hamiltonian-eigenvector `care` (`X=U₂U₁⁻¹` over the stable subspace, now enabled by `vectorsIm`)
+      and measured it vs the retained sign-function path on a complex-Hamiltonian + ill-conditioned
+      corpus: the eigenvector path is **strictly less accurate on every case** (Riccati residual gap
+      widens on ill-conditioned Hamiltonians — near-uncontrollable 3.3e-10 vs 2.3e-13; chain5×5 7.1e-13
+      vs 3.7e-14). Kept sign-function `care` / SDA `dare` (self-contained, more robust); corrected the
+      stale docstring; +3 oracle+residual-pinned complex-spectrum tests. `funm`/`cosm`/`sinm` already
+      use eigen*values* (Lagrange-Sylvester / confluent Hermite), never eigenvectors — nothing to route.
+- [~] **Linalg extension:** ✅ **rank-revealing `qrPivoted` + `rq`/`ql`/`lq` + `condest` DONE 2026-07-16
+  (matrix@0.6.0)** — Businger-Golub pivoted QR w/ rank detection, QR-family variants, Hager 1-norm
+  condest (=133 exact vs numpy); fixed a shared `householder` degenerate-branch reflection bug.
+  **Remaining:** ~~`generalizedEig`/`qz` QZ-hardening (Francis double-shift)~~; ~~sparse `svds` (Lanczos)~~;
+  ~~preconditioners beyond Jacobi (ILU/IC)~~; ~~`minres` optimal Givens (O(k³)→O(k²))~~ — ALL DONE 2026-07-18.
+  - [x] ✅ **QZ-hardening — DONE 2026-07-18.** Root cause was `qz`'s homegrown single-shift `realSchur`
+        (no Hessenberg) _throwing_ on the all-real non-symmetric pencil `A=[[1,2,0],[0,3,1],[1,0,4]]`,
+        `B=diag(2,1,3)`. Routed the Schur step to the hardened `matrixSchur` (Hessenberg + Francis
+        double-shift + exceptional shift). `generalizedEig` already scipy-matched (real/complex/clustered),
+        now oracle-locked. `functions/src/linalg-extra.ts`. **Scoped follow-up:** `generalizedEig` still
+        forms `B⁻¹A` (fine for nonsingular `B`); direct eigenvalue extraction from the `qz` factors for
+        _singular/near-singular_ `B` is a future enhancement.
+  - [x] ✅ **ILU(0)/IC(0) preconditioners — DONE 2026-07-18.** `cg`/`gmres`/`bicgstab`/`minres` accept
+        `preconditioner: 'ilu'|'ic'`; `incompleteLU`/`incompleteCholesky` exported. Factor-on-pattern +
+        iteration-reduction oracles (IC-CG 12 vs 22; ILU-BiCGSTAB 7 vs 15). `functions/src/numeric/krylov.ts`.
+  - [x] ✅ **`minres` O(k³)→O(k·n) — DONE 2026-07-18.** Rewrote to Paige–Saunders short recurrence
+        (Lanczos + incremental Givens QR + 3-term `w`-recurrence); no growing least-squares. One matvec
+        per iteration (structural test), scipy-pinned solution/residual. `functions/src/numeric/krylov.ts`.
+  - [x] ✅ **sparse `svds` (Lanczos) — DONE 2026-07-18 (functions@unreleased).** `svds(A, k)` top-k
+        singular triplets via `eigsh` Lanczos on the smaller normal operator (AᵀA / AAᵀ, never formed);
+        descending (opposite of scipy). scipy/numpy-pinned + defining-relation + Eckart–Young oracles.
+        `functions/src/numeric/svds.ts`.
+- [x] ✅ **funm defective matrices — DONE 2026-07-16 (functions@0.39.0).** Replaced the throw with
+      **confluent Hermite interpolation** (Newton divided differences over repeated eigenvalue nodes;
+      `f(J)=Σ f^(k)(λ)/k!·N^k`). Derivatives of `f` from an optional additive `fDerivs` arg (machine
+      precision — wired for `cosm`/`sinm`) or an order-tuned finite-difference fallback (~3–5e-11).
+      Verified on Jordan blocks vs closed forms + scipy `expm`/`sqrtm` (scipy's OWN `funm` is wrong here
+      — Rule-4). Distinct path bit-for-bit unchanged. ✅ **complex-spectrum _defective_ coverage DONE
+      2026-07-18** — +8 oracle-pinned tests (4×4 real-Jordan `[[C,I],[0,C]]` + 6×6 mult-3) vs
+      scipy `{expm,cosm,sinm}`; the real-dir FD path measured at 6.6e-11 (4×4) / 1.1e-8 (6×6), analytic
+      ~2e-16; **no bug** — impl was already correct. **Remaining:** multiplicity>5 still needs `fDerivs`.
+      (This is the Schur-Parlett follow-up; confluent Hermite is the equivalent for this scope.)
+- [x] **Signal:** ✅ **`csd`/`coherence` hard-pinned 2026-07-16 (functions@0.37.0)** — implementation-independent
+      invariants (coherence∈[0,1]; unity for a scaled/shifted noiseless copy; `csd(x,x)`=welchPSD via the
+      one-sided doubling convention; polarization-identity Cauchy bound). Surfaced: public `csd` returns
+      **magnitude only** (no re/im) — a pre-existing API limit worth revisiting. ✅ **wavelet families beyond
+      Haar/db1 shipped** — `dwt`/`idwt`/`wavedec`/`waverec` now support db1-4/sym2-4/coif1-2 via a general
+      periodization filter bank pinned bit-for-bit against pywt 1.8.0 (`functions/tests/gap-wavelet-families-oracle.test.ts`,
+      55 tests). ✅ **`remez` exact Parks–McClellan — DONE 2026-07-18** (functions): faithful port of the
+      McClellan-Parks-Rabiner program (scipy's `_sigtoolsmodule.cc` `pre_remez`+`remez`) replacing the
+      Lawson-IRLS approximation, in `functions/src/signal/remez-exchange.ts`; scipy convention (0.5=Nyquist,
+      per-band desired/weight, `type` bandpass/differentiator/hilbert); taps match `scipy.signal.remez` to
+      machine precision (~1e-16) for Type I/II/III/IV (`functions/tests/remez-pm.test.ts`). ✅ **`buttord`
+      bandpass/bandstop array form — DONE 2026-07-18** (functions): `wp`/`ws` as `[lo,hi]` pairs → `[lo,hi]`
+      `Wn`; ports scipy's bandstop passband-edge `fminbound` optimizer + `band_stop_obj`; order exact,
+      `Wn` matches scipy to ~1e-8 (`functions/tests/iir-design.test.ts`). Signal breadth CLOSED.
+- [x] ✅ **Graph breadth — DONE 2026-07-16.** `graphColoring` (Welsh-Powell), `maxClique`
+      (Bron-Kerbosch), `louvainCommunities` (deterministic Louvain), `katzCentrality`
+      (networkx-exact), `isIsomorphic` (backtracking), and `betweennessCentrality`'s `normalized`
+      option all shipped in `functions/src/graph/community-coloring.ts` +
+      `functions/src/typed/graph.ts`, oracle-pinned vs networkx 3.6.1
+      (`functions/tests/gap-graph-breadth-oracle.test.ts`). `adjacencyMatrix`'s `directed` option
+      was already implemented (this note was stale — verified with a test, no code change needed).
+      **Root-cause fix:** `betweennessCentrality`'s undirected normalization was dividing by
+      `(n-1)(n-2)/2` instead of `(n-1)(n-2)`, making normalised undirected betweenness 2x too
+      large — caught while oracle-pinning, fixed for both directed/undirected. **Remaining:**
+      incidence matrix + adjacency spectrum (not requested this pass).
+- [x] ✅ **Geometry breadth (partial) — DONE 2026-07-16.** `quaternionExp`/`quaternionLog`/
+      `quaternionPow` (`functions/src/geometry/geometry-extra.ts`, scalar-first `[w,x,y,z]`) and
+      `rayTriangleIntersect`/`rayPlaneIntersect`/`segmentSegmentClosest`
+      (`functions/src/geometry/intersect3d.ts`) shipped, oracle-pinned vs scipy
+      `Rotation`/closed-form geometry (`functions/tests/gap-geometry-breadth-oracle.test.ts`, 15
+      tests).
+- [x] ✅ **Computational-geometry engine — DONE 2026-07-19.** Built the foundation + tractable
+      consumers, all in `functions/src/geometry/`, oracle-pinned vs `scipy.spatial`
+      (`functions/tests/geometry-{hull,delaunay,consumers}-oracle.test.ts`, 27 tests):
+      **`convexHull`** (2-D monotone chain + 3-D QuickHull → structured `{vertices,simplices,area,
+volume}`, scipy-pinned area/volume), **`delaunay`** (2-D Bowyer–Watson, empty-circumcircle
+      invariant + count vs scipy), **`voronoi`** (dual of Delaunay), **`sphericalVoronoi`** (via the
+      3-D hull; areas sum to 4πr²), **`alphaShape`** (annulus recovers the hole). **Root-cause fix:**
+      the broken `delaunay_wasm` kernel (bogus triangle count, buffer over-read) was disabled — JS
+      Bowyer–Watson is always used; the internal test-only 2-D coord hull became `convexHull2D`.
+      **Remaining / surfaced (follow-ups):** - **halfspace-intersection / vertex-enumeration** — the one genuinely hard piece: convert a
+      set of half-spaces `A x ≤ b` to the vertices of the bounded polytope. Needs either the
+      **double-description method** (Motzkin; incrementally intersect half-spaces, maintaining the
+      V-representation) or, given an interior point `x₀`, the standard reduction to a **convex hull
+      of the dual points** `aᵢ/(bᵢ − aᵢ·x₀)` (scipy's `HalfspaceIntersection` route — the dual
+      hull's facets map back to polytope vertices). The 3-D hull engine here already supports the
+      dual-hull route for bounded 3-D polytopes; a full n-D version needs an n-D hull / LP feasibility
+      step. ✅ **SHIPPED 2026-07-19** — `halfspaceIntersection(halfspaces, interiorPoint)` in
+      `functions/src/geometry/halfspace-intersection.ts` via the **dual-hull route** (scipy's
+      convention `[a…, b]` ⇒ `a·x + b ≤ 0`), returning `{vertices, incidences}`. Boundedness is
+      decided by the dual-space **origin lying strictly inside the dual hull**; unbounded input
+      throws (mirroring scipy's `QhullError`). **2-D and 3-D only** — n-D still needs an n-D hull or
+      the double-description method, and throws a clear error rather than half-shipping. Oracle-pinned
+      vs `scipy.spatial.HalfspaceIntersection` (`functions/tests/geometry-halfspace-oracle.test.ts`,
+      14 tests; hexagon vertex set verified byte-identical to scipy). - **Perfectly-cocircular Delaunay degeneracy** — Bowyer–Watson (like Qhull without joggle)
+      mis-triangulates exact concentric rings; needs a joggle or symbolic perturbation. Documented. - **`delaunay_wasm` kernel** — fix or replace the AssemblyScript kernel, then re-enable dispatch.
+- [x] ✅ **Numerics: B-spline fit/eval + Monte-Carlo/QMC integration — DONE 2026-07-17.**
+      `bsplineFit`/`bsplineEval` (de Boor collocation for `s=0` interpolation, least-squares
+      smoothing for `s>0`) and `monteCarloIntegrate` (uniform + Halton/Sobol quasi-MC over an
+      axis-aligned box), `functions/src/numeric/{bspline,monte-carlo}.ts`. Oracle-pinned vs scipy
+      `splrep`/`splev` + known integrals within a 4-sigma band
+      (`functions/tests/gap-numerics-bspline-mc-oracle.test.ts`, 18 tests).
+- [x] ✅ **Stiff-ODE breadth: BDF + Radau + `solveODESystem` adaptive control — DONE 2026-07-19.**
+      `solveODE(..., {method:'BDF'})` = scipy's default variable-order (1–5) variable-step NDF-BDF
+      (faithful port: difference-array `D`, `change_D`, simplified-Newton on `(I−c·J)`);
+      `{method:'Radau'}` = 3-stage order-5 L-stable Radau IIA (real 3n×3n simplified-Newton on the
+      collocation system; scipy's exact embedded error estimate). Both in
+      `functions/src/numeric/solveODE.ts` (`bdfSolve`/`radauSolve`, module-level like Rosenbrock/RODAS),
+      finite-difference or analytic (`jac`) Jacobian, reuse the matrix-LU `_factorSolver`. Oracle-pinned
+      vs scipy `solve_ivp` (`gap-stiff-bdf-radau-oracle.test.ts`): Robertson t=40 BDF Δ≤2.2e-8 / Radau
+      Δ≤3e-10 (mass y1+y2+y3=1 exact); Van der Pol μ=1000 t=3000 BDF Δ=9.5e-7 / Radau Δ=3.3e-9; linear
+      stiff exact closed forms (e^-10, e^-1) to <1e-6. `solveODESystem` gained an **adaptive** embedded
+      RK45 (Dormand-Prince) default path (`_adaptiveRK45System`); explicit `dt` still selects the legacy
+      fixed-step RK4 (back-compat — BVP shooting driver unaffected). Pinned vs exact harmonic oscillator + scipy RK45 Lotka-Volterra (~1e-6).
+- [x] **SURFACED sub-projects (scoped — all 3 of 3 DONE: PDE, DAE, DDE):**
+      **(1) General 1-D parabolic PDE via MOL. ✅ DONE 2026-07-19 (`solveParabolicPDE`).** Solves
+      `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` by method-of-lines (uniform grid, central 2nd/1st
+      differences → stiff ODE system) integrated with the **new `bdfSolve`** (implicit → no CFL cap).
+      Dirichlet + Neumann (ghost-node, O(h²)) BCs; returns `{x, t, u[t][x]}`. Added as a NEW public
+      entry (`functions/src/numeric/solveParabolicPDE.ts`); legacy explicit-Euler `solvePDE` left
+      unchanged (its numerics are ADR-level). Oracle-pinned: exact heat relerr 1.27e-4 @ nx=81, O(h²)
+      rate **2.000**; manufactured 1.19e-4; Neumann 1.27e-4; scipy `solve_ivp(BDF)` MOL cross-check
+      ≤1.0e-12. 2-D/hyperbolic = further extensions.
+      **(2) DAE (index-1) via BDF. ✅ DONE 2026-07-19 (`solveDAE`).** Semi-explicit `y'=f(t,y,z)` /
+      `0=g(t,y,z)` (index-1 ⟺ `∂g/∂z` nonsingular). Variable-step, variable-order (1–2) BDF on the
+      differential block + **coupled** Newton solving the BDF equation AND the algebraic constraint
+      together each step (block Jacobian FD or analytic; LU via the shared `_factorSolver`); consistent
+      `z0` auto-solve; higher-index detected as singular `∂g/∂z`. Returns `{t, y[t], z[t]}`. Added as a
+      NEW public entry (`functions/src/numeric/solveDAE.ts`). Oracle-pinned (scipy has no DAE):
+      manufactured/closed-form max abs err 2.35e-7 @ tol1e-9; **constraint residual ≤8.9e-16 over the
+      whole trajectory**; reduce-to-ODE cross-check Δ2.13e-7; RC-circuit + vector (non-identity ∂g/∂z)
+      cases. `functions/tests/dae.test.ts` (11 cases). Higher-index/2-D = further extensions.
+      **(3) DDE (delay ODEs). ✅ DONE 2026-07-19 (`solveDDE`).** Constant-delay `y'(t)=f(t,y(t),
+[y(t−τ₁),…])` via the **method of steps**: adaptive **BS23** (Bogacki–Shampine, the `dde23` pair)
+  - **cubic-Hermite continuous extension** (dense output) as the history interpolant; step **capped
+    at min(τ)** so delayed args always lie in computed history (fully explicit); **lands exactly on
+    `t0+kτ` breakpoints** so no interval straddles a derivative jump. Multiple delays + vector state;
+    history function-or-constant. Returns `{t, y[t], yInterp}`. NEW public entry
+    (`functions/src/numeric/solveDDE.ts`, re-exported via `typed/numeric.ts`). Oracle-pinned (scipy
+    has no DDE; all implementation-independent): method-of-steps EXACT piecewise polys of `y'=−y(t−1)`
+    over 3 intervals **maxAbs 4.996e-16** (machine precision); characteristic roots `s=a·e^{−sτ}` —
+    real-root decay **−0.357403** and complex-root period **4.698**/decay **−0.31818**; ODE-degeneration
+    vs `solveODESystem` **Δ2.4e-10**; breakpoint-landing + C⁰ continuity + y″-jump. `functions/tests/
+dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = further extensions.
+- [x] **Stats:** ✅ **GLM (Poisson/Gamma IRLS), `mvnPdf`/`mvnSample`, `tTestPower` DONE 2026-07-16
+      (functions@0.41.0)** — statsmodels/scipy-pinned. ✅ **Gaussian-process regression
+      (`gaussianProcessRegression`/`gpRegression`; RBF + Matérn 3/2 & 5/2; posterior mean+variance)
+      DONE 2026-07-18** — sklearn-pinned to machine precision (max |Δ| mean 5.6e-16, std 1.9e-15). ✅
+      **Dirichlet + Wishart sampling (`dirichletSample`/`dirichletPdf`/`wishartSample`) DONE 2026-07-18**
+      — `dirichletPdf` scipy-pinned (~1e-12); samplers moment-convergence-pinned (Dirichlet mean within
+      ~1 SE, Wishart mean within ~2 SE over 200k draws).
+- [~] **Special-fns Phase-5 extension (niche):** ✅ **`polylog`, `struveH`/`struveL`, `kelvinBer`/
+  `kelvinBei`, `barnesG` DONE 2026-07-16 (functions@0.42.0)** — mpmath dps=25-pinned, machine
+  precision. ✅ **`siegelZ`/`riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF` DONE
+  2026-07-19** (`functions/src/special/wave-functions.ts`, 45-test mpmath dps=30 oracle) — max rel
+  err siegelZ 4.3e-15 / lerchPhi 1.0e-14 / pcfd 6.4e-15 / coulombF 3.6e-13.
+  ✅ **`coulombG` (+ `coulombFG` bundle) DONE 2026-07-19** — Barnett/Steed continued fractions
+  (DLMF §33.8: CF1 for `F'/F`, complex CF2 for `p+iq`, Steed recovery via Wronskian `F'G−FG'=1`);
+  reuses `coulombF` for the regular-solution sign. mpmath dps=30 corpus (192 pts): Wronskian
+  residual ≤6.7e-16, and ≤6.9e-13 rel err at/above the turning point `ρ_tp = η+√(η²+L(L+1))`.
+  **Validated domain excludes** the deep-sub-turning-point corner (large +η, ρ≪ρ_tp, e.g. η=5, ρ≤1)
+  where CF2 degrades — documented in the docstring (Steed-method limit in the forbidden region).
+  **Surfaced (scoped designs):**
+  - [x] **Mathieu (`ce_n`/`se_n`, characteristic values `a_n(q)`/`b_n(q)`) — ✅ DONE 2026-07-19.**
+        `functions/src/special/mathieu.ts`: symmetric tridiagonal eigenproblem for the Fourier
+        coefficients (4 parity classes; N=50 truncation), **reusing matrix `eig`** (functions already
+        depends on matrix — schur/geometry-extra import it, so the package boundary is already crossed;
+        the design note's "local QL" caveat was moot). `mathieuA`/`mathieuB` (char values), `mathieuCe`/
+        `mathieuSe` (angular fns via the eigenvector's Fourier coeffs), DLMF/A&S normalization
+        (`(1/π)∫ce²=1`, dominant coeff positive). **Installed mpmath 1.3.0 lacks the Mathieu family** →
+        oracle is `scipy.special` (identical DLMF convention; `cem(0,0,0)=1/√2` verified). Pinned:
+        a_n/b_n relerr ≤1.2e-14, ce/se abserr ≤7.8e-15 (n≤6, q∈{0.5,1,2,5,10}), q→0 limit exact,
+        ODE residual ≤2e-7 (finite-difference-limited). `gap-special-mathieu-oracle.test.ts` (252 asserts).
+  - **Spheroidal wave functions:** genuinely hard (angular `S_mn` + radial via a five-term
+    recurrence eigenvalue problem, prolate/oblate). No clean tractable subset; defer with the design
+    note that the characteristic values `λ_mn(c)` are again a (pentadiagonal-reduced-to-tridiagonal)
+    eigenvalue problem, oracle would be a from-scratch Bouwkamp/continued-fraction reference (mpmath
+    has no direct spheroidal). Lowest priority.
+- [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
+  correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
+  `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16
+  (functions@0.37.0). ✅ **`constants` updated CODATA-2018 → CODATA-2022** (2026-07-18): 27 measured
+  constants (masses/α/permittivities/Planck-units/etc.) oracle-pinned to `scipy.constants`; the 5
+  SI-fixed constants (c/h/e/k/N_A) and constants derived purely from them left untouched; standing
+  oracle guard added (`functions/tests/physical-constants-codata2022.test.ts`).
+
+### 🔧 Forked dependency libs (typed-function, workerpool) — standing grant 2026-07-16
+
+Already standalone repos (`~/danie/github/{typed-function,workerpool}` + github.com/danielsimonjr/\*),
+consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-forked-deps]]
+
+- [ ] **Publish pending fork changes** (awaiting Daniel's confirm on the specific actions):
+      `@danielsimonjr/typed-function` is at `5.0.0-alpha.3` on github/`develop` but only `alpha.1` on npm
+      (2 unpublished versions) → publish alpha.3. `@danielsimonjr/workerpool` has a types-fix commit on an
+      unmerged branch `fix/generate-js-api-types` → merge to `master` + publish 10.2.1.
+- [ ] **First-party integration** of typed-function/workerpool (absorb like BigNumber-in-core) — its
+      blocking condition (a mature oracle-gap gaps/functions analysis) is now **MET** (roadmap complete
+      2026-07-16), so this is unblocked and revisitable on Daniel's word. Still an ADR-level call.
 
 ### Numerical accuracy (NumPy/SciPy parity)
 
@@ -69,10 +702,13 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       `Σd²−(Σd)²/n`, pairwise mean) backs every path; retired WASM statsVariance/statsStd. Now
       machine-precision, **beats NumPy**. ⚠️ The `sum` trap AGAIN: public `variance` is the TYPED
       `typed/arithmetic.ts` one (I first fixed the factory). Fixed both. std/zscore/corr inherit it.
-- [ ] **[cleanup] Dead AS `statsVariance`/`statsStd` WASM kernels.** Their JS-side call paths were
-      retired 2026-07-15 (naive + less accurate than the corrected two-pass; memory-bound so not
-      faster). The AS kernels + WasmLoader decls are now unreachable dead weight — delete like the
-      eig/svd kernels were (needs `build:wasm` + manifest regen). Low priority.
+- [x] ✅ **[cleanup] Dead `statsVariance`/`statsStd` WASM decls — REMOVED 2026-07-16 (matrix@0.4.6).**
+      Rule-4 check found the scope was **narrower** than written: only the TS `AsModule` type declarations
+      in `functions/src/wasm/WasmLoader.ts` + `matrix/src/backends/WasmLoader.ts` were dead (0 live callers,
+      only retirement comments) — the AS source never exported these names (the general-library
+      `array_variance`/`array_stddev` kernels stay). TS-only removal, so **no `build:wasm`/manifest regen**
+      needed. **Follow-up:** broader dead-`stats*`-decl audit vs actual binary exports (statsMedian/Sum/
+      Cumsum/Correlation/Covariance also show 0 refs) — verify against `WebAssembly.Module.exports()`.
 
   ### Functionality expansion (2026-07-15, per "best scientific/engineering modeling library")
 
@@ -84,14 +720,31 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       heuristic (was using the whole interval as step 1 → RK23 silently returned 1/3 for y'=-y).
       Verified vs closed forms; `functions/tests/solveode-jspath.test.ts`.
 - [x] ✅ **Stiff ODE solver (Rosenbrock/ode23s) — ADDED** (2026-07-15). `solveODE(..., {method:
-    'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
+'Rosenbrock'})` — linearly-implicit ode23s (Shampine-Reichelt), L-stable, FD Jacobian + LU
       solve of I−hγJ per step, adaptive. Verified vs a linear stiff system's exact solution and vs
       scipy BDF on stiff Van der Pol(μ=1000). Plain-number state; RK45 stays default for non-stiff.
       `functions/tests/solveode-jspath.test.ts`.
-- [ ] **[follow-up] Stiff solver niceties.** Higher-order stiff option (RODAS/BDF) for tight
-      tolerances (ode23s is 2nd-order → many steps at tol<1e-8); analytic-Jacobian option (avoid FD);
-      Robertson-problem test; reuse the matrix package's LU (currently an inline dense solve — fine
-      for small/moderate systems, O(n³)/step for large ones). Event detection (`events` option).
+- [x] ✅ **[follow-up] Stiff solver niceties — COMPLETE.** ✅ **RODAS (4th-order L-stable Rosenbrock) + analytic-
+      Jacobian (`jac`) option + Robertson test DONE 2026-07-16 (functions@0.41.0)** — RODAS reaches
+      tol 1e-8 in 256 steps vs ode23s's 1487; verified vs exact linear-stiff + scipy Radau.
+  - [x] ✅ **Reuse the matrix package's LU DONE 2026-07-18.** Added a `luSolve(fac, b)` primitive to
+        `@danielsimonjr/mathts-matrix` (solve against an `lu()` factorisation, numpy-pinned). The stiff
+        step now routes its per-step `(I−hγJ)k=b` solve through a **threshold hybrid** (`_factorSolver`):
+        inline elimination for n<8 (measured 1.8×–8× faster on the tiny n=1–3 iteration matrices the stiff
+        solvers actually use — matrix `DenseMatrix`/`lu()` alloc overhead dwarfs the O(n³) work), matrix
+        `lu()`+`luSolve` factor-once for n≥8 (crossover matches `native-accel` threshold; up to 4× faster
+        by n=40). Small-path numerics bit-for-bit unchanged (verified on the full stiff corpus); large path
+        pinned to the exact heat-equation mode. `matrix/tests/operations/lu-solve.test.ts`,
+        `functions/tests/solveode-jspath.test.ts`.
+  - [x] ✅ **Event detection (`events` option) DONE 2026-07-18.** scipy `solve_ivp`-style: one
+        `g(t, y)` event function or an array; zero crossings between accepted steps are located by
+        cubic-Hermite dense interpolation + bisection and returned in `tEvents`/`yEvents` (one list per
+        event fn). `terminal` (`true`/count) stops the integration at the crossing; `direction` (±1)
+        filters the crossing sign; attributes on the function or `{event, terminal, direction}` object
+        form. Method-agnostic (post-pass over the accepted trajectory — RK + stiff alike); plain-number
+        state. Pinned to scipy `solve_ivp(..., events=)`: projectile ground-hit to 4e-15, harmonic
+        up-crossings to ~3e-13, multi-event sin/cos to ~4e-9 (`functions/tests/solveode-events.test.ts`).
+        **Stiff-solver niceties follow-up now COMPLETE.**
 
 ### Special-function / distribution accuracy audit (2026-07-15, vs mpmath dps=50 + scipy)
 
@@ -110,13 +763,12 @@ defects found + fixed:
       cancels two O(I0(x)) terms, so its error grows with x — ~5.3e-9 at the old x=9 crossover. Moved
       the series→asymptotic crossover to x=8 (asymptotic overtakes by x≈8.5): peak **5.3e-9 → 1.6e-9**
       (~3×). Machine-precision below x=5 and above x=15 throughout.
-- [ ] **[follow-up] Machine-precision `besselK`/`besselY` across the whole range.** The series
-      (cancellation) vs asymptotic (divergent) split floors K at ~1.6e-9 in x∈[8,11]. A uniformly
-      accurate **continued-fraction (NR `bessik` / Steed) or Temme** method would hit ~1e-15
-      everywhere. Scoped rewrite of `besselK0Series`/`K1Series`/`Asym` in `typed/special.ts`; verify
-      against mpmath across x∈[0.1,50]. `besselY` order≥2 forward-recurses off Y0/Y1 (fine; Y series
-      has no exponential cancellation, ~1e-13). Also `zeta` near the pole s→1 degrades to ~4e-13
-      (inherent; leave).
+- [x] ✅ **Machine-precision `besselK` — DONE 2026-07-16 (functions@0.38.0).** Replaced the series/
+      asymptotic split with the uniformly-accurate **NR `bessik`** method (Temme series x<2, Steed CF2
+      x≥2) for K0/K1; order recurrence n≥2 unchanged. Worst-case relerr across x∈[0.1,50] now **~8e-16**
+      (band x∈[8,11]: 1.3e-10 → **5.3e-16**, independently re-verified on dist). mpmath-pinned in
+      `gap-besselk-precision-oracle.test.ts`. `besselY` was already fine (~1e-13, no exponential
+      cancellation) — untouched. `zeta` near s→1 (~4e-13, inherent) left as documented.
 
 > **Reduction/statistics accuracy audit — SUBSTANTIALLY COMPLETE (2026-07-15).** Every common
 > reduction is now at or beyond NumPy: `sum`/`mean` (core@0.7.0), `norm`/`fsum` (0.7.0),
@@ -134,9 +786,10 @@ defects found + fixed:
   risk exceeds its benefit. If ever pursued: scale the mantissa by powers of 2 each step
   (exact), accumulate the exponent, `ldexp` at the end; handle 0/Inf/NaN via a separate
   order-preserving accumulator.
-- [ ] **[feature, not defect] `quantile`/`quantileSeq` non-linear interpolation modes.** `np.quantile`
-      offers lower/higher/nearest/midpoint; MathTS does linear only (which already matches np's
-      default exactly). Adding the other modes is a feature-parity nicety, not an accuracy fix.
+- [x] ✅ **`quantileSeq` non-linear interpolation modes — DONE 2026-07-16 (functions@0.38.0).** Added
+      numpy's `lower`/`higher`/`nearest`/`midpoint` via an optional trailing `mode` arg (`linear`
+      stays the default → all existing calls unchanged). Oracle-pinned vs numpy in
+      `gap-quantile-modes-oracle.test.ts` (incl. round-half-to-even ties).
 - ⬜ **[non-decision] `skewness` ~1e-6 abs error on large-mean data is near-zero-value inflation**
   (the 3rd central moment of near-symmetric data is ~0, so abs ~7e-7 reads as large relative
   error). For any genuinely-skewed distribution it's accurate. Not a real defect; leave.
@@ -288,14 +941,18 @@ defects found + fixed:
       core now (`signal/fft-core-f64.ts`), same f64 results, unchanged API. 6 dead helpers deleted.
       Guard: `tests/benchmark/fft-public-surface.test.ts`.
       **I nearly wrote a GPU FFT against a baseline that was itself 8× wrong.**
-- [ ] ⚠️ **The WASM FFT kernel is SLOWER than the JS core — decide whether to retire it.** n=2²⁰: AS
-      WASM **1039 ms** vs flat JS core **170 ms** (6× slower); n=2¹⁸: 141 ms vs 33 ms. Scalar radix-2 +
-      three data copies per dispatch. Same conclusion as the 2026-07 WASM audit reached for
-      element-wise/transpose/reductions; FFT was simply never audited. Currently **unreachable from any
-      public export** (the public `fft` is typed `parallelFFT`; the factory `fft` is not exported), so
-      it is dead weight, not a live pessimisation. A warning sits at the route
-      (`functions/src/matrix/fft.ts`). Options: retire the AS kernel (shrinks the binary) or SIMD-ize
-      it. Do NOT wire it into a public path as-is.
+- [x] ✅ **WASM FFT kernel — RESOLVED = KEEP (2026-07-18).** Re-verified before acting (RFL R4): the
+      "dead weight" premise was **half-wrong**. The AS binary DOES export `fft`/`rfft`/`powerSpectrum`
+      (`assembly/src/ops/fft.ts` → `assembly/build/mathts.wat`), a coherent matrix wrapper consumes it
+      (`matrix/src/backends/wasm/fft-wasm.ts`), and a **live, passing 24-test suite**
+      (`matrix/tests/wasm/fft-wasm.test.ts`) exercises the real kernel — it is the regression guard for the
+      AS `__new` hybrid-allocator fix. Unreachable from PUBLIC exports = true (public `fft`=`parallelFFT`),
+      but "no test depends on it" = FALSE. Per [[feedback-dont-auto-delete-coherent-api]] (which names this
+      kernel specifically as "present the decision, don't auto-retire"): **KEPT** — a functional,
+      correctness-tested internal accelerator whose 6× slowness never bites (nothing in `src` routes to it).
+      Fixed the doc-drift the audit surfaced: `fft-wasm-mock.test.ts` header wrongly claimed the AS artifact
+      "does not export fft/rfft/powerSpectrum" — corrected. Retiring remains a possible future ADR if binary
+      size ever matters (would need re-homing the `__new` regression guard onto a kept export, e.g. matmul).
 - [x] ✅ **Spec 3b — GPU FFT: MEASURED (three times), then BUILT. The WebGPU epic is COMPLETE.**
       (2026-07-14) Radix-2 **Stockham autosort**, f32 — self-sorting, so no bit-reversal pass (a pure
       memory shuffle is the one thing a GPU is worst at). log₂(n) passes, one encoder, one submit.
@@ -317,17 +974,18 @@ defects found + fixed:
       global 50,000 threshold applied — every transform above 50k silently took the four-step worker
       path. It does not pay: **n=2¹⁸, 156 ms via workers vs 77 ms on this thread** (2× slower) in
       Chrome; a wash in Node. The tuned decision was right and simply never read.
-- [ ] **Worker-thread run timeout** — sandboxed cell exec is currently synchronous with
-      **no hard timeout**; add a worker-thread execution path with a kill-able timeout.
-      _(Highest-value robustness gap.)_
-- [ ] **`ipynb` export** — Jupyter-notebook export; sibling of the shipped
-      `mtsw export --format html|tex|json|pdf` (verified absent in `workbook/src`).
-- [ ] **SVG math typesetting** (vs MathML) · **interactive (JS) charts** ·
-      **multi-doc serve** · **mid-run event streaming** · **`--expect-hash` optimistic lock**.
-- [ ] **Electron GUI** — pure presentation over the CLI/serve contract
-      (`electron-vite-react`); on hold pending workbook release-readiness.
-- [ ] 🔒 **Workbook release-readiness** — `@danielsimonjr/mathts-workbook` stays
-      changeset-ignored / unpublished per the explicit 2026-06-29 hold.
+- [x] ✅ **Worker-thread run timeout — DONE 2026-07-17 (workbook@0.3.0).** `runWorkbookWithTimeout(source,
+{timeoutMs})` + `mtsw run --timeout <ms>` run the executor in a `worker_threads` worker and
+      terminate it on budget overrun (`WorkbookTimeoutError`); default in-process path unchanged. Runaway
+      termination MEASURED (chained heavy compute killed at 500ms), not faked.
+- [x] ✅ **`ipynb` export — DONE 2026-07-17 (workbook@0.3.0).** `mtsw export --format ipynb` → nbformat v4
+      (markdown/code cells, execute_result/error/display_data outputs); sibling of html/tex/pdf.
+- [ ] **GUI epic (hold LIFTED 2026-07-17, workbook@0.2.0 debut published).** Remaining: **SVG math
+      typesetting** (vs MathML) · **interactive (JS) charts** · **multi-doc serve** · **mid-run event
+      streaming** · **`--expect-hash` optimistic lock** · **Electron GUI** (`electron-vite-react`, pure
+      presentation over the CLI/serve contract). Daniel approved lifting the hold + scoping the GUI (2026-07-17).
+- [x] ✅ **Workbook release-readiness — HOLD LIFTED 2026-07-17.** Daniel lifted the 2026-06-29 hold;
+      removed from changeset `ignore`; `@danielsimonjr/mathts-workbook@0.2.0` is its npm debut (now @0.3.0).
 
 ### Audit follow-ups (open subset of `BUG_AUDIT_2026-05-25.md`)
 
@@ -358,11 +1016,10 @@ defects found + fixed:
       graph**, not a workspace, absent from every tsconfig/turbo/script, and self-referential only.
       The now-dead `src/**` eslint ignore was removed with it. Also deleted the stray
       `docs/Architecture/Workbook/index 2.ts` (unreferenced snapshot).
-      ⚠️ **Surfaced, NOT deleted:** the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`,
-      `executor.ts`, `graph.ts`, `index.ts`) are stale snapshots of `workbook/src/` that have
-      already rotted — `index.ts` (446 lines) actually contains the **YAML parser**, not an index.
-      They are unreferenced and unbuilt. Left in place because they are docs content, not mine to
-      remove unilaterally; recommend deleting them.
+      ✅ **DELETED 2026-07-18** — the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`, `executor.ts`,
+      `graph.ts`, `index.ts` [the 446-line stale YAML parser], `types.ts`) were rotted snapshots of
+      `workbook/src/`, referenced by nothing but the file-census inventory (`example` disposition),
+      unreferenced + unbuilt. Removed with Daniel's "no limits" authorization; census 1705→1700, gate green.
 
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
 > below): `eigs`/SVD acceleration · `polyFit`/`leastSquares`.
@@ -855,16 +1512,16 @@ mathts-typed.ts` `MATHTS_TYPES` has no `Map` entry), so `resolve`'s `Node, Map|�
 = x^2+2x+1`, `rationalize('x+x+x+y',{y:1}) = 3x+1` (docstring) now work; pinned in `gap-algebra-cas-oracle.test.ts`.
     **Follow-up (deeper root):** register a duck-typing `Map` type in core's `MATHTS_TYPES` so `ObjectWrappingMap` is
     recognized everywhere (removes the per-call-site coercion) — core-wide change, own item.
-- ⬜ **[MED — WS-2 unmeasured ops are broader than min/max] extend the threshold retune.** parallel-pairing shows
-  MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
-  (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
-  `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
-  union first). Same class as the sqrt/square/norm/dot fix already landed.
-  **⚠ Re-triaged 2026-07-05:** `min`/`max`/`distance`/`parallelStat*` DONE (07-02/03 retune) and all 50 OpNames
-  now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
+- [x] ✅ **[MED — WS-2 unmeasured ops broader than min/max] extend the threshold retune — DONE 2026-07-05** (stale ⬜ marker corrected 2026-07-18; body already recorded completion). parallel-pairing showed
+      MORE ops silently defaulting to the 50k global threshold, never benchmarked: the **bitwise** family
+      (`bitAnd`/`bitOr`/`bitXor`/`bitNot`/`leftShift`/`rightArithShift`/`rightLogShift`, Int32Array) plus `distance` and
+      `parallelStat{Min,Max,Distance}`. Add bench cases + set explicitly (and add non-`OpName`s like `min`/`max` to the
+      union first). Same class as the sqrt/square/norm/dot fix already landed.
+      **⚠ Re-triaged 2026-07-05:** `min`/`max`/`distance`/`parallelStat*` DONE (07-02/03 retune) and all 50 OpNames
+      now explicit (07-04) — but the **bitwise family is NOT in the OpName union**: `computePool.bitAnd/bitOr/bitXor/
 bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested global 50k. They DO have inline
-  fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
-  element-wise = the most memory-bound class there is). ✅ **DONE 2026-07-05:** all 7 added to `OpName`, benched (0.04–0.15×, worker loses 7–25× at every size), set `'never'`, call sites pass op names; worker-kernel tests preserved via per-op-map override. WS-2 fully closed — 57/57 OpNames explicit.
+      fallbacks (safe), but the break-even is unmeasured — almost certainly `'never'` territory (Int32Array
+      element-wise = the most memory-bound class there is). ✅ **DONE 2026-07-05:** all 7 added to `OpName`, benched (0.04–0.15×, worker loses 7–25× at every size), set `'never'`, call sites pass op names; worker-kernel tests preserved via per-op-map override. WS-2 fully closed — 57/57 OpNames explicit.
 - ✅ **[LOW — DONE 2026-07-02] 2 type-only import cycles in matrix broken.** `DenseMatrix.ts ↔ dense/arithmetic.ts`
   and `DenseMatrix.ts ↔ dense/reduction.ts`: the helpers only need a read view of the matrix (`rows`/`cols`/`get`/
   `length`/`isSquare`), so their param type was changed from `DenseMatrix` to the `Matrix<number>` base interface
@@ -943,9 +1600,13 @@ bitNot/shift*` gate via nameless `shouldParallelize(len)` → the untested globa
   **2** reconcile toBest/JSON → **3** rewire functions (`unit()`/`to`/`toBest`/operators; drop dual-branching) →
   **4** retire core Unit to an alias → **5** migrate ~130 tests + regression + changeset. Operator dual-flavor
   branching stays until Phase 3. Full step list: the plan doc.
-- ⬜ **[strategic decision, not code] own the synced-mathjs layer** — the `is/number/object` drift came
-  from the dead `.ts→.ts` sync leaving forks. functions/expression still carry large synced layers
-  (`factories/`, `type/`). Decide: fully absorb (own + rename/clean) vs keep as a distinct porting layer.
+- [x] ✅ **[strategic decision — RESOLVED 2026-07-17] own the synced-mathjs layer.** The `is/number/object`
+      drift came from the dead `.ts→.ts` sync leaving forks. Decision: the mathjs-derived `factories/`/`type/`
+      layers are OWNED first-party code — the sync model is dead, and CLAUDE.md already declares them
+      first-class active code (edit like any other source). Inline "synced" framing across
+      `functions/src/factories/`, `functions/src/typed/` reframed as "activated"/owned accordingly (~30
+      comments, comment-only, no behavior change). Future upstream ports go through `tools/mathjs-port/`
+      (a distinct workspace), not a re-sync.
 
 > **Known limitation (surfaced, not silently left):** `studentizedRangeCDF` uses
 > fixed Simpson node counts (240 inner / 120 outer) calibrated against

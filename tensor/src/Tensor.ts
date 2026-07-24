@@ -12,9 +12,15 @@
  */
 
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+import type { NestedArray as CoreNestedArray } from '@danielsimonjr/mathts-core/internal';
 import { Index } from './named-index.js';
 
-export type NestedArray = number | NestedArray[];
+/**
+ * Consolidated onto `@danielsimonjr/mathts-core`'s generic `NestedArray<T>`,
+ * specialised to `number` (Tensor is Float64Array-backed) — see
+ * docs/Architecture/duplicate-symbols.json.
+ */
+export type NestedArray = CoreNestedArray<number>;
 
 export interface EinsumSpec {
   readonly contractions: ReadonlyArray<{

@@ -150,11 +150,12 @@ describe('factory - sortFactories', () => {
     expect(sorted.indexOf('b')).toBeLessThan(sorted.indexOf('a'));
   });
 
-  it('handles a direct circular dependency without infinite recursion', () => {
+  it('throws on a direct circular dependency (adopted core behavior, Bucket B commit 2)', () => {
     const a = factory('a', ['b'], () => 'a');
     const b = factory('b', ['a'], () => 'b');
-    const sorted = sortFactories([a, b]);
-    expect(sorted).toHaveLength(2);
+    // sortFactories now delegates to core's, which throws on ANY cycle instead of
+    // silently preserving input order — see CHANGELOG.md Bucket B commit 2.
+    expect(() => sortFactories([a, b])).toThrow(/Circular dependency/);
   });
 
   it('handles a transitive dependency chain', () => {

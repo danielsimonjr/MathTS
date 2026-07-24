@@ -127,12 +127,16 @@ export function polygonArea(vertices: number[][]): f64 {
 
 /**
  * Compute the convex hull of a set of 2D points using Andrew's monotone chain algorithm.
- * Returns vertices in counter-clockwise order.
+ * Returns vertices (as coordinates) in counter-clockwise order.
+ *
+ * Internal, WASM-sort-accelerated 2-D hull. The public, structured hull API
+ * (indices + area/volume, 2-D and 3-D) is `convexHull` in
+ * `../geometry/hull.ts`.
  *
  * @param points - Array of [x, y] points
- * @returns Convex hull vertices in CCW order
+ * @returns Convex hull vertices (coordinates) in CCW order
  */
-export function convexHull(points: number[][]): number[][] {
+export function convexHull2D(points: number[][]): number[][] {
   const n: i32 = points.length;
   if (n <= 1) return points.slice();
   if (n === 2) return points.slice();
@@ -623,41 +627,14 @@ export function delaunayTriangulation(points: number[][]): number[][] {
   const n: i32 = points.length;
   if (n < 3) return [];
 
-  // WASM-accelerated path
-  if (n >= GEOMETRY_WASM_THRESHOLD) {
-    const wasm = wasmLoader.getModule();
-    if (wasm) {
-      try {
-        // Flatten points to [x0, y0, x1, y1, ...]
-        const flat = new Float64Array(n * 2);
-        for (let i = 0; i < n; i++) {
-          flat[i * 2] = points[i][0];
-          flat[i * 2 + 1] = points[i][1];
-        }
-        const ptsAlloc = wasmLoader.allocateFloat64Array(flat);
-        // Max triangles for n points is 2n-5
-        const maxTris = 2 * n;
-        const trisAlloc = wasmLoader.allocateInt32ArrayEmpty(maxTris * 3);
-        try {
-          const numTris = wasm.delaunay_wasm(ptsAlloc.ptr, n, trisAlloc.ptr);
-          const result: number[][] = [];
-          for (let i = 0; i < numTris; i++) {
-            result.push([
-              trisAlloc.array[i * 3],
-              trisAlloc.array[i * 3 + 1],
-              trisAlloc.array[i * 3 + 2],
-            ]);
-          }
-          return result;
-        } finally {
-          wasmLoader.free(ptsAlloc.ptr);
-          wasmLoader.free(trisAlloc.ptr);
-        }
-      } catch {
-        // Fall through to JS
-      }
-    }
-  }
+  // NOTE: the `delaunay_wasm` kernel is DISABLED — it returns a bogus triangle
+  // count (e.g. 1363 triangles for a 119-point set whose true count is 197),
+  // reading past its output buffer and yielding garbage indices / triangles
+  // with enormous area. It was never correctness-tested (the WASM dispatch is
+  // unreachable in the unit-test environment for the small inputs those tests
+  // use). Until the AssemblyScript kernel is fixed, always use the correct JS
+  // Bowyer–Watson path below. The public `delaunay`/`voronoi`/`alphaShape`
+  // engine (functions/src/geometry/) depends on this being correct at every n.
 
   // Create super-triangle that contains all points
   let minX = Infinity,

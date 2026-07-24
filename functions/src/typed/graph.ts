@@ -718,10 +718,20 @@ export interface BetweennessOptions {
    */
   directed?: boolean;
   /**
-   * Normalise by the maximum possible betweenness: (n-1)(n-2)/2 for
-   * undirected, (n-1)(n-2) for directed.  Default: true.
+   * Normalise by `(n-1)(n-2)` (matches `networkx.betweenness_centrality`'s
+   * default `endpoints=False` scaling — the same divisor for directed AND
+   * undirected graphs, since the raw Brandes accumulation below already
+   * naturally double-counts each undirected unordered pair {s,t} by running
+   * a source BFS from both s and t).  Default: true.
    */
   normalise?: boolean;
+  /**
+   * American-spelling alias for `normalise` (matches `networkx.betweenness_centrality`'s
+   * `normalized` kwarg). When both are given, `normalized` takes precedence.
+   * Default: true — same default/behavior as `normalise`, so existing callers
+   * are unaffected.
+   */
+  normalized?: boolean;
 }
 
 /** Result returned by betweennessCentrality. */
@@ -816,7 +826,15 @@ function _betweennessOnce(
   }
 
   if (normalise) {
-    const denom = directed ? (n - 1) * (n - 2) : ((n - 1) * (n - 2)) / 2;
+    // Same divisor for directed and undirected: the raw `cb` accumulated above
+    // already double-counts each undirected unordered pair {s,t} (once from
+    // the BFS rooted at s, once from the BFS rooted at t), so no additional
+    // `/2` is needed here — matches `networkx.betweenness_centrality`'s
+    // `_rescale` with `normalized=True, endpoints=False` exactly (root-cause
+    // fix: the previous undirected-only `/2` here made normalised undirected
+    // betweenness exactly 2x too large — verified against
+    // `nx.betweenness_centrality(G, normalized=True)`).
+    const denom = (n - 1) * (n - 2);
     if (denom > 0) {
       for (let i = 0; i < n; i++) cb[i] /= denom;
     }
@@ -884,7 +902,7 @@ export async function betweennessCentrality(
   opts?: BetweennessOptions & CentralityRestartOptions
 ): Promise<BetweennessResult | BetweennessRestartResult> {
   const directed = opts?.directed ?? false;
-  const normalise = opts?.normalise ?? true;
+  const normalise = opts?.normalized ?? opts?.normalise ?? true;
   const restarts = opts?.restarts ?? 1;
   const baseSeed = opts?.restartSeed ?? 0;
   const aggregation = opts?.aggregation ?? 'mean';

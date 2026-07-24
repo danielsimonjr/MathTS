@@ -1,13 +1,13 @@
 /**
  * Typed Probability & Combinatorics Functions
  *
- * Promotes genuinely-missing exports from the synced `probability/` layer that
+ * Promotes genuinely-missing exports from the activated `probability/` layer that
  * are not already surfaced by `typed/distributions.ts` (PDF/PMF/CDF/entropy) or
  * `typed/special.ts` (erf, beta, bessel, …).
  *
  * After dedup audit (2026-05-24):
  *
- * | Synced name        | Promote? | Existing surface (if any)                      | Rationale                                        |
+ * | mathjs name        | Promote? | Existing surface (if any)                      | Rationale                                        |
  * | ------------------ | -------- | ---------------------------------------------- | ------------------------------------------------ |
  * | bernoulli          | YES      | —                                              | genuinely missing (bernoulliPMF ≠ Bernoulli number) |
  * | combinations       | YES      | —                                              | genuinely missing                                |

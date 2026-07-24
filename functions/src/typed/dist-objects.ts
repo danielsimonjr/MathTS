@@ -25,6 +25,7 @@
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { erfcScalar } from './special.js';
+import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
 // =============================================================================
 // Type Definitions
@@ -444,55 +445,20 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
  * Generate a Gamma(alpha, 1) random variate using Marsaglia & Tsang's method.
  */
 function _gammaRandom(alpha: f64): f64 {
-  if (alpha < 1) {
-    return _gammaRandom(alpha + 1) * Math.pow(Math.random(), 1 / alpha);
-  }
-  const d = alpha - 1 / 3;
-  const c = 1 / Math.sqrt(9 * d);
-  while (true) {
-    let x: f64;
-    let v: f64;
-    do {
-      x = _normalRandom();
-      v = 1 + c * x;
-    } while (v <= 0);
-    v = v * v * v;
-    const u = Math.random();
-    if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
-    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
-  }
+  return gammaSampleRng(alpha, Math.random);
 }
 
 function _normalRandom(): f64 {
-  const u1 = Math.random();
-  const u2 = Math.random();
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return normalSampleRng(Math.random);
 }
 
 /**
  * Gamma(alpha, 1) variate with a caller-supplied PRNG (used by JS fallback
- * path in batch sampling to avoid calling Math.random()).
+ * path in batch sampling to avoid calling Math.random()). Thin alias over the
+ * shared {@link gammaSampleRng} generator.
  */
 function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
-  if (alpha < 1) {
-    return _gammaRandomRng(alpha + 1, rng) * Math.pow(rng(), 1 / alpha);
-  }
-  const d = alpha - 1 / 3;
-  const c = 1 / Math.sqrt(9 * d);
-  while (true) {
-    let x: f64;
-    let v: f64;
-    do {
-      const u1 = rng();
-      const u2 = rng();
-      x = Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
-      v = 1 + c * x;
-    } while (v <= 0);
-    v = v * v * v;
-    const u = rng();
-    if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
-    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
-  }
+  return gammaSampleRng(alpha, rng);
 }
 
 // =============================================================================
@@ -1449,7 +1415,12 @@ export function invGaussDist(mu: number, lambda: number): Distribution {
   };
 }
 
-/** Lower-triangular Cholesky factor L (Σ = LLᵀ) of a symmetric positive-definite matrix. */
+/**
+ * Lower-triangular Cholesky factor L (Σ = LLᵀ) of a symmetric positive-definite
+ * matrix. Module-private: the public `cholesky` (`typed/matrix-ops.ts`) is a
+ * different, independently-checked implementation (adds an explicit symmetry
+ * check) — other consumers needing Σ = LLᵀ should import that one, not this.
+ */
 function _cholesky(m: number[][]): number[][] {
   const n = m.length;
   const L = Array.from({ length: n }, () => new Array<number>(n).fill(0));

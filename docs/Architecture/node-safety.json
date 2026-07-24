@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-15",
+  "generated": "2026-07-21",
   "browserSafePackages": [
     "packages/typed-function",
     "packages/workerpool",
@@ -29,7 +29,9 @@
     "plot/src/render-file.ts",
     "workbook/src/cli.ts",
     "workbook/src/fs-atomic.ts",
-    "workbook/src/session.ts"
+    "workbook/src/run-worker.ts",
+    "workbook/src/session.ts",
+    "workbook/src/timeout-runner.ts"
   ],
   "leaks": {
     "packages/typed-function": [],

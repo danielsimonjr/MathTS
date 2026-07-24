@@ -135,14 +135,14 @@ math.config({ precision: 128 });
 
 ### Matrix Operations
 
-| Method      | Signature                 | Description       |
-| ----------- | ------------------------- | ----------------- |
-| `transpose` | `(m) => Matrix`           | Transpose         |
-| `det`       | `(m) => number`           | Determinant       |
-| `identity`  | `(n) => Matrix`           | Identity matrix   |
-| `zeros`     | `(rows, cols?) => Matrix` | Zero matrix       |
-| `ones`      | `(rows, cols?) => Matrix` | Ones matrix       |
-| `size`      | `(m) => [rows, cols]`     | Matrix dimensions |
+| Method      | Signature                                    | Description                                              |
+| ----------- | -------------------------------------------- | -------------------------------------------------------- |
+| `transpose` | `(m) => Matrix`                              | Transpose                                                |
+| `det`       | `(m) => number`                              | Determinant                                              |
+| `identity`  | `(n) => Matrix`                              | Identity matrix                                          |
+| `zeros`     | `(n) => number[]` · `(rows, cols) => Matrix` | Zero **vector** (1-arg, mathjs parity) or matrix (2-arg) |
+| `ones`      | `(n) => number[]` · `(rows, cols) => Matrix` | Ones **vector** (1-arg, mathjs parity) or matrix (2-arg) |
+| `size`      | `(m) => [rows, cols]`                        | Matrix dimensions                                        |
 
 ### Type Checking
 

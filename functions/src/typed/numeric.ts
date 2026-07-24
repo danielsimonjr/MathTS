@@ -12,6 +12,39 @@
  */
 
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import { rosenbrockSolve } from '../numeric/solveODE.js';
+import { quad } from '../numeric/adaptive-quad.js';
+
+// General 1-D parabolic PDE via method-of-lines onto the BDF stiff solver (new
+// public entry, distinct from the legacy explicit-Euler heat-only `solvePDE`).
+export {
+  solveParabolicPDE,
+  type SolveParabolicPDEOptions,
+  type ParabolicPDESolution,
+  type ParabolicBC,
+  type SpaceCoefficient,
+  type BoundaryDatum,
+  type ParabolicSource,
+} from '../numeric/solveParabolicPDE.js';
+
+// Semi-explicit index-1 DAE solver (BDF + coupled Newton on the algebraic constraint).
+export {
+  solveDAE,
+  type SolveDAEOptions,
+  type DAESolution,
+  type DAEDifferential,
+  type DAEConstraint,
+  type DAEJacobianBlocks,
+} from '../numeric/solveDAE.js';
+
+// Constant-delay DDE solver (method of steps: adaptive BS23 + cubic-Hermite continuous extension).
+export {
+  solveDDE,
+  type SolveDDEOptions,
+  type DDESolution,
+  type DDEForcing,
+  type DDEHistory,
+} from '../numeric/solveDDE.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -412,13 +445,17 @@ export function leastSquares(A: number[][], b: number[]): number[] {
 // =============================================================================
 
 /**
- * Adaptive numerical integration using Gauss-Legendre quadrature
- * with recursive subdivision.
+ * Adaptive numerical integration via Gauss-Kronrod (G7-K15) quadrature (see
+ * {@link quad} in `../numeric/adaptive-quad.js`). Previously used a fixed
+ * 5-point Gauss-Legendre panel with Richardson-extrapolation adaptivity,
+ * which converged slowly on endpoint singularities (e.g. `x^-1/2` near 0,
+ * ~1.7e-6 error); G7-K15's embedded error estimate resolves those panels
+ * directly, down to ~1e-10.
  *
  * @param f - Function to integrate
  * @param a - Lower bound
  * @param b - Upper bound
- * @param opts - Options (tol, maxIter for max subdivisions)
+ * @param opts - Options (tol, maxDepth for max subdivisions)
  * @returns Approximate integral
  */
 export function nintegrate(
@@ -427,40 +464,7 @@ export function nintegrate(
   b: f64,
   opts?: { tol?: f64; maxDepth?: i32 }
 ): f64 {
-  const tol = opts?.tol ?? 1e-10;
-  const maxDepth = opts?.maxDepth ?? 30;
-
-  function adaptiveQuad(a: f64, b: f64, depth: i32): f64 {
-    const mid = (a + b) / 2;
-    const whole = gaussLegendre5(f, a, b);
-    const left = gaussLegendre5(f, a, mid);
-    const right = gaussLegendre5(f, mid, b);
-    const refined = left + right;
-
-    if (depth >= maxDepth || Math.abs(refined - whole) < 15 * tol) {
-      return refined + (refined - whole) / 15;
-    }
-
-    return adaptiveQuad(a, mid, depth + 1) + adaptiveQuad(mid, b, depth + 1);
-  }
-
-  return adaptiveQuad(a, b, 0);
-}
-
-/** 5-point Gauss-Legendre quadrature on [a,b] */
-function gaussLegendre5(f: (x: f64) => f64, a: f64, b: f64): f64 {
-  const nodes = [-0.906179845938664, -0.5384693101056831, 0, 0.5384693101056831, 0.906179845938664];
-  const weights = [
-    0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665,
-    0.2369268850561891,
-  ];
-  const hw = (b - a) / 2;
-  const mid = (a + b) / 2;
-  let sum = 0;
-  for (let i = 0; i < 5; i++) {
-    sum += weights[i] * f(hw * nodes[i] + mid);
-  }
-  return hw * sum;
+  return quad(f, a, b, opts).value;
 }
 
 /**
@@ -1227,12 +1231,119 @@ export interface ODESolution {
 }
 
 /**
- * Solve a system of ODEs dy/dt = f(t, y) using RK45 (Dormand-Prince).
+ * Embedded Dormand-Prince RK45 tableau (the same 5(4) pair `solveODE`'s RK45 uses) for the
+ * adaptive path of `solveODESystem`. `b` is the 5th-order weight row (FSAL: equals the last stage
+ * row `a7`), `bhat` the embedded 4th-order weight row; their difference is the local error estimate.
+ */
+const _DP_C = [0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1, 1];
+const _DP_A: number[][] = [
+  [],
+  [1 / 5],
+  [3 / 40, 9 / 40],
+  [44 / 45, -56 / 15, 32 / 9],
+  [19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729],
+  [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656],
+  [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84],
+];
+const _DP_B = [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0];
+const _DP_BHAT = [5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187 / 2100, 1 / 40];
+
+/**
+ * Adaptive embedded RK45 (Dormand-Prince) integrator for a plain-number first-order system — the
+ * default (no explicit `dt`) path of `solveODESystem`. Keeps the scaled-RMS local error under the
+ * tolerance `atol + rtol·|y|` (rtol = `tol`, atol = `tol·1e-3`), adjusting the step per accepted
+ * step; the last output point lands exactly on `tf`. Non-stiff use only — stiff systems should use
+ * `stiffODESolver` or `solveODE(..., {method:'BDF'|'Radau'})`.
+ */
+function _adaptiveRK45System(
+  f: (t: f64, y: number[]) => number[],
+  y0: number[],
+  tspan: [f64, f64],
+  tol: f64,
+  maxSteps: i32
+): ODESolution {
+  const n = y0.length;
+  const [t0, tf] = tspan;
+  const dir = tf >= t0 ? 1 : -1;
+  const rtol = tol;
+  const atol = tol * 1e-3;
+
+  const ts: number[] = [t0];
+  const ys: number[][] = [y0.slice()];
+  let t = t0;
+  let y = y0.slice();
+
+  // Initial step: Hairer heuristic h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖ (same as solveODE's JS path).
+  const f0 = f(t, y);
+  const rms = (v: number[]): f64 => {
+    let s = 0;
+    for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+    return Math.sqrt(s / v.length);
+  };
+  const d0 = rms(y);
+  const d1 = rms(f0);
+  let h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), Math.abs(tf - t0));
+
+  let steps = 0;
+  while ((dir > 0 ? t < tf : t > tf) && steps < maxSteps) {
+    steps++;
+    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
+
+    const k: number[][] = [f(t, y)];
+    for (let s = 1; s < 7; s++) {
+      const ys_: number[] = y.slice();
+      for (let j = 0; j < s; j++) {
+        const aij = _DP_A[s][j];
+        if (aij === 0) continue;
+        for (let i = 0; i < n; i++) ys_[i] += h * aij * k[j][i];
+      }
+      k.push(f(t + _DP_C[s] * h, ys_));
+    }
+
+    const yNew = y.slice();
+    let errNorm = 0;
+    for (let i = 0; i < n; i++) {
+      let sum5 = 0;
+      let errI = 0;
+      for (let s = 0; s < 7; s++) {
+        sum5 += _DP_B[s] * k[s][i];
+        errI += (_DP_B[s] - _DP_BHAT[s]) * k[s][i];
+      }
+      yNew[i] = y[i] + h * sum5;
+      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
+      errNorm += ((h * errI) / sc) ** 2;
+    }
+    errNorm = Math.sqrt(errNorm / n);
+
+    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
+      t += h;
+      y = yNew;
+      ts.push(t);
+      ys.push(y.slice());
+    }
+    // Step-size control (order-5 embedded → exponent 1/5), clamped to avoid wild swings.
+    h *= Math.min(5, Math.max(0.2, 0.9 * Math.pow(errNorm || 1e-10, -1 / 5)));
+  }
+
+  if (steps >= maxSteps) {
+    throw new Error('Maximum number of steps reached in solveODESystem, try changing options');
+  }
+  return { t: ts, y: ys };
+}
+
+/**
+ * Solve a system of ODEs dy/dt = f(t, y).
+ *
+ * By default (no `dt`) it uses **adaptive** embedded RK45 (Dormand-Prince) with local-error control
+ * — the step size is chosen automatically to keep the scaled RMS error under `tol`. Passing an
+ * explicit `dt` selects the legacy **fixed-step** RK4 integrator instead (unchanged, for callers
+ * that want a prescribed step, e.g. the BVP shooting driver).
  *
  * @param f - System function (t, y) => dy/dt
  * @param y0 - Initial state vector
  * @param tspan - [t0, tf] time span
- * @param opts - Options (tol, maxIter for max steps)
+ * @param opts - Options: `tol` (adaptive local-error tolerance, default 1e-6), `maxSteps` (step
+ *   cap), `dt` (fixed step — selects the legacy fixed-step RK4 path)
  * @returns Solution { t, y }
  */
 export function solveODESystem(
@@ -1241,8 +1352,13 @@ export function solveODESystem(
   tspan: [f64, f64],
   opts?: { tol?: f64; maxSteps?: i32; dt?: f64 }
 ): ODESolution {
+  // Adaptive path when no explicit fixed step is requested (embedded RK45 error control).
+  if (opts?.dt === undefined) {
+    return _adaptiveRK45System(f, y0, tspan, opts?.tol ?? 1e-6, opts?.maxSteps ?? 100_000);
+  }
+
   const n = y0.length;
-  const dt = opts?.dt ?? (tspan[1] - tspan[0]) / 200;
+  const dt = opts.dt;
   const nSteps = Math.ceil((tspan[1] - tspan[0]) / dt);
   const h = (tspan[1] - tspan[0]) / nSteps;
 
@@ -1309,7 +1425,13 @@ export function solveODESystem(
 }
 
 /**
- * Solve stiff ODE systems using implicit Euler.
+ * Solve stiff ODE systems.
+ *
+ * Delegates to the shared L-stable Rosenbrock (ode23s) engine (`rosenbrockSolve`,
+ * `functions/src/numeric/solveODE.ts` — the same engine `solveODE(..., {method:'Rosenbrock'})`
+ * uses). The previous implementation was fixed-step implicit Euler solved by fixed-point
+ * iteration, which cannot converge when `h·|∂f/∂y|` is large — exactly the stiff regime this
+ * function targets (71% error on `y'=-15y`; `null`/NaN on the stiff mode of `diag(-1,-1000)`).
  *
  * @param f - System function
  * @param y0 - Initial state
@@ -1321,50 +1443,49 @@ export function stiffODESolver(
   y0: number[],
   tspan: [f64, f64]
 ): ODESolution {
-  const nSteps = 200;
-  const n = y0.length;
-  const h = (tspan[1] - tspan[0]) / nSteps;
-
-  const ts: number[] = [tspan[0]];
-  const ys: number[][] = [y0.slice()];
-  let y = y0.slice();
-
-  for (let step = 0; step < nSteps; step++) {
-    const t = tspan[0] + (step + 1) * h;
-
-    // Fixed-point iteration for implicit Euler: y_{n+1} = y_n + h * f(t_{n+1}, y_{n+1})
-    let yGuess = y.slice();
-    for (let iter = 0; iter < 20; iter++) {
-      const fVal = f(t, yGuess);
-      const yNew = y.map((yi, i) => yi + h * fVal[i]);
-      let maxDiff = 0;
-      for (let i = 0; i < n; i++) maxDiff = Math.max(maxDiff, Math.abs(yNew[i] - yGuess[i]));
-      yGuess = yNew;
-      if (maxDiff < 1e-10) break;
-    }
-
-    y = yGuess;
-    ts.push(t);
-    ys.push(y.slice());
-  }
-
-  return { t: ts, y: ys };
+  // rosenbrockSolve's ForcingFunction is typed over the general MathNumericType/MathArray
+  // surface (it's shared with the mathjs-style solveODE factory); internally it always calls
+  // f with a plain (number, number[]) pair, so these casts just narrow back to that guarantee.
+  //
+  // stiffODESolver's signature takes no options, so a tolerance is baked in here rather than
+  // left at rosenbrockSolve's generic default (rtol=1e-4). That default trades accuracy for
+  // speed via atol = rtol*1e-3, which floors the absolute error near the scale of a stiff
+  // mode's already-tiny value (e.g. ~13% relative error decaying y'=-15y to ~3e-7) — too loose
+  // for a solver whose whole purpose is resolving stiff decay accurately. tol: 1e-7 keeps that
+  // error under 1e-9 while remaining well within maxIter (1e5).
+  return rosenbrockSolve((t, y) => f(t as number, y as number[]), tspan, y0, { tol: 1e-7 });
 }
 
 /**
- * Solve boundary value problem using the shooting method.
+ * Solve a boundary value problem for a general first-order system
+ * `y' = f(t, y)` with two-point boundary condition `bc(y(t0), y(tf)) = 0`,
+ * via single shooting + Newton iteration on the initial state.
+ *
+ * The unknowns are the full initial state `y(t0)` (length `n`); Newton's
+ * method adjusts them until `bc` (the boundary residual, length `n`) is
+ * driven to zero, using a forward-difference numerical Jacobian of `shoot`
+ * (re-integrating the IVP per Jacobian column) and `linsolve` for the
+ * Newton step. `n` defaults to 2 (the original
+ * hardcoded case — a single 2nd-order ODE cast as the 2-state system
+ * `[y, y']`, the most common BVP shape) but generalizes to any state
+ * dimension via `y0Guess`, whose length becomes `n`. This makes `solveBVP`
+ * applicable to any first-order system, not just 2-state ones — pass an
+ * `n`-length initial guess for higher-order/coupled systems.
  *
  * @param f - System function (t, y) => dy/dt
- * @param bc - Boundary condition function (y0, yf) => residuals
- * @param mesh - Initial mesh points
+ * @param bc - Boundary condition function (y0, yf) => residuals (length n)
+ * @param mesh - Initial mesh points (only the endpoints are used — [mesh[0], mesh[last]])
+ * @param y0Guess - Initial guess for the shooting unknowns y(t0); its length sets
+ *   the state dimension n. Defaults to `[0, 0]` (back-compat 2-state case).
  * @returns Solution
  */
 export function solveBVP(
   f: (t: f64, y: number[]) => number[],
   bc: (y0: number[], yf: number[]) => number[],
-  mesh: number[]
+  mesh: number[],
+  y0Guess: number[] = [0, 0]
 ): ODESolution {
-  const n = 2; // Simple 2-point BVP
+  const n = y0Guess.length;
   const tspan: [f64, f64] = [mesh[0], mesh[mesh.length - 1]];
 
   // Shooting method: adjust initial conditions to satisfy BC
@@ -1374,8 +1495,9 @@ export function solveBVP(
     return bc(guess, yf);
   }
 
-  // Use simple Newton iteration
-  const s = new Array(n).fill(0);
+  // Use simple Newton iteration, starting from the caller's guess (defaults
+  // to the zero vector, matching the original hardcoded n=2 behavior).
+  const s = y0Guess.slice();
   const delta = 1e-7;
 
   for (let iter = 0; iter < 50; iter++) {
@@ -1573,83 +1695,6 @@ export function eventDetection(
 // =============================================================================
 // Other Numerical Methods
 // =============================================================================
-
-/**
- * Condition number of a matrix (ratio of largest to smallest singular value).
- * Uses a simple power iteration estimate.
- *
- * @param A - Square matrix
- * @returns Approximate condition number
- */
-export function cond(A: number[][]): f64 {
-  const n = A.length;
-  if (n === 0) return 0;
-
-  // WASM-accelerated path (SVD-based condition number)
-  if (n >= NUMERIC_WASM_THRESHOLD) {
-    const wasm = wasmLoader.getModule();
-    if (wasm) {
-      try {
-        const flat = new Float64Array(n * n);
-        for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
-        const aAlloc = wasmLoader.allocateFloat64Array(flat);
-        try {
-          const result = wasm.condition_number_wasm(aAlloc.ptr, n);
-          return result as f64;
-        } finally {
-          wasmLoader.free(aAlloc.ptr);
-        }
-      } catch {
-        /* fall through to JS */
-      }
-    }
-  }
-
-  // A^T A
-  const AtA: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      let s = 0;
-      for (let k = 0; k < n; k++) s += A[k][i] * A[k][j];
-      AtA[i][j] = s;
-    }
-  }
-
-  // Power iteration for largest eigenvalue
-  let v = new Array(n).fill(1);
-  let norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0));
-  v = v.map((x) => x / norm);
-
-  let lambdaMax = 0;
-  for (let iter = 0; iter < 100; iter++) {
-    const w = new Array(n).fill(0);
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) w[i] += AtA[i][j] * v[j];
-    }
-    norm = Math.sqrt(w.reduce((s, x) => s + x * x, 0));
-    lambdaMax = norm;
-    v = w.map((x) => x / (norm || 1));
-  }
-
-  // Inverse power iteration for smallest eigenvalue (use shifted inverse)
-  let u = new Array(n).fill(1);
-  norm = Math.sqrt(u.reduce((s, x) => s + x * x, 0));
-  u = u.map((x) => x / norm);
-
-  let lambdaMin = lambdaMax;
-  for (let iter = 0; iter < 100; iter++) {
-    try {
-      const w = linsolve(AtA, u);
-      norm = Math.sqrt(w.reduce((s, x) => s + x * x, 0));
-      lambdaMin = 1 / norm;
-      u = w.map((x) => x / (norm || 1));
-    } catch {
-      return Infinity;
-    }
-  }
-
-  return Math.sqrt(lambdaMax / (lambdaMin || 1e-30));
-}
 
 /**
  * Numerical rank of a matrix using SVD-like approach.
@@ -2011,15 +2056,36 @@ export function quadprog(H: number[][], f: number[], A: number[][], b: number[])
 }
 
 /**
+ * Options form of {@link linprog}: minimize c^T x subject to A_ub x <= b_ub,
+ * A_eq x = b_eq, and per-variable bounds.
+ */
+export interface LinprogOptions {
+  A_ub?: number[][];
+  b_ub?: number[];
+  A_eq?: number[][];
+  b_eq?: number[];
+  /** Per-variable [lower, upper] bounds; null = unbounded. Default: [0, null] for every variable. */
+  bounds?: readonly (readonly [number | null, number | null])[];
+}
+
+/** Result of the options form of {@link linprog}. */
+export interface LinprogResult {
+  x: number[];
+  fun: number;
+  success: boolean;
+  status: 'optimal' | 'infeasible' | 'unbounded';
+}
+
+/**
  * Linear programming: minimize c^T x subject to Ax <= b, x >= 0.
- * Simple simplex method implementation.
+ * Simple simplex method implementation (legacy one-phase path).
  *
  * @param c - Objective coefficients (length n)
  * @param A - Constraint matrix (m x n)
  * @param b - Constraint bounds (length m, non-negative)
  * @returns Solution vector x, or null if infeasible
  */
-export function linprog(c: number[], A: number[][], b: number[]): number[] | null {
+function linprogOnePhaseLegacy(c: number[], A: number[][], b: number[]): number[] | null {
   const m = A.length;
   const n = c.length;
 
@@ -2083,12 +2149,12 @@ export function linprog(c: number[], A: number[][], b: number[]): number[] | nul
     }
   }
 
-  // Extract solution
+  // Extract solution: each constraint row provides exactly one basic variable.
   const x = new Array(n).fill(0);
+  const usedRows = new Array(m).fill(false);
   for (let j = 0; j < n; j++) {
     let basicRow = -1;
     let isBasic = true;
-    // Check all rows including objective
     for (let i = 0; i <= m; i++) {
       if (Math.abs(tableau[i][j] - 1) < 1e-10) {
         if (basicRow !== -1) {
@@ -2101,12 +2167,379 @@ export function linprog(c: number[], A: number[][], b: number[]): number[] | nul
         break;
       }
     }
-    if (isBasic && basicRow !== -1) {
+    // basic only if its unit column sits in a constraint row not already claimed
+    if (isBasic && basicRow !== -1 && basicRow < m && !usedRows[basicRow]) {
       x[j] = tableau[basicRow][totalVars];
+      usedRows[basicRow] = true;
     }
   }
 
   return x;
+}
+
+const LINPROG_TOL = 1e-9;
+
+/** How an original variable j maps onto the working (>=0) columns of the two-phase tableau. */
+type LinprogVarExpansion =
+  | { kind: 'shift'; col: number; shift: number }
+  | { kind: 'split'; colPos: number; colNeg: number };
+
+interface LinprogRawResult {
+  xWork: number[];
+  status: 'optimal' | 'infeasible' | 'unbounded';
+}
+
+/**
+ * Core two-phase primal simplex over an equality-form system `Aeq x = beq`
+ * (x >= 0). `hasSlack[i]`/`slackCol[i]` identify rows that already carry a
+ * natural +1 slack column (built by the caller for `<=` rows); all other
+ * rows get an artificial variable for Phase 1.
+ */
+function linprogSolveTwoPhase(
+  costWork: number[],
+  Aeq: number[][],
+  beq: number[],
+  hasSlack: boolean[],
+  slackCol: number[]
+): LinprogRawResult {
+  const m = Aeq.length;
+  const nw = costWork.length;
+
+  if (m === 0) {
+    for (let j = 0; j < nw; j++) {
+      if (costWork[j] < -LINPROG_TOL) return { xWork: [], status: 'unbounded' };
+    }
+    return { xWork: new Array(nw).fill(0), status: 'optimal' };
+  }
+
+  // Copy rows, flipping sign where the RHS is negative (so every row has b >= 0).
+  const rows: number[][] = [];
+  const rhs: number[] = [];
+  const flipped: boolean[] = [];
+  for (let i = 0; i < m; i++) {
+    let row = [...Aeq[i]];
+    let b = beq[i];
+    let f = false;
+    if (b < 0) {
+      row = row.map((v) => -v);
+      b = -b;
+      f = true;
+    }
+    rows.push(row);
+    rhs.push(b);
+    flipped.push(f);
+  }
+
+  // Assign an initial basis: the row's natural slack if it's already +1, else a fresh artificial.
+  const basis: number[] = new Array(m).fill(-1);
+  const artificialCols: number[] = [];
+  let nextCol = nw;
+  for (let i = 0; i < m; i++) {
+    if (hasSlack[i] && !flipped[i]) {
+      basis[i] = slackCol[i];
+    } else {
+      const col = nextCol++;
+      artificialCols.push(col);
+      basis[i] = col;
+    }
+  }
+  const totalCols = nextCol;
+  const isArtificial = new Array(totalCols).fill(false);
+  for (const col of artificialCols) isArtificial[col] = true;
+
+  const width = totalCols + 1; // + RHS column
+  const tableau: number[][] = [];
+  for (let i = 0; i < m; i++) {
+    const row = new Array(width).fill(0);
+    for (let j = 0; j < nw; j++) row[j] = rows[i][j];
+    if (isArtificial[basis[i]]) row[basis[i]] = 1;
+    row[totalCols] = rhs[i];
+    tableau.push(row);
+  }
+
+  const pivot = (pr: number, pc: number, objRow: number[]): void => {
+    const pivotVal = tableau[pr][pc];
+    for (let j = 0; j < width; j++) tableau[pr][j] /= pivotVal;
+    for (let i = 0; i < tableau.length; i++) {
+      if (i === pr) continue;
+      const factor = tableau[i][pc];
+      if (factor === 0) continue;
+      for (let j = 0; j < width; j++) tableau[i][j] -= factor * tableau[pr][j];
+    }
+    const factor = objRow[pc];
+    if (factor !== 0) {
+      for (let j = 0; j < width; j++) objRow[j] -= factor * tableau[pr][j];
+    }
+  };
+
+  const buildObjRow = (costFull: number[]): number[] => {
+    const row = new Array(width).fill(0);
+    for (let j = 0; j < totalCols; j++) row[j] = costFull[j];
+    for (let i = 0; i < tableau.length; i++) {
+      const cb = costFull[basis[i]];
+      if (cb === 0) continue;
+      for (let j = 0; j < width; j++) row[j] -= cb * tableau[i][j];
+    }
+    return row;
+  };
+
+  const runSimplex = (
+    objRow: number[],
+    excluded: boolean[],
+    maxIter = 2000
+  ): 'optimal' | 'unbounded' => {
+    for (let iter = 0; iter < maxIter; iter++) {
+      let pivotCol = -1;
+      let minVal = -LINPROG_TOL;
+      for (let j = 0; j < totalCols; j++) {
+        if (excluded[j]) continue;
+        if (objRow[j] < minVal) {
+          minVal = objRow[j];
+          pivotCol = j;
+        }
+      }
+      if (pivotCol === -1) return 'optimal';
+
+      let pivotRow = -1;
+      let minRatio = Infinity;
+      for (let i = 0; i < tableau.length; i++) {
+        if (tableau[i][pivotCol] > LINPROG_TOL) {
+          const ratio = tableau[i][totalCols] / tableau[i][pivotCol];
+          if (ratio < minRatio - 1e-12) {
+            minRatio = ratio;
+            pivotRow = i;
+          }
+        }
+      }
+      if (pivotRow === -1) return 'unbounded';
+
+      basis[pivotRow] = pivotCol;
+      pivot(pivotRow, pivotCol, objRow);
+    }
+    return 'optimal';
+  };
+
+  // Phase 1: drive the artificial variables to zero.
+  const noExclusions = new Array(totalCols).fill(false);
+  const cost1 = new Array(totalCols).fill(0);
+  for (const col of artificialCols) cost1[col] = 1;
+  const objRow1 = buildObjRow(cost1);
+  const phase1Status = runSimplex(objRow1, noExclusions);
+  if (phase1Status === 'unbounded') return { xWork: [], status: 'infeasible' };
+
+  let phase1Obj = 0;
+  for (let i = 0; i < tableau.length; i++) phase1Obj += cost1[basis[i]] * tableau[i][totalCols];
+  if (phase1Obj > 1e-7) return { xWork: [], status: 'infeasible' };
+
+  // Pivot out any artificial that is still (degenerately) basic at zero; drop redundant rows.
+  let i = 0;
+  while (i < tableau.length) {
+    if (!isArtificial[basis[i]]) {
+      i++;
+      continue;
+    }
+    let pc = -1;
+    for (let j = 0; j < nw; j++) {
+      if (Math.abs(tableau[i][j]) > 1e-8) {
+        pc = j;
+        break;
+      }
+    }
+    if (pc === -1) {
+      tableau.splice(i, 1);
+      basis.splice(i, 1);
+      continue; // row was redundant (0 = 0); don't advance, next row shifted into place
+    }
+    basis[i] = pc;
+    pivot(i, pc, new Array(width).fill(0)); // scratch objRow — rebuilt fresh for phase 2
+    i++;
+  }
+
+  // Phase 2: optimize the real objective, locking artificial columns out.
+  const costFull2 = new Array(totalCols).fill(0);
+  for (let j = 0; j < nw; j++) costFull2[j] = costWork[j];
+  const objRow2 = buildObjRow(costFull2);
+  const excludeArtificial = isArtificial.slice();
+  const phase2Status = runSimplex(objRow2, excludeArtificial);
+  if (phase2Status === 'unbounded') return { xWork: [], status: 'unbounded' };
+
+  const xWork = new Array(nw).fill(0);
+  for (let r = 0; r < tableau.length; r++) {
+    if (basis[r] < nw) xWork[basis[r]] = Math.max(0, tableau[r][totalCols]);
+  }
+  return { xWork, status: 'optimal' };
+}
+
+/**
+ * Options-form linear programming: minimize c^T x subject to `A_ub x <= b_ub`,
+ * `A_eq x = b_eq`, and per-variable bounds (default `[0, null]` = x >= 0).
+ * Uses a two-phase simplex (artificial variables in Phase 1) so it can start
+ * from equality constraints and negative-RHS/`>=`-style rows directly.
+ */
+function linprogTwoPhase(c: number[], opts: LinprogOptions): LinprogResult {
+  const n = c.length;
+  const boundsResolved: [number | null, number | null][] = [];
+  for (let j = 0; j < n; j++) {
+    const b = opts.bounds?.[j];
+    boundsResolved.push(b ? [b[0], b[1]] : [0, null]);
+  }
+
+  // Pass 1: assign working columns for each original variable (shift for a
+  // finite lower bound, split into (+)/(-) parts for a free/-Infinity lower bound).
+  let col = 0;
+  const expansions: LinprogVarExpansion[] = [];
+  for (let j = 0; j < n; j++) {
+    const low = boundsResolved[j][0];
+    if (low === null) {
+      const colPos = col++;
+      const colNeg = col++;
+      expansions.push({ kind: 'split', colPos, colNeg });
+    } else {
+      const c0 = col++;
+      expansions.push({ kind: 'shift', col: c0, shift: low });
+    }
+  }
+  const nx = col;
+
+  const expandRow = (row: number[]): number[] => {
+    const out = new Array(nx).fill(0);
+    for (let j = 0; j < n; j++) {
+      const coeff = row[j] ?? 0;
+      if (coeff === 0) continue;
+      const e = expansions[j];
+      if (e.kind === 'shift') out[e.col] += coeff;
+      else {
+        out[e.colPos] += coeff;
+        out[e.colNeg] -= coeff;
+      }
+    }
+    return out;
+  };
+  const shiftedRhs = (row: number[], rhsVal: number): number => {
+    let r = rhsVal;
+    for (let j = 0; j < n; j++) {
+      const e = expansions[j];
+      if (e.kind === 'shift' && e.shift !== 0) r -= (row[j] ?? 0) * e.shift;
+    }
+    return r;
+  };
+
+  let constant = 0;
+  const cWork = new Array(nx).fill(0);
+  for (let j = 0; j < n; j++) {
+    const e = expansions[j];
+    if (e.kind === 'shift') {
+      cWork[e.col] = c[j];
+      constant += c[j] * e.shift;
+    } else {
+      cWork[e.colPos] = c[j];
+      cWork[e.colNeg] = -c[j];
+    }
+  }
+
+  // `<=` rows: caller-provided A_ub/b_ub, plus one extra row per finite upper bound.
+  const ubRows: number[][] = [];
+  const ubRhs: number[] = [];
+  const A_ub = opts.A_ub ?? [];
+  const b_ub = opts.b_ub ?? [];
+  for (let i = 0; i < A_ub.length; i++) {
+    ubRows.push(expandRow(A_ub[i]));
+    ubRhs.push(shiftedRhs(A_ub[i], b_ub[i]));
+  }
+  for (let j = 0; j < n; j++) {
+    const high = boundsResolved[j][1];
+    if (high === null) continue;
+    const e = expansions[j];
+    const row = new Array(nx).fill(0);
+    let rhsVal: number;
+    if (e.kind === 'shift') {
+      row[e.col] = 1;
+      rhsVal = high - e.shift;
+    } else {
+      row[e.colPos] = 1;
+      row[e.colNeg] = -1;
+      rhsVal = high;
+    }
+    ubRows.push(row);
+    ubRhs.push(rhsVal);
+  }
+
+  const A_eq = opts.A_eq ?? [];
+  const b_eq = opts.b_eq ?? [];
+  const eqRows: number[][] = [];
+  const eqRhs: number[] = [];
+  for (let i = 0; i < A_eq.length; i++) {
+    eqRows.push(expandRow(A_eq[i]));
+    eqRhs.push(shiftedRhs(A_eq[i], b_eq[i]));
+  }
+
+  const mUb = ubRows.length;
+  const mEq = eqRows.length;
+  const nw = nx + mUb;
+
+  const Aeq: number[][] = [];
+  const beq: number[] = [];
+  const hasSlack: boolean[] = [];
+  const slackCol: number[] = [];
+  for (let i = 0; i < mUb; i++) {
+    const row = new Array(nw).fill(0);
+    for (let j = 0; j < nx; j++) row[j] = ubRows[i][j];
+    row[nx + i] = 1;
+    Aeq.push(row);
+    beq.push(ubRhs[i]);
+    hasSlack.push(true);
+    slackCol.push(nx + i);
+  }
+  for (let i = 0; i < mEq; i++) {
+    const row = new Array(nw).fill(0);
+    for (let j = 0; j < nx; j++) row[j] = eqRows[i][j];
+    Aeq.push(row);
+    beq.push(eqRhs[i]);
+    hasSlack.push(false);
+    slackCol.push(-1);
+  }
+
+  const costWorkFull = new Array(nw).fill(0);
+  for (let j = 0; j < nx; j++) costWorkFull[j] = cWork[j];
+
+  const raw = linprogSolveTwoPhase(costWorkFull, Aeq, beq, hasSlack, slackCol);
+  if (raw.status !== 'optimal') {
+    return { x: new Array(n).fill(NaN), fun: NaN, success: false, status: raw.status };
+  }
+
+  const x = new Array(n).fill(0);
+  for (let j = 0; j < n; j++) {
+    const e = expansions[j];
+    x[j] =
+      e.kind === 'shift' ? raw.xWork[e.col] + e.shift : raw.xWork[e.colPos] - raw.xWork[e.colNeg];
+  }
+  let fun = constant;
+  for (let j = 0; j < nx; j++) fun += cWork[j] * raw.xWork[j];
+
+  return { x, fun, success: true, status: 'optimal' };
+}
+
+/**
+ * Linear programming: minimize c^T x.
+ *
+ * Two overloads:
+ * - Legacy positional form `linprog(c, A_ub, b_ub)` — subject to `A_ub x <= b_ub`,
+ *   `x >= 0`; returns the solution vector `x` (or `null` if unbounded).
+ * - Options form `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` — a two-phase
+ *   simplex supporting equality constraints, variable bounds, and negative-RHS
+ *   rows; returns `{ x, fun, success, status }`.
+ */
+export function linprog(c: number[], A_ub: number[][], b_ub: number[]): number[] | null;
+export function linprog(c: number[], opts: LinprogOptions): LinprogResult;
+export function linprog(
+  c: number[],
+  arg2: number[][] | LinprogOptions,
+  arg3?: number[]
+): number[] | null | LinprogResult {
+  if (Array.isArray(arg2)) {
+    return linprogOnePhaseLegacy(c, arg2, arg3 as number[]);
+  }
+  return linprogTwoPhase(c, arg2);
 }
 
 /**

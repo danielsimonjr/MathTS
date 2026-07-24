@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-core",
-  "version": "0.10.0",
+  "version": "0.13.1",
   "description": "Core types, utilities, and configuration for MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -23,8 +23,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/internal.ts --format esm --dts --clean",
-    "dev": "tsup src/index.ts src/internal.ts --format esm --dts --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -32,7 +32,7 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
+    "build:prod": "tsup --minify --treeshake"
   },
   "dependencies": {
     "typed-function": "github:danielsimonjr/typed-function"

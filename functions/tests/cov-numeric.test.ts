@@ -4,13 +4,13 @@
  * The existing numeric.test.ts exercises the happy paths of every export;
  * this file targets the remaining uncovered JS branches: secant fallbacks,
  * error/singular paths, the JS fallbacks of WASM-accelerated routines (loess,
- * griddata, rbfInterpolate, leastSquares, cond, rank), basin-hopping
+ * griddata, rbfInterpolate, leastSquares, rank), basin-hopping
  * (globalMinimize), the shooting BVP solver, event detection, residue /
  * Durand-Kerner root finding, quadprog, linprog (unbounded + extraction), and
  * the heat-equation PDE solver edge cases.
  *
  * NOTE on coverage ceiling: the WASM-accelerated `if (wasm) { ... }` blocks in
- * leastSquares/bezierCurve/loess/griddata/rbfInterpolate/solveODESystem/cond/
+ * leastSquares/bezierCurve/loess/griddata/rbfInterpolate/solveODESystem/
  * rank are dead in this environment because no WASM module is loaded
  * (`wasmLoader.getModule()` returns undefined on Node without the WASM
  * artifact — see CLAUDE.md "WASM JS-fallback on Node"). Those branches are
@@ -37,7 +37,6 @@ import {
   solveBVP,
   odeAdaptiveStep,
   eventDetection,
-  cond,
   rank,
   nullspace,
   residue,
@@ -176,29 +175,11 @@ describe('leastSquares / cond / rank / nullspace JS paths', () => {
     close(x[1], 1, 1e-9);
   });
 
-  it('cond of identity is ~1; cond of near-singular is large', () => {
-    close(
-      cond([
-        [1, 0],
-        [0, 1],
-      ]),
-      1,
-      1e-6
-    );
-    const big = cond([
-      [1, 0],
-      [0, 1e-6],
-    ]);
-    expect(big).toBeGreaterThan(100);
-  });
-
-  it('cond returns 0 for an empty matrix', () => {
-    expect(cond([])).toBe(0);
-  });
-
-  it('cond returns Infinity for a singular AtA (inverse iteration throws)', () => {
-    expect(cond([[0]])).toBe(Infinity);
-  });
+  // NOTE: the `cond` tests that lived here covered the shadowed power-iteration
+  // `cond` in `typed/numeric.ts`, which was removed in the 2026-07 dedup campaign
+  // (it duplicated the canonical SVD-based public `cond` in `typed/matrix-ops.ts`,
+  // which is oracle-pinned in `gap-matrix-domain-dedup-parity.test.ts`). Removed
+  // with that impl — nothing imports the numeric.ts `cond` anymore.
 
   it('rank counts independent rows; 0 for empty', () => {
     expect(rank([])).toBe(0);
@@ -429,7 +410,7 @@ describe('ODE solvers', () => {
     close(last[3], 4 * Math.exp(-0.5), 1e-1);
   });
 
-  it('solveBVP solves y\'\' = 0 with y(0)=0, y(1)=1 via shooting', () => {
+  it("solveBVP solves y'' = 0 with y(0)=0, y(1)=1 via shooting", () => {
     // State: [y, y']; f = [y', 0]. BC residual: [y0 - 0, yf - 1].
     const sol = solveBVP(
       (_t, y) => [y[1], 0],
@@ -493,9 +474,7 @@ describe('residue / chebyshev / pade', () => {
     // Residue at x=1: 1/Q'(1) = 1/(2*1-3) = -1; at x=2: 1/(2*2-3)=1.
     const { residues, poles } = residue([1], [2, -3, 1]);
     expect(poles.length).toBe(2);
-    const sorted = poles
-      .map((p, i) => ({ p, r: residues[i] }))
-      .sort((a, b) => a.p - b.p);
+    const sorted = poles.map((p, i) => ({ p, r: residues[i] })).sort((a, b) => a.p - b.p);
     close(sorted[0].p, 1, 1e-4);
     close(sorted[1].p, 2, 1e-4);
     close(sorted[0].r, -1, 1e-3);
@@ -512,8 +491,7 @@ describe('residue / chebyshev / pade', () => {
     // Taylor coeffs of e^x: 1, 1, 1/2, 1/6, 1/24, ...
     const taylor = [1, 1, 1 / 2, 1 / 6, 1 / 24, 1 / 120];
     const { num, den } = padeApproximant(taylor, 2, 2);
-    const evalPoly = (c: number[], x: number) =>
-      c.reduce((s, ci, i) => s + ci * x ** i, 0);
+    const evalPoly = (c: number[], x: number) => c.reduce((s, ci, i) => s + ci * x ** i, 0);
     const x = 0.3;
     const approx = evalPoly(num, x) / evalPoly(den, x);
     close(approx, Math.exp(x), 1e-4);

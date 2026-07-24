@@ -1,5 +1,50 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.18
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.7.0
+
+## 0.2.17
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.0
+  - @danielsimonjr/mathts-matrix@0.6.3
+
+## 0.2.16
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.12.0
+  - @danielsimonjr/mathts-matrix@0.6.2
+
+## 0.2.15
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.11.0
+  - @danielsimonjr/mathts-matrix@0.6.1
+
+## 0.2.14
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.6.0
+
+## 0.2.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.5.0
+
 ## 0.2.12
 
 ### Patch Changes

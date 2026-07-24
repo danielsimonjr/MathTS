@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-15", "f": 1028, "e": 4967, "re": 1802 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-07-21", "f": 1114, "e": 5750, "re": 2304 },
   "s": {
-    "loc": 171986,
-    "cls": 56,
-    "int": 410,
-    "fn": 1613,
+    "loc": 193193,
+    "cls": 52,
+    "int": 504,
+    "fn": 1865,
     "tg": 158,
     "en": 0,
-    "co": 1535,
-    "toi": 523
+    "co": 1543,
+    "toi": 579
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -94,30 +94,33 @@
       ]
     },
     "core": {
-      "f": 9,
+      "f": 17,
       "exp": [
-        "DEFAULT_CONFIG",
-        "PI",
-        "E",
-        "TAU",
-        "PHI",
-        "SQRT2",
-        "SQRT1_2",
-        "LN2",
-        "LN10",
-        "LOG2E",
-        "LOG10E",
-        "factory",
-        "sortFactories",
-        "create",
-        "isFactory",
-        "assertDependencies",
-        "isOptionalDependency",
-        "stripOptionalNotation",
-        "Complex",
-        "isComplex"
+        "arraySize",
+        "validate",
+        "validateIndexSourceSize",
+        "validateIndex",
+        "isEmptyIndex",
+        "resize",
+        "reshape",
+        "processSizesWildcard",
+        "squeeze",
+        "unsqueeze",
+        "flatten",
+        "map",
+        "forEach",
+        "filter",
+        "filterRegExp",
+        "join",
+        "identify",
+        "generalize",
+        "getArrayDataType",
+        "last"
       ],
+      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
+        "IdentifiedValue",
+        "BigNumberValue",
         "ConfigOptions",
         "FactoryFunction",
         "LegacyFactory",
@@ -125,12 +128,14 @@
         "BigNumber",
         "Complex",
         "Fraction",
-        "Unit",
-        "Matrix",
-        "DenseMatrix"
+        "Unit"
       ]
     },
-    "core/error": { "f": 1, "exp": ["MathjsError"], "cls": ["MathjsError"] },
+    "core/error": {
+      "f": 3,
+      "exp": ["DimensionError", "createIndexError", "IndexError", "MathjsError"],
+      "cls": ["DimensionError", "IndexError", "MathjsError"]
+    },
     "core/factory": {
       "f": 2,
       "exp": [
@@ -188,7 +193,7 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",
@@ -308,7 +313,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 14,
+      "f": 17,
       "exp": [
         "cholesky",
         "eye",
@@ -324,12 +329,12 @@
         "householder",
         "applyHouseholderLeft",
         "applyHouseholderRight",
+        "condest",
         "eigWasm",
         "eigvalsWasm",
         "spectralRadiusWasm",
         "eig",
-        "eigvals",
-        "powerIteration"
+        "eigvals"
       ],
       "int": [
         "CholeskyResult",
@@ -339,9 +344,9 @@
         "LogmOptions",
         "LUResult",
         "PinvOptions",
-        "QRResult",
-        "QROptions",
-        "SchurResult"
+        "LQResult",
+        "RQResult",
+        "QLResult"
       ]
     },
     "matrix/types": {
@@ -367,7 +372,7 @@
         "isSparseMatrix"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
-      "int": ["MatrixDimensions", "MatrixIndex", "SliceSpec", "MatrixEntry"]
+      "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
     },
     "tensor": {
       "f": 4,
@@ -521,7 +526,7 @@
       ]
     },
     "functions": {
-      "f": 18,
+      "f": 19,
       "exp": [
         "gradient",
         "hessian",
@@ -548,14 +553,39 @@
         "KMeansResult",
         "LinRegressResult",
         "CorrelationTestResult",
+        "KendallTauTestResult",
         "DescribeResult",
         "HistogramResult",
         "FTestResult",
         "JarqueBeraResult",
         "KruskalResult",
-        "WilcoxonResult",
-        "FisherExactResult"
+        "WilcoxonResult"
       ]
+    },
+    "functions/cas": {
+      "f": 1,
+      "exp": [
+        "ratAdd",
+        "ratSub",
+        "ratMul",
+        "ratDiv",
+        "ratFromBigint",
+        "surdFromRat",
+        "surdNeg",
+        "surdAdd",
+        "surdSub",
+        "surdMul",
+        "surdDiv",
+        "surdRender",
+        "parseRationalFunction",
+        "polynomialPart",
+        "integratePolynomial",
+        "factorDenominator",
+        "partialFractions",
+        "integratePFTerm",
+        "integrateRationalFunction"
+      ],
+      "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
     "functions/combinatorics": {
       "f": 4,
@@ -566,6 +596,8 @@
       "f": 5,
       "exp": [
         "DEFAULT_CONFIG",
+        "ConfigOptions",
+        "MathJsConfig",
         "create",
         "MATRIX_OPTIONS",
         "NUMBER_OPTIONS",
@@ -574,12 +606,12 @@
         "importFactory",
         "createTyped"
       ],
-      "int": ["ConfigOptions", "MathJsInstance", "ImportOptions", "ConfigFunction", "TypedFunction"]
+      "int": ["MathJsInstance", "ConfigFunction", "ImportOptions", "TypedFunction"]
     },
     "functions/error": {
-      "f": 4,
-      "exp": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"],
-      "cls": ["ArgumentsError", "DimensionError", "IndexError", "MathjsError"]
+      "f": 3,
+      "exp": ["ArgumentsError", "DimensionError", "IndexError", "createIndexError"],
+      "cls": ["ArgumentsError"]
     },
     "functions/expression": { "f": 1, "exp": ["properties", "getOperator"] },
     "functions/factories": {
@@ -608,7 +640,42 @@
       ],
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
     },
-    "functions/geometry": { "f": 2, "exp": ["createDistance", "createIntersect"] },
+    "functions/geometry": {
+      "f": 10,
+      "exp": [
+        "alphaShape",
+        "delaunay",
+        "createDistance",
+        "quaternionInverse",
+        "quaternionSlerp",
+        "quaternionToEuler",
+        "quaternionLog",
+        "quaternionExp",
+        "quaternionPow",
+        "boundingBox",
+        "procrustes",
+        "kdTreeKNN",
+        "kdTreeRadius",
+        "setIsSuperset",
+        "setEqual",
+        "setDisjoint",
+        "halfspaceIntersection",
+        "convexHull",
+        "createIntersect",
+        "rayTriangleIntersect"
+      ],
+      "int": [
+        "AlphaShapeResult",
+        "DelaunayResult",
+        "ProcrustesResult",
+        "HalfspaceIntersectionResult",
+        "ConvexHullResult",
+        "RayHit",
+        "SegmentClosestResult",
+        "SphericalVoronoiResult",
+        "VoronoiResult"
+      ]
+    },
     "functions/gpu": {
       "f": 2,
       "exp": [
@@ -622,6 +689,33 @@
         "fftGpuDispatch"
       ],
       "int": ["GpuChainOptions", "GpuFftOptions", "GpuFftResult"]
+    },
+    "functions/graph": {
+      "f": 3,
+      "exp": [
+        "graphColoring",
+        "maxClique",
+        "louvainCommunities",
+        "katzCentrality",
+        "isIsomorphic",
+        "maxFlow",
+        "minCut",
+        "astar",
+        "hungarian",
+        "bfs",
+        "dfs",
+        "floydWarshall",
+        "bellmanFord",
+        "closenessCentrality",
+        "harmonicCentrality"
+      ],
+      "int": [
+        "MaxFlowResult",
+        "MinCutResult",
+        "AStarResult",
+        "HungarianResult",
+        "BellmanFordResult"
+      ]
     },
     "functions/logical": {
       "f": 5,
@@ -660,7 +754,85 @@
         "Dependencies"
       ]
     },
-    "functions/numeric": { "f": 1, "exp": ["createSolveODE"] },
+    "functions/ml": {
+      "f": 6,
+      "exp": [
+        "dbscan",
+        "knnClassify",
+        "knnRegress",
+        "glm",
+        "gaussianKDE",
+        "logisticRegression",
+        "ols",
+        "ridge",
+        "lasso",
+        "elasticNet"
+      ],
+      "int": [
+        "GlmOptions",
+        "GlmResult",
+        "GaussianKDEOptions",
+        "GaussianKDEResult",
+        "LogisticRegressionOptions",
+        "LogisticRegressionResult",
+        "OlsOptions",
+        "OlsResult",
+        "RidgeOptions",
+        "CoordinateDescentOptions"
+      ]
+    },
+    "functions/numbertheory": {
+      "f": 1,
+      "exp": [
+        "continuedFraction",
+        "eulerNumbers",
+        "stirlingS1",
+        "discreteLog",
+        "primitiveRoot",
+        "multiplicativeOrder",
+        "kroneckerSymbol",
+        "combinationsGen",
+        "permutationsGen"
+      ]
+    },
+    "functions/numeric": {
+      "f": 22,
+      "exp": [
+        "quad",
+        "bfgs",
+        "bsplineFit",
+        "bsplineEval",
+        "dlyap",
+        "care",
+        "dare",
+        "eigsh",
+        "root",
+        "fsolve",
+        "rootsLegendre",
+        "interpn",
+        "interval",
+        "Interval",
+        "incompleteLU",
+        "incompleteCholesky",
+        "cg",
+        "minres",
+        "gmres",
+        "bicgstab"
+      ],
+      "cls": ["Interval"],
+      "int": [
+        "QuadOptions",
+        "QuadResult",
+        "BfgsOptions",
+        "BfgsResult",
+        "BSplineFitOptions",
+        "BSplineTuple",
+        "EigshOptions",
+        "EigshResult",
+        "FsolveOptions",
+        "RootsLegendreResult"
+      ]
+    },
     "functions/plain": {
       "f": 10,
       "exp": [
@@ -687,7 +859,7 @@
       ]
     },
     "functions/probability": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "createBernoulli",
         "createCombinations",
@@ -702,6 +874,8 @@
         "createRandom",
         "createRandomNumber",
         "createRandomInt",
+        "normalSampleRng",
+        "gammaSampleRng",
         "randomMatrix",
         "createRng"
       ]
@@ -747,10 +921,66 @@
       ]
     },
     "functions/signal": {
-      "f": 3,
-      "exp": ["bitReverse", "fftCoreFloat64", "createFreqz", "createZpk2tf"]
+      "f": 12,
+      "exp": [
+        "convDirect",
+        "convFFT",
+        "conv",
+        "xcorr",
+        "autocorr",
+        "conv2Direct",
+        "conv2FFT",
+        "conv2",
+        "bitReverse",
+        "fftCoreFloat64",
+        "rfft",
+        "irfft",
+        "fftshift",
+        "ifftshift",
+        "fftfreq",
+        "rfftfreq",
+        "fftn",
+        "complex",
+        "complexConj",
+        "complexAbs"
+      ],
+      "int": [
+        "ComplexNumber",
+        "FFTResult",
+        "DeconvolveResult",
+        "FindPeaksOptions",
+        "CsdOptions",
+        "StftOptions",
+        "StftResult",
+        "WaveletFilters"
+      ]
     },
-    "functions/special": { "f": 2, "exp": ["createErf", "createZeta"] },
+    "functions/special": {
+      "f": 8,
+      "exp": [
+        "createErf",
+        "pFq",
+        "hyp0f1",
+        "hyp1f1",
+        "hyp2f1",
+        "jacobiSN",
+        "jacobiCN",
+        "jacobiDN",
+        "mathieuA",
+        "mathieuB",
+        "mathieuCe",
+        "mathieuSe",
+        "polylog",
+        "struveH",
+        "struveL",
+        "kelvinBer",
+        "kelvinBei",
+        "barnesG",
+        "polygamma",
+        "trigamma"
+      ],
+      "int": ["CoulombFG"]
+    },
     "functions/statistics": {
       "f": 14,
       "exp": [
@@ -768,6 +998,43 @@
         "createSum",
         "improveErrorMessage",
         "createVariance"
+      ]
+    },
+    "functions/stats": {
+      "f": 8,
+      "exp": [
+        "fitDistribution",
+        "gpRegression",
+        "gaussianProcessRegression",
+        "chi2Contingency",
+        "multipleTest",
+        "noncentralChi2CDF",
+        "noncentralFCDF",
+        "noncentralTCDF",
+        "circmean",
+        "circvar",
+        "circstd",
+        "vonMisesPDF",
+        "mcnemar",
+        "cochranQ",
+        "dirichletSample",
+        "dirichletPdf",
+        "wishartSample",
+        "mvnPdf",
+        "mvnSample",
+        "tTestPower"
+      ],
+      "int": [
+        "FitDistributionResult",
+        "GPOptions",
+        "GPPrediction",
+        "GPModel",
+        "Chi2ContingencyResult",
+        "Chi2ContingencyOptions",
+        "CircularOptions",
+        "McNemarOptions",
+        "McNemarResult",
+        "CochranQResult"
       ]
     },
     "functions/string": {
@@ -838,7 +1105,7 @@
       ]
     },
     "functions/typed": {
-      "f": 31,
+      "f": 40,
       "exp": [
         "typedAlgebra",
         "polyval",
@@ -865,18 +1132,18 @@
         "SampleNOptions",
         "Distribution",
         "MultivariateDistribution",
+        "MultiPoly",
+        "SquareFreeFactor",
         "KDTreeNode",
         "CentralityRestartOptions",
         "PageRankOptions",
         "PageRankResult",
-        "PageRankRestartResult",
-        "BetweennessOptions",
-        "BetweennessResult"
+        "PageRankRestartResult"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 35,
+      "f": 34,
       "exp": [
         "arraySize",
         "validate",
@@ -899,18 +1166,17 @@
         "getArrayDataType",
         "last"
       ],
-      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
-        "IdentifiedValue",
         "EmitterMixin",
         "FactoryFunction",
-        "LegacyFactory",
-        "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
-        "Matrix"
+        "Matrix",
+        "DenseMatrix",
+        "SparseMatrix",
+        "Range"
       ]
     },
     "functions/wasm": {
@@ -938,7 +1204,7 @@
         "loadWasmManifest"
       ],
       "cls": ["WasmLoader"],
-      "int": ["RawWasm", "WasmManifest", "WasmModule", "LoadingMetrics"]
+      "int": ["RawWasm", "WasmModule"]
     },
     "expression/compiler": {
       "f": 2,
@@ -970,11 +1236,7 @@
         "booleanDocs"
       ]
     },
-    "expression/error": {
-      "f": 3,
-      "exp": ["DimensionError", "createIndexError", "IndexError", "MathjsError"],
-      "cls": ["DimensionError", "IndexError", "MathjsError"]
-    },
+    "expression/error": { "f": 1, "exp": ["IndexError", "createIndexError"] },
     "expression/evaluator": {
       "f": 2,
       "exp": ["createEvaluate", "compileExpression"],
@@ -1047,7 +1309,7 @@
       ]
     },
     "expression/utils": {
-      "f": 15,
+      "f": 13,
       "exp": [
         "arraySize",
         "validate",
@@ -1070,18 +1332,17 @@
         "getArrayDataType",
         "last"
       ],
-      "cls": ["ObjectWrappingMap", "PartitionedMap"],
       "int": [
-        "IdentifiedValue",
         "FactoryFunction",
-        "LegacyFactory",
-        "FactoryMeta",
         "BigNumber",
         "Complex",
         "Fraction",
         "Unit",
         "Matrix",
-        "DenseMatrix"
+        "DenseMatrix",
+        "SparseMatrix",
+        "Range",
+        "IndexDimension"
       ]
     },
     "parser": {
@@ -1325,7 +1586,7 @@
         "parallelSubtract"
       ],
       "cls": ["ComputePool"],
-      "int": ["ComputePoolConfig", "ParallelResult", "PoolOptions", "ExecOptions", "PoolStats"]
+      "int": ["ComputePoolConfig", "ParallelResult"]
     },
     "parallel/operations": {
       "f": 5,
@@ -1386,7 +1647,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 20,
+      "f": 24,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1409,7 +1670,7 @@
         "COMMAND_NAMES",
         "describeData"
       ],
-      "cls": ["WorkbookExecutor", "Session"],
+      "cls": ["WorkbookExecutor", "Session", "WorkbookTimeoutError"],
       "int": [
         "CommandResult",
         "DescribeDoc",
@@ -1585,19 +1846,19 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },
-    { "p": "utils/factory.ts", "i": 2, "o": 260 },
-    { "p": "factories/index.ts", "i": 244, "o": 8 },
+    { "p": "utils/factory.ts", "i": 1, "o": 260 },
+    { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
+    { "p": "src/index.ts", "i": 127, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
-    { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
-    { "p": "typed/index.ts", "i": 53, "o": 2 },
-    { "p": "utils/array.ts", "i": 6, "o": 49 },
+    { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/factory.ts", "i": 2, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 47 },
-    { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "utils/is.ts", "i": 0, "o": 40 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 }
+    { "p": "utils/array.ts", "i": 0, "o": 48 },
+    { "p": "utils/factory.ts", "i": 1, "o": 46 },
+    { "p": "utils/number.ts", "i": 0, "o": 44 },
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 },
+    { "p": "utils/collection.ts", "i": 0, "o": 37 }
   ]
 }

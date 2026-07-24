@@ -141,11 +141,30 @@ describe('sortFactories', () => {
     expect(sorted.length).toBe(2);
   });
 
-  it('handles circular dependency without infinite loop', () => {
+  it('throws on a direct 2-cycle (adopted core behavior, Bucket B commit 2)', () => {
     const fA = factory('a', ['b'], ({ b }: { b: unknown }) => b);
     const fB = factory('b', ['a'], ({ a }: { a: unknown }) => a);
-    // Should not throw or loop infinitely
-    expect(() => sortFactories([fA, fB])).not.toThrow();
+    // core's sortFactories throws on ANY circular dependency, direct or indirect;
+    // this package's sortFactories now delegates to core's (formerly silently
+    // preserved input order without throwing — see CHANGELOG.md Bucket B commit 2).
+    expect(() => sortFactories([fA, fB])).toThrow(/Circular dependency/);
+  });
+
+  it('throws on an indirect 3-cycle (A->B->C->A)', () => {
+    const fA = factory('a', ['b'], ({ b }: { b: unknown }) => b);
+    const fB = factory('b', ['c'], ({ c }: { c: unknown }) => c);
+    const fC = factory('c', ['a'], ({ a }: { a: unknown }) => a);
+    expect(() => sortFactories([fA, fB, fC])).toThrow(/Circular dependency/);
+  });
+
+  it('still produces a correct topological order on non-cyclic graphs', () => {
+    const fA = factory('a', [], () => 'a');
+    const fB = factory('b', ['a'], ({ a }: { a: string }) => a + 'b');
+    const fC = factory('c', ['a', 'b'], ({ a, b }: { a: string; b: string }) => a + b + 'c');
+    const sorted = sortFactories([fC, fB, fA]);
+    const names = (sorted as (typeof fA)[]).map((f) => f.fn);
+    expect(names.indexOf('a')).toBeLessThan(names.indexOf('b'));
+    expect(names.indexOf('b')).toBeLessThan(names.indexOf('c'));
   });
 });
 

@@ -150,6 +150,7 @@ interface CLIOptions {
   root: string;
   includeTests: boolean;
   all: boolean;
+  checkCensus: boolean;
 }
 
 // Constants - support CLI argument or current working directory for portability
@@ -159,6 +160,7 @@ function parseCliOptions(): CLIOptions {
     root: process.cwd(),
     includeTests: false,
     all: false,
+    checkCensus: false,
   };
 
   for (const arg of args) {
@@ -168,6 +170,8 @@ function parseCliOptions(): CLIOptions {
       options.includeTests = true;
     } else if (arg === '--all' || arg === '-a') {
       options.all = true;
+    } else if (arg === '--check-census') {
+      options.checkCensus = true;
     } else if (arg === '--help' || arg === '-h') {
       console.log(`
 Dependency Graph Generator
@@ -230,6 +234,41 @@ let workspaceMap: Map<string, WorkspacePackage> = new Map();
  * Returns empty map if no workspaces field (backward compat with single packages).
  */
 /**
+ * Bundler entry points declared in a package's config-driven `tsup.config.ts`
+ * (`entry: [ 'src/index.ts', 'src/render-file.ts', … ]`), returned as
+ * repo-relative source paths (e.g. "plot/src/render-file.ts").
+ *
+ * Needed because tsup can take its entries EITHER on the command line
+ * (`tsup src/index.ts src/worker.ts`, parsed from the build-script string in
+ * `exportsSubpathEntries`) OR from `tsup.config.ts` when the script is a bare
+ * `tsup`. plot/workbook moved their multi-entry lists into `tsup.config.ts`,
+ * which the script-string parser can't see — a build-root REGRESSION that
+ * silently dropped `plot/src/render-file.ts` and `workbook/src/run-worker.ts`
+ * from the module graph (1088 → 1086). This restores them by reading the config.
+ */
+function tsupConfigEntries(rootDir: string, pkgDir: string): string[] {
+  const cfgPath = join(rootDir, pkgDir, 'tsup.config.ts');
+  if (!existsSync(cfgPath)) return [];
+  let code: string;
+  try {
+    code = readFileSync(cfgPath, 'utf-8');
+  } catch {
+    return [];
+  }
+  // Grab the `entry: [ … ]` array literal, then pull its string literals that
+  // end in `.ts` (each is a build root emitting its own bundle). Only the array
+  // form is supported (the idiom these packages use); an object-map `entry` form
+  // would need extending here if a package adopts it.
+  const arr = /entry\s*:\s*\[([^\]]*)\]/.exec(code);
+  if (!arr) return [];
+  const out: string[] = [];
+  for (const m of arr[1].matchAll(/['"`]([^'"`]+\.ts)['"`]/g)) {
+    out.push(join(pkgDir, m[1]).replace(/\\/g, '/'));
+  }
+  return out;
+}
+
+/**
  * Source files of a package's `exports` subpath entries other than "." —
  * `"./internal": { import: "./dist/internal.js" }` maps to `src/internal.ts`.
  * Returned paths are repo-relative (e.g. "core/src/internal.ts").
@@ -283,6 +322,18 @@ function exportsSubpathEntries(
     for (const m of script.matchAll(/tsc\s+-p\s+([\w./-]+\.json)/g)) {
       seedTsconfigEntries(rootDir, pkgDir, m[1], addIfExists);
     }
+  }
+  // Config-driven tsup: a `build`/`dev` script that invokes `tsup` with NO
+  // explicit `src/*.ts` entry arg reads its entries from `tsup.config.ts`
+  // instead — the script-string parse above finds none, so also read the config.
+  const buildDevScripts = [pkg.scripts?.build, pkg.scripts?.dev].filter((s): s is string =>
+    Boolean(s)
+  );
+  const hasConfigDrivenTsup = buildDevScripts.some(
+    (s) => /(?:^|\s|&|\|)tsup(?:\s|$|&|\|)/.test(s) && !/(?:^|\s)src\/[\w./-]+\.ts\b/.test(s)
+  );
+  if (hasConfigDrivenTsup) {
+    for (const entry of tsupConfigEntries(rootDir, pkgDir)) addIfExists(entry);
   }
   return entries;
 }
@@ -1572,6 +1623,72 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
   };
 }
 
+interface PublicSurface {
+  /** Files whose ENTIRE export list is public (reached by a wildcard `export *`
+   *  chain from a package root, or is itself a root). */
+  publicWildcardFiles: Set<string>;
+  /** `${path}::${name}` for individually named-re-exported public exports. */
+  publicNamed: Set<string>;
+  /** Public roots beyond each package's `src/index.ts`: `exports` subpath
+   *  entries, `bin` targets, and config-referenced bundle entries. */
+  extraEntryPaths: Set<string>;
+}
+
+/**
+ * Compute the package public-API surface: any export surfaced through a
+ * package `src/index.ts` (or an equally-public root — an `exports` subpath
+ * entry, a `bin` target, or a config-referenced bundle entry) — directly, or
+ * re-exported into one via `export … from` (transitively) — is the package's
+ * external surface. Shared by `detectUnused` (a public export isn't "unused")
+ * and `buildDuplicateEntries` (a public export is a real canonical-candidate
+ * signal; an internal one that merely shares a name elsewhere is not).
+ */
+function computePublicSurface(files: ParsedFile[]): PublicSurface {
+  const byPath = new Map(files.map((f) => [f.path, f] as const));
+  const publicWildcardFiles = new Set<string>();
+  const publicNamed = new Set<string>();
+
+  const markPublic = (file: ParsedFile, seen: Set<string>): void => {
+    if (seen.has(file.path)) return;
+    seen.add(file.path);
+    publicWildcardFiles.add(file.path); // the file's own exports are public
+    for (const dep of file.internalDependencies) {
+      if (!dep.reExport) continue;
+      const target = byPath.get(resolvePath(file.path, dep.file));
+      if (!target) continue;
+      if (dep.imports.includes('*')) {
+        markPublic(target, seen); // export * → every export of the source is public
+      } else {
+        for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
+      }
+    }
+  };
+
+  // Public roots: every package src/index.ts PLUS every package.json `exports`
+  // subpath entry (e.g. core's `./internal` → core/src/internal.ts). A subpath
+  // entry is exactly as public as the index — without seeding it, everything it
+  // re-exports (`export * from './number.js'`) is false-flagged as unused.
+  const extraEntryPaths = new Set<string>();
+  for (const ws of workspaceMap.values()) {
+    for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
+  }
+  // Config-referenced roots (bundler alias / entry targets, e.g. the browser
+  // shim aliased in by vitest.config.browser.ts) are entry points too — nothing
+  // imports them by design, so they must not be flagged as "unused files".
+  for (const entry of configReferencedEntries(ROOT_DIR)) extraEntryPaths.add(entry);
+  for (const file of files) {
+    if (
+      file.path === 'src/index.ts' ||
+      file.path.endsWith('/src/index.ts') ||
+      extraEntryPaths.has(file.path)
+    ) {
+      markPublic(file, new Set());
+    }
+  }
+
+  return { publicWildcardFiles, publicNamed, extraEntryPaths };
+}
+
 /**
  * Detect unused files and exports
  */
@@ -1637,47 +1754,9 @@ function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): Unused
   // directly, or re-exported into one via `export … from` (transitively) — is the
   // package's external surface, consumed by downstream packages / end users, not
   // internal files. Flagging it as "unused" is a false positive (the bulk of the
-  // list). Collect it and exclude it below.
-  const byPath = new Map(files.map((f) => [f.path, f] as const));
-  const publicWildcardFiles = new Set<string>(); // ALL exports public (reached by `export *`)
-  const publicNamed = new Set<string>(); // `${path}::${name}` for named public exports
-
-  const markPublic = (file: ParsedFile, seen: Set<string>): void => {
-    if (seen.has(file.path)) return;
-    seen.add(file.path);
-    publicWildcardFiles.add(file.path); // the file's own exports are public
-    for (const dep of file.internalDependencies) {
-      if (!dep.reExport) continue;
-      const target = byPath.get(resolvePath(file.path, dep.file));
-      if (!target) continue;
-      if (dep.imports.includes('*')) {
-        markPublic(target, seen); // export * → every export of the source is public
-      } else {
-        for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
-      }
-    }
-  };
-  // Public roots: every package src/index.ts PLUS every package.json `exports`
-  // subpath entry (e.g. core's `./internal` → core/src/internal.ts). A subpath
-  // entry is exactly as public as the index — without seeding it, everything it
-  // re-exports (`export * from './number.js'`) is false-flagged as unused.
-  const extraEntryPaths = new Set<string>();
-  for (const ws of workspaceMap.values()) {
-    for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
-  }
-  // Config-referenced roots (bundler alias / entry targets, e.g. the browser
-  // shim aliased in by vitest.config.browser.ts) are entry points too — nothing
-  // imports them by design, so they must not be flagged as "unused files".
-  for (const entry of configReferencedEntries(ROOT_DIR)) extraEntryPaths.add(entry);
-  for (const file of files) {
-    if (
-      file.path === 'src/index.ts' ||
-      file.path.endsWith('/src/index.ts') ||
-      extraEntryPaths.has(file.path)
-    ) {
-      markPublic(file, new Set());
-    }
-  }
+  // list). Collect it and exclude it below. (Also reused by the duplicate-symbol
+  // detector's per-file public flag — see `computePublicSurface`.)
+  const { publicWildcardFiles, publicNamed, extraEntryPaths } = computePublicSurface(files);
 
   // Find unused files (excluding entry point and index files which are re-export hubs)
   const unusedFiles: string[] = [];
@@ -3602,10 +3681,927 @@ function generateParallelPairingMarkdown(p: ParallelPairing): string {
 }
 
 /**
+ * Duplicate-symbol detection: the recurring MathTS "multiple implementations of
+ * one name across packages/files" problem — three `fft`s; `sum`/`distance`/
+ * `cumsum`/`variance` duplicated across the typed/factory/compat layers;
+ * `fftshift`/`ifftshift` defined independently in both
+ * `functions/src/signal/fft.ts` (generic `<T>`) and
+ * `functions/src/signal/fft-helpers.ts` (`number[]`). This is the measurement
+ * that scopes a consolidation campaign — later it can gate CI directly.
+ *
+ * A "definer" is a file that OWNS a symbol's implementation body — the name is
+ * in that file's own `functions`/`constants`/`classes` (runtime) or
+ * `interfaces`/`types`/`enums` (type) export list AND is NOT also in that
+ * file's `reExported` list. `reExported` already captures every re-export FORM
+ * the parser recognises for a named export — `export { x } from './y'`,
+ * `export type { x } from './y'`, and their workspace-scoped equivalents
+ * (`export { x } from '@scope/pkg'`) all push the exported name into
+ * `exports.reExported` regardless of destination (see `parseFile`). A name
+ * landing there is a FORWARD, not an independent body, so it is excluded here
+ * without needing to walk the barrel re-export map — that map resolves
+ * *relative-import chains* for reachability tracing, a different concern from
+ * "does this file's own export list represent a real definition."
+ *
+ * NOT detected here: typed-dispatch polymorphism, e.g. a single public name
+ * (`abs`) registered with multiple typed overloads for different argument
+ * shapes (`abs(number)` vs `abs(matrix)`) — that requires call-graph/signature
+ * analysis, out of scope. A flagged name may be a genuine duplicate OR a
+ * legitimate typed-dispatch/factory variant; a human triages using the
+ * recorded defining files + public flags (see `DUPLICATE_SYMBOLS_NOTE`).
+ */
+type RuntimeSymbolCategory = 'function' | 'constant' | 'class';
+type TypeSymbolCategory = 'interface' | 'type' | 'enum';
+type DupExportKey = 'functions' | 'constants' | 'classes' | 'interfaces' | 'types' | 'enums';
+
+/**
+ * Per-definer classification (see the big comment above `buildDuplicateEntries`
+ * for the full decision model):
+ * - `ALLOWLISTED` — matches `duplicate-allowlist.json` (human-curated: hot-path
+ *   `is*` guards, AssemblyScript mirrors, per-package `VERSION` strings).
+ * - `DISPATCH_VARIANT` — `export const X = mathTyped('X', {...})`, a public
+ *   typed-dispatch registration, not a copy-paste body.
+ * - `ALIAS_DELEGATION` — `export const X = Y` where `Y` is bound by an
+ *   `import` in the same file — a forward, not an independent body.
+ * - `PLAIN` — none of the above; a genuine own-defined body.
+ */
+type DupDefinerTag = 'ALLOWLISTED' | 'DISPATCH_VARIANT' | 'ALIAS_DELEGATION' | 'PLAIN';
+
+/**
+ * Entry-level (per-name) classification, derived from its definers'
+ * `DupDefinerTag`s — see `buildDuplicateEntries`.
+ */
+type DupEntryTag = 'TRUE_DUPLICATE' | 'DISPATCH_VARIANT' | 'ALIAS_DELEGATION' | 'ALLOWLISTED';
+
+interface DuplicateDefiner {
+  file: string;
+  package: string;
+  public: boolean;
+  /** This definer's own classification (see `DupDefinerTag`). */
+  tag: DupDefinerTag;
+  /** Present when `tag === 'ALLOWLISTED'` — the matching allowlist entry's reason. */
+  reason?: string;
+}
+
+interface DuplicateSymbolEntry {
+  name: string;
+  /** Distinct own-definition categories across definers, '+'-joined (e.g.
+   *  "function" or "constant+function" — the latter when e.g. one file
+   *  assigns `export const fft = createFft(...)` and another declares
+   *  `export function fft`, as with the real `fft` case). */
+  category: string;
+  definers: DuplicateDefiner[];
+  /** File path of the sole PUBLIC definer, `'AMBIGUOUS'` (>=2 public
+   *  definers), or `'internal-only'` (0 public definers). A hint, not a
+   *  verdict — a human still confirms before consolidating. */
+  canonicalHint: string;
+  /** Entry-level classification (see `DupEntryTag`). Only `TRUE_DUPLICATE`
+   *  is the actionable merge-target bucket. */
+  tag: DupEntryTag;
+}
+
+interface DuplicateSymbolsReport {
+  generated: string;
+  note: string;
+  summary: {
+    /** Count of `TRUE_DUPLICATE`-tagged runtime entries — the actionable number. */
+    runtimeDuplicates: number;
+    /** Count of `TRUE_DUPLICATE`-tagged type entries. */
+    typeDuplicates: number;
+    runtimeByTag: Record<DupEntryTag, number>;
+    typeByTag: Record<DupEntryTag, number>;
+  };
+  runtime: DuplicateSymbolEntry[];
+  types: DuplicateSymbolEntry[];
+}
+
+const RUNTIME_DUP_CATEGORIES: Array<{ cat: RuntimeSymbolCategory; key: DupExportKey }> = [
+  { cat: 'function', key: 'functions' },
+  { cat: 'constant', key: 'constants' },
+  { cat: 'class', key: 'classes' },
+];
+
+const TYPE_DUP_CATEGORIES: Array<{ cat: TypeSymbolCategory; key: DupExportKey }> = [
+  { cat: 'interface', key: 'interfaces' },
+  { cat: 'type', key: 'types' },
+  { cat: 'enum', key: 'enums' },
+];
+
+const DUPLICATE_SYMBOLS_NOTE =
+  'This report groups names by OWN definition, not by call graph, then classifies each ' +
+  'flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), ' +
+  'DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct ' +
+  'dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ' +
+  'ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — ' +
+  'excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches ' +
+  'duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package ' +
+  'VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for ' +
+  'different argument shapes within one registration — a human still triages TRUE_DUPLICATE ' +
+  'entries using the defining files + public flags before merging anything.';
+
+interface DuplicateAllowlistEntry {
+  /** Symbol-name patterns. A trailing `*` is a prefix match; the literal `*` matches any name. */
+  names: string[];
+  /** File-path patterns, repo-relative. A trailing `/**` is a directory-prefix match; anything
+   *  else must match the file path exactly. */
+  filesGlob: string[];
+  reason: string;
+}
+
+let duplicateAllowlistCache: DuplicateAllowlistEntry[] | undefined;
+
+/**
+ * Load `tools/create-dependency-graph/duplicate-allowlist.json` — the
+ * human-curated set of legitimately-independent own-definitions (hot-path
+ * `is*` guards kept local per project-all-libraries-build-on-core,
+ * AssemblyScript mirrors that can't import core, per-package `VERSION`
+ * strings). Missing/unparseable file → empty allowlist (fail open to
+ * "nothing allowlisted", not a crash).
+ */
+function loadDuplicateAllowlist(): DuplicateAllowlistEntry[] {
+  if (duplicateAllowlistCache) return duplicateAllowlistCache;
+  const path = join(ROOT_DIR, 'tools', 'create-dependency-graph', 'duplicate-allowlist.json');
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf-8')) as {
+      entries?: DuplicateAllowlistEntry[];
+    };
+    duplicateAllowlistCache = parsed.entries ?? [];
+  } catch {
+    duplicateAllowlistCache = [];
+  }
+  return duplicateAllowlistCache;
+}
+
+/** `pattern` against `value`: literal `*` matches anything, a trailing `/**`
+ *  is a directory-prefix match, a trailing `*` is a plain prefix match,
+ *  otherwise exact string equality. */
+function globMatchSingle(pattern: string, value: string): boolean {
+  if (pattern === '*') return true;
+  if (pattern.endsWith('/**')) return value.startsWith(pattern.slice(0, -2)); // keep the trailing '/'
+  if (pattern.endsWith('*')) return value.startsWith(pattern.slice(0, -1));
+  return value === pattern;
+}
+
+function findAllowlistMatch(
+  allowlist: DuplicateAllowlistEntry[],
+  name: string,
+  filePath: string
+): DuplicateAllowlistEntry | undefined {
+  return allowlist.find(
+    (e) =>
+      e.names.some((n) => globMatchSingle(n, name)) &&
+      e.filesGlob.some((f) => globMatchSingle(f, filePath))
+  );
+}
+
+const rawFileContentCache = new Map<string, string>();
+
+/** Raw (unstripped) source of a repo-relative file path, cached. Used only by
+ *  the duplicate-classification regexes below — separate from `parseFile`'s
+ *  own comment-stripped `code` (not retained on `ParsedFile`). */
+function getRawFileContent(relPath: string): string {
+  const cached = rawFileContentCache.get(relPath);
+  if (cached !== undefined) return cached;
+  let content = '';
+  try {
+    content = readFileSync(join(ROOT_DIR, relPath), 'utf-8');
+  } catch {
+    content = '';
+  }
+  rawFileContentCache.set(relPath, content);
+  return content;
+}
+
+function stripCommentsForClassification(content: string): string {
+  return content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
+function escapeRegExpLiteral(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** `export const NAME = mathTyped('NAME', {...` (optional generic args) — a
+ *  typed-function dispatch registration: a distinct public dispatch surface,
+ *  not a copy-paste duplicate body. */
+function isDispatchVariantBody(code: string, name: string): boolean {
+  const re = new RegExp(
+    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*mathTyped\\s*(?:<[^>]*>)?\\s*\\(`
+  );
+  return re.test(code);
+}
+
+/** Every LOCAL binding name introduced by an `import` statement in `code`
+ *  (comment-stripped) — the alias after `as` for named imports, the
+ *  default-import binding, or the namespace-import binding. Deliberately
+ *  ignores WHERE the import resolves (relative vs workspace-scoped) — for
+ *  alias-delegation purposes we only need to know the RHS identifier is
+ *  imported, not same-file-local. */
+function collectImportedLocalNames(code: string): Set<string> {
+  const names = new Set<string>();
+  const importRegex =
+    /import\s+(?:type\s+)?(?:(?:\{([^}]+)\}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:\{([^}]+)\}|(\w+)))?)\s+from\s+['"][^'"]+['"]/g;
+  let m: RegExpExecArray | null;
+  while ((m = importRegex.exec(code)) !== null) {
+    const named = m[1] || m[4] || '';
+    const def = m[2] || m[5] || '';
+    const ns = m[3] || '';
+    if (named) {
+      for (const item of named.split(',')) {
+        const trimmed = item.trim().replace(/^type\s+/, '');
+        if (!trimmed) continue;
+        const parts = trimmed.split(/\s+as\s+/);
+        const local = parts[parts.length - 1].trim();
+        if (local) names.add(local);
+      }
+    }
+    if (def) names.add(def);
+    if (ns) names.add(ns);
+  }
+  return names;
+}
+
+/** `export const NAME = someIdentifier;` (optional type annotation) where the
+ *  RHS is a BARE identifier bound by an `import` elsewhere in the file — a
+ *  delegation/re-export, not an independent body (e.g. `compat/src/shims.ts`'s
+ *  `export const abs = _abs;`, `_abs` imported as `abs as _abs`). */
+function isAliasDelegationBody(
+  code: string,
+  name: string,
+  importedLocalNames: Set<string>
+): boolean {
+  const re = new RegExp(
+    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*([A-Za-z_$][\\w$]*)\\s*;`
+  );
+  const m = code.match(re);
+  return !!m && importedLocalNames.has(m[1]);
+}
+
+/**
+ * Classify a single definer. Allowlist wins first (explicit human curation);
+ * then, for `constant`-category definers only (the shape `export const X =
+ * ...` — the only shape ALIAS_DELEGATION/DISPATCH_VARIANT can apply to),
+ * check for a dispatch registration or an alias forward. Everything else is
+ * `PLAIN` — a genuine own-defined body.
+ */
+function classifyDefiner(
+  file: ParsedFile,
+  name: string,
+  category: string,
+  allowlist: DuplicateAllowlistEntry[]
+): { tag: DupDefinerTag; reason?: string } {
+  const allowMatch = findAllowlistMatch(allowlist, name, file.path);
+  if (allowMatch) return { tag: 'ALLOWLISTED', reason: allowMatch.reason };
+
+  if (category === 'constant') {
+    const raw = getRawFileContent(file.path);
+    if (raw) {
+      const code = stripCommentsForClassification(raw);
+      if (isDispatchVariantBody(code, name)) return { tag: 'DISPATCH_VARIANT' };
+      if (isAliasDelegationBody(code, name, collectImportedLocalNames(code))) {
+        return { tag: 'ALIAS_DELEGATION' };
+      }
+    }
+  }
+  return { tag: 'PLAIN' };
+}
+
+/**
+ * Collect every OWN definition of every symbol name across `files`, keyed by
+ * name. A definer is recorded only when the name is in the file's own export
+ * list for that category AND absent from `file.exports.reExported`.
+ */
+function collectOwnDefiners(
+  files: ParsedFile[],
+  categories: Array<{ cat: string; key: DupExportKey }>
+): Map<string, Array<{ file: ParsedFile; category: string }>> {
+  const byName = new Map<string, Array<{ file: ParsedFile; category: string }>>();
+  for (const file of files) {
+    const reExported = new Set(file.exports.reExported);
+    for (const { cat, key } of categories) {
+      for (const name of file.exports[key]) {
+        if (reExported.has(name)) continue; // forward, not an own body
+        // `exports.types` also contains every interface name (the parser
+        // pushes interfaces into both `interfaces` and `types`) — skip so an
+        // interface isn't double-counted as its own "type" duplicate too.
+        if (key === 'types' && file.exports.interfaces.includes(name)) continue;
+        if (!byName.has(name)) byName.set(name, []);
+        byName.get(name)!.push({ file, category: cat });
+      }
+    }
+  }
+  return byName;
+}
+
+/**
+ * Turn per-name definer lists into report entries, keeping only names with
+ * >=2 DISTINCT defining files (the candidate-duplicate threshold), resolving
+ * each definer's public-surface flag and a canonical-candidate hint.
+ *
+ * Public is resolved per FILE (not per package-name-union): a definer is
+ * public iff its own file is in `publicSurface.publicWildcardFiles` (reached
+ * by a wildcard `export *` chain from a package root) OR its specific name is
+ * in `publicSurface.publicNamed` (`${file}::${name}`, a NAMED re-export chain
+ * to a root). This is what correctly resolves cases like `fftshift`, which is
+ * OWN-defined in both `functions/src/signal/fft.ts` and
+ * `functions/src/signal/fft-helpers.ts` — only the latter is named-re-exported
+ * by `functions/src/index.ts`, so only it is flagged public; a coarser "is the
+ * NAME present anywhere in the package's export surface" check would wrongly
+ * call both public (package-export-surfaces.json is a flat per-package name
+ * set, not file-scoped) and report AMBIGUOUS instead of a clean canonical hint.
+ */
+const DUP_ENTRY_TAG_SORT_ORDER: Record<DupEntryTag, number> = {
+  TRUE_DUPLICATE: 0,
+  DISPATCH_VARIANT: 1,
+  ALIAS_DELEGATION: 2,
+  ALLOWLISTED: 3,
+};
+
+function finalizeDuplicateEntry(
+  name: string,
+  categories: Set<string>,
+  definers: DuplicateDefiner[],
+  tag: DupEntryTag
+): DuplicateSymbolEntry {
+  const publicDefiners = definers.filter((d) => d.public);
+  const canonicalHint =
+    publicDefiners.length === 1
+      ? publicDefiners[0].file
+      : publicDefiners.length > 1
+        ? 'AMBIGUOUS'
+        : 'internal-only';
+  return { name, category: [...categories].sort().join('+'), definers, canonicalHint, tag };
+}
+
+/**
+ * Turn per-name definer lists into classified report entries, keeping only
+ * names with >=2 DISTINCT defining files (the candidate-duplicate threshold),
+ * resolving each definer's public-surface flag, a canonical-candidate hint,
+ * and — the classification-aware extension — an entry-level `DupEntryTag`:
+ *
+ * 1. Classify every definer (`classifyDefiner`): ALLOWLISTED > DISPATCH_VARIANT
+ *    / ALIAS_DELEGATION (constant-shape only) > PLAIN.
+ * 2. Exclude ALIAS_DELEGATION definers first — a const-alias forward is not an
+ *    independent body at all. If fewer than 2 non-alias definers remain, the
+ *    "duplication" was illusory (one real body, the rest just forwards to
+ *    it) — tag the whole entry ALIAS_DELEGATION (still reported, for
+ *    transparency, but excluded from the actionable count).
+ * 3. Of the non-alias definers, exclude ALLOWLISTED ones. If fewer than 2
+ *    remain, the duplication is fully explained by the allowlist (e.g. the
+ *    `is*` guard family, or an AssemblyScript mirror paired with exactly one
+ *    JS definer) — tag ALLOWLISTED.
+ * 4. Otherwise, if >=2 of the remaining definers are DISPATCH_VARIANT, the
+ *    name is a shared public dispatch surface across packages (e.g. `abs`/
+ *    `add` registered independently by `functions` and `matrix`) — a Bucket C
+ *    delegation candidate, not a blind merge target — tag DISPATCH_VARIANT.
+ * 5. Otherwise it's a real TRUE_DUPLICATE — the actionable merge target.
+ *
+ * Public is resolved per FILE (not per package-name-union): a definer is
+ * public iff its own file is in `publicSurface.publicWildcardFiles` (reached
+ * by a wildcard `export *` chain from a package root) OR its specific name is
+ * in `publicSurface.publicNamed` (`${file}::${name}`, a NAMED re-export chain
+ * to a root). This is what correctly resolves cases like `fftshift`, which is
+ * OWN-defined in both `functions/src/signal/fft.ts` and
+ * `functions/src/signal/fft-helpers.ts` — only the latter is named-re-exported
+ * by `functions/src/index.ts`, so only it is flagged public; a coarser "is the
+ * NAME present anywhere in the package's export surface" check would wrongly
+ * call both public (package-export-surfaces.json is a flat per-package name
+ * set, not file-scoped) and report AMBIGUOUS instead of a clean canonical hint.
+ */
+function buildDuplicateEntries(
+  byName: Map<string, Array<{ file: ParsedFile; category: string }>>,
+  publicSurface: PublicSurface,
+  allowlist: DuplicateAllowlistEntry[]
+): DuplicateSymbolEntry[] {
+  const isFilePublic = (file: ParsedFile, name: string): boolean =>
+    publicSurface.publicWildcardFiles.has(file.path) ||
+    publicSurface.publicNamed.has(`${file.path}::${name}`);
+
+  const entries: DuplicateSymbolEntry[] = [];
+  for (const [name, defs] of byName) {
+    const byFile = new Map<string, { file: ParsedFile; category: string }>();
+    for (const d of defs) {
+      if (!byFile.has(d.file.path)) byFile.set(d.file.path, d);
+    }
+    if (byFile.size < 2) continue;
+
+    const categories = new Set<string>();
+    const definers: DuplicateDefiner[] = [];
+    for (const { file, category } of byFile.values()) {
+      categories.add(category);
+      const { tag, reason } = classifyDefiner(file, name, category, allowlist);
+      definers.push({
+        file: file.path,
+        package: file.packageName ?? 'unknown',
+        public: isFilePublic(file, name),
+        tag,
+        ...(reason ? { reason } : {}),
+      });
+    }
+    definers.sort((a, b) => a.file.localeCompare(b.file));
+
+    const nonAlias = definers.filter((d) => d.tag !== 'ALIAS_DELEGATION');
+    if (nonAlias.length < 2) {
+      entries.push(finalizeDuplicateEntry(name, categories, definers, 'ALIAS_DELEGATION'));
+      continue;
+    }
+
+    const nonAllowlisted = nonAlias.filter((d) => d.tag !== 'ALLOWLISTED');
+    let entryTag: DupEntryTag;
+    if (nonAllowlisted.length < 2) {
+      entryTag = 'ALLOWLISTED';
+    } else {
+      const dispatchCount = nonAllowlisted.filter((d) => d.tag === 'DISPATCH_VARIANT').length;
+      entryTag = dispatchCount >= 2 ? 'DISPATCH_VARIANT' : 'TRUE_DUPLICATE';
+    }
+    entries.push(finalizeDuplicateEntry(name, categories, definers, entryTag));
+  }
+  entries.sort(
+    (a, b) =>
+      DUP_ENTRY_TAG_SORT_ORDER[a.tag] - DUP_ENTRY_TAG_SORT_ORDER[b.tag] ||
+      b.definers.length - a.definers.length ||
+      a.name.localeCompare(b.name)
+  );
+  return entries;
+}
+
+function tallyByTag(entries: DuplicateSymbolEntry[]): Record<DupEntryTag, number> {
+  const tally: Record<DupEntryTag, number> = {
+    TRUE_DUPLICATE: 0,
+    DISPATCH_VARIANT: 0,
+    ALIAS_DELEGATION: 0,
+    ALLOWLISTED: 0,
+  };
+  for (const e of entries) tally[e.tag]++;
+  return tally;
+}
+
+function detectDuplicateSymbols(
+  files: ParsedFile[],
+  publicSurface: PublicSurface
+): { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] } {
+  const allowlist = loadDuplicateAllowlist();
+  return {
+    runtime: buildDuplicateEntries(
+      collectOwnDefiners(files, RUNTIME_DUP_CATEGORIES),
+      publicSurface,
+      allowlist
+    ),
+    types: buildDuplicateEntries(
+      collectOwnDefiners(files, TYPE_DUP_CATEGORIES),
+      publicSurface,
+      allowlist
+    ),
+  };
+}
+
+function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): string {
+  let md = '# Duplicate Symbols\n\n';
+  md += `**Generated**: ${report.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across `;
+  md += `the monorepo, then CLASSIFIED (see \`DupEntryTag\`) so the actionable subset is clear: `;
+  md += `\`TRUE_DUPLICATE\` (real merge targets) vs \`DISPATCH_VARIANT\` (>=2 \`mathTyped(...)\` `;
+  md += `registrations of the same public name — distinct dispatch surfaces, Bucket C delegation `;
+  md += `candidates, not copy-paste bodies), \`ALIAS_DELEGATION\` (a \`const X = importedY\` `;
+  md += `forward, excluded once <2 real bodies remain), and \`ALLOWLISTED\` (matches `;
+  md += `\`duplicate-allowlist.json\`: hot-path \`is*\` guards, AssemblyScript mirrors, `;
+  md += `per-package \`VERSION\` strings).\n\n`;
+  md += `> **Note:** ${report.note}\n\n`;
+
+  const summaryTable = (byTag: Record<DupEntryTag, number>, total: number): string =>
+    `| Category | Count |\n| --- | --: |\n` +
+    `| **TRUE_DUPLICATE** (actionable) | ${byTag.TRUE_DUPLICATE} |\n` +
+    `| DISPATCH_VARIANT | ${byTag.DISPATCH_VARIANT} |\n` +
+    `| ALIAS_DELEGATION | ${byTag.ALIAS_DELEGATION} |\n` +
+    `| ALLOWLISTED | ${byTag.ALLOWLISTED} |\n` +
+    `| _Total flagged names_ | ${total} |\n\n`;
+
+  md += `## Summary — runtime (function/constant/class)\n\n`;
+  md += summaryTable(report.summary.runtimeByTag, report.runtime.length);
+  md += `## Summary — types (interface/type/enum)\n\n`;
+  md += summaryTable(report.summary.typeByTag, report.types.length);
+
+  const renderTable = (entries: DuplicateSymbolEntry[]): string => {
+    if (entries.length === 0) return '_None._\n\n';
+    let out = '| Name | Category | Defining files (package, public?, sub-tag) | Canonical hint |\n';
+    out += '| --- | --- | --- | --- |\n';
+    for (const e of entries) {
+      const files = e.definers
+        .map((d) => {
+          const reasonSuffix = d.reason ? `: ${d.reason}` : '';
+          return `\`${d.file}\` (${d.package}, ${d.public ? 'public' : 'internal'}, ${d.tag}${reasonSuffix})`;
+        })
+        .join('<br>');
+      const hint = e.canonicalHint === 'AMBIGUOUS' ? '**AMBIGUOUS**' : `\`${e.canonicalHint}\``;
+      out += `| \`${e.name}\` | ${e.category} | ${files} | ${hint} |\n`;
+    }
+    out += '\n';
+    return out;
+  };
+
+  const renderTaggedSection = (
+    title: string,
+    entries: DuplicateSymbolEntry[],
+    tag: DupEntryTag
+  ): string => `### ${title}\n\n${renderTable(entries.filter((e) => e.tag === tag))}`;
+
+  md += `## Runtime duplicates\n\n`;
+  md += renderTaggedSection(
+    'TRUE_DUPLICATE — actionable merge targets',
+    report.runtime,
+    'TRUE_DUPLICATE'
+  );
+  md += renderTaggedSection(
+    'DISPATCH_VARIANT — distinct public typed-dispatch surfaces (Bucket C candidates)',
+    report.runtime,
+    'DISPATCH_VARIANT'
+  );
+  md += renderTaggedSection(
+    'ALIAS_DELEGATION — const-alias forwards (not independent bodies)',
+    report.runtime,
+    'ALIAS_DELEGATION'
+  );
+  md += renderTaggedSection(
+    'ALLOWLISTED — accepted layering (see duplicate-allowlist.json)',
+    report.runtime,
+    'ALLOWLISTED'
+  );
+
+  md += `## Type duplicates (lower priority)\n\n`;
+  md += renderTaggedSection('TRUE_DUPLICATE', report.types, 'TRUE_DUPLICATE');
+  md += renderTaggedSection('DISPATCH_VARIANT', report.types, 'DISPATCH_VARIANT');
+  md += renderTaggedSection('ALIAS_DELEGATION', report.types, 'ALIAS_DELEGATION');
+  md += renderTaggedSection('ALLOWLISTED', report.types, 'ALLOWLISTED');
+
+  return md;
+}
+
+// ── Complete file census ────────────────────────────────────────────────────
+//
+// A whole-repo inventory of EVERY tracked `.ts` file — not just package src/tests
+// but ALSO the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`,
+// `examples/`, and `docs/` reference sources — each tagged with a disposition. The
+// point is completeness: no `.ts` in the repo may be silently missing from the docs.
+//
+// Two DIFFERENT walks, on purpose (an earlier version had both share a per-package
+// blind spot, so the gate could not catch a scoping gap):
+//   - The CENSUS discovers via ENUMERATED roots (each workspace dir + the specific
+//     root dirs tests/tools/examples/docs + root-level config files) and classifies
+//     each file (`buildFileInventory`).
+//   - The GATE (`verifyFileCensus`) uses a MAXIMAL, location-agnostic walk from the
+//     repo root (`walkRepoTsFiles`) as the authoritative ground truth. Any `.ts` the
+//     maximal walk finds that the census does not account for — e.g. a `.ts` in a NEW
+//     top-level dir the census doesn't enumerate — HARD-FAILS the build. So the gate's
+//     ground truth is strictly broader than the census's discovery and cannot share
+//     its blind spot.
+//
+// Both walks exclude only `node_modules`, `dist`, `*.d.ts`, and dot-directories
+// (`.git`, `.remember`, `.changeset`, …; tooling/transients, not source). That set
+// equals the git-tracked `.ts` files, so there is provably no silent blind spot.
+
+type FileDisposition =
+  | 'reachable'
+  | 'build-entry'
+  | 'test-only'
+  | 'orphan'
+  | 'test'
+  | 'tool'
+  | 'config'
+  | 'example';
+
+type FileArea = 'src' | 'tests' | 'tools' | 'config' | 'examples' | 'docs';
+
+interface FileInventoryRow {
+  file: string;
+  package: string;
+  area: FileArea;
+  disposition: FileDisposition;
+  loc: number;
+}
+
+interface FileInventory {
+  generated: string;
+  totalFiles: number;
+  byDisposition: Record<string, number>;
+  byArea: Record<string, number>;
+  byPackage: Record<string, number>;
+  files: FileInventoryRow[];
+}
+
+/** MAXIMAL repo walk — every `.ts` (except `.d.ts`) under `rootDir`, skipping
+ *  `node_modules`, `dist`, and any dot-directory (`.git`/`.remember`/`.changeset`
+ *  — tooling/transients, matching the git-tracked set). Repo-relative, sorted.
+ *  This is the GATE's authoritative ground truth; it walks from the repo root and
+ *  is location-agnostic, so a `.ts` in any NEW top-level dir is caught. */
+function walkRepoTsFiles(rootDir: string): string[] {
+  const out: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+        out.push(relative(rootDir, p).replace(/\\/g, '/'));
+      }
+    }
+  };
+  walk(rootDir);
+  return out.sort();
+}
+
+/** The CENSUS's file discovery: ENUMERATED source roots only — each workspace
+ *  package directory, the repo-root cross-package dirs (`tests`/`tools`/`examples`/
+ *  `docs`), and root-level `.ts` config files. Deliberately narrower than
+ *  `walkRepoTsFiles` (it never sees a brand-new top-level dir), so the maximal gate
+ *  can catch a scoping gap between them. Same exclusions (node_modules/dist/dot-dirs).
+ */
+function collectCensusFiles(rootDir: string, workspaces: Map<string, WorkspacePackage>): string[] {
+  const set = new Set<string>();
+  const walk = (dir: string): void => {
+    if (!existsSync(dir)) return;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+        set.add(relative(rootDir, p).replace(/\\/g, '/'));
+      }
+    }
+  };
+  for (const [, ws] of workspaces) walk(join(rootDir, ws.directory));
+  for (const d of ['tests', 'tools', 'examples', 'docs']) walk(join(rootDir, d));
+  // Root-level `.ts` files (vitest.config.ts, vitest.config.browser.ts, …).
+  for (const e of readdirSync(rootDir, { withFileTypes: true })) {
+    if (e.isFile() && e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
+      set.add(e.name);
+    }
+  }
+  return [...set];
+}
+
+/** Classify a repo-relative `.ts` path into an AREA purely by location/name —
+ *  independent of the module graph. Order matters: `tools/` and `*.config.ts` win
+ *  before the `tests/` and `src` checks. */
+function classifyArea(rel: string): FileArea {
+  if (/(^|\/)tools\//.test(rel)) return 'tools';
+  // `*.config.ts` and its variants (`vitest.config.browser.ts`, `*.config.bench.ts`).
+  if (/\.config(\.[\w-]+)?\.[cm]?ts$/.test(rel)) return 'config';
+  if (/\.(test|spec)\.ts$/.test(rel) || /(^|\/)tests\//.test(rel)) return 'tests';
+  if (/^examples\//.test(rel)) return 'examples';
+  if (/^docs\//.test(rel)) return 'docs';
+  return 'src';
+}
+
+/** The workspace package a file belongs to (nearest directory prefix), or
+ *  `(root)` for repo-root files (root tests/tools/examples/docs/config). */
+function packageOf(rel: string, workspaces: Map<string, WorkspacePackage>): string {
+  for (const [name, ws] of workspaces) {
+    if (rel.startsWith(ws.directory + '/')) return name;
+  }
+  return '(root)';
+}
+
+function countLoc(rootDir: string, relPath: string): number {
+  try {
+    return readFileSync(join(rootDir, relPath), 'utf-8').split('\n').length;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Build the complete file inventory over the ENUMERATED census roots. Disposition:
+ * for a `src` file — build-entry (a seeded root: index/subpath/bin/config/tsup/worker
+ * entry) > reachable (in the module graph from a root) > test-only (reachable only
+ * from a test) > orphan (reachable from nothing). Non-`src` areas map straight to
+ * their kind: `tests → test`, `tools → tool`, `config → config`, `examples`/`docs`
+ * → `example`. Every tracked `.ts` therefore gets a visible disposition (inclusion
+ * over exclusion — there is no silent allowlist).
+ */
+function buildFileInventory(
+  rootDir: string,
+  workspaces: Map<string, WorkspacePackage>,
+  roots: Set<string>,
+  reachable: Set<string>,
+  testReachable: Set<string>
+): FileInventory {
+  const rows: FileInventoryRow[] = [];
+  for (const rel of collectCensusFiles(rootDir, workspaces)) {
+    const area = classifyArea(rel);
+    let disposition: FileDisposition;
+    if (area === 'src') {
+      disposition = roots.has(rel)
+        ? 'build-entry'
+        : reachable.has(rel)
+          ? 'reachable'
+          : testReachable.has(rel)
+            ? 'test-only'
+            : 'orphan';
+    } else if (area === 'tests') {
+      disposition = 'test';
+    } else if (area === 'tools') {
+      disposition = 'tool';
+    } else if (area === 'config') {
+      disposition = 'config';
+    } else {
+      disposition = 'example'; // examples | docs
+    }
+    rows.push({
+      file: rel,
+      package: packageOf(rel, workspaces),
+      area,
+      disposition,
+      loc: countLoc(rootDir, rel),
+    });
+  }
+  rows.sort((a, b) => a.file.localeCompare(b.file));
+
+  const byDisposition: Record<string, number> = {
+    reachable: 0,
+    'build-entry': 0,
+    'test-only': 0,
+    orphan: 0,
+    test: 0,
+    tool: 0,
+    config: 0,
+    example: 0,
+  };
+  const byArea: Record<string, number> = {};
+  const byPackage: Record<string, number> = {};
+  for (const r of rows) {
+    byDisposition[r.disposition] = (byDisposition[r.disposition] ?? 0) + 1;
+    byArea[r.area] = (byArea[r.area] ?? 0) + 1;
+    byPackage[r.package] = (byPackage[r.package] ?? 0) + 1;
+  }
+
+  return {
+    generated: new Date().toISOString().split('T')[0],
+    totalFiles: rows.length,
+    byDisposition,
+    byArea,
+    byPackage,
+    files: rows,
+  };
+}
+
+const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
+  ['reachable', 'A `src/` file in the module graph, reachable from a root.'],
+  [
+    'build-entry',
+    'A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …).',
+  ],
+  ['test-only', 'A `src/` file not reachable from src roots but imported by a test.'],
+  [
+    'orphan',
+    'A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).',
+  ],
+  ['test', 'A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).'],
+  ['tool', 'A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).'],
+  ['config', 'A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).'],
+  ['example', 'An `examples/` or `docs/` reference/illustration source.'],
+];
+
+function generateFileInventoryMarkdown(inv: FileInventory): string {
+  const lines: string[] = [];
+  lines.push('# Complete File Inventory');
+  lines.push('');
+  lines.push(`**Generated**: ${inv.generated} (by tools/create-dependency-graph)`);
+  lines.push('');
+  lines.push(
+    'Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root ' +
+      'cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` ' +
+      'reference sources — tagged with a disposition. A completeness census: no `.ts` may be ' +
+      'silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, ' +
+      'location-agnostic repo walk (broader than this census’s enumerated discovery) and ' +
+      'HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.'
+  );
+  lines.push('');
+  lines.push(
+    '**Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient ' +
+      'declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The ' +
+      'walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every ' +
+      'tracked `.ts` appears below with an explicit disposition.'
+  );
+  lines.push('');
+  lines.push(`**Total files**: ${inv.totalFiles}`);
+  lines.push('');
+  lines.push('## Disposition counts');
+  lines.push('');
+  lines.push('| Disposition | Count | Meaning |');
+  lines.push('| --- | --: | --- |');
+  for (const [disp, meaning] of FILE_DISPOSITION_LEGEND) {
+    lines.push(`| \`${disp}\` | ${inv.byDisposition[disp] ?? 0} | ${meaning} |`);
+  }
+  lines.push(`| **Total** | **${inv.totalFiles}** | |`);
+  lines.push('');
+  lines.push('## Per-area counts');
+  lines.push('');
+  lines.push('| Area | Files |');
+  lines.push('| --- | --: |');
+  for (const area of Object.keys(inv.byArea).sort()) {
+    lines.push(`| \`${area}\` | ${inv.byArea[area]} |`);
+  }
+  lines.push('');
+  lines.push('## Per-package counts');
+  lines.push('');
+  lines.push('| Package | Files |');
+  lines.push('| --- | --: |');
+  for (const pkg of Object.keys(inv.byPackage).sort()) {
+    lines.push(`| \`${pkg}\` | ${inv.byPackage[pkg]} |`);
+  }
+  lines.push('');
+  lines.push('## All files');
+  lines.push('');
+  lines.push('| file | package | area | disposition |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const r of inv.files) {
+    lines.push(`| \`${r.file}\` | ${r.package} | ${r.area} | ${r.disposition} |`);
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * Self-check gate. The ground truth is a MAXIMAL, location-agnostic repo walk
+ * (`walkRepoTsFiles`) — strictly broader than the census's enumerated discovery,
+ * so it CANNOT share the census's blind spot (the defect an earlier per-package
+ * version shipped). Three independent failure conditions, each HARD-FAILS the run
+ * (throws → non-zero exit):
+ *
+ *   1. **Unaccounted on disk** — a `.ts` the maximal walk finds that the census
+ *      does not list (e.g. a file in a NEW top-level dir the census doesn't
+ *      enumerate). This is the scoping-gap catcher.
+ *   2. **Stale in census** — a census entry with no file on disk.
+ *   3. **Orphans present** — any file the census tagged `orphan` (a `src/` file
+ *      reachable from no root and no test) — almost always a build/worker/subpath
+ *      root the tool failed to detect (the render-file/run-worker regression class),
+ *      so a fresh orphan must stop the build. The inventory is written before the
+ *      throw, so the offending row is visible in FILE_INVENTORY.md.
+ */
+function verifyFileCensus(rootDir: string, inventory: FileInventory): void {
+  const onDisk = new Set(walkRepoTsFiles(rootDir));
+  const census = new Set(inventory.files.map((f) => f.file));
+  const missingFromCensus = [...onDisk].filter((f) => !census.has(f)).sort();
+  const missingFromDisk = [...census].filter((f) => !onDisk.has(f)).sort();
+  const orphans = inventory.files
+    .filter((f) => f.disposition === 'orphan')
+    .map((f) => f.file)
+    .sort();
+
+  if (missingFromCensus.length > 0 || missingFromDisk.length > 0 || orphans.length > 0) {
+    let msg = 'FILE CENSUS SELF-CHECK FAILED.\n';
+    if (missingFromCensus.length > 0) {
+      msg += `  ${missingFromCensus.length} file(s) on disk but ABSENT from the census (scoping/discovery gap — teach the census to enumerate this location):\n`;
+      msg += missingFromCensus.map((f) => `    + ${f}`).join('\n') + '\n';
+    }
+    if (missingFromDisk.length > 0) {
+      msg += `  ${missingFromDisk.length} file(s) in the census but MISSING on disk (stale entry — regenerate with \`npm run docs:deps\`):\n`;
+      msg += missingFromDisk.map((f) => `    - ${f}`).join('\n') + '\n';
+    }
+    if (orphans.length > 0) {
+      msg += `  ${orphans.length} ORPHAN file(s) — a src file reachable from no root and no test. Each is a\n`;
+      msg += `  build/worker/subpath root the tool did not detect (wire it / seed it — see\n`;
+      msg += `  tools/create-dependency-graph tsup.config / exports / bin root handling), or dead\n`;
+      msg += `  code to delete:\n`;
+      msg += orphans.map((f) => `    ! ${f}`).join('\n') + '\n';
+    }
+    throw new Error(msg);
+  }
+  console.log(
+    `File census self-check passed: ${inventory.totalFiles} files == maximal repo walk (independent), 0 orphans.`
+  );
+}
+
+/**
+ * `--check-census` (no-regen) entry: verify the ALREADY-GENERATED
+ * `file-inventory.json` against a fresh maximal repo walk WITHOUT re-running the
+ * graph scan (the standing gate, analogous to `check:duplicates:fast`). Throws
+ * (→ non-zero exit) if the committed census is stale vs the disk — this is what
+ * catches a `.ts` added anywhere in the repo after the last `docs:deps`.
+ */
+function runCensusCheckNoRegen(rootDir: string): void {
+  const invPath = join(rootDir, 'docs', 'Architecture', 'file-inventory.json');
+  if (!existsSync(invPath)) {
+    throw new Error(
+      `file-census check: ${invPath} not found — run \`npm run docs:deps\` first to generate it.`
+    );
+  }
+  const inventory = JSON.parse(readFileSync(invPath, 'utf-8')) as FileInventory;
+  verifyFileCensus(rootDir, inventory);
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
   const cliOptions = parseCliOptions();
+
+  // Standing no-regen census gate: verify the committed file-inventory.json against
+  // a fresh MAXIMAL repo walk without re-running the (expensive) graph scan. Catches
+  // a `.ts` added anywhere in the repo since the last `docs:deps`. Throws → exit 1.
+  if (cliOptions.checkCensus) {
+    runCensusCheckNoRegen(ROOT_DIR);
+    console.log('file-census check passed (no-regen): committed inventory matches the repo.');
+    return;
+  }
 
   console.log('Scanning codebase for dependencies...');
   if (cliOptions.includeTests) {
@@ -3661,6 +4657,9 @@ async function main(): Promise<void> {
   let reachableSet: Set<string> | undefined;
   let dormantSet: Set<string> | undefined;
   let activeParsedFiles = parsedFiles;
+  // Seeded roots (index/subpath/bin/config/tsup/worker entries) — captured for the
+  // file census's `build-entry` disposition.
+  let censusRoots = new Set<string>();
 
   if (isMonorepo) {
     // Find entry points: each package's src/index.ts PLUS its `exports` subpath and
@@ -3671,7 +4670,10 @@ async function main(): Promise<void> {
       const candidates = [`${ws.srcDir}/index.ts`.replace(/\\/g, '/'), ...ws.extraEntries];
       for (const entryPath of candidates) {
         const found = parsedFiles.find((f) => f.path === entryPath);
-        if (found) {
+        // Dedupe: a config-driven `tsup.config.ts` entry list re-lists index.ts
+        // (already the package root) / cli.ts (already a `bin` root), so the same
+        // path can arrive twice — count it once.
+        if (found && !entryPoints.includes(found.path)) {
           entryPoints.push(found.path);
         }
       }
@@ -3690,6 +4692,7 @@ async function main(): Promise<void> {
     }
 
     console.log(`Entry points: ${entryPoints.length}`);
+    censusRoots = new Set(entryPoints);
     reachableSet = findReachableFiles(entryPoints, parsedFiles);
     dormantSet = new Set(parsedFiles.filter((f) => !reachableSet!.has(f.path)).map((f) => f.path));
     console.log(`Reachable files: ${reachableSet.size}`);
@@ -3824,6 +4827,45 @@ async function main(): Promise<void> {
     JSON.stringify({ generated: new Date().toISOString().split('T')[0], surfaces }, null, 2)
   );
   console.log('Written: docs/Architecture/package-export-surfaces.json');
+
+  // Duplicate-symbol detection — the measurement that scopes the "multiple
+  // implementations of one name across packages" dedup campaign (three `fft`s;
+  // `fftshift`/`ifftshift` defined independently in fft.ts and fft-helpers.ts).
+  // Own-definition dedup; re-export forwards excluded. Public/internal is
+  // resolved per FILE via the same public-surface walk `detectUnused` uses (NOT
+  // the flat package-export-surfaces.json above, which can't disambiguate two
+  // same-package same-name definitions). See detectDuplicateSymbols doc comment
+  // above for the full model.
+  const dup = detectDuplicateSymbols(activeParsedFiles, computePublicSurface(activeParsedFiles));
+  const runtimeByTag = tallyByTag(dup.runtime);
+  const typeByTag = tallyByTag(dup.types);
+  const duplicateReport: DuplicateSymbolsReport = {
+    generated: new Date().toISOString().split('T')[0],
+    note: DUPLICATE_SYMBOLS_NOTE,
+    summary: {
+      runtimeDuplicates: runtimeByTag.TRUE_DUPLICATE,
+      typeDuplicates: typeByTag.TRUE_DUPLICATE,
+      runtimeByTag,
+      typeByTag,
+    },
+    runtime: dup.runtime,
+    types: dup.types,
+  };
+  writeFileSync(
+    join(OUTPUT_DIR, 'duplicate-symbols.json'),
+    JSON.stringify(duplicateReport, null, 2)
+  );
+  writeFileSync(
+    join(OUTPUT_DIR, 'duplicate-symbols.md'),
+    generateDuplicateSymbolsMarkdown(duplicateReport)
+  );
+  console.log(
+    `Written: docs/Architecture/duplicate-symbols.md ` +
+      `(${duplicateReport.summary.runtimeDuplicates} runtime TRUE_DUPLICATE / ` +
+      `${dup.runtime.length} runtime flagged, ` +
+      `${duplicateReport.summary.typeDuplicates} type TRUE_DUPLICATE / ` +
+      `${dup.types.length} type flagged)`
+  );
 
   // Test coverage analysis (when --include-tests is specified)
   let testCoverage: TestCoverageAnalysis | null = null;
@@ -4020,6 +5062,32 @@ async function main(): Promise<void> {
   writeFileSync(unusedReportPath, unusedReport);
   console.log(`\nWritten: ${unusedReportPath}`);
 
+  // Complete file census (every tracked .ts in the repo — package src/tests, plus
+  // repo-root tests/tools/config/examples/docs) with a disposition, plus a MAXIMAL
+  // independent repo-walk self-check that HARD-FAILS this run if anything on disk is
+  // unaccounted or any orphan exists. Monorepo only (needs the workspace/reachability
+  // model).
+  if (isMonorepo && reachableSet) {
+    const inventory = buildFileInventory(
+      ROOT_DIR,
+      workspaceMap,
+      censusRoots,
+      reachableSet,
+      testReachable
+    );
+    writeFileSync(join(OUTPUT_DIR, 'file-inventory.json'), JSON.stringify(inventory, null, 2));
+    writeFileSync(join(OUTPUT_DIR, 'FILE_INVENTORY.md'), generateFileInventoryMarkdown(inventory));
+    console.log(
+      `Written: docs/Architecture/FILE_INVENTORY.md (${inventory.totalFiles} files: ` +
+        Object.entries(inventory.byDisposition)
+          .map(([k, v]) => `${v} ${k}`)
+          .join(', ') +
+        ')'
+    );
+    // Fail loudly if the census and the maximal repo walk disagree (throws → non-zero exit).
+    verifyFileCensus(ROOT_DIR, inventory);
+  }
+
   // WASM accelerator <-> function pairing (generated artifact; replaces the
   // formerly hand-maintained docs/Architecture/WASM_ACCELERATION.md map).
   const wasmPairing = analyzeWasmPairing(ROOT_DIR);
@@ -4100,5 +5168,8 @@ async function main(): Promise<void> {
 // compiled `dist/…js`). When imported by another module this guard keeps the
 // heavy codebase scan from running.
 if (require.main === module) {
-  main().catch(console.error);
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

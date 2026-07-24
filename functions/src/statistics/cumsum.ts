@@ -180,7 +180,7 @@ export const createCumSum = /* #__PURE__ */ factory(
         if (!Array.isArray(initialValue)) {
           return _cumsummap(mat);
         } else {
-          tran = _switch(mat);
+          tran = _switch(mat as unknown[][]);
           ret = [];
           for (i = 0; i < tran.length; i++) {
             ret[i] = _cumsumDimensional(tran[i] as unknown[], dim - 1);

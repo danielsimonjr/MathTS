@@ -1,13 +1,13 @@
 /**
  * Tests for the WASM-backed branches of matrix/src/backends/wasm/fft-wasm.ts.
  *
- * The AS artifact loaded here does not export `fft`/`rfft`/`powerSpectrum`
- * (those were legacy-backend exports, not built in this environment), so
- * isWasmFFTAvailable() is false and fft/ifft/rfft/powerSpectrum all take the
- * JS fallback (covered by fft-wasm.test.ts). To exercise the WASM-dispatch
- * code (memory marshalling, in-place transform, re-read from a possibly-grown
- * buffer, free/reset), we inject a fake module backed by a real
- * WebAssembly.Memory whose `fft` performs a genuine in-place radix-2 FFT.
+ * The real AS artifact DOES export `fft`/`rfft`/`powerSpectrum` (verified in
+ * `assembly/build/mathts.wat`; `fft-wasm.test.ts` loads the real binary and
+ * dispatches through them). This companion suite instead injects a FAKE module
+ * backed by a real `WebAssembly.Memory` whose `fft` performs a genuine in-place
+ * radix-2 FFT, so we can deterministically exercise the WASM-dispatch plumbing
+ * (memory marshalling, in-place transform, re-read from a possibly-grown buffer,
+ * free/reset) without depending on the binary being built in this environment.
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';

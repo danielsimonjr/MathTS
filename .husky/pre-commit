@@ -28,6 +28,31 @@ if printf '%s\n' "$staged" | grep -qE '(^|/)src/|^assembly/'; then
   echo "pre-commit: source changed → regenerating function reference (docs:functions)"
   npm run docs:functions
   git add docs/api docs/reference
+elif printf '%s\n' "$staged" | grep -qE '\.ts$'; then
+  # Non-src .ts changed (tests/docs/tools/config). The FILE CENSUS (file-inventory.json) tracks EVERY
+  # tracked .ts, so adding/removing a test/doc/tool .ts leaves it stale even though the module graph
+  # is unchanged. Regenerate docs:deps (which rebuilds the census) so it stays current. docs:functions
+  # is NOT re-run here — the exported surface only changes with src/. (Build-free, ~10-20s.)
+  echo "pre-commit: non-src .ts changed → regenerating dependency-graph + file census (docs:deps)"
+  npm run docs:deps
+  git add docs/Architecture
 fi
+
+# CENSUS GATE (check:file-census): the file-inventory self-check — fails the commit if any tracked .ts
+# on disk is unaccounted for in docs/Architecture/file-inventory.json (a discovery/scoping gap or a
+# stale census). Runs on EVERY commit; it's a maximal disk walk + compare, no graph rebuild (<1s). The
+# regen steps above keep the census fresh; this is the loud backstop that a gap can never slip past.
+echo "pre-commit: verifying complete file census (check:file-census)"
+npm run check:file-census
+
+# DUPGATE (check:duplicates:fast): prevention gate for the cross-package duplicate-symbols
+# campaign — fails the commit if it introduces a NEW TRUE_DUPLICATE beyond
+# docs/Architecture/duplicate-baseline.json (the campaign's shrinking, already-accepted backlog).
+# Runs on EVERY commit (not gated on the src/ check above) since it's just a JSON read + diff, not
+# a regen: `--no-regen` reads docs/Architecture/duplicate-symbols.json as-is, which the DGT step
+# above already refreshed when src/ changed (and is untouched, hence still correct, when it
+# didn't) — so this never triggers a second docs:deps/build:wasm run. Adds well under a second.
+echo "pre-commit: checking for new cross-package duplicate symbols (check:duplicates:fast)"
+npm run check:duplicates:fast
 
 npx lint-staged

@@ -1,5 +1,57 @@
 import { pickShallow } from './object.js';
-import { MathjsError } from '../error/MathjsError.js';
+import {
+  type LegacyFactory,
+  type DependencyName,
+  type FactoryMeta,
+  isFactory,
+  assertDependencies,
+  isOptionalDependency,
+  stripOptionalNotation,
+  sortFactories as coreSortFactories,
+  create as coreCreate,
+} from '@danielsimonjr/mathts-core/internal';
+
+/**
+ * Some of this file's helpers are consolidated onto core (see the re-exports at
+ * the bottom): `isFactory`, `assertDependencies`, `isOptionalDependency`,
+ * `stripOptionalNotation`, and the plain-data types `LegacyFactory`/`FactoryMeta`/
+ * `DependencyName` are byte-for-byte equivalent to
+ * `@danielsimonjr/mathts-core/internal`'s copies (proven via a fast-check property
+ * harness — see `functions/tests/dedup-bucketB-equivalence.test.ts`) and are
+ * re-exported from there. (`FactoryMeta` used to be re-declared locally here
+ * despite this comment already claiming it was consolidated — cross-package
+ * type-dedup pass, docs/Architecture/duplicate-symbols.json, fixed the
+ * comment to match reality.)
+ *
+ * `factory`/`FactoryFunction`/`CreateFunction` remain DELIBERATELY KEPT LOCAL — NOT
+ * safe to redirect: `factory()`'s generic `CreateFunction<TDeps extends
+ * Record<string, unknown>, ...>` constraint (core's copy) rejects real call sites
+ * across this package (259+ activated mathjs-factory call sites in
+ * `functions/src/{arithmetic,algebra,...}`) whose destructured dependency objects
+ * are typed as plain interfaces without an index signature — confirmed
+ * empirically: redirecting it broke `tsc --noEmit` (the same failure mode
+ * reproduced first in `expression`, which has 46 call sites). This is exactly the
+ * constraint mismatch this package's own pre-existing
+ * `@typescript-eslint/no-explicit-any` comment on `CreateFunction`/`factory`
+ * documents — this package already worked around it with `any`; core's copy uses
+ * the stricter `Record<string, unknown>` and cannot be swapped in as-is.
+ *
+ * `sortFactories`/`create` are now ADOPTED from core (Bucket B, commit 2): they
+ * don't depend on `factory()`'s generic constraint (they only operate on already-
+ * constructed `FactoryFunction`/`LegacyFactory` values), so they aren't blocked by
+ * the divergence above. Core's `sortFactories` throws on ANY circular dependency —
+ * direct or indirect (see `core/tests/factory-sort.test.ts`) — which is a
+ * deliberate fix over this file's FORMER local copy, which only special-cased
+ * direct 2-cycles and otherwise silently broke longer cycles via a visited-set
+ * guard without throwing (see `functions/tests/dedup-bucketB-equivalence.test.ts`'s
+ * former "PROVEN DIVERGENCE" block, now updated to reflect the adoption). Verified
+ * this package's real `factory()` call sites (all 251 of them) are never fed
+ * through `sortFactories`/`create` in production (both are otherwise-unused mathjs
+ * legacy machinery here — every real activated factory is wired by hand via
+ * `functions/src/factories/scope.ts` + `functions/src/factories/index.ts`, not a
+ * name-sorted DAG load), so there is no live dependency graph that could hit the
+ * stricter throw.
+ */
 
 /**
  * Type for a factory function that creates instances
@@ -11,41 +63,6 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
   dependencies: string[];
   meta?: FactoryMeta;
 }
-
-/**
- * Type for legacy factory objects (old-style factories)
- */
-export interface LegacyFactory {
-  type?: string;
-  name: string;
-  factory: (...args: unknown[]) => unknown;
-  math?: boolean;
-  dependencies?: string[];
-  meta?: FactoryMeta;
-}
-
-/**
- * Meta information that can be attached to a factory
- */
-export interface FactoryMeta {
-  /**
-   * If true, the factory will be recreated when config changes
-   */
-  recreateOnConfigChange?: boolean;
-  /**
-   * If true, this is a lazy factory that should only be created when needed
-   */
-  lazy?: boolean;
-  /**
-   * Additional custom metadata
-   */
-  [key: string]: unknown;
-}
-
-/**
- * Type for dependency names, which can be optional (prefixed with '?')
- */
-export type DependencyName = string;
 
 /**
  * Type for the create callback function
@@ -109,171 +126,10 @@ export function factory<TDeps extends Record<string, any> = any, TResult = any>(
   return assertAndCreate as FactoryFunction<TDeps, TResult>;
 }
 
-/**
- * Sort all factories such that when loading in order, the dependencies are resolved.
- *
- * @param factories Array of factory functions or legacy factories
- * @returns Returns a new array with the sorted factories
- */
-export function sortFactories(
-  factories: Array<FactoryFunction | LegacyFactory>
-): Array<FactoryFunction | LegacyFactory> {
-  const factoriesByName: Record<string, FactoryFunction | LegacyFactory> = {};
-
-  factories.forEach((factory) => {
-    const name = isFactory(factory) ? factory.fn : factory.name;
-    factoriesByName[name] = factory;
-  });
-
-  // Check if there's a circular dependency between two factories
-  function hasCircularDependency(
-    factory1: FactoryFunction | LegacyFactory,
-    factory2: FactoryFunction | LegacyFactory
-  ): boolean {
-    if (!isFactory(factory1) || !isFactory(factory2)) {
-      return false;
-    }
-
-    const name1 = factory1.fn;
-    const name2 = factory2.fn;
-
-    // Check if factory1 depends on factory2 AND factory2 depends on factory1
-    return factory1.dependencies.includes(name2) && factory2.dependencies.includes(name1);
-  }
-
-  function containsDependency(
-    factory: FactoryFunction | LegacyFactory,
-    dependency: FactoryFunction | LegacyFactory,
-    visited: Set<string> = new Set()
-  ): boolean {
-    if (isFactory(factory)) {
-      // Detect circular references by tracking visited factories
-      const factoryName = factory.fn;
-      if (visited.has(factoryName)) {
-        // Circular dependency detected - return false to avoid infinite recursion
-        return false;
-      }
-
-      const depName = isFactory(dependency) ? dependency.fn : dependency.name;
-
-      // If there's a circular dependency, don't reorder (preserve input order)
-      if (hasCircularDependency(factory, dependency)) {
-        return false;
-      }
-
-      if (factory.dependencies.includes(depName)) {
-        return true;
-      }
-
-      // Mark this factory as visited before recursing
-      visited.add(factoryName);
-
-      if (
-        factory.dependencies.some((d) => {
-          const depFactory = factoriesByName[d];
-          return depFactory && containsDependency(depFactory, dependency, visited);
-        })
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  const sorted: Array<FactoryFunction | LegacyFactory> = [];
-
-  function addFactory(factory: FactoryFunction | LegacyFactory): void {
-    let index = 0;
-    while (index < sorted.length && !containsDependency(sorted[index], factory)) {
-      index++;
-    }
-
-    sorted.splice(index, 0, factory);
-  }
-
-  // sort regular factory functions
-  factories.filter(isFactory).forEach(addFactory);
-
-  // sort legacy factory functions AFTER the regular factory functions
-  factories.filter((factory) => !isFactory(factory)).forEach(addFactory);
-
-  return sorted;
-}
-
-// TODO: comment or cleanup if unused in the end
-export function create(
-  factories: Array<FactoryFunction | LegacyFactory>,
-  scope: Record<string, unknown> = {}
-): Record<string, unknown> {
-  sortFactories(factories).forEach((factory) => {
-    if (isFactory(factory)) {
-      factory(scope);
-    }
-  });
-
-  return scope;
-}
-
-/**
- * Test whether an object is a factory. This is the case when it has
- * properties name, dependencies, and a function create.
- * @param obj Any value to test
- * @returns true if obj is a factory function
- */
-export function isFactory(obj: unknown): obj is FactoryFunction {
-  return (
-    typeof obj === 'function' &&
-    typeof (obj as { fn?: unknown }).fn === 'string' &&
-    Array.isArray((obj as { dependencies?: unknown }).dependencies)
-  );
-}
-
-/**
- * Assert that all dependencies of a list with dependencies are available in the provided scope.
- *
- * Will throw an exception when there are dependencies missing.
- *
- * @param name         Name for the function to be created. Used to generate a useful error message
- * @param dependencies Array of dependency names
- * @param scope        Object containing the available dependencies
- * @throws Error if required dependencies are missing
- */
-export function assertDependencies(
-  name: string,
-  dependencies: DependencyName[],
-  scope: Record<string, unknown>
-): void {
-  const allDefined = dependencies
-    .filter((dependency) => !isOptionalDependency(dependency)) // filter optionals
-    .every((dependency) => scope[dependency] !== undefined);
-
-  if (!allDefined) {
-    const missingDependencies = dependencies.filter(
-      (dependency) => scope[dependency] === undefined
-    );
-
-    throw new MathjsError(
-      `Cannot create function "${name}", ` +
-        `some dependencies are missing: ${missingDependencies.map((d) => `"${d}"`).join(', ')}.`
-    );
-  }
-}
-
-/**
- * Check if a dependency is optional (starts with '?')
- * @param dependency The dependency name to check
- * @returns true if the dependency is optional
- */
-export function isOptionalDependency(dependency: DependencyName): boolean {
-  return Boolean(dependency && dependency[0] === '?');
-}
-
-/**
- * Remove the optional notation '?' from a dependency name
- * @param dependency The dependency name
- * @returns The dependency name without optional notation
- */
-export function stripOptionalNotation(dependency: DependencyName): string {
-  return dependency && dependency[0] === '?' ? dependency.slice(1) : dependency;
-}
+// `sortFactories`/`create` are adopted straight from `@danielsimonjr/mathts-core/internal`
+// (Bucket B, commit 2) — see this file's header comment. A pure re-export (not a
+// locally-typed wrapper): both operate only on already-constructed `FactoryFunction`/
+// `LegacyFactory` values, so core's signature is a clean drop-in.
+export { isFactory, assertDependencies, isOptionalDependency, stripOptionalNotation };
+export { coreSortFactories as sortFactories, coreCreate as create };
+export type { LegacyFactory, DependencyName, FactoryMeta };

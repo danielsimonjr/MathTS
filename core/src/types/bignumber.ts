@@ -634,11 +634,25 @@ export class BigNumber implements MathTSValue {
     const sign: 1 | -1 = (this._sign * b._sign) as 1 | -1;
     const precision = globalConfig.precision;
 
-    // Scale dividend for precision
-    const scale = BigInt(10) ** BigInt(precision + 10);
+    // Scale the dividend so the integer division yields at least `precision + 10`
+    // significant digits. The naive `10^(precision+10)` scaling is only sufficient
+    // when the divisor coefficient has no more digits than the dividend: the number
+    // of quotient digits is roughly `aDigits + scaleDigits - bDigits`, so a divisor
+    // with many more digits than the dividend (e.g. `2 / (g*g)` where `g*g` is an
+    // un-rounded ~2·precision-digit product) collapses the quotient toward — or all
+    // the way to — zero. Widen the scale by the digit deficit `bDigits - aDigits` so
+    // the guarantee holds regardless of divisor magnitude. When `bDigits <= aDigits`
+    // this reduces to the original `precision + 10` scaling (bit-identical), so no
+    // previously-correct division changes; it only repairs the large-divisor case.
+    // Root cause of catastrophic `cbrt(bignumber(2)) -> ~0` and the ~11-digit
+    // `sqrt`/`asinh` precision loss (both iterate `x / bigCoefficient`).
+    const aDigits = this._coefficient.toString().length;
+    const bDigits = b._coefficient.toString().length;
+    const scaleDigits = precision + 10 + Math.max(0, bDigits - aDigits);
+    const scale = BigInt(10) ** BigInt(scaleDigits);
     const scaledDividend = this._coefficient * scale;
     const quotient = scaledDividend / b._coefficient;
-    const exponent = this._exponent - b._exponent - precision - 10;
+    const exponent = this._exponent - b._exponent - scaleDigits;
 
     return this.normalize(sign, quotient, exponent).roundToPrecision(precision);
   }

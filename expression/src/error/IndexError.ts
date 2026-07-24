@@ -1,65 +1,16 @@
 /**
- * Custom error type for index out of range errors
+ * Custom error type for index out of range errors.
+ *
+ * Consolidated onto core: the implementation lives once in
+ * `@danielsimonjr/mathts-core/internal` (see `core/src/error/IndexError.ts` and the
+ * `project-all-libraries-build-on-core` principle). Thin re-export so existing
+ * `../error/IndexError.js` imports keep working while the single source of truth
+ * lives in core. Proven equivalent to the prior local copy (and to `functions`'
+ * copy) before the redirect — same constructor signature, same message format,
+ * same `index`/`min`/`max`/`isIndexError` fields, plus the `createIndexError`
+ * back-compat factory form. `instanceof IndexError` now holds across package
+ * boundaries since there is only one class identity.
+ *
  * @extends RangeError
  */
-export class IndexError extends RangeError {
-  index: number;
-  min: number | undefined;
-  max: number | undefined;
-  isIndexError = true as const;
-
-  /**
-   * Create an IndexError
-   *
-   * Can be called in two ways:
-   * - IndexError(index, max) - assumes min=0
-   * - IndexError(index, min, max)
-   *
-   * @param index  The actual index
-   * @param min    Minimum index (included), or max if only 2 args provided
-   * @param max    Maximum index (excluded)
-   */
-  constructor(index: number, min?: number, max?: number) {
-    let actualMin: number | undefined;
-    let actualMax: number | undefined;
-
-    if (max === undefined) {
-      // Called with 2 args: IndexError(index, max)
-      actualMin = 0;
-      actualMax = min;
-    } else {
-      // Called with 3 args: IndexError(index, min, max)
-      actualMin = min;
-      actualMax = max;
-    }
-
-    let message: string;
-    if (actualMin !== undefined && index < actualMin) {
-      message = 'Index out of range (' + index + ' < ' + actualMin + ')';
-    } else if (actualMax !== undefined && index >= actualMax) {
-      message = 'Index out of range (' + index + ' > ' + (actualMax - 1) + ')';
-    } else {
-      message = 'Index out of range (' + index + ')';
-    }
-
-    super(message);
-
-    this.index = index;
-    this.min = actualMin;
-    this.max = actualMax;
-    this.name = 'IndexError';
-
-    // Maintains proper stack trace for where error was thrown (V8)
-    const { captureStackTrace } = Error as unknown as {
-      captureStackTrace?: (targetObject: object, constructorOpt?: object) => void;
-    };
-    if (captureStackTrace) {
-      captureStackTrace(this, IndexError);
-    }
-  }
-}
-
-// Backward compatibility - allow calling as a function (with new operator)
-export function createIndexError(index: number, min?: number, max?: number): IndexError {
-  return new IndexError(index, min, max);
-}
+export { IndexError, createIndexError } from '@danielsimonjr/mathts-core/internal';

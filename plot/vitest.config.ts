@@ -1,6 +1,16 @@
 import { defineConfig } from 'vitest/config';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+// Mirror the build-time `define` from tsup.config.ts so tests that import the
+// package SOURCE (not dist) still resolve the injected __PKG_VERSION__ global
+// used by src/index.ts's `export const VERSION`.
+const { version } = JSON.parse(
+  readFileSync(fileURLToPath(new URL('./package.json', import.meta.url)), 'utf8')
+) as { version: string };
 
 export default defineConfig({
+  define: { __PKG_VERSION__: JSON.stringify(version) },
   test: {
     include: ['tests/**/*.test.ts'],
     // Calibrated for the CONCURRENT gate. `npm run test` runs EVERY package's

@@ -7,7 +7,7 @@
  * interpolation, circulant ↔ FFT, companion ↔ polynomial roots, `logdet` ↔
  * Gaussian likelihoods (stats).
  */
-import { DenseMatrix, lu } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, lu, matrixSchur } from '@danielsimonjr/mathts-matrix';
 import { inv as _invRaw, eigs as _eigsRaw, qr as _qrRaw } from './factories/index.js';
 import { multiply as _multiplyRaw } from './typed/arithmetic.js';
 
@@ -20,74 +20,21 @@ const _multiply = _multiplyRaw as unknown as (a: number[][], b: number[][]) => n
 const _qr = _qrRaw as unknown as (m: number[][]) => { Q: number[][]; R: number[][] };
 
 const transposeArr = (A: number[][]): number[][] => A[0].map((_, j) => A.map((r) => r[j]));
-const identityArr = (n: number): number[][] =>
-  Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
 
 /**
- * Real Schur decomposition `M = U S Uᵀ` (U orthogonal, S quasi-upper-triangular) via
- * shifted QR iteration with deflation, reusing the working `qr`. Robust for real
- * spectra (the case `qz` needs); the orthogonal similarity `M = U S Uᵀ` holds exactly
- * regardless of convergence.
+ * Real Schur decomposition `M = U S Uᵀ` (U orthogonal, S quasi-upper-triangular),
+ * delegated to the matrix package's hardened `matrixSchur` — Householder reduction
+ * to upper Hessenberg followed by **Francis double-shift** implicit QR with
+ * exceptional-shift stall breaking (Golub & Van Loan §7.5). The earlier homegrown
+ * single-shift QR here (no Hessenberg reduction) stalled on non-symmetric `B⁻¹A`
+ * pencils — e.g. it threw "failed to converge" on `A=[[1,2,0],[0,3,1],[1,0,4]]`,
+ * `B=diag(2,1,3)` (all-real spectrum). Routing to the maintained, oracle-pinned
+ * matrix-layer primitive is the native-accel pattern (prefer the matrix
+ * decomposition over a second, weaker copy).
  */
 function realSchur(M: number[][]): { U: number[][]; S: number[][] } {
-  const n = M.length;
-  let A = M.map((r) => r.slice());
-  let U = identityArr(n);
-  let m = n;
-  // Absolute fallback scale for deflation tolerances: the relative form
-  // `1e-14·(|diag|+|diag|)` collapses to 0 for blocks with zero diagonal (e.g. pure
-  // imaginary spectra, whose converged 2×2 blocks look like rotations), which would
-  // block deflation forever even when the subdiagonal entry is exactly 0.
-  const normM = Math.max(...M.map((r) => r.reduce((s, v) => s + Math.abs(v), 0)), 1e-300);
-  for (let iter = 0; iter < 8000 && m > 1; iter++) {
-    if (
-      Math.abs(A[m - 1][m - 2]) <
-      1e-14 * (Math.abs(A[m - 2][m - 2]) + Math.abs(A[m - 1][m - 1]) || normM)
-    ) {
-      A[m - 1][m - 2] = 0;
-      m--;
-      continue;
-    }
-    // Trailing 2×2 block quantities (shared by the deflation checks and the shift)
-    const a = A[m - 2][m - 2];
-    const b = A[m - 2][m - 1];
-    const c = A[m - 1][m - 2];
-    const d = A[m - 1][m - 1];
-    const delta = (a - d) / 2;
-    const disc = delta * delta + b * c;
-    if (disc < 0) {
-      // Complex-conjugate pair: a real single shift can never drive A[m-1][m-2] to 0
-      // (the pair stays a 2×2 block in the real Schur form), so deflation must happen
-      // BY THE BLOCK — without these two checks the loop spins all 8000 iterations
-      // after convergence (m never decreases), ~1s per call and a vitest-timeout flake.
-      if (m === 2) break; // the whole remaining block IS the 2×2 — quasi-triangular reached
-      if (Math.abs(A[m - 2][m - 3]) < 1e-14 * (Math.abs(A[m - 3][m - 3]) + Math.abs(a) || normM)) {
-        A[m - 2][m - 3] = 0;
-        m -= 2;
-        continue;
-      }
-    }
-    // Wilkinson shift from the trailing 2×2 block (eigenvalue nearest A[m-1][m-1])
-    const denom = Math.abs(delta) + Math.sqrt(Math.abs(disc));
-    const s = disc >= 0 && denom > 1e-300 ? d - ((Math.sign(delta) || 1) * (b * c)) / denom : d; // complex 2×2, or a degenerate block → Rayleigh shift (avoids 0/0 → NaN)
-    const As = A.map((r, i) => r.map((v, j) => v - (i === j ? s : 0)));
-    const { Q, R } = _qr(As);
-    A = _multiply(R, Q).map((r, i) => r.map((v, j) => v + (i === j ? s : 0))); // R·Q + sI
-    U = _multiply(U, Q);
-  }
-  // Postcondition: S must be quasi-upper-triangular (2×2 blocks allowed for complex
-  // conjugate pairs). Single-shift QR converges for real and — empirically — complex
-  // spectra; but if it ever exits the iteration cap without reaching that form, fail
-  // loudly rather than silently returning a non-triangular S that would break qz's
-  // documented (quasi-)triangular contract.
-  for (let i = 2; i < n; i++) {
-    for (let j = 0; j < i - 1; j++) {
-      if (Math.abs(A[i][j]) > 1e-8 * (1 + Math.abs(A[i][i]) + Math.abs(A[j][j]))) {
-        throw new Error('realSchur: QR iteration failed to converge to (quasi-)triangular form');
-      }
-    }
-  }
-  return { U, S: A };
+  const { Q, T } = matrixSchur(DenseMatrix.fromArray(M));
+  return { U: Q.toArray(), S: T.toArray() };
 }
 
 type Vec = readonly number[] | Float64Array;
@@ -96,8 +43,12 @@ const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.fr
 /**
  * Generalized eigenvalues of the pencil `A x = λ B x` (B nonsingular), via the
  * eigendecomposition of `B⁻¹A` — reusing `inv`, `multiply`, and the corrected
- * `eigs`. Eigenvalues match `scipy.linalg.eig(A, B)`. For ill-conditioned `B`
- * prefer a QZ solver (not yet available).
+ * `eigs` (Hessenberg + Francis double-shift). Eigenvalues match
+ * `scipy.linalg.eig(A, B)` across real, complex-pair and clustered spectra. For
+ * a *singular* or numerically near-singular `B` this squaring-free QZ formulation
+ * breaks down; extracting the pencil eigenvalues directly from the {@link qz}
+ * factors (`diag AA / diag BB`, with 2×2-block handling for complex pairs) is the
+ * future enhancement for that regime.
  */
 export function generalizedEig(
   A: readonly number[][],
@@ -232,8 +183,10 @@ export function logdet(A: readonly number[][]): { sign: number; value: number } 
  * Generalized (QZ) Schur decomposition of the pencil `(A, B)` with `B` nonsingular:
  * returns orthogonal `Q`, `Z` and upper-(quasi-)triangular `AA`, `BB` with
  * `A = Q·AA·Zᵀ` and `B = Q·BB·Zᵀ`. Built from the real Schur of `B⁻¹A` (= Z S Zᵀ) and
- * the QR of `B·Z` (= Q·BB): then `AA = Qᵀ·A·Z`. Robust for real spectra; matches the
- * decomposition contract of `scipy.linalg.qz` (the factors are not unique).
+ * the QR of `B·Z` (= Q·BB): then `AA = Qᵀ·A·Z`. The Schur step is the hardened
+ * Hessenberg + Francis double-shift `matrixSchur` (see {@link realSchur}), so `qz`
+ * no longer stalls on non-symmetric `B⁻¹A` pencils; matches the decomposition
+ * contract of `scipy.linalg.qz` (the factors are not unique).
  */
 export function qz(
   A: readonly number[][],

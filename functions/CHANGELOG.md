@@ -1,5 +1,590 @@
 # @danielsimonjr/mathts-functions
 
+## 0.61.0
+
+### Minor Changes
+
+- feat: positive-discriminant quadratic integration (Risch Layer 2) + Critical Landau–Mignotte fix
+
+  `symbolicIntegral`/`integrate` now integrate rational functions whose denominator has a
+  positive-discriminant irreducible quadratic factor (real irrational roots, e.g. 1/(x^2-2) →
+  √2/4·log|x-√2| − √2/4·log|x+√2|), via an exact quadratic-surd type. Covers non-monic, shifted, and
+  mixed neg/pos-disc denominators; differentiation-verified. Repeated pos-disc and degree-≥3 irreducible
+  denominators still return the marker (general Rothstein–Trager / transcendental Risch are future
+  layers).
+
+  Also fixes a Critical false-irreducible bug in the polynomial factorizer (factorUnivariateZ, shipped
+  0.58.0): the Landau–Mignotte bound used |lc| instead of the coefficient 2-norm, so polynomials with a
+  large constant term relative to the leading coefficient (x^2-10000) were wrongly reported irreducible.
+  Now uses 2^deg·‖f‖₂. Corrects univariate + multivariate factorization and rational integration; found
+  by the Layer 2 adversarial review.
+
+## 0.60.0
+
+### Minor Changes
+
+- feat: complete rational-function integration (Risch Layer 1)
+
+  `symbolicIntegral`/`integrate` now integrate any rational function p(x)/q(x) over ℚ whose
+  denominator factors into linear + irreducible-quadratic factors, in closed form (rational part +
+  log + arctan): 1/(x^2+1) → atan(x), (3x+2)/(x^2+1) → (3/2)log(x^2+1)+2·atan(x), repeated factors,
+  improper inputs, content>1 denominators. Previously these returned an unevaluated marker. Method:
+  parse → polynomial-part division → factor the denominator via the #7 engine → exact-ℚ partial
+  fractions → per-factor closed form (completing the square for quadratics, reduction formula for
+  repeated quadratics). Exact rational arithmetic; differentiation-verified. Honestly bounded:
+  degree-≥3 irreducible and positive-discriminant quadratic denominators (real log/atanh) still return
+  the marker — Rothstein–Trager / transcendental Risch are documented follow-ups. Existing behavior
+  preserved (345-test regression); a final adversarial review caught+fixed a Critical discriminant
+  bug before ship.
+
+## 0.59.0
+
+### Minor Changes
+
+- feat: complete multivariate polynomial factorization over ℤ/ℚ (Kronecker) — completes #7
+
+  `factor`/`casFactor` now factor multivariate integer polynomials completely into irreducible factors
+  over ℤ/ℚ (was content/monomial/difference-of-squares only): `x^2-y^2` → `(x-y)(x+y)`,
+  `(x+y+1)(x+2y+3)` → its linear factors, `(x+y)^2(x+2y)` with multiplicity, 3-variable products,
+  non-primitive inputs, with ℚ-irreducibles unchanged. Method: Kronecker substitution reduces to the
+  shipped univariate Zassenhaus engine; recombination keeps a candidate iff it exactly divides
+  (multiExactDivide arbiter), so no unverified factor is emitted. bigint MultiPoly engine; substituted-
+  degree + factor-count caps degrade gracefully. Existing fast-path outputs preserved byte-identical
+  (346-test regression unchanged). Oracle-pinned to sympy factor_list (320-case adversarial review, 0
+  soundness failures). Together with Layer 1 (univariate) this completes A-list #7. Wang/EEZ remains the
+  documented future performance upgrade.
+
+## 0.58.0
+
+### Minor Changes
+
+- feat: complete univariate polynomial factorization over ℤ/ℚ (Zassenhaus)
+
+  `factor`/`casFactor` now factor any single-variable integer polynomial completely into irreducible
+  factors over ℤ/ℚ (was rational-linear-roots only): `x^4-1` → `(x-1)(x+1)(x^2+1)`, `x^4+3x^2+2` →
+  `(x^2+1)(x^2+2)`, non-monic `4x^2-9` → `(2x-3)(2x+3)`, with ℚ-irreducibles (`x^4+1`) returned
+  unchanged. New bigint engine (`functions/src/typed/factorization/`): Yun square-free → factor mod p
+  (distinct-degree + deterministic Cantor–Zassenhaus) → Hensel lift to `p^k` → subset recombination,
+  with the leading-coefficient method for non-monic inputs and a 24-factor recombination cap.
+  Oracle-pinned against sympy `factor_list`. Multivariate factorization (Wang/EEZ) is the follow-up.
+  Existing behavior preserved (346-test algebra/cas regression unchanged).
+
+## 0.57.0
+
+### Minor Changes
+
+- feat: `halfspaceIntersection` — vertex enumeration of a bounded polytope (2-D/3-D)
+
+  Given halfspaces `A·x + b ≤ 0` (SciPy's convention) and a strictly interior point, returns the
+  polytope's `vertices` plus `incidences` (which halfspaces are tight at each vertex), via the
+  dual-hull route — the convex hull of the dual points `aᵢ/−(aᵢ·x₀+bᵢ)`, whose facets map back to
+  primal vertices. Boundedness is decided structurally (the dual origin must lie strictly inside the
+  dual hull); unbounded input throws, mirroring SciPy's `QhullError`. `d > 3` throws a clear error
+  naming what the general case requires rather than returning a wrong answer.
+
+  All tolerances are relative and the dual cloud is normalised to unit scale, so results are invariant
+  to rescaling halfspace rows or changing coordinate units. Oracle-pinned against
+  `scipy.spatial.HalfspaceIntersection` (21 tests).
+
+## 0.56.0
+
+### Minor Changes
+
+- Special functions: Mathieu characteristic values and angular functions.
+
+  Four new exports for the Mathieu equation `y'' + (a − 2q·cos 2x)·y = 0`:
+  - **`mathieuA(n, q)` / `mathieuB(n, q)`** — the characteristic values `a_n(q)` / `b_n(q)`.
+  - **`mathieuCe(n, q, x)` / `mathieuSe(n, q, x)`** — the angular Mathieu functions (x in radians).
+
+  Computed via the symmetric-tridiagonal eigenproblem for the Fourier coefficients (one matrix per parity class,
+  DLMF §28.4, N=50), reusing the matrix package's symmetric `eig`; eigendecomposition cached per `(class, q)`.
+  DLMF/A&S normalization (`(1/π)∫₀^{2π} ce_n² = 1`, so `ce_0(x,0)=1/√2`, `ce_n(x,0)=cos nx`, `se_n(x,0)=sin nx`).
+  vs `scipy.special` (mpmath 1.3.0 omits the Mathieu family): `a_n`/`b_n` max relerr ~1.2e-14, `ce_n`/`se_n`
+  ~7e-15; the `q→0` limits and the Mathieu-ODE residual are also pinned.
+
+## 0.55.0
+
+### Minor Changes
+
+- Numerics: `solveDDE` — constant-delay differential equation solver.
+
+  New `solveDDE(f, tspan, history, delays, options?)` solves `y'(t) = f(t, y(t), [y(t−τ₁), …])` with a history
+  function `φ(t)`, multiple positive constant delays, and vector state, by the method of steps: adaptive BS23
+  (Bogacki–Shampine 3(2), the `dde23` pair) with a C¹ cubic-Hermite continuous extension as the history
+  interpolant. The step is capped at `min(τ)` so every delayed argument lies in already-computed history (fully
+  explicit), and the integrator lands exactly on each `t0 + m·τ` breakpoint so no dense-output interval straddles
+  a derivative jump (the initial discontinuity smooths one order per breakpoint). Returns `{ t, y[t], yInterp }`
+  (dense-output evaluator). Verified (scipy has no DDE — implementation-independent oracles): method-of-steps
+  exact solution of `y'=−y(t−1)` over 3 delay intervals to machine precision (~5e-16); characteristic-root decay
+  and period exact-matched; τ→large ODE-degeneration cross-check vs `solveODESystem` Δ 2.4e-10.
+
+## 0.54.0
+
+### Minor Changes
+
+- Numerics: `solveDAE` — semi-explicit index-1 differential-algebraic equation solver.
+
+  New `solveDAE(f, g, tspan, y0, z0?, options?)` solves `y' = f(t,y,z)`, `0 = g(t,y,z)` (index-1 ⟺ `∂g/∂z`
+  nonsingular) via variable-order (1–2) variable-step BDF: each step solves the coupled nonlinear system (the
+  BDF equation for `y` and `g=0`) by Newton on the block Jacobian, LU-solved through the matrix primitive.
+  Consistent `z0` is Newton-refined onto `g(t0,y0,z0)=0` (or solved from scratch when omitted). A higher-index
+  input (singular `∂g/∂z`) is detected at initialization and throws, rather than silently integrating to
+  garbage. Verified (scipy has no DAE solver — implementation-independent oracles): manufactured/closed-form
+  max abs error 2.35e-7; the **constraint residual `|g|` stays ≤8.9e-16** across the trajectory (the defining
+  DAE invariant — the algebraic block is solved exactly each step); reduce-to-ODE cross-check vs RK4 2.1e-7.
+
+## 0.53.0
+
+### Minor Changes
+
+- Numerics: `solveParabolicPDE` — general 1-D parabolic PDE via method-of-lines.
+
+  New `solveParabolicPDE` solves `u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)` on `[x0,x1]×[0,T]` by method-of-lines:
+  central 2nd/1st differences on a uniform `nx`-grid → a stiff ODE system integrated by the shipped **BDF**
+  solver (implicit, no CFL cap). Dirichlet (`u=g(t)`) and Neumann (`u_x=g(t)`, 2nd-order ghost-node) boundary
+  conditions; `D`/`c` accept constants or `x`-functions. Returns `{ x, t, u[t][x] }` (optional `times`
+  interpolation). Verified: exact heat `e^{−π²t}sin(πx)` relerr 1.27e-4 at nx=81 with **O(h²) convergence rate
+  2.000**; manufactured reaction-diffusion 1.2e-4; scipy `solve_ivp('BDF')` cross-check on the same
+  semi-discretization ≤1e-12. The heat-only `solvePDE` is unchanged (this is an additive new entry).
+
+## 0.52.0
+
+### Minor Changes
+
+- Special functions: irregular Coulomb wave function `coulombG` (+ `coulombFG` bundle).
+
+  `coulombG(L, eta, rho)` — the irregular Coulomb wave function, via the Barnett/Steed method (DLMF §33.8:
+  CF1 for `F'/F`, complex CF2 for `(G'+iF')/(G+iF)`, Steed recovery through the Wronskian `F'G−FG'=1`), with the
+  CF2 coefficients evaluated at the target `L` (no recurrence). `coulombFG(L, eta, rho)` returns `{F, Fp, G, Gp}`
+  in one pass. vs `mpmath.coulombg`: max G relerr **6.9e-13** at/above the turning point (`G₀(0,ρ)=cos ρ` to
+  machine precision); Wronskian residual **≤6.7e-16** across the corpus. Validated for `ρ ≳ 0.15·ρ_tp`; the
+  deep-sub-turning-point corner (large positive η, ρ≪ρ_tp) is the known Steed-method limit and is documented as
+  excluded rather than returning a silently-wrong value. `ρ≤0` throws.
+
+## 0.51.0
+
+### Minor Changes
+
+- Stiff ODEs: BDF and Radau IIA solvers + adaptive `solveODESystem`.
+
+  - **`solveODE(..., { method: 'BDF' })`** — variable-order (1–5) variable-step NDF-BDF (scipy's default stiff
+    method), simplified-Newton on `(I − c·J)` reusing the matrix-LU path. vs `scipy.integrate.solve_ivp('BDF')`:
+    Robertson t=40 Δ≤2.2e-8 (mass invariant exact), Van der Pol μ=1000 Δ=9.5e-7; exact linear-stiff relerr 1.1e-6
+    at `tol=1e-8`.
+  - **`solveODE(..., { method: 'Radau' })`** — 3-stage order-5 L-stable Radau IIA (real-arithmetic
+    simplified-Newton on the collocation system + scipy's embedded error estimate). vs
+    `scipy.integrate.solve_ivp('Radau')`: Robertson Δ≤3e-10, Van der Pol μ=1000 Δ=3.3e-9; linear-stiff relerr
+    ~1.6e-10.
+  - **`solveODESystem` — adaptive by default.** Was fixed-step RK4; now an embedded RK45 (Dormand–Prince) with
+    scaled-RMS error control. Passing an explicit `dt` still selects the legacy fixed-step path (back-compat).
+
+  General method-of-lines PDE (beyond the heat-only `solvePDE`), index-1 DAE, and DDE remain future scope with
+  recorded designs (rewriting `solvePDE`'s numerics is deliberately left for a sign-off, not auto-changed).
+
+## 0.50.0
+
+### Minor Changes
+
+- Computational-geometry engine: convex hull, Delaunay, Voronoi, spherical Voronoi, alpha shapes.
+
+  Five new scipy.spatial-pinned geometry functions built on a new hull/Delaunay foundation:
+  - **`convexHull`** — 2-D monotone-chain + 3-D QuickHull → `{vertices, simplices, area, volume}` (scipy `.area`/
+    `.volume` convention). Vertex sets exact; area/volume to 1e-8–1e-10 vs `scipy.spatial.ConvexHull`.
+  - **`delaunay`** (2-D) — triangle count matches `scipy.spatial.Delaunay`; empty-circumcircle property holds ∀
+    triangle; triangles partition the hull to 1e-10.
+  - **`voronoi`** (2-D) — the Delaunay dual (circumcenter vertices, equidistant to generators to 1e-9).
+  - **`sphericalVoronoi`** — via the 3-D hull; vertex count `2N−4`, geodesic areas sum to `4πr²` to 1e-8 vs
+    `scipy.spatial.SphericalVoronoi`.
+  - **`alphaShape`** (2-D) — Delaunay circumradius filter; recovers holes (annulus → 2 boundary loops).
+
+  Also **fixed a real bug**: the `delaunay_wasm` kernel read past its output buffer (returned 1363 triangles vs 197) — its dispatch is disabled; the JS Bowyer–Watson path is always used. Halfspace-intersection / n-D vertex
+  enumeration remain future scope (double-description / dual-hull design recorded).
+
+## 0.49.0
+
+### Minor Changes
+
+- Special functions: Riemann–Siegel Z, Lerch transcendent, parabolic-cylinder, and regular Coulomb wave.
+
+  Five new mpmath-pinned (dps=30) special-function exports:
+  - **`siegelZ(t)` / `riemannSiegelZ(t)`** — the real Riemann–Siegel Z-function on the critical line
+    (`Z(t)=e^{iθ(t)}ζ(½+it)`), with exact θ via complex log-gamma. Max rel err 4.3e-15; abs ~2e-15 near the first
+    zeros (t≈14.13/21.02/25.01).
+  - **`lerchPhi(z, s, a)`** — Lerch transcendent `Σ zᵏ/(a+k)ˢ` for `|z|<1, a>0` (max rel err 1e-14; cross-checks
+    `Liₛ(z)=z·Φ(z,s,1)`).
+  - **`parabolicCylinderD(nu, x)`** — parabolic-cylinder `D_ν(x)` via the Whittaker `₁F₁` form (6.4e-15).
+  - **`coulombF(L, eta, rho)`** — regular Coulomb wave via DLMF 33.6 ascending series (3.6e-13). Fixed a
+    convergence-test bug that truncated `F₀(0,ρ)=sin ρ` on the exactly-zero terms η=0 produces.
+
+  Irregular `coulombG`, Mathieu (`ce_n`/`se_n`, char. values), and spheroidal wave functions remain future scope
+  (continued-fraction / eigenvalue-recurrence algorithms) with scoped designs recorded.
+
+## 0.48.0
+
+### Minor Changes
+
+- CAS breadth: real `casExpand`/`casFactor`, multivariate `expand`/`factor`, partial-fraction + by-parts integration.
+
+  - **`casExpand` / `casFactor` are now real** (were crude string stubs: `casExpand('(x+1)^2')` gave
+    `'x*x + x*1 + 1*x + 1*1'` and left `(x+1)^3` unchanged; `casFactor` did integer-GCD only, leaving `x^2-1`
+    unfactored). Both now delegate to the real `expand`/`factor` engines. `casExpand('(x+1)^2') → '1 + 2*x + 1*x^2'`,
+    `casFactor('x^2-1') → '(x - 1)*(x + 1)'` (sympy-pinned).
+  - **Multivariate `expand`** (was univariate-gated). N-variable polynomials now expand exactly — `(x+y)^2`,
+    `(x+y)(x-y)`, `(x+y+z)^2`, … coefficient-equal to `sympy.expand`.
+  - **Multivariate `factor`** — the tractable subset (integer content + common-monomial extraction + monomial
+    difference-of-squares), sympy-pinned. Full factorization into irreducibles (Wang/Zassenhaus) is out of scope
+    and left partially-factored/unchanged — never a wrong answer.
+  - **`symbolicIntegral`** gains **partial-fraction** integration of rational functions (composes `apart` with
+    term-wise integration) and **tabular by-parts** for polynomial·{exp,sin,cos}. Verified by differentiate-back
+    (`d/dx(∫f) ≡ f`, sympy-checked, max residual ~3e-9). General u-substitution / a Risch integrator remain the
+    `integral(…)` marker (surfaced as future scope).
+
+## 0.47.0
+
+### Minor Changes
+
+- Stats breadth: Gaussian-process regression + Dirichlet/Wishart sampling.
+
+  - **`gaussianProcessRegression` / `gpRegression`** (new). GP regression with RBF/squared-exponential and Matérn
+    3/2 & 5/2 kernels (`lengthScale`, `signalVariance`, `noise`); `.predict(Xstar)` returns posterior `{mean,
+variance, std}`, plus `logMarginalLikelihood`. Cholesky routes to the matrix-package primitive. Matches
+    `sklearn.gaussian_process.GaussianProcessRegressor` to machine precision (Δmean ~5e-16, Δstd ~2e-15).
+  - **`dirichletSample` / `dirichletPdf` / `wishartSample`** (new). Dirichlet via Gamma-normalization, Wishart via
+    Bartlett decomposition, seeded to match `mvnSample`. `dirichletPdf` matches `scipy.stats.dirichlet.pdf` to
+    ~1e-12; sample moments converge to the theoretical mean/covariance (`E[W]=df·scale`) within a couple of SE.
+    (The Marsaglia–Tsang gamma sampler was extracted to a shared util, removing two pre-existing in-file copies.)
+
+## 0.46.0
+
+### Minor Changes
+
+- Advanced linear algebra: sparse `svds`, ILU/IC preconditioners, O(k²) `minres`, and a `qz` throw fixed.
+
+  - **`svds(A, k)` — sparse/partial SVD** (new). Top-`k` singular triplets via Lanczos (`eigsh` on the smaller
+    normal operator `AᵀA`/`AAᵀ`, never formed), for large/sparse `A` where a full SVD is wasteful. Returns
+    **descending** singular values (opposite scipy's ascending — documented). Matches `scipy.sparse.linalg.svds`
+    to 7–8 digits; Eckart–Young rank-k truncation error pinned.
+  - **ILU(0) / IC(0) preconditioners** (new). `cg`/`gmres`/`bicgstab`/`minres` now accept
+    `preconditioner: 'ilu' | 'ic'` (plus exported `incompleteLU`/`incompleteCholesky`). Measured iteration
+    reductions on an ill-conditioned 2D-Poisson SPD system: IC(0)-CG 12 vs 22 iters, ILU(0)-BiCGSTAB 7 vs 15 —
+    same solution.
+  - **`minres` — O(k³) → O(k·n)**. Replaced the grow-and-re-solve tridiagonal least-squares with the classic
+    Paige–Saunders short recurrence (Lanczos + incremental Givens QR + 3-term `w`-recurrence): one matvec per
+    iteration, O(1) other work. Solutions unchanged (pinned vs `scipy.sparse.linalg.minres`).
+  - **`qz` no longer throws on all-real non-symmetric pencils.** Its homegrown single-shift `realSchur` failed to
+    converge (e.g. `A=[[1,2,0],[0,3,1],[1,0,4]]`, `B=diag(2,1,3)`); the Schur step now routes to the matrix
+    package's hardened `matrixSchur` (Hessenberg → Francis double-shift → exceptional-shift stall breaking).
+    `generalizedEig` was already scipy-correct (routes through the hardened `eig`) — verified, unchanged.
+
+## 0.45.0
+
+### Minor Changes
+
+- Stiff-ODE follow-ups: matrix `luSolve` + `solveODE` event detection.
+
+  **matrix — new `luSolve(fac, b)` export.** Solves `A·x = b` from an `lu()` factorization (the package had `lu()`
+  but no solve step — a real gap). numpy-pinned.
+
+  **functions — `solveODE` linear solve routed onto the matrix LU (threshold hybrid, neutral).** The
+  Rosenbrock/RODAS stiff step re-factorized the iteration matrix per RHS with inline elimination; it now factors
+  once via matrix `lu()`+`luSolve` for `n ≥ 8` and keeps the inline path for the tiny `n = 1–3` matrices real
+  stiff systems use (measured 1.8–8× faster there — `DenseMatrix` allocation overhead dwarfs the trivial work
+  until `n ≈ 8`, the same crossover the det/inv fast-paths use). Existing stiff behavior is **bit-for-bit
+  unchanged** on the small path; the `n ≥ 8` path is oracle-pinned.
+
+  **functions — `solveODE` event detection (`events` option).** scipy `solve_ivp`-style: `events` is a function
+  or array of `g(t, y)` whose zero-crossings are located (cubic-Hermite dense interpolation + bisection), with
+  `terminal` (stop at the crossing) and `direction` (±1 sign filter) as function properties or `{event, terminal,
+direction}` objects. Returns `tEvents`/`yEvents`; a terminal event truncates the output. Absent the option the
+  result shape is unchanged. Event times match `scipy.integrate.solve_ivp(..., events=)` to ~1e-8 or better.
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.7.0
+
+## 0.44.0
+
+### Minor Changes
+
+- Signal: exact Parks–McClellan `remez` (**breaking convention change**) + `buttord` bandpass/bandstop.
+
+  **`remez` — exact Parks–McClellan (BREAKING convention change).** The optimal equiripple FIR designer now
+  uses the exact Parks–McClellan / Remez exchange algorithm (a faithful port of the McClellan–Parks–Rabiner
+  program `scipy.signal.remez` wraps) instead of the previous Lawson-IRLS approximation. Taps now match
+  `scipy.signal.remez` to machine precision (~1e-16) across Type I/II/III/IV, lowpass/highpass/bandpass/
+  multiband/weighted/Hilbert/differentiator. **To match scipy exactly the calling convention changed** and this
+  is breaking for existing callers: band edges are now normalized to `[0, 0.5]` (fs=1, 0.5=Nyquist), and
+  `desired`/the new optional `weight` take **one value per band** (`bands.length/2`), not per edge; an optional
+  `type` (`'bandpass'` default / `'differentiator'` / `'hilbert'`) was added. (This mirrors scipy's own
+  inconsistency between `remez` and `firls` — `firls` keeps its `1=Nyquist`, per-edge convention.) Callers using
+  the old convention must update their band/desired arrays.
+
+  **`buttord` — bandpass/bandstop array form (additive).** `wp`/`ws` now accept `[low, high]` pairs (bandpass /
+  bandstop), returning a 2-element `Wn`; scalar lowpass/highpass is unchanged. Order matches
+  `scipy.signal.buttord` exactly and `Wn` to ~1e-8 (via scipy's exact bandstop passband-edge optimizer).
+
+## 0.43.3
+
+### Patch Changes
+
+- Update the physical constants to CODATA-2022 (were CODATA-2018, one cycle behind scipy).
+
+  27 measured constants shifted to their CODATA-2022 values, oracle-pinned to `scipy.constants` (e.g.
+  `electronMass` 9.1093837015e-31 → 9.1093837139e-31, `fineStructure` 7.2973525693e-3 → 7.2973525643e-3,
+  `weakMixingAngle` 0.2229 → 0.22305, plus proton/neutron/atomic masses, Bohr radius/magneton, Rydberg,
+  fine-structure-derived quantities, and the Planck units). The five constants fixed exactly by the 2019 SI
+  redefinition (`speedOfLight`, `planckConstant`, `elementaryCharge`, `boltzmann`, `avogadro`) and everything
+  derived purely from them are unchanged, as is `gravitationConstant`. A new standing oracle test
+  (`functions/tests/physical-constants-codata2022.test.ts`) pins every physical constant to scipy so they can't
+  silently drift a CODATA cycle behind again.
+
+## 0.43.2
+
+### Patch Changes
+
+- Resolve the deduplication campaign's final decisions: a compat compatibility correction and an internal WasmLoader consolidation.
+
+  **compat (behavior change):** `zeros(n)` and `ones(n)` with a single argument now return a length-`n` **vector** (`[0,0,0]` / `[1,1,1]`), matching mathjs, instead of an `n×n` square matrix. Two-argument `zeros(r, c)` / `ones(r, c)` continue to return an `r×c` matrix. compat's purpose is mathjs compatibility, and the previous square result diverged from mathjs (`math.zeros(3)` is a size-`[3]` vector) — this was a bug. Anyone relying on `zeros(n)` returning a square must now pass `zeros(n, n)`.
+
+  **core / functions / matrix (internal, no runtime behavior change):** the shared WASM-loader logic — the SHA-384 integrity verification (`sha384OfBuffer` / `verifyWasmIntegrity` / `loadWasmManifest`) and packaged-binary resolution (`resolvePackagedWasm` / `defaultWasmLocation`) — was byte-identical in `functions` and `matrix` and is now single-sourced in `@danielsimonjr/mathts-core/internal` (`core/src/wasm-loader.ts`), with each package injecting its own binary/manifest path. The SHA-384 verify-before-instantiate security invariant is preserved byte-for-byte (Node `crypto.createHash('sha384')` / browser `crypto.subtle.digest('SHA-384')`, mismatch throws), node built-ins stay behind lazy dynamic `import()`, and core's browser-safe `.` entry is unaffected. The per-package `WasmLoader` class stays local (distinct AS allocation models).
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.13.0
+  - @danielsimonjr/mathts-matrix@0.6.3
+  - @danielsimonjr/mathts-expression@0.6.7
+  - @danielsimonjr/mathts-parallel@0.6.3
+
+## 0.43.1
+
+### Patch Changes
+
+- Fix two BigNumber/Complex transcendental correctness bugs found by an mpmath/NumPy oracle audit, and consolidate the fftshift/ifftshift roll algorithm.
+
+  **core (correctness):**
+  - `BigNumber.divide` lost all precision when the divisor's coefficient had more digits than the (precision-scaled) dividend — the Newton-iteration step `2 / (g*g)` in `cbrt`/`sqrt` integer-divided to a quotient of `0`. As a result `cbrt(bignumber(2))` returned `4.6e-18` instead of `1.2599…`, and `asinh`/`acosh` on BigNumber degraded to ~11–16 digits. The dividend scale is now widened by `max(0, divisorDigits - dividendDigits)`; the result is **bit-identical** whenever `divisorDigits ≤ dividendDigits`, so no previously-correct division changes.
+  - `Complex.acosh` landed on the wrong Riemann sheet for `Re(z) < 0` (`acosh(-1+0.5i)` returned the negated value). It now uses the factored principal form `ln(z + √(z-1)·√(z+1))` (C99 Annex G / DLMF 4.37 / NumPy).
+
+  Every rich-type case of the 12 transcendental scalars (`sinh cosh tanh asinh acosh atanh cbrt log2 log10 log1p expm1 sign`) is now pinned to the mpmath/NumPy oracle by `functions/tests/gap-transcendental-richtype-oracle.test.ts`.
+
+  **functions:** the public `fftshift`/`ifftshift` (`number[]`) and the internal generic complex-FFT toolkit versions now share one `rollBy<T>` algorithm instead of duplicating the roll logic; behavior is unchanged.
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.12.0
+  - @danielsimonjr/mathts-expression@0.6.6
+  - @danielsimonjr/mathts-matrix@0.6.2
+  - @danielsimonjr/mathts-parallel@0.6.2
+
+## 0.43.0
+
+### Minor Changes
+
+- Arithmetic correctness fixes (BigNumber/Fraction pow/round/equal) + cross-package util consolidation
+
+  **Correctness fixes** (`functions`): three live public-API bugs, fixed at root by delegating the
+  rich-type policy cases of the typed dispatchers to core's oracle-pinned scalar primitives:
+  - `pow(bignumber(2), 0.5)` returned `1` (silently) — now `1.4142…`; `pow(fraction(3), 2.9)` silently
+    floored the exponent to `27` — now `24.19…`.
+  - `round(bignumber(-2.5))` returned `-3` — now `-2` (core's type-consistent `halfCeil`).
+  - `equal(0.1+0.2, 0.3)` returned `false` (strict `===`) — now `true` (mathjs-parity tolerance via
+    `nearlyEqual`; `bigint` stays exact).
+    Hot `number`/`bigint` cases remain inline (unchanged, no perf impact). A new equivalence guard
+    (fast-check property: typed case ≡ core primitive, + edge corpus) prevents future drift.
+
+  **Consolidation** (`core`/`expression`/`functions`): duplicate mathjs-derived cold utilities
+  (factory/string/formatter/array/collection/map) and error classes (`MathjsError`/`DimensionError`/
+  `IndexError`) that `expression` and `functions` each carried are now unified on a single
+  `@danielsimonjr/mathts-core/internal` canonical, with per-package re-export shims (no public API
+  change). Two latent bugs fixed in passing (`ObjectWrappingMap[Symbol.iterator]` type-soundness;
+  `sortFactories` now throws on indirect dependency cycles).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-core@0.11.0
+  - @danielsimonjr/mathts-expression@0.6.5
+  - @danielsimonjr/mathts-matrix@0.6.1
+  - @danielsimonjr/mathts-parallel@0.6.1
+
+## 0.42.0
+
+### Minor Changes
+
+- Niche special functions + numerics (B-spline, Monte-Carlo)
+
+  **Special functions:** adds `polylog` (|z|<1 series), `struveH`/`struveL`, `kelvinBer`/
+  `kelvinBei` (order 0), and `barnesG` (real) — series/recurrence implementations pinned to
+  mpmath dps=25 (machine precision).
+
+  **Numerics:** adds `bsplineFit`/`bsplineEval` (de Boor collocation — interpolation +
+  least-squares smoothing, scipy `tck` shape) and `monteCarloIntegrate` (uniform +
+  Halton/Sobol quasi-MC over an axis-aligned box, seeded/reproducible). Oracle-pinned vs
+  scipy and known integrals.
+
+## 0.41.0
+
+### Minor Changes
+
+- Stiff-solver RODAS + statistics breadth
+
+  **ODE:** `solveODE` gains `method: 'RODAS'` (Hairer-Wanner 4th-order, 6-stage, L-stable
+  Rosenbrock) for tight tolerances where the 2nd-order ode23s takes too many steps (256 vs
+  1487 steps to reach 1e-8 on a stiff linear system), plus an optional analytic `jac`
+  Jacobian for the stiff methods. Verified vs the exact linear-stiff solution and scipy Radau
+  on the Robertson problem.
+
+  **Stats:** adds `glm` (generalized linear models via IRLS — Poisson log link, Gamma
+  log/inverse), `mvnPdf`/`mvnSample` (multivariate-normal density + Cholesky sampling), and
+  `tTestPower` (two-sample t-test power via the noncentral t). Oracle-pinned vs
+  statsmodels/scipy.
+
+## 0.40.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.6.0
+
+## 0.40.0
+
+### Minor Changes
+
+- Graph and geometry breadth
+
+  **Graph:** adds `graphColoring` (greedy Welsh-Powell), `maxClique` (Bron-Kerbosch),
+  `louvainCommunities` (deterministic Louvain modularity), `katzCentrality`, and
+  `isIsomorphic`; `betweennessCentrality` gains a `normalized` option. Oracle-pinned vs
+  networkx 3.6.1. **Fix:** undirected `betweennessCentrality(normalized:true)` was 2× too
+  large (the rescale divisor was `(n-1)(n-2)/2`; networkx uses `(n-1)(n-2)` for both directed
+  and undirected since raw Brandes already double-counts undirected pairs) — now matches
+  networkx.
+
+  **Geometry:** adds `quaternionExp`/`quaternionLog`/`quaternionPow` (unit-quaternion
+  exponential map, scalar-first `[w,x,y,z]`) and `rayTriangleIntersect` (Möller-Trumbore) /
+  `rayPlaneIntersect` / `segmentSegmentClosest`. Oracle-pinned vs scipy `Rotation` and closed
+  forms. (SphericalVoronoi / alpha-shapes / halfspace-intersection remain — they need a
+  Delaunay/convex-hull engine.)
+
+## 0.39.0
+
+### Minor Changes
+
+- `funm` handles defective matrices; wavelet families db/sym/coif
+
+  `funm(A, f)` no longer throws on defective / repeated-eigenvalue (non-diagonalizable)
+  matrices — it now uses confluent Hermite interpolation (Newton divided differences over
+  repeated eigenvalue nodes). Derivatives of `f` come from an optional additive `fDerivs`
+  argument (machine precision — wired for `cosm`/`sinm`) or an order-tuned finite-difference
+  fallback. Verified on Jordan blocks vs closed forms and scipy `expm`/`sqrtm`; the
+  distinct-eigenvalue path is unchanged.
+
+  `dwt`/`idwt`/`wavedec`/`waverec` now support the db1-4, sym2-4 and coif1-2 wavelet
+  families (previously Haar/db1 only), via a general orthogonal filter bank with a
+  periodization boundary. Filter coefficients and single-level transforms match PyWavelets
+  1.8.0 bit-for-bit; perfect reconstruction holds for every family. `cwt` is unchanged.
+
+## 0.38.0
+
+### Minor Changes
+
+- `besselK` uniform machine precision + `quantileSeq` interpolation modes
+
+  `besselK`/`besselK0`/`besselK1` now use a uniformly-accurate Numerical-Recipes
+  `bessik` method (Temme power series for x<2, Steed continued fraction CF2 for
+  x≥2), eliminating the ~1.6e-9 relative-error floor the old series/asymptotic
+  split left in x∈[8,11]. Worst-case relative error across x∈[0.1,50] is now
+  ~8e-16 (machine precision), verified vs mpmath. The order recurrence for n≥2 is
+  unchanged.
+
+  `quantileSeq` gains numpy's `lower`/`higher`/`nearest`/`midpoint` interpolation
+  modes via an optional trailing `mode` argument; `linear` remains the default, so
+  all existing calls are unchanged. Oracle-pinned vs numpy.
+
+## 0.37.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.5.0
+
+## 0.37.0
+
+### Minor Changes
+
+- `cancel` now performs real univariate symbolic rational cancellation
+
+  `cancel(expr)` reduces univariate integer-coefficient rationals via polynomial GCD
+  (`(x^2-1)/(x-1)` → `x + 1`, `(2*x^2-2)/(2*x-2)` → `x + 1`, `(x^3-1)/(x^2-1)` →
+  `(x^2+x+1)/(x+1)`), matching `sympy.cancel`, including shared numeric-content
+  cancellation. Numeric-fraction, identical-string, multivariate and non-integer paths are
+  unchanged.
+
+  Also in this release: `multipleComparison` and `multipleTest` now share one
+  Bonferroni/Holm/Benjamini-Hochberg implementation (both public names and signatures
+  unchanged, results identical); cross-reference docs clarify that `chiSquareTest` and
+  `chi2Contingency` are complementary, not redundant. New implementation-independent
+  oracles pin `csd`/`coherence` invariants and `linprog`'s free-variable (`lower=null`)
+  bounds path (both were already correct — regression guards).
+
+### Patch Changes
+
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.4.6
+
+## 0.36.0
+
+### Minor Changes
+
+- Phase 8 — graph, geometry, interpolation, intervals, and a real CAS engine (final oracle-gap roadmap phase): graph algorithms `bfs`/`dfs`/`floydWarshall`/`bellmanFord`/`closenessCentrality`/`harmonicCentrality`/`maxFlow`/`minCut`/`astar`/`hungarian`; geometry `quaternionSlerp`/`quaternionInverse`/`quaternionToEuler`/`boundingBox`/`procrustes`/`kdTreeKNN`/`kdTreeRadius` and multiset `setIsSuperset`/`setEqual`/`setDisjoint`; N-D `interpn` + a generalized `solveBVP` (beyond the previous 2-unknown limit); `interval`/`Interval` (outward-rounded interval arithmetic — the first verified-bounds numeric type); and a real univariate CAS engine — `expand`/`factor`/`apart`/`together` now perform actual polynomial/rational algebra (verified vs sympy), resolving the Phase-0 pass-through no-ops. All oracle-pinned vs scipy/networkx/sympy.
+
+## 0.35.0
+
+### Minor Changes
+
+- Phase 7 advanced linear algebra (oracle-gap roadmap): iterative Krylov solvers `cg`/`gmres`/`bicgstab`/`minres` (dense or matvec, optional Jacobi preconditioner); `eigsh` (Lanczos k-eigenpairs of a symmetric matrix); structured & indefinite solvers `thomasSolve` (tridiagonal), `solveBanded`, `toeplitzSolve` (Levinson–Durbin), `ldl` (Bunch–Kaufman LDLᵀ); complex matrix functions `funm`/`cosm`/`sinm` (indefinite/complex spectra); and control-theory matrix equations `dlyap` (discrete Lyapunov), `care`/`dare` (continuous/discrete algebraic Riccati via matrix sign function / structure-preserving doubling) for LQR/Kalman design. All oracle-pinned vs scipy.
+
+## 0.34.0
+
+### Minor Changes
+
+- Phase 6 signal processing breadth (oracle-gap roadmap): FFT helpers `rfft`/`irfft`/`fftshift`/`ifftshift`/`fftfreq`/`rfftfreq`/`fftn`; IIR filter design `cheby1`/`cheby2`/`ellip` (elliptic via exact nome/Landen) + `butter` now honors `btype` (high/bandpass/bandstop; 2-arg lowpass unchanged) + `sosfilt`/`zpk2sos`/`bilinear`/`buttord`; FIR + smoothing `firwinBandpass`/`firls`/`remez`/`savgol`/`wiener`/`deconvolve`; wavelets `idwt`/`wavedec`/`waverec`/`cwt`; and spectral/peak analysis `findPeaks`/`peakWidths`/`csd`/`coherence`/`stft`/`istft`/`decimate`. Filter coefficients oracle-pinned vs scipy.signal; resolves the Phase-0 note that `butter`/`firwin` were lowpass/scalar-only.
+
+## 0.33.0
+
+### Minor Changes
+
+- Phase 5 special functions & number theory (oracle-gap roadmap): hypergeometric `hyp0f1`/`hyp1f1`/`hyp2f1` + generic `pFq` (the master functions); `polygamma`/`trigamma` (ψ⁽ⁿ⁾ — only digamma existed); orthogonal polynomials `jacobiP`/`gegenbauerC`; Jacobi elliptic functions `jacobiSN`/`jacobiCN`/`jacobiDN` (AGM; complementing the elliptic integrals); `rootsLegendre` (Gauss–Legendre nodes/weights for custom quadrature); and number-theory fills `continuedFraction`, `eulerNumbers`, signed `stirlingS1`, `discreteLog` (baby-step giant-step), `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, and lexicographic `permutationsGen`/`combinationsGen` tuple enumerators. All oracle-pinned vs mpmath/scipy/sympy.
+
+## 0.32.0
+
+### Minor Changes
+
+- Phase 4 statistics inference (oracle-gap roadmap): `fitDistribution` (MLE fits for normal/exponential/lognormal/poisson/gamma, gamma via the digamma shape equation); **exact small-n Mann–Whitney p-values by default** (was the normal approximation, materially wrong for small n — matches scipy `method='exact'`), a `kolmogorovSmirnov2Test` opt-in `method:'exact'|'asymp'|'auto'` (asymptotic default unchanged), and `kendallTauTest` (τ + p-value); time-series inference `pacf` (Levinson–Durbin), `ljungBox`, `durbinWatson`, `adfuller` (ADF unit-root, MacKinnon approximate p); noncentral distribution CDFs `noncentralChi2CDF`/`noncentralFCDF`/`noncentralTCDF`; circular statistics `circmean`/`circstd`/`circvar` + `vonMisesPDF`; and paired-categorical tests `mcnemar`/`cochranQ`. All oracle-pinned vs scipy/statsmodels.
+
+## 0.31.0
+
+### Minor Changes
+
+- Phase 3 regression & ML breadth (oracle-gap roadmap): `ols` (multiple/multivariate linear regression with full inference — coefficients, stderr, t/p-values, R²/adjusted-R², F-statistic, residuals); `ridge`/`lasso`/`elasticNet` (regularized regression — closed-form L2, coordinate-descent L1 with exact sparsity, combined L1/L2); `logisticRegression` (binary logistic regression via IRLS with predict/predictProba — the first classifier/GLM); `dbscan` (density-based clustering) + `knnClassify`/`knnRegress` (k-nearest-neighbour classifier/regressor); `gaussianKDE` (1-D Gaussian kernel density estimation, Silverman bandwidth); and `chi2Contingency` (χ² test of independence with Yates correction + Cramér's V) + `multipleTest` (Bonferroni/Holm/Benjamini–Hochberg FDR correction). All oracle-pinned vs scikit-learn / scipy / statsmodels.
+
+## 0.30.0
+
+### Minor Changes
+
+- Phase 2 optimization core (oracle-gap roadmap): `bfgs` — BFGS quasi-Newton minimizer with Armijo line search, numeric or analytic gradient, and optional box projection (the smooth-optimization workhorse complementing Nelder–Mead `minimize`); `nnls` (Lawson–Hanson non-negative least squares) and `lsqBounded` (projected-gradient box-constrained least squares), each returning `{ x, residual }`; and a two-phase-simplex overload of `linprog` — `linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })` → `{ x, fun, success, status }` supporting equality constraints, variable bounds, and infeasible/unbounded detection (the legacy positional `linprog(c, A_ub, b_ub)` signature is unchanged). All oracle-pinned vs scipy.
+
+## 0.29.0
+
+### Minor Changes
+
+- Phase 1 foundational numeric primitives (oracle-gap roadmap): `numericJacobian(f, x0)` (central-difference Jacobian for F:ℝⁿ→ℝᵐ) and a polymorphic `jacobian` (numeric when the first arg is a function; symbolic path unchanged); open scalar root-finders `newton`/`secant`/`halley` (complementing the bracketing `findRoot`); nonlinear system solver `fsolve`/`root` (damped Newton with backtracking line search); scalar minimizer `minimizeScalar` (Brent); adaptive Gauss–Kronrod `quad` (G7–K15 with error estimate) which also fixes `nintegrate`'s endpoint-singular accuracy (∫₀¹ x^-1/2 was ~1.7e-6 off, now ~1e-10); and full `svd` (re-exported from the matrix package) plus `orth` (column-space basis) on the functions surface. All oracle-pinned vs scipy/numpy/closed forms.
+
+## 0.28.0
+
+### Minor Changes
+
+- Phase 0 correctness & honesty fixes (oracle-gap roadmap). Bug fixes: `invmod` threw on every call; `lambertW`'s documented lower branch (W₋₁) was unimplemented and now works (Halley); `windowFunction` silently returned a rectangular window for unimplemented types (now throws); `stiffODESolver` diverged on stiff systems (fixed-point implicit Euler) and now delegates to the proven L-stable Rosenbrock engine (extracted as the shared `rosenbrockSolve` export); `summation`/`symbolicProduct` silently returned 0/1 on symbolic bounds (now throw); `taylor`/`series`/`seriesCoefficient` produced garbage coefficients past ~order 3 (finite differences) and are now exact via the Cauchy integral; `linprog` could return an infeasible optimum on degenerate cases (extraction now maps each constraint row to one basic variable). Docs honesty: corrected `betainc`'s documented argument order to `(a, b, x)` (the implementation was always correct) and annotated the pass-through CAS transforms (`factor`/`expand`/`apart`/`together`/`casFactor`/`casExpand`) as not-yet-implemented. All fixes oracle-pinned (mpmath/scipy).
+
 ## 0.27.0
 
 ### Minor Changes

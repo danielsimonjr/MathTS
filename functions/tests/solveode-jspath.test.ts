@@ -112,6 +112,43 @@ describe('solveODE — Rosenbrock stiff method (ode23s)', () => {
   });
 });
 
+describe('solveODE — large stiff system (matrix-LU-routed per-step solve)', () => {
+  // n = 12 ≥ LU_ROUTE_THRESHOLD, so the stiff per-step linear solve routes onto the
+  // @danielsimonjr/mathts-matrix lu()/luSolve primitive. Method-of-lines heat equation
+  // u_t = D·u_xx (Dirichlet 0 ends); a single sine mode decays as exp(−λt) with
+  // λ = D·(2 − 2cos(π/(n+1))). Pin the routed path to that exact closed form.
+  const n = 12;
+  const D = n * n;
+  const f = (_t: number, y: number[]): number[] => {
+    const dy = new Array<number>(n);
+    for (let i = 0; i < n; i++) {
+      const l = i > 0 ? y[i - 1] : 0;
+      const r = i < n - 1 ? y[i + 1] : 0;
+      dy[i] = D * (l - 2 * y[i] + r);
+    }
+    return dy;
+  };
+  const y0 = Array.from({ length: n }, (_, i) => Math.sin((Math.PI * (i + 1)) / (n + 1)));
+  const lambda = D * (2 - 2 * Math.cos(Math.PI / (n + 1)));
+  const tEnd = 0.1;
+  const mid = Math.floor(n / 2);
+  const exact = Math.sin((Math.PI * (mid + 1)) / (n + 1)) * Math.exp(-lambda * tEnd);
+
+  it('RODAS (n=12) matches the exact heat-equation mode', () => {
+    const sol = solveODE(f, [0, tEnd], y0, { method: 'RODAS', tol: 1e-8 });
+    const y = sol.y[sol.y.length - 1] as number[];
+    expect(y[mid]).toBeCloseTo(exact, 6);
+    expect(y.every((v) => Number.isFinite(v))).toBe(true);
+  });
+
+  it('Rosenbrock (n=12) matches the exact heat-equation mode', () => {
+    const sol = solveODE(f, [0, tEnd], y0, { method: 'Rosenbrock', tol: 1e-8 });
+    const y = sol.y[sol.y.length - 1] as number[];
+    expect(y[mid]).toBeCloseTo(exact, 5);
+    expect(y.every((v) => Number.isFinite(v))).toBe(true);
+  });
+});
+
 describe('solveODE — Unit-valued state (numeric time)', () => {
   it("y' = y with y0 = 5 m gives 5·e m (state-is-Unit falls to the whole-interval step, not NaN)", () => {
     // The initial-step heuristic must NOT run on Unit state (rmsNorm would give NaN → h=NaN).
