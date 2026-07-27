@@ -6,7 +6,7 @@
  */
 import { spawn } from 'node:child_process';
 import { writeFile, rm, rename, mkdtemp, readFile } from 'node:fs/promises';
-import { extname, join as joinPath } from 'node:path';
+import { extname, join as joinPath, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 
 /** Thrown when an external tool is missing or a conversion fails. Deliberate
@@ -34,6 +34,8 @@ interface RunResult {
   stderr: string;
 }
 
+const ALLOWED_TOOLS = ['rsvg-convert', 'resvg', 'pdflatex', 'xelatex', 'lualatex', 'tectonic'];
+
 /** Spawn a command, feeding optional stdin, collecting stdout/stderr. Rejects
  *  with PlotRenderError(ENOENT) if the binary is not found. */
 export function runTool(
@@ -42,6 +44,10 @@ export function runTool(
   opts: { timeoutMs?: number; input?: string } = {}
 ): Promise<RunResult> {
   return new Promise((resolve, reject) => {
+    if (!ALLOWED_TOOLS.includes(basename(cmd))) {
+      reject(new PlotRenderError(`Security Error: Execution of tool '${cmd}' is not allowed.`));
+      return;
+    }
     const child = spawn(cmd, args, { timeout: opts.timeoutMs ?? 30000 });
     const out: Buffer[] = [];
     let err = '';
@@ -79,6 +85,9 @@ export async function renderToFile(
   outPath: string,
   opts: RenderOptions = {}
 ): Promise<void> {
+  if (opts.tool && !ALLOWED_TOOLS.includes(basename(opts.tool))) {
+    throw new PlotRenderError(`Security Error: Execution of tool '${opts.tool}' is not allowed.`);
+  }
   const ext = extname(outPath).toLowerCase();
   if (ext === '.svg') {
     await writeFile(outPath, svg, 'utf-8');
@@ -166,6 +175,9 @@ export async function latexToPdf(
   outPath: string,
   opts: RenderOptions = {}
 ): Promise<void> {
+  if (opts.tool && !ALLOWED_TOOLS.includes(basename(opts.tool))) {
+    throw new PlotRenderError(`Security Error: Execution of tool '${opts.tool}' is not allowed.`);
+  }
   if (extname(outPath).toLowerCase() !== '.pdf') {
     throw new PlotRenderError(`latexToPdf output must be a .pdf path (got '${outPath}')`);
   }
