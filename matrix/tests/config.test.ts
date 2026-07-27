@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   DEFAULT_CONFIG,
   getConfig,
@@ -88,6 +88,28 @@ describe('matrix config', () => {
       unsub();
       setConfig({ debug: false });
       expect(count).toBe(1);
+    });
+
+    it('should catch and log errors thrown by listeners without interrupting other listeners', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const error = new Error('Test error');
+      const unsub1 = onConfigChange(() => {
+        throw error;
+      });
+
+      let called = false;
+      const unsub2 = onConfigChange(() => {
+        called = true;
+      });
+
+      expect(() => setConfig({ debug: true })).not.toThrow();
+      expect(consoleSpy).toHaveBeenCalledWith('Config listener error:', error);
+      expect(called).toBe(true);
+
+      unsub1();
+      unsub2();
+      consoleSpy.mockRestore();
     });
   });
 
