@@ -20,20 +20,37 @@ interface BigNumberConstructor {
   new (value: number): BigNumberType;
 }
 
+interface FractionType {
+  isInteger(): boolean;
+  isZero(): boolean;
+  lessThan(other: FractionType): boolean;
+  negate(): FractionType;
+  divide(other: FractionType): FractionType;
+  mod(other: FractionType): FractionType;
+  floor(): FractionType;
+  subtract(other: FractionType): FractionType;
+  multiply(other: FractionType): FractionType;
+}
+
+interface FractionConstructor {
+  new (num: number | bigint, den?: number | bigint): FractionType;
+}
+
 interface XgcdDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   matrix: (arr: unknown[]) => unknown;
   BigNumber: BigNumberConstructor;
+  Fraction?: FractionConstructor;
 }
 
 const name = 'xgcd';
-const dependencies = ['typed', 'config', 'matrix', 'BigNumber'];
+const dependencies = ['typed', 'config', 'matrix', 'BigNumber', '?Fraction'];
 
 export const createXgcd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, matrix, BigNumber }: XgcdDependencies): TypedFunction => {
+  ({ typed, config, matrix, BigNumber, Fraction }: XgcdDependencies): TypedFunction => {
     /**
      * Calculate the extended greatest common divisor for two values.
      * See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm.
@@ -64,8 +81,65 @@ export const createXgcd = /* #__PURE__ */ factory(
         return config.matrix === 'Array' ? res : matrix(res);
       },
       'BigNumber, BigNumber': _xgcdBigNumber,
-      // TODO: implement support for Fraction
+      'Fraction, Fraction': _xgcdFraction,
     }) as TypedFunction;
+
+    /**
+     * Calculate xgcd for two Fractions
+     * @param {Fraction} a
+     * @param {Fraction} b
+     * @return {Fraction[]} result
+     * @private
+     */
+    function _xgcdFraction(a: FractionType, b: FractionType): unknown {
+      if (!Fraction) {
+        throw new Error('Fraction dependency is missing');
+      }
+
+      let // used to swap two variables
+        t: FractionType;
+
+      let // quotient
+        q: FractionType;
+
+      let // remainder
+        r: FractionType;
+
+      const zero = new Fraction(0n, 1n);
+      const one = new Fraction(1n, 1n);
+      let x: FractionType = zero;
+      let lastx: FractionType = one;
+      let y: FractionType = one;
+      let lasty: FractionType = zero;
+
+      if (!a.isInteger() || !b.isInteger()) {
+        throw new Error('Parameters in function xgcd must be integer numbers');
+      }
+
+      while (!b.isZero()) {
+        q = a.divide(b).floor();
+        r = a.mod(b);
+
+        t = x;
+        x = lastx.subtract(q.multiply(x));
+        lastx = t;
+
+        t = y;
+        y = lasty.subtract(q.multiply(y));
+        lasty = t;
+
+        a = b;
+        b = r;
+      }
+
+      let res: FractionType[];
+      if (a.lessThan(zero)) {
+        res = [a.negate(), lastx.negate(), lasty.negate()];
+      } else {
+        res = [a, !a.isZero() ? lastx : zero, lasty];
+      }
+      return config.matrix === 'Array' ? res : matrix(res as unknown[]);
+    }
 
     /**
      * Calculate xgcd for two BigNumbers
