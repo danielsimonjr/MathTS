@@ -28,7 +28,9 @@ describe('markdownToHtml', () => {
 
   it('renders a horizontal rule and allowlisted links', () => {
     expect(markdownToHtml('---')).toContain('<hr');
-    expect(markdownToHtml('[site](https://example.com)')).toContain('<a href="https://example.com">site</a>');
+    expect(markdownToHtml('[site](https://example.com)')).toContain(
+      '<a href="https://example.com">site</a>'
+    );
     expect(markdownToHtml('[rel](./page.html)')).toContain('<a href="./page.html">rel</a>');
     expect(markdownToHtml('[anchor](#sec)')).toContain('<a href="#sec">anchor</a>');
   });
@@ -40,6 +42,10 @@ describe('markdownToHtml', () => {
       '[x](data:text/html,<script>)',
       '[x](vbscript:msgbox)',
       '[x](//evil.com)',
+      '[x](j\na\r\nv\ta\bs\fc\0r\u0000i\u000bp\ft:alert(1))',
+      '[x](java\x09script:alert(1))',
+      '[x](\x01javascript:alert(1))',
+      '[x]( javascript:alert(1))',
     ]) {
       const out = markdownToHtml(bad);
       expect(out).not.toContain('<a href');
