@@ -313,7 +313,6 @@ export const createRationalize = /* #__PURE__ */ factory(
       const node = simplify(expr, rules, scope, { exactFractions: false }) as MathNode; // Resolves any variables and functions with all defined parameters
       extended = !!extended;
 
-      const oper = '+-*' + (extended ? '/' : '');
       recPoly(node);
       const retFunc = {} as PolynomialResult;
       retFunc.expression = node;
@@ -354,9 +353,10 @@ export const createRationalize = /* #__PURE__ */ factory(
               recPoly((node as OperatorNode).args[0]);
             }
           } else {
-            if (!oper.includes((node as OperatorNode).op)) {
+            const op = (node as OperatorNode).op;
+            if (op !== '+' && op !== '-' && op !== '*' && op !== '^' && (!extended || op !== '/')) {
               throw new Error(
-                'Operator ' + (node as OperatorNode).op + ' invalid in polynomial expression'
+                'Operator ' + op + ' invalid in polynomial expression'
               );
             }
             for (let i = 0; i < (node as OperatorNode).args.length; i++) {
@@ -682,8 +682,9 @@ export const createRationalize = /* #__PURE__ */ factory(
           throw new Error('There is an unsolved function call');
         } else if (tp === 'OperatorNode') {
           // ***** OperatorName *****
-          if (!'+-*^'.includes((node as OperatorNode).op))
-            throw new Error('Operator ' + (node as OperatorNode).op + ' invalid');
+          const op = (node as OperatorNode).op;
+          if (op !== '+' && op !== '-' && op !== '*' && op !== '^')
+            throw new Error('Operator ' + op + ' invalid');
 
           if (noPai !== null) {
             // -(unary),^  : children of *,+,-
