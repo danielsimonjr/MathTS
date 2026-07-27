@@ -242,6 +242,7 @@ export const createParse = /* #__PURE__ */ factory(
       '<<': true,
       '>>': true,
       '>>>': true,
+      '.': true,
     };
 
     // map with all named delimiters
@@ -386,35 +387,31 @@ export const createParse = /* #__PURE__ */ factory(
       const c1 = currentCharacter(state);
       const c2 = currentString(state, 2);
       const c3 = currentString(state, 3);
+
+      let delim = '';
       if (c3.length === 3 && DELIMITERS[c3]) {
-        state.tokenType = TOKENTYPE.DELIMITER;
-        state.token = c3;
-        next(state);
-        next(state);
-        next(state);
-        return;
+        delim = c3;
+      } else if (c2.length === 2 && DELIMITERS[c2]) {
+        delim = c2;
+      } else if (DELIMITERS[c1]) {
+        delim = c1;
       }
 
-      // check for delimiters consisting of 2 characters
-      // Special case: the check for '?.' is to prevent a case like 'a?.3:.7' from being interpreted as optional chaining
-      // TODO: refactor the tokenization into some better way to deal with cases like 'a?.3:.7', see https://github.com/josdejong/mathjs/pull/3584
-      if (
-        c2.length === 2 &&
-        DELIMITERS[c2] &&
-        (c2 !== '?.' || !parse.isDigit(state.expression.charAt(state.index + 2)))
-      ) {
-        state.tokenType = TOKENTYPE.DELIMITER;
-        state.token = c2;
-        next(state);
-        next(state);
-        return;
+      if (delim) {
+        if (delim.endsWith('.') && parse.isDigit(state.expression.charAt(state.index + delim.length))) {
+          delim = delim.slice(0, -1);
+          if (delim.length > 0 && !DELIMITERS[delim]) {
+            delim = '';
+          }
+        }
       }
 
-      // check for delimiters consisting of 1 character
-      if (DELIMITERS[c1]) {
+      if (delim) {
         state.tokenType = TOKENTYPE.DELIMITER;
-        state.token = c1;
-        next(state);
+        state.token = delim;
+        for (let i = 0; i < delim.length; i++) {
+          next(state);
+        }
         return;
       }
 
@@ -465,12 +462,6 @@ export const createParse = /* #__PURE__ */ factory(
         if (currentCharacter(state) === '.') {
           state.token += currentCharacter(state);
           next(state);
-
-          if (!parse.isDigit(currentCharacter(state))) {
-            // this is no number, it is just a dot (can be dot notation)
-            state.tokenType = TOKENTYPE.DELIMITER;
-            return;
-          }
         } else {
           while (parse.isDigit(currentCharacter(state))) {
             state.token += currentCharacter(state);
