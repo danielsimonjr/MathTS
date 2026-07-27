@@ -2583,6 +2583,8 @@ function _combineLikeTerms(expr: string): string {
  * @internal
  */
 function _casDerivativeOne(expr: string, variable: string): string {
+  if (expr.indexOf(variable) === -1) return '0';
+
   const terms = expr.split(/\s*\+\s*/);
   const derivedTerms: string[] = [];
 
