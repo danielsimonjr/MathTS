@@ -811,7 +811,24 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
         {
           name: 'core',
           fn: tryCall((a: number[][], dim: number) =>
-            coreReduce(a, dim, (acc: number, v: number) => (acc as number) + v)
+            (() => {
+              try {
+                return coreReduce(a, dim, (acc: number, v: number) => (acc as number) + v);
+              } catch (e) {
+                if (e.name === 'DimensionError') {
+                  const err = new Error(
+                    'Index out of range (' +
+                      dim +
+                      ' ' +
+                      (dim < 0 ? '< 0' : '> ' + (e.expected - 1)) +
+                      ')'
+                  );
+                  err.name = 'IndexError';
+                  throw err;
+                }
+                throw e;
+              }
+            })()
           ),
         },
       ],
