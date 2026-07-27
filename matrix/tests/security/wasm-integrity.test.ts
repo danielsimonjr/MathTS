@@ -156,4 +156,11 @@ describe('matrix wasm integrity — browser code paths (process spoofed)', () =>
     const m = await loadWasmManifest('/missing/path/y.wasm');
     expect(m).toBeNull();
   });
+
+  it('loadWasmManifest browser path returns null when fetch throws', async () => {
+    vi.stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    const m = await loadWasmManifest('/missing/path/z.wasm');
+    expect(m).toBeNull();
+  });
 });
