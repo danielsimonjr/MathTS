@@ -185,6 +185,27 @@ describe('Tier 13: Downstream factories', () => {
     expect(median([1, 2, 3, 4])).toBe(2.5);
   });
 
+  it('median should compute median over a dimension', () => {
+    expect(
+      median(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        0
+      )
+    ).toEqual([2, 3]);
+    expect(
+      median(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        1
+      )
+    ).toEqual([1.5, 3.5]);
+  });
+
   it('factory_variance should compute sample variance', () => {
     // mathjs uses sample variance (n-1) by default
     const v = factory_variance([2, 4, 4, 4, 5, 5, 7, 9]);
