@@ -34,7 +34,7 @@ describe('renderToFile', () => {
       throw new Error('should have thrown');
     } catch (e) {
       expect(e).toBeInstanceOf(PlotRenderError);
-      expect((e as PlotRenderError).message).toMatch(/rsvg-convert|resvg|install/i);
+      expect((e as PlotRenderError).message).toMatch(/Security Error/i);
     }
   });
 });
@@ -42,9 +42,13 @@ describe('renderToFile', () => {
 describe('latexToPdf', () => {
   const TEX = '\\documentclass{article}\\begin{document}hello\\end{document}';
   it('rejects with PlotRenderError naming a LaTeX engine when none is present', async () => {
-    await expect(
-      latexToPdf(TEX, join(dir, 'x.pdf'), { tool: '__definitely_not_a_real_tool__' })
-    ).rejects.toBeInstanceOf(PlotRenderError);
+    try {
+      await latexToPdf(TEX, join(dir, 'x.pdf'), { tool: '__definitely_not_a_real_tool__' });
+      throw new Error('should have thrown');
+    } catch (e) {
+      expect(e).toBeInstanceOf(PlotRenderError);
+      expect((e as PlotRenderError).message).toMatch(/Security Error/i);
+    }
   });
   it('requires a .pdf output path', async () => {
     await expect(latexToPdf(TEX, join(dir, 'x.png'))).rejects.toBeInstanceOf(PlotRenderError);
