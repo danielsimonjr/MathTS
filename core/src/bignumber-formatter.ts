@@ -209,11 +209,13 @@ export function format(value: unknown, options?: unknown): string {
       return formatBigNumberToBase(v, 16, wordSize);
 
     case 'auto': {
-      // determine lower and upper bound for exponential notation.
-      // TODO: implement support for upper and lower to be BigNumbers themselves
       const optionsObj = options as { lowerExp?: unknown; upperExp?: unknown } | undefined;
-      const lowerExp = _toNumberOrDefault(optionsObj?.lowerExp, -3);
-      const upperExp = _toNumberOrDefault(optionsObj?.upperExp, 5);
+      const lowerExp = (isNumber(optionsObj?.lowerExp) || isBigNumber(optionsObj?.lowerExp))
+        ? optionsObj?.lowerExp
+        : -3;
+      const upperExp = (isNumber(optionsObj?.upperExp) || isBigNumber(optionsObj?.upperExp))
+        ? optionsObj?.upperExp
+        : 5;
 
       // handle special case zero
       if (v.isZero()) return '0';
@@ -222,7 +224,27 @@ export function format(value: unknown, options?: unknown): string {
       let str;
       const rounded = v.toSignificantDigits(precision);
       const exp = rounded.e;
-      if (exp >= lowerExp && exp < upperExp) {
+
+      let condition = false;
+      if (isBigNumber(lowerExp) && isBigNumber(upperExp)) {
+        const lowerExpBn = lowerExp as unknown as BigNumberValue;
+        const upperExpBn = upperExp as unknown as BigNumberValue;
+        condition = (!lowerExpBn.greaterThan(exp)) && upperExpBn.greaterThan(exp);
+      } else if (isBigNumber(lowerExp)) {
+        const lowerExpBn = lowerExp as unknown as BigNumberValue;
+        const upperExpNum = upperExp as number;
+        condition = (!lowerExpBn.greaterThan(exp)) && exp < upperExpNum;
+      } else if (isBigNumber(upperExp)) {
+        const upperExpBn = upperExp as unknown as BigNumberValue;
+        const lowerExpNum = lowerExp as number;
+        condition = exp >= lowerExpNum && upperExpBn.greaterThan(exp);
+      } else {
+        const lowerExpNum = lowerExp as number;
+        const upperExpNum = upperExp as number;
+        condition = exp >= lowerExpNum && exp < upperExpNum;
+      }
+
+      if (condition) {
         // normal number notation
         str = rounded.toFixed();
       } else {
@@ -294,14 +316,4 @@ export function toExponential(value: BigNumberValue, precision?: number): string
  */
 export function toFixed(value: BigNumberValue, precision?: number): string {
   return value.toFixed(precision);
-}
-
-function _toNumberOrDefault(value: unknown, defaultValue: number): number {
-  if (isNumber(value)) {
-    return value;
-  } else if (isBigNumber(value)) {
-    return (value as unknown as BigNumberValue).toNumber();
-  } else {
-    return defaultValue;
-  }
 }
