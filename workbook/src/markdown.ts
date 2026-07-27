@@ -24,19 +24,26 @@ function sanitizeHrefRaw(href: string): string | null {
   } catch {
     // malformed escape — inspect the raw form
   }
-  probe = probe.trim().toLowerCase();
+
   if (probe.startsWith('//')) return null;
-  if (probe.startsWith('http://') || probe.startsWith('https://') || probe.startsWith('mailto:'))
-    return h;
-  if (
-    probe.startsWith('/') ||
-    probe.startsWith('./') ||
-    probe.startsWith('../') ||
-    probe.startsWith('#')
-  )
-    return h;
-  if (/^[a-z][a-z0-9+.-]*:/.test(probe)) return null;
-  return null;
+
+  try {
+    const url = new URL(probe);
+    if (url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'mailto:') {
+      return h;
+    }
+    return null;
+  } catch {
+    if (
+      probe.startsWith('/') ||
+      probe.startsWith('./') ||
+      probe.startsWith('../') ||
+      probe.startsWith('#')
+    ) {
+      return h;
+    }
+    return null;
+  }
 }
 
 /** HTML: allowlisted href, quote-escaped for an attribute (or null to drop). */
