@@ -129,6 +129,14 @@ describe('Parser - evaluate', () => {
     const result = p.evaluate('pi');
     expect(result).toBeCloseTo(Math.PI);
   });
+
+  it('throws an error if evaluated with wrong number of arguments', () => {
+    const p = new ParserClass();
+    // @ts-expect-error testing invalid arguments
+    expect(() => p.evaluate()).toThrow(/Wrong number of arguments in function evaluate \(0 provided, 1 expected\)/);
+    // @ts-expect-error testing invalid arguments
+    expect(() => p.evaluate('2 + 3', 5)).toThrow(/Wrong number of arguments in function evaluate \(2 provided, 1 expected\)/);
+  });
 });
 
 // ─── get / set ────────────────────────────────────────────────────────────────
@@ -143,6 +151,14 @@ describe('Parser - get and set', () => {
   it('get returns undefined for non-existent variable', () => {
     const p = new ParserClass();
     expect(p.get('nonExistent')).toBeUndefined();
+  });
+
+  it('get throws an error if called with wrong number of arguments', () => {
+    const p = new ParserClass();
+    // @ts-expect-error testing invalid arguments
+    expect(() => p.get()).toThrow(/Wrong number of arguments in function get \(0 provided, 1 expected\)/);
+    // @ts-expect-error testing invalid arguments
+    expect(() => p.get('myVar', 5)).toThrow(/Wrong number of arguments in function get \(2 provided, 1 expected\)/);
   });
 
   it('set returns the value', () => {

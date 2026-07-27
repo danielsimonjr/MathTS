@@ -109,7 +109,9 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @throws {Error}
      */
     Parser.prototype.evaluate = function (this: ParserInstance, expr: string | string[]): unknown {
-      // TODO: validate arguments
+      if (arguments.length !== 1) {
+        throw new Error(`Wrong number of arguments in function evaluate (${arguments.length} provided, 1 expected)`);
+      }
       return evaluate(expr, this.scope);
     };
 
@@ -120,7 +122,9 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @return {* | undefined} value
      */
     Parser.prototype.get = function (this: ParserInstance, name: string): unknown {
-      // TODO: validate arguments
+      if (arguments.length !== 1) {
+        throw new Error(`Wrong number of arguments in function get (${arguments.length} provided, 1 expected)`);
+      }
       return this.scope.has(name) ? this.scope.get(name) : undefined;
     };
 
