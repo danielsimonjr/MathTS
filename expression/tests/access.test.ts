@@ -33,11 +33,37 @@ function subsetGet(obj: unknown, index: unknown): unknown {
 
 // Numeric index with a `_i` property for mock subset
 function makeSimpleNumericIndex(i: number) {
-  return {
+  const indexObj = {
     isObjectProperty: () => false,
     getObjectProperty: () => null,
+    isIndex: true,
+    isScalar: () => true,
+    size: () => [1],
+    min: () => [i],
+    max: () => [i],
+    dimension: (dim: number) => i,
     _i: i,
   };
+
+  // mock for isIndex(x) function checking `constructor.prototype.isIndex === true`
+  Object.defineProperty(indexObj, 'constructor', {
+    value: {
+      prototype: {
+        isIndex: true,
+      }
+    }
+  });
+
+  // mock for isEmptyIndex accessing index._dimensions.length
+  Object.defineProperty(indexObj, '_dimensions', {
+    value: [i]
+  });
+
+  Object.defineProperty(indexObj, '_sourceSize', {
+    value: [null] // Allows any size
+  });
+
+  return indexObj;
 }
 
 // ── Bootstrap access ──────────────────────────────────────────────────────
