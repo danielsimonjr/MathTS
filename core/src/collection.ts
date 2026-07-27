@@ -14,7 +14,7 @@
  * `utils/switch.ts` remain untouched, a future dedup slice.
  */
 import { isCollection, isMatrix } from './is.js';
-import { IndexError } from './error/IndexError.js';
+import { DimensionError } from './error/DimensionError.js';
 import { arraySize, deepMap as arrayDeepMap, deepForEach as arrayDeepForEach } from './array.js';
 import { _switch } from './switch.js';
 
@@ -111,8 +111,7 @@ export function reduce<T, U>(
 ): U[] | Matrix<U> {
   const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix<T>).size();
   if (dim < 0 || dim >= size.length) {
-    // TODO: would be more clear when throwing a DimensionError here
-    throw new IndexError(dim, 0, size.length);
+    throw new DimensionError(dim, size.length, '<');
   }
 
   if (isMatrix(mat)) {
