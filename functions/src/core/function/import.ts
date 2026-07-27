@@ -376,7 +376,6 @@ export function importFactory(
       isTransformFunctionFactory(factory) || factoryAllowedInExpressions(factory);
     const withTransform = math.expression.mathWithTransform;
 
-    // TODO: add unit test with non-lazy factory
     if (!meta || meta.lazy !== false) {
       lazy(namespace, name, resolver);
       if (former) lazy(namespace, former, resolver);
