@@ -129,6 +129,13 @@ describe('Parser - evaluate', () => {
     const result = p.evaluate('pi');
     expect(result).toBeCloseTo(Math.PI);
   });
+
+  it('throws a TypeError if expr is not a string or string array', () => {
+    const p = new ParserClass();
+    expect(() => p.evaluate(123 as any)).toThrow(TypeError);
+    expect(() => p.evaluate(123 as any)).toThrow('String or string array expected for parameter "expr"');
+    expect(() => p.evaluate({} as any)).toThrow(TypeError);
+  });
 });
 
 // ─── get / set ────────────────────────────────────────────────────────────────
@@ -143,6 +150,13 @@ describe('Parser - get and set', () => {
   it('get returns undefined for non-existent variable', () => {
     const p = new ParserClass();
     expect(p.get('nonExistent')).toBeUndefined();
+  });
+
+  it('get throws a TypeError if name is not a string', () => {
+    const p = new ParserClass();
+    expect(() => p.get(123 as any)).toThrow(TypeError);
+    expect(() => p.get(123 as any)).toThrow('String expected for parameter "name"');
+    expect(() => p.get({} as any)).toThrow(TypeError);
   });
 
   it('set returns the value', () => {
