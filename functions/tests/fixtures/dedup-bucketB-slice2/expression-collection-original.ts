@@ -4,7 +4,7 @@
  * header.
  */
 import { isCollection, isMatrix } from '../../../../expression/src/utils/is.js';
-import { IndexError } from '../../../../expression/src/error/IndexError.js';
+import { DimensionError } from '../../../../expression/src/error/DimensionError.js';
 import {
   arraySize,
   deepMap as arrayDeepMap,
@@ -105,8 +105,7 @@ export function reduce<T, U>(
 ): U[] | Matrix<U> {
   const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix<T>).size();
   if (dim < 0 || dim >= size.length) {
-    // TODO: would be more clear when throwing a DimensionError here
-    throw new IndexError(dim, 0, size.length);
+    throw new DimensionError(dim, size.length, '<');
   }
 
   if (isMatrix(mat)) {
