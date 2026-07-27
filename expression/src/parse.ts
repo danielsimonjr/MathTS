@@ -721,31 +721,31 @@ export const createParse = /* #__PURE__ */ factory(
     function parseBlock(state: ParserState): MathNode {
       let node: MathNode | undefined;
       const blocks: Array<{ node: MathNode; visible: boolean }> = [];
-      let visible: boolean;
+      let hasSeparators = false;
+      let nodePushed = true;
 
-      if (state.token !== '' && state.token !== '\n' && state.token !== ';') {
-        node = parseAssignment(state);
-        if (state.comment) {
-          (node as CommentableNode).comment = state.comment;
-        }
-      }
-
-      // TODO: simplify this loop
-      while (state.token === '\n' || state.token === ';') {
-        if (blocks.length === 0 && node) {
-          visible = state.token !== ';';
-          blocks.push({ node, visible });
-        }
-
-        getToken(state);
-        if (state.token !== '\n' && state.token !== ';' && state.token !== '') {
+      while (state.token !== '') {
+        if (state.token !== '\n' && state.token !== ';') {
           node = parseAssignment(state);
+          nodePushed = false;
           if (state.comment) {
             (node as CommentableNode).comment = state.comment;
           }
+        }
 
-          visible = state.token !== ';';
-          blocks.push({ node, visible });
+        if (state.token === '\n' || state.token === ';') {
+          hasSeparators = true;
+          if (node && !nodePushed) {
+            blocks.push({ node, visible: state.token !== ';' });
+            nodePushed = true;
+          }
+          getToken(state);
+        } else {
+          if (node && hasSeparators && !nodePushed) {
+            blocks.push({ node, visible: state.token !== ';' });
+            nodePushed = true;
+          }
+          break;
         }
       }
 
