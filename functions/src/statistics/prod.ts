@@ -1,4 +1,4 @@
-import { deepForEach } from '../utils/collection.js';
+import { deepForEach, reduce } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
@@ -86,14 +86,7 @@ export const createProd = /* #__PURE__ */ factory(
       'Array | Matrix': _prod,
 
       // prod([a, b, c, d, ...], dim)
-      'Array | Matrix, number | BigNumber': function (
-        _array: unknown[] | MatrixType,
-        _dim: number | { valueOf(): number }
-      ): unknown {
-        // TODO: implement prod(A, dim)
-        throw new Error('prod(A, dim) is not yet supported');
-        // return reduce(arguments[0], arguments[1], math.prod)
-      },
+      'Array | Matrix, number | BigNumber': _nprodDim,
 
       // prod(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
@@ -146,6 +139,26 @@ export const createProd = /* #__PURE__ */ factory(
       }
 
       return prod;
+    }
+
+    /**
+     * Calculate product along a specified dimension
+     * @param {Array | Matrix} array - Input array or matrix
+     * @param {number | BigNumber} dim - Dimension to product along
+     * @return {number | BigNumber | Complex | Unit | Array | Matrix} product
+     * @private
+     */
+    function _nprodDim(
+      array: unknown[] | MatrixType,
+      dim: number | { valueOf(): number }
+    ): unknown {
+      try {
+        const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
+        const prod = reduce(array as Parameters<typeof reduce>[0], dimValue, multiplyScalar);
+        return prod;
+      } catch (err) {
+        throw improveErrorMessage(err, 'prod', undefined);
+      }
     }
   }
 );
