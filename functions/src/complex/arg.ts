@@ -65,8 +65,6 @@ export const createArg = /* #__PURE__ */ factory(
         return x.arg();
       },
 
-      // TODO: implement BigNumber support for function arg
-
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>
