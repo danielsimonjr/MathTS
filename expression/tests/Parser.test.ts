@@ -106,6 +106,18 @@ describe('Parser - constructor', () => {
 // ─── evaluate method ─────────────────────────────────────────────────────────
 
 describe('Parser - evaluate', () => {
+  it('throws an error if missing expression argument', () => {
+    const p = new ParserClass();
+    // @ts-expect-error missing arguments
+    expect(() => p.evaluate()).toThrow(/evaluate requires exactly 1 argument/);
+  });
+
+  it('throws an error if too many arguments', () => {
+    const p = new ParserClass();
+    // @ts-expect-error missing arguments
+    expect(() => p.evaluate('2+2', 3)).toThrow(/evaluate requires exactly 1 argument/);
+  });
+
   it('evaluates a constant expression', () => {
     const p = new ParserClass();
     const result = p.evaluate('2 + 3');
@@ -134,6 +146,18 @@ describe('Parser - evaluate', () => {
 // ─── get / set ────────────────────────────────────────────────────────────────
 
 describe('Parser - get and set', () => {
+  it('throws an error if get missing argument', () => {
+    const p = new ParserClass();
+    // @ts-expect-error missing arguments
+    expect(() => p.get()).toThrow(/get requires exactly 1 argument/);
+  });
+
+  it('throws an error if get too many arguments', () => {
+    const p = new ParserClass();
+    // @ts-expect-error missing arguments
+    expect(() => p.get('a', 'b')).toThrow(/get requires exactly 1 argument/);
+  });
+
   it('set stores a value and get retrieves it', () => {
     const p = new ParserClass();
     p.set('myVar', 42);

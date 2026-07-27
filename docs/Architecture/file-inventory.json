@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-21",
+  "generated": "2026-07-27",
   "totalFiles": 1768,
   "byDisposition": {
     "reachable": 1081,
@@ -3754,7 +3754,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 247
+      "loc": 251
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4384,7 +4384,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 332
+      "loc": 356
     },
     {
       "file": "expression/tests/RangeNode.test.ts",
