@@ -599,10 +599,7 @@ export function toPrecision(
     }
 
     // append trailing zeros
-    // TODO: simplify the next statement
-    c = c.concat(
-      zeros(e - c.length + 1 + (precision && c.length < precision ? precision - c.length : 0))
-    );
+    c = c.concat(zeros(e - c.length + 1));
 
     // prepend zeros
     c = (zeros(-e) as Array<number | string>).concat(c);
