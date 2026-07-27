@@ -1,13 +1,13 @@
 import { factory } from './factory.js';
-import type { BigNumber } from '../types.js';
+import type { BigNumber, Fraction } from '../types.js';
 
 const name = 'parseNumberWithConfig';
-const dependencies = ['config', '?bignumber'];
+const dependencies = ['config', '?bignumber', '?fraction'];
 
 export const createParseNumberWithConfig = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ config, bignumber }) => {
+  ({ config, bignumber, fraction }) => {
     /**
      * Parse a string to a number type based on the config.number setting.
      *
@@ -29,7 +29,7 @@ export const createParseNumberWithConfig = /* #__PURE__ */ factory(
      * parseNumberWithConfig('5')    // Returns: 5n
      * parseNumberWithConfig('3.14') // Returns: 3.14 (number fallback)
      */
-    function parseNumberWithConfig(str: string): number | bigint | BigNumber {
+    function parseNumberWithConfig(str: string): number | bigint | BigNumber | Fraction {
       if (typeof str !== 'string') {
         throw new TypeError(`parseNumberWithConfig expects string, got ${typeof str}`);
       }
@@ -59,12 +59,10 @@ export const createParseNumberWithConfig = /* #__PURE__ */ factory(
           }
 
         case 'Fraction': {
-          // TODO: Add fraction dependency when Fraction support needed
-          const fracNum = Number(str);
-          if (isNaN(fracNum)) {
-            throw new SyntaxError(`String "${str}" is not a valid number`);
+          if (!fraction) {
+            throw new Error('Fraction not available. Configure mathjs with Fraction support.');
           }
-          return fracNum;
+          return fraction(str);
         }
 
         case 'number':
