@@ -1,5 +1,6 @@
 import { errorTransform } from '../../transform/utils/errorTransform.js';
 import { getSafeProperty } from '../../utils/customs.js';
+import { getStringSubset } from './stringSubset.js';
 
 export function accessFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
   /**
@@ -24,8 +25,8 @@ export function accessFactory({ subset }: { subset: (...args: unknown[]) => unkn
         // Matrix
         return (object as { subset: (...a: unknown[]) => unknown }).subset(index);
       } else if (typeof object === 'string') {
-        // TODO: move getStringSubset into a separate util file, use that
-        return subset(object, index);
+        // @ts-expect-error type assertion of index object
+        return getStringSubset(object, index);
       } else if (typeof object === 'object') {
         if (!index.isObjectProperty()) {
           throw new TypeError('Cannot apply a numeric index as object property');
