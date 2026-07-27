@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-statistics",
   "version": "0.3.46",
-  "description": "Statistics & probability for MathTS \u2014 descriptive stats, distributions, hypothesis tests, and combinatorics, every function externally oracle-pinned (SciPy/NumPy/closed-form)",
+  "description": "Statistics & probability for MathTS — descriptive stats, distributions, hypothesis tests, and combinatorics, every function externally oracle-pinned (SciPy/NumPy/closed-form)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -45,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielsimonjr/mathts",
+    "url": "git+https://github.com/danielsimonjr/MathTS.git",
     "directory": "statistics"
   },
   "keywords": [

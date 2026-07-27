@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-21",
+  "generated": "2026-07-27",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -940,6 +940,7 @@
       "differencesDocs",
       "digammaDocs",
       "digits",
+      "DimensionError",
       "dimToZeroBase",
       "discriminantDocs",
       "distance2DDocs",
@@ -1018,6 +1019,7 @@
       "getPrecedence",
       "getSafeMethod",
       "getSafeProperty",
+      "getStringSubset",
       "groupDelayDocs",
       "hasNumericValueDocs",
       "hasOwnProperty",
@@ -2138,6 +2140,7 @@
       "dividedDifferenceJS",
       "divideNumber",
       "divideScalar",
+      "DivisorGeobucket",
       "divisors",
       "divisorSigma",
       "divmodP",

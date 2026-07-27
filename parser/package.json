@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-parser",
   "version": "0.1.19",
-  "description": "Standalone expression parser for MathTS \u2014 the parse function and Parser class, re-exported as a focused package",
+  "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -46,7 +46,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielsimonjr/mathts",
+    "url": "git+https://github.com/danielsimonjr/MathTS.git",
     "directory": "parser"
   },
   "keywords": [

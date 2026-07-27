@@ -1,15 +1,15 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-21
+**Generated**: 2026-07-27
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 3
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
-  - **Test-only (exercised by a test, ships nothing)**: 3
-- **Potentially unused exports**: 224
-  - **Unreferenced anywhere (deletion candidates)**: 1
+  - **Test-only (exercised by a test, ships nothing)**: 2
+- **Potentially unused exports**: 225
+  - **Unreferenced anywhere (deletion candidates)**: 2
   - **Referenced in-module (type contracts / helpers backing live exports)**: 223
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -27,10 +27,6 @@ Not reachable from any package entry point, but imported by a test — deliberat
 kept, standalone-tested code (e.g. legacy signal kernels) or a helper a test drives
 directly. Not dead; not shipped. No action needed.
 
-### `expression` (1)
-
-- `expression/src/error/DimensionError.ts`
-
 ### `parallel` (2)
 
 - `parallel/src/ParallelMatrix.ts`
@@ -44,6 +40,10 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
+
+### `functions/src/probability/random.ts`
+
+- `createRandomNumber` (constant)
 
 ### `functions/src/signal/fft.ts`
 
@@ -212,10 +212,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `rodasSolve` (function) — 4 in-file refs
 - `radauSolve` (function) — 2 in-file refs
 
-### `functions/src/probability/random.ts`
-
-- `createRandomNumber` (constant) — 1 in-file ref
-
 ### `functions/src/relational/compare.ts`
 
 - `createCompareNumber` (constant) — 1 in-file ref
@@ -360,6 +356,7 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `polySub` (function) — 3 in-file refs
 - `polyMul` (function) — 5 in-file refs
 - `polyReduce` (function) — 3 in-file refs
+- `DivisorGeobucket` (class) — 3 in-file refs
 - `Term` (interface) — 2 in-file refs
 
 ### `functions/src/utils/bignumber/bitwise.ts`

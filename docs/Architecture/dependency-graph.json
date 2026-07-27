@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-07-21",
-    "totalFiles": 1114,
+    "lastUpdated": "2026-07-27",
+    "totalFiles": 1116,
     "totalModules": 83,
-    "totalExports": 5750
+    "totalExports": 5753
   },
   "entryPoints": [
     {
@@ -527,8 +527,8 @@
             "imports": ["isCollection", "isMatrix"]
           },
           {
-            "file": "./error/IndexError.js",
-            "imports": ["IndexError"]
+            "file": "./error/DimensionError.js",
+            "imports": ["DimensionError"]
           },
           {
             "file": "./array.js",
@@ -13412,10 +13412,6 @@
             "imports": ["arraySize", "concat"]
           },
           {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
-          },
-          {
             "file": "../error/DimensionError.js",
             "imports": ["DimensionError"]
           },
@@ -15679,7 +15675,7 @@
         "constants": ["createPickRandom"]
       },
       "functions/src/probability/random.ts": {
-        "description": "Return a random number larger or equal to `min` and smaller than `max`",
+        "description": "Type definitions for random",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -17092,8 +17088,8 @@
             "imports": ["arraySize"]
           },
           {
-            "file": "../error/IndexError.js",
-            "imports": ["IndexError"]
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
           },
           {
             "file": "../core/function/typed.js",
@@ -17318,7 +17314,7 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["deepForEach"]
+            "imports": ["deepForEach", "reduce"]
           },
           {
             "file": "../utils/factory.js",
@@ -19993,11 +19989,6 @@
         ],
         "workspaceDependencies": [
           {
-            "package": "@danielsimonjr/mathts-parallel",
-            "directory": "parallel",
-            "imports": ["computePool"]
-          },
-          {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["Complex"]
@@ -21684,8 +21675,10 @@
           "polyFromExpression",
           "polyReduce",
           "buchberger",
-          "polyToString"
+          "polyToString",
+          "DivisorGeobucket"
         ],
+        "classes": ["DivisorGeobucket"],
         "interfaces": ["Term"],
         "functions": [
           "normalize",
@@ -23433,7 +23426,7 @@
           },
           {
             "file": "../types.js",
-            "imports": ["BigNumber"],
+            "imports": ["BigNumber", "Fraction"],
             "typeOnly": true
           }
         ],
@@ -28555,6 +28548,22 @@
       }
     },
     "expression/error": {
+      "expression/src/error/DimensionError.ts": {
+        "description": "Create a range error with the message:",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["DimensionError"],
+            "subpath": "internal"
+          }
+        ],
+        "exports": ["DimensionError"],
+        "reExported": ["DimensionError"]
+      },
       "expression/src/error/IndexError.ts": {
         "description": "Custom error type for index out of range errors.",
         "externalDependencies": [],
@@ -29535,6 +29544,10 @@
           {
             "file": "../../utils/customs.js",
             "imports": ["getSafeProperty"]
+          },
+          {
+            "file": "./stringSubset.js",
+            "imports": ["getStringSubset"]
           }
         ],
         "workspaceDependencies": [],
@@ -29558,6 +29571,28 @@
         "workspaceDependencies": [],
         "exports": ["assignFactory"],
         "functions": ["assignFactory"]
+      },
+      "expression/src/node/utils/stringSubset.ts": {
+        "description": "Retrieve a subset of a string",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isIndex"]
+          },
+          {
+            "file": "../../utils/array.js",
+            "imports": ["isEmptyIndex", "validateIndex", "validateIndexSourceSize"]
+          },
+          {
+            "file": "../../error/DimensionError.js",
+            "imports": ["DimensionError"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["getStringSubset"],
+        "functions": ["getStringSubset"]
       }
     },
     "expression/transform": {
@@ -37271,7 +37306,7 @@
           },
           {
             "module": "path",
-            "imports": ["extname", "join"]
+            "imports": ["extname", "join", "basename"]
           },
           {
             "module": "os",
@@ -38652,7 +38687,7 @@
       },
       {
         "name": "Expression/error",
-        "files": ["expression/src/error/IndexError.ts"]
+        "files": ["expression/src/error/DimensionError.ts", "expression/src/error/IndexError.ts"]
       },
       {
         "name": "Expression/evaluator",
@@ -38694,7 +38729,8 @@
           "expression/src/node/RelationalNode.ts",
           "expression/src/node/SymbolNode.ts",
           "expression/src/node/utils/access.ts",
-          "expression/src/node/utils/assign.ts"
+          "expression/src/node/utils/assign.ts",
+          "expression/src/node/utils/stringSubset.ts"
         ]
       },
       {
@@ -38946,21 +38982,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1114,
+    "totalTypeScriptFiles": 1116,
     "totalModules": 83,
-    "totalLinesOfCode": 193193,
-    "totalExports": 5750,
-    "totalClasses": 52,
+    "totalLinesOfCode": 193170,
+    "totalExports": 5753,
+    "totalClasses": 53,
     "totalInterfaces": 504,
-    "totalFunctions": 1865,
+    "totalFunctions": 1866,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1543,
-    "totalReExports": 2304,
+    "totalReExports": 2305,
     "totalTypeOnlyImports": 579,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 224
+    "unusedExportsCount": 225
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-21",
+  "generated": "2026-07-27",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
@@ -57,12 +57,12 @@
       "core/src/types/unit/unit-types.ts"
     ],
     "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
-    "core/src/error/DimensionError.ts": ["core/src/array.ts", "core/src/internal.ts"],
-    "core/src/error/IndexError.ts": [
+    "core/src/error/DimensionError.ts": [
       "core/src/array.ts",
       "core/src/collection.ts",
       "core/src/internal.ts"
     ],
+    "core/src/error/IndexError.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/object.ts": [
       "core/src/array.ts",
       "core/src/factory.ts",
@@ -1826,6 +1826,7 @@
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/resize.ts",
       "functions/src/matrix/subset.ts",
+      "functions/src/statistics/cumsum.ts",
       "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
       "functions/src/type/matrix/utils/matAlgo02xDS0.ts",
       "functions/src/type/matrix/utils/matAlgo03xDSf.ts",
@@ -1839,9 +1840,7 @@
     ],
     "functions/src/error/IndexError.ts": [
       "functions/src/core/create.ts",
-      "functions/src/matrix/concat.ts",
-      "functions/src/matrix/mapSlices.ts",
-      "functions/src/statistics/cumsum.ts"
+      "functions/src/matrix/mapSlices.ts"
     ],
     "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
     "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
@@ -3456,6 +3455,7 @@
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/ParenthesisNode.ts",
       "expression/src/node/RangeNode.ts",
+      "expression/src/node/utils/stringSubset.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
       "expression/src/transform/and.transform.ts",
@@ -3560,7 +3560,8 @@
       "expression/src/node/BlockNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
       "expression/src/node/IndexNode.ts",
-      "expression/src/node/OperatorNode.ts"
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/utils/stringSubset.ts"
     ],
     "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
     "expression/src/utils/latex.ts": [
@@ -3592,6 +3593,8 @@
       "expression/src/transform/sum.transform.ts",
       "expression/src/transform/variance.transform.ts"
     ],
+    "expression/src/node/utils/stringSubset.ts": ["expression/src/node/utils/access.ts"],
+    "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
     "expression/src/transform/utils/lastDimToZeroBase.ts": [
       "expression/src/transform/diff.transform.ts",
       "expression/src/transform/max.transform.ts",
