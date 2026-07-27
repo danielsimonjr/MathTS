@@ -47,7 +47,7 @@ interface Dependencies {
   multiply: TypedFunction;
   equalScalar: TypedFunction;
   divideScalar: TypedFunction;
-  inv: TypedFunction;
+  pinv: TypedFunction;
   nodeOperations: NodeOperations;
 }
 
@@ -58,20 +58,28 @@ const dependencies = [
   'multiply',
   'equalScalar',
   'divideScalar',
-  'inv',
+  'pinv',
   'nodeOperations',
 ];
 
 export const createDivide = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, multiply, equalScalar, divideScalar, inv, nodeOperations }: Dependencies) => {
+  ({
+    typed,
+    matrix,
+    multiply,
+    equalScalar,
+    divideScalar,
+    pinv,
+    nodeOperations,
+  }: Dependencies) => {
     const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
     /**
      * Divide two values, `x / y`.
-     * To divide matrices, `x` is multiplied with the inverse of `y`: `x * inv(y)`.
+     * To divide matrices, `x` is multiplied with the pseudoinverse of `y`: `x * pinv(y)`.
      *
      * Syntax:
      *
@@ -150,11 +158,7 @@ export const createDivide = /* #__PURE__ */ factory(
             x: unknown[] | Matrix,
             y: unknown[] | Matrix
           ): unknown[] | Matrix {
-            // TODO: implement matrix right division using pseudo inverse
-            // https://www.mathworks.nl/help/matlab/ref/mrdivide.html
-            // https://www.gnu.org/software/octave/doc/interpreter/Arithmetic-Ops.html
-            // https://stackoverflow.com/questions/12263932/how-does-gnu-octave-matrix-division-work-getting-unexpected-behaviour
-            return multiply(x, inv(y)) as unknown[] | Matrix;
+            return multiply(x, pinv(y)) as unknown[] | Matrix;
           },
 
           'DenseMatrix, any': function (x: DenseMatrix, y: unknown): DenseMatrix {
@@ -186,7 +190,7 @@ export const createDivide = /* #__PURE__ */ factory(
           },
 
           'any, Array | Matrix': function (x: unknown, y: unknown[] | Matrix): unknown[] | Matrix {
-            return multiply(x, inv(y)) as unknown[] | Matrix;
+            return multiply(x, pinv(y)) as unknown[] | Matrix;
           },
         },
         divideScalar.signatures
