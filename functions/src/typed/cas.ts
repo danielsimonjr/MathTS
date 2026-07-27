@@ -29,7 +29,7 @@ import {
 // Real polynomial/rational CAS engines — casExpand/casFactor delegate to these
 // (they were formerly crude string-manipulation stubs).
 import { expand as algebraExpand, factor as algebraFactor } from './algebra.js';
-import { computePool } from '@danielsimonjr/mathts-parallel';
+
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
 // cubic, real + complex) instead of duplicating the formulas here.
@@ -2453,21 +2453,10 @@ export function inverseLaplaceTransform(
 // =============================================================================
 
 /**
- * Batch fan-out threshold.
- *
- * Arrays of length ≥ CAS_BATCH_THRESHOLD are processed via the compute pool
- * worker fan-out.  Below the threshold the expressions are processed in-process
- * with a simple loop (still async for a uniform call signature).
+ * CAS batch size threshold (deprecated).
+ * Formerly used to trigger worker pool fan-out. Kept for API compatibility.
  */
 export const CAS_BATCH_THRESHOLD = 16;
-
-// ---------------------------------------------------------------------------
-// Self-contained CAS kernels
-//
-// Each kernel function is designed to be fully self-contained so it can be
-// serialised via `.toString()` and `eval()`'d inside a worker.  They must not
-// close over any module-level variables or imports.
-// ---------------------------------------------------------------------------
 
 /**
  * Self-contained simplify kernel.
@@ -2673,25 +2662,10 @@ function _nodeToStr(expr: string | MathNode): string {
 }
 
 // ---------------------------------------------------------------------------
-// Worker-dispatch helpers
+// Batch processing helpers
 //
-// Batches of length ≥ CAS_BATCH_THRESHOLD are shipped to the compute pool
-// via `computePool.map`.  The transformation closure is shipped as a source
-// string (via `.toString()`) so it can be `eval`'d in the worker.  Therefore
-// the closure passed to `computePool.map` must be fully self-contained — no
-// captured imports or module-level bindings.
-//
-// The round-trip is: string → worker eval → transformed string → main thread.
-// The caller receives `string[]` for the batch path and `string` for the
-// single-expression path.
-//
-// Note on Option A / Option B choice:
-//   We use Option A (string round-trip).  Workers cannot import
-//   `@danielsimonjr/mathts-expression` at runtime (workerpool sits below
-//   functions in the dep graph), so re-parsing in the worker is not
-//   available.  Instead the worker kernel performs the same string-level
-//   symbolic transformations that the single-expression path uses; this is
-//   correct because those transformations are pure string-manipulation.
+// Arrays of expressions are processed in-process. Worker fan-out via string
+// serialization and eval() was removed for security reasons.
 // ---------------------------------------------------------------------------
 
 /**
@@ -2700,7 +2674,7 @@ function _nodeToStr(expr: string | MathNode): string {
  * Named `casSimplify` to avoid ambiguity with the factory-generated
  * `simplify` from the mathjs compatibility layer.  Both perform algebraic
  * simplification; this one uses string-level pattern matching and supports
- * a batch-array overload with worker fan-out for large inputs.
+ * a batch-array overload for array inputs.
  *
  * @param expr - Expression string or parsed MathNode
  * @returns Simplified expression string
@@ -2712,29 +2686,15 @@ function _nodeToStr(expr: string | MathNode): string {
  */
 export function casSimplify(expr: string | MathNode): string;
 /**
- * Simplify an array of expressions (batch overload with worker fan-out).
+ * Simplify an array of expressions (batch overload).
  *
- * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
- * synchronously in-process and the promise resolves immediately.
- * Longer arrays are dispatched to the worker pool — each expression is
- * shipped as a source string, the worker applies the same string-level
- * simplification rules, and the results are returned as strings.
- *
- * **String round-trip:** batch inputs are serialised to their source string,
- * processed in the worker, and the result strings are returned.  Parsed
- * `MathNode` inputs are converted to strings via `.toString()` before
- * dispatch.
+ * Arrays are processed synchronously in-process.
  *
  * @param exprs - Array of expression strings (or MathNodes)
  * @returns Promise resolving to an array of simplified expression strings
  *
  * @example
- * // Below threshold — resolved synchronously
- * await casSimplify(['x + x', 'y * 1', '2 * 3'])
- * // => ['2*x', 'y', '6']
- *
- * // Above threshold — worker fan-out
- * await casSimplify(Array.from({ length: 32 }, (_, i) => `${i}*x + ${i}*x`))
+ * await casSimplify(['x + x', '2 * 3']) // => ['2*x', '6']
  */
 export function casSimplify(exprs: Array<string | MathNode>): Promise<string[]>;
 export function casSimplify(
@@ -2746,156 +2706,7 @@ export function casSimplify(
   }
 
   const strs = input.map(_nodeToStr);
-
-  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
-    // Below threshold or pool not ready — in-process loop
-    return Promise.resolve(strs.map(_casSimplifyOne));
-  }
-
-  // ≥ threshold — worker fan-out via computePool.map
-  // The closure must be self-contained (no captured imports).
-  return computePool
-    .map<string, string>(strs, (exprStr) => {
-      // --- self-contained eval kernel ---
-      function _evalNumeric(exprStr: string): string | undefined {
-        let pos = 0;
-        const s = exprStr.replace(/\s+/g, '');
-        const parseExpr = (): number => {
-          let val = parseTerm();
-          while (pos < s.length) {
-            if (s[pos] === '+') {
-              pos++;
-              val += parseTerm();
-            } else if (s[pos] === '-') {
-              pos++;
-              val -= parseTerm();
-            } else break;
-          }
-          return val;
-        };
-        const parseTerm = (): number => {
-          let val = parseFactor();
-          while (pos < s.length) {
-            if (s[pos] === '*') {
-              pos++;
-              val *= parseFactor();
-            } else if (s[pos] === '/') {
-              pos++;
-              val /= parseFactor();
-            } else break;
-          }
-          return val;
-        };
-        const parseFactor = (): number => {
-          let val = parseBase();
-          if (pos < s.length && s[pos] === '^') {
-            pos++;
-            val = Math.pow(val, parseFactor());
-          }
-          return val;
-        };
-        const parseBase = (): number => {
-          if (s[pos] === '+') {
-            pos++;
-            return parseBase();
-          }
-          if (s[pos] === '-') {
-            pos++;
-            return -parseBase();
-          }
-          if (s[pos] === '(') {
-            pos++;
-            const val = parseExpr();
-            if (s[pos] === ')') pos++;
-            return val;
-          }
-          const start = pos;
-          while (pos < s.length && /[\d.]/.test(s[pos])) pos++;
-          if (start === pos) throw new Error();
-          return parseFloat(s.substring(start, pos));
-        };
-        try {
-          const val = parseExpr();
-          if (pos === s.length && typeof val === 'number' && isFinite(val)) {
-            return String(val);
-          }
-        } catch {
-          // ignore parse errors
-        }
-        return undefined;
-      }
-
-      // --- self-contained simplify kernel (copied from _casSimplifyOne) ---
-      function _combineLikeTermsW(expr: string): string {
-        const normalised = expr.replace(/\s*-\s*/g, ' + -');
-        const rawTerms = normalised.split(/\s*\+\s*/);
-        const termMap = new Map<string, number>();
-        const otherTerms: string[] = [];
-        for (const raw of rawTerms) {
-          const t = raw.trim();
-          if (!t) continue;
-          if (/^-?\d+(\.\d+)?$/.test(t)) {
-            termMap.set('__const__', (termMap.get('__const__') ?? 0) + Number(t));
-            continue;
-          }
-          const cvpMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)\^(\d+)$/);
-          if (cvpMatch) {
-            const c =
-              cvpMatch[1] === '' || cvpMatch[1] === '+'
-                ? 1
-                : cvpMatch[1] === '-'
-                  ? -1
-                  : Number(cvpMatch[1]);
-            const key = cvpMatch[2] + '^' + cvpMatch[3];
-            termMap.set(key, (termMap.get(key) ?? 0) + c);
-            continue;
-          }
-          const cvMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)$/);
-          if (cvMatch && !/^\d+$/.test(cvMatch[2])) {
-            const c =
-              cvMatch[1] === '' || cvMatch[1] === '+'
-                ? 1
-                : cvMatch[1] === '-'
-                  ? -1
-                  : Number(cvMatch[1]);
-            termMap.set(cvMatch[2], (termMap.get(cvMatch[2]) ?? 0) + c);
-            continue;
-          }
-          otherTerms.push(t);
-        }
-        const parts: string[] = [];
-        for (const [key, c] of termMap) {
-          if (Math.abs(c) < 1e-12) continue;
-          if (key === '__const__') {
-            parts.push(String(c));
-          } else if (Math.abs(c - 1) < 1e-12) {
-            parts.push(key);
-          } else if (Math.abs(c + 1) < 1e-12) {
-            parts.push('-' + key);
-          } else {
-            parts.push(c + '*' + key);
-          }
-        }
-        parts.push(...otherTerms);
-        if (parts.length === 0) return '0';
-        return parts.join(' + ').replace(/\+\s*-/g, '- ');
-      }
-
-      let r = exprStr.trim();
-      r = r.replace(/\b(\w+)\^0\b/g, '1');
-      r = r.replace(/\b(\w+)\^1\b/g, '$1');
-      r = r.replace(/\b1\s*\*\s*/g, '');
-      r = r.replace(/\s*\*\s*1\b/g, '');
-      r = r.replace(/\b0\s*\+\s*/g, '');
-      r = r.replace(/\s*\+\s*0\b/g, '');
-      r = r.replace(/\b0\s*\*\s*[^+-]*/g, '0');
-      if (/^[\d\s+\-*/().^]+$/.test(r)) {
-        const val = _evalNumeric(r);
-        if (val !== undefined) return val;
-      }
-      return _combineLikeTermsW(r) || '0';
-    })
-    .then((r) => r.result);
+  return Promise.resolve(strs.map(_casSimplifyOne));
 }
 
 /**
@@ -2920,11 +2731,7 @@ export function casDerivative(expr: string | MathNode, variable: string): string
 /**
  * Compute the symbolic derivative of an array of expressions (batch overload).
  *
- * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
- * synchronously in-process.  Longer arrays are dispatched to the worker pool.
- *
- * **String round-trip:** batch inputs are serialised to their source string
- * before dispatch.
+ * Arrays are processed synchronously in-process.
  *
  * @param exprs - Array of expression strings (or MathNodes)
  * @param variable - Variable to differentiate with respect to
@@ -2944,72 +2751,7 @@ export function casDerivative(
   }
 
   const strs = input.map(_nodeToStr);
-
-  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
-    return Promise.resolve(strs.map((s) => _casDerivativeOne(s, variable)));
-  }
-
-  // Worker fan-out — closure must be self-contained
-  const varName = variable;
-  return computePool
-    .map<string, string>(strs, (exprStr) => {
-      // --- self-contained derivative kernel ---
-      const _variable = varName;
-      const terms = exprStr.split(/\s*\+\s*/);
-      const derivedTerms: string[] = [];
-      for (const term of terms) {
-        const t = term.trim();
-        if (!t.includes(_variable)) {
-          derivedTerms.push('0');
-          continue;
-        }
-        const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + _variable + '\\^(\\d+)$');
-        const powerMatch = t.match(powerRe);
-        if (powerMatch) {
-          const coeff =
-            powerMatch[1] === '' || powerMatch[1] === undefined ? 1 : parseFloat(powerMatch[1]);
-          const n = parseInt(powerMatch[2], 10);
-          if (n === 0) {
-            derivedTerms.push('0');
-          } else if (n === 1) {
-            derivedTerms.push(String(coeff));
-          } else {
-            derivedTerms.push(coeff * n + '*' + _variable + '^' + (n - 1));
-          }
-          continue;
-        }
-        const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + _variable + '$');
-        const linearMatch = t.match(linearRe);
-        if (linearMatch) {
-          const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
-          derivedTerms.push(String(coeff));
-          continue;
-        }
-        if (t === _variable) {
-          derivedTerms.push('1');
-          continue;
-        }
-        if (t === 'sin(' + _variable + ')') {
-          derivedTerms.push('cos(' + _variable + ')');
-          continue;
-        }
-        if (t === 'cos(' + _variable + ')') {
-          derivedTerms.push('-sin(' + _variable + ')');
-          continue;
-        }
-        if (t === 'exp(' + _variable + ')') {
-          derivedTerms.push('exp(' + _variable + ')');
-          continue;
-        }
-        if (t === 'ln(' + _variable + ')') {
-          derivedTerms.push('1/' + _variable);
-          continue;
-        }
-        derivedTerms.push('d/d' + _variable + '(' + t + ')');
-      }
-      return derivedTerms.join(' + ');
-    })
-    .then((r) => r.result);
+  return Promise.resolve(strs.map((s) => _casDerivativeOne(s, variable)));
 }
 
 /**

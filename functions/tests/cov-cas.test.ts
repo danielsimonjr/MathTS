@@ -567,7 +567,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     expect(CAS_BATCH_THRESHOLD).toBe(16);
   });
 
-  it('casSimplify worker batch matches single-expression results', async () => {
+  it('casSimplify batch matches single-expression results', async () => {
     const exprs = Array.from({ length: 20 }, (_, i) => `${i + 1}*x + ${i + 1}*x`);
     const results = await casSimplify(exprs);
     expect(results).toHaveLength(20);
@@ -576,7 +576,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casSimplify worker batch handles numeric and identity rules', async () => {
+  it('casSimplify batch handles numeric and identity rules', async () => {
     const exprs = Array.from({ length: 18 }, (_, i) =>
       i % 3 === 0 ? '2 * 3' : i % 3 === 1 ? '1 * y' : `${i}*x + ${i}*x`
     );
@@ -585,7 +585,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     expect(results[1]).toBe('y');
   });
 
-  it('casDerivative worker batch matches single-expression results', async () => {
+  it('casDerivative batch matches single-expression results', async () => {
     const exprs = Array.from({ length: 18 }, (_, i) => `${i + 1}*x^2`);
     const results = await casDerivative(exprs, 'x');
     expect(results).toHaveLength(18);
@@ -594,7 +594,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casDerivative worker batch covers trig/exp/ln/linear/const/unknown forms', async () => {
+  it('casDerivative batch covers trig/exp/ln/linear/const/unknown forms', async () => {
     const forms = ['x^2', 'sin(x)', 'cos(x)', 'exp(x)', 'ln(x)', '5*x', '7', 'x', 'tan(x)'];
     const exprs = Array.from({ length: 18 }, (_, i) => forms[i % forms.length]);
     const results = await casDerivative(exprs, 'x');
@@ -604,7 +604,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casExpand worker batch matches single-expression results', async () => {
+  it('casExpand batch matches single-expression results', async () => {
     const exprs = Array.from({ length: 18 }, (_, i) => `(x+${i})*(x+${i + 1})`);
     const results = await casExpand(exprs);
     expect(results).toHaveLength(18);
@@ -613,7 +613,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casExpand worker batch handles the (expr)^2 rule', async () => {
+  it('casExpand batch handles the (expr)^2 rule', async () => {
     const exprs = Array.from({ length: 18 }, (_, i) => `(x+${i})^2`);
     const results = await casExpand(exprs);
     for (let i = 0; i < exprs.length; i++) {
@@ -621,7 +621,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casFactor worker batch matches single-expression results', async () => {
+  it('casFactor batch matches single-expression results', async () => {
     const exprs = Array.from({ length: 18 }, (_, i) => `${2 * (i + 1)}*x + ${4 * (i + 1)}*y`);
     const results = await casFactor(exprs);
     expect(results).toHaveLength(18);
@@ -630,7 +630,7 @@ describe('CAS batch worker fan-out (pool ready, >= threshold)', () => {
     }
   });
 
-  it('casFactor worker batch factors univariate polynomials consistently', async () => {
+  it('casFactor batch factors univariate polynomials consistently', async () => {
     const exprs = Array.from({ length: 18 }, () => 'x^2 - 1');
     const results = await casFactor(exprs);
     // Real factorization now applies; every result matches the single call.

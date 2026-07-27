@@ -1,16 +1,15 @@
 /**
- * Tests for Slice 5.14 — CAS batch worker fan-out.
+ * Tests for Slice 5.14 — CAS batch processing.
  *
  * Covers `casSimplify`, `casDerivative`, `casExpand`, `casFactor` from
  * `functions/src/typed/cas.ts`.  Each function has a single-expression
  * overload (returns `string`) and a batch overload (returns `Promise<string[]>`).
  *
- * Worker fan-out is triggered when the batch length ≥ CAS_BATCH_THRESHOLD (16).
- * Shorter batches are processed in-process but still return a Promise.
+ * Batch overloads are processed in-process (worker fan-out was removed).
  *
  * Tests:
  *  1.  casSimplify — small batch (< threshold) returns correct string array.
- *  2.  casSimplify — large batch (≥ threshold, 32 exprs) via worker fan-out.
+ *  2.  casSimplify — large batch (≥ threshold, 32 exprs).
  *  3.  casSimplify — single-expr overload matches each batch element.
  *  4.  casDerivative — small batch returns correct derivatives.
  *  5.  casExpand — small batch returns expanded forms.
@@ -44,7 +43,7 @@ function makePolynomials(n: number): string[] {
 // Test suite
 // ---------------------------------------------------------------------------
 
-describe('Slice 5.14 — CAS batch worker fan-out', () => {
+describe('Slice 5.14 — CAS batch processing', () => {
   // 1. casSimplify — small batch (< threshold) — resolved synchronously
   it('casSimplify: small batch (< threshold) returns correct simplified array', async () => {
     const exprs = ['x + x', 'y * 1', '2 * 3'];
@@ -61,7 +60,7 @@ describe('Slice 5.14 — CAS batch worker fan-out', () => {
     expect(results[2]).toBe('6');
   });
 
-  // 2. casSimplify — large batch (≥ threshold) — worker fan-out path
+  // 2. casSimplify — large batch (≥ threshold)
   it('casSimplify: large batch (32 exprs, ≥ threshold) returns 32 results', async () => {
     const n = 32;
     expect(n).toBeGreaterThanOrEqual(CAS_BATCH_THRESHOLD);
@@ -217,7 +216,7 @@ describe('Slice 5.14 — CAS batch worker fan-out', () => {
     expect(casDerivative('3*x', 'x')).toBe('3');
   });
 
-  // Bonus: large batch for casDerivative (worker fan-out path)
+  // Bonus: large batch for casDerivative
   it('casDerivative: large batch (≥ threshold) returns correct derivatives', async () => {
     const n = CAS_BATCH_THRESHOLD + 2; // 18 expressions
     const exprs = Array.from({ length: n }, (_, i) => `${i + 1}*x`);
@@ -231,7 +230,7 @@ describe('Slice 5.14 — CAS batch worker fan-out', () => {
     }
   });
 
-  // Bonus: large batch for casExpand (worker fan-out path)
+  // Bonus: large batch for casExpand
   it('casExpand: large batch (≥ threshold) returns correct expanded forms', async () => {
     const n = CAS_BATCH_THRESHOLD + 4; // 20 expressions
     const exprs = Array.from({ length: n }, (_, i) => `(x+${i})`);
