@@ -2586,16 +2586,18 @@ function _casDerivativeOne(expr: string, variable: string): string {
   const terms = expr.split(/\s*\+\s*/);
   const derivedTerms: string[] = [];
 
+  const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
+  const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
+
   for (const term of terms) {
     const t = term.trim();
 
-    if (!t.includes(variable)) {
+    if (t.indexOf(variable) === -1) {
       derivedTerms.push('0');
       continue;
     }
 
     // c*var^n
-    const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
     const powerMatch = t.match(powerRe);
     if (powerMatch) {
       const coeff =
@@ -2612,7 +2614,6 @@ function _casDerivativeOne(expr: string, variable: string): string {
     }
 
     // c*var (linear)
-    const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
     const linearMatch = t.match(linearRe);
     if (linearMatch) {
       const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
