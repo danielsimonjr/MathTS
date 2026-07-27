@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { Fraction } from '@danielsimonjr/mathts-core';
 import { gcd, lcm, mod, xgcd, nthRoot, norm } from '../src/typed/arithmetic.js';
 import { hypot } from '../src/typed/trigonometry.js';
 
@@ -110,6 +111,30 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
       const [g, x, y] = xgcd(35, 15);
       expect(g).toBe(5);
       expect(35 * x + 15 * y).toBe(5);
+    });
+
+    it('should work with Fraction inputs', () => {
+      const a = new Fraction(12n, 1n);
+      const b = new Fraction(8n, 1n);
+      const [g, x, y] = xgcd(a, b) as [Fraction, Fraction, Fraction];
+
+      expect(g.equals(new Fraction(4n, 1n))).toBe(true);
+      expect(a.multiply(x).add(b.multiply(y)).equals(g)).toBe(true);
+    });
+
+    it('should handle coprime Fractions', () => {
+      const a = new Fraction(13n, 1n);
+      const b = new Fraction(17n, 1n);
+      const [g, x, y] = xgcd(a, b) as [Fraction, Fraction, Fraction];
+
+      expect(g.equals(new Fraction(1n, 1n))).toBe(true);
+      expect(a.multiply(x).add(b.multiply(y)).equals(g)).toBe(true);
+    });
+
+    it('should throw an error for non-integer Fraction inputs', () => {
+      const a = new Fraction(12n, 5n); // 12/5
+      const b = new Fraction(8n, 1n);
+      expect(() => xgcd(a, b)).toThrow('Parameters in function xgcd must be integer numbers');
     });
   });
 

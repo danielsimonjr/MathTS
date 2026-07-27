@@ -1026,6 +1026,30 @@ export const xgcd = mathTyped('xgcd', {
     }
     return a < 0n ? [-a, -lastX, -lastY] : [a, lastX, lastY];
   },
+  'Fraction, Fraction': (a: Fraction, b: Fraction): [Fraction, Fraction, Fraction] => {
+    if (!a.isInteger() || !b.isInteger()) {
+      throw new Error('Parameters in function xgcd must be integer numbers');
+    }
+    const zero = new Fraction(0n, 1n);
+    const one = new Fraction(1n, 1n);
+    let x = zero,
+      lastX = one;
+    let y = one,
+      lastY = zero;
+    while (!b.isZero()) {
+      const q = a.divide(b).floor();
+      const r = a.mod(b);
+      const nextX = lastX.subtract(q.multiply(x)) as Fraction;
+      const nextY = lastY.subtract(q.multiply(y)) as Fraction;
+      lastX = x;
+      x = nextX;
+      lastY = y;
+      y = nextY;
+      a = b;
+      b = r;
+    }
+    return a.lessThan(zero) ? [a.negate(), lastX.negate(), lastY.negate()] : [a, !a.isZero() ? lastX : zero, lastY];
+  },
 });
 
 /**
