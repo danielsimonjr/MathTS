@@ -26,9 +26,6 @@ export interface RenderOptions {
   timeoutMs?: number;
   density?: number;
   background?: string;
-  /** Enable LaTeX \write18 shell-escape. UNSAFE for untrusted TeX — allows
-   *  arbitrary command execution during compile. Default false. */
-  shellEscape?: boolean;
 }
 
 interface RunResult {
@@ -139,22 +136,20 @@ export async function renderToFile(
   );
 }
 
-/** Build the CLI args for a LaTeX engine. Shell-escape (\write18) is OFF unless
- *  `shellEscape` is true — enabling it is UNSAFE for untrusted TeX (arbitrary
- *  command execution during compile). */
+/** Build the CLI args for a LaTeX engine. Shell-escape (\write18) is OFF
+ *  for security (arbitrary command execution during compile). */
 export function latexArgs(
   engine: string,
   workDir: string,
-  texPath: string,
-  shellEscape: boolean
+  texPath: string
 ): string[] {
   if (engine === 'tectonic') {
-    // tectonic: shell-escape is off by default; only add the enabling flag when asked.
-    return [...(shellEscape ? ['-Z', 'shell-escape'] : []), '--outdir', workDir, texPath];
+    // tectonic: shell-escape is off by default
+    return ['--outdir', workDir, texPath];
   }
   // pdflatex/xelatex/lualatex: explicitly pass -no-shell-escape by default.
   return [
-    shellEscape ? '-shell-escape' : '-no-shell-escape',
+    '-no-shell-escape',
     '-interaction=nonstopmode',
     '-halt-on-error',
     '-output-directory',
@@ -192,7 +187,7 @@ export async function latexToPdf(
   try {
     const texPath = joinPath(work, 'doc.tex');
     await writeFile(texPath, texSource, 'utf-8');
-    const args = latexArgs(engine, work, texPath, opts.shellEscape === true);
+    const args = latexArgs(engine, work, texPath);
     const r = await runTool(engine, args, { timeoutMs: opts.timeoutMs ?? 60000 });
     const pdfPath = joinPath(work, 'doc.pdf');
     let pdf: Buffer;

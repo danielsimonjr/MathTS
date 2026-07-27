@@ -971,7 +971,7 @@ bundle. Exports `PlotRenderError extends Error` (`readonly missingTool?`; plot's
 deliberate exception to its never-throw rule), `RenderOptions`, `runTool`, `hasTool`,
 `renderToFile(svg, outPath, opts?)` (SVG→PNG/PDF via `rsvg-convert` or `resvg` on
 PATH), `latexArgs`, `latexToPdf(texSource, outPath, opts?)` (TikZ/LaTeX → PDF via
-`pdflatex` or `tectonic`; `shellEscape` off by default, unsafe for untrusted TeX).
+`pdflatex` or `tectonic`).
 The `.` entry stays browser-safe — it passes `npm run check:browser-safety`.
 
 Workbook's `svg.ts`/`pdf.ts` are a **chart adapter** in the workbook package (not

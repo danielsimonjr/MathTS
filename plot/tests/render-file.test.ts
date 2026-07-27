@@ -52,22 +52,11 @@ describe('latexToPdf', () => {
 });
 
 describe('latexArgs — shell-escape safe by default', () => {
-  it('pdflatex gets -no-shell-escape by default', () => {
-    const a = latexArgs('pdflatex', '/w', '/w/d.tex', false);
+  it('pdflatex gets -no-shell-escape', () => {
+    const a = latexArgs('pdflatex', '/w', '/w/d.tex');
     expect(a).toContain('-no-shell-escape');
-    expect(a).not.toContain('-shell-escape');
   });
-  it('pdflatex gets -shell-escape only when opted in', () => {
-    const a = latexArgs('pdflatex', '/w', '/w/d.tex', true);
-    expect(a).toContain('-shell-escape');
-    expect(a).not.toContain('-no-shell-escape');
-  });
-  it('tectonic has no shell-escape flag by default', () => {
-    expect(latexArgs('tectonic', '/w', '/w/d.tex', false).join(' ')).not.toContain('shell-escape');
-  });
-  it('tectonic enables shell-escape only when opted in', () => {
-    expect(latexArgs('tectonic', '/w', '/w/d.tex', true)).toEqual(
-      expect.arrayContaining(['-Z', 'shell-escape'])
-    );
+  it('tectonic has no shell-escape flag', () => {
+    expect(latexArgs('tectonic', '/w', '/w/d.tex').join(' ')).not.toContain('shell-escape');
   });
 });

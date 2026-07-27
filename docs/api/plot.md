@@ -110,7 +110,7 @@ import { renderToFile, latexToPdf, PlotRenderError } from '@danielsimonjr/mathts
 | `hasTool`         | `(...) => boolean`                                           | Probe whether a tool is on PATH                                          |
 | `latexArgs`       | `(...) => ...`                                               | Build LaTeX engine args                                                  |
 | `PlotRenderError` | `extends Error` — `readonly missingTool?: string`            | Plot's one deliberate exception (missing tool or I/O failure)            |
-| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background?, shellEscape? }` | Render options (`shellEscape` off by default — unsafe for untrusted TeX) |
+| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background? }`               | Render options                                                           |
 
 > `PlotRenderError` is exported **only** from `./render`, never from the main
 > `.` entry.
