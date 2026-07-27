@@ -113,7 +113,7 @@ export const createIntersect = /* #__PURE__ */ factory(
           y.valueOf() as MathNumericType[],
           plane.valueOf() as MathNumericType[]
         );
-        return arr === null ? null : matrix(arr);
+        return arr === null ? null : matrix(arr as any);
       },
 
       'Matrix, Matrix, Matrix, Matrix': function (
@@ -137,7 +137,7 @@ export const createIntersect = /* #__PURE__ */ factory(
       x: MathNumericType[],
       y: MathNumericType[],
       plane: MathNumericType[]
-    ): MathNumericType[] | null {
+    ): MathNumericType[] | MathNumericType[][] | null {
       x = _coerceArr(x);
       y = _coerceArr(y);
       plane = _coerceArr(plane);
@@ -413,7 +413,7 @@ export const createIntersect = /* #__PURE__ */ factory(
       y: MathNumericType,
       z: MathNumericType,
       c: MathNumericType
-    ): MathNumericType[] {
+    ): MathNumericType[] | MathNumericType[][] | null {
       const x1x = multiplyScalar(x1, x);
       const x2x = multiplyScalar(x2, x);
       const y1y = multiplyScalar(y1, y);
@@ -433,15 +433,22 @@ export const createIntersect = /* #__PURE__ */ factory(
         z1z
       ) as MathNumericType;
 
+      if (isZero(denominator) || smaller(abs(denominator), config.relTol)) {
+        if (isZero(numerator) || smaller(abs(numerator), config.relTol)) {
+          return [
+            [x1, y1, z1],
+            [x2, y2, z2],
+          ];
+        }
+        return null;
+      }
+
       const t = divideScalar(numerator, denominator);
 
       const px = addScalar(x1, multiplyScalar(t, subtract(x2, x1) as MathNumericType));
       const py = addScalar(y1, multiplyScalar(t, subtract(y2, y1) as MathNumericType));
       const pz = addScalar(z1, multiplyScalar(t, subtract(z2, z1) as MathNumericType));
       return [px, py, pz];
-      // TODO: Add cases when line is parallel to the plane:
-      //       (a) no intersection,
-      //       (b) line contained in plane
     }
   }
 );
