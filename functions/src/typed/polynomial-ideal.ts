@@ -235,20 +235,66 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
 // ---------------------------------------------------------------------------
 
 function divides(a: number[], b: number[]): boolean {
-  return a.every((p, i) => p <= b[i]);
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] > b[i]) return false;
+  }
+  return true;
+}
+
+function totalDegree(powers: number[]): number {
+  let sum = 0;
+  for (let i = 0; i < powers.length; i++) sum += powers[i];
+  return sum;
+}
+
+/**
+ * A spatial index grouping divisor polynomials by their leading term's total degree.
+ * This filters out polynomials whose degree exceeds the target term, reducing search overhead.
+ */
+export class DivisorGeobucket {
+  private buckets: Poly[][] = [];
+  private maxDeg = 0;
+
+  constructor(polys: Poly[]) {
+    for (const p of polys) this.insert(p);
+  }
+
+  insert(poly: Poly): void {
+    if (poly.length === 0) return;
+    const d = totalDegree(poly[0].powers);
+    if (!this.buckets[d]) this.buckets[d] = [];
+    this.buckets[d].push(poly);
+    if (d > this.maxDeg) this.maxDeg = d;
+  }
+
+  find(target: number[]): Poly | undefined {
+    const d = totalDegree(target);
+    const limit = d < this.maxDeg ? d : this.maxDeg;
+    for (let i = 0; i <= limit; i++) {
+      const bucket = this.buckets[i];
+      if (!bucket) continue;
+      for (let j = 0; j < bucket.length; j++) {
+        if (divides(bucket[j][0].powers, target)) {
+          return bucket[j];
+        }
+      }
+    }
+    return undefined;
+  }
 }
 
 /** Remainder of p on multivariate division by G (lex order). */
-export function polyReduce(p: Poly, G: Poly[]): Poly {
+export function polyReduce(p: Poly, G: Poly[] | DivisorGeobucket): Poly {
   const rem: Poly = [];
   let work = normalize(p);
   let guard = 0;
+  const index = Array.isArray(G) ? new DivisorGeobucket(G) : G;
   while (work.length > 0) {
     if (++guard > 20_000) {
       throw new Error('polyReduce: iteration cap exceeded (system too large for this CAS)');
     }
     const lt = work[0];
-    const g = G.find((q) => q.length > 0 && divides(q[0].powers, lt.powers));
+    const g = index.find(lt.powers);
     if (g) {
       const factor: Poly = [
         {
@@ -301,15 +347,18 @@ export function buchberger(input: Poly[]): Poly[] {
   }
 
   let iter = 0;
+  const index = new DivisorGeobucket(G);
   while (pairs.length > 0) {
     if (++iter > 2_000 || G.length > 64) {
       throw new Error('groebnerBasis: system too large (iteration/basis cap exceeded)');
     }
     const [i, j] = pairs.shift()!;
-    const s = polyReduce(sPoly(G[i], G[j]), G);
+    const s = polyReduce(sPoly(G[i], G[j]), index);
     if (s.length > 0) {
       const k = G.length;
-      G.push(monic(s));
+      const newPoly = monic(s);
+      G.push(newPoly);
+      index.insert(newPoly);
       for (let t = 0; t < k; t++) pairs.push([t, k]);
     }
   }
