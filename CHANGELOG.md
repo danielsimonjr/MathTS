@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ci(release): make the Release workflow versioning-only — it must never publish
+
+`release.yml` ran `changesets/action` with `publish: npx changeset publish` on every push to
+`main`. That input makes the action dual-purpose: with pending changesets it opens the version PR,
+but with **none** pending it runs the publish command — so an ordinary commit tried to push all 24
+packages to npm.
+
+It failed **every single time it had something to publish** — 4 runs, each one a version-bump
+commit (2026-07-16, two on 07-21, 07-27); the other 176 runs were "green" only because the
+registry already had those versions and `changeset publish` no-op'd. On 2026-07-27 it also **raced
+a local publish** for the same version numbers.
+
+The failure was not simply a missing secret. `NPM_TOKEN` was empty, but the workflow also granted
+`id-token: write`, so changesets **skipped the empty token and fell back to npm trusted publishing
+over OIDC** (`No NPM_TOKEN found, but OIDC is available`) before dying `ENEEDAUTH`. A permission
+granted "just in case" selected a different, equally dead code path.
+
+Publishing is deliberately a **local, manual step** — only one machine holds a valid npm token, and
+that is where releases are cut and verified against the registry. CI's job is the gate, not
+delivery.
+
+- **Removed** the `publish:` input, `NODE_AUTH_TOKEN`/`NPM_TOKEN` env, `id-token: write`, and
+  `setup-node`'s `registry-url` (which exists only to write a publish-time `.npmrc`).
+- **Removed** the build step — `changeset version` only rewrites `package.json` + `CHANGELOG.md`;
+  building was for the publish that no longer happens here. `ci.yml` remains the workflow that
+  builds and tests.
+- **Kept** the half that is genuinely in use: opening the `chore: release packages` PR from pending
+  `.changeset/*.md` files.
+- Job renamed `Release` → `Version`, and a header comment records why re-adding a publish step
+  would be a regression.
+
 ### feat(functions): positive-discriminant quadratic integration (Risch Layer 2)
 
 - **`symbolicIntegral` / `integrate`** now integrate rational functions whose denominator has a
