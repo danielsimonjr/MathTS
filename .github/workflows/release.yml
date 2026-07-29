@@ -16,6 +16,8 @@ name: Release
 on:
   push:
     branches: [main, master]
+  # Safe to run by hand: this workflow cannot publish, only open a version PR.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
