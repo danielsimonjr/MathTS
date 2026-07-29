@@ -1,12 +1,12 @@
 # Complete File Inventory
 
-**Generated**: 2026-07-27 (by tools/create-dependency-graph)
+**Generated**: 2026-07-28 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1772
+**Total files**: 1775
 
 ## Disposition counts
 
@@ -16,11 +16,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        2 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      595 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      598 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1772** |                                                                                                              |
+| **Total**     | **1775** |                                                                                                              |
 
 ## Per-area counts
 
@@ -29,7 +29,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1118 |
-| `tests`    |   595 |
+| `tests`    |   598 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -45,11 +45,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   490 |
 | `@danielsimonjr/mathts-functions`      |   761 |
-| `@danielsimonjr/mathts-gpu`            |    14 |
+| `@danielsimonjr/mathts-gpu`            |    15 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |    92 |
+| `@danielsimonjr/mathts-matrix`         |    93 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
-| `@danielsimonjr/mathts-parallel`       |    36 |
+| `@danielsimonjr/mathts-parallel`       |    37 |
 | `@danielsimonjr/mathts-parser`         |     3 |
 | `@danielsimonjr/mathts-plot`           |    43 |
 | `@danielsimonjr/mathts-signal`         |     3 |
@@ -1480,6 +1480,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `gpu/src/serialize.ts`                                                            | @danielsimonjr/mathts-gpu            | src      | reachable   |
 | `gpu/src/ShaderManager.ts`                                                        | @danielsimonjr/mathts-gpu            | src      | reachable   |
 | `gpu/tests/bufferpool.test.ts`                                                    | @danielsimonjr/mathts-gpu            | tests    | test        |
+| `gpu/tests/context-mocked.test.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/context.test.ts`                                                       | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/detect.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/device.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
@@ -1537,6 +1538,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/backends/Backend.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/BackendManager.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WASMBackend-as.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/backends/WASMBackend.test.ts`                                       | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WasmLoader-as.test.ts`                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WasmLoader-browser.test.ts`                                | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/config.test.ts`                                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -1629,6 +1631,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/tests/strategies/chunk-extended.test.ts`                                | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-consolidation.test.ts`                       | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-extended.test.ts`                            | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/WorkerPool.test.ts`                                               | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/WorkerPool.timeout.test.ts`                                       | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ws2-gated-ops.test.ts`                                            | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/vitest.config.ts`                                                       | @danielsimonjr/mathts-parallel       | config   | config      |
