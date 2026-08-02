@@ -1,4 +1,6 @@
 {
+  "_comment": "DESIGN DOC ONLY - not the real package. The shipping manifest is workbook/package.json. This file declares the real published name at a version (1.0.0) far ahead of the actual release, so `npm publish` run from this directory would ship documentation as a major-version bump over the real package. `private` makes npm refuse that.",
+  "private": true,
   "name": "@danielsimonjr/mathts-workbook",
   "version": "1.0.0",
   "description": "MathTS Scientific Workbook Runtime - YAML-based reactive notebooks for scientific computing",
