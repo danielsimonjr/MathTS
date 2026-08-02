@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### security: clear the vitest critical — a stale LOCK, not a loose range
+
+Four open advisories, all resolved in the lockfiles rather than by loosening anything:
+**`@vitest/browser`** (critical — arbitrary file read/execute while the Vitest UI server listens),
+**`postcss`** (high), and **`tar`** in both `tools/*/package-lock.json` (medium).
+
+**The manifests already permitted the fix.** Root declared `@vitest/browser ^4.1.7`, which admits
+4.1.10 — the lock had simply resolved 4.1.8 and npm will not move a resolution that still satisfies
+its range. Same shape as the json-render strand: *manifest fixed, lock not*, and reading the manifest
+would have reported the repo healthy.
+
+Neither `npm update` nor `npm audit fix` could move it, and the reason is worth recording:
+**`@vitest/browser@4.1.10` peers on `vitest@4.1.10` exactly**, so the whole `@vitest/*` set has to
+move in lockstep — and any one of the 23 workspaces holding a lower floor pins the entire tree.
+Raising the root alone produced `ERESOLVE`. The floor is now `^4.1.10` across the root and all 23
+workspaces, which is the only state npm can satisfy.
+
+Verified against **installed** `node_modules`, not the lock: `vitest` 4.1.10, `@vitest/browser`
+4.1.10, `postcss` 8.5.25; `tar` 7.5.16 → 7.5.22 in both tool lockfiles.
+
+⚠ Noted, not changed: `docs/Architecture/Workbook/package.json` declares `vitest ^3.2.6` and is
+**not** a declared workspace — the globs are `packages/*` plus named directories and it matches
+neither. It is a documentation fixture that the dependency graph will index like a real manifest.
+See `reference_doc_fixture_manifests_alert_forever`.
+
 ### ci(release): make the Release workflow versioning-only — it must never publish
 
 `release.yml` ran `changesets/action` with `publish: npx changeset publish` on every push to
