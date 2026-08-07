@@ -183,3 +183,24 @@ Some factory subsystems still carry integration seams from the porting era:
 - **Matrix interface**: native DenseMatrix (Float64Array) vs. some factory expectations (nested Array with `._data`)
 - **Auxiliary subsystems**: Unit, Index, Range, Chain, ResultSet, Help are used by a subset of factories
 - **Dispatch instances**: native `mathTyped` and the factory `createTyped` instance are bridged rather than unified
+
+## Verification
+
+Generated 2026-08-07 by `repo_map.py map`.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+
+> **Reachability metrics are deliberately absent.** `repo_map` treats this repo as a single
+> package and finds **0 entry-point roots** for the workspace umbrella, so `reachableFiles`,
+> `dormantFiles`, `orphanedFiles` and `testOnlyFiles` would be artifacts of that empty root
+> set rather than measurements — it emits a warning saying so. The repo's own CDG runs in
+> monorepo mode with per-package roots and IS authoritative for reachability; read
+> `FILE_INVENTORY.md` for those figures. The two tools disagree by scope, not correctness.
+
+| Claim                | Value  | Source                |
+| -------------------- | ------ | --------------------- |
+| totalTypeScriptFiles | 1824   | dependency-graph.json |
+| totalLinesOfCode     | 333578 | dependency-graph.json |
+| totalExports         | 7564   | dependency-graph.json |
+| totalModules         | 5      | dependency-graph.json |
+| runtimeCircularDeps  | 0      | dependency-graph.json |
+| typeOnlyCircularDeps | 0      | dependency-graph.json |

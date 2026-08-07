@@ -1,3 +1,8 @@
+<!-- repo-map:no-verification -->
+<!-- A policy/backlog document: it records a decision and a working list, and makes no
+     repo-wide metric claim for the drift gate to verify. Opting out is explicit and
+     visible here, never inferred from the absence of a section. -->
+
 # Test Coverage Policy
 
 **Last updated:** 2026-07-01

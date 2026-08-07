@@ -1086,3 +1086,20 @@ There is no WASM backend-selection environment variable. AssemblyScript is the s
 WASM backend. WASM is loaded automatically when the binary is present and the
 operation is above the size threshold, with transparent fallback to JS. Likewise the
 GPU tier is off by default (`enableGpu()` opt-in) because it is f32-only.
+
+## Verification
+
+Generated 2026-08-07 by `repo_map.py map`.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+
+> **Reachability metrics are deliberately absent.** `repo_map` treats this repo as a single
+> package and finds **0 entry-point roots** for the workspace umbrella, so `reachableFiles`,
+> `dormantFiles`, `orphanedFiles` and `testOnlyFiles` would be artifacts of that empty root
+> set rather than measurements — it emits a warning saying so. The repo's own CDG runs in
+> monorepo mode with per-package roots and IS authoritative for reachability; read
+> `FILE_INVENTORY.md` for those figures. The two tools disagree by scope, not correctness.
+
+| Claim                | Value | Source                |
+| -------------------- | ----- | --------------------- |
+| totalExports         | 7564  | dependency-graph.json |
+| totalTypeScriptFiles | 1824  | dependency-graph.json |

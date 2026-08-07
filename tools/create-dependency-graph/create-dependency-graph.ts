@@ -30,6 +30,31 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import yaml from 'js-yaml';
 import { basename, dirname, join, relative } from 'path';
 
+/**
+ * Banner prepended to every generated Markdown report in docs/Architecture/.
+ *
+ * That directory is also checked by repo_map's drift gate, which fails a doc
+ * carrying no `## Verification` section rather than skipping it silently.
+ * These reports are generated here, on a different methodology, so that gate
+ * cannot meaningfully verify their numbers -- their freshness is governed by
+ * re-running `npm run docs:deps:full` (plain `docs:deps`
+ * omits TEST_COVERAGE.md, which needs --include-tests).
+ *
+ * The marker MUST be emitted here rather than added by hand: a hand-added
+ * marker survives exactly until the next regeneration, and then the gate fails
+ * a full cycle later looking like a new bug. Never hand-edit a generated file.
+ */
+const GENERATED_REPORT_BANNER = `<!-- repo-map:no-verification -->
+<!-- GENERATED FILE -- do not edit by hand.
+     Regenerate with \`npm run docs:deps:full\`. -->
+
+`;
+
+/** Write a generated Markdown report with the do-not-edit banner. */
+function writeGeneratedMarkdown(path: string, body: string): void {
+  writeFileSync(path, GENERATED_REPORT_BANNER + body);
+}
+
 // Types
 interface Dependency {
   file: string;
@@ -4792,7 +4817,7 @@ async function main(): Promise<void> {
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.yaml'), yamlOutput);
   console.log('Written: docs/Architecture/dependency-graph.yaml');
 
-  writeFileSync(join(OUTPUT_DIR, 'DEPENDENCY_GRAPH.md'), markdown);
+  writeGeneratedMarkdown(join(OUTPUT_DIR, 'DEPENDENCY_GRAPH.md'), markdown);
   console.log('Written: docs/Architecture/DEPENDENCY_GRAPH.md');
 
   // Write compact summary for LLM consumption (CTON-style, ~10KB)
@@ -4855,7 +4880,7 @@ async function main(): Promise<void> {
     join(OUTPUT_DIR, 'duplicate-symbols.json'),
     JSON.stringify(duplicateReport, null, 2)
   );
-  writeFileSync(
+  writeGeneratedMarkdown(
     join(OUTPUT_DIR, 'duplicate-symbols.md'),
     generateDuplicateSymbolsMarkdown(duplicateReport)
   );
@@ -4883,7 +4908,7 @@ async function main(): Promise<void> {
     const testCoverageJson = generateTestCoverageJson(testCoverage);
 
     // Write test coverage outputs
-    writeFileSync(join(OUTPUT_DIR, 'TEST_COVERAGE.md'), testCoverageMarkdown);
+    writeGeneratedMarkdown(join(OUTPUT_DIR, 'TEST_COVERAGE.md'), testCoverageMarkdown);
     console.log('Written: docs/Architecture/TEST_COVERAGE.md');
 
     writeFileSync(
@@ -5059,7 +5084,7 @@ async function main(): Promise<void> {
     (e) => ` — ${e.inFileRefs} in-file ref${e.inFileRefs === 1 ? '' : 's'}`
   );
 
-  writeFileSync(unusedReportPath, unusedReport);
+  writeGeneratedMarkdown(unusedReportPath, unusedReport);
   console.log(`\nWritten: ${unusedReportPath}`);
 
   // Complete file census (every tracked .ts in the repo — package src/tests, plus
@@ -5076,7 +5101,10 @@ async function main(): Promise<void> {
       testReachable
     );
     writeFileSync(join(OUTPUT_DIR, 'file-inventory.json'), JSON.stringify(inventory, null, 2));
-    writeFileSync(join(OUTPUT_DIR, 'FILE_INVENTORY.md'), generateFileInventoryMarkdown(inventory));
+    writeGeneratedMarkdown(
+      join(OUTPUT_DIR, 'FILE_INVENTORY.md'),
+      generateFileInventoryMarkdown(inventory)
+    );
     console.log(
       `Written: docs/Architecture/FILE_INVENTORY.md (${inventory.totalFiles} files: ` +
         Object.entries(inventory.byDisposition)
@@ -5093,7 +5121,10 @@ async function main(): Promise<void> {
   const wasmPairing = analyzeWasmPairing(ROOT_DIR);
   if (wasmPairing) {
     writeFileSync(join(OUTPUT_DIR, 'wasm-pairing.json'), JSON.stringify(wasmPairing, null, 2));
-    writeFileSync(join(OUTPUT_DIR, 'wasm-pairing.md'), generateWasmPairingMarkdown(wasmPairing));
+    writeGeneratedMarkdown(
+      join(OUTPUT_DIR, 'wasm-pairing.md'),
+      generateWasmPairingMarkdown(wasmPairing)
+    );
     console.log(
       `Written: ${join(OUTPUT_DIR, 'wasm-pairing.md')} ` +
         `(${wasmPairing.acceleratedCount}/${wasmPairing.total} WASM-accelerated)`
@@ -5109,7 +5140,7 @@ async function main(): Promise<void> {
       join(OUTPUT_DIR, 'parallel-pairing.json'),
       JSON.stringify(parallelPairing, null, 2)
     );
-    writeFileSync(
+    writeGeneratedMarkdown(
       join(OUTPUT_DIR, 'parallel-pairing.md'),
       generateParallelPairingMarkdown(parallelPairing)
     );
@@ -5126,7 +5157,7 @@ async function main(): Promise<void> {
   const webgpuPairing = analyzeWebGPUPairing(ROOT_DIR);
   if (webgpuPairing) {
     writeFileSync(join(OUTPUT_DIR, 'webgpu-pairing.json'), JSON.stringify(webgpuPairing, null, 2));
-    writeFileSync(
+    writeGeneratedMarkdown(
       join(OUTPUT_DIR, 'webgpu-pairing.md'),
       generateWebGPUPairingMarkdown(webgpuPairing)
     );

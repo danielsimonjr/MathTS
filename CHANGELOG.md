@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Architecture docs are now drift-gated.** Every authored document under `docs/Architecture/`
+  carries a `## Verification` block naming the metrics it depends on, so `repo_map.py check`
+  fails when the code moves underneath them. Nothing verified these documents before.
+
+  **Reachability metrics are deliberately absent from those blocks.** `repo_map` treats this repo
+  as a single package and finds **0 entry-point roots** for the workspace umbrella, so
+  `reachableFiles`, `dormantFiles`, `orphanedFiles` and `testOnlyFiles` would be artifacts of that
+  empty root set rather than measurements — it emits a warning saying exactly that. CDG runs in
+  monorepo mode with per-package roots and remains authoritative for reachability; the blocks say
+  so and point at `FILE_INVENTORY.md`. The two tools disagree by scope, not correctness.
+
+  `COVERAGE_POLICY.md` and `duplicate-backlog.md` carry an explicit
+  `<!-- repo-map:no-verification -->` opt-out instead: a policy document and a working list make
+  no repo-wide metric claim. The opt-out is visible in the source, never inferred from a missing
+  section.
+
+- **`npm run docs:deps:full`** — regenerates every report including `TEST_COVERAGE.md`, which
+  needs `--include-tests`. Plain `docs:deps` silently omits it, so that file could only be
+  refreshed by a manual invocation nobody would guess: a staleness trap in itself.
+
+### Changed
+
+- **CDG now emits a do-not-edit banner** at the top of all eight generated Markdown reports
+  (`DEPENDENCY_GRAPH`, `FILE_INVENTORY`, `TEST_COVERAGE`, `duplicate-symbols`, `unused-analysis`,
+  `wasm-pairing`, `parallel-pairing`, `webgpu-pairing`), carrying the drift gate's
+  `<!-- repo-map:no-verification -->` marker and naming the regeneration command. Emitted by the
+  generator rather than added by hand: a hand-added marker survives only until the next
+  regeneration, and then the gate fails a cycle later looking like a new bug.
+
+
 ### security: clear the vitest critical — a stale LOCK, not a loose range
 
 Four open advisories, all resolved in the lockfiles rather than by loosening anything:

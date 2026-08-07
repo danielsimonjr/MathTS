@@ -1,6 +1,10 @@
+<!-- repo-map:no-verification -->
+<!-- GENERATED FILE -- do not edit by hand.
+     Regenerate with `npm run docs:deps:full`. -->
+
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-07-27
+**Generated**: 2026-08-07
 
 ## Summary
 
