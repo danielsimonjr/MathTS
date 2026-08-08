@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Deleted 13 stale source files that sat on disk, were never in any commit, and had made the
+  repo **uncommittable**: the `check:file-census` pre-commit hook correctly rejected every
+  commit while they were present, which is how a routine lockfile bump surfaced them.
+
+  They are leftovers from two *completed* consolidations, not lost work:
+
+  - `expression/src/{error/MathjsError,utils/switch,utils/bignumber/formatter}.ts`,
+    `functions/src/{error/MathjsError,utils/bignumber/formatter}.ts` and their three tests
+    predate the move onto `@danielsimonjr/mathts-core/internal`. `core/src/switch.ts`,
+    `core/src/bignumber-formatter.ts` and `core/src/error/MathjsError.ts` are the tracked
+    canonicals, **no file under `expression/src` or `functions/src` imports the local
+    copies**, and the census flagged three of them as orphans outright. The repo says so in
+    its own words — `functions/tests/dedup-bucketB-equivalence.test.ts` records that these
+    copies "became thin re-export shims of core and were deleted".
+  - `docs/Architecture/Workbook/*.ts` is an earlier prototype of the tracked `workbook/`
+    package (25 files; its `cli.ts` is 1,471 lines against the prototype's 676).
+
+  Committing them would have resurrected code that was deliberately removed. Also drops three
+  tracked `.d.ts.map` files whose `.ts` sources were never in git — generated artifacts swept
+  in by a build step, which is the tell that first exposed the whole inconsistency.
+
+### Security
+
+- `js-yaml` 4.3.0 -> 4.3.1 in the ROOT lockfile, clearing the last open alert here. PR #207
+  patched only `tools/create-dependency-graph/package-lock.json`; the same advisory applied
+  to both manifests and the root one was left behind.
+
+
 ### Added
 
 - **Architecture docs are now drift-gated.** Every authored document under `docs/Architecture/`
