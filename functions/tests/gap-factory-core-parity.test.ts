@@ -18,7 +18,7 @@
  *      scalar predicates (isInteger/factorial) to explicit oracle results.
  *
  * NOTE (surfaced, not a bug): the deeper "collapse the factory/compat layer
- * into the typed layer" ADR remains Daniel's open call; allowlist-with-parity
+ * into the typed layer" ADR remains an open call; allowlist-with-parity
  * is the interim divergence guard, not a resolution.
  */
 import { describe, it, expect } from 'vitest';

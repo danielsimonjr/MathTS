@@ -25,7 +25,7 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 > routing measured _worse_ (declined), qz's real bug was a throw (not eigen-routing), WS-2 already done.
 > **Surfaced for future** (scoped designs recorded): full multivariate factorization (Wang/Zassenhaus),
 > Risch integration, coulombG/Mathieu/spheroidal, halfspace/n-D vertex enumeration, general PDE-MOL/DAE/DDE.
-> **⑭ GUI epic remains — DESIGN-GATED** (Daniel's call): backend contract (`--expect-hash`, event streaming,
+> **⑭ GUI epic remains — DESIGN-GATED** (the user's call): backend contract (`--expect-hash`, event streaming,
 > multi-doc serve, SVG typesetting) is tractable-autonomous; the UI layer (interactive charts framework +
 > Electron shell) needs a brainstorming/design pass before build.
 >
@@ -365,7 +365,7 @@ formatter.ts` (re-export shims of `core/src/bignumber-formatter.ts`). Coverage m
         **SURFACED** as a mathjs-divergence for Daniel, pinned in the parity test, not changed since it's
         outward-facing). Baseline re-seeded 12; `check:duplicates:fast` passes; 0 cycles; core+functions tsc
         clean; parity + cumsum suites green. **No release warranted.** The factory-layer-collapse ADR remains
-        Daniel's open call (allowlist-with-parity = interim divergence guard). See
+        An open call (allowlist-with-parity = interim divergence guard). See
         `docs/Architecture/duplicate-backlog.md` §6.
   - [x] ✅ **Floor-decisions slice — DONE 2026-07-18. `TRUE_DUPLICATE` 12 → 0 = ABSOLUTE ZERO.** Daniel took
         the 4 surfaced HUMAN-DECISIONs; all executed. **D1 (compat bug FIX):** `compat.zeros(n)`/`ones(n)`
@@ -636,13 +636,13 @@ dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = furthe
 Already standalone repos (`~/danie/github/{typed-function,workerpool}` + github.com/danielsimonjr/\*),
 consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-forked-deps]]
 
-- [ ] **Publish pending fork changes** (awaiting Daniel's confirm on the specific actions):
+- [ ] **Publish pending fork changes** (awaiting the user's confirm on the specific actions):
       `@danielsimonjr/typed-function` is at `5.0.0-alpha.3` on github/`develop` but only `alpha.1` on npm
       (2 unpublished versions) → publish alpha.3. `@danielsimonjr/workerpool` has a types-fix commit on an
       unmerged branch `fix/generate-js-api-types` → merge to `master` + publish 10.2.1.
 - [ ] **First-party integration** of typed-function/workerpool (absorb like BigNumber-in-core) — its
       blocking condition (a mature oracle-gap gaps/functions analysis) is now **MET** (roadmap complete
-      2026-07-16), so this is unblocked and revisitable on Daniel's word. Still an ADR-level call.
+      2026-07-16), so this is unblocked and revisitable on the user's word. Still an ADR-level call.
 
 ### Numerical accuracy (NumPy/SciPy parity)
 
@@ -886,7 +886,7 @@ defects found + fixed:
       shipped. Everything else in the release pipeline is now automated and green.
 - [x] ✅ **`Release` workflow unblocked — green for the first time** (2026-07-13). THREE stacked
       failures, each hidden behind the last: 1. _"GitHub Actions is not permitted to create or approve pull requests"_ — repo setting, flipped
-      with Daniel's authorization (`can_approve_pull_request_reviews: true`).
+      with the user's authorization (`can_approve_pull_request_reviews: true`).
       `default_workflow_permissions` stays `read` (least privilege; release.yml declares its own
       writes). Actions can now CREATE the Version Packages PR — it still cannot merge its own
       output, so the no-unattended-self-merge invariant holds. 2. _"No commits between main and changeset-release/main"_ — an EMPTY PR. **11 changesets for
@@ -1019,7 +1019,7 @@ defects found + fixed:
       ✅ **DELETED 2026-07-18** — the rest of `docs/Architecture/Workbook/*.ts` (`cli.ts`, `executor.ts`,
       `graph.ts`, `index.ts` [the 446-line stale YAML parser], `types.ts`) were rotted snapshots of
       `workbook/src/`, referenced by nothing but the file-census inventory (`example` disposition),
-      unreferenced + unbuilt. Removed with Daniel's "no limits" authorization; census 1705→1700, gate green.
+      unreferenced + unbuilt. Removed with the user's "no limits" authorization; census 1705→1700, gate green.
 
 > **Documented non-decisions — NOT backlog** (each has a written rationale, see sections
 > below): `eigs`/SVD acceleration · `polyFit`/`leastSquares`.

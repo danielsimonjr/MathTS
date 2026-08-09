@@ -240,7 +240,7 @@ caps = 4, §1 `qr` = 1) — since resolved in §7 above. Dispositions:
   2026-07-18** (DECISION 1, see §7): single-arg now returns the mathjs size-`n` vector. No longer open.
 - **Factory-layer collapse ADR remains open** (Bucket-C root cause, Adam/Eve): allowlist-with-parity is the
   interim divergence guard for the `functions/src/factories/index.ts` mathjs-plugin layer — it does NOT
-  resolve whether to eventually collapse factory/compat into the typed layer. That is still Daniel's call.
+  resolve whether to eventually collapse factory/compat into the typed layer. That is still the user's call.
 
 ---
 
