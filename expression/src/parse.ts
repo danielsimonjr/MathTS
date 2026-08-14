@@ -645,8 +645,12 @@ export const createParse = /* #__PURE__ */ factory(
      * @return {boolean}
      */
     parse.isWhitespace = function isWhitespace(c: string, nestingLevel: number): boolean {
-      // TODO: also take '\r' carriage return as newline? Or does that give problems on mac?
-      return c === ' ' || c === '\t' || c === '\u00A0' || (c === '\n' && nestingLevel > 0);
+      return (
+        c === ' ' ||
+        c === '\t' ||
+        c === '\u00A0' ||
+        ((c === '\n' || c === '\r') && nestingLevel > 0)
+      );
     };
 
     /**
