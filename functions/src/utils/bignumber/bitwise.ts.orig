@@ -500,11 +500,7 @@ export function rightLogShiftBigNumber(x: BigNumberValue, y: BigNumberValue): Bi
   // Convert negative numbers to their 32-bit two's complement unsigned representation
   let val = x;
   if (val.isNegative()) {
-    const MASK = new BigNumber(4294967296);
-    val = (val as any).mod(MASK);
-    if (val.isNegative()) {
-      val = val.plus(MASK);
-    }
+    val = (val.plus(new BigNumber(4294967296)) as any).mod(new BigNumber(4294967296));
   }
 
   // Math.pow(2, y) is fully precise for y < 55, and fast
