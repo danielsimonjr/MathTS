@@ -5,7 +5,10 @@
 
 version: 2
 updates:
-  # Enable version updates for npm (root)
+  # Root lockfile covers every npm workspace (core/, matrix/, workbook/, …).
+  # Do NOT add /packages/{core,matrix,workbook} — those directories do not
+  # exist (the real packages live at the repo root) and Dependabot failed
+  # weekly against them.
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
@@ -21,39 +24,6 @@ updates:
         dependency-type: 'production'
         patterns:
           - '*'
-    commit-message:
-      prefix: 'chore(deps)'
-      include: 'scope'
-
-  # Enable version updates for npm (packages/core)
-  - package-ecosystem: 'npm'
-    directory: '/packages/core'
-    schedule:
-      interval: 'weekly'
-      day: 'monday'
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: 'chore(deps)'
-      include: 'scope'
-
-  # Enable version updates for npm (packages/matrix)
-  - package-ecosystem: 'npm'
-    directory: '/packages/matrix'
-    schedule:
-      interval: 'weekly'
-      day: 'monday'
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: 'chore(deps)'
-      include: 'scope'
-
-  # Enable version updates for npm (packages/workbook)
-  - package-ecosystem: 'npm'
-    directory: '/packages/workbook'
-    schedule:
-      interval: 'weekly'
-      day: 'monday'
-    open-pull-requests-limit: 5
     commit-message:
       prefix: 'chore(deps)'
       include: 'scope'

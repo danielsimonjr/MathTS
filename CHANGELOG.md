@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`Complex.fromPolar(Infinity, 0)` is `Infinity+0i`, not `NaN`.** IEEE 754 makes
+  `Infinity * 0` a NaN, so `fromPolar` (and therefore `z^w` for a denormal positive
+  real raised to a negative power) returned `NaN` on the imaginary part. Restore the
+  signed-zero trig component when the magnitude is infinite and `cos`/`sin` is
+  exactly 0. Pinned by the CI counterexample
+  `pow(Complex(5e-324, 0), -0.953…)` that was failing `toBeCloseTo(NaN, NaN)` on
+  `main`.
+
+### Security
+
+- **Expression object literals go through `setSafeProperty` at parse and compile.**
+  `{__proto__: …}` assigned into a plain object during parse, which sets
+  `[[Prototype]]` rather than creating an own key. `ObjectNode._compile` also wrote
+  `obj[key] =` directly, bypassing the sandbox helper the tree-walking compiler
+  already used. Both paths now fail closed.
+- **Workbook chart-spec YAML uses the pollution guard.** `validate` / SVG render
+  parsed visualization-cell YAML without walking for `__proto__`/`constructor`/
+  `prototype`. New `parseYamlSafe` is the fail-closed entry; `importWorkbook` now
+  rejects polluted input before the serialize round-trip.
+
+### Changed
+
+- **CI is a compile gate plus parallel test/coverage/browser.** Coverage and the
+  browser smoke no longer wait for the full Node 20+22 test matrix. Workflows pin
+  `actions/checkout` / `setup-node` / `codecov-action` to SHAs, run with
+  `contents: read`, and add `docs:functions:check`,
+  `check:browser-safety`, and `npm audit --audit-level=high`. Dependabot no longer
+  targets the phantom `/packages/{core,matrix,workbook}` directories (the real
+  packages live at the repo root; those jobs were failing weekly).
+
 ### Removed
 
 - Deleted 13 stale source files that sat on disk, were never in any commit, and had made the

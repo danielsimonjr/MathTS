@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-09",
+  "generated": "2026-08-14",
   "totalFiles": 1775,
   "byDisposition": {
     "reachable": 1083,
@@ -709,7 +709,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 671
+      "loc": 684
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -1003,7 +1003,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 428
+      "loc": 442
     },
     {
       "file": "core/tests/types/fraction-coverage.test.ts",
@@ -3691,7 +3691,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 249
+      "loc": 253
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
@@ -3761,7 +3761,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2008
+      "loc": 2011
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4314,7 +4314,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 222
+      "loc": 234
     },
     {
       "file": "expression/tests/OperatorNode-compile.test.ts",
@@ -4384,7 +4384,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 933
+      "loc": 935
     },
     {
       "file": "expression/tests/Parser-extra.test.ts",
@@ -8087,7 +8087,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 657
+      "loc": 677
     },
     {
       "file": "functions/tests/det-native-accel.test.ts",
@@ -12098,7 +12098,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "reachable",
-      "loc": 288
+      "loc": 294
     },
     {
       "file": "workbook/src/formatter.ts",
@@ -12161,7 +12161,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "reachable",
-      "loc": 351
+      "loc": 375
     },
     {
       "file": "workbook/src/pdf.ts",
@@ -12231,14 +12231,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "reachable",
-      "loc": 55
+      "loc": 85
     },
     {
       "file": "workbook/tests/authoring.test.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 124
+      "loc": 144
     },
     {
       "file": "workbook/tests/cli.test.ts",
@@ -12406,7 +12406,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 279
+      "loc": 297
     },
     {
       "file": "workbook/tests/reserved-cell-types.test.ts",

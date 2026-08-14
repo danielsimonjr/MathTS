@@ -5,7 +5,14 @@
 import { stringify as stringifyYaml } from 'yaml';
 import { parseYamlHardened, findPollutionKeys } from './yaml-safe';
 import { buildDependencyGraph, detectCycles } from './graph';
-import type { Workbook, ParseResult, CellType, Cell, RuntimeConfig, WorkbookMetadata } from './types';
+import type {
+  Workbook,
+  ParseResult,
+  CellType,
+  Cell,
+  RuntimeConfig,
+  WorkbookMetadata,
+} from './types';
 
 /**
  * Canonical cell-type keys, in detection-precedence order. Shared between the
@@ -34,7 +41,14 @@ export function isValidIdentifier(id: string): boolean {
 }
 
 /** Cell types the runtime can execute today (the rest are reserved/deferred). */
-export const SUPPORTED_CELL_TYPES: CellType[] = ['code', 'markdown', 'data', 'test', 'equation', 'visualization'];
+export const SUPPORTED_CELL_TYPES: CellType[] = [
+  'code',
+  'markdown',
+  'data',
+  'test',
+  'equation',
+  'visualization',
+];
 
 const EXECUTION_MODES = ['reactive', 'sequential', 'manual'];
 
@@ -91,9 +105,7 @@ function mapCell(raw: unknown, index: number, errors: string[]): Cell {
     errors.push(`Cell at index ${index}: missing "id"`);
     id = `#${index}`;
   } else if (typeof rawId !== 'string' || !IDENTIFIER_RE.test(rawId)) {
-    errors.push(
-      `Cell "${String(rawId)}": id must be a valid identifier ([A-Za-z_][A-Za-z0-9_]*)`
-    );
+    errors.push(`Cell "${String(rawId)}": id must be a valid identifier ([A-Za-z_][A-Za-z0-9_]*)`);
     id = String(rawId);
   } else {
     id = rawId;
@@ -298,10 +310,17 @@ export function importWorkbook(input: string): ParseResult {
   try {
     obj = parseYamlHardened(input);
   } catch (error) {
-    return { success: false, errors: [`Invalid JSON/YAML: ${error instanceof Error ? error.message : String(error)}`] };
+    return {
+      success: false,
+      errors: [`Invalid JSON/YAML: ${error instanceof Error ? error.message : String(error)}`],
+    };
   }
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
     return { success: false, errors: ['Input must be an object with a "cells" array'] };
+  }
+  const pollution = findPollutionKeys(obj);
+  if (pollution.length > 0) {
+    return { success: false, errors: [`Disallowed key "${pollution[0]}" (prototype pollution)`] };
   }
   const root = obj as Record<string, unknown>;
   if (!Array.isArray(root.cells)) {
@@ -318,8 +337,13 @@ export function importWorkbook(input: string): ParseResult {
     const c = raw as Record<string, unknown>;
     const id = typeof c.id === 'string' ? c.id : '';
     const type = typeof c.type === 'string' ? c.type : '';
-    const content = typeof c.content === 'string' ? c.content : c.content == null ? '' : String(c.content);
-    const depsRaw = Array.isArray(c.dependsOn) ? c.dependsOn : Array.isArray(c.depends_on) ? c.depends_on : undefined;
+    const content =
+      typeof c.content === 'string' ? c.content : c.content == null ? '' : String(c.content);
+    const depsRaw = Array.isArray(c.dependsOn)
+      ? c.dependsOn
+      : Array.isArray(c.depends_on)
+        ? c.depends_on
+        : undefined;
     const dependsOn = depsRaw?.map((d) => String(d));
     const cell: Cell = { id, type: type as CellType, content };
     if (dependsOn && dependsOn.length > 0) cell.dependsOn = dependsOn;

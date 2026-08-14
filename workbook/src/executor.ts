@@ -2,10 +2,17 @@
  * Workbook executor
  */
 
-import type { Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult } from './types';
+import type {
+  Workbook,
+  Cell,
+  WorkbookEvent,
+  DependencyGraph,
+  CellResult,
+  RunResult,
+} from './types';
 import { buildDependencyGraph, getDependents, detectCycles, getAncestors } from './graph';
 import { evaluate } from '@danielsimonjr/mathts-functions';
-import { parseYamlHardened, assertNoPollution } from './yaml-safe';
+import { parseYamlSafe } from './yaml-safe';
 
 /**
  * Event handler type
@@ -190,8 +197,7 @@ export class WorkbookExecutor {
    * parser, so both YAML entry points are consistent.
    */
   private async executeData(cell: Cell): Promise<unknown> {
-    const value = parseYamlHardened(cell.content);
-    assertNoPollution(value);
+    const value = parseYamlSafe(cell.content);
     return value;
   }
 

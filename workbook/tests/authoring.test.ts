@@ -79,12 +79,20 @@ describe('mtsw import', () => {
   });
 
   it('rejects invalid input (cycle, bad type, no cells array)', async () => {
-    const cyc = file('cyc.json', JSON.stringify({ cells: [
-      { id: 'a', type: 'code', content: 'b', dependsOn: ['b'] },
-      { id: 'b', type: 'code', content: 'a', dependsOn: ['a'] },
-    ] }));
+    const cyc = file(
+      'cyc.json',
+      JSON.stringify({
+        cells: [
+          { id: 'a', type: 'code', content: 'b', dependsOn: ['b'] },
+          { id: 'b', type: 'code', content: 'a', dependsOn: ['a'] },
+        ],
+      })
+    );
     expect((await dispatch(['import', cyc])).exitCode).toBe(1);
-    const bad = file('bad.json', JSON.stringify({ cells: [{ id: 'x', type: 'frobnicate', content: '1' }] }));
+    const bad = file(
+      'bad.json',
+      JSON.stringify({ cells: [{ id: 'x', type: 'frobnicate', content: '1' }] })
+    );
     expect((await dispatch(['import', bad])).exitCode).toBe(1);
     const noCells = file('nc.json', JSON.stringify({ foo: 1 }));
     expect((await dispatch(['import', noCells])).exitCode).toBe(1);
@@ -93,7 +101,9 @@ describe('mtsw import', () => {
 
 describe('chart validation + capabilities discoverability', () => {
   it('validate flags a chart spec referencing unknown cells', async () => {
-    const p = fixture('cells:\n  - visualization: |\n      type: line\n      x: { data: nope }\n      y: { data: alsoNope }\n    id: ch');
+    const p = fixture(
+      'cells:\n  - visualization: |\n      type: line\n      x: { data: nope }\n      y: { data: alsoNope }\n    id: ch'
+    );
     const env = JSON.parse((await dispatch(['validate', p, '--json'])).stdout);
     expect(env.ok).toBe(false);
     expect(env.problems.join(' ')).toMatch(/unknown cell/i);
@@ -101,8 +111,18 @@ describe('chart validation + capabilities discoverability', () => {
 
   it('validate flags a malformed chart spec', async () => {
     const p = fixture('cells:\n  - visualization: "just a string, not a mapping"\n    id: ch');
-    const env = JSON.parse((await dispatch(['validate', p, '--json'])).stdout);
-    expect(env.ok).toBe(false);
+    const r = await dispatch(['validate', p]);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr).toMatch(/chart spec/i);
+  });
+
+  it('validate flags a chart spec with a prototype-pollution key', async () => {
+    const p = fixture(
+      'cells:\n  - visualization: |\n      type: line\n      constructor: evil\n      x: { data: [1] }\n      y: { data: [2] }\n    id: ch'
+    );
+    const r = await dispatch(['validate', p]);
+    expect(r.exitCode).toBe(1);
+    expect(`${r.stderr}\n${r.stdout}`.toLowerCase()).toMatch(/pollution|disallowed/);
   });
 
   it('capabilities exposes per-cell-type schemas incl. the chart spec', async () => {

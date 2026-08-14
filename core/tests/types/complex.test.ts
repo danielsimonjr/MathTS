@@ -27,6 +27,20 @@ describe('Complex', () => {
       expect(c.im).toBeCloseTo(1);
     });
 
+    it('fromPolar(Infinity, 0) is Infinity+0i, not NaN (Inf * sin(0) is NaN without a guard)', () => {
+      const c = Complex.fromPolar(Infinity, 0);
+      expect(c.re).toBe(Infinity);
+      expect(c.im).toBe(0);
+    });
+
+    it('pow of a denormal real to a negative exponent is infinite, not NaN', () => {
+      const c = new Complex(Number.MIN_VALUE, 0).pow(-0.9534450651769089);
+      expect(c.re).toBe(Infinity);
+      // theta * negativeExp is -0, so im is -0; both ±0 are on the real axis.
+      expect(c.im === 0).toBe(true);
+      expect(Number.isNaN(c.im)).toBe(false);
+    });
+
     it('should create from number', () => {
       const c = Complex.fromNumber(42);
       expect(c.re).toBe(42);

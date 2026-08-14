@@ -36,7 +36,20 @@ export class Complex implements IComplex {
    * @param theta - angle in radians
    */
   static fromPolar(r: number, theta: number): Complex {
-    return new Complex(r * Math.cos(theta), r * Math.sin(theta));
+    const cosT = Math.cos(theta);
+    const sinT = Math.sin(theta);
+    let re = r * cosT;
+    let im = r * sinT;
+    // IEEE 754: Inf * 0 is NaN. Restore the signed-zero trig component so
+    // axis-aligned infinities stay on the axis — e.g. fromPolar(Infinity, 0)
+    // is Infinity+0i, which is what z^w needs for a tiny positive real
+    // raised to a negative power. Do not snap near-zero cos/sin (π/2 is
+    // not exact in f64); only the exact-zero case is NaN.
+    if (!Number.isFinite(r) && !Number.isNaN(r)) {
+      if (cosT === 0) re = cosT;
+      if (sinT === 0) im = sinT;
+    }
+    return new Complex(re, im);
   }
 
   /**

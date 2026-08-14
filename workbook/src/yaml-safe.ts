@@ -11,9 +11,25 @@ import { parse as parseYaml } from 'yaml';
 /** Keys that enable prototype pollution; rejected anywhere in parsed data. */
 const POLLUTION_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
-/** Parse YAML with the hardened options. Throws on malformed input. */
+/**
+ * Parse YAML with the hardened schema options (core schema, no merge keys).
+ * Does **not** walk the result for pollution keys — callers that want
+ * structured errors (the document parser) use {@link findPollutionKeys};
+ * callers that should fail closed use {@link parseYamlSafe}.
+ */
 export function parseYamlHardened(content: string): unknown {
   return parseYaml(content, { schema: 'core', merge: false, logLevel: 'silent' });
+}
+
+/**
+ * Parse YAML with hardened options and reject prototype-pollution keys.
+ * Use this at CLI / executor entry points that should throw rather than
+ * collect structured errors.
+ */
+export function parseYamlSafe(content: string): unknown {
+  const value = parseYamlHardened(content);
+  assertNoPollution(value);
+  return value;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -24,8 +40,17 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
  * Collect every prototype-pollution key found anywhere in a parsed value.
  * Only traverses plain objects and arrays (never class instances / built-in
  * prototypes); a `seen` set guards against alias cycles.
+ *
+ * Also flags an object whose [[Prototype]] is neither `Object.prototype`
+ * nor `null` — that is the shape of `obj['__proto__'] = payload`, which
+ * does not create an own `__proto__` property for `getOwnPropertyNames`
+ * to find.
  */
-export function findPollutionKeys(value: unknown, seen: WeakSet<object> = new WeakSet(), found: string[] = []): string[] {
+export function findPollutionKeys(
+  value: unknown,
+  seen: WeakSet<object> = new WeakSet(),
+  found: string[] = []
+): string[] {
   if (!isPlainObject(value) && !Array.isArray(value)) return found;
   if (seen.has(value)) return found;
   seen.add(value);
@@ -33,6 +58,11 @@ export function findPollutionKeys(value: unknown, seen: WeakSet<object> = new We
   if (Array.isArray(value)) {
     for (const item of value) findPollutionKeys(item, seen, found);
     return found;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) {
+    found.push('__proto__');
   }
 
   for (const key of Object.getOwnPropertyNames(value)) {

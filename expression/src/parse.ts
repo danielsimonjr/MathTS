@@ -11,6 +11,7 @@ import { deepMap } from './utils/collection.js';
 import { safeNumberType } from './utils/number.js';
 import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
+import { setSafeProperty } from './utils/customs.js';
 import type { MathNode } from './node/Node.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
@@ -398,7 +399,10 @@ export const createParse = /* #__PURE__ */ factory(
       }
 
       if (delim) {
-        if (delim.endsWith('.') && parse.isDigit(state.expression.charAt(state.index + delim.length))) {
+        if (
+          delim.endsWith('.') &&
+          parse.isDigit(state.expression.charAt(state.index + delim.length))
+        ) {
           delim = delim.slice(0, -1);
           if (delim.length > 0 && !DELIMITERS[delim]) {
             delim = '';
@@ -792,10 +796,7 @@ export const createParse = /* #__PURE__ */ factory(
           getTokenSkipNewline(state);
           value = parseAssignment(state);
           return new AssignmentNode(accessor.object, accessor.index, value);
-        } else if (
-          isFunctionNode(node) &&
-          isSymbolNode((node as unknown as { fn: MathNode }).fn)
-        ) {
+        } else if (isFunctionNode(node) && isSymbolNode((node as unknown as { fn: MathNode }).fn)) {
           // parse function assignment like 'f(x) = x^2'
           valid = true;
           args = [];
@@ -1857,8 +1858,10 @@ export const createParse = /* #__PURE__ */ factory(
             }
             getToken(state);
 
-            // parse key
-            properties[key] = parseAssignment(state);
+            // Sandbox: object-literal keys go through setSafeProperty so
+            // `{__proto__: ...}` cannot pollute `properties` during parse
+            // (assignment to obj['__proto__'] sets [[Prototype]]).
+            setSafeProperty(properties, key, parseAssignment(state));
           }
         } while ((state.token as string) === ',');
 
