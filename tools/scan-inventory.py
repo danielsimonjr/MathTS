@@ -11,6 +11,7 @@ reference; for current structure use CDG (`npm run docs:deps`) / QDG (`npm run d
 import os, re, json
 from pathlib import Path
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = Path(".")
 SRC = ROOT / "src"
@@ -60,13 +61,15 @@ demo_files = []
 config_files = []
 other_files = []
 
-for rel, p in all_files:
+with ThreadPoolExecutor() as executor:
+    sizes = list(executor.map(lambda p: p.stat().st_size, [p for _, p in all_files]))
+
+for (rel, p), size in zip(all_files, sizes):
     ext = p.suffix.lower()
     by_ext[ext] += 1
     top_dir = rel.split("/")[0] if "/" in rel else "."
     by_dir[top_dir] += 1
 
-    size = p.stat().st_size
     is_conflicted = "conflicted" in rel
 
     entry = {
