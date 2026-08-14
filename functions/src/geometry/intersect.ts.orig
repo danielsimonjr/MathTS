@@ -20,6 +20,7 @@ interface IntersectDependencies {
     b: MathNumericType | MathNumericType[]
   ) => MathNumericType | MathNumericType[];
   addScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
+  matrix: (arr: MathNumericType[]) => Matrix;
   multiply: (
     a: MathNumericType | MathNumericType[],
     b: MathNumericType | MathNumericType[]
@@ -44,6 +45,7 @@ const dependencies = [
   'abs',
   'add',
   'addScalar',
+  'matrix',
   'multiply',
   'multiplyScalar',
   'divideScalar',
@@ -64,6 +66,7 @@ export const createIntersect = /* #__PURE__ */ factory(
     abs,
     add,
     addScalar,
+    matrix,
     multiply,
     multiplyScalar,
     divideScalar,
