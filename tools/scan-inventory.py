@@ -24,27 +24,40 @@ inventory = {
 }
 
 # Scan all files
+skips = [
+    "node_modules/",
+    ".git/",
+    "/target/",
+    "dist/",
+    "lib/cjs/",
+    "lib/esm/",
+    "coverage/",
+    "lib/browser/",
+    ".dropboxignore",
+]
+
 all_files = []
-for p in sorted(ROOT.rglob("*")):
-    if p.is_dir():
-        continue
-    rel = str(p.relative_to(ROOT)).replace(os.sep, "/")
-    if any(
-        skip in rel
-        for skip in [
-            "node_modules/",
-            ".git/",
-            "/target/",
-            "dist/",
-            "lib/cjs/",
-            "lib/esm/",
-            "coverage/",
-            "lib/browser/",
-            ".dropboxignore",
-        ]
-    ):
-        continue
-    all_files.append((rel, p))
+
+
+def scan(path, rel_prefix=""):
+    try:
+        for entry in os.scandir(path):
+            rel = f"{rel_prefix}{entry.name}"
+            if entry.is_dir(follow_symlinks=False):
+                rel_dir = rel + "/"
+                if not any(skip in rel_dir for skip in skips):
+                    scan(entry.path, rel_dir)
+            else:
+                if not any(skip in rel for skip in skips):
+                    all_files.append((rel, entry.path, entry.stat().st_size))
+    except OSError:
+        pass
+
+
+scan(str(ROOT))
+
+# Sorting to match original behavior
+all_files.sort(key=lambda x: x[0])
 
 print(f"Total files found: {len(all_files)}")
 
@@ -60,13 +73,12 @@ demo_files = []
 config_files = []
 other_files = []
 
-for rel, p in all_files:
-    ext = p.suffix.lower()
+for rel, filepath, size in all_files:
+    ext = os.path.splitext(filepath)[1].lower()
     by_ext[ext] += 1
     top_dir = rel.split("/")[0] if "/" in rel else "."
     by_dir[top_dir] += 1
 
-    size = p.stat().st_size
     is_conflicted = "conflicted" in rel
 
     entry = {
@@ -91,7 +103,8 @@ for rel, p in all_files:
         ".sh",
     ):
         try:
-            entry["lines"] = sum(1 for _ in open(p, encoding="utf-8", errors="replace"))
+            with open(filepath, "rb") as f:
+                entry["lines"] = f.read().count(b"\n")
         except:
             pass
 
