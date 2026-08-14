@@ -16,7 +16,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
-import { matrixSchur } from '../../src/operations/schur.js';
+import { matrixSchur, schurInternal } from '../../src/operations/schur.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -229,5 +229,56 @@ describe('matrixSchur', () => {
     const { Q, T } = matrixSchur(A);
     const QTQt = matMulDense(matMulDense(Q, T), transposeDense(Q));
     expect(frobDiff(QTQt, A)).toBeLessThan(1e-5);
+  });
+});
+
+describe('schurInternal', () => {
+  it('1. Identity: Schur(I) => Q = I, H = I', () => {
+    const I3 = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1]
+    ];
+    const { Q, H } = schurInternal(I3);
+    expect(frobDiff(DenseMatrix.fromArray(Q), eye(3))).toBeLessThan(1e-12);
+    expect(frobDiff(DenseMatrix.fromArray(H), eye(3))).toBeLessThan(1e-12);
+  });
+
+  it('2. Reconstruction: Q * H * Q^T ≈ A for non-symmetric matrix', () => {
+    const A = [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ];
+    const { Q, H } = schurInternal(A);
+    const qDense = DenseMatrix.fromArray(Q);
+    const hDense = DenseMatrix.fromArray(H);
+    const aDense = DenseMatrix.fromArray(A);
+    const QTQt = matMulDense(matMulDense(qDense, hDense), transposeDense(qDense));
+    expect(frobDiff(QTQt, aDense)).toBeLessThan(1e-8);
+  });
+
+  it('3. Q is orthogonal: Q^T * Q = I', () => {
+    const A = [
+      [4, 2, 1],
+      [2, 5, 3],
+      [1, 3, 6],
+    ];
+    const { Q } = schurInternal(A);
+    const qDense = DenseMatrix.fromArray(Q);
+    const QtQ = matMulDense(transposeDense(qDense), qDense);
+    expect(frobDiff(QtQ, eye(3))).toBeLessThan(1e-10);
+  });
+
+  it('4. Empty matrix (0x0) returns empty arrays', () => {
+    const { Q, H } = schurInternal([]);
+    expect(Q).toEqual([]);
+    expect(H).toEqual([]);
+  });
+
+  it('5. 1x1 matrix returns scalar wrapper', () => {
+    const { Q, H } = schurInternal([[7]]);
+    expect(Math.abs(Q[0][0] - 1)).toBeLessThan(1e-12);
+    expect(Math.abs(H[0][0] - 7)).toBeLessThan(1e-12);
   });
 });
