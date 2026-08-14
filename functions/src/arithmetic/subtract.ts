@@ -50,8 +50,6 @@ export const createSubtract = /* #__PURE__ */ factory(
     concat,
     nodeOperations,
   }: SubtractDependencies) => {
-    // TODO: split function subtract in two: subtract and subtractScalar
-
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
