@@ -6,7 +6,7 @@
  */
 import { spawn } from 'node:child_process';
 import { writeFile, rm, rename, mkdtemp, readFile } from 'node:fs/promises';
-import { extname, join as joinPath, basename } from 'node:path';
+import { extname, join as joinPath } from 'node:path';
 import { tmpdir } from 'node:os';
 
 /** Thrown when an external tool is missing or a conversion fails. Deliberate
@@ -44,7 +44,7 @@ export function runTool(
   opts: { timeoutMs?: number; input?: string } = {}
 ): Promise<RunResult> {
   return new Promise((resolve, reject) => {
-    if (!ALLOWED_TOOLS.includes(basename(cmd))) {
+    if (!ALLOWED_TOOLS.includes(cmd)) {
       reject(new PlotRenderError(`Security Error: Execution of tool '${cmd}' is not allowed.`));
       return;
     }
@@ -85,7 +85,7 @@ export async function renderToFile(
   outPath: string,
   opts: RenderOptions = {}
 ): Promise<void> {
-  if (opts.tool && !ALLOWED_TOOLS.includes(basename(opts.tool))) {
+  if (opts.tool && !ALLOWED_TOOLS.includes(opts.tool)) {
     throw new PlotRenderError(`Security Error: Execution of tool '${opts.tool}' is not allowed.`);
   }
   const ext = extname(outPath).toLowerCase();
@@ -175,7 +175,7 @@ export async function latexToPdf(
   outPath: string,
   opts: RenderOptions = {}
 ): Promise<void> {
-  if (opts.tool && !ALLOWED_TOOLS.includes(basename(opts.tool))) {
+  if (opts.tool && !ALLOWED_TOOLS.includes(opts.tool)) {
     throw new PlotRenderError(`Security Error: Execution of tool '${opts.tool}' is not allowed.`);
   }
   if (extname(outPath).toLowerCase() !== '.pdf') {
