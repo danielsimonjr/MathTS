@@ -400,13 +400,14 @@ export const createTyped = /* #__PURE__ */ factory(
         },
       },
       {
-        // FIXME: add conversion from Fraction to number, for example for `sqrt(fraction(1,3))`
-        //  from: 'Fraction',
-        //  to: 'number',
-        //  convert: function (x) {
-        //    return x.valueOf()
-        //  }
-        // }, {
+        from: 'Fraction',
+        to: 'number',
+        convert: function (x: unknown) {
+          const frac = x as { valueOf: () => number };
+          return frac.valueOf();
+        },
+      },
+      {
         from: 'string',
         to: 'number',
         convert: function (x: string): number {
