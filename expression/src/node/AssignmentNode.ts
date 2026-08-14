@@ -6,6 +6,7 @@ import { assignFactory } from './utils/assign.js';
 import { getPrecedence } from '../operators.js';
 import { escapeMathML, toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
+import type { IndexLike } from './utils/stringSubset.js';
 
 const name = 'AssignmentNode';
 const dependencies = ['subset', 'Node'];
@@ -24,7 +25,7 @@ interface AccessorNodeChild extends MathNode {
 
 // Runtime Index value produced by a compiled IndexNode, as consumed by
 // access()/assign().
-type RuntimeIndex = { isObjectProperty: () => boolean; getObjectProperty: () => string };
+type RuntimeIndex = { isObjectProperty: () => boolean; getObjectProperty: () => string; isIndex: boolean } & IndexLike;
 
 export const createAssignmentNode = /* #__PURE__ */ factory(
   name,

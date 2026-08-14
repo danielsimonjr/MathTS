@@ -1,5 +1,7 @@
 import { errorTransform } from '../../transform/utils/errorTransform.js';
 import { setSafeProperty } from '../../utils/customs.js';
+import { setStringSubset } from './stringSubset.js';
+import type { IndexLike } from './stringSubset.js';
 
 export function assignFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
   /**
@@ -18,7 +20,7 @@ export function assignFactory({ subset }: { subset: (...args: unknown[]) => unkn
   // TODO: change assign to return the value instead of the object
   return function assign(
     object: unknown,
-    index: { isObjectProperty: () => boolean; getObjectProperty: () => string },
+    index: { isObjectProperty: () => boolean; getObjectProperty: () => string; isIndex?: boolean } & IndexLike,
     value: unknown
   ) {
     try {
@@ -35,8 +37,7 @@ export function assignFactory({ subset }: { subset: (...args: unknown[]) => unkn
         // Matrix
         return (object as { subset: (...a: unknown[]) => unknown }).subset(index, value);
       } else if (typeof object === 'string') {
-        // TODO: move setStringSubset into a separate util file, use that
-        return subset(object, index, value);
+        return setStringSubset(object, index, String(value));
       } else if (typeof object === 'object') {
         if (!index.isObjectProperty()) {
           throw TypeError('Cannot apply a numeric index as object property');

@@ -7,6 +7,12 @@ function makeObjectIndex(prop: string) {
   return {
     isObjectProperty: () => true,
     getObjectProperty: () => prop,
+    isIndex: true,
+    isScalar: () => true,
+    size: () => [1],
+    min: () => [0],
+    max: () => [0],
+    dimension: () => 0,
   };
 }
 
@@ -14,6 +20,12 @@ function makeNumericIndex(_i: number) {
   return {
     isObjectProperty: () => false,
     getObjectProperty: () => null,
+    isIndex: true,
+    isScalar: () => true,
+    size: () => [1],
+    min: () => [0],
+    max: () => [0],
+    dimension: () => 0,
   };
 }
 
@@ -24,6 +36,14 @@ function makeSimpleNumericIndex(i: number) {
     isObjectProperty: () => false,
     getObjectProperty: () => null,
     _i: i,
+    isIndex: true,
+    isScalar: () => true,
+    size: () => [1],
+    min: () => [i],
+    max: () => [i],
+    dimension: () => i,
+    _dimensions: [i],
+    _sourceSize: [null],
   };
 }
 
