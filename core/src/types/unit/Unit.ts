@@ -1866,86 +1866,90 @@ export const createUnitClass = /* #__PURE__ */ factory(
       'AMOUNT_OF_SUBSTANCE',
       'ANGLE',
       'BIT',
+      'SOLID_ANGLE',
     ];
 
     const BASE_UNITS: Record<string, BaseUnitDef> = {
       NONE: {
-        dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       },
       MASS: {
-        dimensions: [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        dimensions: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       },
       LENGTH: {
-        dimensions: [0, 1, 0, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       },
       TIME: {
-        dimensions: [0, 0, 1, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
       },
       CURRENT: {
-        dimensions: [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        dimensions: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
       },
       TEMPERATURE: {
-        dimensions: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        dimensions: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
       },
       LUMINOUS_INTENSITY: {
-        dimensions: [0, 0, 0, 0, 0, 1, 0, 0, 0],
+        dimensions: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
       },
       AMOUNT_OF_SUBSTANCE: {
-        dimensions: [0, 0, 0, 0, 0, 0, 1, 0, 0],
+        dimensions: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
       },
 
       FORCE: {
-        dimensions: [1, 1, -2, 0, 0, 0, 0, 0, 0],
+        dimensions: [1, 1, -2, 0, 0, 0, 0, 0, 0, 0],
       },
       SURFACE: {
-        dimensions: [0, 2, 0, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
       },
       VOLUME: {
-        dimensions: [0, 3, 0, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 3, 0, 0, 0, 0, 0, 0, 0, 0],
       },
       ENERGY: {
-        dimensions: [1, 2, -2, 0, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -2, 0, 0, 0, 0, 0, 0, 0],
       },
       POWER: {
-        dimensions: [1, 2, -3, 0, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -3, 0, 0, 0, 0, 0, 0, 0],
       },
       PRESSURE: {
-        dimensions: [1, -1, -2, 0, 0, 0, 0, 0, 0],
+        dimensions: [1, -1, -2, 0, 0, 0, 0, 0, 0, 0],
       },
 
       ELECTRIC_CHARGE: {
-        dimensions: [0, 0, 1, 1, 0, 0, 0, 0, 0],
+        dimensions: [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
       },
       ELECTRIC_CAPACITANCE: {
-        dimensions: [-1, -2, 4, 2, 0, 0, 0, 0, 0],
+        dimensions: [-1, -2, 4, 2, 0, 0, 0, 0, 0, 0],
       },
       ELECTRIC_POTENTIAL: {
-        dimensions: [1, 2, -3, -1, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -3, -1, 0, 0, 0, 0, 0, 0],
       },
       ELECTRIC_RESISTANCE: {
-        dimensions: [1, 2, -3, -2, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -3, -2, 0, 0, 0, 0, 0, 0],
       },
       ELECTRIC_INDUCTANCE: {
-        dimensions: [1, 2, -2, -2, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -2, -2, 0, 0, 0, 0, 0, 0],
       },
       ELECTRIC_CONDUCTANCE: {
-        dimensions: [-1, -2, 3, 2, 0, 0, 0, 0, 0],
+        dimensions: [-1, -2, 3, 2, 0, 0, 0, 0, 0, 0],
       },
       MAGNETIC_FLUX: {
-        dimensions: [1, 2, -2, -1, 0, 0, 0, 0, 0],
+        dimensions: [1, 2, -2, -1, 0, 0, 0, 0, 0, 0],
       },
       MAGNETIC_FLUX_DENSITY: {
-        dimensions: [1, 0, -2, -1, 0, 0, 0, 0, 0],
+        dimensions: [1, 0, -2, -1, 0, 0, 0, 0, 0, 0],
       },
 
       FREQUENCY: {
-        dimensions: [0, 0, -1, 0, 0, 0, 0, 0, 0],
+        dimensions: [0, 0, -1, 0, 0, 0, 0, 0, 0, 0],
       },
       ANGLE: {
-        dimensions: [0, 0, 0, 0, 0, 0, 0, 1, 0],
+        dimensions: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
       },
       BIT: {
-        dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 1],
+        dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      },
+      SOLID_ANGLE: {
+        dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       },
     };
 
@@ -2830,9 +2834,21 @@ export const createUnitClass = /* #__PURE__ */ factory(
         value: 1,
         offset: 0,
       },
-      // TODO: units STERADIAN
-      // {name: 'sr', base: BASE_UNITS.STERADIAN, prefixes: PREFIXES.NONE, value: 1, offset: 0},
-      // {name: 'steradian', base: BASE_UNITS.STERADIAN, prefixes: PREFIXES.NONE, value: 1, offset: 0},
+      // Solid angle
+      sr: {
+        name: 'sr',
+        base: BASE_UNITS.SOLID_ANGLE,
+        prefixes: PREFIXES.NONE,
+        value: 1,
+        offset: 0,
+      },
+      steradian: {
+        name: 'steradian',
+        base: BASE_UNITS.SOLID_ANGLE,
+        prefixes: PREFIXES.NONE,
+        value: 1,
+        offset: 0,
+      },
 
       // Force
       N: {

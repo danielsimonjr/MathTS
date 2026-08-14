@@ -800,7 +800,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 3870
+      "loc": 3886
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -5371,7 +5371,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1736
+      "loc": 1740
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -7198,7 +7198,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 317
+      "loc": 321
     },
     {
       "file": "functions/src/typed/algebra.ts",
