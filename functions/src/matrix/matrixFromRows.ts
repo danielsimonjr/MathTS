@@ -17,13 +17,14 @@ interface Matrix {
   clone(): Matrix;
   toArray(): MatrixData;
   valueOf(): MatrixData;
+  forEach?(cb: (value: unknown, index: number[], matrix: Matrix) => void): void;
   _data?: MatrixData;
   _size?: number[];
   _datatype?: string;
 }
 
 interface MatrixConstructor {
-  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): Matrix;
+  (data: unknown[] | unknown[][] | { values: unknown[]; index: number[]; ptr: number[]; size: number[] }, storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface FlattenFunction {
@@ -84,6 +85,17 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
         // Check if any argument is a plain array
         const hasArray = arr.some((item) => Array.isArray(item));
 
+        const isSparse =
+          allMatrix &&
+          !hasArray &&
+          arr.some(
+            (item) => typeof (item as Matrix).storage === 'function' && (item as Matrix).storage() === 'sparse'
+          );
+
+        if (isSparse) {
+          return _createSparseMatrixFromRows(arr as Matrix[]);
+        }
+
         // Convert all to arrays for processing
         const arrays = arr.map((item) =>
           typeof (item as { toArray?: unknown }).toArray === 'function'
@@ -95,13 +107,77 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
 
         // Return Matrix only if all inputs were Matrix, otherwise return array
         if (allMatrix && !hasArray) {
-          return matrix(result);
+          return matrix(result, 'dense');
         }
         return result;
       },
-
-      // TODO implement this properly for SparseMatrix
     });
+
+    function _createSparseMatrixFromRows(arr: Matrix[]): Matrix {
+      const N = arr.length;
+      const M = checkVectorTypeAndReturnLength(arr[0]);
+
+      const entries: { row: number; col: number; value: unknown }[] = [];
+
+      for (let i = 0; i < N; i++) {
+        const rowVec = arr[i];
+        const rowLength = checkVectorTypeAndReturnLength(rowVec);
+        if (rowLength !== M) {
+          throw new TypeError(
+            'The vectors had different length: ' + (M | 0) + ' ≠ ' + (rowLength | 0)
+          );
+        }
+
+        if (typeof rowVec.forEach === 'function') {
+          const s = size(rowVec);
+          const is1D = s.length === 1;
+          const isCol = s.length === 2 && s[1] === 1;
+
+          rowVec.forEach((val, idx) => {
+            let col: number;
+            if (is1D) {
+              col = idx[0];
+            } else if (isCol) {
+              col = idx[0];
+            } else {
+              col = idx[1];
+            }
+            if (val !== 0) {
+              entries.push({ row: i, col, value: val });
+            }
+          });
+        } else {
+          const f = flatten(rowVec);
+          for (let j = 0; j < M; j++) {
+            if (f[j] !== 0) {
+              entries.push({ row: i, col: j, value: f[j] });
+            }
+          }
+        }
+      }
+
+      entries.sort((a, b) => {
+        if (a.col !== b.col) return a.col - b.col;
+        return a.row - b.row;
+      });
+
+      const values: unknown[] = [];
+      const index: number[] = [];
+      const ptr: number[] = new Array(M + 1).fill(0);
+
+      for (let i = 0; i < entries.length; i++) {
+        ptr[entries[i].col + 1]++;
+      }
+      for (let j = 1; j <= M; j++) {
+        ptr[j] += ptr[j - 1];
+      }
+      for (let i = 0; i < entries.length; i++) {
+        values.push(entries[i].value);
+        index.push(entries[i].row);
+      }
+
+      return matrix({ values, index, ptr, size: [N, M] }, 'sparse');
+    }
 
     function _createArray(arr: unknown[]): unknown[][] {
       if (arr.length === 0)
