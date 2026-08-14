@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseWorkbook, serializeWorkbook, stripOutputs, detectCellType } from '../src/parser.js';
+import {
+  parseWorkbook,
+  serializeWorkbook,
+  stripOutputs,
+  detectCellType,
+  importWorkbook,
+} from '../src/parser.js';
 import type { Workbook } from '../src/types.js';
 
 describe('parseWorkbook', () => {
@@ -145,17 +151,29 @@ cells:
     it('should reject a mapping containing a prototype-pollution key', () => {
       const result = parseWorkbook('cells: []\nmetadata:\n  constructor: evil');
       expect(result.success).toBe(false);
-      expect(result.errors!.some((e) => e.toLowerCase().includes('prototype pollution'))).toBe(true);
+      expect(result.errors!.some((e) => e.toLowerCase().includes('prototype pollution'))).toBe(
+        true
+      );
     });
 
     it('should not produce a function from a js/function tag', () => {
-      const result = parseWorkbook('cells:\n  - code: !!js/function "function(){return 1}"\n    id: a');
+      const result = parseWorkbook(
+        'cells:\n  - code: !!js/function "function(){return 1}"\n    id: a'
+      );
       // Either an error, or content coerced to a non-function string — never an executable function.
       if (result.success) {
         expect(typeof result.workbook!.cells[0].content).toBe('string');
       } else {
         expect(result.errors!.length).toBeGreaterThan(0);
       }
+    });
+
+    it('importWorkbook rejects a prototype-pollution key before the round-trip', () => {
+      const result = importWorkbook('{"cells":[],"constructor":"evil"}');
+      expect(result.success).toBe(false);
+      expect(result.errors!.some((e) => e.toLowerCase().includes('prototype pollution'))).toBe(
+        true
+      );
     });
   });
 });

@@ -4,7 +4,7 @@
 
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-08-09 (by tools/create-dependency-graph)
+**Generated**: 2026-08-14 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 
@@ -17,53 +17,53 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | JS-only                     |     128 |
 | **Total**                   | **219** |
 
-**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 41 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **unknown**): of the 41 wasm-routed functions, **0 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
 
 ## WASM-accelerated functions
 
 | Function               | Routing       | Effective | Bridge dispatch                | Module        |
 | ---------------------- | ------------- | --------- | ------------------------------ | ------------- |
-| `abs`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `airyAi`               | wasm          | wasm      | `airyAiDispatch`               | special       |
-| `airyBi`               | wasm          | wasm      | `airyBiDispatch`               | special       |
-| `atan`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `atanh`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `besselJ`              | wasm          | wasm      | `besselJDispatch`              | special       |
-| `besselJ0`             | wasm          | wasm      | `besselJ0Dispatch`             | special       |
-| `besselJ1`             | wasm          | wasm      | `besselJ1Dispatch`             | special       |
-| `besselY`              | wasm          | wasm      | `besselYDispatch`              | special       |
-| `besselY0`             | wasm          | wasm      | `besselY0Dispatch`             | special       |
-| `besselY1`             | wasm          | wasm      | `besselY1Dispatch`             | special       |
-| `carlsonRC`            | wasm          | wasm      | `carlsonRCDispatch`            | special       |
-| `carlsonRD`            | wasm          | wasm      | `carlsonRDDispatch`            | special       |
-| `carlsonRF`            | wasm          | wasm      | `carlsonRFDispatch`            | special       |
-| `carlsonRJ`            | wasm          | wasm      | `carlsonRJDispatch`            | special       |
-| `cos`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `cot`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `csc`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `ellipticE`            | wasm          | wasm      | `ellipticEDispatch`            | special       |
-| `ellipticEIncomplete`  | wasm          | wasm      | `ellipticEIncompleteDispatch`  | special       |
-| `ellipticF`            | wasm          | wasm      | `ellipticFIncompleteDispatch`  | special       |
-| `ellipticK`            | wasm          | wasm      | `ellipticKDispatch`            | special       |
-| `ellipticPi`           | wasm          | wasm      | `ellipticPiIncompleteDispatch` | special       |
-| `erfc`                 | wasm          | wasm      | `elementwiseUnaryDispatch`     | special       |
-| `exp`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `expm1`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `lgamma`               | wasm          | wasm      | `lgammaDispatch`               | special       |
-| `log`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log10`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log1p`                | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `log2`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `noncentralChi2PDF`    | wasm          | wasm      | `lgammaDispatch`               | distributions |
+| `abs`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `airyAi`               | wasm          | unknown   | `airyAiDispatch`               | special       |
+| `airyBi`               | wasm          | unknown   | `airyBiDispatch`               | special       |
+| `atan`                 | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `atanh`                | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `besselJ`              | wasm          | unknown   | `besselJDispatch`              | special       |
+| `besselJ0`             | wasm          | unknown   | `besselJ0Dispatch`             | special       |
+| `besselJ1`             | wasm          | unknown   | `besselJ1Dispatch`             | special       |
+| `besselY`              | wasm          | unknown   | `besselYDispatch`              | special       |
+| `besselY0`             | wasm          | unknown   | `besselY0Dispatch`             | special       |
+| `besselY1`             | wasm          | unknown   | `besselY1Dispatch`             | special       |
+| `carlsonRC`            | wasm          | unknown   | `carlsonRCDispatch`            | special       |
+| `carlsonRD`            | wasm          | unknown   | `carlsonRDDispatch`            | special       |
+| `carlsonRF`            | wasm          | unknown   | `carlsonRFDispatch`            | special       |
+| `carlsonRJ`            | wasm          | unknown   | `carlsonRJDispatch`            | special       |
+| `cos`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `cot`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `csc`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `ellipticE`            | wasm          | unknown   | `ellipticEDispatch`            | special       |
+| `ellipticEIncomplete`  | wasm          | unknown   | `ellipticEIncompleteDispatch`  | special       |
+| `ellipticF`            | wasm          | unknown   | `ellipticFIncompleteDispatch`  | special       |
+| `ellipticK`            | wasm          | unknown   | `ellipticKDispatch`            | special       |
+| `ellipticPi`           | wasm          | unknown   | `ellipticPiIncompleteDispatch` | special       |
+| `erfc`                 | wasm          | unknown   | `elementwiseUnaryDispatch`     | special       |
+| `exp`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `expm1`                | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `lgamma`               | wasm          | unknown   | `lgammaDispatch`               | special       |
+| `log`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log10`                | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log1p`                | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `log2`                 | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `noncentralChi2PDF`    | wasm          | unknown   | `lgammaDispatch`               | distributions |
 | `parallelFFT`          | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
 | `parallelIFFT`         | wasm+parallel | unknown   | `fftGpuDispatch`               | signal        |
-| `parallelStatMedian`   | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
-| `parallelStatQuantile` | wasm          | wasm      | `sortF64Dispatch`              | statistics    |
-| `sec`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `sin`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `sinh`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
-| `tan`                  | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | trigonometry  |
-| `tanh`                 | wasm+parallel | wasm      | `elementwiseUnaryDispatch`     | arithmetic    |
+| `parallelStatMedian`   | wasm          | unknown   | `sortF64Dispatch`              | statistics    |
+| `parallelStatQuantile` | wasm          | unknown   | `sortF64Dispatch`              | statistics    |
+| `sec`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `sin`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `sinh`                 | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
+| `tan`                  | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | trigonometry  |
+| `tanh`                 | wasm+parallel | unknown   | `elementwiseUnaryDispatch`     | arithmetic    |
 
 ## Parallel-only functions (worker pool, not WASM)
 
@@ -145,16 +145,4 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 ## WASM binary exports
 
-Probed from `assembly/build/mathts.wasm` via `WebAssembly.Module.exports()` (a parse-only static read — no instantiation; rebuild with `npm run build:wasm`).
-
-**326 total exports** = **314 functions** + **11 globals** (numeric constants such as `PI`/`E`) + **1 memory** (the shared linear memory), compiled from **27 AssemblyScript source files** under `assembly/src/`.
-
-| Category (by export-name prefix) | Function exports |
-| -------------------------------- | ---------------: |
-| Scalar & special (f64)           |              133 |
-| Array                            |               54 |
-| Matrix                           |               46 |
-| Complex scalar                   |               46 |
-| Complex array                    |               33 |
-| FFT                              |                2 |
-| **Total**                        |          **314** |
+> WASM binary not built — run `npm run build:wasm` then `npm run docs:deps` to populate this section (probed via `WebAssembly.Module.exports()`).

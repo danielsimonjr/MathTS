@@ -54,6 +54,12 @@ const bn = (x: number): BigNumber => BigNumber.fromNumber(x);
 const asNum = (v: unknown): number =>
   v instanceof BigNumber || v instanceof Fraction ? v.toNumber() : (v as number);
 
+/** IEEE-aware float equality. `toBeCloseTo` fails on NaN≈NaN (NaN - NaN is NaN). */
+function eqIeee(a: number, b: number, digits = 9): void {
+  if (Object.is(a, b)) return;
+  expect(a).toBeCloseTo(b, digits);
+}
+
 // ---------------------------------------------------------------------------
 // The three (four, counting the Fraction floor) bugs, pinned to CORRECT values.
 // ---------------------------------------------------------------------------
@@ -227,11 +233,25 @@ describe('Bucket C — typed dispatcher ≡ core scalar primitive', () => {
           const a = new Complex(re, im);
           const t = pow(a, exp) as Complex;
           const c = corePow(a, exp) as Complex;
-          expect(t.re).toBeCloseTo(c.re, 9);
-          expect(t.im).toBeCloseTo(c.im, 9);
+          eqIeee(t.re, c.re);
+          eqIeee(t.im, c.im);
         }
       )
     );
+  });
+
+  it('pow(Complex(Number.MIN_VALUE, 0), negative) matches core (CI counterexample)', () => {
+    // Seed 1484219061 / [5e-324, 0, -0.9534450651769089]: toBeCloseTo(NaN, NaN)
+    // failed because Inf*0 in fromPolar produced NaN on the imaginary part.
+    const a = new Complex(5e-324, 0);
+    const exp = -0.9534450651769089;
+    const t = pow(a, exp) as Complex;
+    const c = corePow(a, exp) as Complex;
+    eqIeee(t.re, c.re);
+    eqIeee(t.im, c.im);
+    expect(t.re).toBe(Infinity);
+    expect(t.im === 0).toBe(true);
+    expect(Number.isNaN(t.im)).toBe(false);
   });
 
   it('equal(number, number) matches core tolerance semantics', () => {

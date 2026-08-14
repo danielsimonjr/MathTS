@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-09",
+  "generated": "2026-08-14",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4406,6 +4406,7 @@
       "ParseResult",
       "parseWorkbook",
       "parseYamlHardened",
+      "parseYamlSafe",
       "removeCell",
       "RemoveResult",
       "renameCell",

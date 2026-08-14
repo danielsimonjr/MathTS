@@ -37,10 +37,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 try {
   (
     mathTyped as unknown as {
-      addType: (
-        t: { name: string; test: (x: unknown) => boolean },
-        b: boolean
-      ) => void;
+      addType: (t: { name: string; test: (x: unknown) => boolean }, b: boolean) => void;
     }
   ).addType(
     {
@@ -777,6 +774,11 @@ describe('parse – object literals', () => {
     const node = parse('{"key": 42}') as unknown as ParsedNode;
     expect(nodeType(node)).toBe('ObjectNode');
     expect(node.properties['key'].value).toBe(42);
+  });
+
+  it('rejects {__proto__: 1} (prototype pollution at parse time)', () => {
+    expect(() => parse('{__proto__: 1}')).toThrow(/No access to property/);
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });
 

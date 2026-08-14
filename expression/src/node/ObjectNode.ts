@@ -1,4 +1,4 @@
-import { getSafeProperty } from '../utils/customs.js';
+import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import { isNode } from '../utils/is.js';
 import { hasOwnProperty } from '../utils/object.js';
@@ -92,7 +92,11 @@ export const createObjectNode = /* #__PURE__ */ factory(
             const parsedKey = JSON.parse(stringifiedKey);
             const prop = getSafeProperty(this.properties, key) as Node;
 
-            evalEntries[parsedKey] = prop._compile(math, argNames);
+            // Validate the unicode-decoded key at compile time so a payload
+            // like {"\\u005f\\u005fproto\\u005f\\u005f": ...} cannot land in
+            // evalEntries (which would pollute that object) and is rejected
+            // before evaluation. Matches the tree-walking compiler.
+            setSafeProperty(evalEntries, parsedKey, prop._compile(math, argNames));
           }
         }
 
@@ -105,7 +109,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
           for (const key in evalEntries) {
             if (hasOwnProperty(evalEntries, key)) {
-              obj[key] = evalEntries[key](scope, args, context);
+              setSafeProperty(obj, key, evalEntries[key](scope, args, context));
             }
           }
 

@@ -33,7 +33,7 @@ import { toIpynb } from './ipynb';
 import { runWorkbookWithTimeout } from './timeout-runner';
 import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
-import { parseYamlHardened } from './yaml-safe';
+import { parseYamlSafe } from './yaml-safe';
 
 /**
  * The wired expression parser. `parse` is a real runtime export of the
@@ -397,7 +397,7 @@ function validateChartSpecs(workbook: Workbook): string[] {
     if (cell.type !== 'visualization') continue;
     let spec: unknown;
     try {
-      spec = parseYamlHardened(cell.content);
+      spec = parseYamlSafe(cell.content);
     } catch (error) {
       problems.push(`Cell "${cell.id}": invalid chart spec (${errMessage(error)})`);
       continue;
@@ -646,7 +646,7 @@ function buildRenderDoc(
     if (c.type === 'visualization') {
       rc.type = 'chart';
       try {
-        const spec = parseYamlHardened(c.content) as {
+        const spec = parseYamlSafe(c.content) as {
           type?: 'line' | 'scatter' | 'bar';
           title?: string;
           x?: { label?: string; data?: unknown };

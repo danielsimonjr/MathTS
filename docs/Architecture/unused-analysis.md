@@ -4,7 +4,7 @@
 
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-08-09
+**Generated**: 2026-08-14
 
 ## Summary
 
@@ -12,9 +12,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 225
+- **Potentially unused exports**: 226
   - **Unreferenced anywhere (deletion candidates)**: 2
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 223
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 224
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -485,6 +485,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `WorkerSuccessMessage` (interface) — 1 in-file ref
 - `WorkerFailureMessage` (interface) — 1 in-file ref
+
+### `workbook/src/yaml-safe.ts`
+
+- `assertNoPollution` (function) — 1 in-file ref
 
 ### `plot/src/svg.ts`
 

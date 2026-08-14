@@ -69,6 +69,18 @@ describe('ObjectNode - _compile', () => {
     const fn = node._compile(math, argNames);
     expect(fn(new Map(), {}, null)).toEqual({});
   });
+
+  it('rejects a raw __proto__ key (prototype pollution)', () => {
+    const node = new ObjectNode({});
+    Object.defineProperty(node.properties, '__proto__', {
+      value: makeConst({ polluted: 1 }),
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+    expect(() => node._compile(math, argNames)).toThrow(/No access to property/);
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
+  });
 });
 
 describe('ObjectNode - forEach', () => {

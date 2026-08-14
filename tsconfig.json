@@ -3,9 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@danielsimonjr/mathts-core": ["packages/core/src"],
-      "@danielsimonjr/mathts-matrix": ["packages/matrix/src"],
-      "@danielsimonjr/mathts-workbook": ["packages/workbook/src"]
+      "@danielsimonjr/mathts-core": ["core/src"],
+      "@danielsimonjr/mathts-matrix": ["matrix/src"],
+      "@danielsimonjr/mathts-workbook": ["workbook/src"]
     }
   },
   "references": [],

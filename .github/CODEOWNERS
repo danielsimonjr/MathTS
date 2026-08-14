@@ -6,13 +6,13 @@
 * @danielsimonjr
 
 # Core package
-/packages/core/ @danielsimonjr
+/core/ @danielsimonjr
 
 # Matrix package
-/packages/matrix/ @danielsimonjr
+/matrix/ @danielsimonjr
 
 # Workbook package
-/packages/workbook/ @danielsimonjr
+/workbook/ @danielsimonjr
 
 # Documentation
 /docs/ @danielsimonjr
