@@ -10418,7 +10418,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 517
+      "loc": 593
     },
     {
       "file": "matrix/tests/DenseMatrix.test.ts",
