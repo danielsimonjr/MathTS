@@ -5098,7 +5098,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 149
+      "loc": 155
     },
     {
       "file": "functions/src/arithmetic/subtractScalar.ts",
