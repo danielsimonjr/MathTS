@@ -98,3 +98,9 @@ docs/.docusaurus/
 CUsersdanieAppDataLocalTempclaudecoverage.txt
 .npmrc
 tools/benchmark/gpu/bench-3way.bundle.js
+
+# Merge-conflict debris. Two of these (648 lines) reached main via #237, and #238
+# was closed partly for committing a third. Nothing ignored them, so nothing stopped
+# them.
+*.orig
+*.rej
