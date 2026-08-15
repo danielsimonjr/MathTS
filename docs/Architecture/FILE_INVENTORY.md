@@ -4,27 +4,27 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-08-14 (by tools/create-dependency-graph)
+**Generated**: 2026-08-15 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1778
+**Total files**: 1833
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
-| `reachable`   |     1083 | A `src/` file in the module graph, reachable from a root.                                                    |
+| `reachable`   |     1135 | A `src/` file in the module graph, reachable from a root.                                                    |
 | `build-entry` |       33 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        2 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      601 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      604 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1778** |                                                                                                              |
+| **Total**     | **1833** |                                                                                                              |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1118 |
-| `tests`    |   601 |
+| `src`      |  1170 |
+| `tests`    |   604 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -47,11 +47,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    14 |
 | `@danielsimonjr/mathts-core`           |    79 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   490 |
-| `@danielsimonjr/mathts-functions`      |   762 |
+| `@danielsimonjr/mathts-expression`     |   542 |
+| `@danielsimonjr/mathts-functions`      |   763 |
 | `@danielsimonjr/mathts-gpu`            |    15 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |    95 |
+| `@danielsimonjr/mathts-matrix`         |    97 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    37 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -572,6 +572,58 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/src/embeddedDocs/function/utils/oct.ts`                               | @danielsimonjr/mathts-expression     | src      | reachable   |
 | `expression/src/embeddedDocs/function/utils/print.ts`                             | @danielsimonjr/mathts-expression     | src      | reachable   |
 | `expression/src/embeddedDocs/function/utils/typeOf.ts`                            | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/atomicMass.ts`                     | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/avogadro.ts`                       | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/bohrRadius.ts`                     | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/boltzmann.ts`                      | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts`        | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts`             | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/coulomb.ts`                        | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/coulombConstant.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/deuteronMass.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/efimovFactor.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/electricConstant.ts`               | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/electronMass.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts`               | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/faraday.ts`                        | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts`                  | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/fineStructure.ts`                  | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/firstRadiation.ts`                 | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/gasConstant.ts`                    | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts`            | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/gravity.ts`                        | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts`                  | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/index.ts`                          | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts`      | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/klitzing.ts`                       | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/loschmidt.ts`                      | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/magneticConstant.ts`               | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts`            | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/molarMass.ts`                      | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/molarMassC12.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts`            | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/molarVolume.ts`                    | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/neutronMass.ts`                    | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckCharge.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckConstant.ts`                 | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckLength.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckMass.ts`                     | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckTemperature.ts`              | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/planckTime.ts`                     | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/protonMass.ts`                     | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts`           | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts`          | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/rydberg.ts`                        | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts`                  | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/secondRadiation.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/speedOfLight.ts`                   | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts`            | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts`                | @danielsimonjr/mathts-expression     | src      | reachable   |
+| `expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts`               | @danielsimonjr/mathts-expression     | src      | reachable   |
 | `expression/src/error/DimensionError.ts`                                          | @danielsimonjr/mathts-expression     | src      | reachable   |
 | `expression/src/error/IndexError.ts`                                              | @danielsimonjr/mathts-expression     | src      | reachable   |
 | `expression/src/evaluator/evaluate.ts`                                            | @danielsimonjr/mathts-expression     | src      | reachable   |
@@ -1332,6 +1384,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/geometry-hull-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-sets.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/geometry/intersect.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gp-regression-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gpu-dispatch-overhead.browser.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gpu-elementwise.browser.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1569,6 +1622,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/operations/lu-solve.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/lu.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/pinv.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/operations/qr-family.test.ts`                                       | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/qr.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/schur-eigenvalue-oracle.test.ts`                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/schur.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -1579,6 +1633,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/sparse/SparseMatrix.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/svd-wasm.test.ts`                                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/typed-operations.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/types/dense/reduction.test.ts`                                      | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm-resolve.test.ts`                                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/accuracy.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/decompositions-as.test.ts`                                     | @danielsimonjr/mathts-matrix         | tests    | test        |

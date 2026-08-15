@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The Release workflow could not create a version PR** — `@changesets/cli` bumped to
+  `^3.0.0`. `changesets/action` had been upgraded to v2.0.0 while the CLI stayed on
+  `^2.27.0`, and action v2 refuses CLI v2 outright: *"This version of the Changesets action
+  is designed to work with Changesets CLI v3."* The Release job therefore failed on every
+  push to `main`, which is why the standing `chore: release packages` PR (#209) went stale.
+  A companion-version pair upgraded on one side only — bump both together.
+- **Branch protection on `main` required two status checks that no longer exist.**
+  `Build & Test (20.x)` / `Build & Test (22.x)` were renamed to `Test (20.x)` / `Test (22.x)`
+  by `104a1c90`, but the protection rule was never updated, so two required contexts could
+  never report and **every pull request was permanently `BLOCKED`** — which is the real
+  explanation for the 41-PR backlog. Required contexts now match the emitted job names, and
+  `Compile & Lint` was added: typecheck and lint were previously **not gating merges at all**.
+
 - **`derivative()`'s `order` option was silently removed, along with the test that proved it
   worked.** `{ order: 0 }`, `{ order: 2 }` and `{ order: 3 }` all returned the **first**
   derivative, and a negative or non-integer `order` was accepted instead of throwing. Both

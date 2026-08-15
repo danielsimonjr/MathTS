@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-08-14",
-    "totalFiles": 1116,
+    "lastUpdated": "2026-08-15",
+    "totalFiles": 1168,
     "totalModules": 83,
-    "totalExports": 5754
+    "totalExports": 5806
   },
   "entryPoints": [
     {
@@ -8185,6 +8185,10 @@
             "imports": ["rightLogShiftNumber"]
           },
           {
+            "file": "../utils/bignumber/bitwise.js",
+            "imports": ["rightLogShiftBigNumber"]
+          },
+          {
             "file": "./useMatrixForArrayScalar.js",
             "imports": ["createUseMatrixForArrayScalar"]
           },
@@ -15629,6 +15633,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/collection.js",
+            "imports": ["deepMap"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -22522,7 +22530,8 @@
           "bitwise",
           "bitXor",
           "leftShiftBigNumber",
-          "rightArithShiftBigNumber"
+          "rightArithShiftBigNumber",
+          "rightLogShiftBigNumber"
         ],
         "functions": [
           "bitAndBigNumber",
@@ -22531,7 +22540,8 @@
           "bitwise",
           "bitXor",
           "leftShiftBigNumber",
-          "rightArithShiftBigNumber"
+          "rightArithShiftBigNumber",
+          "rightLogShiftBigNumber"
         ]
       },
       "functions/src/utils/bignumber/nearlyEqual.ts": {
@@ -24353,6 +24363,62 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./physicalConstants/index.js",
+            "imports": [
+              "speedOfLightDocs",
+              "gravitationConstantDocs",
+              "planckConstantDocs",
+              "reducedPlanckConstantDocs",
+              "magneticConstantDocs",
+              "electricConstantDocs",
+              "vacuumImpedanceDocs",
+              "coulombDocs",
+              "coulombConstantDocs",
+              "elementaryChargeDocs",
+              "bohrMagnetonDocs",
+              "conductanceQuantumDocs",
+              "inverseConductanceQuantumDocs",
+              "magneticFluxQuantumDocs",
+              "nuclearMagnetonDocs",
+              "klitzingDocs",
+              "bohrRadiusDocs",
+              "classicalElectronRadiusDocs",
+              "electronMassDocs",
+              "fermiCouplingDocs",
+              "fineStructureDocs",
+              "hartreeEnergyDocs",
+              "protonMassDocs",
+              "deuteronMassDocs",
+              "neutronMassDocs",
+              "quantumOfCirculationDocs",
+              "rydbergDocs",
+              "thomsonCrossSectionDocs",
+              "weakMixingAngleDocs",
+              "efimovFactorDocs",
+              "atomicMassDocs",
+              "avogadroDocs",
+              "boltzmannDocs",
+              "faradayDocs",
+              "firstRadiationDocs",
+              "loschmidtDocs",
+              "gasConstantDocs",
+              "molarPlanckConstantDocs",
+              "molarVolumeDocs",
+              "sackurTetrodeDocs",
+              "secondRadiationDocs",
+              "stefanBoltzmannDocs",
+              "wienDisplacementDocs",
+              "molarMassDocs",
+              "molarMassC12Docs",
+              "gravityDocs",
+              "planckLengthDocs",
+              "planckMassDocs",
+              "planckTimeDocs",
+              "planckChargeDocs",
+              "planckTemperatureDocs"
+            ]
+          },
           {
             "file": "./constants/e.js",
             "imports": ["eDocs"]
@@ -28545,6 +28611,782 @@
         "workspaceDependencies": [],
         "exports": ["typeOfDocs"],
         "constants": ["typeOfDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": {
+        "description": "atomicMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["atomicMassDocs"],
+        "constants": ["atomicMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/avogadro.ts": {
+        "description": "avogadro module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["avogadroDocs"],
+        "constants": ["avogadroDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": {
+        "description": "bohrMagneton module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["bohrMagnetonDocs"],
+        "constants": ["bohrMagnetonDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": {
+        "description": "bohrRadius module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["bohrRadiusDocs"],
+        "constants": ["bohrRadiusDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": {
+        "description": "boltzmann module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["boltzmannDocs"],
+        "constants": ["boltzmannDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": {
+        "description": "classicalElectronRadius module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["classicalElectronRadiusDocs"],
+        "constants": ["classicalElectronRadiusDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": {
+        "description": "conductanceQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["conductanceQuantumDocs"],
+        "constants": ["conductanceQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/coulomb.ts": {
+        "description": "coulomb module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["coulombDocs"],
+        "constants": ["coulombDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": {
+        "description": "coulombConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["coulombConstantDocs"],
+        "constants": ["coulombConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": {
+        "description": "deuteronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["deuteronMassDocs"],
+        "constants": ["deuteronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": {
+        "description": "efimovFactor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["efimovFactorDocs"],
+        "constants": ["efimovFactorDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": {
+        "description": "electricConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["electricConstantDocs"],
+        "constants": ["electricConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/electronMass.ts": {
+        "description": "electronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["electronMassDocs"],
+        "constants": ["electronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": {
+        "description": "elementaryCharge module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["elementaryChargeDocs"],
+        "constants": ["elementaryChargeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/faraday.ts": {
+        "description": "faraday module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["faradayDocs"],
+        "constants": ["faradayDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": {
+        "description": "fermiCoupling module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fermiCouplingDocs"],
+        "constants": ["fermiCouplingDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": {
+        "description": "fineStructure module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fineStructureDocs"],
+        "constants": ["fineStructureDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": {
+        "description": "firstRadiation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["firstRadiationDocs"],
+        "constants": ["firstRadiationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": {
+        "description": "gasConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gasConstantDocs"],
+        "constants": ["gasConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": {
+        "description": "gravitationConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gravitationConstantDocs"],
+        "constants": ["gravitationConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gravity.ts": {
+        "description": "gravity module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gravityDocs"],
+        "constants": ["gravityDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": {
+        "description": "hartreeEnergy module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hartreeEnergyDocs"],
+        "constants": ["hartreeEnergyDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/index.ts": {
+        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 51 symbols)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./speedOfLight.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gravitationConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./reducedPlanckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./magneticConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./electricConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./vacuumImpedance.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./coulomb.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./coulombConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./elementaryCharge.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./bohrMagneton.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./conductanceQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./inverseConductanceQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./magneticFluxQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./nuclearMagneton.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./klitzing.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./bohrRadius.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./classicalElectronRadius.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./electronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./fermiCoupling.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./fineStructure.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./hartreeEnergy.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./protonMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./deuteronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./neutronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./quantumOfCirculation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./rydberg.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./thomsonCrossSection.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./weakMixingAngle.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./efimovFactor.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./atomicMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./avogadro.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./boltzmann.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./faraday.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./firstRadiation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./loschmidt.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gasConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarPlanckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarVolume.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./sackurTetrode.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./secondRadiation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./stefanBoltzmann.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./wienDisplacement.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarMassC12.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gravity.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckLength.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckTime.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckCharge.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckTemperature.js",
+            "imports": ["*"],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "reExported": [
+          "* from ./speedOfLight.js",
+          "* from ./gravitationConstant.js",
+          "* from ./planckConstant.js",
+          "* from ./reducedPlanckConstant.js",
+          "* from ./magneticConstant.js",
+          "* from ./electricConstant.js",
+          "* from ./vacuumImpedance.js",
+          "* from ./coulomb.js",
+          "* from ./coulombConstant.js",
+          "* from ./elementaryCharge.js",
+          "* from ./bohrMagneton.js",
+          "* from ./conductanceQuantum.js",
+          "* from ./inverseConductanceQuantum.js",
+          "* from ./magneticFluxQuantum.js",
+          "* from ./nuclearMagneton.js",
+          "* from ./klitzing.js",
+          "* from ./bohrRadius.js",
+          "* from ./classicalElectronRadius.js",
+          "* from ./electronMass.js",
+          "* from ./fermiCoupling.js",
+          "* from ./fineStructure.js",
+          "* from ./hartreeEnergy.js",
+          "* from ./protonMass.js",
+          "* from ./deuteronMass.js",
+          "* from ./neutronMass.js",
+          "* from ./quantumOfCirculation.js",
+          "* from ./rydberg.js",
+          "* from ./thomsonCrossSection.js",
+          "* from ./weakMixingAngle.js",
+          "* from ./efimovFactor.js",
+          "* from ./atomicMass.js",
+          "* from ./avogadro.js",
+          "* from ./boltzmann.js",
+          "* from ./faraday.js",
+          "* from ./firstRadiation.js",
+          "* from ./loschmidt.js",
+          "* from ./gasConstant.js",
+          "* from ./molarPlanckConstant.js",
+          "* from ./molarVolume.js",
+          "* from ./sackurTetrode.js",
+          "* from ./secondRadiation.js",
+          "* from ./stefanBoltzmann.js",
+          "* from ./wienDisplacement.js",
+          "* from ./molarMass.js",
+          "* from ./molarMassC12.js",
+          "* from ./gravity.js",
+          "* from ./planckLength.js",
+          "* from ./planckMass.js",
+          "* from ./planckTime.js",
+          "* from ./planckCharge.js",
+          "* from ./planckTemperature.js"
+        ]
+      },
+      "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": {
+        "description": "inverseConductanceQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["inverseConductanceQuantumDocs"],
+        "constants": ["inverseConductanceQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/klitzing.ts": {
+        "description": "klitzing module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["klitzingDocs"],
+        "constants": ["klitzingDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": {
+        "description": "loschmidt module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["loschmidtDocs"],
+        "constants": ["loschmidtDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": {
+        "description": "magneticConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["magneticConstantDocs"],
+        "constants": ["magneticConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": {
+        "description": "magneticFluxQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["magneticFluxQuantumDocs"],
+        "constants": ["magneticFluxQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarMass.ts": {
+        "description": "molarMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarMassDocs"],
+        "constants": ["molarMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": {
+        "description": "molarMassC12 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarMassC12Docs"],
+        "constants": ["molarMassC12Docs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": {
+        "description": "molarPlanckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarPlanckConstantDocs"],
+        "constants": ["molarPlanckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": {
+        "description": "molarVolume module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarVolumeDocs"],
+        "constants": ["molarVolumeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": {
+        "description": "neutronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["neutronMassDocs"],
+        "constants": ["neutronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": {
+        "description": "nuclearMagneton module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["nuclearMagnetonDocs"],
+        "constants": ["nuclearMagnetonDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": {
+        "description": "planckCharge module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckChargeDocs"],
+        "constants": ["planckChargeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": {
+        "description": "planckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckConstantDocs"],
+        "constants": ["planckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckLength.ts": {
+        "description": "planckLength module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckLengthDocs"],
+        "constants": ["planckLengthDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckMass.ts": {
+        "description": "planckMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckMassDocs"],
+        "constants": ["planckMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": {
+        "description": "planckTemperature module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckTemperatureDocs"],
+        "constants": ["planckTemperatureDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckTime.ts": {
+        "description": "planckTime module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckTimeDocs"],
+        "constants": ["planckTimeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/protonMass.ts": {
+        "description": "protonMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["protonMassDocs"],
+        "constants": ["protonMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": {
+        "description": "quantumOfCirculation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["quantumOfCirculationDocs"],
+        "constants": ["quantumOfCirculationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": {
+        "description": "reducedPlanckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["reducedPlanckConstantDocs"],
+        "constants": ["reducedPlanckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/rydberg.ts": {
+        "description": "rydberg module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rydbergDocs"],
+        "constants": ["rydbergDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": {
+        "description": "sackurTetrode module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["sackurTetrodeDocs"],
+        "constants": ["sackurTetrodeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": {
+        "description": "secondRadiation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["secondRadiationDocs"],
+        "constants": ["secondRadiationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": {
+        "description": "speedOfLight module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["speedOfLightDocs"],
+        "constants": ["speedOfLightDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": {
+        "description": "stefanBoltzmann module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["stefanBoltzmannDocs"],
+        "constants": ["stefanBoltzmannDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": {
+        "description": "thomsonCrossSection module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["thomsonCrossSectionDocs"],
+        "constants": ["thomsonCrossSectionDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": {
+        "description": "vacuumImpedance module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["vacuumImpedanceDocs"],
+        "constants": ["vacuumImpedanceDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": {
+        "description": "weakMixingAngle module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["weakMixingAngleDocs"],
+        "constants": ["weakMixingAngleDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": {
+        "description": "wienDisplacement module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["wienDisplacementDocs"],
+        "constants": ["wienDisplacementDocs"]
       }
     },
     "expression/error": {
@@ -37315,7 +38157,7 @@
           },
           {
             "module": "path",
-            "imports": ["extname", "join", "basename"]
+            "imports": ["extname", "join"]
           },
           {
             "module": "os",
@@ -38691,7 +39533,59 @@
           "expression/src/embeddedDocs/function/utils/numeric.ts",
           "expression/src/embeddedDocs/function/utils/oct.ts",
           "expression/src/embeddedDocs/function/utils/print.ts",
-          "expression/src/embeddedDocs/function/utils/typeOf.ts"
+          "expression/src/embeddedDocs/function/utils/typeOf.ts",
+          "expression/src/embeddedDocs/physicalConstants/atomicMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/avogadro.ts",
+          "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts",
+          "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts",
+          "expression/src/embeddedDocs/physicalConstants/boltzmann.ts",
+          "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts",
+          "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/coulomb.ts",
+          "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts",
+          "expression/src/embeddedDocs/physicalConstants/electricConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/electronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts",
+          "expression/src/embeddedDocs/physicalConstants/faraday.ts",
+          "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts",
+          "expression/src/embeddedDocs/physicalConstants/fineStructure.ts",
+          "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts",
+          "expression/src/embeddedDocs/physicalConstants/gasConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/gravity.ts",
+          "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts",
+          "expression/src/embeddedDocs/physicalConstants/index.ts",
+          "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/klitzing.ts",
+          "expression/src/embeddedDocs/physicalConstants/loschmidt.ts",
+          "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarVolume.ts",
+          "expression/src/embeddedDocs/physicalConstants/neutronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckCharge.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckLength.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckTime.ts",
+          "expression/src/embeddedDocs/physicalConstants/protonMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts",
+          "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/rydberg.ts",
+          "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts",
+          "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts",
+          "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts",
+          "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts",
+          "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts",
+          "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts",
+          "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts",
+          "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts"
         ]
       },
       {
@@ -38991,17 +39885,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1116,
+    "totalTypeScriptFiles": 1168,
     "totalModules": 83,
-    "totalLinesOfCode": 193263,
-    "totalExports": 5754,
+    "totalLinesOfCode": 194159,
+    "totalExports": 5806,
     "totalClasses": 53,
     "totalInterfaces": 504,
-    "totalFunctions": 1867,
+    "totalFunctions": 1868,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1543,
-    "totalReExports": 2305,
+    "totalConstants": 1594,
+    "totalReExports": 2356,
     "totalTypeOnlyImports": 579,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
