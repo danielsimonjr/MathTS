@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-parser",
   "version": "0.1.19",
-  "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
+  "description": "Standalone expression parser for MathTS \u2014 the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "tsup": "^8.0.0",
-    "typescript": "^7.0.2",
+    "typescript": "^5.3.0",
     "vitest": "^4.1.10"
   },
   "publishConfig": {
