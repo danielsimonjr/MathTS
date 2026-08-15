@@ -63,7 +63,9 @@ jobs:
         # Omitting `publish:` makes this version-only: with pending changesets
         # it opens/updates the release PR; with none, it is a no-op.
         with:
-          title: 'chore: release packages'
-          commit: 'chore: release packages'
+          # v2 renamed these from `title`/`commit`; the v1 names are now a hard
+          # error, not a warning, so they must move with the action bump.
+          pr-title: 'chore: release packages'
+          commit-message: 'chore: release packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
