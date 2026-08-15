@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-14",
+  "generated": "2026-08-15",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -1262,6 +1262,7 @@
       "setPowersetDocs",
       "setSafeProperty",
       "setSizeDocs",
+      "setStringSubset",
       "setSymDifferenceDocs",
       "setUnionDocs",
       "sign",

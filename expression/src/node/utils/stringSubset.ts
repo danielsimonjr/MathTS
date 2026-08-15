@@ -77,10 +77,27 @@ export function setStringSubset(
   if (!index || index.isIndex !== true) {
     throw new TypeError('Invalid index: must be an Index or Index-like object');
   }
-  if (isEmptyIndex(index)) {
+  // DELIBERATELY not the `isIndex()` guard that getStringSubset above uses, even though
+  // that would narrow IndexLike to Index and remove the cast below. The two functions
+  // have different callers and different contracts:
+  //   getStringSubset <- access.ts, always real Index instances
+  //   setStringSubset <- assign.ts, which must accept Index-LIKE objects
+  // `isIndex` tests `constructor.prototype.isIndex`, so a duck-typed object literal
+  // fails it. Swapping the check in breaks `assign - string assignment via subset`
+  // ("replaces a character in a string"), which passes exactly such a literal. Verified
+  // by making that substitution and watching the test go red.
+  //
+  // So the runtime check stays permissive and the narrowing is done once, here. The
+  // helpers below only ever touch the structural surface IndexLike declares
+  // (size/min/max/isScalar/dimension), and the check above has already established it.
+  // The target type is derived from the helper rather than imported by name: `Index` is
+  // declared in expression's utils/is.ts AND in core's, and these helpers come from core
+  // via utils/array.js, so naming it here risks silently picking the wrong one.
+  const idx = index as unknown as Parameters<typeof isEmptyIndex>[0];
+  if (isEmptyIndex(idx)) {
     return str;
   }
-  validateIndexSourceSize(Array.from(str), index);
+  validateIndexSourceSize(Array.from(str), idx);
   if (index.size().length !== 1) {
     throw new DimensionError(index.size().length, 1);
   }
