@@ -1,1 +1,0 @@
-{"version":3,"file":"builtin-shaders.d.ts","sourceRoot":"","sources":["builtin-shaders.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAEH,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,2BAA2B,CAAC;AAE/D,eAAO,MAAM,eAAe;IAC1B,6BAA6B;;IAqB7B,gCAAgC;;IAqBhC,yCAAyC;;IAqBzC,mCAAmC;;IAkBnC,2CAA2C;;IA0B3C,8BAA8B;;IAmB9B,wCAAwC;;CA8ChC,CAAC;AAEX,iEAAiE;AACjE,wBAAgB,sBAAsB,CAAC,EAAE,EAAE,aAAa,GAAG,IAAI,CAI9D"}
