@@ -1,19 +1,19 @@
 {
-  "generated": "2026-08-14",
-  "totalFiles": 1775,
+  "generated": "2026-08-15",
+  "totalFiles": 1833,
   "byDisposition": {
-    "reachable": 1083,
+    "reachable": 1135,
     "build-entry": 33,
     "test-only": 2,
     "orphan": 0,
-    "test": 598,
+    "test": 604,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1118,
-    "tests": 598,
+    "src": 1170,
+    "tests": 604,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -27,11 +27,11 @@
     "@danielsimonjr/mathts-core": 79,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
-    "@danielsimonjr/mathts-expression": 490,
-    "@danielsimonjr/mathts-functions": 761,
+    "@danielsimonjr/mathts-expression": 542,
+    "@danielsimonjr/mathts-functions": 763,
     "@danielsimonjr/mathts-gpu": 15,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 93,
+    "@danielsimonjr/mathts-matrix": 97,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 9,
@@ -800,7 +800,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 3870
+      "loc": 3887
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1038,7 +1038,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 281
+      "loc": 296
     },
     {
       "file": "core/tests/types/unit/core-unit.test.ts",
@@ -1374,7 +1374,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 846
+      "loc": 856
     },
     {
       "file": "expression/src/embeddedDocs/function/algebra/apart.ts",
@@ -3561,6 +3561,370 @@
       "loc": 9
     },
     {
+      "file": "expression/src/embeddedDocs/physicalConstants/atomicMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/avogadro.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/boltzmann.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/coulomb.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/electricConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/electronMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/faraday.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/fineStructure.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/gasConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/gravity.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/index.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 52
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/klitzing.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/loschmidt.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/molarMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/molarVolume.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/neutronMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckCharge.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckLength.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/planckTime.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/protonMass.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/rydberg.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
+      "file": "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 9
+    },
+    {
       "file": "expression/src/error/DimensionError.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
@@ -4587,7 +4951,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 855
+      "loc": 874
     },
     {
       "file": "functions/src/algebra/leafCount.ts",
@@ -5098,7 +5462,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 155
+      "loc": 158
     },
     {
       "file": "functions/src/arithmetic/subtractScalar.ts",
@@ -5182,7 +5546,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 138
+      "loc": 139
     },
     {
       "file": "functions/src/bitwise/useMatrixForArrayScalar.ts",
@@ -5294,7 +5658,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 389
+      "loc": 401
     },
     {
       "file": "functions/src/core/function/config.ts",
@@ -5315,7 +5679,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 584
+      "loc": 585
     },
     {
       "file": "functions/src/descriptive-stats.ts",
@@ -5441,7 +5805,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 455
+      "loc": 453
     },
     {
       "file": "functions/src/geometry/intersect3d.ts",
@@ -5588,7 +5952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 118
+      "loc": 127
     },
     {
       "file": "functions/src/matrix/count.ts",
@@ -5742,7 +6106,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 161
+      "loc": 237
     },
     {
       "file": "functions/src/matrix/matrixFromFunction.ts",
@@ -5756,7 +6120,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 150
+      "loc": 226
     },
     {
       "file": "functions/src/matrix/native-accel.ts",
@@ -6239,7 +6603,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 105
+      "loc": 127
     },
     {
       "file": "functions/src/probability/pickRandom.ts",
@@ -7079,7 +7443,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 172
+      "loc": 185
     },
     {
       "file": "functions/src/type/matrix/utils/matAlgo04xSidSid.ts",
@@ -7135,7 +7499,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 132
+      "loc": 147
     },
     {
       "file": "functions/src/type/matrix/utils/matAlgo12xSfs.ts",
@@ -7345,7 +7709,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1132
+      "loc": 1136
     },
     {
       "file": "functions/src/typed/hypothesis.ts",
@@ -7408,7 +7772,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 411
+      "loc": 479
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -7520,7 +7884,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 459
+      "loc": 516
     },
     {
       "file": "functions/src/utils/bignumber/nearlyEqual.ts",
@@ -8088,6 +8452,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 677
+    },
+    {
+      "file": "functions/tests/derivative.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 44
     },
     {
       "file": "functions/tests/det-native-accel.test.ts",
@@ -8872,6 +9243,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 376
+    },
+    {
+      "file": "functions/tests/geometry/intersect.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
     },
     {
       "file": "functions/tests/gp-regression-oracle.test.ts",
@@ -10344,6 +10722,13 @@
       "loc": 525
     },
     {
+      "file": "matrix/tests/backends/ParallelBackend.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 327
+    },
+    {
       "file": "matrix/tests/backends/WASMBackend-as.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -10411,14 +10796,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 344
+      "loc": 359
     },
     {
       "file": "matrix/tests/decomposition/svd.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 517
+      "loc": 628
     },
     {
       "file": "matrix/tests/DenseMatrix.test.ts",
@@ -10526,6 +10911,13 @@
       "loc": 307
     },
     {
+      "file": "matrix/tests/operations/qr-family.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 341
+    },
+    {
       "file": "matrix/tests/operations/qr.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -10544,7 +10936,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 234
+      "loc": 293
     },
     {
       "file": "matrix/tests/operations/sqrtm.test.ts",
@@ -10552,6 +10944,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 307
+    },
+    {
+      "file": "matrix/tests/parallel-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 167
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",
@@ -10587,6 +10986,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 248
+    },
+    {
+      "file": "matrix/tests/types/dense/reduction.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 117
     },
     {
       "file": "matrix/tests/wasm-resolve.test.ts",

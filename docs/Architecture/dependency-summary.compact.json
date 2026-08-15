@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-14", "f": 1116, "e": 5754, "re": 2305 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-15", "f": 1168, "e": 5806, "re": 2356 },
   "s": {
-    "loc": 193256,
+    "loc": 194168,
     "cls": 53,
     "int": 504,
-    "fn": 1867,
+    "fn": 1868,
     "tg": 158,
     "en": 0,
-    "co": 1543,
+    "co": 1594,
     "toi": 579
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -247,43 +247,43 @@
         "backendManager",
         "createBackendManager",
         "BackendManager",
-        "getGlobalGPUBackend",
-        "initializeGlobalGPUBackend",
-        "destroyGlobalGPUBackend",
-        "GPUBackend",
-        "gpuMatrixBackend",
-        "createGPUMatrixBackend",
-        "GPUMatrixBackend",
-        "jsBackend",
-        "JSBackend",
-        "parallelBackend",
-        "createParallelBackend",
-        "ParallelBackend",
-        "wasmBackend"
+        "BatchExecutor",
+        "BUILTIN_SHADERS",
+        "registerBuiltinShaders",
+        "hasWebGPU",
+        "isBrowser",
+        "getGPUAdapter",
+        "detectGPUCapabilities",
+        "isGPUSuitableForMatrixOps",
+        "getRecommendedWorkgroupSize",
+        "getMaxMatrixSize",
+        "GPUContext",
+        "getGlobalGPUContext",
+        "initializeGlobalGPU"
       ],
       "cls": [
         "BackendRegistry",
         "BackendManager",
+        "BatchExecutor",
+        "SyncManager",
         "GPUBackend",
         "GPUMatrixBackend",
         "JSBackend",
         "ParallelBackend",
         "WASMBackend",
-        "WasmLoader",
-        "BatchExecutor",
-        "SyncManager"
+        "WasmLoader"
       ],
       "int": [
         "BackendHints",
         "MatrixBackend",
         "ExtendedBackendHints",
-        "GPUBackendOptions",
-        "GPUMatrixBackendConfig",
-        "ParallelBackendConfig",
-        "WASMBackendConfig",
-        "WasmModule",
-        "Allocation",
-        "BatchOperation"
+        "BatchOperation",
+        "BatchResult",
+        "BatchOptions",
+        "TransferRequest",
+        "TransferResult",
+        "SyncConfig",
+        "GPUBackendOptions"
       ]
     },
     "matrix": {
@@ -352,11 +352,6 @@
     "matrix/types": {
       "f": 6,
       "exp": [
-        "isDenseMatrix",
-        "DenseMatrix",
-        "isMatrix",
-        "isSparseMatrix",
-        "SparseMatrix",
         "add",
         "subtract",
         "multiplyElementwise",
@@ -369,7 +364,12 @@
         "max",
         "norm",
         "trace",
-        "Matrix"
+        "isDenseMatrix",
+        "DenseMatrix",
+        "Matrix",
+        "isMatrix",
+        "SparseMatrix",
+        "isSparseMatrix"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
@@ -377,8 +377,8 @@
     "tensor": {
       "f": 4,
       "exp": [
-        "Tensor",
         "contractNetwork",
+        "Tensor",
         "Index",
         "idx",
         "tensorSvd",
@@ -394,10 +394,11 @@
         "tensorKron",
         "slice",
         "gather",
-        "stack"
+        "stack",
+        "concatenate"
       ],
-      "cls": ["Tensor", "Index"],
-      "int": ["EinsumSpec", "ContractNetworkOpts", "ContractNetworkResult", "IndexOpts"]
+      "cls": ["Index", "Tensor"],
+      "int": ["ContractNetworkOpts", "ContractNetworkResult", "IndexOpts", "EinsumSpec"]
     },
     "tensor/operations": {
       "f": 17,
@@ -1082,10 +1083,10 @@
         "EUCLID",
         "Decimal",
         "createFibonacciHeapClass",
+        "createIndex",
         "createImmutableDenseMatrixClass",
         "createIndexClass",
         "createSpaClass",
-        "createIndex",
         "broadcast",
         "createMatAlgo01xDSid"
       ],
@@ -1182,8 +1183,6 @@
     "functions/wasm": {
       "f": 12,
       "exp": [
-        "wasmLoader",
-        "WasmLoader",
         "WASM_BITWISE_THRESHOLD",
         "runBinaryBitwiseWasm",
         "runUnaryBitwiseWasm",
@@ -1201,16 +1200,54 @@
         "WASM_ELEMENTWISE_THRESHOLD",
         "WASM_ELEMENTWISE_OPS",
         "elementwiseUnaryDispatch",
-        "elementwiseChainDispatch"
+        "elementwiseChainDispatch",
+        "sha384OfBuffer",
+        "loadWasmManifest"
       ],
       "cls": ["WasmLoader"],
-      "int": ["WasmModule", "RawWasm"]
+      "int": ["RawWasm", "WasmModule"]
     },
+    "expression/compiler": {
+      "f": 2,
+      "exp": ["compile", "CompiledExpression", "Scope"],
+      "int": ["Scope", "CompiledExpression"]
+    },
+    "expression/embeddedDocs": {
+      "f": 398,
+      "exp": [
+        "eDocs",
+        "falseDocs",
+        "iDocs",
+        "InfinityDocs",
+        "LN10Docs",
+        "LN2Docs",
+        "LOG10EDocs",
+        "LOG2EDocs",
+        "NaNDocs",
+        "nullDocs",
+        "phiDocs",
+        "piDocs",
+        "SQRT12Docs",
+        "SQRT2Docs",
+        "tauDocs",
+        "trueDocs",
+        "versionDocs",
+        "bigintDocs",
+        "bignumberDocs",
+        "booleanDocs"
+      ]
+    },
+    "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
+    "expression/evaluator": {
+      "f": 2,
+      "exp": ["createEvaluate", "compileExpression"],
+      "int": ["EvaluateOptions"]
+    },
+    "expression/function": { "f": 1, "exp": ["createParser"] },
     "expression": {
       "f": 7,
       "exp": [
         "createHelpClass",
-        "createParserClass",
         "createParser",
         "embeddedDocs",
         "mathMLDocument",
@@ -1228,47 +1265,11 @@
         "createFunctionNode",
         "createIndexNode",
         "createObjectNode",
-        "createOperatorNode"
+        "createOperatorNode",
+        "createParenthesisNode"
       ],
       "int": ["OperatorProperty"]
     },
-    "expression/compiler": {
-      "f": 2,
-      "exp": ["compile", "CompiledExpression", "Scope"],
-      "int": ["Scope", "CompiledExpression"]
-    },
-    "expression/embeddedDocs": {
-      "f": 346,
-      "exp": [
-        "InfinityDocs",
-        "LN10Docs",
-        "LN2Docs",
-        "LOG10EDocs",
-        "LOG2EDocs",
-        "NaNDocs",
-        "SQRT12Docs",
-        "SQRT2Docs",
-        "eDocs",
-        "falseDocs",
-        "iDocs",
-        "nullDocs",
-        "phiDocs",
-        "piDocs",
-        "tauDocs",
-        "trueDocs",
-        "versionDocs",
-        "bigintDocs",
-        "bignumberDocs",
-        "booleanDocs"
-      ]
-    },
-    "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
-    "expression/evaluator": {
-      "f": 2,
-      "exp": ["createEvaluate", "compileExpression"],
-      "int": ["EvaluateOptions"]
-    },
-    "expression/function": { "f": 1, "exp": ["createParser"] },
     "expression/node": {
       "f": 19,
       "exp": [
@@ -1786,11 +1787,6 @@
       "f": 8,
       "exp": [
         "BufferPool",
-        "getGlobalGPUContext",
-        "initializeGlobalGPU",
-        "destroyGlobalGPU",
-        "GPUContext",
-        "ShaderManager",
         "hasWebGPU",
         "isBrowser",
         "getGPUAdapter",
@@ -1803,17 +1799,21 @@
         "GPU_MIN_ELEMENTS",
         "enableGpu",
         "disableGpu",
-        "isGpuEnabled"
+        "isGpuEnabled",
+        "getGlobalGPUContext",
+        "initializeGlobalGPU",
+        "destroyGlobalGPU",
+        "GPUContext"
       ],
       "cls": ["BufferPool", "GPUContext", "ShaderManager"],
       "int": [
         "BufferPoolOptions",
+        "GPUAdapterInfo",
+        "GPUCapabilities",
         "GPUContextOptions",
         "DeviceLostEvent",
         "ShaderSource",
-        "PipelineConfig",
-        "GPUAdapterInfo",
-        "GPUCapabilities"
+        "PipelineConfig"
       ]
     },
     "plot": {
@@ -1847,7 +1847,7 @@
     }
   },
   "hp": [
-    { "p": "embeddedDocs/embeddedDocs.ts", "i": 345, "o": 1 },
+    { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
@@ -1856,11 +1856,11 @@
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
+    { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
     { "p": "utils/array.ts", "i": 0, "o": 48 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 44 },
-    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 },
-    { "p": "utils/collection.ts", "i": 0, "o": 37 }
+    { "p": "wasm/WasmLoader.ts", "i": 2, "o": 37 }
   ]
 }

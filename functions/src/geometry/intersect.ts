@@ -7,6 +7,8 @@ import type { ConfigOptions } from '../core/config.js';
 // Type definitions for intersect
 interface Matrix {
   valueOf(): MathNumericType[] | MathNumericType[][];
+  create(data: unknown, datatype?: string): Matrix;
+  datatype(): string;
 }
 
 interface IntersectDependencies {
@@ -18,7 +20,6 @@ interface IntersectDependencies {
     b: MathNumericType | MathNumericType[]
   ) => MathNumericType | MathNumericType[];
   addScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
-  matrix: (arr: MathNumericType[]) => Matrix;
   multiply: (
     a: MathNumericType | MathNumericType[],
     b: MathNumericType | MathNumericType[]
@@ -43,7 +44,6 @@ const dependencies = [
   'abs',
   'add',
   'addScalar',
-  'matrix',
   'multiply',
   'multiplyScalar',
   'divideScalar',
@@ -64,7 +64,6 @@ export const createIntersect = /* #__PURE__ */ factory(
     abs,
     add,
     addScalar,
-    matrix,
     multiply,
     multiplyScalar,
     divideScalar,
@@ -113,7 +112,7 @@ export const createIntersect = /* #__PURE__ */ factory(
           y.valueOf() as MathNumericType[],
           plane.valueOf() as MathNumericType[]
         );
-        return arr === null ? null : matrix(arr as any);
+        return arr === null ? null : x.create(arr, x.datatype());
       },
 
       'Matrix, Matrix, Matrix, Matrix': function (
@@ -122,14 +121,13 @@ export const createIntersect = /* #__PURE__ */ factory(
         y: Matrix,
         z: Matrix
       ): Matrix | null {
-        // TODO: output matrix type should match input matrix type
         const arr = _AAAA(
           w.valueOf() as MathNumericType[],
           x.valueOf() as MathNumericType[],
           y.valueOf() as MathNumericType[],
           z.valueOf() as MathNumericType[]
         );
-        return arr === null ? null : matrix(arr);
+        return arr === null ? null : w.create(arr, w.datatype());
       },
     });
 

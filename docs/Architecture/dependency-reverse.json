@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-14",
+  "generated": "2026-08-15",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
@@ -116,9 +116,9 @@
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
-    "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/Unit.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/dependencies.ts": ["core/src/types/unit/index.ts"],
+    "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
     "matrix/src/types/DenseMatrix.ts": [
       "matrix/src/backends/Backend.ts",
       "matrix/src/backends/BackendManager.ts",
@@ -168,24 +168,12 @@
       "matrix/src/backends/GPUBackend.ts",
       "matrix/src/backends/gpu/index.ts"
     ],
+    "matrix/src/backends/gpu/BatchExecutor.ts": ["matrix/src/backends/gpu/index.ts"],
+    "matrix/src/backends/gpu/Sync.ts": ["matrix/src/backends/gpu/index.ts"],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
       "matrix/src/backends/index.ts"
     ],
-    "matrix/src/backends/wasm/detect.ts": [
-      "matrix/src/backends/WASMBackend.ts",
-      "matrix/src/backends/wasm/index.ts"
-    ],
-    "matrix/src/backends/wasm/resolve.ts": [
-      "matrix/src/backends/WASMBackend.ts",
-      "matrix/src/backends/WasmLoader.ts"
-    ],
-    "matrix/src/backends/wasm/integrity.ts": [
-      "matrix/src/backends/WASMBackend.ts",
-      "matrix/src/backends/WasmLoader.ts"
-    ],
-    "matrix/src/backends/gpu/BatchExecutor.ts": ["matrix/src/backends/gpu/index.ts"],
-    "matrix/src/backends/gpu/Sync.ts": ["matrix/src/backends/gpu/index.ts"],
     "matrix/src/backends/ParallelBackend.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/WASMBackend.ts": [
       "matrix/src/backends/index.ts",
@@ -196,7 +184,19 @@
     "matrix/src/backends/wasm/index.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/gpu/index.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/WasmLoader.ts": ["matrix/src/backends/wasm/fft-wasm.ts"],
+    "matrix/src/backends/wasm/detect.ts": [
+      "matrix/src/backends/WASMBackend.ts",
+      "matrix/src/backends/wasm/index.ts"
+    ],
     "matrix/src/backends/wasm/fft-wasm.ts": ["matrix/src/backends/wasm/index.ts"],
+    "matrix/src/backends/wasm/resolve.ts": [
+      "matrix/src/backends/WASMBackend.ts",
+      "matrix/src/backends/WasmLoader.ts"
+    ],
+    "matrix/src/backends/wasm/integrity.ts": [
+      "matrix/src/backends/WASMBackend.ts",
+      "matrix/src/backends/WasmLoader.ts"
+    ],
     "matrix/src/types/index.ts": ["matrix/src/index.ts"],
     "matrix/src/backends/index.ts": ["matrix/src/index.ts"],
     "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
@@ -255,26 +255,6 @@
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
     "matrix/src/types/dense/reduction.ts": ["matrix/src/types/DenseMatrix.ts"],
     "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
-    "tensor/src/named-index.ts": [
-      "tensor/src/Tensor.ts",
-      "tensor/src/contraction-sequence.ts",
-      "tensor/src/index.ts",
-      "tensor/src/operations/cholesky.ts",
-      "tensor/src/operations/concatenate.ts",
-      "tensor/src/operations/flip.ts",
-      "tensor/src/operations/gather.ts",
-      "tensor/src/operations/kron.ts",
-      "tensor/src/operations/lu.ts",
-      "tensor/src/operations/pad.ts",
-      "tensor/src/operations/pinv.ts",
-      "tensor/src/operations/qr.ts",
-      "tensor/src/operations/random.ts",
-      "tensor/src/operations/roll.ts",
-      "tensor/src/operations/scatter.ts",
-      "tensor/src/operations/slice.ts",
-      "tensor/src/operations/solve.ts",
-      "tensor/src/operations/stack.ts"
-    ],
     "tensor/src/Tensor.ts": [
       "tensor/src/contraction-sequence.ts",
       "tensor/src/index.ts",
@@ -295,6 +275,26 @@
       "tensor/src/operations/solve.ts",
       "tensor/src/operations/stack.ts",
       "tensor/src/operations/svd.ts"
+    ],
+    "tensor/src/named-index.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/contraction-sequence.ts",
+      "tensor/src/index.ts",
+      "tensor/src/operations/cholesky.ts",
+      "tensor/src/operations/concatenate.ts",
+      "tensor/src/operations/flip.ts",
+      "tensor/src/operations/gather.ts",
+      "tensor/src/operations/kron.ts",
+      "tensor/src/operations/lu.ts",
+      "tensor/src/operations/pad.ts",
+      "tensor/src/operations/pinv.ts",
+      "tensor/src/operations/qr.ts",
+      "tensor/src/operations/random.ts",
+      "tensor/src/operations/roll.ts",
+      "tensor/src/operations/scatter.ts",
+      "tensor/src/operations/slice.ts",
+      "tensor/src/operations/solve.ts",
+      "tensor/src/operations/stack.ts"
     ],
     "tensor/src/operations/svd.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/random.ts": ["tensor/src/index.ts"],
@@ -1196,6 +1196,7 @@
       "functions/src/logical/not.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/multinomial.ts",
+      "functions/src/probability/permutations.ts",
       "functions/src/special/erf.ts",
       "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/max.ts",
@@ -1546,7 +1547,8 @@
       "functions/src/bitwise/bitOr.ts",
       "functions/src/bitwise/bitXor.ts",
       "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts"
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts": [
       "functions/src/bitwise/leftShift.ts",
@@ -2324,8 +2326,6 @@
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
-    "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],
-    "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
       "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -2335,114 +2335,8 @@
       "functions/src/wasm/sort/wasm-bridge.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
-    "expression/src/utils/is.ts": [
-      "expression/src/Help.ts",
-      "expression/src/Parser.ts",
-      "expression/src/node/AccessorNode.ts",
-      "expression/src/node/ArrayNode.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/BlockNode.ts",
-      "expression/src/node/ConditionalNode.ts",
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/ParenthesisNode.ts",
-      "expression/src/node/RangeNode.ts",
-      "expression/src/node/utils/stringSubset.ts",
-      "expression/src/operators.ts",
-      "expression/src/parse.ts",
-      "expression/src/transform/and.transform.ts",
-      "expression/src/transform/bitAnd.transform.ts",
-      "expression/src/transform/bitOr.transform.ts",
-      "expression/src/transform/column.transform.ts",
-      "expression/src/transform/concat.transform.ts",
-      "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/index.transform.ts",
-      "expression/src/transform/map.transform.ts",
-      "expression/src/transform/mapSlices.transform.ts",
-      "expression/src/transform/nullish.transform.ts",
-      "expression/src/transform/or.transform.ts",
-      "expression/src/transform/row.transform.ts",
-      "expression/src/transform/utils/compileInlineExpression.ts",
-      "expression/src/transform/utils/dimToZeroBase.ts",
-      "expression/src/transform/utils/lastDimToZeroBase.ts"
-    ],
-    "expression/src/utils/object.ts": [
-      "expression/src/Help.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/operators.ts",
-      "expression/src/parse.ts",
-      "expression/src/utils/customs.ts",
-      "expression/src/utils/factory.ts",
-      "expression/src/utils/latex.ts"
-    ],
-    "expression/src/utils/string.ts": [
-      "expression/src/Help.ts",
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts"
-    ],
-    "expression/src/utils/factory.ts": [
-      "expression/src/Help.ts",
-      "expression/src/Parser.ts",
-      "expression/src/function/parser.ts",
-      "expression/src/node/AccessorNode.ts",
-      "expression/src/node/ArrayNode.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/BlockNode.ts",
-      "expression/src/node/ConditionalNode.ts",
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/ParenthesisNode.ts",
-      "expression/src/node/RangeNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts",
-      "expression/src/parse.ts",
-      "expression/src/transform/and.transform.ts",
-      "expression/src/transform/bitAnd.transform.ts",
-      "expression/src/transform/bitOr.transform.ts",
-      "expression/src/transform/column.transform.ts",
-      "expression/src/transform/concat.transform.ts",
-      "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/diff.transform.ts",
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/index.transform.ts",
-      "expression/src/transform/map.transform.ts",
-      "expression/src/transform/mapSlices.transform.ts",
-      "expression/src/transform/max.transform.ts",
-      "expression/src/transform/mean.transform.ts",
-      "expression/src/transform/min.transform.ts",
-      "expression/src/transform/nullish.transform.ts",
-      "expression/src/transform/or.transform.ts",
-      "expression/src/transform/print.transform.ts",
-      "expression/src/transform/quantileSeq.transform.ts",
-      "expression/src/transform/range.transform.ts",
-      "expression/src/transform/row.transform.ts",
-      "expression/src/transform/std.transform.ts",
-      "expression/src/transform/subset.transform.ts",
-      "expression/src/transform/sum.transform.ts",
-      "expression/src/transform/utils/transformCallback.ts",
-      "expression/src/transform/variance.transform.ts"
-    ],
+    "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],
+    "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
     "expression/src/utils/map.ts": [
       "expression/src/Parser.ts",
       "expression/src/compiler/compile.ts",
@@ -2450,41 +2344,19 @@
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/utils/scope.ts"
     ],
-    "expression/src/types.ts": [
-      "expression/src/index.ts",
-      "expression/src/transform/utils/transformCallback.ts"
-    ],
-    "expression/src/keywords.ts": [
-      "expression/src/index.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/Node.ts"
-    ],
-    "expression/src/operators.ts": [
-      "expression/src/index.ts",
+    "expression/src/utils/customs.ts": [
+      "expression/src/compiler/compile.ts",
+      "expression/src/node/AccessorNode.ts",
       "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/ConditionalNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RangeNode.ts",
-      "expression/src/node/RelationalNode.ts"
-    ],
-    "expression/src/parse.ts": ["expression/src/index.ts"],
-    "expression/src/Parser.ts": ["expression/src/index.ts"],
-    "expression/src/Help.ts": ["expression/src/index.ts"],
-    "expression/src/compiler/index.ts": ["expression/src/index.ts"],
-    "expression/src/evaluator/index.ts": ["expression/src/index.ts"],
-    "expression/src/transform/index.ts": ["expression/src/index.ts"],
-    "expression/src/function/parser.ts": ["expression/src/index.ts"],
-    "expression/src/embeddedDocs/embeddedDocs.ts": ["expression/src/index.ts"],
-    "expression/src/utils/mathml.ts": [
-      "expression/src/index.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionNode.ts",
-      "expression/src/node/Node.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts"
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts",
+      "expression/src/parse.ts"
     ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
@@ -2501,40 +2373,12 @@
       "expression/src/parse.ts",
       "expression/src/utils/latex.ts"
     ],
-    "expression/src/node/AccessorNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/ArrayNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/AssignmentNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/BlockNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/ConditionalNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/ConstantNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/FunctionAssignmentNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/FunctionNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/IndexNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/ObjectNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/OperatorNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/ParenthesisNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
-    "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
-    "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
-    "expression/src/utils/number.ts": ["expression/src/parse.ts"],
-    "expression/src/utils/customs.ts": [
-      "expression/src/compiler/compile.ts",
-      "expression/src/node/AccessorNode.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts",
-      "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts",
-      "expression/src/parse.ts"
-    ],
     "expression/src/compiler/compile.ts": [
       "expression/src/compiler/index.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/index.ts": [
+      "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
     "expression/src/embeddedDocs/constants/e.ts": ["expression/src/embeddedDocs/embeddedDocs.ts"],
     "expression/src/embeddedDocs/constants/false.ts": [
@@ -3551,7 +3395,321 @@
     "expression/src/embeddedDocs/function/special/gammainc.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
+    "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulomb.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/klitzing.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/protonMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/rydberg.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/avogadro.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/faraday.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravity.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckLength.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTime.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
     "expression/src/evaluator/evaluate.ts": ["expression/src/evaluator/index.ts"],
+    "expression/src/utils/factory.ts": [
+      "expression/src/Help.ts",
+      "expression/src/Parser.ts",
+      "expression/src/function/parser.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/parse.ts",
+      "expression/src/transform/and.transform.ts",
+      "expression/src/transform/bitAnd.transform.ts",
+      "expression/src/transform/bitOr.transform.ts",
+      "expression/src/transform/column.transform.ts",
+      "expression/src/transform/concat.transform.ts",
+      "expression/src/transform/cumsum.transform.ts",
+      "expression/src/transform/diff.transform.ts",
+      "expression/src/transform/filter.transform.ts",
+      "expression/src/transform/forEach.transform.ts",
+      "expression/src/transform/index.transform.ts",
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/mapSlices.transform.ts",
+      "expression/src/transform/max.transform.ts",
+      "expression/src/transform/mean.transform.ts",
+      "expression/src/transform/min.transform.ts",
+      "expression/src/transform/nullish.transform.ts",
+      "expression/src/transform/or.transform.ts",
+      "expression/src/transform/print.transform.ts",
+      "expression/src/transform/quantileSeq.transform.ts",
+      "expression/src/transform/range.transform.ts",
+      "expression/src/transform/row.transform.ts",
+      "expression/src/transform/std.transform.ts",
+      "expression/src/transform/subset.transform.ts",
+      "expression/src/transform/sum.transform.ts",
+      "expression/src/transform/utils/transformCallback.ts",
+      "expression/src/transform/variance.transform.ts"
+    ],
+    "expression/src/utils/is.ts": [
+      "expression/src/Help.ts",
+      "expression/src/Parser.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/utils/stringSubset.ts",
+      "expression/src/operators.ts",
+      "expression/src/parse.ts",
+      "expression/src/transform/and.transform.ts",
+      "expression/src/transform/bitAnd.transform.ts",
+      "expression/src/transform/bitOr.transform.ts",
+      "expression/src/transform/column.transform.ts",
+      "expression/src/transform/concat.transform.ts",
+      "expression/src/transform/cumsum.transform.ts",
+      "expression/src/transform/filter.transform.ts",
+      "expression/src/transform/forEach.transform.ts",
+      "expression/src/transform/index.transform.ts",
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/mapSlices.transform.ts",
+      "expression/src/transform/nullish.transform.ts",
+      "expression/src/transform/or.transform.ts",
+      "expression/src/transform/row.transform.ts",
+      "expression/src/transform/utils/compileInlineExpression.ts",
+      "expression/src/transform/utils/dimToZeroBase.ts",
+      "expression/src/transform/utils/lastDimToZeroBase.ts"
+    ],
+    "expression/src/utils/object.ts": [
+      "expression/src/Help.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/operators.ts",
+      "expression/src/parse.ts",
+      "expression/src/utils/customs.ts",
+      "expression/src/utils/factory.ts",
+      "expression/src/utils/latex.ts"
+    ],
+    "expression/src/utils/string.ts": [
+      "expression/src/Help.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/src/types.ts": [
+      "expression/src/index.ts",
+      "expression/src/transform/utils/transformCallback.ts"
+    ],
+    "expression/src/keywords.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/Node.ts"
+    ],
+    "expression/src/operators.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts"
+    ],
+    "expression/src/parse.ts": ["expression/src/index.ts"],
+    "expression/src/Parser.ts": ["expression/src/index.ts"],
+    "expression/src/Help.ts": ["expression/src/index.ts"],
+    "expression/src/compiler/index.ts": ["expression/src/index.ts"],
+    "expression/src/evaluator/index.ts": ["expression/src/index.ts"],
+    "expression/src/transform/index.ts": ["expression/src/index.ts"],
+    "expression/src/function/parser.ts": ["expression/src/index.ts"],
+    "expression/src/embeddedDocs/embeddedDocs.ts": ["expression/src/index.ts"],
+    "expression/src/utils/mathml.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/src/node/AccessorNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/ArrayNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/AssignmentNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/BlockNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/ConditionalNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/ConstantNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/FunctionAssignmentNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/FunctionNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/IndexNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/ObjectNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/OperatorNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/ParenthesisNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
+    "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
+    "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/node/utils/access.ts": [
       "expression/src/node/AccessorNode.ts",
       "expression/src/node/AssignmentNode.ts"

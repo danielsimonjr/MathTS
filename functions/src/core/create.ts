@@ -359,7 +359,19 @@ export function create(
     Object.values(importedFactories).forEach((factory) => {
       if (factory && factory.meta && factory.meta.recreateOnConfigChange) {
         // FIXME: only re-create when the current instance is the same as was initially created
-        // FIXME: delete the functions/constants before importing them again?
+        // delete the functions/constants before importing them again
+        const name = (factory as FactoryFunction).fn || (factory as any).name;
+        delete math[name];
+        delete math.expression.transform[name];
+        delete math.expression.mathWithTransform[name];
+
+        const formerly = factory.meta.formerly as string | undefined;
+        if (formerly) {
+          delete math[formerly];
+          delete math.expression.transform[formerly];
+          delete math.expression.mathWithTransform[formerly];
+        }
+
         internalImport(factory, { override: true });
       }
     });
