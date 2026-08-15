@@ -161,7 +161,7 @@ The codebase is organized into the following modules:
 - **functions/utils**: 34 files
 - **functions/wasm**: 12 files
 - **expression/compiler**: 2 files
-- **expression/embeddedDocs**: 346 files
+- **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
@@ -209,7 +209,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 467            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 423            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 475            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3790,6 +3790,7 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../plain/number/index.js` | `rightLogShiftNumber` | Import |
+| `../utils/bignumber/bitwise.js` | `rightLogShiftBigNumber` | Import |
 | `./useMatrixForArrayScalar.js` | `createUseMatrixForArrayScalar` | Import |
 | `../type/bignumber/BigNumber.js` | `BigNumber` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
@@ -6596,6 +6597,7 @@ graph LR
 | `../utils/number.js` | `isInteger` | Import |
 | `../utils/product.js` | `product` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -9603,7 +9605,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitAndBigNumber`, `bitNotBigNumber`, `bitOrBigNumber`, `bitwise`, `bitXor`, `leftShiftBigNumber`, `rightArithShiftBigNumber`
+- Functions: `bitAndBigNumber`, `bitNotBigNumber`, `bitOrBigNumber`, `bitwise`, `bitXor`, `leftShiftBigNumber`, `rightArithShiftBigNumber`, `rightLogShiftBigNumber`
 
 ---
 
@@ -10523,6 +10525,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `./physicalConstants/index.js` | `speedOfLightDocs, gravitationConstantDocs, planckConstantDocs, reducedPlanckConstantDocs, magneticConstantDocs, electricConstantDocs, vacuumImpedanceDocs, coulombDocs, coulombConstantDocs, elementaryChargeDocs, bohrMagnetonDocs, conductanceQuantumDocs, inverseConductanceQuantumDocs, magneticFluxQuantumDocs, nuclearMagnetonDocs, klitzingDocs, bohrRadiusDocs, classicalElectronRadiusDocs, electronMassDocs, fermiCouplingDocs, fineStructureDocs, hartreeEnergyDocs, protonMassDocs, deuteronMassDocs, neutronMassDocs, quantumOfCirculationDocs, rydbergDocs, thomsonCrossSectionDocs, weakMixingAngleDocs, efimovFactorDocs, atomicMassDocs, avogadroDocs, boltzmannDocs, faradayDocs, firstRadiationDocs, loschmidtDocs, gasConstantDocs, molarPlanckConstantDocs, molarVolumeDocs, sackurTetrodeDocs, secondRadiationDocs, stefanBoltzmannDocs, wienDisplacementDocs, molarMassDocs, molarMassC12Docs, gravityDocs, planckLengthDocs, planckMassDocs, planckTimeDocs, planckChargeDocs, planckTemperatureDocs` | Import |
 | `./constants/e.js` | `eDocs` | Import |
 | `./constants/false.js` | `falseDocs` | Import |
 | `./constants/i.js` | `iDocs` | Import |
@@ -13371,6 +13374,477 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/physicalConstants/atomicMass.ts` - atomicMass module
+
+**Exports:**
+
+- Constants: `atomicMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/avogadro.ts` - avogadro module
+
+**Exports:**
+
+- Constants: `avogadroDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts` - bohrMagneton module
+
+**Exports:**
+
+- Constants: `bohrMagnetonDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/bohrRadius.ts` - bohrRadius module
+
+**Exports:**
+
+- Constants: `bohrRadiusDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/boltzmann.ts` - boltzmann module
+
+**Exports:**
+
+- Constants: `boltzmannDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts` - classicalElectronRadius module
+
+**Exports:**
+
+- Constants: `classicalElectronRadiusDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts` - conductanceQuantum module
+
+**Exports:**
+
+- Constants: `conductanceQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/coulomb.ts` - coulomb module
+
+**Exports:**
+
+- Constants: `coulombDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/coulombConstant.ts` - coulombConstant module
+
+**Exports:**
+
+- Constants: `coulombConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/deuteronMass.ts` - deuteronMass module
+
+**Exports:**
+
+- Constants: `deuteronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/efimovFactor.ts` - efimovFactor module
+
+**Exports:**
+
+- Constants: `efimovFactorDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/electricConstant.ts` - electricConstant module
+
+**Exports:**
+
+- Constants: `electricConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/electronMass.ts` - electronMass module
+
+**Exports:**
+
+- Constants: `electronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts` - elementaryCharge module
+
+**Exports:**
+
+- Constants: `elementaryChargeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/faraday.ts` - faraday module
+
+**Exports:**
+
+- Constants: `faradayDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts` - fermiCoupling module
+
+**Exports:**
+
+- Constants: `fermiCouplingDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/fineStructure.ts` - fineStructure module
+
+**Exports:**
+
+- Constants: `fineStructureDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/firstRadiation.ts` - firstRadiation module
+
+**Exports:**
+
+- Constants: `firstRadiationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gasConstant.ts` - gasConstant module
+
+**Exports:**
+
+- Constants: `gasConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts` - gravitationConstant module
+
+**Exports:**
+
+- Constants: `gravitationConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gravity.ts` - gravity module
+
+**Exports:**
+
+- Constants: `gravityDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts` - hartreeEnergy module
+
+**Exports:**
+
+- Constants: `hartreeEnergyDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 51 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./speedOfLight.js` | `*` | Re-export |
+| `./gravitationConstant.js` | `*` | Re-export |
+| `./planckConstant.js` | `*` | Re-export |
+| `./reducedPlanckConstant.js` | `*` | Re-export |
+| `./magneticConstant.js` | `*` | Re-export |
+| `./electricConstant.js` | `*` | Re-export |
+| `./vacuumImpedance.js` | `*` | Re-export |
+| `./coulomb.js` | `*` | Re-export |
+| `./coulombConstant.js` | `*` | Re-export |
+| `./elementaryCharge.js` | `*` | Re-export |
+| `./bohrMagneton.js` | `*` | Re-export |
+| `./conductanceQuantum.js` | `*` | Re-export |
+| `./inverseConductanceQuantum.js` | `*` | Re-export |
+| `./magneticFluxQuantum.js` | `*` | Re-export |
+| `./nuclearMagneton.js` | `*` | Re-export |
+| `./klitzing.js` | `*` | Re-export |
+| `./bohrRadius.js` | `*` | Re-export |
+| `./classicalElectronRadius.js` | `*` | Re-export |
+| `./electronMass.js` | `*` | Re-export |
+| `./fermiCoupling.js` | `*` | Re-export |
+| `./fineStructure.js` | `*` | Re-export |
+| `./hartreeEnergy.js` | `*` | Re-export |
+| `./protonMass.js` | `*` | Re-export |
+| `./deuteronMass.js` | `*` | Re-export |
+| `./neutronMass.js` | `*` | Re-export |
+| `./quantumOfCirculation.js` | `*` | Re-export |
+| `./rydberg.js` | `*` | Re-export |
+| `./thomsonCrossSection.js` | `*` | Re-export |
+| `./weakMixingAngle.js` | `*` | Re-export |
+| `./efimovFactor.js` | `*` | Re-export |
+| `./atomicMass.js` | `*` | Re-export |
+| `./avogadro.js` | `*` | Re-export |
+| `./boltzmann.js` | `*` | Re-export |
+| `./faraday.js` | `*` | Re-export |
+| `./firstRadiation.js` | `*` | Re-export |
+| `./loschmidt.js` | `*` | Re-export |
+| `./gasConstant.js` | `*` | Re-export |
+| `./molarPlanckConstant.js` | `*` | Re-export |
+| `./molarVolume.js` | `*` | Re-export |
+| `./sackurTetrode.js` | `*` | Re-export |
+| `./secondRadiation.js` | `*` | Re-export |
+| `./stefanBoltzmann.js` | `*` | Re-export |
+| `./wienDisplacement.js` | `*` | Re-export |
+| `./molarMass.js` | `*` | Re-export |
+| `./molarMassC12.js` | `*` | Re-export |
+| `./gravity.js` | `*` | Re-export |
+| `./planckLength.js` | `*` | Re-export |
+| `./planckMass.js` | `*` | Re-export |
+| `./planckTime.js` | `*` | Re-export |
+| `./planckCharge.js` | `*` | Re-export |
+| `./planckTemperature.js` | `*` | Re-export |
+
+**Exports:**
+
+- Re-exports: `* from ./speedOfLight.js`, `* from ./gravitationConstant.js`, `* from ./planckConstant.js`, `* from ./reducedPlanckConstant.js`, `* from ./magneticConstant.js`, `* from ./electricConstant.js`, `* from ./vacuumImpedance.js`, `* from ./coulomb.js`, `* from ./coulombConstant.js`, `* from ./elementaryCharge.js`, `* from ./bohrMagneton.js`, `* from ./conductanceQuantum.js`, `* from ./inverseConductanceQuantum.js`, `* from ./magneticFluxQuantum.js`, `* from ./nuclearMagneton.js`, `* from ./klitzing.js`, `* from ./bohrRadius.js`, `* from ./classicalElectronRadius.js`, `* from ./electronMass.js`, `* from ./fermiCoupling.js`, `* from ./fineStructure.js`, `* from ./hartreeEnergy.js`, `* from ./protonMass.js`, `* from ./deuteronMass.js`, `* from ./neutronMass.js`, `* from ./quantumOfCirculation.js`, `* from ./rydberg.js`, `* from ./thomsonCrossSection.js`, `* from ./weakMixingAngle.js`, `* from ./efimovFactor.js`, `* from ./atomicMass.js`, `* from ./avogadro.js`, `* from ./boltzmann.js`, `* from ./faraday.js`, `* from ./firstRadiation.js`, `* from ./loschmidt.js`, `* from ./gasConstant.js`, `* from ./molarPlanckConstant.js`, `* from ./molarVolume.js`, `* from ./sackurTetrode.js`, `* from ./secondRadiation.js`, `* from ./stefanBoltzmann.js`, `* from ./wienDisplacement.js`, `* from ./molarMass.js`, `* from ./molarMassC12.js`, `* from ./gravity.js`, `* from ./planckLength.js`, `* from ./planckMass.js`, `* from ./planckTime.js`, `* from ./planckCharge.js`, `* from ./planckTemperature.js`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts` - inverseConductanceQuantum module
+
+**Exports:**
+
+- Constants: `inverseConductanceQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/klitzing.ts` - klitzing module
+
+**Exports:**
+
+- Constants: `klitzingDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/loschmidt.ts` - loschmidt module
+
+**Exports:**
+
+- Constants: `loschmidtDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/magneticConstant.ts` - magneticConstant module
+
+**Exports:**
+
+- Constants: `magneticConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts` - magneticFluxQuantum module
+
+**Exports:**
+
+- Constants: `magneticFluxQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarMass.ts` - molarMass module
+
+**Exports:**
+
+- Constants: `molarMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarMassC12.ts` - molarMassC12 module
+
+**Exports:**
+
+- Constants: `molarMassC12Docs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts` - molarPlanckConstant module
+
+**Exports:**
+
+- Constants: `molarPlanckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarVolume.ts` - molarVolume module
+
+**Exports:**
+
+- Constants: `molarVolumeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/neutronMass.ts` - neutronMass module
+
+**Exports:**
+
+- Constants: `neutronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts` - nuclearMagneton module
+
+**Exports:**
+
+- Constants: `nuclearMagnetonDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckCharge.ts` - planckCharge module
+
+**Exports:**
+
+- Constants: `planckChargeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckConstant.ts` - planckConstant module
+
+**Exports:**
+
+- Constants: `planckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckLength.ts` - planckLength module
+
+**Exports:**
+
+- Constants: `planckLengthDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckMass.ts` - planckMass module
+
+**Exports:**
+
+- Constants: `planckMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckTemperature.ts` - planckTemperature module
+
+**Exports:**
+
+- Constants: `planckTemperatureDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckTime.ts` - planckTime module
+
+**Exports:**
+
+- Constants: `planckTimeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/protonMass.ts` - protonMass module
+
+**Exports:**
+
+- Constants: `protonMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts` - quantumOfCirculation module
+
+**Exports:**
+
+- Constants: `quantumOfCirculationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts` - reducedPlanckConstant module
+
+**Exports:**
+
+- Constants: `reducedPlanckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/rydberg.ts` - rydberg module
+
+**Exports:**
+
+- Constants: `rydbergDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts` - sackurTetrode module
+
+**Exports:**
+
+- Constants: `sackurTetrodeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/secondRadiation.ts` - secondRadiation module
+
+**Exports:**
+
+- Constants: `secondRadiationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/speedOfLight.ts` - speedOfLight module
+
+**Exports:**
+
+- Constants: `speedOfLightDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts` - stefanBoltzmann module
+
+**Exports:**
+
+- Constants: `stefanBoltzmannDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts` - thomsonCrossSection module
+
+**Exports:**
+
+- Constants: `thomsonCrossSectionDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts` - vacuumImpedance module
+
+**Exports:**
+
+- Constants: `vacuumImpedanceDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts` - weakMixingAngle module
+
+**Exports:**
+
+- Constants: `weakMixingAngleDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts` - wienDisplacement module
+
+**Exports:**
+
+- Constants: `wienDisplacementDocs`
+
+---
+
 <a id="expression-error-dependencies"></a>
 
 ## Expression/error Dependencies
@@ -16032,7 +16506,7 @@ graph LR
 |--------|--------|
 | `child_process` | `spawn` |
 | `fs/promises` | `writeFile, rm, rename, mkdtemp, readFile` |
-| `path` | `extname, join, basename` |
+| `path` | `extname, join` |
 | `os` | `tmpdir` |
 
 **Exports:**
@@ -16156,7 +16630,7 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
-| `expression/src/embeddedDocs/embeddedDocs`             | 345 files    | 1 file     |
+| `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 243 files    | 9 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
@@ -16164,12 +16638,13 @@ graph LR
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
+| `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `functions/src/utils/array`                            | 0 files      | 48 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 37 files   |
-| `functions/src/utils/collection`                       | 0 files      | 37 files   |
+| `functions/src/utils/collection`                       | 0 files      | 38 files   |
 | `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -16195,7 +16670,6 @@ graph LR
 | `core/src/index`                                       | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
-| `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
 
 ---
 
@@ -16721,7 +17195,7 @@ graph TD
         N353[LOG2E]
         N354[NaN]
         N355[null]
-        N356[...336 more]
+        N356[...388 more]
     end
 
     subgraph Expression/error
@@ -17027,14 +17501,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1116   |
+| Total TypeScript Files  | 1168   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 193342 |
-| Total Exports           | 5755   |
-| Total Re-exports        | 2305   |
+| Total Lines of Code     | 194251 |
+| Total Exports           | 5807   |
+| Total Re-exports        | 2356   |
 | Total Classes           | 53     |
 | Total Interfaces        | 505    |
-| Total Functions         | 1868   |
+| Total Functions         | 1869   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 581    |

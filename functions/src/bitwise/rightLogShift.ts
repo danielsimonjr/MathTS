@@ -7,6 +7,7 @@ import { createMatAlgo08xS0Sid } from '../type/matrix/utils/matAlgo08xS0Sid.js';
 import { factory } from '../utils/factory.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { rightLogShiftNumber } from '../plain/number/index.js';
+import { rightLogShiftBigNumber } from '../utils/bignumber/bitwise.js';
 import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -80,7 +81,7 @@ export const createRightLogShift = /* #__PURE__ */ factory(
       {
         'number, number': rightLogShiftNumber,
 
-        // 'BigNumber, BigNumber': ..., // TODO: implement BigNumber support for rightLogShift
+        'BigNumber, BigNumber': rightLogShiftBigNumber,
 
         'SparseMatrix, number | BigNumber': typed.referToSelf(
           (self: TypedFunction) =>

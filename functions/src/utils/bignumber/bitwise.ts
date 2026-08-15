@@ -456,3 +456,60 @@ export function rightArithShiftBigNumber(x: BigNumberValue, y: BigNumberValue): 
   }
   return x.div(new BigNumber(2).pow(y)).floor();
 }
+
+/**
+ * Bitwise right logical shift
+ *
+ * Special Cases:
+ *   n >>> -n =  N
+ *   n >>>  N =  N
+ *   N >>>  n =  N
+ *   I >>>  I =  N
+ *   n >>>  0 =  n
+ *   I >>>  n =  I
+ *  -I >>>  n =  N
+ *  -I >>>  I =  N
+ *   n >>>  I =  0
+ *  -n >>>  I =  0
+ *   0 >>>  n =  0
+ *
+ * @param {BigNumber} x
+ * @param {BigNumber} y
+ * @return {BigNumber} Result of `x` >>> `y`
+ *
+ */
+export function rightLogShiftBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
+  if ((x.isFinite() && !x.isInteger()) || (y.isFinite() && !y.isInteger())) {
+    throw new Error('Integers expected in function rightLogShift');
+  }
+
+  const BigNumber = x.constructor;
+  if (x.isNaN() || y.isNaN() || (y.isNegative() && !y.isZero())) {
+    return new BigNumber(NaN);
+  }
+  if (x.isZero() || y.isZero()) {
+    return x;
+  }
+  if (!y.isFinite()) {
+    if (x.isNegative() || !x.isFinite()) {
+      return new BigNumber(NaN);
+    }
+    return new BigNumber(0);
+  }
+
+  // Convert negative numbers to their 32-bit two's complement unsigned representation
+  let val = x;
+  if (val.isNegative()) {
+    const MASK = new BigNumber(4294967296);
+    val = (val as any).mod(MASK);
+    if (val.isNegative()) {
+      val = val.plus(MASK);
+    }
+  }
+
+  // Math.pow(2, y) is fully precise for y < 55, and fast
+  if (y.lt(55)) {
+    return val.div(Math.pow(2, y.toNumber()) + '').floor();
+  }
+  return val.div(new BigNumber(2).pow(y)).floor();
+}

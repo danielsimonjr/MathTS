@@ -40,9 +40,13 @@ export function normalize(p: Poly): Poly {
     if (existing) existing.coeff += t.coeff;
     else byKey.set(key, { coeff: t.coeff, powers: [...t.powers] });
   }
-  return [...byKey.values()]
-    .filter((t) => Math.abs(t.coeff) > EPS)
-    .sort((a, b) => cmpPowers(b.powers, a.powers));
+  const out: Poly = [];
+  for (const t of byKey.values()) {
+    if (Math.abs(t.coeff) > EPS) {
+      out.push(t);
+    }
+  }
+  return out.sort((a, b) => cmpPowers(b.powers, a.powers));
 }
 
 export function polyAdd(a: Poly, b: Poly): Poly {
@@ -50,7 +54,11 @@ export function polyAdd(a: Poly, b: Poly): Poly {
 }
 
 export function polyNeg(a: Poly): Poly {
-  return a.map((t) => ({ coeff: -t.coeff, powers: [...t.powers] }));
+  const out: Poly = [];
+  for (let i = 0; i < a.length; i++) {
+    out.push({ coeff: -a[i].coeff, powers: [...a[i].powers] });
+  }
+  return out;
 }
 
 export function polySub(a: Poly, b: Poly): Poly {
@@ -61,9 +69,13 @@ export function polyMul(a: Poly, b: Poly): Poly {
   const out: Poly = [];
   for (const ta of a) {
     for (const tb of b) {
+      const powers = new Array(ta.powers.length);
+      for (let i = 0; i < ta.powers.length; i++) {
+        powers[i] = ta.powers[i] + tb.powers[i];
+      }
       out.push({
         coeff: ta.coeff * tb.coeff,
-        powers: ta.powers.map((p, i) => p + tb.powers[i]),
+        powers,
       });
     }
   }
@@ -102,7 +114,10 @@ function polyPow(a: Poly, n: number, nVars: number): Poly {
  */
 export function polyFromExpression(expr: string, vars: string[]): Poly {
   const nVars = vars.length;
-  const varIndex = new Map(vars.map((v, i) => [v, i]));
+  const varIndex = new Map();
+  for (let i = 0; i < vars.length; i++) {
+    varIndex.set(vars[i], i);
+  }
   let pos = 0;
 
   const constPoly = (v: number): Poly =>
@@ -110,7 +125,16 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
 
   function constOf(p: Poly): number | null {
     if (p.length === 0) return 0;
-    if (p.length === 1 && p[0].powers.every((x) => x === 0)) return p[0].coeff;
+    if (p.length === 1) {
+      let isConst = true;
+      for (let i = 0; i < p[0].powers.length; i++) {
+        if (p[0].powers[i] !== 0) {
+          isConst = false;
+          break;
+        }
+      }
+      if (isConst) return p[0].coeff;
+    }
     return null;
   }
 
@@ -199,7 +223,11 @@ export function polyFromExpression(expr: string, vars: string[]): Poly {
         if (denom === null || Math.abs(denom) <= EPS) {
           return fail('division only by a nonzero numeric constant');
         }
-        p = normalize(p.map((t) => ({ coeff: t.coeff / denom, powers: t.powers })));
+        const nextP: Poly = [];
+        for (let i = 0; i < p.length; i++) {
+          nextP.push({ coeff: p[i].coeff / denom, powers: p[i].powers });
+        }
+        p = normalize(nextP);
       } else {
         break;
       }
@@ -296,10 +324,14 @@ export function polyReduce(p: Poly, G: Poly[] | DivisorGeobucket): Poly {
     const lt = work[0];
     const g = index.find(lt.powers);
     if (g) {
+      const powers = new Array(lt.powers.length);
+      for (let i = 0; i < lt.powers.length; i++) {
+        powers[i] = lt.powers[i] - g[0].powers[i];
+      }
       const factor: Poly = [
         {
           coeff: lt.coeff / g[0].coeff,
-          powers: lt.powers.map((x, i) => x - g[0].powers[i]),
+          powers,
         },
       ];
       work = polySub(work, polyMul(factor, g));
@@ -312,13 +344,24 @@ export function polyReduce(p: Poly, G: Poly[] | DivisorGeobucket): Poly {
 }
 
 function lcmPowers(a: number[], b: number[]): number[] {
-  return a.map((x, i) => Math.max(x, b[i]));
+  const len = a.length;
+  const out = new Array(len);
+  for (let i = 0; i < len; i++) {
+    out[i] = Math.max(a[i], b[i]);
+  }
+  return out;
 }
 
 function sPoly(f: Poly, g: Poly): Poly {
   const l = lcmPowers(f[0].powers, g[0].powers);
-  const mf: Poly = [{ coeff: 1 / f[0].coeff, powers: l.map((x, i) => x - f[0].powers[i]) }];
-  const mg: Poly = [{ coeff: 1 / g[0].coeff, powers: l.map((x, i) => x - g[0].powers[i]) }];
+  const mfPowers = new Array(l.length);
+  const mgPowers = new Array(l.length);
+  for (let i = 0; i < l.length; i++) {
+    mfPowers[i] = l[i] - f[0].powers[i];
+    mgPowers[i] = l[i] - g[0].powers[i];
+  }
+  const mf: Poly = [{ coeff: 1 / f[0].coeff, powers: mfPowers }];
+  const mg: Poly = [{ coeff: 1 / g[0].coeff, powers: mgPowers }];
   return polySub(polyMul(mf, f), polyMul(mg, g));
 }
 
@@ -326,7 +369,11 @@ function sPoly(f: Poly, g: Poly): Poly {
 function monic(p: Poly): Poly {
   if (p.length === 0) return p;
   const c = p[0].coeff;
-  return p.map((t) => ({ coeff: t.coeff / c, powers: [...t.powers] }));
+  const out: Poly = [];
+  for (let i = 0; i < p.length; i++) {
+    out.push({ coeff: p[i].coeff / c, powers: [...p[i].powers] });
+  }
+  return out;
 }
 
 /**
@@ -335,10 +382,13 @@ function monic(p: Poly): Poly {
  * ordering, or throws if the caps are exceeded.
  */
 export function buchberger(input: Poly[]): Poly[] {
-  let G = input
-    .map(normalize)
-    .filter((p) => p.length > 0)
-    .map(monic);
+  let G: Poly[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const p = normalize(input[i]);
+    if (p.length > 0) {
+      G.push(monic(p));
+    }
+  }
   if (G.length === 0) return [];
 
   const pairs: Array<[number, number]> = [];
@@ -364,25 +414,38 @@ export function buchberger(input: Poly[]): Poly[] {
   }
 
   // Minimalize: drop g whose leading monomial is divisible by another's.
-  G = G.filter(
-    (g, i) =>
-      !G.some(
-        (h, j) =>
-          j !== i &&
-          h.length > 0 &&
-          divides(h[0].powers, g[0].powers) &&
-          (cmpPowers(h[0].powers, g[0].powers) !== 0 || j < i)
-      )
-  );
+  const minimalG: Poly[] = [];
+  for (let i = 0; i < G.length; i++) {
+    const g = G[i];
+    let isDivisible = false;
+    for (let j = 0; j < G.length; j++) {
+      if (i === j) continue;
+      const h = G[j];
+      if (
+        h.length > 0 &&
+        divides(h[0].powers, g[0].powers) &&
+        (cmpPowers(h[0].powers, g[0].powers) !== 0 || j < i)
+      ) {
+        isDivisible = true;
+        break;
+      }
+    }
+    if (!isDivisible) minimalG.push(g);
+  }
+  G = minimalG;
+
   // Inter-reduce tails.
-  G = G.map((g, i) =>
-    monic(
-      polyReduce(
-        g,
-        G.filter((_, j) => j !== i)
-      )
-    )
-  ).filter((g) => g.length > 0);
+  const reducedG: Poly[] = [];
+  for (let i = 0; i < G.length; i++) {
+    const others: Poly[] = [];
+    for (let j = 0; j < G.length; j++) {
+      if (i !== j) others.push(G[j]);
+    }
+    const reduced = monic(polyReduce(G[i], others));
+    if (reduced.length > 0) reducedG.push(reduced);
+  }
+  G = reducedG;
+
   // Deterministic order: by leading monomial, descending.
   G.sort((a, b) => cmpPowers(b[0].powers, a[0].powers));
   return G;
@@ -399,12 +462,17 @@ export function polyToString(p: Poly, vars: string[]): string {
     const r = Math.round(c);
     return Math.abs(c - r) < 1e-9 ? String(r) : String(Number(c.toPrecision(12)));
   };
-  const terms = [...p].reverse().map((t) => {
-    const varPart = t.powers
-      .map((e, i) => (e === 0 ? '' : e === 1 ? vars[i] : `${vars[i]}^${e}`))
-      .filter(Boolean)
-      .join('*');
-    return varPart ? `${fmt(t.coeff)}*${varPart}` : fmt(t.coeff);
-  });
+  const terms: string[] = [];
+  for (let i = p.length - 1; i >= 0; i--) {
+    const t = p[i];
+    const parts: string[] = [];
+    for (let j = 0; j < t.powers.length; j++) {
+      const e = t.powers[j];
+      if (e === 1) parts.push(vars[j]);
+      else if (e > 1) parts.push(`${vars[j]}^${e}`);
+    }
+    const varPart = parts.join('*');
+    terms.push(varPart ? `${fmt(t.coeff)}*${varPart}` : fmt(t.coeff));
+  }
   return terms.join(' + ').replace(/\+ -/g, '- ');
 }

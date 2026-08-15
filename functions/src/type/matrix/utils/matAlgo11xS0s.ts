@@ -28,6 +28,11 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, equalScalar }: { typed: TypedFunction; equalScalar: EqualScalarFunction }) => {
+    let _dtCache: DataType | undefined;
+    let _cbCache: MatrixCallback | undefined;
+    let _eqCache: EqualScalarFunction | undefined;
+    let _cfCache: MatrixCallback | undefined;
+
     /**
      * Iterates over SparseMatrix S nonzero items and invokes the callback function f(Sij, b).
      * Callback function invoked NZ times (number of nonzero items in S).
@@ -82,14 +87,24 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
       if (typeof adt === 'string') {
         // datatype
         dt = adt;
-        // find signature that matches (dt, dt)
-        eq = typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [dt, dt]) as EqualScalarFunction;
+        if (dt === _dtCache && callback === _cbCache) {
+          eq = _eqCache!;
+          cf = _cfCache!;
+        } else {
+          // find signature that matches (dt, dt)
+          eq = (typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [dt, dt]) as EqualScalarFunction) || equalScalar;
+          // callback
+          cf = (typed.find(callback, [dt, dt]) as unknown as MatrixCallback) || callback;
+
+          _dtCache = dt;
+          _cbCache = callback;
+          _eqCache = eq;
+          _cfCache = cf;
+        }
         // convert 0 to the same datatype
         zero = typed.convert(0, dt);
         // convert b to the same datatype
         b = typed.convert(b, dt);
-        // callback
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
       }
 
       // result arrays
