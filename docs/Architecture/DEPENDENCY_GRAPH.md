@@ -4,7 +4,7 @@
 
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-08-14
+**Version**: 0.1.0 | **Last Updated**: 2026-08-15
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -64,12 +64,12 @@ This document provides a comprehensive dependency graph of all files, components
 50. [Functions/unit Dependencies](#functions-unit-dependencies)
 51. [Functions/utils Dependencies](#functions-utils-dependencies)
 52. [Functions/wasm Dependencies](#functions-wasm-dependencies)
-53. [Expression Dependencies](#expression-dependencies)
-54. [Expression/compiler Dependencies](#expression-compiler-dependencies)
-55. [Expression/embeddedDocs Dependencies](#expression-embeddeddocs-dependencies)
-56. [Expression/error Dependencies](#expression-error-dependencies)
-57. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
-58. [Expression/function Dependencies](#expression-function-dependencies)
+53. [Expression/compiler Dependencies](#expression-compiler-dependencies)
+54. [Expression/embeddedDocs Dependencies](#expression-embeddeddocs-dependencies)
+55. [Expression/error Dependencies](#expression-error-dependencies)
+56. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
+57. [Expression/function Dependencies](#expression-function-dependencies)
+58. [Expression Dependencies](#expression-dependencies)
 59. [Expression/node Dependencies](#expression-node-dependencies)
 60. [Expression/transform Dependencies](#expression-transform-dependencies)
 61. [Expression/utils Dependencies](#expression-utils-dependencies)
@@ -160,12 +160,12 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 12 files
-- **expression**: 7 files
 - **expression/compiler**: 2 files
-- **expression/embeddedDocs**: 346 files
+- **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
+- **expression**: 7 files
 - **expression/node**: 19 files
 - **expression/transform**: 31 files
 - **expression/utils**: 13 files
@@ -209,7 +209,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 467            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 423            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 475            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -906,25 +906,6 @@ graph LR
 
 ---
 
-### `core/src/types/unit/Unit.ts` - Normalize degree-symbol unit notations to their ASCII spellings before parsing,
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../is.js` | `isComplex, isUnit, typeOf` | Import |
-| `../../factory.js` | `factory` | Import |
-| `../../object.js` | `clone` | Import |
-| `../../shared.js` | `memoize, endsWith, hasOwnProperty, warnOnce` | Import |
-| `../bignumber.js` | `BIGNUMBER_PI` | Import |
-| `./unit-types.js` | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` | Import (type-only) |
-| `./errors.js` | `DimensionMismatchError, UnitParseError` | Import |
-
-**Exports:**
-
-- Constants: `createUnitClass`
-
----
-
 ### `core/src/types/unit/dependencies.ts` - The dependency object injected into the relocated mathjs `Unit` factory
 
 **Internal Dependencies:**
@@ -983,6 +964,25 @@ graph LR
 
 - Interfaces: `BigNumberValue`, `FractionValue`, `PrefixDef`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitJSON`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `SubtractScalar`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`
 - Types: `ComplexValue`, `Numeric`, `PrefixTable`, `UnitSystem`, `ConverterFn`, `ScalarBinaryOp`, `ScalarUnaryOp`
+
+---
+
+### `core/src/types/unit/Unit.ts` - Normalize degree-symbol unit notations to their ASCII spellings before parsing,
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../is.js` | `isComplex, isUnit, typeOf` | Import |
+| `../../factory.js` | `factory` | Import |
+| `../../object.js` | `clone` | Import |
+| `../../shared.js` | `memoize, endsWith, hasOwnProperty, warnOnce` | Import |
+| `../bignumber.js` | `BIGNUMBER_PI` | Import |
+| `./unit-types.js` | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` | Import (type-only) |
+| `./errors.js` | `DimensionMismatchError, UnitParseError` | Import |
+
+**Exports:**
+
+- Constants: `createUnitClass`
 
 ---
 
@@ -1082,6 +1082,74 @@ graph LR
 
 ---
 
+### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPUContext` |
+| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
+| `@danielsimonjr/mathts-gpu` | `BufferPool` |
+
+**Exports:**
+
+- Classes: `BatchExecutor`
+- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
+- Types: `BatchOperationType`
+
+---
+
+### `matrix/src/backends/gpu/builtin-shaders.ts` - Matrix-domain WGSL kernels.
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
+
+**Exports:**
+
+- Functions: `registerBuiltinShaders`
+- Constants: `BUILTIN_SHADERS`
+
+---
+
+### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, getGpuDevice, resetGpuDevice, BufferPool, ShaderManager, GPUAdapterInfo, GPUCapabilities, GPUContextOptions, GPUContextStatus, DeviceLostEvent, BufferPoolOptions, ShaderSource, PipelineConfig` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./builtin-shaders.js` | `BUILTIN_SHADERS, registerBuiltinShaders` | Re-export |
+| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
+| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
+
+**Exports:**
+
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `ShaderManager`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPoolOptions`, `ShaderSource`, `PipelineConfig`, `BUILTIN_SHADERS`, `registerBuiltinShaders`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
+
+---
+
+### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-gpu` | `GPUContext` |
+| `@danielsimonjr/mathts-gpu` | `BufferPool` |
+
+**Exports:**
+
+- Classes: `SyncManager`
+- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
+- Types: `SyncStrategy`, `TransferDirection`
+- Functions: `createSyncManager`
+
+---
+
 ### `matrix/src/backends/GPUBackend.ts` - GPU Backend for Matrix Operations
 
 **Workspace Dependencies:**
@@ -1127,6 +1195,31 @@ graph LR
 
 ---
 
+### `matrix/src/backends/index.ts` - Matrix Backend Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./register-backends.js` | ``| Import |
+|`./Backend.js`|`BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS`| Re-export |
+|`./JSBackend.js`|`JSBackend, jsBackend`| Re-export |
+|`./ParallelBackend.js`|`ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig`| Re-export |
+|`./WASMBackend.js`|`WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig`| Re-export |
+|`./GPUMatrixBackend.js`|`GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig`| Re-export |
+|`./GPUBackend.js`|`GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus`| Re-export |
+|`./BackendManager.js`|`BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType`| Re-export |
+|`./wasm/index.js`|`detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures`| Re-export |
+|`./gpu/index.js`|`hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager`| Re-export |
+|`./Backend.js`|`MatrixBackend, BackendType, BackendHints`| Re-export (type-only) |
+|`./wasm/index.js`|`WasmFeatures`| Re-export (type-only) |
+|`./gpu/index.js`|`GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig` | Re-export (type-only) |
+
+**Exports:**
+
+- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`, `MatrixBackend`, `BackendType`, `BackendHints`, `WasmFeatures`, `GPUCapabilities`, `GPUContextOptions`, `SyncStrategy`, `SyncConfig`
+
+---
+
 ### `matrix/src/backends/JSBackend.ts` - Pure TypeScript Matrix Backend
 
 **Internal Dependencies:**
@@ -1161,142 +1254,6 @@ graph LR
 - Interfaces: `ParallelBackendConfig`
 - Functions: `createParallelBackend`
 - Constants: `parallelBackend`
-
----
-
-### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend (AssemblyScript)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
-| `./wasm/resolve.js` | ``| Import (type-only) |
-| `./wasm/integrity.js` |`` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `WASMBackend`
-- Interfaces: `WASMBackendConfig`
-- Functions: `createWASMBackend`
-- Constants: `wasmBackend`
-
----
-
-### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./wasm/integrity.js` | ``| Import (type-only) |
-| `./wasm/resolve.js` |`` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `Allocation`
-- Functions: `initWasm`
-- Constants: `wasmLoader`
-
----
-
-### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-gpu` | `GPUContext` |
-| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
-| `@danielsimonjr/mathts-gpu` | `BufferPool` |
-
-**Exports:**
-
-- Classes: `BatchExecutor`
-- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
-- Types: `BatchOperationType`
-
----
-
-### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-gpu` | `GPUContext` |
-| `@danielsimonjr/mathts-gpu` | `BufferPool` |
-
-**Exports:**
-
-- Classes: `SyncManager`
-- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
-- Types: `SyncStrategy`, `TransferDirection`
-- Functions: `createSyncManager`
-
----
-
-### `matrix/src/backends/gpu/builtin-shaders.ts` - Matrix-domain WGSL kernels.
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-gpu` | `ShaderManager` |
-
-**Exports:**
-
-- Functions: `registerBuiltinShaders`
-- Constants: `BUILTIN_SHADERS`
-
----
-
-### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-gpu` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, getGpuDevice, resetGpuDevice, BufferPool, ShaderManager, GPUAdapterInfo, GPUCapabilities, GPUContextOptions, GPUContextStatus, DeviceLostEvent, BufferPoolOptions, ShaderSource, PipelineConfig` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./builtin-shaders.js` | `BUILTIN_SHADERS, registerBuiltinShaders` | Re-export |
-| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
-| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
-
-**Exports:**
-
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `ShaderManager`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPoolOptions`, `ShaderSource`, `PipelineConfig`, `BUILTIN_SHADERS`, `registerBuiltinShaders`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
-
----
-
-### `matrix/src/backends/index.ts` - Matrix Backend Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./register-backends.js` | ``| Import |
-|`./Backend.js`|`BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS`| Re-export |
-|`./JSBackend.js`|`JSBackend, jsBackend`| Re-export |
-|`./ParallelBackend.js`|`ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig`| Re-export |
-|`./WASMBackend.js`|`WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig`| Re-export |
-|`./GPUMatrixBackend.js`|`GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig`| Re-export |
-|`./GPUBackend.js`|`GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus`| Re-export |
-|`./BackendManager.js`|`BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType`| Re-export |
-|`./wasm/index.js`|`detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures`| Re-export |
-|`./gpu/index.js`|`hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager`| Re-export |
-|`./Backend.js`|`MatrixBackend, BackendType, BackendHints`| Re-export (type-only) |
-|`./wasm/index.js`|`WasmFeatures`| Re-export (type-only) |
-|`./gpu/index.js`|`GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig` | Re-export (type-only) |
-
-**Exports:**
-
-- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`, `MatrixBackend`, `BackendType`, `BackendHints`, `WasmFeatures`, `GPUCapabilities`, `GPUContextOptions`, `SyncStrategy`, `SyncConfig`
 
 ---
 
@@ -1374,6 +1331,49 @@ graph LR
 **Exports:**
 
 - Re-exports: `resolvePackagedWasm`, `defaultWasmLocation`
+
+---
+
+### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend (AssemblyScript)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
+| `./wasm/resolve.js` | ``| Import (type-only) |
+| `./wasm/integrity.js` |`` | Import (type-only) |
+
+**Exports:**
+
+- Classes: `WASMBackend`
+- Interfaces: `WASMBackendConfig`
+- Functions: `createWASMBackend`
+- Constants: `wasmBackend`
+
+---
+
+### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./wasm/integrity.js` | ``| Import (type-only) |
+| `./wasm/resolve.js` |`` | Import (type-only) |
+
+**Exports:**
+
+- Classes: `WasmLoader`
+- Interfaces: `WasmModule`, `Allocation`
+- Functions: `initWasm`
+- Constants: `wasmLoader`
 
 ---
 
@@ -1716,6 +1716,32 @@ graph LR
 
 ## Matrix/types Dependencies
 
+### `matrix/src/types/dense/arithmetic.ts` - Contiguous row-major view of a matrix's data. Using the flat Float64Array
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Matrix.js` | `Matrix` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `add`, `subtract`, `multiplyElementwise`, `multiply`, `scale`, `transpose`
+
+---
+
+### `matrix/src/types/dense/reduction.ts` - reduction module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Matrix.js` | `Matrix` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `sum`, `mean`, `min`, `max`, `norm`, `trace`
+
+---
+
 ### `matrix/src/types/DenseMatrix.ts` - Dense Matrix Implementation
 
 **Internal Dependencies:**
@@ -1729,6 +1755,22 @@ graph LR
 
 - Classes: `DenseMatrix`
 - Functions: `isDenseMatrix`
+
+---
+
+### `matrix/src/types/index.ts` - Matrix Type Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
+| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
+| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
+| `./Matrix.js` | `MatrixDimensions, MatrixIndex, SliceSpec, MatrixEntry, MatrixType` | Re-export (type-only) |
+
+**Exports:**
+
+- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`, `MatrixDimensions`, `MatrixIndex`, `SliceSpec`, `MatrixEntry`, `MatrixType`
 
 ---
 
@@ -1762,72 +1804,9 @@ graph LR
 
 ---
 
-### `matrix/src/types/dense/arithmetic.ts` - Contiguous row-major view of a matrix's data. Using the flat Float64Array
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../Matrix.js` | `Matrix` | Import (type-only) |
-
-**Exports:**
-
-- Functions: `add`, `subtract`, `multiplyElementwise`, `multiply`, `scale`, `transpose`
-
----
-
-### `matrix/src/types/dense/reduction.ts` - reduction module
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../Matrix.js` | `Matrix` | Import (type-only) |
-
-**Exports:**
-
-- Functions: `sum`, `mean`, `min`, `max`, `norm`, `trace`
-
----
-
-### `matrix/src/types/index.ts` - Matrix Type Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
-| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
-| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
-| `./Matrix.js` | `MatrixDimensions, MatrixIndex, SliceSpec, MatrixEntry, MatrixType` | Re-export (type-only) |
-
-**Exports:**
-
-- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`, `MatrixDimensions`, `MatrixIndex`, `SliceSpec`, `MatrixEntry`, `MatrixType`
-
----
-
 <a id="tensor-dependencies"></a>
 
 ## Tensor Dependencies
-
-### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
-| `@danielsimonjr/mathts-core` | `NestedArray` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./named-index.js` | `Index` | Import |
-
-**Exports:**
-
-- Classes: `Tensor`
-- Interfaces: `EinsumSpec`
-- Types: `NestedArray`
-
----
 
 ### `tensor/src/contraction-sequence.ts` - contractNetwork — given an ordered list of Tensors (each carrying
 
@@ -1899,6 +1878,27 @@ graph LR
 - Classes: `Index`
 - Interfaces: `IndexOpts`
 - Functions: `idx`
+
+---
+
+### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, backendManager` |
+| `@danielsimonjr/mathts-core` | `NestedArray` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./named-index.js` | `Index` | Import |
+
+**Exports:**
+
+- Classes: `Tensor`
+- Interfaces: `EinsumSpec`
+- Types: `NestedArray`
 
 ---
 
@@ -3790,6 +3790,7 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../plain/number/index.js` | `rightLogShiftNumber` | Import |
+| `../utils/bignumber/bitwise.js` | `rightLogShiftBigNumber` | Import |
 | `./useMatrixForArrayScalar.js` | `createUseMatrixForArrayScalar` | Import |
 | `../type/bignumber/BigNumber.js` | `BigNumber` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
@@ -6596,6 +6597,7 @@ graph LR
 | `../utils/number.js` | `isInteger` | Import |
 | `../utils/product.js` | `product` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8413,6 +8415,21 @@ graph LR
 
 ---
 
+### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+
+- Constants: `createIndex`
+
+---
+
 ### `functions/src/type/matrix/ImmutableDenseMatrix.ts` - Interface for Index objects (local copy to avoid circular deps)
 
 **Internal Dependencies:**
@@ -8458,21 +8475,6 @@ graph LR
 **Exports:**
 
 - Constants: `createSpaClass`
-
----
-
-### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
-| `../../../utils/factory.js` | `factory` | Import |
-| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-
-**Exports:**
-
-- Constants: `createIndex`
 
 ---
 
@@ -9603,7 +9605,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `bitAndBigNumber`, `bitNotBigNumber`, `bitOrBigNumber`, `bitwise`, `bitXor`, `leftShiftBigNumber`, `rightArithShiftBigNumber`
+- Functions: `bitAndBigNumber`, `bitNotBigNumber`, `bitOrBigNumber`, `bitwise`, `bitXor`, `leftShiftBigNumber`, `rightArithShiftBigNumber`, `rightLogShiftBigNumber`
 
 ---
 
@@ -10041,27 +10043,6 @@ graph LR
 
 ## Functions/wasm Dependencies
 
-### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
-
-**Workspace Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest` | Import |
-| `./resolve.js` | `resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm` | Import |
-
-**Exports:**
-
-- Classes: `WasmLoader`
-- Interfaces: `WasmModule`
-- Constants: `wasmLoader`
-
----
-
 ### `functions/src/wasm/bitwise/wasm-bridge.ts` - WASM dispatch bridge for elementwise Int32Array bitwise ops.
 
 **Internal Dependencies:**
@@ -10216,131 +10197,24 @@ graph LR
 
 ---
 
-<a id="expression-dependencies"></a>
+### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
 
-## Expression Dependencies
-
-### `expression/src/Help.ts` - Documentation object
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/is.js` | `isHelp` | Import |
-| `./utils/object.js` | `clone` | Import |
-| `./utils/string.js` | `format` | Import |
-| `./utils/factory.js` | `factory` | Import |
-
-**Exports:**
-
-- Constants: `createHelpClass`
-
----
-
-### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
+**Workspace Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `LoadingMetrics` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./utils/factory.js` | `factory` | Import |
-| `./utils/is.js` | `isFunction` | Import |
-| `./utils/map.js` | `createEmptyMap, toObject` | Import |
+| `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest` | Import |
+| `./resolve.js` | `resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm` | Import |
 
 **Exports:**
 
-- Constants: `createParserClass`
-
----
-
-### `expression/src/index.ts` - Expression parsing and evaluation for MathTS.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `*` | Re-export |
-| `./keywords.js` | `*` | Re-export |
-| `./operators.js` | `*` | Re-export |
-| `./parse.js` | `*` | Re-export |
-| `./Parser.js` | `*` | Re-export |
-| `./Help.js` | `*` | Re-export |
-| `./compiler/index.js` | `*` | Re-export |
-| `./evaluator/index.js` | `*` | Re-export |
-| `./transform/index.js` | `*` | Re-export |
-| `./function/parser.js` | `createParser` | Re-export |
-| `./embeddedDocs/embeddedDocs.js` | `embeddedDocs` | Re-export |
-| `./utils/mathml.js` | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol` | Re-export |
-| `./node/Node.js` | `createNode` | Re-export |
-| `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
-| `./node/ArrayNode.js` | `createArrayNode` | Re-export |
-| `./node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
-| `./node/BlockNode.js` | `createBlockNode` | Re-export |
-| `./node/ConditionalNode.js` | `createConditionalNode` | Re-export |
-| `./node/ConstantNode.js` | `createConstantNode` | Re-export |
-| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
-| `./node/FunctionNode.js` | `createFunctionNode` | Re-export |
-| `./node/IndexNode.js` | `createIndexNode` | Re-export |
-| `./node/ObjectNode.js` | `createObjectNode` | Re-export |
-| `./node/OperatorNode.js` | `createOperatorNode` | Re-export |
-| `./node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
-| `./node/RangeNode.js` | `createRangeNode` | Re-export |
-| `./node/RelationalNode.js` | `createRelationalNode` | Re-export |
-| `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
-
-**Exports:**
-
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
-
----
-
-### `expression/src/keywords.ts` - Reserved keywords not allowed to use in the parser
-
-**Exports:**
-
-- Constants: `keywords`
-
----
-
-### `expression/src/operators.ts` - Metadata for a single operator/node identifier in the precedence table.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/object.js` | `hasOwnProperty` | Import |
-| `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
-
-**Exports:**
-
-- Interfaces: `OperatorProperty`
-- Types: `OperatorGroup`
-- Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
-- Constants: `properties`
-
----
-
-### `expression/src/parse.ts` - Parse an expression. Returns a node tree, which can be evaluated by
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/factory.js` | `factory` | Import |
-| `./utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
-| `./utils/collection.js` | `deepMap` | Import |
-| `./utils/number.js` | `safeNumberType` | Import |
-| `./utils/number.js` | `NumberTypeConfig` | Import (type-only) |
-| `./utils/object.js` | `hasOwnProperty` | Import |
-| `./utils/customs.js` | `setSafeProperty` | Import |
-| `./node/Node.js` | `MathNode` | Import (type-only) |
-
-**Exports:**
-
-- Constants: `createParse`
-
----
-
-### `expression/src/types.ts` - Type definitions for expression module
-
-**Exports:**
-
-- Types: `TypedFunction`, `TypedFunctionConstructor`
+- Classes: `WasmLoader`
+- Interfaces: `WasmModule`
+- Constants: `wasmLoader`
 
 ---
 
@@ -10381,6 +10255,30 @@ graph LR
 <a id="expression-embeddeddocs-dependencies"></a>
 
 ## Expression/embeddedDocs Dependencies
+
+### `expression/src/embeddedDocs/constants/e.ts` - e module
+
+**Exports:**
+
+- Constants: `eDocs`
+
+---
+
+### `expression/src/embeddedDocs/constants/false.ts` - false module
+
+**Exports:**
+
+- Constants: `falseDocs`
+
+---
+
+### `expression/src/embeddedDocs/constants/i.ts` - i module
+
+**Exports:**
+
+- Constants: `iDocs`
+
+---
 
 ### `expression/src/embeddedDocs/constants/Infinity.ts` - Infinity module
 
@@ -10430,46 +10328,6 @@ graph LR
 
 ---
 
-### `expression/src/embeddedDocs/constants/SQRT1_2.ts` - SQRT1_2 module
-
-**Exports:**
-
-- Constants: `SQRT12Docs`
-
----
-
-### `expression/src/embeddedDocs/constants/SQRT2.ts` - SQRT2 module
-
-**Exports:**
-
-- Constants: `SQRT2Docs`
-
----
-
-### `expression/src/embeddedDocs/constants/e.ts` - e module
-
-**Exports:**
-
-- Constants: `eDocs`
-
----
-
-### `expression/src/embeddedDocs/constants/false.ts` - false module
-
-**Exports:**
-
-- Constants: `falseDocs`
-
----
-
-### `expression/src/embeddedDocs/constants/i.ts` - i module
-
-**Exports:**
-
-- Constants: `iDocs`
-
----
-
 ### `expression/src/embeddedDocs/constants/null.ts` - null module
 
 **Exports:**
@@ -10491,6 +10349,22 @@ graph LR
 **Exports:**
 
 - Constants: `piDocs`
+
+---
+
+### `expression/src/embeddedDocs/constants/SQRT1_2.ts` - SQRT1_2 module
+
+**Exports:**
+
+- Constants: `SQRT12Docs`
+
+---
+
+### `expression/src/embeddedDocs/constants/SQRT2.ts` - SQRT2 module
+
+**Exports:**
+
+- Constants: `SQRT2Docs`
 
 ---
 
@@ -10651,6 +10525,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `./physicalConstants/index.js` | `speedOfLightDocs, gravitationConstantDocs, planckConstantDocs, reducedPlanckConstantDocs, magneticConstantDocs, electricConstantDocs, vacuumImpedanceDocs, coulombDocs, coulombConstantDocs, elementaryChargeDocs, bohrMagnetonDocs, conductanceQuantumDocs, inverseConductanceQuantumDocs, magneticFluxQuantumDocs, nuclearMagnetonDocs, klitzingDocs, bohrRadiusDocs, classicalElectronRadiusDocs, electronMassDocs, fermiCouplingDocs, fineStructureDocs, hartreeEnergyDocs, protonMassDocs, deuteronMassDocs, neutronMassDocs, quantumOfCirculationDocs, rydbergDocs, thomsonCrossSectionDocs, weakMixingAngleDocs, efimovFactorDocs, atomicMassDocs, avogadroDocs, boltzmannDocs, faradayDocs, firstRadiationDocs, loschmidtDocs, gasConstantDocs, molarPlanckConstantDocs, molarVolumeDocs, sackurTetrodeDocs, secondRadiationDocs, stefanBoltzmannDocs, wienDisplacementDocs, molarMassDocs, molarMassC12Docs, gravityDocs, planckLengthDocs, planckMassDocs, planckTimeDocs, planckChargeDocs, planckTemperatureDocs` | Import |
 | `./constants/e.js` | `eDocs` | Import |
 | `./constants/false.js` | `falseDocs` | Import |
 | `./constants/i.js` | `iDocs` | Import |
@@ -11099,19 +10974,19 @@ graph LR
 
 ---
 
-### `expression/src/embeddedDocs/function/algebra/expToTrig.ts` - expToTrig module
-
-**Exports:**
-
-- Constants: `expToTrigDocs`
-
----
-
 ### `expression/src/embeddedDocs/function/algebra/expand.ts` - expand module
 
 **Exports:**
 
 - Constants: `expandDocs`
+
+---
+
+### `expression/src/embeddedDocs/function/algebra/expToTrig.ts` - expToTrig module
+
+**Exports:**
+
+- Constants: `expToTrigDocs`
 
 ---
 
@@ -13499,6 +13374,477 @@ graph LR
 
 ---
 
+### `expression/src/embeddedDocs/physicalConstants/atomicMass.ts` - atomicMass module
+
+**Exports:**
+
+- Constants: `atomicMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/avogadro.ts` - avogadro module
+
+**Exports:**
+
+- Constants: `avogadroDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts` - bohrMagneton module
+
+**Exports:**
+
+- Constants: `bohrMagnetonDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/bohrRadius.ts` - bohrRadius module
+
+**Exports:**
+
+- Constants: `bohrRadiusDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/boltzmann.ts` - boltzmann module
+
+**Exports:**
+
+- Constants: `boltzmannDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts` - classicalElectronRadius module
+
+**Exports:**
+
+- Constants: `classicalElectronRadiusDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts` - conductanceQuantum module
+
+**Exports:**
+
+- Constants: `conductanceQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/coulomb.ts` - coulomb module
+
+**Exports:**
+
+- Constants: `coulombDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/coulombConstant.ts` - coulombConstant module
+
+**Exports:**
+
+- Constants: `coulombConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/deuteronMass.ts` - deuteronMass module
+
+**Exports:**
+
+- Constants: `deuteronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/efimovFactor.ts` - efimovFactor module
+
+**Exports:**
+
+- Constants: `efimovFactorDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/electricConstant.ts` - electricConstant module
+
+**Exports:**
+
+- Constants: `electricConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/electronMass.ts` - electronMass module
+
+**Exports:**
+
+- Constants: `electronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts` - elementaryCharge module
+
+**Exports:**
+
+- Constants: `elementaryChargeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/faraday.ts` - faraday module
+
+**Exports:**
+
+- Constants: `faradayDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts` - fermiCoupling module
+
+**Exports:**
+
+- Constants: `fermiCouplingDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/fineStructure.ts` - fineStructure module
+
+**Exports:**
+
+- Constants: `fineStructureDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/firstRadiation.ts` - firstRadiation module
+
+**Exports:**
+
+- Constants: `firstRadiationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gasConstant.ts` - gasConstant module
+
+**Exports:**
+
+- Constants: `gasConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts` - gravitationConstant module
+
+**Exports:**
+
+- Constants: `gravitationConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/gravity.ts` - gravity module
+
+**Exports:**
+
+- Constants: `gravityDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts` - hartreeEnergy module
+
+**Exports:**
+
+- Constants: `hartreeEnergyDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 51 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./speedOfLight.js` | `*` | Re-export |
+| `./gravitationConstant.js` | `*` | Re-export |
+| `./planckConstant.js` | `*` | Re-export |
+| `./reducedPlanckConstant.js` | `*` | Re-export |
+| `./magneticConstant.js` | `*` | Re-export |
+| `./electricConstant.js` | `*` | Re-export |
+| `./vacuumImpedance.js` | `*` | Re-export |
+| `./coulomb.js` | `*` | Re-export |
+| `./coulombConstant.js` | `*` | Re-export |
+| `./elementaryCharge.js` | `*` | Re-export |
+| `./bohrMagneton.js` | `*` | Re-export |
+| `./conductanceQuantum.js` | `*` | Re-export |
+| `./inverseConductanceQuantum.js` | `*` | Re-export |
+| `./magneticFluxQuantum.js` | `*` | Re-export |
+| `./nuclearMagneton.js` | `*` | Re-export |
+| `./klitzing.js` | `*` | Re-export |
+| `./bohrRadius.js` | `*` | Re-export |
+| `./classicalElectronRadius.js` | `*` | Re-export |
+| `./electronMass.js` | `*` | Re-export |
+| `./fermiCoupling.js` | `*` | Re-export |
+| `./fineStructure.js` | `*` | Re-export |
+| `./hartreeEnergy.js` | `*` | Re-export |
+| `./protonMass.js` | `*` | Re-export |
+| `./deuteronMass.js` | `*` | Re-export |
+| `./neutronMass.js` | `*` | Re-export |
+| `./quantumOfCirculation.js` | `*` | Re-export |
+| `./rydberg.js` | `*` | Re-export |
+| `./thomsonCrossSection.js` | `*` | Re-export |
+| `./weakMixingAngle.js` | `*` | Re-export |
+| `./efimovFactor.js` | `*` | Re-export |
+| `./atomicMass.js` | `*` | Re-export |
+| `./avogadro.js` | `*` | Re-export |
+| `./boltzmann.js` | `*` | Re-export |
+| `./faraday.js` | `*` | Re-export |
+| `./firstRadiation.js` | `*` | Re-export |
+| `./loschmidt.js` | `*` | Re-export |
+| `./gasConstant.js` | `*` | Re-export |
+| `./molarPlanckConstant.js` | `*` | Re-export |
+| `./molarVolume.js` | `*` | Re-export |
+| `./sackurTetrode.js` | `*` | Re-export |
+| `./secondRadiation.js` | `*` | Re-export |
+| `./stefanBoltzmann.js` | `*` | Re-export |
+| `./wienDisplacement.js` | `*` | Re-export |
+| `./molarMass.js` | `*` | Re-export |
+| `./molarMassC12.js` | `*` | Re-export |
+| `./gravity.js` | `*` | Re-export |
+| `./planckLength.js` | `*` | Re-export |
+| `./planckMass.js` | `*` | Re-export |
+| `./planckTime.js` | `*` | Re-export |
+| `./planckCharge.js` | `*` | Re-export |
+| `./planckTemperature.js` | `*` | Re-export |
+
+**Exports:**
+
+- Re-exports: `* from ./speedOfLight.js`, `* from ./gravitationConstant.js`, `* from ./planckConstant.js`, `* from ./reducedPlanckConstant.js`, `* from ./magneticConstant.js`, `* from ./electricConstant.js`, `* from ./vacuumImpedance.js`, `* from ./coulomb.js`, `* from ./coulombConstant.js`, `* from ./elementaryCharge.js`, `* from ./bohrMagneton.js`, `* from ./conductanceQuantum.js`, `* from ./inverseConductanceQuantum.js`, `* from ./magneticFluxQuantum.js`, `* from ./nuclearMagneton.js`, `* from ./klitzing.js`, `* from ./bohrRadius.js`, `* from ./classicalElectronRadius.js`, `* from ./electronMass.js`, `* from ./fermiCoupling.js`, `* from ./fineStructure.js`, `* from ./hartreeEnergy.js`, `* from ./protonMass.js`, `* from ./deuteronMass.js`, `* from ./neutronMass.js`, `* from ./quantumOfCirculation.js`, `* from ./rydberg.js`, `* from ./thomsonCrossSection.js`, `* from ./weakMixingAngle.js`, `* from ./efimovFactor.js`, `* from ./atomicMass.js`, `* from ./avogadro.js`, `* from ./boltzmann.js`, `* from ./faraday.js`, `* from ./firstRadiation.js`, `* from ./loschmidt.js`, `* from ./gasConstant.js`, `* from ./molarPlanckConstant.js`, `* from ./molarVolume.js`, `* from ./sackurTetrode.js`, `* from ./secondRadiation.js`, `* from ./stefanBoltzmann.js`, `* from ./wienDisplacement.js`, `* from ./molarMass.js`, `* from ./molarMassC12.js`, `* from ./gravity.js`, `* from ./planckLength.js`, `* from ./planckMass.js`, `* from ./planckTime.js`, `* from ./planckCharge.js`, `* from ./planckTemperature.js`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts` - inverseConductanceQuantum module
+
+**Exports:**
+
+- Constants: `inverseConductanceQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/klitzing.ts` - klitzing module
+
+**Exports:**
+
+- Constants: `klitzingDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/loschmidt.ts` - loschmidt module
+
+**Exports:**
+
+- Constants: `loschmidtDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/magneticConstant.ts` - magneticConstant module
+
+**Exports:**
+
+- Constants: `magneticConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts` - magneticFluxQuantum module
+
+**Exports:**
+
+- Constants: `magneticFluxQuantumDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarMass.ts` - molarMass module
+
+**Exports:**
+
+- Constants: `molarMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarMassC12.ts` - molarMassC12 module
+
+**Exports:**
+
+- Constants: `molarMassC12Docs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts` - molarPlanckConstant module
+
+**Exports:**
+
+- Constants: `molarPlanckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/molarVolume.ts` - molarVolume module
+
+**Exports:**
+
+- Constants: `molarVolumeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/neutronMass.ts` - neutronMass module
+
+**Exports:**
+
+- Constants: `neutronMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts` - nuclearMagneton module
+
+**Exports:**
+
+- Constants: `nuclearMagnetonDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckCharge.ts` - planckCharge module
+
+**Exports:**
+
+- Constants: `planckChargeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckConstant.ts` - planckConstant module
+
+**Exports:**
+
+- Constants: `planckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckLength.ts` - planckLength module
+
+**Exports:**
+
+- Constants: `planckLengthDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckMass.ts` - planckMass module
+
+**Exports:**
+
+- Constants: `planckMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckTemperature.ts` - planckTemperature module
+
+**Exports:**
+
+- Constants: `planckTemperatureDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/planckTime.ts` - planckTime module
+
+**Exports:**
+
+- Constants: `planckTimeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/protonMass.ts` - protonMass module
+
+**Exports:**
+
+- Constants: `protonMassDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts` - quantumOfCirculation module
+
+**Exports:**
+
+- Constants: `quantumOfCirculationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts` - reducedPlanckConstant module
+
+**Exports:**
+
+- Constants: `reducedPlanckConstantDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/rydberg.ts` - rydberg module
+
+**Exports:**
+
+- Constants: `rydbergDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts` - sackurTetrode module
+
+**Exports:**
+
+- Constants: `sackurTetrodeDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/secondRadiation.ts` - secondRadiation module
+
+**Exports:**
+
+- Constants: `secondRadiationDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/speedOfLight.ts` - speedOfLight module
+
+**Exports:**
+
+- Constants: `speedOfLightDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts` - stefanBoltzmann module
+
+**Exports:**
+
+- Constants: `stefanBoltzmannDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts` - thomsonCrossSection module
+
+**Exports:**
+
+- Constants: `thomsonCrossSectionDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts` - vacuumImpedance module
+
+**Exports:**
+
+- Constants: `vacuumImpedanceDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts` - weakMixingAngle module
+
+**Exports:**
+
+- Constants: `weakMixingAngleDocs`
+
+---
+
+### `expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts` - wienDisplacement module
+
+**Exports:**
+
+- Constants: `wienDisplacementDocs`
+
+---
+
 <a id="expression-error-dependencies"></a>
 
 ## Expression/error Dependencies
@@ -13576,6 +13922,134 @@ graph LR
 **Exports:**
 
 - Constants: `createParser`
+
+---
+
+<a id="expression-dependencies"></a>
+
+## Expression Dependencies
+
+### `expression/src/Help.ts` - Documentation object
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/is.js` | `isHelp` | Import |
+| `./utils/object.js` | `clone` | Import |
+| `./utils/string.js` | `format` | Import |
+| `./utils/factory.js` | `factory` | Import |
+
+**Exports:**
+
+- Constants: `createHelpClass`
+
+---
+
+### `expression/src/index.ts` - Expression parsing and evaluation for MathTS.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `*` | Re-export |
+| `./keywords.js` | `*` | Re-export |
+| `./operators.js` | `*` | Re-export |
+| `./parse.js` | `*` | Re-export |
+| `./Parser.js` | `*` | Re-export |
+| `./Help.js` | `*` | Re-export |
+| `./compiler/index.js` | `*` | Re-export |
+| `./evaluator/index.js` | `*` | Re-export |
+| `./transform/index.js` | `*` | Re-export |
+| `./function/parser.js` | `createParser` | Re-export |
+| `./embeddedDocs/embeddedDocs.js` | `embeddedDocs` | Re-export |
+| `./utils/mathml.js` | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol` | Re-export |
+| `./node/Node.js` | `createNode` | Re-export |
+| `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
+| `./node/ArrayNode.js` | `createArrayNode` | Re-export |
+| `./node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
+| `./node/BlockNode.js` | `createBlockNode` | Re-export |
+| `./node/ConditionalNode.js` | `createConditionalNode` | Re-export |
+| `./node/ConstantNode.js` | `createConstantNode` | Re-export |
+| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
+| `./node/FunctionNode.js` | `createFunctionNode` | Re-export |
+| `./node/IndexNode.js` | `createIndexNode` | Re-export |
+| `./node/ObjectNode.js` | `createObjectNode` | Re-export |
+| `./node/OperatorNode.js` | `createOperatorNode` | Re-export |
+| `./node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
+| `./node/RangeNode.js` | `createRangeNode` | Re-export |
+| `./node/RelationalNode.js` | `createRelationalNode` | Re-export |
+| `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
+
+**Exports:**
+
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+
+---
+
+### `expression/src/keywords.ts` - Reserved keywords not allowed to use in the parser
+
+**Exports:**
+
+- Constants: `keywords`
+
+---
+
+### `expression/src/operators.ts` - Metadata for a single operator/node identifier in the precedence table.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/object.js` | `hasOwnProperty` | Import |
+| `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
+
+**Exports:**
+
+- Interfaces: `OperatorProperty`
+- Types: `OperatorGroup`
+- Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
+- Constants: `properties`
+
+---
+
+### `expression/src/parse.ts` - Parse an expression. Returns a node tree, which can be evaluated by
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
+| `./utils/collection.js` | `deepMap` | Import |
+| `./utils/number.js` | `safeNumberType` | Import |
+| `./utils/number.js` | `NumberTypeConfig` | Import (type-only) |
+| `./utils/object.js` | `hasOwnProperty` | Import |
+| `./utils/customs.js` | `setSafeProperty` | Import |
+| `./node/Node.js` | `MathNode` | Import (type-only) |
+
+**Exports:**
+
+- Constants: `createParse`
+
+---
+
+### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isFunction` | Import |
+| `./utils/map.js` | `createEmptyMap, toObject` | Import |
+
+**Exports:**
+
+- Constants: `createParserClass`
+
+---
+
+### `expression/src/types.ts` - Type definitions for expression module
+
+**Exports:**
+
+- Types: `TypedFunction`, `TypedFunctionConstructor`
 
 ---
 
@@ -15721,36 +16195,6 @@ graph LR
 
 ---
 
-### `gpu/src/GPUContext.ts` - WebGPU Context Management
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
-
-**Exports:**
-
-- Classes: `GPUContext`
-- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
-
----
-
-### `gpu/src/ShaderManager.ts` - GPU Shader Manager (generic)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-
-- Classes: `ShaderManager`
-- Interfaces: `ShaderSource`, `PipelineConfig`
-
----
-
 ### `gpu/src/detect.ts` - WebGPU Detection and Capability Checking
 
 **Exports:**
@@ -15782,6 +16226,22 @@ graph LR
 
 ---
 
+### `gpu/src/GPUContext.ts` - WebGPU Context Management
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+
+**Exports:**
+
+- Classes: `GPUContext`
+- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
+- Types: `GPUContextStatus`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+
+---
+
 ### `gpu/src/index.ts` - / <reference types="@webgpu/types" />
 
 **Internal Dependencies:**
@@ -15806,6 +16266,20 @@ graph LR
 **Exports:**
 
 - Functions: `serializeGpu`
+
+---
+
+### `gpu/src/ShaderManager.ts` - GPU Shader Manager (generic)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+
+- Classes: `ShaderManager`
+- Interfaces: `ShaderSource`, `PipelineConfig`
 
 ---
 
@@ -16028,7 +16502,7 @@ graph LR
 |--------|--------|
 | `child_process` | `spawn` |
 | `fs/promises` | `writeFile, rm, rename, mkdtemp, readFile` |
-| `path` | `extname, join, basename` |
+| `path` | `extname, join` |
 | `os` | `tmpdir` |
 
 **Exports:**
@@ -16152,7 +16626,7 @@ graph LR
 
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
-| `expression/src/embeddedDocs/embeddedDocs`             | 345 files    | 1 file     |
+| `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 243 files    | 9 files    |
 | `functions/src/core/function/typed`                    | 3 files      | 202 files  |
@@ -16160,12 +16634,13 @@ graph LR
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
+| `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `functions/src/utils/array`                            | 0 files      | 48 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
 | `functions/src/wasm/WasmLoader`                        | 2 files      | 37 files   |
-| `functions/src/utils/collection`                       | 0 files      | 37 files   |
+| `functions/src/utils/collection`                       | 0 files      | 38 files   |
 | `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -16177,8 +16652,8 @@ graph LR
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 21 files   |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
-| `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
+| `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `core/src/internal`                                    | 19 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
@@ -16191,7 +16666,6 @@ graph LR
 | `core/src/index`                                       | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
-| `functions/src/type/complex/Complex`                   | 0 files      | 15 files   |
 
 ---
 
@@ -16265,23 +16739,23 @@ graph TD
         N30[fraction]
         N31[interfaces]
         N32[Range]
-        N33[Unit]
-        N34[dependencies]
-        N35[errors]
+        N33[dependencies]
+        N34[errors]
+        N35[index]
         N36[...6 more]
     end
 
     subgraph Matrix/backends
         N37[Backend]
         N38[BackendManager]
-        N39[GPUBackend]
-        N40[GPUMatrixBackend]
-        N41[JSBackend]
-        N42[ParallelBackend]
-        N43[WASMBackend]
-        N44[WasmLoader]
-        N45[BatchExecutor]
-        N46[Sync]
+        N39[BatchExecutor]
+        N40[builtin-shaders]
+        N41[index]
+        N42[Sync]
+        N43[GPUBackend]
+        N44[GPUMatrixBackend]
+        N45[index]
+        N46[JSBackend]
         N47[...9 more]
     end
 
@@ -16307,19 +16781,19 @@ graph TD
     end
 
     subgraph Matrix/types
-        N63[DenseMatrix]
-        N64[Matrix]
-        N65[SparseMatrix]
-        N66[arithmetic]
-        N67[reduction]
-        N68[index]
+        N63[arithmetic]
+        N64[reduction]
+        N65[DenseMatrix]
+        N66[index]
+        N67[Matrix]
+        N68[SparseMatrix]
     end
 
     subgraph Tensor
-        N69[Tensor]
-        N70[contraction-sequence]
-        N71[index]
-        N72[named-index]
+        N69[contraction-sequence]
+        N70[index]
+        N71[named-index]
+        N72[Tensor]
     end
 
     subgraph Tensor/operations
@@ -16647,10 +17121,10 @@ graph TD
         N301[Complex]
         N302[Decimal]
         N303[FibonacciHeap]
-        N304[ImmutableDenseMatrix]
-        N305[MatrixIndex]
-        N306[Spa]
-        N307[index]
+        N304[index]
+        N305[ImmutableDenseMatrix]
+        N306[MatrixIndex]
+        N307[Spa]
         N308[...22 more]
     end
 
@@ -16688,60 +17162,60 @@ graph TD
     end
 
     subgraph Functions/wasm
-        N333[WasmLoader]
-        N334[wasm-bridge]
-        N335[common]
-        N336[wasm-bridge]
-        N337[integrity]
+        N333[wasm-bridge]
+        N334[common]
+        N335[wasm-bridge]
+        N336[integrity]
+        N337[wasm-bridge]
         N338[wasm-bridge]
-        N339[wasm-bridge]
-        N340[resolve]
+        N339[resolve]
+        N340[wasm-bridge]
         N341[wasm-bridge]
-        N342[wasm-bridge]
+        N342[scalars]
         N343[...2 more]
     end
 
-    subgraph Expression
-        N344[Help]
-        N345[Parser]
-        N346[index]
-        N347[keywords]
-        N348[operators]
-        N349[parse]
-        N350[types]
-    end
-
     subgraph Expression/compiler
-        N351[compile]
-        N352[index]
+        N344[compile]
+        N345[index]
     end
 
     subgraph Expression/embeddedDocs
-        N353[Infinity]
-        N354[LN10]
-        N355[LN2]
-        N356[LOG10E]
-        N357[LOG2E]
-        N358[NaN]
-        N359[SQRT1_2]
-        N360[SQRT2]
-        N361[e]
-        N362[false]
-        N363[...336 more]
+        N346[e]
+        N347[false]
+        N348[i]
+        N349[Infinity]
+        N350[LN10]
+        N351[LN2]
+        N352[LOG10E]
+        N353[LOG2E]
+        N354[NaN]
+        N355[null]
+        N356[...388 more]
     end
 
     subgraph Expression/error
-        N364[DimensionError]
-        N365[IndexError]
+        N357[DimensionError]
+        N358[IndexError]
     end
 
     subgraph Expression/evaluator
-        N366[evaluate]
-        N367[index]
+        N359[evaluate]
+        N360[index]
     end
 
     subgraph Expression/function
-        N368[parser]
+        N361[parser]
+    end
+
+    subgraph Expression
+        N362[Help]
+        N363[index]
+        N364[keywords]
+        N365[operators]
+        N366[parse]
+        N367[Parser]
+        N368[types]
     end
 
     subgraph Expression/node
@@ -16909,13 +17383,13 @@ graph TD
 
     subgraph Gpu
         N460[BufferPool]
-        N461[GPUContext]
-        N462[ShaderManager]
-        N463[detect]
-        N464[device]
-        N465[flag]
-        N466[index]
-        N467[serialize]
+        N461[detect]
+        N462[device]
+        N463[flag]
+        N464[GPUContext]
+        N465[index]
+        N466[serialize]
+        N467[ShaderManager]
     end
 
     subgraph Plot
@@ -16973,6 +17447,7 @@ graph TD
     N14 --> N17
     N14 --> N18
     N14 --> N7
+    N14 --> N35
     N14 --> N6
     N14 --> N8
     N23 --> N24
@@ -16990,29 +17465,28 @@ graph TD
     N30 --> N31
     N32 --> N15
     N32 --> N12
+    N33 --> N5
+    N33 --> N9
     N33 --> N15
-    N33 --> N12
     N33 --> N26
-    N33 --> N35
-    N34 --> N5
-    N34 --> N9
-    N34 --> N15
-    N34 --> N26
-    N34 --> N27
-    N34 --> N30
-    N37 --> N63
-    N38 --> N63
+    N33 --> N27
+    N33 --> N30
+    N35 --> N33
+    N37 --> N65
+    N38 --> N65
     N38 --> N37
-    N38 --> N41
+    N38 --> N46
     N38 --> N48
-    N40 --> N37
-    N40 --> N63
-    N40 --> N41
-    N40 --> N39
-    N41 --> N63
-    N41 --> N37
-    N42 --> N63
-    N42 --> N37
+    N41 --> N40
+    N41 --> N39
+    N41 --> N42
+    N43 --> N40
+    N44 --> N37
+    N44 --> N65
+    N44 --> N46
+    N44 --> N43
+    N45 --> N37
+    N45 --> N46
 ```
 
 ---
@@ -17023,14 +17497,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1116   |
+| Total TypeScript Files  | 1168   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 193274 |
-| Total Exports           | 5756   |
-| Total Re-exports        | 2305   |
+| Total Lines of Code     | 194167 |
+| Total Exports           | 5808   |
+| Total Re-exports        | 2356   |
 | Total Classes           | 53     |
 | Total Interfaces        | 504    |
-| Total Functions         | 1867   |
+| Total Functions         | 1868   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 579    |
@@ -17039,5 +17513,5 @@ graph TD
 
 ---
 
-_Last Updated_: 2026-08-14
+_Last Updated_: 2026-08-15
 _Version_: 0.1.0

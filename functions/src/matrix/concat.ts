@@ -49,56 +49,65 @@ export const createConcat = /* #__PURE__ */ factory(
      * @return {Array | Matrix} Concatenated matrix
      */
     return typed(name, {
-      // TODO: change signature to '...Array | Matrix, dim?' when supported
       '...Array | Matrix | number | BigNumber': function (args: unknown[]): unknown {
-        let i: number;
         const len = args.length;
-        let dim = -1; // zero-based dimension
-        let prevDim: number;
-        let asMatrix = false;
-        const matrices: unknown[] = []; // contains multi dimensional arrays
+        if (len === 0) {
+          throw new SyntaxError('At least one matrix expected');
+        }
 
-        for (i = 0; i < len; i++) {
+        const lastArg = args[len - 1];
+        const hasDim = isNumber(lastArg) || isBigNumber(lastArg);
+        const dimIndex = hasDim ? len - 1 : len;
+
+        let dim = -1; // zero-based dimension
+        if (hasDim) {
+          dim = (lastArg as { valueOf(): number }).valueOf(); // change BigNumber to number
+          if (!isInteger(dim)) {
+            throw new TypeError('Integer number expected for dimension');
+          }
+        }
+
+        let asMatrix = false;
+        let prevDim = -1;
+        const matrices: unknown[][] = []; // contains multi dimensional arrays
+
+        for (let i = 0; i < dimIndex; i++) {
           const arg = args[i];
+
+          if (isNumber(arg) || isBigNumber(arg)) {
+            throw new Error('Dimension must be specified as last argument');
+          }
 
           // test whether we need to return a Matrix (if not we return an Array)
           if (isMatrix(arg)) {
             asMatrix = true;
           }
 
-          if (isNumber(arg) || isBigNumber(arg)) {
-            if (i !== len - 1) {
-              throw new Error('Dimension must be specified as last argument');
-            }
+          // this is a matrix or array
+          const m = (clone(arg) as { valueOf(): unknown }).valueOf() as unknown[];
+          const size = arraySize(m);
+          matrices.push(m);
 
-            // last argument contains the dimension on which to concatenate
-            prevDim = dim;
-            dim = arg.valueOf() as number; // change BigNumber to number
+          const currentDim = size.length - 1;
 
-            if (!isInteger(dim)) {
-              throw new TypeError('Integer number expected for dimension');
-            }
-
-            if (dim < 0 || (i > 0 && dim > prevDim)) {
-              throw new DimensionError(dim, dim < 0 ? 0 : prevDim, dim < 0 ? '<' : '>');
-            }
-          } else {
-            // this is a matrix or array
-            const m = (clone(arg) as { valueOf(): unknown }).valueOf() as unknown[];
-            const size = arraySize(m);
-            matrices[i] = m;
-            prevDim = dim;
-            dim = size.length - 1;
-
-            // verify whether each of the matrices has the same number of dimensions
-            if (i > 0 && dim !== prevDim) {
-              throw new DimensionError(prevDim + 1, dim + 1);
-            }
+          // verify whether each of the matrices has the same number of dimensions
+          if (i === 0) {
+            prevDim = currentDim;
+          } else if (currentDim !== prevDim) {
+            throw new DimensionError(prevDim + 1, currentDim + 1);
           }
         }
 
         if (matrices.length === 0) {
           throw new SyntaxError('At least one matrix expected');
+        }
+
+        if (hasDim) {
+          if (dim < 0 || dim > prevDim) {
+            throw new DimensionError(dim, dim < 0 ? 0 : prevDim, dim < 0 ? '<' : '>');
+          }
+        } else {
+          dim = prevDim;
         }
 
         let res = matrices.shift();

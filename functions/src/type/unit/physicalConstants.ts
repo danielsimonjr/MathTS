@@ -127,9 +127,9 @@ export const createNuclearMagneton = /* #__PURE__ */ unitFactory(
 export const createKlitzing = /* #__PURE__ */ unitFactory('klitzing', '25812.807459304513', 'ohm');
 export const createJosephson = /* #__PURE__ */ unitFactory(
   'josephson',
-  '4.835978484169836e14 Hz V',
+  '4.835978484169836e14',
   'Hz V^-1'
-); // TODO: support for Hz needed
+);
 
 // Atomic and nuclear constants
 export const createBohrRadius = /* #__PURE__ */ unitFactory('bohrRadius', '5.29177210544e-11', 'm');

@@ -43,6 +43,8 @@ export const createMatAlgo03xDSf = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed }: { typed: TypedFunction }) => {
+    const signaturesCache = new WeakMap<MatrixCallback, Map<string, MatrixCallback>>();
+
     /**
      * Iterates over SparseMatrix items and invokes the callback function f(Dij, Sij).
      * Callback function invoked M*N times.
@@ -117,8 +119,19 @@ export const createMatAlgo03xDSf = /* #__PURE__ */ factory(
         dt = adt;
         // convert 0 to the same datatype
         zero = typed.convert(0, dt);
+
+        let callbacksForDt = signaturesCache.get(callback);
+        if (!callbacksForDt) {
+          callbacksForDt = new Map<string, MatrixCallback>();
+          signaturesCache.set(callback, callbacksForDt);
+        }
+        let cachedCf = callbacksForDt.get(dt);
+        if (!cachedCf) {
+          cachedCf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+          callbacksForDt.set(dt, cachedCf);
+        }
         // callback
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+        cf = cachedCf;
       }
 
       // result (DenseMatrix)

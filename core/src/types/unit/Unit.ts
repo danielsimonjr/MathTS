@@ -2845,7 +2845,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       steradian: {
         name: 'steradian',
         base: BASE_UNITS.SOLID_ANGLE,
-        prefixes: PREFIXES.NONE,
+        prefixes: PREFIXES.LONG,
         value: 1,
         offset: 0,
       },
@@ -3397,6 +3397,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         LUMINOUS_INTENSITY: { unit: UNITS.cd, prefix: PREFIXES.SHORT[''] },
         AMOUNT_OF_SUBSTANCE: { unit: UNITS.mol, prefix: PREFIXES.SHORT[''] },
         ANGLE: { unit: UNITS.rad, prefix: PREFIXES.SHORT[''] },
+        SOLID_ANGLE: { unit: UNITS.sr, prefix: PREFIXES.NONE[''] },
         BIT: { unit: UNITS.bits, prefix: PREFIXES.SHORT[''] },
 
         // Derived units
