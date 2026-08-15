@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.14.1
+
+### Patch Changes
+
+- 104a1c9: Fix Complex.fromPolar Inf×0 NaN, close expression object-literal sandbox holes, and fail-closed workbook YAML chart-spec parsing.
+
 ## 0.13.1
 
 ### Patch Changes
