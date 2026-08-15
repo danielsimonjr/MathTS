@@ -904,6 +904,10 @@ describe('parse – static helpers', () => {
     expect((parse as unknown as ParseStatics).isWhitespace('\n', 1)).toBe(true);
   });
 
+  it('parse.isWhitespace: carriage return inside params (nesting>0) IS whitespace', () => {
+    expect((parse as unknown as ParseStatics).isWhitespace('\r', 1)).toBe(true);
+  });
+
   it('parse.isDecimalMark: dot before digit is decimal', () => {
     expect((parse as unknown as ParseStatics).isDecimalMark('.', '5')).toBe(true);
   });

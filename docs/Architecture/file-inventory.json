@@ -4125,7 +4125,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2011
+      "loc": 2015
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4748,7 +4748,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 935
+      "loc": 939
     },
     {
       "file": "expression/tests/Parser-extra.test.ts",
