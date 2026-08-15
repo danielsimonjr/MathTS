@@ -14103,6 +14103,7 @@ graph LR
 | `../operators.js` | `getPrecedence` | Import |
 | `../utils/mathml.js` | `escapeMathML, toMathMLSymbol` | Import |
 | `./Node.js` | `MathNode, StringOptions` | Import (type-only) |
+| `./utils/stringSubset.js` | `IndexLike` | Import (type-only) |
 
 **Exports:**
 
@@ -14362,6 +14363,8 @@ graph LR
 |------|---------|------|
 | `../../transform/utils/errorTransform.js` | `errorTransform` | Import |
 | `../../utils/customs.js` | `setSafeProperty` | Import |
+| `./stringSubset.js` | `setStringSubset` | Import |
+| `./stringSubset.js` | `IndexLike` | Import (type-only) |
 
 **Exports:**
 
@@ -14380,7 +14383,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `getStringSubset`
+- Interfaces: `IndexLike`
+- Functions: `getStringSubset`, `setStringSubset`
 
 ---
 
@@ -17499,15 +17503,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1168   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 194180 |
-| Total Exports           | 5808   |
+| Total Lines of Code     | 194272 |
+| Total Exports           | 5809   |
 | Total Re-exports        | 2356   |
 | Total Classes           | 53     |
-| Total Interfaces        | 504    |
-| Total Functions         | 1868   |
+| Total Interfaces        | 505    |
+| Total Functions         | 1869   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 579    |
+| Type-only Imports       | 581    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

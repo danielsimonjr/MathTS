@@ -3999,7 +3999,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 401
+      "loc": 402
     },
     {
       "file": "expression/src/node/BlockNode.ts",
@@ -4104,14 +4104,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 54
+      "loc": 55
     },
     {
       "file": "expression/src/node/utils/stringSubset.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 61
+      "loc": 151
     },
     {
       "file": "expression/src/operators.ts",
@@ -4475,7 +4475,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 163
+      "loc": 183
     },
     {
       "file": "expression/tests/AssignmentNode.test.ts",

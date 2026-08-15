@@ -3723,6 +3723,11 @@
       "expression/src/node/utils/stringSubset.ts"
     ],
     "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
+    "expression/src/node/utils/stringSubset.ts": [
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts"
+    ],
     "expression/src/utils/latex.ts": [
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
@@ -3752,7 +3757,6 @@
       "expression/src/transform/sum.transform.ts",
       "expression/src/transform/variance.transform.ts"
     ],
-    "expression/src/node/utils/stringSubset.ts": ["expression/src/node/utils/access.ts"],
     "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
     "expression/src/transform/utils/lastDimToZeroBase.ts": [
       "expression/src/transform/diff.transform.ts",

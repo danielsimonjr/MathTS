@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-08-15'
   totalFiles: 1168
   totalModules: 83
-  totalExports: 5808
+  totalExports: 5809
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -28249,6 +28249,10 @@ modules:
             - MathNode
             - StringOptions
           typeOnly: true
+        - file: ./utils/stringSubset.js
+          imports:
+            - IndexLike
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createAssignmentNode
@@ -28678,6 +28682,13 @@ modules:
         - file: ../../utils/customs.js
           imports:
             - setSafeProperty
+        - file: ./stringSubset.js
+          imports:
+            - setStringSubset
+        - file: ./stringSubset.js
+          imports:
+            - IndexLike
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - assignFactory
@@ -28702,8 +28713,12 @@ modules:
       workspaceDependencies: []
       exports:
         - getStringSubset
+        - setStringSubset
+      interfaces:
+        - IndexLike
       functions:
         - getStringSubset
+        - setStringSubset
   expression/transform:
     expression/src/transform/and.transform.ts:
       description: and.transform module
@@ -37589,16 +37604,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1168
   totalModules: 83
-  totalLinesOfCode: 194180
-  totalExports: 5808
+  totalLinesOfCode: 194272
+  totalExports: 5809
   totalClasses: 53
-  totalInterfaces: 504
-  totalFunctions: 1868
+  totalInterfaces: 505
+  totalFunctions: 1869
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1596
   totalReExports: 2356
-  totalTypeOnlyImports: 579
+  totalTypeOnlyImports: 581
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

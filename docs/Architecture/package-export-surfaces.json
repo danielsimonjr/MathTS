@@ -1307,6 +1307,7 @@
       "setPowersetDocs",
       "setSafeProperty",
       "setSizeDocs",
+      "setStringSubset",
       "setSymDifferenceDocs",
       "setUnionDocs",
       "sign",
