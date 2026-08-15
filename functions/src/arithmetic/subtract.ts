@@ -50,8 +50,6 @@ export const createSubtract = /* #__PURE__ */ factory(
     concat,
     nodeOperations,
   }: SubtractDependencies) => {
-    // TODO: split function subtract in two: subtract and subtractScalar
-
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
@@ -134,6 +132,17 @@ export const createSubtract = /* #__PURE__ */ factory(
         // =========================================================================
 
         'any, any': subtractScalar,
+
+        'any, any, ...any': typed.referToSelf(
+          (self: TypedFunction) =>
+            (x: unknown, y: unknown, ...rest: unknown[]): unknown => {
+              let res = self(x, y);
+              for (let i = 0; i < rest.length; i++) {
+                res = self(res, rest[i]);
+              }
+              return res;
+            }
+        ),
       },
       matrixAlgorithmSuite({
         elop: subtractScalar,
