@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-08-14",
-    "totalFiles": 1116,
+    "lastUpdated": "2026-08-15",
+    "totalFiles": 1168,
     "totalModules": 83,
-    "totalExports": 5754
+    "totalExports": 5806
   },
   "entryPoints": [
     {
@@ -2339,67 +2339,6 @@
         "interfaces": ["RangeFormatOptions", "RangeJSON"],
         "constants": ["createRangeClass", "Range"]
       },
-      "core/src/types/unit/Unit.ts": {
-        "description": "Normalize degree-symbol unit notations to their ASCII spellings before parsing,",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../../is.js",
-            "imports": ["isComplex", "isUnit", "typeOf"]
-          },
-          {
-            "file": "../../factory.js",
-            "imports": ["factory"]
-          },
-          {
-            "file": "../../object.js",
-            "imports": ["clone"]
-          },
-          {
-            "file": "../../shared.js",
-            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce"]
-          },
-          {
-            "file": "../bignumber.js",
-            "imports": ["BIGNUMBER_PI"]
-          },
-          {
-            "file": "./unit-types.js",
-            "imports": [
-              "BaseUnitDef",
-              "BigNumberValue",
-              "ConverterFn",
-              "CreateUnitDefObject",
-              "CreateUnitOptions",
-              "FractionValue",
-              "Numeric",
-              "ParseOptions",
-              "PrefixDef",
-              "PrefixTable",
-              "TypeConverters",
-              "UnitComponent",
-              "UnitConfig",
-              "UnitConstructor",
-              "UnitDef",
-              "UnitDependencies",
-              "UnitFormatOptions",
-              "UnitInstance",
-              "UnitJSON",
-              "UnitSystem",
-              "UnitSystemEntry"
-            ],
-            "typeOnly": true
-          },
-          {
-            "file": "./errors.js",
-            "imports": ["DimensionMismatchError", "UnitParseError"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["createUnitClass"],
-        "constants": ["createUnitClass"]
-      },
       "core/src/types/unit/dependencies.ts": {
         "description": "The dependency object injected into the relocated mathjs `Unit` factory",
         "externalDependencies": [],
@@ -2551,6 +2490,67 @@
           "UnitInstance",
           "UnitConstructor"
         ]
+      },
+      "core/src/types/unit/Unit.ts": {
+        "description": "Normalize degree-symbol unit notations to their ASCII spellings before parsing,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../is.js",
+            "imports": ["isComplex", "isUnit", "typeOf"]
+          },
+          {
+            "file": "../../factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "../../object.js",
+            "imports": ["clone"]
+          },
+          {
+            "file": "../../shared.js",
+            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce"]
+          },
+          {
+            "file": "../bignumber.js",
+            "imports": ["BIGNUMBER_PI"]
+          },
+          {
+            "file": "./unit-types.js",
+            "imports": [
+              "BaseUnitDef",
+              "BigNumberValue",
+              "ConverterFn",
+              "CreateUnitDefObject",
+              "CreateUnitOptions",
+              "FractionValue",
+              "Numeric",
+              "ParseOptions",
+              "PrefixDef",
+              "PrefixTable",
+              "TypeConverters",
+              "UnitComponent",
+              "UnitConfig",
+              "UnitConstructor",
+              "UnitDef",
+              "UnitDependencies",
+              "UnitFormatOptions",
+              "UnitInstance",
+              "UnitJSON",
+              "UnitSystem",
+              "UnitSystemEntry"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./errors.js",
+            "imports": ["DimensionMismatchError", "UnitParseError"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createUnitClass"],
+        "constants": ["createUnitClass"]
       },
       "core/src/types/unit-definitions.ts": {
         "description": "Unit definitions for the Unit type.",
@@ -2729,206 +2729,6 @@
         "functions": ["createBackendManager"],
         "constants": ["DEFAULT_EXTENDED_HINTS", "backendManager"]
       },
-      "matrix/src/backends/GPUBackend.ts": {
-        "description": "GPU Backend for Matrix Operations",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./gpu/builtin-shaders.js",
-            "imports": ["registerBuiltinShaders"]
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-gpu",
-            "directory": "gpu",
-            "imports": [
-              "GPUContext",
-              "GPUContextOptions",
-              "getGlobalGPUContext",
-              "BufferPool",
-              "ShaderManager",
-              "hasWebGPU",
-              "detectGPUCapabilities",
-              "getRecommendedWorkgroupSize",
-              "GPUCapabilities"
-            ]
-          }
-        ],
-        "exports": [
-          "getGlobalGPUBackend",
-          "initializeGlobalGPUBackend",
-          "destroyGlobalGPUBackend",
-          "GPUBackend"
-        ],
-        "classes": ["GPUBackend"],
-        "interfaces": ["GPUBackendOptions"],
-        "functions": [
-          "getGlobalGPUBackend",
-          "initializeGlobalGPUBackend",
-          "destroyGlobalGPUBackend"
-        ]
-      },
-      "matrix/src/backends/GPUMatrixBackend.ts": {
-        "description": "GPU Matrix Backend Adapter",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./Backend.js",
-            "imports": ["MatrixBackend", "BackendType"],
-            "typeOnly": true
-          },
-          {
-            "file": "../types/DenseMatrix.js",
-            "imports": ["DenseMatrix"]
-          },
-          {
-            "file": "./JSBackend.js",
-            "imports": ["jsBackend"]
-          },
-          {
-            "file": "./GPUBackend.js",
-            "imports": [
-              "GPUBackend",
-              "getGlobalGPUBackend",
-              "initializeGlobalGPUBackend",
-              "GPUBackendOptions"
-            ]
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-gpu",
-            "directory": "gpu",
-            "imports": ["hasWebGPU", "detectGPUCapabilities", "GPUCapabilities"]
-          }
-        ],
-        "exports": ["gpuMatrixBackend", "createGPUMatrixBackend", "GPUMatrixBackend"],
-        "classes": ["GPUMatrixBackend"],
-        "interfaces": ["GPUMatrixBackendConfig"],
-        "functions": ["createGPUMatrixBackend"],
-        "constants": ["gpuMatrixBackend"]
-      },
-      "matrix/src/backends/JSBackend.ts": {
-        "description": "Pure TypeScript Matrix Backend",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/DenseMatrix.js",
-            "imports": ["DenseMatrix"]
-          },
-          {
-            "file": "./Backend.js",
-            "imports": ["MatrixBackend", "BackendType"],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["jsBackend", "JSBackend"],
-        "classes": ["JSBackend"],
-        "constants": ["jsBackend"]
-      },
-      "matrix/src/backends/ParallelBackend.ts": {
-        "description": "Parallel Matrix Backend",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/DenseMatrix.js",
-            "imports": ["DenseMatrix"]
-          },
-          {
-            "file": "./Backend.js",
-            "imports": ["BackendType"],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-parallel",
-            "directory": "parallel",
-            "imports": ["computePool", "ComputePool", "ComputePoolConfig"]
-          }
-        ],
-        "exports": ["parallelBackend", "createParallelBackend", "ParallelBackend"],
-        "classes": ["ParallelBackend"],
-        "interfaces": ["ParallelBackendConfig"],
-        "functions": ["createParallelBackend"],
-        "constants": ["parallelBackend"]
-      },
-      "matrix/src/backends/WASMBackend.ts": {
-        "description": "WASM Matrix Backend (AssemblyScript)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./Backend.js",
-            "imports": ["MatrixBackend", "BackendType"],
-            "typeOnly": true
-          },
-          {
-            "file": "../types/DenseMatrix.js",
-            "imports": ["DenseMatrix"]
-          },
-          {
-            "file": "./JSBackend.js",
-            "imports": ["jsBackend"]
-          },
-          {
-            "file": "./wasm/detect.js",
-            "imports": ["detectWasmFeatures", "WasmFeatures"]
-          },
-          {
-            "file": "./wasm/resolve.js",
-            "imports": [],
-            "typeOnly": true
-          },
-          {
-            "file": "./wasm/integrity.js",
-            "imports": [],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["wasmBackend", "createWASMBackend", "WASMBackend"],
-        "classes": ["WASMBackend"],
-        "interfaces": ["WASMBackendConfig"],
-        "functions": ["createWASMBackend"],
-        "constants": ["wasmBackend"]
-      },
-      "matrix/src/backends/WasmLoader.ts": {
-        "description": "WASM Loader - Loads and manages WebAssembly modules",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./wasm/integrity.js",
-            "imports": [],
-            "typeOnly": true
-          },
-          {
-            "file": "./wasm/resolve.js",
-            "imports": [],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core",
-            "directory": "core",
-            "imports": ["LoadingMetrics"],
-            "subpath": "internal"
-          }
-        ],
-        "exports": ["wasmLoader", "initWasm", "WasmLoader"],
-        "classes": ["WasmLoader"],
-        "interfaces": ["WasmModule", "Allocation"],
-        "functions": ["initWasm"],
-        "constants": ["wasmLoader"]
-      },
       "matrix/src/backends/gpu/BatchExecutor.ts": {
         "description": "GPU Batch Executor",
         "externalDependencies": [],
@@ -2954,28 +2754,6 @@
         "exports": ["BatchExecutor"],
         "classes": ["BatchExecutor"],
         "interfaces": ["BatchOperation", "BatchResult", "BatchOptions"]
-      },
-      "matrix/src/backends/gpu/Sync.ts": {
-        "description": "GPU-CPU Synchronization Strategy",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-gpu",
-            "directory": "gpu",
-            "imports": ["GPUContext"]
-          },
-          {
-            "package": "@danielsimonjr/mathts-gpu",
-            "directory": "gpu",
-            "imports": ["BufferPool"]
-          }
-        ],
-        "exports": ["createSyncManager", "SyncManager"],
-        "classes": ["SyncManager"],
-        "interfaces": ["TransferRequest", "TransferResult", "SyncConfig"],
-        "functions": ["createSyncManager"]
       },
       "matrix/src/backends/gpu/builtin-shaders.ts": {
         "description": "Matrix-domain WGSL kernels.",
@@ -3137,6 +2915,110 @@
           "TransferResult",
           "SyncConfig"
         ]
+      },
+      "matrix/src/backends/gpu/Sync.ts": {
+        "description": "GPU-CPU Synchronization Strategy",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["GPUContext"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["BufferPool"]
+          }
+        ],
+        "exports": ["createSyncManager", "SyncManager"],
+        "classes": ["SyncManager"],
+        "interfaces": ["TransferRequest", "TransferResult", "SyncConfig"],
+        "functions": ["createSyncManager"]
+      },
+      "matrix/src/backends/GPUBackend.ts": {
+        "description": "GPU Backend for Matrix Operations",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./gpu/builtin-shaders.js",
+            "imports": ["registerBuiltinShaders"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": [
+              "GPUContext",
+              "GPUContextOptions",
+              "getGlobalGPUContext",
+              "BufferPool",
+              "ShaderManager",
+              "hasWebGPU",
+              "detectGPUCapabilities",
+              "getRecommendedWorkgroupSize",
+              "GPUCapabilities"
+            ]
+          }
+        ],
+        "exports": [
+          "getGlobalGPUBackend",
+          "initializeGlobalGPUBackend",
+          "destroyGlobalGPUBackend",
+          "GPUBackend"
+        ],
+        "classes": ["GPUBackend"],
+        "interfaces": ["GPUBackendOptions"],
+        "functions": [
+          "getGlobalGPUBackend",
+          "initializeGlobalGPUBackend",
+          "destroyGlobalGPUBackend"
+        ]
+      },
+      "matrix/src/backends/GPUMatrixBackend.ts": {
+        "description": "GPU Matrix Backend Adapter",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Backend.js",
+            "imports": ["MatrixBackend", "BackendType"],
+            "typeOnly": true
+          },
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./JSBackend.js",
+            "imports": ["jsBackend"]
+          },
+          {
+            "file": "./GPUBackend.js",
+            "imports": [
+              "GPUBackend",
+              "getGlobalGPUBackend",
+              "initializeGlobalGPUBackend",
+              "GPUBackendOptions"
+            ]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["hasWebGPU", "detectGPUCapabilities", "GPUCapabilities"]
+          }
+        ],
+        "exports": ["gpuMatrixBackend", "createGPUMatrixBackend", "GPUMatrixBackend"],
+        "classes": ["GPUMatrixBackend"],
+        "interfaces": ["GPUMatrixBackendConfig"],
+        "functions": ["createGPUMatrixBackend"],
+        "constants": ["gpuMatrixBackend"]
       },
       "matrix/src/backends/index.ts": {
         "description": "Matrix Backend Exports",
@@ -3371,6 +3253,54 @@
           "SyncConfig"
         ]
       },
+      "matrix/src/backends/JSBackend.ts": {
+        "description": "Pure TypeScript Matrix Backend",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./Backend.js",
+            "imports": ["MatrixBackend", "BackendType"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["jsBackend", "JSBackend"],
+        "classes": ["JSBackend"],
+        "constants": ["jsBackend"]
+      },
+      "matrix/src/backends/ParallelBackend.ts": {
+        "description": "Parallel Matrix Backend",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./Backend.js",
+            "imports": ["BackendType"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-parallel",
+            "directory": "parallel",
+            "imports": ["computePool", "ComputePool", "ComputePoolConfig"]
+          }
+        ],
+        "exports": ["parallelBackend", "createParallelBackend", "ParallelBackend"],
+        "classes": ["ParallelBackend"],
+        "interfaces": ["ParallelBackendConfig"],
+        "functions": ["createParallelBackend"],
+        "constants": ["parallelBackend"]
+      },
       "matrix/src/backends/register-backends.ts": {
         "description": "Default backend registrations.",
         "externalDependencies": [],
@@ -3590,6 +3520,76 @@
         ],
         "exports": ["resolvePackagedWasm", "defaultWasmLocation"],
         "reExported": ["resolvePackagedWasm", "defaultWasmLocation"]
+      },
+      "matrix/src/backends/WASMBackend.ts": {
+        "description": "WASM Matrix Backend (AssemblyScript)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Backend.js",
+            "imports": ["MatrixBackend", "BackendType"],
+            "typeOnly": true
+          },
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./JSBackend.js",
+            "imports": ["jsBackend"]
+          },
+          {
+            "file": "./wasm/detect.js",
+            "imports": ["detectWasmFeatures", "WasmFeatures"]
+          },
+          {
+            "file": "./wasm/resolve.js",
+            "imports": [],
+            "typeOnly": true
+          },
+          {
+            "file": "./wasm/integrity.js",
+            "imports": [],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["wasmBackend", "createWASMBackend", "WASMBackend"],
+        "classes": ["WASMBackend"],
+        "interfaces": ["WASMBackendConfig"],
+        "functions": ["createWASMBackend"],
+        "constants": ["wasmBackend"]
+      },
+      "matrix/src/backends/WasmLoader.ts": {
+        "description": "WASM Loader - Loads and manages WebAssembly modules",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./wasm/integrity.js",
+            "imports": [],
+            "typeOnly": true
+          },
+          {
+            "file": "./wasm/resolve.js",
+            "imports": [],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["LoadingMetrics"],
+            "subpath": "internal"
+          }
+        ],
+        "exports": ["wasmLoader", "initWasm", "WasmLoader"],
+        "classes": ["WasmLoader"],
+        "interfaces": ["WasmModule", "Allocation"],
+        "functions": ["initWasm"],
+        "constants": ["wasmLoader"]
       }
     },
     "matrix": {
@@ -4399,64 +4399,6 @@
       }
     },
     "matrix/types": {
-      "matrix/src/types/DenseMatrix.ts": {
-        "description": "Dense Matrix Implementation",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./Matrix.js",
-            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
-          },
-          {
-            "file": "./dense/arithmetic.js",
-            "imports": ["* as arithmetic"]
-          },
-          {
-            "file": "./dense/reduction.js",
-            "imports": ["* as reduction"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["isDenseMatrix", "DenseMatrix"],
-        "classes": ["DenseMatrix"],
-        "functions": ["isDenseMatrix"]
-      },
-      "matrix/src/types/Matrix.ts": {
-        "description": "Matrix Base Class",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core",
-            "directory": "core",
-            "imports": ["MatrixDimensions"]
-          }
-        ],
-        "exports": ["isMatrix"],
-        "interfaces": ["MatrixIndex", "SliceSpec", "MatrixEntry"],
-        "functions": ["isMatrix"]
-      },
-      "matrix/src/types/SparseMatrix.ts": {
-        "description": "Sparse Matrix Implementation (CSR Format)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./Matrix.js",
-            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
-          },
-          {
-            "file": "./DenseMatrix.js",
-            "imports": ["DenseMatrix"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["isSparseMatrix", "SparseMatrix"],
-        "classes": ["SparseMatrix"],
-        "functions": ["isSparseMatrix"]
-      },
       "matrix/src/types/dense/arithmetic.ts": {
         "description": "Contiguous row-major view of a matrix's data. Using the flat Float64Array",
         "externalDependencies": [],
@@ -4486,6 +4428,29 @@
         "workspaceDependencies": [],
         "exports": ["sum", "mean", "min", "max", "norm", "trace"],
         "functions": ["sum", "mean", "min", "max", "norm", "trace"]
+      },
+      "matrix/src/types/DenseMatrix.ts": {
+        "description": "Dense Matrix Implementation",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Matrix.js",
+            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
+          },
+          {
+            "file": "./dense/arithmetic.js",
+            "imports": ["* as arithmetic"]
+          },
+          {
+            "file": "./dense/reduction.js",
+            "imports": ["* as reduction"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["isDenseMatrix", "DenseMatrix"],
+        "classes": ["DenseMatrix"],
+        "functions": ["isDenseMatrix"]
       },
       "matrix/src/types/index.ts": {
         "description": "Matrix Type Exports",
@@ -4547,36 +4512,44 @@
           "MatrixEntry",
           "MatrixType"
         ]
-      }
-    },
-    "tensor": {
-      "tensor/src/Tensor.ts": {
-        "description": "Tensor — rank-N, Float64Array-backed, row-major dense tensor. The",
+      },
+      "matrix/src/types/Matrix.ts": {
+        "description": "Matrix Base Class",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["MatrixDimensions"]
+          }
+        ],
+        "exports": ["isMatrix"],
+        "interfaces": ["MatrixIndex", "SliceSpec", "MatrixEntry"],
+        "functions": ["isMatrix"]
+      },
+      "matrix/src/types/SparseMatrix.ts": {
+        "description": "Sparse Matrix Implementation (CSR Format)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./named-index.js",
-            "imports": ["Index"]
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-matrix",
-            "directory": "matrix",
-            "imports": ["DenseMatrix", "backendManager"]
+            "file": "./Matrix.js",
+            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
           },
           {
-            "package": "@danielsimonjr/mathts-core",
-            "directory": "core",
-            "imports": ["NestedArray"],
-            "subpath": "internal"
+            "file": "./DenseMatrix.js",
+            "imports": ["DenseMatrix"]
           }
         ],
-        "exports": ["Tensor"],
-        "classes": ["Tensor"],
-        "interfaces": ["EinsumSpec"]
-      },
+        "workspaceDependencies": [],
+        "exports": ["isSparseMatrix", "SparseMatrix"],
+        "classes": ["SparseMatrix"],
+        "functions": ["isSparseMatrix"]
+      }
+    },
+    "tensor": {
       "tensor/src/contraction-sequence.ts": {
         "description": "contractNetwork — given an ordered list of Tensors (each carrying",
         "externalDependencies": [],
@@ -4908,6 +4881,33 @@
         "classes": ["Index"],
         "interfaces": ["IndexOpts"],
         "functions": ["idx"]
+      },
+      "tensor/src/Tensor.ts": {
+        "description": "Tensor — rank-N, Float64Array-backed, row-major dense tensor. The",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "backendManager"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["NestedArray"],
+            "subpath": "internal"
+          }
+        ],
+        "exports": ["Tensor"],
+        "classes": ["Tensor"],
+        "interfaces": ["EinsumSpec"]
       }
     },
     "tensor/operations": {
@@ -8183,6 +8183,10 @@
           {
             "file": "../plain/number/index.js",
             "imports": ["rightLogShiftNumber"]
+          },
+          {
+            "file": "../utils/bignumber/bitwise.js",
+            "imports": ["rightLogShiftBigNumber"]
           },
           {
             "file": "./useMatrixForArrayScalar.js",
@@ -15629,6 +15633,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/collection.js",
+            "imports": ["deepMap"]
+          },
+          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -18793,6 +18801,29 @@
         "exports": ["createFibonacciHeapClass"],
         "constants": ["createFibonacciHeapClass"]
       },
+      "functions/src/type/matrix/function/index.ts": {
+        "description": "Create an index. An Index can store ranges having start, step, and end",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../utils/is.js",
+            "imports": ["isBigNumber", "isMatrix", "isArray"]
+          },
+          {
+            "file": "../../../utils/factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "../../../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createIndex"],
+        "constants": ["createIndex"]
+      },
       "functions/src/type/matrix/ImmutableDenseMatrix.ts": {
         "description": "Interface for Index objects (local copy to avoid circular deps)",
         "externalDependencies": [],
@@ -18881,29 +18912,6 @@
         "workspaceDependencies": [],
         "exports": ["createSpaClass"],
         "constants": ["createSpaClass"]
-      },
-      "functions/src/type/matrix/function/index.ts": {
-        "description": "Create an index. An Index can store ranges having start, step, and end",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../../../utils/is.js",
-            "imports": ["isBigNumber", "isMatrix", "isArray"]
-          },
-          {
-            "file": "../../../utils/factory.js",
-            "imports": ["factory"]
-          },
-          {
-            "file": "../../../core/function/typed.js",
-            "imports": ["TypedFunction"],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["createIndex"],
-        "constants": ["createIndex"]
       },
       "functions/src/type/matrix/types.ts": {
         "description": "Type Philosophy:",
@@ -22522,7 +22530,8 @@
           "bitwise",
           "bitXor",
           "leftShiftBigNumber",
-          "rightArithShiftBigNumber"
+          "rightArithShiftBigNumber",
+          "rightLogShiftBigNumber"
         ],
         "functions": [
           "bitAndBigNumber",
@@ -22531,7 +22540,8 @@
           "bitwise",
           "bitXor",
           "leftShiftBigNumber",
-          "rightArithShiftBigNumber"
+          "rightArithShiftBigNumber",
+          "rightLogShiftBigNumber"
         ]
       },
       "functions/src/utils/bignumber/nearlyEqual.ts": {
@@ -23509,33 +23519,6 @@
       }
     },
     "functions/wasm": {
-      "functions/src/wasm/WasmLoader.ts": {
-        "description": "WASM Loader - Loads and manages WebAssembly modules",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./integrity.js",
-            "imports": ["verifyWasmIntegrity", "loadWasmManifest"]
-          },
-          {
-            "file": "./resolve.js",
-            "imports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"]
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-core",
-            "directory": "core",
-            "imports": ["LoadingMetrics"],
-            "subpath": "internal"
-          }
-        ],
-        "exports": ["wasmLoader", "WasmLoader"],
-        "classes": ["WasmLoader"],
-        "interfaces": ["WasmModule"],
-        "constants": ["wasmLoader"]
-      },
       "functions/src/wasm/bitwise/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for elementwise Int32Array bitwise ops.",
         "externalDependencies": [],
@@ -24001,355 +23984,33 @@
           "ellipticKDispatch",
           "ellipticEDispatch"
         ]
-      }
-    },
-    "expression": {
-      "expression/src/Help.ts": {
-        "description": "Documentation object",
+      },
+      "functions/src/wasm/WasmLoader.ts": {
+        "description": "WASM Loader - Loads and manages WebAssembly modules",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./utils/is.js",
-            "imports": ["isHelp"]
+            "file": "./integrity.js",
+            "imports": ["verifyWasmIntegrity", "loadWasmManifest"]
           },
           {
-            "file": "./utils/object.js",
-            "imports": ["clone"]
-          },
-          {
-            "file": "./utils/string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "./utils/factory.js",
-            "imports": ["factory"]
+            "file": "./resolve.js",
+            "imports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"]
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["createHelpClass"],
-        "constants": ["createHelpClass"]
-      },
-      "expression/src/Parser.ts": {
-        "description": "Parser contains methods to evaluate or parse expressions, and has a number",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
+        "workspaceDependencies": [
           {
-            "file": "./utils/factory.js",
-            "imports": ["factory"]
-          },
-          {
-            "file": "./utils/is.js",
-            "imports": ["isFunction"]
-          },
-          {
-            "file": "./utils/map.js",
-            "imports": ["createEmptyMap", "toObject"]
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["LoadingMetrics"],
+            "subpath": "internal"
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["createParserClass"],
-        "constants": ["createParserClass"]
-      },
-      "expression/src/index.ts": {
-        "description": "Expression parsing and evaluation for MathTS.",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./types.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./keywords.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./operators.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./parse.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./Parser.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./Help.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./compiler/index.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./evaluator/index.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./transform/index.js",
-            "imports": ["*"],
-            "reExport": true
-          },
-          {
-            "file": "./function/parser.js",
-            "imports": ["createParser"],
-            "reExport": true
-          },
-          {
-            "file": "./embeddedDocs/embeddedDocs.js",
-            "imports": ["embeddedDocs"],
-            "reExport": true
-          },
-          {
-            "file": "./utils/mathml.js",
-            "imports": ["mathMLDocument", "mathMLError", "escapeMathML", "toMathMLSymbol"],
-            "reExport": true
-          },
-          {
-            "file": "./node/Node.js",
-            "imports": ["createNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/AccessorNode.js",
-            "imports": ["createAccessorNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/ArrayNode.js",
-            "imports": ["createArrayNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/AssignmentNode.js",
-            "imports": ["createAssignmentNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/BlockNode.js",
-            "imports": ["createBlockNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/ConditionalNode.js",
-            "imports": ["createConditionalNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/ConstantNode.js",
-            "imports": ["createConstantNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/FunctionAssignmentNode.js",
-            "imports": ["createFunctionAssignmentNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/FunctionNode.js",
-            "imports": ["createFunctionNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/IndexNode.js",
-            "imports": ["createIndexNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/ObjectNode.js",
-            "imports": ["createObjectNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/OperatorNode.js",
-            "imports": ["createOperatorNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/ParenthesisNode.js",
-            "imports": ["createParenthesisNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/RangeNode.js",
-            "imports": ["createRangeNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/RelationalNode.js",
-            "imports": ["createRelationalNode"],
-            "reExport": true
-          },
-          {
-            "file": "./node/SymbolNode.js",
-            "imports": ["createSymbolNode"],
-            "reExport": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": [
-          "createParser",
-          "embeddedDocs",
-          "mathMLDocument",
-          "mathMLError",
-          "escapeMathML",
-          "toMathMLSymbol",
-          "createNode",
-          "createAccessorNode",
-          "createArrayNode",
-          "createAssignmentNode",
-          "createBlockNode",
-          "createConditionalNode",
-          "createConstantNode",
-          "createFunctionAssignmentNode",
-          "createFunctionNode",
-          "createIndexNode",
-          "createObjectNode",
-          "createOperatorNode",
-          "createParenthesisNode",
-          "createRangeNode",
-          "createRelationalNode",
-          "createSymbolNode"
-        ],
-        "reExported": [
-          "* from ./types.js",
-          "* from ./keywords.js",
-          "* from ./operators.js",
-          "* from ./parse.js",
-          "* from ./Parser.js",
-          "* from ./Help.js",
-          "* from ./compiler/index.js",
-          "* from ./evaluator/index.js",
-          "* from ./transform/index.js",
-          "createParser",
-          "embeddedDocs",
-          "mathMLDocument",
-          "mathMLError",
-          "escapeMathML",
-          "toMathMLSymbol",
-          "createNode",
-          "createAccessorNode",
-          "createArrayNode",
-          "createAssignmentNode",
-          "createBlockNode",
-          "createConditionalNode",
-          "createConstantNode",
-          "createFunctionAssignmentNode",
-          "createFunctionNode",
-          "createIndexNode",
-          "createObjectNode",
-          "createOperatorNode",
-          "createParenthesisNode",
-          "createRangeNode",
-          "createRelationalNode",
-          "createSymbolNode"
-        ]
-      },
-      "expression/src/keywords.ts": {
-        "description": "Reserved keywords not allowed to use in the parser",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["keywords"],
-        "constants": ["keywords"]
-      },
-      "expression/src/operators.ts": {
-        "description": "Metadata for a single operator/node identifier in the precedence table.",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./utils/object.js",
-            "imports": ["hasOwnProperty"]
-          },
-          {
-            "file": "./utils/is.js",
-            "imports": ["isConstantNode", "isParenthesisNode", "rule2Node"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": [
-          "properties",
-          "getPrecedence",
-          "getAssociativity",
-          "isAssociativeWith",
-          "getOperator"
-        ],
-        "interfaces": ["OperatorProperty"],
-        "functions": ["getPrecedence", "getAssociativity", "isAssociativeWith", "getOperator"],
-        "constants": ["properties"]
-      },
-      "expression/src/parse.ts": {
-        "description": "Parse an expression. Returns a node tree, which can be evaluated by",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./utils/factory.js",
-            "imports": ["factory"]
-          },
-          {
-            "file": "./utils/is.js",
-            "imports": [
-              "isAccessorNode",
-              "isConstantNode",
-              "isFunctionNode",
-              "isOperatorNode",
-              "isSymbolNode",
-              "rule2Node"
-            ]
-          },
-          {
-            "file": "./utils/collection.js",
-            "imports": ["deepMap"]
-          },
-          {
-            "file": "./utils/number.js",
-            "imports": ["safeNumberType"]
-          },
-          {
-            "file": "./utils/number.js",
-            "imports": ["NumberTypeConfig"],
-            "typeOnly": true
-          },
-          {
-            "file": "./utils/object.js",
-            "imports": ["hasOwnProperty"]
-          },
-          {
-            "file": "./utils/customs.js",
-            "imports": ["setSafeProperty"]
-          },
-          {
-            "file": "./node/Node.js",
-            "imports": ["MathNode"],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["createParse"],
-        "constants": ["createParse"]
-      },
-      "expression/src/types.ts": {
-        "description": "Type definitions for expression module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": []
+        "exports": ["wasmLoader", "WasmLoader"],
+        "classes": ["WasmLoader"],
+        "interfaces": ["WasmModule"],
+        "constants": ["wasmLoader"]
       }
     },
     "expression/compiler": {
@@ -24400,6 +24061,33 @@
       }
     },
     "expression/embeddedDocs": {
+      "expression/src/embeddedDocs/constants/e.ts": {
+        "description": "e module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["eDocs"],
+        "constants": ["eDocs"]
+      },
+      "expression/src/embeddedDocs/constants/false.ts": {
+        "description": "false module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["falseDocs"],
+        "constants": ["falseDocs"]
+      },
+      "expression/src/embeddedDocs/constants/i.ts": {
+        "description": "i module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["iDocs"],
+        "constants": ["iDocs"]
+      },
       "expression/src/embeddedDocs/constants/Infinity.ts": {
         "description": "Infinity module",
         "externalDependencies": [],
@@ -24454,51 +24142,6 @@
         "exports": ["NaNDocs"],
         "constants": ["NaNDocs"]
       },
-      "expression/src/embeddedDocs/constants/SQRT1_2.ts": {
-        "description": "SQRT1_2 module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["SQRT12Docs"],
-        "constants": ["SQRT12Docs"]
-      },
-      "expression/src/embeddedDocs/constants/SQRT2.ts": {
-        "description": "SQRT2 module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["SQRT2Docs"],
-        "constants": ["SQRT2Docs"]
-      },
-      "expression/src/embeddedDocs/constants/e.ts": {
-        "description": "e module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["eDocs"],
-        "constants": ["eDocs"]
-      },
-      "expression/src/embeddedDocs/constants/false.ts": {
-        "description": "false module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["falseDocs"],
-        "constants": ["falseDocs"]
-      },
-      "expression/src/embeddedDocs/constants/i.ts": {
-        "description": "i module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["iDocs"],
-        "constants": ["iDocs"]
-      },
       "expression/src/embeddedDocs/constants/null.ts": {
         "description": "null module",
         "externalDependencies": [],
@@ -24525,6 +24168,24 @@
         "workspaceDependencies": [],
         "exports": ["piDocs"],
         "constants": ["piDocs"]
+      },
+      "expression/src/embeddedDocs/constants/SQRT1_2.ts": {
+        "description": "SQRT1_2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["SQRT12Docs"],
+        "constants": ["SQRT12Docs"]
+      },
+      "expression/src/embeddedDocs/constants/SQRT2.ts": {
+        "description": "SQRT2 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["SQRT2Docs"],
+        "constants": ["SQRT2Docs"]
       },
       "expression/src/embeddedDocs/constants/tau.ts": {
         "description": "tau module",
@@ -24702,6 +24363,62 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./physicalConstants/index.js",
+            "imports": [
+              "speedOfLightDocs",
+              "gravitationConstantDocs",
+              "planckConstantDocs",
+              "reducedPlanckConstantDocs",
+              "magneticConstantDocs",
+              "electricConstantDocs",
+              "vacuumImpedanceDocs",
+              "coulombDocs",
+              "coulombConstantDocs",
+              "elementaryChargeDocs",
+              "bohrMagnetonDocs",
+              "conductanceQuantumDocs",
+              "inverseConductanceQuantumDocs",
+              "magneticFluxQuantumDocs",
+              "nuclearMagnetonDocs",
+              "klitzingDocs",
+              "bohrRadiusDocs",
+              "classicalElectronRadiusDocs",
+              "electronMassDocs",
+              "fermiCouplingDocs",
+              "fineStructureDocs",
+              "hartreeEnergyDocs",
+              "protonMassDocs",
+              "deuteronMassDocs",
+              "neutronMassDocs",
+              "quantumOfCirculationDocs",
+              "rydbergDocs",
+              "thomsonCrossSectionDocs",
+              "weakMixingAngleDocs",
+              "efimovFactorDocs",
+              "atomicMassDocs",
+              "avogadroDocs",
+              "boltzmannDocs",
+              "faradayDocs",
+              "firstRadiationDocs",
+              "loschmidtDocs",
+              "gasConstantDocs",
+              "molarPlanckConstantDocs",
+              "molarVolumeDocs",
+              "sackurTetrodeDocs",
+              "secondRadiationDocs",
+              "stefanBoltzmannDocs",
+              "wienDisplacementDocs",
+              "molarMassDocs",
+              "molarMassC12Docs",
+              "gravityDocs",
+              "planckLengthDocs",
+              "planckMassDocs",
+              "planckTimeDocs",
+              "planckChargeDocs",
+              "planckTemperatureDocs"
+            ]
+          },
           {
             "file": "./constants/e.js",
             "imports": ["eDocs"]
@@ -26195,15 +25912,6 @@
         "exports": ["eliminateDocs"],
         "constants": ["eliminateDocs"]
       },
-      "expression/src/embeddedDocs/function/algebra/expToTrig.ts": {
-        "description": "expToTrig module",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["expToTrigDocs"],
-        "constants": ["expToTrigDocs"]
-      },
       "expression/src/embeddedDocs/function/algebra/expand.ts": {
         "description": "expand module",
         "externalDependencies": [],
@@ -26212,6 +25920,15 @@
         "workspaceDependencies": [],
         "exports": ["expandDocs"],
         "constants": ["expandDocs"]
+      },
+      "expression/src/embeddedDocs/function/algebra/expToTrig.ts": {
+        "description": "expToTrig module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["expToTrigDocs"],
+        "constants": ["expToTrigDocs"]
       },
       "expression/src/embeddedDocs/function/algebra/factor.ts": {
         "description": "factor module",
@@ -28894,6 +28611,782 @@
         "workspaceDependencies": [],
         "exports": ["typeOfDocs"],
         "constants": ["typeOfDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": {
+        "description": "atomicMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["atomicMassDocs"],
+        "constants": ["atomicMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/avogadro.ts": {
+        "description": "avogadro module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["avogadroDocs"],
+        "constants": ["avogadroDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": {
+        "description": "bohrMagneton module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["bohrMagnetonDocs"],
+        "constants": ["bohrMagnetonDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": {
+        "description": "bohrRadius module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["bohrRadiusDocs"],
+        "constants": ["bohrRadiusDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": {
+        "description": "boltzmann module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["boltzmannDocs"],
+        "constants": ["boltzmannDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": {
+        "description": "classicalElectronRadius module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["classicalElectronRadiusDocs"],
+        "constants": ["classicalElectronRadiusDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": {
+        "description": "conductanceQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["conductanceQuantumDocs"],
+        "constants": ["conductanceQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/coulomb.ts": {
+        "description": "coulomb module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["coulombDocs"],
+        "constants": ["coulombDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": {
+        "description": "coulombConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["coulombConstantDocs"],
+        "constants": ["coulombConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": {
+        "description": "deuteronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["deuteronMassDocs"],
+        "constants": ["deuteronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": {
+        "description": "efimovFactor module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["efimovFactorDocs"],
+        "constants": ["efimovFactorDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": {
+        "description": "electricConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["electricConstantDocs"],
+        "constants": ["electricConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/electronMass.ts": {
+        "description": "electronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["electronMassDocs"],
+        "constants": ["electronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": {
+        "description": "elementaryCharge module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["elementaryChargeDocs"],
+        "constants": ["elementaryChargeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/faraday.ts": {
+        "description": "faraday module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["faradayDocs"],
+        "constants": ["faradayDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": {
+        "description": "fermiCoupling module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fermiCouplingDocs"],
+        "constants": ["fermiCouplingDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": {
+        "description": "fineStructure module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["fineStructureDocs"],
+        "constants": ["fineStructureDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": {
+        "description": "firstRadiation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["firstRadiationDocs"],
+        "constants": ["firstRadiationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": {
+        "description": "gasConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gasConstantDocs"],
+        "constants": ["gasConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": {
+        "description": "gravitationConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gravitationConstantDocs"],
+        "constants": ["gravitationConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/gravity.ts": {
+        "description": "gravity module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gravityDocs"],
+        "constants": ["gravityDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": {
+        "description": "hartreeEnergy module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hartreeEnergyDocs"],
+        "constants": ["hartreeEnergyDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/index.ts": {
+        "description": "Package entry point for @danielsimonjr/mathts-expression (re-exports 51 symbols)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./speedOfLight.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gravitationConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./reducedPlanckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./magneticConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./electricConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./vacuumImpedance.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./coulomb.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./coulombConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./elementaryCharge.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./bohrMagneton.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./conductanceQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./inverseConductanceQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./magneticFluxQuantum.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./nuclearMagneton.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./klitzing.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./bohrRadius.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./classicalElectronRadius.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./electronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./fermiCoupling.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./fineStructure.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./hartreeEnergy.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./protonMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./deuteronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./neutronMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./quantumOfCirculation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./rydberg.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./thomsonCrossSection.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./weakMixingAngle.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./efimovFactor.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./atomicMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./avogadro.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./boltzmann.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./faraday.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./firstRadiation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./loschmidt.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gasConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarPlanckConstant.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarVolume.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./sackurTetrode.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./secondRadiation.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./stefanBoltzmann.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./wienDisplacement.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./molarMassC12.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./gravity.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckLength.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckMass.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckTime.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckCharge.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./planckTemperature.js",
+            "imports": ["*"],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "reExported": [
+          "* from ./speedOfLight.js",
+          "* from ./gravitationConstant.js",
+          "* from ./planckConstant.js",
+          "* from ./reducedPlanckConstant.js",
+          "* from ./magneticConstant.js",
+          "* from ./electricConstant.js",
+          "* from ./vacuumImpedance.js",
+          "* from ./coulomb.js",
+          "* from ./coulombConstant.js",
+          "* from ./elementaryCharge.js",
+          "* from ./bohrMagneton.js",
+          "* from ./conductanceQuantum.js",
+          "* from ./inverseConductanceQuantum.js",
+          "* from ./magneticFluxQuantum.js",
+          "* from ./nuclearMagneton.js",
+          "* from ./klitzing.js",
+          "* from ./bohrRadius.js",
+          "* from ./classicalElectronRadius.js",
+          "* from ./electronMass.js",
+          "* from ./fermiCoupling.js",
+          "* from ./fineStructure.js",
+          "* from ./hartreeEnergy.js",
+          "* from ./protonMass.js",
+          "* from ./deuteronMass.js",
+          "* from ./neutronMass.js",
+          "* from ./quantumOfCirculation.js",
+          "* from ./rydberg.js",
+          "* from ./thomsonCrossSection.js",
+          "* from ./weakMixingAngle.js",
+          "* from ./efimovFactor.js",
+          "* from ./atomicMass.js",
+          "* from ./avogadro.js",
+          "* from ./boltzmann.js",
+          "* from ./faraday.js",
+          "* from ./firstRadiation.js",
+          "* from ./loschmidt.js",
+          "* from ./gasConstant.js",
+          "* from ./molarPlanckConstant.js",
+          "* from ./molarVolume.js",
+          "* from ./sackurTetrode.js",
+          "* from ./secondRadiation.js",
+          "* from ./stefanBoltzmann.js",
+          "* from ./wienDisplacement.js",
+          "* from ./molarMass.js",
+          "* from ./molarMassC12.js",
+          "* from ./gravity.js",
+          "* from ./planckLength.js",
+          "* from ./planckMass.js",
+          "* from ./planckTime.js",
+          "* from ./planckCharge.js",
+          "* from ./planckTemperature.js"
+        ]
+      },
+      "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": {
+        "description": "inverseConductanceQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["inverseConductanceQuantumDocs"],
+        "constants": ["inverseConductanceQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/klitzing.ts": {
+        "description": "klitzing module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["klitzingDocs"],
+        "constants": ["klitzingDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": {
+        "description": "loschmidt module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["loschmidtDocs"],
+        "constants": ["loschmidtDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": {
+        "description": "magneticConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["magneticConstantDocs"],
+        "constants": ["magneticConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": {
+        "description": "magneticFluxQuantum module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["magneticFluxQuantumDocs"],
+        "constants": ["magneticFluxQuantumDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarMass.ts": {
+        "description": "molarMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarMassDocs"],
+        "constants": ["molarMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": {
+        "description": "molarMassC12 module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarMassC12Docs"],
+        "constants": ["molarMassC12Docs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": {
+        "description": "molarPlanckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarPlanckConstantDocs"],
+        "constants": ["molarPlanckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": {
+        "description": "molarVolume module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["molarVolumeDocs"],
+        "constants": ["molarVolumeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": {
+        "description": "neutronMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["neutronMassDocs"],
+        "constants": ["neutronMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": {
+        "description": "nuclearMagneton module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["nuclearMagnetonDocs"],
+        "constants": ["nuclearMagnetonDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": {
+        "description": "planckCharge module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckChargeDocs"],
+        "constants": ["planckChargeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": {
+        "description": "planckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckConstantDocs"],
+        "constants": ["planckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckLength.ts": {
+        "description": "planckLength module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckLengthDocs"],
+        "constants": ["planckLengthDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckMass.ts": {
+        "description": "planckMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckMassDocs"],
+        "constants": ["planckMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": {
+        "description": "planckTemperature module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckTemperatureDocs"],
+        "constants": ["planckTemperatureDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/planckTime.ts": {
+        "description": "planckTime module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["planckTimeDocs"],
+        "constants": ["planckTimeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/protonMass.ts": {
+        "description": "protonMass module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["protonMassDocs"],
+        "constants": ["protonMassDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": {
+        "description": "quantumOfCirculation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["quantumOfCirculationDocs"],
+        "constants": ["quantumOfCirculationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": {
+        "description": "reducedPlanckConstant module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["reducedPlanckConstantDocs"],
+        "constants": ["reducedPlanckConstantDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/rydberg.ts": {
+        "description": "rydberg module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rydbergDocs"],
+        "constants": ["rydbergDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": {
+        "description": "sackurTetrode module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["sackurTetrodeDocs"],
+        "constants": ["sackurTetrodeDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": {
+        "description": "secondRadiation module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["secondRadiationDocs"],
+        "constants": ["secondRadiationDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": {
+        "description": "speedOfLight module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["speedOfLightDocs"],
+        "constants": ["speedOfLightDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": {
+        "description": "stefanBoltzmann module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["stefanBoltzmannDocs"],
+        "constants": ["stefanBoltzmannDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": {
+        "description": "thomsonCrossSection module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["thomsonCrossSectionDocs"],
+        "constants": ["thomsonCrossSectionDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": {
+        "description": "vacuumImpedance module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["vacuumImpedanceDocs"],
+        "constants": ["vacuumImpedanceDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": {
+        "description": "weakMixingAngle module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["weakMixingAngleDocs"],
+        "constants": ["weakMixingAngleDocs"]
+      },
+      "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": {
+        "description": "wienDisplacement module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["wienDisplacementDocs"],
+        "constants": ["wienDisplacementDocs"]
       }
     },
     "expression/error": {
@@ -28986,6 +29479,355 @@
         "workspaceDependencies": [],
         "exports": ["createParser"],
         "constants": ["createParser"]
+      }
+    },
+    "expression": {
+      "expression/src/Help.ts": {
+        "description": "Documentation object",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/is.js",
+            "imports": ["isHelp"]
+          },
+          {
+            "file": "./utils/object.js",
+            "imports": ["clone"]
+          },
+          {
+            "file": "./utils/string.js",
+            "imports": ["format"]
+          },
+          {
+            "file": "./utils/factory.js",
+            "imports": ["factory"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createHelpClass"],
+        "constants": ["createHelpClass"]
+      },
+      "expression/src/index.ts": {
+        "description": "Expression parsing and evaluation for MathTS.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./keywords.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./operators.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./parse.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./Parser.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./Help.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./compiler/index.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./evaluator/index.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./transform/index.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./function/parser.js",
+            "imports": ["createParser"],
+            "reExport": true
+          },
+          {
+            "file": "./embeddedDocs/embeddedDocs.js",
+            "imports": ["embeddedDocs"],
+            "reExport": true
+          },
+          {
+            "file": "./utils/mathml.js",
+            "imports": ["mathMLDocument", "mathMLError", "escapeMathML", "toMathMLSymbol"],
+            "reExport": true
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["createNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/AccessorNode.js",
+            "imports": ["createAccessorNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/ArrayNode.js",
+            "imports": ["createArrayNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/AssignmentNode.js",
+            "imports": ["createAssignmentNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/BlockNode.js",
+            "imports": ["createBlockNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/ConditionalNode.js",
+            "imports": ["createConditionalNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/ConstantNode.js",
+            "imports": ["createConstantNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/FunctionAssignmentNode.js",
+            "imports": ["createFunctionAssignmentNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/FunctionNode.js",
+            "imports": ["createFunctionNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/IndexNode.js",
+            "imports": ["createIndexNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/ObjectNode.js",
+            "imports": ["createObjectNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/OperatorNode.js",
+            "imports": ["createOperatorNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/ParenthesisNode.js",
+            "imports": ["createParenthesisNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/RangeNode.js",
+            "imports": ["createRangeNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/RelationalNode.js",
+            "imports": ["createRelationalNode"],
+            "reExport": true
+          },
+          {
+            "file": "./node/SymbolNode.js",
+            "imports": ["createSymbolNode"],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "createParser",
+          "embeddedDocs",
+          "mathMLDocument",
+          "mathMLError",
+          "escapeMathML",
+          "toMathMLSymbol",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createFunctionNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode"
+        ],
+        "reExported": [
+          "* from ./types.js",
+          "* from ./keywords.js",
+          "* from ./operators.js",
+          "* from ./parse.js",
+          "* from ./Parser.js",
+          "* from ./Help.js",
+          "* from ./compiler/index.js",
+          "* from ./evaluator/index.js",
+          "* from ./transform/index.js",
+          "createParser",
+          "embeddedDocs",
+          "mathMLDocument",
+          "mathMLError",
+          "escapeMathML",
+          "toMathMLSymbol",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createFunctionNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode"
+        ]
+      },
+      "expression/src/keywords.ts": {
+        "description": "Reserved keywords not allowed to use in the parser",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["keywords"],
+        "constants": ["keywords"]
+      },
+      "expression/src/operators.ts": {
+        "description": "Metadata for a single operator/node identifier in the precedence table.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./utils/is.js",
+            "imports": ["isConstantNode", "isParenthesisNode", "rule2Node"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "properties",
+          "getPrecedence",
+          "getAssociativity",
+          "isAssociativeWith",
+          "getOperator"
+        ],
+        "interfaces": ["OperatorProperty"],
+        "functions": ["getPrecedence", "getAssociativity", "isAssociativeWith", "getOperator"],
+        "constants": ["properties"]
+      },
+      "expression/src/parse.ts": {
+        "description": "Parse an expression. Returns a node tree, which can be evaluated by",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "./utils/is.js",
+            "imports": [
+              "isAccessorNode",
+              "isConstantNode",
+              "isFunctionNode",
+              "isOperatorNode",
+              "isSymbolNode",
+              "rule2Node"
+            ]
+          },
+          {
+            "file": "./utils/collection.js",
+            "imports": ["deepMap"]
+          },
+          {
+            "file": "./utils/number.js",
+            "imports": ["safeNumberType"]
+          },
+          {
+            "file": "./utils/number.js",
+            "imports": ["NumberTypeConfig"],
+            "typeOnly": true
+          },
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./utils/customs.js",
+            "imports": ["setSafeProperty"]
+          },
+          {
+            "file": "./node/Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createParse"],
+        "constants": ["createParse"]
+      },
+      "expression/src/Parser.ts": {
+        "description": "Parser contains methods to evaluate or parse expressions, and has a number",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/factory.js",
+            "imports": ["factory"]
+          },
+          {
+            "file": "./utils/is.js",
+            "imports": ["isFunction"]
+          },
+          {
+            "file": "./utils/map.js",
+            "imports": ["createEmptyMap", "toObject"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["createParserClass"],
+        "constants": ["createParserClass"]
+      },
+      "expression/src/types.ts": {
+        "description": "Type definitions for expression module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
       }
     },
     "expression/node": {
@@ -36673,37 +37515,6 @@
         "classes": ["BufferPool"],
         "interfaces": ["BufferPoolOptions"]
       },
-      "gpu/src/GPUContext.ts": {
-        "description": "WebGPU Context Management",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./detect.js",
-            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
-        "classes": ["GPUContext"],
-        "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
-        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
-      },
-      "gpu/src/ShaderManager.ts": {
-        "description": "GPU Shader Manager (generic)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./GPUContext.js",
-            "imports": ["GPUContext"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": ["ShaderManager"],
-        "classes": ["ShaderManager"],
-        "interfaces": ["ShaderSource", "PipelineConfig"]
-      },
       "gpu/src/detect.ts": {
         "description": "WebGPU Detection and Capability Checking",
         "externalDependencies": [],
@@ -36753,6 +37564,22 @@
         "exports": ["GPU_MIN_ELEMENTS", "enableGpu", "disableGpu", "isGpuEnabled"],
         "functions": ["enableGpu", "disableGpu", "isGpuEnabled"],
         "constants": ["GPU_MIN_ELEMENTS"]
+      },
+      "gpu/src/GPUContext.ts": {
+        "description": "WebGPU Context Management",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./detect.js",
+            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "classes": ["GPUContext"],
+        "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
+        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
       },
       "gpu/src/index.ts": {
         "description": "/ <reference types=\"@webgpu/types\" />",
@@ -36883,6 +37710,21 @@
         "workspaceDependencies": [],
         "exports": ["serializeGpu"],
         "functions": ["serializeGpu"]
+      },
+      "gpu/src/ShaderManager.ts": {
+        "description": "GPU Shader Manager (generic)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./GPUContext.js",
+            "imports": ["GPUContext"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["ShaderManager"],
+        "classes": ["ShaderManager"],
+        "interfaces": ["ShaderSource", "PipelineConfig"]
       }
     },
     "plot": {
@@ -37315,7 +38157,7 @@
           },
           {
             "module": "path",
-            "imports": ["extname", "join", "basename"]
+            "imports": ["extname", "join"]
           },
           {
             "module": "os",
@@ -37595,11 +38437,11 @@
           "core/src/types/fraction.ts",
           "core/src/types/interfaces.ts",
           "core/src/types/matrix/Range.ts",
-          "core/src/types/unit/Unit.ts",
           "core/src/types/unit/dependencies.ts",
           "core/src/types/unit/errors.ts",
           "core/src/types/unit/index.ts",
           "core/src/types/unit/unit-types.ts",
+          "core/src/types/unit/Unit.ts",
           "core/src/types/unit-definitions.ts",
           "core/src/types/unit-prefixes.ts",
           "core/src/types/unit.ts",
@@ -37611,23 +38453,23 @@
         "files": [
           "matrix/src/backends/Backend.ts",
           "matrix/src/backends/BackendManager.ts",
-          "matrix/src/backends/GPUBackend.ts",
-          "matrix/src/backends/GPUMatrixBackend.ts",
-          "matrix/src/backends/JSBackend.ts",
-          "matrix/src/backends/ParallelBackend.ts",
-          "matrix/src/backends/WASMBackend.ts",
-          "matrix/src/backends/WasmLoader.ts",
           "matrix/src/backends/gpu/BatchExecutor.ts",
-          "matrix/src/backends/gpu/Sync.ts",
           "matrix/src/backends/gpu/builtin-shaders.ts",
           "matrix/src/backends/gpu/index.ts",
+          "matrix/src/backends/gpu/Sync.ts",
+          "matrix/src/backends/GPUBackend.ts",
+          "matrix/src/backends/GPUMatrixBackend.ts",
           "matrix/src/backends/index.ts",
+          "matrix/src/backends/JSBackend.ts",
+          "matrix/src/backends/ParallelBackend.ts",
           "matrix/src/backends/register-backends.ts",
           "matrix/src/backends/wasm/detect.ts",
           "matrix/src/backends/wasm/fft-wasm.ts",
           "matrix/src/backends/wasm/index.ts",
           "matrix/src/backends/wasm/integrity.ts",
-          "matrix/src/backends/wasm/resolve.ts"
+          "matrix/src/backends/wasm/resolve.ts",
+          "matrix/src/backends/WASMBackend.ts",
+          "matrix/src/backends/WasmLoader.ts"
         ]
       },
       {
@@ -37664,21 +38506,21 @@
       {
         "name": "Matrix/types",
         "files": [
-          "matrix/src/types/DenseMatrix.ts",
-          "matrix/src/types/Matrix.ts",
-          "matrix/src/types/SparseMatrix.ts",
           "matrix/src/types/dense/arithmetic.ts",
           "matrix/src/types/dense/reduction.ts",
-          "matrix/src/types/index.ts"
+          "matrix/src/types/DenseMatrix.ts",
+          "matrix/src/types/index.ts",
+          "matrix/src/types/Matrix.ts",
+          "matrix/src/types/SparseMatrix.ts"
         ]
       },
       {
         "name": "Tensor",
         "files": [
-          "tensor/src/Tensor.ts",
           "tensor/src/contraction-sequence.ts",
           "tensor/src/index.ts",
-          "tensor/src/named-index.ts"
+          "tensor/src/named-index.ts",
+          "tensor/src/Tensor.ts"
         ]
       },
       {
@@ -38206,10 +39048,10 @@
           "functions/src/type/complex/Complex.ts",
           "functions/src/type/local/Decimal.ts",
           "functions/src/type/matrix/FibonacciHeap.ts",
+          "functions/src/type/matrix/function/index.ts",
           "functions/src/type/matrix/ImmutableDenseMatrix.ts",
           "functions/src/type/matrix/MatrixIndex.ts",
           "functions/src/type/matrix/Spa.ts",
-          "functions/src/type/matrix/function/index.ts",
           "functions/src/type/matrix/types.ts",
           "functions/src/type/matrix/utils/broadcast.ts",
           "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
@@ -38325,7 +39167,6 @@
       {
         "name": "Functions/wasm",
         "files": [
-          "functions/src/wasm/WasmLoader.ts",
           "functions/src/wasm/bitwise/wasm-bridge.ts",
           "functions/src/wasm/bridges/common.ts",
           "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -38336,19 +39177,8 @@
           "functions/src/wasm/signal/wasm-bridge.ts",
           "functions/src/wasm/sort/wasm-bridge.ts",
           "functions/src/wasm/special/scalars.ts",
-          "functions/src/wasm/special/wasm-bridge.ts"
-        ]
-      },
-      {
-        "name": "Expression",
-        "files": [
-          "expression/src/Help.ts",
-          "expression/src/Parser.ts",
-          "expression/src/index.ts",
-          "expression/src/keywords.ts",
-          "expression/src/operators.ts",
-          "expression/src/parse.ts",
-          "expression/src/types.ts"
+          "functions/src/wasm/special/wasm-bridge.ts",
+          "functions/src/wasm/WasmLoader.ts"
         ]
       },
       {
@@ -38358,20 +39188,20 @@
       {
         "name": "Expression/embeddedDocs",
         "files": [
+          "expression/src/embeddedDocs/constants/e.ts",
+          "expression/src/embeddedDocs/constants/false.ts",
+          "expression/src/embeddedDocs/constants/i.ts",
           "expression/src/embeddedDocs/constants/Infinity.ts",
           "expression/src/embeddedDocs/constants/LN10.ts",
           "expression/src/embeddedDocs/constants/LN2.ts",
           "expression/src/embeddedDocs/constants/LOG10E.ts",
           "expression/src/embeddedDocs/constants/LOG2E.ts",
           "expression/src/embeddedDocs/constants/NaN.ts",
-          "expression/src/embeddedDocs/constants/SQRT1_2.ts",
-          "expression/src/embeddedDocs/constants/SQRT2.ts",
-          "expression/src/embeddedDocs/constants/e.ts",
-          "expression/src/embeddedDocs/constants/false.ts",
-          "expression/src/embeddedDocs/constants/i.ts",
           "expression/src/embeddedDocs/constants/null.ts",
           "expression/src/embeddedDocs/constants/phi.ts",
           "expression/src/embeddedDocs/constants/pi.ts",
+          "expression/src/embeddedDocs/constants/SQRT1_2.ts",
+          "expression/src/embeddedDocs/constants/SQRT2.ts",
           "expression/src/embeddedDocs/constants/tau.ts",
           "expression/src/embeddedDocs/constants/true.ts",
           "expression/src/embeddedDocs/constants/version.ts",
@@ -38404,8 +39234,8 @@
           "expression/src/embeddedDocs/function/algebra/discriminant.ts",
           "expression/src/embeddedDocs/function/algebra/element.ts",
           "expression/src/embeddedDocs/function/algebra/eliminate.ts",
-          "expression/src/embeddedDocs/function/algebra/expToTrig.ts",
           "expression/src/embeddedDocs/function/algebra/expand.ts",
+          "expression/src/embeddedDocs/function/algebra/expToTrig.ts",
           "expression/src/embeddedDocs/function/algebra/factor.ts",
           "expression/src/embeddedDocs/function/algebra/fullSimplify.ts",
           "expression/src/embeddedDocs/function/algebra/functionExpand.ts",
@@ -38703,7 +39533,59 @@
           "expression/src/embeddedDocs/function/utils/numeric.ts",
           "expression/src/embeddedDocs/function/utils/oct.ts",
           "expression/src/embeddedDocs/function/utils/print.ts",
-          "expression/src/embeddedDocs/function/utils/typeOf.ts"
+          "expression/src/embeddedDocs/function/utils/typeOf.ts",
+          "expression/src/embeddedDocs/physicalConstants/atomicMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/avogadro.ts",
+          "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts",
+          "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts",
+          "expression/src/embeddedDocs/physicalConstants/boltzmann.ts",
+          "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts",
+          "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/coulomb.ts",
+          "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts",
+          "expression/src/embeddedDocs/physicalConstants/electricConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/electronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts",
+          "expression/src/embeddedDocs/physicalConstants/faraday.ts",
+          "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts",
+          "expression/src/embeddedDocs/physicalConstants/fineStructure.ts",
+          "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts",
+          "expression/src/embeddedDocs/physicalConstants/gasConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/gravity.ts",
+          "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts",
+          "expression/src/embeddedDocs/physicalConstants/index.ts",
+          "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/klitzing.ts",
+          "expression/src/embeddedDocs/physicalConstants/loschmidt.ts",
+          "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/molarVolume.ts",
+          "expression/src/embeddedDocs/physicalConstants/neutronMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckCharge.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckLength.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts",
+          "expression/src/embeddedDocs/physicalConstants/planckTime.ts",
+          "expression/src/embeddedDocs/physicalConstants/protonMass.ts",
+          "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts",
+          "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts",
+          "expression/src/embeddedDocs/physicalConstants/rydberg.ts",
+          "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts",
+          "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts",
+          "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts",
+          "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts",
+          "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts",
+          "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts",
+          "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts",
+          "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts"
         ]
       },
       {
@@ -38717,6 +39599,18 @@
       {
         "name": "Expression/function",
         "files": ["expression/src/function/parser.ts"]
+      },
+      {
+        "name": "Expression",
+        "files": [
+          "expression/src/Help.ts",
+          "expression/src/index.ts",
+          "expression/src/keywords.ts",
+          "expression/src/operators.ts",
+          "expression/src/parse.ts",
+          "expression/src/Parser.ts",
+          "expression/src/types.ts"
+        ]
       },
       {
         "name": "Expression/node",
@@ -38948,13 +39842,13 @@
         "name": "Gpu",
         "files": [
           "gpu/src/BufferPool.ts",
-          "gpu/src/GPUContext.ts",
-          "gpu/src/ShaderManager.ts",
           "gpu/src/detect.ts",
           "gpu/src/device.ts",
           "gpu/src/flag.ts",
+          "gpu/src/GPUContext.ts",
           "gpu/src/index.ts",
-          "gpu/src/serialize.ts"
+          "gpu/src/serialize.ts",
+          "gpu/src/ShaderManager.ts"
         ]
       },
       {
@@ -38991,17 +39885,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1116,
+    "totalTypeScriptFiles": 1168,
     "totalModules": 83,
-    "totalLinesOfCode": 193249,
-    "totalExports": 5754,
+    "totalLinesOfCode": 194163,
+    "totalExports": 5806,
     "totalClasses": 53,
     "totalInterfaces": 504,
-    "totalFunctions": 1867,
+    "totalFunctions": 1868,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1543,
-    "totalReExports": 2305,
+    "totalConstants": 1594,
+    "totalReExports": 2356,
     "totalTypeOnlyImports": 579,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

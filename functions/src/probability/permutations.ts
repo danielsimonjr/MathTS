@@ -1,6 +1,7 @@
 import { isInteger } from '../utils/number.js';
 import { product } from '../utils/product.js';
 import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for permutations
@@ -14,6 +15,11 @@ interface BigNumberType {
   lte(n: BigNumberType): boolean;
   gte(n: BigNumberType | number): boolean;
   isInteger(): boolean;
+}
+
+// Type definitions for Matrix interface
+interface Matrix {
+  valueOf(): unknown;
 }
 
 interface PermutationsDependencies {
@@ -89,7 +95,23 @@ export const createPermutations = /* #__PURE__ */ factory(
         return result;
       },
 
-      // TODO: implement support for collection in permutations
+      'Array | Matrix': typed.referToSelf(
+        (self: TypedFunction) =>
+          (n: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(n as unknown[], self) as unknown[] | Matrix
+      ),
+
+      'Array | Matrix, number | BigNumber': typed.referToSelf(
+        (self: TypedFunction) =>
+          (n: unknown[] | Matrix, k: number | BigNumberType): unknown[] | Matrix =>
+            deepMap(n as unknown[], (n_val) => self(n_val, k)) as unknown[] | Matrix
+      ),
+
+      'number | BigNumber, Array | Matrix': typed.referToSelf(
+        (self: TypedFunction) =>
+          (n: number | BigNumberType, k: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(k as unknown[], (k_val) => self(n, k_val)) as unknown[] | Matrix
+      ),
     });
   }
 );

@@ -838,6 +838,10 @@ function _betweennessOnce(
     if (denom > 0) {
       for (let i = 0; i < n; i++) cb[i] /= denom;
     }
+  } else if (!directed) {
+    // NetworkX returns raw counts for undirected graphs divided by 2
+    // because each unordered pair {s, t} is counted twice.
+    for (let i = 0; i < n; i++) cb[i] /= 2;
   }
 
   return cb;

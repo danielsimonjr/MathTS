@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-expression
 
+## 0.7.1
+
+### Patch Changes
+
+- 104a1c9: Fix Complex.fromPolar Inf×0 NaN, close expression object-literal sandbox holes, and fail-closed workbook YAML chart-spec parsing.
+- Updated dependencies [104a1c9]
+  - @danielsimonjr/mathts-core@0.14.1
+
 ## 0.6.7
 
 ### Patch Changes
