@@ -1,1 +1,0 @@
-{"version":3,"file":"cumsum.transform.d.ts","sourceRoot":"","sources":["cumsum.transform.ts"],"names":[],"mappings":"AAIA,UAAU,aAAa,CAAC,CAAC,GAAG,OAAO;IACjC,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,GAAG,CAAC,CAAC;CACzB;AAED,UAAU,YAAY;IACpB,MAAM,EAAE,CAAC,GAAG,IAAI,EAAE,OAAO,EAAE,KAAK,OAAO,CAAC;IACxC,KAAK,EAAE,aAAa,CAAC;CACtB;AAYD,eAAO,MAAM,qBAAqB,sEAyBjC,CAAC"}

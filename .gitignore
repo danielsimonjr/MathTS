@@ -104,3 +104,9 @@ tools/benchmark/gpu/bench-3way.bundle.js
 # them.
 *.orig
 *.rej
+
+# Orphaned declaration source maps. 513 of these were committed under package src/
+# dirs (none had a matching .d.ts). .gitignore only covered dist/, so anything a
+# build left in src/ was committable. NOT *.d.ts - those are real ambient decls.
+*.d.ts.map
+*.js.map
