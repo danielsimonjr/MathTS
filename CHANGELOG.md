@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`derivative()`'s `order` option was silently removed, along with the test that proved it
+  worked.** `{ order: 0 }`, `{ order: 2 }` and `{ order: 3 }` all returned the **first**
+  derivative, and a negative or non-integer `order` was accepted instead of throwing. Both
+  the loop and the `TypeError('Option "order" must be a non-negative integer')` guard are
+  restored.
+  - **`simplify` also regressed.** `options.simplify !== false` had become a truthiness test,
+    so any options object omitting `simplify` — including `{ order: 2 }` — silently returned
+    an unsimplified tree (`3 * 1 * x ^ (3 - 1)` rather than `3 * x ^ 2`), contradicting the
+    `{ simplify: true }` default used when no options are passed.
+  - **Root cause, and why CI never caught it:** both entered in `d25f00a9` — *"Fix dynamic
+    code execution vulnerability in CAS evaluator"* — a 56-file commit (+3,059/−4,492) whose
+    only parent is PR #153's merge commit and which **deleted 6 test files**, including
+    `functions/tests/derivative.test.ts`. The capability and its evidence were removed
+    together, so the suite stayed green. Three of those six test files were restored weeks
+    later by PRs #203/#204/#205; the remaining three are restored here
+    (`derivative.test.ts`, `matrix/tests/backends/ParallelBackend.test.ts`,
+    `matrix/tests/parallel-matrix.test.ts` — 426 lines).
+  - `ParallelBackend.ts` (370 lines) and `parallel-matrix.ts` (1,078 lines) had **no test
+    coverage at all** in the interim: the commit deleted their tests but kept the source,
+    which continued to ship.
+  - The restored `derivative.test.ts` fails against the regressed implementation and passes
+    against the fix, so it gates the behaviour rather than merely documenting it. The genuine
+    security fix from that commit (`functions/src/typed/cas.ts`, removing an
+    `evaluate(tensorDef, scope)` dynamic-evaluation path) is untouched.
+
 - **`Complex.fromPolar(Infinity, 0)` is `Infinity+0i`, not `NaN`.** IEEE 754 makes
   `Infinity * 0` a NaN, so `fromPolar` (and therefore `z^w` for a denormal positive
   real raised to a negative power) returned `NaN` on the imaginary part. Restore the
