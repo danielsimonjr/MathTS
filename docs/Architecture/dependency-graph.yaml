@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-08-15'
   totalFiles: 1168
   totalModules: 83
-  totalExports: 5807
+  totalExports: 5809
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -11328,6 +11328,7 @@ modules:
             - createSackurTetrode
             - createStefanBoltzmann
             - createFirstRadiation
+            - createSpectralRadiance
             - createSecondRadiation
             - createWienDisplacement
             - createElectronMass
@@ -11626,6 +11627,7 @@ modules:
         - sackurTetrode
         - stefanBoltzmann
         - firstRadiation
+        - spectralRadiance
         - secondRadiation
         - wienDisplacement
         - electronMass
@@ -11878,6 +11880,7 @@ modules:
         - sackurTetrode
         - stefanBoltzmann
         - firstRadiation
+        - spectralRadiance
         - secondRadiation
         - wienDisplacement
         - electronMass
@@ -18190,6 +18193,7 @@ modules:
         - createBoltzmann
         - createFaraday
         - createFirstRadiation
+        - createSpectralRadiance
         - createLoschmidt
         - createGasConstant
         - createMolarPlanckConstant
@@ -18245,6 +18249,7 @@ modules:
         - createBoltzmann
         - createFaraday
         - createFirstRadiation
+        - createSpectralRadiance
         - createLoschmidt
         - createGasConstant
         - createMolarPlanckConstant
@@ -37599,14 +37604,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1168
   totalModules: 83
-  totalLinesOfCode: 194251
-  totalExports: 5807
+  totalLinesOfCode: 194272
+  totalExports: 5809
   totalClasses: 53
   totalInterfaces: 505
   totalFunctions: 1869
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1594
+  totalConstants: 1596
   totalReExports: 2356
   totalTypeOnlyImports: 581
   runtimeCircularDeps: 0
