@@ -5462,7 +5462,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 149
+      "loc": 158
     },
     {
       "file": "functions/src/arithmetic/subtractScalar.ts",
@@ -5735,7 +5735,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1736
+      "loc": 1740
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -7562,7 +7562,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 317
+      "loc": 321
     },
     {
       "file": "functions/src/typed/algebra.ts",
