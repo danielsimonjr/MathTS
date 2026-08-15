@@ -300,6 +300,22 @@ describe('Singular Value Decomposition', () => {
   });
 
   describe('Pseudoinverse (pinv)', () => {
+    it('should compute pseudoinverse of a zero matrix', () => {
+      const A = [
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+      const Ainv = pinv(A);
+
+      expect(Ainv.length).toBe(3);
+      expect(Ainv[0].length).toBe(2);
+      for (const row of Ainv) {
+        for (const val of row) {
+          expect(val).toBe(0);
+        }
+      }
+    });
+
     it('should compute pseudoinverse of square matrix', () => {
       const A = [
         [1, 2],
@@ -420,6 +436,12 @@ describe('Singular Value Decomposition', () => {
   });
 
   describe('Float64Array input', () => {
+    it('should throw for non-square Float64Array', () => {
+      const A = new Float64Array([1, 2, 3]);
+
+      expect(() => svd(A)).toThrow('Float64Array must represent a square matrix');
+    });
+
     it('should accept Float64Array', () => {
       // 2x2 matrix in row-major order
       const A = new Float64Array([1, 2, 3, 4]);
@@ -431,6 +453,19 @@ describe('Singular Value Decomposition', () => {
   });
 
   describe('Edge cases', () => {
+    it('should trigger handleZero with zero on diagonal but non-negligible superdiagonal', () => {
+      const A = [
+        [0, 1, 0, 0],
+        [0, 0, 2, 0],
+        [0, 0, 0, 3],
+        [0, 0, 0, 0]
+      ];
+
+      const result = svd(A);
+
+      expect(result.S.length).toBe(4);
+    });
+
     it('should handle zero matrix', () => {
       const A = [
         [0, 0],
