@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-14",
+  "generated": "2026-08-15",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
@@ -1196,6 +1196,7 @@
       "functions/src/logical/not.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/multinomial.ts",
+      "functions/src/probability/permutations.ts",
       "functions/src/special/erf.ts",
       "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/max.ts",
@@ -1546,7 +1547,8 @@
       "functions/src/bitwise/bitOr.ts",
       "functions/src/bitwise/bitXor.ts",
       "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts"
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts": [
       "functions/src/bitwise/leftShift.ts",
@@ -2374,6 +2376,9 @@
     "expression/src/compiler/compile.ts": [
       "expression/src/compiler/index.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/index.ts": [
+      "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
     "expression/src/embeddedDocs/constants/e.ts": ["expression/src/embeddedDocs/embeddedDocs.ts"],
     "expression/src/embeddedDocs/constants/false.ts": [
@@ -3389,6 +3394,159 @@
     ],
     "expression/src/embeddedDocs/function/special/gammainc.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulomb.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/klitzing.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/protonMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/rydberg.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/avogadro.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/faraday.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravity.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckLength.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTime.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
     ],
     "expression/src/evaluator/evaluate.ts": ["expression/src/evaluator/index.ts"],
     "expression/src/utils/factory.ts": [
