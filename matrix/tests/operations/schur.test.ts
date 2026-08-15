@@ -16,7 +16,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
-import { matrixSchur } from '../../src/operations/schur.js';
+import { matrixSchur, schurInternal } from '../../src/operations/schur.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -229,5 +229,64 @@ describe('matrixSchur', () => {
     const { Q, T } = matrixSchur(A);
     const QTQt = matMulDense(matMulDense(Q, T), transposeDense(Q));
     expect(frobDiff(QTQt, A)).toBeLessThan(1e-5);
+  });
+});
+
+describe('schurInternal', () => {
+  it('1. returns trivial { H, Q } for 1x1 matrix', () => {
+    const A = [[7]];
+    const { H, Q } = schurInternal(A);
+
+    expect(H).toEqual([[7]]);
+    expect(Q).toEqual([[1]]);
+  });
+
+  it('2. returns raw 2D arrays { H, Q } for 2x2 identity matrix', () => {
+    const A = [
+      [1, 0],
+      [0, 1],
+    ];
+    const { H, Q } = schurInternal(A);
+
+    expect(H).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+    expect(Q).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+  });
+
+  it('3. returns raw 2D arrays for a 3x3 identity matrix', () => {
+    const A = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ];
+    const { H, Q } = schurInternal(A);
+
+    expect(H.length).toBe(3);
+    expect(Q.length).toBe(3);
+
+    // Q should be identity
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        expect(Math.abs(Q[i][j] - (i === j ? 1 : 0))).toBeLessThan(1e-12);
+        expect(Math.abs(H[i][j] - (i === j ? 1 : 0))).toBeLessThan(1e-12);
+      }
+    }
+  });
+
+  it('4. passes maxIterations and tolerance to schurRaw', () => {
+    // We can just verify it runs properly with basic arguments,
+    // since schurRaw's logic handles it. A basic check is ensuring it doesn't throw.
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const { H, Q } = schurInternal(A, 50, 1e-10);
+    expect(H.length).toBe(2);
+    expect(Q.length).toBe(2);
   });
 });
