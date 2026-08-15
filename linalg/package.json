@@ -35,9 +35,9 @@
     "@danielsimonjr/mathts-matrix": "^0.7.1"
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^26.2.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.3.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
   "publishConfig": {
