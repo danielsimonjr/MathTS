@@ -338,10 +338,25 @@ describe('Singular Value Decomposition', () => {
 
       const Ainv = pinv(A);
 
-      // A^+ * A should be identity-like
+      // Shape check
+      expect(Ainv.length).toBe(2);
+      expect(Ainv[0].length).toBe(3);
+
+      // Moore-Penrose condition 1: A * A^+ * A = A
+      const AAinvA = matmul(matmul(A, Ainv), A);
+      expect(matDiff(A, AAinvA)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 2: A^+ * A * A^+ = A^+
+      const AinvAAinv = matmul(matmul(Ainv, A), Ainv);
+      expect(matDiff(Ainv, AinvAAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 3: (A * A^+)^T = A * A^+
+      const AAinv = matmul(A, Ainv);
+      expect(matDiff(transpose(AAinv), AAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 4: (A^+ * A)^T = A^+ * A
       const AinvA = matmul(Ainv, A);
-      expect(AinvA.length).toBe(2);
-      expect(AinvA[0].length).toBe(2);
+      expect(matDiff(transpose(AinvA), AinvA)).toBeLessThan(1e-10);
     });
 
     it('should compute pseudoinverse of wide matrix', () => {
@@ -352,10 +367,71 @@ describe('Singular Value Decomposition', () => {
 
       const Ainv = pinv(A);
 
-      // A * A^+ should be identity-like
+      // Shape check
+      expect(Ainv.length).toBe(3);
+      expect(Ainv[0].length).toBe(2);
+
+      // Moore-Penrose condition 1: A * A^+ * A = A
+      const AAinvA = matmul(matmul(A, Ainv), A);
+      expect(matDiff(A, AAinvA)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 2: A^+ * A * A^+ = A^+
+      const AinvAAinv = matmul(matmul(Ainv, A), Ainv);
+      expect(matDiff(Ainv, AinvAAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 3: (A * A^+)^T = A * A^+
       const AAinv = matmul(A, Ainv);
-      expect(AAinv.length).toBe(2);
-      expect(AAinv[0].length).toBe(2);
+      expect(matDiff(transpose(AAinv), AAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 4: (A^+ * A)^T = A^+ * A
+      const AinvA = matmul(Ainv, A);
+      expect(matDiff(transpose(AinvA), AinvA)).toBeLessThan(1e-10);
+    });
+
+    it('should handle rank-deficient matrix correctly', () => {
+      // Rank 1 matrix
+      const A = [
+        [1, 2, 3],
+        [2, 4, 6],
+        [3, 6, 9],
+      ];
+
+      const Ainv = pinv(A);
+
+      // Moore-Penrose condition 1: A * A^+ * A = A
+      const AAinvA = matmul(matmul(A, Ainv), A);
+      expect(matDiff(A, AAinvA)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 2: A^+ * A * A^+ = A^+
+      const AinvAAinv = matmul(matmul(Ainv, A), Ainv);
+      expect(matDiff(Ainv, AinvAAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 3: (A * A^+)^T = A * A^+
+      const AAinv = matmul(A, Ainv);
+      expect(matDiff(transpose(AAinv), AAinv)).toBeLessThan(1e-10);
+
+      // Moore-Penrose condition 4: (A^+ * A)^T = A^+ * A
+      const AinvA = matmul(Ainv, A);
+      expect(matDiff(transpose(AinvA), AinvA)).toBeLessThan(1e-10);
+    });
+
+    it('should compute pseudoinverse of a zero matrix', () => {
+      const A = [
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+
+      const Ainv = pinv(A);
+
+      expect(Ainv.length).toBe(3);
+      expect(Ainv[0].length).toBe(2);
+
+      // A zero matrix should have a zero pseudoinverse
+      for (let i = 0; i < Ainv.length; i++) {
+        for (let j = 0; j < Ainv[i].length; j++) {
+          expect(Ainv[i][j]).toBe(0);
+        }
+      }
     });
   });
 
