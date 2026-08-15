@@ -31,11 +31,11 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
+    "@types/node": "^25.5.2",
     "tsup": "^8.0.0",
-    "typescript": "^7.0.2",
+    "typescript": "^5.3.0",
     "vitest": "^4.1.10",
-    "@webgpu/types": "^0.1.71"
+    "@webgpu/types": "^0.1.67"
   },
   "publishConfig": {
     "access": "public"
@@ -54,7 +54,7 @@
   ],
   "dependencies": {},
   "peerDependencies": {
-    "@webgpu/types": "^0.1.71"
+    "@webgpu/types": "^0.1.67"
   },
   "peerDependenciesMeta": {
     "@webgpu/types": {
