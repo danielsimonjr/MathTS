@@ -117,4 +117,4 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim                | Value | Source                |
 | -------------------- | ----- | --------------------- |
-| totalTypeScriptFiles | 1824  | dependency-graph.json |
+| totalTypeScriptFiles | 1880  | dependency-graph.json |

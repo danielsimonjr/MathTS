@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Architecture Verification blocks were stale; the drift gate is green again.** Six documents
+  claimed `totalTypeScriptFiles` 1824, `totalExports` 7564 and `totalLinesOfCode` 333583, against
+  an actual 1880 / 7620 / 332049 — about 56 files of real growth since the blocks were last
+  written. Checked rather than assumed: running discovery both by git file list and by filesystem
+  walk gives 1880 and 1882, so the gap is code drift and not a change of instrument.
+  Regenerate with `npm run docs:deps`; check with
+  `repo_map.py check . --docs docs/Architecture`.
+
+### Fixed
+
 - **The Release workflow could not create a version PR** — `@changesets/cli` bumped to
   `^3.0.0`. `changesets/action` had been upgraded to v2.0.0 while the CLI stayed on
   `^2.27.0`, and action v2 refuses CLI v2 outright: *"This version of the Changesets action
