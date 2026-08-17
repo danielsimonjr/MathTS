@@ -29,6 +29,13 @@ describe('BigNumber', () => {
       expect(bn.toString()).toBe('42');
     });
 
+    it('strips trailing zeros on integer fromNumber / fromBigInt', () => {
+      expect(BigNumber.fromNumber(1000).toString()).toBe('1000');
+      expect(BigNumber.fromNumber(-1000).toString()).toBe('-1000');
+      expect(BigNumber.fromBigInt(1000n).toString()).toBe('1000');
+      expect(BigNumber.fromBigInt(1000n).equals(BigNumber.parse('1000'))).toBe(true);
+    });
+
     it('should create from negative number', () => {
       const bn = BigNumber.fromNumber(-123.456);
       expect(bn.toString()).toBe('-123.456');

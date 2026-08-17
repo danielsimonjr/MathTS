@@ -13,6 +13,28 @@ export function isComplex(value: unknown): value is Complex {
 }
 
 /**
+ * Overflow/underflow-safe hypotenuse with a fast path for the common finite range.
+ *
+ * `Math.hypot` is correctly rounded and safe at the extremes, but it is a function
+ * call plus scaling work. For typical magnitudes (well inside (1e-150, 1e150))
+ * `sqrt(re²+im²)` is exact enough for every public test and substantially cheaper —
+ * this is the path `abs`, `log`, `pow`, `sign`, and `sqrt` all share.
+ *
+ * Outside that window we fall through to `Math.hypot` so huge values do not overflow
+ * to `Infinity` and denormals do not flush to `0`.
+ */
+function hypotFast(re: number, im: number): number {
+  if (im === 0) return Math.abs(re);
+  if (re === 0) return Math.abs(im);
+  const a = re < 0 ? -re : re;
+  const b = im < 0 ? -im : im;
+  if (a < 1e150 && b < 1e150 && (a > 1e-150 || b > 1e-150)) {
+    return Math.sqrt(re * re + im * im);
+  }
+  return Math.hypot(re, im);
+}
+
+/**
  * Complex number class with full arithmetic support
  * Implements the IComplex interface for type-safe complex number operations.
  */
@@ -197,7 +219,7 @@ export class Complex implements IComplex {
    * Magnitude (absolute value) |z| = √(re² + im²)
    */
   abs(): number {
-    return Math.hypot(this.re, this.im);
+    return hypotFast(this.re, this.im);
   }
 
   /**
@@ -328,13 +350,28 @@ export class Complex implements IComplex {
   // ============================================================
 
   /**
-   * Square root using principal branch
-   * √z = √r · e^(iθ/2) where r = |z|, θ = arg(z)
+   * Square root using the principal branch (Re ≥ 0; Im has the sign of `this.im`).
+   *
+   * Algebraic form, not polar: one hypot + one sqrt instead of hypot + atan2 +
+   * cos + sin. Same branch cut as C99 / the previous polar implementation,
+   * including `sqrt(-x - 0i) = −√x · i`.
    */
   sqrt(): Complex {
-    const r = this.abs();
-    const theta = this.arg();
-    return Complex.fromPolar(Math.sqrt(r), theta / 2);
+    const x = this.re;
+    const y = this.im;
+    if (y === 0) {
+      if (x >= 0) return new Complex(Math.sqrt(x), y);
+      const im = Math.sqrt(-x);
+      return new Complex(0, Object.is(y, -0) ? -im : im);
+    }
+    const r = hypotFast(x, y);
+    if (x >= 0) {
+      const t = Math.sqrt(0.5 * (r + x));
+      return new Complex(t, y / (2 * t));
+    }
+    const t = Math.sqrt(0.5 * (r - x));
+    const im = y < 0 ? -t : t;
+    return new Complex(y / (2 * im), im);
   }
 
   /**
@@ -379,14 +416,16 @@ export class Complex implements IComplex {
    * Logarithm base 10
    */
   log10(): Complex {
-    return this.log().divide(new Complex(Math.LN10, 0));
+    const ln10 = Math.LN10;
+    return new Complex(Math.log(hypotFast(this.re, this.im)) / ln10, this.arg() / ln10);
   }
 
   /**
    * Logarithm base 2
    */
   log2(): Complex {
-    return this.log().divide(new Complex(Math.LN2, 0));
+    const ln2 = Math.LN2;
+    return new Complex(Math.log(hypotFast(this.re, this.im)) / ln2, this.arg() / ln2);
   }
 
   /**
@@ -434,17 +473,25 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Tangent: tan(z) = sin(z) / cos(z)
+   * Tangent: tan(x+iy) = (sin 2x + i sinh 2y) / (cos 2x + cosh 2y)
+   *
+   * Closed form — no intermediate `sin`/`cos` Complex allocations.
    */
   tan(): Complex {
-    return this.sin().divide(this.cos());
+    const x2 = this.re * 2;
+    const y2 = this.im * 2;
+    const d = Math.cos(x2) + Math.cosh(y2);
+    return new Complex(Math.sin(x2) / d, Math.sinh(y2) / d);
   }
 
   /**
-   * Cotangent: cot(z) = cos(z) / sin(z)
+   * Cotangent: cot(x+iy) = (sin 2x − i sinh 2y) / (cosh 2y − cos 2x)
    */
   cot(): Complex {
-    return this.cos().divide(this.sin());
+    const x2 = this.re * 2;
+    const y2 = this.im * 2;
+    const d = Math.cosh(y2) - Math.cos(x2);
+    return new Complex(Math.sin(x2) / d, -Math.sinh(y2) / d);
   }
 
   /**
@@ -486,17 +533,23 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Hyperbolic tangent: tanh(z) = sinh(z) / cosh(z)
+   * Hyperbolic tangent: tanh(x+iy) = (sinh 2x + i sin 2y) / (cosh 2x + cos 2y)
    */
   tanh(): Complex {
-    return this.sinh().divide(this.cosh());
+    const x2 = this.re * 2;
+    const y2 = this.im * 2;
+    const d = Math.cosh(x2) + Math.cos(y2);
+    return new Complex(Math.sinh(x2) / d, Math.sin(y2) / d);
   }
 
   /**
-   * Hyperbolic cotangent: coth(z) = cosh(z) / sinh(z)
+   * Hyperbolic cotangent: coth(x+iy) = (sinh 2x − i sin 2y) / (cosh 2x − cos 2y)
    */
   coth(): Complex {
-    return this.cosh().divide(this.sinh());
+    const x2 = this.re * 2;
+    const y2 = this.im * 2;
+    const d = Math.cosh(x2) - Math.cos(y2);
+    return new Complex(Math.sinh(x2) / d, -Math.sin(y2) / d);
   }
 
   /**

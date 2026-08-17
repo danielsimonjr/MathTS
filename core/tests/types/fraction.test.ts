@@ -388,3 +388,26 @@ describe('Fraction: non-integer number constructor (regression)', () => {
     expect(new Fraction(6, 4).toString()).toBe('3/2'); // reduces
   });
 });
+
+describe('Fraction constructor hot path', () => {
+  it('adds same-denominator fractions without inflating the denominator', () => {
+    const r = new Fraction(1n, 6n).add(new Fraction(5n, 6n));
+    expect(r.numerator).toBe(1n);
+    expect(r.denominator).toBe(1n);
+  });
+
+  it('keeps mixed-sign multiply and divide reduced', () => {
+    const prod = new Fraction(-2n, 3n).multiply(new Fraction(3n, 4n));
+    expect(prod.numerator).toBe(-1n);
+    expect(prod.denominator).toBe(2n);
+    const quot = new Fraction(-2n, 3n).divide(new Fraction(-4n, 9n));
+    expect(quot.numerator).toBe(3n);
+    expect(quot.denominator).toBe(2n);
+  });
+
+  it('accepts mixed integer number/bigint constructor arguments', () => {
+    expect(new Fraction(5).toString()).toBe('5');
+    expect(new Fraction(3n, 4).toString()).toBe('3/4');
+    expect(new Fraction(6, 8n).toString()).toBe('3/4');
+  });
+});

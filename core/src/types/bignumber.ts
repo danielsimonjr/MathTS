@@ -105,7 +105,13 @@ export class BigNumber implements MathTSValue {
       return new BigNumber(0, 0n, 0);
     }
 
-    // Convert to string to preserve precision
+    // Safe integers are exact — skip the toString → parse round-trip.
+    if (Number.isSafeInteger(n)) {
+      return BigNumber.fromBigInt(BigInt(n));
+    }
+
+    // Convert to string to preserve the decimal representation of a float
+    // (so 0.1 stays "0.1", not the binary expansion).
     return BigNumber.parse(n.toString());
   }
 
@@ -189,23 +195,14 @@ export class BigNumber implements MathTSValue {
       return new BigNumber(0, 0n, 0);
     }
     const sign: 1 | -1 = n < 0n ? -1 : 1;
-    let str = (n < 0n ? -n : n).toString();
-
-    // Remove trailing zeros
-    let trailingZeros = 0;
-    for (let i = str.length - 1; i >= 0; i--) {
-      if (str[i] === '0') {
-        trailingZeros++;
-      } else {
-        break;
-      }
+    let coef = n < 0n ? -n : n;
+    let exp = 0;
+    // Strip factors of 10 in place — no toString / BigInt(string) round-trip.
+    while (coef % 10n === 0n) {
+      coef /= 10n;
+      exp++;
     }
-
-    if (trailingZeros > 0) {
-      str = str.slice(0, -trailingZeros);
-    }
-
-    return new BigNumber(sign, BigInt(str), trailingZeros);
+    return new BigNumber(sign, coef, exp);
   }
 
   /**

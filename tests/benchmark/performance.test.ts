@@ -8,7 +8,7 @@
  * Time limits are set at ~3–5x the expected time on a modern developer machine.
  */
 import { describe, it, expect } from 'vitest';
-import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { Complex, Fraction, BigNumber, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { add, abs, sqrt, exp } from '@danielsimonjr/mathts-functions';
@@ -117,6 +117,21 @@ describe('Performance Regression Tests', () => {
       const b = new Fraction(22, 7);
       const elapsed = benchmark('Fraction multiply', () => a.multiply(b));
       expect(elapsed).toBeLessThan(200);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+
+  describe('Core numeric – sumSquaredDeviations', () => {
+    it('SSD of 50K samples: 50 ops under 400ms', () => {
+      const xs = Float64Array.from({ length: 50_000 }, (_, i) => 1e6 + (i % 97) / 97);
+      const elapsed = benchmark(
+        'sumSquaredDeviations n=50k',
+        () => sumSquaredDeviations(xs),
+        50,
+        5
+      );
+      expect(elapsed).toBeLessThan(400);
     });
   });
 

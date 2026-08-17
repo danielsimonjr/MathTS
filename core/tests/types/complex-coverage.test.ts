@@ -221,4 +221,59 @@ describe('Complex (coverage supplement)', () => {
       expect(r.im).toBe(0);
     });
   });
+
+  describe('sqrt principal branch (algebraic form)', () => {
+    it('sqrt(-1) = i and sqrt(-1 - 0i) = −i', () => {
+      const pos = new Complex(-1, 0).sqrt();
+      expect(pos.re).toBeCloseTo(0);
+      expect(pos.im).toBeCloseTo(1);
+      const neg = new Complex(-1, -0).sqrt();
+      expect(neg.re).toBeCloseTo(0);
+      expect(neg.im).toBeCloseTo(-1);
+    });
+
+    it('lands in the right half-plane for every quadrant', () => {
+      const samples = [
+        new Complex(3, 4),
+        new Complex(-3, 4),
+        new Complex(-3, -4),
+        new Complex(3, -4),
+      ];
+      for (const z of samples) {
+        const s = z.sqrt();
+        expect(s.re).toBeGreaterThanOrEqual(0);
+        const back = s.multiply(s);
+        expect(back.re).toBeCloseTo(z.re, 12);
+        expect(back.im).toBeCloseTo(z.im, 12);
+      }
+    });
+
+    it('sqrt of a positive real keeps a signed-zero imaginary part', () => {
+      const s = new Complex(9, -0).sqrt();
+      expect(s.re).toBe(3);
+      expect(Object.is(s.im, -0)).toBe(true);
+    });
+  });
+
+  describe('abs overflow / underflow window', () => {
+    it('matches hypot for ordinary, huge, and tiny magnitudes', () => {
+      const ordinary = new Complex(3, 4);
+      expect(ordinary.abs()).toBe(5);
+      const huge = new Complex(1e200, 1e200);
+      expect(huge.abs()).toBeCloseTo(Math.SQRT2 * 1e200, 6);
+      const tiny = new Complex(1e-200, 1e-200);
+      expect(tiny.abs()).toBeCloseTo(Math.SQRT2 * 1e-200, 6);
+    });
+  });
+
+  describe('tan / tanh closed forms', () => {
+    it('tan(z) matches sin(z)/cos(z) off the real axis', () => {
+      const z = new Complex(0.7, 0.4);
+      expect(z.tan().equals(z.sin().divide(z.cos()))).toBe(true);
+    });
+    it('tanh(z) matches sinh(z)/cosh(z) off the real axis', () => {
+      const z = new Complex(0.7, 0.4);
+      expect(z.tanh().equals(z.sinh().divide(z.cosh()))).toBe(true);
+    });
+  });
 });
