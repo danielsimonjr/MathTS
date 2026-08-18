@@ -44,6 +44,7 @@
     "test:wasm": "npm run test -w @danielsimonjr/mathts-wasm",
     "test:wasm:integration": "vitest run tests/wasm/",
     "test:coverage": "turbo run test:coverage",
+    "bench:core": "node tools/benchmarks/core-hot-paths.mjs",
     "bench:parallel": "npx tsx tools/benchmark/parallel/run.ts",
     "bench:tensor": "npx tsx tools/benchmark/tensor/contract.bench.ts && npx tsx tools/benchmark/tensor/contract-network.bench.ts && npx tsx tools/benchmark/tensor/tensordot.bench.ts && npx tsx tools/benchmark/tensor/decompositions.bench.ts",
     "bench:wasm": "npx tsx tools/benchmark/wasm/run.ts",

@@ -1,11 +1,11 @@
 {
-  "generated": "2026-08-15",
+  "generated": "2026-08-17",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
   "jsOnlyCount": 128,
-  "bundledBackend": "assemblyscript",
-  "wasmEffectiveCount": 39,
+  "bundledBackend": "unknown",
+  "wasmEffectiveCount": 0,
   "jsFallbackCount": 0,
   "accelerated": [
     {
@@ -13,224 +13,224 @@
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "airyAi",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["airyAiDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "airyBi",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["airyBiDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atan",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atanh",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselJDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ0",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselJ0Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselJ1",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselJ1Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselYDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY0",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselY0Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "besselY1",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["besselY1Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRC",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["carlsonRCDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRD",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["carlsonRDDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRF",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["carlsonRFDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "carlsonRJ",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["carlsonRJDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cos",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cot",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "csc",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticE",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["ellipticEDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticEIncomplete",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["ellipticEIncompleteDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticF",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["ellipticFIncompleteDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticK",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["ellipticKDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ellipticPi",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["ellipticPiIncompleteDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "erfc",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "exp",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "expm1",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "lgamma",
       "file": "special.ts",
       "routing": "wasm",
       "dispatch": ["lgammaDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log10",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log1p",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log2",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "noncentralChi2PDF",
       "file": "distributions.ts",
       "routing": "wasm",
       "dispatch": ["lgammaDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelFFT",
@@ -251,49 +251,49 @@
       "file": "statistics.ts",
       "routing": "wasm",
       "dispatch": ["sortF64Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatQuantile",
       "file": "statistics.ts",
       "routing": "wasm",
       "dispatch": ["sortF64Dispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sec",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sin",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sinh",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "tan",
       "file": "trigonometry.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     },
     {
       "name": "tanh",
       "file": "arithmetic.ts",
       "routing": "wasm+parallel",
       "dispatch": ["elementwiseUnaryDispatch"],
-      "effectiveBackend": "wasm"
+      "effectiveBackend": "unknown"
     }
   ],
   "parallelOnly": [
@@ -860,38 +860,5 @@
       "jsOnly": 2
     }
   },
-  "binary": {
-    "path": "assembly/build/mathts.wasm",
-    "total": 326,
-    "functions": 314,
-    "globals": 11,
-    "memory": 1,
-    "sourceFiles": 27,
-    "byCategory": [
-      {
-        "category": "Scalar & special (f64)",
-        "count": 133
-      },
-      {
-        "category": "Array",
-        "count": 54
-      },
-      {
-        "category": "Matrix",
-        "count": 46
-      },
-      {
-        "category": "Complex scalar",
-        "count": 46
-      },
-      {
-        "category": "Complex array",
-        "count": 33
-      },
-      {
-        "category": "FFT",
-        "count": 2
-      }
-    ]
-  }
+  "binary": null
 }

@@ -255,6 +255,9 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
  * Measured on 1e9-pedestal data: the plain naive two-pass (what shipped) lands ~1e-7 relative error;
  * this lands ~1e-16 — better than `np.var`, which uses the uncorrected two-pass (~1e-13).
  *
+ * The deviation vector is never materialised: both pairwise sums walk `xs` in
+ * registers, so variance/std no longer pay an extra n-long allocation.
+ *
  * Divide the result by `n` (uncorrected), `n − 1` (unbiased/sample), or `n + 1` (biased) for the
  * corresponding variance. Returns 0 for fewer than two elements.
  */
@@ -263,12 +266,9 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
   if (n < 2) return 0;
 
   const mean = pairwiseSum(xs) / n;
-
-  const d = new Float64Array(n);
-  for (let i = 0; i < n; i++) d[i] = xs[i] - mean;
-
-  const sumD = pairwiseSum(d); // ≈ 0; its square is the residual mean-bias correction
-  const sumDD = pairwiseDot(d, d); // Σ dᵢ²
+  // Same pairwise tree as `pairwiseSum(d)` + `pairwiseDot(d, d)`, but the
+  // deviations are formed in registers — no n-long scratch array.
+  const { sumD, sumDD } = pairwiseDeviationSums(xs, mean, 0, n);
 
   const corrected = sumDD - (sumD * sumD) / n;
   // Clamp only genuine negatives (tiny round-off on near-constant input) to 0. Written as
@@ -276,6 +276,85 @@ export function sumSquaredDeviations(xs: ArrayLike<number>): number {
   // are false for NaN): variance of data containing NaN must stay NaN, matching NumPy and the
   // generic fallback, not collapse to 0.
   return corrected < 0 ? 0 : corrected;
+}
+
+/**
+ * Pairwise Σ(xᵢ − μ) and Σ(xᵢ − μ)² over `[start, end)` — the two sums
+ * {@link sumSquaredDeviations} needs, without materialising the deviation vector.
+ */
+function pairwiseDeviationSums(
+  xs: ArrayLike<number>,
+  mean: number,
+  start: number,
+  end: number
+): { sumD: number; sumDD: number } {
+  const n = end - start;
+
+  if (n <= PAIRWISE_BLOCK) {
+    let d0 = 0,
+      d1 = 0,
+      d2 = 0,
+      d3 = 0,
+      d4 = 0,
+      d5 = 0,
+      d6 = 0,
+      d7 = 0;
+    let q0 = 0,
+      q1 = 0,
+      q2 = 0,
+      q3 = 0,
+      q4 = 0,
+      q5 = 0,
+      q6 = 0,
+      q7 = 0;
+
+    let i = start;
+    const limit = start + (n - (n % 8));
+    for (; i < limit; i += 8) {
+      const a0 = xs[i] - mean;
+      const a1 = xs[i + 1] - mean;
+      const a2 = xs[i + 2] - mean;
+      const a3 = xs[i + 3] - mean;
+      const a4 = xs[i + 4] - mean;
+      const a5 = xs[i + 5] - mean;
+      const a6 = xs[i + 6] - mean;
+      const a7 = xs[i + 7] - mean;
+      d0 += a0;
+      q0 += a0 * a0;
+      d1 += a1;
+      q1 += a1 * a1;
+      d2 += a2;
+      q2 += a2 * a2;
+      d3 += a3;
+      q3 += a3 * a3;
+      d4 += a4;
+      q4 += a4 * a4;
+      d5 += a5;
+      q5 += a5 * a5;
+      d6 += a6;
+      q6 += a6 * a6;
+      d7 += a7;
+      q7 += a7 * a7;
+    }
+
+    let tailD = 0;
+    let tailDD = 0;
+    for (; i < end; i++) {
+      const a = xs[i] - mean;
+      tailD += a;
+      tailDD += a * a;
+    }
+
+    return {
+      sumD: d0 + d1 + (d2 + d3) + (d4 + d5 + (d6 + d7)) + tailD,
+      sumDD: q0 + q1 + (q2 + q3) + (q4 + q5 + (q6 + q7)) + tailDD,
+    };
+  }
+
+  const half = (n >> 1) - ((n >> 1) % 8);
+  const left = pairwiseDeviationSums(xs, mean, start, start + half);
+  const right = pairwiseDeviationSums(xs, mean, start + half, end);
+  return { sumD: left.sumD + right.sumD, sumDD: left.sumDD + right.sumDD };
 }
 
 /**

@@ -26,6 +26,20 @@ function gcd(a: bigint, b: bigint): bigint {
   return a;
 }
 
+/** Reduce `num/den` to lowest terms with a positive denominator. */
+function reducePair(num: bigint, den: bigint): [bigint, bigint] {
+  if (den === 0n) {
+    throw new Error('Fraction denominator cannot be zero');
+  }
+  if (den < 0n) {
+    num = -num;
+    den = -den;
+  }
+  if (num === 0n) return [0n, 1n];
+  const g = gcd(num, den);
+  return [num / g, den / g];
+}
+
 /**
  * Fraction class for exact rational arithmetic
  * Uses bigint for arbitrary precision numerator and denominator.
@@ -40,6 +54,39 @@ export class Fraction implements IFraction {
     numerator: bigint | number | string | Fraction,
     denominator: bigint | number | string | Fraction = 1n
   ) {
+    // Hot path: both arguments already integers. Every arithmetic method lands
+    // here, so skip the toRatio closure / type walk / cross-multiply.
+    if (typeof numerator === 'bigint' && typeof denominator === 'bigint') {
+      const [num, den] = reducePair(numerator, denominator);
+      this.numerator = num;
+      this.denominator = den;
+      return;
+    }
+    if (typeof numerator === 'number' && Number.isInteger(numerator)) {
+      if (typeof denominator === 'bigint') {
+        const [num, den] = reducePair(BigInt(numerator), denominator);
+        this.numerator = num;
+        this.denominator = den;
+        return;
+      }
+      if (typeof denominator === 'number' && Number.isInteger(denominator)) {
+        const [num, den] = reducePair(BigInt(numerator), BigInt(denominator));
+        this.numerator = num;
+        this.denominator = den;
+        return;
+      }
+    }
+    if (
+      typeof numerator === 'bigint' &&
+      typeof denominator === 'number' &&
+      Number.isInteger(denominator)
+    ) {
+      const [num, den] = reducePair(numerator, BigInt(denominator));
+      this.numerator = num;
+      this.denominator = den;
+      return;
+    }
+
     // Decompose each argument into an exact integer ratio so that non-integer
     // numbers work too: `new Fraction(0.25)` → 1/4 (previously `BigInt(0.25)` threw).
     // A Fraction argument is accepted directly (mathjs parity: `new Fraction(frac)`
@@ -293,6 +340,9 @@ export class Fraction implements IFraction {
    */
   add(other: Scalar): Fraction {
     if (other instanceof Fraction) {
+      if (this.denominator === other.denominator) {
+        return new Fraction(this.numerator + other.numerator, this.denominator);
+      }
       const num = this.numerator * other.denominator + other.numerator * this.denominator;
       const den = this.denominator * other.denominator;
       return new Fraction(num, den);
@@ -305,6 +355,9 @@ export class Fraction implements IFraction {
    */
   subtract(other: Scalar): Fraction {
     if (other instanceof Fraction) {
+      if (this.denominator === other.denominator) {
+        return new Fraction(this.numerator - other.numerator, this.denominator);
+      }
       const num = this.numerator * other.denominator - other.numerator * this.denominator;
       const den = this.denominator * other.denominator;
       return new Fraction(num, den);

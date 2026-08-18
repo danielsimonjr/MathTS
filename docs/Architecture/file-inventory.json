@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15",
+  "generated": "2026-08-17",
   "totalFiles": 1833,
   "byDisposition": {
     "reachable": 1135,
@@ -646,7 +646,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 306
+      "loc": 385
     },
     {
       "file": "core/src/object.ts",
@@ -702,14 +702,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1590
+      "loc": 1587
     },
     {
       "file": "core/src/types/complex.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 684
+      "loc": 737
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -730,7 +730,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 641
+      "loc": 694
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -989,14 +989,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 387
+      "loc": 394
     },
     {
       "file": "core/tests/types/complex-coverage.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 225
+      "loc": 280
     },
     {
       "file": "core/tests/types/complex.test.ts",
@@ -1017,7 +1017,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 391
+      "loc": 414
     },
     {
       "file": "core/tests/types/matrix/Range.test.ts",
@@ -12182,7 +12182,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 236
+      "loc": 251
     },
     {
       "file": "tests/benchmark/wasm-comparison.test.ts",
