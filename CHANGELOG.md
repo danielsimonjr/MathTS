@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Architecture Verification claims refreshed after the #263 release.** `totalTypeScriptFiles`
+  1880 -> 1881 and `totalLinesOfCode` 332049 -> 332379 across six documents. `totalExports` was
+  already correct at 7620.
+
+### Fixed
+
 - **Architecture Verification blocks were stale; the drift gate is green again.** Six documents
   claimed `totalTypeScriptFiles` 1824, `totalExports` 7564 and `totalLinesOfCode` 333583, against
   an actual 1880 / 7620 / 332049 — about 56 files of real growth since the blocks were last
