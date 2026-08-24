@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The weekly dev-dependencies PR is no longer permanently red.** Every group PR pulled
+  typescript 7.x, which `npm ci` rejects with ERESOLVE because
+  `@typescript-eslint/eslint-plugin` (8.68.0, current stable) still declares
+  `peer typescript ">=4.8.4 <6.1.0"`. One blocked package held back the other 19 updates in the
+  group (PR #265). Dependabot now ignores **major** typescript updates only; 6.x minor and patch
+  updates still flow. Remove that ignore when typescript-eslint raises its ceiling, and bump
+  typescript and typescript-eslint together in one PR.
+
 - **Architecture Verification claims refreshed after the #263 release.** `totalTypeScriptFiles`
   1880 -> 1881 and `totalLinesOfCode` 332049 -> 332379 across six documents. `totalExports` was
   already correct at 7620.
