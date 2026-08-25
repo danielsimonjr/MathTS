@@ -311,7 +311,9 @@ export function reshape<T = unknown>(array: NestedArray<T>, sizes: number[]): Ne
     return _reshape(flatArray, processedSizes);
   } catch (e) {
     if (e instanceof DimensionError) {
-      throw new DimensionError(newLength, currentLength, '!=');
+      const dimErr = new DimensionError(newLength, currentLength, '!=');
+      dimErr.cause = e;
+      throw dimErr;
     }
     throw e;
   }

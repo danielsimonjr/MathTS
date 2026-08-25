@@ -111,7 +111,7 @@ export const createStd = /* #__PURE__ */ factory(
         }
       } catch (err: unknown) {
         if (err instanceof TypeError && err.message.includes(' variance')) {
-          throw new TypeError(err.message.replace(' variance', ' std'));
+          throw new TypeError(err.message.replace(' variance', ' std'), { cause: err });
         } else {
           throw err;
         }

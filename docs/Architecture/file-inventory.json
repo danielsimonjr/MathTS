@@ -527,14 +527,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 1065
+      "loc": 1067
     },
     {
       "file": "core/src/bignumber-formatter.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "reachable",
-      "loc": 320
+      "loc": 322
     },
     {
       "file": "core/src/collection.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 282
+      "loc": 283
     },
     {
       "file": "functions/src/arithmetic/round.ts",
