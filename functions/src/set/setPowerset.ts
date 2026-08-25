@@ -59,7 +59,7 @@ export const createSetPowerset = /* #__PURE__ */ factory(
 
     // sort subsests by length
     function _sort(array: MathNumericType[][]): MathNumericType[][] {
-      let temp: MathNumericType[] = [];
+      let temp: MathNumericType[];
       for (let i = array.length - 1; i > 0; i--) {
         for (let j = 0; j < i; j++) {
           if (array[j].length > array[j + 1].length) {

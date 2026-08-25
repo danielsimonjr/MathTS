@@ -1014,7 +1014,7 @@ export function bdfSolve(
     const J = _jacobianAt(f, t, y, F0, options);
 
     let stepAccepted = false;
-    let yNew: number[] = y;
+    let yNew: number[];
     let dVec: number[] = new Array<number>(n).fill(0);
     let errorNorm = 0;
     let nIter = 1;

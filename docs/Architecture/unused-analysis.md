@@ -13,8 +13,8 @@
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
 - **Potentially unused exports**: 226
-  - **Unreferenced anywhere (deletion candidates)**: 2
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 224
+  - **Unreferenced anywhere (deletion candidates)**: 3
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 223
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -52,6 +52,10 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `functions/src/signal/fft.ts`
 
 - `complexConj` (function)
+
+### `functions/src/type/complex/Complex.ts`
+
+- `ComplexConstructor` (interface)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -286,7 +290,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `ComplexFormatOptions` (interface) — 1 in-file ref
 - `PolarInput` (interface) — 3 in-file refs
 - `AbsArgInput` (interface) — 2 in-file refs
-- `ComplexConstructor` (interface) — 1 in-file ref
 
 ### `functions/src/type/local/Decimal.ts`
 

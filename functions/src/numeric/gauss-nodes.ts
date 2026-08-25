@@ -68,7 +68,7 @@ export function rootsLegendre(n: number): RootsLegendreResult {
   for (let i = 0; i < n; i++) {
     let x = Math.cos((Math.PI * (i + 0.75)) / (n + 0.5));
 
-    let pn = 0;
+    let pn: number;
     let dpn = 0;
     for (let iter = 0; iter < NEWTON_MAX_ITERATIONS; iter++) {
       const [pCurr, pPrev] = legendrePair(n, x);

@@ -93,7 +93,9 @@ export function besselHankel(nu: f64, x: f64, wantY: boolean): f64 {
   }
   const chi = x - (nu * 0.5 + 0.25) * Math.PI;
   const amp = Math.sqrt(2.0 / (Math.PI * x));
-  return wantY ? amp * (P * Math.sin(chi) + Q * Math.cos(chi)) : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+  return wantY
+    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
+    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
 }
 
 export function besselJ0Series(x: f64): f64 {
@@ -135,7 +137,9 @@ export function besselY0Series(x: f64): f64 {
     sign = -sign;
     if (k > 2 && Math.abs(d) <= Math.abs(s) * 1e-17) break;
   }
-  return 0.63661977236758134308 * ((Math.log(0.5 * x) + 0.5772156649015328606) * besselJ0Series(x) + s);
+  return (
+    0.63661977236758134308 * ((Math.log(0.5 * x) + 0.5772156649015328606) * besselJ0Series(x) + s)
+  );
 }
 
 // Y1 = (2/pi)[ln(x/2)+gamma] J1 - 2/(pi x)
@@ -551,7 +555,7 @@ export function betaincScalar(a: f64, b: f64, x: f64): f64 {
   const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
   const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
 
-  let f = 1;
+  let f: number;
   let c = 1;
   let d = 1 - ((a + b) * x) / (a + 1);
   if (Math.abs(d) < 1e-30) d = 1e-30;

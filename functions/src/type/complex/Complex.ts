@@ -1,4 +1,4 @@
-import ComplexJs, { Complex as ComplexClass } from 'complex.js';
+import { Complex as ComplexClass } from 'complex.js';
 
 /**
  * JSON representation of a Complex number
@@ -79,4 +79,3 @@ export interface ComplexConstructor {
 }
 
 // Cast to allow prototype access and static method additions
-const Complex = ComplexJs as unknown as ComplexConstructor;

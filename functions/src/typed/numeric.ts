@@ -554,7 +554,6 @@ export function interpolate(
         if (x <= xs[0]) j = 0;
         else if (x >= xs[n]) j = n - 1;
         else {
-          j = 0;
           for (j = 0; j < n; j++) {
             if (x >= xs[j] && x <= xs[j + 1]) break;
           }
@@ -567,7 +566,7 @@ export function interpolate(
     case 'linear':
     default:
       return (x: f64) => {
-        let i = 0;
+        let i: number;
         if (x <= xs[0]) i = 0;
         else if (x >= xs[xs.length - 1]) i = xs.length - 2;
         else {
@@ -619,7 +618,7 @@ export function pchip(xs: number[], ys: number[], x: f64): f64 {
     m[n - 1] = delta[n - 2];
   }
 
-  let idx = 0;
+  let idx: number;
   if (x <= xs[0]) idx = 0;
   else if (x >= xs[n - 1]) idx = n - 2;
   else {

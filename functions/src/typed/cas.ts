@@ -2366,7 +2366,7 @@ function iltSimplifyNode(node: MathNode): MathNode {
 }
 
 function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string {
-  let simplified: MathNode = node;
+  let simplified: MathNode;
   try {
     simplified = iltSimplifyNode(node);
   } catch {

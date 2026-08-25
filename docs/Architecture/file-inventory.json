@@ -5147,7 +5147,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 221
+      "loc": 219
     },
     {
       "file": "functions/src/algebra/sparse/csMark.ts",
@@ -7366,7 +7366,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 83
+      "loc": 82
     },
     {
       "file": "functions/src/type/local/Decimal.ts",
@@ -7758,7 +7758,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2591
+      "loc": 2590
     },
     {
       "file": "functions/src/typed/parallel-map.ts",

@@ -8382,7 +8382,7 @@ graph LR
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `complex.js` | `Complex, ComplexJs` |
+| `complex.js` | `Complex` |
 
 **Exports:**
 
@@ -17503,7 +17503,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1168   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 194459 |
+| Total Lines of Code     | 194455 |
 | Total Exports           | 5809   |
 | Total Re-exports        | 2356   |
 | Total Classes           | 53     |
