@@ -210,12 +210,14 @@ export function format(value: unknown, options?: unknown): string {
 
     case 'auto': {
       const optionsObj = options as { lowerExp?: unknown; upperExp?: unknown } | undefined;
-      const lowerExp = (isNumber(optionsObj?.lowerExp) || isBigNumber(optionsObj?.lowerExp))
-        ? optionsObj?.lowerExp
-        : -3;
-      const upperExp = (isNumber(optionsObj?.upperExp) || isBigNumber(optionsObj?.upperExp))
-        ? optionsObj?.upperExp
-        : 5;
+      const lowerExp =
+        isNumber(optionsObj?.lowerExp) || isBigNumber(optionsObj?.lowerExp)
+          ? optionsObj?.lowerExp
+          : -3;
+      const upperExp =
+        isNumber(optionsObj?.upperExp) || isBigNumber(optionsObj?.upperExp)
+          ? optionsObj?.upperExp
+          : 5;
 
       // handle special case zero
       if (v.isZero()) return '0';
@@ -225,15 +227,15 @@ export function format(value: unknown, options?: unknown): string {
       const rounded = v.toSignificantDigits(precision);
       const exp = rounded.e;
 
-      let condition = false;
+      let condition: boolean;
       if (isBigNumber(lowerExp) && isBigNumber(upperExp)) {
         const lowerExpBn = lowerExp as unknown as BigNumberValue;
         const upperExpBn = upperExp as unknown as BigNumberValue;
-        condition = (!lowerExpBn.greaterThan(exp)) && upperExpBn.greaterThan(exp);
+        condition = !lowerExpBn.greaterThan(exp) && upperExpBn.greaterThan(exp);
       } else if (isBigNumber(lowerExp)) {
         const lowerExpBn = lowerExp as unknown as BigNumberValue;
         const upperExpNum = upperExp as number;
-        condition = (!lowerExpBn.greaterThan(exp)) && exp < upperExpNum;
+        condition = !lowerExpBn.greaterThan(exp) && exp < upperExpNum;
       } else if (isBigNumber(upperExp)) {
         const upperExpBn = upperExp as unknown as BigNumberValue;
         const lowerExpNum = lowerExp as number;

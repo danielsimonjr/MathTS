@@ -15,7 +15,7 @@
  * To cover a new package, add a row to TARGETS.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -278,7 +278,16 @@ function embedMarkdown(htmlRaw, md) {
 const jobs = []; // { file, prev, next, label, isMd }
 let functionsSurface = null; // runtime dist Object.keys of the functions package
 for (const t of TARGETS) {
-  const mod = await import(pathToFileURL(resolve(REPO, t.pkg, 'dist', 'index.js')).href);
+  // Import through the PACKAGE NAME, not an absolute path into dist/.
+  // Node does not dedupe a bare specifier (resolved via the node_modules
+  // workspace symlink) against the same file reached by absolute path -- they
+  // become two module instances. Importing `functions` by path and then
+  // `compat` (which imports `@danielsimonjr/mathts-functions` by name) therefore
+  // instantiated functions TWICE, re-running its module-level side effects. The
+  // second run re-registered typed-function's string->Node conversion and threw
+  // `There is already a conversion from "string" to "Node"`, breaking the
+  // pre-commit hook for every source change.
+  const mod = await import(`@danielsimonjr/mathts-${t.pkg}`);
   if (t.pkg === 'functions') functionsSurface = Object.keys(mod);
   // Packages with a curated reference doc (functions) group their index by
   // mathematical domain, derived from that doc's `##` sections + DOMAIN_SUPPLEMENT.
