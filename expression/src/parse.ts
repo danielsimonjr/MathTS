@@ -742,7 +742,6 @@ export const createParse = /* #__PURE__ */ factory(
         } else {
           if (node && hasSeparators && !nodePushed) {
             blocks.push({ node, visible: state.token !== ';' });
-            nodePushed = true;
           }
           break;
         }
@@ -1176,7 +1175,6 @@ export const createParse = /* #__PURE__ */ factory(
       let fn: string;
 
       node = parseImplicitMultiplication(state);
-      last = node;
 
       const operators: Record<string, string> = {
         '*': 'multiply',

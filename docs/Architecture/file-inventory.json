@@ -4125,7 +4125,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "reachable",
-      "loc": 2015
+      "loc": 2013
     },
     {
       "file": "expression/src/Parser.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 283
+      "loc": 285
     },
     {
       "file": "functions/src/arithmetic/round.ts",
