@@ -31,11 +31,15 @@ describe('rational-integrate: positive-discriminant quadratic (Layer 2, differen
     });
   }
 
-  it('declines a repeated positive-discriminant quadratic (Layer 3)', () => {
-    expect(integrateRationalFunction('1/(x^2-2)^2', 'x')).toBeNull();
+  it('Layer 3: repeated positive-discriminant quadratic differentiates back', () => {
+    const F = integrateRationalFunction('1/(x^2-2)^2', 'x');
+    expect(F).not.toBeNull();
+    for (const x of PROBES) expect(dF(F!, x)).toBeCloseTo(f('1/(x^2-2)^2', x), 4);
   });
 
-  it('declines a degree-3 irreducible denominator', () => {
-    expect(integrateRationalFunction('1/(x^3-2)', 'x')).toBeNull();
+  it('Layer 3: degree-3 irreducible denominator differentiates back', () => {
+    const F = integrateRationalFunction('1/(x^3-2)', 'x');
+    expect(F).not.toBeNull();
+    for (const x of [0.3, 0.9, 3.1, -0.7]) expect(dF(F!, x)).toBeCloseTo(f('1/(x^3-2)', x), 4);
   });
 });

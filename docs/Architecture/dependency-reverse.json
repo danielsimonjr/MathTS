@@ -1787,6 +1787,7 @@
     "functions/src/special/niche.ts": ["functions/src/index.ts"],
     "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
     "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
+    "functions/src/special/spheroidal.ts": ["functions/src/index.ts"],
     "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
     "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
@@ -1803,6 +1804,8 @@
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rat.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/factorization/finite-field.ts",
       "functions/src/typed/factorization/hensel.ts",
@@ -1814,10 +1817,16 @@
       "functions/src/typed/factorization/zassenhaus.ts"
     ],
     "functions/src/typed/factorization/zassenhaus.ts": [
+      "functions/src/cas/layer3.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/factorization/index.ts",
       "functions/src/typed/factorization/kronecker-factor.ts"
     ],
+    "functions/src/cas/rat.ts": [
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rational-integrate.ts"
+    ],
+    "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
     "functions/src/error/ArgumentsError.ts": [
       "functions/src/core/create.ts",
       "functions/src/core/function/import.ts"
@@ -3905,6 +3914,7 @@
       "workbook/src/parser.ts"
     ],
     "workbook/src/markdown.ts": ["workbook/src/html.ts", "workbook/src/tex.ts"],
+    "workbook/src/svg-math.ts": ["workbook/src/index.ts"],
     "workbook/src/worker-protocol.ts": [
       "workbook/src/run-worker.ts",
       "workbook/src/timeout-runner.ts"

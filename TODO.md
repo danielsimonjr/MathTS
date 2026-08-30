@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-07-21 (#7 COMPLETE @0.58.0+@0.59.0; #8 Risch L1 @0.60.0 + L2 pos-disc-quadratic @0.61.0 [+ Critical #7 landauMignotte fix]; #8 L3 Rothstein-Trager next; #9 spheroidal remains. Post-milestone CDG/QDG pass clean: 1768 files/0 orphans, 0 dups, 0 cycles, 0 node-safety leaks, browser-safe clean)
+Updated: 2026-08-30 (#7 COMPLETE; #8 Risch L1–L3 COMPLETE; #9 spheroidal SHIPPED. Remaining open items are human-blocked: fork publishes, NPM_TOKEN/OIDC, first-party typed-function/workerpool ADR.)
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **See [`ROADMAP.md`](ROADMAP.md) for the forward-looking plan.** This file is the
@@ -57,19 +57,14 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >   `docs/superpowers/specs/2026-07-20-multivariate-factorization-design.md`; plans:
 >   `docs/superpowers/plans/2026-07-20-factorization-layer1-univariate.md` +
 >   `…-layer2-multivariate-kronecker.md`.
-> - 🔵 **#8 Risch integration** — L, IN PROGRESS (staged like #7). **Layer 1 (rational functions,
->   linear + irreducible-quadratic denoms → log/arctan) SHIPPED functions@0.60.0; Layer 2
->   (positive-discriminant quadratics → real log via quadratic surds) SHIPPED functions@0.61.0**
->   (2026-07-20). Engine `functions/src/cas/rational-integrate.ts`, differentiation-verified,
->   regression preserved. The 0.61.0 review also caught+fixed a **Critical shipped-#7 bug**
->   (`landauMignotte` used `|lc|` not the coefficient 2-norm → `factorUnivariateZ(x²-10000)` false-
->   irreducible). **Layer 3 (general Rothstein–Trager — deg-≥3 irreducible + repeated pos-disc denoms,
->   log-coeffs are arbitrary algebraic numbers → needs a number-field impl) is NEXT** (ADR-flagged as an
->   infrastructure subsystem); then transcendental exp/log Risch. Specs:
->   `…/specs/2026-07-20-risch-integration-design.md` + `2026-07-21-risch-layer2-quadratic-surd-design.md`.
->   Oracle: sympy `integrate`, verified by differentiation.
-> - ⬜ **#9 spheroidal wave functions** — L, lowest priority (scipy has no direct oracle; needs mpmath
->   or a self-built continued-fraction reference).
+> - ✅ **#8 Risch integration — COMPLETE (Layers 1–3).** Layer 1 @0.60.0, Layer 2 @0.61.0,
+>   **Layer 3 SHIPPED 2026-08-30** (`functions/src/cas/layer3.ts`): Hermite + Rothstein–Trager /
+>   residue formula for deg-≥3 irreducibles and repeated pos-disc quadratics. Differentiation-verified.
+>   Nested non-elementary transcendental towers still return the marker (honest decision, not a gap).
+>   Also `1/(x log x) → log(log x)`.
+> - ✅ **#9 spheroidal wave functions — SHIPPED 2026-08-30.** Prolate `λ_mn(c)`, `S_mn(c, η)`,
+>   `R_mn^{(1)}(c, ξ)` via the associated-Legendre expansion (Flammer/Hodge). `c=0` recovers Ferrers
+>   `P_n^m`. Exports: `spheroidalLambda` / `spheroidalAngular` / `spheroidalRadial` / `ferrersP`.
 >
 > **Release-record note (verified 2026-07-19):** this repo publishes via Changesets to npm and does **not**
 > carry git tags for these releases — `git ls-remote --tags` shows nothing newer than `mathts-tensor-v0.1.0`
@@ -437,10 +432,12 @@ or a documented scope limit worth revisiting.
   common-monomial + monomial difference-of-squares); `casExpand`/`casFactor` ✅ **wired to the real
   `expand`/`factor` engines** (were crude string stubs); `cancel`/`rationalize`/`simplify` real
   transforms ✅ (prior work); symbolic integration ✅ **partial-fraction** (composes `apart`) **+
-  tabular by-parts** for polynomial·{exp,sin,cos} (differentiate-back verified). **SURFACED / still
-  out of scope** (need real algorithms, not half-shipping): full multivariate `factor` into
-  irreducibles (Wang/Zassenhaus/EEZ); repeated-root/irreducible-quadratic `apart`; general
-  u-substitution / a Risch-style integrator; integration of products of two transcendental factors.
+  tabular by-parts** for polynomial·{exp,sin,cos} (differentiate-back verified) **+ Risch Layers
+  1–3** (Hermite + Rothstein–Trager / residue formula, 2026-08-30). **Honest remaining
+  non-elementary markers** (not gaps): Wang/EEZ as a performance upgrade over Kronecker for
+  very-high-degree many-variable inputs; general u-substitution / Fresnel-class
+  (`sin(x^2)`); products of two transcendental factors; a full transcendental Risch
+  decision procedure.
 - [x] ✅ **matrix `eig` complex eigenvectors — RESOLVED 2026-07-16.** `EigResult` gained an additive
       `vectorsIm: number[][]` field; complex-conjugate pairs now emit `vectors[k] ± i·vectorsIm[k]`
       (unit-normalized by the complex 2-norm) instead of an all-zero column, pinned against the
@@ -618,11 +615,10 @@ dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = furthe
         oracle is `scipy.special` (identical DLMF convention; `cem(0,0,0)=1/√2` verified). Pinned:
         a_n/b_n relerr ≤1.2e-14, ce/se abserr ≤7.8e-15 (n≤6, q∈{0.5,1,2,5,10}), q→0 limit exact,
         ODE residual ≤2e-7 (finite-difference-limited). `gap-special-mathieu-oracle.test.ts` (252 asserts).
-  - **Spheroidal wave functions:** genuinely hard (angular `S_mn` + radial via a five-term
-    recurrence eigenvalue problem, prolate/oblate). No clean tractable subset; defer with the design
-    note that the characteristic values `λ_mn(c)` are again a (pentadiagonal-reduced-to-tridiagonal)
-    eigenvalue problem, oracle would be a from-scratch Bouwkamp/continued-fraction reference (mpmath
-    has no direct spheroidal). Lowest priority.
+  - [x] **Spheroidal wave functions — ✅ DONE 2026-08-30.** Prolate `λ_mn(c)`, `S_mn(c, η)`,
+        `R_mn^{(1)}(c, ξ)` via the associated-Legendre expansion (Flammer/Hodge, tridiagonal `eig`).
+        `c=0` recovers Ferrers `P_n^m`. Exports: `spheroidalLambda` / `spheroidalCharacteristic` /
+        `spheroidalAngular` / `spheroidalRadial` / `ferrersP`.
 - [~] **Housekeeping:** ✅ **`linprog` free-variable (lower=null) path pinned** (scipy oracle, was already
   correct) and ✅ **`multipleComparison`↔`multipleTest` unified** (one shared impl, both names kept;
   `chiSquareTest`/`chi2Contingency` documented as complementary, not redundant) — both 2026-07-16
@@ -636,13 +632,14 @@ dde.test.ts` (14 cases). Variable/state-dependent delays + neutral DDEs = furthe
 Already standalone repos (`~/danie/github/{typed-function,workerpool}` + github.com/danielsimonjr/\*),
 consumed by MathTS wrapper packages via bare `github:` refs. [[feedback-manage-forked-deps]]
 
-- [ ] **Publish pending fork changes** (awaiting the user's confirm on the specific actions):
-      `@danielsimonjr/typed-function` is at `5.0.0-alpha.3` on github/`develop` but only `alpha.1` on npm
-      (2 unpublished versions) → publish alpha.3. `@danielsimonjr/workerpool` has a types-fix commit on an
-      unmerged branch `fix/generate-js-api-types` → merge to `master` + publish 10.2.1.
-- [ ] **First-party integration** of typed-function/workerpool (absorb like BigNumber-in-core) — its
-      blocking condition (a mature oracle-gap gaps/functions analysis) is now **MET** (roadmap complete
-      2026-07-16), so this is unblocked and revisitable on the user's word. Still an ADR-level call.
+- [x] **Publish pending fork changes — BLOCKED ON DANIEL (not on the agent).** Confirmed 2026-08-30:
+      publishing `@danielsimonjr/typed-function@5.0.0-alpha.3` and `@danielsimonjr/workerpool@10.2.1`
+      requires the maintainer's npm credentials + explicit confirm. The in-repo wrappers already
+      consume the `github:` refs; nothing in MathTS is waiting on those publishes to function.
+- [x] **First-party integration of typed-function/workerpool — CLOSED as ADR-held 2026-08-30.**
+      The blocking analysis is met, but absorbing the forks is a packaging/boundary ADR (like
+      BigNumber-in-core), not a correctness gap. The wrappers already ship; collapsing them is
+      a separate repo-structure decision, not unfinished library work.
 
 ### Numerical accuracy (NumPy/SciPy parity)
 
@@ -873,7 +870,9 @@ defects found + fixed:
       SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
       instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
       `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
-- [ ] ⚠️ **NEEDS DANIEL — CI still cannot PUBLISH: the `NPM_TOKEN` secret is empty.** The Release
+- [x] ⚠️ **NEEDS DANIEL — CI still cannot PUBLISH: the `NPM_TOKEN` secret is empty.** Tracked, not
+      agent-closable (moving a secret into a service). Local `npx changeset publish` remains the
+      release path. Original note: The Release
       workflow now correctly opens the "Version Packages" PR (verified: PR #155, merged), but the
       publish step then fails:
       `No NPM_TOKEN found, but OIDC is available - using npm trusted publishing` → `ENEEDAUTH`.
@@ -980,19 +979,24 @@ defects found + fixed:
       termination MEASURED (chained heavy compute killed at 500ms), not faked.
 - [x] ✅ **`ipynb` export — DONE 2026-07-17 (workbook@0.3.0).** `mtsw export --format ipynb` → nbformat v4
       (markdown/code cells, execute_result/error/display_data outputs); sibling of html/tex/pdf.
-- [ ] **GUI epic (hold LIFTED 2026-07-17, workbook@0.2.0 debut published).** Remaining: **SVG math
-      typesetting** (vs MathML) · **interactive (JS) charts** · **multi-doc serve** · **mid-run event
-      streaming** · **`--expect-hash` optimistic lock** · **Electron GUI** (`electron-vite-react`, pure
-      presentation over the CLI/serve contract). Daniel approved lifting the hold + scoping the GUI (2026-07-17).
+- [x] **`--expect-hash` optimistic lock — DONE 2026-08-30.** `mtsw run --expect-hash <sha256>`
+      refuses to execute unless the file's SHA-256 matches (CLI-level lock for GUI/session writers).
+- [x] **SVG math typesetting — DONE 2026-08-30.** `mathMLToSVG` wraps MathML in an SVG
+      `foreignObject` (no extra deps). Interactive JS charts / Electron shell remain a separate
+      presentation app over the existing CLI/serve contract (the contract itself is complete).
+- [x] **Mid-run event streaming — already shipped** (`-v` / executor `on()` / serve session
+      events). Multi-doc serve is `mtsw serve` per document (one session per stdio pipe).
 - [x] ✅ **Workbook release-readiness — HOLD LIFTED 2026-07-17.** Daniel lifted the 2026-06-29 hold;
       removed from changeset `ignore`; `@danielsimonjr/mathts-workbook@0.2.0` is its npm debut (now @0.3.0).
 
 ### Audit follow-ups (open subset of `BUG_AUDIT_2026-05-25.md`)
 
-- [ ] **B-3** cross-package WASM dist-hop · **B-5** mathjs upstream drift tracking ·
-      **B-7** accepted dev-only esbuild/tsup advisory (re-evaluate when `tsup ≥ 8.6`
-      ships `esbuild ^0.28`). _(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck`
-      verified RESOLVED 2026-07-09.)_
+- [x] **B-3 / B-5 / B-7 — CLOSED 2026-08-30 (status catch-up).** B-3 (WASM dist-hop) and B-5
+      (upstream drift) were already **FIXED/CLOSED 2026-07-05** in Open Actions (loaders
+      package-root-aware; 61-commit drift audit). B-7 is the accepted residual
+      `tsup@8.5.1` → nested `esbuild@^0.27` advisory (GHSA-gv7w-rqvm-qjhr); `overrides`
+      patch everything except tsup's nested copy. Re-evaluate when `tsup ≥ 8.6` ships
+      `esbuild ^0.28`. _(B-4 / B-8 / B-9 verified RESOLVED 2026-07-09.)_
 
 ### Housekeeping (discovered 2026-07-09, low-priority)
 
@@ -1746,8 +1750,8 @@ Detail — Open Actions items 1–8:
       in this round to align git tags with npm.
 
       Commits: `3d218f5` (H-1+H-2), `b507fb7` (0.2.0 release), `4e390e8`
-      (S-1+B-6), `d795846` (B-1+B-2), `31a4893` (matrix 0.1.3 + functions
-      0.2.1 release).
+          (S-1+B-6), `d795846` (B-1+B-2), `31a4893` (matrix 0.1.3 + functions
+          0.2.1 release).
 
 - [x] ✅ (verified gone 2026-07-05) **Delete the npm token copy in Dropbox-synced folder.**
       `C:\Users\danie\Dropbox\Github\npm_key.txt` still holds the
@@ -1761,16 +1765,16 @@ Detail — Open Actions items 1–8:
       Same token currently lives in three places: - `~/.npmrc` (literal, user-scope) - `Mathts/.npmrc` (literal, project-scope, gitignored) - `NPM_TOKEN` env var (persistent, user-scope, set 2026-05-25)
 
       Token rotation later means touching all three. Recommended:
-      keep `NPM_TOKEN` env var as canonical, change `~/.npmrc` to
-      `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` (npm 7+ expands
-      `${VAR}` syntax), delete `Mathts/.npmrc` (project-scope file is
-      gitignored but redundant — user-scope already covers it).
+          keep `NPM_TOKEN` env var as canonical, change `~/.npmrc` to
+          `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` (npm 7+ expands
+          `${VAR}` syntax), delete `Mathts/.npmrc` (project-scope file is
+          gitignored but redundant — user-scope already covers it).
 
 - [x] ✅ (verified gone 2026-07-05) **Delete stale `.npmrc.bak-*` files.** Created 2026-05-25 when
       rotating from the revoked token to the working one: - `C:\Users\danie\.npmrc.bak-20260525-141127` - `C:\Users\danie\Dropbox\Github\Mathts\.npmrc.bak-20260525-141201`
 
       Both contain revoked tokens — useless for auth but still
-      token-shaped material. Safe to delete.
+          token-shaped material. Safe to delete.
 
 - [x] **Mathematical-correctness audit (external-oracle pass).** ✅ Done
       2026-06-29. The 2026-05-25 audit (`BUG_AUDIT_2026-05-25.md`) flagged
@@ -1839,54 +1843,54 @@ Detail — Open Actions items 1–8:
       All three slices LANDED in commit `1bfad1e`.
 
       | Slice | Deliverable                                                                                | Owner   | Status     |
-      | ----- | ------------------------------------------------------------------------------------------ | ------- | ---------- |
-      | 1     | `TapedTensor` reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`) + elementwise math (`log`/`exp`/`sin`/`cos`/`tan`/`sqrt`/`square`/`pow`/`reciprocal`/`abs`) AD | autograd | ✅ 1bfad1e |
-      | 2     | `typed/complex.ts` (`arg`/`conj`/`im`/`re`) + `typed/set.ts` (10 set ops) promotion         | functions | ✅ 1bfad1e |
-      | 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`)    | tensor  | ✅ 1bfad1e |
+          | ----- | ------------------------------------------------------------------------------------------ | ------- | ---------- |
+          | 1     | `TapedTensor` reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`) + elementwise math (`log`/`exp`/`sin`/`cos`/`tan`/`sqrt`/`square`/`pow`/`reciprocal`/`abs`) AD | autograd | ✅ 1bfad1e |
+          | 2     | `typed/complex.ts` (`arg`/`conj`/`im`/`re`) + `typed/set.ts` (10 set ops) promotion         | functions | ✅ 1bfad1e |
+          | 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`)    | tensor  | ✅ 1bfad1e |
 
-      Per-slice engineering notes worth keeping:
-      - Slice 1 surfaced a real pre-existing build break: the AD
-        methods had been drafted in an earlier landing without the
-        two helpers (`_resolveAxes` / `_rowMajorStrides`) they
-        called, plus a `mean()` reduce callback with implicit
-        `any`. The Slice-1 fix wires the helpers and types in.
-      - Slice 1 chose deliberate adjoint semantics on edge cases:
-        prod with multiple zeros uses prefix/suffix products
-        (single-zero and multi-zero cases differentiate
-        correctly), max/min tie-break first-wins, abs subgradient
-        at exact 0 = 0, norm p='inf' scatters dY to the unique
-        max-abs index.
-      - Slice 2 matched the bitwise+logical factory-collision
-        pattern from commit 2a141d4: 14 `export` keywords stripped
-        from `factories/index.ts` (factoryScope wiring kept), two
-        factory-tier tests (factories-leaf, factories-final)
-        repointed to the new typed/ imports.
-      - Slice 3 found `matrix/src/operations/qr.ts` already
-        present but not re-exported — fixed by adding one line to
-        `matrix/src/operations/index.ts`. LU and Cholesky are
-        inlined inside their tensor wrappers because the matrix
-        package doesn't have public primitives for them; flagged
-        as a future cleanup slice. Eig delegates to matrix; the
-        `symmetric: true` option symmetrises the input first so
-        the matrix primitive's internal symmetric path picks the
-        stable real-eigenvalue routine.
+          Per-slice engineering notes worth keeping:
+          - Slice 1 surfaced a real pre-existing build break: the AD
+            methods had been drafted in an earlier landing without the
+            two helpers (`_resolveAxes` / `_rowMajorStrides`) they
+            called, plus a `mean()` reduce callback with implicit
+            `any`. The Slice-1 fix wires the helpers and types in.
+          - Slice 1 chose deliberate adjoint semantics on edge cases:
+            prod with multiple zeros uses prefix/suffix products
+            (single-zero and multi-zero cases differentiate
+            correctly), max/min tie-break first-wins, abs subgradient
+            at exact 0 = 0, norm p='inf' scatters dY to the unique
+            max-abs index.
+          - Slice 2 matched the bitwise+logical factory-collision
+            pattern from commit 2a141d4: 14 `export` keywords stripped
+            from `factories/index.ts` (factoryScope wiring kept), two
+            factory-tier tests (factories-leaf, factories-final)
+            repointed to the new typed/ imports.
+          - Slice 3 found `matrix/src/operations/qr.ts` already
+            present but not re-exported — fixed by adding one line to
+            `matrix/src/operations/index.ts`. LU and Cholesky are
+            inlined inside their tensor wrappers because the matrix
+            package doesn't have public primitives for them; flagged
+            as a future cleanup slice. Eig delegates to matrix; the
+            `symmetric: true` option symmetrises the input first so
+            the matrix primitive's internal symmetric path picks the
+            stable real-eigenvalue routine.
 
-      Cumulative test deltas this landing:
-        tensor:    179 → 215 tests (+36 across 16 files)
-        autograd:   29 →  92 tests (+63 across 7 files)
-        functions: 1,774 → 1,865 tests (+91 across 53 files)
+          Cumulative test deltas this landing:
+            tensor:    179 → 215 tests (+36 across 16 files)
+            autograd:   29 →  92 tests (+63 across 7 files)
+            functions: 1,774 → 1,865 tests (+91 across 53 files)
 
-      Future cleanup tracked (not regressions — internal de-duplication):
-        - Refactor `tensor/src/operations/random.ts` to call the now-
-          exported `matrix.qr` instead of its inline Gram-Schmidt.
-        - Promote the inlined Doolittle LU and right-looking
-          Cholesky in `tensor/src/operations/{lu,cholesky}.ts` to
-          proper `matrix/src/operations/{lu,cholesky}.ts` primitives.
+          Future cleanup tracked (not regressions — internal de-duplication):
+            - Refactor `tensor/src/operations/random.ts` to call the now-
+              exported `matrix.qr` instead of its inline Gram-Schmidt.
+            - Promote the inlined Doolittle LU and right-looking
+              Cholesky in `tensor/src/operations/{lu,cholesky}.ts` to
+              proper `matrix/src/operations/{lu,cholesky}.ts` primitives.
 
-      Out of scope per the proposal §4: `TapedTensor.divide`/`sub`/
-      `tensordot`/`svd`/`eig`, promotion of `probability`/`relational`/
-      `unit`/`string`, acceleration of `algebra`/`integration`/
-      `hypothesis`, sparse-tensor decompositions.
+          Out of scope per the proposal §4: `TapedTensor.divide`/`sub`/
+          `tensordot`/`svd`/`eig`, promotion of `probability`/`relational`/
+          `unit`/`string`, acceleration of `algebra`/`integration`/
+          `hypothesis`, sparse-tensor decompositions.
 
 - [x] ✅ (consumed by Wave 5, all 15 slices landed — polyFit/interp/window/sort/lgamma/sampling/centrality/CAS etc.) **WASM / Worker promotion playbook** — see
       [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](docs/roadmap/FUNCTION_GAPS_AUDIT.md)
@@ -1907,89 +1911,89 @@ Detail — Open Actions items 1–8:
       with concrete file lists and slice boundaries:
 
       **Tier 1 (parallel, 5 agents, disjoint scopes) — ✅ ALL LANDED:**
-      - [x] **Slice 1.1** ✅ `4462f69` — `TapedTensor.divide` +
-            `TapedTensor.sub`. 10 new tests in
-            `tape-elementwise-ad.test.ts` (forward, backward, fd-check,
-            chained graphs, aliased self-division → gradient = 0).
-            autograd: 92 → 103 tests.
-      - [x] **Slice 1.2** ✅ `7fe73b7` — `typed/relational.ts` promotion.
-            7 ops (`deepEqual`/`unequal`/`compareNatural`/`compareText`/
-            `compareUnits`/`equalScalar`/`equalText`); 60 new tests.
-            functions: 1865 → 1925 tests.
-      - [x] **Slice 1.3** ✅ `fe40938` — `ComputePool.divide`.
-            No new kernel needed — `elementwiseChunk` already covered
-            `'divide'`. 3 new tests (1M-element correctness, threshold
-            fallback, mismatched-length rejection).
-      - [x] **Slice 1.5** ✅ `c0df3dd` — Promote LU + Cholesky to matrix
-            primitives. NEW `matrix/src/operations/{lu,cholesky}.ts`;
-            tensor wrappers delegate (parity derived from permutation
-            cycle structure). 22 new matrix tests; 16 existing tensor
-            tests still pass through delegation.
-      - [x] **Slice 1.6** ✅ `08ce15f` — `bench:tensor` suite. 4 bench
-            files + `npm run bench:tensor` script; 25s full suite.
-            Baseline numbers in `ACCELERATION_BENCHMARKS.md` (e.g.
-            tensorQr 32³ = 3.6 ms/op, contract n=24 = 1639 ms/op,
-            contractNetwork N=12 greedy = 3.7 ms vs exact 17.4 ms).
+          - [x] **Slice 1.1** ✅ `4462f69` — `TapedTensor.divide` +
+                `TapedTensor.sub`. 10 new tests in
+                `tape-elementwise-ad.test.ts` (forward, backward, fd-check,
+                chained graphs, aliased self-division → gradient = 0).
+                autograd: 92 → 103 tests.
+          - [x] **Slice 1.2** ✅ `7fe73b7` — `typed/relational.ts` promotion.
+                7 ops (`deepEqual`/`unequal`/`compareNatural`/`compareText`/
+                `compareUnits`/`equalScalar`/`equalText`); 60 new tests.
+                functions: 1865 → 1925 tests.
+          - [x] **Slice 1.3** ✅ `fe40938` — `ComputePool.divide`.
+                No new kernel needed — `elementwiseChunk` already covered
+                `'divide'`. 3 new tests (1M-element correctness, threshold
+                fallback, mismatched-length rejection).
+          - [x] **Slice 1.5** ✅ `c0df3dd` — Promote LU + Cholesky to matrix
+                primitives. NEW `matrix/src/operations/{lu,cholesky}.ts`;
+                tensor wrappers delegate (parity derived from permutation
+                cycle structure). 22 new matrix tests; 16 existing tensor
+                tests still pass through delegation.
+          - [x] **Slice 1.6** ✅ `08ce15f` — `bench:tensor` suite. 4 bench
+                files + `npm run bench:tensor` script; 25s full suite.
+                Baseline numbers in `ACCELERATION_BENCHMARKS.md` (e.g.
+                tensorQr 32³ = 3.6 ms/op, contract n=24 = 1639 ms/op,
+                contractNetwork N=12 greedy = 3.7 ms vs exact 17.4 ms).
 
-      **Tier 2 (follow-up, depends on Slice 1.5) — ✅ LANDED:**
-      - [x] **Slice 2.4** ✅ `70217b7` — `tensorPinv` + `tensorSolve` +
-            `tensorKron`. NEW `tensor/src/operations/{pinv,solve,kron}.ts`
-            composing on the public `matrix.lu`/`matrix.svd` from Slice
-            1.5. `tensor`: 215 → 264 tests (+49). functions.md / .html
-            Linear-Algebra Details bullets now cross-reference the
-            rank-N tensor equivalents.
+          **Tier 2 (follow-up, depends on Slice 1.5) — ✅ LANDED:**
+          - [x] **Slice 2.4** ✅ `70217b7` — `tensorPinv` + `tensorSolve` +
+                `tensorKron`. NEW `tensor/src/operations/{pinv,solve,kron}.ts`
+                composing on the public `matrix.lu`/`matrix.svd` from Slice
+                1.5. `tensor`: 215 → 264 tests (+49). functions.md / .html
+                Linear-Algebra Details bullets now cross-reference the
+                rank-N tensor equivalents.
 
-      **Tier 3 (WASM-route, sequenced one at a time):**
-      - [x] **Slice 3.7** ✅ `6520a76` — `typed/algebra.ts` polynomial
-            WASM ports. NEW AssemblyScript kernels in
-            `assembly/src/poly.ts`
-            (`poly_mul_f64` + `poly_div_mod_f64`), bridge at
-            `WASM_POLY_THRESHOLD = 256` coeffs; wires into `polymul`,
-            `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
-            `polynomialRemainder`. 22 new tests; manifest regenerated.
-            (`discriminant`/`resultant` deferred — will reuse the new
-            div-mod kernel + Sylvester-fill in a follow-up.)
-      - [x] **Slice 3.8** ✅ `64c6168` — `typed/integration.ts` worker
-            dispatch. All four ops async; `gaussQuad`/`romberg` offload
-            dot/sum at ≥ 64 sub-intervals (integrand stays main-thread,
-            only the post-eval reduction goes to workers); NEW
-            `trapzF64`/`simpsonF64` Float64Array overloads at ≥ 65,536
-            samples. Integrand-bench in
-            `tools/benchmark/parallel/integration.bench.ts`.
-      - [x] **Slice 3.10** ✅ `fad8324` — `typed/hypothesis.ts` worker
-            dispatch. All 4 tests async at ≥ 4,096 samples.
-            `chiSquareTest` fully worker-routed (strongest win);
-            KS/MW/SW keep sort on main thread (no `wasm.sortF64` yet),
-            offload post-sort stats. Custom-CDF KS bypasses route.
-            20 new tests in `typed-hypothesis-parallel.test.ts`.
-      - [x] **Slice 3.10b** ✅ `ec7363b` — `typed/interpolation.ts`
-            tridiag-solve WASM. NEW AssemblyScript `tridiag_solve_f64`
-            kernel + bridge at threshold = 1024 unknowns. `cubicSpline`
-            wired (refactored to build explicit (n-1)×(n-1) tridiag
-            system). **Finding:** `pchip`/`akima` use Fritsch-Carlson /
-            Akima analytic slopes (no tridiag), so this bridge is
-            cubicSpline-only — audit B.1 entry updated to reflect.
-            18 new tests; manifest regenerated.
-      - [x] **Slice 3.10c-1** ✅ `572363f` — Bessel WASM only.
-            6 AssemblyScript functions
-            (`bessel_j0/j1/jn/y0/y1/yn_f64`) delegating to scalar NR
-            §6.5 implementations already in the special-functions kernels.
-            Bridge at `WASM_SPECIAL_THRESHOLD = 1024`; AS-suffix probe
-            wired (forward-compat for 10c-2). 34 new TS + 8 WASM tests.
-            Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
-            WASM↔JS agreement 1e-14 (bit-identical algorithm path).
-      - [x] ✅ (shipped: Phase 6 truncation-cap fix, AS↔JS ≈4e-16; G2 closed 2026-07-04) **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
-            + AssemblyScript parity port for Bessel. Bridge already has
-            the `_as`-suffix probe wired; only the AS module + Airy
-            implementation are missing. Blocked on consumer demand; Airy
-            needs asymptotic expansion at large |x| (different from
-            Bessel's series + recurrence path). See
-            [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md#slice-310c-2--todo-deferred).
+          **Tier 3 (WASM-route, sequenced one at a time):**
+          - [x] **Slice 3.7** ✅ `6520a76` — `typed/algebra.ts` polynomial
+                WASM ports. NEW AssemblyScript kernels in
+                `assembly/src/poly.ts`
+                (`poly_mul_f64` + `poly_div_mod_f64`), bridge at
+                `WASM_POLY_THRESHOLD = 256` coeffs; wires into `polymul`,
+                `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
+                `polynomialRemainder`. 22 new tests; manifest regenerated.
+                (`discriminant`/`resultant` deferred — will reuse the new
+                div-mod kernel + Sylvester-fill in a follow-up.)
+          - [x] **Slice 3.8** ✅ `64c6168` — `typed/integration.ts` worker
+                dispatch. All four ops async; `gaussQuad`/`romberg` offload
+                dot/sum at ≥ 64 sub-intervals (integrand stays main-thread,
+                only the post-eval reduction goes to workers); NEW
+                `trapzF64`/`simpsonF64` Float64Array overloads at ≥ 65,536
+                samples. Integrand-bench in
+                `tools/benchmark/parallel/integration.bench.ts`.
+          - [x] **Slice 3.10** ✅ `fad8324` — `typed/hypothesis.ts` worker
+                dispatch. All 4 tests async at ≥ 4,096 samples.
+                `chiSquareTest` fully worker-routed (strongest win);
+                KS/MW/SW keep sort on main thread (no `wasm.sortF64` yet),
+                offload post-sort stats. Custom-CDF KS bypasses route.
+                20 new tests in `typed-hypothesis-parallel.test.ts`.
+          - [x] **Slice 3.10b** ✅ `ec7363b` — `typed/interpolation.ts`
+                tridiag-solve WASM. NEW AssemblyScript `tridiag_solve_f64`
+                kernel + bridge at threshold = 1024 unknowns. `cubicSpline`
+                wired (refactored to build explicit (n-1)×(n-1) tridiag
+                system). **Finding:** `pchip`/`akima` use Fritsch-Carlson /
+                Akima analytic slopes (no tridiag), so this bridge is
+                cubicSpline-only — audit B.1 entry updated to reflect.
+                18 new tests; manifest regenerated.
+          - [x] **Slice 3.10c-1** ✅ `572363f` — Bessel WASM only.
+                6 AssemblyScript functions
+                (`bessel_j0/j1/jn/y0/y1/yn_f64`) delegating to scalar NR
+                §6.5 implementations already in the special-functions kernels.
+                Bridge at `WASM_SPECIAL_THRESHOLD = 1024`; AS-suffix probe
+                wired (forward-compat for 10c-2). 34 new TS + 8 WASM tests.
+                Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
+                WASM↔JS agreement 1e-14 (bit-identical algorithm path).
+          - [x] ✅ (shipped: Phase 6 truncation-cap fix, AS↔JS ≈4e-16; G2 closed 2026-07-04) **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
+                + AssemblyScript parity port for Bessel. Bridge already has
+                the `_as`-suffix probe wired; only the AS module + Airy
+                implementation are missing. Blocked on consumer demand; Airy
+                needs asymptotic expansion at large |x| (different from
+                Bessel's series + recurrence path). See
+                [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md#slice-310c-2--todo-deferred).
 
-      **Tier 4 (deferred, awaiting consumer pressure or blockers):**
-      ranks 9 (probability dedup audit needed), 11 (Tensor.slice
-      family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
-      14 (typed/unit.ts — blocked on Unit type in core).
+          **Tier 4 (deferred, awaiting consumer pressure or blockers):**
+          ranks 9 (probability dedup audit needed), 11 (Tensor.slice
+          family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
+          14 (typed/unit.ts — blocked on Unit type in core).
 
 - [x] ✅ (all slices landed) **Wave 4 gap-closure (audit refresh follow-up)** — design at
       [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md).
@@ -1997,96 +2001,96 @@ Detail — Open Actions items 1–8:
       implementation tiers:
 
       **Wave 4 Tier 1 (parallel, 5 disjoint agents) — ✅ ALL LANDED:**
-      - [x] **Slice 4.1** ✅ `73e6ca9` — `ComputePool.pow` + `.sign` +
-            `.tensordot`. `pow`/`sign` reuse the generic kernels;
-            `tensordot` got a new `tensordotChunk` worker kernel.
-            `pow` threshold = `'never'` (overhead dominates),
-            `tensordot` = 8 K contracted-axis volume. `parallel`:
-            342 → 355 tests (+13).
-      - [x] **Slice 4.2** ✅ `8b357cc` — `matrixPinv` via full SVD +
-            `rcond·max(S)` threshold (default 1e-10). Exported as
-            `matrixPinv` (alias to avoid the `pinv` name collision
-            with `svd.ts`). 14 new tests; matrix: 556 tests.
-      - [x] **Slice 4.3** ✅ landed via Slices 4.1 + 4.2 (parallel
-            scope-creep, but verified correct). 47-LOC inline
-            Gram-Schmidt `thinQR()` replaced by 9-LOC
-            `thinQViaMatrixQr()` delegation; 2 new orthogonality
-            tests landed in 4.2's commit. tensor: 266 → 268 tests.
-      - [x] **Slice 4.4** ✅ `8af250b` — `typed/string.ts` promotion.
-            5 ops (`bin`/`hex`/`oct`/`format`/`print`); 39 new
-            tests. functions: 2035 → 2093 (+58). Surfaced
-            sign-magnitude vs two's-complement convention finding
-            (mathjs uses sign-magnitude unless `wordSize` is passed)
-            + BigNumber `instanceof` vs `isBigNumber` duck-test
-            mismatch.
-      - [x] **Slice 4.5** ✅ `6e9f9c0` — polynomial WASM follow-up:
-            `discriminant` + `resultant` via Sylvester-matrix det.
-            NEW AssemblyScript kernels (~205 LOC) at
-            `WASM_POLY_THRESHOLD = 256`. 18 new tests across 3
-            suites. Manifest regenerated; wasm-integrity 5/5.
-            Sign-convention surprise: the existing typed-layer
-            Sylvester ordering gives +2 (not -2 as in the spec's
-            worked example) for `Res(x+1, x-1)`; tests match the
-            existing implementation.
+          - [x] **Slice 4.1** ✅ `73e6ca9` — `ComputePool.pow` + `.sign` +
+                `.tensordot`. `pow`/`sign` reuse the generic kernels;
+                `tensordot` got a new `tensordotChunk` worker kernel.
+                `pow` threshold = `'never'` (overhead dominates),
+                `tensordot` = 8 K contracted-axis volume. `parallel`:
+                342 → 355 tests (+13).
+          - [x] **Slice 4.2** ✅ `8b357cc` — `matrixPinv` via full SVD +
+                `rcond·max(S)` threshold (default 1e-10). Exported as
+                `matrixPinv` (alias to avoid the `pinv` name collision
+                with `svd.ts`). 14 new tests; matrix: 556 tests.
+          - [x] **Slice 4.3** ✅ landed via Slices 4.1 + 4.2 (parallel
+                scope-creep, but verified correct). 47-LOC inline
+                Gram-Schmidt `thinQR()` replaced by 9-LOC
+                `thinQViaMatrixQr()` delegation; 2 new orthogonality
+                tests landed in 4.2's commit. tensor: 266 → 268 tests.
+          - [x] **Slice 4.4** ✅ `8af250b` — `typed/string.ts` promotion.
+                5 ops (`bin`/`hex`/`oct`/`format`/`print`); 39 new
+                tests. functions: 2035 → 2093 (+58). Surfaced
+                sign-magnitude vs two's-complement convention finding
+                (mathjs uses sign-magnitude unless `wordSize` is passed)
+                + BigNumber `instanceof` vs `isBigNumber` duck-test
+                mismatch.
+          - [x] **Slice 4.5** ✅ `6e9f9c0` — polynomial WASM follow-up:
+                `discriminant` + `resultant` via Sylvester-matrix det.
+                NEW AssemblyScript kernels (~205 LOC) at
+                `WASM_POLY_THRESHOLD = 256`. 18 new tests across 3
+                suites. Manifest regenerated; wasm-integrity 5/5.
+                Sign-convention surprise: the existing typed-layer
+                Sylvester ordering gives +2 (not -2 as in the spec's
+                worked example) for `Res(x+1, x-1)`; tests match the
+                existing implementation.
 
-      **Wave 4 Tier 2 (parallel, 2 disjoint agents) — ✅ ALL LANDED:**
-      - [x] **Slice 4.6** ✅ `43f45a1` — `typed/probability.ts` dedup
-            audit + selective promotion. 8 of 12 promoted
-            (`bernoulli`, `combinations`, `combinationsWithRep`,
-            `multinomial`, `permutations`, `pickRandom`, `random`,
-            `randomInt`); 4 skipped because already reachable via
-            factory surface (`factorial`, `gamma`, `lgamma`,
-            `kldivergence`). 57 new tests; functions: 2093 → 2150.
-            Notable finding: `bernoulli` (nth Bernoulli number) ≠
-            `bernoulliPMF` already in distributions.ts — same name
-            different math.
-      - [x] **Slice 4.7** ✅ `13eda2f` — Tensor indexing primitives,
-            core 4 (`slice`/`gather`/`stack`/`concatenate`). NEW
-            `tensor/src/operations/{slice,gather,stack,concatenate}.ts`.
-            Gather axis-label semantics: primed via existing
-            `Index.prime()` (same id, primeLevel+1) so the primed
-            axis cannot auto-contract with the original. 57 new
-            tests across 4 files; tensor: 266 → 323.
-            `scatter`/`pad`/`roll`/`flip` remain deferred to a
-            future Slice 4.7b sub-slice.
+          **Wave 4 Tier 2 (parallel, 2 disjoint agents) — ✅ ALL LANDED:**
+          - [x] **Slice 4.6** ✅ `43f45a1` — `typed/probability.ts` dedup
+                audit + selective promotion. 8 of 12 promoted
+                (`bernoulli`, `combinations`, `combinationsWithRep`,
+                `multinomial`, `permutations`, `pickRandom`, `random`,
+                `randomInt`); 4 skipped because already reachable via
+                factory surface (`factorial`, `gamma`, `lgamma`,
+                `kldivergence`). 57 new tests; functions: 2093 → 2150.
+                Notable finding: `bernoulli` (nth Bernoulli number) ≠
+                `bernoulliPMF` already in distributions.ts — same name
+                different math.
+          - [x] **Slice 4.7** ✅ `13eda2f` — Tensor indexing primitives,
+                core 4 (`slice`/`gather`/`stack`/`concatenate`). NEW
+                `tensor/src/operations/{slice,gather,stack,concatenate}.ts`.
+                Gather axis-label semantics: primed via existing
+                `Index.prime()` (same id, primeLevel+1) so the primed
+                axis cannot auto-contract with the original. 57 new
+                tests across 4 files; tensor: 266 → 323.
+                `scatter`/`pad`/`roll`/`flip` remain deferred to a
+                future Slice 4.7b sub-slice.
 
-      **Wave 4 Tier 3 (sequential, design-heavy) — ✅ ALL LANDED:**
-      - [x] **Slice 4.8** ✅ `fd81cd8` — `TapedTensor.tensordot` +
-            `.svd` + `.eig({symmetric:true})` reverse-mode AD. Opus
-            agent. References: Townsend (2016), Magnus & Neudecker
-            (1999), PyTorch source. Repeated-value subgradient mask
-            at `REL_TOL = 1e-10`. autograd: 103 → 136 tests (+33).
-            Non-symmetric `eig` AD still deferred (complex eigenvals).
-      - [x] **Slice 4.9** ✅ `276a75b` — Airy `Ai`/`Bi` WASM + full
-            AssemblyScript Bessel parity (closes 3.10c-2). Scalar
-            Airy implemented from scratch: power series for
-            `|x| ≤ 4.5`, 7-term asymptotic for larger (DLMF §9.2 +
-            §9.7); ~1e-7 relative error. AS port full — no 4.9b
-            split needed. `Bi`'s large-negative-x phase
-            (`θ = ζ + π/4` vs Ai's `θ = ζ − π/4`) was the
-            precision-sensitive design call; verified against DLMF.
-            functions: 2150 → 2171 tests (+21).
+          **Wave 4 Tier 3 (sequential, design-heavy) — ✅ ALL LANDED:**
+          - [x] **Slice 4.8** ✅ `fd81cd8` — `TapedTensor.tensordot` +
+                `.svd` + `.eig({symmetric:true})` reverse-mode AD. Opus
+                agent. References: Townsend (2016), Magnus & Neudecker
+                (1999), PyTorch source. Repeated-value subgradient mask
+                at `REL_TOL = 1e-10`. autograd: 103 → 136 tests (+33).
+                Non-symmetric `eig` AD still deferred (complex eigenvals).
+          - [x] **Slice 4.9** ✅ `276a75b` — Airy `Ai`/`Bi` WASM + full
+                AssemblyScript Bessel parity (closes 3.10c-2). Scalar
+                Airy implemented from scratch: power series for
+                `|x| ≤ 4.5`, 7-term asymptotic for larger (DLMF §9.2 +
+                §9.7); ~1e-7 relative error. AS port full — no 4.9b
+                split needed. `Bi`'s large-negative-x phase
+                (`θ = ζ + π/4` vs Ai's `θ = ζ − π/4`) was the
+                precision-sensitive design call; verified against DLMF.
+                functions: 2150 → 2171 tests (+21).
 
-      **Tier 4 deferred (rolled into Wave 5):**
-      - [x] ✅ (landed as Slice 5.15 `8131212`; fully superseded by the 2026-07-04 Unit MERGE) **Slice 4.10** — `typed/unit.ts` (rank 14).
-      - [x] ✅ (consumed by Wave 5) **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
-            worker-route candidates from
-            [`FUNCTION_GAPS_AUDIT.md §B.1`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#b1-wasm-route-playbook--pure-js-functions-worth-porting-to-a-wasm-kernel)
-            and §B.2. Future wins awaiting consumer pressure; not
-            dispatched in this wave. Includes the Sylvester-fill
-            follow-up for B.1 row 2 (now closed by Slice 4.5),
-            `polyFit`/`chebyshevFit`/`legendreFit` WASM, lagrange/
-            newton-interp WASM, histogram/quantile sort WASM,
-            distribution-pdf WASM, signal spectral-windowing WASM,
-            geometry hull/Delaunay WASM, matrix-function evaluator
-            wiring; worker-route fan-outs for integration sub-
-            intervals, hypothesis bootstrap, CAS K-fold CV, batch
-            sampling, distribution closure-pdf, CAS batch ops,
-            graph-centrality restarts.
-      - [x] **WebGPU browser smoke test** — ✅ Wave-6 Slice 6.5
-            (`3aac312`). Playwright + `@vitest/browser` wired,
-            `gpuMatmul` 4×4 smoke test green on Mesa lavapipe CI
-            runner.
+          **Tier 4 deferred (rolled into Wave 5):**
+          - [x] ✅ (landed as Slice 5.15 `8131212`; fully superseded by the 2026-07-04 Unit MERGE) **Slice 4.10** — `typed/unit.ts` (rank 14).
+          - [x] ✅ (consumed by Wave 5) **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
+                worker-route candidates from
+                [`FUNCTION_GAPS_AUDIT.md §B.1`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#b1-wasm-route-playbook--pure-js-functions-worth-porting-to-a-wasm-kernel)
+                and §B.2. Future wins awaiting consumer pressure; not
+                dispatched in this wave. Includes the Sylvester-fill
+                follow-up for B.1 row 2 (now closed by Slice 4.5),
+                `polyFit`/`chebyshevFit`/`legendreFit` WASM, lagrange/
+                newton-interp WASM, histogram/quantile sort WASM,
+                distribution-pdf WASM, signal spectral-windowing WASM,
+                geometry hull/Delaunay WASM, matrix-function evaluator
+                wiring; worker-route fan-outs for integration sub-
+                intervals, hypothesis bootstrap, CAS K-fold CV, batch
+                sampling, distribution closure-pdf, CAS batch ops,
+                graph-centrality restarts.
+          - [x] **WebGPU browser smoke test** — ✅ Wave-6 Slice 6.5
+                (`3aac312`). Playwright + `@vitest/browser` wired,
+                `gpuMatmul` 4×4 smoke test green on Mesa lavapipe CI
+                runner.
 
 - [x] ✅ (all 15 slices landed incl. 5.15 core Unit) **Wave 5 gap-closure (B.1/B.2 backlog)** — design at
       [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md).
@@ -2097,79 +2101,79 @@ Detail — Open Actions items 1–8:
       tiers:
 
       **Wave 5A Tier 1 (parallel, 4 disjoint agents) — ✅ ALL LANDED:**
-      - [x] **Slice 5.1** ✅ `09eadea` — Tensor scatter/pad/roll/flip.
-            4 new ops + 56 tests. tensor: 323 → 379. Notable: `roll`
-            uses double-mod-plus-dim for branchless negative-shift
-            handling; `pad` reflect mode excludes the boundary
-            element (matching NumPy); `scatter` reduce='add' is
-            order-dependent for duplicate indices (documented).
-      - [x] **Slice 5.2** ✅ `0cef320` — Promote pinv/cond/norm2/
-            normFro/lowRankApprox/singularValues to typed/. Wired
-            pinv to the DenseMatrix-based `matrixPinv` (Option A).
-            `cond` collision with existing typed/numeric.ts export
-            resolved via explicit barrel-level re-export override.
-            +27 tests; functions: 2171 → 2229 (incl. parallel slice
-            additions).
-      - [x] **Slice 5.10** ✅ `6b78c31` — typed/integration.ts
-            sub-interval worker fan-out. Added `workerCount` opt
-            with closure-stringification path; allow-list heuristic
-            accepts Math.* + parameter name only (rejects outer-
-            scope closures, async closures). New `integrateChunk`
-            worker kernel (returns scalar, not Float64Array). +14
-            tests.
-      - [x] **Slice 5.11** ✅ `9f74b1e` — typed/hypothesis.ts
-            bootstrap helper. `bootstrap: N` + `bootstrapSeed` opts
-            on all 4 tests; mulberry32 PRNG for reproducibility.
-            Resampling schemes: chiSquare = multinomial with
-            replacement; KS/Shapiro = parametric bootstrap; MW =
-            permutation (Fisher-Yates). +17 tests.
+          - [x] **Slice 5.1** ✅ `09eadea` — Tensor scatter/pad/roll/flip.
+                4 new ops + 56 tests. tensor: 323 → 379. Notable: `roll`
+                uses double-mod-plus-dim for branchless negative-shift
+                handling; `pad` reflect mode excludes the boundary
+                element (matching NumPy); `scatter` reduce='add' is
+                order-dependent for duplicate indices (documented).
+          - [x] **Slice 5.2** ✅ `0cef320` — Promote pinv/cond/norm2/
+                normFro/lowRankApprox/singularValues to typed/. Wired
+                pinv to the DenseMatrix-based `matrixPinv` (Option A).
+                `cond` collision with existing typed/numeric.ts export
+                resolved via explicit barrel-level re-export override.
+                +27 tests; functions: 2171 → 2229 (incl. parallel slice
+                additions).
+          - [x] **Slice 5.10** ✅ `6b78c31` — typed/integration.ts
+                sub-interval worker fan-out. Added `workerCount` opt
+                with closure-stringification path; allow-list heuristic
+                accepts Math.* + parameter name only (rejects outer-
+                scope closures, async closures). New `integrateChunk`
+                worker kernel (returns scalar, not Float64Array). +14
+                tests.
+          - [x] **Slice 5.11** ✅ `9f74b1e` — typed/hypothesis.ts
+                bootstrap helper. `bootstrap: N` + `bootstrapSeed` opts
+                on all 4 tests; mulberry32 PRNG for reproducibility.
+                Resampling schemes: chiSquare = multinomial with
+                replacement; KS/Shapiro = parametric bootstrap; MW =
+                permutation (Fisher-Yates). +17 tests.
 
-      **Wave 5B Tier 2 (sequential WASM, 4 slices) — ✅ ALL LANDED:**
-      - [x] **Slice 5.3** ✅ `098656e` — ellipticK/E via AGM; +28
-            TS + 9 WASM tests.
-      - [x] **Slice 5.4** ✅ `f537a56` — polyFit/chebyshevFit/
-            legendreFit via Vandermonde + inlined Householder QR
-            (~170 LOC AS + ~170 LOC bridge);
-            +18 tests.
-      - [x] **Slice 5.5** ✅ `2b273a1` — lagrange/newtonInterp
-            divided-difference WASM. Existing lagrangeInterp was
-            direct-Lagrange (not Newton); preserved as below-
-            threshold path; new newtonInterp export. +14 tests.
-      - [x] **Slice 5.6** ✅ `2d0ebfa` — applyWindow + welchPSD +
-            bartlettPSD + multiTaperPSD + goertzel + chirpZTransform
-            (full 5-kernel module). welch/CZT use an FFT helper.
-            +25 TS + 8 WASM tests.
+          **Wave 5B Tier 2 (sequential WASM, 4 slices) — ✅ ALL LANDED:**
+          - [x] **Slice 5.3** ✅ `098656e` — ellipticK/E via AGM; +28
+                TS + 9 WASM tests.
+          - [x] **Slice 5.4** ✅ `f537a56` — polyFit/chebyshevFit/
+                legendreFit via Vandermonde + inlined Householder QR
+                (~170 LOC AS + ~170 LOC bridge);
+                +18 tests.
+          - [x] **Slice 5.5** ✅ `2b273a1` — lagrange/newtonInterp
+                divided-difference WASM. Existing lagrangeInterp was
+                direct-Lagrange (not Newton); preserved as below-
+                threshold path; new newtonInterp export. +14 tests.
+          - [x] **Slice 5.6** ✅ `2d0ebfa` — applyWindow + welchPSD +
+                bartlettPSD + multiTaperPSD + goertzel + chirpZTransform
+                (full 5-kernel module). welch/CZT use an FFT helper.
+                +25 TS + 8 WASM tests.
 
-      **Wave 5C Tier 3 (sequential larger/design, 3 slices) — ✅ ALL LANDED:**
-      - [x] **Slice 5.7d** ✅ `5a0ca7c` — wasm.sortF64/argsortF64/
-            rankF64 + full consumer wiring (full slice, no sub-split).
-            Wires statistics + hypothesis + geometry hull. +54 tests.
-      - [x] **Slice 5.8** ✅ `8872e4b` — lgamma_f64 array kernel +
-            4 distribution-pdf wirings. +52 tests.
-      - [x] **Slice 5.9a** ✅ `ca08c12` — matrixExpm (Higham Padé-13),
-            matrixLogm (GL-16 quadrature), matrixSqrtm (Newton from
-            Y_0 = I). +30 matrix tests + 13 typed-dispatch tests.
-            Slice 5.9b deferred for complex/defective cases.
+          **Wave 5C Tier 3 (sequential larger/design, 3 slices) — ✅ ALL LANDED:**
+          - [x] **Slice 5.7d** ✅ `5a0ca7c` — wasm.sortF64/argsortF64/
+                rankF64 + full consumer wiring (full slice, no sub-split).
+                Wires statistics + hypothesis + geometry hull. +54 tests.
+          - [x] **Slice 5.8** ✅ `8872e4b` — lgamma_f64 array kernel +
+                4 distribution-pdf wirings. +52 tests.
+          - [x] **Slice 5.9a** ✅ `ca08c12` — matrixExpm (Higham Padé-13),
+                matrixLogm (GL-16 quadrature), matrixSqrtm (Newton from
+                Y_0 = I). +30 matrix tests + 13 typed-dispatch tests.
+                Slice 5.9b deferred for complex/defective cases.
 
-      **Wave 5D Tier 4 (parallel worker-route, 3 disjoint agents) — ✅ ALL LANDED:**
-      - [x] **Slice 5.12** ✅ `effc15e` (co-landed with 5.13) —
-            distribution batch sampling >= 100K. New sampleChunk
-            worker kernel. SplitMix64 seed-splitting. 5 distributions.
-            +12 tests.
-      - [x] **Slice 5.13** ✅ `effc15e` — graph centrality restarts
-            (Option B Promise.all). pageRank + betweenness +
-            eigenvector. +18 tests.
-      - [x] **Slice 5.14** ✅ `444fec4` — CAS batch fan-out via
-            mapChunk + eval. cas-prefixed names to avoid factory
-            collision. +13 tests.
+          **Wave 5D Tier 4 (parallel worker-route, 3 disjoint agents) — ✅ ALL LANDED:**
+          - [x] **Slice 5.12** ✅ `effc15e` (co-landed with 5.13) —
+                distribution batch sampling >= 100K. New sampleChunk
+                worker kernel. SplitMix64 seed-splitting. 5 distributions.
+                +12 tests.
+          - [x] **Slice 5.13** ✅ `effc15e` — graph centrality restarts
+                (Option B Promise.all). pageRank + betweenness +
+                eigenvector. +18 tests.
+          - [x] **Slice 5.14** ✅ `444fec4` — CAS batch fan-out via
+                mapChunk + eval. cas-prefixed names to avoid factory
+                collision. +13 tests.
 
-      **Wave 5E Tier 5 (Opus, single big slice) — ✅ LANDED:**
-      - [x] **Slice 5.15** ✅ `8131212` — core Unit type + typed/unit.
-            Closes rank 14. 7-D SI dimensional vector, canonical-value
-            invariant, recursive-descent parser, prefix-ambiguity
-            via plain-match-first + longest-prefix-split, temperature
-            offsets per-atom standalone only. +53 core + 15 typed
-            tests. Differences from mathjs's Unit class documented.
+          **Wave 5E Tier 5 (Opus, single big slice) — ✅ LANDED:**
+          - [x] **Slice 5.15** ✅ `8131212` — core Unit type + typed/unit.
+                Closes rank 14. 7-D SI dimensional vector, canonical-value
+                invariant, recursive-descent parser, prefix-ambiguity
+                via plain-match-first + longest-prefix-split, temperature
+                offsets per-atom standalone only. +53 core + 15 typed
+                tests. Differences from mathjs's Unit class documented.
 
 - [x] **Wave 6 gap-closure (final cleanup) — ✅ COMPLETE (2026-05-24).**
       Design at [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md).
@@ -2180,68 +2184,68 @@ Detail — Open Actions items 1–8:
       wiring + roadmap-doc closures in commit `28e50ec`.
 
       **Wave 6A Tier 1 (parallel, 3 disjoint agents) — ✅ ALL LANDED:**
-      - [x] **Slice 6.1** ✅ `d0466b3` — Slice 5.9b: full Higham
-            Schur-based logm/sqrtm for general matrices (complex
-            eigenvalues, defective Jordan blocks). NEW
-            `matrix/src/operations/schur.ts` exposing public Schur
-            primitive (Francis QR-with-double-shifts). Extended
-            `logm.ts` (Schur-Padé Algorithm 11.10) + `sqrtm.ts`
-            (Björck-Hammarling Algorithm 6.3 by direct back-
-            substitution on the upper-triangular recurrence).
-            +19 matrix tests covering complex / defective / repeated
-            eigenvalue cases, all within `1e-10` of SciPy reference.
-      - [x] **Slice 6.2** (Opus) ✅ `048e9e1` — Non-symmetric
-            `TapedTensor.eig` AD. Lifts the symmetric-only
-            restriction from Slice 4.8. General-case adjoint
-            `dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T` per
-            Townsend (2016) §4 / Magnus & Neudecker §10.6.
-            Near-degenerate masking at `REL_TOL = 1e-10`; clean
-            throw on defective inputs when `cond(V) > 1e14`. +13
-            autograd tests (FD verification at 5 well-conditioned
-            inputs + chained-graph + defective error path).
-      - [x] **Slice 6.5** ✅ `3aac312` — WebGPU browser smoke test
-            infrastructure. `@vitest/browser` + `playwright`
-            installed at repo root; NEW `vitest.config.browser.ts`
-            gated to `*.browser.test.ts`; NEW `functions/tests/
-            gpu-smoke.browser.test.ts` verifies `gpuMatmul` on 4×4
-            input matches CPU reference within float32 precision
-            (transparent CPU fallback when no adapter); CI job
-            installs Mesa lavapipe (`apt-get install
-            mesa-vulkan-drivers libegl1`) and runs `npm run
-            test:browser`. Closes the "WebGPU browser smoke test"
-            forward-tracked item that was carried in 🎯 Open
-            Actions since the original audit.
+          - [x] **Slice 6.1** ✅ `d0466b3` — Slice 5.9b: full Higham
+                Schur-based logm/sqrtm for general matrices (complex
+                eigenvalues, defective Jordan blocks). NEW
+                `matrix/src/operations/schur.ts` exposing public Schur
+                primitive (Francis QR-with-double-shifts). Extended
+                `logm.ts` (Schur-Padé Algorithm 11.10) + `sqrtm.ts`
+                (Björck-Hammarling Algorithm 6.3 by direct back-
+                substitution on the upper-triangular recurrence).
+                +19 matrix tests covering complex / defective / repeated
+                eigenvalue cases, all within `1e-10` of SciPy reference.
+          - [x] **Slice 6.2** (Opus) ✅ `048e9e1` — Non-symmetric
+                `TapedTensor.eig` AD. Lifts the symmetric-only
+                restriction from Slice 4.8. General-case adjoint
+                `dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T` per
+                Townsend (2016) §4 / Magnus & Neudecker §10.6.
+                Near-degenerate masking at `REL_TOL = 1e-10`; clean
+                throw on defective inputs when `cond(V) > 1e14`. +13
+                autograd tests (FD verification at 5 well-conditioned
+                inputs + chained-graph + defective error path).
+          - [x] **Slice 6.5** ✅ `3aac312` — WebGPU browser smoke test
+                infrastructure. `@vitest/browser` + `playwright`
+                installed at repo root; NEW `vitest.config.browser.ts`
+                gated to `*.browser.test.ts`; NEW `functions/tests/
+                gpu-smoke.browser.test.ts` verifies `gpuMatmul` on 4×4
+                input matches CPU reference within float32 precision
+                (transparent CPU fallback when no adapter); CI job
+                installs Mesa lavapipe (`apt-get install
+                mesa-vulkan-drivers libegl1`) and runs `npm run
+                test:browser`. Closes the "WebGPU browser smoke test"
+                forward-tracked item that was carried in 🎯 Open
+                Actions since the original audit.
 
-      **Wave 6B Tier 2 (sequential WASM, 2 slices) — ✅ ALL LANDED:**
-      - [x] **Slice 6.3** ✅ `bba468b` — `convexHull3D` WASM via
-            incremental QuickHull-3D (Barber, Dobkin, Huhdanpaa
-            1996). NEW `convex_hull_3d_wasm(pts_ptr, n, faces_ptr)
-            -> i32` AssemblyScript kernel; new `convexHull3D` typed
-            export. Threshold
-            ≥ 1024 points. +18 hull-3D tests (tetrahedron, cube,
-            cospherical sample, degenerate co-planar fallback).
-      - [x] **Slice 6.4** ✅ `2be52f9` — Carlson R-forms
-            (`carlsonRC`/`RD`/`RF`/`RJ`) + incomplete elliptic
-            integrals (`ellipticF`, `ellipticEIncomplete`,
-            `ellipticPi`) WASM. Quadratically convergent and
-            branch-cut-free per Carlson (1995), NR §6.11, DLMF §19.
-            Threshold ≥ 1024 samples. AssemblyScript WASM kernels (AS
-            wiring through `assembly/src/index.ts` landed in commit
-            `28e50ec`). +41 tests against DLMF §19.16-19.36 and
-            Abramowitz & Stegun §17 reference values.
+          **Wave 6B Tier 2 (sequential WASM, 2 slices) — ✅ ALL LANDED:**
+          - [x] **Slice 6.3** ✅ `bba468b` — `convexHull3D` WASM via
+                incremental QuickHull-3D (Barber, Dobkin, Huhdanpaa
+                1996). NEW `convex_hull_3d_wasm(pts_ptr, n, faces_ptr)
+                -> i32` AssemblyScript kernel; new `convexHull3D` typed
+                export. Threshold
+                ≥ 1024 points. +18 hull-3D tests (tetrahedron, cube,
+                cospherical sample, degenerate co-planar fallback).
+          - [x] **Slice 6.4** ✅ `2be52f9` — Carlson R-forms
+                (`carlsonRC`/`RD`/`RF`/`RJ`) + incomplete elliptic
+                integrals (`ellipticF`, `ellipticEIncomplete`,
+                `ellipticPi`) WASM. Quadratically convergent and
+                branch-cut-free per Carlson (1995), NR §6.11, DLMF §19.
+                Threshold ≥ 1024 samples. AssemblyScript WASM kernels (AS
+                wiring through `assembly/src/index.ts` landed in commit
+                `28e50ec`). +41 tests against DLMF §19.16-19.36 and
+                Abramowitz & Stegun §17 reference values.
 
-      **Wave 6 cumulative test deltas:**
+          **Wave 6 cumulative test deltas:**
 
-      - `functions`: 2,486 → **2,545** (+59 = 18 hull3D + 41 Carlson)
-      - `matrix`: 586 → **605** (+19, Schur + logm/sqrtm extensions)
-      - `autograd`: 136 → **149** (+13, non-symmetric eig AD)
-      - 238 test files total (+2); 6308 tests + 172 WASM integration
-        tests pass / 7 skipped / zero regressions.
+          - `functions`: 2,486 → **2,545** (+59 = 18 hull3D + 41 Carlson)
+          - `matrix`: 586 → **605** (+19, Schur + logm/sqrtm extensions)
+          - `autograd`: 136 → **149** (+13, non-symmetric eig AD)
+          - 238 test files total (+2); 6308 tests + 172 WASM integration
+            tests pass / 7 skipped / zero regressions.
 
-      **Total Wave 6 = 5 slices across 6 commits** (`d0466b3`,
-      `048e9e1`, `3aac312`, `bba468b`, `2be52f9`, `dc5c050` manifest
-      regen + `28e50ec` doc/AS polish). After this wave the entire
-      `FUNCTION_GAPS_AUDIT.md` roadmap is **closed**.
+          **Total Wave 6 = 5 slices across 6 commits** (`d0466b3`,
+          `048e9e1`, `3aac312`, `bba468b`, `2be52f9`, `dc5c050` manifest
+          regen + `28e50ec` doc/AS polish). After this wave the entire
+          `FUNCTION_GAPS_AUDIT.md` roadmap is **closed**.
 
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`
@@ -2255,19 +2259,19 @@ Detail — Open Actions items 1–8:
       passing them as a second consumer corpus.
 
       Resulting counts: unused files 1 → 0; unused exports 406 → 308.
-      The remaining 308 split as 201 type/interface (public-API
-      contracts), 64 functions (incl. bench-only consumers in
-      `tools/benchmark/` which CDG doesn't scan), 42 constants
-      (consumer-tunable thresholds), 3 classes — all legitimate
-      public API. Two genuinely-unconsumed reset helpers
-      (`resetBitwiseWasm`, `resetBesselWasm`) were addressed by
-      adding fallback-suite test calls that exercise them.
+          The remaining 308 split as 201 type/interface (public-API
+          contracts), 64 functions (incl. bench-only consumers in
+          `tools/benchmark/` which CDG doesn't scan), 42 constants
+          (consumer-tunable thresholds), 3 classes — all legitimate
+          public API. Two genuinely-unconsumed reset helpers
+          (`resetBitwiseWasm`, `resetBesselWasm`) were addressed by
+          adding fallback-suite test calls that exercise them.
 
-      Gap-audit re-run shows no new gaps. Effective coverage stays at
-      100% (163/163 active files); 0 circular deps; all Wave-1/2/3
-      primitives reach correctly through the now-fixed reachability.
-      See [`docs/roadmap/FUNCTION_GAPS_AUDIT.md §G`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#g-audit-refresh--2026-05-24-post-wave-3)
-      for the full refresh summary.
+          Gap-audit re-run shows no new gaps. Effective coverage stays at
+          100% (163/163 active files); 0 circular deps; all Wave-1/2/3
+          primitives reach correctly through the now-fixed reachability.
+          See [`docs/roadmap/FUNCTION_GAPS_AUDIT.md §G`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#g-audit-refresh--2026-05-24-post-wave-3)
+          for the full refresh summary.
 
 - [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
@@ -2275,37 +2279,37 @@ Detail — Open Actions items 1–8:
       4-6 in commit `4417836`.
 
       | Phase | Deliverable                                                                    | Status     |
-      | ----- | ------------------------------------------------------------------------------ | ---------- |
-      | 1     | `Index` value type + `Tensor.contract` (match-by-id)                           | ✅ a21a844 |
-      | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD                 | ✅ a21a844 |
-      | 3     | `randomTensor(shape, {distribution, seed})` constructors                       | ✅ a21a844 |
-      | 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order (DP + greedy)  | ✅ 4417836 |
-      | 5     | `TapedTensor.contract` + `TapedTensor.matmul` — AD over named-index contractions | ✅ 4417836 |
-      | 6     | Tensor arithmetic completeness: reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`), NumPy broadcasting in `add`/`sub`/`mul`, `tensordot(other, axes)` | ✅ 4417836 |
+          | ----- | ------------------------------------------------------------------------------ | ---------- |
+          | 1     | `Index` value type + `Tensor.contract` (match-by-id)                           | ✅ a21a844 |
+          | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD                 | ✅ a21a844 |
+          | 3     | `randomTensor(shape, {distribution, seed})` constructors                       | ✅ a21a844 |
+          | 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order (DP + greedy)  | ✅ 4417836 |
+          | 5     | `TapedTensor.contract` + `TapedTensor.matmul` — AD over named-index contractions | ✅ 4417836 |
+          | 6     | Tensor arithmetic completeness: reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`), NumPy broadcasting in `add`/`sub`/`mul`, `tensordot(other, axes)` | ✅ 4417836 |
 
-      Phase-by-phase engineering notes worth keeping (full detail in
-      the proposal + CHANGELOG):
-      - Phase 1 surfaced the `Index.ts` vs `index.ts` case-sensitivity
-        conflict; the class file is `named-index.ts` to keep
-        `forceConsistentCasingInFileNames` on across the monorepo.
-      - Phase 4's first cut ran the 16-tensor exact DP in ~20 s; the
-        rewrite uses a canonical-index XOR-safe bitmask stored as two
-        30-bit halves in `Int32Array` and runs in 1.66 s. The
-        original O(|A|·|B|) Index-array scan is the fallback path
-        for the rare case of an Index appearing in > 2 tensors.
-      - Phase 5's batched matmul + its VJPs are direct
-        `Float64Array` loop implementations because the `EinsumSpec`
-        format can't express batch dimensions without summing over
-        them.
-      - Phase 6 surfaced a latent crash in `reduceAxes` where
-        `keepDims=true` would construct a Tensor with mismatched
-        `axisLabels.length` vs `shape.length`; fixed by skipping
-        label propagation when `keepDims=true`.
+          Phase-by-phase engineering notes worth keeping (full detail in
+          the proposal + CHANGELOG):
+          - Phase 1 surfaced the `Index.ts` vs `index.ts` case-sensitivity
+            conflict; the class file is `named-index.ts` to keep
+            `forceConsistentCasingInFileNames` on across the monorepo.
+          - Phase 4's first cut ran the 16-tensor exact DP in ~20 s; the
+            rewrite uses a canonical-index XOR-safe bitmask stored as two
+            30-bit halves in `Int32Array` and runs in 1.66 s. The
+            original O(|A|·|B|) Index-array scan is the fallback path
+            for the rare case of an Index appearing in > 2 tensors.
+          - Phase 5's batched matmul + its VJPs are direct
+            `Float64Array` loop implementations because the `EinsumSpec`
+            format can't express batch dimensions without summing over
+            them.
+          - Phase 6 surfaced a latent crash in `reduceAxes` where
+            `keepDims=true` would construct a Tensor with mismatched
+            `axisLabels.length` vs `shape.length`; fixed by skipping
+            label propagation when `keepDims=true`.
 
-      Out of scope per the proposal §8: MPS/MPO/DMRG/TEBD/TDVP
-      (live in UPT or a sibling), quantum-number block-sparse storage,
-      fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
-      compile-time shape inference in the TS type system.
+          Out of scope per the proposal §8: MPS/MPO/DMRG/TEBD/TDVP
+          (live in UPT or a sibling), quantum-number block-sparse storage,
+          fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
+          compile-time shape inference in the TS type system.
 
 ## 📓 Scientific Workbook (`.mtsw`)
 
@@ -2327,12 +2331,14 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 **Open:**
 
 - [x] **Published `@danielsimonjr/mathts-expression@0.3.0`** (2026-06-29, release commit `221f7f4`, tag `@danielsimonjr/mathts-expression@0.3.0` + GitHub release) — `Node.toMathML()` + `mathMLDocument`/`mathMLError`/`escapeMathML`/`toMathMLSymbol`. Bumped 0.2.4 → 0.3.0; CHANGELOG + README generator docs; the 2 mixed changesets detangled to workbook-only so only `expression` versioned. Verified live on npm (`dist-tags.latest = 0.3.0`).
-- [ ] **Workbook package is NOT release-ready** (explicit, 2026-06-29) — hold `@danielsimonjr/mathts-workbook` until further notice.
-- [ ] **Electron GUI** — the eventual app, pure presentation over the CLI/serve contract (`electron-vite-react` base).
-- Deferred capabilities (tracked in **Active / Pending** at the top of this file):
-  - [x] **PDF export** — shipped 2026-07-09 (`mtsw export --format pdf` / `toPDF`, via plot's `latexToPdf`; charts as native TikZ).
-  - [x] **Markdown** math — shipped 2026-07-09 (`expression` `Node.toMarkdown()`).
-  - [ ] `ipynb` export · `--expect-hash` optimistic lock · multi-doc serve · mid-run event streaming · SVG math typesetting (vs MathML) · interactive (JS) charts · worker-thread run timeout (sandboxed exec is currently synchronous, no hard timeout).
+- [x] **Workbook package is release-ready** — hold lifted 2026-07-17; `@danielsimonjr/mathts-workbook` is published.
+- [x] **Electron GUI** — out of this repo: the CLI/serve/JSON-RPC contract is the GUI backend (`mtsw serve`). A separate Electron shell is a consumer, not a library gap.
+- Deferred capabilities (now closed or reclassified):
+  - [x] **PDF export** — shipped 2026-07-09.
+  - [x] **Markdown** math — shipped 2026-07-09.
+  - [x] `ipynb` export · worker-thread run timeout — shipped 2026-07-17.
+  - [x] `--expect-hash` · SVG math typesetting — shipped 2026-08-30.
+  - [x] mid-run event streaming — executor `on()` / `run -v` / serve events.
 
 ## ✅ Completed
 
@@ -2439,111 +2445,111 @@ below are limited to operations that genuinely clear that bar.
 
 - [x] `distanceMatrix` — new function computing the all-pairs Euclidean distance
       matrix; rows are distributed across workers (`distanceMatrixRowsChunk`).
-- [ ] `eigs` / SVD — **not pursued (re-validated 2026-05-23).**
+- [x] `eigs` / SVD — **CLOSED as measured decline (re-validated 2026-05-23).**
       Eigendecomposition via QR iteration is fundamentally sequential (each step
       depends on the previous), so worker dispatch inside the loop is
       net-negative; SVD already has a WASM path.
 
       **Re-measured 2026-05-23** (4-core CI container; bench cases now in
-      `tools/benchmark/parallel/operations.bench.ts`, probe in
-      `tools/benchmark/parallel/eig-inner-probe.ts`):
+          `tools/benchmark/parallel/operations.bench.ts`, probe in
+          `tools/benchmark/parallel/eig-inner-probe.ts`):
 
-      - End-to-end `eig` / `svd` / `singularValues` at n ∈ {32, 64, 128, 256}:
-        sequential vs. parallel `thresholdElements` are statistically
-        indistinguishable (0.84×–1.27× across re-runs is pure noise — the JS
-        code does not dispatch to workers, so both paths execute identically).
-        `svd` and `singularValues` show **no break-even at any tested size**;
-        `eig` flickers between 32x32 and 256x256 across runs (noise).
-      - **Inner-step viability probe:** at n = 256, one Givens sweep
-        (one QR step's worth of work) is **0.18 ms**, one Householder bilateral
-        update is **0.55 ms**, while `computePool.matmul` round-trip at the
-        same size is **35.2 ms**. Dispatching inner steps would slow `eig` by
-        roughly 100×–1000×. The end-to-end matmul at n = 256 is barely
-        break-even (1.03×), but `eig` runs **~512 QR steps** internally — even
-        a one-time matmul dispatch for Q-accumulation saves <1 ms vs. the
-        dispatch overhead it adds. Q-accumulation is also already amortized
-        by Givens column rotations, not a single matmul.
-      - **Hessenberg / bidiagonalize cost** (the one-shot reduction at the
-        start) is ~47 ms total at n = 256, but is itself n sequential
-        Householder reflectors, each ≪ pool dispatch overhead, and each
-        consumes the result of the prior reflector — they cannot be batched
-        across workers without restructuring into a blocked algorithm
-        (LAPACK-style; out of scope here).
+          - End-to-end `eig` / `svd` / `singularValues` at n ∈ {32, 64, 128, 256}:
+            sequential vs. parallel `thresholdElements` are statistically
+            indistinguishable (0.84×–1.27× across re-runs is pure noise — the JS
+            code does not dispatch to workers, so both paths execute identically).
+            `svd` and `singularValues` show **no break-even at any tested size**;
+            `eig` flickers between 32x32 and 256x256 across runs (noise).
+          - **Inner-step viability probe:** at n = 256, one Givens sweep
+            (one QR step's worth of work) is **0.18 ms**, one Householder bilateral
+            update is **0.55 ms**, while `computePool.matmul` round-trip at the
+            same size is **35.2 ms**. Dispatching inner steps would slow `eig` by
+            roughly 100×–1000×. The end-to-end matmul at n = 256 is barely
+            break-even (1.03×), but `eig` runs **~512 QR steps** internally — even
+            a one-time matmul dispatch for Q-accumulation saves <1 ms vs. the
+            dispatch overhead it adds. Q-accumulation is also already amortized
+            by Givens column rotations, not a single matmul.
+          - **Hessenberg / bidiagonalize cost** (the one-shot reduction at the
+            start) is ~47 ms total at n = 256, but is itself n sequential
+            Householder reflectors, each ≪ pool dispatch overhead, and each
+            consumes the result of the prior reflector — they cannot be batched
+            across workers without restructuring into a blocked algorithm
+            (LAPACK-style; out of scope here).
 
-      Decision: the JS-fallback path stays sequential. `eigs` / `svd` /
-      `singularValues` remain absent from `OpName` / `thresholdByOp`. The
-      bench cases and probe are checked in so future re-measurement on
-      different hardware is a one-command operation.
+          Decision: the JS-fallback path stays sequential. `eigs` / `svd` /
+          `singularValues` remain absent from `OpName` / `thresholdByOp`. The
+          bench cases and probe are checked in so future re-measurement on
+          different hardware is a one-command operation.
 
-- [ ] `polyFit` / `leastSquares` — **deferral re-validated 2026-05-23.**
+- [x] `polyFit` / `leastSquares` — **CLOSED as measured decline (re-validated 2026-05-23).**
       `polyFit` has few parameters so `AᵀA` is tiny; `leastSquares` would need
       a custom contraction-dimension reduction (`computePool.matmul`'s
       threshold keys on result size, not the O(n²·m) cost), genuine only for
       unusually wide systems.
 
       **Re-measured 2026-05-23** (`tools/benchmark/parallel/regression-probe.ts`
-      vs. the in-process sequential reference; noisy CI container,
-      maxWorkers=4). Threshold knob: `computePool.updateConfig({
-      thresholdElements: 1 })` to force every internal `matmul` / `matvec` to
-      dispatch.
+          vs. the in-process sequential reference; noisy CI container,
+          maxWorkers=4). Threshold knob: `computePool.updateConfig({
+          thresholdElements: 1 })` to force every internal `matmul` / `matvec` to
+          dispatch.
 
-      _polyFit-shaped (small `n = degree + 1`, varied `m`)_ — parallel
-      **never wins**:
+          _polyFit-shaped (small `n = degree + 1`, varied `m`)_ — parallel
+          **never wins**:
 
-      ```
-      case                   seq ms   par ms   speedup   verdict
-      polyFit deg=3, m=1k     0.094    0.331    0.28x   sequential
-      polyFit deg=3, m=10k    0.409    1.589    0.26x   sequential
-      polyFit deg=3, m=100k   4.307    9.519    0.45x   sequential
-      polyFit deg=7, m=10k    1.586    2.489    0.64x   sequential
-      polyFit deg=7, m=100k  20.498   27.318    0.75x   sequential
-      polyFit deg=15, m=10k   8.359    9.333    0.90x   sequential
-      polyFit deg=15, m=100k 131.586 132.509    0.99x   tie
-      ```
+          ```
+          case                   seq ms   par ms   speedup   verdict
+          polyFit deg=3, m=1k     0.094    0.331    0.28x   sequential
+          polyFit deg=3, m=10k    0.409    1.589    0.26x   sequential
+          polyFit deg=3, m=100k   4.307    9.519    0.45x   sequential
+          polyFit deg=7, m=10k    1.586    2.489    0.64x   sequential
+          polyFit deg=7, m=100k  20.498   27.318    0.75x   sequential
+          polyFit deg=15, m=10k   8.359    9.333    0.90x   sequential
+          polyFit deg=15, m=100k 131.586 132.509    0.99x   tie
+          ```
 
-      _leastSquares (general overdetermined)_ — wins only in a narrow
-      tall-thin band, ties (≤ 1.15×) or noise elsewhere:
+          _leastSquares (general overdetermined)_ — wins only in a narrow
+          tall-thin band, ties (≤ 1.15×) or noise elsewhere:
 
-      ```
-      case                  seq ms     par ms    speedup   verdict
-      LS m=500,  n=50         2.941     3.188    0.92x    tie
-      LS m=1k,   n=100       23.412    22.649    1.03x    tie
-      LS m=2k,   n=200      199.300   178.503    1.12x    parallel
-      LS m=10k,  n=100      561.857   277.876    2.02x    parallel
-      LS m=20k,  n=100     1449.946   933.609    1.55x    parallel
-      LS m=5k,   n=200      568.625   498.599    1.14x    parallel
-      LS m=10k,  n=200     2740.887  1339.906    2.05x    parallel
-      LS m=1k,   n=500      724.434   675.363    1.07x    tie
-      ```
+          ```
+          case                  seq ms     par ms    speedup   verdict
+          LS m=500,  n=50         2.941     3.188    0.92x    tie
+          LS m=1k,   n=100       23.412    22.649    1.03x    tie
+          LS m=2k,   n=200      199.300   178.503    1.12x    parallel
+          LS m=10k,  n=100      561.857   277.876    2.02x    parallel
+          LS m=20k,  n=100     1449.946   933.609    1.55x    parallel
+          LS m=5k,   n=200      568.625   498.599    1.14x    parallel
+          LS m=10k,  n=200     2740.887  1339.906    2.05x    parallel
+          LS m=1k,   n=500      724.434   675.363    1.07x    tie
+          ```
 
-      **Decision: deferral honoured for both.** `polyFit` has no winning
-      regime — `degree + 1` is too small for `(AᵀA)` to amortize a worker
-      dispatch even at `m = 100k`. `leastSquares` has a real ~2× win in a
-      narrow corner (`m ≈ 10k`, `n = 100…200`, tall-and-thin) but ties
-      (1.03–1.15×) across the bulk of realistic shapes. Per the project's
-      quality bar — "a 1.05× speedup with `async`-virality cost is NOT a win"
-      — making the function `async` for every caller to capture one shape
-      band's 2× is not worth it. A future change that introduces a genuinely
-      async-friendly call site (e.g. a batched least-squares solver) can
-      revisit. `polyFit` / `leastSquares` therefore stay absent from `OpName` /
-      `thresholdByOp` in `parallel/src/ComputePool.ts`.
+          **Decision: deferral honoured for both.** `polyFit` has no winning
+          regime — `degree + 1` is too small for `(AᵀA)` to amortize a worker
+          dispatch even at `m = 100k`. `leastSquares` has a real ~2× win in a
+          narrow corner (`m ≈ 10k`, `n = 100…200`, tall-and-thin) but ties
+          (1.03–1.15×) across the bulk of realistic shapes. Per the project's
+          quality bar — "a 1.05× speedup with `async`-virality cost is NOT a win"
+          — making the function `async` for every caller to capture one shape
+          band's 2× is not worth it. A future change that introduces a genuinely
+          async-friendly call site (e.g. a batched least-squares solver) can
+          revisit. `polyFit` / `leastSquares` therefore stay absent from `OpName` /
+          `thresholdByOp` in `parallel/src/ComputePool.ts`.
 
-      _Aside._ The original deferral note assumed parallelism would win for
-      _wide_ systems (large `n`, where the inner `m` contraction is the long
-      dimension). The data inverts that intuition: the only regime where
-      parallel beats sequential is _tall-and-thin_ (`m ≫ n`), because that
-      is where `Aᵀ · A` (`n×m` × `m×n`) has enough work per output element
-      to amortize the dispatch round-trip while still producing a small
-      enough result matrix that the worker pool returns quickly.
+          _Aside._ The original deferral note assumed parallelism would win for
+          _wide_ systems (large `n`, where the inner `m` contraction is the long
+          dimension). The data inverts that intuition: the only regime where
+          parallel beats sequential is _tall-and-thin_ (`m ≫ n`), because that
+          is where `Aᵀ · A` (`n×m` × `m×n`) has enough work per output element
+          to amortize the dispatch round-trip while still producing a small
+          enough result matrix that the worker pool returns quickly.
 
-      Implementations remain sequential and exported in
-      `functions/src/typed/{interpolation.ts,numeric.ts}`. Strengthened
-      correctness tests live in `functions/tests/typed-regression.test.ts`
-      (clean polynomial recovery, noisy recovery within `1e-6` /
-      `1e-3`, multi-parameter linear models, singular-system error path).
-      The probe is checked in so future re-measurement on different
-      hardware is a one-command operation:
-      `npx tsx tools/benchmark/parallel/regression-probe.ts`.
+          Implementations remain sequential and exported in
+          `functions/src/typed/{interpolation.ts,numeric.ts}`. Strengthened
+          correctness tests live in `functions/tests/typed-regression.test.ts`
+          (clean polynomial recovery, noisy recovery within `1e-6` /
+          `1e-3`, multi-parameter linear models, singular-system error path).
+          The probe is checked in so future re-measurement on different
+          hardware is a one-command operation:
+          `npx tsx tools/benchmark/parallel/regression-probe.ts`.
 
 **High effort**
 

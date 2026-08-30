@@ -100,8 +100,14 @@ describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
   it('returns an unevaluated marker for out-of-scope integrands', () => {
     // non-linear inner argument (needs a general u-substitution / Risch)
     expect(symbolicIntegral('sin(x^2)')).toBe('integral(sin(x^2), x)');
-    // rational with a degree-≥3 irreducible denominator (Risch Layer 2 territory)
-    expect(symbolicIntegral('1/(x^3 - 2)')).toBe('integral(1/(x^3 - 2), x)');
+  });
+
+  it('∫1/(x^3-2) is now Layer 3 (no marker) and differentiates back', () => {
+    const F = symbolicIntegral('1/(x^3 - 2)', 'x');
+    expect(F.startsWith('integral(')).toBe(false);
+    for (const x of [0.4, 0.9, -0.7]) {
+      expect(dF(F, x)).toBeCloseTo(evaluate('1/(x^3 - 2)', { x }), 4);
+    }
   });
 
   it('handles a custom integration variable', () => {

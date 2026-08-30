@@ -47,6 +47,10 @@ export { SCHEMA_VERSION, VERSION } from './contract';
 export { Session } from './session';
 export { handleRequest } from './rpc';
 
+// SVG math typesetting (MathML → SVG)
+export { mathMLToSVG } from './svg-math';
+export type { MathSvgOptions } from './svg-math';
+
 // Kill-able worker-thread execution with a hard timeout
 export { runWorkbookWithTimeout, WorkbookTimeoutError } from './timeout-runner';
 export type {

@@ -1,19 +1,19 @@
 {
   "generated": "2026-08-30",
-  "totalFiles": 1833,
+  "totalFiles": 1854,
   "byDisposition": {
-    "reachable": 1135,
+    "reachable": 1139,
     "build-entry": 33,
     "test-only": 2,
     "orphan": 0,
-    "test": 604,
+    "test": 621,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1170,
-    "tests": 604,
+    "src": 1174,
+    "tests": 621,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -22,28 +22,28 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 19,
-    "@danielsimonjr/mathts-compat": 14,
-    "@danielsimonjr/mathts-core": 79,
+    "@danielsimonjr/mathts-autograd": 20,
+    "@danielsimonjr/mathts-compat": 15,
+    "@danielsimonjr/mathts-core": 80,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 44,
-    "@danielsimonjr/mathts-expression": 542,
-    "@danielsimonjr/mathts-functions": 763,
-    "@danielsimonjr/mathts-gpu": 15,
+    "@danielsimonjr/mathts-expression": 543,
+    "@danielsimonjr/mathts-functions": 771,
+    "@danielsimonjr/mathts-gpu": 16,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 97,
+    "@danielsimonjr/mathts-matrix": 98,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 9,
-    "@danielsimonjr/mathts-parallel": 37,
+    "@danielsimonjr/mathts-parallel": 38,
     "@danielsimonjr/mathts-parser": 3,
-    "@danielsimonjr/mathts-plot": 43,
+    "@danielsimonjr/mathts-plot": 44,
     "@danielsimonjr/mathts-signal": 3,
     "@danielsimonjr/mathts-statistics": 3,
-    "@danielsimonjr/mathts-tensor": 51,
+    "@danielsimonjr/mathts-tensor": 52,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 58
+    "@danielsimonjr/mathts-workbook": 62
   },
   "files": [
     {
@@ -355,6 +355,13 @@
       "loc": 58
     },
     {
+      "file": "autograd/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 26
+    },
+    {
       "file": "autograd/tests/reverse-grad.test.ts",
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
@@ -493,6 +500,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 296
+    },
+    {
+      "file": "compat/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 33
     },
     {
       "file": "compat/tests/shims.test.ts",
@@ -892,6 +906,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 224
+    },
+    {
+      "file": "core/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 42
     },
     {
       "file": "core/tests/range-integration.test.ts",
@@ -4765,6 +4786,13 @@
       "loc": 346
     },
     {
+      "file": "expression/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
+    },
+    {
       "file": "expression/tests/RangeNode.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -5567,14 +5595,28 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 396
+      "loc": 416
+    },
+    {
+      "file": "functions/src/cas/layer3.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 473
+    },
+    {
+      "file": "functions/src/cas/rat.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 55
     },
     {
       "file": "functions/src/cas/rational-integrate.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 915
+      "loc": 889
     },
     {
       "file": "functions/src/clustering-extra.ts",
@@ -5889,7 +5931,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 598
+      "loc": 608
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6947,6 +6989,13 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 171
+    },
+    {
+      "file": "functions/src/special/spheroidal.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 254
     },
     {
       "file": "functions/src/special/wave-functions.ts",
@@ -9109,7 +9158,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 114
+      "loc": 120
     },
     {
       "file": "functions/tests/gap-transcendental-richtype-oracle.test.ts",
@@ -9483,6 +9532,13 @@
       "loc": 28
     },
     {
+      "file": "functions/tests/layer3-primitives.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 85
+    },
+    {
       "file": "functions/tests/lgamma-complex.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9693,11 +9749,25 @@
       "loc": 317
     },
     {
+      "file": "functions/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 496
+    },
+    {
       "file": "functions/tests/qz-hardening.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 164
+    },
+    {
+      "file": "functions/tests/rat.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
     },
     {
       "file": "functions/tests/rational-integrate-apart.test.ts",
@@ -9718,21 +9788,28 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 19
+      "loc": 26
+    },
+    {
+      "file": "functions/tests/rational-integrate-layer3.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 71
     },
     {
       "file": "functions/tests/rational-integrate-posdisc.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 42
+      "loc": 46
     },
     {
       "file": "functions/tests/rational-integrate-terms.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 61
+      "loc": 64
     },
     {
       "file": "functions/tests/rational-integrate.test.ts",
@@ -9873,6 +9950,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 35
+    },
+    {
+      "file": "functions/tests/spheroidal.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 103
     },
     {
       "file": "functions/tests/statistics-extended.test.ts",
@@ -10349,6 +10433,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 25
+    },
+    {
+      "file": "gpu/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
     },
     {
       "file": "gpu/tests/shader-manager.test.ts",
@@ -10953,6 +11044,13 @@
       "loc": 167
     },
     {
+      "file": "matrix/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
+    },
+    {
       "file": "matrix/tests/security/wasm-integrity.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -11380,6 +11478,13 @@
       "loc": 109
     },
     {
+      "file": "parallel/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-parallel",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
+    },
+    {
       "file": "parallel/tests/strategies-index.test.ts",
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
@@ -11679,6 +11784,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 19
+    },
+    {
+      "file": "plot/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 26
     },
     {
       "file": "plot/tests/render-file.test.ts",
@@ -12101,6 +12213,13 @@
       "loc": 29
     },
     {
+      "file": "tensor/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
       "file": "tensor/tests/reductions.test.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
@@ -12469,14 +12588,14 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 143
+      "loc": 104
     },
     {
       "file": "workbook/src/cli.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1472
+      "loc": 1486
     },
     {
       "file": "workbook/src/contract.ts",
@@ -12539,7 +12658,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 57
+      "loc": 61
     },
     {
       "file": "workbook/src/introspect.ts",
@@ -12596,6 +12715,13 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 186
+    },
+    {
+      "file": "workbook/src/svg-math.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 40
     },
     {
       "file": "workbook/src/svg.ts",
@@ -12686,7 +12812,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 187
+      "loc": 189
+    },
+    {
+      "file": "workbook/tests/expect-hash.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 36
     },
     {
       "file": "workbook/tests/export-json.test.ts",
@@ -12815,6 +12948,13 @@
       "loc": 297
     },
     {
+      "file": "workbook/tests/public-api-smoke.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
+    },
+    {
       "file": "workbook/tests/reserved-cell-types.test.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
@@ -12848,6 +12988,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 128
+    },
+    {
+      "file": "workbook/tests/svg-math.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 29
     },
     {
       "file": "workbook/tests/svg.test.ts",

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-30", "f": 1168, "e": 5809, "re": 2356 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-30", "f": 1172, "e": 5836, "re": 2363 },
   "s": {
-    "loc": 194464,
+    "loc": 195308,
     "cls": 53,
-    "int": 505,
-    "fn": 1869,
+    "int": 506,
+    "fn": 1882,
     "tg": 158,
     "en": 0,
-    "co": 1596,
-    "toi": 581
+    "co": 1598,
+    "toi": 582
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -562,27 +562,23 @@
       ]
     },
     "functions/cas": {
-      "f": 1,
+      "f": 3,
       "exp": [
+        "detZ",
+        "resultantZ",
+        "rothsteinResultant",
+        "hermiteReduce",
+        "residueIntegral",
+        "rothsteinTrager",
+        "integrateLayer3",
+        "RAT_ZERO",
+        "ratNormalize",
         "ratAdd",
         "ratSub",
         "ratMul",
         "ratDiv",
         "ratFromBigint",
-        "surdFromRat",
-        "surdNeg",
-        "surdAdd",
-        "surdSub",
-        "surdMul",
-        "surdDiv",
-        "surdRender",
-        "parseRationalFunction",
-        "polynomialPart",
-        "integratePolynomial",
-        "factorDenominator",
-        "partialFractions",
-        "integratePFTerm",
-        "integrateRationalFunction"
+        "surdFromRat"
       ],
       "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
@@ -955,7 +951,7 @@
       ]
     },
     "functions/special": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "createErf",
         "pFq",
@@ -1649,7 +1645,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 24,
+      "f": 25,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1852,7 +1848,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 127, "o": 0 },
+    { "p": "src/index.ts", "i": 128, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

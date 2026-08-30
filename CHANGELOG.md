@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Risch Layer 3** (`functions/src/cas/layer3.ts`): Hermite reduction + Rothstein–Trager /
+  residue-formula integration for rational functions with degree-≥3 irreducible denominators
+  (and repeated positive-discriminant quadratics). `1/(x^3-2)` and `1/(x^3+x+1)` now return
+  closed forms that differentiate back to the integrand. `1/(x log x) → log(log x)`.
+- **Spheroidal wave functions**: `spheroidalLambda` / `spheroidalAngular` / `spheroidalRadial`
+  / `ferrersP` (prolate angular characteristic values and `S_mn(c, η)` via the
+  associated-Legendre expansion).
+- **Workbook `--expect-hash`**: `mtsw run --expect-hash <sha256>` is an optimistic lock —
+  refuse to execute if the file's SHA-256 does not match.
+- **SVG math typesetting**: `mathMLToSVG` wraps MathML in an SVG `foreignObject`.
+- **Public-API smoke coverage**: representative (and heuristic) calls across the functions,
+  core, matrix, workbook, expression, tensor, autograd, plot, gpu, parallel, and compat
+  export surfaces so `test:coverage` exercises nearly every published function.
+
 ### Fixed
 
 - **Root vitest aggregate no longer crashes on VERSION-bearing packages.** `npx vitest run`

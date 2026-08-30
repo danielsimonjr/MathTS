@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-08-30'
-  totalFiles: 1168
+  totalFiles: 1172
   totalModules: 83
-  totalExports: 5809
+  totalExports: 5836
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8504,6 +8504,14 @@ modules:
             - mathieuCe
             - mathieuSe
           reExport: true
+        - file: ./special/spheroidal.js
+          imports:
+            - spheroidalLambda
+            - spheroidalCharacteristic
+            - spheroidalAngular
+            - spheroidalRadial
+            - ferrersP
+          reExport: true
         - file: ./graph/traversal-centrality.js
           imports:
             - bfs
@@ -9139,6 +9147,11 @@ modules:
         - mathieuB
         - mathieuCe
         - mathieuSe
+        - spheroidalLambda
+        - spheroidalCharacteristic
+        - spheroidalAngular
+        - spheroidalRadial
+        - ferrersP
         - bfs
         - dfs
         - floydWarshall
@@ -9542,6 +9555,11 @@ modules:
         - mathieuB
         - mathieuCe
         - mathieuSe
+        - spheroidalLambda
+        - spheroidalCharacteristic
+        - spheroidalAngular
+        - spheroidalRadial
+        - ferrersP
         - bfs
         - dfs
         - floydWarshall
@@ -9933,6 +9951,83 @@ modules:
         - Unit
         - MatrixConstructor
   functions/cas:
+    functions/src/cas/layer3.ts:
+      description: Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - trim
+            - degree
+            - sub
+            - mul
+            - scalarMul
+            - derivative
+            - exactDivide
+            - polyGcdZ
+            - IntPoly
+        - file: ../typed/factorization/zassenhaus.js
+          imports:
+            - factorUnivariateZ
+        - file: ./rat.js
+          imports:
+            - ratAdd
+            - ratSub
+            - ratMul
+            - ratDiv
+            - ratFromBigint
+            - RAT_ZERO
+            - Rat
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+      exports:
+        - detZ
+        - resultantZ
+        - rothsteinResultant
+        - hermiteReduce
+        - residueIntegral
+        - rothsteinTrager
+        - integrateLayer3
+      functions:
+        - detZ
+        - resultantZ
+        - rothsteinResultant
+        - hermiteReduce
+        - residueIntegral
+        - rothsteinTrager
+        - integrateLayer3
+    functions/src/cas/rat.ts:
+      description: Exact rational arithmetic (lowest-terms, positive denominator).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - bigintGcd
+      workspaceDependencies: []
+      exports:
+        - RAT_ZERO
+        - ratNormalize
+        - ratAdd
+        - ratSub
+        - ratMul
+        - ratDiv
+        - ratFromBigint
+      interfaces:
+        - Rat
+      functions:
+        - ratNormalize
+        - ratAdd
+        - ratSub
+        - ratMul
+        - ratDiv
+        - ratFromBigint
+      constants:
+        - RAT_ZERO
     functions/src/cas/rational-integrate.ts:
       description: 'Layer 1 rational-function symbolic integration — Task 1: parse a'
       externalDependencies: []
@@ -9945,13 +10040,25 @@ modules:
         - file: ../typed/factorization/integer-poly.js
           imports:
             - trim
-            - bigintGcd
             - mul
             - exactDivide
             - IntPoly
         - file: ../typed/factorization/zassenhaus.js
           imports:
             - factorUnivariateZ
+        - file: ./layer3.js
+          imports:
+            - integrateLayer3
+        - file: ./rat.js
+          imports:
+            - ratAdd
+            - ratSub
+            - ratMul
+            - ratDiv
+            - ratFromBigint
+            - ratNormalize
+            - RAT_ZERO
+            - Rat
       workspaceDependencies: []
       exports:
         - ratAdd
@@ -9974,17 +10081,11 @@ modules:
         - integratePFTerm
         - integrateRationalFunction
       interfaces:
-        - Rat
         - RatFunc
         - Surd
         - DenFactor
         - PFTerm
       functions:
-        - ratAdd
-        - ratSub
-        - ratMul
-        - ratDiv
-        - ratFromBigint
         - surdFromRat
         - surdNeg
         - surdAdd
@@ -15925,6 +16026,29 @@ modules:
         - trigamma
         - jacobiP
         - gegenbauerC
+    functions/src/special/spheroidal.ts:
+      description: Prolate spheroidal wave functions — angular characteristic values
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - eig
+      exports:
+        - spheroidalCharacteristic
+        - ferrersP
+        - spheroidalLambda
+        - spheroidalAngular
+        - spheroidalRadial
+      functions:
+        - ferrersP
+        - spheroidalLambda
+        - spheroidalAngular
+        - spheroidalRadial
+      constants:
+        - spheroidalCharacteristic
     functions/src/special/wave-functions.ts:
       description: 'Advanced niche special functions: the Riemann–Siegel Z-function, the Lerch'
       externalDependencies: []
@@ -32331,6 +32455,9 @@ modules:
       description: MathTS Workbook CLI
       externalDependencies: []
       nodeDependencies:
+        - module: crypto
+          imports:
+            - createHash
         - module: fs
           imports:
             - readFileSync
@@ -32708,6 +32835,10 @@ modules:
           imports:
             - handleRequest
           reExport: true
+        - file: ./svg-math
+          imports:
+            - mathMLToSVG
+          reExport: true
         - file: ./timeout-runner
           imports:
             - runWorkbookWithTimeout
@@ -32731,6 +32862,11 @@ modules:
           imports:
             - CellPosition
             - RemoveResult
+          reExport: true
+          typeOnly: true
+        - file: ./svg-math
+          imports:
+            - MathSvgOptions
           reExport: true
           typeOnly: true
         - file: ./timeout-runner
@@ -32765,6 +32901,7 @@ modules:
         - VERSION
         - Session
         - handleRequest
+        - mathMLToSVG
         - runWorkbookWithTimeout
         - WorkbookTimeoutError
         - Workbook
@@ -32779,6 +32916,7 @@ modules:
         - RunResult
         - CellPosition
         - RemoveResult
+        - MathSvgOptions
         - RunWorkbookWithTimeoutOptions
         - SerializedCellResult
         - SerializedRunResult
@@ -32806,6 +32944,7 @@ modules:
         - VERSION
         - Session
         - handleRequest
+        - mathMLToSVG
         - runWorkbookWithTimeout
         - WorkbookTimeoutError
         - Workbook
@@ -32820,6 +32959,7 @@ modules:
         - RunResult
         - CellPosition
         - RemoveResult
+        - MathSvgOptions
         - RunWorkbookWithTimeoutOptions
         - SerializedCellResult
         - SerializedRunResult
@@ -33046,6 +33186,18 @@ modules:
         - Session
       interfaces:
         - WorkbookEventLite
+    workbook/src/svg-math.ts:
+      description: MathML → SVG typesetting. Wraps a MathML fragment in an SVG document so
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - mathMLToSVG
+      interfaces:
+        - MathSvgOptions
+      functions:
+        - mathMLToSVG
     workbook/src/svg.ts:
       description: 'Adapter: workbook ChartSpec → @danielsimonjr/mathts-plot per-type functions.'
       externalDependencies: []
@@ -36539,6 +36691,8 @@ dependencyGraph:
         - functions/src/types.ts
     - name: Functions/cas
       files:
+        - functions/src/cas/layer3.ts
+        - functions/src/cas/rat.ts
         - functions/src/cas/rational-integrate.ts
     - name: Functions/combinatorics
       files:
@@ -36761,6 +36915,7 @@ dependencyGraph:
         - functions/src/special/mathieu.ts
         - functions/src/special/niche.ts
         - functions/src/special/polygamma-orthopoly.ts
+        - functions/src/special/spheroidal.ts
         - functions/src/special/wave-functions.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
@@ -37517,6 +37672,7 @@ dependencyGraph:
         - workbook/src/rpc.ts
         - workbook/src/run-worker.ts
         - workbook/src/session.ts
+        - workbook/src/svg-math.ts
         - workbook/src/svg.ts
         - workbook/src/tex.ts
         - workbook/src/timeout-runner.ts
@@ -37601,19 +37757,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1168
+  totalTypeScriptFiles: 1172
   totalModules: 83
-  totalLinesOfCode: 194464
-  totalExports: 5809
+  totalLinesOfCode: 195308
+  totalExports: 5836
   totalClasses: 53
-  totalInterfaces: 505
-  totalFunctions: 1869
+  totalInterfaces: 506
+  totalFunctions: 1882
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1596
-  totalReExports: 2356
-  totalTypeOnlyImports: 581
+  totalConstants: 1598
+  totalReExports: 2363
+  totalTypeOnlyImports: 582
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
-  unusedExportsCount: 226
+  unusedExportsCount: 220
