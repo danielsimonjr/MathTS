@@ -359,7 +359,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 26
+      "loc": 10
     },
     {
       "file": "autograd/tests/reverse-grad.test.ts",
@@ -506,7 +506,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 33
+      "loc": 11
     },
     {
       "file": "compat/tests/shims.test.ts",
@@ -912,7 +912,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 42
+      "loc": 41
     },
     {
       "file": "core/tests/range-integration.test.ts",
@@ -4790,7 +4790,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 35
+      "loc": 24
     },
     {
       "file": "expression/tests/RangeNode.test.ts",
@@ -5602,7 +5602,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 473
+      "loc": 461
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -5903,7 +5903,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 365
+      "loc": 376
     },
     {
       "file": "functions/src/graph/traversal-centrality.ts",
@@ -6995,7 +6995,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 254
+      "loc": 252
     },
     {
       "file": "functions/src/special/wave-functions.ts",
@@ -9375,7 +9375,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 57
+      "loc": 65
     },
     {
       "file": "functions/tests/graph-traversal.test.ts",
@@ -9753,7 +9753,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 496
+      "loc": 824
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",
@@ -10439,7 +10439,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 28
+      "loc": 11
     },
     {
       "file": "gpu/tests/shader-manager.test.ts",
@@ -11048,7 +11048,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 41
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",
@@ -11482,7 +11482,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 28
+      "loc": 45
     },
     {
       "file": "parallel/tests/strategies-index.test.ts",
@@ -11790,7 +11790,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
       "disposition": "test",
-      "loc": 26
+      "loc": 10
     },
     {
       "file": "plot/tests/render-file.test.ts",
@@ -12217,7 +12217,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 21
     },
     {
       "file": "tensor/tests/reductions.test.ts",
@@ -12595,7 +12595,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1486
+      "loc": 1484
     },
     {
       "file": "workbook/src/contract.ts",
@@ -12952,7 +12952,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 52
+      "loc": 35
     },
     {
       "file": "workbook/tests/reserved-cell-types.test.ts",

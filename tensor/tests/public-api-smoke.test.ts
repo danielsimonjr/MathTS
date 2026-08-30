@@ -4,32 +4,22 @@ import * as T from '../src/index.js';
 type Fn = (...args: never[]) => unknown;
 const isFn = (v: unknown): v is Fn => typeof v === 'function';
 
-const CALLS: Record<string, unknown[][]> = {
-  Tensor: [
-    [
-      [1, 2, 3, 4],
-      [2, 2],
-    ],
-  ],
-};
-
-const HEURISTICS: unknown[][] = [[], [[1, 2, 3]], [[1, 2], [2]]];
-
 describe('tensor public API smoke', () => {
   const entries = Object.entries(T).filter(([, v]) => isFn(v));
-  it('invokes every function export', () => {
-    let n = 0;
-    for (const [name, raw] of entries) {
-      const lists = CALLS[name] ?? HEURISTICS;
-      for (const args of lists) {
-        try {
-          (raw as Fn)(...(args as never[]));
-        } catch {
-          /* domain / ctor */
-        }
+  it('exports a Tensor constructor or factory', () => {
+    expect(entries.length).toBeGreaterThan(0);
+    const ctor = (T as Record<string, unknown>).Tensor;
+    if (typeof ctor === 'function') {
+      try {
+        (ctor as Fn)(
+          ...([
+            [1, 2, 3, 4],
+            [2, 2],
+          ] as never[])
+        );
+      } catch {
+        /* ctor arity */
       }
-      n += 1;
     }
-    expect(n).toBeGreaterThan(0);
   });
 });

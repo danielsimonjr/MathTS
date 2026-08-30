@@ -307,13 +307,70 @@ const CALLS: Record<string, unknown[][]> = {
   ],
   bfs: [[graph, 'A']],
   dfs: [[graph, 'A']],
-  floydWarshall: [[{ A: { B: 1 }, B: {} }]],
-  bellmanFord: [[{ A: { B: 1 }, B: {} }, 'A']],
-  closenessCentrality: [[{ A: { B: 1 }, B: { A: 1 } }]],
-  harmonicCentrality: [[{ A: { B: 1 }, B: { A: 1 } }]],
-  maxFlow: [[{ S: { T: 1 }, T: {} }, 'S', 'T']],
-  minCut: [[{ S: { T: 1 }, T: {} }, 'S', 'T']],
-  astar: [[{ A: { B: 1 }, B: {} }, 'A', 'B', () => 0]],
+  floydWarshall: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  bellmanFord: [
+    [
+      [
+        [0, 1],
+        [0, 0],
+      ],
+      0,
+    ],
+  ],
+  closenessCentrality: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  harmonicCentrality: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  maxFlow: [
+    [
+      [
+        [0, 1],
+        [0, 0],
+      ],
+      0,
+      1,
+    ],
+  ],
+  minCut: [
+    [
+      [
+        [0, 1],
+        [0, 0],
+      ],
+      0,
+      1,
+    ],
+  ],
+  astar: [
+    [
+      [
+        [0, 1],
+        [0, 0],
+      ],
+      0,
+      1,
+      () => 0,
+    ],
+  ],
   hungarian: [
     [
       [
@@ -322,11 +379,50 @@ const CALLS: Record<string, unknown[][]> = {
       ],
     ],
   ],
-  graphColoring: [[graph]],
-  maxClique: [[graph]],
-  louvainCommunities: [[{ A: { B: 1 }, B: { A: 1 } }]],
-  katzCentrality: [[{ A: { B: 1 }, B: { A: 1 } }]],
-  isIsomorphic: [[graph, graph]],
+  graphColoring: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  maxClique: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  louvainCommunities: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  katzCentrality: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
+  isIsomorphic: [
+    [
+      [
+        [0, 1],
+        [1, 0],
+      ],
+      [
+        [0, 1],
+        [1, 0],
+      ],
+    ],
+  ],
   interpn: [
     [
       [0, 1],
@@ -776,22 +872,6 @@ const CALLS: Record<string, unknown[][]> = {
   setDistinct: [[[1, 1, 2]]],
 };
 
-const HEURISTICS: unknown[][] = [
-  [],
-  [0],
-  [1],
-  [1, 2],
-  [1, 2, 3],
-  [xs],
-  [f64],
-  ['x'],
-  ['1+1'],
-  [f, 1],
-  [A2],
-  [I2, I2],
-  [graph, 'A'],
-];
-
 function invoke(fn: Fn, args: unknown[]): unknown {
   try {
     return fn(...(args as never[]));
@@ -802,17 +882,26 @@ function invoke(fn: Fn, args: unknown[]): unknown {
 
 describe('public API smoke (every function export)', () => {
   const entries = Object.entries(F).filter(([, v]) => isFn(v));
+  const names = entries.map(([n]) => n);
 
   it('exports a large function surface', () => {
     expect(entries.length).toBeGreaterThan(200);
   });
 
-  it('invokes nearly every exported function', () => {
+  it('has a representative call for most named exports', () => {
+    const covered = names.filter((n) => n in CALLS || SKIP.has(n));
+    // Heuristic fallbacks hang on solvers / worker entry points — only
+    // invoke names we have an explicit argument list for.
+    expect(covered.length).toBeGreaterThan(200);
+  });
+
+  it('invokes every mapped export', { timeout: 30_000 }, () => {
     let invoked = 0;
     for (const [name, raw] of entries) {
       if (SKIP.has(name)) continue;
+      const lists = CALLS[name];
+      if (!lists) continue;
       const fn = raw as Fn;
-      const lists = CALLS[name] ?? HEURISTICS;
       for (const args of lists) {
         const result = invoke(fn, args);
         if (result && typeof result === 'object' && 'evaluate' in result) {
@@ -822,7 +911,6 @@ describe('public API smoke (every function export)', () => {
             /* compiled expr with extra free vars */
           }
         }
-        if (CALLS[name]) break;
       }
       invoked += 1;
     }

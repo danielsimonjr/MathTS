@@ -53,4 +53,20 @@ describe('graph optimization', () => {
     expect(r.cost).toBe(2);
     expect(r.path).toEqual([0, 1, 2]);
   });
+  it('astar rejects a non-matrix adjacency (no infinite reconstruct loop)', () => {
+    expect(() => astar({ A: { B: 1 }, B: {} } as unknown as number[][], 0, 1, () => 0)).toThrow(
+      /adjacency/
+    );
+    expect(() =>
+      astar(
+        [
+          [0, 1],
+          [0, 0],
+        ],
+        'A' as unknown as number,
+        1,
+        () => 0
+      )
+    ).toThrow(/start or goal/);
+  });
 });
