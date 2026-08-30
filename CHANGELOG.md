@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Root vitest aggregate no longer crashes on VERSION-bearing packages.** `npx vitest run`
+  and `test:coverage` import `core`/`plot`/`workbook` source directly; without the per-package
+  tsup `define` those modules threw `ReferenceError: __PKG_VERSION__ is not defined` (20 test
+  files). Root `vitest.config.ts` now applies a small transform plugin that injects each
+  package's version from its nearest `package.json`, matching the per-package vitest configs.
+
+### Security
+
+- **Workbook code cells: regression tests for the expression sandbox.** `executor.test.ts` now
+  asserts that `import(...)` and `f(x) = …` assignments are rejected when evaluated through the
+  workbook executor (the path `.mtsw` notebooks actually use).
+
+### Fixed
+
 - **The weekly dev-dependencies PR is no longer permanently red.** Every group PR pulled
   typescript 7.x, which `npm ci` rejects with ERESOLVE because
   `@typescript-eslint/eslint-plugin` (8.68.0, current stable) still declares

@@ -1,6 +1,55 @@
-import { defineConfig } from 'vitest/config';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { defineConfig, type Plugin } from 'vitest/config';
+
+/**
+ * Root vitest imports package SOURCE (not dist), but `__PKG_VERSION__` is
+ * normally injected at build time via each package's tsup `define`. Per-package
+ * vitest configs mirror that define; this plugin does the same for the root
+ * aggregate runner (`npx vitest run`, `test:coverage`) so core/plot/workbook
+ * tests that import VERSION-bearing modules do not fail with ReferenceError.
+ */
+const pkgVersionCache = new Map<string, string>();
+
+function pkgVersionForFile(filePath: string): string | null {
+  let dir = dirname(filePath);
+  for (let depth = 0; depth < 12; depth++) {
+    const pkgPath = join(dir, 'package.json');
+    if (existsSync(pkgPath)) {
+      if (!pkgVersionCache.has(pkgPath)) {
+        const { version } = JSON.parse(readFileSync(pkgPath, 'utf8')) as { version: string };
+        pkgVersionCache.set(pkgPath, version);
+      }
+      return pkgVersionCache.get(pkgPath)!;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
+function pkgVersionDefinePlugin(): Plugin {
+  return {
+    name: 'mathts-pkg-version-define',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!code.includes('__PKG_VERSION__')) return;
+      if (id.includes('node_modules')) return;
+      const version = pkgVersionForFile(id);
+      if (!version) return;
+      // Drop the ambient declare — it becomes invalid once the identifier is
+      // replaced with a string literal. The export site keeps the real value.
+      let next = code.replace(/declare const __PKG_VERSION__: string;\r?\n?/g, '');
+      next = next.replace(/\b__PKG_VERSION__\b/g, JSON.stringify(version));
+      if (next === code) return;
+      return { code: next, map: null };
+    },
+  };
+}
 
 export default defineConfig({
+  plugins: [pkgVersionDefinePlugin()],
   test: {
     globals: true,
     environment: 'node',

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-25",
+  "generated": "2026-08-30",
   "totalFiles": 1833,
   "byDisposition": {
     "reachable": 1135,
@@ -5147,7 +5147,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 219
+      "loc": 224
     },
     {
       "file": "functions/src/algebra/sparse/csMark.ts",
@@ -8171,7 +8171,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 599
+      "loc": 603
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -12469,7 +12469,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 94
+      "loc": 143
     },
     {
       "file": "workbook/src/cli.ts",
@@ -12686,7 +12686,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 175
+      "loc": 187
     },
     {
       "file": "workbook/tests/export-json.test.ts",
