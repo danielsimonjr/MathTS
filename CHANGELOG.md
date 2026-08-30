@@ -11,13 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **CI could not run on a bot-pushed branch, so the Changesets release PR was permanently
   ungaugeable.** `ci.yml` fired only on `push` and `pull_request`. GitHub's recursion guard
-  suppresses both for a branch pushed with `GITHUB_TOKEN`, which is exactly how
-  `changeset-release/main` is created -- so PR #269 sat at `BLOCKED` with **zero** workflow runs
-  and all five required contexts (`Coverage`, `Browser (WebGPU smoke)`, `Test (20.x)`,
-  `Test (22.x)`, `Compile & Lint`) simply absent. Not a red check: a missing one, which branch
-  protection can never satisfy. Added `workflow_dispatch` (gauge it on demand) and a nightly
-  `schedule` at 07:00 UTC (exercise `main` regardless of who pushed). This closes on MathTS the
-  same gap already closed across the other six owned repos; MathTS had been missed.
+  suppresses both for a branch pushed with `GITHUB_TOKEN`. Added `workflow_dispatch` (gauge any
+  branch on demand) and a nightly `schedule` at 07:00 UTC (exercise `main` regardless of who
+  pushed it). This closes on MathTS the same gap already closed across the other six owned repos;
+  MathTS had been missed.
+
+  **Correction, same day:** this change is right, but the cause first committed with it was not.
+  The Changesets release PR sat at `BLOCKED` with all five required contexts (`Coverage`,
+  `Browser (WebGPU smoke)`, `Test (20.x)`, `Test (22.x)`, `Compile & Lint`) absent, and that was
+  attributed to the recursion guard. It was not: the run existed, and its conclusion was
+  **`action_required`** -- the workflow-approval gate for a bot-authored pull request, which
+  presents as the identical zero-jobs / missing-contexts shape. The discriminator is the run's own
+  conclusion, and it was readable before the theory was written. The remedy is
+  `POST /actions/runs/<id>/approve`, not a trigger change.
 
 ### Added
 
