@@ -209,7 +209,17 @@ export function astar(
   heuristic: (node: number) => number
 ): AStarResult {
   const n = adj.length;
-  if (start < 0 || start >= n || goal < 0 || goal >= n) {
+  if (!Array.isArray(adj) || !Number.isInteger(n) || n < 0) {
+    throw new Error('astar: adjacency must be a square number[][]');
+  }
+  if (
+    !Number.isInteger(start) ||
+    !Number.isInteger(goal) ||
+    start < 0 ||
+    start >= n ||
+    goal < 0 ||
+    goal >= n
+  ) {
     throw new Error('astar: start or goal out of bounds');
   }
 
@@ -255,7 +265,8 @@ export function astar(
   }
 
   const path: number[] = [];
-  for (let v = goal; v !== -1; v = cameFrom[v]) {
+  for (let v = goal, guard = 0; v !== -1 && guard <= n; v = cameFrom[v], guard += 1) {
+    if (!Number.isInteger(v) || v < 0 || v >= n) break;
     path.unshift(v);
     if (v === start) break;
   }

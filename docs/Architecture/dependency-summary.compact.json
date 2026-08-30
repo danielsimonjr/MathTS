@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-25", "f": 1168, "e": 5809, "re": 2356 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-08-30", "f": 1172, "e": 5836, "re": 2363 },
   "s": {
-    "loc": 194455,
+    "loc": 195303,
     "cls": 53,
-    "int": 505,
-    "fn": 1869,
+    "int": 506,
+    "fn": 1882,
     "tg": 158,
     "en": 0,
-    "co": 1596,
-    "toi": 581
+    "co": 1598,
+    "toi": 582
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -247,43 +247,43 @@
         "backendManager",
         "createBackendManager",
         "BackendManager",
-        "BatchExecutor",
-        "BUILTIN_SHADERS",
-        "registerBuiltinShaders",
-        "hasWebGPU",
-        "isBrowser",
-        "getGPUAdapter",
-        "detectGPUCapabilities",
-        "isGPUSuitableForMatrixOps",
-        "getRecommendedWorkgroupSize",
-        "getMaxMatrixSize",
-        "GPUContext",
-        "getGlobalGPUContext",
-        "initializeGlobalGPU"
+        "getGlobalGPUBackend",
+        "initializeGlobalGPUBackend",
+        "destroyGlobalGPUBackend",
+        "GPUBackend",
+        "gpuMatrixBackend",
+        "createGPUMatrixBackend",
+        "GPUMatrixBackend",
+        "jsBackend",
+        "JSBackend",
+        "parallelBackend",
+        "createParallelBackend",
+        "ParallelBackend",
+        "wasmBackend"
       ],
       "cls": [
         "BackendRegistry",
         "BackendManager",
-        "BatchExecutor",
-        "SyncManager",
         "GPUBackend",
         "GPUMatrixBackend",
         "JSBackend",
         "ParallelBackend",
         "WASMBackend",
-        "WasmLoader"
+        "WasmLoader",
+        "BatchExecutor",
+        "SyncManager"
       ],
       "int": [
         "BackendHints",
         "MatrixBackend",
         "ExtendedBackendHints",
-        "BatchOperation",
-        "BatchResult",
-        "BatchOptions",
-        "TransferRequest",
-        "TransferResult",
-        "SyncConfig",
-        "GPUBackendOptions"
+        "GPUBackendOptions",
+        "GPUMatrixBackendConfig",
+        "ParallelBackendConfig",
+        "WASMBackendConfig",
+        "WasmModule",
+        "Allocation",
+        "BatchOperation"
       ]
     },
     "matrix": {
@@ -352,6 +352,11 @@
     "matrix/types": {
       "f": 6,
       "exp": [
+        "isDenseMatrix",
+        "DenseMatrix",
+        "isMatrix",
+        "isSparseMatrix",
+        "SparseMatrix",
         "add",
         "subtract",
         "multiplyElementwise",
@@ -364,12 +369,7 @@
         "max",
         "norm",
         "trace",
-        "isDenseMatrix",
-        "DenseMatrix",
-        "Matrix",
-        "isMatrix",
-        "SparseMatrix",
-        "isSparseMatrix"
+        "Matrix"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]
@@ -377,8 +377,8 @@
     "tensor": {
       "f": 4,
       "exp": [
-        "contractNetwork",
         "Tensor",
+        "contractNetwork",
         "Index",
         "idx",
         "tensorSvd",
@@ -394,11 +394,10 @@
         "tensorKron",
         "slice",
         "gather",
-        "stack",
-        "concatenate"
+        "stack"
       ],
-      "cls": ["Index", "Tensor"],
-      "int": ["ContractNetworkOpts", "ContractNetworkResult", "IndexOpts", "EinsumSpec"]
+      "cls": ["Tensor", "Index"],
+      "int": ["EinsumSpec", "ContractNetworkOpts", "ContractNetworkResult", "IndexOpts"]
     },
     "tensor/operations": {
       "f": 17,
@@ -563,27 +562,23 @@
       ]
     },
     "functions/cas": {
-      "f": 1,
+      "f": 3,
       "exp": [
+        "detZ",
+        "resultantZ",
+        "rothsteinResultant",
+        "hermiteReduce",
+        "residueIntegral",
+        "rothsteinTrager",
+        "integrateLayer3",
+        "RAT_ZERO",
+        "ratNormalize",
         "ratAdd",
         "ratSub",
         "ratMul",
         "ratDiv",
         "ratFromBigint",
-        "surdFromRat",
-        "surdNeg",
-        "surdAdd",
-        "surdSub",
-        "surdMul",
-        "surdDiv",
-        "surdRender",
-        "parseRationalFunction",
-        "polynomialPart",
-        "integratePolynomial",
-        "factorDenominator",
-        "partialFractions",
-        "integratePFTerm",
-        "integrateRationalFunction"
+        "surdFromRat"
       ],
       "int": ["Rat", "RatFunc", "Surd", "DenFactor", "PFTerm"]
     },
@@ -956,7 +951,7 @@
       ]
     },
     "functions/special": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "createErf",
         "pFq",
@@ -1083,10 +1078,10 @@
         "EUCLID",
         "Decimal",
         "createFibonacciHeapClass",
-        "createIndex",
         "createImmutableDenseMatrixClass",
         "createIndexClass",
         "createSpaClass",
+        "createIndex",
         "broadcast",
         "createMatAlgo01xDSid"
       ],
@@ -1183,6 +1178,8 @@
     "functions/wasm": {
       "f": 12,
       "exp": [
+        "wasmLoader",
+        "WasmLoader",
         "WASM_BITWISE_THRESHOLD",
         "runBinaryBitwiseWasm",
         "runUnaryBitwiseWasm",
@@ -1200,54 +1197,16 @@
         "WASM_ELEMENTWISE_THRESHOLD",
         "WASM_ELEMENTWISE_OPS",
         "elementwiseUnaryDispatch",
-        "elementwiseChainDispatch",
-        "sha384OfBuffer",
-        "loadWasmManifest"
+        "elementwiseChainDispatch"
       ],
       "cls": ["WasmLoader"],
-      "int": ["RawWasm", "WasmModule"]
+      "int": ["WasmModule", "RawWasm"]
     },
-    "expression/compiler": {
-      "f": 2,
-      "exp": ["compile", "CompiledExpression", "Scope"],
-      "int": ["Scope", "CompiledExpression"]
-    },
-    "expression/embeddedDocs": {
-      "f": 398,
-      "exp": [
-        "eDocs",
-        "falseDocs",
-        "iDocs",
-        "InfinityDocs",
-        "LN10Docs",
-        "LN2Docs",
-        "LOG10EDocs",
-        "LOG2EDocs",
-        "NaNDocs",
-        "nullDocs",
-        "phiDocs",
-        "piDocs",
-        "SQRT12Docs",
-        "SQRT2Docs",
-        "tauDocs",
-        "trueDocs",
-        "versionDocs",
-        "bigintDocs",
-        "bignumberDocs",
-        "booleanDocs"
-      ]
-    },
-    "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
-    "expression/evaluator": {
-      "f": 2,
-      "exp": ["createEvaluate", "compileExpression"],
-      "int": ["EvaluateOptions"]
-    },
-    "expression/function": { "f": 1, "exp": ["createParser"] },
     "expression": {
       "f": 7,
       "exp": [
         "createHelpClass",
+        "createParserClass",
         "createParser",
         "embeddedDocs",
         "mathMLDocument",
@@ -1265,11 +1224,47 @@
         "createFunctionNode",
         "createIndexNode",
         "createObjectNode",
-        "createOperatorNode",
-        "createParenthesisNode"
+        "createOperatorNode"
       ],
       "int": ["OperatorProperty"]
     },
+    "expression/compiler": {
+      "f": 2,
+      "exp": ["compile", "CompiledExpression", "Scope"],
+      "int": ["Scope", "CompiledExpression"]
+    },
+    "expression/embeddedDocs": {
+      "f": 398,
+      "exp": [
+        "InfinityDocs",
+        "LN10Docs",
+        "LN2Docs",
+        "LOG10EDocs",
+        "LOG2EDocs",
+        "NaNDocs",
+        "SQRT12Docs",
+        "SQRT2Docs",
+        "eDocs",
+        "falseDocs",
+        "iDocs",
+        "nullDocs",
+        "phiDocs",
+        "piDocs",
+        "tauDocs",
+        "trueDocs",
+        "versionDocs",
+        "bigintDocs",
+        "bignumberDocs",
+        "booleanDocs"
+      ]
+    },
+    "expression/error": { "f": 2, "exp": ["DimensionError", "IndexError", "createIndexError"] },
+    "expression/evaluator": {
+      "f": 2,
+      "exp": ["createEvaluate", "compileExpression"],
+      "int": ["EvaluateOptions"]
+    },
+    "expression/function": { "f": 1, "exp": ["createParser"] },
     "expression/node": {
       "f": 19,
       "exp": [
@@ -1650,7 +1645,7 @@
       "int": ["ChunkResult", "ChunkInfo", "ChunkOptions", "ThresholdConfig", "DispatchResult"]
     },
     "workbook": {
-      "f": 24,
+      "f": 25,
       "exp": [
         "runCommand",
         "validateCommand",
@@ -1788,6 +1783,11 @@
       "f": 8,
       "exp": [
         "BufferPool",
+        "getGlobalGPUContext",
+        "initializeGlobalGPU",
+        "destroyGlobalGPU",
+        "GPUContext",
+        "ShaderManager",
         "hasWebGPU",
         "isBrowser",
         "getGPUAdapter",
@@ -1800,21 +1800,17 @@
         "GPU_MIN_ELEMENTS",
         "enableGpu",
         "disableGpu",
-        "isGpuEnabled",
-        "getGlobalGPUContext",
-        "initializeGlobalGPU",
-        "destroyGlobalGPU",
-        "GPUContext"
+        "isGpuEnabled"
       ],
       "cls": ["BufferPool", "GPUContext", "ShaderManager"],
       "int": [
         "BufferPoolOptions",
-        "GPUAdapterInfo",
-        "GPUCapabilities",
         "GPUContextOptions",
         "DeviceLostEvent",
         "ShaderSource",
-        "PipelineConfig"
+        "PipelineConfig",
+        "GPUAdapterInfo",
+        "GPUCapabilities"
       ]
     },
     "plot": {
@@ -1852,7 +1848,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 127, "o": 0 },
+    { "p": "src/index.ts", "i": 128, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

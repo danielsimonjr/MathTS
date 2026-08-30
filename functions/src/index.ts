@@ -525,6 +525,16 @@ export type { CoulombFG } from './special/wave-functions.js';
 // eigenvalue problem for the Fourier coefficients (reuses matrix `eig`).
 export { mathieuA, mathieuB, mathieuCe, mathieuSe } from './special/mathieu.js';
 
+// Spheroidal wave functions — prolate angular characteristic values λ_mn(c)
+// and S_mn(c, η) / R_mn^{(1)}(c, ξ) via the associated-Legendre expansion.
+export {
+  spheroidalLambda,
+  spheroidalCharacteristic,
+  spheroidalAngular,
+  spheroidalRadial,
+  ferrersP,
+} from './special/spheroidal.js';
+
 // Phase 8 Task 1 — graph traversal (bfs/dfs), all-pairs Floyd-Warshall,
 // single-source Bellman-Ford (negative-weight/cycle-aware), and
 // closeness/harmonic centrality, complementing the existing Dijkstra

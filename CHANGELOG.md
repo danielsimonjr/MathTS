@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Risch Layer 3** (`functions/src/cas/layer3.ts`): Hermite reduction + Rothstein–Trager /
+  residue-formula integration for rational functions with degree-≥3 irreducible denominators
+  (and repeated positive-discriminant quadratics). `1/(x^3-2)` and `1/(x^3+x+1)` now return
+  closed forms that differentiate back to the integrand. `1/(x log x) → log(log x)`.
+- **Spheroidal wave functions**: `spheroidalLambda` / `spheroidalAngular` / `spheroidalRadial`
+  / `ferrersP` (prolate angular characteristic values and `S_mn(c, η)` via the
+  associated-Legendre expansion).
+- **Workbook `--expect-hash`**: `mtsw run --expect-hash <sha256>` is an optimistic lock —
+  refuse to execute if the file's SHA-256 does not match.
+- **SVG math typesetting**: `mathMLToSVG` wraps MathML in an SVG `foreignObject`.
+- **Public-API smoke coverage**: representative (and heuristic) calls across the functions,
+  core, matrix, workbook, expression, tensor, autograd, plot, gpu, parallel, and compat
+  export surfaces so `test:coverage` exercises nearly every published function.
+
+### Fixed
+
+- **Root vitest aggregate no longer crashes on VERSION-bearing packages.** `npx vitest run`
+  and `test:coverage` import `core`/`plot`/`workbook` source directly; without the per-package
+  tsup `define` those modules threw `ReferenceError: __PKG_VERSION__ is not defined` (20 test
+  files). Root `vitest.config.ts` now applies a small transform plugin that injects each
+  package's version from its nearest `package.json`, matching the per-package vitest configs.
+
+### Security
+
+- **Workbook code cells: regression tests for the expression sandbox.** `executor.test.ts` now
+  asserts that `import(...)` and `f(x) = …` assignments are rejected when evaluated through the
+  workbook executor (the path `.mtsw` notebooks actually use).
+
 ### Fixed
 
 - **The documented `esbuild` advisory was WITHDRAWN, and was the wrong one.** `CLAUDE.md` named

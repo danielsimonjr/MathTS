@@ -93,6 +93,20 @@ describe('WorkbookExecutor', () => {
       expect(result).toBeCloseTo(1, 10);
     });
 
+    it('rejects forbidden expression builtins in code cells (sandbox)', async () => {
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'import(1)' }]);
+      const exec = new WorkbookExecutor(wb);
+      await expect(exec.runCell('a')).rejects.toThrow(/forbidden|disabled|unsafe|Security/i);
+    });
+
+    it('rejects function definitions in code cells (sandbox)', async () => {
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'f(x) = x^2' }]);
+      const exec = new WorkbookExecutor(wb);
+      await expect(exec.runCell('a')).rejects.toThrow(
+        /FunctionAssignment|disabled|unsafe|Security/i
+      );
+    });
+
     it('should throw for unknown cell id', async () => {
       const wb = makeWorkbook([]);
       const exec = new WorkbookExecutor(wb);
