@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.4.0
+
+### Minor Changes
+
+- 8789126: Risch Layer 3 (Hermite + Rothstein–Trager / residue formula), prolate spheroidal wave functions, workbook `--expect-hash` and MathML→SVG typesetting.
+
+### Patch Changes
+
+- Updated dependencies [8789126]
+  - @danielsimonjr/mathts-functions@0.64.0
+  - @danielsimonjr/mathts-plot@0.4.2
+
 ## 0.3.24
 
 ### Patch Changes
