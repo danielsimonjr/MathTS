@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The documented `esbuild` advisory was WITHDRAWN, and was the wrong one.** `CLAUDE.md` named
+  `GHSA-gv7w-rqvm-qjhr` and carried its rationale — that the exploit *"needs a malicious
+  `NPM_CONFIG_REGISTRY` at install time"*. That advisory is **withdrawn**, and describes a different
+  vulnerability from the one `npm audit` reports. The live one is `GHSA-g7r4-m6w7-qqqr` (**low**):
+  arbitrary file read when running esbuild's **development server** on Windows. `tsup` uses the
+  build API and never starts that server, so the vulnerable path is unreachable — that is the
+  correct reachability argument, and it was not what was written down. A security note reasoning
+  about the wrong advisory is worse than no note: it reads as a considered acceptance while covering
+  nothing that is open.
+  Also recorded, measured rather than assumed: the root `overrides` reach `node_modules/esbuild`
+  (0.28.1) but **not** `tsup/node_modules/esbuild` (0.27.7), and an in-range fix **does** exist —
+  `0.27.0`–`0.27.2` sit below the `0.27.3` vulnerable floor. Applying it is blocked by an unrelated
+  pre-existing `ERESOLVE`, so it is *untested* rather than *unavailable*; the previous note implied
+  no in-range fix existed.
+
 - **The weekly dev-dependencies PR is no longer permanently red.** Every group PR pulled
   typescript 7.x, which `npm ci` rejects with ERESOLVE because
   `@typescript-eslint/eslint-plugin` (8.68.0, current stable) still declares
