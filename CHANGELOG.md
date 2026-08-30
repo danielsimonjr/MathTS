@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI could not run on a bot-pushed branch, so the Changesets release PR was permanently
+  ungaugeable.** `ci.yml` fired only on `push` and `pull_request`. GitHub's recursion guard
+  suppresses both for a branch pushed with `GITHUB_TOKEN`, which is exactly how
+  `changeset-release/main` is created -- so PR #269 sat at `BLOCKED` with **zero** workflow runs
+  and all five required contexts (`Coverage`, `Browser (WebGPU smoke)`, `Test (20.x)`,
+  `Test (22.x)`, `Compile & Lint`) simply absent. Not a red check: a missing one, which branch
+  protection can never satisfy. Added `workflow_dispatch` (gauge it on demand) and a nightly
+  `schedule` at 07:00 UTC (exercise `main` regardless of who pushed). This closes on MathTS the
+  same gap already closed across the other six owned repos; MathTS had been missed.
+
 ### Added
 
 - **Risch Layer 3** (`functions/src/cas/layer3.ts`): Hermite reduction + Rothstein–Trager /
