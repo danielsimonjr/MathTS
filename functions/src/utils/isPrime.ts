@@ -133,7 +133,7 @@ export const createIsPrime = /* #__PURE__ */ factory(
           d = d.div(2);
           r += 1;
         }
-        let bases: number[] | null = null;
+        let bases: number[] | null;
         // https://en.wikipedia.org/wiki/Miller–Rabin_primality_test#Testing_against_small_sets_of_bases
         if (n.toBigInt() < 3317044064679887385961981n) {
           bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41].filter((x) => x < n.toNumber());

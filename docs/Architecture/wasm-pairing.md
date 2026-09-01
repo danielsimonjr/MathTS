@@ -4,7 +4,7 @@
 
 # WASM Accelerator ↔ Function Pairing
 
-**Generated**: 2026-08-17 (by tools/create-dependency-graph)
+**Generated**: 2026-09-01 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; the functions dispatch is AS → JS.
 
@@ -145,4 +145,16 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 ## WASM binary exports
 
-> WASM binary not built — run `npm run build:wasm` then `npm run docs:deps` to populate this section (probed via `WebAssembly.Module.exports()`).
+Probed from `assembly/build/mathts.wasm` via `WebAssembly.Module.exports()` (a parse-only static read — no instantiation; rebuild with `npm run build:wasm`).
+
+**326 total exports** = **314 functions** + **11 globals** (numeric constants such as `PI`/`E`) + **1 memory** (the shared linear memory), compiled from **27 AssemblyScript source files** under `assembly/src/`.
+
+| Category (by export-name prefix) | Function exports |
+| -------------------------------- | ---------------: |
+| Scalar & special (f64)           |              133 |
+| Array                            |               54 |
+| Matrix                           |               46 |
+| Complex scalar                   |               46 |
+| Complex array                    |               33 |
+| FFT                              |                2 |
+| **Total**                        |          **314** |

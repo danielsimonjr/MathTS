@@ -426,7 +426,7 @@ function remezCore(
       ft = Math.acos(xt) / TWOPI;
     }
     // Inner label L410..L425: locate xt among the extremal cosines x[].
-    let assigned = false;
+    let assigned: boolean;
     for (;;) {
       const xe = x[l];
       if (xt > xe) {

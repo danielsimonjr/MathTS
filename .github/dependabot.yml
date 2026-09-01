@@ -24,6 +24,19 @@ updates:
         dependency-type: 'production'
         patterns:
           - '*'
+    ignore:
+      # TypeScript 7 is blocked by typescript-eslint, not by this repo.
+      # @typescript-eslint/eslint-plugin (8.68.0, the current stable) still
+      # declares `peer typescript ">=4.8.4 <6.1.0"`, so npm ci fails ERESOLVE
+      # the moment the group pulls typescript 7.x -- which made the whole
+      # weekly dev-dependencies PR permanently red and held back the other 19
+      # updates in it (see PR #265).
+      #
+      # Scoped to MAJOR only: 6.x minor/patch updates still flow normally.
+      # REMOVE THIS ENTRY once typescript-eslint raises its peer ceiling, and
+      # bump typescript + typescript-eslint together in ONE PR.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: 'chore(deps)'
       include: 'scope'

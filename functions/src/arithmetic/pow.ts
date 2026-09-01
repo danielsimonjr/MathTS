@@ -248,7 +248,10 @@ export const createPow = /* #__PURE__ */ factory(
             error.message === 'Cannot calculate inverse, determinant is zero'
           ) {
             throw new TypeError(
-              'For A^b, when A is not invertible, b must be a positive integer (value is ' + y + ')'
+              'For A^b, when A is not invertible, b must be a positive integer (value is ' +
+                y +
+                ')',
+              { cause: error }
             );
           }
           throw error;

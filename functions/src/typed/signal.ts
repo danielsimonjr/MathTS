@@ -819,7 +819,7 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
     try {
       return dwtPeriodization(x, wavelet);
     } catch (err) {
-      throw new Error(`dwt: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`dwt: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   }
 }

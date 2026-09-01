@@ -15,7 +15,12 @@ export interface SparseMatrixData {
 }
 
 interface SparseMatrixConstructor {
-  new (data: { values: unknown[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
+  new (data: {
+    values: unknown[];
+    index: number[];
+    ptr: number[];
+    size: number[];
+  }): SparseMatrixData;
 }
 
 interface CsLuDependencies {
@@ -87,13 +92,11 @@ export const createCsLu = /* #__PURE__ */ factory(
       const n = size[1];
       // symbolic analysis result
       let q;
-      let lnz = 100;
-      let unz = 100;
+      let lnz: number;
+      let unz: number;
       // update symbolic analysis parameters
       if (s) {
         q = s.q;
-        lnz = s.lnz || lnz;
-        unz = s.unz || unz;
       }
       // L arrays
       const lvalues: unknown[] = []; // (lnz)

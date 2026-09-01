@@ -8,6 +8,7 @@
  * this file is the process entry point.
  */
 
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, lstatSync, realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { basename } from 'node:path';
@@ -55,6 +56,7 @@ mtsw - MathTS Workbook CLI
 
 Usage:
   mtsw run <file> [-c <id>] [-v] [--json] [--write] [--timeout <ms>]
+                 [--expect-hash <sha256>]
                                             Execute a workbook (or one cell + its
                                             deps with -c/--cell). -v: events,
                                             --json: machine output, --write: persist
@@ -63,6 +65,8 @@ Usage:
                                             kills it (WorkbookTimeoutError) if it
                                             exceeds the budget — a runaway cell can't
                                             hang the process. Incompatible with -c/-v.
+                                            --expect-hash refuses to run unless the
+                                            file's SHA-256 matches (optimistic lock).
   mtsw describe <file> [--json]             Structured document model (cells, graph)
   mtsw validate <file> [--json]             Validate structure (ids, deps, cycles)
   mtsw graph <file> [-f mermaid|dot]        Print the dependency graph
@@ -297,6 +301,14 @@ export async function runCommand(args: string[]): Promise<CommandResult> {
 
   const read = readFile(file);
   if (read.error) return fail([read.error]);
+
+  const expectHash = flagValue(args, '--expect-hash');
+  if (expectHash !== undefined) {
+    const actual = createHash('sha256').update(read.content!, 'utf8').digest('hex');
+    if (actual.toLowerCase() !== expectHash.toLowerCase()) {
+      return fail([`--expect-hash mismatch: file SHA-256 is ${actual}, expected ${expectHash}`]);
+    }
+  }
 
   const parsed = parseWorkbook(read.content!);
   if (!parsed.success) {

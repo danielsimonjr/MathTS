@@ -17,67 +17,31 @@
 import { polyFromExpression, type Poly } from '../typed/polynomial-ideal.js';
 import {
   trim as trimIntPoly,
-  bigintGcd,
   mul as mulIntPoly,
   exactDivide as exactDivideIntPoly,
   type IntPoly,
 } from '../typed/factorization/integer-poly.js';
 import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
+import { integrateLayer3 } from './layer3.js';
+import {
+  ratAdd,
+  ratSub,
+  ratMul,
+  ratDiv,
+  ratFromBigint,
+  ratNormalize,
+  RAT_ZERO,
+  type Rat,
+} from './rat.js';
 
-/** Exact rational number, always normalized to lowest terms with a positive denominator. */
-export interface Rat {
-  num: bigint;
-  den: bigint;
-}
+export type { Rat };
+export { ratAdd, ratSub, ratMul, ratDiv, ratFromBigint };
 
 /** A rational function `numer(x)/denom(x)` with integer dense (`IntPoly`) coefficients. */
 export interface RatFunc {
   numer: IntPoly;
   denom: IntPoly;
 }
-
-/** Reduces `num/den` to lowest terms with a positive denominator. Throws on a zero denominator. */
-function ratNormalize(num: bigint, den: bigint): Rat {
-  if (den === 0n) {
-    throw new Error('Rat: zero denominator');
-  }
-  let n = num;
-  let d = den;
-  if (d < 0n) {
-    n = -n;
-    d = -d;
-  }
-  if (n === 0n) {
-    return { num: 0n, den: 1n };
-  }
-  const g = bigintGcd(n, d);
-  return { num: n / g, den: d / g };
-}
-
-export function ratAdd(a: Rat, b: Rat): Rat {
-  return ratNormalize(a.num * b.den + b.num * a.den, a.den * b.den);
-}
-
-export function ratSub(a: Rat, b: Rat): Rat {
-  return ratNormalize(a.num * b.den - b.num * a.den, a.den * b.den);
-}
-
-export function ratMul(a: Rat, b: Rat): Rat {
-  return ratNormalize(a.num * b.num, a.den * b.den);
-}
-
-export function ratDiv(a: Rat, b: Rat): Rat {
-  if (b.num === 0n) {
-    throw new Error('Rat: division by zero');
-  }
-  return ratNormalize(a.num * b.den, a.den * b.num);
-}
-
-export function ratFromBigint(n: bigint): Rat {
-  return { num: n, den: 1n };
-}
-
-const RAT_ZERO: Rat = { num: 0n, den: 1n };
 
 /**
  * A quadratic surd `a + b·√Δ` for a fixed positive non-square radicand `Δ`
@@ -872,7 +836,14 @@ export function integrateRationalFunction(expr: string, v: string): string | nul
     }
     const factors = factorDenominator(rf.denom);
     if (factors === null) {
-      return null;
+      // Layer 3: degree-≥3 irreducibles and repeated pos-disc quadratics.
+      const { quotient, remainder } = polynomialPart(rf);
+      const parts: string[] = [];
+      const polyPart = integratePolynomial(quotient, v);
+      if (polyPart !== '0') parts.push(polyPart);
+      const l3 = integrateLayer3(remainder, rf.denom, v);
+      if (l3 !== '0') parts.push(l3);
+      return joinTerms(parts);
     }
     const { quotient, remainder } = polynomialPart(rf);
     const terms = partialFractions(remainder, factors);
@@ -908,7 +879,10 @@ export function integrateRationalFunction(expr: string, v: string): string | nul
       }
     }
     return joinTerms(parts);
-  } catch {
+  } catch (err) {
+    if (typeof process !== 'undefined' && process.env.MATHTS_DEBUG_L3) {
+      console.error('integrateRationalFunction declined:', err);
+    }
     return null;
   }
 }

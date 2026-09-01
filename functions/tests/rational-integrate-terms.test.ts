@@ -24,8 +24,10 @@ describe('rational-integrate: per-factor integration (differentiation-verified)'
       for (const x of [0.4, 1.7, -0.9, 2.3]) expect(dF(F!, x)).toBeCloseTo(f(integrand, x), 5);
     });
   }
-  it('declines a degree-3 irreducible denominator', () => {
-    expect(integrateRationalFunction('1/(x^3-2)', 'x')).toBeNull();
+  it('Layer 3: degree-3 irreducible denominator differentiates back', () => {
+    const F = integrateRationalFunction('1/(x^3-2)', 'x');
+    expect(F).not.toBeNull();
+    for (const x of [0.4, 0.9, -0.7, 2.3]) expect(dF(F!, x)).toBeCloseTo(f('1/(x^3-2)', x), 4);
   });
 
   // Layer 2 (quadratic surds): a degree-2 factor irreducible over ℚ with a
@@ -41,9 +43,10 @@ describe('rational-integrate: per-factor integration (differentiation-verified)'
     });
   }
 
-  // Boundary: a REPEATED positive-discriminant quadratic is Layer 3 — still declined.
-  it('declines a repeated positive-discriminant quadratic denominator', () => {
-    expect(integrateRationalFunction('1/(x^2-2)^2', 'x')).toBeNull();
+  it('Layer 3: repeated positive-discriminant quadratic differentiates back', () => {
+    const F = integrateRationalFunction('1/(x^2-2)^2', 'x');
+    expect(F).not.toBeNull();
+    for (const x of [0.3, 0.9, 3.1, -0.7]) expect(dF(F!, x)).toBeCloseTo(f('1/(x^2-2)^2', x), 4);
   });
 
   // Regression: denominators with integer content > 1 must be scaled correctly

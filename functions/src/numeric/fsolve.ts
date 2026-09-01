@@ -75,7 +75,7 @@ export function fsolve(F: VectorField, x0: readonly number[], opts: FsolveOption
       delta = linsolve(J, rhs);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(`fsolve: singular Jacobian at iteration ${iter} (${msg})`);
+      throw new Error(`fsolve: singular Jacobian at iteration ${iter} (${msg})`, { cause: err });
     }
 
     const residualNorm = norm2(Fx);

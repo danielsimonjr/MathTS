@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-arithmetic",
-  "version": "0.1.64",
+  "version": "0.1.65",
   "description": "Standalone arithmetic functions for MathTS, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,11 +31,11 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "^0.63.0",
+    "@danielsimonjr/mathts-functions": "^0.64.0",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^26.4.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^4.1.10"

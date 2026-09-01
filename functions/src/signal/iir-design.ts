@@ -393,7 +393,7 @@ function fminbound(f: (x: number) => number, x1: number, x2: number): number {
   let x = xf;
   let fx = f(x);
   let num = 1;
-  let fu = Infinity;
+  let fu: number;
 
   let ffulc = fx;
   let fnfc = fx;

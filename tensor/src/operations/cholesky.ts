@@ -121,7 +121,7 @@ export function tensorCholesky(
     lData = matL.toFloat64Array();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(msg.replace(/^cholesky:/, 'tensorCholesky:'));
+    throw new Error(msg.replace(/^cholesky:/, 'tensorCholesky:'), { cause: err });
   }
 
   const factorData = lower ? lData : transposeSquare(lData, n);

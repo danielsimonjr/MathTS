@@ -112,7 +112,7 @@ export const createMad = /* #__PURE__ */ factory(
         );
       } catch (err) {
         if (err instanceof TypeError && err.message.includes('median')) {
-          throw new TypeError(err.message.replace('median', 'mad'));
+          throw new TypeError(err.message.replace('median', 'mad'), { cause: err });
         } else {
           throw improveErrorMessage(err, 'mad', undefined);
         }

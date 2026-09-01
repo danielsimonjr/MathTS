@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-core",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "description": "Core types, utilities, and configuration for MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -38,7 +38,7 @@
     "typed-function": "github:danielsimonjr/typed-function"
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^26.4.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^4.1.10"

@@ -33,7 +33,7 @@ export function csLeaf(
   let s: number, sparent: number;
 
   // our result
-  let jleaf = 0;
+  let jleaf: number;
   let q: number;
 
   // check j is a leaf

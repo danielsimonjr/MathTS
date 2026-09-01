@@ -31,7 +31,7 @@ export function idwt(approx: number[], detail: number[], wavelet: string = 'haar
   try {
     return idwtPeriodization(approx, detail, wavelet);
   } catch (err) {
-    throw new Error(`idwt: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`idwt: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
   }
 }
 

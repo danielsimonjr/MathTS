@@ -4,7 +4,7 @@
 
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-08-17
+**Generated**: 2026-09-01
 
 ## Summary
 
@@ -12,9 +12,9 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 2
-- **Potentially unused exports**: 226
-  - **Unreferenced anywhere (deletion candidates)**: 2
-  - **Referenced in-module (type contracts / helpers backing live exports)**: 224
+- **Potentially unused exports**: 220
+  - **Unreferenced anywhere (deletion candidates)**: 3
+  - **Referenced in-module (type contracts / helpers backing live exports)**: 217
 
 ## Dormant Files — Orphaned (delete/wire candidates)
 
@@ -52,6 +52,10 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `functions/src/signal/fft.ts`
 
 - `complexConj` (function)
+
+### `functions/src/type/complex/Complex.ts`
+
+- `ComplexConstructor` (interface)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -148,16 +152,10 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 ### `functions/src/cas/rational-integrate.ts`
 
-- `ratAdd` (function) — 4 in-file refs
-- `ratSub` (function) — 8 in-file refs
-- `ratMul` (function) — 21 in-file refs
-- `ratDiv` (function) — 19 in-file refs
-- `ratFromBigint` (function) — 32 in-file refs
 - `surdNeg` (function) — 2 in-file refs
 - `surdSub` (function) — 1 in-file ref
 - `surdRender` (function) — 3 in-file refs
 - `integratePFTerm` (function) — 3 in-file refs
-- `Rat` (interface) — 65 in-file refs
 - `RatFunc` (interface) — 2 in-file refs
 - `DenFactor` (interface) — 3 in-file refs
 - `PFTerm` (interface) — 3 in-file refs
@@ -286,7 +284,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `ComplexFormatOptions` (interface) — 1 in-file ref
 - `PolarInput` (interface) — 3 in-file refs
 - `AbsArgInput` (interface) — 2 in-file refs
-- `ComplexConstructor` (interface) — 1 in-file ref
 
 ### `functions/src/type/local/Decimal.ts`
 

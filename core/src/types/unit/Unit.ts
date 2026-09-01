@@ -3757,7 +3757,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
       // If defUnit is null, it is because the user did not
       // specify a defintion. So create a new base dimension.
-      let newUnit: UnitDef = {} as UnitDef;
+      let newUnit: UnitDef;
       if (!defUnit) {
         // Add a new base dimension
         baseName = baseName || name + '_STUFF'; // foo --> foo_STUFF, or the essence of foo

@@ -443,14 +443,14 @@ subfactorial(4); // 9 (derangements of 4 items)
 
 ## Comparison Functions
 
-| Function    | Signature           | Description           |
+| Function | Signature | Description |
 | ----------- | ------------------- | --------------------- | --- | -------------------- |
-| `equal`     | `(a, b) => boolean` | Equality              |
-| `smaller`   | `(a, b) => boolean` | Less than             |
-| `larger`    | `(a, b) => boolean` | Greater than          |
-| `smallerEq` | `(a, b) => boolean` | Less than or equal    |
-| `largerEq`  | `(a, b) => boolean` | Greater than or equal |
-| `compare`   | `(a, b) => -1       | 0                     | 1`  | Three-way comparison |
+| `equal` | `(a, b) => boolean` | Equality |
+| `smaller` | `(a, b) => boolean` | Less than |
+| `larger` | `(a, b) => boolean` | Greater than |
+| `smallerEq` | `(a, b) => boolean` | Less than or equal |
+| `largerEq` | `(a, b) => boolean` | Greater than or equal |
+| `compare` | `(a, b) => -1       | 0                     | 1` | Three-way comparison |
 
 ---
 
@@ -480,7 +480,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1065 exports).
+> `@danielsimonjr/mathts-functions` (1070 exports).
 
 ### Functions by category
 
@@ -538,7 +538,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (10): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `wishartSample`
+**Other exports (uncategorized)** (15): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
 ### Constants & values (65)
 

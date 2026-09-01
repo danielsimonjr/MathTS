@@ -1,6 +1,55 @@
-import { defineConfig } from 'vitest/config';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { defineConfig, type Plugin } from 'vitest/config';
+
+/**
+ * Root vitest imports package SOURCE (not dist), but `__PKG_VERSION__` is
+ * normally injected at build time via each package's tsup `define`. Per-package
+ * vitest configs mirror that define; this plugin does the same for the root
+ * aggregate runner (`npx vitest run`, `test:coverage`) so core/plot/workbook
+ * tests that import VERSION-bearing modules do not fail with ReferenceError.
+ */
+const pkgVersionCache = new Map<string, string>();
+
+function pkgVersionForFile(filePath: string): string | null {
+  let dir = dirname(filePath);
+  for (let depth = 0; depth < 12; depth++) {
+    const pkgPath = join(dir, 'package.json');
+    if (existsSync(pkgPath)) {
+      if (!pkgVersionCache.has(pkgPath)) {
+        const { version } = JSON.parse(readFileSync(pkgPath, 'utf8')) as { version: string };
+        pkgVersionCache.set(pkgPath, version);
+      }
+      return pkgVersionCache.get(pkgPath)!;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
+function pkgVersionDefinePlugin(): Plugin {
+  return {
+    name: 'mathts-pkg-version-define',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!code.includes('__PKG_VERSION__')) return;
+      if (id.includes('node_modules')) return;
+      const version = pkgVersionForFile(id);
+      if (!version) return;
+      // Drop the ambient declare — it becomes invalid once the identifier is
+      // replaced with a string literal. The export site keeps the real value.
+      let next = code.replace(/declare const __PKG_VERSION__: string;\r?\n?/g, '');
+      next = next.replace(/\b__PKG_VERSION__\b/g, JSON.stringify(version));
+      if (next === code) return;
+      return { code: next, map: null };
+    },
+  };
+}
 
 export default defineConfig({
+  plugins: [pkgVersionDefinePlugin()],
   test: {
     globals: true,
     environment: 'node',
@@ -34,58 +83,19 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: [
-        // Core - active modules only
-        'core/src/config.ts',
-        'core/src/shared.ts',
-        'core/src/utils.ts',
-        'core/src/factory/**',
-        'core/src/typed/**',
-        'core/src/types/complex.ts',
-        'core/src/types/fraction.ts',
-        'core/src/types/bignumber.ts',
-        // Matrix - active modules
-        'matrix/src/DenseMatrix.ts',
-        'matrix/src/SparseMatrix.ts',
-        'matrix/src/types.ts',
-        'matrix/src/config.ts',
-        'matrix/src/backends/JSBackend.ts',
-        'matrix/src/backends/Backend.ts',
-        'matrix/src/backends/BackendManager.ts',
-        'matrix/src/backends/WASMBackend.ts',
-        'matrix/src/backends/WasmLoader.ts',
-        'matrix/src/backends/wasm/**',
-        'matrix/src/decomposition/**',
-        'matrix/src/operations/**',
-        // Functions - active typed functions + the GPU dispatch bridge
-        'functions/src/typed/**',
-        'functions/src/gpu/**',
-        // GPU foundation leaf (was omitted when the package was created)
+        'core/src/**',
+        'matrix/src/**',
+        'functions/src/**',
         'gpu/src/**',
-        // Parallel - testable modules
-        'parallel/src/ComputePool.ts',
-        'parallel/src/ParallelMatrix.ts',
-        'parallel/src/operations/elementwise.ts',
-        'parallel/src/operations/matmul.ts',
-        'parallel/src/operations/reduce.ts',
-        'parallel/src/strategies/**',
-        // Workbook - testable modules
-        'workbook/src/parser.ts',
-        'workbook/src/graph.ts',
-        'workbook/src/executor.ts',
-        'workbook/src/types.ts',
-        // Compat - all active
+        'parallel/src/**',
+        'workbook/src/**',
         'compat/src/**',
-        // Expression - active modules
-        'expression/src/parse.ts',
-        'expression/src/Parser.ts',
-        'expression/src/operators.ts',
-        'expression/src/keywords.ts',
-        'expression/src/Help.ts',
-        'expression/src/compiler/**',
-        'expression/src/evaluator/**',
-        'expression/src/node/**',
-        'expression/src/function/**',
-        'expression/src/utils/**',
+        'expression/src/**',
+        'tensor/src/**',
+        'autograd/src/**',
+        'plot/src/**',
+        'packages/typed-function/src/**',
+        'packages/workerpool/src/**',
       ],
       exclude: ['node_modules/', 'dist/', '**/*.d.ts', '**/*.config.*', '**/index.ts'],
     },

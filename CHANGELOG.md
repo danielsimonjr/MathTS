@@ -9,6 +9,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **CI could not run on a bot-pushed branch, so the Changesets release PR was permanently
+  ungaugeable.** `ci.yml` fired only on `push` and `pull_request`. GitHub's recursion guard
+  suppresses both for a branch pushed with `GITHUB_TOKEN`. Added `workflow_dispatch` (gauge any
+  branch on demand) and a nightly `schedule` at 07:00 UTC (exercise `main` regardless of who
+  pushed it). This closes on MathTS the same gap already closed across the other six owned repos;
+  MathTS had been missed.
+
+  **Correction, same day:** this change is right, but the cause first committed with it was not.
+  The Changesets release PR sat at `BLOCKED` with all five required contexts (`Coverage`,
+  `Browser (WebGPU smoke)`, `Test (20.x)`, `Test (22.x)`, `Compile & Lint`) absent, and that was
+  attributed to the recursion guard. It was not: the run existed, and its conclusion was
+  **`action_required`** -- the workflow-approval gate for a bot-authored pull request, which
+  presents as the identical zero-jobs / missing-contexts shape. The discriminator is the run's own
+  conclusion, and it was readable before the theory was written. The remedy is
+  `POST /actions/runs/<id>/approve`, not a trigger change.
+
+### Added
+
+- **Risch Layer 3** (`functions/src/cas/layer3.ts`): Hermite reduction + Rothstein–Trager /
+  residue-formula integration for rational functions with degree-≥3 irreducible denominators
+  (and repeated positive-discriminant quadratics). `1/(x^3-2)` and `1/(x^3+x+1)` now return
+  closed forms that differentiate back to the integrand. `1/(x log x) → log(log x)`.
+- **Spheroidal wave functions**: `spheroidalLambda` / `spheroidalAngular` / `spheroidalRadial`
+  / `ferrersP` (prolate angular characteristic values and `S_mn(c, η)` via the
+  associated-Legendre expansion).
+- **Workbook `--expect-hash`**: `mtsw run --expect-hash <sha256>` is an optimistic lock —
+  refuse to execute if the file's SHA-256 does not match.
+- **SVG math typesetting**: `mathMLToSVG` wraps MathML in an SVG `foreignObject`.
+- **Public-API smoke coverage**: representative (and heuristic) calls across the functions,
+  core, matrix, workbook, expression, tensor, autograd, plot, gpu, parallel, and compat
+  export surfaces so `test:coverage` exercises nearly every published function.
+
+### Fixed
+
+- **Root vitest aggregate no longer crashes on VERSION-bearing packages.** `npx vitest run`
+  and `test:coverage` import `core`/`plot`/`workbook` source directly; without the per-package
+  tsup `define` those modules threw `ReferenceError: __PKG_VERSION__ is not defined` (20 test
+  files). Root `vitest.config.ts` now applies a small transform plugin that injects each
+  package's version from its nearest `package.json`, matching the per-package vitest configs.
+
+### Security
+
+- **Workbook code cells: regression tests for the expression sandbox.** `executor.test.ts` now
+  asserts that `import(...)` and `f(x) = …` assignments are rejected when evaluated through the
+  workbook executor (the path `.mtsw` notebooks actually use).
+
+### Fixed
+
+- **The documented `esbuild` advisory was WITHDRAWN, and was the wrong one.** `CLAUDE.md` named
+  `GHSA-gv7w-rqvm-qjhr` and carried its rationale — that the exploit *"needs a malicious
+  `NPM_CONFIG_REGISTRY` at install time"*. That advisory is **withdrawn**, and describes a different
+  vulnerability from the one `npm audit` reports. The live one is `GHSA-g7r4-m6w7-qqqr` (**low**):
+  arbitrary file read when running esbuild's **development server** on Windows. `tsup` uses the
+  build API and never starts that server, so the vulnerable path is unreachable — that is the
+  correct reachability argument, and it was not what was written down. A security note reasoning
+  about the wrong advisory is worse than no note: it reads as a considered acceptance while covering
+  nothing that is open.
+  Also recorded, measured rather than assumed: the root `overrides` reach `node_modules/esbuild`
+  (0.28.1) but **not** `tsup/node_modules/esbuild` (0.27.7), and an in-range fix **does** exist —
+  `0.27.0`–`0.27.2` sit below the `0.27.3` vulnerable floor. Applying it is blocked by an unrelated
+  pre-existing `ERESOLVE`, so it is *untested* rather than *unavailable*; the previous note implied
+  no in-range fix existed.
+
+- **The weekly dev-dependencies PR is no longer permanently red.** Every group PR pulled
+  typescript 7.x, which `npm ci` rejects with ERESOLVE because
+  `@typescript-eslint/eslint-plugin` (8.68.0, current stable) still declares
+  `peer typescript ">=4.8.4 <6.1.0"`. One blocked package held back the other 19 updates in the
+  group (PR #265). Dependabot now ignores **major** typescript updates only; 6.x minor and patch
+  updates still flow. Remove that ignore when typescript-eslint raises its ceiling, and bump
+  typescript and typescript-eslint together in one PR.
+
+- **Architecture Verification claims refreshed after the #263 release.** `totalTypeScriptFiles`
+  1880 -> 1881 and `totalLinesOfCode` 332049 -> 332379 across six documents. `totalExports` was
+  already correct at 7620.
+
+### Fixed
+
 - **Architecture Verification blocks were stale; the drift gate is green again.** Six documents
   claimed `totalTypeScriptFiles` 1824, `totalExports` 7564 and `totalLinesOfCode` 333583, against
   an actual 1880 / 7620 / 332049 — about 56 files of real growth since the blocks were last

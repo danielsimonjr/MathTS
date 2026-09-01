@@ -681,7 +681,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
       // Newton's method
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
-      let x = d1 > 2 ? (d2 * (d1 - 2)) / (d1 * (d2 + 2)) : 1; // rough initial guess
+      let x: number; // rough initial guess assigned below
       // Prefer simply using bisection for robustness
       let lo = 0;
       let hi = 1000;

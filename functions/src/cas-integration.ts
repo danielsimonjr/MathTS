@@ -19,7 +19,9 @@
  *    denominator factors into linear + irreducible-quadratic factors —
  *    including **repeated** and **irreducible-quadratic** denominators the
  *    `apart` path can't split — producing the rational part + `log` + `arctan`.
- *    A degree-≥3 irreducible denominator is out of scope (returns the marker).
+ *    Degree-≥3 irreducible and repeated positive-discriminant-quadratic
+ *    denominators are handled by Risch Layer 3 (Hermite + Rothstein–Trager /
+ *    residue formula).
  *
  * NOTE: the package's CAS `simplify`/`derivative` throw on non-integer coefficients
  * (a separate bug — they BigInt-convert constants), so this builds clean output
@@ -28,9 +30,10 @@
  * OUT OF SCOPE (returns an unevaluated `integral(expr, v)` marker rather than a
  * wrong answer): general u-substitution / a full transcendental Risch-style
  * integrator, non-linear inner arguments (`sin(x^2)`), products of two
- * transcendental factors (`sin(x)·cos(x)` beyond a trig identity), rational
- * integrands whose denominator has a degree-≥3 irreducible factor (Risch
- * Layer 2 / Rothstein–Trager territory), and `tan`/`sec`/….
+ * transcendental factors (`sin(x)·cos(x)` beyond a trig identity), a full
+ * transcendental Risch decision procedure (nested exp/log towers that prove
+ * non-elementarity), and `tan`/`sec`/…. Rational functions of any degree,
+ * including irreducible cubics+, are in scope (Layers 1–3).
  */
 import { parse as _parseRaw } from './factories/evaluate.js';
 import { evaluate as _evaluateRaw } from './factories/evaluate.js';
@@ -140,6 +143,23 @@ function integrateNode(raw: Node, x: string): string {
           if (a !== null) {
             const k = evalConst(args[0].toString()) / a;
             return `${num(k)} * log(abs(${args[1].toString()}))`;
+          }
+          // 1 / (x * log(x)) → log(log(x))
+          const den = unwrap(args[1]);
+          if (den.type === 'OperatorNode' && den.op === '*') {
+            const df = (den.args ?? []).map(unwrap);
+            const hasX = df.some((f) => f.type === 'SymbolNode' && f.name === x);
+            const logF = df.find(
+              (f) =>
+                f.type === 'FunctionNode' &&
+                (f.fn?.name === 'log' || f.fn?.name === 'ln') &&
+                unwrap((f.args ?? [])[0] ?? f).type === 'SymbolNode' &&
+                unwrap((f.args ?? [])[0] ?? f).name === x
+            );
+            if (hasX && logF && df.length === 2) {
+              const k = evalConst(args[0].toString());
+              return k === 1 ? `log(log(${x}))` : `${num(k)} * log(log(${x}))`;
+            }
           }
         }
         throw new NotIntegrable('general quotient');
@@ -370,9 +390,9 @@ function tryByParts(expr: string, x: string): string | null {
  * (for distinct-rational-root integrands), tabular integration by parts (for
  * polynomial·{exp,sin,cos}), and full rational-function integration (Risch
  * Layer 1) are attempted before giving up with the marker. Rational functions
- * with irreducible-quadratic and repeated factors are now integrated (rational
- * part + `log` + `arctan`); degree-≥3 irreducible denominators and transcendental
- * Risch remain out of scope (marker).
+ * with irreducible-quadratic, repeated, and degree-≥3 irreducible factors
+ * are integrated (Layers 1–3: rational part + `log` + `arctan` / residues).
+ * Nested transcendental towers that are not elementary still return the marker.
  *
  * @example symbolicIntegral('x^3')          // 'x^4 / 4'
  * @example symbolicIntegral('cos(3*x + 1)') // 'sin(3 * x + 1) / 3'

@@ -56,7 +56,7 @@ export function linearInterp(xs: number[], ys: number[], x: number): number {
   }
 
   // Find interval
-  let i = 0;
+  let i: number;
   if (x <= xs[0]) {
     i = 0;
   } else if (x >= xs[xs.length - 1]) {
@@ -430,7 +430,7 @@ export function pchipInterp(xs: number[], ys: number[], x: number): number {
   }
 
   // Find interval and evaluate cubic Hermite basis
-  let i = 0;
+  let i: number;
   if (x <= xs[0]) {
     i = 0;
   } else if (x >= xs[n - 1]) {

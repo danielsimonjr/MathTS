@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17",
+  "generated": "2026-09-01",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
@@ -860,5 +860,38 @@
       "jsOnly": 2
     }
   },
-  "binary": null
+  "binary": {
+    "path": "assembly/build/mathts.wasm",
+    "total": 326,
+    "functions": 314,
+    "globals": 11,
+    "memory": 1,
+    "sourceFiles": 27,
+    "byCategory": [
+      {
+        "category": "Scalar & special (f64)",
+        "count": 133
+      },
+      {
+        "category": "Array",
+        "count": 54
+      },
+      {
+        "category": "Matrix",
+        "count": 46
+      },
+      {
+        "category": "Complex scalar",
+        "count": 46
+      },
+      {
+        "category": "Complex array",
+        "count": 33
+      },
+      {
+        "category": "FFT",
+        "count": 2
+      }
+    ]
+  }
 }

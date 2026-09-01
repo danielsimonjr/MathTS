@@ -247,7 +247,39 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 ## Known Issues
 
 - `assembly/` WASM build emits AS235 warnings for exported classes (cosmetic — WASM can only export functions, not classes)
-- **Residual dev-only `esbuild` advisory (GHSA-gv7w-rqvm-qjhr).** Patched esbuild is `0.28.1`, but the latest `tsup` (8.5.1) pins `esbuild@^0.27.0`, so the root `overrides` (`esbuild: ^0.28.1`) patches `vite`/everything else but cannot force `tsup`'s nested copy without risking the bundler. `npm audit fix --force` "fixes" this by _downgrading_ tsup to 6.5.0 (still vulnerable) — do **not** run it. esbuild ships in no published package and the exploit needs a malicious `NPM_CONFIG_REGISTRY` at install time, so this is accepted until tsup supports esbuild 0.28. Re-evaluate when `tsup@>=8.6` (esbuild `^0.28`) ships.
+- **Residual dev-only `esbuild` advisory (GHSA-g7r4-m6w7-qqqr, low).** _"esbuild allows arbitrary
+  file read when running the development server on Windows."_
+
+  > **Corrected 2026-08-30.** This entry previously named **GHSA-gv7w-rqvm-qjhr**, which is a
+  > **WITHDRAWN** advisory, and carried its rationale — that the exploit _"needs a malicious
+  > `NPM_CONFIG_REGISTRY` at install time"_. That describes a different vulnerability. A security
+  > note reasoning about the wrong advisory is worse than none: it reads as a considered acceptance
+  > while covering nothing that is actually open.
+
+  **Why it is accepted:** the vulnerability is in esbuild's **development server**. `tsup` uses
+  esbuild's **build API** and never starts that server, so the vulnerable path is unreachable here.
+  That is the reachability argument; it is not a claim that the advisory is unfixable.
+
+  **State of the dependency tree** (measured, not assumed):
+
+  ```
+  vulnerable range              0.27.3 - 0.28.0
+  tsup 8.5.1 requires           esbuild ^0.27.0   =  >=0.27.0 <0.28.0
+  node_modules/esbuild          0.28.1   <- root `overrides` reaches this copy
+  tsup/node_modules/esbuild     0.27.7   <- the override does NOT reach this one
+  ```
+
+  The root `overrides: { esbuild: ^0.28.1 }` patches the top-level copy only; tsup keeps a nested
+  0.27.7 because 0.28.1 is outside its declared range.
+
+  **A fix inside tsup's range does exist** — `0.27.0`/`0.27.1`/`0.27.2` are all `^0.27.0`-compatible
+  _and_ below the vulnerable floor. Pinning `overrides: { tsup: { esbuild: "0.27.2" } }` is the
+  candidate. **Untested:** a full re-resolve to apply it currently fails on an unrelated
+  pre-existing `ERESOLVE` (`@typescript-eslint/eslint-plugin@^8.67.0` vs peer
+  `@typescript-eslint/parser@8.68.0`), so the experiment is blocked rather than the fix being
+  unavailable. Do **not** run `npm audit fix --force` — it "fixes" this by _downgrading_ tsup to
+  6.5.0, which is still vulnerable.
+
 - **WASM JS-fallback when no AS binary is built.** Both `functions` and `matrix` load the AssemblyScript binary `mathts-as.wasm` (built by `npm run build:wasm`). If that build has not run, the loaders log an `ENOENT … mathts-as.wasm` and fall back to the pure-JS backend (tests stay green). The AssemblyScript `asc` build and all turbo build tasks succeed on Node 26.3.0.
 
 ## Tools
