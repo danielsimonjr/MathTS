@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.14.3
+
+### Patch Changes
+
+- 966a632: Speed up core hot paths: algebraic Complex.sqrt, closed-form tan/tanh, overflow-safe fast abs, integer BigNumber construction, and allocation-free sumSquaredDeviations.
+
 ## 0.14.2
 
 ### Patch Changes
