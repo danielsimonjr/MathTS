@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-30",
+  "generated": "2026-09-01",
   "totalFiles": 1854,
   "byDisposition": {
     "reachable": 1139,
@@ -9375,7 +9375,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 65
+      "loc": 73
     },
     {
       "file": "functions/tests/graph-traversal.test.ts",
@@ -9753,7 +9753,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 824
+      "loc": 920
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",
@@ -12217,7 +12217,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 21
+      "loc": 26
     },
     {
       "file": "tensor/tests/reductions.test.ts",
