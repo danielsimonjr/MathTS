@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Released
+
+- **`@danielsimonjr/mathts-core@0.14.3` published to npm** (release PR #273). The registry had
+  been two versions behind at 0.14.1: 0.14.2 was version-bumped but never published, so the
+  gap was not visible from the repo alone -- only from comparing every workspace manifest
+  against the registry.
+  Built explicitly before publishing. These packages define no `prepublishOnly`, so
+  `npm publish` ships whatever already sits in `dist/` without building it.
+  **Verified against the registry, and it took two instruments to get the truth.**
+  `npm publish` printed `+ @danielsimonjr/mathts-core@0.14.3` while `npm view` still reported
+  **0.14.1**. The registry endpoint itself resolved it -- `dist-tags.latest` = 0.14.3, published
+  2026-09-02T04:15:48Z -- and `npm view --prefer-online` then agreed. **`npm view` serves a
+  stale cache immediately after a publish**; trusting it would have reported a failed publish
+  that had in fact succeeded, and invited a pointless republish.
+
 ### Fixed
 
 - **CI could not run on a bot-pushed branch, so the Changesets release PR was permanently
