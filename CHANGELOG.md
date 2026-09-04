@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI: pin npm >= 11 before `npm ci` (all four jobs).** The `Test (22.x)` leg failed three
+  consecutive runs on an unchanged SHA with `git dep preparation failed` /
+  `Cannot read properties of null (reading 'edgesOut')`. Root-caused to npm 10's arborist
+  crashing while preparing a git dependency: npm runs a nested `npm install --force` for
+  `github:danielsimonjr/workerpool`, and npm 10 throws where npm 11 succeeds. Reproduced
+  deterministically outside CI (`npx npm@10 install github:danielsimonjr/workerpool` fails with
+  the identical error; npm 11 exits 0), which is what distinguished it from the unrelated npm
+  advisory-endpoint incident happening the same morning. Only the Node 22 leg was affected
+  because the Node 20 leg's bundled npm predates the regression -- so it presented as a flaky
+  install for a day when it is in fact deterministic and client-version-specific.
+  This fixes the trigger; the underlying fragility (a git dependency has no integrity check and
+  its nested prepare resolves with no lockfile, so its transitive tree floats) is unchanged and
+  is a dependency-strategy decision, not a CI one.
+
 ### Released
 
 - **`@danielsimonjr/mathts-core@0.14.3` published to npm** (release PR #273). The registry had

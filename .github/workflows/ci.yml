@@ -44,6 +44,23 @@ jobs:
           node-version: 20.x
           cache: 'npm'
 
+      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
+      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
+      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
+      #   npm error git dep preparation failed
+      #   npm error Cannot read properties of null (reading 'edgesOut')
+      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
+      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
+      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
+      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
+      # install for a day. It is neither: it is client-version-specific and fully reproducible.
+      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
+      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
+      # install. Sourcing those two packages from the registry instead of a fork would remove the
+      # whole class; that is a dependency-strategy decision, deliberately left alone here.
+      - name: Pin npm (git-dep prepare crashes on npm 10)
+        run: npm install -g npm@^11.0.0
+
       - name: Install dependencies
         run: npm ci
 
@@ -91,6 +108,23 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
+      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
+      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
+      #   npm error git dep preparation failed
+      #   npm error Cannot read properties of null (reading 'edgesOut')
+      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
+      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
+      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
+      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
+      # install for a day. It is neither: it is client-version-specific and fully reproducible.
+      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
+      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
+      # install. Sourcing those two packages from the registry instead of a fork would remove the
+      # whole class; that is a dependency-strategy decision, deliberately left alone here.
+      - name: Pin npm (git-dep prepare crashes on npm 10)
+        run: npm install -g npm@^11.0.0
+
       - name: Install dependencies
         run: npm ci
 
@@ -117,6 +151,23 @@ jobs:
         with:
           node-version: 20.x
           cache: 'npm'
+
+      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
+      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
+      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
+      #   npm error git dep preparation failed
+      #   npm error Cannot read properties of null (reading 'edgesOut')
+      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
+      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
+      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
+      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
+      # install for a day. It is neither: it is client-version-specific and fully reproducible.
+      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
+      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
+      # install. Sourcing those two packages from the registry instead of a fork would remove the
+      # whole class; that is a dependency-strategy decision, deliberately left alone here.
+      - name: Pin npm (git-dep prepare crashes on npm 10)
+        run: npm install -g npm@^11.0.0
 
       - name: Install dependencies
         run: npm ci
@@ -155,6 +206,23 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y mesa-vulkan-drivers libegl1
+
+      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
+      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
+      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
+      #   npm error git dep preparation failed
+      #   npm error Cannot read properties of null (reading 'edgesOut')
+      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
+      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
+      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
+      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
+      # install for a day. It is neither: it is client-version-specific and fully reproducible.
+      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
+      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
+      # install. Sourcing those two packages from the registry instead of a fork would remove the
+      # whole class; that is a dependency-strategy decision, deliberately left alone here.
+      - name: Pin npm (git-dep prepare crashes on npm 10)
+        run: npm install -g npm@^11.0.0
 
       - name: Install dependencies
         run: npm ci
