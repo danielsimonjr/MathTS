@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Release workflow: pin npm >= 11 too (completes the fix below).** `release.yml` runs its own
+  `npm ci` on Node 22 and failed on the identical `edgesOut` git-dep-prepare crash immediately
+  after the CI fix landed -- the fix had been applied per-file rather than per-repo, so the one
+  workflow not named `ci.yml` was missed. Every workflow in the repo that runs `npm ci` is now
+  pinned; verified by grep, not by memory.
 - **CI: pin npm >= 11 before `npm ci` (all four jobs).** The `Test (22.x)` leg failed three
   consecutive runs on an unchanged SHA with `git dep preparation failed` /
   `Cannot read properties of null (reading 'edgesOut')`. Root-caused to npm 10's arborist

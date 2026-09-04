@@ -52,6 +52,12 @@ jobs:
           # No `registry-url:` — that only exists to write an .npmrc wired to
           # NODE_AUTH_TOKEN for publishing, which this workflow does not do.
 
+      # Same npm-10 git-dep-prepare crash guarded in ci.yml -- see the long comment there.
+      # This workflow was MISSED in the first fix (cb198bba) and failed on exactly the error that
+      # commit was written to prevent, because the fix was applied per-file instead of per-repo.
+      - name: Pin npm (git-dep prepare crashes on npm 10)
+        run: npm install -g npm@^11.0.0
+
       - name: Install dependencies
         run: npm ci
 
