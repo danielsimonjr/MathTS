@@ -38,49 +38,42 @@ jobs:
         with:
           persist-credentials: false
 
+      # Bun is the monorepo package manager (see packageManager + bun.lock).
+      # Node stays installed because vitest / AssemblyScript / several tools
+      # still run under a Node shebang (bunfig [run].bun = false).
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 20.x
-          cache: 'npm'
-
-      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
-      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
-      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
-      #   npm error git dep preparation failed
-      #   npm error Cannot read properties of null (reading 'edgesOut')
-      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
-      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
-      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
-      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
-      # install for a day. It is neither: it is client-version-specific and fully reproducible.
-      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
-      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
-      # install. Sourcing those two packages from the registry instead of a fork would remove the
-      # whole class; that is a dependency-strategy decision, deliberately left alone here.
-      - name: Pin npm (git-dep prepare crashes on npm 10)
-        run: npm install -g npm@^11.0.0
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build
-        run: npm run build
+        run: bun run build
 
       - name: Type check
-        run: npm run typecheck
+        run: bun run typecheck
 
       - name: Lint
-        run: npm run lint
+        run: bun run lint
 
       - name: Docs export-index drift check
-        run: npm run docs:functions:check
+        run: bun run docs:functions:check
 
       - name: Browser-safety (no node leaks from browser entries)
-        run: npm run check:browser-safety
+        run: bun run check:browser-safety
 
       - name: Audit (high+)
-        run: npm audit --audit-level=high
+        # Bun audit covers the bun.lock tree. Same high+ floor as the old
+        # `npm audit --audit-level=high` gate (accepted residual esbuild low
+        # advisory is documented in CLAUDE.md Known Issues).
+        run: bun audit --audit-level=high
 
   test:
     name: Test
@@ -90,6 +83,8 @@ jobs:
 
     strategy:
       # Independent legs so one Node version failing doesn't cancel the others.
+      # Vitest still runs under Node (shebang); the matrix keeps validating the
+      # published packages against supported Node engines.
       fail-fast: false
       matrix:
         # Node 18 reached EOL 2026-04 and the toolchain uses Node 20+ APIs
@@ -102,37 +97,24 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
-      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
-      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
-      #   npm error git dep preparation failed
-      #   npm error Cannot read properties of null (reading 'edgesOut')
-      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
-      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
-      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
-      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
-      # install for a day. It is neither: it is client-version-specific and fully reproducible.
-      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
-      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
-      # install. Sourcing those two packages from the registry instead of a fork would remove the
-      # whole class; that is a dependency-strategy decision, deliberately left alone here.
-      - name: Pin npm (git-dep prepare crashes on npm 10)
-        run: npm install -g npm@^11.0.0
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build
-        run: npm run build
+        run: bun run build
 
       - name: Test
-        run: npm test
+        run: bun run test
 
   coverage:
     name: Coverage
@@ -146,37 +128,24 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 20.x
-          cache: 'npm'
-
-      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
-      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
-      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
-      #   npm error git dep preparation failed
-      #   npm error Cannot read properties of null (reading 'edgesOut')
-      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
-      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
-      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
-      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
-      # install for a day. It is neither: it is client-version-specific and fully reproducible.
-      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
-      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
-      # install. Sourcing those two packages from the registry instead of a fork would remove the
-      # whole class; that is a dependency-strategy decision, deliberately left alone here.
-      - name: Pin npm (git-dep prepare crashes on npm 10)
-        run: npm install -g npm@^11.0.0
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build
-        run: npm run build
+        run: bun run build
 
       - name: Test with coverage
-        run: npm run test:coverage
+        run: bun run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
@@ -196,45 +165,32 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 20.x
-          cache: 'npm'
 
       - name: Install Mesa lavapipe (software Vulkan adapter for WebGPU)
         run: |
           sudo apt-get update -y
           sudo apt-get install -y mesa-vulkan-drivers libegl1
 
-      # Pin npm >= 11 before installing. The root package depends on two GIT dependencies
-      # (github:danielsimonjr/workerpool and .../typed-function). npm must "prepare" a git dep by
-      # running a NESTED `npm install --force`, and npm 10's arborist crashes doing so:
-      #   npm error git dep preparation failed
-      #   npm error Cannot read properties of null (reading 'edgesOut')
-      # Reproduced deterministically 2026-09-04 outside CI: `npx npm@10 install
-      # github:danielsimonjr/workerpool` fails with that exact error while npm 11 installs it
-      # cleanly. It surfaced only on the Node 22 leg because that line ships the affected npm,
-      # while the Node 20 leg's npm predates the regression -- so this read as a flaky/intermittent
-      # install for a day. It is neither: it is client-version-specific and fully reproducible.
-      # NOTE: this fixes the TRIGGER, not the CAUSE. A git dependency gets no integrity check and
-      # its nested prepare resolves with NO lockfile, so its transitive tree floats on every
-      # install. Sourcing those two packages from the registry instead of a fork would remove the
-      # whole class; that is a dependency-strategy decision, deliberately left alone here.
-      - name: Pin npm (git-dep prepare crashes on npm 10)
-        run: npm install -g npm@^11.0.0
-
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
+        run: bunx playwright install chromium --with-deps
 
       - name: Build (required for workspace package resolution)
-        run: npm run build
+        run: bun run build
 
       - name: Browser smoke tests (WebGPU)
-        run: npm run test:browser
+        run: bun run test:browser
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           GALLIUM_DRIVER: llvmpipe

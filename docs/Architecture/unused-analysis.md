@@ -4,7 +4,7 @@
 
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-09-01
+**Generated**: 2026-09-05
 
 ## Summary
 
@@ -49,13 +49,13 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 
 - `createRandomNumber` (constant)
 
-### `functions/src/signal/fft.ts`
-
-- `complexConj` (function)
-
 ### `functions/src/type/complex/Complex.ts`
 
 - `ComplexConstructor` (interface)
+
+### `functions/src/signal/fft.ts`
+
+- `complexConj` (function)
 
 ## Referenced In-Module (type contracts / helpers backing live exports)
 
@@ -86,84 +86,22 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `ProfilingConfig` (interface) — 1 in-file ref
 - `BackendPreference` (type) — 2 in-file refs
 
-### `functions/src/algebra/simplify/util.ts`
+### `functions/src/wasm/WasmLoader.ts`
 
-- `OpNodeLike` (interface) — 8 in-file refs
-- `FuncNodeLike` (interface) — 4 in-file refs
+- `WasmLoader` (class) — 8 in-file refs
 
-### `functions/src/algebra/solver/lsolveAll.ts`
+### `functions/src/expression/operators.ts`
 
-- `DenseMatrix` (interface) — 29 in-file refs
-
-### `functions/src/algebra/solver/usolveAll.ts`
-
-- `DenseMatrix` (interface) — 29 in-file refs
-
-### `functions/src/algebra/sparse/csAmd.ts`
-
-- `SparseMatrixData` (interface) — 9 in-file refs
-
-### `functions/src/algebra/sparse/csChol.ts`
-
-- `SparseMatrixData` (interface) — 4 in-file refs
-- `SymbolicAnalysis` (interface) — 1 in-file ref
-- `CholResult` (interface) — 1 in-file ref
-
-### `functions/src/algebra/sparse/csCounts.ts`
-
-- `SparseMatrixData` (interface) — 3 in-file refs
-
-### `functions/src/algebra/sparse/csLu.ts`
-
-- `SparseMatrixData` (interface) — 4 in-file refs
-- `SymbolicAnalysis` (interface) — 1 in-file ref
-- `LuResult` (interface) — 1 in-file ref
-
-### `functions/src/algebra/sparse/csSpsolve.ts`
-
-- `SparseMatrixData` (interface) — 2 in-file refs
-
-### `functions/src/algebra/sparse/csSqr.ts`
-
-- `SparseMatrixData` (interface) — 3 in-file refs
-- `SymbolicAnalysis` (interface) — 3 in-file refs
-
-### `functions/src/algebra/sparse/csSymperm.ts`
-
-- `SparseMatrixData` (interface) — 3 in-file refs
-
-### `functions/src/arithmetic/ceil.ts`
-
-- `createCeilNumber` (constant) — 1 in-file ref
-
-### `functions/src/arithmetic/fix.ts`
-
-- `createFixNumber` (constant) — 1 in-file ref
-
-### `functions/src/arithmetic/floor.ts`
-
-- `createFloorNumber` (constant) — 1 in-file ref
-
-### `functions/src/arithmetic/utils/nodeOperations.ts`
-
-- `MathNode` (interface) — 7 in-file refs
-- `name` (constant) — 5 in-file refs
-- `dependencies` (constant) — 1 in-file ref
-
-### `functions/src/cas/rational-integrate.ts`
-
-- `surdNeg` (function) — 2 in-file refs
-- `surdSub` (function) — 1 in-file ref
-- `surdRender` (function) — 3 in-file refs
-- `integratePFTerm` (function) — 3 in-file refs
-- `RatFunc` (interface) — 2 in-file refs
-- `DenFactor` (interface) — 3 in-file refs
-- `PFTerm` (interface) — 3 in-file refs
+- `properties` (constant) — 2 in-file refs
 
 ### `functions/src/core/create.ts`
 
 - `create` (function) — 11 in-file refs
 - `FactoriesInput` (type) — 4 in-file refs
+
+### `functions/src/core/function/import.ts`
+
+- `path` (constant) — 3 in-file refs
 
 ### `functions/src/core/function/config.ts`
 
@@ -175,10 +113,6 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `MATRIX_OPTIONS` (constant) — 6 in-file refs
 - `NUMBER_OPTIONS` (constant) — 6 in-file refs
 
-### `functions/src/core/function/import.ts`
-
-- `path` (constant) — 3 in-file refs
-
 ### `functions/src/core/function/typed.ts`
 
 - `TypedSignatures` (type) — 4 in-file refs
@@ -187,19 +121,44 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `TypeDefinition` (type) — 2 in-file refs
 - `createTyped` (constant) — 2 in-file refs
 
-### `functions/src/expression/operators.ts`
+### `functions/src/typed/polynomial-ideal.ts`
 
-- `properties` (constant) — 2 in-file refs
+- `polyAdd` (function) — 2 in-file refs
+- `polyNeg` (function) — 2 in-file refs
+- `polySub` (function) — 3 in-file refs
+- `polyMul` (function) — 5 in-file refs
+- `polyReduce` (function) — 3 in-file refs
+- `DivisorGeobucket` (class) — 3 in-file refs
+- `Term` (interface) — 2 in-file refs
+
+### `functions/src/typed/factorization/multi-poly.ts`
+
+- `key` (function) — 6 in-file refs
+- `subMP` (function) — 1 in-file ref
+- `negMP` (function) — 2 in-file refs
+
+### `functions/src/typed/factorization/square-free.ts`
+
+- `SquareFreeFactor` (interface) — 2 in-file refs
+
+### `functions/src/typed/factorization/integer-poly.ts`
+
+- `neg` (function) — 1 in-file ref
+
+### `functions/src/typed/factorization/zassenhaus.ts`
+
+- `Factorization` (type) — 1 in-file ref
+
+### `functions/src/typed/factorization/finite-field.ts`
+
+- `distinctDegreeFactor` (function) — 1 in-file ref
+- `equalDegreeFactor` (function) — 1 in-file ref
 
 ### `functions/src/matrix/native-accel.ts`
 
 - `isLargeNumericSquare` (function) — 2 in-file refs
 - `isNumericSquare` (function) — 1 in-file ref
 - `NATIVE_MATRIX_THRESHOLD` (constant) — 2 in-file refs
-
-### `functions/src/matrix/sqrtm.ts`
-
-- `Matrix` (interface) — 33 in-file refs
 
 ### `functions/src/matrix/utils/zerosAndOnes.ts`
 
@@ -209,30 +168,37 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `Matrix` (interface) — 17 in-file refs
 - `Config` (interface) — 1 in-file ref
 
-### `functions/src/numeric/solveODE.ts`
+### `functions/src/matrix/sqrtm.ts`
 
-- `rodasSolve` (function) — 4 in-file refs
-- `radauSolve` (function) — 2 in-file refs
+- `Matrix` (interface) — 33 in-file refs
+
+### `functions/src/cas/rational-integrate.ts`
+
+- `surdNeg` (function) — 2 in-file refs
+- `surdSub` (function) — 1 in-file ref
+- `surdRender` (function) — 3 in-file refs
+- `integratePFTerm` (function) — 3 in-file refs
+- `RatFunc` (interface) — 2 in-file refs
+- `DenFactor` (interface) — 3 in-file refs
+- `PFTerm` (interface) — 3 in-file refs
+
+### `functions/src/signal-filter-extra.ts`
+
+- `zpkToTf` (function) — 1 in-file ref
+- `cAdd` (constant) — 5 in-file refs
+- `cSub` (constant) — 11 in-file refs
 
 ### `functions/src/relational/compare.ts`
 
 - `createCompareNumber` (constant) — 1 in-file ref
 
-### `functions/src/relational/equal.ts`
-
-- `createEqualNumber` (constant) — 1 in-file ref
-
-### `functions/src/relational/larger.ts`
-
-- `createLargerNumber` (constant) — 1 in-file ref
-
-### `functions/src/relational/largerEq.ts`
-
-- `createLargerEqNumber` (constant) — 1 in-file ref
-
 ### `functions/src/relational/smaller.ts`
 
 - `createSmallerNumber` (constant) — 1 in-file ref
+
+### `functions/src/relational/equal.ts`
+
+- `createEqualNumber` (constant) — 1 in-file ref
 
 ### `functions/src/relational/smallerEq.ts`
 
@@ -242,48 +208,13 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `createUnequalNumber` (constant) — 1 in-file ref
 
-### `functions/src/signal/conv.ts`
+### `functions/src/relational/largerEq.ts`
 
-- `ConvMode` (type) — 8 in-file refs
+- `createLargerEqNumber` (constant) — 1 in-file ref
 
-### `functions/src/signal/fft-core-f64.ts`
+### `functions/src/relational/larger.ts`
 
-- `bitReverse` (function) — 1 in-file ref
-
-### `functions/src/signal/fft.ts`
-
-- `rollBy` (function) — 2 in-file refs
-- `FFTResult` (interface) — 1 in-file ref
-
-### `functions/src/signal/wavelet-filters.ts`
-
-- `WaveletFilters` (interface) — 1 in-file ref
-
-### `functions/src/signal-filter-extra.ts`
-
-- `zpkToTf` (function) — 1 in-file ref
-- `cAdd` (constant) — 5 in-file refs
-- `cSub` (constant) — 11 in-file refs
-
-### `functions/src/type/bignumber/BigNumber.ts`
-
-- `BigNumberJSON` (interface) — 2 in-file refs
-- `BigNumberClass` (interface) — 1 in-file ref
-- `BigNumberInstance` (interface) — 3 in-file refs
-
-### `functions/src/type/chain/Chain.ts`
-
-- `ChainJSON` (interface) — 4 in-file refs
-- `ChainInstance` (interface) — 14 in-file refs
-- `ChainConstructor` (interface) — 9 in-file refs
-
-### `functions/src/type/complex/Complex.ts`
-
-- `ComplexJSON` (interface) — 4 in-file refs
-- `PolarCoordinates` (interface) — 1 in-file ref
-- `ComplexFormatOptions` (interface) — 1 in-file ref
-- `PolarInput` (interface) — 3 in-file refs
-- `AbsArgInput` (interface) — 2 in-file refs
+- `createLargerNumber` (constant) — 1 in-file ref
 
 ### `functions/src/type/local/Decimal.ts`
 
@@ -327,42 +258,30 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `UnitInstance` (interface) — 2 in-file refs
 
-### `functions/src/typed/factorization/finite-field.ts`
+### `functions/src/type/complex/Complex.ts`
 
-- `distinctDegreeFactor` (function) — 1 in-file ref
-- `equalDegreeFactor` (function) — 1 in-file ref
+- `ComplexJSON` (interface) — 4 in-file refs
+- `PolarCoordinates` (interface) — 1 in-file ref
+- `ComplexFormatOptions` (interface) — 1 in-file ref
+- `PolarInput` (interface) — 3 in-file refs
+- `AbsArgInput` (interface) — 2 in-file refs
 
-### `functions/src/typed/factorization/integer-poly.ts`
+### `functions/src/type/bignumber/BigNumber.ts`
 
-- `neg` (function) — 1 in-file ref
+- `BigNumberJSON` (interface) — 2 in-file refs
+- `BigNumberClass` (interface) — 1 in-file ref
+- `BigNumberInstance` (interface) — 3 in-file refs
 
-### `functions/src/typed/factorization/multi-poly.ts`
+### `functions/src/type/chain/Chain.ts`
 
-- `key` (function) — 6 in-file refs
-- `subMP` (function) — 1 in-file ref
-- `negMP` (function) — 2 in-file refs
+- `ChainJSON` (interface) — 4 in-file refs
+- `ChainInstance` (interface) — 14 in-file refs
+- `ChainConstructor` (interface) — 9 in-file refs
 
-### `functions/src/typed/factorization/square-free.ts`
+### `functions/src/numeric/solveODE.ts`
 
-- `SquareFreeFactor` (interface) — 2 in-file refs
-
-### `functions/src/typed/factorization/zassenhaus.ts`
-
-- `Factorization` (type) — 1 in-file ref
-
-### `functions/src/typed/polynomial-ideal.ts`
-
-- `polyAdd` (function) — 2 in-file refs
-- `polyNeg` (function) — 2 in-file refs
-- `polySub` (function) — 3 in-file refs
-- `polyMul` (function) — 5 in-file refs
-- `polyReduce` (function) — 3 in-file refs
-- `DivisorGeobucket` (class) — 3 in-file refs
-- `Term` (interface) — 2 in-file refs
-
-### `functions/src/utils/bignumber/bitwise.ts`
-
-- `bitwise` (function) — 4 in-file refs
+- `rodasSolve` (function) — 4 in-file refs
+- `radauSolve` (function) — 2 in-file refs
 
 ### `functions/src/utils/is.ts`
 
@@ -396,17 +315,102 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `functions/src/wasm/WasmLoader.ts`
+### `functions/src/utils/bignumber/bitwise.ts`
 
-- `WasmLoader` (class) — 8 in-file refs
+- `bitwise` (function) — 4 in-file refs
+
+### `functions/src/arithmetic/floor.ts`
+
+- `createFloorNumber` (constant) — 1 in-file ref
+
+### `functions/src/arithmetic/fix.ts`
+
+- `createFixNumber` (constant) — 1 in-file ref
+
+### `functions/src/arithmetic/utils/nodeOperations.ts`
+
+- `MathNode` (interface) — 7 in-file refs
+- `name` (constant) — 5 in-file refs
+- `dependencies` (constant) — 1 in-file ref
+
+### `functions/src/arithmetic/ceil.ts`
+
+- `createCeilNumber` (constant) — 1 in-file ref
+
+### `functions/src/signal/wavelet-filters.ts`
+
+- `WaveletFilters` (interface) — 1 in-file ref
+
+### `functions/src/signal/fft.ts`
+
+- `rollBy` (function) — 2 in-file refs
+- `FFTResult` (interface) — 1 in-file ref
+
+### `functions/src/signal/fft-core-f64.ts`
+
+- `bitReverse` (function) — 1 in-file ref
+
+### `functions/src/signal/conv.ts`
+
+- `ConvMode` (type) — 8 in-file refs
+
+### `functions/src/algebra/simplify/util.ts`
+
+- `OpNodeLike` (interface) — 8 in-file refs
+- `FuncNodeLike` (interface) — 4 in-file refs
+
+### `functions/src/algebra/sparse/csSpsolve.ts`
+
+- `SparseMatrixData` (interface) — 2 in-file refs
+
+### `functions/src/algebra/sparse/csChol.ts`
+
+- `SparseMatrixData` (interface) — 4 in-file refs
+- `SymbolicAnalysis` (interface) — 1 in-file ref
+- `CholResult` (interface) — 1 in-file ref
+
+### `functions/src/algebra/sparse/csAmd.ts`
+
+- `SparseMatrixData` (interface) — 9 in-file refs
+
+### `functions/src/algebra/sparse/csSymperm.ts`
+
+- `SparseMatrixData` (interface) — 3 in-file refs
+
+### `functions/src/algebra/sparse/csCounts.ts`
+
+- `SparseMatrixData` (interface) — 3 in-file refs
+
+### `functions/src/algebra/sparse/csSqr.ts`
+
+- `SparseMatrixData` (interface) — 3 in-file refs
+- `SymbolicAnalysis` (interface) — 3 in-file refs
+
+### `functions/src/algebra/sparse/csLu.ts`
+
+- `SparseMatrixData` (interface) — 4 in-file refs
+- `SymbolicAnalysis` (interface) — 1 in-file ref
+- `LuResult` (interface) — 1 in-file ref
+
+### `functions/src/algebra/solver/lsolveAll.ts`
+
+- `DenseMatrix` (interface) — 29 in-file refs
+
+### `functions/src/algebra/solver/usolveAll.ts`
+
+- `DenseMatrix` (interface) — 29 in-file refs
+
+### `expression/src/node/Node.ts`
+
+- `CompiledExpression` (interface) — 1 in-file ref
 
 ### `expression/src/evaluator/evaluate.ts`
 
 - `EvaluateOptions` (interface) — 7 in-file refs
 
-### `expression/src/node/Node.ts`
+### `expression/src/utils/mathml.ts`
 
-- `CompiledExpression` (interface) — 1 in-file ref
+- `numberToMathML` (function) — 1 in-file ref
 
 ### `expression/src/utils/is.ts`
 
@@ -440,35 +444,9 @@ interfaces typing live guards and per-package API completeness, not rot.
 - `SymbolNode` (interface) — 1 in-file ref
 - `PartitionedMap` (interface) — 1 in-file ref
 
-### `expression/src/utils/mathml.ts`
-
-- `numberToMathML` (function) — 1 in-file ref
-
 ### `parallel/src/ComputePool.ts`
 
 - `tensordotChunkKernel` (function) — 1 in-file ref
-
-### `workbook/src/doc.ts`
-
-- `DescribeDoc` (interface) — 1 in-file ref
-
-### `workbook/src/html.ts`
-
-- `ToHtmlOptions` (interface) — 1 in-file ref
-
-### `workbook/src/pdf.ts`
-
-- `ToPdfOptions` (interface) — 1 in-file ref
-
-### `workbook/src/rpc.ts`
-
-- `JsonRpcResponse` (interface) — 1 in-file ref
-- `JsonRpcEvent` (interface) — 3 in-file refs
-- `HandleResult` (interface) — 3 in-file refs
-
-### `workbook/src/session.ts`
-
-- `WorkbookEventLite` (interface) — 2 in-file refs
 
 ### `workbook/src/svg.ts`
 
@@ -478,6 +456,16 @@ interfaces typing live guards and per-package API completeness, not rot.
 
 - `ToTexOptions` (interface) — 1 in-file ref
 
+### `workbook/src/rpc.ts`
+
+- `JsonRpcResponse` (interface) — 1 in-file ref
+- `JsonRpcEvent` (interface) — 3 in-file refs
+- `HandleResult` (interface) — 3 in-file refs
+
+### `workbook/src/html.ts`
+
+- `ToHtmlOptions` (interface) — 1 in-file ref
+
 ### `workbook/src/worker-protocol.ts`
 
 - `WorkerSuccessMessage` (interface) — 1 in-file ref
@@ -486,6 +474,18 @@ interfaces typing live guards and per-package API completeness, not rot.
 ### `workbook/src/yaml-safe.ts`
 
 - `assertNoPollution` (function) — 1 in-file ref
+
+### `workbook/src/session.ts`
+
+- `WorkbookEventLite` (interface) — 2 in-file refs
+
+### `workbook/src/pdf.ts`
+
+- `ToPdfOptions` (interface) — 1 in-file ref
+
+### `workbook/src/doc.ts`
+
+- `DescribeDoc` (interface) — 1 in-file ref
 
 ### `plot/src/svg.ts`
 

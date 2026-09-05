@@ -41,6 +41,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -48,18 +53,12 @@ jobs:
           # engines.node '^22.11 || ^24 || >=26'. On Node 20 its bin.js dies with
           # `TypeError: enableCompileCache is not a function` before doing any work.
           node-version: 22.x
-          cache: 'npm'
           # No `registry-url:` — that only exists to write an .npmrc wired to
           # NODE_AUTH_TOKEN for publishing, which this workflow does not do.
-
-      # Same npm-10 git-dep-prepare crash guarded in ci.yml -- see the long comment there.
-      # This workflow was MISSED in the first fix (cb198bba) and failed on exactly the error that
-      # commit was written to prevent, because the fix was applied per-file instead of per-repo.
-      - name: Pin npm (git-dep prepare crashes on npm 10)
-        run: npm install -g npm@^11.0.0
+          # No `cache: npm` — the lockfile is bun.lock now.
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       # No build step: `changeset version` only rewrites package.json +
       # CHANGELOG.md. Building was for the publish that no longer happens here;
