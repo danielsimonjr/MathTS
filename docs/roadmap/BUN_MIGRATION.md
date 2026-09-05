@@ -71,11 +71,12 @@ packages do **not** need Bun.
 
 ## Known Bun-specific notes
 
-1. **Git dependency integrity.** Migrating an old `package-lock.json` into Bun
-   fails `IntegrityCheckFailed` on the `github:danielsimonjr/{workerpool,typed-function}`
-   tarballs (npm stored a hash for a different archive shape). The committed
-   `bun.lock` is authoritative — use `bun install --frozen-lockfile`, not a
-   re-migration from npm's lockfile.
+1. **Git dependency integrity.** npm's `package-lock.json` stores integrity
+   hashes for a different git-tarball shape than Bun/GitHub serve, so a naive
+   lockfile migration yields `IntegrityCheckFailed` on cold CI installs (seen
+   on `@danielsimonjr/workerpool`). The committed `bun.lock` pins the hash of
+   the GitHub `legacy.tar.gz` for that commit — use
+   `bun install --frozen-lockfile`, never re-migrate from npm's lockfile.
 2. **`bun test` ≠ `bun run test`.** The former is Bun's built-in runner; the
    latter runs the Turbo/vitest graph. CI must call `bun run test`.
 3. **Publish path unchanged.** `npx changeset publish` / `npm publish` from the

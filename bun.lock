@@ -1089,7 +1089,7 @@
 
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
 
-    "typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5", {}, "b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5"],
+    "typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5", {}, "b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5", "sha512-VyGpExyEQ9FP9sLvqqipfZ3onwsA13fPyzTZfwuR+/Ne6qRiHvxD2XK3LMZcTBcdXRiRcjmgF894MIQI4v9hWw=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
@@ -1111,7 +1111,7 @@
 
     "word-wrap": ["word-wrap@1.2.5", "", {}, "sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA=="],
 
-    "workerpool": ["@danielsimonjr/workerpool@github:danielsimonjr/workerpool#f4fb28c0f8fff4cea396e0834b9259dec170f9c2", {}, "f4fb28c0f8fff4cea396e0834b9259dec170f9c2", "sha512-/yYaP4q9tuMPM4jbXfgoTfHbn2OaqYX+XCOZc2naZlNNv0mPlS1dPL/6PZl7S0iRpi2S4WlDsdm4sdjZzoJYiA=="],
+    "workerpool": ["@danielsimonjr/workerpool@github:danielsimonjr/workerpool#f4fb28c0f8fff4cea396e0834b9259dec170f9c2", {}, "f4fb28c0f8fff4cea396e0834b9259dec170f9c2", "sha512-YkrtDQ6jqwSbvXiQEEne4X9KtfW0aNr3cK1m5m4bRLrAJExA3fL5E/sYV/4/0vlUzX9xv1tAAFEOLGl/+dHXEw=="],
 
     "ws": ["ws@8.21.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="],
 
