@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-01",
+  "generated": "2026-09-05",
   "status": "9 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
   "total": 219,
   "gpuAcceleratedCount": 2,
@@ -238,33 +238,57 @@
     "xor"
   ],
   "byFile": {
-    "arithmetic.ts": {
-      "gpu": 0,
-      "none": 46
-    },
-    "bitwise.ts": {
-      "gpu": 0,
-      "none": 7
-    },
-    "combinatorics.ts": {
-      "gpu": 0,
-      "none": 21
-    },
     "complex.ts": {
       "gpu": 0,
       "none": 4
+    },
+    "set.ts": {
+      "gpu": 0,
+      "none": 10
+    },
+    "trigonometry.ts": {
+      "gpu": 0,
+      "none": 19
+    },
+    "statistics.ts": {
+      "gpu": 0,
+      "none": 17
     },
     "distributions.ts": {
       "gpu": 0,
       "none": 14
     },
-    "logical.ts": {
-      "gpu": 0,
+    "signal.ts": {
+      "gpu": 2,
       "none": 5
     },
     "matrix-ops.ts": {
       "gpu": 0,
       "none": 9
+    },
+    "unit.ts": {
+      "gpu": 0,
+      "none": 2
+    },
+    "combinatorics.ts": {
+      "gpu": 0,
+      "none": 21
+    },
+    "string.ts": {
+      "gpu": 0,
+      "none": 5
+    },
+    "arithmetic.ts": {
+      "gpu": 0,
+      "none": 46
+    },
+    "special.ts": {
+      "gpu": 0,
+      "none": 38
+    },
+    "logical.ts": {
+      "gpu": 0,
+      "none": 5
     },
     "probability.ts": {
       "gpu": 0,
@@ -274,33 +298,9 @@
       "gpu": 0,
       "none": 7
     },
-    "set.ts": {
+    "bitwise.ts": {
       "gpu": 0,
-      "none": 10
-    },
-    "signal.ts": {
-      "gpu": 2,
-      "none": 5
-    },
-    "special.ts": {
-      "gpu": 0,
-      "none": 38
-    },
-    "statistics.ts": {
-      "gpu": 0,
-      "none": 17
-    },
-    "string.ts": {
-      "gpu": 0,
-      "none": 5
-    },
-    "trigonometry.ts": {
-      "gpu": 0,
-      "none": 19
-    },
-    "unit.ts": {
-      "gpu": 0,
-      "none": 2
+      "none": 7
     }
   },
   "standaloneAcceleratedCount": 9,

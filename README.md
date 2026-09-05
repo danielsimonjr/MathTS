@@ -3,7 +3,8 @@
 [![npm version](https://img.shields.io/npm/v/@danielsimonjr/mathts-core.svg)](https://www.npmjs.com/package/@danielsimonjr/mathts-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.2-fbf0df.svg)](https://bun.sh/)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-green.svg)](https://nodejs.org/)
 
 MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) packaged as an
 ESM-only npm workspaces monorepo. It accelerates computation through an AssemblyScript
@@ -244,41 +245,45 @@ are unaffected.
 
 ## Development
 
+The monorepo package manager is **Bun** (see `docs/roadmap/BUN_MIGRATION.md`).
+Published packages still run on Node ≥20 / browsers — Bun is for install, scripts,
+and CI. Node remains on PATH for vitest and AssemblyScript.
+
 ```bash
-# Install dependencies
-npm install
+# Install Bun once: https://bun.sh  (needs ≥1.2; repo pins 1.4.2)
+bun install
 
 # Build all packages
-npm run build
+bun run build
 
 # Run all tests
-npm run test
+bun run test
 
 # Cross-package WASM integration tests (separate from turbo graph)
-npm run test:wasm:integration
+bun run test:wasm:integration
 
 # Type-check all packages
-npm run typecheck
+bun run typecheck
 
 # Lint all packages
-npm run lint
+bun run lint
 
 # Parallel-execution break-even benchmarks
-npm run bench:parallel
+bun run bench:parallel
 
 # Build WASM artifacts (AssemblyScript — the sole WASM backend)
-npm run build:wasm
+bun run build:wasm
 
 # Format all files
-npm run format
+bun run format
 ```
 
 Single-package commands (examples):
 
 ```bash
-npx turbo build --filter=@danielsimonjr/mathts-core
-npx turbo test --filter=@danielsimonjr/mathts-matrix
-cd functions && npx vitest run
+bunx turbo build --filter=@danielsimonjr/mathts-core
+bunx turbo test --filter=@danielsimonjr/mathts-matrix
+cd functions && bunx vitest run
 ```
 
 ---
@@ -291,7 +296,7 @@ The dependency graph has **0 runtime circular dependencies** (verified by
 
 Live metrics — file / export / module counts, per-file test coverage, and the
 WASM↔function pairing — are kept in **generated** reports rather than duplicated
-here (so they can't drift). Regenerate with `npm run docs:deps`:
+here (so they can't drift). Regenerate with `bun run docs:deps`:
 
 | Report                                                                             | Contents                            |
 | ---------------------------------------------------------------------------------- | ----------------------------------- |

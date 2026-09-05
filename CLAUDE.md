@@ -8,47 +8,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MathTS is a TypeScript rewrite of mathjs with WASM/WebGPU/WebWorker optimization. It uses an npm workspaces monorepo with Turborepo orchestration. All packages are ESM-only (`"type": "module"`), target ES2022, and use `tsup` for bundling with `vitest` for testing.
+MathTS is a TypeScript rewrite of mathjs with WASM/WebGPU/WebWorker optimization. It uses a Bun-managed npm-workspaces monorepo with Turborepo orchestration. All packages are ESM-only (`"type": "module"`), target ES2022, and use `tsup` for bundling with `vitest` for testing.
 
 It also includes a Scientific Workbook system (`.mtsw` files) for reactive YAML-based notebooks.
 
 ## Build & Development Commands
 
 ```bash
-# From repo root:
-npm run build               # turbo run build (all packages)
-npm run dev                 # turbo run dev (watch mode, all packages)
-npm run test                # turbo run test (all packages)
-npm run test:coverage       # turbo run test:coverage (coverage scoped to an include-list in vitest.config.ts)
-npm run typecheck           # turbo run typecheck (all packages)
-npm run lint                # turbo run lint (all packages)
-npm run format              # prettier --write all files
-npm run format:check        # prettier --check (CI)
+# From repo root (Bun is the package manager — see docs/roadmap/BUN_MIGRATION.md):
+bun install
+bun run build               # turbo run build (all packages)
+bun run dev                 # turbo run dev (watch mode, all packages)
+bun run test                # turbo run test (all packages) — NOT `bun test`
+bun run test:coverage       # turbo run test:coverage (coverage scoped to an include-list in vitest.config.ts)
+bun run typecheck           # turbo run typecheck (all packages)
+bun run lint                # turbo run lint (all packages)
+bun run format              # prettier --write all files
+bun run format:check        # prettier --check (CI)
 
 # WASM builds. AssemblyScript is the SOLE WASM backend for the whole repo
 # (functions + matrix).
-npm run build:wasm          # AssemblyScript build (assembly/ package) — the only WASM build
-npm run test:wasm           # AssemblyScript WASM tests
-npm run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)
+bun run build:wasm          # AssemblyScript build (assembly/ package) — the only WASM build
+bun run test:wasm           # AssemblyScript WASM tests
+bun run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)
 
 # Single package:
-npx turbo build --filter=@danielsimonjr/mathts-core
-npx turbo test --filter=@danielsimonjr/mathts-matrix
+bunx turbo build --filter=@danielsimonjr/mathts-core
+bunx turbo test --filter=@danielsimonjr/mathts-matrix
 
 # Run specific test file (from repo root):
-npx vitest run core/tests/utils.test.ts
-npx vitest run matrix/tests/DenseMatrix.test.ts
+bunx vitest run core/tests/utils.test.ts
+bunx vitest run matrix/tests/DenseMatrix.test.ts
 
 # Run tests for one package directly:
-cd core && npx vitest run
-cd matrix && npx vitest run
+cd core && bunx vitest run
+cd matrix && bunx vitest run
 
 # Typecheck a single package:
-cd functions && npx tsc --noEmit
+cd functions && bunx tsc --noEmit
 
 # Coverage measurement is scoped to an explicit include-list in root vitest.config.ts.
-# Prefer the npm script — it goes through Turbo for caching:
-npm run test:coverage
+# Prefer the script via Bun — it goes through Turbo for caching:
+bun run test:coverage
 ```
 
 ## Monorepo Structure

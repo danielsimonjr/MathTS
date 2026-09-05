@@ -1,0 +1,16 @@
+# Bun configuration for the MathTS monorepo.
+# Package manager + TypeScript script runner; Node remains the consumer runtime
+# and the shebang target for vitest / AssemblyScript tooling. See
+# docs/roadmap/BUN_MIGRATION.md for the phased cutover plan.
+
+[install]
+# Match the historical npm hoisted layout so workspace resolution and
+# tooling (vitest, tsup, asc) keep finding packages the way they do today.
+linker = "hoisted"
+# Never auto-install on the fly — always use the committed bun.lock.
+auto = "disable"
+
+[run]
+# Keep package scripts on their declared shebang (vitest → node, asc → node).
+# Opt into Bun's runtime per-script with `bun --bun run <script>` when ready.
+bun = false

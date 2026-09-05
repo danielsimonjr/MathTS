@@ -5,11 +5,11 @@
 
 version: 2
 updates:
-  # Root lockfile covers every npm workspace (core/, matrix/, workbook/, …).
+  # Root bun.lock covers every workspace (core/, matrix/, workbook/, …).
   # Do NOT add /packages/{core,matrix,workbook} — those directories do not
   # exist (the real packages live at the repo root) and Dependabot failed
-  # weekly against them.
-  - package-ecosystem: 'npm'
+  # weekly against them under the old npm config.
+  - package-ecosystem: 'bun'
     directory: '/'
     schedule:
       interval: 'weekly'
@@ -27,7 +27,7 @@ updates:
     ignore:
       # TypeScript 7 is blocked by typescript-eslint, not by this repo.
       # @typescript-eslint/eslint-plugin (8.68.0, the current stable) still
-      # declares `peer typescript ">=4.8.4 <6.1.0"`, so npm ci fails ERESOLVE
+      # declares `peer typescript ">=4.8.4 <6.1.0"`, so installs fail ERESOLVE
       # the moment the group pulls typescript 7.x -- which made the whole
       # weekly dev-dependencies PR permanently red and held back the other 19
       # updates in it (see PR #265).

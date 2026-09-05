@@ -1,45 +1,9 @@
 {
-  "generated": "2026-09-01",
+  "generated": "2026-09-05",
   "dependents": {
     "packages/workerpool/src/fft-core.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
-    ],
-    "core/src/config.ts": [
-      "core/src/arithmetic/scalar.ts",
-      "core/src/internal.ts",
-      "core/src/types/unit/dependencies.ts"
-    ],
-    "core/src/number.ts": [
-      "core/src/arithmetic/scalar.ts",
-      "core/src/array.ts",
-      "core/src/bignumber-formatter.ts",
-      "core/src/internal.ts",
-      "core/src/string.ts",
-      "core/src/types/matrix/Range.ts",
-      "core/src/types/unit/dependencies.ts"
-    ],
-    "core/src/types/bignumber.ts": [
-      "core/src/arithmetic/scalar.ts",
-      "core/src/index.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/typed/type-bridge.ts",
-      "core/src/types/unit/Unit.ts",
-      "core/src/types/unit/dependencies.ts"
-    ],
-    "core/src/types/complex.ts": [
-      "core/src/arithmetic/scalar.ts",
-      "core/src/index.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/typed/type-bridge.ts",
-      "core/src/types/unit/dependencies.ts"
-    ],
-    "core/src/types/fraction.ts": [
-      "core/src/arithmetic/scalar.ts",
-      "core/src/index.ts",
-      "core/src/typed/mathts-typed.ts",
-      "core/src/typed/type-bridge.ts",
-      "core/src/types/unit/dependencies.ts"
     ],
     "core/src/is.ts": [
       "core/src/array.ts",
@@ -56,12 +20,23 @@
       "core/src/types/unit/dependencies.ts",
       "core/src/types/unit/unit-types.ts"
     ],
-    "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/error/DimensionError.ts": [
       "core/src/array.ts",
       "core/src/collection.ts",
       "core/src/internal.ts"
     ],
+    "core/src/array.ts": ["core/src/collection.ts", "core/src/internal.ts"],
+    "core/src/switch.ts": ["core/src/collection.ts", "core/src/internal.ts"],
+    "core/src/number.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/array.ts",
+      "core/src/bignumber-formatter.ts",
+      "core/src/internal.ts",
+      "core/src/string.ts",
+      "core/src/types/matrix/Range.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
+    "core/src/string.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/error/IndexError.ts": ["core/src/array.ts", "core/src/internal.ts"],
     "core/src/object.ts": [
       "core/src/array.ts",
@@ -69,19 +44,61 @@
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts"
     ],
-    "core/src/array.ts": ["core/src/collection.ts", "core/src/internal.ts"],
-    "core/src/switch.ts": ["core/src/collection.ts", "core/src/internal.ts"],
+    "core/src/factory.ts": [
+      "core/src/internal.ts",
+      "core/src/types/matrix/Range.ts",
+      "core/src/types/unit/Unit.ts"
+    ],
     "core/src/shared.ts": [
       "core/src/customs.ts",
       "core/src/internal.ts",
       "core/src/object.ts",
       "core/src/types/unit/Unit.ts"
     ],
+    "core/src/config.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/internal.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
     "core/src/error/MathjsError.ts": ["core/src/factory.ts", "core/src/internal.ts"],
+    "core/src/bignumber-formatter.ts": ["core/src/internal.ts", "core/src/string.ts"],
+    "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
+    "core/src/collection.ts": ["core/src/internal.ts"],
+    "core/src/map.ts": ["core/src/internal.ts"],
+    "core/src/wasm-loader.ts": ["core/src/internal.ts"],
+    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
+    "core/src/types/unit/unit-types.ts": [
+      "core/src/internal.ts",
+      "core/src/types/unit/Unit.ts",
+      "core/src/types/unit/dependencies.ts",
+      "core/src/types/unit/index.ts"
+    ],
+    "core/src/types/complex.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/index.ts",
+      "core/src/typed/mathts-typed.ts",
+      "core/src/typed/type-bridge.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
     "core/src/types/matrix/Range.ts": ["core/src/index.ts"],
     "core/src/types/dual.ts": ["core/src/index.ts", "core/src/typed/mathts-typed.ts"],
     "core/src/types/dual-rules.ts": ["core/src/index.ts", "core/src/types/dual.ts"],
     "core/src/constants.ts": ["core/src/index.ts"],
+    "core/src/types/fraction.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/index.ts",
+      "core/src/typed/mathts-typed.ts",
+      "core/src/typed/type-bridge.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
+    "core/src/types/bignumber.ts": [
+      "core/src/arithmetic/scalar.ts",
+      "core/src/index.ts",
+      "core/src/typed/mathts-typed.ts",
+      "core/src/typed/type-bridge.ts",
+      "core/src/types/unit/Unit.ts",
+      "core/src/types/unit/dependencies.ts"
+    ],
     "core/src/arithmetic/scalar.ts": ["core/src/index.ts", "core/src/types/unit/dependencies.ts"],
     "core/src/types/unit.ts": ["core/src/index.ts"],
     "core/src/types/unit-definitions.ts": ["core/src/index.ts", "core/src/types/unit.ts"],
@@ -94,23 +111,6 @@
       "core/src/types/bignumber.ts",
       "core/src/types/complex.ts",
       "core/src/types/fraction.ts"
-    ],
-    "core/src/factory.ts": [
-      "core/src/internal.ts",
-      "core/src/types/matrix/Range.ts",
-      "core/src/types/unit/Unit.ts"
-    ],
-    "core/src/bignumber-formatter.ts": ["core/src/internal.ts", "core/src/string.ts"],
-    "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
-    "core/src/collection.ts": ["core/src/internal.ts"],
-    "core/src/map.ts": ["core/src/internal.ts"],
-    "core/src/wasm-loader.ts": ["core/src/internal.ts"],
-    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
-    "core/src/types/unit/unit-types.ts": [
-      "core/src/internal.ts",
-      "core/src/types/unit/Unit.ts",
-      "core/src/types/unit/dependencies.ts",
-      "core/src/types/unit/index.ts"
     ],
     "core/src/customs.ts": ["core/src/map.ts"],
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
@@ -142,6 +142,11 @@
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/index.ts"
     ],
+    "matrix/src/types/index.ts": ["matrix/src/index.ts"],
+    "matrix/src/backends/index.ts": ["matrix/src/index.ts"],
+    "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
+    "matrix/src/typed-operations.ts": ["matrix/src/index.ts"],
+    "matrix/src/parallel-matrix.ts": ["matrix/src/index.ts"],
     "matrix/src/backends/Backend.ts": [
       "matrix/src/backends/BackendManager.ts",
       "matrix/src/backends/GPUMatrixBackend.ts",
@@ -152,29 +157,18 @@
       "matrix/src/backends/register-backends.ts",
       "matrix/src/config.ts"
     ],
+    "matrix/src/backends/WasmLoader.ts": ["matrix/src/backends/wasm/fft-wasm.ts"],
+    "matrix/src/backends/wasm/detect.ts": [
+      "matrix/src/backends/WASMBackend.ts",
+      "matrix/src/backends/wasm/index.ts"
+    ],
+    "matrix/src/backends/wasm/fft-wasm.ts": ["matrix/src/backends/wasm/index.ts"],
     "matrix/src/backends/JSBackend.ts": [
       "matrix/src/backends/BackendManager.ts",
       "matrix/src/backends/GPUMatrixBackend.ts",
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/backends/index.ts",
       "matrix/src/backends/register-backends.ts"
-    ],
-    "matrix/src/config.ts": ["matrix/src/backends/BackendManager.ts"],
-    "matrix/src/backends/register-backends.ts": [
-      "matrix/src/backends/BackendManager.ts",
-      "matrix/src/backends/index.ts"
-    ],
-    "matrix/src/backends/gpu/builtin-shaders.ts": [
-      "matrix/src/backends/GPUBackend.ts",
-      "matrix/src/backends/gpu/index.ts"
-    ],
-    "matrix/src/backends/GPUBackend.ts": [
-      "matrix/src/backends/GPUMatrixBackend.ts",
-      "matrix/src/backends/index.ts"
-    ],
-    "matrix/src/backends/wasm/detect.ts": [
-      "matrix/src/backends/WASMBackend.ts",
-      "matrix/src/backends/wasm/index.ts"
     ],
     "matrix/src/backends/wasm/resolve.ts": [
       "matrix/src/backends/WASMBackend.ts",
@@ -184,33 +178,33 @@
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/backends/WasmLoader.ts"
     ],
-    "matrix/src/backends/gpu/BatchExecutor.ts": ["matrix/src/backends/gpu/index.ts"],
-    "matrix/src/backends/gpu/Sync.ts": ["matrix/src/backends/gpu/index.ts"],
-    "matrix/src/backends/ParallelBackend.ts": ["matrix/src/backends/index.ts"],
+    "matrix/src/config.ts": ["matrix/src/backends/BackendManager.ts"],
+    "matrix/src/backends/register-backends.ts": [
+      "matrix/src/backends/BackendManager.ts",
+      "matrix/src/backends/index.ts"
+    ],
     "matrix/src/backends/WASMBackend.ts": [
       "matrix/src/backends/index.ts",
       "matrix/src/backends/register-backends.ts"
     ],
+    "matrix/src/backends/ParallelBackend.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/GPUMatrixBackend.ts": ["matrix/src/backends/index.ts"],
+    "matrix/src/backends/GPUBackend.ts": [
+      "matrix/src/backends/GPUMatrixBackend.ts",
+      "matrix/src/backends/index.ts"
+    ],
     "matrix/src/backends/BackendManager.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/wasm/index.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/gpu/index.ts": ["matrix/src/backends/index.ts"],
-    "matrix/src/backends/WasmLoader.ts": ["matrix/src/backends/wasm/fft-wasm.ts"],
-    "matrix/src/backends/wasm/fft-wasm.ts": ["matrix/src/backends/wasm/index.ts"],
-    "matrix/src/types/index.ts": ["matrix/src/index.ts"],
-    "matrix/src/backends/index.ts": ["matrix/src/index.ts"],
-    "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
-    "matrix/src/typed-operations.ts": ["matrix/src/index.ts"],
-    "matrix/src/parallel-matrix.ts": ["matrix/src/index.ts"],
+    "matrix/src/backends/gpu/builtin-shaders.ts": [
+      "matrix/src/backends/GPUBackend.ts",
+      "matrix/src/backends/gpu/index.ts"
+    ],
+    "matrix/src/backends/gpu/BatchExecutor.ts": ["matrix/src/backends/gpu/index.ts"],
+    "matrix/src/backends/gpu/Sync.ts": ["matrix/src/backends/gpu/index.ts"],
     "matrix/src/operations/lu.ts": [
       "matrix/src/operations/condest.ts",
       "matrix/src/operations/index.ts"
-    ],
-    "matrix/src/operations/eig.ts": [
-      "matrix/src/operations/eig-wasm.ts",
-      "matrix/src/operations/index.ts",
-      "matrix/src/operations/logm.ts",
-      "matrix/src/operations/sqrtm.ts"
     ],
     "matrix/src/operations/common.ts": [
       "matrix/src/operations/eig.ts",
@@ -220,6 +214,12 @@
       "matrix/src/operations/schur.ts",
       "matrix/src/operations/sqrtm.ts",
       "matrix/src/operations/svd.ts"
+    ],
+    "matrix/src/operations/eig.ts": [
+      "matrix/src/operations/eig-wasm.ts",
+      "matrix/src/operations/index.ts",
+      "matrix/src/operations/logm.ts",
+      "matrix/src/operations/sqrtm.ts"
     ],
     "matrix/src/operations/svd.ts": [
       "matrix/src/operations/index.ts",
@@ -252,9 +252,9 @@
       "matrix/src/types/dense/reduction.ts",
       "matrix/src/types/index.ts"
     ],
+    "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
     "matrix/src/types/dense/reduction.ts": ["matrix/src/types/DenseMatrix.ts"],
-    "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",
       "tensor/src/contraction-sequence.ts",
@@ -315,43 +315,579 @@
     "tensor/src/operations/roll.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/flip.ts": ["tensor/src/index.ts"],
     "autograd/src/dual-tensor.ts": ["autograd/src/forward-grad.ts", "autograd/src/index.ts"],
+    "autograd/src/forward-grad.ts": ["autograd/src/index.ts"],
     "autograd/src/tape.ts": [
       "autograd/src/grad.ts",
       "autograd/src/index.ts",
       "autograd/src/reverse-grad.ts"
     ],
-    "autograd/src/forward-grad.ts": ["autograd/src/index.ts"],
     "autograd/src/reverse-grad.ts": ["autograd/src/index.ts"],
     "autograd/src/grad.ts": ["autograd/src/index.ts"],
-    "functions/src/utils/object.ts": [
+    "functions/src/factories/evaluate.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/help.ts",
+      "functions/src/index.ts",
+      "functions/src/typed/cas.ts"
+    ],
+    "functions/src/typed/algebra.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/polynomial-ideal.ts": [
+      "functions/src/cas-integration.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/multi-poly.ts"
+    ],
+    "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
+    "functions/src/factories/index.ts": [
+      "functions/src/clustering-extra.ts",
+      "functions/src/descriptive-stats.ts",
+      "functions/src/factories/evaluate.ts",
+      "functions/src/index.ts",
+      "functions/src/linalg-extra.ts",
+      "functions/src/optimization-extra.ts",
+      "functions/src/signal-filter-extra.ts",
+      "functions/src/signal/fft-helpers.ts",
+      "functions/src/typed/cas.ts"
+    ],
+    "functions/src/linalg-extra.ts": [
+      "functions/src/clustering-extra.ts",
+      "functions/src/index.ts",
+      "functions/src/signal-filter-extra.ts"
+    ],
+    "functions/src/typed/arithmetic.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/factories/index.ts",
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/linalg-extra.ts",
+      "functions/src/numeric-extra.ts",
+      "functions/src/regression-extra.ts",
+      "functions/src/stats/fit-distribution.ts",
+      "functions/src/timeseries-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/distribution-functions.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/index.ts",
+      "functions/src/ml/ols.ts",
+      "functions/src/regression-extra.ts",
+      "functions/src/stats/inference-extra.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/power-analysis.ts",
+      "functions/src/stats/timeseries.ts",
+      "functions/src/typed/hypothesis.ts"
+    ],
+    "functions/src/typed/distributions.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/dist-objects.ts": [
+      "functions/src/distribution-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/mvn.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/trigonometry.ts": [
+      "functions/src/geometry-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
+    "functions/src/core/function/typed.ts": [
       "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/decomposition/schur.ts",
+      "functions/src/algebra/decomposition/slu.ts",
+      "functions/src/algebra/derivative.ts",
+      "functions/src/algebra/leafCount.ts",
+      "functions/src/algebra/lyap.ts",
+      "functions/src/algebra/polynomialRoot.ts",
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/algebra/resolve.ts",
       "functions/src/algebra/simplify.ts",
-      "functions/src/algebra/simplify/util.ts",
-      "functions/src/arithmetic/divide.ts",
+      "functions/src/algebra/simplifyConstant.ts",
+      "functions/src/algebra/simplifyCore.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/sparse/csAmd.ts",
+      "functions/src/algebra/sparse/csChol.ts",
+      "functions/src/algebra/sparse/csCounts.ts",
+      "functions/src/algebra/sparse/csLu.ts",
+      "functions/src/algebra/sparse/csSpsolve.ts",
+      "functions/src/algebra/sparse/csSqr.ts",
+      "functions/src/algebra/sparse/csSymperm.ts",
+      "functions/src/algebra/sylvester.ts",
+      "functions/src/algebra/symbolicEqual.ts",
+      "functions/src/arithmetic/abs.ts",
+      "functions/src/arithmetic/addScalar.ts",
+      "functions/src/arithmetic/cbrt.ts",
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/cube.ts",
+      "functions/src/arithmetic/divideScalar.ts",
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotMultiply.ts",
+      "functions/src/arithmetic/dotPow.ts",
+      "functions/src/arithmetic/exp.ts",
+      "functions/src/arithmetic/expm1.ts",
+      "functions/src/arithmetic/fix.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/invmod.ts",
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/arithmetic/log.ts",
+      "functions/src/arithmetic/log10.ts",
+      "functions/src/arithmetic/log1p.ts",
+      "functions/src/arithmetic/log2.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/multiplyScalar.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/arithmetic/nthRoots.ts",
+      "functions/src/arithmetic/pow.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/arithmetic/sign.ts",
+      "functions/src/arithmetic/sqrt.ts",
+      "functions/src/arithmetic/square.ts",
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/arithmetic/subtractScalar.ts",
+      "functions/src/arithmetic/unaryMinus.ts",
+      "functions/src/arithmetic/unaryPlus.ts",
+      "functions/src/arithmetic/xgcd.ts",
+      "functions/src/bitwise/bitAnd.ts",
+      "functions/src/bitwise/bitNot.ts",
+      "functions/src/bitwise/bitOr.ts",
+      "functions/src/bitwise/bitXor.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts",
+      "functions/src/bitwise/useMatrixForArrayScalar.ts",
+      "functions/src/combinatorics/bellNumbers.ts",
+      "functions/src/combinatorics/catalan.ts",
+      "functions/src/combinatorics/composition.ts",
+      "functions/src/combinatorics/stirlingS2.ts",
+      "functions/src/complex/arg.ts",
+      "functions/src/complex/conj.ts",
+      "functions/src/complex/im.ts",
+      "functions/src/complex/re.ts",
       "functions/src/core/create.ts",
-      "functions/src/core/function/config.ts",
       "functions/src/core/function/import.ts",
-      "functions/src/matrix/column.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/geometry/intersect.ts",
+      "functions/src/logical/and.ts",
+      "functions/src/logical/not.ts",
+      "functions/src/logical/or.ts",
+      "functions/src/logical/xor.ts",
       "functions/src/matrix/concat.ts",
-      "functions/src/matrix/det.ts",
-      "functions/src/matrix/eigs/complexEigs.ts",
-      "functions/src/matrix/eigs/realSymmetric.ts",
-      "functions/src/matrix/pinv.ts",
+      "functions/src/matrix/count.ts",
+      "functions/src/matrix/cross.ts",
+      "functions/src/matrix/ctranspose.ts",
+      "functions/src/matrix/diag.ts",
+      "functions/src/matrix/dot.ts",
+      "functions/src/matrix/fft.ts",
+      "functions/src/matrix/filter.ts",
+      "functions/src/matrix/flatten.ts",
+      "functions/src/matrix/forEach.ts",
+      "functions/src/matrix/getMatrixDataType.ts",
+      "functions/src/matrix/identity.ts",
+      "functions/src/matrix/map.ts",
+      "functions/src/matrix/range.ts",
+      "functions/src/matrix/reshape.ts",
       "functions/src/matrix/resize.ts",
-      "functions/src/matrix/row.ts",
+      "functions/src/matrix/size.ts",
       "functions/src/matrix/squeeze.ts",
       "functions/src/matrix/subset.ts",
       "functions/src/matrix/trace.ts",
       "functions/src/matrix/transpose.ts",
+      "functions/src/matrix/utils/zerosAndOnes.ts",
+      "functions/src/probability/bernoulli.ts",
+      "functions/src/probability/combinations.ts",
+      "functions/src/probability/combinationsWithRep.ts",
+      "functions/src/probability/factorial.ts",
+      "functions/src/probability/gamma.ts",
+      "functions/src/probability/kldivergence.ts",
+      "functions/src/probability/lgamma.ts",
+      "functions/src/probability/multinomial.ts",
+      "functions/src/probability/permutations.ts",
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/probability/random.ts",
+      "functions/src/probability/randomInt.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/compareNatural.ts",
+      "functions/src/relational/compareText.ts",
+      "functions/src/relational/compareUnits.ts",
+      "functions/src/relational/deepEqual.ts",
+      "functions/src/relational/equal.ts",
+      "functions/src/relational/equalText.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts",
+      "functions/src/set/setCartesian.ts",
+      "functions/src/set/setDifference.ts",
+      "functions/src/set/setIntersect.ts",
+      "functions/src/set/setSymDifference.ts",
+      "functions/src/set/setUnion.ts",
+      "functions/src/special/erf.ts",
+      "functions/src/special/zeta.ts",
+      "functions/src/statistics/corr.ts",
+      "functions/src/statistics/cumsum.ts",
+      "functions/src/statistics/mad.ts",
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/mean.ts",
+      "functions/src/statistics/median.ts",
+      "functions/src/statistics/min.ts",
+      "functions/src/statistics/mode.ts",
+      "functions/src/statistics/prod.ts",
+      "functions/src/statistics/quantileSeq.ts",
+      "functions/src/statistics/std.ts",
+      "functions/src/statistics/sum.ts",
+      "functions/src/statistics/variance.ts",
+      "functions/src/string/bin.ts",
+      "functions/src/string/format.ts",
+      "functions/src/string/hex.ts",
+      "functions/src/string/oct.ts",
+      "functions/src/string/print.ts",
+      "functions/src/trigonometry/acos.ts",
+      "functions/src/trigonometry/acosh.ts",
+      "functions/src/trigonometry/acot.ts",
+      "functions/src/trigonometry/acoth.ts",
+      "functions/src/trigonometry/acsc.ts",
+      "functions/src/trigonometry/acsch.ts",
+      "functions/src/trigonometry/asec.ts",
+      "functions/src/trigonometry/asech.ts",
+      "functions/src/trigonometry/asin.ts",
+      "functions/src/trigonometry/asinh.ts",
+      "functions/src/trigonometry/atan.ts",
+      "functions/src/trigonometry/atan2.ts",
+      "functions/src/trigonometry/atanh.ts",
+      "functions/src/trigonometry/cos.ts",
+      "functions/src/trigonometry/cosh.ts",
+      "functions/src/trigonometry/cot.ts",
+      "functions/src/trigonometry/coth.ts",
+      "functions/src/trigonometry/csc.ts",
+      "functions/src/trigonometry/csch.ts",
+      "functions/src/trigonometry/sec.ts",
+      "functions/src/trigonometry/sech.ts",
+      "functions/src/trigonometry/sin.ts",
+      "functions/src/trigonometry/sinh.ts",
+      "functions/src/trigonometry/tan.ts",
+      "functions/src/trigonometry/tanh.ts",
+      "functions/src/trigonometry/trigUnit.ts",
       "functions/src/type/chain/Chain.ts",
-      "functions/src/type/matrix/ImmutableDenseMatrix.ts",
-      "functions/src/type/matrix/MatrixIndex.ts",
-      "functions/src/type/matrix/utils/broadcast.ts",
-      "functions/src/type/matrix/utils/matAlgo14xDs.ts",
-      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts",
+      "functions/src/type/matrix/function/index.ts",
+      "functions/src/type/unit/function/createUnit.ts",
+      "functions/src/type/unit/function/splitUnit.ts",
+      "functions/src/type/unit/function/unit.ts",
+      "functions/src/types.ts",
+      "functions/src/unit/to.ts",
+      "functions/src/unit/toBest.ts",
       "functions/src/utils/clone.ts",
-      "functions/src/utils/customs.ts",
-      "functions/src/utils/factory.ts"
+      "functions/src/utils/hasNumericValue.ts",
+      "functions/src/utils/isBounded.ts",
+      "functions/src/utils/isFinite.ts",
+      "functions/src/utils/isInteger.ts",
+      "functions/src/utils/isNaN.ts",
+      "functions/src/utils/isNegative.ts",
+      "functions/src/utils/isNumeric.ts",
+      "functions/src/utils/isPositive.ts",
+      "functions/src/utils/isPrime.ts",
+      "functions/src/utils/isZero.ts",
+      "functions/src/utils/typeOf.ts"
+    ],
+    "functions/src/core/config.ts": [
+      "functions/src/algebra/derivative.ts",
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/arithmetic/cbrt.ts",
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/invmod.ts",
+      "functions/src/arithmetic/log.ts",
+      "functions/src/arithmetic/log10.ts",
+      "functions/src/arithmetic/log1p.ts",
+      "functions/src/arithmetic/log2.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/nthRoots.ts",
+      "functions/src/arithmetic/pow.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/arithmetic/sqrt.ts",
+      "functions/src/arithmetic/unaryMinus.ts",
+      "functions/src/arithmetic/unaryPlus.ts",
+      "functions/src/arithmetic/xgcd.ts",
+      "functions/src/config-api.ts",
+      "functions/src/core/create.ts",
+      "functions/src/core/function/config.ts",
+      "functions/src/factories/scope.ts",
+      "functions/src/geometry/intersect.ts",
+      "functions/src/matrix/range.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/rotationMatrix.ts",
+      "functions/src/probability/bernoulli.ts",
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/probability/random.ts",
+      "functions/src/probability/randomInt.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/equalScalar.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts",
+      "functions/src/special/zeta.ts",
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/min.ts",
+      "functions/src/statistics/prod.ts",
+      "functions/src/statistics/sum.ts",
+      "functions/src/trigonometry/acos.ts",
+      "functions/src/trigonometry/acosh.ts",
+      "functions/src/trigonometry/acoth.ts",
+      "functions/src/trigonometry/acsc.ts",
+      "functions/src/trigonometry/asec.ts",
+      "functions/src/trigonometry/asech.ts",
+      "functions/src/trigonometry/asin.ts",
+      "functions/src/trigonometry/atanh.ts",
+      "functions/src/type/unit/physicalConstants.ts",
+      "functions/src/types.ts",
+      "functions/src/utils/isNegative.ts",
+      "functions/src/utils/isPositive.ts"
+    ],
+    "functions/src/core/create.ts": ["functions/src/types.ts"],
+    "functions/src/typed/index.ts": [
+      "functions/src/factories/evaluate.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/typed/cas.ts": ["functions/src/index.ts"],
+    "functions/src/config-api.ts": ["functions/src/index.ts"],
+    "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
+    "functions/src/help.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
+    "functions/src/grad-forward.ts": ["functions/src/index.ts"],
+    "functions/src/descriptive-stats.ts": [
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/numeric-extra.ts": ["functions/src/index.ts"],
+    "functions/src/hypothesis-extra.ts": ["functions/src/index.ts"],
+    "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
+    "functions/src/linalg-svd-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/numeric-jacobian.ts": [
+      "functions/src/index.ts",
+      "functions/src/numeric/fsolve.ts",
+      "functions/src/typed/cas.ts"
+    ],
+    "functions/src/numeric/open-root-finders.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/fit-distribution.ts"
+    ],
+    "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/krylov.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/eigsh.ts": ["functions/src/index.ts", "functions/src/numeric/svds.ts"],
+    "functions/src/numeric/svds.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/structured-solvers.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/matrix-functions.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/control-equations.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/adaptive-quad.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/bspline.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/monte-carlo.ts": ["functions/src/index.ts"],
+    "functions/src/timeseries-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/timeseries.ts"
+    ],
+    "functions/src/stats/timeseries.ts": ["functions/src/index.ts"],
+    "functions/src/regression-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
+    "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
+    "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
+    "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
+    "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
+    "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
+    "functions/src/ml/kde.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/hypothesis.ts"
+    ],
+    "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
+    "functions/src/cas-integration.ts": ["functions/src/index.ts"],
+    "functions/src/signal-filter-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/iir-design.ts",
+      "functions/src/signal/spectral-peaks.ts"
+    ],
+    "functions/src/signal/fft-helpers.ts": ["functions/src/index.ts"],
+    "functions/src/signal/iir-design.ts": ["functions/src/index.ts"],
+    "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
+    "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
+    "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
+    "functions/src/geometry-extra.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/hull.ts": [
+      "functions/src/geometry/halfspace-intersection.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/delaunay.ts": [
+      "functions/src/geometry/alpha-shape.ts",
+      "functions/src/geometry/voronoi.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/voronoi.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/alpha-shape.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/spherical-voronoi.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/halfspace-intersection.ts": ["functions/src/index.ts"],
+    "functions/src/stats/inference-extra2.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/power-analysis.ts"
+    ],
+    "functions/src/special/hypergeometric.ts": [
+      "functions/src/index.ts",
+      "functions/src/special/wave-functions.ts"
+    ],
+    "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
+    "functions/src/special/jacobi-elliptic.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/iir-design.ts"
+    ],
+    "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
+    "functions/src/special/niche.ts": ["functions/src/index.ts"],
+    "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
+    "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
+    "functions/src/special/spheroidal.ts": ["functions/src/index.ts"],
+    "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
+    "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
+    "functions/src/graph/community-coloring.ts": ["functions/src/index.ts"],
+    "functions/src/ml/glm.ts": ["functions/src/index.ts"],
+    "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
+    "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
+    "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
+    "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/signal/remez-exchange.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/factories/scope.ts": [
+      "functions/src/config-api.ts",
+      "functions/src/factories/evaluate.ts",
+      "functions/src/factories/index.ts"
+    ],
+    "functions/src/typed/special.ts": [
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/special/polygamma-orthopoly.ts",
+      "functions/src/stats/fit-distribution.ts",
+      "functions/src/typed/dist-objects.ts",
+      "functions/src/typed/fused.ts",
+      "functions/src/typed/hypothesis.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/numeric.ts": [
+      "functions/src/ml/glm.ts",
+      "functions/src/ml/logistic-regression.ts",
+      "functions/src/ml/regularized-regression.ts",
+      "functions/src/numeric/bspline.ts",
+      "functions/src/numeric/control-equations.ts",
+      "functions/src/numeric/fsolve.ts",
+      "functions/src/numeric/nnls.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/wasm/WasmLoader.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/sparse/csAmd.ts",
+      "functions/src/algebra/sparse/csCounts.ts",
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/hypot.ts",
+      "functions/src/arithmetic/norm.ts",
+      "functions/src/geometry/distance.ts",
+      "functions/src/geometry/intersect.ts",
+      "functions/src/matrix/det.ts",
+      "functions/src/matrix/eigs/complexEigs.ts",
+      "functions/src/matrix/eigs/realSymmetric.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/matrix/kron.ts",
+      "functions/src/matrix/partitionSelect.ts",
+      "functions/src/matrix/sqrtm.ts",
+      "functions/src/matrix/transpose.ts",
+      "functions/src/numeric/solveODE.ts",
+      "functions/src/probability/lgamma.ts",
+      "functions/src/signal/freqz.ts",
+      "functions/src/special/erf.ts",
+      "functions/src/statistics/mad.ts",
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/mean.ts",
+      "functions/src/statistics/min.ts",
+      "functions/src/statistics/prod.ts",
+      "functions/src/typed/geometry.ts",
+      "functions/src/typed/numeric.ts",
+      "functions/src/typed/signal.ts",
+      "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/bridges/common.ts",
+      "functions/src/wasm/interpolation/wasm-bridge.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/wasm/bridges/common.ts": [
+      "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/elementwise/wasm-bridge.ts",
+      "functions/src/wasm/interpolation/wasm-bridge.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts",
+      "functions/src/wasm/signal/wasm-bridge.ts",
+      "functions/src/wasm/sort/wasm-bridge.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/wasm/special/scalars.ts": [
+      "functions/src/signal/iir-design.ts",
+      "functions/src/special/niche.ts",
+      "functions/src/special/wave-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],
+    "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
+    "functions/src/typed/matrix-ops.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/stats/gaussian-process.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/probability/util/seededRNG.ts": [
+      "functions/src/numeric/monte-carlo.ts",
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/probability/random.ts",
+      "functions/src/probability/randomInt.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts"
+    ],
+    "functions/src/probability/util/gammaSample.ts": [
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/typed/dist-objects.ts"
+    ],
+    "functions/src/plain/number/probability.ts": [
+      "functions/src/plain/number/index.ts",
+      "functions/src/stats/multivariate-sampling.ts"
     ],
     "functions/src/utils/factory.ts": [
       "functions/src/algebra/decomposition/lup.ts",
@@ -615,302 +1151,95 @@
       "functions/src/utils/parseNumber.ts",
       "functions/src/utils/typeOf.ts"
     ],
-    "functions/src/wasm/WasmLoader.ts": [
-      "functions/src/algebra/decomposition/lup.ts",
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/algebra/solver/lsolve.ts",
-      "functions/src/algebra/solver/lusolve.ts",
-      "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/sparse/csAmd.ts",
-      "functions/src/algebra/sparse/csCounts.ts",
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/hypot.ts",
-      "functions/src/arithmetic/norm.ts",
-      "functions/src/geometry/distance.ts",
-      "functions/src/geometry/intersect.ts",
-      "functions/src/matrix/det.ts",
-      "functions/src/matrix/eigs/complexEigs.ts",
-      "functions/src/matrix/eigs/realSymmetric.ts",
-      "functions/src/matrix/inv.ts",
-      "functions/src/matrix/kron.ts",
-      "functions/src/matrix/partitionSelect.ts",
-      "functions/src/matrix/sqrtm.ts",
-      "functions/src/matrix/transpose.ts",
-      "functions/src/numeric/solveODE.ts",
-      "functions/src/probability/lgamma.ts",
-      "functions/src/signal/freqz.ts",
-      "functions/src/special/erf.ts",
-      "functions/src/statistics/mad.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/mean.ts",
-      "functions/src/statistics/min.ts",
-      "functions/src/statistics/prod.ts",
-      "functions/src/typed/geometry.ts",
-      "functions/src/typed/numeric.ts",
-      "functions/src/typed/signal.ts",
-      "functions/src/wasm/bitwise/wasm-bridge.ts",
-      "functions/src/wasm/bridges/common.ts",
-      "functions/src/wasm/interpolation/wasm-bridge.ts",
-      "functions/src/wasm/poly/wasm-bridge.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
-    "functions/src/core/function/typed.ts": [
-      "functions/src/algebra/decomposition/lup.ts",
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/algebra/decomposition/schur.ts",
-      "functions/src/algebra/decomposition/slu.ts",
-      "functions/src/algebra/derivative.ts",
-      "functions/src/algebra/leafCount.ts",
-      "functions/src/algebra/lyap.ts",
-      "functions/src/algebra/polynomialRoot.ts",
-      "functions/src/algebra/rationalize.ts",
-      "functions/src/algebra/resolve.ts",
-      "functions/src/algebra/simplify.ts",
-      "functions/src/algebra/simplifyConstant.ts",
-      "functions/src/algebra/simplifyCore.ts",
-      "functions/src/algebra/solver/lsolve.ts",
-      "functions/src/algebra/solver/lusolve.ts",
-      "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/sparse/csAmd.ts",
-      "functions/src/algebra/sparse/csChol.ts",
-      "functions/src/algebra/sparse/csCounts.ts",
-      "functions/src/algebra/sparse/csLu.ts",
-      "functions/src/algebra/sparse/csSpsolve.ts",
-      "functions/src/algebra/sparse/csSqr.ts",
-      "functions/src/algebra/sparse/csSymperm.ts",
-      "functions/src/algebra/sylvester.ts",
-      "functions/src/algebra/symbolicEqual.ts",
+    "functions/src/utils/collection.ts": [
       "functions/src/arithmetic/abs.ts",
-      "functions/src/arithmetic/addScalar.ts",
-      "functions/src/arithmetic/cbrt.ts",
       "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/cube.ts",
-      "functions/src/arithmetic/divideScalar.ts",
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotMultiply.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/arithmetic/exp.ts",
-      "functions/src/arithmetic/expm1.ts",
       "functions/src/arithmetic/fix.ts",
       "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/hypot.ts",
-      "functions/src/arithmetic/invmod.ts",
-      "functions/src/arithmetic/lcm.ts",
-      "functions/src/arithmetic/log.ts",
       "functions/src/arithmetic/log10.ts",
       "functions/src/arithmetic/log1p.ts",
       "functions/src/arithmetic/log2.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/multiplyScalar.ts",
-      "functions/src/arithmetic/norm.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/arithmetic/nthRoots.ts",
-      "functions/src/arithmetic/pow.ts",
       "functions/src/arithmetic/round.ts",
       "functions/src/arithmetic/sign.ts",
-      "functions/src/arithmetic/sqrt.ts",
-      "functions/src/arithmetic/square.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/arithmetic/subtractScalar.ts",
       "functions/src/arithmetic/unaryMinus.ts",
       "functions/src/arithmetic/unaryPlus.ts",
-      "functions/src/arithmetic/xgcd.ts",
-      "functions/src/bitwise/bitAnd.ts",
       "functions/src/bitwise/bitNot.ts",
-      "functions/src/bitwise/bitOr.ts",
-      "functions/src/bitwise/bitXor.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/bitwise/useMatrixForArrayScalar.ts",
-      "functions/src/combinatorics/bellNumbers.ts",
-      "functions/src/combinatorics/catalan.ts",
-      "functions/src/combinatorics/composition.ts",
-      "functions/src/combinatorics/stirlingS2.ts",
       "functions/src/complex/arg.ts",
       "functions/src/complex/conj.ts",
       "functions/src/complex/im.ts",
       "functions/src/complex/re.ts",
-      "functions/src/core/create.ts",
-      "functions/src/core/function/import.ts",
-      "functions/src/geometry/distance.ts",
-      "functions/src/geometry/intersect.ts",
-      "functions/src/logical/and.ts",
       "functions/src/logical/not.ts",
-      "functions/src/logical/or.ts",
-      "functions/src/logical/xor.ts",
-      "functions/src/matrix/concat.ts",
-      "functions/src/matrix/count.ts",
-      "functions/src/matrix/cross.ts",
-      "functions/src/matrix/ctranspose.ts",
-      "functions/src/matrix/diag.ts",
-      "functions/src/matrix/dot.ts",
-      "functions/src/matrix/fft.ts",
-      "functions/src/matrix/filter.ts",
-      "functions/src/matrix/flatten.ts",
-      "functions/src/matrix/forEach.ts",
-      "functions/src/matrix/getMatrixDataType.ts",
-      "functions/src/matrix/identity.ts",
-      "functions/src/matrix/map.ts",
-      "functions/src/matrix/range.ts",
-      "functions/src/matrix/reshape.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/size.ts",
-      "functions/src/matrix/squeeze.ts",
-      "functions/src/matrix/subset.ts",
-      "functions/src/matrix/trace.ts",
-      "functions/src/matrix/transpose.ts",
-      "functions/src/matrix/utils/zerosAndOnes.ts",
-      "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/combinations.ts",
-      "functions/src/probability/combinationsWithRep.ts",
       "functions/src/probability/factorial.ts",
-      "functions/src/probability/gamma.ts",
-      "functions/src/probability/kldivergence.ts",
-      "functions/src/probability/lgamma.ts",
       "functions/src/probability/multinomial.ts",
       "functions/src/probability/permutations.ts",
-      "functions/src/probability/pickRandom.ts",
-      "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts",
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/compareNatural.ts",
-      "functions/src/relational/compareText.ts",
-      "functions/src/relational/compareUnits.ts",
-      "functions/src/relational/deepEqual.ts",
-      "functions/src/relational/equal.ts",
-      "functions/src/relational/equalText.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts",
-      "functions/src/set/setCartesian.ts",
-      "functions/src/set/setDifference.ts",
-      "functions/src/set/setIntersect.ts",
-      "functions/src/set/setSymDifference.ts",
-      "functions/src/set/setUnion.ts",
       "functions/src/special/erf.ts",
-      "functions/src/special/zeta.ts",
-      "functions/src/statistics/corr.ts",
       "functions/src/statistics/cumsum.ts",
-      "functions/src/statistics/mad.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/mean.ts",
       "functions/src/statistics/median.ts",
       "functions/src/statistics/min.ts",
-      "functions/src/statistics/mode.ts",
       "functions/src/statistics/prod.ts",
-      "functions/src/statistics/quantileSeq.ts",
-      "functions/src/statistics/std.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts",
-      "functions/src/string/bin.ts",
-      "functions/src/string/format.ts",
-      "functions/src/string/hex.ts",
-      "functions/src/string/oct.ts",
-      "functions/src/string/print.ts",
-      "functions/src/trigonometry/acos.ts",
-      "functions/src/trigonometry/acosh.ts",
-      "functions/src/trigonometry/acot.ts",
-      "functions/src/trigonometry/acoth.ts",
-      "functions/src/trigonometry/acsc.ts",
-      "functions/src/trigonometry/acsch.ts",
-      "functions/src/trigonometry/asec.ts",
-      "functions/src/trigonometry/asech.ts",
-      "functions/src/trigonometry/asin.ts",
-      "functions/src/trigonometry/asinh.ts",
-      "functions/src/trigonometry/atan.ts",
-      "functions/src/trigonometry/atan2.ts",
-      "functions/src/trigonometry/atanh.ts",
-      "functions/src/trigonometry/cos.ts",
-      "functions/src/trigonometry/cosh.ts",
-      "functions/src/trigonometry/cot.ts",
-      "functions/src/trigonometry/coth.ts",
-      "functions/src/trigonometry/csc.ts",
-      "functions/src/trigonometry/csch.ts",
-      "functions/src/trigonometry/sec.ts",
-      "functions/src/trigonometry/sech.ts",
-      "functions/src/trigonometry/sin.ts",
-      "functions/src/trigonometry/sinh.ts",
-      "functions/src/trigonometry/tan.ts",
-      "functions/src/trigonometry/tanh.ts",
-      "functions/src/trigonometry/trigUnit.ts",
-      "functions/src/type/chain/Chain.ts",
-      "functions/src/type/matrix/function/index.ts",
-      "functions/src/type/unit/function/createUnit.ts",
-      "functions/src/type/unit/function/splitUnit.ts",
+      "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
       "functions/src/type/unit/function/unit.ts",
-      "functions/src/types.ts",
-      "functions/src/unit/to.ts",
-      "functions/src/unit/toBest.ts",
-      "functions/src/utils/clone.ts",
-      "functions/src/utils/hasNumericValue.ts",
-      "functions/src/utils/isBounded.ts",
-      "functions/src/utils/isFinite.ts",
       "functions/src/utils/isInteger.ts",
       "functions/src/utils/isNaN.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/isPositive.ts",
       "functions/src/utils/isPrime.ts",
-      "functions/src/utils/isZero.ts",
-      "functions/src/utils/typeOf.ts"
+      "functions/src/utils/isZero.ts"
     ],
-    "functions/src/utils/number.ts": [
-      "functions/src/algebra/decomposition/slu.ts",
-      "functions/src/algebra/derivative.ts",
-      "functions/src/algebra/rationalize.ts",
-      "functions/src/algebra/simplifyConstant.ts",
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/log1p.ts",
+    "functions/src/utils/array.ts": [
+      "functions/src/algebra/solver/utils/solveValidation.ts",
+      "functions/src/arithmetic/hypot.ts",
       "functions/src/arithmetic/pow.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/arithmetic/unaryPlus.ts",
-      "functions/src/core/function/typed.ts",
+      "functions/src/matrix/column.ts",
+      "functions/src/matrix/concat.ts",
+      "functions/src/matrix/cross.ts",
       "functions/src/matrix/diag.ts",
-      "functions/src/matrix/diff.ts",
+      "functions/src/matrix/fft.ts",
+      "functions/src/matrix/filter.ts",
+      "functions/src/matrix/flatten.ts",
+      "functions/src/matrix/forEach.ts",
+      "functions/src/matrix/getMatrixDataType.ts",
       "functions/src/matrix/identity.ts",
-      "functions/src/matrix/partitionSelect.ts",
+      "functions/src/matrix/ifft.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/matrix/kron.ts",
+      "functions/src/matrix/map.ts",
+      "functions/src/matrix/mapSlices.ts",
+      "functions/src/matrix/pinv.ts",
+      "functions/src/matrix/reshape.ts",
       "functions/src/matrix/resize.ts",
+      "functions/src/matrix/rotate.ts",
+      "functions/src/matrix/row.ts",
+      "functions/src/matrix/size.ts",
+      "functions/src/matrix/sort.ts",
+      "functions/src/matrix/sqrtm.ts",
+      "functions/src/matrix/squeeze.ts",
+      "functions/src/matrix/subset.ts",
       "functions/src/matrix/utils/zerosAndOnes.ts",
-      "functions/src/plain/number/arithmetic.ts",
-      "functions/src/plain/number/bitwise.ts",
-      "functions/src/plain/number/combinations.ts",
-      "functions/src/plain/number/probability.ts",
-      "functions/src/plain/number/trigonometry.ts",
-      "functions/src/plain/number/utils.ts",
-      "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/combinationsWithRep.ts",
-      "functions/src/probability/lgamma.ts",
-      "functions/src/probability/permutations.ts",
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/equalScalar.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/special/erf.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/min.ts",
-      "functions/src/trigonometry/cosh.ts",
-      "functions/src/trigonometry/tanh.ts",
-      "functions/src/type/matrix/MatrixIndex.ts",
-      "functions/src/typed/relational.ts",
-      "functions/src/utils/complex.ts",
-      "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts"
-    ],
-    "functions/src/algebra/sparse/csSqr.ts": [
-      "functions/src/algebra/decomposition/slu.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/algebra/sparse/csLu.ts": [
-      "functions/src/algebra/decomposition/slu.ts",
-      "functions/src/factories/index.ts"
+      "functions/src/probability/pickRandom.ts",
+      "functions/src/set/setCartesian.ts",
+      "functions/src/set/setDifference.ts",
+      "functions/src/set/setDistinct.ts",
+      "functions/src/set/setIntersect.ts",
+      "functions/src/set/setIsSubset.ts",
+      "functions/src/set/setMultiplicity.ts",
+      "functions/src/set/setPowerset.ts",
+      "functions/src/set/setSize.ts",
+      "functions/src/set/setSymDifference.ts",
+      "functions/src/set/setUnion.ts",
+      "functions/src/statistics/cumsum.ts",
+      "functions/src/statistics/mad.ts",
+      "functions/src/statistics/mean.ts",
+      "functions/src/statistics/median.ts",
+      "functions/src/statistics/mode.ts",
+      "functions/src/statistics/quantileSeq.ts",
+      "functions/src/type/matrix/utils/broadcast.ts",
+      "functions/src/utils/optimizeCallback.ts"
     ],
     "functions/src/utils/is.ts": [
       "functions/src/algebra/derivative.ts",
@@ -970,251 +1299,9 @@
       "functions/src/utils/optimizeCallback.ts",
       "functions/src/utils/typeOf.ts"
     ],
-    "functions/src/utils/node.ts": [
-      "functions/src/algebra/derivative.ts",
-      "functions/src/algebra/leafCount.ts",
-      "functions/src/algebra/rationalize.ts",
-      "functions/src/algebra/resolve.ts",
-      "functions/src/algebra/simplify.ts",
-      "functions/src/algebra/simplify/util.ts",
-      "functions/src/algebra/simplify/wildcards.ts",
-      "functions/src/algebra/simplifyConstant.ts",
-      "functions/src/algebra/simplifyCore.ts",
-      "functions/src/algebra/symbolicEqual.ts"
-    ],
-    "functions/src/core/config.ts": [
-      "functions/src/algebra/derivative.ts",
-      "functions/src/algebra/rationalize.ts",
-      "functions/src/arithmetic/cbrt.ts",
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/invmod.ts",
-      "functions/src/arithmetic/log.ts",
-      "functions/src/arithmetic/log10.ts",
-      "functions/src/arithmetic/log1p.ts",
-      "functions/src/arithmetic/log2.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/nthRoots.ts",
-      "functions/src/arithmetic/pow.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/arithmetic/sqrt.ts",
-      "functions/src/arithmetic/unaryMinus.ts",
-      "functions/src/arithmetic/unaryPlus.ts",
-      "functions/src/arithmetic/xgcd.ts",
-      "functions/src/config-api.ts",
-      "functions/src/core/create.ts",
-      "functions/src/core/function/config.ts",
-      "functions/src/factories/scope.ts",
-      "functions/src/geometry/intersect.ts",
-      "functions/src/matrix/range.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/rotationMatrix.ts",
-      "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/pickRandom.ts",
+    "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts",
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/equalScalar.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts",
-      "functions/src/special/zeta.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/min.ts",
-      "functions/src/statistics/prod.ts",
-      "functions/src/statistics/sum.ts",
-      "functions/src/trigonometry/acos.ts",
-      "functions/src/trigonometry/acosh.ts",
-      "functions/src/trigonometry/acoth.ts",
-      "functions/src/trigonometry/acsc.ts",
-      "functions/src/trigonometry/asec.ts",
-      "functions/src/trigonometry/asech.ts",
-      "functions/src/trigonometry/asin.ts",
-      "functions/src/trigonometry/atanh.ts",
-      "functions/src/type/unit/physicalConstants.ts",
-      "functions/src/types.ts",
-      "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isPositive.ts"
-    ],
-    "functions/src/utils/map.ts": [
-      "functions/src/algebra/resolve.ts",
-      "functions/src/algebra/simplify.ts",
-      "functions/src/core/create.ts"
-    ],
-    "functions/src/algebra/simplify/wildcards.ts": ["functions/src/algebra/simplify.ts"],
-    "functions/src/algebra/simplify/util.ts": [
-      "functions/src/algebra/simplify.ts",
-      "functions/src/algebra/simplifyConstant.ts",
-      "functions/src/algebra/simplifyCore.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/utils/noop.ts": [
-      "functions/src/algebra/simplifyConstant.ts",
-      "functions/src/matrix/range.ts",
-      "functions/src/utils/numeric.ts"
-    ],
-    "functions/src/expression/operators.ts": ["functions/src/algebra/simplifyCore.ts"],
-    "functions/src/algebra/solver/utils/solveValidation.ts": [
-      "functions/src/algebra/solver/lsolve.ts",
-      "functions/src/algebra/solver/lsolveAll.ts",
-      "functions/src/algebra/solver/lusolve.ts",
-      "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/usolveAll.ts"
-    ],
-    "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
-    "functions/src/utils/array.ts": [
-      "functions/src/algebra/solver/utils/solveValidation.ts",
-      "functions/src/arithmetic/hypot.ts",
-      "functions/src/arithmetic/pow.ts",
-      "functions/src/matrix/column.ts",
-      "functions/src/matrix/concat.ts",
-      "functions/src/matrix/cross.ts",
-      "functions/src/matrix/diag.ts",
-      "functions/src/matrix/fft.ts",
-      "functions/src/matrix/filter.ts",
-      "functions/src/matrix/flatten.ts",
-      "functions/src/matrix/forEach.ts",
-      "functions/src/matrix/getMatrixDataType.ts",
-      "functions/src/matrix/identity.ts",
-      "functions/src/matrix/ifft.ts",
-      "functions/src/matrix/inv.ts",
-      "functions/src/matrix/kron.ts",
-      "functions/src/matrix/map.ts",
-      "functions/src/matrix/mapSlices.ts",
-      "functions/src/matrix/pinv.ts",
-      "functions/src/matrix/reshape.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/rotate.ts",
-      "functions/src/matrix/row.ts",
-      "functions/src/matrix/size.ts",
-      "functions/src/matrix/sort.ts",
-      "functions/src/matrix/sqrtm.ts",
-      "functions/src/matrix/squeeze.ts",
-      "functions/src/matrix/subset.ts",
-      "functions/src/matrix/utils/zerosAndOnes.ts",
-      "functions/src/probability/pickRandom.ts",
-      "functions/src/set/setCartesian.ts",
-      "functions/src/set/setDifference.ts",
-      "functions/src/set/setDistinct.ts",
-      "functions/src/set/setIntersect.ts",
-      "functions/src/set/setIsSubset.ts",
-      "functions/src/set/setMultiplicity.ts",
-      "functions/src/set/setPowerset.ts",
-      "functions/src/set/setSize.ts",
-      "functions/src/set/setSymDifference.ts",
-      "functions/src/set/setUnion.ts",
-      "functions/src/statistics/cumsum.ts",
-      "functions/src/statistics/mad.ts",
-      "functions/src/statistics/mean.ts",
-      "functions/src/statistics/median.ts",
-      "functions/src/statistics/mode.ts",
-      "functions/src/statistics/quantileSeq.ts",
-      "functions/src/type/matrix/utils/broadcast.ts",
-      "functions/src/utils/optimizeCallback.ts"
-    ],
-    "functions/src/utils/string.ts": [
-      "functions/src/algebra/solver/utils/solveValidation.ts",
-      "functions/src/matrix/det.ts",
-      "functions/src/matrix/eigs.ts",
-      "functions/src/matrix/inv.ts",
-      "functions/src/matrix/pinv.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/sqrtm.ts",
-      "functions/src/matrix/trace.ts",
-      "functions/src/matrix/transpose.ts",
-      "functions/src/relational/compareText.ts",
-      "functions/src/string/format.ts",
-      "functions/src/string/print.ts",
-      "functions/src/type/chain/Chain.ts",
-      "functions/src/typed/string.ts"
-    ],
-    "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
-    "functions/src/algebra/sparse/csFlip.ts": [
-      "functions/src/algebra/sparse/csAmd.ts",
-      "functions/src/algebra/sparse/csMark.ts",
-      "functions/src/algebra/sparse/csUnflip.ts"
-    ],
-    "functions/src/algebra/sparse/csTdfs.ts": [
-      "functions/src/algebra/sparse/csAmd.ts",
-      "functions/src/algebra/sparse/csPost.ts"
-    ],
-    "functions/src/algebra/sparse/csEreach.ts": ["functions/src/algebra/sparse/csChol.ts"],
-    "functions/src/algebra/sparse/csSymperm.ts": [
-      "functions/src/algebra/sparse/csChol.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/algebra/sparse/csLeaf.ts": ["functions/src/algebra/sparse/csCounts.ts"],
-    "functions/src/algebra/sparse/csMarked.ts": [
-      "functions/src/algebra/sparse/csDfs.ts",
-      "functions/src/algebra/sparse/csEreach.ts",
-      "functions/src/algebra/sparse/csReach.ts"
-    ],
-    "functions/src/algebra/sparse/csMark.ts": [
-      "functions/src/algebra/sparse/csDfs.ts",
-      "functions/src/algebra/sparse/csEreach.ts",
-      "functions/src/algebra/sparse/csReach.ts"
-    ],
-    "functions/src/algebra/sparse/csUnflip.ts": ["functions/src/algebra/sparse/csDfs.ts"],
-    "functions/src/algebra/sparse/csSpsolve.ts": [
-      "functions/src/algebra/sparse/csLu.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/algebra/sparse/csDfs.ts": ["functions/src/algebra/sparse/csReach.ts"],
-    "functions/src/algebra/sparse/csReach.ts": ["functions/src/algebra/sparse/csSpsolve.ts"],
-    "functions/src/algebra/sparse/csPermute.ts": ["functions/src/algebra/sparse/csSqr.ts"],
-    "functions/src/algebra/sparse/csPost.ts": ["functions/src/algebra/sparse/csSqr.ts"],
-    "functions/src/algebra/sparse/csEtree.ts": ["functions/src/algebra/sparse/csSqr.ts"],
-    "functions/src/algebra/sparse/csAmd.ts": [
-      "functions/src/algebra/sparse/csSqr.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/algebra/sparse/csCounts.ts": [
-      "functions/src/algebra/sparse/csSqr.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/algebra/sparse/csCumsum.ts": ["functions/src/algebra/sparse/csSymperm.ts"],
-    "functions/src/utils/collection.ts": [
-      "functions/src/arithmetic/abs.ts",
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/fix.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/log10.ts",
-      "functions/src/arithmetic/log1p.ts",
-      "functions/src/arithmetic/log2.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/arithmetic/sign.ts",
-      "functions/src/arithmetic/unaryMinus.ts",
-      "functions/src/arithmetic/unaryPlus.ts",
-      "functions/src/bitwise/bitNot.ts",
-      "functions/src/complex/arg.ts",
-      "functions/src/complex/conj.ts",
-      "functions/src/complex/im.ts",
-      "functions/src/complex/re.ts",
-      "functions/src/logical/not.ts",
-      "functions/src/probability/factorial.ts",
-      "functions/src/probability/multinomial.ts",
-      "functions/src/probability/permutations.ts",
-      "functions/src/special/erf.ts",
-      "functions/src/statistics/cumsum.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/mean.ts",
-      "functions/src/statistics/median.ts",
-      "functions/src/statistics/min.ts",
-      "functions/src/statistics/prod.ts",
-      "functions/src/statistics/sum.ts",
-      "functions/src/statistics/variance.ts",
-      "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
-      "functions/src/type/unit/function/unit.ts",
-      "functions/src/utils/isInteger.ts",
-      "functions/src/utils/isNaN.ts",
-      "functions/src/utils/isNegative.ts",
-      "functions/src/utils/isNumeric.ts",
-      "functions/src/utils/isPositive.ts",
-      "functions/src/utils/isPrime.ts",
-      "functions/src/utils/isZero.ts"
+      "functions/src/probability/randomInt.ts"
     ],
     "functions/src/plain/number/index.ts": [
       "functions/src/arithmetic/abs.ts",
@@ -1271,70 +1358,90 @@
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
     ],
-    "functions/src/utils/bignumber/nearlyEqual.ts": [
+    "functions/src/plain/number/combinations.ts": [
+      "functions/src/plain/number/index.ts",
+      "functions/src/probability/combinations.ts"
+    ],
+    "functions/src/utils/number.ts": [
+      "functions/src/algebra/decomposition/slu.ts",
+      "functions/src/algebra/derivative.ts",
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/algebra/simplifyConstant.ts",
       "functions/src/arithmetic/ceil.ts",
       "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/log1p.ts",
+      "functions/src/arithmetic/pow.ts",
       "functions/src/arithmetic/round.ts",
+      "functions/src/arithmetic/unaryPlus.ts",
+      "functions/src/core/function/typed.ts",
+      "functions/src/matrix/diag.ts",
+      "functions/src/matrix/diff.ts",
+      "functions/src/matrix/identity.ts",
+      "functions/src/matrix/partitionSelect.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/utils/zerosAndOnes.ts",
+      "functions/src/plain/number/arithmetic.ts",
+      "functions/src/plain/number/bitwise.ts",
+      "functions/src/plain/number/combinations.ts",
+      "functions/src/plain/number/probability.ts",
+      "functions/src/plain/number/trigonometry.ts",
+      "functions/src/plain/number/utils.ts",
+      "functions/src/probability/bernoulli.ts",
+      "functions/src/probability/combinationsWithRep.ts",
+      "functions/src/probability/lgamma.ts",
+      "functions/src/probability/permutations.ts",
       "functions/src/relational/compare.ts",
       "functions/src/relational/equalScalar.ts",
       "functions/src/relational/larger.ts",
       "functions/src/relational/largerEq.ts",
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
+      "functions/src/special/erf.ts",
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/min.ts",
+      "functions/src/trigonometry/cosh.ts",
+      "functions/src/trigonometry/tanh.ts",
+      "functions/src/type/matrix/MatrixIndex.ts",
+      "functions/src/typed/relational.ts",
+      "functions/src/utils/complex.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo11xS0s.ts": [
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/divide.ts",
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotMultiply.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/lcm.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/bitwise/bitAnd.ts",
+    "functions/src/utils/product.ts": [
+      "functions/src/plain/number/combinations.ts",
+      "functions/src/plain/number/probability.ts",
+      "functions/src/probability/combinationsWithRep.ts",
+      "functions/src/probability/permutations.ts"
+    ],
+    "functions/src/type/bignumber/BigNumber.ts": [
       "functions/src/bitwise/leftShift.ts",
       "functions/src/bitwise/rightArithShift.ts",
       "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/logical/and.ts",
-      "functions/src/trigonometry/atan2.ts"
-    ],
-    "functions/src/type/matrix/utils/matAlgo12xSfs.ts": [
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/arithmetic/fix.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/bitwise/bitXor.ts",
-      "functions/src/logical/or.ts",
-      "functions/src/logical/xor.ts",
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/equal.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts",
-      "functions/src/trigonometry/atan2.ts"
-    ],
-    "functions/src/type/matrix/utils/matAlgo14xDs.ts": [
-      "functions/src/arithmetic/ceil.ts",
-      "functions/src/arithmetic/divide.ts",
-      "functions/src/arithmetic/fix.ts",
-      "functions/src/arithmetic/floor.ts",
-      "functions/src/arithmetic/round.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/logical/and.ts",
-      "functions/src/logical/nullish.ts",
-      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
+      "functions/src/bitwise/useMatrixForArrayScalar.ts",
+      "functions/src/combinatorics/bellNumbers.ts",
+      "functions/src/combinatorics/catalan.ts",
+      "functions/src/combinatorics/composition.ts",
+      "functions/src/combinatorics/stirlingS2.ts",
+      "functions/src/string/bin.ts",
+      "functions/src/string/hex.ts",
+      "functions/src/string/oct.ts",
+      "functions/src/trigonometry/acosh.ts",
+      "functions/src/trigonometry/acot.ts",
+      "functions/src/trigonometry/acoth.ts",
+      "functions/src/trigonometry/acsc.ts",
+      "functions/src/trigonometry/acsch.ts",
+      "functions/src/trigonometry/asec.ts",
+      "functions/src/trigonometry/asech.ts",
+      "functions/src/trigonometry/asinh.ts",
+      "functions/src/trigonometry/atan2.ts",
+      "functions/src/trigonometry/atanh.ts",
+      "functions/src/trigonometry/cot.ts",
+      "functions/src/trigonometry/coth.ts",
+      "functions/src/trigonometry/csc.ts",
+      "functions/src/trigonometry/csch.ts",
+      "functions/src/trigonometry/sec.ts",
+      "functions/src/trigonometry/sech.ts"
     ],
     "functions/src/type/matrix/types.ts": [
       "functions/src/arithmetic/dotDivide.ts",
@@ -1387,107 +1494,225 @@
       "functions/src/type/matrix/utils/matAlgo14xDs.ts",
       "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo02xDS0.ts": [
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotMultiply.ts",
-      "functions/src/arithmetic/lcm.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/bitwise/bitAnd.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/logical/and.ts",
-      "functions/src/trigonometry/atan2.ts"
+    "functions/src/plain/number/arithmetic.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/bitwise.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/constants.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/logical.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/error/ArgumentsError.ts": [
+      "functions/src/core/create.ts",
+      "functions/src/core/function/import.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo03xDSf.ts": [
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/bitwise/bitXor.ts",
+    "functions/src/error/DimensionError.ts": [
+      "functions/src/core/create.ts",
       "functions/src/logical/nullish.ts",
-      "functions/src/logical/or.ts",
-      "functions/src/logical/xor.ts",
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/equal.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts",
-      "functions/src/trigonometry/atan2.ts"
+      "functions/src/matrix/concat.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/subset.ts",
+      "functions/src/statistics/cumsum.ts",
+      "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
+      "functions/src/type/matrix/utils/matAlgo02xDS0.ts",
+      "functions/src/type/matrix/utils/matAlgo03xDSf.ts",
+      "functions/src/type/matrix/utils/matAlgo04xSidSid.ts",
+      "functions/src/type/matrix/utils/matAlgo05xSfSf.ts",
+      "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
+      "functions/src/type/matrix/utils/matAlgo07xSSf.ts",
+      "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts",
+      "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts",
+      "functions/src/type/matrix/utils/matAlgo13xDD.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo07xSSf.ts": [
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/bitwise/bitXor.ts",
-      "functions/src/logical/xor.ts",
-      "functions/src/relational/equal.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts"
+    "functions/src/error/IndexError.ts": [
+      "functions/src/core/create.ts",
+      "functions/src/matrix/mapSlices.ts"
     ],
-    "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts": [
-      "functions/src/arithmetic/dotDivide.ts",
-      "functions/src/arithmetic/dotMultiply.ts",
-      "functions/src/arithmetic/dotPow.ts",
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/lcm.ts",
-      "functions/src/arithmetic/mod.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/bitwise/bitAnd.ts",
-      "functions/src/bitwise/bitOr.ts",
-      "functions/src/bitwise/bitXor.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/logical/and.ts",
-      "functions/src/logical/or.ts",
-      "functions/src/logical/xor.ts",
-      "functions/src/relational/compare.ts",
+    "functions/src/utils/object.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/simplify.ts",
+      "functions/src/algebra/simplify/util.ts",
+      "functions/src/arithmetic/divide.ts",
+      "functions/src/core/create.ts",
+      "functions/src/core/function/config.ts",
+      "functions/src/core/function/import.ts",
+      "functions/src/matrix/column.ts",
+      "functions/src/matrix/concat.ts",
+      "functions/src/matrix/det.ts",
+      "functions/src/matrix/eigs/complexEigs.ts",
+      "functions/src/matrix/eigs/realSymmetric.ts",
+      "functions/src/matrix/pinv.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/row.ts",
+      "functions/src/matrix/squeeze.ts",
+      "functions/src/matrix/subset.ts",
+      "functions/src/matrix/trace.ts",
+      "functions/src/matrix/transpose.ts",
+      "functions/src/type/chain/Chain.ts",
+      "functions/src/type/matrix/ImmutableDenseMatrix.ts",
+      "functions/src/type/matrix/MatrixIndex.ts",
+      "functions/src/type/matrix/utils/broadcast.ts",
+      "functions/src/type/matrix/utils/matAlgo14xDs.ts",
+      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts",
+      "functions/src/utils/clone.ts",
+      "functions/src/utils/customs.ts",
+      "functions/src/utils/factory.ts"
+    ],
+    "functions/src/utils/map.ts": [
+      "functions/src/algebra/resolve.ts",
+      "functions/src/algebra/simplify.ts",
+      "functions/src/core/create.ts"
+    ],
+    "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
+    "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
+    "functions/src/core/function/import.ts": ["functions/src/core/create.ts"],
+    "functions/src/wasm/elementwise/wasm-bridge.ts": [
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/fused.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/typed/trigonometry.ts"
+    ],
+    "functions/src/gpu/elementwise-gpu.ts": [
+      "functions/src/typed/fused.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/wasm/poly/wasm-bridge.ts": [
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/interpolation.ts"
+    ],
+    "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/numeric/solveODE.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/numeric/solveDAE.ts",
+      "functions/src/numeric/solveParabolicPDE.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/wasm/sort/wasm-bridge.ts": [
+      "functions/src/typed/geometry.ts",
+      "functions/src/typed/hypothesis.ts",
+      "functions/src/typed/statistics.ts"
+    ],
+    "functions/src/wasm/special/wasm-bridge.ts": [
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/special.ts"
+    ],
+    "functions/src/typed/parallel-map.ts": [
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/special.ts"
+    ],
+    "functions/src/signal/fft-core-f64.ts": [
+      "functions/src/matrix/fft.ts",
+      "functions/src/matrix/ifft.ts",
+      "functions/src/signal/fft.ts",
+      "functions/src/typed/signal.ts"
+    ],
+    "functions/src/gpu/fft-gpu.ts": [
+      "functions/src/typed/index.ts",
+      "functions/src/typed/signal.ts"
+    ],
+    "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
+    "functions/src/signal/wavelet-filters.ts": [
+      "functions/src/signal/wavelets.ts",
+      "functions/src/typed/signal.ts"
+    ],
+    "functions/src/typed/statistics.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/signal.ts": [
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/signal/wavelets.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/combinatorics.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/bitwise.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/logical.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/complex.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/set.ts": [
+      "functions/src/geometry/geometry-extra.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/fused.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/geometry.ts": [
+      "functions/src/geometry/delaunay.ts",
+      "functions/src/geometry/hull.ts",
+      "functions/src/geometry/spherical-voronoi.ts",
+      "functions/src/typed/index.ts"
+    ],
+    "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/interpolation.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/graph.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/hypothesis.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/relational.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
+    "functions/src/typed/factorization/integer-poly.ts": [
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rat.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/factorization/finite-field.ts",
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts",
+      "functions/src/typed/factorization/multi-poly.ts",
+      "functions/src/typed/factorization/square-free.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/zassenhaus.ts": [
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts"
+    ],
+    "functions/src/typed/factorization/multi-poly.ts": [
+      "functions/src/typed/factorization/index.ts",
+      "functions/src/typed/factorization/kronecker-factor.ts",
+      "functions/src/typed/factorization/kronecker.ts"
+    ],
+    "functions/src/typed/factorization/kronecker-factor.ts": [
+      "functions/src/typed/factorization/index.ts"
+    ],
+    "functions/src/typed/factorization/kronecker.ts": [
+      "functions/src/typed/factorization/kronecker-factor.ts"
+    ],
+    "functions/src/typed/factorization/finite-field.ts": [
+      "functions/src/typed/factorization/hensel.ts",
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/hensel.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/typed/factorization/square-free.ts": [
+      "functions/src/typed/factorization/zassenhaus.ts"
+    ],
+    "functions/src/utils/string.ts": [
+      "functions/src/algebra/solver/utils/solveValidation.ts",
+      "functions/src/matrix/det.ts",
+      "functions/src/matrix/eigs.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/matrix/pinv.ts",
+      "functions/src/matrix/resize.ts",
+      "functions/src/matrix/sqrtm.ts",
+      "functions/src/matrix/trace.ts",
+      "functions/src/matrix/transpose.ts",
       "functions/src/relational/compareText.ts",
-      "functions/src/relational/equal.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts",
-      "functions/src/relational/unequal.ts",
-      "functions/src/trigonometry/atan2.ts",
-      "functions/src/unit/to.ts"
+      "functions/src/string/format.ts",
+      "functions/src/string/print.ts",
+      "functions/src/type/chain/Chain.ts",
+      "functions/src/typed/string.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts": [
-      "functions/src/arithmetic/dotMultiply.ts",
-      "functions/src/trigonometry/atan2.ts"
+    "functions/src/utils/print.ts": [
+      "functions/src/string/print.ts",
+      "functions/src/typed/string.ts"
     ],
-    "functions/src/arithmetic/mod.ts": [
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/factories/index.ts"
+    "functions/src/factories/matrix-bridge.ts": [
+      "functions/src/factories/scope.ts",
+      "functions/src/typed/arithmetic.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo01xDSid.ts": [
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/bitwise/bitOr.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts"
-    ],
-    "functions/src/type/matrix/utils/matAlgo04xSidSid.ts": [
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/bitwise/bitOr.ts"
-    ],
-    "functions/src/type/matrix/utils/matAlgo10xSids.ts": [
-      "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/subtract.ts",
-      "functions/src/bitwise/bitOr.ts",
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts"
-    ],
+    "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
+    "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
+    "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
     "functions/src/types.ts": [
       "functions/src/arithmetic/hypot.ts",
       "functions/src/complex/arg.ts",
@@ -1520,20 +1745,65 @@
       "functions/src/utils/isNumeric.ts",
       "functions/src/utils/parseNumber.ts"
     ],
-    "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
-      "functions/src/arithmetic/lcm.ts",
-      "functions/src/arithmetic/nthRoot.ts",
-      "functions/src/bitwise/bitAnd.ts",
-      "functions/src/logical/and.ts"
+    "functions/src/utils/optimizeCallback.ts": [
+      "functions/src/matrix/filter.ts",
+      "functions/src/matrix/forEach.ts",
+      "functions/src/matrix/map.ts"
     ],
-    "functions/src/utils/bigint.ts": [
-      "functions/src/arithmetic/log.ts",
-      "functions/src/arithmetic/log10.ts",
-      "functions/src/arithmetic/log2.ts"
+    "functions/src/utils/noop.ts": [
+      "functions/src/algebra/simplifyConstant.ts",
+      "functions/src/matrix/range.ts",
+      "functions/src/utils/numeric.ts"
     ],
-    "functions/src/arithmetic/floor.ts": [
+    "functions/src/matrix/utils/zerosAndOnes.ts": [
+      "functions/src/matrix/ones.ts",
+      "functions/src/matrix/zeros.ts"
+    ],
+    "functions/src/matrix/eigs/complexEigs.ts": ["functions/src/matrix/eigs.ts"],
+    "functions/src/matrix/eigs/realSymmetric.ts": ["functions/src/matrix/eigs.ts"],
+    "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
+    "functions/src/cas/rat.ts": [
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rational-integrate.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo03xDSf.ts": [
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotPow.ts",
       "functions/src/arithmetic/mod.ts",
-      "functions/src/factories/index.ts"
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/bitwise/bitXor.ts",
+      "functions/src/logical/nullish.ts",
+      "functions/src/logical/or.ts",
+      "functions/src/logical/xor.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/equal.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts",
+      "functions/src/trigonometry/atan2.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo12xSfs.ts": [
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotPow.ts",
+      "functions/src/arithmetic/fix.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/bitwise/bitXor.ts",
+      "functions/src/logical/or.ts",
+      "functions/src/logical/xor.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/equal.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts",
+      "functions/src/trigonometry/atan2.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo05xSfSf.ts": [
       "functions/src/arithmetic/mod.ts",
@@ -1541,11 +1811,149 @@
       "functions/src/logical/or.ts",
       "functions/src/relational/compare.ts"
     ],
+    "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts": [
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotMultiply.ts",
+      "functions/src/arithmetic/dotPow.ts",
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/bitwise/bitAnd.ts",
+      "functions/src/bitwise/bitOr.ts",
+      "functions/src/bitwise/bitXor.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts",
+      "functions/src/logical/and.ts",
+      "functions/src/logical/or.ts",
+      "functions/src/logical/xor.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/compareText.ts",
+      "functions/src/relational/equal.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts",
+      "functions/src/trigonometry/atan2.ts",
+      "functions/src/unit/to.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo07xSSf.ts": [
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotPow.ts",
+      "functions/src/bitwise/bitXor.ts",
+      "functions/src/logical/xor.ts",
+      "functions/src/relational/equal.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/relational/unequal.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo14xDs.ts": [
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/divide.ts",
+      "functions/src/arithmetic/fix.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts",
+      "functions/src/logical/and.ts",
+      "functions/src/logical/nullish.ts",
+      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo13xDD.ts": [
+      "functions/src/logical/nullish.ts",
+      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo02xDS0.ts": [
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotMultiply.ts",
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/bitwise/bitAnd.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts",
+      "functions/src/logical/and.ts",
+      "functions/src/trigonometry/atan2.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo11xS0s.ts": [
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/divide.ts",
+      "functions/src/arithmetic/dotDivide.ts",
+      "functions/src/arithmetic/dotMultiply.ts",
+      "functions/src/arithmetic/dotPow.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/bitwise/bitAnd.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts",
+      "functions/src/logical/and.ts",
+      "functions/src/trigonometry/atan2.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo06xS0S0.ts": [
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/bitwise/bitAnd.ts",
+      "functions/src/logical/and.ts"
+    ],
+    "functions/src/utils/bignumber/nearlyEqual.ts": [
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/floor.ts",
+      "functions/src/arithmetic/round.ts",
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/equalScalar.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts",
+      "functions/src/utils/isNegative.ts",
+      "functions/src/utils/isPositive.ts"
+    ],
+    "functions/src/relational/compareUnits.ts": [
+      "functions/src/relational/compare.ts",
+      "functions/src/relational/equalScalar.ts",
+      "functions/src/relational/larger.ts",
+      "functions/src/relational/largerEq.ts",
+      "functions/src/relational/smaller.ts",
+      "functions/src/relational/smallerEq.ts"
+    ],
+    "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
     "functions/src/utils/bignumber/bitwise.ts": [
       "functions/src/bitwise/bitAnd.ts",
       "functions/src/bitwise/bitNot.ts",
       "functions/src/bitwise/bitOr.ts",
       "functions/src/bitwise/bitXor.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo10xSids.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/bitwise/bitOr.ts",
+      "functions/src/bitwise/leftShift.ts",
+      "functions/src/bitwise/rightArithShift.ts",
+      "functions/src/bitwise/rightLogShift.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo04xSidSid.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/bitwise/bitOr.ts"
+    ],
+    "functions/src/type/matrix/utils/matAlgo01xDSid.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/arithmetic/nthRoot.ts",
+      "functions/src/arithmetic/subtract.ts",
+      "functions/src/bitwise/bitOr.ts",
       "functions/src/bitwise/leftShift.ts",
       "functions/src/bitwise/rightArithShift.ts",
       "functions/src/bitwise/rightLogShift.ts"
@@ -1560,302 +1968,10 @@
       "functions/src/bitwise/rightArithShift.ts",
       "functions/src/bitwise/rightLogShift.ts"
     ],
-    "functions/src/type/bignumber/BigNumber.ts": [
-      "functions/src/bitwise/leftShift.ts",
-      "functions/src/bitwise/rightArithShift.ts",
-      "functions/src/bitwise/rightLogShift.ts",
-      "functions/src/bitwise/useMatrixForArrayScalar.ts",
-      "functions/src/combinatorics/bellNumbers.ts",
-      "functions/src/combinatorics/catalan.ts",
-      "functions/src/combinatorics/composition.ts",
-      "functions/src/combinatorics/stirlingS2.ts",
-      "functions/src/string/bin.ts",
-      "functions/src/string/hex.ts",
-      "functions/src/string/oct.ts",
-      "functions/src/trigonometry/acosh.ts",
-      "functions/src/trigonometry/acot.ts",
-      "functions/src/trigonometry/acoth.ts",
-      "functions/src/trigonometry/acsc.ts",
-      "functions/src/trigonometry/acsch.ts",
-      "functions/src/trigonometry/asec.ts",
-      "functions/src/trigonometry/asech.ts",
-      "functions/src/trigonometry/asinh.ts",
-      "functions/src/trigonometry/atan2.ts",
-      "functions/src/trigonometry/atanh.ts",
-      "functions/src/trigonometry/cot.ts",
-      "functions/src/trigonometry/coth.ts",
-      "functions/src/trigonometry/csc.ts",
-      "functions/src/trigonometry/csch.ts",
-      "functions/src/trigonometry/sec.ts",
-      "functions/src/trigonometry/sech.ts"
+    "functions/src/type/matrix/utils/broadcast.ts": [
+      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
     ],
-    "functions/src/factories/evaluate.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/help.ts",
-      "functions/src/index.ts",
-      "functions/src/typed/cas.ts"
-    ],
-    "functions/src/typed/algebra.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/polynomial-ideal.ts": [
-      "functions/src/cas-integration.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/cas.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/multi-poly.ts"
-    ],
-    "functions/src/cas/rational-integrate.ts": ["functions/src/cas-integration.ts"],
-    "functions/src/factories/index.ts": [
-      "functions/src/clustering-extra.ts",
-      "functions/src/descriptive-stats.ts",
-      "functions/src/factories/evaluate.ts",
-      "functions/src/index.ts",
-      "functions/src/linalg-extra.ts",
-      "functions/src/optimization-extra.ts",
-      "functions/src/signal-filter-extra.ts",
-      "functions/src/signal/fft-helpers.ts",
-      "functions/src/typed/cas.ts"
-    ],
-    "functions/src/linalg-extra.ts": [
-      "functions/src/clustering-extra.ts",
-      "functions/src/index.ts",
-      "functions/src/signal-filter-extra.ts"
-    ],
-    "functions/src/factories/scope.ts": [
-      "functions/src/config-api.ts",
-      "functions/src/factories/evaluate.ts",
-      "functions/src/factories/index.ts"
-    ],
-    "functions/src/typed/arithmetic.ts": [
-      "functions/src/descriptive-stats.ts",
-      "functions/src/factories/index.ts",
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/linalg-extra.ts",
-      "functions/src/numeric-extra.ts",
-      "functions/src/regression-extra.ts",
-      "functions/src/stats/fit-distribution.ts",
-      "functions/src/timeseries-extra.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/distribution-functions.ts": [
-      "functions/src/descriptive-stats.ts",
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/index.ts",
-      "functions/src/ml/ols.ts",
-      "functions/src/regression-extra.ts",
-      "functions/src/stats/inference-extra.ts",
-      "functions/src/stats/inference-extra2.ts",
-      "functions/src/stats/power-analysis.ts",
-      "functions/src/stats/timeseries.ts",
-      "functions/src/typed/hypothesis.ts"
-    ],
-    "functions/src/typed/distributions.ts": [
-      "functions/src/descriptive-stats.ts",
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/dist-objects.ts": [
-      "functions/src/distribution-functions.ts",
-      "functions/src/stats/inference-extra2.ts",
-      "functions/src/stats/mvn.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/trigonometry.ts": [
-      "functions/src/geometry-extra.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/descriptive-stats.ts": [
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/index.ts"
-    ],
-    "functions/src/typed/special.ts": [
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/special/polygamma-orthopoly.ts",
-      "functions/src/stats/fit-distribution.ts",
-      "functions/src/typed/dist-objects.ts",
-      "functions/src/typed/fused.ts",
-      "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/index.ts": [
-      "functions/src/factories/evaluate.ts",
-      "functions/src/index.ts"
-    ],
-    "functions/src/typed/cas.ts": ["functions/src/index.ts"],
-    "functions/src/config-api.ts": ["functions/src/index.ts"],
-    "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
-    "functions/src/help.ts": ["functions/src/index.ts"],
-    "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
-    "functions/src/grad-forward.ts": ["functions/src/index.ts"],
-    "functions/src/numeric-extra.ts": ["functions/src/index.ts"],
-    "functions/src/hypothesis-extra.ts": ["functions/src/index.ts"],
-    "functions/src/calculus-extra.ts": ["functions/src/index.ts"],
-    "functions/src/linalg-svd-extra.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/numeric-jacobian.ts": [
-      "functions/src/index.ts",
-      "functions/src/numeric/fsolve.ts",
-      "functions/src/typed/cas.ts"
-    ],
-    "functions/src/numeric/open-root-finders.ts": [
-      "functions/src/index.ts",
-      "functions/src/stats/fit-distribution.ts"
-    ],
-    "functions/src/numeric/fsolve.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/krylov.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/eigsh.ts": ["functions/src/index.ts", "functions/src/numeric/svds.ts"],
-    "functions/src/numeric/svds.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/structured-solvers.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/matrix-functions.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/control-equations.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/adaptive-quad.ts": [
-      "functions/src/index.ts",
-      "functions/src/typed/numeric.ts"
-    ],
-    "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/bspline.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/monte-carlo.ts": ["functions/src/index.ts"],
-    "functions/src/timeseries-extra.ts": [
-      "functions/src/index.ts",
-      "functions/src/stats/timeseries.ts"
-    ],
-    "functions/src/stats/timeseries.ts": ["functions/src/index.ts"],
-    "functions/src/regression-extra.ts": ["functions/src/index.ts"],
-    "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
-    "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
-    "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
-    "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
-    "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
-    "functions/src/ml/kde.ts": ["functions/src/index.ts"],
-    "functions/src/stats/inference-extra.ts": [
-      "functions/src/index.ts",
-      "functions/src/typed/hypothesis.ts"
-    ],
-    "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
-    "functions/src/cas-integration.ts": ["functions/src/index.ts"],
-    "functions/src/signal-filter-extra.ts": [
-      "functions/src/index.ts",
-      "functions/src/signal/fir-smoothing.ts",
-      "functions/src/signal/iir-design.ts",
-      "functions/src/signal/spectral-peaks.ts"
-    ],
-    "functions/src/signal/fft-helpers.ts": ["functions/src/index.ts"],
-    "functions/src/signal/iir-design.ts": ["functions/src/index.ts"],
-    "functions/src/signal/fir-smoothing.ts": ["functions/src/index.ts"],
-    "functions/src/signal/wavelets.ts": ["functions/src/index.ts"],
-    "functions/src/signal/spectral-peaks.ts": ["functions/src/index.ts"],
-    "functions/src/geometry-extra.ts": [
-      "functions/src/geometry/geometry-extra.ts",
-      "functions/src/index.ts"
-    ],
-    "functions/src/geometry/geometry-extra.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/hull.ts": [
-      "functions/src/geometry/halfspace-intersection.ts",
-      "functions/src/index.ts"
-    ],
-    "functions/src/geometry/delaunay.ts": [
-      "functions/src/geometry/alpha-shape.ts",
-      "functions/src/geometry/voronoi.ts",
-      "functions/src/index.ts"
-    ],
-    "functions/src/geometry/voronoi.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/alpha-shape.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/spherical-voronoi.ts": ["functions/src/index.ts"],
-    "functions/src/geometry/halfspace-intersection.ts": ["functions/src/index.ts"],
-    "functions/src/stats/inference-extra2.ts": [
-      "functions/src/index.ts",
-      "functions/src/stats/power-analysis.ts"
-    ],
-    "functions/src/special/hypergeometric.ts": [
-      "functions/src/index.ts",
-      "functions/src/special/wave-functions.ts"
-    ],
-    "functions/src/special/polygamma-orthopoly.ts": ["functions/src/index.ts"],
-    "functions/src/special/jacobi-elliptic.ts": [
-      "functions/src/index.ts",
-      "functions/src/signal/iir-design.ts"
-    ],
-    "functions/src/numeric/gauss-nodes.ts": ["functions/src/index.ts"],
-    "functions/src/special/niche.ts": ["functions/src/index.ts"],
-    "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
-    "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
-    "functions/src/special/spheroidal.ts": ["functions/src/index.ts"],
-    "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
-    "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
-    "functions/src/graph/community-coloring.ts": ["functions/src/index.ts"],
-    "functions/src/ml/glm.ts": ["functions/src/index.ts"],
-    "functions/src/stats/mvn.ts": ["functions/src/index.ts"],
-    "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
-    "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
-    "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
-    "functions/src/signal/remez-exchange.ts": [
-      "functions/src/index.ts",
-      "functions/src/signal/fir-smoothing.ts"
-    ],
-    "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
-    "functions/src/core/create.ts": ["functions/src/types.ts"],
-    "functions/src/typed/factorization/integer-poly.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rat.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/factorization/finite-field.ts",
-      "functions/src/typed/factorization/hensel.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts",
-      "functions/src/typed/factorization/multi-poly.ts",
-      "functions/src/typed/factorization/square-free.ts",
-      "functions/src/typed/factorization/zassenhaus.ts"
-    ],
-    "functions/src/typed/factorization/zassenhaus.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts"
-    ],
-    "functions/src/cas/rat.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rational-integrate.ts"
-    ],
-    "functions/src/cas/layer3.ts": ["functions/src/cas/rational-integrate.ts"],
-    "functions/src/error/ArgumentsError.ts": [
-      "functions/src/core/create.ts",
-      "functions/src/core/function/import.ts"
-    ],
-    "functions/src/error/DimensionError.ts": [
-      "functions/src/core/create.ts",
-      "functions/src/logical/nullish.ts",
-      "functions/src/matrix/concat.ts",
-      "functions/src/matrix/resize.ts",
-      "functions/src/matrix/subset.ts",
-      "functions/src/statistics/cumsum.ts",
-      "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
-      "functions/src/type/matrix/utils/matAlgo02xDS0.ts",
-      "functions/src/type/matrix/utils/matAlgo03xDSf.ts",
-      "functions/src/type/matrix/utils/matAlgo04xSidSid.ts",
-      "functions/src/type/matrix/utils/matAlgo05xSfSf.ts",
-      "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
-      "functions/src/type/matrix/utils/matAlgo07xSSf.ts",
-      "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts",
-      "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts",
-      "functions/src/type/matrix/utils/matAlgo13xDD.ts"
-    ],
-    "functions/src/error/IndexError.ts": [
-      "functions/src/core/create.ts",
-      "functions/src/matrix/mapSlices.ts"
-    ],
-    "functions/src/utils/emitter.ts": ["functions/src/core/create.ts"],
-    "functions/src/core/function/config.ts": ["functions/src/core/create.ts"],
-    "functions/src/core/function/import.ts": ["functions/src/core/create.ts"],
+    "functions/src/typed/typed-bridge.ts": ["functions/src/factories/scope.ts"],
     "functions/src/arithmetic/abs.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/addScalar.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/cube.ts": ["functions/src/factories/index.ts"],
@@ -1953,6 +2069,22 @@
     "functions/src/matrix/det.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/native-accel.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/reshape.ts": ["functions/src/factories/index.ts"],
+    "functions/src/algebra/sparse/csAmd.ts": [
+      "functions/src/algebra/sparse/csSqr.ts",
+      "functions/src/factories/index.ts"
+    ],
+    "functions/src/algebra/sparse/csCounts.ts": [
+      "functions/src/algebra/sparse/csSqr.ts",
+      "functions/src/factories/index.ts"
+    ],
+    "functions/src/algebra/sparse/csSqr.ts": [
+      "functions/src/algebra/decomposition/slu.ts",
+      "functions/src/factories/index.ts"
+    ],
+    "functions/src/algebra/sparse/csSymperm.ts": [
+      "functions/src/algebra/sparse/csChol.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/algebra/solver/lsolve.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/solver/lsolveAll.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/solver/usolve.ts": ["functions/src/factories/index.ts"],
@@ -1979,9 +2111,17 @@
     "functions/src/arithmetic/gcd.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/lcm.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/log1p.ts": ["functions/src/factories/index.ts"],
+    "functions/src/arithmetic/mod.ts": [
+      "functions/src/arithmetic/gcd.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/arithmetic/nthRoot.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/pow.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/ceil.ts": ["functions/src/factories/index.ts"],
+    "functions/src/arithmetic/floor.ts": [
+      "functions/src/arithmetic/mod.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/bitwise/bitAnd.ts": ["functions/src/factories/index.ts"],
     "functions/src/bitwise/bitOr.ts": ["functions/src/factories/index.ts"],
     "functions/src/bitwise/bitXor.ts": ["functions/src/factories/index.ts"],
@@ -1990,13 +2130,6 @@
     "functions/src/bitwise/rightLogShift.ts": ["functions/src/factories/index.ts"],
     "functions/src/logical/or.ts": ["functions/src/factories/index.ts"],
     "functions/src/logical/xor.ts": ["functions/src/factories/index.ts"],
-    "functions/src/typed/matrix-ops.ts": [
-      "functions/src/factories/index.ts",
-      "functions/src/stats/gaussian-process.ts",
-      "functions/src/stats/multivariate-sampling.ts",
-      "functions/src/stats/mvn.ts",
-      "functions/src/typed/index.ts"
-    ],
     "functions/src/relational/compare.ts": ["functions/src/factories/index.ts"],
     "functions/src/relational/compareText.ts": ["functions/src/factories/index.ts"],
     "functions/src/relational/deepEqual.ts": ["functions/src/factories/index.ts"],
@@ -2035,6 +2168,12 @@
     "functions/src/algebra/leafCount.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/resolve.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyConstant.ts": ["functions/src/factories/index.ts"],
+    "functions/src/algebra/simplify/util.ts": [
+      "functions/src/algebra/simplify.ts",
+      "functions/src/algebra/simplifyConstant.ts",
+      "functions/src/algebra/simplifyCore.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/type/unit/function/splitUnit.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/fft.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/chain/Chain.ts": ["functions/src/factories/index.ts"],
@@ -2055,6 +2194,14 @@
     "functions/src/algebra/decomposition/lup.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/decomposition/slu.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/sparse/csChol.ts": ["functions/src/factories/index.ts"],
+    "functions/src/algebra/sparse/csLu.ts": [
+      "functions/src/algebra/decomposition/slu.ts",
+      "functions/src/factories/index.ts"
+    ],
+    "functions/src/algebra/sparse/csSpsolve.ts": [
+      "functions/src/algebra/sparse/csLu.ts",
+      "functions/src/factories/index.ts"
+    ],
     "functions/src/type/matrix/Spa.ts": ["functions/src/factories/index.ts"],
     "functions/src/geometry/intersect.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/mean.ts": ["functions/src/factories/index.ts"],
@@ -2073,12 +2220,6 @@
     "functions/src/set/setPowerset.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyCore.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
-    "functions/src/numeric/solveODE.ts": [
-      "functions/src/factories/index.ts",
-      "functions/src/numeric/solveDAE.ts",
-      "functions/src/numeric/solveParabolicPDE.ts",
-      "functions/src/typed/numeric.ts"
-    ],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
@@ -2099,122 +2240,6 @@
     "functions/src/algebra/sylvester.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/lyap.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/unit/physicalConstants.ts": ["functions/src/factories/index.ts"],
-    "functions/src/typed/typed-bridge.ts": ["functions/src/factories/scope.ts"],
-    "functions/src/factories/matrix-bridge.ts": [
-      "functions/src/factories/scope.ts",
-      "functions/src/typed/arithmetic.ts"
-    ],
-    "functions/src/typed/geometry.ts": [
-      "functions/src/geometry/delaunay.ts",
-      "functions/src/geometry/hull.ts",
-      "functions/src/geometry/spherical-voronoi.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/set.ts": [
-      "functions/src/geometry/geometry-extra.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/type/matrix/utils/matAlgo13xDD.ts": [
-      "functions/src/logical/nullish.ts",
-      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
-    ],
-    "functions/src/matrix/eigs/complexEigs.ts": ["functions/src/matrix/eigs.ts"],
-    "functions/src/matrix/eigs/realSymmetric.ts": ["functions/src/matrix/eigs.ts"],
-    "functions/src/signal/fft-core-f64.ts": [
-      "functions/src/matrix/fft.ts",
-      "functions/src/matrix/ifft.ts",
-      "functions/src/signal/fft.ts",
-      "functions/src/typed/signal.ts"
-    ],
-    "functions/src/utils/optimizeCallback.ts": [
-      "functions/src/matrix/filter.ts",
-      "functions/src/matrix/forEach.ts",
-      "functions/src/matrix/map.ts"
-    ],
-    "functions/src/matrix/utils/zerosAndOnes.ts": [
-      "functions/src/matrix/ones.ts",
-      "functions/src/matrix/zeros.ts"
-    ],
-    "functions/src/utils/customs.ts": ["functions/src/matrix/subset.ts"],
-    "functions/src/typed/numeric.ts": [
-      "functions/src/ml/glm.ts",
-      "functions/src/ml/logistic-regression.ts",
-      "functions/src/ml/regularized-regression.ts",
-      "functions/src/numeric/bspline.ts",
-      "functions/src/numeric/control-equations.ts",
-      "functions/src/numeric/fsolve.ts",
-      "functions/src/numeric/nnls.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/probability/util/seededRNG.ts": [
-      "functions/src/numeric/monte-carlo.ts",
-      "functions/src/probability/pickRandom.ts",
-      "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts",
-      "functions/src/stats/multivariate-sampling.ts",
-      "functions/src/stats/mvn.ts"
-    ],
-    "functions/src/utils/product.ts": [
-      "functions/src/plain/number/combinations.ts",
-      "functions/src/plain/number/probability.ts",
-      "functions/src/probability/combinationsWithRep.ts",
-      "functions/src/probability/permutations.ts"
-    ],
-    "functions/src/plain/number/arithmetic.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/bitwise.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/combinations.ts": [
-      "functions/src/plain/number/index.ts",
-      "functions/src/probability/combinations.ts"
-    ],
-    "functions/src/plain/number/constants.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/logical.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/probability.ts": [
-      "functions/src/plain/number/index.ts",
-      "functions/src/stats/multivariate-sampling.ts"
-    ],
-    "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/probability/util/randomMatrix.ts": [
-      "functions/src/probability/random.ts",
-      "functions/src/probability/randomInt.ts"
-    ],
-    "functions/src/relational/compareUnits.ts": [
-      "functions/src/relational/compare.ts",
-      "functions/src/relational/equalScalar.ts",
-      "functions/src/relational/larger.ts",
-      "functions/src/relational/largerEq.ts",
-      "functions/src/relational/smaller.ts",
-      "functions/src/relational/smallerEq.ts"
-    ],
-    "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
-    "functions/src/signal/fft.ts": [
-      "functions/src/signal/conv.ts",
-      "functions/src/signal/fft-helpers.ts",
-      "functions/src/signal/spectral-peaks.ts"
-    ],
-    "functions/src/signal/conv.ts": [
-      "functions/src/signal/fir-smoothing.ts",
-      "functions/src/signal/wavelets.ts"
-    ],
-    "functions/src/wasm/special/scalars.ts": [
-      "functions/src/signal/iir-design.ts",
-      "functions/src/special/niche.ts",
-      "functions/src/special/wave-functions.ts",
-      "functions/src/stats/inference-extra2.ts",
-      "functions/src/typed/special.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
-    "functions/src/typed/signal.ts": [
-      "functions/src/signal/spectral-peaks.ts",
-      "functions/src/signal/wavelets.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/signal/wavelet-filters.ts": [
-      "functions/src/signal/wavelets.ts",
-      "functions/src/typed/signal.ts"
-    ],
-    "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
       "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/mad.ts",
@@ -2226,13 +2251,24 @@
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts"
     ],
-    "functions/src/probability/util/gammaSample.ts": [
-      "functions/src/stats/multivariate-sampling.ts",
-      "functions/src/typed/dist-objects.ts"
+    "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
+    "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts": [
+      "functions/src/arithmetic/dotMultiply.ts",
+      "functions/src/trigonometry/atan2.ts"
     ],
-    "functions/src/utils/print.ts": [
-      "functions/src/string/print.ts",
-      "functions/src/typed/string.ts"
+    "functions/src/utils/bigint.ts": [
+      "functions/src/arithmetic/log.ts",
+      "functions/src/arithmetic/log10.ts",
+      "functions/src/arithmetic/log2.ts"
+    ],
+    "functions/src/signal/fft.ts": [
+      "functions/src/signal/conv.ts",
+      "functions/src/signal/fft-helpers.ts",
+      "functions/src/signal/spectral-peaks.ts"
+    ],
+    "functions/src/signal/conv.ts": [
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/wavelets.ts"
     ],
     "functions/src/type/complex/Complex.ts": [
       "functions/src/trigonometry/acosh.ts",
@@ -2259,152 +2295,78 @@
       "functions/src/trigonometry/sin.ts",
       "functions/src/trigonometry/tan.ts"
     ],
-    "functions/src/type/matrix/utils/broadcast.ts": [
-      "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts"
+    "functions/src/utils/node.ts": [
+      "functions/src/algebra/derivative.ts",
+      "functions/src/algebra/leafCount.ts",
+      "functions/src/algebra/rationalize.ts",
+      "functions/src/algebra/resolve.ts",
+      "functions/src/algebra/simplify.ts",
+      "functions/src/algebra/simplify/util.ts",
+      "functions/src/algebra/simplify/wildcards.ts",
+      "functions/src/algebra/simplifyConstant.ts",
+      "functions/src/algebra/simplifyCore.ts",
+      "functions/src/algebra/symbolicEqual.ts"
     ],
-    "functions/src/wasm/poly/wasm-bridge.ts": [
-      "functions/src/typed/algebra.ts",
-      "functions/src/typed/interpolation.ts"
+    "functions/src/algebra/sparse/csReach.ts": ["functions/src/algebra/sparse/csSpsolve.ts"],
+    "functions/src/algebra/sparse/csEreach.ts": ["functions/src/algebra/sparse/csChol.ts"],
+    "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
+    "functions/src/algebra/sparse/csFlip.ts": [
+      "functions/src/algebra/sparse/csAmd.ts",
+      "functions/src/algebra/sparse/csMark.ts",
+      "functions/src/algebra/sparse/csUnflip.ts"
     ],
-    "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
-    "functions/src/wasm/elementwise/wasm-bridge.ts": [
-      "functions/src/typed/arithmetic.ts",
-      "functions/src/typed/fused.ts",
-      "functions/src/typed/special.ts",
-      "functions/src/typed/trigonometry.ts"
+    "functions/src/algebra/sparse/csTdfs.ts": [
+      "functions/src/algebra/sparse/csAmd.ts",
+      "functions/src/algebra/sparse/csPost.ts"
     ],
-    "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
-    "functions/src/wasm/special/wasm-bridge.ts": [
-      "functions/src/typed/distributions.ts",
-      "functions/src/typed/special.ts"
+    "functions/src/algebra/sparse/csCumsum.ts": ["functions/src/algebra/sparse/csSymperm.ts"],
+    "functions/src/algebra/sparse/csLeaf.ts": ["functions/src/algebra/sparse/csCounts.ts"],
+    "functions/src/algebra/sparse/csMarked.ts": [
+      "functions/src/algebra/sparse/csDfs.ts",
+      "functions/src/algebra/sparse/csEreach.ts",
+      "functions/src/algebra/sparse/csReach.ts"
     ],
-    "functions/src/typed/parallel-map.ts": [
-      "functions/src/typed/distributions.ts",
-      "functions/src/typed/special.ts"
+    "functions/src/algebra/sparse/csMark.ts": [
+      "functions/src/algebra/sparse/csDfs.ts",
+      "functions/src/algebra/sparse/csEreach.ts",
+      "functions/src/algebra/sparse/csReach.ts"
     ],
-    "functions/src/typed/factorization/finite-field.ts": [
-      "functions/src/typed/factorization/hensel.ts",
-      "functions/src/typed/factorization/zassenhaus.ts"
+    "functions/src/algebra/sparse/csUnflip.ts": ["functions/src/algebra/sparse/csDfs.ts"],
+    "functions/src/algebra/sparse/csPermute.ts": ["functions/src/algebra/sparse/csSqr.ts"],
+    "functions/src/algebra/sparse/csPost.ts": ["functions/src/algebra/sparse/csSqr.ts"],
+    "functions/src/algebra/sparse/csEtree.ts": ["functions/src/algebra/sparse/csSqr.ts"],
+    "functions/src/algebra/sparse/csDfs.ts": ["functions/src/algebra/sparse/csReach.ts"],
+    "functions/src/algebra/solver/utils/solveValidation.ts": [
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lsolveAll.ts",
+      "functions/src/algebra/solver/lusolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/usolveAll.ts"
     ],
-    "functions/src/typed/factorization/multi-poly.ts": [
-      "functions/src/typed/factorization/index.ts",
-      "functions/src/typed/factorization/kronecker-factor.ts",
-      "functions/src/typed/factorization/kronecker.ts"
-    ],
-    "functions/src/typed/factorization/kronecker-factor.ts": [
-      "functions/src/typed/factorization/index.ts"
-    ],
-    "functions/src/typed/factorization/kronecker.ts": [
-      "functions/src/typed/factorization/kronecker-factor.ts"
-    ],
-    "functions/src/typed/factorization/hensel.ts": [
-      "functions/src/typed/factorization/zassenhaus.ts"
-    ],
-    "functions/src/typed/factorization/square-free.ts": [
-      "functions/src/typed/factorization/zassenhaus.ts"
-    ],
-    "functions/src/gpu/elementwise-gpu.ts": [
-      "functions/src/typed/fused.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/wasm/sort/wasm-bridge.ts": [
-      "functions/src/typed/geometry.ts",
-      "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/statistics.ts"
-    ],
-    "functions/src/typed/statistics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/combinatorics.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/bitwise.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/logical.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/complex.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/fused.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/integration.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/interpolation.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/graph.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/hypothesis.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/relational.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
-    "functions/src/gpu/fft-gpu.ts": [
-      "functions/src/typed/index.ts",
-      "functions/src/typed/signal.ts"
-    ],
-    "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
-    "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
-    "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
-    "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
-    "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
-    "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],
-    "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
-    "functions/src/wasm/bridges/common.ts": [
-      "functions/src/wasm/bitwise/wasm-bridge.ts",
-      "functions/src/wasm/elementwise/wasm-bridge.ts",
-      "functions/src/wasm/interpolation/wasm-bridge.ts",
-      "functions/src/wasm/poly/wasm-bridge.ts",
-      "functions/src/wasm/signal/wasm-bridge.ts",
-      "functions/src/wasm/sort/wasm-bridge.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
-    "expression/src/utils/is.ts": [
-      "expression/src/Help.ts",
-      "expression/src/Parser.ts",
-      "expression/src/node/AccessorNode.ts",
+    "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
+    "functions/src/expression/operators.ts": ["functions/src/algebra/simplifyCore.ts"],
+    "functions/src/algebra/simplify/wildcards.ts": ["functions/src/algebra/simplify.ts"],
+    "expression/src/utils/array.ts": [
       "expression/src/node/ArrayNode.ts",
-      "expression/src/node/AssignmentNode.ts",
       "expression/src/node/BlockNode.ts",
-      "expression/src/node/ConditionalNode.ts",
-      "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
       "expression/src/node/IndexNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/ObjectNode.ts",
       "expression/src/node/OperatorNode.ts",
-      "expression/src/node/ParenthesisNode.ts",
-      "expression/src/node/RangeNode.ts",
-      "expression/src/node/utils/stringSubset.ts",
-      "expression/src/operators.ts",
-      "expression/src/parse.ts",
-      "expression/src/transform/and.transform.ts",
-      "expression/src/transform/bitAnd.transform.ts",
-      "expression/src/transform/bitOr.transform.ts",
-      "expression/src/transform/column.transform.ts",
-      "expression/src/transform/concat.transform.ts",
-      "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/index.transform.ts",
-      "expression/src/transform/map.transform.ts",
-      "expression/src/transform/mapSlices.transform.ts",
-      "expression/src/transform/nullish.transform.ts",
-      "expression/src/transform/or.transform.ts",
-      "expression/src/transform/row.transform.ts",
-      "expression/src/transform/utils/compileInlineExpression.ts",
-      "expression/src/transform/utils/dimToZeroBase.ts",
-      "expression/src/transform/utils/lastDimToZeroBase.ts"
+      "expression/src/node/utils/stringSubset.ts"
     ],
-    "expression/src/utils/object.ts": [
-      "expression/src/Help.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/operators.ts",
-      "expression/src/parse.ts",
-      "expression/src/utils/customs.ts",
-      "expression/src/utils/factory.ts",
-      "expression/src/utils/latex.ts"
-    ],
-    "expression/src/utils/string.ts": [
-      "expression/src/Help.ts",
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
+    "expression/src/utils/customs.ts": [
+      "expression/src/compiler/compile.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/AssignmentNode.ts",
       "expression/src/node/FunctionNode.ts",
       "expression/src/node/IndexNode.ts",
       "expression/src/node/ObjectNode.ts",
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts"
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts",
+      "expression/src/parse.ts"
     ],
     "expression/src/utils/factory.ts": [
       "expression/src/Help.ts",
@@ -2454,21 +2416,54 @@
       "expression/src/transform/utils/transformCallback.ts",
       "expression/src/transform/variance.transform.ts"
     ],
-    "expression/src/utils/map.ts": [
+    "expression/src/utils/is.ts": [
+      "expression/src/Help.ts",
       "expression/src/Parser.ts",
-      "expression/src/compiler/compile.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/transform/utils/compileInlineExpression.ts",
-      "expression/src/utils/scope.ts"
-    ],
-    "expression/src/types.ts": [
-      "expression/src/index.ts",
-      "expression/src/transform/utils/transformCallback.ts"
-    ],
-    "expression/src/keywords.ts": [
-      "expression/src/index.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/Node.ts"
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/utils/stringSubset.ts",
+      "expression/src/operators.ts",
+      "expression/src/parse.ts",
+      "expression/src/transform/and.transform.ts",
+      "expression/src/transform/bitAnd.transform.ts",
+      "expression/src/transform/bitOr.transform.ts",
+      "expression/src/transform/column.transform.ts",
+      "expression/src/transform/concat.transform.ts",
+      "expression/src/transform/cumsum.transform.ts",
+      "expression/src/transform/filter.transform.ts",
+      "expression/src/transform/forEach.transform.ts",
+      "expression/src/transform/index.transform.ts",
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/mapSlices.transform.ts",
+      "expression/src/transform/nullish.transform.ts",
+      "expression/src/transform/or.transform.ts",
+      "expression/src/transform/row.transform.ts",
+      "expression/src/transform/utils/compileInlineExpression.ts",
+      "expression/src/transform/utils/dimToZeroBase.ts",
+      "expression/src/transform/utils/lastDimToZeroBase.ts"
+    ],
+    "expression/src/utils/string.ts": [
+      "expression/src/Help.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
     ],
     "expression/src/operators.ts": [
       "expression/src/index.ts",
@@ -2478,24 +2473,6 @@
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts"
-    ],
-    "expression/src/parse.ts": ["expression/src/index.ts"],
-    "expression/src/Parser.ts": ["expression/src/index.ts"],
-    "expression/src/Help.ts": ["expression/src/index.ts"],
-    "expression/src/compiler/index.ts": ["expression/src/index.ts"],
-    "expression/src/evaluator/index.ts": ["expression/src/index.ts"],
-    "expression/src/transform/index.ts": ["expression/src/index.ts"],
-    "expression/src/function/parser.ts": ["expression/src/index.ts"],
-    "expression/src/embeddedDocs/embeddedDocs.ts": ["expression/src/index.ts"],
-    "expression/src/utils/mathml.ts": [
-      "expression/src/index.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/Node.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts"
     ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
@@ -2512,6 +2489,91 @@
       "expression/src/parse.ts",
       "expression/src/utils/latex.ts"
     ],
+    "expression/src/node/utils/access.ts": [
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/AssignmentNode.ts"
+    ],
+    "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
+    "expression/src/utils/mathml.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/src/node/utils/stringSubset.ts": [
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts"
+    ],
+    "expression/src/utils/latex.ts": [
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/src/utils/scope.ts": [
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/OperatorNode.ts"
+    ],
+    "expression/src/utils/object.ts": [
+      "expression/src/Help.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/operators.ts",
+      "expression/src/parse.ts",
+      "expression/src/utils/customs.ts",
+      "expression/src/utils/factory.ts",
+      "expression/src/utils/latex.ts"
+    ],
+    "expression/src/keywords.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/Node.ts"
+    ],
+    "expression/src/utils/map.ts": [
+      "expression/src/Parser.ts",
+      "expression/src/compiler/compile.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/transform/utils/compileInlineExpression.ts",
+      "expression/src/utils/scope.ts"
+    ],
+    "expression/src/transform/utils/errorTransform.ts": [
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts",
+      "expression/src/transform/column.transform.ts",
+      "expression/src/transform/concat.transform.ts",
+      "expression/src/transform/cumsum.transform.ts",
+      "expression/src/transform/diff.transform.ts",
+      "expression/src/transform/mapSlices.transform.ts",
+      "expression/src/transform/max.transform.ts",
+      "expression/src/transform/mean.transform.ts",
+      "expression/src/transform/min.transform.ts",
+      "expression/src/transform/row.transform.ts",
+      "expression/src/transform/std.transform.ts",
+      "expression/src/transform/subset.transform.ts",
+      "expression/src/transform/sum.transform.ts",
+      "expression/src/transform/variance.transform.ts"
+    ],
+    "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
+    "expression/src/types.ts": [
+      "expression/src/index.ts",
+      "expression/src/transform/utils/transformCallback.ts"
+    ],
+    "expression/src/parse.ts": ["expression/src/index.ts"],
+    "expression/src/Parser.ts": ["expression/src/index.ts"],
+    "expression/src/Help.ts": ["expression/src/index.ts"],
+    "expression/src/compiler/index.ts": ["expression/src/index.ts"],
+    "expression/src/evaluator/index.ts": ["expression/src/index.ts"],
+    "expression/src/transform/index.ts": ["expression/src/index.ts"],
+    "expression/src/function/parser.ts": ["expression/src/index.ts"],
+    "expression/src/embeddedDocs/embeddedDocs.ts": ["expression/src/index.ts"],
     "expression/src/node/AccessorNode.ts": ["expression/src/index.ts"],
     "expression/src/node/ArrayNode.ts": ["expression/src/index.ts"],
     "expression/src/node/AssignmentNode.ts": ["expression/src/index.ts"],
@@ -2529,23 +2591,213 @@
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
-    "expression/src/utils/customs.ts": [
-      "expression/src/compiler/compile.ts",
-      "expression/src/node/AccessorNode.ts",
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/ObjectNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts",
-      "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts",
-      "expression/src/parse.ts"
-    ],
+    "expression/src/evaluator/evaluate.ts": ["expression/src/evaluator/index.ts"],
     "expression/src/compiler/compile.ts": [
       "expression/src/compiler/index.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/src/transform/utils/lastDimToZeroBase.ts": [
+      "expression/src/transform/diff.transform.ts",
+      "expression/src/transform/max.transform.ts",
+      "expression/src/transform/mean.transform.ts",
+      "expression/src/transform/min.transform.ts",
+      "expression/src/transform/quantileSeq.transform.ts",
+      "expression/src/transform/std.transform.ts",
+      "expression/src/transform/sum.transform.ts",
+      "expression/src/transform/variance.transform.ts"
+    ],
+    "expression/src/transform/utils/compileInlineExpression.ts": [
+      "expression/src/transform/filter.transform.ts",
+      "expression/src/transform/forEach.transform.ts",
+      "expression/src/transform/map.transform.ts"
+    ],
+    "expression/src/transform/utils/transformCallback.ts": [
+      "expression/src/transform/filter.transform.ts",
+      "expression/src/transform/forEach.transform.ts",
+      "expression/src/transform/map.transform.ts"
+    ],
+    "expression/src/transform/and.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/bitAnd.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/bitOr.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/column.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/concat.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/cumsum.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/diff.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/filter.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/forEach.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/index.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/map.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/mapSlices.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/max.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/mean.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/min.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/nullish.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/or.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/print.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/quantileSeq.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/range.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/row.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/std.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/subset.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
+    "expression/src/transform/utils/dimToZeroBase.ts": [
+      "expression/src/transform/utils/lastDimToZeroBase.ts"
+    ],
+    "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
+    "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulomb.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/klitzing.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/electronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/protonMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/rydberg.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/avogadro.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/faraday.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/gravity.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckLength.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckMass.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTime.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
+    ],
+    "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": [
+      "expression/src/embeddedDocs/physicalConstants/index.ts"
     ],
     "expression/src/embeddedDocs/physicalConstants/index.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
@@ -3565,259 +3817,6 @@
     "expression/src/embeddedDocs/function/special/gammainc.ts": [
       "expression/src/embeddedDocs/embeddedDocs.ts"
     ],
-    "expression/src/embeddedDocs/physicalConstants/speedOfLight.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/gravitationConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/reducedPlanckConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/magneticConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/electricConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/vacuumImpedance.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/coulomb.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/coulombConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/elementaryCharge.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/bohrMagneton.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/conductanceQuantum.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/inverseConductanceQuantum.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/magneticFluxQuantum.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/nuclearMagneton.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/klitzing.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/bohrRadius.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/classicalElectronRadius.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/electronMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/fermiCoupling.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/fineStructure.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/hartreeEnergy.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/protonMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/deuteronMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/neutronMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/quantumOfCirculation.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/rydberg.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/thomsonCrossSection.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/weakMixingAngle.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/efimovFactor.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/atomicMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/avogadro.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/boltzmann.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/faraday.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/firstRadiation.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/loschmidt.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/gasConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/molarPlanckConstant.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/molarVolume.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/sackurTetrode.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/secondRadiation.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/stefanBoltzmann.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/wienDisplacement.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/molarMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/molarMassC12.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/gravity.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckLength.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckMass.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckTime.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckCharge.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/embeddedDocs/physicalConstants/planckTemperature.ts": [
-      "expression/src/embeddedDocs/physicalConstants/index.ts"
-    ],
-    "expression/src/evaluator/evaluate.ts": ["expression/src/evaluator/index.ts"],
-    "expression/src/node/utils/access.ts": [
-      "expression/src/node/AccessorNode.ts",
-      "expression/src/node/AssignmentNode.ts"
-    ],
-    "expression/src/utils/array.ts": [
-      "expression/src/node/ArrayNode.ts",
-      "expression/src/node/BlockNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/utils/stringSubset.ts"
-    ],
-    "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
-    "expression/src/node/utils/stringSubset.ts": [
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts"
-    ],
-    "expression/src/utils/latex.ts": [
-      "expression/src/node/ConstantNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/RelationalNode.ts",
-      "expression/src/node/SymbolNode.ts"
-    ],
-    "expression/src/utils/scope.ts": [
-      "expression/src/node/FunctionNode.ts",
-      "expression/src/node/OperatorNode.ts"
-    ],
-    "expression/src/transform/utils/errorTransform.ts": [
-      "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts",
-      "expression/src/transform/column.transform.ts",
-      "expression/src/transform/concat.transform.ts",
-      "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/diff.transform.ts",
-      "expression/src/transform/mapSlices.transform.ts",
-      "expression/src/transform/max.transform.ts",
-      "expression/src/transform/mean.transform.ts",
-      "expression/src/transform/min.transform.ts",
-      "expression/src/transform/row.transform.ts",
-      "expression/src/transform/std.transform.ts",
-      "expression/src/transform/subset.transform.ts",
-      "expression/src/transform/sum.transform.ts",
-      "expression/src/transform/variance.transform.ts"
-    ],
-    "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
-    "expression/src/transform/utils/lastDimToZeroBase.ts": [
-      "expression/src/transform/diff.transform.ts",
-      "expression/src/transform/max.transform.ts",
-      "expression/src/transform/mean.transform.ts",
-      "expression/src/transform/min.transform.ts",
-      "expression/src/transform/quantileSeq.transform.ts",
-      "expression/src/transform/std.transform.ts",
-      "expression/src/transform/sum.transform.ts",
-      "expression/src/transform/variance.transform.ts"
-    ],
-    "expression/src/transform/utils/compileInlineExpression.ts": [
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/map.transform.ts"
-    ],
-    "expression/src/transform/utils/transformCallback.ts": [
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/map.transform.ts"
-    ],
-    "expression/src/transform/and.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/bitAnd.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/bitOr.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/column.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/concat.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/cumsum.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/diff.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/filter.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/forEach.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/index.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/map.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/mapSlices.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/max.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/mean.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/min.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/nullish.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/or.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/print.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/quantileSeq.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/range.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/row.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/std.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/subset.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
-    "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
-    "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
-    "expression/src/transform/utils/dimToZeroBase.ts": [
-      "expression/src/transform/utils/lastDimToZeroBase.ts"
-    ],
-    "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",
       "parallel/src/operations/elementwise.ts",
@@ -3827,23 +3826,17 @@
       "parallel/src/strategies/threshold.ts"
     ],
     "parallel/src/operations/index.ts": ["parallel/src/index.ts"],
+    "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/strategies/index.ts": ["parallel/src/index.ts"],
-    "parallel/src/operations/matmul.ts": ["parallel/src/operations/index.ts"],
-    "parallel/src/operations/elementwise.ts": ["parallel/src/operations/index.ts"],
-    "parallel/src/operations/reduce.ts": ["parallel/src/operations/index.ts"],
-    "parallel/src/operations/map.ts": ["parallel/src/operations/index.ts"],
     "parallel/src/strategies/chunk.ts": [
       "parallel/src/ops/bitwise.ts",
       "parallel/src/strategies/index.ts"
     ],
     "parallel/src/strategies/threshold.ts": ["parallel/src/strategies/index.ts"],
-    "workbook/src/fs-atomic.ts": ["workbook/src/cli.ts", "workbook/src/session.ts"],
-    "workbook/src/session.ts": [
-      "workbook/src/cli.ts",
-      "workbook/src/index.ts",
-      "workbook/src/rpc.ts"
-    ],
-    "workbook/src/rpc.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
+    "parallel/src/operations/matmul.ts": ["parallel/src/operations/index.ts"],
+    "parallel/src/operations/elementwise.ts": ["parallel/src/operations/index.ts"],
+    "parallel/src/operations/reduce.ts": ["parallel/src/operations/index.ts"],
+    "parallel/src/operations/map.ts": ["parallel/src/operations/index.ts"],
     "workbook/src/parser.ts": [
       "workbook/src/cli.ts",
       "workbook/src/edit.ts",
@@ -3858,6 +3851,22 @@
       "workbook/src/run-worker.ts",
       "workbook/src/session.ts"
     ],
+    "workbook/src/formatter.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/index.ts",
+      "workbook/src/run-worker.ts"
+    ],
+    "workbook/src/worker-protocol.ts": [
+      "workbook/src/run-worker.ts",
+      "workbook/src/timeout-runner.ts"
+    ],
+    "workbook/src/fs-atomic.ts": ["workbook/src/cli.ts", "workbook/src/session.ts"],
+    "workbook/src/session.ts": [
+      "workbook/src/cli.ts",
+      "workbook/src/index.ts",
+      "workbook/src/rpc.ts"
+    ],
+    "workbook/src/rpc.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
     "workbook/src/graph.ts": [
       "workbook/src/cli.ts",
       "workbook/src/doc.ts",
@@ -3866,11 +3875,6 @@
       "workbook/src/index.ts",
       "workbook/src/parser.ts",
       "workbook/src/session.ts"
-    ],
-    "workbook/src/formatter.ts": [
-      "workbook/src/cli.ts",
-      "workbook/src/index.ts",
-      "workbook/src/run-worker.ts"
     ],
     "workbook/src/contract.ts": [
       "workbook/src/cli.ts",
@@ -3915,10 +3919,6 @@
     ],
     "workbook/src/markdown.ts": ["workbook/src/html.ts", "workbook/src/tex.ts"],
     "workbook/src/svg-math.ts": ["workbook/src/index.ts"],
-    "workbook/src/worker-protocol.ts": [
-      "workbook/src/run-worker.ts",
-      "workbook/src/timeout-runner.ts"
-    ],
     "assembly/src/bindings/wasm-loader.ts": ["assembly/src/bindings/index.ts"],
     "assembly/src/types/complex.ts": [
       "assembly/src/index.ts",
@@ -3950,18 +3950,47 @@
     "assembly/src/ops/complex-array.ts": ["assembly/src/index.ts"],
     "compat/src/shims.ts": ["compat/src/index.ts"],
     "compat/src/chain.ts": ["compat/src/index.ts"],
+    "gpu/src/detect.ts": ["gpu/src/GPUContext.ts", "gpu/src/index.ts"],
     "gpu/src/GPUContext.ts": [
       "gpu/src/BufferPool.ts",
       "gpu/src/ShaderManager.ts",
       "gpu/src/device.ts",
       "gpu/src/index.ts"
     ],
-    "gpu/src/detect.ts": ["gpu/src/GPUContext.ts", "gpu/src/index.ts"],
     "gpu/src/device.ts": ["gpu/src/index.ts"],
     "gpu/src/flag.ts": ["gpu/src/index.ts"],
     "gpu/src/BufferPool.ts": ["gpu/src/index.ts"],
     "gpu/src/ShaderManager.ts": ["gpu/src/index.ts"],
     "gpu/src/serialize.ts": ["gpu/src/index.ts"],
+    "plot/src/scene.ts": [
+      "plot/src/contour.ts",
+      "plot/src/emit.ts",
+      "plot/src/frame.ts",
+      "plot/src/heatmap.ts",
+      "plot/src/render-core.ts",
+      "plot/src/svg.ts",
+      "plot/src/three/points3d.ts",
+      "plot/src/three/surface.ts",
+      "plot/src/tikz.ts"
+    ],
+    "plot/src/coerce.ts": [
+      "plot/src/contour.ts",
+      "plot/src/frame.ts",
+      "plot/src/heatmap.ts",
+      "plot/src/histogram.ts",
+      "plot/src/render-core.ts",
+      "plot/src/three/points3d.ts",
+      "plot/src/three/surface.ts"
+    ],
+    "plot/src/svg.ts": [
+      "plot/src/contour.ts",
+      "plot/src/emit.ts",
+      "plot/src/frame.ts",
+      "plot/src/heatmap.ts",
+      "plot/src/render-core.ts",
+      "plot/src/three/points3d.ts",
+      "plot/src/three/surface.ts"
+    ],
     "plot/src/types.ts": [
       "plot/src/coerce.ts",
       "plot/src/contour.ts",
@@ -3978,41 +4007,13 @@
       "plot/src/three/surface.ts",
       "plot/src/tikz.ts"
     ],
-    "plot/src/coerce.ts": [
-      "plot/src/contour.ts",
-      "plot/src/frame.ts",
-      "plot/src/heatmap.ts",
-      "plot/src/histogram.ts",
-      "plot/src/render-core.ts",
-      "plot/src/three/points3d.ts",
-      "plot/src/three/surface.ts"
-    ],
+    "plot/src/frame.ts": ["plot/src/histogram.ts", "plot/src/marks2d.ts", "plot/src/overlay.ts"],
     "plot/src/scale.ts": ["plot/src/contour.ts", "plot/src/frame.ts"],
     "plot/src/palette.ts": [
       "plot/src/contour.ts",
       "plot/src/heatmap.ts",
       "plot/src/index.ts",
       "plot/src/three/surface.ts"
-    ],
-    "plot/src/svg.ts": [
-      "plot/src/contour.ts",
-      "plot/src/emit.ts",
-      "plot/src/frame.ts",
-      "plot/src/heatmap.ts",
-      "plot/src/render-core.ts",
-      "plot/src/three/points3d.ts",
-      "plot/src/three/surface.ts"
-    ],
-    "plot/src/scene.ts": [
-      "plot/src/contour.ts",
-      "plot/src/emit.ts",
-      "plot/src/frame.ts",
-      "plot/src/heatmap.ts",
-      "plot/src/render-core.ts",
-      "plot/src/svg.ts",
-      "plot/src/three/points3d.ts",
-      "plot/src/three/surface.ts",
-      "plot/src/tikz.ts"
     ],
     "plot/src/emit.ts": [
       "plot/src/contour.ts",
@@ -4021,9 +4022,6 @@
       "plot/src/three/points3d.ts",
       "plot/src/three/surface.ts"
     ],
-    "plot/src/tikz.ts": ["plot/src/emit.ts"],
-    "plot/src/render-core.ts": ["plot/src/frame.ts"],
-    "plot/src/frame.ts": ["plot/src/histogram.ts", "plot/src/marks2d.ts", "plot/src/overlay.ts"],
     "plot/src/plot.ts": ["plot/src/index.ts"],
     "plot/src/marks2d.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/histogram.ts": ["plot/src/index.ts"],
@@ -4032,6 +4030,8 @@
     "plot/src/overlay.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/three/surface.ts": ["plot/src/index.ts", "plot/src/plot.ts"],
     "plot/src/three/points3d.ts": ["plot/src/index.ts"],
+    "plot/src/tikz.ts": ["plot/src/emit.ts"],
+    "plot/src/render-core.ts": ["plot/src/frame.ts"],
     "plot/src/three/project.ts": ["plot/src/three/points3d.ts", "plot/src/three/surface.ts"]
   }
 }

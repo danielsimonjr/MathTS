@@ -16,18 +16,21 @@ human-facing overview.
 
 ## Build / Test / Verify (run from repo root)
 
-| Task          | Command                                                 | Notes                                                                                          |
-| ------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Build all     | `npm run build`                                         | turbo, respects dep graph                                                                      |
-| Typecheck all | `npm run typecheck`                                     | turbo; **green baseline = 32/32, 0 errors**                                                    |
-| Test all      | `npm run test`                                          | vitest via turbo                                                                               |
-| Lint / format | `npm run lint` · `npm run format`                       | eslint + prettier                                                                              |
-| Coverage      | `npm run test:coverage`                                 | measurement scoped to an include-list in vitest.config.ts                                      |
-| One package   | `npx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                |
-| One test file | `npx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                |
-| WASM (AS)     | `npm run build:wasm`                                    | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
+| Task          | Command                                                  | Notes                                                                                          |
+| ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`); Node ≥20 still needed for vitest/`asc`                |
+| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                      |
+| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 32/32, 0 errors**                                                    |
+| Test all      | `bun run test`                                           | vitest via turbo (`bun test` is a different runner — do not use it for CI)                     |
+| Lint / format | `bun run lint` · `bun run format`                        | eslint + prettier                                                                              |
+| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                      |
+| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                |
+| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                |
+| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
 
-**Before claiming "done":** run `npm run typecheck` (must stay 0 errors) and the
+Bun migration status / next phases: `docs/roadmap/BUN_MIGRATION.md`.
+
+**Before claiming "done":** run `bun run typecheck` (must stay 0 errors) and the
 affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 
 ---

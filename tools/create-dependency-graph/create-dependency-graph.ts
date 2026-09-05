@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Generic Dependency Graph Generator
@@ -9,7 +9,8 @@
  * - docs/Architecture/dependency-graph.yaml (compact, ~40% smaller than JSON)
  * - docs/Architecture/unused-analysis.md (unused exports + DORMANT FILES)
  *
- * Usage: npx tsx tools/create-dependency-graph.ts
+ * Usage: bun tools/create-dependency-graph/create-dependency-graph.ts
+ *        (or: bun run docs:deps)
  *
  * This tool is generic and does not depend on any codebase-specific functions.
  * It dynamically discovers the project structure from the filesystem.
@@ -3274,7 +3275,7 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
       // emit the exported ones.
       const markersOf = new Map(fns.map((f) => [f.name, new Set(f.markers)]));
       const callsRe = new Map(fns.map((f) => [f.name, new RegExp(`\\b${f.name}\\s*\\(`)]));
-      for (let changed = true; changed; ) {
+      for (let changed = true; changed;) {
         changed = false;
         for (const caller of fns) {
           const into = markersOf.get(caller.name)!;
@@ -3886,14 +3887,14 @@ const rawFileContentCache = new Map<string, string>();
 function getRawFileContent(relPath: string): string {
   const cached = rawFileContentCache.get(relPath);
   if (cached !== undefined) return cached;
-  let content = '';
   try {
-    content = readFileSync(join(ROOT_DIR, relPath), 'utf-8');
+    const content = readFileSync(join(ROOT_DIR, relPath), 'utf-8');
+    rawFileContentCache.set(relPath, content);
+    return content;
   } catch {
-    content = '';
+    rawFileContentCache.set(relPath, '');
+    return '';
   }
-  rawFileContentCache.set(relPath, content);
-  return content;
 }
 
 function stripCommentsForClassification(content: string): string {
@@ -4283,14 +4284,7 @@ function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): strin
 // equals the git-tracked `.ts` files, so there is provably no silent blind spot.
 
 type FileDisposition =
-  | 'reachable'
-  | 'build-entry'
-  | 'test-only'
-  | 'orphan'
-  | 'test'
-  | 'tool'
-  | 'config'
-  | 'example';
+  'reachable' | 'build-entry' | 'test-only' | 'orphan' | 'test' | 'tool' | 'config' | 'example';
 
 type FileArea = 'src' | 'tests' | 'tools' | 'config' | 'examples' | 'docs';
 
