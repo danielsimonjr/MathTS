@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`engines.bun` raised from `>=1.2.0` to `>=1.4.2`,** matching the `packageManager`
+  field which already said `bun@1.4.2`. The two had drifted, so the manifest declared
+  a floor two minor versions below the toolchain it actually pins.
+
+- **TypeScript stays at `^5.3.0`: TypeScript 7 is BLOCKED here TWICE over.** `tsup`'s
+  declaration emitter crashes on it (`useCaseSensitiveFileNames`; upstream tsup #1405
+  and #1408) and `typescript-eslint` refuses it outright
+  (`typescript-eslint does not support TS 7.0.`). Both trace to TS 7.0 shipping
+  without the stable programmatic Compiler API, expected in 7.1.
+
+## [Unreleased]
+
 ### Fixed
 
 - **Dependabot switched back from the `bun` ecosystem to `npm`.** The Bun migration (#274)
