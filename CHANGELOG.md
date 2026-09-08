@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`core` failed declaration emit under TypeScript 7 (TS4094).** `Range`'s four
+  `#cache*` fields are ES-private on a class returned from a `factory()` call, so
+  declaration emit describes it as an ANONYMOUS class type -- and TS4094 forbids
+  private members there, because an anonymous type has no name to refer them to.
+  They are now `_`-prefixed and marked `@internal`, with the reason recorded in the
+  source so the next reader does not "restore" the `#`.
+
+- **`functions` typecheck was broken BEFORE this migration (TS6059).** Its tsconfig
+  mapped five sibling packages to their SOURCE (`../core/src` and friends), which
+  with `rootDir: "./src"` makes tsc reject every file it pulls in. The mappings are
+  removed; resolution now goes through the workspace symlinks to each package's
+  published types -- what consumers actually get. turbo builds dependencies first,
+  so the declarations exist when typecheck runs.
+
+- **`assembly`'s loader bindings** needed `types: ["node"]` in
+  `tsconfig.bindings.json` for `process`, `crypto` and `Buffer`. My earlier sweep
+  skipped it because the file already had a `types` key.
+
 ### Changed
 
 - **TypeScript raised to `^7.0.2` across all 25 manifests.** This monorepo hit both

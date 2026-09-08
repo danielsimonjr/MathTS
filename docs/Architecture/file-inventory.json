@@ -758,7 +758,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 429
+      "loc": 438
     },
     {
       "file": "core/src/types/unit-definitions.ts",

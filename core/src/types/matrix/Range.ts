@@ -108,12 +108,21 @@ export const createRangeClass = /* #__PURE__ */ factory(
       step: number;
 
       /**
-       * Cached primitive array representation
+       * Cached primitive array representation.
+       *
+       * @internal Not part of the public API.
+       *
+       * These four were ES-private (`#cache`) until TypeScript 7. This class is
+       * returned from a `factory()` call, so declaration emit describes it as an
+       * ANONYMOUS class type -- and TS4094 forbids private or protected members
+       * there, because an anonymous type has no name to refer them to. The
+       * underscore prefix keeps the "do not touch" signal without the emit
+       * failure. Restore `#` if the class is ever hoisted out of the factory.
        */
-      #cache: number[] | null = null;
-      #cacheStart?: number;
-      #cacheEnd?: number;
-      #cacheStep?: number;
+      _cache: number[] | null = null;
+      _cacheStart?: number;
+      _cacheEnd?: number;
+      _cacheStep?: number;
 
       constructor(
         start?: number | bigint | BigNumber | null,
@@ -344,19 +353,19 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       valueOf(): number[] {
         if (
-          this.#cache !== null &&
-          this.start === this.#cacheStart &&
-          this.end === this.#cacheEnd &&
-          this.step === this.#cacheStep
+          this._cache !== null &&
+          this.start === this._cacheStart &&
+          this.end === this._cacheEnd &&
+          this.step === this._cacheStep
         ) {
-          return this.#cache;
+          return this._cache;
         }
 
-        this.#cache = this.toArray();
-        this.#cacheStart = this.start;
-        this.#cacheEnd = this.end;
-        this.#cacheStep = this.step;
-        return this.#cache;
+        this._cache = this.toArray();
+        this._cacheStart = this.start;
+        this._cacheEnd = this.end;
+        this._cacheStep = this.step;
+        return this._cache;
       }
 
       /**

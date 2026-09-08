@@ -6,14 +6,7 @@
     "types": ["@webgpu/types", "node"],
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "paths": {
-      "@danielsimonjr/mathts-core": ["../core/src"],
-      "@danielsimonjr/mathts-expression": ["../expression/src"],
-      "@danielsimonjr/mathts-matrix": ["../matrix/src"],
-      "@danielsimonjr/mathts-parallel": ["../parallel/src"],
-      "@danielsimonjr/mathts-gpu": ["../gpu/src"]
-    }
+    "noEmit": true
   },
   "include": ["src/index.ts", "types/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "tests"]
