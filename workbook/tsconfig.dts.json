@@ -8,5 +8,5 @@
     "rootDir": "./src",
     "paths": {}
   },
-  "include": ["src/index.ts", "types/**/*.d.ts", "src/**/*.d.ts"]
+  "include": ["src/index.ts", "src/cli.ts", "src/run-worker.ts", "types/**/*.d.ts", "src/**/*.d.ts"]
 }

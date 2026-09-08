@@ -1,6 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    // TypeScript 7 does not auto-include node_modules/@types; a package that
+    // typechecks without this is relying on a dependency shipping its own node
+    // reference, which a bump can remove.
+    "types": ["node"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,

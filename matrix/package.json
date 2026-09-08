@@ -19,15 +19,15 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean && node scripts/copy-wasm.mjs",
+    "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs",
     "copy:wasm": "node scripts/copy-wasm.mjs",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake && node scripts/copy-wasm.mjs"
   },
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/node": "^26.4.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.3.0",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.0",
     "@webgpu/types": "^0.1.72"
   },

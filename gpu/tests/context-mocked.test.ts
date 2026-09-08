@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GPUContext } from '../src/GPUContext.js';
 
 describe('GPUContext (mocked WebGPU)', () => {
-  let originalNavigator: any;
+  let _originalNavigator: any;
   let originalGPUBufferUsage: any;
   let originalGPUMapMode: any;
 
@@ -29,7 +29,7 @@ describe('GPUContext (mocked WebGPU)', () => {
     };
 
     // Save original navigator if exists
-    originalNavigator = globalThis.navigator;
+    _originalNavigator = globalThis.navigator;
 
     // Create a robust mock for navigator.gpu
     const mockDevice = {
@@ -267,7 +267,7 @@ describe('GPUContext (mocked WebGPU)', () => {
     lostCallback({ reason: 'destroyed', message: 'Test device lost' });
 
     // Wait for the promise resolution to propagate
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(ctx.status).toBe('lost');
     expect(eventHandler).toHaveBeenCalledWith({ reason: 'destroyed', message: 'Test device lost' });

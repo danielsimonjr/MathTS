@@ -1,0 +1,41 @@
+{
+  "plugins": ["typescript", "oxc"],
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "docs/**",
+    ".remember/**",
+    "**/*.js",
+    "**/*.cjs",
+    "assembly/src/*.ts",
+    "assembly/src/algebra/**",
+    "assembly/src/ops/**",
+    "assembly/src/env/**",
+    "assembly/src/types/**",
+    "**/*.d.ts"
+  ],
+  "rules": {
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/explicit-function-return-type": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    "typescript/no-explicit-any": "warn",
+    "no-undef": "off",
+    "no-eval": "warn",
+    "oxc/erasing-op": "warn"
+  }
+}

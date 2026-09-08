@@ -11,7 +11,11 @@ const { version } = JSON.parse(
 export default defineConfig({
   entry: ['src/index.ts', 'src/internal.ts'],
   format: 'esm',
-  dts: true,
+  // Declarations come from tsc (tsconfig.dts.json), not tsup: rollup-plugin-dts
+
+  // needs TypeScript's programmatic Compiler API, absent in TS 7.0.
+
+  dts: false,
   clean: true,
   define: { __PKG_VERSION__: JSON.stringify(version) },
 });

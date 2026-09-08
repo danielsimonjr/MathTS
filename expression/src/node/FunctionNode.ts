@@ -131,7 +131,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           } else {
             // with square brackets
             const indexed = (property as Record<string, unknown>)[match[2]];
-            if (isNode(indexed && indexed)) {
+            if (isNode(indexed)) {
               latex += (indexed as MathNode).toTex(options);
             } else {
               throw new TypeError('Template: ' + match[1] + '[' + match[2] + '] is not a Node.');

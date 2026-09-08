@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-05",
+  "generated": "2026-09-08",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
     "runtimeDuplicates": 0,
@@ -37,7 +37,7 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
@@ -49,7 +49,7 @@
         {
           "file": "matrix/src/types/dense/arithmetic.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -113,7 +113,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -145,7 +145,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -177,7 +177,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -209,7 +209,7 @@
         {
           "file": "matrix/src/types/dense/arithmetic.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -273,7 +273,7 @@
         {
           "file": "matrix/src/types/dense/arithmetic.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -305,7 +305,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -409,7 +409,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
@@ -663,21 +663,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -706,21 +706,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -749,21 +749,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -792,7 +792,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -806,14 +806,14 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
@@ -835,21 +835,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -878,7 +878,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -892,14 +892,14 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
@@ -921,21 +921,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -964,7 +964,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -978,14 +978,14 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
@@ -1007,21 +1007,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1050,21 +1050,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1093,21 +1093,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1136,21 +1136,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1179,21 +1179,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1222,21 +1222,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1265,21 +1265,21 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
@@ -1315,7 +1315,7 @@
         {
           "file": "matrix/src/operations/common.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "same name, different functions: compat/src/shims.ts's transpose flips a mathjs number[][]; functions/src/typed/arithmetic.ts's transpose(data: Float64Array, rows, cols) is the async PARALLEL ComputePool primitive; matrix/src/operations/common.ts + matrix/src/types/dense/arithmetic.ts are the DenseMatrix transpose op/method (matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). Distinct signatures/domains. compat's array transpose pinned to the numpy .T oracle in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
         },
@@ -1328,7 +1328,7 @@
         {
           "file": "matrix/src/types/dense/arithmetic.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "same name, different functions: compat/src/shims.ts's transpose flips a mathjs number[][]; functions/src/typed/arithmetic.ts's transpose(data: Float64Array, rows, cols) is the async PARALLEL ComputePool primitive; matrix/src/operations/common.ts + matrix/src/types/dense/arithmetic.ts are the DenseMatrix transpose op/method (matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). Distinct signatures/domains. compat's array transpose pinned to the numpy .T oracle in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
         }
@@ -1363,7 +1363,7 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "the Complex constructor homonym: compat/src/shims.ts's complex(re,im) is the compat factory; functions/src/signal/fft.ts's complex is the FFT toolkit's Complex helper; functions/src/factories/index.ts's (left canonical) is the mathjs `complex` factory (assembly/src/types/complex.ts already allowlisted). compat's re/im pinned in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
         }
@@ -1392,13 +1392,13 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
         }
@@ -1455,26 +1455,26 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1491,7 +1491,7 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type-dispatch helper (rides with the is* guards; project-all-libraries-build-on-core). core/expression/functions each keep a local typeOf switch over the same guards for V8-inlinable dispatch; functions/src/factories/index.ts is the mathjs factory-registry copy. Same duck-typed logic, kept local by the same policy as is*. 2026-07 dedup campaign, closing tail slice."
         },
@@ -1505,7 +1505,7 @@
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type-dispatch helper (rides with the is* guards; project-all-libraries-build-on-core). core/expression/functions each keep a local typeOf switch over the same guards for V8-inlinable dispatch; functions/src/factories/index.ts is the mathjs factory-registry copy. Same duck-typed logic, kept local by the same policy as is*. 2026-07 dedup campaign, closing tail slice."
         }
@@ -1526,7 +1526,7 @@
         {
           "file": "functions/src/utils/bignumber/bitwise.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "the BigNumber bit-xor op, the functions-internal sibling of the already-allowlisted bitAnd/bitOr/... BigNumber bitwise layer. With this, bitXor's remaining definers are functions/src/typed/bitwise.ts (auto-tagged DISPATCH_VARIANT) and parallel/src/ops/bitwise.ts (already allowlisted). 2026-07 dedup campaign, closing tail slice."
         },
@@ -1589,7 +1589,7 @@
         {
           "file": "functions/src/core/create.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three distinct instance-creators: compat/src/index.ts's create builds a mathjs-compat MathInstance; functions/src/core/create.ts's builds a MathJsInstance from factories; core/src/factory.ts's create (left canonical) is the core factory-registry constructor. Different contracts per package. 2026-07 dedup campaign, closing tail slice."
         }
@@ -1611,19 +1611,19 @@
         {
           "file": "core/src/factory/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
         },
         {
           "file": "matrix/src/config.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
         }
       ],
-      "canonicalHint": "core/src/config.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1646,7 +1646,7 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
         }
@@ -1667,19 +1667,19 @@
         {
           "file": "expression/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (same reason as the already-allowlisted FactoryFunction/CreateFunction types: core Record<string,unknown> vs expression object vs functions Record<string,any>) — redirecting to one shape breaks tsc at real call sites in the other packages. core/src/factory.ts's factory stays canonical. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "functions/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (same reason as the already-allowlisted FactoryFunction/CreateFunction types: core Record<string,unknown> vs expression object vs functions Record<string,any>) — redirecting to one shape breaks tsc at real call sites in the other packages. core/src/factory.ts's factory stays canonical. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "core/src/factory.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1724,18 +1724,18 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "functions/src/factories/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1752,19 +1752,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1781,19 +1781,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1810,19 +1810,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1867,19 +1867,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1896,19 +1896,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1925,19 +1925,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -1953,19 +1953,19 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
         },
         {
           "file": "functions/src/typed/factorization/multi-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained multivariate factorization engine (sparse bigint MultiPoly) primitives, surfaced as TRUE_DUPLICATE only once factor() wired the Kronecker Layer-2 engine into the live graph (2026-07-20): isZero(p: MultiPoly) tests the empty term-map (vs functions/src/factories/index.ts's numeric isZero [left canonical] and the Layer-1 integer-poly.ts IntPoly isZero [separately allowlisted]); equals(a,b: MultiPoly) is structural term-map equality (vs functions/src/typed/factorization/integer-poly.ts's IntPoly equals [left canonical]). The engine is bigint-only and operates on a distinct type (MultiPoly), so it cannot delegate to the number/IntPoly-typed homonyms — a genuinely independent body, not a copy to consolidate. Engine correctness is sympy-oracle-pinned (functions/tests/factorization/*). 2026-07 factorization Layer-2 slice."
         }
       ],
-      "canonicalHint": "functions/src/factories/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -2208,7 +2208,7 @@
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "the matrix WASM-FFT accelerator bridge's real-FFT entry (split Float64Array); functions/src/signal/fft-helpers.ts (left canonical) is the public number[] rFFT (assembly/src/ops/fft.ts already allowlisted). Distinct representation, coherent scaffolding. 2026-07 dedup campaign, closing tail slice."
         }
@@ -2285,18 +2285,18 @@
         {
           "file": "parallel/src/strategies/chunk.ts",
           "package": "@danielsimonjr/mathts-parallel",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "parallelization threshold heuristic: functions/src/typed/arithmetic.ts inlines the i32 hot-path check; parallel/src/strategies/chunk.ts and .../threshold.ts (threshold.ts left canonical) are the strategy-layer copies. Kept local per project-all-libraries-build-on-core. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "parallel/src/strategies/threshold.ts",
           "package": "@danielsimonjr/mathts-parallel",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "functions/src/typed/arithmetic.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -2401,7 +2401,7 @@
         {
           "file": "matrix/src/types/dense/reduction.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
         }
@@ -3071,12 +3071,12 @@
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "distinct representation: matrix/src/backends/wasm/fft-wasm.ts's convolve is the (coherent, currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays; functions/src/typed/signal.ts's convolve (left canonical) is the public number[] convolution. Kept as coherent accelerator scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "functions/src/typed/signal.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3128,18 +3128,18 @@
         {
           "file": "compat/src/chain.ts",
           "package": "@danielsimonjr/mathts-compat",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "distinct chain surfaces (mirrors the already-allowlisted Chain type split): compat/src/chain.ts's createChain builds the real done/valueOf method-chaining proxy; functions/src/type/chain/function/chain.ts's (left canonical) is the mathjs `Chain` factory. 2026-07 dedup campaign, closing tail slice."
         },
         {
           "file": "functions/src/type/chain/function/chain.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3155,12 +3155,12 @@
         {
           "file": "functions/src/matrix/map.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "same name, different function: functions/src/matrix/map.ts's createMap is the mathjs `map` factory (element-wise map over Matrix/array); core/src/map.ts's createMap builds a JS Map from entries. Distinct-by-domain; core stays canonical. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "core/src/map.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3170,18 +3170,18 @@
         {
           "file": "core/src/factory/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "two distinct core subsystems (mirrors the already-allowlisted DEFAULT_CONFIG / FactoryFunction core-internal splits): core/src/typed/mathts-typed.ts's createTypedFunction builds a MathTSTyped dispatch instance; core/src/factory/factory.ts's is the factory-registry helper. Different shapes for different subsystems. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3239,12 +3239,12 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
         }
       ],
-      "canonicalHint": "functions/src/typed/algebra.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3317,7 +3317,7 @@
         {
           "file": "parallel/src/strategies/threshold.ts",
           "package": "@danielsimonjr/mathts-parallel",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
@@ -3328,7 +3328,7 @@
           "reason": "same name, different function: workbook/src/cli.ts's dispatch(argv) is the CLI command router; parallel/src/strategies/threshold.ts's dispatch (left canonical) selects a parallel execution strategy. Distinct-by-domain. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "workbook/src/cli.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3429,11 +3429,11 @@
         {
           "file": "functions/src/plain/number/constants.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "compat/src/shims.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3485,18 +3485,18 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
           "file": "functions/src/typed/factorization/multi-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained multivariate factorization engine (sparse bigint MultiPoly) primitives, surfaced as TRUE_DUPLICATE only once factor() wired the Kronecker Layer-2 engine into the live graph (2026-07-20): isZero(p: MultiPoly) tests the empty term-map (vs functions/src/factories/index.ts's numeric isZero [left canonical] and the Layer-1 integer-poly.ts IntPoly isZero [separately allowlisted]); equals(a,b: MultiPoly) is structural term-map equality (vs functions/src/typed/factorization/integer-poly.ts's IntPoly equals [left canonical]). The engine is bigint-only and operates on a distinct type (MultiPoly), so it cannot delegate to the number/IntPoly-typed homonyms — a genuinely independent body, not a copy to consolidate. Engine correctness is sympy-oracle-pinned (functions/tests/factorization/*). 2026-07 factorization Layer-2 slice."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3554,12 +3554,12 @@
         {
           "file": "functions/src/typed/factorization/integer-poly.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
         }
       ],
-      "canonicalHint": "functions/src/factories/evaluate.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3638,12 +3638,12 @@
         {
           "file": "functions/src/wasm/special/scalars.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "intra-functions, distinct roles: functions/src/wasm/special/scalars.ts's factorial(n: number) is the scalar primitive shared with the WASM special-function bridge; functions/src/factories/index.ts's is the mathjs `factorial` factory (BigNumber/Complex-aware), left canonical. Oracle-guarded (=120,=720) in gap-factory-core-parity.test.ts. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "functions/src/factories/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3660,11 +3660,11 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "functions/src/signal/fft-helpers.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3807,12 +3807,12 @@
         {
           "file": "functions/src/expression/operators.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "mathjs operator-precedence table + lookup, kept local to the functions expression-node helpers; expression/src/operators.ts (left canonical) is the parser's copy. Pinned identical by expression↔functions operator tables in their own suites; a divergence here is inert (each package reads its own). 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "expression/src/operators.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3892,11 +3892,11 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "functions/src/signal/fft-helpers.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3970,19 +3970,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -3992,19 +3992,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4014,19 +4014,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4036,19 +4036,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4058,19 +4058,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4080,19 +4080,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4102,19 +4102,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4124,7 +4124,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -4136,7 +4136,7 @@
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4146,7 +4146,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -4158,7 +4158,7 @@
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4168,19 +4168,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4190,19 +4190,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4212,19 +4212,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4234,19 +4234,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4256,7 +4256,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -4268,7 +4268,7 @@
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4299,19 +4299,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4342,19 +4342,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4364,19 +4364,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4386,19 +4386,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4408,19 +4408,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4430,19 +4430,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4452,19 +4452,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4474,19 +4474,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4496,19 +4496,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4518,7 +4518,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path type guards, kept local for V8 inlining (is.ts policy, project-all-libraries-build-on-core). These are the class-adjacent / dispatch-adjacent `isX(v): v is X` predicates: core/src/types/*.ts define the guard next to each numeric class; core/src/typed/mathts-typed.ts wraps them for typed-function dispatch; matrix/src/types/*.ts define the DenseMatrix/SparseMatrix/Matrix guards; compat/src/shims.ts re-pins isMatrix for its mathjs-compat surface. Guards, not logic to consolidate. 2026-07 dedup campaign, closing tail slice."
         },
@@ -4530,7 +4530,7 @@
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4651,12 +4651,12 @@
         {
           "file": "plot/src/svg.ts",
           "package": "@danielsimonjr/mathts-plot",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "two levels within plot: plot/src/svg.ts's line is the low-level SVG `<line>` element primitive; plot/src/marks2d.ts's line (left canonical) is the high-level line-chart mark. Distinct-by-role. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "plot/src/marks2d.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -4966,12 +4966,12 @@
         {
           "file": "functions/src/utils/bignumber/nearlyEqual.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "BigNumber near-equality, distinct by input type from core/src/number.ts's number nearlyEqual (which stays canonical). 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "core/src/number.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5093,11 +5093,11 @@
         {
           "file": "functions/src/plain/number/constants.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "compat/src/shims.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5135,11 +5135,11 @@
         {
           "file": "functions/src/plain/number/constants.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "compat/src/shims.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5303,11 +5303,11 @@
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "assembly/src/ops/fft.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5338,18 +5338,18 @@
         {
           "file": "expression/src/utils/print.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         },
         {
           "file": "functions/src/utils/print.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "mathjs print-template helper, kept local to the functions print path; expression/src/utils/print.ts (left canonical) is the expression copy. Distinct consumers. 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5365,12 +5365,12 @@
         {
           "file": "functions/src/expression/operators.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "mathjs operator-precedence table + lookup, kept local to the functions expression-node helpers; expression/src/operators.ts (left canonical) is the parser's copy. Pinned identical by expression↔functions operator tables in their own suites; a divergence here is inert (each package reads its own). 2026-07 dedup campaign, closing tail slice."
         }
       ],
-      "canonicalHint": "expression/src/operators.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5829,12 +5829,12 @@
         {
           "file": "functions/src/typed/factorization/kronecker.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "same name, different function (distinct-by-domain): functions/src/typed/factorization/kronecker.ts's substitute(p: MultiPoly, bases): IntPoly performs Kronecker substitution xₖ↦x^{bₖ}, collapsing a multivariate bigint poly to its univariate image; functions/src/typed/algebra.ts's substitute (left canonical) is the CAS string/AST variable substitution. Surfaced as TRUE_DUPLICATE only once factor() wired the Layer-2 engine into the live graph (2026-07-20). 2026-07 factorization Layer-2 slice."
         }
       ],
-      "canonicalHint": "functions/src/typed/algebra.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -5893,11 +5893,11 @@
         {
           "file": "functions/src/plain/number/constants.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "PLAIN"
         }
       ],
-      "canonicalHint": "compat/src/shims.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6076,19 +6076,19 @@
         {
           "file": "functions/src/wasm/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
         },
         {
           "file": "matrix/src/backends/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6098,19 +6098,19 @@
         {
           "file": "functions/src/wasm/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
         },
         {
           "file": "matrix/src/backends/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes bind DIFFERENT allocation models — functions/src/wasm/WasmLoader.ts uses the simple single-pointer model (`__new(byteLength, 2)`, ptr IS the data pointer), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6143,54 +6143,54 @@
         {
           "file": "functions/src/algebra/sparse/csAmd.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csChol.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csCounts.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csLu.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csSpsolve.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csSqr.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csSymperm.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "DIVERGED, deliberately not merged: csLu/csChol/csSpsolve require _values: unknown[] (numeric decomposition results), while csAmd/csCounts/csSqr/csSymperm declare _values?: unknown[] optional (structural/symbolic-only analyses that may run without values). Merging to one shape would either weaken the 3 numeric call sites' null-safety or wrongly force values on the 4 symbolic-only ones. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6207,40 +6207,40 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/matrix/utils/zerosAndOnes.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of BigNumber beyond the is.ts guard pair — zerosAndOnes.ts needs only what its zeros/ones construction path reads; type/bignumber/BigNumber.ts is the local mathjs-mirror BigNumber type. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/type/bignumber/BigNumber.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of BigNumber beyond the is.ts guard pair — zerosAndOnes.ts needs only what its zeros/ones construction path reads; type/bignumber/BigNumber.ts is the local mathjs-mirror BigNumber type. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6257,33 +6257,33 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/type/complex/Complex.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "the local mathjs-mirror Complex type, additional to the is.ts guard pair. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6300,33 +6300,33 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/solver/lsolveAll.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of DenseMatrix beyond the is.ts guard pair — each triangular-solver file declares only the concrete _data/_size/_datatype/valueOf() shape it operates on. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/solver/usolveAll.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of DenseMatrix beyond the is.ts guard pair — each triangular-solver file declares only the concrete _data/_size/_datatype/valueOf() shape it operates on. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6343,33 +6343,33 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/matrix/sqrtm.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of Matrix beyond the is.ts guard pair — each file declares only the fields/methods it actually reads (sqrtm.ts's spectral helpers; zerosAndOnes.ts's construction path). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/matrix/utils/zerosAndOnes.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "additional minimal per-consumer structural views of Matrix beyond the is.ts guard pair — each file declares only the fields/methods it actually reads (sqrtm.ts's spectral helpers; zerosAndOnes.ts's construction path). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6386,26 +6386,26 @@
         {
           "file": "core/src/factory/factory.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
         },
         {
           "file": "expression/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
         },
         {
           "file": "functions/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
         }
       ],
-      "canonicalHint": "core/src/factory.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6422,26 +6422,26 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6458,26 +6458,26 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/type/matrix/MatrixIndex.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "the local mathjs-mirror IndexDimension type used by MatrixIndex's own implementation, additional to the is.ts guard pair. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6494,26 +6494,26 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6530,26 +6530,26 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions/src/types.ts's own mathjs-mirror duck-type re-declaration, additional to the is.ts guard pair above (same minimal shape, kept local rather than imported to avoid a dependency from this low-level types barrel back onto the is.ts guard files). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6559,26 +6559,26 @@
         {
           "file": "compat/src/chain.ts",
           "package": "@danielsimonjr/mathts-compat",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "compat's Chain is the real chain-wrapper object contract (done/valueOf/toString/method-chaining proxy), genuinely different from the is.ts guard-adjacent Chain (a minimal {constructor.prototype.isChain} duck type) — additional to the is.ts guard pair in the AST-node group below. 2026-07 type-dedup pass."
         },
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6595,19 +6595,19 @@
         {
           "file": "expression/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
         },
         {
           "file": "functions/src/utils/factory.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
         }
       ],
-      "canonicalHint": "core/src/factory.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6624,19 +6624,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6653,7 +6653,7 @@
         {
           "file": "functions/src/type/matrix/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "already consolidated in substance, not just name: both non-core copies are now generic-specialization aliases that delegate 100% of their body to core's canonical `NestedArray<T>` (functions/src/type/matrix/types.ts keeps its own default type param `T = MatrixValue`; tensor/src/Tensor.ts specializes `T = number`) — the static scanner still counts each `export type X = ...` as an own declaration since neither can use a bare `export type { NestedArray } from ...` re-export without losing the default/specialization. 2026-07 type-dedup pass."
         },
@@ -6682,19 +6682,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/is.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6704,26 +6704,26 @@
         {
           "file": "functions/src/algebra/sparse/csChol.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three genuinely distinct per-algorithm symbolic-analysis result shapes (Cholesky: parent/cp/pinv; LU: q/lnz/unz; QR: q/parent/cp/pinv/leftmost/lnz/unz/m2) sharing a name coincidentally. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csLu.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three genuinely distinct per-algorithm symbolic-analysis result shapes (Cholesky: parent/cp/pinv; LU: q/lnz/unz; QR: q/parent/cp/pinv/leftmost/lnz/unz/m2) sharing a name coincidentally. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/algebra/sparse/csSqr.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three genuinely distinct per-algorithm symbolic-analysis result shapes (Cholesky: parent/cp/pinv; LU: q/lnz/unz; QR: q/parent/cp/pinv/leftmost/lnz/unz/m2) sharing a name coincidentally. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6740,19 +6740,19 @@
         {
           "file": "functions/src/core/function/typed.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three genuinely distinct shapes: expression's is a minimal callable-with-signatures duck type, functions/core/function/typed.ts's is the full typed-function instance API (create/addTypes/referTo/find/resolve/...), functions/type/matrix/types.ts's is a narrow find-only view. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/type/matrix/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "three genuinely distinct shapes: expression's is a minimal callable-with-signatures duck type, functions/core/function/typed.ts's is the full typed-function instance API (create/addTypes/referTo/find/resolve/...), functions/type/matrix/types.ts's is a narrow find-only view. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "expression/src/types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6762,19 +6762,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6784,19 +6784,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6806,19 +6806,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6857,12 +6857,12 @@
         {
           "file": "functions/src/matrix/utils/zerosAndOnes.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "core's is a minimal new-only constructor view for the Unit factory's angle math; functions' additionally has a callable (non-new) signature needed for its zeros/ones construction path. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/types/unit/unit-types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6894,19 +6894,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6945,12 +6945,12 @@
         {
           "file": "expression/src/node/Node.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "near-miss, deliberately not merged: compile.ts's evaluate() accepts Record<string, unknown> | Scope, Node.ts's accepts only Record<string, unknown> — Node.ts is imported by compile.ts so redirecting the other way risks a circular import for a one-parameter-type difference. Flagged for a future follow-up rather than forced now. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "expression/src/compiler/compile.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6967,12 +6967,12 @@
         {
           "file": "functions/src/type/complex/Complex.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "core's is a minimal {readonly I} view for the Unit factory; functions' is the full Complex constructor contract (new/callable/prototype/fromPolar/...). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/types/unit/unit-types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -6982,19 +6982,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7011,12 +7011,12 @@
         {
           "file": "functions/src/core/function/config.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions' copy is Partial<MathJsConfig> & {epsilon}, a legacy-compat partial wrapper for the config() function's overload — not a copy of core's full ConfigOptions (which functions/src/core/config.ts already re-exports as-is from @danielsimonjr/mathts-core/internal). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/config.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7026,19 +7026,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7048,7 +7048,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         },
@@ -7060,7 +7060,7 @@
           "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7070,7 +7070,7 @@
         {
           "file": "parallel/src/strategies/threshold.ts",
           "package": "@danielsimonjr/mathts-parallel",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "unrelated domains sharing a name: parallel dispatch mode ('parallel' | 'sequential') vs workbook cell-execution mode ('reactive' | 'sequential' | 'manual'). 2026-07 type-dedup pass."
         },
@@ -7082,7 +7082,7 @@
           "reason": "unrelated domains sharing a name: parallel dispatch mode ('parallel' | 'sequential') vs workbook cell-execution mode ('reactive' | 'sequential' | 'manual'). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "workbook/src/types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7092,19 +7092,19 @@
         {
           "file": "functions/src/signal/fft.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
         },
         {
           "file": "matrix/src/backends/wasm/fft-wasm.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7114,19 +7114,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7136,19 +7136,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7158,19 +7158,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7180,19 +7180,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7202,19 +7202,19 @@
         {
           "file": "expression/src/node/Node.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "expression's is the full AST Node class instance type; functions' is a minimal local {type, isNode, toString} view for one helper file. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/arithmetic/utils/nodeOperations.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "expression's is the full AST Node class instance type; functions' is a minimal local {type, isNode, toString} view for one helper file. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7246,19 +7246,19 @@
         {
           "file": "functions/src/matrix/utils/zerosAndOnes.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "zerosAndOnes.ts's is a callable matrix-factory shape; types.ts's is a constructible-with-index-signature shape — different contracts. 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/types.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "zerosAndOnes.ts's is a callable matrix-factory shape; types.ts's is a constructible-with-index-signature shape — different contracts. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7268,19 +7268,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7290,19 +7290,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7312,19 +7312,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7356,19 +7356,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7378,19 +7378,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7400,19 +7400,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7422,19 +7422,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7444,19 +7444,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7466,19 +7466,19 @@
         {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         },
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "AST-node / collection duck-type guard interfaces, byte-identical, paired 1:1 with the keep-local hot-path is* guard functions in the same 2 files (project-all-libraries-build-on-core). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7488,7 +7488,7 @@
         {
           "file": "core/src/typed/mathts-typed.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         },
@@ -7500,7 +7500,7 @@
           "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7510,7 +7510,7 @@
         {
           "file": "functions/src/core/function/typed.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "functions' is a plain (value: unknown) => boolean; typed-function's is generic (x: unknown) => x is T (a type predicate) — different signatures. 2026-07 type-dedup pass."
         },
@@ -7522,7 +7522,7 @@
           "reason": "functions' is a plain (value: unknown) => boolean; typed-function's is generic (x: unknown) => x is T (a type predicate) — different signatures. 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "packages/typed-function/src/index.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7532,7 +7532,7 @@
         {
           "file": "core/src/types/unit-definitions.ts",
           "package": "@danielsimonjr/mathts-core",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "two coexisting unit-table shapes within core: unit-definitions.ts's legacy multiplier/offset/dimensions/prefixable table vs unit/unit-types.ts's active mathjs-derived name/base/prefixes/value/offset/dimensions/reciprocal table for the merged Unit factory. 2026-07 type-dedup pass; possible follow-up to fully retire the legacy table is out of scope here."
         },
@@ -7544,7 +7544,7 @@
           "reason": "two coexisting unit-table shapes within core: unit-definitions.ts's legacy multiplier/offset/dimensions/prefixable table vs unit/unit-types.ts's active mathjs-derived name/base/prefixes/value/offset/dimensions/reciprocal table for the merged Unit factory. 2026-07 type-dedup pass; possible follow-up to fully retire the legacy table is out of scope here."
         }
       ],
-      "canonicalHint": "core/src/types/unit/unit-types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7561,12 +7561,12 @@
         {
           "file": "functions/src/type/unit/physicalConstants.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "core's is the full ~30-member Unit instance API; functions' is a deliberately narrow 1-field {fixPrefix} local view (only what physicalConstants.ts reads). 2026-07 type-dedup pass."
         }
       ],
-      "canonicalHint": "core/src/types/unit/unit-types.ts",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     },
     {
@@ -7576,19 +7576,19 @@
         {
           "file": "functions/src/wasm/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-functions",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions needs the full breadth including signal/geometry/special-function kernels; matrix only needs matrix-relevant exports) — a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) — core/internal is reachable from both packages without creating the functions<->matrix cycle."
         },
         {
           "file": "matrix/src/backends/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-matrix",
-          "public": false,
+          "public": true,
           "tag": "ALLOWLISTED",
           "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions needs the full breadth including signal/geometry/special-function kernels; matrix only needs matrix-relevant exports) — a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) — core/internal is reachable from both packages without creating the functions<->matrix cycle."
         }
       ],
-      "canonicalHint": "internal-only",
+      "canonicalHint": "AMBIGUOUS",
       "tag": "ALLOWLISTED"
     }
   ]

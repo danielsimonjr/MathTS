@@ -9,6 +9,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TypeScript raised to `^7.0.2` across all 25 manifests.** This monorepo hit both
+  TS 7 blockers, in 23 packages at once.
+
+  **Build:** 22 packages moved from `tsup --dts` to `tsup` + `tsc -p
+  tsconfig.dts.json`. tsup emits declarations via `rollup-plugin-dts`, which needs
+  TypeScript's programmatic Compiler API -- TS 7.0 does not ship it (expected in 7.1).
+  tsup's bundling is esbuild and unaffected. **The pattern was not invented: `functions/`
+  already did exactly this**, so its `tsconfig.dts.json` is the template and there is
+  still one way to build declarations here, not two.
+
+  **Lint:** ESLint replaced by `oxlint`, at the root and in all 22 packages that had
+  their own lint script. oxlint resolves the root `.oxlintrc.json`, so the rule set
+  lives in one place instead of 23. `no-unused-vars` (`^_` patterns) stays an error;
+  `no-explicit-any` stays a warning; the AssemblyScript and `.d.ts` exclusions carry
+  over verbatim.
+
+  **Three sweeps missed things that only checking caught:**
+  - `core`, `plot` and `workbook` set `dts: true` in `tsup.config.ts` rather than on
+    the command line, so a scan for `--dts` skipped them.
+  - Those three also have MULTIPLE entries (`internal.ts`, `render-file.ts`,
+    `cli.ts`, `run-worker.ts`). A declaration config including only `src/index.ts`
+    built fine and silently omitted `dist/internal.d.ts`, which broke `expression`
+    downstream with TS7016.
+  - `packages/workerpool` has an ambient `src/workerpool.d.ts` declaring an untyped
+    dependency. It is not reachable from the entry files, so a narrow `include`
+    dropped it -- and the declaration build failed while `tsc --noEmit` passed.
+
+- **`types: ["node"]` added to 19 tsconfigs.** TypeScript 7 does not auto-include
+  `node_modules/@types`; without it `packages/workerpool` failed with `Cannot find
+  name 'require'`/`'process'`, which then surfaced as misleading TS7016/TS2339 errors
+  about an unrelated dependency.
+
+### Fixed
+
+- **`isNode(indexed && indexed)` in `expression/src/node/FunctionNode.ts`** -- a
+  duplicated operand that always evaluates to `indexed`. Found by oxlint's
+  `const-comparisons` rule, which the previous config did not have.
+- **Two unused test-file bindings** (`gpu/tests/context-mocked.test.ts`,
+  `expression/tests/access.test.ts`), now `_`-prefixed to match the project's own
+  ignore pattern.
+
+### Known
+
+- **`no-eval` (10 hits) and `erasing-op` (4) are WARNINGS, not errors.** Every
+  `no-eval` is in `packages/workerpool/src/worker.ts`, which deserialises function
+  bodies to run them in workers -- that is what the package does. `erasing-op` flags
+  `x * 0` patterns in a maths library, which need a human read rather than a blanket
+  fix. Left visible rather than silenced or force-fixed.
+
+### Changed
+
 - **`engines.bun` raised from `>=1.2.0` to `>=1.4.2`,** matching the `packageManager`
   field which already said `bun@1.4.2`. The two had drifted, so the manifest declared
   a floor two minor versions below the toolchain it actually pins.

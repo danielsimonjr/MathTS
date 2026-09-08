@@ -41,7 +41,7 @@ function makeSimpleNumericIndex(i: number) {
     size: () => [1],
     min: () => [i],
     max: () => [i],
-    dimension: (dim: number) => i,
+    dimension: (_dim: number) => i,
     _i: i,
   };
 
@@ -50,17 +50,17 @@ function makeSimpleNumericIndex(i: number) {
     value: {
       prototype: {
         isIndex: true,
-      }
-    }
+      },
+    },
   });
 
   // mock for isEmptyIndex accessing index._dimensions.length
   Object.defineProperty(indexObj, '_dimensions', {
-    value: [i]
+    value: [i],
   });
 
   Object.defineProperty(indexObj, '_sourceSize', {
-    value: [null] // Allows any size
+    value: [null], // Allows any size
   });
 
   return indexObj;
