@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(deps): de-index the Workbook doc fixture that was failing Dependabot
+
+`docs/Architecture/Workbook/package.json` -> `package.json.txt`.
+
+GitHub's dependency graph indexes any file named `package.json` anywhere in the
+repository, installable or not. This one is documentation: not a declared
+workspace (the root globs are `packages/*` plus named directories, and `docs/`
+matches neither), no lockfile, sitting among `.md` specs and `.mtsw` examples.
+Indexed as a production manifest, it made Dependabot attempt a `vitest` update
+inside it and fail the entire run with `dependency_file_not_supported` -- which
+is what turned the **Dependabot check red on `main`** while all 24 real packages
+updated normally.
+
+A previous pass recorded this as "⚠ Noted, not changed" and cited
+`reference_doc_fixture_manifests_alert_forever`. It has now come due: the
+predicted cost arrived as a red check.
+
+Two independent mechanisms, so neither has to be right on its own:
+
+- **The rename takes it out of the graph.** A `README.md` beside it explains the
+  convention and says not to rename it back, because the obvious "helpful" fix
+  is to restore the name.
+- **The pin is bumped anyway**, `vitest ^3.2.6` -> `^5.0.0`, matching the 24 real
+  packages. Bumping alone would have been a symptom fix: it clears today's
+  advisory and guarantees the same class returns on the next CVE, with no
+  security value.
+
+Verified: the fixture no longer appears in `git ls-files '*package.json'`,
+nothing references the old path, `typecheck` passes, and `core` runs 811 tests
+green.
+
 ### Fixed
 
 - **CI was red on `main` for two consecutive commits while the build reported success.**
