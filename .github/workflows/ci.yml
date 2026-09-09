@@ -54,6 +54,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
+      # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
+      # fresh runner never has the source, and copy-wasm.mjs warns and exits 0 when it is
+      # missing -- so the build reports SUCCESS while emitting no wasm, and
+      # wasm-resolve.test.ts then fails on the absent artifact in every test job.
+      # `Compile & Lint` passes throughout because it never asserts the artifact exists.
+      # Green locally, red on CI, for as long as a developer's ignored assembly/build/
+      # still holds a wasm from an earlier manual run.
+      - name: Build AssemblyScript wasm
+        run: bun run build:wasm
+
       - name: Build
         run: bun run build
 
@@ -110,6 +121,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
+      # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
+      # fresh runner never has the source, and copy-wasm.mjs warns and exits 0 when it is
+      # missing -- so the build reports SUCCESS while emitting no wasm, and
+      # wasm-resolve.test.ts then fails on the absent artifact in every test job.
+      # `Compile & Lint` passes throughout because it never asserts the artifact exists.
+      # Green locally, red on CI, for as long as a developer's ignored assembly/build/
+      # still holds a wasm from an earlier manual run.
+      - name: Build AssemblyScript wasm
+        run: bun run build:wasm
+
       - name: Build
         run: bun run build
 
@@ -140,6 +162,17 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
+      # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
+      # fresh runner never has the source, and copy-wasm.mjs warns and exits 0 when it is
+      # missing -- so the build reports SUCCESS while emitting no wasm, and
+      # wasm-resolve.test.ts then fails on the absent artifact in every test job.
+      # `Compile & Lint` passes throughout because it never asserts the artifact exists.
+      # Green locally, red on CI, for as long as a developer's ignored assembly/build/
+      # still holds a wasm from an earlier manual run.
+      - name: Build AssemblyScript wasm
+        run: bun run build:wasm
 
       - name: Build
         run: bun run build
@@ -185,6 +218,17 @@ jobs:
 
       - name: Install Playwright browsers
         run: bunx playwright install chromium --with-deps
+
+      # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
+      # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
+      # fresh runner never has the source, and copy-wasm.mjs warns and exits 0 when it is
+      # missing -- so the build reports SUCCESS while emitting no wasm, and
+      # wasm-resolve.test.ts then fails on the absent artifact in every test job.
+      # `Compile & Lint` passes throughout because it never asserts the artifact exists.
+      # Green locally, red on CI, for as long as a developer's ignored assembly/build/
+      # still holds a wasm from an earlier manual run.
+      - name: Build AssemblyScript wasm
+        run: bun run build:wasm
 
       - name: Build (required for workspace package resolution)
         run: bun run build

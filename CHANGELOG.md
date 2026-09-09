@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **CI was red on `main` for two consecutive commits while the build reported success.**
+  Every test job failed `wasm-resolve.test.ts` with *"run `npm run build` in matrix/ first"*,
+  while `Compile & Lint` — which runs the same `bun run build` — passed throughout.
+
+  `bun run build` only **copies** the AssemblyScript wasm (`matrix/scripts/copy-wasm.mjs`); it
+  never compiles it. The source lives in `assembly/build/`, which is **gitignored**, so a fresh
+  runner never has it — and when the source is missing `copy-wasm.mjs` warns and **exits 0**.
+  The build therefore succeeds while emitting no wasm, and the test then fails on the absent
+  artifact. `ci.yml` had **zero** references to `build:wasm`.
+
+  It passed locally only because a developer's ignored `assembly/build/` still held a wasm from
+  a manual run on 2026-09-01 — the whole "green locally, red on CI" gap.
+
+  Fixed by adding a **Build AssemblyScript wasm** step before `bun run build` in all four jobs.
+  Verified from a genuinely cold state (artifact deleted, then `build:wasm` → `build` → tests):
+  **6 passed in `matrix`, 6 in `functions`**.
+
+  Worth naming as a class: **a build step that cannot produce its artifact should fail, not
+  warn and continue.** That silent `exit(0)` is what let a broken build report success for two
+  commits. It is left as-is because the wasm is genuinely optional for *consumers* (there is a
+  JS fallback) while the *test* treats it as required — reconciling that mismatch is the real
+  follow-up, and is filed in `todo.md`.
 - **`core` failed declaration emit under TypeScript 7 (TS4094).** `Range`'s four
   `#cache*` fields are ES-private on a class returned from a `factory()` call, so
   declaration emit describes it as an ANONYMOUS class type -- and TS4094 forbids
