@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(security): dismiss the stale Workbook vitest alert (#79)
+
+The alert the de-index above was meant to stop: Dependabot alert **#79**, `vitest`,
+against `docs/Architecture/Workbook/package.json` — a path that no longer exists.
+
+**Nothing in this repository was ever in range.** The advisory covers
+`>= 2.1.0, < 4.1.11`; every real manifest here specifies `vitest: ^5.0.0` — one
+distinct spec across all workspace packages, resolved **5.0.0**, already past the
+fix. The surviving `workbook/package.json` is a real workspace member at a
+different (lowercase) path and is also `^5.0.0`.
+
+Dismissed as `not_used`. The rationale lives here rather than on the alert because
+the dismissal could not carry a comment — see below.
+
+Two things worth knowing if this recurs:
+
+- **GitHub returned HTTP 500 for every valid `dismissed_reason`** for roughly an
+  hour (four reasons tried, twice, 25 s apart), while omitting the reason returned a
+  clean 400 and the token carried the required `repo` scope. So it was server-side,
+  not payload and not permissions. It succeeded unchanged on a retry an hour later.
+  A 500 here is worth retrying before it is worth debugging.
+- **The dismissal is one-shot.** Once dismissed, a further `PATCH` returns
+  `409 Alert is already dismissed`, so `dismissed_comment` cannot be added
+  afterwards. The comment was lost here because the payload had been reduced to
+  `state` + `reason` while probing which reason the failing endpoint would accept.
+  **Keep the full payload when probing an API: the probe that succeeds is the write.**
+
 ### fix(deps): de-index the Workbook doc fixture that was failing Dependabot
 
 `docs/Architecture/Workbook/package.json` -> `package.json.txt`.
