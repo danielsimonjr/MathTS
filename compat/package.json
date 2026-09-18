@@ -19,7 +19,7 @@
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "bun test --isolate --timeout 30000",
     "test:coverage": "vitest run --coverage",
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(test): Bun migration Phase 2c - plain-vitest packages
+
+Second package batch of the vitest -> `bun test` phase (see `TODO.md`).
+
+- `autograd`, `compat`, `expression`, `tensor`, `workbook` and `packages/typed-function` now run
+  `"test": "bun test --isolate --timeout 30000"`. The 30 s value is the `testTimeout` from each
+  package's `vitest.config.ts` (all seven were 30 s).
+- `--isolate` is required. `bun test` shares one global across test files, so `compat` (a shared
+  `config().precision`) and `expression` (`addConversion` twice) failed without it.
+- `workbook` gains `bunfig.toml` (`[test] preload`) and `bun-test-preload.mjs`, which define
+  `__PKG_VERSION__` the way the vitest config and `tsup.config.ts` do.
+- Test counts are identical before and after: autograd 259, compat 165, expression 1949,
+  tensor 390, workbook 337, typed-function 55. A deliberately broken assertion fails under
+  `bun test`.
+- `packages/workerpool` stays on vitest. Its worker-dispatch suites time out under `bun test`
+  because the `workerpool` library never answers under Bun 1.4.2 (the same probe passes under Node).
+
 ### chore(test): Bun migration Phase 2a - assessment and pilot (`bun test` for trigonometry, statistics)
 
 Phase 1 (#274) made Bun the package manager and script runner; vitest stayed. This is the first step of
