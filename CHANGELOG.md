@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(test): Bun migration Phase 2a - assessment and pilot (`bun test` for trigonometry, statistics)
+
+Phase 1 (#274) made Bun the package manager and script runner; vitest stayed. This is the first step of
+the vitest -> `bun test` phase, and the phases are now tracked in `TODO.md`.
+
+- `trigonometry` and `statistics` now run `"test": "bun test"`. Test files are unchanged: `bun test`
+  resolves the `vitest` import specifier to `bun:test`, so their `vitest.config.ts`, the root aggregate
+  run and `test:coverage` keep working.
+- Test counts are identical before and after (trigonometry 1 -> 1, statistics 6 -> 6). A deliberately
+  broken assertion fails under `bun test`, so the runner is not a no-op.
+- Assessment of all 23 workspace packages is recorded in `TODO.md`: 10 are drop-in, 7 need timeout and
+  concurrency checks, 5 use `vi.*` mocks, and `plot` uses snapshots. Nothing is blocked outright; the
+  browser config and coverage stay on vitest for now.
+
 ### chore(security): dismiss the stale Workbook vitest alert (#79)
 
 The alert the de-index above was meant to stop: Dependabot alert **#79**, `vitest`,
