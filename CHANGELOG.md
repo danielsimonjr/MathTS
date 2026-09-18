@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(test): Bun migration Phase 2b - 8 drop-in packages to `bun test`
+
+- `arithmetic`, `ast`, `evaluator`, `linalg`, `numbers`, `parser`, `signal` and `units` now run
+  `"test": "bun test"`, the same one-line change as the Phase 2a pilot. Test files are unchanged.
+- Test counts are identical before and after (arithmetic 3, ast 1, evaluator 2, linalg 1, numbers 3,
+  parser 5, signal 1, units 2). A deliberately broken assertion fails under `bun test`.
+
 ### chore(test): Bun migration Phase 2a - assessment and pilot (`bun test` for trigonometry, statistics)
 
 Phase 1 (#274) made Bun the package manager and script runner; vitest stayed. This is the first step of
