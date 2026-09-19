@@ -16,6 +16,9 @@
  */
 import { DUAL_UNARY_RULES, type DualUnaryRule } from './dual-rules.js';
 
+/**
+ * A dual number `value + deriv·ε` for forward-mode automatic differentiation.
+ */
 export class Dual {
   /** Function value (the real part). */
   readonly value: number;

@@ -9,7 +9,7 @@ import { hasOwnProperty } from './shared.js';
  * Can clone any primitive type, array, and object.
  * If x has a function clone, this function will be invoked to clone the object.
  *
- * @param {*} x
+ * @param x
  * @return {*} clone
  */
 export function clone<T>(x: T): T {
@@ -56,8 +56,8 @@ export function clone<T>(x: T): T {
 
 /**
  * Apply map to all properties of an object
- * @param {Object} object
- * @param {function} callback
+ * @param object
+ * @param callback
  * @return {Object} Returns a copy of the object with mapped properties
  */
 export function mapObject<T, U>(
@@ -77,8 +77,8 @@ export function mapObject<T, U>(
 
 /**
  * Extend object a with the properties of object b
- * @param {Object} a
- * @param {Object} b
+ * @param a
+ * @param b
  * @return {Object} a
  */
 export function extend<T extends Record<string, unknown>, U extends Record<string, unknown>>(
@@ -96,8 +96,8 @@ export function extend<T extends Record<string, unknown>, U extends Record<strin
 
 /**
  * Deep extend an object a with the properties of object b
- * @param {Object} a
- * @param {Object} b
+ * @param a
+ * @param b
  * @returns {Object}
  */
 export function deepExtend<T>(a: T, b: unknown): T {
@@ -167,8 +167,8 @@ export function deepExtend<T>(a: T, b: unknown): T {
 /**
  * Deep test equality of all fields in two pairs of arrays or objects.
  * Compares values and functions strictly (ie. 2 is not the same as '2').
- * @param {Array | Object} a
- * @param {Array | Object} b
+ * @param a
+ * @param b
  * @returns {boolean}
  */
 export function deepStrictEqual(a: unknown, b: unknown): boolean {
@@ -220,7 +220,7 @@ export function deepStrictEqual(a: unknown, b: unknown): boolean {
 
 /**
  * Recursively flatten a nested object.
- * @param {Object} nestedObject
+ * @param nestedObject
  * @return {Object} Returns the flattened object
  */
 export function deepFlatten(nestedObject: Record<string, unknown>): Record<string, unknown> {
@@ -274,9 +274,9 @@ export function canDefineProperty(): boolean {
  * Attach a lazy loading property to a constant.
  * The given function `fn` is called once when the property is first requested.
  *
- * @param {Object} object         Object where to add the property
- * @param {string} prop           Property name
- * @param {Function} valueResolver Function returning the property value. Called
+ * @param object - Object where to add the property
+ * @param prop - Property name
+ * @param valueResolver - Function returning the property value. Called
  *                                without arguments.
  */
 export function lazy<T>(
@@ -309,8 +309,8 @@ export function lazy<T>(
 /**
  * Traverse a path into an object.
  * When a namespace is missing, it will be created
- * @param {Object} object
- * @param {string | string[]} path   A dot separated string like 'name.space'
+ * @param object
+ * @param path - A dot separated string like 'name.space'
  * @return {Object} Returns the object at the end of the path
  */
 export function traverse(
@@ -348,7 +348,7 @@ export { hasOwnProperty };
  * - math: boolean   If true (false by default), the math namespace is passed
  *                   as fifth argument of the factory function
  *
- * @param {*} object
+ * @param object
  * @returns {boolean}
  */
 export function isLegacyFactory(object: unknown): boolean {
@@ -357,8 +357,8 @@ export function isLegacyFactory(object: unknown): boolean {
 
 /**
  * Get a nested property from an object
- * @param {Object} object
- * @param {string | string[]} path
+ * @param object
+ * @param path
  * @returns {Object}
  */
 export function get(object: Record<string, unknown>, path: string | string[]): unknown {
@@ -384,9 +384,9 @@ export function get(object: Record<string, unknown>, path: string | string[]): u
  * Set a nested property in an object
  * Mutates the object itself
  * If the path doesn't exist, it will be created
- * @param {Object} object
- * @param {string | string[]} path
- * @param {*} value
+ * @param object
+ * @param path
+ * @param value
  * @returns {Object}
  */
 export function set<T extends Record<string, unknown>>(
@@ -422,9 +422,9 @@ export function set<T extends Record<string, unknown>>(
 
 /**
  * Create an object composed of the picked object properties
- * @param {Object} object
- * @param {string[]} properties
- * @param {function} [transform] Optional value to transform a value when picking it
+ * @param object
+ * @param properties
+ * @param transform - Optional value to transform a value when picking it
  * @return {Object}
  */
 export function pick(
@@ -448,8 +448,8 @@ export function pick(
 /**
  * Shallow version of pick, creating an object composed of the picked object properties
  * but not for nested properties
- * @param {Object} object
- * @param {string[]} properties
+ * @param object
+ * @param properties
  * @return {Object}
  */
 export function pickShallow(

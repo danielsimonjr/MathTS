@@ -77,9 +77,6 @@ export const createRangeClass = /* #__PURE__ */ factory(
      *
      * @class Range
      * @constructor Range
-     * @param {number} start included lower bound
-     * @param {number} end excluded upper bound
-     * @param {number} [step] step size, default value is 1
      */
     class Range {
       /**
@@ -124,6 +121,15 @@ export const createRangeClass = /* #__PURE__ */ factory(
       _cacheEnd?: number;
       _cacheStep?: number;
 
+      /**
+       * Create a range from start to end with a step.
+       *
+       * @param start - Included lower bound. Default is 0.
+       * @param end - Excluded upper bound. Default is 0.
+       * @param step - Optional step size. Default is 1.
+       * @throws TypeError when start, end or step is not a number, bigint or BigNumber.
+       * @throws Error when step is zero.
+       */
       constructor(
         start?: number | bigint | BigNumber | null,
         end?: number | bigint | BigNumber | null,
@@ -183,7 +189,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * If the string does not contain a valid range, null is returned.
        * For example str='0:2:11'.
        * @memberof Range
-       * @param {string} str
+       * @param str
        * @return {Range | null} range
        */
       static parse(str: string): Range | null {
@@ -291,7 +297,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Execute a callback function for each value in the range.
        * @memberof Range
-       * @param {function} callback The callback method is invoked with three
+       * @param callback - The callback method is invoked with three
        *                            parameters: the value of the element, the index
        *                            of the element, and the Range being traversed.
        */
@@ -320,7 +326,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * Execute a callback function for each value in the Range, and return the
        * results as an array
        * @memberof Range
-       * @param {function} callback The callback method is invoked with three
+       * @param callback - The callback method is invoked with three
        *                            parameters: the value of the element, the index
        *                            of the element, and the Matrix being traversed.
        * @returns {Array} array
@@ -372,7 +378,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * Get a string representation of the range, with optional formatting options.
        * Output is formatted as 'start:step:end', for example '2:6' or '0:0.2:11'
        * @memberof Range
-       * @param {Object | number | function} [options] Formatting options. See
+       * @param options - Optional. Formatting options. See
        *                                               lib/utils/number:format for a
        *                                               description of the available
        *                                               options.
@@ -415,7 +421,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Instantiate a Range from a JSON object
        * @memberof Range
-       * @param {Object} json A JSON object structured as:
+       * @param json - A JSON object structured as:
        *                      `{"mathjs": "Range", "start": 2, "end": 4, "step": 1}`
        * @return {Range}
        */

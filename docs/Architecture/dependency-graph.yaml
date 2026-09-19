@@ -1416,7 +1416,7 @@ modules:
         - WasmManifest
         - type * from ./types/unit/unit-types.js
     core/src/is.ts:
-      description: 'Structural view used by the duck-typing guards below: math.js types are'
+      description: Shape of a BigNumber value that the duck-typing guards in this module read.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -37806,7 +37806,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 196350
+  totalLinesOfCode: 196566
   totalExports: 5841
   totalClasses: 55
   totalInterfaces: 508

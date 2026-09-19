@@ -26,6 +26,9 @@ export interface BigNumberConfig {
   maxExponent: number;
 }
 
+/**
+ * Rounding mode of a BigNumber operation. The default configuration uses `'halfUp'`.
+ */
 export type RoundingMode =
   | 'up' // Round away from zero
   | 'down' // Round toward zero (truncate)

@@ -13,6 +13,13 @@ import { BigNumber } from '../types/bignumber.js';
 
 let registered = false;
 
+/**
+ * Add duck-typing markers to the prototypes of the native Complex, Fraction and BigNumber classes.
+ *
+ * The function adds each marker only when the prototype does not have it.
+ * The markers are not writable, not enumerable and not configurable.
+ * Calls after the first call do nothing.
+ */
 export function registerNativeTypes(): void {
   if (registered) return;
   registered = true;
