@@ -5,7 +5,7 @@
     "lastUpdated": "2026-09-19",
     "totalFiles": 1175,
     "totalModules": 83,
-    "totalExports": 5839
+    "totalExports": 5841
   },
   "entryPoints": [
     {
@@ -38533,7 +38533,7 @@
         "functions": ["project"]
       },
       "plot/src/three/surface.ts": {
-        "description": "surface module",
+        "description": "Depth tolerance for the painter's sort. Every vertex is normalised into the cube",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -38569,8 +38569,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["surface"],
-        "functions": ["surface"]
+        "exports": ["DEPTH_EPS", "compareDepth", "surface"],
+        "functions": ["compareDepth", "surface"],
+        "constants": ["DEPTH_EPS"]
       }
     }
   },
@@ -40115,14 +40116,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 196185,
-    "totalExports": 5839,
+    "totalLinesOfCode": 196218,
+    "totalExports": 5841,
     "totalClasses": 55,
     "totalInterfaces": 508,
-    "totalFunctions": 1883,
+    "totalFunctions": 1884,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1598,
+    "totalConstants": 1599,
     "totalReExports": 2363,
     "totalTypeOnlyImports": 582,
     "runtimeCircularDeps": 0,

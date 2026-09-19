@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-19", "f": 1175, "e": 5839, "re": 2363 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-19", "f": 1175, "e": 5841, "re": 2363 },
   "s": {
-    "loc": 196185,
+    "loc": 196218,
     "cls": 55,
     "int": 508,
-    "fn": 1883,
+    "fn": 1884,
     "tg": 158,
     "en": 0,
-    "co": 1598,
+    "co": 1599,
     "toi": 582
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -1839,7 +1839,7 @@
     },
     "plot/three": {
       "f": 3,
-      "exp": ["scatter3d", "curve3d", "project", "surface"],
+      "exp": ["scatter3d", "curve3d", "project", "DEPTH_EPS", "compareDepth", "surface"],
       "int": ["Camera"]
     }
   },

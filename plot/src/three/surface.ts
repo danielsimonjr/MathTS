@@ -8,6 +8,29 @@ import type { PlotOptions } from '../types.js';
 
 const MARGIN = 40;
 
+/**
+ * Depth tolerance for the painter's sort. Every vertex is normalised into the cube
+ * [-1, 1]^3 before projection, so |depth| <= sqrt(3) whatever the input data scale.
+ * Float rounding in the projection and the 4-corner mean moves a depth by a few ulp
+ * (~1e-16 at this scale); a real geometric difference between two quads of any grid
+ * up to 10^6 cells per side is >= ~1e-6. 1e-9 sits many orders of magnitude from both.
+ */
+export const DEPTH_EPS = 1e-9;
+
+/**
+ * Painter's-order comparator: far (large depth) first. Depths within {@link DEPTH_EPS}
+ * are a tie, and a tie falls back to the face index (lower index first), so the order
+ * never depends on the last bit of a float (which differs between runtimes' Math.sin).
+ */
+export function compareDepth(
+  a: { depth: number; index: number },
+  b: { depth: number; index: number }
+): number {
+  const d = b.depth - a.depth;
+  if (Math.abs(d) > DEPTH_EPS) return d;
+  return a.index - b.index;
+}
+
 /** 3-D surface z[row][col], projected to 2-D SVG. Painter's algorithm for `filled`. */
 export function surface(
   z: unknown,
@@ -95,16 +118,26 @@ export function surface(
       });
   } else {
     // build quads, sort back-to-front by mean depth (painter's algorithm)
-    const quads: Array<{ depth: number; pts: Array<[number, number]>; shade: number }> = [];
+    const quads: Array<{
+      depth: number;
+      index: number;
+      pts: Array<[number, number]>;
+      shade: number;
+    }> = [];
     for (let r = 0; r < rows - 1; r++) {
       for (let c = 0; c < cols - 1; c++) {
         const corners = [proj[r][c], proj[r][c + 1], proj[r + 1][c + 1], proj[r + 1][c]];
         const depth = (corners[0][2] + corners[1][2] + corners[2][2] + corners[3][2]) / 4;
         const meanZ = (grid[r][c] + grid[r][c + 1] + grid[r + 1][c + 1] + grid[r + 1][c]) / 4;
-        quads.push({ depth, pts: corners.map(toScreen), shade: (meanZ - zlo) / zspan });
+        quads.push({
+          depth,
+          index: quads.length,
+          pts: corners.map(toScreen),
+          shade: (meanZ - zlo) / zspan,
+        });
       }
     }
-    quads.sort((a, b) => b.depth - a.depth); // far (large depth) first — painter's: draw far first, near last
+    quads.sort(compareDepth); // far (large depth) first — painter's: draw far first, near last; ties by face index
     for (const q of quads)
       prims.push({ k: 'polygon', pts: q.pts, fill: viridis(q.shade), stroke: theme.grid });
   }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { surface } from '../src/three/surface.js';
+import { surface, compareDepth, DEPTH_EPS } from '../src/three/surface.js';
 
 describe('surface', () => {
   it('filled surface emits one polygon per grid quad', () => {
@@ -36,5 +36,38 @@ describe('surface', () => {
     expect(farIdx).toBeGreaterThan(-1);
     expect(nearIdx).toBeGreaterThan(-1);
     expect(farIdx).toBeLessThan(nearIdx); // far painted first (earlier in the document)
+  });
+
+  describe('compareDepth: ties within DEPTH_EPS resolve by face index', () => {
+    // Math.sin(PI/4) is 0.7071067811865475 in Node and 0.7071067811865476 in Bun, so two
+    // geometrically equal depths can differ by 1 ulp. The order must not depend on that bit.
+    const d = Math.SQRT1_2;
+    const up = d + Number.EPSILON / 2; // the next double above SQRT1_2 (1 ulp in [0.5, 1))
+    it('the test depths really differ by exactly 1 ulp', () => {
+      expect(up).toBeGreaterThan(d);
+      expect((up + d) / 2 === d || (up + d) / 2 === up).toBe(true);
+      expect(up - d).toBeLessThan(DEPTH_EPS);
+    });
+    it('lower index first when the LOWER index has the 1-ulp-larger depth', () => {
+      const q = [
+        { depth: d, index: 1 },
+        { depth: up, index: 0 },
+      ];
+      expect(q.sort(compareDepth).map((x) => x.index)).toEqual([0, 1]);
+    });
+    it('lower index first when the LOWER index has the 1-ulp-smaller depth', () => {
+      const q = [
+        { depth: up, index: 1 },
+        { depth: d, index: 0 },
+      ];
+      expect(q.sort(compareDepth).map((x) => x.index)).toEqual([0, 1]);
+    });
+    it('a real depth difference still wins over the index (far first)', () => {
+      const q = [
+        { depth: 0.1, index: 0 },
+        { depth: 0.2, index: 1 },
+      ];
+      expect(q.sort(compareDepth).map((x) => x.index)).toEqual([1, 0]);
+    });
   });
 });
