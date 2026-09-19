@@ -18,7 +18,7 @@ human-facing overview.
 
 | Task          | Command                                                  | Notes                                                                                          |
 | ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`); Node ≥20 still needed for vitest/`asc`                |
+| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development |
 | Build all     | `bun run build`                                          | turbo, respects dep graph                                                                      |
 | Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 32/32, 0 errors**                                                    |
 | Test all      | `bun run test`                                           | vitest via turbo (`bun test` is a different runner — do not use it for CI)                     |
