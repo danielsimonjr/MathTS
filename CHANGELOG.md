@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs: both documentation gates green - root causes fixed
+
+- **architecture-docs gate (`repo_map.py check`)**: the hand-written Verification tables quoted stale
+  counts (1881 files, 7620 exports, 332379 lines). Corrected to the fresh `repo_map.py map` values (1901,
+  7649, 334654). Each row's Source cell now names the command that produces the number, so the next
+  drift is traceable. The committed dependency-graph reports were regenerated with `bun run docs:deps`.
+- **code-docs gate (`code_docs.py check <pkg>/src`)**: `ast` and `parser` failed because their
+  `index.ts` uses `export type * from ...` (TypeScript 5.0). The source is valid; tree-sitter-typescript
+  0.23.2 cannot parse it. Fixed in the checker (skills repo `64a678d`, code-docs 0.3.4), not here.
+- **Pre-commit reflowed ~1000 lines of `TODO.md`**: `bun.lock` pinned prettier 3.9.6, but `TODO.md` was
+  last formatted by prettier >= 3.9.7, which changed markdown list-continuation indentation. Measured on
+  an LF export of `origin/main`: 3.9.6 flags 44 files, 3.9.8 flags 43, and the only difference is
+  `TODO.md`. prettier devDependency raised to `^3.9.8`, so the hook and the file agree.
+
 ### chore(test): Bun migration Phase 2b - 8 drop-in packages to `bun test`
 
 - `arithmetic`, `ast`, `evaluator`, `linalg`, `numbers`, `parser`, `signal` and `units` now run
