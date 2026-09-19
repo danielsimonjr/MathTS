@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(build): Bun migration Phase 4 - Node out of the dev toolchain
+
+- `.github/workflows/ci.yml`: the `Compile & Lint`, `Coverage` and `Browser (WebGPU smoke)` jobs no
+  longer install Node. Proof: CI run 35436728046 put a `node` that exits 97 first on `PATH` in these
+  three jobs. All five jobs passed, and the log has no `PROBE: node was called` line.
+- The probe found two hidden `node` calls, and both now run on Bun. `bun install` runs the root
+  `prepare` script outside `bunfig.toml` `[run].bun`, so the husky bin used the system `node`. The
+  script is now `bun --bun husky`. `bunx playwright install` did the same and is now
+  `bunx --bun playwright install`.
+- Kept: the `Test (20.x)`/`Test (22.x)` matrix and its `setup-node`. They run the suite
+  (`tools/test/run-vitest-node.mjs`) and the dist smoke test (`tools/test/smoke-dist-node.mjs`) on
+  real Node. Also kept: `setup-node` in `release.yml`, which the release process owns.
+- Root `package.json`: `engines.node` removed (the root is private and describes only the
+  toolchain). No published package's `engines`, `exports` or other metadata changes.
+- `.nvmrc` removed: no workflow or script read it.
+- `CONTRIBUTING.md`, `README.md`, `AGENTS.md`: development needs Bun only; Node is optional, for
+  running the Node test matrix locally.
+
 ### test(ci): run the full suite and a dist smoke test on real Node in the test matrix
 
 - Measured on this PR before the fix (CI run 35434515205): in both `Test (20.x)` and

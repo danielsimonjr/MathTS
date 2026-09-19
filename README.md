@@ -247,7 +247,9 @@ are unaffected.
 
 The monorepo package manager is **Bun** (see `docs/roadmap/BUN_MIGRATION.md`).
 Published packages still run on Node ≥20 / browsers — Bun is for install, scripts,
-and CI. Node remains on PATH for vitest and AssemblyScript.
+and CI. Development needs Bun only: every `bun run` script (vitest and AssemblyScript
+included) runs on Bun. Node is needed only to reproduce the CI Node test matrix
+(`node tools/test/run-vitest-node.mjs`, `node tools/test/smoke-dist-node.mjs`).
 
 ```bash
 # Install Bun once: https://bun.sh  (needs ≥1.2; repo pins 1.4.2)

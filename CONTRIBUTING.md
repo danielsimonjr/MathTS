@@ -6,9 +6,9 @@ Thank you for your interest in contributing to MathTS! This document provides gu
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- npm (the repo uses npm workspaces + Turborepo)
+- Bun >= 1.4.2 (package manager and script runtime; the repo uses Bun workspaces + Turborepo)
 - Git
+- Node.js >= 20 is optional: you need it only to run the CI Node test matrix locally
 
 ### Setup
 
@@ -18,13 +18,14 @@ git clone https://github.com/danielsimonjr/mathts.git
 cd mathts
 
 # Install dependencies
-npm install
+bun install
 
-# Build all packages
-npm run build
+# Build the AssemblyScript wasm, then all packages
+bun run build:wasm
+bun run build
 
 # Run tests
-npm test
+bun run test
 ```
 
 ## Development Workflow
@@ -66,9 +67,9 @@ docs(readme): add WebGPU backend examples
 1. Fork the repository
 2. Create a feature branch from `main`
 3. Make your changes
-4. Ensure all tests pass: `npm test`
-5. Ensure linting passes: `npm run lint`
-6. Ensure type checking passes: `npm run typecheck`
+4. Ensure all tests pass: `bun run test`
+5. Ensure linting passes: `bun run lint`
+6. Ensure type checking passes: `bun run typecheck`
 7. Submit a pull request
 
 ### PR Checklist
@@ -148,7 +149,7 @@ function helperFunction() {
 
 ```bash
 # All tests
-npm test
+bun run test
 
 # Specific package
 npx turbo test --filter=@danielsimonjr/mathts-matrix
@@ -157,7 +158,7 @@ npx turbo test --filter=@danielsimonjr/mathts-matrix
 cd matrix && npx vitest
 
 # Coverage
-npm run test:coverage
+bun run test:coverage
 ```
 
 ### Writing Tests
