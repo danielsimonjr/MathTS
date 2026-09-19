@@ -232,18 +232,43 @@ export const cos = _cos;
 export const tan = _tan;
 
 // Inverse trig (shims - these may not be fully implemented in MathTS yet)
+/**
+ * Return the inverse sine of `x`. This shim calls `Math.asin`.
+ *
+ * @param x - The sine value.
+ * @returns The angle in radians.
+ */
 export function asin(x: number): number {
   return Math.asin(x);
 }
 
+/**
+ * Return the inverse cosine of `x`. This shim calls `Math.acos`.
+ *
+ * @param x - The cosine value.
+ * @returns The angle in radians.
+ */
 export function acos(x: number): number {
   return Math.acos(x);
 }
 
+/**
+ * Return the inverse tangent of `x`. This shim calls `Math.atan`.
+ *
+ * @param x - The tangent value.
+ * @returns The angle in radians.
+ */
 export function atan(x: number): number {
   return Math.atan(x);
 }
 
+/**
+ * Return the angle of the point (`x`, `y`). This shim calls `Math.atan2(y, x)`.
+ *
+ * @param y - The y coordinate. This argument comes first.
+ * @param x - The x coordinate.
+ * @returns The angle in radians.
+ */
 export function atan2(y: number, x: number): number {
   return Math.atan2(y, x);
 }
@@ -268,6 +293,18 @@ function toNumericArray(data: unknown): number[] {
   return [data as number];
 }
 
+/**
+ * Return the variance of all values in `data`.
+ *
+ * This function flattens a DenseMatrix or a nested array to one list.
+ * It uses any other input as a list of one value.
+ * An empty list gives `NaN`.
+ * The divisor is N - 1 for `'unbiased'` (N for one value), N for `'uncorrected'` and N + 1 for `'biased'`.
+ *
+ * @param data - A number, a DenseMatrix or a nested array of numbers.
+ * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
+ * @returns The variance.
+ */
 export function variance(data: unknown, normalization: Normalization = 'unbiased'): number {
   const arr = toNumericArray(data);
   const n = arr.length;
@@ -279,6 +316,15 @@ export function variance(data: unknown, normalization: Normalization = 'unbiased
   return ss / denom;
 }
 
+/**
+ * Return the standard deviation of all values in `data`.
+ *
+ * The result is the square root of `variance(data, normalization)`.
+ *
+ * @param data - A number, a DenseMatrix or a nested array of numbers.
+ * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
+ * @returns The standard deviation.
+ */
 export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
   return Math.sqrt(variance(data, normalization));
 }
@@ -495,22 +541,54 @@ export function size(m: DenseMatrix | SparseMatrix | number[][]): [number, numbe
 // Type Checking Shims
 // =============================================================================
 
+/**
+ * Return `true` if `x` is a Complex. This shim calls the core `isComplex` check.
+ *
+ * @param x - The value to check.
+ * @returns `true` if `x` is a Complex.
+ */
 export function isComplex_(x: unknown): x is Complex {
   return isComplex(x);
 }
 
+/**
+ * Return `true` if `x` is a Fraction. This shim calls the core `isFraction` check.
+ *
+ * @param x - The value to check.
+ * @returns `true` if `x` is a Fraction.
+ */
 export function isFraction_(x: unknown): x is Fraction {
   return isFraction(x);
 }
 
+/**
+ * Return `true` if `x` is a BigNumber. This shim calls the core `isBigNumber` check.
+ *
+ * @param x - The value to check.
+ * @returns `true` if `x` is a BigNumber.
+ */
 export function isBigNumber_(x: unknown): x is BigNumber {
   return isBigNumber(x);
 }
 
+/**
+ * Return `true` if `x` is a number. This shim calls the core `isNumber` check.
+ *
+ * @param x - The value to check.
+ * @returns `true` if `x` is a number.
+ */
 export function isNumber_(x: unknown): x is number {
   return isNumber(x);
 }
 
+/**
+ * Return `true` if `x` is a DenseMatrix or a SparseMatrix instance.
+ *
+ * A nested array gives `false`.
+ *
+ * @param x - The value to check.
+ * @returns `true` if `x` is a DenseMatrix or a SparseMatrix.
+ */
 export function isMatrix(x: unknown): x is DenseMatrix | SparseMatrix {
   return x instanceof DenseMatrix || x instanceof SparseMatrix;
 }
