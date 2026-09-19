@@ -7,7 +7,7 @@
  */
 
 import type { RenderDoc, RenderCell } from './html.js';
-import { markdownToTex, texEscape } from './markdown.js';
+import { markdownToTex, texEscape, verbatimBody } from './markdown.js';
 
 export interface ToTexOptions {
   /** Parser for equation expressions (e.g. the functions package `parse`). */
@@ -46,12 +46,12 @@ function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): str
       return renderEquationTex(cell.content, parse);
     case 'code': {
       const cap = cell.id ? `\\textit{${texEscape(cell.id)}}\\\\\n` : '';
-      const src = `\\begin{lstlisting}\n${cell.content}\n\\end{lstlisting}`;
+      const src = `\\begin{lstlisting}\n${verbatimBody(cell.content, 'lstlisting')}\n\\end{lstlisting}`;
       let res = '';
       if (cell.error !== undefined)
         res = `\n\n\\textcolor{red}{\\texttt{${texEscape(cell.error)}}}`;
       else if (cell.output !== undefined)
-        res = `\n\n\\begin{verbatim}\n${cell.output}\n\\end{verbatim}`;
+        res = `\n\n\\begin{verbatim}\n${verbatimBody(cell.output, 'verbatim')}\n\\end{verbatim}`;
       return `${cap}${src}${res}`;
     }
     case 'test': {
@@ -65,7 +65,7 @@ function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): str
     case 'data': {
       const val = cell.error !== undefined ? cell.error : (cell.output ?? '');
       const cap = cell.id ? `\\textit{${texEscape(cell.id)}}\\\\\n` : '';
-      return `${cap}\\begin{verbatim}\n${val}\n\\end{verbatim}`;
+      return `${cap}\\begin{verbatim}\n${verbatimBody(val, 'verbatim')}\n\\end{verbatim}`;
     }
     case 'chart': {
       const chart = cell.chartTikz ?? '% no chart';
@@ -73,7 +73,7 @@ function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): str
       return `\\begin{center}\n${chart}\n\\end{center}${note}`;
     }
     default:
-      return `\\begin{verbatim}\n${cell.content}\n\\end{verbatim}`;
+      return `\\begin{verbatim}\n${verbatimBody(cell.content, 'verbatim')}\n\\end{verbatim}`;
   }
 }
 

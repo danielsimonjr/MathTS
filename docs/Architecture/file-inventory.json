@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1861,
+  "totalFiles": 1863,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 627,
+    "test": 629,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1175,
-    "tests": 627,
+    "tests": 629,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -37,13 +37,13 @@
     "@danielsimonjr/mathts-workerpool": 10,
     "@danielsimonjr/mathts-parallel": 38,
     "@danielsimonjr/mathts-parser": 3,
-    "@danielsimonjr/mathts-plot": 45,
+    "@danielsimonjr/mathts-plot": 46,
     "@danielsimonjr/mathts-signal": 3,
     "@danielsimonjr/mathts-statistics": 3,
     "@danielsimonjr/mathts-tensor": 52,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 62
+    "@danielsimonjr/mathts-workbook": 63
   },
   "files": [
     {
@@ -11685,7 +11685,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 219
+      "loc": 215
     },
     {
       "file": "plot/src/scale.ts",
@@ -11706,7 +11706,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 141
+      "loc": 233
     },
     {
       "file": "plot/src/three/points3d.ts",
@@ -11734,7 +11734,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 96
+      "loc": 103
     },
     {
       "file": "plot/src/types.ts",
@@ -11875,6 +11875,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 74
+    },
+    {
+      "file": "plot/tests/svg-attr-escape.test.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 246
     },
     {
       "file": "plot/tests/svg.test.ts",
@@ -12728,7 +12735,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 255
+      "loc": 267
     },
     {
       "file": "workbook/src/parser.ts",
@@ -12974,6 +12981,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 68
+    },
+    {
+      "file": "workbook/tests/markup-escape.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 81
     },
     {
       "file": "workbook/tests/package-index.test.ts",

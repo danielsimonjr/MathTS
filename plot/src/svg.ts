@@ -40,7 +40,7 @@ export const THEMES: Record<'light' | 'dark', Theme> = {
   },
 };
 
-/** Replace `&`, `<` and `>` in a string with their XML entities. Quote characters stay unchanged, so use the result as element text only. */
+/** Replace `&`, `<` and `>` in a string with their XML entities. Quote characters stay unchanged, so use the result as element text only. Attribute values go through `escAttr`. */
 export function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -55,15 +55,62 @@ export function fmt(n: number): string {
 
 const r2 = (n: number): number => Math.round(n * 100) / 100;
 
-/** Wrap SVG body markup in a complete `<svg>` document of the given size, with a full-size background rectangle and the `img` ARIA role. */
+const ATTR_ENTITIES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+
+/** Escape a value for use inside a quoted XML attribute. Replaces `&`, `<`, `>`, `"` and `'` with entities. A number is converted with `String` first, so a value typed `number` but passed as a string at run time cannot end the attribute. */
+export function escAttr(v: string | number): string {
+  return String(v).replace(/[&<>"']/g, (c) => ATTR_ENTITIES[c]);
+}
+
+/** Attribute list for `el`, in output order. An entry whose value is `undefined` is left out. */
+type Attrs = ReadonlyArray<readonly [name: string, value: string | number | undefined]>;
+
+/**
+ * Build one SVG element. This is the only place that writes an attribute, and it passes
+ * every value through `escAttr`, so no builder can interpolate a raw value. Attribute names
+ * are compile-time constants. `body` is markup that the caller already escaped; when it is
+ * `undefined` the element is self-closing.
+ */
+function el(tag: string, attrs: Attrs, body?: string): string {
+  let s = `<${tag}`;
+  for (const [name, value] of attrs) if (value !== undefined) s += ` ${name}="${escAttr(value)}"`;
+  return body === undefined ? `${s}/>` : `${s}>${body}</${tag}>`;
+}
+
+/** An opacity attribute value, or `undefined` (attribute left out) when the opacity is absent or at least 1. */
+const opacityAttr = (opacity?: number): number | undefined =>
+  opacity !== undefined && opacity < 1 ? Math.round(opacity * 1000) / 1000 : undefined;
+
+const points = (pts: Array<[number, number]>): string =>
+  pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join(' ');
+
+/** Wrap SVG body markup in a complete `<svg>` document of the given size, with a full-size background rectangle and the `img` ARIA role. Every attribute value is escaped with `escAttr`. */
 export function svgDoc(width: number, height: number, body: string, bg: string): string {
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" role="img">` +
-    `<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}"/>${body}</svg>`
+  return el(
+    'svg',
+    [
+      ['xmlns', 'http://www.w3.org/2000/svg'],
+      ['viewBox', `0 0 ${width} ${height}`],
+      ['width', '100%'],
+      ['role', 'img'],
+    ],
+    el('rect', [
+      ['x', 0],
+      ['y', 0],
+      ['width', width],
+      ['height', height],
+      ['fill', bg],
+    ]) + body
   );
 }
 
-/** Make an SVG `<line>` element between two points. Coordinates are rounded to two decimals. The `stroke-opacity` attribute is added only when the opacity is below 1. */
+/** Make an SVG `<line>` element between two points. Coordinates are rounded to two decimals. The `stroke-opacity` attribute is added only when the opacity is below 1. Every attribute value is escaped with `escAttr`. */
 export function line(
   x1: number,
   y1: number,
@@ -73,44 +120,81 @@ export function line(
   w = 1,
   opacity?: number
 ): string {
-  const op =
-    opacity !== undefined && opacity < 1
-      ? ` stroke-opacity="${Math.round(opacity * 1000) / 1000}"`
-      : '';
-  return `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${w}"${op}/>`;
+  return el('line', [
+    ['x1', r2(x1)],
+    ['y1', r2(y1)],
+    ['x2', r2(x2)],
+    ['y2', r2(y2)],
+    ['stroke', stroke],
+    ['stroke-width', w],
+    ['stroke-opacity', opacityAttr(opacity)],
+  ]);
 }
-/** Make an SVG `<circle>` element. The `fill-opacity` attribute is added only when the opacity is below 1. */
+/** Make an SVG `<circle>` element. The `fill-opacity` attribute is added only when the opacity is below 1. Every attribute value is escaped with `escAttr`. */
 export function circle(cx: number, cy: number, r: number, fill: string, opacity?: number): string {
-  const op =
-    opacity !== undefined && opacity < 1
-      ? ` fill-opacity="${Math.round(opacity * 1000) / 1000}"`
-      : '';
-  return `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r}" fill="${fill}"${op}/>`;
+  return el('circle', [
+    ['cx', r2(cx)],
+    ['cy', r2(cy)],
+    ['r', r],
+    ['fill', fill],
+    ['fill-opacity', opacityAttr(opacity)],
+  ]);
 }
-/** Make a filled SVG `<rect>` element. Position and size are rounded to two decimals. */
+/** Make a filled SVG `<rect>` element. Position and size are rounded to two decimals. Every attribute value is escaped with `escAttr`. */
 export function rect(x: number, y: number, w: number, h: number, fill: string): string {
-  return `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" fill="${fill}"/>`;
+  return el('rect', [
+    ['x', r2(x)],
+    ['y', r2(y)],
+    ['width', r2(w)],
+    ['height', r2(h)],
+    ['fill', fill],
+  ]);
 }
-/** Make an SVG `<polyline>` element with no fill from a list of [x, y] points. */
+/** Make an SVG `<polyline>` element with no fill from a list of [x, y] points. Every attribute value is escaped with `escAttr`. */
 export function polyline(pts: Array<[number, number]>, stroke: string, w = 2): string {
-  const p = pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join(' ');
-  return `<polyline points="${p}" fill="none" stroke="${stroke}" stroke-width="${w}"/>`;
+  return el('polyline', [
+    ['points', points(pts)],
+    ['fill', 'none'],
+    ['stroke', stroke],
+    ['stroke-width', w],
+  ]);
 }
-/** Make an SVG `<polygon>` element from a list of [x, y] vertices. The stroke is `none` by default. */
+/** Make an SVG `<polygon>` element from a list of [x, y] vertices. The stroke is `none` by default. Every attribute value is escaped with `escAttr`. */
 export function polygon(pts: Array<[number, number]>, fill: string, stroke = 'none'): string {
-  const p = pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join(' ');
-  return `<polygon points="${p}" fill="${fill}" stroke="${stroke}"/>`;
+  return el('polygon', [
+    ['points', points(pts)],
+    ['fill', fill],
+    ['stroke', stroke],
+  ]);
 }
-/** Make an SVG `<text>` element. The text content is escaped with `esc`. */
+/** Make an SVG `<text>` element. The text content is escaped with `esc`, and every attribute value with `escAttr`. When `transform` is given it replaces the `x`/`y` attributes. */
 export function text(
   x: number,
   y: number,
   s: string,
   fill: string,
   anchor = 'start',
-  size = 12
+  size = 12,
+  transform?: string
 ): string {
-  return `<text x="${r2(x)}" y="${r2(y)}" text-anchor="${anchor}" font-family="system-ui,sans-serif" font-size="${size}" fill="${fill}">${esc(s)}</text>`;
+  const pos: Attrs =
+    transform === undefined
+      ? [
+          ['x', r2(x)],
+          ['y', r2(y)],
+        ]
+      : [['transform', transform]];
+  return el(
+    'text',
+    [
+      ...pos,
+      ['text-anchor', anchor],
+      ['font-family', 'system-ui,sans-serif'],
+      ['font-size', size],
+      ['fill', fill],
+    ],
+    esc(s)
+  );
 }
 
 function primSVG(p: Prim): string {
@@ -129,7 +213,15 @@ function primSVG(p: Prim): string {
       // rotate branch reproduces frame.ts's former hand-written y-label string exactly
       // (no r2 on the translate coords — matches the prior output byte-for-byte).
       return p.rotate !== undefined
-        ? `<text transform="translate(${p.x},${p.y}) rotate(${p.rotate})" text-anchor="${p.anchor}" font-family="system-ui,sans-serif" font-size="${p.size}" fill="${p.fill}">${esc(p.s)}</text>`
+        ? text(
+            p.x,
+            p.y,
+            p.s,
+            p.fill,
+            p.anchor,
+            p.size,
+            `translate(${p.x},${p.y}) rotate(${p.rotate})`
+          )
         : text(p.x, p.y, p.s, p.fill, p.anchor, p.size);
   }
 }

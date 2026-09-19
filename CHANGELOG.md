@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(plot): escape every SVG attribute value (security)
+
+- `plot/src/svg.ts` wrote attribute values by string interpolation without escaping. Only element
+  text went through `esc()`. A caller color (`Layer2D.color`, `PlotOptions.palette`) or a width or
+  height passed as a string could contain a quote character, end the attribute, and add attributes
+  or elements to the SVG.
+- Every SVG element is now built by one private `el()` helper. It is the only code that writes an
+  attribute, and it passes every value, numbers included, through the new `escAttr()` escaper
+  (`&`, `<`, `>`, `"`, `'`). No builder interpolates a raw attribute value any more.
+- TikZ backend: a caller color is written only when it is a color name or an xcolor mix (letters,
+  digits, `!`, `.`). Any other value becomes `black`.
+- Workbook TeX export: code source, outputs, data cells and fenced Markdown code could close their
+  `verbatim` or `lstlisting` environment early. The new `verbatimBody()` breaks each end sequence in
+  a body.
+- Tests: `plot/tests/svg-attr-escape.test.ts` and `workbook/tests/markup-escape.test.ts` parse the
+  output with `@xmldom/xmldom` (new dev dependency). They failed on `main` (11 plot, 2 workbook).
+- Output for ordinary inputs is byte-identical: the 15 golden SVG snapshots did not change.
+
 ### docs(plot): doc comments for every exported symbol
 
 - Added doc comments to the 12 exported symbols of `@danielsimonjr/mathts-plot` that had none:
