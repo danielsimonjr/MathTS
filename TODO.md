@@ -2369,7 +2369,7 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 
 ## ✅ Completed
 
-- [x] **2026-09-18 doc gates green** - architecture-docs and code-docs gates pass for ast and parser; prettier pinned to 3.9.8 so this file no longer reflows on commit.
+- [x] **2026-09-18 doc gates green** - architecture-docs and code-docs gates pass, including ast and parser; prettier pinned to 3.9.8 so this file no longer reflows on commit.
 
 ### 2026-07-09 session — Export-formats expansion (published)
 
