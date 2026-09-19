@@ -1491,6 +1491,7 @@ graph LR
 | Package                          | Import                        |
 | -------------------------------- | ----------------------------- |
 | `@danielsimonjr/mathts-core`     | `mathTyped`                   |
+| `@danielsimonjr/mathts-core`     | `TypedFunction`               |
 | `@danielsimonjr/mathts-parallel` | `computePool, ParallelResult` |
 | `@danielsimonjr/mathts-core`     | `SignatureFunction`           |
 
@@ -1514,6 +1515,7 @@ graph LR
 | Package                      | Import              |
 | ---------------------------- | ------------------- |
 | `@danielsimonjr/mathts-core` | `mathTyped`         |
+| `@danielsimonjr/mathts-core` | `TypedFunction`     |
 | `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
@@ -17001,6 +17003,7 @@ graph LR
 | Package                           | Import                                                                                                                                  |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2` |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                         |
 | `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil`           |
 | `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, add, subtract, multiply`                                                                                    |
 
@@ -18365,7 +18368,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197621 |
+| Total Lines of Code     | 197624 |
 | Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |

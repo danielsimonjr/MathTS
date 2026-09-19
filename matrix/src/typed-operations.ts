@@ -8,6 +8,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import type { SignatureFunction } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from './types/DenseMatrix.js';
 
@@ -21,7 +22,7 @@ type Signatures = Record<string, SignatureFunction>;
 /**
  * Create a matrix from various input types
  */
-export const matrix = mathTyped('matrix', {
+export const matrix: TypedFunction = mathTyped('matrix', {
   Array: (arr: number[][]) => DenseMatrix.fromArray(arr),
 
   'number, number': (rows: number, cols: number) => DenseMatrix.zeros(rows, cols),
@@ -36,35 +37,35 @@ export const matrix = mathTyped('matrix', {
 /**
  * Create an identity matrix
  */
-export const identity = mathTyped('identity', {
+export const identity: TypedFunction = mathTyped('identity', {
   number: (n: number) => DenseMatrix.identity(n),
 } as Signatures);
 
 /**
  * Create a matrix of zeros
  */
-export const zeros = mathTyped('zeros', {
+export const zeros: TypedFunction = mathTyped('zeros', {
   'number, number': (rows: number, cols: number) => DenseMatrix.zeros(rows, cols),
 } as Signatures);
 
 /**
  * Create a matrix of ones
  */
-export const ones = mathTyped('ones', {
+export const ones: TypedFunction = mathTyped('ones', {
   'number, number': (rows: number, cols: number) => DenseMatrix.ones(rows, cols),
 } as Signatures);
 
 /**
  * Create a diagonal matrix
  */
-export const diag = mathTyped('diag', {
+export const diag: TypedFunction = mathTyped('diag', {
   Array: (values: number[]) => DenseMatrix.diag(values),
 } as Signatures);
 
 /**
  * Create a random matrix
  */
-export const random = mathTyped('random', {
+export const random: TypedFunction = mathTyped('random', {
   'number, number': (rows: number, cols: number) => DenseMatrix.random(rows, cols),
 } as Signatures);
 
@@ -75,7 +76,7 @@ export const random = mathTyped('random', {
 /**
  * Matrix addition - polymorphic add function
  */
-export const add = mathTyped('add', {
+export const add: TypedFunction = mathTyped('add', {
   // Matrix + Matrix
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.add(b),
 
@@ -92,7 +93,7 @@ export const add = mathTyped('add', {
 /**
  * Matrix subtraction
  */
-export const subtract = mathTyped('subtract', {
+export const subtract: TypedFunction = mathTyped('subtract', {
   // Matrix - Matrix
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.subtract(b),
 
@@ -109,7 +110,7 @@ export const subtract = mathTyped('subtract', {
 /**
  * Matrix multiplication (matmul)
  */
-export const multiply = mathTyped('multiply', {
+export const multiply: TypedFunction = mathTyped('multiply', {
   // Matrix * Matrix (matmul)
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.multiply(b),
 
@@ -126,7 +127,7 @@ export const multiply = mathTyped('multiply', {
 /**
  * Element-wise multiplication (Hadamard product)
  */
-export const dotMultiply = mathTyped('dotMultiply', {
+export const dotMultiply: TypedFunction = mathTyped('dotMultiply', {
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.multiplyElementwise(b),
 
   'number, number': (a: number, b: number) => a * b,
@@ -135,7 +136,7 @@ export const dotMultiply = mathTyped('dotMultiply', {
 /**
  * Matrix division (A / B where B is scalar or element-wise)
  */
-export const divide = mathTyped('divide', {
+export const divide: TypedFunction = mathTyped('divide', {
   // Matrix / scalar
   'DenseMatrix, number': (a: DenseMatrix, scalar: number) => a.scale(1 / scalar),
 
@@ -149,7 +150,7 @@ export const divide = mathTyped('divide', {
 /**
  * Matrix negation
  */
-export const unaryMinus = mathTyped('unaryMinus', {
+export const unaryMinus: TypedFunction = mathTyped('unaryMinus', {
   DenseMatrix: (a: DenseMatrix) => a.negate(),
   number: (a: number) => -a,
 } as Signatures);
@@ -157,7 +158,7 @@ export const unaryMinus = mathTyped('unaryMinus', {
 /**
  * Matrix transpose
  */
-export const transpose = mathTyped('transpose', {
+export const transpose: TypedFunction = mathTyped('transpose', {
   DenseMatrix: (a: DenseMatrix) => a.transpose(),
 } as Signatures);
 
@@ -168,7 +169,7 @@ export const transpose = mathTyped('transpose', {
 /**
  * Sum of all elements
  */
-export const sum = mathTyped('sum', {
+export const sum: TypedFunction = mathTyped('sum', {
   DenseMatrix: (a: DenseMatrix) => a.sum(),
   Array: (arr: number[]) => arr.reduce((acc, v) => acc + v, 0),
 } as Signatures);
@@ -176,7 +177,7 @@ export const sum = mathTyped('sum', {
 /**
  * Mean of all elements
  */
-export const mean = mathTyped('mean', {
+export const mean: TypedFunction = mathTyped('mean', {
   DenseMatrix: (a: DenseMatrix) => a.mean(),
   Array: (arr: number[]) => arr.reduce((acc, v) => acc + v, 0) / arr.length,
 } as Signatures);
@@ -184,7 +185,7 @@ export const mean = mathTyped('mean', {
 /**
  * Minimum element
  */
-export const min = mathTyped('min', {
+export const min: TypedFunction = mathTyped('min', {
   DenseMatrix: (a: DenseMatrix) => a.min(),
   Array: (arr: number[]) => Math.min(...arr),
   'number, number': (a: number, b: number) => Math.min(a, b),
@@ -193,7 +194,7 @@ export const min = mathTyped('min', {
 /**
  * Maximum element
  */
-export const max = mathTyped('max', {
+export const max: TypedFunction = mathTyped('max', {
   DenseMatrix: (a: DenseMatrix) => a.max(),
   Array: (arr: number[]) => Math.max(...arr),
   'number, number': (a: number, b: number) => Math.max(a, b),
@@ -202,7 +203,7 @@ export const max = mathTyped('max', {
 /**
  * Frobenius norm
  */
-export const norm = mathTyped('norm', {
+export const norm: TypedFunction = mathTyped('norm', {
   DenseMatrix: (a: DenseMatrix) => a.norm(),
   Array: (arr: number[]) => Math.sqrt(arr.reduce((acc, v) => acc + v * v, 0)),
 } as Signatures);
@@ -210,7 +211,7 @@ export const norm = mathTyped('norm', {
 /**
  * Matrix trace (sum of diagonal elements)
  */
-export const trace = mathTyped('trace', {
+export const trace: TypedFunction = mathTyped('trace', {
   DenseMatrix: (a: DenseMatrix) => a.trace(),
 } as Signatures);
 
@@ -221,7 +222,7 @@ export const trace = mathTyped('trace', {
 /**
  * Element-wise absolute value
  */
-export const abs = mathTyped('abs', {
+export const abs: TypedFunction = mathTyped('abs', {
   DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.abs(v)),
   number: (a: number) => Math.abs(a),
 } as Signatures);
@@ -229,7 +230,7 @@ export const abs = mathTyped('abs', {
 /**
  * Element-wise square root
  */
-export const sqrt = mathTyped('sqrt', {
+export const sqrt: TypedFunction = mathTyped('sqrt', {
   DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.sqrt(v)),
   number: (a: number) => Math.sqrt(a),
 } as Signatures);
@@ -237,7 +238,7 @@ export const sqrt = mathTyped('sqrt', {
 /**
  * Element-wise square
  */
-export const square = mathTyped('square', {
+export const square: TypedFunction = mathTyped('square', {
   DenseMatrix: (a: DenseMatrix) => a.map((v) => v * v),
   number: (a: number) => a * a,
 } as Signatures);
@@ -245,7 +246,7 @@ export const square = mathTyped('square', {
 /**
  * Element-wise exponential
  */
-export const exp = mathTyped('exp', {
+export const exp: TypedFunction = mathTyped('exp', {
   DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.exp(v)),
   number: (a: number) => Math.exp(a),
 } as Signatures);
@@ -253,7 +254,7 @@ export const exp = mathTyped('exp', {
 /**
  * Element-wise natural logarithm
  */
-export const log = mathTyped('log', {
+export const log: TypedFunction = mathTyped('log', {
   DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.log(v)),
   number: (a: number) => Math.log(a),
 } as Signatures);
@@ -261,7 +262,7 @@ export const log = mathTyped('log', {
 /**
  * Element-wise power
  */
-export const pow = mathTyped('pow', {
+export const pow: TypedFunction = mathTyped('pow', {
   'DenseMatrix, number': (a: DenseMatrix, n: number) => a.map((v) => Math.pow(v, n)),
   'number, number': (a: number, b: number) => Math.pow(a, b),
 } as Signatures);
@@ -273,7 +274,7 @@ export const pow = mathTyped('pow', {
 /**
  * Get matrix dimensions
  */
-export const size = mathTyped('size', {
+export const size: TypedFunction = mathTyped('size', {
   DenseMatrix: (a: DenseMatrix) => [a.rows, a.cols],
   Array: (arr: unknown[]) => {
     if (Array.isArray(arr[0])) {
@@ -286,28 +287,28 @@ export const size = mathTyped('size', {
 /**
  * Get element at position
  */
-export const subset = mathTyped('subset', {
+export const subset: TypedFunction = mathTyped('subset', {
   'DenseMatrix, number, number': (a: DenseMatrix, row: number, col: number) => a.get(row, col),
 } as Signatures);
 
 /**
  * Get row from matrix
  */
-export const row = mathTyped('row', {
+export const row: TypedFunction = mathTyped('row', {
   'DenseMatrix, number': (a: DenseMatrix, index: number) => a.row(index),
 } as Signatures);
 
 /**
  * Get column from matrix
  */
-export const column = mathTyped('column', {
+export const column: TypedFunction = mathTyped('column', {
   'DenseMatrix, number': (a: DenseMatrix, index: number) => a.column(index),
 } as Signatures);
 
 /**
  * Get diagonal from matrix
  */
-export const diagonal = mathTyped('diagonal', {
+export const diagonal: TypedFunction = mathTyped('diagonal', {
   DenseMatrix: (a: DenseMatrix) => a.diagonal(),
   'DenseMatrix, number': (a: DenseMatrix, k: number) => a.diagonal(k),
 } as Signatures);

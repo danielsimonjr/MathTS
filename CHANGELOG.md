@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(types): matrix/compat .d.ts resolve typed-function through a declared dependency
+
+- The published `.d.ts` files of `matrix` (`parallel-matrix.d.ts`, `typed-operations.d.ts`) and
+  `compat` (`shims.d.ts`) contained `import("typed-function").TypedFunction`. Neither package
+  declares `typed-function`. A consumer with `skipLibCheck: false` got TS7016 (138 errors in
+  matrix, 39 in compat), because the import resolved to the untyped `typed-function@4.2.2` that
+  other MathTS packages hoist.
+- Cause: no source file imports `typed-function`. `tsc` inferred the type of each
+  `export const x = mathTyped(...)` (or a re-exported `mathts-functions` function) and wrote the
+  inferred type as an import of the undeclared module.
+- Fix: the 87 affected exports now have an explicit `TypedFunction` annotation, imported from
+  `@danielsimonjr/mathts-core`, which re-exports it. The emitted `.d.ts` imports the type from core,
+  a declared dependency, and core resolves its own typed `typed-function@5.0.0-alpha.4`. No
+  dependency was added.
+- `tools/test/consumer-typecheck.mjs`: the two TS7016 `KNOWN_ERRORS` entries are removed. The
+  guard fails on the previous `main` (177 errors) and passes on this change (0 errors, npm 10 and
+  npm 11).
+
 ### fix(core): map entries() returns a real iterable iterator
 
 - `ObjectWrappingMap.entries()` and `PartitionedMap.entries()` returned a plain `{ next }` object

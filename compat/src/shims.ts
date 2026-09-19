@@ -24,6 +24,7 @@ import {
   SQRT2 as CORE_SQRT2,
   SQRT1_2 as CORE_SQRT1_2,
 } from '@danielsimonjr/mathts-core';
+import type { TypedFunction } from '@danielsimonjr/mathts-core';
 
 import {
   add as _add,
@@ -216,20 +217,20 @@ export const multiply = makeArithmetic(
   _multiply as (a: unknown, b: unknown) => unknown,
   _matMultiply as (a: unknown, b: unknown) => unknown
 ) as typeof _multiply;
-export const divide = _divide;
-export const pow = _pow;
-export const sqrt = _sqrt;
-export const abs = _abs;
-export const exp = _exp;
-export const log = _log;
+export const divide: TypedFunction = _divide;
+export const pow: TypedFunction = _pow;
+export const sqrt: TypedFunction = _sqrt;
+export const abs: TypedFunction = _abs;
+export const exp: TypedFunction = _exp;
+export const log: TypedFunction = _log;
 
 // =============================================================================
 // Trigonometric Function Shims
 // =============================================================================
 
-export const sin = _sin;
-export const cos = _cos;
-export const tan = _tan;
+export const sin: TypedFunction = _sin;
+export const cos: TypedFunction = _cos;
+export const tan: TypedFunction = _tan;
 
 // Inverse trig (shims - these may not be fully implemented in MathTS yet)
 /**
@@ -277,8 +278,8 @@ export function atan2(y: number, x: number): number {
 // Statistical Function Shims
 // =============================================================================
 
-export const sum = _sum;
-export const mean = _mean;
+export const sum: TypedFunction = _sum;
+export const mean: TypedFunction = _mean;
 
 // std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
 // functions-package versions now also default to unbiased and accept a
@@ -328,23 +329,23 @@ export function variance(data: unknown, normalization: Normalization = 'unbiased
 export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
   return Math.sqrt(variance(data, normalization));
 }
-export const min = _min;
-export const max = _max;
+export const min: TypedFunction = _min;
+export const max: TypedFunction = _max;
 
 // =============================================================================
 // Number Theory Shims
 // =============================================================================
 
-export const gcd = _gcd;
-export const lcm = _lcm;
+export const gcd: TypedFunction = _gcd;
+export const lcm: TypedFunction = _lcm;
 
 // =============================================================================
 // Rounding Shims
 // =============================================================================
 
-export const round = _round;
-export const floor = _floor;
-export const ceil = _ceil;
+export const round: TypedFunction = _round;
+export const floor: TypedFunction = _floor;
+export const ceil: TypedFunction = _ceil;
 
 // =============================================================================
 // Complex-specific Shims

@@ -34,20 +34,7 @@ import { repoRoot, workspaceDirs } from './workspaces.mjs';
  * Pre-existing consumer errors, accepted by package and error code so that any NEW error fails.
  * Remove an entry when its cause is fixed; the script warns when an entry no longer matches.
  */
-const KNOWN_ERRORS = [
-  {
-    pkg: '@danielsimonjr/mathts-matrix',
-    code: 'TS7016',
-    reason:
-      "dist .d.ts imports 'typed-function', which is not a declared dependency (resolves to an untyped copy)",
-  },
-  {
-    pkg: '@danielsimonjr/mathts-compat',
-    code: 'TS7016',
-    reason:
-      "dist .d.ts imports 'typed-function', which is not a declared dependency (resolves to an untyped copy)",
-  },
-];
+const KNOWN_ERRORS = [];
 
 const args = process.argv.slice(2);
 const option = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];

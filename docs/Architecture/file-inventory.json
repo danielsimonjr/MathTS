@@ -443,7 +443,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 699
+      "loc": 700
     },
     {
       "file": "compat/tests/chain.test.ts",
@@ -912,7 +912,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 89
     },
     {
       "file": "core/tests/map.test.ts",
@@ -10768,14 +10768,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1079
+      "loc": 1080
     },
     {
       "file": "matrix/src/typed-operations.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 360
+      "loc": 361
     },
     {
       "file": "matrix/src/types/dense/arithmetic.ts",
