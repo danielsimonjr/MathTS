@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each behavioural statement was checked against the implementation. The comments on
   `RenderCell` state that `toHTML()` and `toTeX()` insert `chartSvg` and `chartTikz` without
   escaping, so the caller must supply trusted markup.
-- Comments only: the files compile to identical output with comments removed.
+- Comments only: the files compile to identical output with comments removed. The pre-commit
+  `prettier --write` also re-wrapped six long lines in `doc.ts`, `edit.ts` and `session.ts`.
+  This change is whitespace only.
 - `docs/Architecture`: regenerated with `docs:deps`. `OVERVIEW.md` line count updated.
 
 ### fix(plot): escape every SVG attribute value (security)
