@@ -17,6 +17,16 @@ function flat(m: Matrix<number>): Float64Array {
   return out;
 }
 
+/**
+ * Add two matrices element by element.
+ *
+ * The function does not check the shapes. The two matrices must have the
+ * same number of elements.
+ *
+ * @param a - First matrix.
+ * @param b - Second matrix.
+ * @returns A new row-major array that holds a + b.
+ */
 export function add(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
@@ -25,6 +35,16 @@ export function add(a: Matrix<number>, b: Matrix<number>): Float64Array {
   return result;
 }
 
+/**
+ * Subtract one matrix from another, element by element.
+ *
+ * The function does not check the shapes. The two matrices must have the
+ * same number of elements.
+ *
+ * @param a - Matrix to subtract from.
+ * @param b - Matrix to subtract.
+ * @returns A new row-major array that holds a - b.
+ */
 export function subtract(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
@@ -33,6 +53,16 @@ export function subtract(a: Matrix<number>, b: Matrix<number>): Float64Array {
   return result;
 }
 
+/**
+ * Multiply two matrices element by element (Hadamard product).
+ *
+ * The function does not check the shapes. The two matrices must have the
+ * same number of elements.
+ *
+ * @param a - First matrix.
+ * @param b - Second matrix.
+ * @returns A new row-major array that holds the element-wise product.
+ */
 export function multiplyElementwise(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const ad = flat(a);
   const bd = flat(b);
@@ -41,6 +71,16 @@ export function multiplyElementwise(a: Matrix<number>, b: Matrix<number>): Float
   return result;
 }
 
+/**
+ * Multiply two matrices (matrix product a · b).
+ *
+ * The function does not check that `a.cols` equals `b.rows`. The loop skips
+ * the zero elements of `a`.
+ *
+ * @param a - Left matrix (n × p).
+ * @param b - Right matrix (p × m).
+ * @returns A new row-major array of length n · m that holds a · b.
+ */
 export function multiply(a: Matrix<number>, b: Matrix<number>): Float64Array {
   const n = a.rows;
   const p = a.cols;
@@ -63,6 +103,13 @@ export function multiply(a: Matrix<number>, b: Matrix<number>): Float64Array {
   return result;
 }
 
+/**
+ * Multiply each element of a matrix by a scalar.
+ *
+ * @param a - Input matrix.
+ * @param scalar - Value to multiply by.
+ * @returns A new row-major array that holds scalar · a.
+ */
 export function scale(a: Matrix<number>, scalar: number): Float64Array {
   const ad = flat(a);
   const result = new Float64Array(ad.length);
@@ -70,6 +117,12 @@ export function scale(a: Matrix<number>, scalar: number): Float64Array {
   return result;
 }
 
+/**
+ * Transpose a matrix.
+ *
+ * @param a - Input matrix (rows × cols).
+ * @returns A new row-major array of the transposed matrix (cols × rows).
+ */
 export function transpose(a: Matrix<number>): Float64Array {
   const ad = flat(a);
   const rows = a.rows;

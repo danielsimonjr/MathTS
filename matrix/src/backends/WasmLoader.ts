@@ -29,6 +29,13 @@
 import type { LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
 export type { LoadingMetrics };
 
+/**
+ * Functions that the compiled WebAssembly matrix module exports.
+ *
+ * Each function reads and writes data through pointers into the linear
+ * memory of the module. Use the `WasmLoader` allocation methods to get
+ * these pointers.
+ */
 export interface WasmModule {
   // Matrix operations
   multiplyDense: (
@@ -555,6 +562,13 @@ interface PoolEntry {
 // `functions/src/wasm/WasmLoader.ts` (see
 // docs/Architecture/duplicate-symbols.json).
 
+/**
+ * Singleton that compiles, loads, and caches the WebAssembly matrix module.
+ *
+ * Use `WasmLoader.getInstance()` to get the instance; the constructor is
+ * private. The loader also allocates typed arrays in the memory of the
+ * module, keeps a pool of released allocations, and records loading metrics.
+ */
 export class WasmLoader {
   private static instance: WasmLoader | null = null;
   private wasmModule: WasmModule | null = null;

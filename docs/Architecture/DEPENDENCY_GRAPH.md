@@ -1820,7 +1820,7 @@ graph LR
 
 ---
 
-### `matrix/src/types/dense/reduction.ts` - reduction module
+### `matrix/src/types/dense/reduction.ts` - Add all elements of a matrix.
 
 **Internal Dependencies:**
 
@@ -18365,7 +18365,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197621 |
+| Total Lines of Code     | 197791 |
 | Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |

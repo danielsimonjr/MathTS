@@ -391,6 +391,22 @@ function completeOrthonormalBasis(cols: number[][], m: number): number[][] {
   return Array.from({ length: m }, (_, i) => basis.map((b) => b[i]));
 }
 
+/**
+ * Compute the singular value decomposition A = U · diag(S) · Vᵀ.
+ *
+ * The singular values in `S` are non-negative and in descending order.
+ * If a singular value is near zero, the function computes the decomposition
+ * again with one-sided Jacobi SVD, because that method is correct for
+ * rank-deficient input.
+ *
+ * @param matrix - Input matrix as a 2D array, or as a row-major
+ *   `Float64Array`. A `Float64Array` must hold a square matrix.
+ * @param options - Iteration limit, tolerances, and the `fullMatrices` flag.
+ *   Default rank tolerance: 1e-10.
+ * @returns The factors U, S, and V, and the numerical rank. For an empty
+ *   input, all arrays are empty and the rank is 0.
+ * @throws Error if a `Float64Array` length is not a perfect square.
+ */
 export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {}): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,

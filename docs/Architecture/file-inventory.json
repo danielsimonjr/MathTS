@@ -912,7 +912,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 89
     },
     {
       "file": "core/tests/map.test.ts",
@@ -10628,7 +10628,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1103
+      "loc": 1117
     },
     {
       "file": "matrix/src/config.ts",
@@ -10649,7 +10649,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 58
+      "loc": 61
     },
     {
       "file": "matrix/src/operations/common.ts",
@@ -10684,7 +10684,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 193
+      "loc": 199
     },
     {
       "file": "matrix/src/operations/index.ts",
@@ -10698,56 +10698,56 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 486
+      "loc": 489
     },
     {
       "file": "matrix/src/operations/lu.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 153
+      "loc": 156
     },
     {
       "file": "matrix/src/operations/pinv.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 79
     },
     {
       "file": "matrix/src/operations/qr-family.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 103
+      "loc": 112
     },
     {
       "file": "matrix/src/operations/qr-pivoted.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 153
+      "loc": 160
     },
     {
       "file": "matrix/src/operations/qr.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 188
+      "loc": 194
     },
     {
       "file": "matrix/src/operations/schur.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 440
+      "loc": 446
     },
     {
       "file": "matrix/src/operations/sqrtm.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 568
+      "loc": 571
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -10761,7 +10761,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 678
+      "loc": 694
     },
     {
       "file": "matrix/src/parallel-matrix.ts",
@@ -10782,14 +10782,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 137
     },
     {
       "file": "matrix/src/types/dense/reduction.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 60
+      "loc": 98
     },
     {
       "file": "matrix/src/types/DenseMatrix.ts",

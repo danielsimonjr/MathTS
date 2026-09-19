@@ -18,6 +18,10 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eye, householder, applyHouseholderLeft, applyHouseholderRight } from './common.js';
 
+/**
+ * Result of `qrPivoted`: the factors Q and R, the column permutation P, and
+ * the numerical rank.
+ */
 export interface QRPivotedResult {
   /** Orthonormal Q factor (m × k, k = min(m, n)). */
   Q: DenseMatrix;
@@ -29,6 +33,9 @@ export interface QRPivotedResult {
   rank: number;
 }
 
+/**
+ * Options for `qrPivoted`.
+ */
 export interface QRPivotedOptions {
   /** Relative rank tolerance (default `1e-10`). */
   tolerance?: number;

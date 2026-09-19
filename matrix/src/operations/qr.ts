@@ -17,6 +17,9 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 
+/**
+ * Result of `qr`: the factors Q and R, where A = Q · R.
+ */
 export interface QRResult {
   /** Orthonormal Q factor. Reduced: (m × k); full: (m × m). */
   Q: DenseMatrix;
@@ -24,6 +27,9 @@ export interface QRResult {
   R: DenseMatrix;
 }
 
+/**
+ * Options for `qr`.
+ */
 export interface QROptions {
   /** 'reduced' (default, thin QR) or 'full'. */
   mode?: 'reduced' | 'full';

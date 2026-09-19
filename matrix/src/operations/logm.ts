@@ -385,6 +385,9 @@ function logmEig(A: number[][]): number[][] {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * Options for `matrixLogm`.
+ */
 export interface LogmOptions {
   /**
    * Tolerance for the "near-identity" test.
