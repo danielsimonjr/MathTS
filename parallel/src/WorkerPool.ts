@@ -28,6 +28,15 @@ interface WorkerMessage<T = unknown> {
   error?: string;
 }
 
+/**
+ * Runs tasks on a set of workers and queues tasks when no worker is free.
+ *
+ * The pool uses `worker_threads` when `process.versions.node` is defined, and
+ * module Web Workers otherwise. When the caller gives no worker count, the
+ * count is `navigator.hardwareConcurrency - 1` (minimum 2), or 4 when that
+ * value is not available. A worker error rejects all active tasks.
+ * `terminate` rejects all queued and active tasks and stops all workers.
+ */
 export class WorkerPool {
   private workers: Worker[] = [];
   private availableWorkers: Worker[] = [];

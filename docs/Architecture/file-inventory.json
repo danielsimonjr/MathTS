@@ -11377,7 +11377,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 538
+      "loc": 566
     },
     {
       "file": "parallel/src/strategies/chunk.ts",
@@ -11405,7 +11405,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 280
+      "loc": 289
     },
     {
       "file": "parallel/tests/benchmark.test.ts",
